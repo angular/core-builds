@@ -1,11 +1,11 @@
 /**
- * @license Angular v6.1.0-beta.3+45.sha-fddd2af
+ * @license Angular v6.1.0-beta.3+47.sha-1e74ea9
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { ApplicationInitStatus, Compiler, Component, Injectable, InjectionToken, Injector, NgModule, NgZone, Optional, RendererFactory2, SkipSelf, getDebugNode, ɵAPP_ROOT, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify } from '@angular/core';
-import { __extends, __spread, __values } from 'tslib';
+import { RendererFactory2, getDebugNode, Compiler, Injectable, ApplicationInitStatus, Component, InjectionToken, Injector, NgModule, NgZone, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify } from '@angular/core';
+import { __spread, __values, __extends } from 'tslib';
 
 /**
  * @license
@@ -377,9 +377,9 @@ function scheduleMicroTask(fn) {
  * fakeAsync has been moved to zone.js
  * this file is for fallback in case old version of zone.js is used
  */
-var _Zone$1 = typeof Zone !== 'undefined' ? Zone : null;
-var FakeAsyncTestZoneSpec = _Zone$1 && _Zone$1['FakeAsyncTestZoneSpec'];
-var ProxyZoneSpec = _Zone$1 && _Zone$1['ProxyZoneSpec'];
+var _Zone = typeof Zone !== 'undefined' ? Zone : null;
+var FakeAsyncTestZoneSpec = _Zone && _Zone['FakeAsyncTestZoneSpec'];
+var ProxyZoneSpec = _Zone && _Zone['ProxyZoneSpec'];
 var _fakeAsyncTestZoneSpec = null;
 /**
  * Clears out the shared fake async zone for a test.
@@ -518,8 +518,8 @@ function flushMicrotasksFallback() {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var _Zone = typeof Zone !== 'undefined' ? Zone : null;
-var fakeAsyncTestModule = _Zone && _Zone[_Zone.__symbol__('fakeAsyncTest')];
+var _Zone$1 = typeof Zone !== 'undefined' ? Zone : null;
+var fakeAsyncTestModule = _Zone$1 && _Zone$1[_Zone$1.__symbol__('fakeAsyncTest')];
 /**
  * Clears out the shared fake async zone for a test.
  * To be called in a global `beforeEach`.
@@ -1150,7 +1150,7 @@ var TestBed = /** @class */ (function () {
             value = provider.useValue;
         }
         var deps = (provider.deps || []).map(function (dep) {
-            var depFlags = 0;
+            var depFlags = 0 /* None */;
             var depToken;
             if (Array.isArray(dep)) {
                 dep.forEach(function (entry) {
@@ -1301,11 +1301,6 @@ function withModule(moduleDef, fn) {
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Public Test Library for unit testing Angular applications. Assumes that you are running
- * with Jasmine, Mocha, or a similar framework which exports a beforeEach function and
- * allows tests to be asynchronous by either returning a promise or using a 'done' parameter.
  */
 var _global$1 = (typeof window === 'undefined' ? global : window);
 // Reset the test providers and the fake async zone before each test.
@@ -1459,11 +1454,6 @@ if (typeof afterEach == 'function')
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * @module
- * @description
- * Entry point for all public APIs of the core/testing package.
- */
 
 /**
  * @license
@@ -1472,12 +1462,6 @@ if (typeof afterEach == 'function')
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * @module
- * @description
- * Entry point for all public APIs of this package.
- */
-
 // This file only reexports content of the `src` folder. Keep it that way.
 
 /**
@@ -1487,10 +1471,6 @@ if (typeof afterEach == 'function')
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-// This file is not used to build this module. It is only used during editing
-// by the TypeScript language service and during build for verification. `ngc`
-// replaces this file with production index.ts when it rewrites private symbol
-// names.
 
 /**
  * Generated bundle index. Do not edit.

@@ -1,10 +1,10 @@
 /**
- * @license Angular v6.1.0-beta.3+45.sha-fddd2af
+ * @license Angular v6.1.0-beta.3+47.sha-1e74ea9
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { ApplicationInitStatus, Compiler, Component, Injectable, InjectionToken, Injector, NgModule, NgZone, Optional, RendererFactory2, SkipSelf, getDebugNode, ɵAPP_ROOT, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify } from '@angular/core';
+import { RendererFactory2, getDebugNode, Compiler, Injectable, ApplicationInitStatus, Component, InjectionToken, Injector, NgModule, NgZone, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify } from '@angular/core';
 
 /**
  * @fileoverview added by tsickle
@@ -130,13 +130,6 @@ function runInTestZone(fn, context, finishCallback, failCallback) {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Wraps a test function in an asynchronous test zone. The test will automatically
  * complete when all asynchronous calls within this zone are done. Can be used
  * to wrap an {\@link inject} call.
@@ -217,13 +210,6 @@ function jasmineAwait(fn) {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /**
  * Fixture for debugging and testing a component.
@@ -437,11 +423,11 @@ function scheduleMicroTask(fn) {
  * fakeAsync has been moved to zone.js
  * this file is for fallback in case old version of zone.js is used
   @type {?} */
-const _Zone$1 = typeof Zone !== 'undefined' ? Zone : null;
+const _Zone = typeof Zone !== 'undefined' ? Zone : null;
 /** @type {?} */
-const FakeAsyncTestZoneSpec = _Zone$1 && _Zone$1['FakeAsyncTestZoneSpec'];
+const FakeAsyncTestZoneSpec = _Zone && _Zone['FakeAsyncTestZoneSpec'];
 /** @type {?} */
-const ProxyZoneSpec = _Zone$1 && _Zone$1['ProxyZoneSpec'];
+const ProxyZoneSpec = _Zone && _Zone['ProxyZoneSpec'];
 /** @type {?} */
 let _fakeAsyncTestZoneSpec = null;
 /**
@@ -588,9 +574,9 @@ function flushMicrotasksFallback() {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /** @type {?} */
-const _Zone = typeof Zone !== 'undefined' ? Zone : null;
+const _Zone$1 = typeof Zone !== 'undefined' ? Zone : null;
 /** @type {?} */
-const fakeAsyncTestModule = _Zone && _Zone[_Zone.__symbol__('fakeAsyncTest')];
+const fakeAsyncTestModule = _Zone$1 && _Zone$1[_Zone$1.__symbol__('fakeAsyncTest')];
 /**
  * Clears out the shared fake async zone for a test.
  * To be called in a global `beforeEach`.
@@ -746,13 +732,6 @@ class AsyncTestCompleter {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * @return {?}
  */
 function unimplemented() {
@@ -839,13 +818,6 @@ class TestingCompilerFactory {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /** @type {?} */
 const UNDEFINED = new Object();
@@ -1392,7 +1364,7 @@ class TestBed {
         /** @type {?} */
         const deps = (provider.deps || []).map((dep) => {
             /** @type {?} */
-            let depFlags = 0;
+            let depFlags = 0 /* None */;
             /** @type {?} */
             let depToken;
             if (Array.isArray(dep)) {
@@ -1580,13 +1552,6 @@ function withModule(moduleDef, fn) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /** @type {?} */
 const _global$1 = /** @type {?} */ ((typeof window === 'undefined' ? global : window));
 // Reset the test providers and the fake async zone before each test.
@@ -1602,13 +1567,6 @@ const __core_private_testing_placeholder__ = '';
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 
 /**
@@ -1656,7 +1614,6 @@ const __core_private_testing_placeholder__ = '';
 function withBody(html, blockFn) {
     return /** @type {?} */ (function (done) {
         ensureDocument();
-        /** @type {?} */
         if (typeof blockFn === 'function') {
             document.body.innerHTML = html;
             /** @type {?} */
@@ -1751,53 +1708,17 @@ if (typeof afterEach == 'function')
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * @module
- * @description
- * Entry point for all public APIs of the core/testing package.
- */
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * @module
- * @description
- * Entry point for all public APIs of this package.
- */
-
 // This file only reexports content of the `src` folder. Keep it that way.
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-// This file is not used to build this module. It is only used during editing
-// by the TypeScript language service and during build for verification. `ngc`
-// replaces this file with production index.ts when it rewrites private symbol
-// names.
 
 /**
  * Generated bundle index. Do not edit.

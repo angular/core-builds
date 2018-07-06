@@ -1,83 +1,16 @@
 /**
- * @license Angular v6.1.0-beta.3+45.sha-fddd2af
+ * @license Angular v6.1.0-beta.3+47.sha-1e74ea9
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { Observable, Subject, Subscription, merge } from 'rxjs';
+import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { share } from 'rxjs/operators';
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Information about how a type or `InjectionToken` interfaces with the DI system.
- *
- * At a minimum, this includes a `factory` which defines how to create the given type `T`, possibly
- * requesting injection of other types if necessary.
- *
- * Optionally, a `providedIn` parameter specifies that the given type belongs to a particular
- * `InjectorDef`, `NgModule`, or a special scope (e.g. `'root'`). A value of `null` indicates
- * that the injectable does not belong to any scope.
- *
- * NOTE: This is a private type and should not be exported
- * @record
- * @template T
- */
-
-/**
- * Information about the providers to be included in an `Injector` as well as how the given type
- * which carries the information should be created by the DI system.
- *
- * An `InjectorDef` can import other types which have `InjectorDefs`, forming a deep nested
- * structure of providers with a defined priority (identically to how `NgModule`s also have
- * an import/dependency structure).
- *
- * NOTE: This is a private type and should not be exported
- * @record
- * @template T
- */
-
-/**
- * A `Type` which has an `InjectableDef` static field.
- *
- * `InjectableDefType`s contain their own Dependency Injection metadata and are usable in an
- * `InjectorDef`-based `StaticInjector.
- *
- * \@experimental
- * @record
- * @template T
- */
-
-/**
- * A type which has an `InjectorDef` static field.
- *
- * `InjectorDefTypes` can be used to configure a `StaticInjector`.
- *
- * \@experimental
- * @record
- * @template T
- */
-
-/**
- * Describes the `InjectorDef` equivalent of a `ModuleWithProviders`, an `InjectorDefType` with an
- * associated array of providers.
- *
- * Objects of this type can be listed in the imports section of an `InjectorDef`.
- *
- * NOTE: This is a private type and should not be exported
- * @record
- * @template T
- */
-
 /**
  * Construct an `InjectableDef` which defines how a token will be constructed by the DI system, and
  * in which injectors (if any) it will be available.
@@ -133,13 +66,6 @@ function defineInjector(options) {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /**
  * Creates a token that can be used in a DI Provider.
@@ -204,37 +130,11 @@ class InjectionToken {
      */
     toString() { return `InjectionToken ${this._desc}`; }
 }
-/**
- * @record
- * @template T
- */
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * An interface implemented by all Angular type decorators, which allows them to be used as ES7
- * decorators as well as
- * Angular DSL syntax.
- *
- * ES7 syntax:
- *
- * ```
- * \@ng.Component({...})
- * class MyClass {...}
- * ```
- *
- * @record
- */
-
 /** @type {?} */
 const ANNOTATIONS = '__annotations__';
 /** @type {?} */
@@ -392,13 +292,6 @@ function makePropDecorator(name, props, parentClass) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /** *
  * This token can be used to create a virtual provider that will populate the
  * `entryComponents` fields of components and ng modules based on its `useValue`.
@@ -435,13 +328,6 @@ function makePropDecorator(name, props, parentClass) {
  * \@experimental
   @type {?} */
 const ANALYZE_FOR_ENTRY_COMPONENTS = new InjectionToken('AnalyzeForEntryComponents');
-/**
- * Type of the Attribute decorator / constructor function.
- *
- *
- * @record
- */
-
 /** *
  * Attribute decorator and metadata.
  *
@@ -459,13 +345,6 @@ const Attribute = makeParamDecorator('Attribute', (attributeName) => ({ attribut
  */
 class Query {
 }
-/**
- * Type of the ContentChildren decorator / constructor function.
- *
- * @see `ContentChildren`.
- * @record
- */
-
 /** *
  * ContentChildren decorator and metadata.
  *
@@ -473,14 +352,6 @@ class Query {
  * \@Annotation
   @type {?} */
 const ContentChildren = makePropDecorator('ContentChildren', (selector, data = {}) => (Object.assign({ selector, first: false, isViewQuery: false, descendants: false }, data)), Query);
-/**
- * Type of the ContentChild decorator / constructor function.
- *
- *
- *
- * @record
- */
-
 /** *
  * ContentChild decorator and metadata.
  *
@@ -488,28 +359,12 @@ const ContentChildren = makePropDecorator('ContentChildren', (selector, data = {
  * \@Annotation
   @type {?} */
 const ContentChild = makePropDecorator('ContentChild', (selector, data = {}) => (Object.assign({ selector, first: true, isViewQuery: false, descendants: true }, data)), Query);
-/**
- * Type of the ViewChildren decorator / constructor function.
- *
- * @see `ViewChildren`.
- *
- *
- * @record
- */
-
 /** *
  * ViewChildren decorator and metadata.
  *
  * \@Annotation
   @type {?} */
 const ViewChildren = makePropDecorator('ViewChildren', (selector, data = {}) => (Object.assign({ selector, first: false, isViewQuery: true, descendants: true }, data)), Query);
-/**
- * Type of the ViewChild decorator / constructor function.
- *
- * @see `ViewChild`.
- * @record
- */
-
 /** *
  * ViewChild decorator and metadata.
  *
@@ -602,16 +457,6 @@ function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
  */
 /** @type {?} */
 const ivyEnabled = false;
-/** @type {?} */
-const R3_COMPILE_COMPONENT = null;
-/** @type {?} */
-const R3_COMPILE_DIRECTIVE = null;
-/** @type {?} */
-const R3_COMPILE_INJECTABLE = null;
-/** @type {?} */
-const R3_COMPILE_NGMODULE = null;
-/** @type {?} */
-const R3_COMPILE_PIPE = null;
 
 /**
  * @fileoverview added by tsickle
@@ -622,28 +467,10 @@ const R3_COMPILE_PIPE = null;
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Type of the Directive decorator / constructor function.
- * @record
- */
-
 /** *
  * Type of the Component metadata.
   @type {?} */
-const Directive = makeDecorator('Directive', (dir = {}) => dir, undefined, undefined, (type, meta) => (R3_COMPILE_DIRECTIVE || (() => { }))(type, meta));
-/**
- * Component decorator interface
- *
- * @record
- */
-
+const Directive = makeDecorator('Directive', (dir = {}) => dir, undefined, undefined, (type, meta) => (() => { })(type, meta));
 /** *
  * Component decorator and metadata.
  *
@@ -732,53 +559,28 @@ const Directive = makeDecorator('Directive', (dir = {}) => dir, undefined, undef
  *
  * \@Annotation
   @type {?} */
-const Component = makeDecorator('Component', (c = {}) => (Object.assign({ changeDetection: ChangeDetectionStrategy.Default }, c)), Directive, undefined, (type, meta) => (R3_COMPILE_COMPONENT || (() => { }))(type, meta));
-/**
- * Type of the Pipe decorator / constructor function.
- * @record
- */
-
+const Component = makeDecorator('Component', (c = {}) => (Object.assign({ changeDetection: ChangeDetectionStrategy.Default }, c)), Directive, undefined, (type, meta) => (() => { })(type, meta));
 /** *
  *
  *
  * \@Annotation
   @type {?} */
-const Pipe = makeDecorator('Pipe', (p) => (Object.assign({ pure: true }, p)), undefined, undefined, (type, meta) => (R3_COMPILE_PIPE || (() => { }))(type, meta));
-/**
- *
- * @record
- */
-
+const Pipe = makeDecorator('Pipe', (p) => (Object.assign({ pure: true }, p)), undefined, undefined, (type, meta) => (() => { })(type, meta));
 /** *
  *
  * \@Annotation
   @type {?} */
 const Input = makePropDecorator('Input', (bindingPropertyName) => ({ bindingPropertyName }));
-/**
- * Type of the Output decorator / constructor function.
- * @record
- */
-
 /** *
  *
  * \@Annotation
   @type {?} */
 const Output = makePropDecorator('Output', (bindingPropertyName) => ({ bindingPropertyName }));
-/**
- * Type of the HostBinding decorator / constructor function.
- * @record
- */
-
 /** *
  *
  * \@Annotation
   @type {?} */
 const HostBinding = makePropDecorator('HostBinding', (hostPropertyName) => ({ hostPropertyName }));
-/**
- * Type of the HostListener decorator / constructor function.
- * @record
- */
-
 /** *
  * Binds a CSS event to a host listener and supplies configuration metadata.
  * Angular invokes the supplied handler method when the host element emits the specified event,
@@ -945,13 +747,6 @@ function stringify(token) {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /** *
  * Attention: These regex has to hold even if the code is minified!
@@ -1318,24 +1113,6 @@ function getClosureSafeProperty(objWithPropertyToExtract, target) {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * An interface that a function passed into {\@link forwardRef} has to implement.
- *
- * \@usageNotes
- * ### Example
- *
- * {\@example core/di/ts/forward_ref/forward_ref_spec.ts region='forward_ref_fn'}
- * \@experimental
- * @record
- */
-
-/**
  * Allows to refer to references which are not yet defined.
  *
  * For instance, `forwardRef` is used when the `token` which we need to refer to for the purposes of
@@ -1383,62 +1160,30 @@ function resolveForwardRef(type) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Type of the Inject decorator / constructor function.
- * @record
- */
-
 /** *
  * Inject decorator and metadata.
  *
  * \@Annotation
   @type {?} */
 const Inject = makeParamDecorator('Inject', (token) => ({ token }));
-/**
- * Type of the Optional decorator / constructor function.
- * @record
- */
-
 /** *
  * Optional decorator and metadata.
  *
  * \@Annotation
   @type {?} */
 const Optional = makeParamDecorator('Optional');
-/**
- * Type of the Self decorator / constructor function.
- * @record
- */
-
 /** *
  * Self decorator and metadata.
  *
  * \@Annotation
   @type {?} */
 const Self = makeParamDecorator('Self');
-/**
- * Type of the SkipSelf decorator / constructor function.
- * @record
- */
-
 /** *
  * SkipSelf decorator and metadata.
  *
  * \@Annotation
   @type {?} */
 const SkipSelf = makeParamDecorator('SkipSelf');
-/**
- * Type of the Host decorator / constructor function.
- * @record
- */
-
 /** *
  * Host decorator and metadata.
  *
@@ -1449,13 +1194,6 @@ const Host = makeParamDecorator('Host');
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /** @type {?} */
 const SOURCE = '__source';
@@ -1546,9 +1284,9 @@ const MULTI_PROVIDER_FN = function () {
     return Array.prototype.slice.call(arguments);
 };
 /** @type {?} */
-const GET_PROPERTY_NAME$1 = /** @type {?} */ ({});
+const GET_PROPERTY_NAME = /** @type {?} */ ({});
 /** @type {?} */
-const USE_VALUE$1 = getClosureSafeProperty$1({ provide: String, useValue: GET_PROPERTY_NAME$1 });
+const USE_VALUE = getClosureSafeProperty$1({ provide: String, useValue: GET_PROPERTY_NAME });
 /** @type {?} */
 const NG_TOKEN_PATH = 'ngTokenPath';
 /** @type {?} */
@@ -1625,16 +1363,14 @@ function resolveProvider(provider) {
     let useNew = false;
     /** @type {?} */
     let provide = resolveForwardRef(provider.provide);
-    if (USE_VALUE$1 in provider) {
+    if (USE_VALUE in provider) {
         // We need to use USE_VALUE in provider since provider.useValue could be defined as undefined.
         value = (/** @type {?} */ (provider)).useValue;
     }
     else if ((/** @type {?} */ (provider)).useFactory) {
         fn = (/** @type {?} */ (provider)).useFactory;
     }
-    else if ((/** @type {?} */ (provider)).useExisting) {
-        // Just use IDENT
-    }
+    else if ((/** @type {?} */ (provider)).useExisting) ;
     else if ((/** @type {?} */ (provider)).useClass) {
         useNew = true;
         fn = resolveForwardRef((/** @type {?} */ (provider)).useClass);
@@ -1810,7 +1546,7 @@ function computeDeps(provider) {
         deps = [];
         for (let i = 0; i < providerDeps.length; i++) {
             /** @type {?} */
-            let options = 6;
+            let options = 6 /* Default */;
             /** @type {?} */
             let token = resolveForwardRef(providerDeps[i]);
             if (token instanceof Array) {
@@ -1842,7 +1578,7 @@ function computeDeps(provider) {
         const token = resolveForwardRef((/** @type {?} */ (provider)).useExisting);
         deps = [{ token, options: 6 /* Default */ }];
     }
-    else if (!providerDeps && !(USE_VALUE$1 in provider)) {
+    else if (!providerDeps && !(USE_VALUE in provider)) {
         // useValue & useExisting are the only ones which are exempt from deps all others need it.
         throw staticError('\'deps\' required', provider);
     }
@@ -1890,7 +1626,7 @@ function staticError(text, obj) {
  */
 function getClosureSafeProperty$1(objWithPropertyToExtract) {
     for (let key in objWithPropertyToExtract) {
-        if (objWithPropertyToExtract[key] === GET_PROPERTY_NAME$1) {
+        if (objWithPropertyToExtract[key] === GET_PROPERTY_NAME) {
             return key;
         }
     }
@@ -1955,7 +1691,7 @@ function injectArgs(types) {
             /** @type {?} */
             let type = undefined;
             /** @type {?} */
-            let flags = 0;
+            let flags = 0 /* Default */;
             for (let j = 0; j < arg.length; j++) {
                 /** @type {?} */
                 const meta = arg[j];
@@ -1988,23 +1724,11 @@ function injectArgs(types) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /** @type {?} */
-const GET_PROPERTY_NAME = /** @type {?} */ ({});
-const ɵ0 = GET_PROPERTY_NAME;
+const GET_PROPERTY_NAME$1 = /** @type {?} */ ({});
+const ɵ0$1 = GET_PROPERTY_NAME$1;
 /** @type {?} */
-const USE_VALUE = getClosureSafeProperty({ provide: String, useValue: ɵ0 }, GET_PROPERTY_NAME);
-/**
- * Type of the Injectable decorator / constructor function.
- * @record
- */
-
+const USE_VALUE$1 = getClosureSafeProperty({ provide: String, useValue: ɵ0$1 }, GET_PROPERTY_NAME$1);
 /** @type {?} */
 const EMPTY_ARRAY = [];
 /**
@@ -2021,7 +1745,7 @@ function convertInjectableProviderToFactory(type, provider) {
         // TODO - convert to flags.
         return () => new type(...injectArgs(/** @type {?} */ (deps)));
     }
-    if (USE_VALUE in provider) {
+    if (USE_VALUE$1 in provider) {
         /** @type {?} */
         const valueProvider = (/** @type {?} */ (provider));
         return () => valueProvider.useValue;
@@ -2078,68 +1802,12 @@ function preR3InjectableCompile(injectableType, options) {
  *
  * \@Annotation
   @type {?} */
-const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, (type, meta) => (R3_COMPILE_INJECTABLE || preR3InjectableCompile)(type, meta));
-/**
- * Type representing injectable service.
- *
- * \@experimental
- * @record
- * @template T
- */
+const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, (type, meta) => (preR3InjectableCompile)(type, meta));
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Represents the expansion of an `NgModule` into its scopes.
- *
- * A scope is a set of directives and pipes that are visible in a particular context. Each
- * `NgModule` has two scopes. The `compilation` scope is the set of directives and pipes that will
- * be recognized in the templates of components declared by the module. The `exported` scope is the
- * set of directives and pipes exported by a module (that is, module B's exported scope gets added
- * to module A's compilation scope when module A imports B).
- * @record
- */
-
-/**
- * Runtime link information for NgModules.
- *
- * This is the internal data structure used by the runtime to assemble components, directives,
- * pipes, and injectors.
- *
- * NOTE: Always use `defineNgModule` function to create this object,
- * never create the object directly since the shape of this object
- * can change between versions.
- * @record
- * @template T, Declarations, Imports, Exports
- */
-
-/**
- * A wrapper around an NgModule that associates it with the providers.
- *
- *
- * @record
- */
-
-/**
- * A schema definition associated with an NgModule.
- *
- * @see `\@NgModule`, `CUSTOM_ELEMENTS_SCHEMA`, `NO_ERRORS_SCHEMA`
- *
- * @param name The name of a defined schema.
- *
- * \@experimental
- * @record
- */
-
 /** *
  * Defines a schema that allows an NgModule to contain the following:
  * - Non-Angular elements named with dash case (`-`).
@@ -2159,13 +1827,6 @@ const CUSTOM_ELEMENTS_SCHEMA = {
 const NO_ERRORS_SCHEMA = {
     name: 'no-errors-schema'
 };
-/**
- * Type of the NgModule decorator / constructor function.
- *
- *
- * @record
- */
-
 /**
  * @param {?} moduleType
  * @param {?} metadata
@@ -2190,7 +1851,7 @@ const NgModule = makeDecorator('NgModule', (ngModule) => ngModule, undefined, un
      * Decorator that marks the following class as an NgModule, and supplies
      * configuration metadata for it.
      */
-(type, meta) => (R3_COMPILE_NGMODULE || preR3NgModuleCompile)(type, meta));
+(type, meta) => (preR3NgModuleCompile)(type, meta));
 
 /**
  * @fileoverview added by tsickle
@@ -2248,13 +1909,6 @@ ViewEncapsulation[ViewEncapsulation.ShadowDom] = 'ShadowDom';
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 
 /**
  * @fileoverview added by tsickle
@@ -2284,32 +1938,18 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('6.1.0-beta.3+45.sha-fddd2af');
+const VERSION = new Version('6.1.0-beta.3+47.sha-1e74ea9');
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/** @type {?} */
-
 /** @type {?} */
 const ERROR_DEBUG_CONTEXT = 'ngDebugContext';
 /** @type {?} */
 const ERROR_ORIGINAL_ERROR = 'ngOriginalError';
 /** @type {?} */
 const ERROR_LOGGER = 'ngErrorLogger';
-/**
- * @param {?} error
- * @return {?}
- */
-
 /**
  * @param {?} error
  * @return {?}
@@ -2343,13 +1983,6 @@ function defaultErrorLogger(console, ...values) {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /**
  * Provides a hook for centralized exception handling.
@@ -2445,13 +2078,6 @@ function wrappedError(message, originalError) {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * @param {?} keys
  * @return {?}
  */
@@ -2481,10 +2107,6 @@ function constructResolvingPath(keys) {
     }
     return '';
 }
-/**
- * @record
- */
-
 /**
  * @param {?} injector
  * @param {?} key
@@ -2718,13 +2340,6 @@ function mixingMultiProvidersWithRegularProvidersError(provider1, provider2) {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * A unique object used for retrieving items from the {\@link ReflectiveInjector}.
  *
  * Keys have:
@@ -2904,13 +2519,6 @@ class Reflector {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /** *
  * The {\@link Reflector} used internally in Angular to access metadata
  * about symbols.
@@ -2920,13 +2528,6 @@ const reflector = new Reflector(new ReflectionCapabilities());
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /**
  * `Dependency` is used by the framework to extend DI.
@@ -2953,27 +2554,6 @@ class ReflectiveDependency {
 }
 /** @type {?} */
 const _EMPTY_LIST = [];
-/**
- * An internal resolved representation of a `Provider` used by the `Injector`.
- *
- * \@usageNotes
- * This is usually created automatically by `Injector.resolveAndCreate`.
- *
- * It can be created manually, as follows:
- *
- * ### Example
- *
- * ```typescript
- * var resolvedProviders = Injector.resolve([{ provide: 'message', useValue: 'Hello' }]);
- * var injector = Injector.fromResolvedProviders(resolvedProviders);
- *
- * expect(injector.get('message')).toEqual('Hello');
- * ```
- *
- * \@experimental
- * @record
- */
-
 class ResolvedReflectiveProvider_ {
     /**
      * @param {?} key
@@ -3208,13 +2788,6 @@ function _createDependency(token, optional, visibility) {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /** @type {?} */
 const UNDEFINED = new Object();
@@ -3620,13 +3193,6 @@ function _mapProviders(injector, fn) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /** *
  * An internal token whose presence in an injector indicates that the injector should treat itself
  * as a root scoped injector when processing requests for unknown tokens which may indicate
@@ -3637,13 +3203,6 @@ const APP_ROOT = new InjectionToken('The presence of this token marks an injecto
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /** *
  * Marker which indicates that a value has not yet been created from the factory function.
@@ -4001,7 +3560,7 @@ function deepForEach(input, fn) {
  * @return {?}
  */
 function isValueProvider(value) {
-    return USE_VALUE$1 in value;
+    return USE_VALUE in value;
 }
 /**
  * @param {?} value
@@ -4052,18 +3611,6 @@ function couldBeInjectableType(value) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * @module
- * @description
- * The `di` module provides dependency injection container services.
- */
 
 /**
  * @fileoverview added by tsickle
@@ -4099,13 +3646,6 @@ function isObservable(obj) {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /** *
  * A function that will be executed when an application is initialized.
@@ -4173,13 +3713,6 @@ ApplicationInitStatus.ctorParameters = () => [
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /** *
  * A DI Token representing a unique string id assigned to the application by Angular and used
  * primarily for prefixing application attributes and CSS styles when
@@ -4241,13 +3774,6 @@ const PACKAGE_ROOT_URL = new InjectionToken('Application Packages Root URL');
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 class Console {
     /**
      * @param {?} message
@@ -4273,13 +3799,6 @@ Console.decorators = [
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /**
  * Combination of NgModuleFactory and ComponentFactorys.
@@ -4418,13 +3937,6 @@ class ComponentFactory {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * @param {?} component
  * @return {?}
  */
@@ -4436,11 +3948,6 @@ function noComponentFactoryError(component) {
 }
 /** @type {?} */
 const ERROR_COMPONENT = 'ngComponent';
-/**
- * @param {?} error
- * @return {?}
- */
-
 class _NullComponentFactoryResolver {
     /**
      * @template T
@@ -4544,11 +4051,6 @@ class ComponentFactoryBoundToModule extends ComponentFactory {
 class NgModuleRef {
 }
 /**
- * @record
- * @template T
- */
-
-/**
  * \@experimental
  * @abstract
  * @template T
@@ -4560,28 +4062,6 @@ class NgModuleFactory {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * A scope function for the Web Tracing Framework (WTF).
- *
- * \@experimental
- * @record
- */
-
-/**
- * @record
- */
-
-/**
- * @record
- */
-
 /** @type {?} */
 let trace;
 /** @type {?} */
@@ -4638,13 +4118,6 @@ function endTimeRange(range) {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /** *
  * True if WTF is enabled.
@@ -4724,13 +4197,6 @@ const wtfEndTimeRange = wtfEnabled ? endTimeRange : (r) => null;
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /**
  * Use by directives and components to emit custom Events.
@@ -4850,13 +4316,6 @@ class EventEmitter extends Subject {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /**
  * An injectable service for executing work inside or outside of the Angular zone.
@@ -5221,17 +4680,6 @@ class NoopNgZone {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * @record
- */
-
-/**
  * The Testability service provides testing hooks that can be accessed from
  * the browser and by services such as Protractor. Each bootstrapped Angular
  * application on the page will have an instance of Testability.
@@ -5486,15 +4934,6 @@ TestabilityRegistry.decorators = [
 ];
 /** @nocollapse */
 TestabilityRegistry.ctorParameters = () => [];
-/**
- * Adapter interface for retrieving the `Testability` service associated for a
- * particular context.
- *
- * \@experimental Testability apis are primarily intended to be used by e2e test tool vendors like
- * the Protractor team.
- * @record
- */
-
 class _NoopGetTestability {
     /**
      * @param {?} registry
@@ -5526,13 +4965,6 @@ let _testabilityGetter = new _NoopGetTestability();
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /** @type {?} */
 let _devMode = true;
@@ -5675,13 +5107,6 @@ function destroyPlatform() {
 function getPlatform() {
     return _platform && !_platform.destroyed ? _platform : null;
 }
-/**
- * Provides additional options to the bootstraping process.
- *
- *
- * @record
- */
-
 /**
  * The Angular platform is the entry point for Angular on a web page. Each page
  * has exactly one platform, and services (such as reflection) which are common
@@ -6161,24 +5586,10 @@ function remove(list, el) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /**
  * @deprecated Use `RendererType2` (and `Renderer2`) instead.
@@ -6209,11 +5620,6 @@ class RenderDebugInfo {
 }
 /**
  * @deprecated Use the `Renderer2` instead.
- * @record
- */
-
-/**
- * @deprecated Use the `Renderer2` instead.
  * @abstract
  */
 class Renderer {
@@ -6239,11 +5645,6 @@ class RootRenderer {
 }
 /**
  * \@experimental
- * @record
- */
-
-/**
- * \@experimental
  * @abstract
  */
 class RendererFactory2 {
@@ -6265,13 +5666,6 @@ class Renderer2 {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 
 /**
@@ -6341,10 +5735,6 @@ function registerModuleFactory(id, factory) {
     moduleFactories.set(id, factory);
 }
 /**
- * @return {?}
- */
-
-/**
  * Returns the NgModuleFactory with the given id, if it exists and has been loaded.
  * Factories for modules that do not specify an `id` cannot be retrieved. Throws if the module
  * cannot be found.
@@ -6363,13 +5753,6 @@ function getModuleFactory(id) {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /**
  * An unmodifiable list of items that Angular keeps up to date when the state
@@ -6513,13 +5896,6 @@ function flatten(list) {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /** @type {?} */
 const _SEPARATOR = '#';
@@ -6696,13 +6072,6 @@ class ChangeDetectorRef {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * @abstract
  */
 class ViewRef extends ChangeDetectorRef {
@@ -6768,20 +6137,10 @@ class ViewRef extends ChangeDetectorRef {
  */
 class EmbeddedViewRef extends ViewRef {
 }
-/**
- * @record
- */
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 
 /**
@@ -7024,10 +6383,6 @@ function getDebugNode(nativeNode) {
     return _nativeNodeToDebugNode.get(nativeNode) || null;
 }
 /**
- * @return {?}
- */
-
-/**
  * @param {?} node
  * @return {?}
  */
@@ -7041,25 +6396,10 @@ function indexDebugNode(node) {
 function removeDebugNodeFromIndex(node) {
     _nativeNodeToDebugNode.delete(node.nativeNode);
 }
-/**
- * A boolean-valued function over a value, possibly including context information
- * regarding that value's position in an array.
- *
- * \@experimental All debugging apis are currently experimental.
- * @record
- * @template T
- */
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /**
  * @param {?} a
@@ -7221,13 +6561,6 @@ function isJsObject(o) {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 class DefaultIterableDifferFactory {
     constructor() { }
@@ -8086,13 +7419,6 @@ function getPreviousIndex(item, addRemoveOffset, moveOffsets) {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * @template K, V
  */
 class DefaultKeyValueDifferFactory {
@@ -8442,61 +7768,6 @@ class KeyValueChangeRecord_ {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * A strategy for tracking changes over time to an iterable. Used by {\@link NgForOf} to
- * respond to changes in an iterable by effecting equivalent changes in the DOM.
- *
- *
- * @record
- * @template V
- */
-
-/**
- * An object describing the changes in the `Iterable` collection since last time
- * `IterableDiffer#diff()` was invoked.
- *
- *
- * @record
- * @template V
- */
-
-/**
- * Record representing the item change information.
- *
- *
- * @record
- * @template V
- */
-
-/**
- * @deprecated v4.0.0 - Use IterableChangeRecord instead.
- * @record
- * @template V
- */
-
-/**
- * An optional function passed into {\@link NgForOf} that defines how to track
- * items in an iterable (e.g. fby index or id)
- *
- *
- * @record
- * @template T
- */
-
-/**
- * Provides a factory for {\@link IterableDiffer}.
- *
- *
- * @record
- */
-
-/**
  * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
  *
  */
@@ -8588,45 +7859,6 @@ function getTypeNameForDebugging(type) {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * A differ that tracks changes made to an object over time.
- *
- *
- * @record
- * @template K, V
- */
-
-/**
- * An object describing the changes in the `Map` or `{[k:string]: string}` since last time
- * `KeyValueDiffer#diff()` was invoked.
- *
- *
- * @record
- * @template K, V
- */
-
-/**
- * Record representing the item change information.
- *
- *
- * @record
- * @template K, V
- */
-
-/**
- * Provides a factory for {\@link KeyValueDiffer}.
- *
- *
- * @record
- */
-
-/**
  * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
  *
  */
@@ -8705,13 +7937,6 @@ class KeyValueDiffers {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /** *
  * Structural diffing for `Object`s and `Map`s.
   @type {?} */
@@ -8729,24 +7954,10 @@ const defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /** @type {?} */
 const _CORE_PLATFORM_PROVIDERS = [
@@ -8766,13 +7977,6 @@ const platformCore = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDER
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /** *
  * Provide this token to set the locale of your application.
@@ -8857,13 +8061,6 @@ MissingTranslationStrategy[MissingTranslationStrategy.Ignore] = 'Ignore';
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /**
  * @return {?}
@@ -9019,20 +8216,6 @@ function resolveComponentResources(resourceResolver) {
 }
 /** @type {?} */
 const componentResourceResolutionQueue = new Set();
-/**
- * @param {?} metadata
- * @return {?}
- */
-
-/**
- * @param {?} component
- * @return {?}
- */
-
-/**
- * @return {?}
- */
-
 /**
  * @param {?} response
  * @return {?}
@@ -9226,13 +8409,6 @@ function isDOMParserAvailable() {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /** *
  * A pattern that recognizes a commonly useful subset of URLs that are safe.
  *
@@ -9289,13 +8465,6 @@ function sanitizeSrcset(srcset) {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /**
  * @param {?} tags
@@ -9564,13 +8733,6 @@ function isTemplateElement(el) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /** *
  * Regular expression for safe style values.
  *
@@ -9708,126 +8870,6 @@ class Sanitizer {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-// unsupported: template constraints.
-/**
- * Factory for ViewDefinitions/NgModuleDefinitions.
- * We use a function so we can reexeute it in case an error happens and use the given logger
- * function to log the error from the definition of the node, which is shown in all browser
- * logs.
- * @record
- * @template D
- */
-
-/**
- * Function to call console.error at the right source location. This is an indirection
- * via another function as browser will log the location that actually called
- * `console.error`.
- * @record
- */
-
-// unsupported: template constraints.
-/**
- * @record
- * @template DF
- */
-
-/**
- * @record
- */
-
-/**
- * @record
- */
-
-/**
- * @record
- */
-
-/**
- * @record
- */
-
-/**
- * @record
- */
-
-/**
- * @record
- */
-
-/**
- * @record
- */
-
-/**
- * A node definition in the view.
- *
- * Note: We use one type for all nodes so that loops that loop over all nodes
- * of a ViewDefinition stay monomorphic!
- * @record
- */
-
-/**
- * @record
- */
-
-/**
- * @record
- */
-
-/**
- * @record
- */
-
-/**
- * @record
- */
-
-/**
- * @record
- */
-
-/**
- * @record
- */
-
-/**
- * @record
- */
-
-/**
- * @record
- */
-
-/**
- * @record
- */
-
-/**
- * @record
- */
-
-/**
- * @record
- */
-
-/**
- * @record
- */
-
-/**
- * View instance data.
- * Attention: Adding fields to this is performance sensitive!
- * @record
- */
-
-/**
  * @param {?} view
  * @param {?} priorInitState
  * @param {?} newInitState
@@ -9837,7 +8879,7 @@ function shiftInitState(view, priorInitState, newInitState) {
     /** @type {?} */
     const state = view.state;
     /** @type {?} */
-    const initState = state & 1792;
+    const initState = state & 1792 /* InitState_Mask */;
     if (initState === priorInitState) {
         view.state = (state & ~1792 /* InitState_Mask */) | newInitState;
         view.initIndex = -1;
@@ -9859,29 +8901,6 @@ function shouldCallLifecycleInitHook(view, initState, index) {
     return false;
 }
 /**
- * @record
- */
-
-/**
- * Node instance data.
- *
- * We have a separate type per NodeType to save memory
- * (TextData | ElementData | ProviderData | PureExpressionData | QueryList<any>)
- *
- * To keep our code monomorphic,
- * we prohibit using `NodeData` directly but enforce the use of accessors (`asElementData`, ...).
- * This way, no usage site can get a `NodeData` from view.nodes and then use it for different
- * purposes.
- */
-
-/**
- * Data for an instantiated NodeType.Text.
- *
- * Attention: Adding fields to this is performance sensitive!
- * @record
- */
-
-/**
  * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
  * @param {?} view
  * @param {?} index
@@ -9890,21 +8909,6 @@ function shouldCallLifecycleInitHook(view, initState, index) {
 function asTextData(view, index) {
     return /** @type {?} */ (view.nodes[index]);
 }
-/**
- * Data for an instantiated NodeType.Element.
- *
- * Attention: Adding fields to this is performance sensitive!
- * @record
- */
-
-/**
- * @record
- */
-
-/**
- * @record
- */
-
 /**
  * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
  * @param {?} view
@@ -9915,13 +8919,6 @@ function asElementData(view, index) {
     return /** @type {?} */ (view.nodes[index]);
 }
 /**
- * Data for an instantiated NodeType.Provider.
- *
- * Attention: Adding fields to this is performance sensitive!
- * @record
- */
-
-/**
  * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
  * @param {?} view
  * @param {?} index
@@ -9930,13 +8927,6 @@ function asElementData(view, index) {
 function asProviderData(view, index) {
     return /** @type {?} */ (view.nodes[index]);
 }
-/**
- * Data for an instantiated NodeType.PureExpression.
- *
- * Attention: Adding fields to this is performance sensitive!
- * @record
- */
-
 /**
  * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
  * @param {?} view
@@ -9956,18 +8946,10 @@ function asQueryList(view, index) {
     return /** @type {?} */ (view.nodes[index]);
 }
 /**
- * @record
- */
-
-/**
  * @abstract
  */
 class DebugContext {
 }
-/**
- * @record
- */
-
 /** *
  * This object is used to prevent cycles in the source files and to have a place where
  * debug mode can hook it. It is lazily filled when `isDevMode` is known.
@@ -9995,13 +8977,6 @@ const Services = {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /**
  * @param {?} context
@@ -10072,13 +9047,6 @@ function viewDestroyedError(action) {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /** @type {?} */
 const NOOP = () => { };
@@ -10679,13 +9647,6 @@ const EMPTY_MAP = {};
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * @param {?} flags
  * @param {?} matchedQueriesDsl
  * @param {?} ngContentIndex
@@ -11101,19 +10062,12 @@ function setElementProperty(view, binding, renderNode$$1, name, value) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /** @type {?} */
 const UNDEFINED_VALUE = new Object();
 /** @type {?} */
-const InjectorRefTokenKey$1 = tokenKey(Injector);
+const InjectorRefTokenKey = tokenKey(Injector);
 /** @type {?} */
-const INJECTORRefTokenKey$1 = tokenKey(INJECTOR);
+const INJECTORRefTokenKey = tokenKey(INJECTOR);
 /** @type {?} */
 const NgModuleRefTokenKey = tokenKey(NgModuleRef);
 /**
@@ -11183,7 +10137,7 @@ function initNgModule(data) {
         if (!(provDef.flags & 4096 /* LazyProvider */)) {
             // Make sure the provider has not been already initialized outside this loop.
             if (providers[i] === undefined) {
-                providers[i] = _createProviderInstance$1(data, provDef);
+                providers[i] = _createProviderInstance(data, provDef);
             }
         }
     }
@@ -11210,8 +10164,8 @@ function resolveNgModuleDep(data, depDef, notFoundValue = Injector.THROW_IF_NOT_
         /** @type {?} */
         const tokenKey$$1 = depDef.tokenKey;
         switch (tokenKey$$1) {
-            case InjectorRefTokenKey$1:
-            case INJECTORRefTokenKey$1:
+            case InjectorRefTokenKey:
+            case INJECTORRefTokenKey:
             case NgModuleRefTokenKey:
                 return data;
         }
@@ -11222,7 +10176,7 @@ function resolveNgModuleDep(data, depDef, notFoundValue = Injector.THROW_IF_NOT_
             let providerInstance = data._providers[providerDef.index];
             if (providerInstance === undefined) {
                 providerInstance = data._providers[providerDef.index] =
-                    _createProviderInstance$1(data, providerDef);
+                    _createProviderInstance(data, providerDef);
             }
             return providerInstance === UNDEFINED_VALUE ? undefined : providerInstance;
         }
@@ -11239,7 +10193,7 @@ function resolveNgModuleDep(data, depDef, notFoundValue = Injector.THROW_IF_NOT_
             };
             data._providers[index] = UNDEFINED_VALUE;
             return (data._providers[index] =
-                _createProviderInstance$1(data, data._def.providersByKey[depDef.tokenKey]));
+                _createProviderInstance(data, data._def.providersByKey[depDef.tokenKey]));
         }
         else if (depDef.flags & 4 /* Self */) {
             return notFoundValue;
@@ -11272,7 +10226,7 @@ function targetsModule(ngModule, def) {
  * @param {?} providerDef
  * @return {?}
  */
-function _createProviderInstance$1(ngModule, providerDef) {
+function _createProviderInstance(ngModule, providerDef) {
     /** @type {?} */
     let injectable;
     switch (providerDef.flags & 201347067 /* Types */) {
@@ -11384,13 +10338,6 @@ function callNgModuleLifecycle(ngModule, lifecycles) {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /**
  * @param {?} parentView
@@ -11586,13 +10533,6 @@ function removeFromArray(arr, index) {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /** @type {?} */
 const EMPTY_CONTEXT = new Object();
@@ -12336,7 +11276,7 @@ class NgModuleRef_ {
      */
     get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND, injectFlags = 0 /* Default */) {
         /** @type {?} */
-        let flags = 0;
+        let flags = 0 /* None */;
         if (injectFlags & 4 /* SkipSelf */) {
             flags |= 1 /* SkipSelf */;
         }
@@ -12375,13 +11315,6 @@ class NgModuleRef_ {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /** @type {?} */
 const RendererV1TokenKey = tokenKey(Renderer);
 /** @type {?} */
@@ -12395,9 +11328,9 @@ const TemplateRefTokenKey = tokenKey(TemplateRef);
 /** @type {?} */
 const ChangeDetectorRefTokenKey = tokenKey(ChangeDetectorRef);
 /** @type {?} */
-const InjectorRefTokenKey = tokenKey(Injector);
+const InjectorRefTokenKey$1 = tokenKey(Injector);
 /** @type {?} */
-const INJECTORRefTokenKey = tokenKey(INJECTOR);
+const INJECTORRefTokenKey$1 = tokenKey(INJECTOR);
 /**
  * @param {?} checkIndex
  * @param {?} flags
@@ -12509,7 +11442,7 @@ function _def(checkIndex, flags, matchedQueriesDsl, childCount, token, value, de
  * @return {?}
  */
 function createProviderInstance(view, def) {
-    return _createProviderInstance(view, def);
+    return _createProviderInstance$1(view, def);
 }
 /**
  * @param {?} view
@@ -12673,7 +11606,7 @@ function checkAndUpdateDirectiveDynamic(view, def, values) {
  * @param {?} def
  * @return {?}
  */
-function _createProviderInstance(view, def) {
+function _createProviderInstance$1(view, def) {
     /** @type {?} */
     const allowPrivateServices = (def.flags & 8192 /* PrivateProvider */) > 0;
     /** @type {?} */
@@ -12807,8 +11740,8 @@ function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue = I
                     let cdView = findCompView(searchView, elDef, allowPrivateServices);
                     return createChangeDetectorRef(cdView);
                 }
-                case InjectorRefTokenKey:
-                case INJECTORRefTokenKey:
+                case InjectorRefTokenKey$1:
+                case INJECTORRefTokenKey$1:
                     return createInjector$1(searchView, elDef);
                 default:
                     /** @type {?} */
@@ -12817,7 +11750,7 @@ function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue = I
                         /** @type {?} */
                         let providerData = asProviderData(searchView, providerDef.nodeIndex);
                         if (!providerData) {
-                            providerData = { instance: _createProviderInstance(searchView, providerDef) };
+                            providerData = { instance: _createProviderInstance$1(searchView, providerDef) };
                             searchView.nodes[providerDef.nodeIndex] = /** @type {?} */ (providerData);
                         }
                         return providerData.instance;
@@ -12997,13 +11930,6 @@ function callProviderLifecycles(view, index, lifecycles, initIndex) {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /**
  * @param {?} flags
@@ -13232,13 +12158,6 @@ function getQueryValue(view, nodeDef, queryValueType) {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * @param {?} ngContentIndex
  * @param {?} index
  * @return {?}
@@ -13292,13 +12211,6 @@ function appendNgContent(view, renderHost, def) {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /**
  * @param {?} checkIndex
@@ -13580,13 +12492,6 @@ function checkAndUpdatePureExpressionDynamic(view, def, values) {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * @param {?} checkIndex
  * @param {?} ngContentIndex
  * @param {?} staticText
@@ -13766,13 +12671,6 @@ function _addInterpolationPart(value, binding) {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /**
  * @param {?} flags
@@ -14612,13 +13510,6 @@ function execQueriesAction(view, queryFlags, staticDynamicQueryFlag, checkType) 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /** @type {?} */
 let initialized = false;
@@ -15810,13 +14701,6 @@ class DebugRenderer2 {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * @param {?} override
  * @return {?}
  */
@@ -15879,46 +14763,16 @@ class NgModuleFactory_ extends NgModuleFactory {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
+
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-// The functions in this file verify that the assumptions we are making
-// about state in an instruction are correct before implementing any logic.
-// They are meant only to be called in dev mode as sanity checks.
-/**
- * @param {?} actual
- * @param {?} msg
- * @return {?}
- */
-
 /**
  * @template T
  * @param {?} actual
@@ -15943,14 +14797,6 @@ function assertNotEqual(actual, expected, msg) {
         throwError(msg);
     }
 }
-/**
- * @template T
- * @param {?} actual
- * @param {?} expected
- * @param {?} msg
- * @return {?}
- */
-
 /**
  * @template T
  * @param {?} actual
@@ -16061,44 +14907,10 @@ const SANITIZER = 12;
 const TAIL = 13;
 /** @type {?} */
 const CONTAINER_INDEX = 14;
-/**
- * `LViewData` stores all of the information needed to process the instructions as
- * they are invoked from the template. Each embedded view and component view has its
- * own `LViewData`. When processing a particular view, we set the `viewData` to that
- * `LViewData`. When that view is done processing, the `viewData` is set back to
- * whatever the original `viewData` was before (the parent `LViewData`).
- *
- * Keeping separate state for each view facilities view insertion / deletion, so we
- * don't have to edit the data array based on which views are present.
- * @record
- */
-
-/**
- * The static data for an LView (shared between all templates of a
- * given type).
- *
- * Stored on the template function as ngPrivateData.
- * @record
- */
-
-/**
- * RootContext contains information which is shared for all components which
- * were bootstrapped with {\@link renderComponent}.
- * @record
- */
-
-/** @type {?} */
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /**
  * If this is the first template pass, any ngOnInit or ngDoCheck hooks will be queued into
@@ -16135,9 +14947,9 @@ function queueInitHooks(index, onInit, doCheck, tView) {
 function queueLifecycleHooks(flags, tView) {
     if (tView.firstTemplatePass) {
         /** @type {?} */
-        const start = flags >> 13;
+        const start = flags >> 13 /* DirectiveStartingIndexShift */;
         /** @type {?} */
-        const count = flags & 4095;
+        const count = flags & 4095 /* DirectiveCountMask */;
         /** @type {?} */
         const end = start + count;
         // It's necessary to loop through the directives at elementEnd() (rather than processing in
@@ -16330,13 +15142,6 @@ function throwErrorIfNoChangesMode(creationMode, checkNoChangesMode, oldValue, c
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /** *
  * Below are constants for LContainer indices to help us look up LContainer members
  * without having to remember the specific indices.
@@ -16347,48 +15152,17 @@ const ACTIVE_INDEX = 0;
 const VIEWS = 4;
 /** @type {?} */
 const RENDER_PARENT = 5;
-/**
- * The state associated with an LContainerNode.
- *
- * This is an array so that its structure is closer to LViewData. This helps
- * when traversing the view tree (which is a mix of containers and component
- * views), so we can jump to viewOrContainer[NEXT] in the same way regardless
- * of type.
- * @record
- */
-
-/** @type {?} */
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Linked list of projected nodes (using the pNextOrParent property).
- * @record
- */
-
 /** @type {?} */
 const NG_PROJECT_AS_ATTR_NAME = 'ngProjectAs';
-/** @type {?} */
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /**
  * @param {?} node
@@ -16430,95 +15204,6 @@ function typeName(type) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/** @enum {number} */
-/**
- * LNode is an internal data structure which is used for the incremental DOM algorithm.
- * The "L" stands for "Logical" to differentiate between `RNodes` (actual rendered DOM
- * node) and our logical representation of DOM nodes, `LNodes`.
- *
- * The data structure is optimized for speed and size.
- *
- * In order to be fast, all subtypes of `LNode` should have the same shape.
- * Because size of the `LNode` matters, many fields have multiple roles depending
- * on the `LNode` subtype.
- *
- * See: https://en.wikipedia.org/wiki/Inline_caching#Monomorphic_inline_caching
- *
- * NOTE: This is a private data structure and should not be exported by any of the
- * instructions.
- * @record
- */
-
-/**
- * LNode representing an element.
- * @record
- */
-
-/**
- * LNode representing a #text node.
- * @record
- */
-
-/**
- * Abstract node which contains root nodes of a view.
- * @record
- */
-
-/**
- * Abstract node container which contains other views.
- * @record
- */
-
-/**
- * @record
- */
-
-/**
- * LNode binding data (flyweight) for a particular node that is shared between all templates
- * of a specific type.
- *
- * If a property is:
- *    - PropertyAliases: that property's data was generated and this is it
- *    - Null: that property's data was already generated and nothing was found.
- *    - Undefined: that property's data has not yet been generated
- *
- * see: https://en.wikipedia.org/wiki/Flyweight_pattern for more on the Flyweight pattern
- * @record
- */
-
-/**
- * Static data for an LElementNode
- * @record
- */
-
-/**
- * Static data for an LTextNode
- * @record
- */
-
-/**
- * Static data for an LContainerNode
- * @record
- */
-
-/**
- * Static data for an LViewNode
- * @record
- */
-
-/**
- * Static data for an LProjectionNode
- * @record
- */
-
-/** @type {?} */
 
 /**
  * @fileoverview added by tsickle
@@ -16539,16 +15224,6 @@ const RendererStyleFlags3 = {
 RendererStyleFlags3[RendererStyleFlags3.Important] = 'Important';
 RendererStyleFlags3[RendererStyleFlags3.DashCase] = 'DashCase';
 /**
- * Object Oriented style of API needed to create elements and text nodes.
- *
- * This is the native browser API style, e.g. operations are methods on individual objects
- * like HTMLElement. With this style, no additional code is needed as a facade
- * (reducing payload size).
- *
- * @record
- */
-
-/**
  * Returns whether the `renderer` is a `ProceduralRenderer3`
  * @param {?} renderer
  * @return {?}
@@ -16556,51 +15231,10 @@ RendererStyleFlags3[RendererStyleFlags3.DashCase] = 'DashCase';
 function isProceduralRenderer(renderer) {
     return !!((/** @type {?} */ (renderer)).listen);
 }
-/**
- * Procedural style of API needed to create elements and text nodes.
- *
- * In non-native browser environments (e.g. platforms such as web-workers), this is the
- * facade that enables element manipulation. This also facilitates backwards compatibility
- * with Renderer2.
- * @record
- */
-
-/**
- * @record
- */
-
 /** @type {?} */
 const domRendererFactory3 = {
     createRenderer: (hostElement, rendererType) => { return document; }
 };
-/**
- * Subset of API needed for appending elements and text nodes.
- * @record
- */
-
-/**
- * Subset of API needed for writing attributes, properties, and setting up
- * listeners on Element.
- * @record
- */
-
-/**
- * @record
- */
-
-/**
- * @record
- */
-
-/**
- * @record
- */
-
-/**
- * @record
- */
-
-/** @type {?} */
 
 /**
  * @fileoverview added by tsickle
@@ -16681,13 +15315,6 @@ function flatten$1(list) {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Retrieves the sibling node for the given node.
  * @param {?} node
  * @return {?}
@@ -16740,7 +15367,7 @@ function getNextLNodeWithProjection(node) {
     const pNextOrParent = node.pNextOrParent;
     if (pNextOrParent) {
         /** @type {?} */
-        const isLastProjectedNode = pNextOrParent.tNode.type === 1;
+        const isLastProjectedNode = pNextOrParent.tNode.type === 1 /* Projection */;
         // returns pNextOrParent if we are not at the end of the list, null otherwise
         return isLastProjectedNode ? null : pNextOrParent;
     }
@@ -17313,13 +15940,6 @@ function appendProjectedNode(node, currentParent, currentView, renderParent) {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * @param {?} nodeClassAttrVal
  * @param {?} cssClassToMatch
  * @return {?}
@@ -17350,7 +15970,7 @@ function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
 function isNodeMatchingSelector(tNode, selector) {
     ngDevMode && assertDefined(selector[0], 'Selector should have a tag name');
     /** @type {?} */
-    let mode = 4;
+    let mode = 4 /* ELEMENT */;
     /** @type {?} */
     const nodeAttrs = /** @type {?} */ ((tNode.attrs));
     /** @type {?} */
@@ -17522,13 +16142,6 @@ function matchingSelectorIndex(tNode, selectors, textSelectors) {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /** *
  * Directive (D) sets a property on all component instances using this constant as a key and the
@@ -17941,20 +16554,6 @@ function resetApplicationState() {
     previousOrParentNode = /** @type {?} */ ((null));
 }
 /**
- *
- * @template T
- * @param {?} hostNode Existing node to render into.
- * @param {?} template Template function with the instructions.
- * @param {?} context to pass into the template.
- * @param {?} providedRendererFactory renderer factory to use
- * @param {?} host The host element node to use
- * @param {?=} directives Directive defs that should be used for matching
- * @param {?=} pipes Pipe defs that should be used for matching
- * @param {?=} sanitizer
- * @return {?}
- */
-
-/**
  * Used for creating the LViewNode of a dynamic embedded view,
  * either through ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
  * Such lViewNode will then be renderer with renderEmbeddedTemplate() (see below).
@@ -18021,7 +16620,7 @@ function renderEmbeddedTemplate(viewNode, tView, context, rf) {
     }
     finally {
         /** @type {?} */
-        const isCreationOnly = (rf & 1 /* Create */) === 1;
+        const isCreationOnly = (rf & 1 /* Create */) === 1 /* Create */;
         leaveView(/** @type {?} */ ((oldView)), isCreationOnly);
         isParent = _isParent;
         previousOrParentNode = _previousOrParentNode;
@@ -18293,10 +16892,10 @@ function instantiateDirectivesDirectly() {
     /** @type {?} */
     const tNode = previousOrParentNode.tNode;
     /** @type {?} */
-    const count = tNode.flags & 4095;
+    const count = tNode.flags & 4095 /* DirectiveCountMask */;
     if (count > 0) {
         /** @type {?} */
-        const start = tNode.flags >> 13;
+        const start = tNode.flags >> 13 /* DirectiveStartingIndexShift */;
         /** @type {?} */
         const end = start + count;
         /** @type {?} */
@@ -18780,16 +17379,16 @@ function setInputsForProperty(inputs, value) {
  */
 function generatePropertyAliases(tNodeFlags, direction) {
     /** @type {?} */
-    const count = tNodeFlags & 4095;
+    const count = tNodeFlags & 4095 /* DirectiveCountMask */;
     /** @type {?} */
     let propStore = null;
     if (count > 0) {
         /** @type {?} */
-        const start = tNodeFlags >> 13;
+        const start = tNodeFlags >> 13 /* DirectiveStartingIndexShift */;
         /** @type {?} */
         const end = start + count;
         /** @type {?} */
-        const isInput = direction === 0;
+        const isInput = direction === 0 /* Input */;
         /** @type {?} */
         const defs = /** @type {?} */ ((tView.directives));
         for (let i = start; i < end; i++) {
@@ -19678,22 +18277,6 @@ function scheduleTick(rootContext) {
     }
 }
 /**
- * Used to perform change detection on the whole application.
- *
- * This is equivalent to `detectChanges`, but invoked on root component. Additionally, `tick`
- * executes lifecycle hooks and conditionally checks components based on their
- * `ChangeDetectionStrategy` and dirtiness.
- *
- * The preferred way to trigger change detection is to call `markDirty`. `markDirty` internally
- * schedules `tick` using a scheduler in order to coalesce multiple `markDirty` calls into a
- * single change detection run. By default, the scheduler is `requestAnimationFrame`, but can
- * be changed when calling `renderComponent` and providing the `scheduler` option.
- * @template T
- * @param {?} component
- * @return {?}
- */
-
-/**
  * @param {?} rootContext
  * @return {?}
  */
@@ -20329,20 +18912,6 @@ const ROOT_DIRECTIVE_INDICES = _ROOT_DIRECTIVE_INDICES;
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Options that control how the component should be bootstrapped.
- * @record
- */
-
-/** @type {?} */
-
-/**
  * Bootstraps a Component into an existing host element and returns an instance
  * of the component.
  *
@@ -20414,23 +18983,6 @@ function createRootContext(scheduler) {
     };
 }
 /**
- * Used to enable lifecycle hooks on the root component.
- *
- * Include this feature when calling `renderComponent` if the root component
- * you are rendering has lifecycle hooks defined. Otherwise, the hooks won't
- * be called properly.
- *
- * Example:
- *
- * ```
- * renderComponent(AppComponent, {features: [RootLifecycleHooks]});
- * ```
- * @param {?} component
- * @param {?} def
- * @return {?}
- */
-
-/**
  * Retrieve the root context for any component by walking the parent `LView` until
  * reaching the root `LView`.
  *
@@ -20443,29 +18995,6 @@ function getRootContext(component) {
     ngDevMode && assertDefined(rootContext, 'rootContext');
     return rootContext;
 }
-/**
- * Retrieve the host element of the component.
- *
- * Use this function to retrieve the host element of the component. The host
- * element is the element which the component is associated with.
- *
- * @template T
- * @param {?} component Component for which the host element should be retrieved.
- * @return {?}
- */
-
-/**
- * Retrieves the rendered text for a given component.
- *
- * This function retrieves the host element of a component and
- * and then returns the `textContent` for that element. This implies
- * that the text returned will include re-projected content of
- * the component as well.
- *
- * @param {?} component The component to return the content text for.
- * @return {?}
- */
-
 /**
  * Wait on component until it is rendered.
  *
@@ -20489,13 +19018,6 @@ function whenRendered(component) {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /**
  * Create a component definition object.
@@ -20719,36 +19241,10 @@ function definePipe(pipeDef) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Sets properties on a target object from a source object, but only if
- * the property doesn't already exist on the target object.
- * @param {?} target The target to set properties on
- * @param {?} source The source of the property keys and values to set
- * @return {?}
- */
-/**
- * Merges the definition from a super class to a sub class.
- * @param {?} definition The definition that is a SubClass of another directive of component
- * @return {?}
- */
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /** @type {?} */
 const PRIVATE_PREFIX = '__ngOnChanges_';
@@ -20870,17 +19366,6 @@ function onChangesWrapper(delegateHook) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * @record
- */
-
 /**
  * @template T
  */
@@ -21143,13 +19628,6 @@ class EmbeddedViewRef$1 extends ViewRef$1 {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /** *
  * If a directive is diPublic, bloomAdd sets a property on the instance with this constant as
  * the key and the directive's unique ID as the value. This allows us to map directives to their
@@ -21274,13 +19752,6 @@ function diPublic(def) {
 function directiveInject(token, flags = 0 /* Default */) {
     return getOrCreateInjectable(getOrCreateNodeInjector(), token, flags);
 }
-/**
- * Creates an ElementRef and stores it on the injector.
- * Or, if the ElementRef already exists, retrieves the existing ElementRef.
- *
- * @return {?} The ElementRef instance to use
- */
-
 /**
  * Creates a TemplateRef and stores it on the injector. Or, if the TemplateRef already
  * exists, retrieves the existing TemplateRef.
@@ -21466,10 +19937,10 @@ function getOrCreateInjectable(di, token, flags = 0 /* Default */) {
             /** @type {?} */
             const nodeFlags = node.tNode.flags;
             /** @type {?} */
-            const count = nodeFlags & 4095;
+            const count = nodeFlags & 4095 /* DirectiveCountMask */;
             if (count !== 0) {
                 /** @type {?} */
-                const start = nodeFlags >> 13;
+                const start = nodeFlags >> 13 /* DirectiveStartingIndexShift */;
                 /** @type {?} */
                 const end = start + count;
                 /** @type {?} */
@@ -21631,14 +20102,6 @@ class ReadFromInjectorFn {
 function getOrCreateElementRef(di) {
     return di.elementRef || (di.elementRef = new ElementRef$1(di.node.native));
 }
-/** @type {?} */
-
-/** @type {?} */
-
-/** @type {?} */
-
-/** @type {?} */
-
 /**
  * A ref to a node's native element.
  */
@@ -21902,14 +20365,6 @@ function PublicFeature(definition) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-
 /** *
  * Default {\@link RootContext} for all components rendered with {\@link renderComponent}.
   @type {?} */
@@ -21919,31 +20374,10 @@ const ROOT_CONTEXT = new InjectionToken('ROOT_CONTEXT_TOKEN', { providedIn: 'roo
  * for the default `RootContext` found in the {\@link ROOT_CONTEXT} token.
   @type {?} */
 const SCHEDULER = new InjectionToken('SCHEDULER_TOKEN', { providedIn: 'root', factory: () => requestAnimationFrame.bind(window) });
-/**
- * Render3 implementation of {\@link viewEngine_ComponentFactory}.
- * @template T
- */
-
-/**
- * Represents an instance of a Component created via a {\@link ComponentFactory}.
- *
- * `ComponentRef` provides access to the Component Instance as well other objects related to this
- * Component Instance and allows you to destroy the Component Instance via the {\@link #destroy}
- * method.
- *
- * @template T
- */
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /** @type {?} */
 const i18nTagRegex = /\{\$([^}]+)\}/g;
@@ -22215,7 +20649,7 @@ function i18nApply(startIndex, instructions) {
                     ngDevMode.rendererRemoveNode++;
                 }
                 /** @type {?} */
-                const index = instruction & 536870911;
+                const index = instruction & 536870911 /* IndexMask */;
                 /** @type {?} */
                 const removedNode = load(index);
                 /** @type {?} */
@@ -22371,41 +20805,10 @@ function i18nInterpolationV(instructions, values) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * @record
- */
-
-/**
- * @record
- */
-
-/** @type {?} */
-
-/**
- * @template T
- */
-
-/**
- * @template T
- */
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /**
  * If the value hasn't been saved, calls the pure function to store and return the
@@ -22672,13 +21075,6 @@ function pureFunctionV(slotOffset, pureFn, exps, thisArg) {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Create a pipe.
  *
  * @param {?} index Pipe index where the pipe will be stored.
@@ -22832,153 +21228,21 @@ function isPure(index) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/** @typedef {?} */
-/**
- * A subclass of `Type` which has a static `ngComponentDef`:`ComponentDef` field making it
- * consumable for rendering.
- * @record
- * @template T
- */
-
-/**
- * A subclass of `Type` which has a static `ngDirectiveDef`:`DirectiveDef` field making it
- * consumable for rendering.
- * @record
- * @template T
- */
-
-/**
- * A subclass of `Type` which has a static `ngPipeDef`:`PipeDef` field making it
- * consumable for rendering.
- * @record
- * @template T
- */
-
-// unsupported: template constraints.
-/**
- * Runtime link information for Directives.
- *
- * This is internal data structure used by the render to link
- * directives into templates.
- *
- * NOTE: Always use `defineDirective` function to create this object,
- * never create the object directly since the shape of this object
- * can change between versions.
- *
- * @param Selector type metadata specifying the selector of the directive or component
- *
- * See: {\@link defineDirective}
- * @record
- * @template T, Selector
- */
-
-// unsupported: template constraints.
-/**
- * Runtime link information for Components.
- *
- * This is internal data structure used by the render to link
- * components into templates.
- *
- * NOTE: Always use `defineComponent` function to create this object,
- * never create the object directly since the shape of this object
- * can change between versions.
- *
- * See: {\@link defineComponent}
- * @record
- * @template T, Selector
- */
-
-// unsupported: template constraints.
-/**
- * Runtime link information for Pipes.
- *
- * This is internal data structure used by the renderer to link
- * pipes into templates.
- *
- * NOTE: Always use `definePipe` function to create this object,
- * never create the object directly since the shape of this object
- * can change between versions.
- *
- * See: {\@link definePipe}
- * @record
- * @template T, S
- */
-
-/** @type {?} */
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * @record
- */
-
-/** @type {?} */
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Used for tracking queries (e.g. ViewChild, ContentChild).
- * @record
- */
-
-/**
- * @template T
- */
-
-/** @type {?} */
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * A predicate which determines if a given element/directive should be included in the query
- * results.
- * @record
- * @template T
- */
-
-/**
- * An object representing a query, which is a combination of:
- * - query predicate to determines if a given element/directive should be included in the query
- * - values collected based on a predicate
- * - `QueryList` to which collected values should be reported
- * @record
- * @template T
- */
-
 class LQueries_ {
     /**
      * @param {?=} deep
@@ -23154,9 +21418,9 @@ function getIdxOfMatchingDirective(node, type) {
     /** @type {?} */
     const flags = node.tNode.flags;
     /** @type {?} */
-    const count = flags & 4095;
+    const count = flags & 4095 /* DirectiveCountMask */;
     /** @type {?} */
-    const start = flags >> 13;
+    const start = flags >> 13 /* DirectiveStartingIndexShift */;
     /** @type {?} */
     const end = start + count;
     for (let i = start; i < end; i++) {
@@ -23444,70 +21708,13 @@ function queryRefresh(queryList) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /** @type {?} */
 const BRAND = '__SANITIZER_TRUSTED_BRAND__';
-/**
- * A branded trusted string used with sanitization.
- *
- * See: {\@link TrustedHtmlString}, {\@link TrustedResourceUrlString}, {\@link TrustedScriptString},
- * {\@link TrustedStyleString}, {\@link TrustedUrlString}
- * @record
- */
-
-/**
- * A branded trusted string used with sanitization of `html` strings.
- *
- * See: {\@link bypassSanitizationTrustHtml} and {\@link htmlSanitizer}.
- * @record
- */
-
-/**
- * A branded trusted string used with sanitization of `style` strings.
- *
- * See: {\@link bypassSanitizationTrustStyle} and {\@link styleSanitizer}.
- * @record
- */
-
-/**
- * A branded trusted string used with sanitization of `url` strings.
- *
- * See: {\@link bypassSanitizationTrustScript} and {\@link scriptSanitizer}.
- * @record
- */
-
-/**
- * A branded trusted string used with sanitization of `url` strings.
- *
- * See: {\@link bypassSanitizationTrustUrl} and {\@link urlSanitizer}.
- * @record
- */
-
-/**
- * A branded trusted string used with sanitization of `resourceUrl` strings.
- *
- * See: {\@link bypassSanitizationTrustResourceUrl} and {\@link resourceUrlSanitizer}.
- * @record
- */
-
 /**
  * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
  * dangerous content.
@@ -23603,16 +21810,6 @@ function sanitizeResourceUrl(unsafeResourceUrl) {
     throw new Error('unsafe value used in a resource URL context (see http://g.co/ng/security#xss)');
 }
 /**
- * A `script` sanitizer which only lets trusted javascript through.
- *
- * This passes only `script`s marked trusted by calling {\@link bypassSanitizationTrustScript}.
- *
- * @param {?} unsafeScript untrusted `script`, typically from the user.
- * @return {?} `url` string which is safe to bind to the `<script>` element such as `<img src>`,
- * because only trusted `scripts`s have been allowed to pass.
- */
-
-/**
  * Mark `html` string as trusted.
  *
  * This function wraps the trusted string in `String` and brands it in a way which makes it
@@ -23688,79 +21885,28 @@ function bypassSanitizationTrustString(trustedString, mode) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-
 // clang-format on
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
+
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * @module
- * @description
- * Entry point from which you should import all public core APIs.
- */
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * @module
- * @description
- * Entry point for all public APIs of this package.
- */
-
 // This file only reexports content of the `src` folder. Keep it that way.
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-// This file is not used to build this module. It is only used during editing
-// by the TypeScript language service and during build for verification. `ngc`
-// replaces this file with production index.ts when it rewrites private symbol
-// names.
 
 /**
  * Generated bundle index. Do not edit.
