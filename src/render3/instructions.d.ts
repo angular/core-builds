@@ -272,9 +272,57 @@ export declare function elementClassNamed<T>(index: number, className: string, v
  */
 export declare function elementClass<T>(index: number, value: T | NO_CHANGE): void;
 /**
- * Update a given style on an Element.
+ * Assign any inline style values to the element during creation mode.
  *
- * @param index Index of the element to change in the data array
+ * This instruction is meant to be called during creation mode to apply all styling
+ * (e.g. `style="..."`) values to the element. This is also where the provided index
+ * value is allocated for the styling details for its corresponding element (the element
+ * index is the previous index value from this one).
+ *
+ * (Note this function calls `elementStylingApply` immediately when called.)
+ *
+ *
+ * @param index Index value which will be allocated to store styling data for the element.
+ *        (Note that this is not the element index, but rather an index value allocated
+ *        specifically for element styling--the index must be the next index after the element
+ *        index.)
+ * @param styles A key/value map of CSS styles that will be registered on the element.
+ *   Each individual style will be used on the element as long as it is not overridden
+ *   by any styles placed on the element by multiple (`[style]`) or singular (`[style.prop]`)
+ *   bindings. If a style binding changes its value to null then the initial styling
+ *   values that are passed in here will be applied to the element (if matched).
+ */
+export declare function elementStyling<T>(index: number, styles?: (string | number)[] | null): void;
+/**
+ * Apply all styling values to the element which have been queued by any styling instructions.
+ *
+ * This instruction is meant to be run once one or more `elementStyle` and/or `elementStyleProp`
+ * have been issued against the element. This function will also determine if any styles have
+ * changed and will then skip the operation if there is nothing new to render.
+ *
+ * Once called then all queued styles will be flushed.
+ *
+ * @param index Index of the element's styling storage that will be rendered.
+ *        (Note that this is not the element index, but rather an index value allocated
+ *        specifically for element styling--the index must be the next index after the element
+ *        index.)
+ */
+export declare function elementStylingApply<T>(index: number): void;
+/**
+ * Queue a given style to be rendered on an Element.
+ *
+ * If the style value is `null` then it will be removed from the element
+ * (or assigned a different value depending if there are any styles placed
+ * on the element with `elementStyle` or any styles that are present
+ * from when the element was created (with `elementStyling`).
+ *
+ * (Note that the styling instruction will not be applied until `elementStylingApply` is called.)
+ *
+ * @param index Index of the element's styling storage to change in the data array.
+ *        (Note that this is not the element index, but rather an index value allocated
+ *        specifically for element styling--the index must be the next index after the element
+ *        index.)
+ * @param styleIndex Index of the style property on this element. (Monotonically increasing.)
  * @param styleName Name of property. Because it is going to DOM this is not subject to
  *        renaming as part of minification.
  * @param value New value to write (null to remove).
@@ -282,24 +330,29 @@ export declare function elementClass<T>(index: number, value: T | NO_CHANGE): vo
  * @param sanitizer An optional function used to transform the value typically used for
  *        sanitization.
  */
-export declare function elementStyleNamed<T>(index: number, styleName: string, value: T | NO_CHANGE, suffix?: string): void;
-export declare function elementStyleNamed<T>(index: number, styleName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn): void;
+export declare function elementStyleProp<T>(index: number, styleIndex: number, value: T | null, suffix?: string): void;
+export declare function elementStyleProp<T>(index: number, styleIndex: number, value: T | null, sanitizer?: SanitizerFn): void;
 /**
- * Set the `style` property on a DOM element.
+ * Queue a key/value map of styles to be rendered on an Element.
  *
- * This instruction is meant to handle the `[style]="exp"` usage.
+ * This instruction is meant to handle the `[style]="exp"` usage. When styles are applied to
+ * the Element they will then be placed with respect to any styles set with `elementStyleProp`.
+ * If any styles are set to `null` then they will be removed from the element (unless the same
+ * style properties have been assigned to the element during creation using `elementStyling`).
  *
+ * (Note that the styling instruction will not be applied until `elementStylingApply` is called.)
  *
- * @param index The index of the element to update in the LViewData array
+ * @param index Index of the element's styling storage to change in the data array.
+ *        (Note that this is not the element index, but rather an index value allocated
+ *        specifically for element styling--the index must be the next index after the element
+ *        index.)
  * @param value A value indicating if a given style should be added or removed.
  *   The expected shape of `value` is an object where keys are style names and the values
- *   are their corresponding values to set. If value is falsy, then the style is removed. An absence
- *   of style does not cause that style to be removed. `NO_CHANGE` implies that no update should be
- *   performed.
+ *   are their corresponding values to set. If value is null, then the style is removed.
  */
 export declare function elementStyle<T>(index: number, value: {
     [styleName: string]: any;
-} | NO_CHANGE): void;
+} | null): void;
 /**
  * Create static text node
  *
