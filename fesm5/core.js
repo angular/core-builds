@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.3+31.sha-7f3242a
+ * @license Angular v6.1.0-beta.3+36.sha-8fe8b8f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -430,6 +430,7 @@ var R3_COMPILE_COMPONENT = null;
 var R3_COMPILE_DIRECTIVE = null;
 var R3_COMPILE_INJECTABLE = null;
 var R3_COMPILE_NGMODULE = null;
+var R3_COMPILE_PIPE = null;
 
 /**
  * @license
@@ -542,7 +543,7 @@ var Component = makeDecorator('Component', function (c) {
  *
  * @Annotation
  */
-var Pipe = makeDecorator('Pipe', function (p) { return (__assign({ pure: true }, p)); });
+var Pipe = makeDecorator('Pipe', function (p) { return (__assign({ pure: true }, p)); }, undefined, undefined, function (type, meta) { return (R3_COMPILE_PIPE || (function () { }))(type, meta); });
 /**
  *
  * @Annotation
@@ -1630,7 +1631,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-beta.3+31.sha-7f3242a');
+var VERSION = new Version('6.1.0-beta.3+36.sha-8fe8b8f');
 
 /**
  * @license

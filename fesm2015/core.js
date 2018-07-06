@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.3+31.sha-7f3242a
+ * @license Angular v6.1.0-beta.3+36.sha-8fe8b8f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -610,6 +610,8 @@ const R3_COMPILE_DIRECTIVE = null;
 const R3_COMPILE_INJECTABLE = null;
 /** @type {?} */
 const R3_COMPILE_NGMODULE = null;
+/** @type {?} */
+const R3_COMPILE_PIPE = null;
 
 /**
  * @fileoverview added by tsickle
@@ -741,7 +743,7 @@ const Component = makeDecorator('Component', (c = {}) => (Object.assign({ change
  *
  * \@Annotation
   @type {?} */
-const Pipe = makeDecorator('Pipe', (p) => (Object.assign({ pure: true }, p)));
+const Pipe = makeDecorator('Pipe', (p) => (Object.assign({ pure: true }, p)), undefined, undefined, (type, meta) => (R3_COMPILE_PIPE || (() => { }))(type, meta));
 /**
  *
  * @record
@@ -2282,7 +2284,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('6.1.0-beta.3+31.sha-7f3242a');
+const VERSION = new Version('6.1.0-beta.3+36.sha-8fe8b8f');
 
 /**
  * @fileoverview added by tsickle
@@ -22893,6 +22895,7 @@ function isPure(index) {
  * @template T, Selector
  */
 
+// unsupported: template constraints.
 /**
  * Runtime link information for Pipes.
  *
@@ -22905,7 +22908,7 @@ function isPure(index) {
  *
  * See: {\@link definePipe}
  * @record
- * @template T
+ * @template T, S
  */
 
 /** @type {?} */
