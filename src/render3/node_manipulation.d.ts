@@ -1,3 +1,10 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 import { LContainer } from './interfaces/container';
 import { LContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode } from './interfaces/node';
 import { RNode, RText, Renderer3 } from './interfaces/renderer';
@@ -95,27 +102,28 @@ export declare function destroyLView(view: LViewData): void;
  */
 export declare function getParentState(state: LViewData | LContainer, rootView: LViewData): LViewData | LContainer | null;
 /**
- * Returns whether a native element should be inserted in the given parent.
+ * Returns whether a native element can be inserted into the given parent.
  *
- * The native node can be inserted when its parent is:
- * - A regular element => Yes
- * - A component host element =>
- *    - if the `currentView` === the parent `view`: The element is in the content (vs the
- *      template)
- *      => don't add as the parent component will project if needed.
- *    - `currentView` !== the parent `view` => The element is in the template (vs the content),
- *      add it
- * - View element => delay insertion, will be done on `viewEnd()`
+ * There are two reasons why we may not be able to insert a element immediately.
+ * - Projection: When creating a child content element of a component, we have to skip the
+ *   insertion because the content of a component will be projected.
+ *   `<component><content>delayed due to projection</content></component>`
+ * - Parent container is disconnected: This can happen when we are inserting a view into
+ *   parent container, which itself is disconnected. For example the parent container is part
+ *   of a View which has not be inserted or is mare for projection but has not been inserted
+ *   into destination.
  *
- * @param parent The parent in which to insert the child
- * @param currentView The LView being processed
- * @return boolean Whether the child element should be inserted.
+
+ *
+ * @param parent The parent where the child will be inserted into.
+ * @param currentView Current LView being processed.
+ * @return boolean Whether the child should be inserted now (or delayed until later).
  */
 export declare function canInsertNativeNode(parent: LNode, currentView: LViewData): boolean;
 /**
  * Appends the `child` element to the `parent`.
  *
- * The element insertion might be delayed {@link canInsertNativeNode}
+ * The element insertion might be delayed {@link canInsertNativeNode}.
  *
  * @param parent The parent to which to append the child
  * @param child The child that should be appended
@@ -124,6 +132,15 @@ export declare function canInsertNativeNode(parent: LNode, currentView: LViewDat
  */
 export declare function appendChild(parent: LNode, child: RNode | null, currentView: LViewData): boolean;
 /**
+ * Removes the `child` element of the `parent` from the DOM.
+ *
+ * @param parent The parent from which to remove the child
+ * @param child The child that should be removed
+ * @param currentView The current LView
+ * @returns Whether or not the child was removed
+ */
+export declare function removeChild(parent: LNode, child: RNode | null, currentView: LViewData): boolean;
+/**
  * Appends a projected node to the DOM, or in the case of a projected container,
  * appends the nodes from all of the container's active views to the DOM.
  *
@@ -131,4 +148,4 @@ export declare function appendChild(parent: LNode, child: RNode | null, currentV
  * @param currentParent The last parent element to be processed
  * @param currentView Current LView
  */
-export declare function appendProjectedNode(node: LElementNode | LTextNode | LContainerNode, currentParent: LElementNode, currentView: LViewData): void;
+export declare function appendProjectedNode(node: LElementNode | LTextNode | LContainerNode, currentParent: LElementNode | LViewNode, currentView: LViewData, renderParent: LElementNode): void;

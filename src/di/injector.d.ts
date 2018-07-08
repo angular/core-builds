@@ -43,10 +43,8 @@ export declare abstract class Injector {
     static NULL: Injector;
     /**
      * Retrieves an instance from the injector based on the provided token.
-     * If not found:
-     * - Throws an error if no `notFoundValue` that is not equal to
-     * Injector.THROW_IF_NOT_FOUND is given
-     * - Returns the `notFoundValue` otherwise
+     * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
+     * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
      */
     abstract get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
     /**
@@ -90,7 +88,7 @@ export declare const enum InjectFlags {
     /** Skip the node that is requesting injection. */
     SkipSelf = 4,
     /** Inject `defaultValue` instead if token not found. */
-    Optional = 8,
+    Optional = 8
 }
 export declare function setCurrentInjector(injector: Injector | null | undefined): Injector | undefined | null;
 /**

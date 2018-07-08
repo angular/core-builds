@@ -1,4 +1,4 @@
-import * as i0 from '@angular/core';
+import * as ɵ0 from '@angular/core';
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -35,7 +35,7 @@ export declare class TestingCompiler extends Compiler {
      * This can be used for errors created by compileModule...
      */
     getComponentFromError(error: Error): Type<any> | null;
-    static ngInjectableDef: i0.InjectableDef<TestingCompiler>;
+    static ngInjectableDef: ɵ0.InjectableDef<TestingCompiler>;
 }
 /**
  * A factory for creating a Compiler

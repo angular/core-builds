@@ -1,9 +1,16 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 import { ChangeDetectionStrategy } from '../change_detection/constants';
 import { Provider } from '../core';
 import { NgModuleDef } from '../metadata/ng_module';
 import { RendererType2 } from '../render/api';
 import { Type } from '../type';
-import { ComponentDefFeature, ComponentDefInternal, ComponentTemplate, ComponentType, DirectiveDefFeature, DirectiveDefInternal, DirectiveType, DirectiveTypesOrFactory, PipeDef, PipeType, PipeTypesOrFactory } from './interfaces/definition';
+import { ComponentDefFeature, ComponentDefInternal, ComponentQuery, ComponentTemplate, ComponentType, DirectiveDefFeature, DirectiveDefInternal, DirectiveType, DirectiveTypesOrFactory, PipeDefInternal, PipeType, PipeTypesOrFactory } from './interfaces/definition';
 import { CssSelectorList, SelectorFlags } from './interfaces/projection';
 /**
  * Create a component definition object.
@@ -43,15 +50,48 @@ export declare function defineComponent<T>(componentDefinition: {
     /**
      * A map of input names.
      *
-     * The format is in: `{[actualPropertyName: string]:string}`.
+     * The format is in: `{[actualPropertyName: string]:(string|[string, string])}`.
      *
-     * Which the minifier may translate to: `{[minifiedPropertyName: string]:string}`.
+     * Given:
+     * ```
+     * class MyComponent {
+     *   @Input()
+     *   publicInput1: string;
      *
-     * This allows the render to re-construct the minified and non-minified names
+     *   @Input('publicInput2')
+     *   declaredInput2: string;
+     * }
+     * ```
+     *
+     * is described as:
+     * ```
+     * {
+     *   publicInput1: 'publicInput1',
+     *   declaredInput2: ['declaredInput2', 'publicInput2'],
+     * }
+     * ```
+     *
+     * Which the minifier may translate to:
+     * ```
+     * {
+     *   minifiedPublicInput1: 'publicInput1',
+     *   minifiedDeclaredInput2: [ 'publicInput2', 'declaredInput2'],
+     * }
+     * ```
+     *
+     * This allows the render to re-construct the minified, public, and declared names
      * of properties.
+     *
+     * NOTE:
+     *  - Because declared and public name are usually same we only generate the array
+     *    `['declared', 'public']` format when they differ.
+     *  - The reason why this API and `outputs` API is not the same is that `NgOnChanges` has
+     *    inconsistent behavior in that it uses declared names rather than minified or public. For
+     *    this reason `NgOnChanges` will be deprecated and removed in future version and this
+     *    API will be simplified to be consistent with `output`.
      */
     inputs?: {
-        [P in keyof T]?: string;
+        [P in keyof T]?: string | [string, string];
     };
     /**
      * A map of output names.
@@ -107,6 +147,15 @@ export declare function defineComponent<T>(componentDefinition: {
      */
     template: ComponentTemplate<T>;
     /**
+     * Additional set of instructions specific to view query processing. This could be seen as a
+     * set of instruction to be inserted into the template function.
+     *
+     * Query-related instructions need to be pulled out to a specific function as a timing of
+     * execution is different as compared to all other instructions (after change detection hooks but
+     * before view hooks).
+     */
+    viewQuery?: ComponentQuery<T> | null;
+    /**
      * A list of optional features to apply.
      *
      * See: {@link NgOnChangesFeature}, {@link PublicFeature}
@@ -139,37 +188,10 @@ export declare function defineComponent<T>(componentDefinition: {
     pipes?: PipeTypesOrFactory | null;
 }): never;
 export declare function extractDirectiveDef(type: DirectiveType<any> & ComponentType<any>): DirectiveDefInternal<any> | ComponentDefInternal<any>;
-export declare function extractPipeDef(type: PipeType<any>): PipeDef<any>;
+export declare function extractPipeDef(type: PipeType<any>): PipeDefInternal<any>;
 export declare function defineNgModule<T>(def: {
     type: T;
 } & Partial<NgModuleDef<T, any, any, any>>): never;
-/**
- * Creates an NgOnChangesFeature function for a component's features list.
- *
- * It accepts an optional map of minified input property names to original property names,
- * if any input properties have a public alias.
- *
- * The NgOnChangesFeature function that is returned decorates a component with support for
- * the ngOnChanges lifecycle hook, so it should be included in any component that implements
- * that hook.
- *
- * Example usage:
- *
- * ```
- * static ngComponentDef = defineComponent({
- *   ...
- *   inputs: {name: 'publicName'},
- *   features: [NgOnChangesFeature({name: 'name'})]
- * });
- * ```
- *
- * @param inputPropertyNames Map of input property names, if they are aliased
- * @returns DirectiveDefFeature
- */
-export declare function NgOnChangesFeature(inputPropertyNames?: {
-    [key: string]: string;
-}): DirectiveDefFeature;
-export declare function PublicFeature<T>(definition: DirectiveDefInternal<T>): void;
 /**
  * Create a directive definition object.
  *
@@ -185,16 +207,95 @@ export declare function PublicFeature<T>(definition: DirectiveDefInternal<T>): v
  * ```
  */
 export declare const defineDirective: <T>(directiveDefinition: {
+    /**
+     * Directive type, needed to configure the injector.
+     */
     type: Type<T>;
+    /** The selectors that will be used to match nodes to this directive. */
     selectors: (string | SelectorFlags)[][];
+    /**
+     * Factory method used to create an instance of directive.
+     */
     factory: () => T | ({
         0: T;
     } & any[]);
+    /**
+     * Static attributes to set on host element.
+     *
+     * Even indices: attribute name
+     * Odd indices: attribute value
+     */
     attributes?: string[] | undefined;
-    inputs?: { [P in keyof T]?: string | undefined; } | undefined;
+    /**
+     * A map of input names.
+     *
+     * The format is in: `{[actualPropertyName: string]:(string|[string, string])}`.
+     *
+     * Given:
+     * ```
+     * class MyComponent {
+     *   @Input()
+     *   publicInput1: string;
+     *
+     *   @Input('publicInput2')
+     *   declaredInput2: string;
+     * }
+     * ```
+     *
+     * is described as:
+     * ```
+     * {
+     *   publicInput1: 'publicInput1',
+     *   declaredInput2: ['declaredInput2', 'publicInput2'],
+     * }
+     * ```
+     *
+     * Which the minifier may translate to:
+     * ```
+     * {
+     *   minifiedPublicInput1: 'publicInput1',
+     *   minifiedDeclaredInput2: [ 'publicInput2', 'declaredInput2'],
+     * }
+     * ```
+     *
+     * This allows the render to re-construct the minified, public, and declared names
+     * of properties.
+     *
+     * NOTE:
+     *  - Because declared and public name are usually same we only generate the array
+     *    `['declared', 'public']` format when they differ.
+     *  - The reason why this API and `outputs` API is not the same is that `NgOnChanges` has
+     *    inconsistent behavior in that it uses declared names rather than minified or public. For
+     *    this reason `NgOnChanges` will be deprecated and removed in future version and this
+     *    API will be simplified to be consistent with `output`.
+     */
+    inputs?: { [P in keyof T]?: string | [string, string] | undefined; } | undefined;
+    /**
+     * A map of output names.
+     *
+     * The format is in: `{[actualPropertyName: string]:string}`.
+     *
+     * Which the minifier may translate to: `{[minifiedPropertyName: string]:string}`.
+     *
+     * This allows the render to re-construct the minified and non-minified names
+     * of properties.
+     */
     outputs?: { [P in keyof T]?: string | undefined; } | undefined;
+    /**
+     * A list of optional features to apply.
+     *
+     * See: {@link NgOnChangesFeature}, {@link PublicFeature}, {@link InheritDefinitionFeature}
+     */
     features?: DirectiveDefFeature[] | undefined;
+    /**
+     * Function executed by the parent template to allow child directive to apply host bindings.
+     */
     hostBindings?: ((directiveIndex: number, elementIndex: number) => void) | undefined;
+    /**
+     * Defines the name that can be used in the template to assign this directive to a variable.
+     *
+     * See: {@link Directive.exportAs}
+     */
     exportAs?: string | undefined;
 }) => never;
 /**

@@ -1,3 +1,11 @@
+import * as ɵ0 from './r3_symbols';
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 import { ApplicationRef } from './application_ref';
 import { IterableDiffers, KeyValueDiffers } from './change_detection/change_detection';
 import { StaticProvider } from './di';
@@ -13,4 +21,6 @@ export declare const APPLICATION_MODULE_PROVIDERS: StaticProvider[];
  */
 export declare class ApplicationModule {
     constructor(appRef: ApplicationRef);
+    static ngModuleDef: ɵ0.NgModuleDef<ApplicationModule, [], [], []>;
+    static ngInjectorDef: ɵ0.InjectorDef;
 }

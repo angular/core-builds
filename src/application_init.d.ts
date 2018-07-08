@@ -1,3 +1,11 @@
+import * as ɵ0 from './r3_symbols';
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 import { InjectionToken } from './di';
 /**
  * A function that will be executed when an application is initialized.
@@ -17,4 +25,5 @@ export declare class ApplicationInitStatus {
     readonly donePromise: Promise<any>;
     readonly done: boolean;
     constructor(appInits: (() => any)[]);
+    static ngInjectableDef: ɵ0.InjectableDef<ApplicationInitStatus>;
 }
