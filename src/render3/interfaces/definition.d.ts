@@ -17,6 +17,10 @@ export declare type ComponentTemplate<T> = {
     ngPrivateData?: never;
 };
 /**
+ * Definition of what a query function should look like.
+ */
+export declare type ComponentQuery<T> = ComponentTemplate<T>;
+/**
  * Flags passed into template functions to determine which blocks (i.e. creation, update)
  * should be executed.
  *
@@ -26,7 +30,7 @@ export declare type ComponentTemplate<T> = {
  */
 export declare const enum RenderFlags {
     Create = 1,
-    Update = 2,
+    Update = 2
 }
 /**
  * A subclass of `Type` which has a static `ngComponentDef`:`ComponentDef` field making it
@@ -43,7 +47,7 @@ export interface DirectiveType<T> extends Type<T> {
     ngDirectiveDef: never;
 }
 export declare const enum DirectiveDefFlags {
-    ContentQuery = 2,
+    ContentQuery = 2
 }
 /**
  * A subclass of `Type` which has a static `ngPipeDef`:`PipeDef` field making it
@@ -75,7 +79,7 @@ export interface DirectiveDef<T, Selector extends string> {
     /** Token representing the directive. Used by DI. */
     type: Type<T>;
     /** Function that makes a directive public to the DI system. */
-    diPublic: ((def: DirectiveDef<any, string>) => void) | null;
+    diPublic: ((def: DirectiveDef<T, string>) => void) | null;
     /** The selectors that will be used to match nodes to this directive. */
     selectors: CssSelectorList;
     /**
@@ -84,6 +88,13 @@ export interface DirectiveDef<T, Selector extends string> {
      * (as in `@Input('alias') propertyName: any;`).
      */
     readonly inputs: {
+        [P in keyof T]: string;
+    };
+    /**
+     * @deprecated This is only here because `NgOnChanges` incorrectly uses declared name instead of
+     * public or minified name.
+     */
+    readonly declaredInputs: {
         [P in keyof T]: P;
     };
     /**
@@ -121,6 +132,10 @@ export interface DirectiveDef<T, Selector extends string> {
     afterViewInit: (() => void) | null;
     afterViewChecked: (() => void) | null;
     onDestroy: (() => void) | null;
+    /**
+     * The features applied to this directive
+     */
+    features: DirectiveDefFeature[] | null;
 }
 /**
  * A version of {@link ComponentDef} that represents the runtime type shape only, and excludes
@@ -142,14 +157,14 @@ export declare type ComponentDefInternal<T> = ComponentDef<T, string>;
 export interface ComponentDef<T, Selector extends string> extends DirectiveDef<T, Selector> {
     /**
      * The View template of the component.
-     *
-     * NOTE: only used with component directives.
      */
     readonly template: ComponentTemplate<T>;
     /**
+     * Query-related instructions for a component.
+     */
+    readonly viewQuery: ComponentQuery<T> | null;
+    /**
      * Renderer type data of the component.
-     *
-     * NOTE: only used with component directives.
      */
     readonly rendererType: RendererType2 | null;
     /** Whether or not this component's ChangeDetectionStrategy is OnPush */
@@ -191,13 +206,13 @@ export interface ComponentDef<T, Selector extends string> extends DirectiveDef<T
  *
  * See: {@link definePipe}
  */
-export interface PipeDef<T> {
+export interface PipeDef<T, S extends string> {
     /**
      * Pipe name.
      *
      * Used to resolve pipe in templates.
      */
-    name: string;
+    name: S;
     /**
      * Factory function used to create a new pipe instance.
      */
@@ -211,6 +226,7 @@ export interface PipeDef<T> {
     pure: boolean;
     onDestroy: (() => void) | null;
 }
+export declare type PipeDefInternal<T> = PipeDef<T, string>;
 export declare type DirectiveDefFeature = <T>(directiveDef: DirectiveDef<T, string>) => void;
 export declare type ComponentDefFeature = <T>(componentDef: ComponentDef<T, string>) => void;
 /**
@@ -228,7 +244,11 @@ export declare type DirectiveTypeList = (DirectiveDef<any, string> | ComponentDe
  * The function is necessary to be able to support forward declarations.
  */
 export declare type PipeDefListOrFactory = (() => PipeDefList) | PipeDefList;
-export declare type PipeDefList = PipeDef<any>[];
+export declare type PipeDefList = PipeDefInternal<any>[];
 export declare type PipeTypesOrFactory = (() => DirectiveTypeList) | DirectiveTypeList;
-export declare type PipeTypeList = (PipeDef<any> | Type<any>)[];
+export declare type PipeTypeList = (PipeDefInternal<any> | Type<any>)[];
 export declare const unusedValueExportToPlacateAjd = 1;
+export declare const enum InitialStylingFlags {
+    /** Mode for matching initial style values */
+    INITIAL_STYLES = 0
+}

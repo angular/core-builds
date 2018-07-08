@@ -1,6 +1,6 @@
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -103,7 +103,7 @@ export class Reflector {
         return this.reflectionCapabilities.resolveEnum(identifier, name);
     }
 }
-function Reflector_tsickle_Closure_declarations() {
+if (false) {
     /** @type {?} */
     Reflector.prototype.reflectionCapabilities;
 }

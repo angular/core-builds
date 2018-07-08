@@ -1,6 +1,6 @@
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -21,7 +21,7 @@
  */
 export class ComponentRef {
 }
-function ComponentRef_tsickle_Closure_declarations() {
+if (false) {
     /**
      * Location of the Host Element of this Component Instance.
      * @abstract
@@ -78,7 +78,7 @@ function ComponentRef_tsickle_Closure_declarations() {
  */
 export class ComponentFactory {
 }
-function ComponentFactory_tsickle_Closure_declarations() {
+if (false) {
     /**
      * @abstract
      * @return {?}

@@ -45,4 +45,4 @@ export declare function createTemplateData(view: ViewData, def: NodeDef): Templa
 export declare function createInjector(view: ViewData, elDef: NodeDef): Injector;
 export declare function nodeValue(view: ViewData, index: number): any;
 export declare function createRendererV1(view: ViewData): RendererV1;
-export declare function createNgModuleRef(moduleType: Type<any>, parent: Injector, bootstrapComponents: Type<any>[], def: NgModuleDefinition): NgModuleRef<any>;
+export declare function createNgModuleRef(moduleType: Type<any>, parent: Injector, bootstrapComponents: Type<any>[], def: NgModuleDefinition): NgModuleRef<any> & Injector;

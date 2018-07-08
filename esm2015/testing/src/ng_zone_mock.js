@@ -1,6 +1,6 @@
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -38,7 +38,7 @@ MockNgZone.decorators = [
 ];
 /** @nocollapse */
 MockNgZone.ctorParameters = () => [];
-function MockNgZone_tsickle_Closure_declarations() {
+if (false) {
     /** @type {?} */
     MockNgZone.prototype.onStable;
 }

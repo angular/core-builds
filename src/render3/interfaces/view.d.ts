@@ -8,12 +8,12 @@
 import { Injector } from '../../di/injector';
 import { Sanitizer } from '../../sanitization/security';
 import { LContainer } from './container';
-import { ComponentTemplate, DirectiveDefInternal, DirectiveDefList, PipeDef, PipeDefList } from './definition';
+import { ComponentQuery, ComponentTemplate, DirectiveDefInternal, DirectiveDefList, PipeDefInternal, PipeDefList } from './definition';
 import { LElementNode, LViewNode, TNode } from './node';
 import { LQueries } from './query';
 import { Renderer3 } from './renderer';
 /** Size of LViewData's header. Necessary to adjust for it when setting slots.  */
-export declare const HEADER_OFFSET = 14;
+export declare const HEADER_OFFSET = 15;
 export declare const TVIEW = 0;
 export declare const PARENT = 1;
 export declare const NEXT = 2;
@@ -28,6 +28,7 @@ export declare const INJECTOR = 10;
 export declare const RENDERER = 11;
 export declare const SANITIZER = 12;
 export declare const TAIL = 13;
+export declare const CONTAINER_INDEX = 14;
 /**
  * `LViewData` stores all of the information needed to process the instructions as
  * they are invoked from the template. Each embedded view and component view has its
@@ -102,7 +103,7 @@ export interface LViewData extends Array<any> {
      * - For embedded views, the context with which to render the template.
      * - For root view of the root component the context contains change detection data.
      * - `null` otherwise.
-    */
+     */
     [CONTEXT]: {} | RootContext | null;
     /** An optional Module Injector to be used as fall back after Element Injectors are consulted. */
     [INJECTOR]: Injector | null;
@@ -117,6 +118,15 @@ export interface LViewData extends Array<any> {
      * without having to propagate starting from the first child.
      */
     [TAIL]: LViewData | LContainer | null;
+    /**
+     * The index of the parent container's host node. Applicable only to embedded views that
+     * have been inserted dynamically. Will be -1 for component views and inline views.
+     *
+     * This is necessary to jump from dynamically created embedded views to their parent
+     * containers because their parent cannot be stored on the TViewNode (views may be inserted
+     * in multiple containers, so the parent cannot be shared between view instances).
+     */
+    [CONTAINER_INDEX]: number;
 }
 /** Flags associated with an LView (saved in LViewData[FLAGS]) */
 export declare const enum LViewFlags {
@@ -144,7 +154,7 @@ export declare const enum LViewFlags {
      */
     RunInit = 16,
     /** Whether or not this view is destroyed. */
-    Destroyed = 32,
+    Destroyed = 32
 }
 /**
  * The static data for an LView (shared between all templates of a
@@ -166,6 +176,10 @@ export interface TView {
      * and components. Will be null for inline views.
      */
     template: ComponentTemplate<{}> | null;
+    /**
+     * A function containing query-related instructions.
+     */
+    viewQuery: ComponentQuery<{}> | null;
     /**
      * Pointer to the `TNode` that represents the root of the view.
      *
@@ -382,7 +396,7 @@ export declare type HookData = (number | (() => void))[];
  * as its pipe instance in the data array. Any nodes that do not have static
  * data store a null value in tData to avoid a sparse array.
  */
-export declare type TData = (TNode | PipeDef<any> | null)[];
+export declare type TData = (TNode | PipeDefInternal<any> | null)[];
 /** Type for TView.currentMatches */
 export declare type CurrentMatchesList = [DirectiveDefInternal<any>, (string | number | null)];
 export declare const unusedValueExportToPlacateAjd = 1;

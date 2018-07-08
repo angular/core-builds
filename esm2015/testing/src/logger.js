@@ -1,6 +1,6 @@
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -40,7 +40,7 @@ Log.decorators = [
 ];
 /** @nocollapse */
 Log.ctorParameters = () => [];
-function Log_tsickle_Closure_declarations() {
+if (false) {
     /** @type {?} */
     Log.prototype.logItems;
 }

@@ -1,3 +1,10 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 import { IterableDiffers } from './differs/iterable_differs';
 import { KeyValueDiffers } from './differs/keyvalue_differs';
 export { SimpleChanges } from '../metadata/lifecycle_hooks';
