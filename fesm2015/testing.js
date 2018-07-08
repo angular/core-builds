@@ -1,10 +1,10 @@
 /**
- * @license Angular v6.1.0-beta.1+46.sha-a5799e6
+ * @license Angular v6.1.0-beta.3+80.sha-6c604bd
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { ApplicationInitStatus, Compiler, Component, Injectable, InjectionToken, Injector, NgModule, NgZone, Optional, RendererFactory2, SkipSelf, getDebugNode, ɵAPP_ROOT, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify } from '@angular/core';
+import { RendererFactory2, getDebugNode, Compiler, Injectable, ApplicationInitStatus, Component, InjectionToken, Injector, NgModule, NgZone, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify } from '@angular/core';
 import { __decorate } from 'tslib';
 
 /**
@@ -147,6 +147,39 @@ function async(fn) {
     // TODO @JiaLiPassion, remove this after all library updated to
     // newest version of zone.js(0.8.25)
     return asyncFallback(fn);
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Converts an `async` function, with `await`, into a function which is compatible with Jasmine test
+ * framework.
+ *
+ * For asynchronous function blocks, Jasmine expects `it` (and friends) to take a function which
+ * takes a `done` callback. (Jasmine does not understand functions which return `Promise`.) The
+ * `jasmineAwait()` wrapper converts the test function returning `Promise` into a function which
+ * Jasmine understands.
+ *
+ *
+ * Example:
+ * ```
+ * it('...', jasmineAwait(async() => {
+ *   doSomething();
+ *   await asyncFn();
+ *   doSomethingAfter();
+ * }));
+ * ```
+ *
+ */
+function jasmineAwait(fn) {
+    return function (done) {
+        fn().then(done, done.fail);
+    };
 }
 
 /**
@@ -337,9 +370,9 @@ function scheduleMicroTask(fn) {
  * fakeAsync has been moved to zone.js
  * this file is for fallback in case old version of zone.js is used
  */
-const _Zone$1 = typeof Zone !== 'undefined' ? Zone : null;
-const FakeAsyncTestZoneSpec = _Zone$1 && _Zone$1['FakeAsyncTestZoneSpec'];
-const ProxyZoneSpec = _Zone$1 && _Zone$1['ProxyZoneSpec'];
+const _Zone = typeof Zone !== 'undefined' ? Zone : null;
+const FakeAsyncTestZoneSpec = _Zone && _Zone['FakeAsyncTestZoneSpec'];
+const ProxyZoneSpec = _Zone && _Zone['ProxyZoneSpec'];
 let _fakeAsyncTestZoneSpec = null;
 /**
  * Clears out the shared fake async zone for a test.
@@ -473,8 +506,8 @@ function flushMicrotasksFallback() {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-const _Zone = typeof Zone !== 'undefined' ? Zone : null;
-const fakeAsyncTestModule = _Zone && _Zone[_Zone.__symbol__('fakeAsyncTest')];
+const _Zone$1 = typeof Zone !== 'undefined' ? Zone : null;
+const fakeAsyncTestModule = _Zone$1 && _Zone$1[_Zone$1.__symbol__('fakeAsyncTest')];
 /**
  * Clears out the shared fake async zone for a test.
  * To be called in a global `beforeEach`.
@@ -1050,7 +1083,7 @@ class TestBed {
             value = provider.useValue;
         }
         const deps = (provider.deps || []).map((dep) => {
-            let depFlags = 0;
+            let depFlags = 0 /* None */;
             let depToken;
             if (Array.isArray(dep)) {
                 dep.forEach((entry) => {
@@ -1194,11 +1227,6 @@ function withModule(moduleDef, fn) {
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Public Test Library for unit testing Angular applications. Assumes that you are running
- * with Jasmine, Mocha, or a similar framework which exports a beforeEach function and
- * allows tests to be asynchronous by either returning a promise or using a 'done' parameter.
  */
 const _global$1 = (typeof window === 'undefined' ? global : window);
 // Reset the test providers and the fake async zone before each test.
@@ -1351,11 +1379,6 @@ if (typeof afterEach == 'function')
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * @module
- * @description
- * Entry point for all public APIs of the core/testing package.
- */
 
 /**
  * @license
@@ -1364,12 +1387,6 @@ if (typeof afterEach == 'function')
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * @module
- * @description
- * Entry point for all public APIs of this package.
- */
-
 // This file only reexports content of the `src` folder. Keep it that way.
 
 /**
@@ -1379,10 +1396,6 @@ if (typeof afterEach == 'function')
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-// This file is not used to build this module. It is only used during editing
-// by the TypeScript language service and during build for verification. `ngc`
-// replaces this file with production index.ts when it rewrites private symbol
-// names.
 
-export { async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, flush, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestBed, getTestBed, inject, InjectSetupWrapper, withModule, __core_private_testing_placeholder__, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory, withBody, ensureDocument, cleanupDocument };
+export { async, jasmineAwait, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, flush, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestBed, getTestBed, inject, InjectSetupWrapper, withModule, __core_private_testing_placeholder__, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory, withBody, ensureDocument, cleanupDocument };
 //# sourceMappingURL=testing.js.map

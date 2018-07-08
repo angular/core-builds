@@ -1,3 +1,10 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 import { ViewEncapsulation } from '../metadata/view';
 import { RendererType2 } from '../render/api';
 import { BindingDef, BindingFlags, Definition, DefinitionFactory, DepDef, DepFlags, ElementData, NodeDef, QueryValueType, ViewData } from './types';
@@ -47,7 +54,7 @@ export declare const enum RenderNodeAction {
     Collect = 0,
     AppendChild = 1,
     InsertBefore = 2,
-    RemoveChild = 3,
+    RemoveChild = 3
 }
 export declare function visitRootRenderNodes(view: ViewData, action: RenderNodeAction, parentNode: any, nextSibling: any, target?: any[]): void;
 export declare function visitSiblingRenderNodes(view: ViewData, action: RenderNodeAction, startIndex: number, endIndex: number, parentNode: any, nextSibling: any, target?: any[]): void;

@@ -1,11 +1,11 @@
 /**
- * @license Angular v6.1.0-beta.1+46.sha-a5799e6
+ * @license Angular v6.1.0-beta.3+80.sha-6c604bd
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { ApplicationInitStatus, Compiler, Component, Injectable, InjectionToken, Injector, NgModule, NgZone, Optional, RendererFactory2, SkipSelf, getDebugNode, ɵAPP_ROOT, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify } from '@angular/core';
-import { __decorate, __extends, __spread, __values } from 'tslib';
+import { RendererFactory2, getDebugNode, Compiler, Injectable, ApplicationInitStatus, Component, InjectionToken, Injector, NgModule, NgZone, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify } from '@angular/core';
+import { __spread, __values, __decorate, __extends } from 'tslib';
 
 /**
  * @license
@@ -148,6 +148,39 @@ function async(fn) {
     // TODO @JiaLiPassion, remove this after all library updated to
     // newest version of zone.js(0.8.25)
     return asyncFallback(fn);
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Converts an `async` function, with `await`, into a function which is compatible with Jasmine test
+ * framework.
+ *
+ * For asynchronous function blocks, Jasmine expects `it` (and friends) to take a function which
+ * takes a `done` callback. (Jasmine does not understand functions which return `Promise`.) The
+ * `jasmineAwait()` wrapper converts the test function returning `Promise` into a function which
+ * Jasmine understands.
+ *
+ *
+ * Example:
+ * ```
+ * it('...', jasmineAwait(async() => {
+ *   doSomething();
+ *   await asyncFn();
+ *   doSomethingAfter();
+ * }));
+ * ```
+ *
+ */
+function jasmineAwait(fn) {
+    return function (done) {
+        fn().then(done, done.fail);
+    };
 }
 
 /**
@@ -344,9 +377,9 @@ function scheduleMicroTask(fn) {
  * fakeAsync has been moved to zone.js
  * this file is for fallback in case old version of zone.js is used
  */
-var _Zone$1 = typeof Zone !== 'undefined' ? Zone : null;
-var FakeAsyncTestZoneSpec = _Zone$1 && _Zone$1['FakeAsyncTestZoneSpec'];
-var ProxyZoneSpec = _Zone$1 && _Zone$1['ProxyZoneSpec'];
+var _Zone = typeof Zone !== 'undefined' ? Zone : null;
+var FakeAsyncTestZoneSpec = _Zone && _Zone['FakeAsyncTestZoneSpec'];
+var ProxyZoneSpec = _Zone && _Zone['ProxyZoneSpec'];
 var _fakeAsyncTestZoneSpec = null;
 /**
  * Clears out the shared fake async zone for a test.
@@ -485,8 +518,8 @@ function flushMicrotasksFallback() {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var _Zone = typeof Zone !== 'undefined' ? Zone : null;
-var fakeAsyncTestModule = _Zone && _Zone[_Zone.__symbol__('fakeAsyncTest')];
+var _Zone$1 = typeof Zone !== 'undefined' ? Zone : null;
+var fakeAsyncTestModule = _Zone$1 && _Zone$1[_Zone$1.__symbol__('fakeAsyncTest')];
 /**
  * Clears out the shared fake async zone for a test.
  * To be called in a global `beforeEach`.
@@ -919,6 +952,7 @@ var TestBed = /** @class */ (function () {
         this._compilerOptions.push(config);
     };
     TestBed.prototype.configureTestingModule = function (moduleDef) {
+        var _a, _b, _c, _d;
         this._assertNotInstantiated('TestBed.configureTestingModule', 'configure the test module');
         if (moduleDef.providers) {
             (_a = this._providers).push.apply(_a, __spread(moduleDef.providers));
@@ -935,7 +969,6 @@ var TestBed = /** @class */ (function () {
         if (moduleDef.aotSummaries) {
             this._aotSummaries.push(moduleDef.aotSummaries);
         }
-        var _a, _b, _c, _d;
     };
     TestBed.prototype.compileComponents = function () {
         var _this = this;
@@ -949,6 +982,7 @@ var TestBed = /** @class */ (function () {
         });
     };
     TestBed.prototype._initIfNeeded = function () {
+        var e_1, _a;
         if (this._instantiated) {
             return;
         }
@@ -970,8 +1004,8 @@ var TestBed = /** @class */ (function () {
             }
         }
         try {
-            for (var _a = __values(this._templateOverrides), _b = _a.next(); !_b.done; _b = _a.next()) {
-                var _c = _b.value, component = _c.component, templateOf = _c.templateOf;
+            for (var _b = __values(this._templateOverrides), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var _d = _c.value, component = _d.component, templateOf = _d.templateOf;
                 var compFactory = this._compiler.getComponentFactory(templateOf);
                 ɵoverrideComponentView(component, compFactory);
             }
@@ -979,7 +1013,7 @@ var TestBed = /** @class */ (function () {
         catch (e_1_1) { e_1 = { error: e_1_1 }; }
         finally {
             try {
-                if (_b && !_b.done && (_d = _a.return)) _d.call(_a);
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
             }
             finally { if (e_1) throw e_1.error; }
         }
@@ -995,10 +1029,10 @@ var TestBed = /** @class */ (function () {
         // before accessing it.
         this._moduleRef.injector.get(ApplicationInitStatus).runInitializers();
         this._instantiated = true;
-        var e_1, _d;
     };
     TestBed.prototype._createCompilerAndModule = function () {
         var _this = this;
+        var e_2, _a;
         var providers = this._providers.concat([{ provide: TestBed, useValue: this }]);
         var declarations = __spread(this._declarations, this._templateOverrides.map(function (entry) { return entry.templateOf; }));
         var rootScopeImports = [];
@@ -1031,15 +1065,15 @@ var TestBed = /** @class */ (function () {
         var compilerFactory = this.platform.injector.get(TestingCompilerFactory);
         this._compiler = compilerFactory.createTestingCompiler(this._compilerOptions);
         try {
-            for (var _a = __values(__spread([this._testEnvAotSummaries], this._aotSummaries)), _b = _a.next(); !_b.done; _b = _a.next()) {
-                var summary = _b.value;
+            for (var _b = __values(__spread([this._testEnvAotSummaries], this._aotSummaries)), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var summary = _c.value;
                 this._compiler.loadAotSummaries(summary);
             }
         }
         catch (e_2_1) { e_2 = { error: e_2_1 }; }
         finally {
             try {
-                if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
             }
             finally { if (e_2) throw e_2.error; }
         }
@@ -1048,7 +1082,6 @@ var TestBed = /** @class */ (function () {
         this._directiveOverrides.forEach(function (entry) { return _this._compiler.overrideDirective(entry[0], entry[1]); });
         this._pipeOverrides.forEach(function (entry) { return _this._compiler.overridePipe(entry[0], entry[1]); });
         return DynamicTestModule;
-        var e_2, _c;
     };
     TestBed.prototype._assertNotInstantiated = function (methodName, methodDescription) {
         if (this._instantiated) {
@@ -1117,7 +1150,7 @@ var TestBed = /** @class */ (function () {
             value = provider.useValue;
         }
         var deps = (provider.deps || []).map(function (dep) {
-            var depFlags = 0;
+            var depFlags = 0 /* None */;
             var depToken;
             if (Array.isArray(dep)) {
                 dep.forEach(function (entry) {
@@ -1268,11 +1301,6 @@ function withModule(moduleDef, fn) {
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Public Test Library for unit testing Angular applications. Assumes that you are running
- * with Jasmine, Mocha, or a similar framework which exports a beforeEach function and
- * allows tests to be asynchronous by either returning a promise or using a 'done' parameter.
  */
 var _global$1 = (typeof window === 'undefined' ? global : window);
 // Reset the test providers and the fake async zone before each test.
@@ -1425,11 +1453,6 @@ if (typeof afterEach == 'function')
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * @module
- * @description
- * Entry point for all public APIs of the core/testing package.
- */
 
 /**
  * @license
@@ -1438,12 +1461,6 @@ if (typeof afterEach == 'function')
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * @module
- * @description
- * Entry point for all public APIs of this package.
- */
-
 // This file only reexports content of the `src` folder. Keep it that way.
 
 /**
@@ -1453,10 +1470,6 @@ if (typeof afterEach == 'function')
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-// This file is not used to build this module. It is only used during editing
-// by the TypeScript language service and during build for verification. `ngc`
-// replaces this file with production index.ts when it rewrites private symbol
-// names.
 
-export { async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, flush, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestBed, getTestBed, inject, InjectSetupWrapper, withModule, __core_private_testing_placeholder__, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory, withBody, ensureDocument, cleanupDocument };
+export { async, jasmineAwait, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, flush, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestBed, getTestBed, inject, InjectSetupWrapper, withModule, __core_private_testing_placeholder__, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory, withBody, ensureDocument, cleanupDocument };
 //# sourceMappingURL=testing.js.map

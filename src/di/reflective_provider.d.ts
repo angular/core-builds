@@ -1,3 +1,10 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 import { Self, SkipSelf } from './metadata';
 import { Provider } from './provider';
 import { ReflectiveKey } from './reflective_key';
@@ -66,14 +73,14 @@ export declare class ResolvedReflectiveFactory {
      */
     dependencies: ReflectiveDependency[];
     constructor(
-        /**
-         * Factory function which can return an instance of an object represented by a key.
-         */
-        factory: Function, 
-        /**
-         * Arguments (dependencies) to the `factory` function.
-         */
-        dependencies: ReflectiveDependency[]);
+    /**
+     * Factory function which can return an instance of an object represented by a key.
+     */
+    factory: Function, 
+    /**
+     * Arguments (dependencies) to the `factory` function.
+     */
+    dependencies: ReflectiveDependency[]);
 }
 /**
  * Resolve a list of Providers.
