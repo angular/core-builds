@@ -36,7 +36,7 @@ export function queueInitHooks(index, onInit, doCheck, tView) {
  */
 export function queueLifecycleHooks(flags, tView) {
     if (tView.firstTemplatePass) {
-        var start = flags >> 13 /* DirectiveStartingIndexShift */;
+        var start = flags >> 14 /* DirectiveStartingIndexShift */;
         var count = flags & 4095 /* DirectiveCountMask */;
         var end = start + count;
         // It's necessary to loop through the directives at elementEnd() (rather than processing in
