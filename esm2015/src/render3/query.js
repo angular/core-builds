@@ -265,7 +265,7 @@ function getIdxOfMatchingDirective(node, type) {
     /** @type {?} */
     const count = flags & 4095 /* DirectiveCountMask */;
     /** @type {?} */
-    const start = flags >> 13 /* DirectiveStartingIndexShift */;
+    const start = flags >> 14 /* DirectiveStartingIndexShift */;
     /** @type {?} */
     const end = start + count;
     for (let i = start; i < end; i++) {
