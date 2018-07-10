@@ -8,13 +8,13 @@
 import './ng_dev_mode';
 import { Sanitizer } from '../sanitization/security';
 import { LContainer } from './interfaces/container';
+import { ComponentDefInternal, ComponentQuery, ComponentTemplate, DirectiveDefInternal, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { LInjector } from './interfaces/injector';
-import { CssSelectorList, LProjection } from './interfaces/projection';
+import { LContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode, TAttributes, TContainerNode, TElementNode, TNode, TNodeType } from './interfaces/node';
+import { CssSelectorList } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
-import { CurrentMatchesList, LViewData, LViewFlags, RootContext, TView } from './interfaces/view';
-import { TAttributes, LContainerNode, LElementNode, LNode, TNodeType, LProjectionNode, LTextNode, LViewNode, TNode, TContainerNode, TElementNode } from './interfaces/node';
-import { ComponentDefInternal, ComponentTemplate, ComponentQuery, DirectiveDefInternal, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
+import { CurrentMatchesList, LViewData, LViewFlags, RootContext, TView } from './interfaces/view';
 /**
  * Directive (D) sets a property on all component instances using this constant as a key and the
  * component's host node (LElement) as the value. This is used in methods like detectChanges to
@@ -94,7 +94,7 @@ export declare function createLNodeObject(type: TNodeType, currentView: LViewDat
 export declare function createLNode(index: number, type: TNodeType.Element, native: RElement | RText | null, name: string | null, attrs: TAttributes | null, lViewData?: LViewData | null): LElementNode;
 export declare function createLNode(index: number, type: TNodeType.View, native: null, name: null, attrs: null, lViewData: LViewData): LViewNode;
 export declare function createLNode(index: number, type: TNodeType.Container, native: RComment, name: string | null, attrs: TAttributes | null, lContainer: LContainer): LContainerNode;
-export declare function createLNode(index: number, type: TNodeType.Projection, native: null, name: null, attrs: TAttributes | null, lProjection: LProjection): LProjectionNode;
+export declare function createLNode(index: number, type: TNodeType.Projection, native: null, name: null, attrs: TAttributes | null, lProjection: null): LProjectionNode;
 /**
  * Resets the application state.
  */
@@ -457,18 +457,17 @@ export declare function viewAttached(view: LViewData): boolean;
  * @param selectors A collection of parsed CSS selectors
  * @param rawSelectors A collection of CSS selectors in the raw, un-parsed form
  */
-export declare function projectionDef(index: number, selectors?: CssSelectorList[], textSelectors?: string[]): void;
+export declare function projectionDef(selectors?: CssSelectorList[], textSelectors?: string[]): void;
 /**
  * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
  * to the projectionDef instruction.
  *
  * @param nodeIndex
- * @param localIndex - index under which distribution of projected nodes was memorized
  * @param selectorIndex:
  *        - 0 when the selector is `*` (or unspecified as this is the default value),
  *        - 1 based index of the selector from the {@link projectionDef}
  */
-export declare function projection(nodeIndex: number, localIndex: number, selectorIndex?: number, attrs?: string[]): void;
+export declare function projection(nodeIndex: number, selectorIndex?: number, attrs?: string[]): void;
 /**
  * Adds LViewData or LContainer to the end of the current view tree.
  *
