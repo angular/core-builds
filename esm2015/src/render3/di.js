@@ -232,7 +232,7 @@ function getOrCreateHostChangeDetector(currentNode) {
     return existingRef ?
         existingRef :
         new ViewRef(hostNode.data, hostNode
-            .view[DIRECTIVES][hostNode.tNode.flags >> 13 /* DirectiveStartingIndexShift */]);
+            .view[DIRECTIVES][hostNode.tNode.flags >> 14 /* DirectiveStartingIndexShift */]);
 }
 /**
  * If the node is an embedded view, traverses up the view tree to return the closest
@@ -293,7 +293,7 @@ export function getOrCreateInjectable(di, token, flags = 0 /* Default */) {
             const nodeFlags = node.tNode.flags;
             const count = nodeFlags & 4095 /* DirectiveCountMask */;
             if (count !== 0) {
-                const start = nodeFlags >> 13 /* DirectiveStartingIndexShift */;
+                const start = nodeFlags >> 14 /* DirectiveStartingIndexShift */;
                 const end = start + count;
                 const defs = node.view[TVIEW].directives;
                 for (let i = start; i < end; i++) {

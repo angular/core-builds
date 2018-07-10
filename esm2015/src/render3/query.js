@@ -143,7 +143,7 @@ function getIdxOfMatchingDirective(node, type) {
     const defs = node.view[TVIEW].directives;
     const flags = node.tNode.flags;
     const count = flags & 4095 /* DirectiveCountMask */;
-    const start = flags >> 13 /* DirectiveStartingIndexShift */;
+    const start = flags >> 14 /* DirectiveStartingIndexShift */;
     const end = start + count;
     for (let i = start; i < end; i++) {
         const def = defs[i];
