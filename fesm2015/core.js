@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.3+66.sha-ddb792d
+ * @license Angular v6.1.0-beta.3+67.sha-1089261
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1938,7 +1938,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('6.1.0-beta.3+66.sha-ddb792d');
+const VERSION = new Version('6.1.0-beta.3+67.sha-1089261');
 
 /**
  * @fileoverview added by tsickle
@@ -10104,7 +10104,7 @@ function moduleDef(providers) {
     for (let i = 0; i < providers.length; i++) {
         /** @type {?} */
         const provider = providers[i];
-        if (provider.token === APP_ROOT) {
+        if (provider.token === APP_ROOT && provider.value === true) {
             isRoot = true;
         }
         if (provider.flags & 1073741824 /* TypeNgModule */) {
