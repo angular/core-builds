@@ -1,10 +1,10 @@
 /**
- * @license Angular v6.1.0-beta.3+76.sha-03616bc
+ * @license Angular v6.1.0-beta.3+77.sha-7d27ecc
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __decorate, __metadata, __assign, __param, __extends, __spread, __read, __values } from 'tslib';
+import { __decorate, __metadata, __extends, __spread, __param, __assign, __read, __values } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compileInjectable, compilePipeFromMetadata } from '@angular/compiler';
 import { share } from 'rxjs/operators';
@@ -12184,7 +12184,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-beta.3+76.sha-03616bc');
+var VERSION = new Version('6.1.0-beta.3+77.sha-7d27ecc');
 
 /**
  * @license
