@@ -1,10 +1,10 @@
 /**
- * @license Angular v6.0.7+21.sha-0437598
+ * @license Angular v6.0.8+4.sha-48415ed
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { ApplicationInitStatus, Compiler, Component, Injectable, InjectionToken, Injector, NgModule, NgZone, Optional, RendererFactory2, SkipSelf, getDebugNode, ɵAPP_ROOT, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify } from '@angular/core';
+import { RendererFactory2, getDebugNode, Compiler, Injectable, ApplicationInitStatus, Component, InjectionToken, Injector, NgModule, NgZone, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify } from '@angular/core';
 
 /**
  * @fileoverview added by tsickle
@@ -17,7 +17,7 @@ import { ApplicationInitStatus, Compiler, Component, Injectable, InjectionToken,
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-const _global = /** @type {?} */ ((typeof window === 'undefined' ? global : window));
+const /** @type {?} */ _global = /** @type {?} */ ((typeof window === 'undefined' ? global : window));
 /**
  * Wraps a test function in an asynchronous test zone. The test will automatically
  * complete when all asynchronous calls within this zone are done. Can be used
@@ -124,13 +124,6 @@ function runInTestZone(fn, context, finishCallback, failCallback) {
  * @suppress {checkTypes} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Wraps a test function in an asynchronous test zone. The test will automatically
  * complete when all asynchronous calls within this zone are done. Can be used
  * to wrap an {\@link inject} call.
@@ -170,13 +163,6 @@ function async(fn) {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /**
  * Fixture for debugging and testing a component.
@@ -389,10 +375,10 @@ function scheduleMicroTask(fn) {
  * fakeAsync has been moved to zone.js
  * this file is for fallback in case old version of zone.js is used
  */
-const _Zone$1 = typeof Zone !== 'undefined' ? Zone : null;
-const FakeAsyncTestZoneSpec = _Zone$1 && _Zone$1['FakeAsyncTestZoneSpec'];
-const ProxyZoneSpec = _Zone$1 && _Zone$1['ProxyZoneSpec'];
-let _fakeAsyncTestZoneSpec = null;
+const /** @type {?} */ _Zone = typeof Zone !== 'undefined' ? Zone : null;
+const /** @type {?} */ FakeAsyncTestZoneSpec = _Zone && _Zone['FakeAsyncTestZoneSpec'];
+const /** @type {?} */ ProxyZoneSpec = _Zone && _Zone['ProxyZoneSpec'];
+let /** @type {?} */ _fakeAsyncTestZoneSpec = null;
 /**
  * Clears out the shared fake async zone for a test.
  * To be called in a global `beforeEach`.
@@ -405,7 +391,7 @@ function resetFakeAsyncZoneFallback() {
     // in node.js testing we may not have ProxyZoneSpec in which case there is nothing to reset.
     ProxyZoneSpec && ProxyZoneSpec.assertPresent().resetDelegate();
 }
-let _inFakeAsyncCall = false;
+let /** @type {?} */ _inFakeAsyncCall = false;
 /**
  * Wraps a function to be executed in the fakeAsync zone:
  * - microtasks are manually executed by calling `flushMicrotasks()`,
@@ -530,8 +516,8 @@ function flushMicrotasksFallback() {
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
-const _Zone = typeof Zone !== 'undefined' ? Zone : null;
-const fakeAsyncTestModule = _Zone && _Zone[_Zone.__symbol__('fakeAsyncTest')];
+const /** @type {?} */ _Zone$1 = typeof Zone !== 'undefined' ? Zone : null;
+const /** @type {?} */ fakeAsyncTestModule = _Zone$1 && _Zone$1[_Zone$1.__symbol__('fakeAsyncTest')];
 /**
  * Clears out the shared fake async zone for a test.
  * To be called in a global `beforeEach`.
@@ -687,13 +673,6 @@ class AsyncTestCompleter {
  * @suppress {checkTypes} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * @return {?}
  */
 function unimplemented() {
@@ -781,14 +760,7 @@ class TestingCompilerFactory {
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-const UNDEFINED = new Object();
+const /** @type {?} */ UNDEFINED = new Object();
 /**
  * An abstract class for inserting the root test component element in a platform independent way.
  *
@@ -801,15 +773,15 @@ class TestComponentRenderer {
      */
     insertRootElement(rootElementId) { }
 }
-let _nextRootElementId = 0;
+let /** @type {?} */ _nextRootElementId = 0;
 /**
  * \@experimental
  */
-const ComponentFixtureAutoDetect = new InjectionToken('ComponentFixtureAutoDetect');
+const /** @type {?} */ ComponentFixtureAutoDetect = new InjectionToken('ComponentFixtureAutoDetect');
 /**
  * \@experimental
  */
-const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
+const /** @type {?} */ ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
 /**
  * \@description
  * Configures and initializes environment for unit testing and provides methods for
@@ -1311,7 +1283,7 @@ class TestBed {
             value = provider.useValue;
         }
         const /** @type {?} */ deps = (provider.deps || []).map((dep) => {
-            let /** @type {?} */ depFlags = 0;
+            let /** @type {?} */ depFlags = 0 /* None */;
             let /** @type {?} */ depToken;
             if (Array.isArray(dep)) {
                 dep.forEach((entry) => {
@@ -1373,7 +1345,7 @@ class TestBed {
         return fixture;
     }
 }
-let _testBed = /** @type {?} */ ((null));
+let /** @type {?} */ _testBed = /** @type {?} */ ((null));
 /**
  * \@experimental
  * @return {?}
@@ -1483,14 +1455,7 @@ function withModule(moduleDef, fn) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-const _global$1 = /** @type {?} */ ((typeof window === 'undefined' ? global : window));
+const /** @type {?} */ _global$1 = /** @type {?} */ ((typeof window === 'undefined' ? global : window));
 // Reset the test providers and the fake async zone before each test.
 if (_global$1.beforeEach) {
     _global$1.beforeEach(() => {
@@ -1500,18 +1465,11 @@ if (_global$1.beforeEach) {
 }
 // TODO(juliemr): remove this, only used because we need to export something to have compilation
 // work.
-const __core_private_testing_placeholder__ = '';
+const /** @type {?} */ __core_private_testing_placeholder__ = '';
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 
 /**
@@ -1574,10 +1532,10 @@ function withBody(html, blockFn) {
         }
     });
 }
-let savedDocument = undefined;
-let savedRequestAnimationFrame = undefined;
-let savedNode = undefined;
-let requestAnimationFrameCount = 0;
+let /** @type {?} */ savedDocument = undefined;
+let /** @type {?} */ savedRequestAnimationFrame = undefined;
+let /** @type {?} */ savedNode = undefined;
+let /** @type {?} */ requestAnimationFrameCount = 0;
 const ɵ0 = function (domino) {
     if (typeof global == 'object' && global.process && typeof require == 'function') {
         try {
@@ -1595,7 +1553,7 @@ const ɵ0 = function (domino) {
  * extracted into a constant so that the regexp in the System.js does not match
  * and does not try to load domino in the browser.
  */
-const domino = (ɵ0)('domino');
+const /** @type {?} */ domino = (ɵ0)('domino');
 /**
  * Ensure that global has `Document` if we are in node.js
  * \@experimental
@@ -1651,53 +1609,17 @@ if (typeof afterEach == 'function')
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * @module
- * @description
- * Entry point for all public APIs of the core/testing package.
- */
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * @module
- * @description
- * Entry point for all public APIs of this package.
- */
-
 // This file only reexports content of the `src` folder. Keep it that way.
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-// This file is not used to build this module. It is only used during editing
-// by the TypeScript language service and during build for verification. `ngc`
-// replaces this file with production index.ts when it rewrites private symbol
-// names.
 
 /**
  * Generated bundle index. Do not edit.
