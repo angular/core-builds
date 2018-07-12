@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import './ng_dev_mode';
+import { QueryList } from '../linker';
 import { Sanitizer } from '../sanitization/security';
 import { LContainer } from './interfaces/container';
 import { ComponentDefInternal, ComponentQuery, ComponentTemplate, DirectiveDefInternal, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
@@ -369,7 +370,7 @@ export declare function text(index: number, value?: any): void;
  */
 export declare function textBinding<T>(index: number, value: T | NO_CHANGE): void;
 /**
- * Create a directive.
+ * Create a directive and their associated content queries.
  *
  * NOTE: directives can be created in order other than the index order. They can also
  *       be retrieved before they are created in which case the value will be null.
@@ -377,7 +378,7 @@ export declare function textBinding<T>(index: number, value: T | NO_CHANGE): voi
  * @param directive The directive instance.
  * @param directiveDef DirectiveDef object which contains information about the template.
  */
-export declare function directiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDefInternal<T> | ComponentDefInternal<T>): T;
+export declare function directiveCreate<T>(directiveDefIdx: number, directive: T, directiveDef: DirectiveDefInternal<T> | ComponentDefInternal<T>): T;
 /**
  * A lighter version of directiveCreate() that is used for the root component
  *
@@ -651,6 +652,7 @@ export declare function load<T>(index: number): T;
 export declare function loadInternal<T>(index: number, arr: LViewData): T;
 /** Retrieves a value from the `directives` array. */
 export declare function loadDirective<T>(index: number): T;
+export declare function loadQueryList<T>(queryListIdx: number): QueryList<T>;
 /** Gets the current binding value and increments the binding index. */
 export declare function consumeBinding(): any;
 /** Updates binding if changed, then returns whether it was updated. */
@@ -662,7 +664,11 @@ export declare function bindingUpdated2(exp1: any, exp2: any): boolean;
 /** Updates 4 bindings if changed, then returns whether any was updated. */
 export declare function bindingUpdated4(exp1: any, exp2: any, exp3: any, exp4: any): boolean;
 export declare function getTView(): TView;
-export declare function getDirectiveInstance<T>(instanceOrArray: T | [T]): T;
+/**
+ * Registers a QueryList, associated with a content query, for later refresh (part of a view
+ * refresh).
+ */
+export declare function registerContentQuery<Q>(queryList: QueryList<Q>): void;
 export declare function assertPreviousIsParent(): void;
 /**
  * On the first template pass, the reserved slots should be set `NO_CHANGE`.

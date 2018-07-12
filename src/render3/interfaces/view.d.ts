@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Injector } from '../../di/injector';
+import { QueryList } from '../../linker';
 import { Sanitizer } from '../../sanitization/security';
 import { LContainer } from './container';
 import { ComponentQuery, ComponentTemplate, DirectiveDefInternal, DirectiveDefList, PipeDefInternal, PipeDefList } from './definition';
@@ -13,7 +14,7 @@ import { LElementNode, LViewNode, TNode } from './node';
 import { LQueries } from './query';
 import { Renderer3 } from './renderer';
 /** Size of LViewData's header. Necessary to adjust for it when setting slots.  */
-export declare const HEADER_OFFSET = 15;
+export declare const HEADER_OFFSET = 16;
 export declare const TVIEW = 0;
 export declare const PARENT = 1;
 export declare const NEXT = 2;
@@ -29,6 +30,7 @@ export declare const RENDERER = 11;
 export declare const SANITIZER = 12;
 export declare const TAIL = 13;
 export declare const CONTAINER_INDEX = 14;
+export declare const CONTENT_QUERIES = 15;
 /**
  * `LViewData` stores all of the information needed to process the instructions as
  * they are invoked from the template. Each embedded view and component view has its
@@ -127,6 +129,12 @@ export interface LViewData extends Array<any> {
      * in multiple containers, so the parent cannot be shared between view instances).
      */
     [CONTAINER_INDEX]: number;
+    /**
+     * Stores QueryLists associated with content queries of a directive. This data structure is
+     * filled-in as part of a directive creation process and is later used to retrieve a QueryList to
+     * be refreshed.
+     */
+    [CONTENT_QUERIES]: QueryList<any>[] | null;
 }
 /** Flags associated with an LView (saved in LViewData[FLAGS]) */
 export declare const enum LViewFlags {
@@ -358,6 +366,13 @@ export interface TView {
      * they will be fed into instructions that expect the raw index (e.g. elementProperty)
      */
     hostBindings: number[] | null;
+    /**
+     * A list of indices for child directives that have content queries.
+     *
+     * Even indices: Directive indices
+     * Odd indices: Starting index of content queries (stored in CONTENT_QUERIES) for this directive
+     */
+    contentQueries: number[] | null;
 }
 /**
  * RootContext contains information which is shared for all components which
