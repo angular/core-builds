@@ -5,9 +5,9 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-export { InjectableDef, InjectorDef, defineInjectable, defineInjector } from './di/defs';
+export { InjectableDef, InjectorDef as ɵInjectorDef, defineInjectable, defineInjector } from './di/defs';
 export { inject } from './di/injector';
-export { NgModuleDef } from './metadata/ng_module';
+export { NgModuleDef as ɵNgModuleDef } from './metadata/ng_module';
 export { defineNgModule as ɵdefineNgModule } from './render3/definition';
 /**
  * The existence of this constant (in this particular file) informs the Angular compiler that the
