@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.3+94.sha-328971f
+ * @license Angular v6.1.0-beta.3+108.sha-80a74b4
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1192,7 +1192,7 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /** Size of LViewData's header. Necessary to adjust for it when setting slots.  */
-    var HEADER_OFFSET = 15;
+    var HEADER_OFFSET = 16;
     // Below are constants for LViewData indices to help us look up LViewData members
     // without having to remember the specific indices.
     // Uglify will inline these when minifying so there shouldn't be a cost.
@@ -1211,6 +1211,7 @@
     var SANITIZER = 12;
     var TAIL = 13;
     var CONTAINER_INDEX = 14;
+    var CONTENT_QUERIES = 15;
 
     /**
      * @license
@@ -2859,6 +2860,7 @@
         // This needs to be set before children are processed to support recursive components
         tView.firstTemplatePass = firstTemplatePass = false;
         setHostBindings(tView.hostBindings);
+        refreshContentQueries(tView);
         refreshChildComponents(tView.components);
     }
     /** Sets the host bindings for the current view. */
@@ -2869,6 +2871,16 @@
                 var dirIndex = bindings[i];
                 var def = defs[dirIndex];
                 def.hostBindings && def.hostBindings(dirIndex, bindings[i + 1]);
+            }
+        }
+    }
+    /** Refreshes content queries for all directives in the given view. */
+    function refreshContentQueries(tView) {
+        if (tView.contentQueries != null) {
+            for (var i = 0; i < tView.contentQueries.length; i += 2) {
+                var directiveDefIdx = tView.contentQueries[i];
+                var directiveDef = tView.directives[directiveDefIdx];
+                directiveDef.contentQueriesRefresh(directiveDefIdx, tView.contentQueries[i + 1]);
             }
         }
     }
@@ -2902,7 +2914,8 @@
             renderer,
             sanitizer || null,
             null,
-            -1 // containerIndex
+            -1,
+            null,
         ];
     }
     /**
@@ -3346,6 +3359,7 @@
             pipeDestroyHooks: null,
             cleanup: null,
             hostBindings: null,
+            contentQueries: null,
             components: null,
             directiveRegistry: typeof directives === 'function' ? directives() : directives,
             pipeRegistry: typeof pipes === 'function' ? pipes() : pipes,
@@ -3863,7 +3877,7 @@
     //// Directive
     //////////////////////////
     /**
-     * Create a directive.
+     * Create a directive and their associated content queries.
      *
      * NOTE: directives can be created in order other than the index order. They can also
      *       be retrieved before they are created in which case the value will be null.
@@ -3871,23 +3885,26 @@
      * @param directive The directive instance.
      * @param directiveDef DirectiveDef object which contains information about the template.
      */
-    function directiveCreate(index, directive, directiveDef) {
-        var instance = baseDirectiveCreate(index, directive, directiveDef);
+    function directiveCreate(directiveDefIdx, directive, directiveDef) {
+        var instance = baseDirectiveCreate(directiveDefIdx, directive, directiveDef);
         ngDevMode && assertDefined(previousOrParentNode.tNode, 'previousOrParentNode.tNode');
         var tNode = previousOrParentNode.tNode;
         var isComponent = directiveDef.template;
         if (isComponent) {
-            addComponentLogic(index, directive, directiveDef);
+            addComponentLogic(directiveDefIdx, directive, directiveDef);
         }
         if (firstTemplatePass) {
             // Init hooks are queued now so ngOnInit is called in host components before
             // any projected components.
-            queueInitHooks(index, directiveDef.onInit, directiveDef.doCheck, tView);
+            queueInitHooks(directiveDefIdx, directiveDef.onInit, directiveDef.doCheck, tView);
             if (directiveDef.hostBindings)
-                queueHostBindingForCheck(index);
+                queueHostBindingForCheck(directiveDefIdx);
         }
         if (tNode && tNode.attrs) {
-            setInputsFromAttrs(index, instance, directiveDef.inputs, tNode);
+            setInputsFromAttrs(directiveDefIdx, instance, directiveDef.inputs, tNode);
+        }
+        if (directiveDef.contentQueries) {
+            directiveDef.contentQueries();
         }
         return instance;
     }
@@ -4242,7 +4259,7 @@
         // Only attached CheckAlways components or attached, dirty OnPush components should be checked
         if (viewAttached(hostView) && hostView[FLAGS] & (2 /* CheckAlways */ | 4 /* Dirty */)) {
             ngDevMode && assertDataInRange(directiveIndex, directives);
-            detectChangesInternal(hostView, element, getDirectiveInstance(directives[directiveIndex]));
+            detectChangesInternal(hostView, element, directives[directiveIndex]);
         }
     }
     /** Returns a boolean for whether the view is attached */
@@ -4744,6 +4761,11 @@
         ngDevMode && assertDataInRange(index, directives);
         return directives[index];
     }
+    function loadQueryList(queryListIdx) {
+        ngDevMode && assertDefined(viewData[CONTENT_QUERIES], 'Content QueryList array should be defined if reading a query.');
+        ngDevMode && assertDataInRange(queryListIdx, viewData[CONTENT_QUERIES]);
+        return viewData[CONTENT_QUERIES][queryListIdx];
+    }
     /** Gets the current binding value and increments the binding index. */
     function consumeBinding() {
         ngDevMode && assertDataInRange(viewData[BINDING_INDEX]);
@@ -4788,10 +4810,20 @@
     function getTView() {
         return tView;
     }
-    function getDirectiveInstance(instanceOrArray) {
-        // Directives with content queries store an array in directives[directiveIndex]
-        // with the instance as the first index
-        return Array.isArray(instanceOrArray) ? instanceOrArray[0] : instanceOrArray;
+    /**
+     * Registers a QueryList, associated with a content query, for later refresh (part of a view
+     * refresh).
+     */
+    function registerContentQuery(queryList) {
+        var savedContentQueriesLength = (viewData[CONTENT_QUERIES] || (viewData[CONTENT_QUERIES] = [])).push(queryList);
+        if (firstTemplatePass) {
+            var currentDirectiveIndex = directives.length - 1;
+            var tViewContentQueries = tView.contentQueries || (tView.contentQueries = []);
+            var lastSavedDirectiveIndex = tView.contentQueries.length ? tView.contentQueries[tView.contentQueries.length - 2] : -1;
+            if (currentDirectiveIndex !== lastSavedDirectiveIndex) {
+                tViewContentQueries.push(currentDirectiveIndex, savedContentQueriesLength - 1);
+            }
+        }
     }
     function assertPreviousIsParent() {
         assertEqual(isParent, true, 'previousOrParentNode should be a parent');
@@ -8382,6 +8414,8 @@
             factory: componentDefinition.factory,
             template: componentDefinition.template || null,
             hostBindings: componentDefinition.hostBindings || null,
+            contentQueries: componentDefinition.contentQueries || null,
+            contentQueriesRefresh: componentDefinition.contentQueriesRefresh || null,
             attributes: componentDefinition.attributes || null,
             inputs: invertObject(componentDefinition.inputs, declaredInputs),
             declaredInputs: declaredInputs,
@@ -9284,7 +9318,7 @@
                         // and matches the given token, return the directive instance.
                         var directiveDef = defs[i];
                         if (directiveDef.type === token && directiveDef.diPublic) {
-                            return getDirectiveInstance(node.view[DIRECTIVES][i]);
+                            return node.view[DIRECTIVES][i];
                         }
                     }
                 }
@@ -12232,7 +12266,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('6.1.0-beta.3+94.sha-328971f');
+    var VERSION = new Version('6.1.0-beta.3+108.sha-80a74b4');
 
     /**
      * @license
@@ -18813,6 +18847,7 @@
     exports.ɵT = text;
     exports.ɵV = embeddedViewStart;
     exports.ɵQ = query;
+    exports.ɵQr = registerContentQuery;
     exports.ɵd = loadDirective;
     exports.ɵP = projection;
     exports.ɵb = bind;
@@ -18843,6 +18878,7 @@
     exports.ɵcR = containerRefreshStart;
     exports.ɵcr = containerRefreshEnd;
     exports.ɵqR = queryRefresh;
+    exports.ɵql = loadQueryList;
     exports.ɵe = elementEnd;
     exports.ɵp = elementProperty;
     exports.ɵpD = projectionDef;
