@@ -37,9 +37,7 @@ export declare function defineComponent<T>(componentDefinition: {
     /**
      * Factory method used to create an instance of directive.
      */
-    factory: () => T | ({
-        0: T;
-    } & any[]);
+    factory: () => T;
     /**
      * Static attributes to set on host element.
      *
@@ -110,6 +108,12 @@ export declare function defineComponent<T>(componentDefinition: {
      * Function executed by the parent template to allow child directive to apply host bindings.
      */
     hostBindings?: (directiveIndex: number, elementIndex: number) => void;
+    /**
+     * Function to create instances of content queries associated with a given directive.
+     */
+    contentQueries?: (() => void);
+    /** Refreshes content queries associated with directives in a given view */
+    contentQueriesRefresh?: ((directiveIndex: number, queryIndex: number) => void);
     /**
      * Defines the name that can be used in the template to assign this directive to a variable.
      *
@@ -291,6 +295,12 @@ export declare const defineDirective: <T>(directiveDefinition: {
      * Function executed by the parent template to allow child directive to apply host bindings.
      */
     hostBindings?: ((directiveIndex: number, elementIndex: number) => void) | undefined;
+    /**
+     * Function to create instances of content queries associated with a given directive.
+     */
+    contentQueries?: (() => void) | undefined;
+    /** Refreshes content queries associated with directives in a given view */
+    contentQueriesRefresh?: ((directiveIndex: number, queryIndex: number) => void) | undefined;
     /**
      * Defines the name that can be used in the template to assign this directive to a variable.
      *

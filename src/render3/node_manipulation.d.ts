@@ -17,6 +17,13 @@ export declare function getChildLNode(node: LNode): LNode | null;
 export declare function getParentLNode(node: LContainerNode | LElementNode | LTextNode | LProjectionNode): LElementNode | LViewNode;
 export declare function getParentLNode(node: LViewNode): LContainerNode | null;
 export declare function getParentLNode(node: LNode): LElementNode | LContainerNode | LViewNode | null;
+/**
+ * Given a current view, finds the nearest component's host (LElement).
+ *
+ * @param lViewData LViewData for which we want a host element node
+ * @returns The host node
+ */
+export declare function findComponentHost(lViewData: LViewData): LElementNode;
 export declare function createTextNode(value: any, renderer: Renderer3): RText;
 /**
  * Adds or removes all DOM elements associated with a view.
