@@ -1,5 +1,5 @@
 import * as tslib_1 from "tslib";
-import * as ɵ0 from "@angular/core";
+import * as i0 from "@angular/core";
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -54,7 +54,7 @@ var TestingCompiler = /** @class */ (function (_super) {
      * This can be used for errors created by compileModule...
      */
     TestingCompiler.prototype.getComponentFromError = function (error) { throw unimplemented(); };
-    TestingCompiler.ngInjectableDef = ɵ0.defineInjectable({ token: TestingCompiler, factory: function TestingCompiler_Factory() { return new TestingCompiler(); }, providedIn: null });
+    TestingCompiler.ngInjectableDef = i0.defineInjectable({ token: TestingCompiler, factory: function TestingCompiler_Factory() { return new TestingCompiler(); }, providedIn: null });
     return TestingCompiler;
 }(Compiler));
 export { TestingCompiler };

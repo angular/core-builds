@@ -1,4 +1,4 @@
-import * as ɵ0 from "@angular/core";
+import * as i0 from "@angular/core";
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -46,7 +46,7 @@ export class TestingCompiler extends Compiler {
      */
     getComponentFromError(error) { throw unimplemented(); }
 }
-TestingCompiler.ngInjectableDef = ɵ0.defineInjectable({ token: TestingCompiler, factory: function TestingCompiler_Factory() { return new TestingCompiler(); }, providedIn: null });
+TestingCompiler.ngInjectableDef = i0.defineInjectable({ token: TestingCompiler, factory: function TestingCompiler_Factory() { return new TestingCompiler(); }, providedIn: null });
 /**
  * A factory for creating a Compiler
  *

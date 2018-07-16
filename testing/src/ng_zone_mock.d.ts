@@ -1,4 +1,4 @@
-import * as ɵ0 from '@angular/core';
+import * as i0 from '@angular/core';
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -16,5 +16,5 @@ export declare class MockNgZone extends NgZone {
     run(fn: Function): any;
     runOutsideAngular(fn: Function): any;
     simulateZoneExit(): void;
-    static ngInjectableDef: ɵ0.InjectableDef<MockNgZone>;
+    static ngInjectableDef: i0.InjectableDef<MockNgZone>;
 }

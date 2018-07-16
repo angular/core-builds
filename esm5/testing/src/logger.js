@@ -1,4 +1,4 @@
-import * as ɵ0 from "@angular/core";
+import * as i0 from "@angular/core";
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -25,7 +25,7 @@ var Log = /** @class */ (function () {
     };
     Log.prototype.clear = function () { this.logItems = []; };
     Log.prototype.result = function () { return this.logItems.join('; '); };
-    Log.ngInjectableDef = ɵ0.defineInjectable({ token: Log, factory: function Log_Factory() { return new Log(); }, providedIn: null });
+    Log.ngInjectableDef = i0.defineInjectable({ token: Log, factory: function Log_Factory() { return new Log(); }, providedIn: null });
     return Log;
 }());
 export { Log };

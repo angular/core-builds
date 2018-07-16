@@ -1,4 +1,4 @@
-import * as ɵ0 from '../r3_symbols';
+import * as i0 from '../r3_symbols';
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -36,5 +36,5 @@ export declare class SystemJsNgModuleLoader implements NgModuleFactoryLoader {
     load(path: string): Promise<NgModuleFactory<any>>;
     private loadAndCompile;
     private loadFactory;
-    static ngInjectableDef: ɵ0.InjectableDef<SystemJsNgModuleLoader>;
+    static ngInjectableDef: i0.InjectableDef<SystemJsNgModuleLoader>;
 }

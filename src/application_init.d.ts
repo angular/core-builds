@@ -1,4 +1,4 @@
-import * as ɵ0 from './r3_symbols';
+import * as i0 from './r3_symbols';
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -25,5 +25,5 @@ export declare class ApplicationInitStatus {
     readonly donePromise: Promise<any>;
     readonly done: boolean;
     constructor(appInits: (() => any)[]);
-    static ngInjectableDef: ɵ0.InjectableDef<ApplicationInitStatus>;
+    static ngInjectableDef: i0.InjectableDef<ApplicationInitStatus>;
 }

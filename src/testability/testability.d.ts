@@ -1,4 +1,4 @@
-import * as ɵ0 from '../r3_symbols';
+import * as i0 from '../r3_symbols';
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -83,7 +83,7 @@ export declare class Testability implements PublicTestability {
      * @param exactMatch Whether using exactMatch
      */
     findProviders(using: any, provider: string, exactMatch: boolean): any[];
-    static ngInjectableDef: ɵ0.InjectableDef<Testability>;
+    static ngInjectableDef: i0.InjectableDef<Testability>;
 }
 /**
  * A global registry of {@link Testability} instances for specific elements.
@@ -126,7 +126,7 @@ export declare class TestabilityRegistry {
      * current node
      */
     findTestabilityInTree(elem: Node, findInAncestors?: boolean): Testability | null;
-    static ngInjectableDef: ɵ0.InjectableDef<TestabilityRegistry>;
+    static ngInjectableDef: i0.InjectableDef<TestabilityRegistry>;
 }
 /**
  * Adapter interface for retrieving the `Testability` service associated for a

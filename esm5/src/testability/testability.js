@@ -1,4 +1,4 @@
-import * as ɵ0 from "../r3_symbols";
+import * as i0 from "../r3_symbols";
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -170,7 +170,7 @@ var Testability = /** @class */ (function () {
         // TODO(juliemr): implement.
         return [];
     };
-    Testability.ngInjectableDef = ɵ0.defineInjectable({ token: Testability, factory: function Testability_Factory() { return new Testability(ɵ0.inject(NgZone)); }, providedIn: null });
+    Testability.ngInjectableDef = i0.defineInjectable({ token: Testability, factory: function Testability_Factory() { return new Testability(i0.inject(NgZone)); }, providedIn: null });
     return Testability;
 }());
 export { Testability };
@@ -224,7 +224,7 @@ var TestabilityRegistry = /** @class */ (function () {
         if (findInAncestors === void 0) { findInAncestors = true; }
         return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
     };
-    TestabilityRegistry.ngInjectableDef = ɵ0.defineInjectable({ token: TestabilityRegistry, factory: function TestabilityRegistry_Factory() { return new TestabilityRegistry(); }, providedIn: null });
+    TestabilityRegistry.ngInjectableDef = i0.defineInjectable({ token: TestabilityRegistry, factory: function TestabilityRegistry_Factory() { return new TestabilityRegistry(); }, providedIn: null });
     return TestabilityRegistry;
 }());
 export { TestabilityRegistry };

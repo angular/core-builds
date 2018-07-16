@@ -1,4 +1,4 @@
-import * as ɵ0 from "../r3_symbols";
+import * as i0 from "../r3_symbols";
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -66,7 +66,7 @@ export class Compiler {
      */
     getModuleId(moduleType) { return undefined; }
 }
-Compiler.ngInjectableDef = ɵ0.defineInjectable({ token: Compiler, factory: function Compiler_Factory() { return new Compiler(); }, providedIn: null });
+Compiler.ngInjectableDef = i0.defineInjectable({ token: Compiler, factory: function Compiler_Factory() { return new Compiler(); }, providedIn: null });
 /**
  * Token to provide CompilerOptions in the platform injector.
  *

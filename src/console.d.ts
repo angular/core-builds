@@ -1,4 +1,4 @@
-import * as ɵ0 from './r3_symbols';
+import * as i0 from './r3_symbols';
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -9,5 +9,5 @@ import * as ɵ0 from './r3_symbols';
 export declare class Console {
     log(message: string): void;
     warn(message: string): void;
-    static ngInjectableDef: ɵ0.InjectableDef<Console>;
+    static ngInjectableDef: i0.InjectableDef<Console>;
 }

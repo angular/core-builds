@@ -1,4 +1,4 @@
-import * as ɵ0 from "../r3_symbols";
+import * as i0 from "../r3_symbols";
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -167,7 +167,7 @@ export class Testability {
         return [];
     }
 }
-Testability.ngInjectableDef = ɵ0.defineInjectable({ token: Testability, factory: function Testability_Factory() { return new Testability(ɵ0.inject(NgZone)); }, providedIn: null });
+Testability.ngInjectableDef = i0.defineInjectable({ token: Testability, factory: function Testability_Factory() { return new Testability(i0.inject(NgZone)); }, providedIn: null });
 /**
  * A global registry of {@link Testability} instances for specific elements.
  * @experimental
@@ -218,7 +218,7 @@ export class TestabilityRegistry {
         return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
     }
 }
-TestabilityRegistry.ngInjectableDef = ɵ0.defineInjectable({ token: TestabilityRegistry, factory: function TestabilityRegistry_Factory() { return new TestabilityRegistry(); }, providedIn: null });
+TestabilityRegistry.ngInjectableDef = i0.defineInjectable({ token: TestabilityRegistry, factory: function TestabilityRegistry_Factory() { return new TestabilityRegistry(); }, providedIn: null });
 class _NoopGetTestability {
     addToWindow(registry) { }
     findTestabilityInTree(registry, elem, findInAncestors) {

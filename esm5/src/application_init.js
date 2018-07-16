@@ -1,4 +1,4 @@
-import * as ɵ0 from "./r3_symbols";
+import * as i0 from "./r3_symbols";
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -54,7 +54,7 @@ var ApplicationInitStatus = /** @class */ (function () {
         }
         this.initialized = true;
     };
-    ApplicationInitStatus.ngInjectableDef = ɵ0.defineInjectable({ token: ApplicationInitStatus, factory: function ApplicationInitStatus_Factory() { return new ApplicationInitStatus(ɵ0.inject(APP_INITIALIZER, 8)); }, providedIn: null });
+    ApplicationInitStatus.ngInjectableDef = i0.defineInjectable({ token: ApplicationInitStatus, factory: function ApplicationInitStatus_Factory() { return new ApplicationInitStatus(i0.inject(APP_INITIALIZER, 8)); }, providedIn: null });
     return ApplicationInitStatus;
 }());
 export { ApplicationInitStatus };

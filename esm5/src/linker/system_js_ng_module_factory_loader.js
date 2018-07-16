@@ -1,5 +1,5 @@
 import * as tslib_1 from "tslib";
-import * as ɵ0 from "../r3_symbols";
+import * as i0 from "../r3_symbols";
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -62,7 +62,7 @@ var SystemJsNgModuleLoader = /** @class */ (function () {
             .then(function (module) { return module[exportName + factoryClassSuffix]; })
             .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
     };
-    SystemJsNgModuleLoader.ngInjectableDef = ɵ0.defineInjectable({ token: SystemJsNgModuleLoader, factory: function SystemJsNgModuleLoader_Factory() { return new SystemJsNgModuleLoader(ɵ0.inject(Compiler), ɵ0.inject(SystemJsNgModuleLoaderConfig, 8)); }, providedIn: null });
+    SystemJsNgModuleLoader.ngInjectableDef = i0.defineInjectable({ token: SystemJsNgModuleLoader, factory: function SystemJsNgModuleLoader_Factory() { return new SystemJsNgModuleLoader(i0.inject(Compiler), i0.inject(SystemJsNgModuleLoaderConfig, 8)); }, providedIn: null });
     return SystemJsNgModuleLoader;
 }());
 export { SystemJsNgModuleLoader };

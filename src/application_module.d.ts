@@ -1,4 +1,4 @@
-import * as ɵ0 from './r3_symbols';
+import * as i0 from './r3_symbols';
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -21,6 +21,6 @@ export declare const APPLICATION_MODULE_PROVIDERS: StaticProvider[];
  */
 export declare class ApplicationModule {
     constructor(appRef: ApplicationRef);
-    static ngModuleDef: ɵ0.NgModuleDef<ApplicationModule, [], [], []>;
-    static ngInjectorDef: ɵ0.InjectorDef;
+    static ngModuleDef: i0.ɵNgModuleDef<ApplicationModule, [], [], []>;
+    static ngInjectorDef: i0.ɵInjectorDef<ApplicationModule>;
 }

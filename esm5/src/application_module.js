@@ -1,4 +1,4 @@
-import * as ɵ0 from "./r3_symbols";
+import * as i0 from "./r3_symbols";
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -59,8 +59,8 @@ var ApplicationModule = /** @class */ (function () {
     // Inject ApplicationRef to make it eager...
     function ApplicationModule(appRef) {
     }
-    ApplicationModule.ngModuleDef = ɵ0.ɵdefineNgModule({ type: ApplicationModule, bootstrap: [], declarations: [], imports: [], exports: [] });
-    ApplicationModule.ngInjectorDef = ɵ0.defineInjector({ factory: function ApplicationModule_Factory() { return new ApplicationModule(ɵ0.inject(ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS, imports: [] });
+    ApplicationModule.ngModuleDef = i0.ɵdefineNgModule({ type: ApplicationModule, bootstrap: [], declarations: [], imports: [], exports: [] });
+    ApplicationModule.ngInjectorDef = i0.defineInjector({ factory: function ApplicationModule_Factory() { return new ApplicationModule(i0.inject(ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS, imports: [] });
     return ApplicationModule;
 }());
 export { ApplicationModule };

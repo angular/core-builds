@@ -1,4 +1,4 @@
-import * as ɵ0 from "../r3_symbols";
+import * as i0 from "../r3_symbols";
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -57,7 +57,7 @@ export class SystemJsNgModuleLoader {
             .then((factory) => checkNotEmpty(factory, module, exportName));
     }
 }
-SystemJsNgModuleLoader.ngInjectableDef = ɵ0.defineInjectable({ token: SystemJsNgModuleLoader, factory: function SystemJsNgModuleLoader_Factory() { return new SystemJsNgModuleLoader(ɵ0.inject(Compiler), ɵ0.inject(SystemJsNgModuleLoaderConfig, 8)); }, providedIn: null });
+SystemJsNgModuleLoader.ngInjectableDef = i0.defineInjectable({ token: SystemJsNgModuleLoader, factory: function SystemJsNgModuleLoader_Factory() { return new SystemJsNgModuleLoader(i0.inject(Compiler), i0.inject(SystemJsNgModuleLoaderConfig, 8)); }, providedIn: null });
 function checkNotEmpty(value, modulePath, exportName) {
     if (!value) {
         throw new Error(`Cannot find '${exportName}' in '${modulePath}'`);

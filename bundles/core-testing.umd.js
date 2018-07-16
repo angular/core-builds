@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.3+86.sha-6b3f5dd
+ * @license Angular v6.1.0-beta.3+129.sha-acdb672
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -8,7 +8,7 @@
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@angular/core')) :
     typeof define === 'function' && define.amd ? define('@angular/core/testing', ['exports', '@angular/core'], factory) :
     (factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}, global.ng.core.testing = {}),global.ng.core));
-}(this, (function (exports,ɵ0) { 'use strict';
+}(this, (function (exports,i0) { 'use strict';
 
     /**
      * @license
@@ -214,7 +214,7 @@
             this._onErrorSubscription = null;
             this.changeDetectorRef = componentRef.changeDetectorRef;
             this.elementRef = componentRef.location;
-            this.debugElement = ɵ0.getDebugNode(this.elementRef.nativeElement);
+            this.debugElement = i0.getDebugNode(this.elementRef.nativeElement);
             this.componentInstance = componentRef.instance;
             this.nativeElement = this.elementRef.nativeElement;
             this.componentRef = componentRef;
@@ -324,7 +324,7 @@
         };
         ComponentFixture.prototype._getRenderer = function () {
             if (this._renderer === undefined) {
-                this._renderer = this.componentRef.injector.get(ɵ0.RendererFactory2, null);
+                this._renderer = this.componentRef.injector.get(i0.RendererFactory2, null);
             }
             return this._renderer;
         };
@@ -772,9 +772,9 @@
          * This can be used for errors created by compileModule...
          */
         TestingCompiler.prototype.getComponentFromError = function (error) { throw unimplemented(); };
-        TestingCompiler.ngInjectableDef = ɵ0.defineInjectable({ token: TestingCompiler, factory: function TestingCompiler_Factory() { return new TestingCompiler(); }, providedIn: null });
+        TestingCompiler.ngInjectableDef = i0.defineInjectable({ token: TestingCompiler, factory: function TestingCompiler_Factory() { return new TestingCompiler(); }, providedIn: null });
         return TestingCompiler;
-    }(ɵ0.Compiler));
+    }(i0.Compiler));
     /**
      * A factory for creating a Compiler
      *
@@ -809,11 +809,11 @@
     /**
      * @experimental
      */
-    var ComponentFixtureAutoDetect = new ɵ0.InjectionToken('ComponentFixtureAutoDetect');
+    var ComponentFixtureAutoDetect = new i0.InjectionToken('ComponentFixtureAutoDetect');
     /**
      * @experimental
      */
-    var ComponentFixtureNoNgZone = new ɵ0.InjectionToken('ComponentFixtureNoNgZone');
+    var ComponentFixtureNoNgZone = new i0.InjectionToken('ComponentFixtureNoNgZone');
     /**
      * @description
      * Configures and initializes environment for unit testing and provides methods for
@@ -936,7 +936,7 @@
             return TestBed;
         };
         TestBed.get = function (token, notFoundValue) {
-            if (notFoundValue === void 0) { notFoundValue = ɵ0.Injector.THROW_IF_NOT_FOUND; }
+            if (notFoundValue === void 0) { notFoundValue = i0.Injector.THROW_IF_NOT_FOUND; }
             return getTestBed().get(token, notFoundValue);
         };
         TestBed.createComponent = function (component) {
@@ -977,7 +977,7 @@
             this._testEnvAotSummaries = function () { return []; };
         };
         TestBed.prototype.resetTestingModule = function () {
-            ɵ0.ɵclearOverrides();
+            i0.ɵclearOverrides();
             this._aotSummaries = [];
             this._templateOverrides = [];
             this._compiler = null;
@@ -1056,7 +1056,7 @@
                 catch (e) {
                     var errorCompType = this._compiler.getComponentFromError(e);
                     if (errorCompType) {
-                        throw new Error("This test module uses the component " + ɵ0.ɵstringify(errorCompType) + " which is using a \"templateUrl\" or \"styleUrls\", but they were never compiled. " +
+                        throw new Error("This test module uses the component " + i0.ɵstringify(errorCompType) + " which is using a \"templateUrl\" or \"styleUrls\", but they were never compiled. " +
                             "Please call \"TestBed.compileComponents\" before your test.");
                     }
                     else {
@@ -1068,7 +1068,7 @@
                 for (var _b = __values(this._templateOverrides), _c = _b.next(); !_c.done; _c = _b.next()) {
                     var _d = _c.value, component = _d.component, templateOf = _d.templateOf;
                     var compFactory = this._compiler.getComponentFactory(templateOf);
-                    ɵ0.ɵoverrideComponentView(component, compFactory);
+                    i0.ɵoverrideComponentView(component, compFactory);
                 }
             }
             catch (e_1_1) { e_1 = { error: e_1_1 }; }
@@ -1078,9 +1078,9 @@
                 }
                 finally { if (e_1) throw e_1.error; }
             }
-            var ngZone = new ɵ0.NgZone({ enableLongStackTrace: true });
-            var providers = [{ provide: ɵ0.NgZone, useValue: ngZone }];
-            var ngZoneInjector = ɵ0.Injector.create({
+            var ngZone = new i0.NgZone({ enableLongStackTrace: true });
+            var providers = [{ provide: i0.NgZone, useValue: ngZone }];
+            var ngZoneInjector = i0.Injector.create({
                 providers: providers,
                 parent: this.platform.injector,
                 name: this._moduleFactory.moduleType.name
@@ -1088,7 +1088,7 @@
             this._moduleRef = this._moduleFactory.create(ngZoneInjector);
             // ApplicationInitStatus.runInitializers() is marked @internal to core. So casting to any
             // before accessing it.
-            this._moduleRef.injector.get(ɵ0.ApplicationInitStatus).runInitializers();
+            this._moduleRef.injector.get(i0.ApplicationInitStatus).runInitializers();
             this._instantiated = true;
         };
         TestBed.prototype._createCompilerAndModule = function () {
@@ -1103,7 +1103,7 @@
                     function RootScopeModule() {
                     }
                     RootScopeModule = __decorate([
-                        ɵ0.NgModule({
+                        i0.NgModule({
                             providers: __spread(rootProviderOverrides),
                             jit: true,
                         })
@@ -1112,14 +1112,14 @@
                 }());
                 rootScopeImports.push(RootScopeModule);
             }
-            providers.push({ provide: ɵ0.ɵAPP_ROOT, useValue: this._isRoot });
+            providers.push({ provide: i0.ɵAPP_ROOT, useValue: this._isRoot });
             var imports = [rootScopeImports, this.ngModule, this._imports];
             var schemas = this._schemas;
             var DynamicTestModule = /** @class */ (function () {
                 function DynamicTestModule() {
                 }
                 DynamicTestModule = __decorate([
-                    ɵ0.NgModule({ providers: providers, declarations: declarations, imports: imports, schemas: schemas, jit: true })
+                    i0.NgModule({ providers: providers, declarations: declarations, imports: imports, schemas: schemas, jit: true })
                 ], DynamicTestModule);
                 return DynamicTestModule;
             }());
@@ -1151,7 +1151,7 @@
             }
         };
         TestBed.prototype.get = function (token, notFoundValue) {
-            if (notFoundValue === void 0) { notFoundValue = ɵ0.Injector.THROW_IF_NOT_FOUND; }
+            if (notFoundValue === void 0) { notFoundValue = i0.Injector.THROW_IF_NOT_FOUND; }
             this._initIfNeeded();
             if (token === TestBed) {
                 return this;
@@ -1215,10 +1215,10 @@
                 var depToken;
                 if (Array.isArray(dep)) {
                     dep.forEach(function (entry) {
-                        if (entry instanceof ɵ0.Optional) {
+                        if (entry instanceof i0.Optional) {
                             depFlags |= 2 /* Optional */;
                         }
-                        else if (entry instanceof ɵ0.SkipSelf) {
+                        else if (entry instanceof i0.SkipSelf) {
                             depFlags |= 1 /* SkipSelf */;
                         }
                         else {
@@ -1231,7 +1231,7 @@
                 }
                 return [depFlags, depToken];
             });
-            ɵ0.ɵoverrideProvider({ token: token, flags: flags, deps: deps, value: value, deprecatedBehavior: deprecated });
+            i0.ɵoverrideProvider({ token: token, flags: flags, deps: deps, value: value, deprecatedBehavior: deprecated });
         };
         TestBed.prototype.overrideTemplateUsingTestingModule = function (component, template) {
             this._assertNotInstantiated('overrideTemplateUsingTestingModule', 'override template');
@@ -1239,7 +1239,7 @@
                 function OverrideComponent() {
                 }
                 OverrideComponent = __decorate([
-                    ɵ0.Component({ selector: 'empty', template: template, jit: true })
+                    i0.Component({ selector: 'empty', template: template, jit: true })
                 ], OverrideComponent);
                 return OverrideComponent;
             }());
@@ -1250,16 +1250,16 @@
             this._initIfNeeded();
             var componentFactory = this._compiler.getComponentFactory(component);
             if (!componentFactory) {
-                throw new Error("Cannot create the component " + ɵ0.ɵstringify(component) + " as it was not imported into the testing module!");
+                throw new Error("Cannot create the component " + i0.ɵstringify(component) + " as it was not imported into the testing module!");
             }
             var noNgZone = this.get(ComponentFixtureNoNgZone, false);
             var autoDetect = this.get(ComponentFixtureAutoDetect, false);
-            var ngZone = noNgZone ? null : this.get(ɵ0.NgZone, null);
+            var ngZone = noNgZone ? null : this.get(i0.NgZone, null);
             var testComponentRenderer = this.get(TestComponentRenderer);
             var rootElId = "root" + _nextRootElementId++;
             testComponentRenderer.insertRootElement(rootElId);
             var initComponent = function () {
-                var componentRef = componentFactory.create(ɵ0.Injector.NULL, [], "#" + rootElId, _this._moduleRef);
+                var componentRef = componentFactory.create(i0.Injector.NULL, [], "#" + rootElId, _this._moduleRef);
                 return new ComponentFixture(componentRef, ngZone, autoDetect);
             };
             var fixture = !ngZone ? initComponent() : ngZone.run(initComponent);

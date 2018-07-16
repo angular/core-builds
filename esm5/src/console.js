@@ -1,4 +1,4 @@
-import * as ɵ0 from "./r3_symbols";
+import * as i0 from "./r3_symbols";
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -19,7 +19,7 @@ var Console = /** @class */ (function () {
         // tslint:disable-next-line:no-console
         console.warn(message);
     };
-    Console.ngInjectableDef = ɵ0.defineInjectable({ token: Console, factory: function Console_Factory() { return new Console(); }, providedIn: null });
+    Console.ngInjectableDef = i0.defineInjectable({ token: Console, factory: function Console_Factory() { return new Console(); }, providedIn: null });
     return Console;
 }());
 export { Console };

@@ -1,4 +1,4 @@
-import * as ɵ0 from "../r3_symbols";
+import * as i0 from "../r3_symbols";
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -69,7 +69,7 @@ var Compiler = /** @class */ (function () {
      * Returns the id for a given NgModule, if one is defined and known to the compiler.
      */
     Compiler.prototype.getModuleId = function (moduleType) { return undefined; };
-    Compiler.ngInjectableDef = ɵ0.defineInjectable({ token: Compiler, factory: function Compiler_Factory() { return new Compiler(); }, providedIn: null });
+    Compiler.ngInjectableDef = i0.defineInjectable({ token: Compiler, factory: function Compiler_Factory() { return new Compiler(); }, providedIn: null });
     return Compiler;
 }());
 export { Compiler };

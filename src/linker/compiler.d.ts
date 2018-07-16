@@ -1,4 +1,4 @@
-import * as ɵ0 from '../r3_symbols';
+import * as i0 from '../r3_symbols';
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -62,7 +62,7 @@ export declare class Compiler {
      * Returns the id for a given NgModule, if one is defined and known to the compiler.
      */
     getModuleId(moduleType: Type<any>): string | undefined;
-    static ngInjectableDef: ɵ0.InjectableDef<Compiler>;
+    static ngInjectableDef: i0.InjectableDef<Compiler>;
 }
 /**
  * Options for creating a compiler

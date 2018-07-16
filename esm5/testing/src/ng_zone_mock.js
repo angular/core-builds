@@ -1,5 +1,5 @@
 import * as tslib_1 from "tslib";
-import * as ɵ0 from "@angular/core";
+import * as i0 from "@angular/core";
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -21,7 +21,7 @@ var MockNgZone = /** @class */ (function (_super) {
     MockNgZone.prototype.run = function (fn) { return fn(); };
     MockNgZone.prototype.runOutsideAngular = function (fn) { return fn(); };
     MockNgZone.prototype.simulateZoneExit = function () { this.onStable.emit(null); };
-    MockNgZone.ngInjectableDef = ɵ0.defineInjectable({ token: MockNgZone, factory: function MockNgZone_Factory() { return new MockNgZone(); }, providedIn: null });
+    MockNgZone.ngInjectableDef = i0.defineInjectable({ token: MockNgZone, factory: function MockNgZone_Factory() { return new MockNgZone(); }, providedIn: null });
     return MockNgZone;
 }(NgZone));
 export { MockNgZone };

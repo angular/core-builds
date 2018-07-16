@@ -1,4 +1,4 @@
-import * as ɵ0 from "./r3_symbols";
+import * as i0 from "./r3_symbols";
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -265,7 +265,7 @@ export class PlatformRef {
     }
     get destroyed() { return this._destroyed; }
 }
-PlatformRef.ngInjectableDef = ɵ0.defineInjectable({ token: PlatformRef, factory: function PlatformRef_Factory() { return new PlatformRef(ɵ0.inject(Injector)); }, providedIn: null });
+PlatformRef.ngInjectableDef = i0.defineInjectable({ token: PlatformRef, factory: function PlatformRef_Factory() { return new PlatformRef(i0.inject(Injector)); }, providedIn: null });
 function getNgZone(ngZoneOption) {
     let ngZone;
     if (ngZoneOption === 'noop') {
@@ -493,7 +493,7 @@ export class ApplicationRef {
 }
 /** @internal */
 ApplicationRef._tickScope = wtfCreateScope('ApplicationRef#tick()');
-ApplicationRef.ngInjectableDef = ɵ0.defineInjectable({ token: ApplicationRef, factory: function ApplicationRef_Factory() { return new ApplicationRef(ɵ0.inject(NgZone), ɵ0.inject(Console), ɵ0.inject(Injector), ɵ0.inject(ErrorHandler), ɵ0.inject(ComponentFactoryResolver), ɵ0.inject(ApplicationInitStatus)); }, providedIn: null });
+ApplicationRef.ngInjectableDef = i0.defineInjectable({ token: ApplicationRef, factory: function ApplicationRef_Factory() { return new ApplicationRef(i0.inject(NgZone), i0.inject(Console), i0.inject(Injector), i0.inject(ErrorHandler), i0.inject(ComponentFactoryResolver), i0.inject(ApplicationInitStatus)); }, providedIn: null });
 function remove(list, el) {
     const index = list.indexOf(el);
     if (index > -1) {
