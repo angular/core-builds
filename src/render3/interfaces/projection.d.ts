@@ -5,14 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { LContainerNode, LElementNode, LTextNode } from './node';
-/**
- * Linked list of projected nodes (using the pNextOrParent property).
- */
-export interface LProjection {
-    head: LElementNode | LTextNode | LContainerNode | null;
-    tail: LElementNode | LTextNode | LContainerNode | null;
-}
 /**
  * Expresses a single CSS Selector.
  *
