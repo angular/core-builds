@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.3+119.sha-06a3398
+ * @license Angular v6.1.0-beta.3+120.sha-0b28732
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -12187,7 +12187,7 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * Type of the Component metadata.
+     * Type of the Directive metadata.
      */
     var Directive = makeDecorator('Directive', function (dir) {
         if (dir === void 0) { dir = {}; }
@@ -12415,7 +12415,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('6.1.0-beta.3+119.sha-06a3398');
+    var VERSION = new Version('6.1.0-beta.3+120.sha-0b28732');
 
     /**
      * @license
