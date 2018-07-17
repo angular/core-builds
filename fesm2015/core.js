@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.9+11.sha-e97d961
+ * @license Angular v6.0.9+12.sha-0cbef9a
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -440,7 +440,7 @@ function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
  * @suppress {checkTypes} checked by tsc
  */
 /**
- * Type of the Component metadata.
+ * Type of the Directive metadata.
  */
 const /** @type {?} */ Directive = makeDecorator('Directive', (dir = {}) => dir);
 /**
@@ -1791,7 +1791,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const /** @type {?} */ VERSION = new Version('6.0.9+11.sha-e97d961');
+const /** @type {?} */ VERSION = new Version('6.0.9+12.sha-0cbef9a');
 
 /**
  * @fileoverview added by tsickle
