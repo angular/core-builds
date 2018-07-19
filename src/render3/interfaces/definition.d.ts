@@ -255,6 +255,5 @@ export declare type PipeTypesOrFactory = (() => DirectiveTypeList) | DirectiveTy
 export declare type PipeTypeList = (PipeDefInternal<any> | Type<any>)[];
 export declare const unusedValueExportToPlacateAjd = 1;
 export declare const enum InitialStylingFlags {
-    /** Mode for matching initial style values */
-    INITIAL_STYLES = 0
+    VALUES_MODE = 1
 }
