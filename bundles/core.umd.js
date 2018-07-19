@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.3+117.sha-c8ad965
+ * @license Angular v6.1.0-beta.3+122.sha-d76531d
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1176,6 +1176,7 @@
     function assertComponentType(actual, msg) {
         if (msg === void 0) { msg = 'Type passed in is not ComponentType, it does not have \'ngComponentDef\' property.'; }
         if (!actual.ngComponentDef) {
+            debugger;
             throwError(msg);
         }
     }
@@ -1527,6 +1528,26 @@
         }
         return result;
     }
+    /** Retrieves a value from any `LViewData`. */
+    function loadInternal(index, arr) {
+        ngDevMode && assertDataInRangeInternal(index + HEADER_OFFSET, arr);
+        return arr[index + HEADER_OFFSET];
+    }
+    function assertDataInRangeInternal(index, arr) {
+        assertLessThan(index, arr ? arr.length : 0, 'index expected to be a valid data index');
+    }
+    /** Retrieves an element value from the provided `viewData`.
+      *
+      * Elements that are read may be wrapped in a style context,
+      * therefore reading the value may involve unwrapping that.
+      */
+    function loadElementInternal(index, arr) {
+        var value = loadInternal(index, arr);
+        return readElementValue(value);
+    }
+    function readElementValue(value) {
+        return (Array.isArray(value) ? value[0] : value);
+    }
 
     /**
      * @license
@@ -1548,7 +1569,7 @@
     function getChildLNode(node) {
         if (node.tNode.child) {
             var viewData = node.tNode.type === 2 /* View */ ? node.data : node.view;
-            return viewData[node.tNode.child.index];
+            return readElementValue(viewData[node.tNode.child.index]);
         }
         return null;
     }
@@ -1560,7 +1581,7 @@
             return containerHostIndex === -1 ? null : node.view[containerHostIndex].dynamicLContainerNode;
         }
         var parent = node.tNode.parent;
-        return parent ? node.view[parent.index] : node.view[HOST_NODE];
+        return readElementValue(parent ? node.view[parent.index] : node.view[HOST_NODE]);
     }
     /**
      * Stack used to keep track of projection nodes in walkLNodeTree.
@@ -1909,7 +1930,7 @@
             for (var i = 0; i < cleanup.length - 1; i += 2) {
                 if (typeof cleanup[i] === 'string') {
                     // This is a listener with the native renderer
-                    var native = viewData[cleanup[i + 1]].native;
+                    var native = readElementValue(viewData[cleanup[i + 1]]).native;
                     var listener = viewData[CLEANUP][cleanup[i + 2]];
                     native.removeEventListener(cleanup[i], listener, cleanup[i + 3]);
                     i += 2;
@@ -2264,9 +2285,11 @@
      * A pre-computed template is designed to be computed once for a given element
      * (instructions.ts has logic for caching this).
      */
-    function allocStylingContext(templateStyleContext) {
+    function allocStylingContext(lElement, templateStyleContext) {
         // each instance gets a copy
-        return templateStyleContext.slice();
+        var context = templateStyleContext.slice();
+        context[0 /* ElementPosition */] = lElement;
+        return context;
     }
     /**
      * Creates a styling context template where styling information is stored.
@@ -2282,142 +2305,230 @@
      *    -> ['width', 'height', SPECIAL_ENUM_VAL, 'width', '100px']
      *       This implies that `width` and `height` will be later styled and that the `width`
      *       property has an initial value of `100px`.
+     *
+     * @param initialClassDeclarations a list of class declarations and initial class values
+     *    that are used later within the styling context.
+     *
+     *    -> ['foo', 'bar', SPECIAL_ENUM_VAL, 'foo', true]
+     *       This implies that `foo` and `bar` will be later styled and that the `foo`
+     *       class will be applied to the element as an initial class since it's true
      */
-    function createStylingContextTemplate(initialStyleDeclarations) {
-        var initialStyles = [null];
-        var context = [initialStyles, 0];
-        var indexLookup = {};
+    function createStylingContextTemplate(initialStyleDeclarations, initialClassDeclarations) {
+        var initialStylingValues = [null];
+        var context = [null, initialStylingValues, 0, 0, null];
+        // we use two maps since a class name might collide with a CSS style prop
+        var stylesLookup = {};
+        var classesLookup = {};
+        var totalStyleDeclarations = 0;
         if (initialStyleDeclarations) {
             var hasPassedDeclarations = false;
             for (var i = 0; i < initialStyleDeclarations.length; i++) {
                 var v = initialStyleDeclarations[i];
                 // this flag value marks where the declarations end the initial values begin
-                if (v === 0 /* INITIAL_STYLES */) {
+                if (v === 1 /* VALUES_MODE */) {
                     hasPassedDeclarations = true;
                 }
                 else {
                     var prop = v;
                     if (hasPassedDeclarations) {
                         var value = initialStyleDeclarations[++i];
-                        initialStyles.push(value);
-                        indexLookup[prop] = initialStyles.length - 1;
+                        initialStylingValues.push(value);
+                        stylesLookup[prop] = initialStylingValues.length - 1;
                     }
                     else {
-                        // it's safe to use `0` since the default initial value for
-                        // each property will always be null (which is at position 0)
-                        indexLookup[prop] = 0;
+                        totalStyleDeclarations++;
+                        stylesLookup[prop] = 0;
                     }
                 }
             }
         }
-        var allProps = Object.keys(indexLookup);
-        var totalProps = allProps.length;
+        // make where the class offsets begin
+        context[3 /* ClassOffsetPosition */] = totalStyleDeclarations;
+        if (initialClassDeclarations) {
+            var hasPassedDeclarations = false;
+            for (var i = 0; i < initialClassDeclarations.length; i++) {
+                var v = initialClassDeclarations[i];
+                // this flag value marks where the declarations end the initial values begin
+                if (v === 1 /* VALUES_MODE */) {
+                    hasPassedDeclarations = true;
+                }
+                else {
+                    var className = v;
+                    if (hasPassedDeclarations) {
+                        var value = initialClassDeclarations[++i];
+                        initialStylingValues.push(value);
+                        classesLookup[className] = initialStylingValues.length - 1;
+                    }
+                    else {
+                        classesLookup[className] = 0;
+                    }
+                }
+            }
+        }
+        var styleProps = Object.keys(stylesLookup);
+        var classNames = Object.keys(classesLookup);
+        var classNamesIndexStart = styleProps.length;
+        var totalProps = styleProps.length + classNames.length;
         // *2 because we are filling for both single and multi style spaces
-        var maxLength = totalProps * 3 /* Size */ * 2 + 2 /* SingleStylesStartPosition */;
+        var maxLength = totalProps * 3 /* Size */ * 2 + 5 /* SingleStylesStartPosition */;
         // we need to fill the array from the start so that we can access
         // both the multi and the single array positions in the same loop block
-        for (var i = 2 /* SingleStylesStartPosition */; i < maxLength; i++) {
+        for (var i = 5 /* SingleStylesStartPosition */; i < maxLength; i++) {
             context.push(null);
         }
-        var singleStart = 2 /* SingleStylesStartPosition */;
-        var multiStart = totalProps * 3 /* Size */ + 2 /* SingleStylesStartPosition */;
+        var singleStart = 5 /* SingleStylesStartPosition */;
+        var multiStart = totalProps * 3 /* Size */ + 5 /* SingleStylesStartPosition */;
         // fill single and multi-level styles
-        for (var i = 0; i < allProps.length; i++) {
-            var prop = allProps[i];
-            var indexForInitial = indexLookup[prop];
+        for (var i = 0; i < totalProps; i++) {
+            var isClassBased_1 = i >= classNamesIndexStart;
+            var prop = isClassBased_1 ? classNames[i - classNamesIndexStart] : styleProps[i];
+            var indexForInitial = isClassBased_1 ? classesLookup[prop] : stylesLookup[prop];
+            var initialValue = initialStylingValues[indexForInitial];
             var indexForMulti = i * 3 /* Size */ + multiStart;
             var indexForSingle = i * 3 /* Size */ + singleStart;
-            setFlag(context, indexForSingle, pointers(0 /* None */, indexForInitial, indexForMulti));
+            var initialFlag = isClassBased_1 ? 2 /* Class */ : 0 /* None */;
+            setFlag(context, indexForSingle, pointers(initialFlag, indexForInitial, indexForMulti));
             setProp(context, indexForSingle, prop);
             setValue(context, indexForSingle, null);
-            setFlag(context, indexForMulti, pointers(1 /* Dirty */, indexForInitial, indexForSingle));
+            var flagForMulti = initialFlag | (initialValue !== null ? 1 /* Dirty */ : 0 /* None */);
+            setFlag(context, indexForMulti, pointers(flagForMulti, indexForInitial, indexForSingle));
             setProp(context, indexForMulti, prop);
             setValue(context, indexForMulti, null);
         }
-        // there is no initial value flag for the master index since it doesn't reference an initial style
-        // value
-        setFlag(context, 1 /* MasterFlagPosition */, pointers(0, 0, multiStart));
-        setContextDirty(context, initialStyles.length > 1);
+        // there is no initial value flag for the master index since it doesn't
+        // reference an initial style value
+        setFlag(context, 2 /* MasterFlagPosition */, pointers(0, 0, multiStart));
+        setContextDirty(context, initialStylingValues.length > 1);
         return context;
     }
     var EMPTY_ARR = [];
+    var EMPTY_OBJ = {};
     /**
-     * Sets and resolves all `multi` styles on an `StylingContext` so that they can be
-     * applied to the element once `renderStyles` is called.
+     * Sets and resolves all `multi` styling on an `StylingContext` so that they can be
+     * applied to the element once `renderStyling` is called.
      *
-     * All missing styles (any values that are not provided in the new `styles` param)
-     * will resolve to `null` within their respective positions in the context.
+     * All missing styles/class (any values that are not provided in the new `styles`
+     * or `classes` params) will resolve to `null` within their respective positions
+     * in the context.
      *
      * @param context The styling context that will be updated with the
      *    newly provided style values.
      * @param styles The key/value map of CSS styles that will be used for the update.
+     * @param classes The key/value map of CSS class names that will be used for the update.
      */
-    function updateStyleMap(context, styles) {
-        var propsToApply = styles ? Object.keys(styles) : EMPTY_ARR;
+    function updateStylingMap(context, styles, classes) {
+        var classNames = EMPTY_ARR;
+        var applyAllClasses = false;
+        var ignoreAllClassUpdates = false;
+        // each time a string-based value pops up then it shouldn't require a deep
+        // check of what's changed.
+        if (typeof classes == 'string') {
+            var cachedClassString = context[4 /* CachedCssClassString */];
+            if (cachedClassString && cachedClassString === classes) {
+                ignoreAllClassUpdates = true;
+            }
+            else {
+                context[4 /* CachedCssClassString */] = classes;
+                classNames = classes.split(/\s+/);
+                // this boolean is used to avoid having to create a key/value map of `true` values
+                // since a classname string implies that all those classes are added
+                applyAllClasses = true;
+            }
+        }
+        else {
+            classNames = classes ? Object.keys(classes) : EMPTY_ARR;
+            context[4 /* CachedCssClassString */] = null;
+        }
+        classes = (classes || EMPTY_OBJ);
+        var styleProps = styles ? Object.keys(styles) : EMPTY_ARR;
+        styles = styles || EMPTY_OBJ;
+        var classesStartIndex = styleProps.length;
         var multiStartIndex = getMultiStartIndex(context);
         var dirty = false;
         var ctxIndex = multiStartIndex;
         var propIndex = 0;
+        var propLimit = styleProps.length + classNames.length;
         // the main loop here will try and figure out how the shape of the provided
-        // styles differ with respect to the context. Later if the context/styles are
-        // off-balance then they will be dealt in another loop after this one
-        while (ctxIndex < context.length && propIndex < propsToApply.length) {
-            var flag = getPointers(context, ctxIndex);
-            var prop = getProp(context, ctxIndex);
-            var value = getValue(context, ctxIndex);
-            var newProp = propsToApply[propIndex];
-            var newValue = styles[newProp];
-            if (prop === newProp) {
-                if (value !== newValue) {
-                    setValue(context, ctxIndex, newValue);
-                    var initialValue = getInitialValue(context, flag);
-                    // there is no point in setting this to dirty if the previously
-                    // rendered value was being referenced by the initial style (or null)
-                    if (initialValue !== newValue) {
-                        setDirty(context, ctxIndex, true);
-                        dirty = true;
-                    }
-                }
-            }
-            else {
-                var indexOfEntry = findEntryPositionByProp(context, newProp, ctxIndex);
-                if (indexOfEntry > 0) {
-                    // it was found at a later point ... just swap the values
-                    swapMultiContextEntries(context, ctxIndex, indexOfEntry);
+        // styles differ with respect to the context. Later if the context/styles/classes
+        // are off-balance then they will be dealt in another loop after this one
+        while (ctxIndex < context.length && propIndex < propLimit) {
+            var isClassBased_2 = propIndex >= classesStartIndex;
+            // when there is a cache-hit for a string-based class then we should
+            // avoid doing any work diffing any of the changes
+            if (!ignoreAllClassUpdates || !isClassBased_2) {
+                var adjustedPropIndex = isClassBased_2 ? propIndex - classesStartIndex : propIndex;
+                var newProp = isClassBased_2 ? classNames[adjustedPropIndex] : styleProps[adjustedPropIndex];
+                var newValue = isClassBased_2 ? (applyAllClasses ? true : classes[newProp]) : styles[newProp];
+                var prop = getProp(context, ctxIndex);
+                if (prop === newProp) {
+                    var value = getValue(context, ctxIndex);
                     if (value !== newValue) {
                         setValue(context, ctxIndex, newValue);
-                        dirty = true;
+                        var flag = getPointers(context, ctxIndex);
+                        var initialValue = getInitialValue(context, flag);
+                        // there is no point in setting this to dirty if the previously
+                        // rendered value was being referenced by the initial style (or null)
+                        if (initialValue !== newValue) {
+                            setDirty(context, ctxIndex, true);
+                            dirty = true;
+                        }
                     }
                 }
                 else {
-                    // we only care to do this if the insertion is in the middle
-                    var doShift = ctxIndex < context.length;
-                    insertNewMultiProperty(context, ctxIndex, newProp, newValue);
-                    dirty = true;
+                    var indexOfEntry = findEntryPositionByProp(context, newProp, ctxIndex);
+                    if (indexOfEntry > 0) {
+                        // it was found at a later point ... just swap the values
+                        var valueToCompare = getValue(context, indexOfEntry);
+                        var flagToCompare = getPointers(context, indexOfEntry);
+                        swapMultiContextEntries(context, ctxIndex, indexOfEntry);
+                        if (valueToCompare !== newValue) {
+                            var initialValue = getInitialValue(context, flagToCompare);
+                            setValue(context, ctxIndex, newValue);
+                            if (initialValue !== newValue) {
+                                setDirty(context, ctxIndex, true);
+                                dirty = true;
+                            }
+                        }
+                    }
+                    else {
+                        // we only care to do this if the insertion is in the middle
+                        insertNewMultiProperty(context, ctxIndex, isClassBased_2, newProp, newValue);
+                        dirty = true;
+                    }
                 }
             }
             ctxIndex += 3 /* Size */;
             propIndex++;
         }
         // this means that there are left-over values in the context that
-        // were not included in the provided styles and in this case the
-        // goal is to "remove" them from the context (by nullifying)
+        // were not included in the provided styles/classes and in this
+        // case the  goal is to "remove" them from the context (by nullifying)
         while (ctxIndex < context.length) {
-            var value = context[ctxIndex + 2 /* ValueOffset */];
-            if (value !== null) {
+            var flag = getPointers(context, ctxIndex);
+            var isClassBased_3 = (flag & 2 /* Class */) === 2 /* Class */;
+            if (ignoreAllClassUpdates && isClassBased_3)
+                break;
+            var value = getValue(context, ctxIndex);
+            var doRemoveValue = valueExists(value, isClassBased_3);
+            if (doRemoveValue) {
                 setDirty(context, ctxIndex, true);
                 setValue(context, ctxIndex, null);
                 dirty = true;
             }
             ctxIndex += 3 /* Size */;
         }
-        // this means that there are left-over property in the context that
+        // this means that there are left-over properties in the context that
         // were not detected in the context during the loop above. In that
         // case we want to add the new entries into the list
-        while (propIndex < propsToApply.length) {
-            var prop = propsToApply[propIndex];
-            var value = styles[prop];
-            context.push(1 /* Dirty */, prop, value);
+        while (propIndex < propLimit) {
+            var isClassBased_4 = propIndex >= classesStartIndex;
+            if (ignoreAllClassUpdates && isClassBased_4)
+                break;
+            var adjustedPropIndex = isClassBased_4 ? propIndex - classesStartIndex : propIndex;
+            var prop = isClassBased_4 ? classNames[adjustedPropIndex] : styleProps[adjustedPropIndex];
+            var value = isClassBased_4 ? (applyAllClasses ? true : classes[prop]) : styles[prop];
+            var flag = 1 /* Dirty */ | (isClassBased_4 ? 2 /* Class */ : 0 /* None */);
+            context.push(flag, prop, value);
             propIndex++;
             dirty = true;
         }
@@ -2426,13 +2537,13 @@
         }
     }
     /**
-     * Sets and resolves a single CSS style on a property on an `StylingContext` so that they
-     * can be applied to the element once `renderElementStyles` is called.
+     * Sets and resolves a single styling property/value on the provided `StylingContext` so
+     * that they can be applied to the element once `renderStyling` is called.
      *
-     * Note that prop-level styles are considered higher priority than styles that are applied
-     * using `updateStyleMap`, therefore, when styles are rendered then any styles that
-     * have been applied using this function will be considered first (then multi values second
-     * and then initial values as a backup).
+     * Note that prop-level styling values are considered higher priority than any styling that
+     * has been applied using `updateStylingMap`, therefore, when styling values are rendered
+     * then any styles/classes that have been applied using this function will be considered first
+     * (then multi values second and then initial values as a backup).
      *
      * @param context The styling context that will be updated with the
      *    newly provided style value.
@@ -2440,7 +2551,7 @@
      * @param value The CSS style value that will be assigned
      */
     function updateStyleProp(context, index, value) {
-        var singleIndex = 2 /* SingleStylesStartPosition */ + index * 3 /* Size */;
+        var singleIndex = 5 /* SingleStylesStartPosition */ + index * 3 /* Size */;
         var currValue = getValue(context, singleIndex);
         var currFlag = getPointers(context, singleIndex);
         // didn't change ... nothing to make a note of
@@ -2453,8 +2564,9 @@
             if (!valueForMulti || valueForMulti !== value) {
                 var multiDirty = false;
                 var singleDirty = true;
+                var isClassBased_5 = (currFlag & 2 /* Class */) === 2 /* Class */;
                 // only when the value is set to `null` should the multi-value get flagged
-                if (value == null && valueForMulti) {
+                if (!valueExists(value, isClassBased_5) && valueExists(valueForMulti, isClassBased_5)) {
                     multiDirty = true;
                     singleDirty = false;
                 }
@@ -2465,12 +2577,26 @@
         }
     }
     /**
-     * Renders all queued styles using a renderer onto the given element.
+     * This method will toggle the referenced CSS class (by the provided index)
+     * within the given context.
+     *
+     * @param context The styling context that will be updated with the
+     *    newly provided class value.
+     * @param index The index of the CSS class which is being updated.
+     * @param addOrRemove Whether or not to add or remove the CSS class
+     */
+    function updateClassProp(context, index, addOrRemove) {
+        var adjustedIndex = index + context[3 /* ClassOffsetPosition */];
+        updateStyleProp(context, adjustedIndex, addOrRemove);
+    }
+    /**
+     * Renders all queued styling using a renderer onto the given element.
      *
      * This function works by rendering any styles (that have been applied
-     * using `updateStyleMap` and `updateStyleProp`) onto the
-     * provided element using the provided renderer. Just before the styles
-     * are rendered a final key/value style map will be assembled.
+     * using `updateStylingMap`) and any classes (that have been applied using
+     * `updateStyleProp`) onto the provided element using the provided renderer.
+     * Just before the styles/classes are rendered a final key/value style map
+     * will be assembled (if `styleStore` or `classStore` are provided).
      *
      * @param lElement the element that the styles will be rendered on
      * @param context The styling context that will be used to determine
@@ -2478,35 +2604,45 @@
      * @param renderer the renderer that will be used to apply the styling
      * @param styleStore if provided, the updated style values will be applied
      *    to this key/value map instead of being renderered via the renderer.
-     * @returns an object literal. `{ color: 'red', height: 'auto'}`.
+     * @param classStore if provided, the updated class values will be applied
+     *    to this key/value map instead of being renderered via the renderer.
      */
-    function renderStyles(lElement, context, renderer, styleStore) {
+    function renderStyling(context, renderer, styleStore, classStore) {
         if (isContextDirty(context)) {
-            var native = lElement.native;
+            var native = context[0 /* ElementPosition */].native;
             var multiStartIndex = getMultiStartIndex(context);
-            for (var i = 2 /* SingleStylesStartPosition */; i < context.length; i += 3 /* Size */) {
+            for (var i = 5 /* SingleStylesStartPosition */; i < context.length; i += 3 /* Size */) {
                 // there is no point in rendering styles that have not changed on screen
                 if (isDirty(context, i)) {
                     var prop = getProp(context, i);
                     var value = getValue(context, i);
                     var flag = getPointers(context, i);
+                    var isClassBased_6 = flag & 2 /* Class */ ? true : false;
                     var isInSingleRegion = i < multiStartIndex;
-                    var styleToApply = value;
-                    // STYLE DEFER CASE 1: Use a multi value instead of a null single value
+                    var valueToApply = value;
+                    // VALUE DEFER CASE 1: Use a multi value instead of a null single value
                     // this check implies that a single value was removed and we
                     // should now defer to a multi value and use that (if set).
-                    if (isInSingleRegion && styleToApply == null) {
+                    if (isInSingleRegion && !valueExists(valueToApply, isClassBased_6)) {
                         // single values ALWAYS have a reference to a multi index
                         var multiIndex = getMultiOrSingleIndex(flag);
-                        styleToApply = getValue(context, multiIndex);
+                        valueToApply = getValue(context, multiIndex);
                     }
-                    // STYLE DEFER CASE 2: Use the initial value if all else fails (is null)
+                    // VALUE DEFER CASE 2: Use the initial value if all else fails (is falsy)
                     // the initial value will always be a string or null,
                     // therefore we can safely adopt it incase there's nothing else
-                    if (styleToApply == null) {
-                        styleToApply = getInitialValue(context, flag);
+                    // note that this should always be a falsy check since `false` is used
+                    // for both class and style comparisons (styles can't be false and false
+                    // classes are turned off and should therefore defer to their initial values)
+                    if (!valueExists(valueToApply, isClassBased_6)) {
+                        valueToApply = getInitialValue(context, flag);
                     }
-                    setStyle(native, prop, styleToApply, renderer, styleStore);
+                    if (isClassBased_6) {
+                        setClass(native, prop, valueToApply ? true : false, renderer, classStore);
+                    }
+                    else {
+                        setStyle(native, prop, valueToApply, renderer, styleStore);
+                    }
                     setDirty(context, i, false);
                 }
             }
@@ -2515,7 +2651,7 @@
     }
     /**
      * This function renders a given CSS prop/value entry using the
-     * provided renderer. If a `styleStore` value is provided then
+     * provided renderer. If a `store` value is provided then
      * that will be used a render context instead of the provided
      * renderer.
      *
@@ -2523,27 +2659,54 @@
      * @param prop the CSS style property that will be rendered
      * @param value the CSS style value that will be rendered
      * @param renderer
-     * @param styleStore an optional key/value map that will be used as a context to render styles on
+     * @param store an optional key/value map that will be used as a context to render styles on
      */
-    function setStyle(native, prop, value, renderer, styleStore) {
-        if (styleStore) {
-            styleStore[prop] = value;
+    function setStyle(native, prop, value, renderer, store) {
+        if (store) {
+            store[prop] = value;
         }
-        else if (value == null) {
-            ngDevMode && ngDevMode.rendererRemoveStyle++;
-            isProceduralRenderer(renderer) ?
-                renderer.removeStyle(native, prop, RendererStyleFlags3.DashCase) :
-                native['style'].removeProperty(prop);
-        }
-        else {
+        else if (value) {
             ngDevMode && ngDevMode.rendererSetStyle++;
             isProceduralRenderer(renderer) ?
                 renderer.setStyle(native, prop, value, RendererStyleFlags3.DashCase) :
                 native['style'].setProperty(prop, value);
         }
+        else {
+            ngDevMode && ngDevMode.rendererRemoveStyle++;
+            isProceduralRenderer(renderer) ?
+                renderer.removeStyle(native, prop, RendererStyleFlags3.DashCase) :
+                native['style'].removeProperty(prop);
+        }
+    }
+    /**
+     * This function renders a given CSS class value using the provided
+     * renderer (by adding or removing it from the provided element).
+     * If a `store` value is provided then that will be used a render
+     * context instead of the provided renderer.
+     *
+     * @param native the DOM Element
+     * @param prop the CSS style property that will be rendered
+     * @param value the CSS style value that will be rendered
+     * @param renderer
+     * @param store an optional key/value map that will be used as a context to render styles on
+     */
+    function setClass(native, className, add, renderer, store) {
+        if (store) {
+            store[className] = add;
+        }
+        else if (add) {
+            ngDevMode && ngDevMode.rendererAddClass++;
+            isProceduralRenderer(renderer) ? renderer.addClass(native, className) :
+                native['classList'].add(className);
+        }
+        else {
+            ngDevMode && ngDevMode.rendererRemoveClass++;
+            isProceduralRenderer(renderer) ? renderer.removeClass(native, className) :
+                native['classList'].remove(className);
+        }
     }
     function setDirty(context, index, isDirtyYes) {
-        var adjustedIndex = index >= 2 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
+        var adjustedIndex = index >= 5 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
         if (isDirtyYes) {
             context[adjustedIndex] |= 1 /* Dirty */;
         }
@@ -2552,26 +2715,30 @@
         }
     }
     function isDirty(context, index) {
-        var adjustedIndex = index >= 2 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
+        var adjustedIndex = index >= 5 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
         return (context[adjustedIndex] & 1 /* Dirty */) == 1 /* Dirty */;
     }
+    function isClassBased(context, index) {
+        var adjustedIndex = index >= 5 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
+        return (context[adjustedIndex] & 2 /* Class */) == 2 /* Class */;
+    }
     function pointers(configFlag, staticIndex, dynamicIndex) {
-        return (configFlag & 1 /* Dirty */) | (staticIndex << 1 /* BitCountSize */) |
-            (dynamicIndex << (15 /* BitCountSize */ + 1 /* BitCountSize */));
+        return (configFlag & 3 /* BitMask */) | (staticIndex << 2 /* BitCountSize */) |
+            (dynamicIndex << (15 /* BitCountSize */ + 2 /* BitCountSize */));
     }
     function getInitialValue(context, flag) {
         var index = getInitialIndex(flag);
-        return context[0 /* InitialStylesPosition */][index];
+        return context[1 /* InitialStylesPosition */][index];
     }
     function getInitialIndex(flag) {
-        return (flag >> 1 /* BitCountSize */) & 32767 /* BitMask */;
+        return (flag >> 2 /* BitCountSize */) & 32767 /* BitMask */;
     }
     function getMultiOrSingleIndex(flag) {
-        var index = (flag >> (15 /* BitCountSize */ + 1 /* BitCountSize */)) & 32767 /* BitMask */;
-        return index >= 2 /* SingleStylesStartPosition */ ? index : -1;
+        var index = (flag >> (15 /* BitCountSize */ + 2 /* BitCountSize */)) & 32767 /* BitMask */;
+        return index >= 5 /* SingleStylesStartPosition */ ? index : -1;
     }
     function getMultiStartIndex(context) {
-        return getMultiOrSingleIndex(context[1 /* MasterFlagPosition */]);
+        return getMultiOrSingleIndex(context[2 /* MasterFlagPosition */]);
     }
     function setProp(context, index, prop) {
         context[index + 1 /* PropertyOffset */] = prop;
@@ -2580,11 +2747,11 @@
         context[index + 2 /* ValueOffset */] = value;
     }
     function setFlag(context, index, flag) {
-        var adjustedIndex = index === 1 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
+        var adjustedIndex = index === 2 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
         context[adjustedIndex] = flag;
     }
     function getPointers(context, index) {
-        var adjustedIndex = index === 1 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
+        var adjustedIndex = index === 2 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
         return context[adjustedIndex];
     }
     function getValue(context, index) {
@@ -2594,10 +2761,10 @@
         return context[index + 1 /* PropertyOffset */];
     }
     function isContextDirty(context) {
-        return isDirty(context, 1 /* MasterFlagPosition */);
+        return isDirty(context, 2 /* MasterFlagPosition */);
     }
     function setContextDirty(context, isDirtyYes) {
-        setDirty(context, 1 /* MasterFlagPosition */, isDirtyYes);
+        setDirty(context, 2 /* MasterFlagPosition */, isDirtyYes);
     }
     function findEntryPositionByProp(context, prop, startIndex) {
         for (var i = (startIndex || 0) + 1 /* PropertyOffset */; i < context.length; i += 3 /* Size */) {
@@ -2640,21 +2807,29 @@
             if (singleIndex > 0) {
                 var singleFlag = getPointers(context, singleIndex);
                 var initialIndexForSingle = getInitialIndex(singleFlag);
-                var updatedFlag = pointers(isDirty(context, singleIndex) ? 1 /* Dirty */ : 0 /* None */, initialIndexForSingle, i);
+                var flagValue = (isDirty(context, singleIndex) ? 1 /* Dirty */ : 0 /* None */) |
+                    (isClassBased(context, singleIndex) ? 2 /* Class */ : 0 /* None */);
+                var updatedFlag = pointers(flagValue, initialIndexForSingle, i);
                 setFlag(context, singleIndex, updatedFlag);
             }
         }
     }
-    function insertNewMultiProperty(context, index, name, value) {
+    function insertNewMultiProperty(context, index, classBased, name, value) {
         var doShift = index < context.length;
         // prop does not exist in the list, add it in
-        context.splice(index, 0, 1 /* Dirty */, name, value);
+        context.splice(index, 0, 1 /* Dirty */ | (classBased ? 2 /* Class */ : 0 /* None */), name, value);
         if (doShift) {
             // because the value was inserted midway into the array then we
             // need to update all the shifted multi values' single value
             // pointers to point to the newly shifted location
             updateSinglePointerValues(context, index + 3 /* Size */);
         }
+    }
+    function valueExists(value, isClassBased) {
+        if (isClassBased) {
+            return value ? true : false;
+        }
+        return value !== null;
     }
 
     /**
@@ -2719,6 +2894,7 @@
      */
     var renderer;
     var rendererFactory;
+    var currentElementNode = null;
     function getRenderer() {
         // top level variables should not be exported for performance reasons (PERF_NOTES.md)
         return renderer;
@@ -3153,6 +3329,7 @@
         }
         ngDevMode && assertDataInRange(index - 1);
         var node = createLNode(index, 3 /* Element */, native, name, attrs || null, null);
+        currentElementNode = node;
         if (attrs) {
             setUpAttributes(native, attrs);
         }
@@ -3544,6 +3721,7 @@
         var queries = previousOrParentNode.queries;
         queries && queries.addNode(previousOrParentNode);
         queueLifecycleHooks(previousOrParentNode.tNode.flags, tView);
+        currentElementNode = null;
     }
     /**
      * Updates the value of removes an attribute on an Element.
@@ -3556,7 +3734,7 @@
      */
     function elementAttribute(index, name, value, sanitizer) {
         if (value !== NO_CHANGE) {
-            var element_1 = load(index);
+            var element_1 = loadElement(index);
             if (value == null) {
                 ngDevMode && ngDevMode.rendererRemoveAttribute++;
                 isProceduralRenderer(renderer) ? renderer.removeAttribute(element_1.native, name) :
@@ -3586,7 +3764,7 @@
     function elementProperty(index, propName, value, sanitizer) {
         if (value === NO_CHANGE)
             return;
-        var node = load(index);
+        var node = loadElement(index);
         var tNode = node.tNode;
         // if tNode.inputs is undefined, a listener has created outputs, but inputs haven't
         // yet been checked
@@ -3695,43 +3873,8 @@
      *        renaming as part of minification.
      * @param value A value indicating if a given class should be added or removed.
      */
-    function elementClassNamed(index, className, value) {
-        if (value !== NO_CHANGE) {
-            var lElement = load(index);
-            if (value) {
-                ngDevMode && ngDevMode.rendererAddClass++;
-                isProceduralRenderer(renderer) ? renderer.addClass(lElement.native, className) :
-                    lElement.native.classList.add(className);
-            }
-            else {
-                ngDevMode && ngDevMode.rendererRemoveClass++;
-                isProceduralRenderer(renderer) ? renderer.removeClass(lElement.native, className) :
-                    lElement.native.classList.remove(className);
-            }
-        }
-    }
-    /**
-     * Set the `className` property on a DOM element.
-     *
-     * This instruction is meant to handle the `[class]="exp"` usage.
-     *
-     * `elementClass` instruction writes the value to the "element's" `className` property.
-     *
-     * @param index The index of the element to update in the data array
-     * @param value A value indicating a set of classes which should be applied. The method overrides
-     *   any existing classes. The value is stringified (`toString`) before it is applied to the
-     *   element.
-     */
-    function elementClass(index, value) {
-        if (value !== NO_CHANGE) {
-            // TODO: This is a naive implementation which simply writes value to the `className`. In the
-            // future
-            // we will add logic here which would work with the animation code.
-            var lElement = load(index);
-            ngDevMode && ngDevMode.rendererSetClassName++;
-            isProceduralRenderer(renderer) ? renderer.setProperty(lElement.native, 'className', value) :
-                lElement.native['className'] = stringify$1(value);
-        }
+    function elementClassProp(index, stylingIndex, value) {
+        updateClassProp(getStylingContext(index), stylingIndex, value ? true : false);
     }
     /**
      * Assign any inline style values to the element during creation mode.
@@ -3748,22 +3891,27 @@
      *        (Note that this is not the element index, but rather an index value allocated
      *        specifically for element styling--the index must be the next index after the element
      *        index.)
-     * @param styles A key/value map of CSS styles that will be registered on the element.
+     * @param styleDeclarations A key/value array of CSS styles that will be registered on the element.
      *   Each individual style will be used on the element as long as it is not overridden
      *   by any styles placed on the element by multiple (`[style]`) or singular (`[style.prop]`)
      *   bindings. If a style binding changes its value to null then the initial styling
      *   values that are passed in here will be applied to the element (if matched).
+     * @param classDeclarations A key/value array of CSS classes that will be registered on the element.
+     *   Each individual style will be used on the element as long as it is not overridden
+     *   by any classes placed on the element by multiple (`[class]`) or singular (`[class.named]`)
+     *   bindings. If a class binding changes its value to a falsy value then the matching initial
+     *   class value that are passed in here will be applied to the element (if matched).
      */
-    function elementStyling(index, styles) {
-        var tNode = load(index - 1).tNode;
+    function elementStyling(styleDeclarations, classDeclarations) {
+        var lElement = currentElementNode;
+        var tNode = lElement.tNode;
         if (!tNode.stylingTemplate) {
             // initialize the styling template.
-            tNode.stylingTemplate = createStylingContextTemplate(styles);
+            tNode.stylingTemplate = createStylingContextTemplate(styleDeclarations, classDeclarations);
         }
-        // Allocate space but leave null for lazy creation.
-        viewData[index + HEADER_OFFSET] = null;
-        if (styles && styles.length) {
-            elementStylingApply(index);
+        if (styleDeclarations && styleDeclarations.length ||
+            classDeclarations && classDeclarations.length) {
+            elementStylingApply(tNode.index - HEADER_OFFSET);
         }
     }
     /**
@@ -3778,12 +3926,13 @@
      */
     function getStylingContext(index) {
         var stylingContext = load(index);
-        if (!stylingContext) {
-            var lElement = load(index - 1);
+        if (!Array.isArray(stylingContext)) {
+            var lElement = stylingContext;
             var tNode = lElement.tNode;
             ngDevMode &&
                 assertDefined(tNode.stylingTemplate, 'getStylingContext() called before elementStyling()');
-            stylingContext = viewData[index + HEADER_OFFSET] = allocStylingContext(tNode.stylingTemplate);
+            stylingContext = viewData[index + HEADER_OFFSET] =
+                allocStylingContext(lElement, tNode.stylingTemplate);
         }
         return stylingContext;
     }
@@ -3802,7 +3951,7 @@
      *        index.)
      */
     function elementStylingApply(index) {
-        renderStyles(load(index - 1), getStylingContext(index), renderer);
+        renderStyling(getStylingContext(index), renderer);
     }
     function elementStyleProp(index, styleIndex, value, suffixOrSanitizer) {
         var valueToAdd = null;
@@ -3829,12 +3978,15 @@
      *        (Note that this is not the element index, but rather an index value allocated
      *        specifically for element styling--the index must be the next index after the element
      *        index.)
-     * @param value A value indicating if a given style should be added or removed.
-     *   The expected shape of `value` is an object where keys are style names and the values
-     *   are their corresponding values to set. If value is null, then the style is removed.
+     * @param styles A key/value style map of the styles that will be applied to the given element.
+     *        Any missing styles (that have already been applied to the element beforehand) will be
+     *        removed (unset) from the element's styling.
+     * @param classes A key/value style map of CSS classes that will be added to the given element.
+     *        Any missing classes (that have already been applied to the element beforehand) will be
+     *        removed (unset) from the element's list of CSS classes.
      */
-    function elementStyle(index, value) {
-        updateStyleMap(getStylingContext(index), value);
+    function elementStylingMap(index, styles, classes) {
+        updateStylingMap(getStylingContext(index), styles, classes);
     }
     //////////////////////////
     //// Text
@@ -3865,7 +4017,7 @@
     function textBinding(index, value) {
         if (value !== NO_CHANGE) {
             ngDevMode && assertDataInRange(index + HEADER_OFFSET);
-            var existingNode = load(index);
+            var existingNode = loadElement(index);
             ngDevMode && assertDefined(existingNode, 'LNode should exist');
             ngDevMode && assertDefined(existingNode.native, 'native element should exist');
             ngDevMode && ngDevMode.rendererSetText++;
@@ -4094,7 +4246,7 @@
      * @param index The index of the container in the data array
      */
     function containerRefreshStart(index) {
-        previousOrParentNode = load(index);
+        previousOrParentNode = loadElement(index);
         ngDevMode && assertNodeType(previousOrParentNode, 0 /* Container */);
         isParent = true;
         previousOrParentNode.data[ACTIVE_INDEX] = 0;
@@ -4746,15 +4898,6 @@
         }
         viewData[adjustedIndex] = value;
     }
-    /** Retrieves a value from current `viewData`. */
-    function load(index) {
-        return loadInternal(index, viewData);
-    }
-    /** Retrieves a value from any `LViewData`. */
-    function loadInternal(index, arr) {
-        ngDevMode && assertDataInRange(index + HEADER_OFFSET, arr);
-        return arr[index + HEADER_OFFSET];
-    }
     /** Retrieves a value from the `directives` array. */
     function loadDirective(index) {
         ngDevMode && assertDefined(directives, 'Directives array should be defined if reading a dir.');
@@ -4765,6 +4908,13 @@
         ngDevMode && assertDefined(viewData[CONTENT_QUERIES], 'Content QueryList array should be defined if reading a query.');
         ngDevMode && assertDataInRange(queryListIdx, viewData[CONTENT_QUERIES]);
         return viewData[CONTENT_QUERIES][queryListIdx];
+    }
+    /** Retrieves a value from current `viewData`. */
+    function load(index) {
+        return loadInternal(index, viewData);
+    }
+    function loadElement(index) {
+        return loadElementInternal(index, viewData);
     }
     /** Gets the current binding value and increments the binding index. */
     function consumeBinding() {
@@ -4834,7 +4984,7 @@
     function assertDataInRange(index, arr) {
         if (arr == null)
             arr = viewData;
-        assertLessThan(index, arr ? arr.length : 0, 'index expected to be a valid data index');
+        assertDataInRangeInternal(index, arr || viewData);
     }
     function assertDataNext(index, arr) {
         if (arr == null)
@@ -11343,8 +11493,7 @@
         'ɵi7': interpolation7,
         'ɵi8': interpolation8,
         'ɵiV': interpolationV,
-        'ɵk': elementClass,
-        'ɵkn': elementClassNamed,
+        'ɵcp': elementClassProp,
         'ɵL': listener,
         'ɵld': load,
         'ɵP': projection,
@@ -11360,7 +11509,7 @@
         'ɵqR': queryRefresh,
         'ɵrS': reserveSlots,
         'ɵs': elementStyling,
-        'ɵsm': elementStyle,
+        'ɵsm': elementStylingMap,
         'ɵsp': elementStyleProp,
         'ɵsa': elementStylingApply,
         'ɵT': text,
@@ -12038,7 +12187,7 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * Type of the Component metadata.
+     * Type of the Directive metadata.
      */
     var Directive = makeDecorator('Directive', function (dir) {
         if (dir === void 0) { dir = {}; }
@@ -12266,7 +12415,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('6.1.0-beta.3+117.sha-c8ad965');
+    var VERSION = new Version('6.1.0-beta.3+122.sha-d76531d');
 
     /**
      * @license
@@ -18885,11 +19034,10 @@
     exports.ɵrS = reserveSlots;
     exports.ɵa = elementAttribute;
     exports.ɵs = elementStyling;
-    exports.ɵsm = elementStyle;
+    exports.ɵsm = elementStylingMap;
     exports.ɵsp = elementStyleProp;
     exports.ɵsa = elementStylingApply;
-    exports.ɵk = elementClass;
-    exports.ɵkn = elementClassNamed;
+    exports.ɵcp = elementClassProp;
     exports.ɵt = textBinding;
     exports.ɵv = embeddedViewEnd;
     exports.ɵst = store;
