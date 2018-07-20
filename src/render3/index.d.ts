@@ -17,7 +17,7 @@ export { RenderFlags } from './interfaces/definition';
 export { CssSelectorList } from './interfaces/projection';
 export { NO_CHANGE as NC, bind as b, interpolation1 as i1, interpolation2 as i2, interpolation3 as i3, interpolation4 as i4, interpolation5 as i5, interpolation6 as i6, interpolation7 as i7, interpolation8 as i8, interpolationV as iV, container as C, containerRefreshStart as cR, containerRefreshEnd as cr, element as Ee, elementAttribute as a, elementClassProp as cp, elementEnd as e, elementProperty as p, elementStart as E, elementStyling as s, elementStylingMap as sm, elementStyleProp as sp, elementStylingApply as sa, listener as L, store as st, load as ld, loadDirective as d, namespaceHTML as NH, namespaceMathML as NM, namespaceSVG as NS, projection as P, projectionDef as pD, text as T, textBinding as t, reserveSlots as rS, embeddedViewStart as V, embeddedViewEnd as v, detectChanges, markDirty, tick, } from './instructions';
 export { i18nApply as iA, i18nMapping as iM, i18nInterpolation as iI, i18nInterpolationV as iIV, i18nExpMapping as iEM, I18nInstruction, I18nExpInstruction } from './i18n';
-export { NgModuleDef, NgModuleFactory, NgModuleRef, NgModuleType } from './ng_module_ref';
+export { NgModuleFactory, NgModuleRef, NgModuleType } from './ng_module_ref';
 export { AttributeMarker } from './interfaces/node';
 export { pipe as Pp, pipeBind1 as pb1, pipeBind2 as pb2, pipeBind3 as pb3, pipeBind4 as pb4, pipeBindV as pbV, } from './pipe';
 export { QueryList, query as Q, queryRefresh as qR, } from './query';

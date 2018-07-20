@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-rc.3+17.sha-bb58138
+ * @license Angular v6.1.0-rc.3+41.sha-8620373
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1677,7 +1677,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('6.1.0-rc.3+17.sha-bb58138');
+    var VERSION = new Version('6.1.0-rc.3+41.sha-8620373');
 
     /**
      * @license
@@ -2820,9 +2820,9 @@
             if (ngModule !== undefined) {
                 def = ngModule.ngInjectorDef;
             }
-            // If no definition was found, throw.
+            // If no definition was found, it might be from exports. Remove it.
             if (def == null) {
-                throw new Error("Type " + stringify(defType) + " is missing an ngInjectorDef definition.");
+                return;
             }
             // Check for circular dependencies.
             if (parents.has(defType)) {
@@ -2917,7 +2917,12 @@
     function injectableDefRecord(token) {
         var def = token.ngInjectableDef;
         if (def === undefined) {
-            throw new Error("Type " + stringify(token) + " is missing an ngInjectableDef definition.");
+            if (token instanceof InjectionToken) {
+                throw new Error("Token " + stringify(token) + " is missing an ngInjectableDef definition.");
+            }
+            // TODO(alxhub): there should probably be a strict mode which throws here instead of assuming a
+            // no-args constructor.
+            return makeRecord(function () { return new token(); });
         }
         return makeRecord(def.factory);
     }
@@ -15674,6 +15679,119 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    /**
+     * Sets properties on a target object from a source object, but only if
+     * the property doesn't already exist on the target object.
+     * @param target The target to set properties on
+     * @param source The source of the property keys and values to set
+     */
+    function fillProperties(target, source) {
+        for (var key in source) {
+            if (source.hasOwnProperty(key) && !target.hasOwnProperty(key)) {
+                target[key] = source[key];
+            }
+        }
+    }
+    /**
+     * Determines if a definition is a {@link ComponentDefInternal} or a {@link DirectiveDefInternal}
+     * @param definition The definition to examine
+     */
+    function isComponentDef(definition) {
+        var def = definition;
+        return typeof def.template === 'function';
+    }
+    function getSuperType(type) {
+        return Object.getPrototypeOf(type.prototype).constructor;
+    }
+    /**
+     * Merges the definition from a super class to a sub class.
+     * @param definition The definition that is a SubClass of another directive of component
+     */
+    function InheritDefinitionFeature(definition) {
+        var superType = getSuperType(definition.type);
+        var superDef = undefined;
+        var _loop_1 = function () {
+            var e_1, _a;
+            if (isComponentDef(definition)) {
+                superDef = superType.ngComponentDef || superType.ngDirectiveDef;
+            }
+            else {
+                if (superType.ngComponentDef) {
+                    throw new Error('Directives cannot inherit Components');
+                }
+                superDef = superType.ngDirectiveDef;
+            }
+            if (superDef) {
+                // Merge inputs and outputs
+                fillProperties(definition.inputs, superDef.inputs);
+                fillProperties(definition.declaredInputs, superDef.declaredInputs);
+                fillProperties(definition.outputs, superDef.outputs);
+                // Merge hostBindings
+                var prevHostBindings_1 = definition.hostBindings;
+                var superHostBindings_1 = superDef.hostBindings;
+                if (superHostBindings_1) {
+                    if (prevHostBindings_1) {
+                        definition.hostBindings = function (directiveIndex, elementIndex) {
+                            superHostBindings_1(directiveIndex, elementIndex);
+                            prevHostBindings_1(directiveIndex, elementIndex);
+                        };
+                    }
+                    else {
+                        definition.hostBindings = superHostBindings_1;
+                    }
+                }
+                // Inherit hooks
+                // Assume super class inheritance feature has already run.
+                definition.afterContentChecked =
+                    definition.afterContentChecked || superDef.afterContentChecked;
+                definition.afterContentInit = definition.afterContentInit || superDef.afterContentInit;
+                definition.afterViewChecked = definition.afterViewChecked || superDef.afterViewChecked;
+                definition.afterViewInit = definition.afterViewInit || superDef.afterViewInit;
+                definition.doCheck = definition.doCheck || superDef.doCheck;
+                definition.onDestroy = definition.onDestroy || superDef.onDestroy;
+                definition.onInit = definition.onInit || superDef.onInit;
+                // Run parent features
+                var features = superDef.features;
+                if (features) {
+                    try {
+                        for (var features_1 = __values(features), features_1_1 = features_1.next(); !features_1_1.done; features_1_1 = features_1.next()) {
+                            var feature = features_1_1.value;
+                            if (feature && feature !== InheritDefinitionFeature) {
+                                feature(definition);
+                            }
+                        }
+                    }
+                    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                    finally {
+                        try {
+                            if (features_1_1 && !features_1_1.done && (_a = features_1.return)) _a.call(features_1);
+                        }
+                        finally { if (e_1) throw e_1.error; }
+                    }
+                }
+            }
+            else {
+                // Even if we don't have a definition, check the type for the hooks and use those if need be
+                var superPrototype = superType.prototype;
+                if (superPrototype) {
+                    definition.afterContentChecked =
+                        definition.afterContentChecked || superPrototype.afterContentChecked;
+                    definition.afterContentInit =
+                        definition.afterContentInit || superPrototype.afterContentInit;
+                    definition.afterViewChecked =
+                        definition.afterViewChecked || superPrototype.afterViewChecked;
+                    definition.afterViewInit = definition.afterViewInit || superPrototype.afterViewInit;
+                    definition.doCheck = definition.doCheck || superPrototype.doCheck;
+                    definition.onDestroy = definition.onDestroy || superPrototype.onDestroy;
+                    definition.onInit = definition.onInit || superPrototype.onInit;
+                }
+            }
+            superType = Object.getPrototypeOf(superType);
+        };
+        while (superType && !superDef) {
+            _loop_1();
+        }
+    }
 
     /**
      * @license
@@ -16119,6 +16237,15 @@
     function directiveInject(token, flags) {
         if (flags === void 0) { flags = 0 /* Default */; }
         return getOrCreateInjectable(getOrCreateNodeInjector(), token, flags);
+    }
+    /**
+     * Creates an ElementRef and stores it on the injector.
+     * Or, if the ElementRef already exists, retrieves the existing ElementRef.
+     *
+     * @returns The ElementRef instance to use
+     */
+    function injectElementRef() {
+        return getOrCreateElementRef(getOrCreateNodeInjector());
     }
     /**
      * Creates a TemplateRef and stores it on the injector. Or, if the TemplateRef already
@@ -18140,12 +18267,13 @@
     exports.ɵangular_packages_core_core_p = leave;
     exports.ɵangular_packages_core_core_q = startTimeRange;
     exports.ɵangular_packages_core_core_v = getOrCreateChangeDetectorRef;
-    exports.ɵangular_packages_core_core_x = getOrCreateContainerRef;
+    exports.ɵangular_packages_core_core_y = getOrCreateContainerRef;
+    exports.ɵangular_packages_core_core_x = getOrCreateElementRef;
     exports.ɵangular_packages_core_core_w = getOrCreateInjectable;
     exports.ɵangular_packages_core_core_u = getOrCreateNodeInjector;
-    exports.ɵangular_packages_core_core_y = getOrCreateTemplateRef;
-    exports.ɵangular_packages_core_core_z = bindingUpdated;
-    exports.ɵangular_packages_core_core_ba = loadInternal;
+    exports.ɵangular_packages_core_core_z = getOrCreateTemplateRef;
+    exports.ɵangular_packages_core_core_ba = bindingUpdated;
+    exports.ɵangular_packages_core_core_bb = loadInternal;
     exports.ɵangular_packages_core_core_a = makeParamDecorator;
     exports.ɵangular_packages_core_core_b = makePropDecorator;
     exports.ɵangular_packages_core_core_s = _def;
@@ -18293,13 +18421,16 @@
     exports.ɵdetectChanges = detectChanges;
     exports.ɵrenderComponent = renderComponent;
     exports.ɵdirectiveInject = directiveInject;
+    exports.ɵinjectElementRef = injectElementRef;
     exports.ɵinjectTemplateRef = injectTemplateRef;
     exports.ɵinjectViewContainerRef = injectViewContainerRef;
     exports.ɵinjectChangeDetectorRef = injectChangeDetectorRef;
     exports.ɵinjectAttribute = injectAttribute;
     exports.ɵPublicFeature = PublicFeature;
+    exports.ɵInheritDefinitionFeature = InheritDefinitionFeature;
     exports.ɵNgOnChangesFeature = NgOnChangesFeature;
     exports.ɵmarkDirty = markDirty;
+    exports.ɵNgModuleFactory = NgModuleFactory$1;
     exports.ɵNC = NO_CHANGE;
     exports.ɵC = container;
     exports.ɵE = elementStart;
