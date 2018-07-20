@@ -21,6 +21,6 @@ export declare const APPLICATION_MODULE_PROVIDERS: StaticProvider[];
  */
 export declare class ApplicationModule {
     constructor(appRef: ApplicationRef);
-    static ngModuleDef: i0.ɵNgModuleDef<ApplicationModule, [], [], []>;
+    static ngModuleDef: i0.ɵNgModuleDef<ApplicationModule, never, never, never>;
     static ngInjectorDef: i0.ɵInjectorDef<ApplicationModule>;
 }

@@ -16,5 +16,5 @@ export declare class MockNgZone extends NgZone {
     run(fn: Function): any;
     runOutsideAngular(fn: Function): any;
     simulateZoneExit(): void;
-    static ngInjectableDef: i0.InjectableDef<MockNgZone>;
+    static ngInjectableDef: i0.ɵInjectableDef<MockNgZone>;
 }
