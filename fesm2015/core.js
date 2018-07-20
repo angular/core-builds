@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-rc.3+11.sha-c438b5e
+ * @license Angular v6.1.0-rc.3+13.sha-2d38fa1
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -4121,10 +4121,8 @@ function container(index, template, tagName, attrs, localRefs) {
     createDirectivesAndLocals(localRefs);
     isParent = false;
     ngDevMode && assertNodeType(previousOrParentNode, 0 /* Container */);
-    if (queries) {
-        // check if a given container node matches
-        queries.addNode(node);
-    }
+    queries && queries.addNode(node); // check if a given container node matches
+    queueLifecycleHooks(node.tNode.flags, tView);
 }
 /**
  * Sets a container up to receive views.
@@ -11929,7 +11927,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.0-rc.3+11.sha-c438b5e');
+const VERSION = new Version('6.1.0-rc.3+13.sha-2d38fa1');
 
 /**
  * @license
