@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-rc.3+17.sha-bb58138
+ * @license Angular v6.1.0-rc.3+41.sha-8620373
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -7723,9 +7723,9 @@
             if (ngModule !== undefined) {
                 def = ngModule.ngInjectorDef;
             }
-            // If no definition was found, throw.
+            // If no definition was found, it might be from exports. Remove it.
             if (def == null) {
-                throw new Error("Type " + stringify(defType) + " is missing an ngInjectorDef definition.");
+                return;
             }
             // Check for circular dependencies.
             if (parents.has(defType)) {
@@ -7820,7 +7820,12 @@
     function injectableDefRecord(token) {
         var def = token.ngInjectableDef;
         if (def === undefined) {
-            throw new Error("Type " + stringify(token) + " is missing an ngInjectableDef definition.");
+            if (token instanceof InjectionToken) {
+                throw new Error("Token " + stringify(token) + " is missing an ngInjectableDef definition.");
+            }
+            // TODO(alxhub): there should probably be a strict mode which throws here instead of assuming a
+            // no-args constructor.
+            return makeRecord(function () { return new token(); });
         }
         return makeRecord(def.factory);
     }
@@ -11981,6 +11986,7 @@
         return {
             name: type.name,
             type: new compiler.WrappedNodeExpr(type),
+            typeArgumentCount: 0,
             selector: metadata.selector,
             deps: reflectDependencies(type), host: host,
             inputs: __assign({}, inputsFromMetadata, inputsFromType),
@@ -12428,7 +12434,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('6.1.0-rc.3+17.sha-bb58138');
+    var VERSION = new Version('6.1.0-rc.3+41.sha-8620373');
 
     /**
      * @license
@@ -19063,13 +19069,16 @@
     exports.ɵdetectChanges = detectChanges;
     exports.ɵrenderComponent = renderComponent;
     exports.ɵdirectiveInject = directiveInject;
+    exports.ɵinjectElementRef = injectElementRef;
     exports.ɵinjectTemplateRef = injectTemplateRef;
     exports.ɵinjectViewContainerRef = injectViewContainerRef;
     exports.ɵinjectChangeDetectorRef = injectChangeDetectorRef;
     exports.ɵinjectAttribute = injectAttribute;
     exports.ɵPublicFeature = PublicFeature;
+    exports.ɵInheritDefinitionFeature = InheritDefinitionFeature;
     exports.ɵNgOnChangesFeature = NgOnChangesFeature;
     exports.ɵmarkDirty = markDirty;
+    exports.ɵNgModuleFactory = NgModuleFactory$1;
     exports.ɵNC = NO_CHANGE;
     exports.ɵC = container;
     exports.ɵE = elementStart;
