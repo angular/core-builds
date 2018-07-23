@@ -9,12 +9,10 @@ import { Injector } from '../di/injector';
 import { StaticProvider } from '../di/provider';
 import { ComponentFactoryResolver as viewEngine_ComponentFactoryResolver } from '../linker/component_factory_resolver';
 import { InternalNgModuleRef, NgModuleFactory as viewEngine_NgModuleFactory, NgModuleRef as viewEngine_NgModuleRef } from '../linker/ng_module_factory';
+import { NgModuleDefInternal } from '../metadata/ng_module';
 import { Type } from '../type';
 export interface NgModuleType {
-    ngModuleDef: NgModuleDef;
-}
-export interface NgModuleDef {
-    bootstrap: Type<any>[];
+    ngModuleDef: NgModuleDefInternal<any>;
 }
 export declare const COMPONENT_FACTORY_RESOLVER: StaticProvider;
 export declare class NgModuleRef<T> extends viewEngine_NgModuleRef<T> implements InternalNgModuleRef<T> {
