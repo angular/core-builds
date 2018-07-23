@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-rc.3+43.sha-7960d18
+ * @license Angular v6.1.0-rc.3+44.sha-6b859da
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1951,7 +1951,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('6.1.0-rc.3+43.sha-7960d18');
+const VERSION = new Version('6.1.0-rc.3+44.sha-6b859da');
 
 /**
  * @fileoverview added by tsickle
@@ -14816,6 +14816,25 @@ function clearOverrides() {
 function createNgModuleFactory(ngModuleType, bootstrapComponents, defFactory) {
     return new NgModuleFactory_(ngModuleType, bootstrapComponents, defFactory);
 }
+/**
+ * @param {?} def
+ * @return {?}
+ */
+function cloneNgModuleDefinition(def) {
+    /** @type {?} */
+    const providers = Array.from(def.providers);
+    /** @type {?} */
+    const modules = Array.from(def.modules);
+    /** @type {?} */
+    const providersByKey = {};
+    for (const key in def.providersByKey) {
+        providersByKey[key] = def.providersByKey[key];
+    }
+    return {
+        factory: def.factory,
+        isRoot: def.isRoot, providers, modules, providersByKey,
+    };
+}
 class NgModuleFactory_ extends NgModuleFactory {
     /**
      * @param {?} moduleType
@@ -14837,7 +14856,7 @@ class NgModuleFactory_ extends NgModuleFactory {
     create(parentInjector) {
         initServicesIfNeeded();
         /** @type {?} */
-        const def = resolveDefinition(this._ngModuleDefFactory);
+        const def = cloneNgModuleDefinition(resolveDefinition(this._ngModuleDefFactory));
         return Services.createNgModuleRef(this.moduleType, parentInjector || Injector.NULL, this._bootstrapComponents, def);
     }
 }

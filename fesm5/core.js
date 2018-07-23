@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-rc.3+43.sha-7960d18
+ * @license Angular v6.1.0-rc.3+44.sha-6b859da
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1642,7 +1642,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-rc.3+43.sha-7960d18');
+var VERSION = new Version('6.1.0-rc.3+44.sha-6b859da');
 
 /**
  * @license
@@ -11551,6 +11551,18 @@ function clearOverrides() {
 function createNgModuleFactory(ngModuleType, bootstrapComponents, defFactory) {
     return new NgModuleFactory_(ngModuleType, bootstrapComponents, defFactory);
 }
+function cloneNgModuleDefinition(def) {
+    var providers = Array.from(def.providers);
+    var modules = Array.from(def.modules);
+    var providersByKey = {};
+    for (var key in def.providersByKey) {
+        providersByKey[key] = def.providersByKey[key];
+    }
+    return {
+        factory: def.factory,
+        isRoot: def.isRoot, providers: providers, modules: modules, providersByKey: providersByKey,
+    };
+}
 var NgModuleFactory_ = /** @class */ (function (_super) {
     __extends(NgModuleFactory_, _super);
     function NgModuleFactory_(moduleType, _bootstrapComponents, _ngModuleDefFactory) {
@@ -11565,7 +11577,10 @@ var NgModuleFactory_ = /** @class */ (function (_super) {
     }
     NgModuleFactory_.prototype.create = function (parentInjector) {
         initServicesIfNeeded();
-        var def = resolveDefinition(this._ngModuleDefFactory);
+        // Clone the NgModuleDefinition so that any tree shakeable provider definition
+        // added to this instance of the NgModuleRef doesn't affect the cached copy.
+        // See https://github.com/angular/angular/issues/25018.
+        var def = cloneNgModuleDefinition(resolveDefinition(this._ngModuleDefFactory));
         return Services.createNgModuleRef(this.moduleType, parentInjector || Injector.NULL, this._bootstrapComponents, def);
     };
     return NgModuleFactory_;
