@@ -9,7 +9,7 @@ import './ng_dev_mode';
 import { QueryList } from '../linker';
 import { Sanitizer } from '../sanitization/security';
 import { LContainer } from './interfaces/container';
-import { ComponentDefInternal, ComponentQuery, ComponentTemplate, DirectiveDefInternal, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
+import { ComponentDefInternal, ComponentQuery, ComponentTemplate, DirectiveDefInternal, DirectiveDefListOrFactory, InitialStylingFlags, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { LInjector } from './interfaces/injector';
 import { LContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode, TAttributes, TContainerNode, TElementNode, TNode, TNodeType } from './interfaces/node';
 import { CssSelectorList } from './interfaces/projection';
@@ -258,20 +258,7 @@ export declare function createTNode(type: TNodeType, adjustedIndex: number, tagN
  *        renaming as part of minification.
  * @param value A value indicating if a given class should be added or removed.
  */
-export declare function elementClassNamed<T>(index: number, className: string, value: T | NO_CHANGE): void;
-/**
- * Set the `className` property on a DOM element.
- *
- * This instruction is meant to handle the `[class]="exp"` usage.
- *
- * `elementClass` instruction writes the value to the "element's" `className` property.
- *
- * @param index The index of the element to update in the data array
- * @param value A value indicating a set of classes which should be applied. The method overrides
- *   any existing classes. The value is stringified (`toString`) before it is applied to the
- *   element.
- */
-export declare function elementClass<T>(index: number, value: T | NO_CHANGE): void;
+export declare function elementClassProp<T>(index: number, stylingIndex: number, value: T | NO_CHANGE): void;
 /**
  * Assign any inline style values to the element during creation mode.
  *
@@ -287,13 +274,18 @@ export declare function elementClass<T>(index: number, value: T | NO_CHANGE): vo
  *        (Note that this is not the element index, but rather an index value allocated
  *        specifically for element styling--the index must be the next index after the element
  *        index.)
- * @param styles A key/value map of CSS styles that will be registered on the element.
+ * @param styleDeclarations A key/value array of CSS styles that will be registered on the element.
  *   Each individual style will be used on the element as long as it is not overridden
  *   by any styles placed on the element by multiple (`[style]`) or singular (`[style.prop]`)
  *   bindings. If a style binding changes its value to null then the initial styling
  *   values that are passed in here will be applied to the element (if matched).
+ * @param classDeclarations A key/value array of CSS classes that will be registered on the element.
+ *   Each individual style will be used on the element as long as it is not overridden
+ *   by any classes placed on the element by multiple (`[class]`) or singular (`[class.named]`)
+ *   bindings. If a class binding changes its value to a falsy value then the matching initial
+ *   class value that are passed in here will be applied to the element (if matched).
  */
-export declare function elementStyling<T>(index: number, styles?: (string | number)[] | null): void;
+export declare function elementStyling<T>(styleDeclarations?: (string | boolean | InitialStylingFlags)[] | null, classDeclarations?: (string | boolean | InitialStylingFlags)[] | null): void;
 /**
  * Apply all styling values to the element which have been queued by any styling instructions.
  *
@@ -347,13 +339,18 @@ export declare function elementStyleProp<T>(index: number, styleIndex: number, v
  *        (Note that this is not the element index, but rather an index value allocated
  *        specifically for element styling--the index must be the next index after the element
  *        index.)
- * @param value A value indicating if a given style should be added or removed.
- *   The expected shape of `value` is an object where keys are style names and the values
- *   are their corresponding values to set. If value is null, then the style is removed.
+ * @param styles A key/value style map of the styles that will be applied to the given element.
+ *        Any missing styles (that have already been applied to the element beforehand) will be
+ *        removed (unset) from the element's styling.
+ * @param classes A key/value style map of CSS classes that will be added to the given element.
+ *        Any missing classes (that have already been applied to the element beforehand) will be
+ *        removed (unset) from the element's list of CSS classes.
  */
-export declare function elementStyle<T>(index: number, value: {
+export declare function elementStylingMap<T>(index: number, styles: {
     [styleName: string]: any;
-} | null): void;
+} | null, classes?: {
+    [key: string]: any;
+} | string | null): void;
 /**
  * Create static text node
  *
@@ -646,13 +643,12 @@ export declare function interpolation7(prefix: string, v0: any, i0: string, v1: 
 export declare function interpolation8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): string | NO_CHANGE;
 /** Store a value in the `data` at a given `index`. */
 export declare function store<T>(index: number, value: T): void;
-/** Retrieves a value from current `viewData`. */
-export declare function load<T>(index: number): T;
-/** Retrieves a value from any `LViewData`. */
-export declare function loadInternal<T>(index: number, arr: LViewData): T;
 /** Retrieves a value from the `directives` array. */
 export declare function loadDirective<T>(index: number): T;
 export declare function loadQueryList<T>(queryListIdx: number): QueryList<T>;
+/** Retrieves a value from current `viewData`. */
+export declare function load<T>(index: number): T;
+export declare function loadElement(index: number): LElementNode;
 /** Gets the current binding value and increments the binding index. */
 export declare function consumeBinding(): any;
 /** Updates binding if changed, then returns whether it was updated. */
