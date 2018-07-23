@@ -13,5 +13,5 @@ export declare class Log {
     fn(value: any /** TODO #9100 */): (a1?: any, a2?: any, a3?: any, a4?: any, a5?: any) => void;
     clear(): void;
     result(): string;
-    static ngInjectableDef: i0.InjectableDef<Log>;
+    static ngInjectableDef: i0.ɵInjectableDef<Log>;
 }
