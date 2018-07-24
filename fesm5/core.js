@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-rc.3+54.sha-be3cca4
+ * @license Angular v6.1.0-rc.3+43.sha-7960d18
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1642,7 +1642,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-rc.3+54.sha-be3cca4');
+var VERSION = new Version('6.1.0-rc.3+43.sha-7960d18');
 
 /**
  * @license
@@ -11551,18 +11551,6 @@ function clearOverrides() {
 function createNgModuleFactory(ngModuleType, bootstrapComponents, defFactory) {
     return new NgModuleFactory_(ngModuleType, bootstrapComponents, defFactory);
 }
-function cloneNgModuleDefinition(def) {
-    var providers = Array.from(def.providers);
-    var modules = Array.from(def.modules);
-    var providersByKey = {};
-    for (var key in def.providersByKey) {
-        providersByKey[key] = def.providersByKey[key];
-    }
-    return {
-        factory: def.factory,
-        isRoot: def.isRoot, providers: providers, modules: modules, providersByKey: providersByKey,
-    };
-}
 var NgModuleFactory_ = /** @class */ (function (_super) {
     __extends(NgModuleFactory_, _super);
     function NgModuleFactory_(moduleType, _bootstrapComponents, _ngModuleDefFactory) {
@@ -11577,10 +11565,7 @@ var NgModuleFactory_ = /** @class */ (function (_super) {
     }
     NgModuleFactory_.prototype.create = function (parentInjector) {
         initServicesIfNeeded();
-        // Clone the NgModuleDefinition so that any tree shakeable provider definition
-        // added to this instance of the NgModuleRef doesn't affect the cached copy.
-        // See https://github.com/angular/angular/issues/25018.
-        var def = cloneNgModuleDefinition(resolveDefinition(this._ngModuleDefFactory));
+        var def = resolveDefinition(this._ngModuleDefFactory);
         return Services.createNgModuleRef(this.moduleType, parentInjector || Injector.NULL, this._bootstrapComponents, def);
     };
     return NgModuleFactory_;
@@ -12779,9 +12764,9 @@ function allocStylingContext(lElement, templateStyleContext) {
  *       This implies that `foo` and `bar` will be later styled and that the `foo`
  *       class will be applied to the element as an initial class since it's true
  */
-function createStylingContextTemplate(initialClassDeclarations, initialStyleDeclarations, styleSanitizer) {
+function createStylingContextTemplate(initialStyleDeclarations, initialClassDeclarations) {
     var initialStylingValues = [null];
-    var context = [null, styleSanitizer || null, initialStylingValues, 0, 0, null];
+    var context = [null, initialStylingValues, 0, 0, null];
     // we use two maps since a class name might collide with a CSS style prop
     var stylesLookup = {};
     var classesLookup = {};
@@ -12809,7 +12794,7 @@ function createStylingContextTemplate(initialClassDeclarations, initialStyleDecl
         }
     }
     // make where the class offsets begin
-    context[4 /* ClassOffsetPosition */] = totalStyleDeclarations;
+    context[3 /* ClassOffsetPosition */] = totalStyleDeclarations;
     if (initialClassDeclarations) {
         var hasPassedDeclarations = false;
         for (var i = 0; i < initialClassDeclarations.length; i++) {
@@ -12836,14 +12821,14 @@ function createStylingContextTemplate(initialClassDeclarations, initialStyleDecl
     var classNamesIndexStart = styleProps.length;
     var totalProps = styleProps.length + classNames.length;
     // *2 because we are filling for both single and multi style spaces
-    var maxLength = totalProps * 3 /* Size */ * 2 + 6 /* SingleStylesStartPosition */;
+    var maxLength = totalProps * 3 /* Size */ * 2 + 5 /* SingleStylesStartPosition */;
     // we need to fill the array from the start so that we can access
     // both the multi and the single array positions in the same loop block
-    for (var i = 6 /* SingleStylesStartPosition */; i < maxLength; i++) {
+    for (var i = 5 /* SingleStylesStartPosition */; i < maxLength; i++) {
         context.push(null);
     }
-    var singleStart = 6 /* SingleStylesStartPosition */;
-    var multiStart = totalProps * 3 /* Size */ + 6 /* SingleStylesStartPosition */;
+    var singleStart = 5 /* SingleStylesStartPosition */;
+    var multiStart = totalProps * 3 /* Size */ + 5 /* SingleStylesStartPosition */;
     // fill single and multi-level styles
     for (var i = 0; i < totalProps; i++) {
         var isClassBased_1 = i >= classNamesIndexStart;
@@ -12852,7 +12837,7 @@ function createStylingContextTemplate(initialClassDeclarations, initialStyleDecl
         var initialValue = initialStylingValues[indexForInitial];
         var indexForMulti = i * 3 /* Size */ + multiStart;
         var indexForSingle = i * 3 /* Size */ + singleStart;
-        var initialFlag = prepareInitialFlag(prop, isClassBased_1, styleSanitizer || null);
+        var initialFlag = isClassBased_1 ? 2 /* Class */ : 0 /* None */;
         setFlag(context, indexForSingle, pointers(initialFlag, indexForInitial, indexForMulti));
         setProp(context, indexForSingle, prop);
         setValue(context, indexForSingle, null);
@@ -12863,7 +12848,7 @@ function createStylingContextTemplate(initialClassDeclarations, initialStyleDecl
     }
     // there is no initial value flag for the master index since it doesn't
     // reference an initial style value
-    setFlag(context, 3 /* MasterFlagPosition */, pointers(0, 0, multiStart));
+    setFlag(context, 2 /* MasterFlagPosition */, pointers(0, 0, multiStart));
     setContextDirty(context, initialStylingValues.length > 1);
     return context;
 }
@@ -12879,22 +12864,22 @@ var EMPTY_OBJ = {};
  *
  * @param context The styling context that will be updated with the
  *    newly provided style values.
- * @param classes The key/value map of CSS class names that will be used for the update.
  * @param styles The key/value map of CSS styles that will be used for the update.
+ * @param classes The key/value map of CSS class names that will be used for the update.
  */
-function updateStylingMap(context, classes, styles) {
+function updateStylingMap(context, styles, classes) {
     var classNames = EMPTY_ARR;
     var applyAllClasses = false;
     var ignoreAllClassUpdates = false;
     // each time a string-based value pops up then it shouldn't require a deep
     // check of what's changed.
     if (typeof classes == 'string') {
-        var cachedClassString = context[5 /* CachedCssClassString */];
+        var cachedClassString = context[4 /* CachedCssClassString */];
         if (cachedClassString && cachedClassString === classes) {
             ignoreAllClassUpdates = true;
         }
         else {
-            context[5 /* CachedCssClassString */] = classes;
+            context[4 /* CachedCssClassString */] = classes;
             classNames = classes.split(/\s+/);
             // this boolean is used to avoid having to create a key/value map of `true` values
             // since a classname string implies that all those classes are added
@@ -12903,7 +12888,7 @@ function updateStylingMap(context, classes, styles) {
     }
     else {
         classNames = classes ? Object.keys(classes) : EMPTY_ARR;
-        context[5 /* CachedCssClassString */] = null;
+        context[4 /* CachedCssClassString */] = null;
     }
     classes = (classes || EMPTY_OBJ);
     var styleProps = styles ? Object.keys(styles) : EMPTY_ARR;
@@ -12928,9 +12913,9 @@ function updateStylingMap(context, classes, styles) {
             var prop = getProp(context, ctxIndex);
             if (prop === newProp) {
                 var value = getValue(context, ctxIndex);
-                var flag = getPointers(context, ctxIndex);
-                if (hasValueChanged(flag, value, newValue)) {
+                if (value !== newValue) {
                     setValue(context, ctxIndex, newValue);
+                    var flag = getPointers(context, ctxIndex);
                     var initialValue = getInitialValue(context, flag);
                     // there is no point in setting this to dirty if the previously
                     // rendered value was being referenced by the initial style (or null)
@@ -12958,8 +12943,7 @@ function updateStylingMap(context, classes, styles) {
                 }
                 else {
                     // we only care to do this if the insertion is in the middle
-                    var newFlag = prepareInitialFlag(newProp, isClassBased_2, getStyleSanitizer(context));
-                    insertNewMultiProperty(context, ctxIndex, isClassBased_2, newProp, newFlag, newValue);
+                    insertNewMultiProperty(context, ctxIndex, isClassBased_2, newProp, newValue);
                     dirty = true;
                 }
             }
@@ -12987,7 +12971,6 @@ function updateStylingMap(context, classes, styles) {
     // this means that there are left-over properties in the context that
     // were not detected in the context during the loop above. In that
     // case we want to add the new entries into the list
-    var sanitizer = getStyleSanitizer(context);
     while (propIndex < propLimit) {
         var isClassBased_4 = propIndex >= classesStartIndex;
         if (ignoreAllClassUpdates && isClassBased_4)
@@ -12995,7 +12978,7 @@ function updateStylingMap(context, classes, styles) {
         var adjustedPropIndex = isClassBased_4 ? propIndex - classesStartIndex : propIndex;
         var prop = isClassBased_4 ? classNames[adjustedPropIndex] : styleProps[adjustedPropIndex];
         var value = isClassBased_4 ? (applyAllClasses ? true : classes[prop]) : styles[prop];
-        var flag = prepareInitialFlag(prop, isClassBased_4, sanitizer) | 1 /* Dirty */;
+        var flag = 1 /* Dirty */ | (isClassBased_4 ? 2 /* Class */ : 0 /* None */);
         context.push(flag, prop, value);
         propIndex++;
         dirty = true;
@@ -13019,11 +13002,11 @@ function updateStylingMap(context, classes, styles) {
  * @param value The CSS style value that will be assigned
  */
 function updateStyleProp(context, index, value) {
-    var singleIndex = 6 /* SingleStylesStartPosition */ + index * 3 /* Size */;
+    var singleIndex = 5 /* SingleStylesStartPosition */ + index * 3 /* Size */;
     var currValue = getValue(context, singleIndex);
     var currFlag = getPointers(context, singleIndex);
     // didn't change ... nothing to make a note of
-    if (hasValueChanged(currFlag, currValue, value)) {
+    if (currValue !== value) {
         // the value will always get updated (even if the dirty flag is skipped)
         setValue(context, singleIndex, value);
         var indexForMulti = getMultiOrSingleIndex(currFlag);
@@ -13054,7 +13037,7 @@ function updateStyleProp(context, index, value) {
  * @param addOrRemove Whether or not to add or remove the CSS class
  */
 function updateClassProp(context, index, addOrRemove) {
-    var adjustedIndex = index + context[4 /* ClassOffsetPosition */];
+    var adjustedIndex = index + context[3 /* ClassOffsetPosition */];
     updateStyleProp(context, adjustedIndex, addOrRemove);
 }
 /**
@@ -13079,8 +13062,7 @@ function renderStyling(context, renderer, styleStore, classStore) {
     if (isContextDirty(context)) {
         var native = context[0 /* ElementPosition */].native;
         var multiStartIndex = getMultiStartIndex(context);
-        var styleSanitizer = getStyleSanitizer(context);
-        for (var i = 6 /* SingleStylesStartPosition */; i < context.length; i += 3 /* Size */) {
+        for (var i = 5 /* SingleStylesStartPosition */; i < context.length; i += 3 /* Size */) {
             // there is no point in rendering styles that have not changed on screen
             if (isDirty(context, i)) {
                 var prop = getProp(context, i);
@@ -13110,8 +13092,7 @@ function renderStyling(context, renderer, styleStore, classStore) {
                     setClass(native, prop, valueToApply ? true : false, renderer, classStore);
                 }
                 else {
-                    var sanitizer = (flag & 4 /* Sanitize */) ? styleSanitizer : null;
-                    setStyle(native, prop, valueToApply, renderer, sanitizer, styleStore);
+                    setStyle(native, prop, valueToApply, renderer, styleStore);
                 }
                 setDirty(context, i, false);
             }
@@ -13131,8 +13112,7 @@ function renderStyling(context, renderer, styleStore, classStore) {
  * @param renderer
  * @param store an optional key/value map that will be used as a context to render styles on
  */
-function setStyle(native, prop, value, renderer, sanitizer, store) {
-    value = sanitizer && value ? sanitizer(prop, value) : value;
+function setStyle(native, prop, value, renderer, store) {
     if (store) {
         store[prop] = value;
     }
@@ -13177,7 +13157,7 @@ function setClass(native, className, add, renderer, store) {
     }
 }
 function setDirty(context, index, isDirtyYes) {
-    var adjustedIndex = index >= 6 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
+    var adjustedIndex = index >= 5 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
     if (isDirtyYes) {
         context[adjustedIndex] |= 1 /* Dirty */;
     }
@@ -13186,37 +13166,30 @@ function setDirty(context, index, isDirtyYes) {
     }
 }
 function isDirty(context, index) {
-    var adjustedIndex = index >= 6 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
+    var adjustedIndex = index >= 5 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
     return (context[adjustedIndex] & 1 /* Dirty */) == 1 /* Dirty */;
 }
 function isClassBased(context, index) {
-    var adjustedIndex = index >= 6 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
+    var adjustedIndex = index >= 5 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
     return (context[adjustedIndex] & 2 /* Class */) == 2 /* Class */;
 }
-function isSanitizable(context, index) {
-    var adjustedIndex = index >= 6 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
-    return (context[adjustedIndex] & 4 /* Sanitize */) == 4 /* Sanitize */;
-}
 function pointers(configFlag, staticIndex, dynamicIndex) {
-    return (configFlag & 7 /* BitMask */) | (staticIndex << 3 /* BitCountSize */) |
-        (dynamicIndex << (14 /* BitCountSize */ + 3 /* BitCountSize */));
+    return (configFlag & 3 /* BitMask */) | (staticIndex << 2 /* BitCountSize */) |
+        (dynamicIndex << (15 /* BitCountSize */ + 2 /* BitCountSize */));
 }
 function getInitialValue(context, flag) {
     var index = getInitialIndex(flag);
-    return context[2 /* InitialStylesPosition */][index];
+    return context[1 /* InitialStylesPosition */][index];
 }
 function getInitialIndex(flag) {
-    return (flag >> 3 /* BitCountSize */) & 16383 /* BitMask */;
+    return (flag >> 2 /* BitCountSize */) & 32767 /* BitMask */;
 }
 function getMultiOrSingleIndex(flag) {
-    var index = (flag >> (14 /* BitCountSize */ + 3 /* BitCountSize */)) & 16383 /* BitMask */;
-    return index >= 6 /* SingleStylesStartPosition */ ? index : -1;
+    var index = (flag >> (15 /* BitCountSize */ + 2 /* BitCountSize */)) & 32767 /* BitMask */;
+    return index >= 5 /* SingleStylesStartPosition */ ? index : -1;
 }
 function getMultiStartIndex(context) {
-    return getMultiOrSingleIndex(context[3 /* MasterFlagPosition */]);
-}
-function getStyleSanitizer(context) {
-    return context[1 /* StyleSanitizerPosition */];
+    return getMultiOrSingleIndex(context[2 /* MasterFlagPosition */]);
 }
 function setProp(context, index, prop) {
     context[index + 1 /* PropertyOffset */] = prop;
@@ -13225,11 +13198,11 @@ function setValue(context, index, value) {
     context[index + 2 /* ValueOffset */] = value;
 }
 function setFlag(context, index, flag) {
-    var adjustedIndex = index === 3 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
+    var adjustedIndex = index === 2 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
     context[adjustedIndex] = flag;
 }
 function getPointers(context, index) {
-    var adjustedIndex = index === 3 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
+    var adjustedIndex = index === 2 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
     return context[adjustedIndex];
 }
 function getValue(context, index) {
@@ -13239,10 +13212,10 @@ function getProp(context, index) {
     return context[index + 1 /* PropertyOffset */];
 }
 function isContextDirty(context) {
-    return isDirty(context, 3 /* MasterFlagPosition */);
+    return isDirty(context, 2 /* MasterFlagPosition */);
 }
 function setContextDirty(context, isDirtyYes) {
-    setDirty(context, 3 /* MasterFlagPosition */, isDirtyYes);
+    setDirty(context, 2 /* MasterFlagPosition */, isDirtyYes);
 }
 function findEntryPositionByProp(context, prop, startIndex) {
     for (var i = (startIndex || 0) + 1 /* PropertyOffset */; i < context.length; i += 3 /* Size */) {
@@ -13286,17 +13259,16 @@ function updateSinglePointerValues(context, indexStartPosition) {
             var singleFlag = getPointers(context, singleIndex);
             var initialIndexForSingle = getInitialIndex(singleFlag);
             var flagValue = (isDirty(context, singleIndex) ? 1 /* Dirty */ : 0 /* None */) |
-                (isClassBased(context, singleIndex) ? 2 /* Class */ : 0 /* None */) |
-                (isSanitizable(context, singleIndex) ? 4 /* Sanitize */ : 0 /* None */);
+                (isClassBased(context, singleIndex) ? 2 /* Class */ : 0 /* None */);
             var updatedFlag = pointers(flagValue, initialIndexForSingle, i);
             setFlag(context, singleIndex, updatedFlag);
         }
     }
 }
-function insertNewMultiProperty(context, index, classBased, name, flag, value) {
+function insertNewMultiProperty(context, index, classBased, name, value) {
     var doShift = index < context.length;
     // prop does not exist in the list, add it in
-    context.splice(index, 0, flag | 1 /* Dirty */ | (classBased ? 2 /* Class */ : 0 /* None */), name, value);
+    context.splice(index, 0, 1 /* Dirty */ | (classBased ? 2 /* Class */ : 0 /* None */), name, value);
     if (doShift) {
         // because the value was inserted midway into the array then we
         // need to update all the shifted multi values' single value
@@ -13309,29 +13281,6 @@ function valueExists(value, isClassBased) {
         return value ? true : false;
     }
     return value !== null;
-}
-function prepareInitialFlag(name, isClassBased, sanitizer) {
-    if (isClassBased) {
-        return 2 /* Class */;
-    }
-    else if (sanitizer && sanitizer(name)) {
-        return 4 /* Sanitize */;
-    }
-    return 0 /* None */;
-}
-function hasValueChanged(flag, a, b) {
-    var isClassBased = flag & 2 /* Class */;
-    var hasValues = a && b;
-    var usesSanitizer = flag & 4 /* Sanitize */;
-    // the toString() comparison ensures that a value is checked
-    // ... otherwise (during sanitization bypassing) the === comparsion
-    // would fail since a new String() instance is created
-    if (!isClassBased && hasValues && usesSanitizer) {
-        // we know for sure we're dealing with strings at this point
-        return a.toString() !== b.toString();
-    }
-    // everything else is safe to check with a normal equality check
-    return a !== b;
 }
 
 /**
@@ -14393,26 +14342,23 @@ function elementClassProp(index, stylingIndex, value) {
  *        (Note that this is not the element index, but rather an index value allocated
  *        specifically for element styling--the index must be the next index after the element
  *        index.)
- * @param classDeclarations A key/value array of CSS classes that will be registered on the element.
- *   Each individual style will be used on the element as long as it is not overridden
- *   by any classes placed on the element by multiple (`[class]`) or singular (`[class.named]`)
- *   bindings. If a class binding changes its value to a falsy value then the matching initial
- *   class value that are passed in here will be applied to the element (if matched).
  * @param styleDeclarations A key/value array of CSS styles that will be registered on the element.
  *   Each individual style will be used on the element as long as it is not overridden
  *   by any styles placed on the element by multiple (`[style]`) or singular (`[style.prop]`)
  *   bindings. If a style binding changes its value to null then the initial styling
  *   values that are passed in here will be applied to the element (if matched).
- * @param styleSanitizer An optional sanitizer function that will be used (if provided)
- *   to sanitize the any CSS property values that are applied to the element (during rendering).
+ * @param classDeclarations A key/value array of CSS classes that will be registered on the element.
+ *   Each individual style will be used on the element as long as it is not overridden
+ *   by any classes placed on the element by multiple (`[class]`) or singular (`[class.named]`)
+ *   bindings. If a class binding changes its value to a falsy value then the matching initial
+ *   class value that are passed in here will be applied to the element (if matched).
  */
-function elementStyling(classDeclarations, styleDeclarations, styleSanitizer) {
+function elementStyling(styleDeclarations, classDeclarations) {
     var lElement = currentElementNode;
     var tNode = lElement.tNode;
     if (!tNode.stylingTemplate) {
         // initialize the styling template.
-        tNode.stylingTemplate =
-            createStylingContextTemplate(classDeclarations, styleDeclarations, styleSanitizer);
+        tNode.stylingTemplate = createStylingContextTemplate(styleDeclarations, classDeclarations);
     }
     if (styleDeclarations && styleDeclarations.length ||
         classDeclarations && classDeclarations.length) {
@@ -14458,42 +14404,13 @@ function getStylingContext(index) {
 function elementStylingApply(index) {
     renderStyling(getStylingContext(index), renderer);
 }
-/**
- * Queue a given style to be rendered on an Element.
- *
- * If the style value is `null` then it will be removed from the element
- * (or assigned a different value depending if there are any styles placed
- * on the element with `elementStyle` or any styles that are present
- * from when the element was created (with `elementStyling`).
- *
- * (Note that the styling instruction will not be applied until `elementStylingApply` is called.)
- *
- * @param index Index of the element's styling storage to change in the data array.
- *        (Note that this is not the element index, but rather an index value allocated
- *        specifically for element styling--the index must be the next index after the element
- *        index.)
- * @param styleIndex Index of the style property on this element. (Monotonically increasing.)
- * @param styleName Name of property. Because it is going to DOM this is not subject to
- *        renaming as part of minification.
- * @param value New value to write (null to remove).
- * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
- *        Note that when a suffix is provided then the underlying sanitizer will
- *        be ignored.
- */
-function elementStyleProp(index, styleIndex, value, suffix) {
+function elementStyleProp(index, styleIndex, value, suffixOrSanitizer) {
     var valueToAdd = null;
     if (value) {
-        if (suffix) {
-            // when a suffix is applied then it will bypass
-            // sanitization entirely (b/c a new string is created)
-            valueToAdd = stringify$1(value) + suffix;
-        }
-        else {
-            // sanitization happens by dealing with a String value
-            // this means that the string value will be passed through
-            // into the style rendering later (which is where the value
-            // will be sanitized before it is applied)
-            valueToAdd = value;
+        valueToAdd =
+            typeof suffixOrSanitizer == 'function' ? suffixOrSanitizer(value) : stringify$1(value);
+        if (typeof suffixOrSanitizer == 'string') {
+            valueToAdd = valueToAdd + suffixOrSanitizer;
         }
     }
     updateStyleProp(getStylingContext(index), styleIndex, valueToAdd);
@@ -14512,15 +14429,15 @@ function elementStyleProp(index, styleIndex, value, suffix) {
  *        (Note that this is not the element index, but rather an index value allocated
  *        specifically for element styling--the index must be the next index after the element
  *        index.)
- * @param classes A key/value style map of CSS classes that will be added to the given element.
- *        Any missing classes (that have already been applied to the element beforehand) will be
- *        removed (unset) from the element's list of CSS classes.
  * @param styles A key/value style map of the styles that will be applied to the given element.
  *        Any missing styles (that have already been applied to the element beforehand) will be
  *        removed (unset) from the element's styling.
+ * @param classes A key/value style map of CSS classes that will be added to the given element.
+ *        Any missing classes (that have already been applied to the element beforehand) will be
+ *        removed (unset) from the element's list of CSS classes.
  */
-function elementStylingMap(index, classes, styles) {
-    updateStylingMap(getStylingContext(index), classes, styles);
+function elementStylingMap(index, styles, classes) {
+    updateStylingMap(getStylingContext(index), styles, classes);
 }
 //////////////////////////
 //// Text
@@ -18210,82 +18127,6 @@ function queryRefresh(queryList) {
  * found in the LICENSE file at https://angular.io/license
  */
 var BRAND = '__SANITIZER_TRUSTED_BRAND__';
-function allowSanitizationBypass(value, type) {
-    return (value instanceof String && value[BRAND] === type) ? true : false;
-}
-/**
- * Mark `html` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {@link htmlSanitizer} to be trusted implicitly.
- *
- * @param trustedHtml `html` string which needs to be implicitly trusted.
- * @returns a `html` `String` which has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustHtml(trustedHtml) {
-    return bypassSanitizationTrustString(trustedHtml, "Html" /* Html */);
-}
-/**
- * Mark `style` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {@link styleSanitizer} to be trusted implicitly.
- *
- * @param trustedStyle `style` string which needs to be implicitly trusted.
- * @returns a `style` `String` which has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustStyle(trustedStyle) {
-    return bypassSanitizationTrustString(trustedStyle, "Style" /* Style */);
-}
-/**
- * Mark `script` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {@link scriptSanitizer} to be trusted implicitly.
- *
- * @param trustedScript `script` string which needs to be implicitly trusted.
- * @returns a `script` `String` which has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustScript(trustedScript) {
-    return bypassSanitizationTrustString(trustedScript, "Script" /* Script */);
-}
-/**
- * Mark `url` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {@link urlSanitizer} to be trusted implicitly.
- *
- * @param trustedUrl `url` string which needs to be implicitly trusted.
- * @returns a `url` `String` which has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustUrl(trustedUrl) {
-    return bypassSanitizationTrustString(trustedUrl, "Url" /* Url */);
-}
-/**
- * Mark `url` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {@link resourceUrlSanitizer} to be trusted implicitly.
- *
- * @param trustedResourceUrl `url` string which needs to be implicitly trusted.
- * @returns a `url` `String` which has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
-    return bypassSanitizationTrustString(trustedResourceUrl, "ResourceUrl" /* ResourceUrl */);
-}
-function bypassSanitizationTrustString(trustedString, mode) {
-    var trusted = new String(trustedString);
-    trusted[BRAND] = mode;
-    return trusted;
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
  * dangerous content.
@@ -18304,7 +18145,7 @@ function sanitizeHtml(unsafeHtml) {
     if (s) {
         return s.sanitize(SecurityContext.HTML, unsafeHtml) || '';
     }
-    if (allowSanitizationBypass(unsafeHtml, "Html" /* Html */)) {
+    if (unsafeHtml instanceof String && unsafeHtml[BRAND] === 'Html') {
         return unsafeHtml.toString();
     }
     return _sanitizeHtml(document, stringify$1(unsafeHtml));
@@ -18327,7 +18168,7 @@ function sanitizeStyle(unsafeStyle) {
     if (s) {
         return s.sanitize(SecurityContext.STYLE, unsafeStyle) || '';
     }
-    if (allowSanitizationBypass(unsafeStyle, "Style" /* Style */)) {
+    if (unsafeStyle instanceof String && unsafeStyle[BRAND] === 'Style') {
         return unsafeStyle.toString();
     }
     return _sanitizeStyle(stringify$1(unsafeStyle));
@@ -18351,7 +18192,7 @@ function sanitizeUrl(unsafeUrl) {
     if (s) {
         return s.sanitize(SecurityContext.URL, unsafeUrl) || '';
     }
-    if (allowSanitizationBypass(unsafeUrl, "Url" /* Url */)) {
+    if (unsafeUrl instanceof String && unsafeUrl[BRAND] === 'Url') {
         return unsafeUrl.toString();
     }
     return _sanitizeUrl(stringify$1(unsafeUrl));
@@ -18370,10 +18211,76 @@ function sanitizeResourceUrl(unsafeResourceUrl) {
     if (s) {
         return s.sanitize(SecurityContext.RESOURCE_URL, unsafeResourceUrl) || '';
     }
-    if (allowSanitizationBypass(unsafeResourceUrl, "ResourceUrl" /* ResourceUrl */)) {
+    if (unsafeResourceUrl instanceof String &&
+        unsafeResourceUrl[BRAND] === 'ResourceUrl') {
         return unsafeResourceUrl.toString();
     }
     throw new Error('unsafe value used in a resource URL context (see http://g.co/ng/security#xss)');
+}
+/**
+ * Mark `html` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {@link htmlSanitizer} to be trusted implicitly.
+ *
+ * @param trustedHtml `html` string which needs to be implicitly trusted.
+ * @returns a `html` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustHtml(trustedHtml) {
+    return bypassSanitizationTrustString(trustedHtml, 'Html');
+}
+/**
+ * Mark `style` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {@link styleSanitizer} to be trusted implicitly.
+ *
+ * @param trustedStyle `style` string which needs to be implicitly trusted.
+ * @returns a `style` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustStyle(trustedStyle) {
+    return bypassSanitizationTrustString(trustedStyle, 'Style');
+}
+/**
+ * Mark `script` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {@link scriptSanitizer} to be trusted implicitly.
+ *
+ * @param trustedScript `script` string which needs to be implicitly trusted.
+ * @returns a `script` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustScript(trustedScript) {
+    return bypassSanitizationTrustString(trustedScript, 'Script');
+}
+/**
+ * Mark `url` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {@link urlSanitizer} to be trusted implicitly.
+ *
+ * @param trustedUrl `url` string which needs to be implicitly trusted.
+ * @returns a `url` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustUrl(trustedUrl) {
+    return bypassSanitizationTrustString(trustedUrl, 'Url');
+}
+/**
+ * Mark `url` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {@link resourceUrlSanitizer} to be trusted implicitly.
+ *
+ * @param trustedResourceUrl `url` string which needs to be implicitly trusted.
+ * @returns a `url` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
+    return bypassSanitizationTrustString(trustedResourceUrl, 'ResourceUrl');
+}
+function bypassSanitizationTrustString(trustedString, mode) {
+    var trusted = new String(trustedString);
+    trusted[BRAND] = mode;
+    return trusted;
 }
 
 /**
@@ -18422,5 +18329,5 @@ function sanitizeResourceUrl(unsafeResourceUrl) {
  * Generated bundle index. Do not edit.
  */
 
-export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_l, _iterableDiffersFactory as ɵangular_packages_core_core_i, _keyValueDiffersFactory as ɵangular_packages_core_core_j, _localeFactory as ɵangular_packages_core_core_k, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, DefaultIterableDifferFactory as ɵangular_packages_core_core_g, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_h, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, wtfEnabled as ɵangular_packages_core_core_m, createScope as ɵangular_packages_core_core_o, detectWTF as ɵangular_packages_core_core_n, endTimeRange as ɵangular_packages_core_core_r, leave as ɵangular_packages_core_core_p, startTimeRange as ɵangular_packages_core_core_q, getOrCreateChangeDetectorRef as ɵangular_packages_core_core_v, getOrCreateContainerRef as ɵangular_packages_core_core_y, getOrCreateElementRef as ɵangular_packages_core_core_x, getOrCreateInjectable as ɵangular_packages_core_core_w, getOrCreateNodeInjector as ɵangular_packages_core_core_u, getOrCreateTemplateRef as ɵangular_packages_core_core_z, bindingUpdated as ɵangular_packages_core_core_ba, loadInternal as ɵangular_packages_core_core_bb, makeParamDecorator as ɵangular_packages_core_core_a, makePropDecorator as ɵangular_packages_core_core_b, _def as ɵangular_packages_core_core_s, DebugContext as ɵangular_packages_core_core_t, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, inject, INJECTOR, Injector, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, directiveInject as ɵdirectiveInject, injectElementRef as ɵinjectElementRef, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, injectChangeDetectorRef as ɵinjectChangeDetectorRef, injectAttribute as ɵinjectAttribute, PublicFeature as ɵPublicFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, NgOnChangesFeature as ɵNgOnChangesFeature, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNC, container as ɵC, elementStart as ɵE, namespaceHTML as ɵNH, namespaceMathML as ɵNM, namespaceSVG as ɵNS, element as ɵEe, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, query as ɵQ, registerContentQuery as ɵQr, loadDirective as ɵd, projection as ɵP, bind as ɵb, interpolation1 as ɵi1, interpolation2 as ɵi2, interpolation3 as ɵi3, interpolation4 as ɵi4, interpolation5 as ɵi5, interpolation6 as ɵi6, interpolation7 as ɵi7, interpolation8 as ɵi8, interpolationV as ɵiV, pipeBind1 as ɵpb1, pipeBind2 as ɵpb2, pipeBind3 as ɵpb3, pipeBind4 as ɵpb4, pipeBindV as ɵpbV, pureFunction0 as ɵf0, pureFunction1 as ɵf1, pureFunction2 as ɵf2, pureFunction3 as ɵf3, pureFunction4 as ɵf4, pureFunction5 as ɵf5, pureFunction6 as ɵf6, pureFunction7 as ɵf7, pureFunction8 as ɵf8, pureFunctionV as ɵfV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, queryRefresh as ɵqR, loadQueryList as ɵql, elementEnd as ɵe, elementProperty as ɵp, projectionDef as ɵpD, reserveSlots as ɵrS, elementAttribute as ɵa, elementStyling as ɵs, elementStylingMap as ɵsm, elementStyleProp as ɵsp, elementStylingApply as ɵsa, elementClassProp as ɵcp, textBinding as ɵt, embeddedViewEnd as ɵv, store as ɵst, load as ɵld, pipe as ɵPp, whenRendered as ɵwhenRendered, i18nApply as ɵiA, i18nExpMapping as ɵiEM, i18nInterpolation as ɵiI, i18nInterpolationV as ɵIV, i18nMapping as ɵiM, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$2 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_l, _iterableDiffersFactory as ɵangular_packages_core_core_i, _keyValueDiffersFactory as ɵangular_packages_core_core_j, _localeFactory as ɵangular_packages_core_core_k, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, DefaultIterableDifferFactory as ɵangular_packages_core_core_g, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_h, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, wtfEnabled as ɵangular_packages_core_core_m, createScope as ɵangular_packages_core_core_o, detectWTF as ɵangular_packages_core_core_n, endTimeRange as ɵangular_packages_core_core_r, leave as ɵangular_packages_core_core_p, startTimeRange as ɵangular_packages_core_core_q, getOrCreateChangeDetectorRef as ɵangular_packages_core_core_v, getOrCreateContainerRef as ɵangular_packages_core_core_y, getOrCreateElementRef as ɵangular_packages_core_core_x, getOrCreateInjectable as ɵangular_packages_core_core_w, getOrCreateNodeInjector as ɵangular_packages_core_core_u, getOrCreateTemplateRef as ɵangular_packages_core_core_z, bindingUpdated as ɵangular_packages_core_core_ba, loadInternal as ɵangular_packages_core_core_bb, makeParamDecorator as ɵangular_packages_core_core_a, makePropDecorator as ɵangular_packages_core_core_b, _def as ɵangular_packages_core_core_s, DebugContext as ɵangular_packages_core_core_t, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, inject, INJECTOR, Injector, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, directiveInject as ɵdirectiveInject, injectElementRef as ɵinjectElementRef, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, injectChangeDetectorRef as ɵinjectChangeDetectorRef, injectAttribute as ɵinjectAttribute, PublicFeature as ɵPublicFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, NgOnChangesFeature as ɵNgOnChangesFeature, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNC, container as ɵC, elementStart as ɵE, namespaceHTML as ɵNH, namespaceMathML as ɵNM, namespaceSVG as ɵNS, element as ɵEe, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, query as ɵQ, registerContentQuery as ɵQr, loadDirective as ɵd, projection as ɵP, bind as ɵb, interpolation1 as ɵi1, interpolation2 as ɵi2, interpolation3 as ɵi3, interpolation4 as ɵi4, interpolation5 as ɵi5, interpolation6 as ɵi6, interpolation7 as ɵi7, interpolation8 as ɵi8, interpolationV as ɵiV, pipeBind1 as ɵpb1, pipeBind2 as ɵpb2, pipeBind3 as ɵpb3, pipeBind4 as ɵpb4, pipeBindV as ɵpbV, pureFunction0 as ɵf0, pureFunction1 as ɵf1, pureFunction2 as ɵf2, pureFunction3 as ɵf3, pureFunction4 as ɵf4, pureFunction5 as ɵf5, pureFunction6 as ɵf6, pureFunction7 as ɵf7, pureFunction8 as ɵf8, pureFunctionV as ɵfV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, queryRefresh as ɵqR, loadQueryList as ɵql, elementEnd as ɵe, elementProperty as ɵp, projectionDef as ɵpD, reserveSlots as ɵrS, elementAttribute as ɵa, elementStyling as ɵs, elementStylingMap as ɵsm, elementStyleProp as ɵsp, elementStylingApply as ɵsa, elementClassProp as ɵcp, textBinding as ɵt, embeddedViewEnd as ɵv, store as ɵst, load as ɵld, pipe as ɵPp, whenRendered as ɵwhenRendered, i18nApply as ɵiA, i18nExpMapping as ɵiEM, i18nInterpolation as ɵiI, i18nInterpolationV as ɵIV, i18nMapping as ɵiM, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$2 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map
