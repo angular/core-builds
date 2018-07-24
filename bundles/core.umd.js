@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-rc.3+43.sha-7960d18
+ * @license Angular v6.1.0-rc.3+60.sha-2cb0f68
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1694,7 +1694,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('6.1.0-rc.3+43.sha-7960d18');
+    var VERSION = new Version('6.1.0-rc.3+60.sha-2cb0f68');
 
     /**
      * @license
@@ -11564,6 +11564,18 @@
     function createNgModuleFactory(ngModuleType, bootstrapComponents, defFactory) {
         return new NgModuleFactory_(ngModuleType, bootstrapComponents, defFactory);
     }
+    function cloneNgModuleDefinition(def) {
+        var providers = Array.from(def.providers);
+        var modules = Array.from(def.modules);
+        var providersByKey = {};
+        for (var key in def.providersByKey) {
+            providersByKey[key] = def.providersByKey[key];
+        }
+        return {
+            factory: def.factory,
+            isRoot: def.isRoot, providers: providers, modules: modules, providersByKey: providersByKey,
+        };
+    }
     var NgModuleFactory_ = /** @class */ (function (_super) {
         __extends(NgModuleFactory_, _super);
         function NgModuleFactory_(moduleType, _bootstrapComponents, _ngModuleDefFactory) {
@@ -11578,7 +11590,10 @@
         }
         NgModuleFactory_.prototype.create = function (parentInjector) {
             initServicesIfNeeded();
-            var def = resolveDefinition(this._ngModuleDefFactory);
+            // Clone the NgModuleDefinition so that any tree shakeable provider definition
+            // added to this instance of the NgModuleRef doesn't affect the cached copy.
+            // See https://github.com/angular/angular/issues/25018.
+            var def = cloneNgModuleDefinition(resolveDefinition(this._ngModuleDefFactory));
             return Services.createNgModuleRef(this.moduleType, parentInjector || Injector.NULL, this._bootstrapComponents, def);
         };
         return NgModuleFactory_;
@@ -11958,15 +11973,6 @@
         if (value == null)
             return '';
         return '' + value;
-    }
-    /**
-     *  Function that throws a "not implemented" error so it's clear certain
-     *  behaviors/methods aren't yet ready.
-     *
-     * @returns Not implemented error
-     */
-    function notImplemented() {
-        return new Error('NotImplemented');
     }
     /**
      * Flattens an array in non-recursive way. Input arrays are not modified.
@@ -12777,9 +12783,9 @@
      *       This implies that `foo` and `bar` will be later styled and that the `foo`
      *       class will be applied to the element as an initial class since it's true
      */
-    function createStylingContextTemplate(initialStyleDeclarations, initialClassDeclarations) {
+    function createStylingContextTemplate(initialClassDeclarations, initialStyleDeclarations, styleSanitizer) {
         var initialStylingValues = [null];
-        var context = [null, initialStylingValues, 0, 0, null];
+        var context = [null, styleSanitizer || null, initialStylingValues, 0, 0, null];
         // we use two maps since a class name might collide with a CSS style prop
         var stylesLookup = {};
         var classesLookup = {};
@@ -12807,7 +12813,7 @@
             }
         }
         // make where the class offsets begin
-        context[3 /* ClassOffsetPosition */] = totalStyleDeclarations;
+        context[4 /* ClassOffsetPosition */] = totalStyleDeclarations;
         if (initialClassDeclarations) {
             var hasPassedDeclarations = false;
             for (var i = 0; i < initialClassDeclarations.length; i++) {
@@ -12834,14 +12840,14 @@
         var classNamesIndexStart = styleProps.length;
         var totalProps = styleProps.length + classNames.length;
         // *2 because we are filling for both single and multi style spaces
-        var maxLength = totalProps * 3 /* Size */ * 2 + 5 /* SingleStylesStartPosition */;
+        var maxLength = totalProps * 3 /* Size */ * 2 + 6 /* SingleStylesStartPosition */;
         // we need to fill the array from the start so that we can access
         // both the multi and the single array positions in the same loop block
-        for (var i = 5 /* SingleStylesStartPosition */; i < maxLength; i++) {
+        for (var i = 6 /* SingleStylesStartPosition */; i < maxLength; i++) {
             context.push(null);
         }
-        var singleStart = 5 /* SingleStylesStartPosition */;
-        var multiStart = totalProps * 3 /* Size */ + 5 /* SingleStylesStartPosition */;
+        var singleStart = 6 /* SingleStylesStartPosition */;
+        var multiStart = totalProps * 3 /* Size */ + 6 /* SingleStylesStartPosition */;
         // fill single and multi-level styles
         for (var i = 0; i < totalProps; i++) {
             var isClassBased_1 = i >= classNamesIndexStart;
@@ -12850,7 +12856,7 @@
             var initialValue = initialStylingValues[indexForInitial];
             var indexForMulti = i * 3 /* Size */ + multiStart;
             var indexForSingle = i * 3 /* Size */ + singleStart;
-            var initialFlag = isClassBased_1 ? 2 /* Class */ : 0 /* None */;
+            var initialFlag = prepareInitialFlag(prop, isClassBased_1, styleSanitizer || null);
             setFlag(context, indexForSingle, pointers(initialFlag, indexForInitial, indexForMulti));
             setProp(context, indexForSingle, prop);
             setValue(context, indexForSingle, null);
@@ -12861,7 +12867,7 @@
         }
         // there is no initial value flag for the master index since it doesn't
         // reference an initial style value
-        setFlag(context, 2 /* MasterFlagPosition */, pointers(0, 0, multiStart));
+        setFlag(context, 3 /* MasterFlagPosition */, pointers(0, 0, multiStart));
         setContextDirty(context, initialStylingValues.length > 1);
         return context;
     }
@@ -12877,22 +12883,22 @@
      *
      * @param context The styling context that will be updated with the
      *    newly provided style values.
-     * @param styles The key/value map of CSS styles that will be used for the update.
      * @param classes The key/value map of CSS class names that will be used for the update.
+     * @param styles The key/value map of CSS styles that will be used for the update.
      */
-    function updateStylingMap(context, styles, classes) {
+    function updateStylingMap(context, classes, styles) {
         var classNames = EMPTY_ARR;
         var applyAllClasses = false;
         var ignoreAllClassUpdates = false;
         // each time a string-based value pops up then it shouldn't require a deep
         // check of what's changed.
         if (typeof classes == 'string') {
-            var cachedClassString = context[4 /* CachedCssClassString */];
+            var cachedClassString = context[5 /* CachedCssClassString */];
             if (cachedClassString && cachedClassString === classes) {
                 ignoreAllClassUpdates = true;
             }
             else {
-                context[4 /* CachedCssClassString */] = classes;
+                context[5 /* CachedCssClassString */] = classes;
                 classNames = classes.split(/\s+/);
                 // this boolean is used to avoid having to create a key/value map of `true` values
                 // since a classname string implies that all those classes are added
@@ -12901,7 +12907,7 @@
         }
         else {
             classNames = classes ? Object.keys(classes) : EMPTY_ARR;
-            context[4 /* CachedCssClassString */] = null;
+            context[5 /* CachedCssClassString */] = null;
         }
         classes = (classes || EMPTY_OBJ);
         var styleProps = styles ? Object.keys(styles) : EMPTY_ARR;
@@ -12926,9 +12932,9 @@
                 var prop = getProp(context, ctxIndex);
                 if (prop === newProp) {
                     var value = getValue(context, ctxIndex);
-                    if (value !== newValue) {
+                    var flag = getPointers(context, ctxIndex);
+                    if (hasValueChanged(flag, value, newValue)) {
                         setValue(context, ctxIndex, newValue);
-                        var flag = getPointers(context, ctxIndex);
                         var initialValue = getInitialValue(context, flag);
                         // there is no point in setting this to dirty if the previously
                         // rendered value was being referenced by the initial style (or null)
@@ -12956,7 +12962,8 @@
                     }
                     else {
                         // we only care to do this if the insertion is in the middle
-                        insertNewMultiProperty(context, ctxIndex, isClassBased_2, newProp, newValue);
+                        var newFlag = prepareInitialFlag(newProp, isClassBased_2, getStyleSanitizer(context));
+                        insertNewMultiProperty(context, ctxIndex, isClassBased_2, newProp, newFlag, newValue);
                         dirty = true;
                     }
                 }
@@ -12984,6 +12991,7 @@
         // this means that there are left-over properties in the context that
         // were not detected in the context during the loop above. In that
         // case we want to add the new entries into the list
+        var sanitizer = getStyleSanitizer(context);
         while (propIndex < propLimit) {
             var isClassBased_4 = propIndex >= classesStartIndex;
             if (ignoreAllClassUpdates && isClassBased_4)
@@ -12991,7 +12999,7 @@
             var adjustedPropIndex = isClassBased_4 ? propIndex - classesStartIndex : propIndex;
             var prop = isClassBased_4 ? classNames[adjustedPropIndex] : styleProps[adjustedPropIndex];
             var value = isClassBased_4 ? (applyAllClasses ? true : classes[prop]) : styles[prop];
-            var flag = 1 /* Dirty */ | (isClassBased_4 ? 2 /* Class */ : 0 /* None */);
+            var flag = prepareInitialFlag(prop, isClassBased_4, sanitizer) | 1 /* Dirty */;
             context.push(flag, prop, value);
             propIndex++;
             dirty = true;
@@ -13015,11 +13023,11 @@
      * @param value The CSS style value that will be assigned
      */
     function updateStyleProp(context, index, value) {
-        var singleIndex = 5 /* SingleStylesStartPosition */ + index * 3 /* Size */;
+        var singleIndex = 6 /* SingleStylesStartPosition */ + index * 3 /* Size */;
         var currValue = getValue(context, singleIndex);
         var currFlag = getPointers(context, singleIndex);
         // didn't change ... nothing to make a note of
-        if (currValue !== value) {
+        if (hasValueChanged(currFlag, currValue, value)) {
             // the value will always get updated (even if the dirty flag is skipped)
             setValue(context, singleIndex, value);
             var indexForMulti = getMultiOrSingleIndex(currFlag);
@@ -13050,7 +13058,7 @@
      * @param addOrRemove Whether or not to add or remove the CSS class
      */
     function updateClassProp(context, index, addOrRemove) {
-        var adjustedIndex = index + context[3 /* ClassOffsetPosition */];
+        var adjustedIndex = index + context[4 /* ClassOffsetPosition */];
         updateStyleProp(context, adjustedIndex, addOrRemove);
     }
     /**
@@ -13075,7 +13083,8 @@
         if (isContextDirty(context)) {
             var native = context[0 /* ElementPosition */].native;
             var multiStartIndex = getMultiStartIndex(context);
-            for (var i = 5 /* SingleStylesStartPosition */; i < context.length; i += 3 /* Size */) {
+            var styleSanitizer = getStyleSanitizer(context);
+            for (var i = 6 /* SingleStylesStartPosition */; i < context.length; i += 3 /* Size */) {
                 // there is no point in rendering styles that have not changed on screen
                 if (isDirty(context, i)) {
                     var prop = getProp(context, i);
@@ -13105,7 +13114,8 @@
                         setClass(native, prop, valueToApply ? true : false, renderer, classStore);
                     }
                     else {
-                        setStyle(native, prop, valueToApply, renderer, styleStore);
+                        var sanitizer = (flag & 4 /* Sanitize */) ? styleSanitizer : null;
+                        setStyle(native, prop, valueToApply, renderer, sanitizer, styleStore);
                     }
                     setDirty(context, i, false);
                 }
@@ -13125,7 +13135,8 @@
      * @param renderer
      * @param store an optional key/value map that will be used as a context to render styles on
      */
-    function setStyle(native, prop, value, renderer, store) {
+    function setStyle(native, prop, value, renderer, sanitizer, store) {
+        value = sanitizer && value ? sanitizer(prop, value) : value;
         if (store) {
             store[prop] = value;
         }
@@ -13170,7 +13181,7 @@
         }
     }
     function setDirty(context, index, isDirtyYes) {
-        var adjustedIndex = index >= 5 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
+        var adjustedIndex = index >= 6 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
         if (isDirtyYes) {
             context[adjustedIndex] |= 1 /* Dirty */;
         }
@@ -13179,30 +13190,37 @@
         }
     }
     function isDirty(context, index) {
-        var adjustedIndex = index >= 5 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
+        var adjustedIndex = index >= 6 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
         return (context[adjustedIndex] & 1 /* Dirty */) == 1 /* Dirty */;
     }
     function isClassBased(context, index) {
-        var adjustedIndex = index >= 5 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
+        var adjustedIndex = index >= 6 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
         return (context[adjustedIndex] & 2 /* Class */) == 2 /* Class */;
     }
+    function isSanitizable(context, index) {
+        var adjustedIndex = index >= 6 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
+        return (context[adjustedIndex] & 4 /* Sanitize */) == 4 /* Sanitize */;
+    }
     function pointers(configFlag, staticIndex, dynamicIndex) {
-        return (configFlag & 3 /* BitMask */) | (staticIndex << 2 /* BitCountSize */) |
-            (dynamicIndex << (15 /* BitCountSize */ + 2 /* BitCountSize */));
+        return (configFlag & 7 /* BitMask */) | (staticIndex << 3 /* BitCountSize */) |
+            (dynamicIndex << (14 /* BitCountSize */ + 3 /* BitCountSize */));
     }
     function getInitialValue(context, flag) {
         var index = getInitialIndex(flag);
-        return context[1 /* InitialStylesPosition */][index];
+        return context[2 /* InitialStylesPosition */][index];
     }
     function getInitialIndex(flag) {
-        return (flag >> 2 /* BitCountSize */) & 32767 /* BitMask */;
+        return (flag >> 3 /* BitCountSize */) & 16383 /* BitMask */;
     }
     function getMultiOrSingleIndex(flag) {
-        var index = (flag >> (15 /* BitCountSize */ + 2 /* BitCountSize */)) & 32767 /* BitMask */;
-        return index >= 5 /* SingleStylesStartPosition */ ? index : -1;
+        var index = (flag >> (14 /* BitCountSize */ + 3 /* BitCountSize */)) & 16383 /* BitMask */;
+        return index >= 6 /* SingleStylesStartPosition */ ? index : -1;
     }
     function getMultiStartIndex(context) {
-        return getMultiOrSingleIndex(context[2 /* MasterFlagPosition */]);
+        return getMultiOrSingleIndex(context[3 /* MasterFlagPosition */]);
+    }
+    function getStyleSanitizer(context) {
+        return context[1 /* StyleSanitizerPosition */];
     }
     function setProp(context, index, prop) {
         context[index + 1 /* PropertyOffset */] = prop;
@@ -13211,11 +13229,11 @@
         context[index + 2 /* ValueOffset */] = value;
     }
     function setFlag(context, index, flag) {
-        var adjustedIndex = index === 2 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
+        var adjustedIndex = index === 3 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
         context[adjustedIndex] = flag;
     }
     function getPointers(context, index) {
-        var adjustedIndex = index === 2 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
+        var adjustedIndex = index === 3 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
         return context[adjustedIndex];
     }
     function getValue(context, index) {
@@ -13225,10 +13243,10 @@
         return context[index + 1 /* PropertyOffset */];
     }
     function isContextDirty(context) {
-        return isDirty(context, 2 /* MasterFlagPosition */);
+        return isDirty(context, 3 /* MasterFlagPosition */);
     }
     function setContextDirty(context, isDirtyYes) {
-        setDirty(context, 2 /* MasterFlagPosition */, isDirtyYes);
+        setDirty(context, 3 /* MasterFlagPosition */, isDirtyYes);
     }
     function findEntryPositionByProp(context, prop, startIndex) {
         for (var i = (startIndex || 0) + 1 /* PropertyOffset */; i < context.length; i += 3 /* Size */) {
@@ -13272,16 +13290,17 @@
                 var singleFlag = getPointers(context, singleIndex);
                 var initialIndexForSingle = getInitialIndex(singleFlag);
                 var flagValue = (isDirty(context, singleIndex) ? 1 /* Dirty */ : 0 /* None */) |
-                    (isClassBased(context, singleIndex) ? 2 /* Class */ : 0 /* None */);
+                    (isClassBased(context, singleIndex) ? 2 /* Class */ : 0 /* None */) |
+                    (isSanitizable(context, singleIndex) ? 4 /* Sanitize */ : 0 /* None */);
                 var updatedFlag = pointers(flagValue, initialIndexForSingle, i);
                 setFlag(context, singleIndex, updatedFlag);
             }
         }
     }
-    function insertNewMultiProperty(context, index, classBased, name, value) {
+    function insertNewMultiProperty(context, index, classBased, name, flag, value) {
         var doShift = index < context.length;
         // prop does not exist in the list, add it in
-        context.splice(index, 0, 1 /* Dirty */ | (classBased ? 2 /* Class */ : 0 /* None */), name, value);
+        context.splice(index, 0, flag | 1 /* Dirty */ | (classBased ? 2 /* Class */ : 0 /* None */), name, value);
         if (doShift) {
             // because the value was inserted midway into the array then we
             // need to update all the shifted multi values' single value
@@ -13294,6 +13313,29 @@
             return value ? true : false;
         }
         return value !== null;
+    }
+    function prepareInitialFlag(name, isClassBased, sanitizer) {
+        if (isClassBased) {
+            return 2 /* Class */;
+        }
+        else if (sanitizer && sanitizer(name)) {
+            return 4 /* Sanitize */;
+        }
+        return 0 /* None */;
+    }
+    function hasValueChanged(flag, a, b) {
+        var isClassBased = flag & 2 /* Class */;
+        var hasValues = a && b;
+        var usesSanitizer = flag & 4 /* Sanitize */;
+        // the toString() comparison ensures that a value is checked
+        // ... otherwise (during sanitization bypassing) the === comparsion
+        // would fail since a new String() instance is created
+        if (!isClassBased && hasValues && usesSanitizer) {
+            // we know for sure we're dealing with strings at this point
+            return a.toString() !== b.toString();
+        }
+        // everything else is safe to check with a normal equality check
+        return a !== b;
     }
 
     /**
@@ -13673,26 +13715,32 @@
         var _isParent = isParent;
         var _previousOrParentNode = previousOrParentNode;
         var oldView;
-        try {
-            isParent = true;
-            previousOrParentNode = null;
-            oldView = enterView(viewNode.data, viewNode);
-            namespaceHTML();
-            tView.template(rf, context);
-            if (rf & 2 /* Update */) {
-                refreshView();
-            }
-            else {
-                viewNode.data[TVIEW].firstTemplatePass = firstTemplatePass = false;
-            }
+        if (viewNode.data[PARENT] == null && viewNode.data[CONTEXT] && !tView.template) {
+            // This is a root view inside the view tree
+            tickRootContext(viewNode.data[CONTEXT]);
         }
-        finally {
-            // renderEmbeddedTemplate() is called twice in fact, once for creation only and then once for
-            // update. When for creation only, leaveView() must not trigger view hooks, nor clean flags.
-            var isCreationOnly = (rf & 1 /* Create */) === 1 /* Create */;
-            leaveView(oldView, isCreationOnly);
-            isParent = _isParent;
-            previousOrParentNode = _previousOrParentNode;
+        else {
+            try {
+                isParent = true;
+                previousOrParentNode = null;
+                oldView = enterView(viewNode.data, viewNode);
+                namespaceHTML();
+                tView.template(rf, context);
+                if (rf & 2 /* Update */) {
+                    refreshView();
+                }
+                else {
+                    viewNode.data[TVIEW].firstTemplatePass = firstTemplatePass = false;
+                }
+            }
+            finally {
+                // renderEmbeddedTemplate() is called twice in fact, once for creation only and then once for
+                // update. When for creation only, leaveView() must not trigger view hooks, nor clean flags.
+                var isCreationOnly = (rf & 1 /* Create */) === 1 /* Create */;
+                leaveView(oldView, isCreationOnly);
+                isParent = _isParent;
+                previousOrParentNode = _previousOrParentNode;
+            }
         }
         return viewNode;
     }
@@ -13779,18 +13827,7 @@
         ngDevMode &&
             assertEqual(viewData[BINDING_INDEX], -1, 'elements should be created before any bindings');
         ngDevMode && ngDevMode.rendererCreateElement++;
-        var native;
-        if (isProceduralRenderer(renderer)) {
-            native = renderer.createElement(name, _currentNamespace);
-        }
-        else {
-            if (_currentNamespace === null) {
-                native = renderer.createElement(name);
-            }
-            else {
-                native = renderer.createElementNS(_currentNamespace, name);
-            }
-        }
+        var native = elementCreate(name);
         ngDevMode && assertDataInRange(index - 1);
         var node = createLNode(index, 3 /* Element */, native, name, attrs || null, null);
         currentElementNode = node;
@@ -13799,6 +13836,28 @@
         }
         appendChild(getParentLNode(node), native, viewData);
         createDirectivesAndLocals(localRefs);
+        return native;
+    }
+    /**
+     * Creates a native element from a tag name, using a renderer.
+     * @param name the tag name
+     * @param overriddenRenderer Optional A renderer to override the default one
+     * @returns the element created
+     */
+    function elementCreate(name, overriddenRenderer) {
+        var native;
+        var rendererToUse = overriddenRenderer || renderer;
+        if (isProceduralRenderer(rendererToUse)) {
+            native = rendererToUse.createElement(name, _currentNamespace);
+        }
+        else {
+            if (_currentNamespace === null) {
+                native = rendererToUse.createElement(name);
+            }
+            else {
+                native = rendererToUse.createElementNS(_currentNamespace, name);
+            }
+        }
         return native;
     }
     /**
@@ -14355,23 +14414,26 @@
      *        (Note that this is not the element index, but rather an index value allocated
      *        specifically for element styling--the index must be the next index after the element
      *        index.)
-     * @param styleDeclarations A key/value array of CSS styles that will be registered on the element.
-     *   Each individual style will be used on the element as long as it is not overridden
-     *   by any styles placed on the element by multiple (`[style]`) or singular (`[style.prop]`)
-     *   bindings. If a style binding changes its value to null then the initial styling
-     *   values that are passed in here will be applied to the element (if matched).
      * @param classDeclarations A key/value array of CSS classes that will be registered on the element.
      *   Each individual style will be used on the element as long as it is not overridden
      *   by any classes placed on the element by multiple (`[class]`) or singular (`[class.named]`)
      *   bindings. If a class binding changes its value to a falsy value then the matching initial
      *   class value that are passed in here will be applied to the element (if matched).
+     * @param styleDeclarations A key/value array of CSS styles that will be registered on the element.
+     *   Each individual style will be used on the element as long as it is not overridden
+     *   by any styles placed on the element by multiple (`[style]`) or singular (`[style.prop]`)
+     *   bindings. If a style binding changes its value to null then the initial styling
+     *   values that are passed in here will be applied to the element (if matched).
+     * @param styleSanitizer An optional sanitizer function that will be used (if provided)
+     *   to sanitize the any CSS property values that are applied to the element (during rendering).
      */
-    function elementStyling(styleDeclarations, classDeclarations) {
+    function elementStyling(classDeclarations, styleDeclarations, styleSanitizer) {
         var lElement = currentElementNode;
         var tNode = lElement.tNode;
         if (!tNode.stylingTemplate) {
             // initialize the styling template.
-            tNode.stylingTemplate = createStylingContextTemplate(styleDeclarations, classDeclarations);
+            tNode.stylingTemplate =
+                createStylingContextTemplate(classDeclarations, styleDeclarations, styleSanitizer);
         }
         if (styleDeclarations && styleDeclarations.length ||
             classDeclarations && classDeclarations.length) {
@@ -14417,13 +14479,42 @@
     function elementStylingApply(index) {
         renderStyling(getStylingContext(index), renderer);
     }
-    function elementStyleProp(index, styleIndex, value, suffixOrSanitizer) {
+    /**
+     * Queue a given style to be rendered on an Element.
+     *
+     * If the style value is `null` then it will be removed from the element
+     * (or assigned a different value depending if there are any styles placed
+     * on the element with `elementStyle` or any styles that are present
+     * from when the element was created (with `elementStyling`).
+     *
+     * (Note that the styling instruction will not be applied until `elementStylingApply` is called.)
+     *
+     * @param index Index of the element's styling storage to change in the data array.
+     *        (Note that this is not the element index, but rather an index value allocated
+     *        specifically for element styling--the index must be the next index after the element
+     *        index.)
+     * @param styleIndex Index of the style property on this element. (Monotonically increasing.)
+     * @param styleName Name of property. Because it is going to DOM this is not subject to
+     *        renaming as part of minification.
+     * @param value New value to write (null to remove).
+     * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
+     *        Note that when a suffix is provided then the underlying sanitizer will
+     *        be ignored.
+     */
+    function elementStyleProp(index, styleIndex, value, suffix) {
         var valueToAdd = null;
         if (value) {
-            valueToAdd =
-                typeof suffixOrSanitizer == 'function' ? suffixOrSanitizer(value) : stringify$1(value);
-            if (typeof suffixOrSanitizer == 'string') {
-                valueToAdd = valueToAdd + suffixOrSanitizer;
+            if (suffix) {
+                // when a suffix is applied then it will bypass
+                // sanitization entirely (b/c a new string is created)
+                valueToAdd = stringify$1(value) + suffix;
+            }
+            else {
+                // sanitization happens by dealing with a String value
+                // this means that the string value will be passed through
+                // into the style rendering later (which is where the value
+                // will be sanitized before it is applied)
+                valueToAdd = value;
             }
         }
         updateStyleProp(getStylingContext(index), styleIndex, valueToAdd);
@@ -14442,15 +14533,15 @@
      *        (Note that this is not the element index, but rather an index value allocated
      *        specifically for element styling--the index must be the next index after the element
      *        index.)
-     * @param styles A key/value style map of the styles that will be applied to the given element.
-     *        Any missing styles (that have already been applied to the element beforehand) will be
-     *        removed (unset) from the element's styling.
      * @param classes A key/value style map of CSS classes that will be added to the given element.
      *        Any missing classes (that have already been applied to the element beforehand) will be
      *        removed (unset) from the element's list of CSS classes.
+     * @param styles A key/value style map of the styles that will be applied to the given element.
+     *        Any missing styles (that have already been applied to the element beforehand) will be
+     *        removed (unset) from the element's styling.
      */
-    function elementStylingMap(index, styles, classes) {
-        updateStylingMap(getStylingContext(index), styles, classes);
+    function elementStylingMap(index, classes, styles) {
+        updateStylingMap(getStylingContext(index), classes, styles);
     }
     //////////////////////////
     //// Text
@@ -15540,6 +15631,26 @@
         };
     }
     /**
+     * Used to enable lifecycle hooks on the root component.
+     *
+     * Include this feature when calling `renderComponent` if the root component
+     * you are rendering has lifecycle hooks defined. Otherwise, the hooks won't
+     * be called properly.
+     *
+     * Example:
+     *
+     * ```
+     * renderComponent(AppComponent, {features: [RootLifecycleHooks]});
+     * ```
+     */
+    function LifecycleHooksFeature(component, def) {
+        var elementNode = _getComponentHostLElementNode(component);
+        // Root component is always created at dir index 0
+        var tView = elementNode.view[TVIEW];
+        queueInitHooks(0, def.onInit, def.doCheck, tView);
+        queueLifecycleHooks(elementNode.tNode.flags, tView);
+    }
+    /**
      * Retrieve the root context for any component by walking the parent `LView` until
      * reaching the root `LView`.
      *
@@ -15997,6 +16108,12 @@
     var ViewRef$1 = /** @class */ (function () {
         function ViewRef(_view, context) {
             this._view = _view;
+            this._appRef = null;
+            this._viewContainerRef = null;
+            /**
+             * @internal
+             */
+            this._lViewNode = null;
             this.context = context;
         }
         /** @internal */
@@ -16011,7 +16128,13 @@
             enumerable: true,
             configurable: true
         });
-        ViewRef.prototype.destroy = function () { destroyLView(this._view); };
+        ViewRef.prototype.destroy = function () {
+            if (this._viewContainerRef && viewAttached(this._view)) {
+                this._viewContainerRef.detach(this._viewContainerRef.indexOf(this));
+                this._viewContainerRef = null;
+            }
+            destroyLView(this._view);
+        };
         ViewRef.prototype.onDestroy = function (callback) { storeCleanupFn(this._view, callback); };
         /**
          * Marks a view and all of its ancestors dirty.
@@ -16188,28 +16311,188 @@
          * introduce other changes.
          */
         ViewRef.prototype.checkNoChanges = function () { checkNoChanges(this.context); };
+        ViewRef.prototype.attachToViewContainerRef = function (vcRef) { this._viewContainerRef = vcRef; };
         ViewRef.prototype.detachFromAppRef = function () { this._appRef = null; };
         ViewRef.prototype.attachToAppRef = function (appRef) { this._appRef = appRef; };
         return ViewRef;
     }());
-    var EmbeddedViewRef$1 = /** @class */ (function (_super) {
-        __extends(EmbeddedViewRef, _super);
-        function EmbeddedViewRef(viewNode, template, context) {
-            var _this = _super.call(this, viewNode.data, context) || this;
-            _this._viewContainerRef = null;
-            _this._lViewNode = viewNode;
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var ComponentFactoryResolver$1 = /** @class */ (function (_super) {
+        __extends(ComponentFactoryResolver$$1, _super);
+        function ComponentFactoryResolver$$1() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        ComponentFactoryResolver$$1.prototype.resolveComponentFactory = function (component) {
+            ngDevMode && assertComponentType(component);
+            var componentDef = component.ngComponentDef;
+            return new ComponentFactory$1(componentDef);
+        };
+        return ComponentFactoryResolver$$1;
+    }(ComponentFactoryResolver));
+    function toRefArray(map) {
+        var array = [];
+        for (var nonMinified in map) {
+            if (map.hasOwnProperty(nonMinified)) {
+                var minified = map[nonMinified];
+                array.push({ propName: minified, templateName: nonMinified });
+            }
+        }
+        return array;
+    }
+    /**
+     * Default {@link RootContext} for all components rendered with {@link renderComponent}.
+     */
+    var ROOT_CONTEXT = new InjectionToken('ROOT_CONTEXT_TOKEN', { providedIn: 'root', factory: function () { return createRootContext(inject(SCHEDULER)); } });
+    /**
+     * A change detection scheduler token for {@link RootContext}. This token is the default value used
+     * for the default `RootContext` found in the {@link ROOT_CONTEXT} token.
+     */
+    var SCHEDULER = new InjectionToken('SCHEDULER_TOKEN', { providedIn: 'root', factory: function () { return requestAnimationFrame.bind(window); } });
+    /**
+     * Render3 implementation of {@link viewEngine_ComponentFactory}.
+     */
+    var ComponentFactory$1 = /** @class */ (function (_super) {
+        __extends(ComponentFactory$$1, _super);
+        function ComponentFactory$$1(componentDef) {
+            var _this = _super.call(this) || this;
+            _this.componentDef = componentDef;
+            _this.componentType = componentDef.type;
+            _this.selector = componentDef.selectors[0][0];
+            _this.ngContentSelectors = [];
             return _this;
         }
-        EmbeddedViewRef.prototype.destroy = function () {
-            if (this._viewContainerRef && viewAttached(this._view)) {
-                this._viewContainerRef.detach(this._viewContainerRef.indexOf(this));
-                this._viewContainerRef = null;
+        Object.defineProperty(ComponentFactory$$1.prototype, "inputs", {
+            get: function () {
+                return toRefArray(this.componentDef.inputs);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ComponentFactory$$1.prototype, "outputs", {
+            get: function () {
+                return toRefArray(this.componentDef.outputs);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        ComponentFactory$$1.prototype.create = function (injector, projectableNodes, rootSelectorOrNode, ngModule) {
+            var isInternalRootView = rootSelectorOrNode === undefined;
+            var rendererFactory = ngModule ? ngModule.injector.get(RendererFactory2) : domRendererFactory3;
+            var hostNode = isInternalRootView ?
+                elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef.rendererType)) :
+                locateHostElement(rendererFactory, rootSelectorOrNode);
+            // The first index of the first selector is the tag name.
+            var componentTag = this.componentDef.selectors[0][0];
+            var rootContext = ngModule && !isInternalRootView ?
+                ngModule.injector.get(ROOT_CONTEXT) :
+                createRootContext(requestAnimationFrame.bind(window));
+            // Create the root view. Uses empty TView and ContentTemplate.
+            var rootView = createLViewData(rendererFactory.createRenderer(hostNode, this.componentDef.rendererType), createTView(-1, null, null, null, null), rootContext, this.componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
+            rootView[INJECTOR$1] = ngModule && ngModule.injector || null;
+            // rootView is the parent when bootstrapping
+            var oldView = enterView(rootView, null);
+            var component;
+            var elementNode;
+            try {
+                if (rendererFactory.begin)
+                    rendererFactory.begin();
+                // Create element node at index 0 in data array
+                elementNode = hostElement(componentTag, hostNode, this.componentDef);
+                // Create directive instance with factory() and store at index 0 in directives array
+                rootContext.components.push(component = baseDirectiveCreate(0, this.componentDef.factory(), this.componentDef));
+                initChangeDetectorIfExisting(elementNode.nodeInjector, component, elementNode.data);
+                // TODO: should LifecycleHooksFeature and other host features be generated by the compiler and
+                // executed here?
+                // Angular 5 reference: https://stackblitz.com/edit/lifecycle-hooks-vcref
+                LifecycleHooksFeature(component, this.componentDef);
+                // Transform the arrays of native nodes into a LNode structure that can be consumed by the
+                // projection instruction. This is needed to support the reprojection of these nodes.
+                if (projectableNodes) {
+                    var index = 0;
+                    var projection$$1 = elementNode.tNode.projection = [];
+                    for (var i = 0; i < projectableNodes.length; i++) {
+                        var nodeList = projectableNodes[i];
+                        var firstTNode = null;
+                        var previousTNode = null;
+                        for (var j = 0; j < nodeList.length; j++) {
+                            var lNode = createLNode(++index, 3 /* Element */, nodeList[j], null, null);
+                            if (previousTNode) {
+                                previousTNode.next = lNode.tNode;
+                            }
+                            else {
+                                firstTNode = lNode.tNode;
+                            }
+                            previousTNode = lNode.tNode;
+                        }
+                        projection$$1.push(firstTNode);
+                    }
+                }
+                // Execute the template in creation mode only, and then turn off the CreationMode flag
+                renderEmbeddedTemplate(elementNode, elementNode.data[TVIEW], component, 1 /* Create */);
+                elementNode.data[FLAGS] &= ~1 /* CreationMode */;
             }
-            _super.prototype.destroy.call(this);
+            finally {
+                enterView(oldView, null);
+                if (rendererFactory.end)
+                    rendererFactory.end();
+            }
+            var componentRef = new ComponentRef$1(this.componentType, component, rootView, injector, hostNode);
+            if (isInternalRootView) {
+                // The host element of the internal root view is attached to the component's host view node
+                componentRef.hostView._lViewNode.tNode.child = elementNode.tNode;
+            }
+            return componentRef;
         };
-        EmbeddedViewRef.prototype.attachToViewContainerRef = function (vcRef) { this._viewContainerRef = vcRef; };
-        return EmbeddedViewRef;
-    }(ViewRef$1));
+        return ComponentFactory$$1;
+    }(ComponentFactory));
+    /**
+     * Represents an instance of a Component created via a {@link ComponentFactory}.
+     *
+     * `ComponentRef` provides access to the Component Instance as well other objects related to this
+     * Component Instance and allows you to destroy the Component Instance via the {@link #destroy}
+     * method.
+     *
+     */
+    var ComponentRef$1 = /** @class */ (function (_super) {
+        __extends(ComponentRef$$1, _super);
+        function ComponentRef$$1(componentType, instance, rootView, injector, hostNode) {
+            var _this = _super.call(this) || this;
+            _this.destroyCbs = [];
+            _this.instance = instance;
+            /* TODO(jasonaden): This is incomplete, to be adjusted in follow-up PR. Notes from Kara:When
+             * ViewRef.detectChanges is called from ApplicationRef.tick, it will call detectChanges at the
+             * component instance level. I suspect this means that lifecycle hooks and host bindings on the
+             * given component won't work (as these are always called at the level above a component).
+             *
+             * In render2, ViewRef.detectChanges uses the root view instance for view checks, not the
+             * component instance. So passing in the root view (1 level above the component) is sufficient.
+             * We might  want to think about creating a fake component for the top level? Or overwrite
+             * detectChanges with a function that calls tickRootContext? */
+            _this.hostView = _this.changeDetectorRef = new ViewRef$1(rootView, instance);
+            _this.hostView._lViewNode = createLNode(-1, 2 /* View */, null, null, null, rootView);
+            _this.injector = injector;
+            _this.location = new ElementRef(hostNode);
+            _this.componentType = componentType;
+            return _this;
+        }
+        ComponentRef$$1.prototype.destroy = function () {
+            ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
+            this.destroyCbs.forEach(function (fn) { return fn(); });
+            this.destroyCbs = null;
+        };
+        ComponentRef$$1.prototype.onDestroy = function (callback) {
+            ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
+            this.destroyCbs.push(callback);
+        };
+        return ComponentRef$$1;
+    }(ComponentRef));
 
     /**
      * @license
@@ -16306,7 +16589,7 @@
             templateRef: null,
             viewContainerRef: null,
             elementRef: null,
-            changeDetectorRef: null
+            changeDetectorRef: null,
         };
     }
     /**
@@ -16361,6 +16644,7 @@
     function injectChangeDetectorRef() {
         return getOrCreateChangeDetectorRef(getOrCreateNodeInjector(), null);
     }
+    var componentFactoryResolver = new ComponentFactoryResolver$1();
     /**
      * Inject static attribute value into directive constructor.
      *
@@ -16719,8 +17003,14 @@
             this._viewRefs.splice(adjustedIdx, 0, viewRef);
             return viewRef;
         };
-        ViewContainerRef.prototype.createComponent = function (componentFactory, index, injector, projectableNodes, ngModule) {
-            throw notImplemented();
+        ViewContainerRef.prototype.createComponent = function (componentFactory, index, injector, projectableNodes, ngModuleRef) {
+            var contextInjector = injector || this.parentInjector;
+            if (!ngModuleRef && contextInjector) {
+                ngModuleRef = contextInjector.get(NgModuleRef);
+            }
+            var componentRef = componentFactory.create(contextInjector, projectableNodes, undefined, ngModuleRef);
+            this.insert(componentRef.hostView, index);
+            return componentRef;
         };
         ViewContainerRef.prototype.insert = function (viewRef, index) {
             if (viewRef.destroyed) {
@@ -16799,7 +17089,9 @@
                 insertView(containerNode, viewNode, index);
             }
             renderEmbeddedTemplate(viewNode, this._tView, context, 1 /* Create */);
-            return new EmbeddedViewRef$1(viewNode, this._tView.template, context);
+            var viewRef = new ViewRef$1(viewNode.data, context);
+            viewRef._lViewNode = viewNode;
+            return viewRef;
         };
         return TemplateRef;
     }());
@@ -16820,145 +17112,6 @@
     function PublicFeature(definition) {
         definition.diPublic = diPublic;
     }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var ComponentFactoryResolver$1 = /** @class */ (function (_super) {
-        __extends(ComponentFactoryResolver$$1, _super);
-        function ComponentFactoryResolver$$1() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        ComponentFactoryResolver$$1.prototype.resolveComponentFactory = function (component) {
-            ngDevMode && assertComponentType(component);
-            var componentDef = component.ngComponentDef;
-            return new ComponentFactory$1(componentDef);
-        };
-        return ComponentFactoryResolver$$1;
-    }(ComponentFactoryResolver));
-    function toRefArray(map) {
-        var array = [];
-        for (var nonMinified in map) {
-            if (map.hasOwnProperty(nonMinified)) {
-                var minified = map[nonMinified];
-                array.push({ propName: minified, templateName: nonMinified });
-            }
-        }
-        return array;
-    }
-    /**
-     * Default {@link RootContext} for all components rendered with {@link renderComponent}.
-     */
-    var ROOT_CONTEXT = new InjectionToken('ROOT_CONTEXT_TOKEN', { providedIn: 'root', factory: function () { return createRootContext(inject(SCHEDULER)); } });
-    /**
-     * A change detection scheduler token for {@link RootContext}. This token is the default value used
-     * for the default `RootContext` found in the {@link ROOT_CONTEXT} token.
-     */
-    var SCHEDULER = new InjectionToken('SCHEDULER_TOKEN', { providedIn: 'root', factory: function () { return requestAnimationFrame.bind(window); } });
-    /**
-     * Render3 implementation of {@link viewEngine_ComponentFactory}.
-     */
-    var ComponentFactory$1 = /** @class */ (function (_super) {
-        __extends(ComponentFactory$$1, _super);
-        function ComponentFactory$$1(componentDef) {
-            var _this = _super.call(this) || this;
-            _this.componentDef = componentDef;
-            _this.componentType = componentDef.type;
-            _this.selector = componentDef.selectors[0][0];
-            _this.ngContentSelectors = [];
-            return _this;
-        }
-        Object.defineProperty(ComponentFactory$$1.prototype, "inputs", {
-            get: function () {
-                return toRefArray(this.componentDef.inputs);
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(ComponentFactory$$1.prototype, "outputs", {
-            get: function () {
-                return toRefArray(this.componentDef.outputs);
-            },
-            enumerable: true,
-            configurable: true
-        });
-        ComponentFactory$$1.prototype.create = function (parentComponentInjector, projectableNodes, rootSelectorOrNode, ngModule) {
-            ngDevMode && assertDefined(ngModule, 'ngModule should always be defined');
-            var rendererFactory = ngModule ? ngModule.injector.get(RendererFactory2) : document;
-            var hostNode = locateHostElement(rendererFactory, rootSelectorOrNode);
-            // The first index of the first selector is the tag name.
-            var componentTag = this.componentDef.selectors[0][0];
-            var rootContext = ngModule.injector.get(ROOT_CONTEXT);
-            // Create the root view. Uses empty TView and ContentTemplate.
-            var rootView = createLViewData(rendererFactory.createRenderer(hostNode, this.componentDef.rendererType), createTView(-1, null, null, null, null), null, this.componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
-            rootView[INJECTOR$1] = ngModule && ngModule.injector || null;
-            // rootView is the parent when bootstrapping
-            var oldView = enterView(rootView, null);
-            var component;
-            var elementNode;
-            try {
-                if (rendererFactory.begin)
-                    rendererFactory.begin();
-                // Create element node at index 0 in data array
-                elementNode = hostElement(componentTag, hostNode, this.componentDef);
-                // Create directive instance with factory() and store at index 0 in directives array
-                rootContext.components.push(component = baseDirectiveCreate(0, this.componentDef.factory(), this.componentDef));
-                initChangeDetectorIfExisting(elementNode.nodeInjector, component, elementNode.data);
-            }
-            finally {
-                enterView(oldView, null);
-                if (rendererFactory.end)
-                    rendererFactory.end();
-            }
-            // TODO(misko): this is the wrong injector here.
-            return new ComponentRef$1(this.componentType, component, rootView, ngModule.injector, hostNode);
-        };
-        return ComponentFactory$$1;
-    }(ComponentFactory));
-    /**
-     * Represents an instance of a Component created via a {@link ComponentFactory}.
-     *
-     * `ComponentRef` provides access to the Component Instance as well other objects related to this
-     * Component Instance and allows you to destroy the Component Instance via the {@link #destroy}
-     * method.
-     *
-     */
-    var ComponentRef$1 = /** @class */ (function (_super) {
-        __extends(ComponentRef$$1, _super);
-        function ComponentRef$$1(componentType, instance, rootView, injector, hostNode) {
-            var _this = _super.call(this) || this;
-            _this.destroyCbs = [];
-            _this.instance = instance;
-            /* TODO(jasonaden): This is incomplete, to be adjusted in follow-up PR. Notes from Kara:When
-             * ViewRef.detectChanges is called from ApplicationRef.tick, it will call detectChanges at the
-             * component instance level. I suspect this means that lifecycle hooks and host bindings on the
-             * given component won't work (as these are always called at the level above a component).
-             *
-             * In render2, ViewRef.detectChanges uses the root view instance for view checks, not the
-             * component instance. So passing in the root view (1 level above the component) is sufficient.
-             * We might  want to think about creating a fake component for the top level? Or overwrite
-             * detectChanges with a function that calls tickRootContext? */
-            _this.hostView = _this.changeDetectorRef = new ViewRef$1(rootView, instance);
-            _this.injector = injector;
-            _this.location = new ElementRef(hostNode);
-            _this.componentType = componentType;
-            return _this;
-        }
-        ComponentRef$$1.prototype.destroy = function () {
-            ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
-            this.destroyCbs.forEach(function (fn) { return fn(); });
-            this.destroyCbs = null;
-        };
-        ComponentRef$$1.prototype.onDestroy = function (callback) {
-            ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
-            this.destroyCbs.push(callback);
-        };
-        return ComponentRef$$1;
-    }(ComponentRef));
 
     /**
      * @license
@@ -18140,6 +18293,82 @@
      * found in the LICENSE file at https://angular.io/license
      */
     var BRAND = '__SANITIZER_TRUSTED_BRAND__';
+    function allowSanitizationBypass(value, type) {
+        return (value instanceof String && value[BRAND] === type) ? true : false;
+    }
+    /**
+     * Mark `html` string as trusted.
+     *
+     * This function wraps the trusted string in `String` and brands it in a way which makes it
+     * recognizable to {@link htmlSanitizer} to be trusted implicitly.
+     *
+     * @param trustedHtml `html` string which needs to be implicitly trusted.
+     * @returns a `html` `String` which has been branded to be implicitly trusted.
+     */
+    function bypassSanitizationTrustHtml(trustedHtml) {
+        return bypassSanitizationTrustString(trustedHtml, "Html" /* Html */);
+    }
+    /**
+     * Mark `style` string as trusted.
+     *
+     * This function wraps the trusted string in `String` and brands it in a way which makes it
+     * recognizable to {@link styleSanitizer} to be trusted implicitly.
+     *
+     * @param trustedStyle `style` string which needs to be implicitly trusted.
+     * @returns a `style` `String` which has been branded to be implicitly trusted.
+     */
+    function bypassSanitizationTrustStyle(trustedStyle) {
+        return bypassSanitizationTrustString(trustedStyle, "Style" /* Style */);
+    }
+    /**
+     * Mark `script` string as trusted.
+     *
+     * This function wraps the trusted string in `String` and brands it in a way which makes it
+     * recognizable to {@link scriptSanitizer} to be trusted implicitly.
+     *
+     * @param trustedScript `script` string which needs to be implicitly trusted.
+     * @returns a `script` `String` which has been branded to be implicitly trusted.
+     */
+    function bypassSanitizationTrustScript(trustedScript) {
+        return bypassSanitizationTrustString(trustedScript, "Script" /* Script */);
+    }
+    /**
+     * Mark `url` string as trusted.
+     *
+     * This function wraps the trusted string in `String` and brands it in a way which makes it
+     * recognizable to {@link urlSanitizer} to be trusted implicitly.
+     *
+     * @param trustedUrl `url` string which needs to be implicitly trusted.
+     * @returns a `url` `String` which has been branded to be implicitly trusted.
+     */
+    function bypassSanitizationTrustUrl(trustedUrl) {
+        return bypassSanitizationTrustString(trustedUrl, "Url" /* Url */);
+    }
+    /**
+     * Mark `url` string as trusted.
+     *
+     * This function wraps the trusted string in `String` and brands it in a way which makes it
+     * recognizable to {@link resourceUrlSanitizer} to be trusted implicitly.
+     *
+     * @param trustedResourceUrl `url` string which needs to be implicitly trusted.
+     * @returns a `url` `String` which has been branded to be implicitly trusted.
+     */
+    function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
+        return bypassSanitizationTrustString(trustedResourceUrl, "ResourceUrl" /* ResourceUrl */);
+    }
+    function bypassSanitizationTrustString(trustedString, mode) {
+        var trusted = new String(trustedString);
+        trusted[BRAND] = mode;
+        return trusted;
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     /**
      * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
      * dangerous content.
@@ -18158,7 +18387,7 @@
         if (s) {
             return s.sanitize(exports.SecurityContext.HTML, unsafeHtml) || '';
         }
-        if (unsafeHtml instanceof String && unsafeHtml[BRAND] === 'Html') {
+        if (allowSanitizationBypass(unsafeHtml, "Html" /* Html */)) {
             return unsafeHtml.toString();
         }
         return _sanitizeHtml(document, stringify$1(unsafeHtml));
@@ -18181,7 +18410,7 @@
         if (s) {
             return s.sanitize(exports.SecurityContext.STYLE, unsafeStyle) || '';
         }
-        if (unsafeStyle instanceof String && unsafeStyle[BRAND] === 'Style') {
+        if (allowSanitizationBypass(unsafeStyle, "Style" /* Style */)) {
             return unsafeStyle.toString();
         }
         return _sanitizeStyle(stringify$1(unsafeStyle));
@@ -18205,7 +18434,7 @@
         if (s) {
             return s.sanitize(exports.SecurityContext.URL, unsafeUrl) || '';
         }
-        if (unsafeUrl instanceof String && unsafeUrl[BRAND] === 'Url') {
+        if (allowSanitizationBypass(unsafeUrl, "Url" /* Url */)) {
             return unsafeUrl.toString();
         }
         return _sanitizeUrl(stringify$1(unsafeUrl));
@@ -18224,76 +18453,10 @@
         if (s) {
             return s.sanitize(exports.SecurityContext.RESOURCE_URL, unsafeResourceUrl) || '';
         }
-        if (unsafeResourceUrl instanceof String &&
-            unsafeResourceUrl[BRAND] === 'ResourceUrl') {
+        if (allowSanitizationBypass(unsafeResourceUrl, "ResourceUrl" /* ResourceUrl */)) {
             return unsafeResourceUrl.toString();
         }
         throw new Error('unsafe value used in a resource URL context (see http://g.co/ng/security#xss)');
-    }
-    /**
-     * Mark `html` string as trusted.
-     *
-     * This function wraps the trusted string in `String` and brands it in a way which makes it
-     * recognizable to {@link htmlSanitizer} to be trusted implicitly.
-     *
-     * @param trustedHtml `html` string which needs to be implicitly trusted.
-     * @returns a `html` `String` which has been branded to be implicitly trusted.
-     */
-    function bypassSanitizationTrustHtml(trustedHtml) {
-        return bypassSanitizationTrustString(trustedHtml, 'Html');
-    }
-    /**
-     * Mark `style` string as trusted.
-     *
-     * This function wraps the trusted string in `String` and brands it in a way which makes it
-     * recognizable to {@link styleSanitizer} to be trusted implicitly.
-     *
-     * @param trustedStyle `style` string which needs to be implicitly trusted.
-     * @returns a `style` `String` which has been branded to be implicitly trusted.
-     */
-    function bypassSanitizationTrustStyle(trustedStyle) {
-        return bypassSanitizationTrustString(trustedStyle, 'Style');
-    }
-    /**
-     * Mark `script` string as trusted.
-     *
-     * This function wraps the trusted string in `String` and brands it in a way which makes it
-     * recognizable to {@link scriptSanitizer} to be trusted implicitly.
-     *
-     * @param trustedScript `script` string which needs to be implicitly trusted.
-     * @returns a `script` `String` which has been branded to be implicitly trusted.
-     */
-    function bypassSanitizationTrustScript(trustedScript) {
-        return bypassSanitizationTrustString(trustedScript, 'Script');
-    }
-    /**
-     * Mark `url` string as trusted.
-     *
-     * This function wraps the trusted string in `String` and brands it in a way which makes it
-     * recognizable to {@link urlSanitizer} to be trusted implicitly.
-     *
-     * @param trustedUrl `url` string which needs to be implicitly trusted.
-     * @returns a `url` `String` which has been branded to be implicitly trusted.
-     */
-    function bypassSanitizationTrustUrl(trustedUrl) {
-        return bypassSanitizationTrustString(trustedUrl, 'Url');
-    }
-    /**
-     * Mark `url` string as trusted.
-     *
-     * This function wraps the trusted string in `String` and brands it in a way which makes it
-     * recognizable to {@link resourceUrlSanitizer} to be trusted implicitly.
-     *
-     * @param trustedResourceUrl `url` string which needs to be implicitly trusted.
-     * @returns a `url` `String` which has been branded to be implicitly trusted.
-     */
-    function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
-        return bypassSanitizationTrustString(trustedResourceUrl, 'ResourceUrl');
-    }
-    function bypassSanitizationTrustString(trustedString, mode) {
-        var trusted = new String(trustedString);
-        trusted[BRAND] = mode;
-        return trusted;
     }
 
     /**
@@ -18587,15 +18750,15 @@
     exports.ɵiI = i18nInterpolation;
     exports.ɵIV = i18nInterpolationV;
     exports.ɵiM = i18nMapping;
+    exports.ɵsanitizeHtml = sanitizeHtml;
+    exports.ɵsanitizeStyle = sanitizeStyle;
+    exports.ɵsanitizeUrl = sanitizeUrl;
+    exports.ɵsanitizeResourceUrl = sanitizeResourceUrl;
     exports.ɵbypassSanitizationTrustHtml = bypassSanitizationTrustHtml;
     exports.ɵbypassSanitizationTrustStyle = bypassSanitizationTrustStyle;
     exports.ɵbypassSanitizationTrustScript = bypassSanitizationTrustScript;
     exports.ɵbypassSanitizationTrustUrl = bypassSanitizationTrustUrl;
     exports.ɵbypassSanitizationTrustResourceUrl = bypassSanitizationTrustResourceUrl;
-    exports.ɵsanitizeHtml = sanitizeHtml;
-    exports.ɵsanitizeStyle = sanitizeStyle;
-    exports.ɵsanitizeUrl = sanitizeUrl;
-    exports.ɵsanitizeResourceUrl = sanitizeResourceUrl;
     exports.ɵregisterModuleFactory = registerModuleFactory;
     exports.ɵEMPTY_ARRAY = EMPTY_ARRAY$2;
     exports.ɵEMPTY_MAP = EMPTY_MAP;

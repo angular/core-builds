@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
 import { InitialStylingFlags } from './interfaces/definition';
 import { LElementNode } from './interfaces/node';
 import { Renderer3 } from './interfaces/renderer';
@@ -49,42 +50,44 @@ import { Renderer3 } from './interfaces/renderer';
  *
  * ```
  * context = [
+ *   element,
+ *   styleSanitizer | null,
  *   [null, '100px', '200px', true],  // property names are not needed since they have already been
  * written to DOM.
  *
+ *   configMasterVal,
  *   1, // this instructs how many `style` values there are so that class index values can be
  * offsetted
- *
- *   configMasterVal,
- *
- *   // 3
- *   'width',
- *   pointers(1, 12);  // Point to static `width`: `100px` and multi `width`.
- *   null,
+ *   'last class string applied',
  *
  *   // 6
- *   'height',
- *   pointers(2, 15); // Point to static `height`: `200px` and multi `height`.
+ *   'width',
+ *   pointers(1, 15);  // Point to static `width`: `100px` and multi `width`.
  *   null,
  *
  *   // 9
- *   'foo',
- *   pointers(1, 18);  // Point to static `foo`: `true` and multi `foo`.
+ *   'height',
+ *   pointers(2, 18); // Point to static `height`: `200px` and multi `height`.
  *   null,
  *
  *   // 12
- *   'width',
- *   pointers(1, 3);  // Point to static `width`: `100px` and single `width`.
+ *   'foo',
+ *   pointers(1, 21);  // Point to static `foo`: `true` and multi `foo`.
  *   null,
  *
  *   // 15
- *   'height',
- *   pointers(2, 6);  // Point to static `height`: `200px` and single `height`.
+ *   'width',
+ *   pointers(1, 6);  // Point to static `width`: `100px` and single `width`.
  *   null,
  *
  *   // 18
+ *   'height',
+ *   pointers(2, 9);  // Point to static `height`: `200px` and single `height`.
+ *   null,
+ *
+ *   // 21
  *   'foo',
- *   pointers(3, 9);  // Point to static `foo`: `true` and single `foo`.
+ *   pointers(3, 12);  // Point to static `foo`: `true` and single `foo`.
  *   null,
  * ]
  *
@@ -108,32 +111,36 @@ import { Renderer3 } from './interfaces/renderer';
  * `updateStyleProp` or `updateClassProp` cannot be called with a new property (only
  * `updateStylingMap` can include new CSS properties that will be added to the context).
  */
-export interface StylingContext extends Array<InitialStyles | number | string | boolean | LElementNode | null> {
+export interface StylingContext extends Array<InitialStyles | number | string | boolean | LElementNode | StyleSanitizeFn | null> {
     /**
      * Location of element that is used as a target for this context.
      */
     [0]: LElementNode | null;
     /**
+     * The style sanitizer that is used within this context
+     */
+    [1]: StyleSanitizeFn | null;
+    /**
      * Location of initial data shared by all instances of this style.
      */
-    [1]: InitialStyles;
+    [2]: InitialStyles;
     /**
      * A numeric value representing the configuration status (whether the context is dirty or not)
      * mixed together (using bit shifting) with a index value which tells the starting index value
      * of where the multi style entries begin.
      */
-    [2]: number;
+    [3]: number;
     /**
      * A numeric value representing the class index offset value. Whenever a single class is
      * applied (using `elementClassProp`) it should have an styling index value that doesn't
      * need to take into account any style values that exist in the context.
      */
-    [3]: number;
+    [4]: number;
     /**
      * The last CLASS STRING VALUE that was interpreted by elementStylingMap. This is cached
      * So that the algorithm can exit early incase the string has not changed.
      */
-    [4]: string | null;
+    [5]: string | null;
 }
 /**
  * The initial styles is populated whether or not there are any initial styles passed into
@@ -154,23 +161,25 @@ export declare const enum StylingFlags {
     None = 0,
     Dirty = 1,
     Class = 2,
-    BitCountSize = 2,
-    BitMask = 3
+    Sanitize = 4,
+    BitCountSize = 3,
+    BitMask = 7
 }
 /** Used as numeric pointer values to determine what cells to update in the `StylingContext` */
 export declare const enum StylingIndex {
     ElementPosition = 0,
-    InitialStylesPosition = 1,
-    MasterFlagPosition = 2,
-    ClassOffsetPosition = 3,
-    CachedCssClassString = 4,
-    SingleStylesStartPosition = 5,
+    StyleSanitizerPosition = 1,
+    InitialStylesPosition = 2,
+    MasterFlagPosition = 3,
+    ClassOffsetPosition = 4,
+    CachedCssClassString = 5,
+    SingleStylesStartPosition = 6,
     FlagsOffset = 0,
     PropertyOffset = 1,
     ValueOffset = 2,
     Size = 3,
-    BitCountSize = 15,
-    BitMask = 32767
+    BitCountSize = 14,
+    BitMask = 16383
 }
 /**
  * Used clone a copy of a pre-computed template of a styling context.
@@ -201,7 +210,7 @@ export declare function allocStylingContext(lElement: LElementNode | null, templ
  *       This implies that `foo` and `bar` will be later styled and that the `foo`
  *       class will be applied to the element as an initial class since it's true
  */
-export declare function createStylingContextTemplate(initialStyleDeclarations?: (string | boolean | InitialStylingFlags)[] | null, initialClassDeclarations?: (string | boolean | InitialStylingFlags)[] | null): StylingContext;
+export declare function createStylingContextTemplate(initialClassDeclarations?: (string | boolean | InitialStylingFlags)[] | null, initialStyleDeclarations?: (string | boolean | InitialStylingFlags)[] | null, styleSanitizer?: StyleSanitizeFn | null): StylingContext;
 /**
  * Sets and resolves all `multi` styling on an `StylingContext` so that they can be
  * applied to the element once `renderStyling` is called.
@@ -212,14 +221,14 @@ export declare function createStylingContextTemplate(initialStyleDeclarations?: 
  *
  * @param context The styling context that will be updated with the
  *    newly provided style values.
- * @param styles The key/value map of CSS styles that will be used for the update.
  * @param classes The key/value map of CSS class names that will be used for the update.
+ * @param styles The key/value map of CSS styles that will be used for the update.
  */
-export declare function updateStylingMap(context: StylingContext, styles: {
+export declare function updateStylingMap(context: StylingContext, classes: {
     [key: string]: any;
-} | null, classes?: {
+} | string | null, styles?: {
     [key: string]: any;
-} | string | null): void;
+} | null): void;
 /**
  * Sets and resolves a single styling property/value on the provided `StylingContext` so
  * that they can be applied to the element once `renderStyling` is called.
