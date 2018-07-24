@@ -9,14 +9,13 @@ import { ApplicationRef } from '../application_ref';
 import { ChangeDetectorRef as viewEngine_ChangeDetectorRef } from '../change_detection/change_detector_ref';
 import { ViewContainerRef as viewEngine_ViewContainerRef } from '../linker/view_container_ref';
 import { EmbeddedViewRef as viewEngine_EmbeddedViewRef, InternalViewRef as viewEngine_InternalViewRef } from '../linker/view_ref';
-import { ComponentTemplate } from './interfaces/definition';
-import { LViewNode } from './interfaces/node';
 import { LViewData } from './interfaces/view';
 export interface viewEngine_ChangeDetectorRef_interface extends viewEngine_ChangeDetectorRef {
 }
 export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T>, viewEngine_InternalViewRef, viewEngine_ChangeDetectorRef_interface {
     protected _view: LViewData;
     private _appRef;
+    private _viewContainerRef;
     context: T;
     rootNodes: any[];
     constructor(_view: LViewData, context: T | null);
@@ -198,12 +197,7 @@ export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T>, viewEn
      * introduce other changes.
      */
     checkNoChanges(): void;
+    attachToViewContainerRef(vcRef: viewEngine_ViewContainerRef): void;
     detachFromAppRef(): void;
     attachToAppRef(appRef: ApplicationRef): void;
-}
-export declare class EmbeddedViewRef<T> extends ViewRef<T> {
-    private _viewContainerRef;
-    constructor(viewNode: LViewNode, template: ComponentTemplate<T>, context: T);
-    destroy(): void;
-    attachToViewContainerRef(vcRef: viewEngine_ViewContainerRef): void;
 }
