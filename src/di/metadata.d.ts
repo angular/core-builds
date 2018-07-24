@@ -3,19 +3,19 @@
  */
 export interface InjectDecorator {
     /**
-     * A constructor parameter decorator that specifies a
-     * custom provider of a dependency.
+     * A parameter decorator that specifies a dependency.
      *
-     * @see ["Dependency Injection Guide"](guide/dependency-injection).
+     * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
      *
      * @usageNotes
-     * The following example shows a class constructor that specifies a
-     * custom provider of a dependency using the parameter decorator.
+     * ### Example
      *
      * {@example core/di/ts/metadata_spec.ts region='Inject'}
      *
-     * When `@Inject()` is not present, the `Injector` uses the type annotation of the
-     * parameter as the provider.
+     * When `@Inject()` is not present, `Injector` will use the type annotation of the
+     * parameter.
+     *
+     * ### Example
      *
      * {@example core/di/ts/metadata_spec.ts region='InjectWithoutDecorator'}
      */
@@ -26,9 +26,6 @@ export interface InjectDecorator {
  * Type of the Inject metadata.
  */
 export interface Inject {
-    /**
-     * Injector token that maps to the dependency to be injected.
-     */
     token: any;
 }
 /**
@@ -42,14 +39,15 @@ export declare const Inject: InjectDecorator;
  */
 export interface OptionalDecorator {
     /**
-     * A constructor parameter decorator that marks a dependency as optional.
+     * A parameter metadata that marks a dependency as optional.
+     * `Injector` provides `null` if the dependency is not found.
      *
-     * The DI framework provides null if the dependency is not found.
-     * For example, the following code allows the possibility of a null result:
+     * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+     *
+     * @usageNotes
+     * ### Example
      *
      * {@example core/di/ts/metadata_spec.ts region='Optional'}
-     *
-     * @see ["Dependency Injection Guide"](guide/dependency-injection).
      */
     (): any;
     new (): Optional;
@@ -70,18 +68,14 @@ export declare const Optional: OptionalDecorator;
  */
 export interface SelfDecorator {
     /**
-     * A constructor parameter decorator that tells the DI framework
-     * to retrieve a dependency only from the local injector.
+     * Specifies that an `Injector` should retrieve a dependency only from itself.
      *
-     * In the following example, the dependency can be resolved
-     * by the local injector when instantiating the class itself, but not
-     * when instantiating a child.
+     * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+     *
+     * @usageNotes
+     * ### Example
      *
      * {@example core/di/ts/metadata_spec.ts region='Self'}
-     *
-     * @see ["Dependency Injection Guide"](guide/dependency-injection).
-     *
-     *
      */
     (): any;
     new (): Self;
@@ -102,17 +96,14 @@ export declare const Self: SelfDecorator;
  */
 export interface SkipSelfDecorator {
     /**
-     * A constructor parameter decorator that tells the DI framework
-     * that dependency resolution should start from the parent injector.
+     * Specifies that the dependency resolution should start from the parent injector.
      *
-     * In the following example, the dependency can be resolved when
-     * instantiating a child, but not when instantiating the class itself.
+     * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+     *
+     * @usageNotes
+     * ### Example
      *
      * {@example core/di/ts/metadata_spec.ts region='SkipSelf'}
-     *
-     * @see ["Dependency Injection Guide"](guide/dependency-injection).
-     *
-     *
      */
     (): any;
     new (): SkipSelf;
@@ -135,13 +126,13 @@ export declare const SkipSelf: SkipSelfDecorator;
  */
 export interface HostDecorator {
     /**
-     * A constructor parameter decorator that tells the DI framework
-     * to retrieve a dependency from any injector until
+     * Specifies that an injector should retrieve a dependency from any injector until
      * reaching the host element of the current component.
      *
-     * @see ["Dependency Injection Guide"](guide/dependency-injection).
+     * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
      *
      * @usageNotes
+     * ### Example
      *
      * {@example core/di/ts/metadata_spec.ts region='Host'}
      */
