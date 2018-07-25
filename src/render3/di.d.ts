@@ -7,6 +7,7 @@
  */
 import { ChangeDetectorRef as viewEngine_ChangeDetectorRef } from '../change_detection/change_detector_ref';
 import { InjectFlags } from '../di/injector';
+import { ComponentFactoryResolver as viewEngine_ComponentFactoryResolver } from '../linker/component_factory_resolver';
 import { ElementRef as viewEngine_ElementRef } from '../linker/element_ref';
 import { TemplateRef as viewEngine_TemplateRef } from '../linker/template_ref';
 import { ViewContainerRef as viewEngine_ViewContainerRef } from '../linker/view_container_ref';
@@ -95,6 +96,14 @@ export declare function injectTemplateRef<T>(): viewEngine_TemplateRef<T>;
 export declare function injectViewContainerRef(): viewEngine_ViewContainerRef;
 /** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
 export declare function injectChangeDetectorRef(): viewEngine_ChangeDetectorRef;
+/**
+ * Creates a ComponentFactoryResolver and stores it on the injector. Or, if the
+ * ComponentFactoryResolver
+ * already exists, retrieves the existing ComponentFactoryResolver.
+ *
+ * @returns The ComponentFactoryResolver instance to use
+ */
+export declare function injectComponentFactoryResolver(): viewEngine_ComponentFactoryResolver;
 /**
  * Inject static attribute value into directive constructor.
  *
