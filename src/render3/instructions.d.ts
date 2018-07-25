@@ -638,7 +638,7 @@ export declare function interpolationV(values: any[]): string | NO_CHANGE;
 export declare function interpolation1(prefix: string, v0: any, suffix: string): string | NO_CHANGE;
 /** Creates an interpolation binding with 2 expressions. */
 export declare function interpolation2(prefix: string, v0: any, i0: string, v1: any, suffix: string): string | NO_CHANGE;
-/** Creates an interpolation bindings with 3 expressions. */
+/** Creates an interpolation binding with 3 expressions. */
 export declare function interpolation3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): string | NO_CHANGE;
 /** Create an interpolation binding with 4 expressions. */
 export declare function interpolation4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): string | NO_CHANGE;

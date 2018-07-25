@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-rc.3+60.sha-2cb0f68
+ * @license Angular v6.1.0-rc.3+64.sha-1ceddb6
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1694,7 +1694,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('6.1.0-rc.3+60.sha-2cb0f68');
+    var VERSION = new Version('6.1.0-rc.3+64.sha-1ceddb6');
 
     /**
      * @license
@@ -15389,7 +15389,7 @@
         var different = bindingUpdated2(v0, v1);
         return different ? prefix + stringify$1(v0) + i0 + stringify$1(v1) + suffix : NO_CHANGE;
     }
-    /** Creates an interpolation bindings with 3 expressions. */
+    /** Creates an interpolation binding with 3 expressions. */
     function interpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
         var different = bindingUpdated2(v0, v1);
         different = bindingUpdated(v2) || different;
@@ -17120,7 +17120,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var i18nTagRegex = /\{\$([^}]+)\}/g;
+    var i18nTagRegex = /{\$([^}]+)}/g;
     /**
      * Takes a translation string, the initial list of placeholders (elements and expressions) and the
      * indexes of their corresponding expression nodes to return a list of instructions for each
@@ -17135,17 +17135,18 @@
      * their indexes.
      * @param expressions An array containing, for each template, the maps of expression placeholders
      * and their indexes.
-     * @param tmplContainers An array of template container placeholders whose content should be ignored
-     * when generating the instructions for their parent template.
+     * @param templateRoots An array of template roots whose content should be ignored when
+     * generating the instructions for their parent template.
      * @param lastChildIndex The index of the last child of the i18n node. Used when the i18n block is
      * an ng-container.
      *
      * @returns A list of instructions used to translate each template.
      */
-    function i18nMapping(translation, elements, expressions, tmplContainers, lastChildIndex) {
+    function i18nMapping(translation, elements, expressions, templateRoots, lastChildIndex) {
         var translationParts = translation.split(i18nTagRegex);
-        var instructions = [];
-        generateMappingInstructions(0, translationParts, instructions, elements, expressions, tmplContainers, lastChildIndex);
+        var nbTemplates = templateRoots ? templateRoots.length + 1 : 1;
+        var instructions = (new Array(nbTemplates)).fill(undefined);
+        generateMappingInstructions(0, 0, translationParts, instructions, elements, expressions, templateRoots, lastChildIndex);
         return instructions;
     }
     /**
@@ -17154,7 +17155,9 @@
      *
      * See `i18nMapping()` for more details.
      *
-     * @param index The current index in `translationParts`.
+     * @param tmplIndex The order of appearance of the template.
+     * 0 for the root template, following indexes match the order in `templateRoots`.
+     * @param partIndex The current index in `translationParts`.
      * @param translationParts The translation string split into an array of placeholders and text
      * elements.
      * @param instructions The current list of instructions to update.
@@ -17162,41 +17165,50 @@
      * their indexes.
      * @param expressions An array containing, for each template, the maps of expression placeholders
      * and their indexes.
-     * @param tmplContainers An array of template container placeholders whose content should be ignored
-     * when generating the instructions for their parent template.
+     * @param templateRoots An array of template roots whose content should be ignored when
+     * generating the instructions for their parent template.
      * @param lastChildIndex The index of the last child of the i18n node. Used when the i18n block is
      * an ng-container.
+     *
      * @returns the current index in `translationParts`
      */
-    function generateMappingInstructions(index, translationParts, instructions, elements, expressions, tmplContainers, lastChildIndex) {
-        var tmplIndex = instructions.length;
+    function generateMappingInstructions(tmplIndex, partIndex, translationParts, instructions, elements, expressions, templateRoots, lastChildIndex) {
         var tmplInstructions = [];
         var phVisited = [];
         var openedTagCount = 0;
         var maxIndex = 0;
-        instructions.push(tmplInstructions);
-        for (; index < translationParts.length; index++) {
-            var value = translationParts[index];
+        var currentElements = elements && elements[tmplIndex] ? elements[tmplIndex] : null;
+        var currentExpressions = expressions && expressions[tmplIndex] ? expressions[tmplIndex] : null;
+        instructions[tmplIndex] = tmplInstructions;
+        for (; partIndex < translationParts.length; partIndex++) {
+            // The value can either be text or the name of a placeholder (element/template root/expression)
+            var value = translationParts[partIndex];
             // Odd indexes are placeholders
-            if (index & 1) {
+            if (partIndex & 1) {
                 var phIndex = void 0;
-                if (elements && elements[tmplIndex] &&
-                    typeof (phIndex = elements[tmplIndex][value]) !== 'undefined') {
-                    // The placeholder represents a DOM element
-                    // Add an instruction to move the element
-                    tmplInstructions.push(phIndex | 1073741824 /* Element */);
+                if (currentElements && currentElements[value] !== undefined) {
+                    phIndex = currentElements[value];
+                    // The placeholder represents a DOM element, add an instruction to move it
+                    var templateRootIndex = templateRoots ? templateRoots.indexOf(value) : -1;
+                    if (templateRootIndex !== -1 && (templateRootIndex + 1) !== tmplIndex) {
+                        // This is a template root, it has no closing tag, not treating it as an element
+                        tmplInstructions.push(phIndex | -2147483648 /* TemplateRoot */);
+                    }
+                    else {
+                        tmplInstructions.push(phIndex | 1073741824 /* Element */);
+                        openedTagCount++;
+                    }
                     phVisited.push(value);
-                    openedTagCount++;
                 }
-                else if (expressions && expressions[tmplIndex] &&
-                    typeof (phIndex = expressions[tmplIndex][value]) !== 'undefined') {
-                    // The placeholder represents an expression
-                    // Add an instruction to move the expression
+                else if (currentExpressions && currentExpressions[value] !== undefined) {
+                    phIndex = currentExpressions[value];
+                    // The placeholder represents an expression, add an instruction to move it
                     tmplInstructions.push(phIndex | 1610612736 /* Expression */);
                     phVisited.push(value);
                 }
-                else { // It is a closing tag
-                    tmplInstructions.push(-2147483648 /* CloseNode */);
+                else {
+                    // It is a closing tag
+                    tmplInstructions.push(-1073741824 /* CloseNode */);
                     if (tmplIndex > 0) {
                         openedTagCount--;
                         // If we have reached the closing tag for this template, exit the loop
@@ -17205,12 +17217,14 @@
                         }
                     }
                 }
-                if (typeof phIndex !== 'undefined' && phIndex > maxIndex) {
+                if (phIndex !== undefined && phIndex > maxIndex) {
                     maxIndex = phIndex;
                 }
-                if (tmplContainers && tmplContainers.indexOf(value) !== -1 &&
-                    tmplContainers.indexOf(value) >= tmplIndex) {
-                    index = generateMappingInstructions(index, translationParts, instructions, elements, expressions, tmplContainers, lastChildIndex);
+                if (templateRoots) {
+                    var newTmplIndex = templateRoots.indexOf(value) + 1;
+                    if (newTmplIndex !== 0 && newTmplIndex !== tmplIndex) {
+                        partIndex = generateMappingInstructions(newTmplIndex, partIndex, translationParts, instructions, elements, expressions, templateRoots, lastChildIndex);
+                    }
                 }
             }
             else if (value) {
@@ -17218,7 +17232,7 @@
                 tmplInstructions.push(536870912 /* Text */, value);
             }
         }
-        // Check if some elements from the template are missing from the translation
+        // Add instructions to remove elements that are not used in the translation
         if (elements) {
             var tmplElements = elements[tmplIndex];
             if (tmplElements) {
@@ -17226,17 +17240,17 @@
                 for (var i = 0; i < phKeys.length; i++) {
                     var ph = phKeys[i];
                     if (phVisited.indexOf(ph) === -1) {
-                        var index_1 = tmplElements[ph];
+                        var index = tmplElements[ph];
                         // Add an instruction to remove the element
-                        tmplInstructions.push(index_1 | -1610612736 /* RemoveNode */);
-                        if (index_1 > maxIndex) {
-                            maxIndex = index_1;
+                        tmplInstructions.push(index | -536870912 /* RemoveNode */);
+                        if (index > maxIndex) {
+                            maxIndex = index;
                         }
                     }
                 }
             }
         }
-        // Check if some expressions from the template are missing from the translation
+        // Add instructions to remove expressions that are not used in the translation
         if (expressions) {
             var tmplExpressions = expressions[tmplIndex];
             if (tmplExpressions) {
@@ -17244,14 +17258,14 @@
                 for (var i = 0; i < phKeys.length; i++) {
                     var ph = phKeys[i];
                     if (phVisited.indexOf(ph) === -1) {
-                        var index_2 = tmplExpressions[ph];
+                        var index = tmplExpressions[ph];
                         if (ngDevMode) {
-                            assertLessThan(index_2.toString(2).length, 28, "Index " + index_2 + " is too big and will overflow");
+                            assertLessThan(index.toString(2).length, 28, "Index " + index + " is too big and will overflow");
                         }
                         // Add an instruction to remove the expression
-                        tmplInstructions.push(index_2 | -1610612736 /* RemoveNode */);
-                        if (index_2 > maxIndex) {
-                            maxIndex = index_2;
+                        tmplInstructions.push(index | -536870912 /* RemoveNode */);
+                        if (index > maxIndex) {
+                            maxIndex = index;
                         }
                     }
                 }
@@ -17264,12 +17278,10 @@
                 if (ngDevMode) {
                     assertLessThan(i.toString(2).length, 28, "Index " + i + " is too big and will overflow");
                 }
-                // We consider those additional placeholders as expressions because we don't care about
-                // their children, all we need to do is to append them
-                tmplInstructions.push(i | 1610612736 /* Expression */);
+                tmplInstructions.push(i | -1610612736 /* Any */);
             }
         }
-        return index;
+        return partIndex;
     }
     function appendI18nNode(node, parentNode, previousNode) {
         if (ngDevMode) {
@@ -17296,8 +17308,6 @@
         }
         // Template containers also have a comment node for the `ViewContainerRef` that should be moved
         if (node.tNode.type === 0 /* Container */ && node.dynamicLContainerNode) {
-            // (node.native as RComment).textContent = 'test';
-            // console.log(node.native);
             appendChild(parentNode, node.dynamicLContainerNode.native || null, viewData);
             if (firstTemplatePass) {
                 node.tNode.dynamicContainerNode = node.dynamicLContainerNode.tNode;
@@ -17335,8 +17345,10 @@
                     localParentNode = element$$1;
                     break;
                 case 1610612736 /* Expression */:
-                    var expr = load(instruction & 536870911 /* IndexMask */);
-                    localPreviousNode = appendI18nNode(expr, localParentNode, localPreviousNode);
+                case -2147483648 /* TemplateRoot */:
+                case -1610612736 /* Any */:
+                    var node = load(instruction & 536870911 /* IndexMask */);
+                    localPreviousNode = appendI18nNode(node, localParentNode, localPreviousNode);
                     break;
                 case 536870912 /* Text */:
                     if (ngDevMode) {
@@ -17351,11 +17363,11 @@
                     localPreviousNode = appendI18nNode(textLNode, localParentNode, localPreviousNode);
                     resetApplicationState();
                     break;
-                case -2147483648 /* CloseNode */:
+                case -1073741824 /* CloseNode */:
                     localPreviousNode = localParentNode;
                     localParentNode = getParentLNode(localParentNode);
                     break;
-                case -1610612736 /* RemoveNode */:
+                case -536870912 /* RemoveNode */:
                     if (ngDevMode) {
                         ngDevMode.rendererRemoveNode++;
                     }
@@ -17388,68 +17400,283 @@
         return staticText;
     }
     /**
-     * Checks if the value of up to 8 expressions have changed and replaces them by their values in a
-     * translation, or returns NO_CHANGE.
+     * Checks if the value of an expression has changed and replaces it by its value in a translation,
+     * or returns NO_CHANGE.
+     *
+     * @param instructions A list of instructions that will be used to translate an attribute.
+     * @param v0 value checked for change.
      *
      * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
      */
-    function i18nInterpolation(instructions, numberOfExp, v0, v1, v2, v3, v4, v5, v6, v7) {
+    function i18nInterpolation1(instructions, v0) {
         var different = bindingUpdated(v0);
-        if (numberOfExp > 1) {
-            different = bindingUpdated(v1) || different;
-            if (numberOfExp > 2) {
-                different = bindingUpdated(v2) || different;
-                if (numberOfExp > 3) {
-                    different = bindingUpdated(v3) || different;
-                    if (numberOfExp > 4) {
-                        different = bindingUpdated(v4) || different;
-                        if (numberOfExp > 5) {
-                            different = bindingUpdated(v5) || different;
-                            if (numberOfExp > 6) {
-                                different = bindingUpdated(v6) || different;
-                                if (numberOfExp > 7) {
-                                    different = bindingUpdated(v7) || different;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
         if (!different) {
             return NO_CHANGE;
         }
         var res = '';
         for (var i = 0; i < instructions.length; i++) {
-            var value = void 0;
-            // Odd indexes are placeholders
+            // Odd indexes are bindings
             if (i & 1) {
-                switch (instructions[i]) {
-                    case 0:
-                        value = v0;
-                        break;
-                    case 1:
-                        value = v1;
-                        break;
-                    case 2:
-                        value = v2;
-                        break;
-                    case 3:
-                        value = v3;
-                        break;
-                    case 4:
-                        value = v4;
-                        break;
-                    case 5:
-                        value = v5;
-                        break;
-                    case 6:
-                        value = v6;
-                        break;
-                    case 7:
-                        value = v7;
-                        break;
-                }
+                res += stringify$1(v0);
+            }
+            else {
+                res += instructions[i];
+            }
+        }
+        return res;
+    }
+    /**
+     * Checks if the values of up to 2 expressions have changed and replaces them by their values in a
+     * translation, or returns NO_CHANGE.
+     *
+     * @param instructions A list of instructions that will be used to translate an attribute.
+     * @param v0 value checked for change.
+     * @param v1 value checked for change.
+     *
+     * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+     */
+    function i18nInterpolation2(instructions, v0, v1) {
+        var different = bindingUpdated2(v0, v1);
+        if (!different) {
+            return NO_CHANGE;
+        }
+        var res = '';
+        for (var i = 0; i < instructions.length; i++) {
+            // Odd indexes are bindings
+            if (i & 1) {
+                // Extract bits
+                var idx = instructions[i];
+                var b1 = idx & 1;
+                // Get the value from the argument vx where x = idx
+                var value = b1 ? v1 : v0;
+                res += stringify$1(value);
+            }
+            else {
+                res += instructions[i];
+            }
+        }
+        return res;
+    }
+    /**
+     * Checks if the values of up to 3 expressions have changed and replaces them by their values in a
+     * translation, or returns NO_CHANGE.
+     *
+     * @param instructions A list of instructions that will be used to translate an attribute.
+     * @param v0 value checked for change.
+     * @param v1 value checked for change.
+     * @param v2 value checked for change.
+     *
+     * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+     */
+    function i18nInterpolation3(instructions, v0, v1, v2) {
+        var different = bindingUpdated2(v0, v1);
+        different = bindingUpdated(v2) || different;
+        if (!different) {
+            return NO_CHANGE;
+        }
+        var res = '';
+        for (var i = 0; i < instructions.length; i++) {
+            // Odd indexes are bindings
+            if (i & 1) {
+                // Extract bits
+                var idx = instructions[i];
+                var b2 = idx & 2;
+                var b1 = idx & 1;
+                // Get the value from the argument vx where x = idx
+                var value = b2 ? v2 : (b1 ? v1 : v0);
+                res += stringify$1(value);
+            }
+            else {
+                res += instructions[i];
+            }
+        }
+        return res;
+    }
+    /**
+     * Checks if the values of up to 4 expressions have changed and replaces them by their values in a
+     * translation, or returns NO_CHANGE.
+     *
+     * @param instructions A list of instructions that will be used to translate an attribute.
+     * @param v0 value checked for change.
+     * @param v1 value checked for change.
+     * @param v2 value checked for change.
+     * @param v3 value checked for change.
+     *
+     * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+     */
+    function i18nInterpolation4(instructions, v0, v1, v2, v3) {
+        var different = bindingUpdated4(v0, v1, v2, v3);
+        if (!different) {
+            return NO_CHANGE;
+        }
+        var res = '';
+        for (var i = 0; i < instructions.length; i++) {
+            // Odd indexes are bindings
+            if (i & 1) {
+                // Extract bits
+                var idx = instructions[i];
+                var b2 = idx & 2;
+                var b1 = idx & 1;
+                // Get the value from the argument vx where x = idx
+                var value = b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0);
+                res += stringify$1(value);
+            }
+            else {
+                res += instructions[i];
+            }
+        }
+        return res;
+    }
+    /**
+     * Checks if the values of up to 5 expressions have changed and replaces them by their values in a
+     * translation, or returns NO_CHANGE.
+     *
+     * @param instructions A list of instructions that will be used to translate an attribute.
+     * @param v0 value checked for change.
+     * @param v1 value checked for change.
+     * @param v2 value checked for change.
+     * @param v3 value checked for change.
+     * @param v4 value checked for change.
+     *
+     * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+     */
+    function i18nInterpolation5(instructions, v0, v1, v2, v3, v4) {
+        var different = bindingUpdated4(v0, v1, v2, v3);
+        different = bindingUpdated(v4) || different;
+        if (!different) {
+            return NO_CHANGE;
+        }
+        var res = '';
+        for (var i = 0; i < instructions.length; i++) {
+            // Odd indexes are bindings
+            if (i & 1) {
+                // Extract bits
+                var idx = instructions[i];
+                var b4 = idx & 4;
+                var b2 = idx & 2;
+                var b1 = idx & 1;
+                // Get the value from the argument vx where x = idx
+                var value = b4 ? v4 : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
+                res += stringify$1(value);
+            }
+            else {
+                res += instructions[i];
+            }
+        }
+        return res;
+    }
+    /**
+     * Checks if the values of up to 6 expressions have changed and replaces them by their values in a
+     * translation, or returns NO_CHANGE.
+     *
+     * @param instructions A list of instructions that will be used to translate an attribute.
+     * @param v0 value checked for change.
+     * @param v1 value checked for change.
+     * @param v2 value checked for change.
+     * @param v3 value checked for change.
+     * @param v4 value checked for change.
+     * @param v5 value checked for change.
+     *
+     * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+     */ function i18nInterpolation6(instructions, v0, v1, v2, v3, v4, v5) {
+        var different = bindingUpdated4(v0, v1, v2, v3);
+        different = bindingUpdated2(v4, v5) || different;
+        if (!different) {
+            return NO_CHANGE;
+        }
+        var res = '';
+        for (var i = 0; i < instructions.length; i++) {
+            // Odd indexes are bindings
+            if (i & 1) {
+                // Extract bits
+                var idx = instructions[i];
+                var b4 = idx & 4;
+                var b2 = idx & 2;
+                var b1 = idx & 1;
+                // Get the value from the argument vx where x = idx
+                var value = b4 ? (b1 ? v5 : v4) : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
+                res += stringify$1(value);
+            }
+            else {
+                res += instructions[i];
+            }
+        }
+        return res;
+    }
+    /**
+     * Checks if the values of up to 7 expressions have changed and replaces them by their values in a
+     * translation, or returns NO_CHANGE.
+     *
+     * @param instructions A list of instructions that will be used to translate an attribute.
+     * @param v0 value checked for change.
+     * @param v1 value checked for change.
+     * @param v2 value checked for change.
+     * @param v3 value checked for change.
+     * @param v4 value checked for change.
+     * @param v5 value checked for change.
+     * @param v6 value checked for change.
+     *
+     * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+     */
+    function i18nInterpolation7(instructions, v0, v1, v2, v3, v4, v5, v6) {
+        var different = bindingUpdated4(v0, v1, v2, v3);
+        different = bindingUpdated2(v4, v5) || different;
+        different = bindingUpdated(v6) || different;
+        if (!different) {
+            return NO_CHANGE;
+        }
+        var res = '';
+        for (var i = 0; i < instructions.length; i++) {
+            // Odd indexes are bindings
+            if (i & 1) {
+                // Extract bits
+                var idx = instructions[i];
+                var b4 = idx & 4;
+                var b2 = idx & 2;
+                var b1 = idx & 1;
+                // Get the value from the argument vx where x = idx
+                var value = b4 ? (b2 ? v6 : (b1 ? v5 : v4)) : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
+                res += stringify$1(value);
+            }
+            else {
+                res += instructions[i];
+            }
+        }
+        return res;
+    }
+    /**
+     * Checks if the values of up to 8 expressions have changed and replaces them by their values in a
+     * translation, or returns NO_CHANGE.
+     *
+     * @param instructions A list of instructions that will be used to translate an attribute.
+     * @param v0 value checked for change.
+     * @param v1 value checked for change.
+     * @param v2 value checked for change.
+     * @param v3 value checked for change.
+     * @param v4 value checked for change.
+     * @param v5 value checked for change.
+     * @param v6 value checked for change.
+     * @param v7 value checked for change.
+     *
+     * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+     */
+    function i18nInterpolation8(instructions, v0, v1, v2, v3, v4, v5, v6, v7) {
+        var different = bindingUpdated4(v0, v1, v2, v3);
+        different = bindingUpdated4(v4, v5, v6, v7) || different;
+        if (!different) {
+            return NO_CHANGE;
+        }
+        var res = '';
+        for (var i = 0; i < instructions.length; i++) {
+            // Odd indexes are bindings
+            if (i & 1) {
+                // Extract bits
+                var idx = instructions[i];
+                var b4 = idx & 4;
+                var b2 = idx & 2;
+                var b1 = idx & 1;
+                // Get the value from the argument vx where x = idx
+                var value = b4 ? (b2 ? (b1 ? v7 : v6) : (b1 ? v5 : v4)) : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
                 res += stringify$1(value);
             }
             else {
@@ -18747,7 +18974,14 @@
     exports.ɵwhenRendered = whenRendered;
     exports.ɵiA = i18nApply;
     exports.ɵiEM = i18nExpMapping;
-    exports.ɵiI = i18nInterpolation;
+    exports.ɵiI1 = i18nInterpolation1;
+    exports.ɵiI2 = i18nInterpolation2;
+    exports.ɵiI3 = i18nInterpolation3;
+    exports.ɵiI4 = i18nInterpolation4;
+    exports.ɵiI5 = i18nInterpolation5;
+    exports.ɵiI6 = i18nInterpolation6;
+    exports.ɵiI7 = i18nInterpolation7;
+    exports.ɵiI8 = i18nInterpolation8;
     exports.ɵIV = i18nInterpolationV;
     exports.ɵiM = i18nMapping;
     exports.ɵsanitizeHtml = sanitizeHtml;
