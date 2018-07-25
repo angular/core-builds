@@ -8,6 +8,7 @@
 import './ng_dev_mode';
 import { QueryList } from '../linker';
 import { Sanitizer } from '../sanitization/security';
+import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
 import { LContainer } from './interfaces/container';
 import { ComponentDefInternal, ComponentQuery, ComponentTemplate, DirectiveDefInternal, DirectiveDefListOrFactory, InitialStylingFlags, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { LInjector } from './interfaces/injector';
@@ -127,7 +128,7 @@ export declare function createEmbeddedViewNode<T>(tView: TView, context: T, rend
  * can't store TViews in the template function itself (as we do for comps). Instead, we store the
  * TView for dynamically created views on their host TNode, which only has one instance.
  */
-export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode, tView: TView, context: T, rf: RenderFlags): LViewNode;
+export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | LElementNode, tView: TView, context: T, rf: RenderFlags): LViewNode | LElementNode;
 export declare function renderComponentOrTemplate<T>(node: LElementNode, hostView: LViewData, componentOrContext: T, template?: ComponentTemplate<T>): void;
 export declare function namespaceSVG(): void;
 export declare function namespaceMathML(): void;
@@ -154,6 +155,13 @@ export declare function element(index: number, name: string, attrs?: TAttributes
  * ['id', 'warning5', 'class', 'alert']
  */
 export declare function elementStart(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): RElement;
+/**
+ * Creates a native element from a tag name, using a renderer.
+ * @param name the tag name
+ * @param overriddenRenderer Optional A renderer to override the default one
+ * @returns the element created
+ */
+export declare function elementCreate(name: string, overriddenRenderer?: Renderer3): RElement;
 export declare function resolveDirective(def: DirectiveDefInternal<any>, valueIndex: number, matches: CurrentMatchesList, tView: TView): any;
 /** Sets the context for a ChangeDetectorRef to the given instance. */
 export declare function initChangeDetectorIfExisting(injector: LInjector | null, instance: any, view: LViewData): void;
@@ -274,18 +282,20 @@ export declare function elementClassProp<T>(index: number, stylingIndex: number,
  *        (Note that this is not the element index, but rather an index value allocated
  *        specifically for element styling--the index must be the next index after the element
  *        index.)
- * @param styleDeclarations A key/value array of CSS styles that will be registered on the element.
- *   Each individual style will be used on the element as long as it is not overridden
- *   by any styles placed on the element by multiple (`[style]`) or singular (`[style.prop]`)
- *   bindings. If a style binding changes its value to null then the initial styling
- *   values that are passed in here will be applied to the element (if matched).
  * @param classDeclarations A key/value array of CSS classes that will be registered on the element.
  *   Each individual style will be used on the element as long as it is not overridden
  *   by any classes placed on the element by multiple (`[class]`) or singular (`[class.named]`)
  *   bindings. If a class binding changes its value to a falsy value then the matching initial
  *   class value that are passed in here will be applied to the element (if matched).
+ * @param styleDeclarations A key/value array of CSS styles that will be registered on the element.
+ *   Each individual style will be used on the element as long as it is not overridden
+ *   by any styles placed on the element by multiple (`[style]`) or singular (`[style.prop]`)
+ *   bindings. If a style binding changes its value to null then the initial styling
+ *   values that are passed in here will be applied to the element (if matched).
+ * @param styleSanitizer An optional sanitizer function that will be used (if provided)
+ *   to sanitize the any CSS property values that are applied to the element (during rendering).
  */
-export declare function elementStyling<T>(styleDeclarations?: (string | boolean | InitialStylingFlags)[] | null, classDeclarations?: (string | boolean | InitialStylingFlags)[] | null): void;
+export declare function elementStyling<T>(classDeclarations?: (string | boolean | InitialStylingFlags)[] | null, styleDeclarations?: (string | boolean | InitialStylingFlags)[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
 /**
  * Apply all styling values to the element which have been queued by any styling instructions.
  *
@@ -320,11 +330,10 @@ export declare function elementStylingApply<T>(index: number): void;
  *        renaming as part of minification.
  * @param value New value to write (null to remove).
  * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param sanitizer An optional function used to transform the value typically used for
- *        sanitization.
+ *        Note that when a suffix is provided then the underlying sanitizer will
+ *        be ignored.
  */
 export declare function elementStyleProp<T>(index: number, styleIndex: number, value: T | null, suffix?: string): void;
-export declare function elementStyleProp<T>(index: number, styleIndex: number, value: T | null, sanitizer?: SanitizerFn): void;
 /**
  * Queue a key/value map of styles to be rendered on an Element.
  *
@@ -339,18 +348,18 @@ export declare function elementStyleProp<T>(index: number, styleIndex: number, v
  *        (Note that this is not the element index, but rather an index value allocated
  *        specifically for element styling--the index must be the next index after the element
  *        index.)
- * @param styles A key/value style map of the styles that will be applied to the given element.
- *        Any missing styles (that have already been applied to the element beforehand) will be
- *        removed (unset) from the element's styling.
  * @param classes A key/value style map of CSS classes that will be added to the given element.
  *        Any missing classes (that have already been applied to the element beforehand) will be
  *        removed (unset) from the element's list of CSS classes.
+ * @param styles A key/value style map of the styles that will be applied to the given element.
+ *        Any missing styles (that have already been applied to the element beforehand) will be
+ *        removed (unset) from the element's styling.
  */
-export declare function elementStylingMap<T>(index: number, styles: {
-    [styleName: string]: any;
-} | null, classes?: {
+export declare function elementStylingMap<T>(index: number, classes: {
     [key: string]: any;
-} | string | null): void;
+} | string | null, styles?: {
+    [styleName: string]: any;
+} | null): void;
 /**
  * Create static text node
  *
@@ -629,7 +638,7 @@ export declare function interpolationV(values: any[]): string | NO_CHANGE;
 export declare function interpolation1(prefix: string, v0: any, suffix: string): string | NO_CHANGE;
 /** Creates an interpolation binding with 2 expressions. */
 export declare function interpolation2(prefix: string, v0: any, i0: string, v1: any, suffix: string): string | NO_CHANGE;
-/** Creates an interpolation bindings with 3 expressions. */
+/** Creates an interpolation binding with 3 expressions. */
 export declare function interpolation3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): string | NO_CHANGE;
 /** Create an interpolation binding with 4 expressions. */
 export declare function interpolation4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): string | NO_CHANGE;

@@ -46,7 +46,7 @@ export declare class ComponentFactory<T> extends viewEngine_ComponentFactory<T> 
         templateName: string;
     }[];
     constructor(componentDef: ComponentDefInternal<any>);
-    create(parentComponentInjector: Injector, projectableNodes?: any[][] | undefined, rootSelectorOrNode?: any, ngModule?: viewEngine_NgModuleRef<any> | undefined): viewEngine_ComponentRef<T>;
+    create(injector: Injector, projectableNodes?: any[][] | undefined, rootSelectorOrNode?: any, ngModule?: viewEngine_NgModuleRef<any> | undefined): viewEngine_ComponentRef<T>;
 }
 /**
  * Represents an instance of a Component created via a {@link ComponentFactory}.

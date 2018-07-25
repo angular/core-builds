@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-rc.3+71.sha-0650f32
+ * @license Angular v6.1.0-rc.3+85.sha-70668f7
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1951,7 +1951,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('6.1.0-rc.3+71.sha-0650f32');
+const VERSION = new Version('6.1.0-rc.3+85.sha-70668f7');
 
 /**
  * @fileoverview added by tsickle
@@ -14816,6 +14816,25 @@ function clearOverrides() {
 function createNgModuleFactory(ngModuleType, bootstrapComponents, defFactory) {
     return new NgModuleFactory_(ngModuleType, bootstrapComponents, defFactory);
 }
+/**
+ * @param {?} def
+ * @return {?}
+ */
+function cloneNgModuleDefinition(def) {
+    /** @type {?} */
+    const providers = Array.from(def.providers);
+    /** @type {?} */
+    const modules = Array.from(def.modules);
+    /** @type {?} */
+    const providersByKey = {};
+    for (const key in def.providersByKey) {
+        providersByKey[key] = def.providersByKey[key];
+    }
+    return {
+        factory: def.factory,
+        isRoot: def.isRoot, providers, modules, providersByKey,
+    };
+}
 class NgModuleFactory_ extends NgModuleFactory {
     /**
      * @param {?} moduleType
@@ -14837,7 +14856,7 @@ class NgModuleFactory_ extends NgModuleFactory {
     create(parentInjector) {
         initServicesIfNeeded();
         /** @type {?} */
-        const def = resolveDefinition(this._ngModuleDefFactory);
+        const def = cloneNgModuleDefinition(resolveDefinition(this._ngModuleDefFactory));
         return Services.createNgModuleRef(this.moduleType, parentInjector || Injector.NULL, this._bootstrapComponents, def);
     }
 }
@@ -15349,15 +15368,6 @@ function stringify$1(value) {
     if (value == null)
         return '';
     return '' + value;
-}
-/**
- *  Function that throws a "not implemented" error so it's clear certain
- *  behaviors/methods aren't yet ready.
- *
- * @return {?} Not implemented error
- */
-function notImplemented() {
-    return new Error('NotImplemented');
 }
 /**
  * Flattens an array in non-recursive way. Input arrays are not modified.
@@ -16295,6 +16305,12 @@ function allocStylingContext(lElement, templateStyleContext) {
  * mode between declarations and initial styles is made possible using a special
  * enum value found in `definition.ts`).
  *
+ * @param {?=} initialClassDeclarations a list of class declarations and initial class values
+ *    that are used later within the styling context.
+ *
+ *    -> ['foo', 'bar', SPECIAL_ENUM_VAL, 'foo', true]
+ *       This implies that `foo` and `bar` will be later styled and that the `foo`
+ *       class will be applied to the element as an initial class since it's true
  * @param {?=} initialStyleDeclarations a list of style declarations and initial style values
  *    that are used later within the styling context.
  *
@@ -16302,19 +16318,14 @@ function allocStylingContext(lElement, templateStyleContext) {
  *       This implies that `width` and `height` will be later styled and that the `width`
  *       property has an initial value of `100px`.
  *
- * @param {?=} initialClassDeclarations a list of class declarations and initial class values
- *    that are used later within the styling context.
- *
- *    -> ['foo', 'bar', SPECIAL_ENUM_VAL, 'foo', true]
- *       This implies that `foo` and `bar` will be later styled and that the `foo`
- *       class will be applied to the element as an initial class since it's true
+ * @param {?=} styleSanitizer
  * @return {?}
  */
-function createStylingContextTemplate(initialStyleDeclarations, initialClassDeclarations) {
+function createStylingContextTemplate(initialClassDeclarations, initialStyleDeclarations, styleSanitizer) {
     /** @type {?} */
     const initialStylingValues = [null];
     /** @type {?} */
-    const context = [null, initialStylingValues, 0, 0, null];
+    const context = [null, styleSanitizer || null, initialStylingValues, 0, 0, null];
     /** @type {?} */
     const stylesLookup = {};
     /** @type {?} */
@@ -16348,7 +16359,7 @@ function createStylingContextTemplate(initialStyleDeclarations, initialClassDecl
         }
     }
     // make where the class offsets begin
-    context[3 /* ClassOffsetPosition */] = totalStyleDeclarations;
+    context[4 /* ClassOffsetPosition */] = totalStyleDeclarations;
     if (initialClassDeclarations) {
         /** @type {?} */
         let hasPassedDeclarations = false;
@@ -16383,16 +16394,16 @@ function createStylingContextTemplate(initialStyleDeclarations, initialClassDecl
     /** @type {?} */
     const totalProps = styleProps.length + classNames.length;
     /** @type {?} */
-    const maxLength = totalProps * 3 /* Size */ * 2 + 5 /* SingleStylesStartPosition */;
+    const maxLength = totalProps * 3 /* Size */ * 2 + 6 /* SingleStylesStartPosition */;
     // we need to fill the array from the start so that we can access
     // both the multi and the single array positions in the same loop block
-    for (let i = 5 /* SingleStylesStartPosition */; i < maxLength; i++) {
+    for (let i = 6 /* SingleStylesStartPosition */; i < maxLength; i++) {
         context.push(null);
     }
     /** @type {?} */
-    const singleStart = 5 /* SingleStylesStartPosition */;
+    const singleStart = 6 /* SingleStylesStartPosition */;
     /** @type {?} */
-    const multiStart = totalProps * 3 /* Size */ + 5 /* SingleStylesStartPosition */;
+    const multiStart = totalProps * 3 /* Size */ + 6 /* SingleStylesStartPosition */;
     // fill single and multi-level styles
     for (let i = 0; i < totalProps; i++) {
         /** @type {?} */
@@ -16408,7 +16419,7 @@ function createStylingContextTemplate(initialStyleDeclarations, initialClassDecl
         /** @type {?} */
         const indexForSingle = i * 3 /* Size */ + singleStart;
         /** @type {?} */
-        const initialFlag = isClassBased ? 2 /* Class */ : 0 /* None */;
+        const initialFlag = prepareInitialFlag(prop, isClassBased, styleSanitizer || null);
         setFlag(context, indexForSingle, pointers(initialFlag, indexForInitial, indexForMulti));
         setProp(context, indexForSingle, prop);
         setValue(context, indexForSingle, null);
@@ -16420,7 +16431,7 @@ function createStylingContextTemplate(initialStyleDeclarations, initialClassDecl
     }
     // there is no initial value flag for the master index since it doesn't
     // reference an initial style value
-    setFlag(context, 2 /* MasterFlagPosition */, pointers(0, 0, multiStart));
+    setFlag(context, 3 /* MasterFlagPosition */, pointers(0, 0, multiStart));
     setContextDirty(context, initialStylingValues.length > 1);
     return context;
 }
@@ -16438,11 +16449,11 @@ const EMPTY_OBJ = {};
  *
  * @param {?} context The styling context that will be updated with the
  *    newly provided style values.
- * @param {?} styles The key/value map of CSS styles that will be used for the update.
- * @param {?=} classes The key/value map of CSS class names that will be used for the update.
+ * @param {?} classes The key/value map of CSS class names that will be used for the update.
+ * @param {?=} styles The key/value map of CSS styles that will be used for the update.
  * @return {?}
  */
-function updateStylingMap(context, styles, classes) {
+function updateStylingMap(context, classes, styles) {
     /** @type {?} */
     let classNames = EMPTY_ARR;
     /** @type {?} */
@@ -16453,12 +16464,12 @@ function updateStylingMap(context, styles, classes) {
     // check of what's changed.
     if (typeof classes == 'string') {
         /** @type {?} */
-        const cachedClassString = /** @type {?} */ (context[4 /* CachedCssClassString */]);
+        const cachedClassString = /** @type {?} */ (context[5 /* CachedCssClassString */]);
         if (cachedClassString && cachedClassString === classes) {
             ignoreAllClassUpdates = true;
         }
         else {
-            context[4 /* CachedCssClassString */] = classes;
+            context[5 /* CachedCssClassString */] = classes;
             classNames = classes.split(/\s+/);
             // this boolean is used to avoid having to create a key/value map of `true` values
             // since a classname string implies that all those classes are added
@@ -16467,7 +16478,7 @@ function updateStylingMap(context, styles, classes) {
     }
     else {
         classNames = classes ? Object.keys(classes) : EMPTY_ARR;
-        context[4 /* CachedCssClassString */] = null;
+        context[5 /* CachedCssClassString */] = null;
     }
     classes = /** @type {?} */ ((classes || EMPTY_OBJ));
     /** @type {?} */
@@ -16505,10 +16516,10 @@ function updateStylingMap(context, styles, classes) {
             if (prop === newProp) {
                 /** @type {?} */
                 const value = getValue(context, ctxIndex);
-                if (value !== newValue) {
+                /** @type {?} */
+                const flag = getPointers(context, ctxIndex);
+                if (hasValueChanged(flag, value, newValue)) {
                     setValue(context, ctxIndex, newValue);
-                    /** @type {?} */
-                    const flag = getPointers(context, ctxIndex);
                     /** @type {?} */
                     const initialValue = getInitialValue(context, flag);
                     // there is no point in setting this to dirty if the previously
@@ -16539,8 +16550,9 @@ function updateStylingMap(context, styles, classes) {
                     }
                 }
                 else {
-                    // we only care to do this if the insertion is in the middle
-                    insertNewMultiProperty(context, ctxIndex, isClassBased, newProp, newValue);
+                    /** @type {?} */
+                    const newFlag = prepareInitialFlag(newProp, isClassBased, getStyleSanitizer(context));
+                    insertNewMultiProperty(context, ctxIndex, isClassBased, newProp, newFlag, newValue);
                     dirty = true;
                 }
             }
@@ -16569,9 +16581,8 @@ function updateStylingMap(context, styles, classes) {
         }
         ctxIndex += 3 /* Size */;
     }
-    // this means that there are left-over properties in the context that
-    // were not detected in the context during the loop above. In that
-    // case we want to add the new entries into the list
+    /** @type {?} */
+    const sanitizer = getStyleSanitizer(context);
     while (propIndex < propLimit) {
         /** @type {?} */
         const isClassBased = propIndex >= classesStartIndex;
@@ -16584,7 +16595,7 @@ function updateStylingMap(context, styles, classes) {
         /** @type {?} */
         const value = isClassBased ? (applyAllClasses ? true : classes[prop]) : styles[prop];
         /** @type {?} */
-        const flag = 1 /* Dirty */ | (isClassBased ? 2 /* Class */ : 0 /* None */);
+        const flag = prepareInitialFlag(prop, isClassBased, sanitizer) | 1 /* Dirty */;
         context.push(flag, prop, value);
         propIndex++;
         dirty = true;
@@ -16610,13 +16621,13 @@ function updateStylingMap(context, styles, classes) {
  */
 function updateStyleProp(context, index, value) {
     /** @type {?} */
-    const singleIndex = 5 /* SingleStylesStartPosition */ + index * 3 /* Size */;
+    const singleIndex = 6 /* SingleStylesStartPosition */ + index * 3 /* Size */;
     /** @type {?} */
     const currValue = getValue(context, singleIndex);
     /** @type {?} */
     const currFlag = getPointers(context, singleIndex);
     // didn't change ... nothing to make a note of
-    if (currValue !== value) {
+    if (hasValueChanged(currFlag, currValue, value)) {
         // the value will always get updated (even if the dirty flag is skipped)
         setValue(context, singleIndex, value);
         /** @type {?} */
@@ -16653,7 +16664,7 @@ function updateStyleProp(context, index, value) {
  */
 function updateClassProp(context, index, addOrRemove) {
     /** @type {?} */
-    const adjustedIndex = index + context[3 /* ClassOffsetPosition */];
+    const adjustedIndex = index + context[4 /* ClassOffsetPosition */];
     updateStyleProp(context, adjustedIndex, addOrRemove);
 }
 /**
@@ -16680,7 +16691,9 @@ function renderStyling(context, renderer, styleStore, classStore) {
         const native = /** @type {?} */ ((context[0 /* ElementPosition */])).native;
         /** @type {?} */
         const multiStartIndex = getMultiStartIndex(context);
-        for (let i = 5 /* SingleStylesStartPosition */; i < context.length; i += 3 /* Size */) {
+        /** @type {?} */
+        const styleSanitizer = getStyleSanitizer(context);
+        for (let i = 6 /* SingleStylesStartPosition */; i < context.length; i += 3 /* Size */) {
             // there is no point in rendering styles that have not changed on screen
             if (isDirty(context, i)) {
                 /** @type {?} */
@@ -16716,7 +16729,9 @@ function renderStyling(context, renderer, styleStore, classStore) {
                     setClass(native, prop, valueToApply ? true : false, renderer, classStore);
                 }
                 else {
-                    setStyle(native, prop, /** @type {?} */ (valueToApply), renderer, styleStore);
+                    /** @type {?} */
+                    const sanitizer = (flag & 4 /* Sanitize */) ? styleSanitizer : null;
+                    setStyle(native, prop, /** @type {?} */ (valueToApply), renderer, sanitizer, styleStore);
                 }
                 setDirty(context, i, false);
             }
@@ -16734,10 +16749,12 @@ function renderStyling(context, renderer, styleStore, classStore) {
  * @param {?} prop the CSS style property that will be rendered
  * @param {?} value the CSS style value that will be rendered
  * @param {?} renderer
+ * @param {?} sanitizer
  * @param {?=} store an optional key/value map that will be used as a context to render styles on
  * @return {?}
  */
-function setStyle(native, prop, value, renderer, store) {
+function setStyle(native, prop, value, renderer, sanitizer, store) {
+    value = sanitizer && value ? sanitizer(prop, value) : value;
     if (store) {
         store[prop] = value;
     }
@@ -16790,7 +16807,7 @@ function setClass(native, className, add, renderer, store) {
  */
 function setDirty(context, index, isDirtyYes) {
     /** @type {?} */
-    const adjustedIndex = index >= 5 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
+    const adjustedIndex = index >= 6 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
     if (isDirtyYes) {
         (/** @type {?} */ (context[adjustedIndex])) |= 1 /* Dirty */;
     }
@@ -16805,7 +16822,7 @@ function setDirty(context, index, isDirtyYes) {
  */
 function isDirty(context, index) {
     /** @type {?} */
-    const adjustedIndex = index >= 5 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
+    const adjustedIndex = index >= 6 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
     return ((/** @type {?} */ (context[adjustedIndex])) & 1 /* Dirty */) == 1 /* Dirty */;
 }
 /**
@@ -16815,8 +16832,18 @@ function isDirty(context, index) {
  */
 function isClassBased(context, index) {
     /** @type {?} */
-    const adjustedIndex = index >= 5 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
+    const adjustedIndex = index >= 6 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
     return ((/** @type {?} */ (context[adjustedIndex])) & 2 /* Class */) == 2 /* Class */;
+}
+/**
+ * @param {?} context
+ * @param {?} index
+ * @return {?}
+ */
+function isSanitizable(context, index) {
+    /** @type {?} */
+    const adjustedIndex = index >= 6 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
+    return ((/** @type {?} */ (context[adjustedIndex])) & 4 /* Sanitize */) == 4 /* Sanitize */;
 }
 /**
  * @param {?} configFlag
@@ -16825,8 +16852,8 @@ function isClassBased(context, index) {
  * @return {?}
  */
 function pointers(configFlag, staticIndex, dynamicIndex) {
-    return (configFlag & 3 /* BitMask */) | (staticIndex << 2 /* BitCountSize */) |
-        (dynamicIndex << (15 /* BitCountSize */ + 2 /* BitCountSize */));
+    return (configFlag & 7 /* BitMask */) | (staticIndex << 3 /* BitCountSize */) |
+        (dynamicIndex << (14 /* BitCountSize */ + 3 /* BitCountSize */));
 }
 /**
  * @param {?} context
@@ -16836,14 +16863,14 @@ function pointers(configFlag, staticIndex, dynamicIndex) {
 function getInitialValue(context, flag) {
     /** @type {?} */
     const index = getInitialIndex(flag);
-    return /** @type {?} */ (context[1 /* InitialStylesPosition */][index]);
+    return /** @type {?} */ (context[2 /* InitialStylesPosition */][index]);
 }
 /**
  * @param {?} flag
  * @return {?}
  */
 function getInitialIndex(flag) {
-    return (flag >> 2 /* BitCountSize */) & 32767 /* BitMask */;
+    return (flag >> 3 /* BitCountSize */) & 16383 /* BitMask */;
 }
 /**
  * @param {?} flag
@@ -16851,15 +16878,22 @@ function getInitialIndex(flag) {
  */
 function getMultiOrSingleIndex(flag) {
     /** @type {?} */
-    const index = (flag >> (15 /* BitCountSize */ + 2 /* BitCountSize */)) & 32767 /* BitMask */;
-    return index >= 5 /* SingleStylesStartPosition */ ? index : -1;
+    const index = (flag >> (14 /* BitCountSize */ + 3 /* BitCountSize */)) & 16383 /* BitMask */;
+    return index >= 6 /* SingleStylesStartPosition */ ? index : -1;
 }
 /**
  * @param {?} context
  * @return {?}
  */
 function getMultiStartIndex(context) {
-    return /** @type {?} */ (getMultiOrSingleIndex(context[2 /* MasterFlagPosition */]));
+    return /** @type {?} */ (getMultiOrSingleIndex(context[3 /* MasterFlagPosition */]));
+}
+/**
+ * @param {?} context
+ * @return {?}
+ */
+function getStyleSanitizer(context) {
+    return context[1 /* StyleSanitizerPosition */];
 }
 /**
  * @param {?} context
@@ -16887,7 +16921,7 @@ function setValue(context, index, value) {
  */
 function setFlag(context, index, flag) {
     /** @type {?} */
-    const adjustedIndex = index === 2 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
+    const adjustedIndex = index === 3 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
     context[adjustedIndex] = flag;
 }
 /**
@@ -16897,7 +16931,7 @@ function setFlag(context, index, flag) {
  */
 function getPointers(context, index) {
     /** @type {?} */
-    const adjustedIndex = index === 2 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
+    const adjustedIndex = index === 3 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
     return /** @type {?} */ (context[adjustedIndex]);
 }
 /**
@@ -16921,7 +16955,7 @@ function getProp(context, index) {
  * @return {?}
  */
 function isContextDirty(context) {
-    return isDirty(context, 2 /* MasterFlagPosition */);
+    return isDirty(context, 3 /* MasterFlagPosition */);
 }
 /**
  * @param {?} context
@@ -16929,7 +16963,7 @@ function isContextDirty(context) {
  * @return {?}
  */
 function setContextDirty(context, isDirtyYes) {
-    setDirty(context, 2 /* MasterFlagPosition */, isDirtyYes);
+    setDirty(context, 3 /* MasterFlagPosition */, isDirtyYes);
 }
 /**
  * @param {?} context
@@ -17007,7 +17041,8 @@ function updateSinglePointerValues(context, indexStartPosition) {
             const initialIndexForSingle = getInitialIndex(singleFlag);
             /** @type {?} */
             const flagValue = (isDirty(context, singleIndex) ? 1 /* Dirty */ : 0 /* None */) |
-                (isClassBased(context, singleIndex) ? 2 /* Class */ : 0 /* None */);
+                (isClassBased(context, singleIndex) ? 2 /* Class */ : 0 /* None */) |
+                (isSanitizable(context, singleIndex) ? 4 /* Sanitize */ : 0 /* None */);
             /** @type {?} */
             const updatedFlag = pointers(flagValue, initialIndexForSingle, i);
             setFlag(context, singleIndex, updatedFlag);
@@ -17019,14 +17054,15 @@ function updateSinglePointerValues(context, indexStartPosition) {
  * @param {?} index
  * @param {?} classBased
  * @param {?} name
+ * @param {?} flag
  * @param {?} value
  * @return {?}
  */
-function insertNewMultiProperty(context, index, classBased, name, value) {
+function insertNewMultiProperty(context, index, classBased, name, flag, value) {
     /** @type {?} */
     const doShift = index < context.length;
     // prop does not exist in the list, add it in
-    context.splice(index, 0, 1 /* Dirty */ | (classBased ? 2 /* Class */ : 0 /* None */), name, value);
+    context.splice(index, 0, flag | 1 /* Dirty */ | (classBased ? 2 /* Class */ : 0 /* None */), name, value);
     if (doShift) {
         // because the value was inserted midway into the array then we
         // need to update all the shifted multi values' single value
@@ -17044,6 +17080,44 @@ function valueExists(value, isClassBased) {
         return value ? true : false;
     }
     return value !== null;
+}
+/**
+ * @param {?} name
+ * @param {?} isClassBased
+ * @param {?=} sanitizer
+ * @return {?}
+ */
+function prepareInitialFlag(name, isClassBased, sanitizer) {
+    if (isClassBased) {
+        return 2 /* Class */;
+    }
+    else if (sanitizer && sanitizer(name)) {
+        return 4 /* Sanitize */;
+    }
+    return 0 /* None */;
+}
+/**
+ * @param {?} flag
+ * @param {?} a
+ * @param {?} b
+ * @return {?}
+ */
+function hasValueChanged(flag, a, b) {
+    /** @type {?} */
+    const isClassBased = flag & 2 /* Class */;
+    /** @type {?} */
+    const hasValues = a && b;
+    /** @type {?} */
+    const usesSanitizer = flag & 4 /* Sanitize */;
+    // the toString() comparison ensures that a value is checked
+    // ... otherwise (during sanitization bypassing) the === comparsion
+    // would fail since a new String() instance is created
+    if (!isClassBased && hasValues && usesSanitizer) {
+        // we know for sure we're dealing with strings at this point
+        return (/** @type {?} */ (a)).toString() !== (/** @type {?} */ (b)).toString();
+    }
+    // everything else is safe to check with a normal equality check
+    return a !== b;
 }
 
 /**
@@ -17531,25 +17605,31 @@ function renderEmbeddedTemplate(viewNode, tView, context, rf) {
     const _previousOrParentNode = previousOrParentNode;
     /** @type {?} */
     let oldView;
-    try {
-        isParent = true;
-        previousOrParentNode = /** @type {?} */ ((null));
-        oldView = enterView(viewNode.data, viewNode);
-        namespaceHTML(); /** @type {?} */
-        ((tView.template))(rf, context);
-        if (rf & 2 /* Update */) {
-            refreshView();
-        }
-        else {
-            viewNode.data[TVIEW].firstTemplatePass = firstTemplatePass = false;
-        }
+    if (/** @type {?} */ ((viewNode.data))[PARENT] == null && /** @type {?} */ ((viewNode.data))[CONTEXT] && !tView.template) {
+        // This is a root view inside the view tree
+        tickRootContext(/** @type {?} */ (((viewNode.data))[CONTEXT]));
     }
-    finally {
-        /** @type {?} */
-        const isCreationOnly = (rf & 1 /* Create */) === 1 /* Create */;
-        leaveView(/** @type {?} */ ((oldView)), isCreationOnly);
-        isParent = _isParent;
-        previousOrParentNode = _previousOrParentNode;
+    else {
+        try {
+            isParent = true;
+            previousOrParentNode = /** @type {?} */ ((null));
+            oldView = enterView(/** @type {?} */ ((viewNode.data)), viewNode);
+            namespaceHTML(); /** @type {?} */
+            ((tView.template))(rf, context);
+            if (rf & 2 /* Update */) {
+                refreshView();
+            }
+            else {
+                /** @type {?} */ ((viewNode.data))[TVIEW].firstTemplatePass = firstTemplatePass = false;
+            }
+        }
+        finally {
+            /** @type {?} */
+            const isCreationOnly = (rf & 1 /* Create */) === 1 /* Create */;
+            leaveView(/** @type {?} */ ((oldView)), isCreationOnly);
+            isParent = _isParent;
+            previousOrParentNode = _previousOrParentNode;
+        }
     }
     return viewNode;
 }
@@ -17654,18 +17734,7 @@ function elementStart(index, name, attrs, localRefs) {
         assertEqual(viewData[BINDING_INDEX], -1, 'elements should be created before any bindings');
     ngDevMode && ngDevMode.rendererCreateElement++;
     /** @type {?} */
-    let native;
-    if (isProceduralRenderer(renderer)) {
-        native = renderer.createElement(name, _currentNamespace);
-    }
-    else {
-        if (_currentNamespace === null) {
-            native = renderer.createElement(name);
-        }
-        else {
-            native = renderer.createElementNS(_currentNamespace, name);
-        }
-    }
+    const native = elementCreate(name);
     ngDevMode && assertDataInRange(index - 1);
     /** @type {?} */
     const node = createLNode(index, 3 /* Element */, /** @type {?} */ ((native)), name, attrs || null, null);
@@ -17675,6 +17744,30 @@ function elementStart(index, name, attrs, localRefs) {
     }
     appendChild(getParentLNode(node), native, viewData);
     createDirectivesAndLocals(localRefs);
+    return native;
+}
+/**
+ * Creates a native element from a tag name, using a renderer.
+ * @param {?} name the tag name
+ * @param {?=} overriddenRenderer Optional A renderer to override the default one
+ * @return {?} the element created
+ */
+function elementCreate(name, overriddenRenderer) {
+    /** @type {?} */
+    let native;
+    /** @type {?} */
+    const rendererToUse = overriddenRenderer || renderer;
+    if (isProceduralRenderer(rendererToUse)) {
+        native = rendererToUse.createElement(name, _currentNamespace);
+    }
+    else {
+        if (_currentNamespace === null) {
+            native = rendererToUse.createElement(name);
+        }
+        else {
+            native = rendererToUse.createElementNS(_currentNamespace, name);
+        }
+    }
     return native;
 }
 /**
@@ -18369,26 +18462,29 @@ function elementClassProp(index, stylingIndex, value) {
  *
  *
  * @template T
- * @param {?=} styleDeclarations A key/value array of CSS styles that will be registered on the element.
- *   Each individual style will be used on the element as long as it is not overridden
- *   by any styles placed on the element by multiple (`[style]`) or singular (`[style.prop]`)
- *   bindings. If a style binding changes its value to null then the initial styling
- *   values that are passed in here will be applied to the element (if matched).
  * @param {?=} classDeclarations A key/value array of CSS classes that will be registered on the element.
  *   Each individual style will be used on the element as long as it is not overridden
  *   by any classes placed on the element by multiple (`[class]`) or singular (`[class.named]`)
  *   bindings. If a class binding changes its value to a falsy value then the matching initial
  *   class value that are passed in here will be applied to the element (if matched).
+ * @param {?=} styleDeclarations A key/value array of CSS styles that will be registered on the element.
+ *   Each individual style will be used on the element as long as it is not overridden
+ *   by any styles placed on the element by multiple (`[style]`) or singular (`[style.prop]`)
+ *   bindings. If a style binding changes its value to null then the initial styling
+ *   values that are passed in here will be applied to the element (if matched).
+ * @param {?=} styleSanitizer An optional sanitizer function that will be used (if provided)
+ *   to sanitize the any CSS property values that are applied to the element (during rendering).
  * @return {?}
  */
-function elementStyling(styleDeclarations, classDeclarations) {
+function elementStyling(classDeclarations, styleDeclarations, styleSanitizer) {
     /** @type {?} */
     const lElement = /** @type {?} */ ((currentElementNode));
     /** @type {?} */
     const tNode = lElement.tNode;
     if (!tNode.stylingTemplate) {
         // initialize the styling template.
-        tNode.stylingTemplate = createStylingContextTemplate(styleDeclarations, classDeclarations);
+        tNode.stylingTemplate =
+            createStylingContextTemplate(classDeclarations, styleDeclarations, styleSanitizer);
     }
     if (styleDeclarations && styleDeclarations.length ||
         classDeclarations && classDeclarations.length) {
@@ -18441,21 +18537,42 @@ function elementStylingApply(index) {
     renderStyling(getStylingContext(index), renderer);
 }
 /**
+ * Queue a given style to be rendered on an Element.
+ *
+ * If the style value is `null` then it will be removed from the element
+ * (or assigned a different value depending if there are any styles placed
+ * on the element with `elementStyle` or any styles that are present
+ * from when the element was created (with `elementStyling`).
+ *
+ * (Note that the styling instruction will not be applied until `elementStylingApply` is called.)
+ *
  * @template T
- * @param {?} index
- * @param {?} styleIndex
- * @param {?} value
- * @param {?=} suffixOrSanitizer
+ * @param {?} index Index of the element's styling storage to change in the data array.
+ *        (Note that this is not the element index, but rather an index value allocated
+ *        specifically for element styling--the index must be the next index after the element
+ *        index.)
+ * @param {?} styleIndex Index of the style property on this element. (Monotonically increasing.)
+ * @param {?} value New value to write (null to remove).
+ * @param {?=} suffix Optional suffix. Used with scalar values to add unit such as `px`.
+ *        Note that when a suffix is provided then the underlying sanitizer will
+ *        be ignored.
  * @return {?}
  */
-function elementStyleProp(index, styleIndex, value, suffixOrSanitizer) {
+function elementStyleProp(index, styleIndex, value, suffix) {
     /** @type {?} */
     let valueToAdd = null;
     if (value) {
-        valueToAdd =
-            typeof suffixOrSanitizer == 'function' ? suffixOrSanitizer(value) : stringify$1(value);
-        if (typeof suffixOrSanitizer == 'string') {
-            valueToAdd = valueToAdd + suffixOrSanitizer;
+        if (suffix) {
+            // when a suffix is applied then it will bypass
+            // sanitization entirely (b/c a new string is created)
+            valueToAdd = stringify$1(value) + suffix;
+        }
+        else {
+            // sanitization happens by dealing with a String value
+            // this means that the string value will be passed through
+            // into the style rendering later (which is where the value
+            // will be sanitized before it is applied)
+            valueToAdd = /** @type {?} */ ((value));
         }
     }
     updateStyleProp(getStylingContext(index), styleIndex, valueToAdd);
@@ -18475,16 +18592,16 @@ function elementStyleProp(index, styleIndex, value, suffixOrSanitizer) {
  *        (Note that this is not the element index, but rather an index value allocated
  *        specifically for element styling--the index must be the next index after the element
  *        index.)
- * @param {?} styles A key/value style map of the styles that will be applied to the given element.
- *        Any missing styles (that have already been applied to the element beforehand) will be
- *        removed (unset) from the element's styling.
- * @param {?=} classes A key/value style map of CSS classes that will be added to the given element.
+ * @param {?} classes A key/value style map of CSS classes that will be added to the given element.
  *        Any missing classes (that have already been applied to the element beforehand) will be
  *        removed (unset) from the element's list of CSS classes.
+ * @param {?=} styles A key/value style map of the styles that will be applied to the given element.
+ *        Any missing styles (that have already been applied to the element beforehand) will be
+ *        removed (unset) from the element's styling.
  * @return {?}
  */
-function elementStylingMap(index, styles, classes) {
-    updateStylingMap(getStylingContext(index), styles, classes);
+function elementStylingMap(index, classes, styles) {
+    updateStylingMap(getStylingContext(index), classes, styles);
 }
 /**
  * Create static text node
@@ -19493,7 +19610,7 @@ function interpolation2(prefix, v0, i0, v1, suffix) {
     return different ? prefix + stringify$1(v0) + i0 + stringify$1(v1) + suffix : NO_CHANGE;
 }
 /**
- * Creates an interpolation bindings with 3 expressions.
+ * Creates an interpolation binding with 3 expressions.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -19927,6 +20044,30 @@ function createRootContext(scheduler) {
         scheduler: scheduler,
         clean: CLEAN_PROMISE,
     };
+}
+/**
+ * Used to enable lifecycle hooks on the root component.
+ *
+ * Include this feature when calling `renderComponent` if the root component
+ * you are rendering has lifecycle hooks defined. Otherwise, the hooks won't
+ * be called properly.
+ *
+ * Example:
+ *
+ * ```
+ * renderComponent(AppComponent, {features: [RootLifecycleHooks]});
+ * ```
+ * @param {?} component
+ * @param {?} def
+ * @return {?}
+ */
+function LifecycleHooksFeature(component, def) {
+    /** @type {?} */
+    const elementNode = _getComponentHostLElementNode(component);
+    /** @type {?} */
+    const tView = elementNode.view[TVIEW];
+    queueInitHooks(0, def.onInit, def.doCheck, tView);
+    queueLifecycleHooks(elementNode.tNode.flags, tView);
 }
 /**
  * Retrieve the root context for any component by walking the parent `LView` until
@@ -20442,6 +20583,12 @@ class ViewRef$1 {
      */
     constructor(_view, context) {
         this._view = _view;
+        this._appRef = null;
+        this._viewContainerRef = null;
+        /**
+         * \@internal
+         */
+        this._lViewNode = null;
         this.context = /** @type {?} */ ((context));
     }
     /**
@@ -20463,7 +20610,13 @@ class ViewRef$1 {
     /**
      * @return {?}
      */
-    destroy() { destroyLView(this._view); }
+    destroy() {
+        if (this._viewContainerRef && viewAttached(this._view)) {
+            this._viewContainerRef.detach(this._viewContainerRef.indexOf(this));
+            this._viewContainerRef = null;
+        }
+        destroyLView(this._view);
+    }
     /**
      * @param {?} callback
      * @return {?}
@@ -20650,6 +20803,11 @@ class ViewRef$1 {
      */
     checkNoChanges() { checkNoChanges(this.context); }
     /**
+     * @param {?} vcRef
+     * @return {?}
+     */
+    attachToViewContainerRef(vcRef) { this._viewContainerRef = vcRef; }
+    /**
      * @return {?}
      */
     detachFromAppRef() { this._appRef = null; }
@@ -20659,35 +20817,218 @@ class ViewRef$1 {
      */
     attachToAppRef(appRef) { this._appRef = appRef; }
 }
+
 /**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+class ComponentFactoryResolver$1 extends ComponentFactoryResolver {
+    /**
+     * @template T
+     * @param {?} component
+     * @return {?}
+     */
+    resolveComponentFactory(component) {
+        ngDevMode && assertComponentType(component);
+        /** @type {?} */
+        const componentDef = (/** @type {?} */ (component)).ngComponentDef;
+        return new ComponentFactory$1(componentDef);
+    }
+}
+/**
+ * @param {?} map
+ * @return {?}
+ */
+function toRefArray(map) {
+    /** @type {?} */
+    const array = [];
+    for (let nonMinified in map) {
+        if (map.hasOwnProperty(nonMinified)) {
+            /** @type {?} */
+            const minified = map[nonMinified];
+            array.push({ propName: minified, templateName: nonMinified });
+        }
+    }
+    return array;
+}
+/** *
+ * Default {\@link RootContext} for all components rendered with {\@link renderComponent}.
+  @type {?} */
+const ROOT_CONTEXT = new InjectionToken('ROOT_CONTEXT_TOKEN', { providedIn: 'root', factory: () => createRootContext(inject(SCHEDULER)) });
+/** *
+ * A change detection scheduler token for {\@link RootContext}. This token is the default value used
+ * for the default `RootContext` found in the {\@link ROOT_CONTEXT} token.
+  @type {?} */
+const SCHEDULER = new InjectionToken('SCHEDULER_TOKEN', { providedIn: 'root', factory: () => requestAnimationFrame.bind(window) });
+/**
+ * Render3 implementation of {\@link viewEngine_ComponentFactory}.
  * @template T
  */
-class EmbeddedViewRef$1 extends ViewRef$1 {
+class ComponentFactory$1 extends ComponentFactory {
     /**
-     * @param {?} viewNode
-     * @param {?} template
-     * @param {?} context
+     * @param {?} componentDef
      */
-    constructor(viewNode, template, context) {
-        super(viewNode.data, context);
-        this._viewContainerRef = null;
-        this._lViewNode = viewNode;
+    constructor(componentDef) {
+        super();
+        this.componentDef = componentDef;
+        this.componentType = componentDef.type;
+        this.selector = /** @type {?} */ (componentDef.selectors[0][0]);
+        this.ngContentSelectors = [];
+    }
+    /**
+     * @return {?}
+     */
+    get inputs() {
+        return toRefArray(this.componentDef.inputs);
+    }
+    /**
+     * @return {?}
+     */
+    get outputs() {
+        return toRefArray(this.componentDef.outputs);
+    }
+    /**
+     * @param {?} injector
+     * @param {?=} projectableNodes
+     * @param {?=} rootSelectorOrNode
+     * @param {?=} ngModule
+     * @return {?}
+     */
+    create(injector, projectableNodes, rootSelectorOrNode, ngModule) {
+        /** @type {?} */
+        const isInternalRootView = rootSelectorOrNode === undefined;
+        /** @type {?} */
+        const rendererFactory = ngModule ? ngModule.injector.get(RendererFactory2) : domRendererFactory3;
+        /** @type {?} */
+        const hostNode = isInternalRootView ?
+            elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef.rendererType)) :
+            locateHostElement(rendererFactory, rootSelectorOrNode);
+        /** @type {?} */
+        const componentTag = /** @type {?} */ (((/** @type {?} */ ((this.componentDef.selectors))[0]))[0]);
+        /** @type {?} */
+        const rootContext = ngModule && !isInternalRootView ?
+            ngModule.injector.get(ROOT_CONTEXT) :
+            createRootContext(requestAnimationFrame.bind(window));
+        /** @type {?} */
+        const rootView = createLViewData(rendererFactory.createRenderer(hostNode, this.componentDef.rendererType), createTView(-1, null, null, null, null), rootContext, this.componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
+        rootView[INJECTOR$1] = ngModule && ngModule.injector || null;
+        /** @type {?} */
+        const oldView = enterView(rootView, /** @type {?} */ ((null)));
+        /** @type {?} */
+        let component;
+        /** @type {?} */
+        let elementNode;
+        try {
+            if (rendererFactory.begin)
+                rendererFactory.begin();
+            // Create element node at index 0 in data array
+            elementNode = hostElement(componentTag, hostNode, this.componentDef);
+            // Create directive instance with factory() and store at index 0 in directives array
+            rootContext.components.push(component = /** @type {?} */ (baseDirectiveCreate(0, this.componentDef.factory(), this.componentDef)));
+            initChangeDetectorIfExisting(elementNode.nodeInjector, component, /** @type {?} */ ((elementNode.data)));
+            // TODO: should LifecycleHooksFeature and other host features be generated by the compiler and
+            // executed here?
+            // Angular 5 reference: https://stackblitz.com/edit/lifecycle-hooks-vcref
+            LifecycleHooksFeature(component, this.componentDef);
+            // Transform the arrays of native nodes into a LNode structure that can be consumed by the
+            // projection instruction. This is needed to support the reprojection of these nodes.
+            if (projectableNodes) {
+                /** @type {?} */
+                let index = 0;
+                /** @type {?} */
+                const projection$$1 = elementNode.tNode.projection = [];
+                for (let i = 0; i < projectableNodes.length; i++) {
+                    /** @type {?} */
+                    const nodeList = projectableNodes[i];
+                    /** @type {?} */
+                    let firstTNode = null;
+                    /** @type {?} */
+                    let previousTNode = null;
+                    for (let j = 0; j < nodeList.length; j++) {
+                        /** @type {?} */
+                        const lNode = createLNode(++index, 3 /* Element */, /** @type {?} */ (nodeList[j]), null, null);
+                        if (previousTNode) {
+                            previousTNode.next = lNode.tNode;
+                        }
+                        else {
+                            firstTNode = lNode.tNode;
+                        }
+                        previousTNode = lNode.tNode;
+                    }
+                    projection$$1.push(/** @type {?} */ ((firstTNode)));
+                }
+            }
+            // Execute the template in creation mode only, and then turn off the CreationMode flag
+            renderEmbeddedTemplate(elementNode, /** @type {?} */ ((elementNode.data))[TVIEW], component, 1 /* Create */); /** @type {?} */
+            ((elementNode.data))[FLAGS] &= ~1 /* CreationMode */;
+        }
+        finally {
+            enterView(oldView, null);
+            if (rendererFactory.end)
+                rendererFactory.end();
+        }
+        /** @type {?} */
+        const componentRef = new ComponentRef$1(this.componentType, component, rootView, injector, /** @type {?} */ ((hostNode)));
+        if (isInternalRootView) {
+            /** @type {?} */ ((
+            // The host element of the internal root view is attached to the component's host view node
+            componentRef.hostView._lViewNode)).tNode.child = elementNode.tNode;
+        }
+        return componentRef;
+    }
+}
+/**
+ * Represents an instance of a Component created via a {\@link ComponentFactory}.
+ *
+ * `ComponentRef` provides access to the Component Instance as well other objects related to this
+ * Component Instance and allows you to destroy the Component Instance via the {\@link #destroy}
+ * method.
+ *
+ * @template T
+ */
+class ComponentRef$1 extends ComponentRef {
+    /**
+     * @param {?} componentType
+     * @param {?} instance
+     * @param {?} rootView
+     * @param {?} injector
+     * @param {?} hostNode
+     */
+    constructor(componentType, instance, rootView, injector, hostNode) {
+        super();
+        this.destroyCbs = [];
+        this.instance = instance;
+        /* TODO(jasonaden): This is incomplete, to be adjusted in follow-up PR. Notes from Kara:When
+             * ViewRef.detectChanges is called from ApplicationRef.tick, it will call detectChanges at the
+             * component instance level. I suspect this means that lifecycle hooks and host bindings on the
+             * given component won't work (as these are always called at the level above a component).
+             *
+             * In render2, ViewRef.detectChanges uses the root view instance for view checks, not the
+             * component instance. So passing in the root view (1 level above the component) is sufficient.
+             * We might  want to think about creating a fake component for the top level? Or overwrite
+             * detectChanges with a function that calls tickRootContext? */
+        this.hostView = this.changeDetectorRef = new ViewRef$1(rootView, instance);
+        this.hostView._lViewNode = createLNode(-1, 2 /* View */, null, null, null, rootView);
+        this.injector = injector;
+        this.location = new ElementRef(hostNode);
+        this.componentType = componentType;
     }
     /**
      * @return {?}
      */
     destroy() {
-        if (this._viewContainerRef && viewAttached(this._view)) {
-            this._viewContainerRef.detach(this._viewContainerRef.indexOf(this));
-            this._viewContainerRef = null;
-        }
-        super.destroy();
+        ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed'); /** @type {?} */
+        ((this.destroyCbs)).forEach(fn => fn());
+        this.destroyCbs = null;
     }
     /**
-     * @param {?} vcRef
+     * @param {?} callback
      * @return {?}
      */
-    attachToViewContainerRef(vcRef) { this._viewContainerRef = vcRef; }
+    onDestroy(callback) {
+        ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed'); /** @type {?} */
+        ((this.destroyCbs)).push(callback);
+    }
 }
 
 /**
@@ -20787,7 +21128,7 @@ function getOrCreateNodeInjectorForNode(node) {
         templateRef: null,
         viewContainerRef: null,
         elementRef: null,
-        changeDetectorRef: null
+        changeDetectorRef: null,
     };
 }
 /**
@@ -21281,11 +21622,19 @@ class ViewContainerRef$1 {
      * @param {?=} index
      * @param {?=} injector
      * @param {?=} projectableNodes
-     * @param {?=} ngModule
+     * @param {?=} ngModuleRef
      * @return {?}
      */
-    createComponent(componentFactory, index, injector, projectableNodes, ngModule) {
-        throw notImplemented();
+    createComponent(componentFactory, index, injector, projectableNodes, ngModuleRef) {
+        /** @type {?} */
+        const contextInjector = injector || this.parentInjector;
+        if (!ngModuleRef && contextInjector) {
+            ngModuleRef = contextInjector.get(NgModuleRef);
+        }
+        /** @type {?} */
+        const componentRef = componentFactory.create(contextInjector, projectableNodes, undefined, ngModuleRef);
+        this.insert(componentRef.hostView, index);
+        return componentRef;
     }
     /**
      * @param {?} viewRef
@@ -21297,7 +21646,7 @@ class ViewContainerRef$1 {
             throw new Error('Cannot insert a destroyed View in a ViewContainer!');
         }
         /** @type {?} */
-        const lViewNode = (/** @type {?} */ (viewRef))._lViewNode;
+        const lViewNode = /** @type {?} */ (((/** @type {?} */ (viewRef))._lViewNode));
         /** @type {?} */
         const adjustedIdx = this._adjustIndex(index);
         insertView(this._lContainerNode, lViewNode, adjustedIdx);
@@ -21416,7 +21765,10 @@ class TemplateRef$1 {
             insertView(containerNode, viewNode, /** @type {?} */ ((index)));
         }
         renderEmbeddedTemplate(viewNode, this._tView, context, 1 /* Create */);
-        return new EmbeddedViewRef$1(viewNode, /** @type {?} */ (((this._tView.template))), context);
+        /** @type {?} */
+        const viewRef = new ViewRef$1(viewNode.data, context);
+        viewRef._lViewNode = viewNode;
+        return viewRef;
     }
 }
 
@@ -21440,174 +21792,8 @@ function PublicFeature(definition) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-class ComponentFactoryResolver$1 extends ComponentFactoryResolver {
-    /**
-     * @template T
-     * @param {?} component
-     * @return {?}
-     */
-    resolveComponentFactory(component) {
-        ngDevMode && assertComponentType(component);
-        /** @type {?} */
-        const componentDef = (/** @type {?} */ (component)).ngComponentDef;
-        return new ComponentFactory$1(componentDef);
-    }
-}
-/**
- * @param {?} map
- * @return {?}
- */
-function toRefArray(map) {
-    /** @type {?} */
-    const array = [];
-    for (let nonMinified in map) {
-        if (map.hasOwnProperty(nonMinified)) {
-            /** @type {?} */
-            const minified = map[nonMinified];
-            array.push({ propName: minified, templateName: nonMinified });
-        }
-    }
-    return array;
-}
-/** *
- * Default {\@link RootContext} for all components rendered with {\@link renderComponent}.
-  @type {?} */
-const ROOT_CONTEXT = new InjectionToken('ROOT_CONTEXT_TOKEN', { providedIn: 'root', factory: () => createRootContext(inject(SCHEDULER)) });
-/** *
- * A change detection scheduler token for {\@link RootContext}. This token is the default value used
- * for the default `RootContext` found in the {\@link ROOT_CONTEXT} token.
-  @type {?} */
-const SCHEDULER = new InjectionToken('SCHEDULER_TOKEN', { providedIn: 'root', factory: () => requestAnimationFrame.bind(window) });
-/**
- * Render3 implementation of {\@link viewEngine_ComponentFactory}.
- * @template T
- */
-class ComponentFactory$1 extends ComponentFactory {
-    /**
-     * @param {?} componentDef
-     */
-    constructor(componentDef) {
-        super();
-        this.componentDef = componentDef;
-        this.componentType = componentDef.type;
-        this.selector = /** @type {?} */ (componentDef.selectors[0][0]);
-        this.ngContentSelectors = [];
-    }
-    /**
-     * @return {?}
-     */
-    get inputs() {
-        return toRefArray(this.componentDef.inputs);
-    }
-    /**
-     * @return {?}
-     */
-    get outputs() {
-        return toRefArray(this.componentDef.outputs);
-    }
-    /**
-     * @param {?} parentComponentInjector
-     * @param {?=} projectableNodes
-     * @param {?=} rootSelectorOrNode
-     * @param {?=} ngModule
-     * @return {?}
-     */
-    create(parentComponentInjector, projectableNodes, rootSelectorOrNode, ngModule) {
-        ngDevMode && assertDefined(ngModule, 'ngModule should always be defined');
-        /** @type {?} */
-        const rendererFactory = ngModule ? ngModule.injector.get(RendererFactory2) : document;
-        /** @type {?} */
-        const hostNode = locateHostElement(rendererFactory, rootSelectorOrNode);
-        /** @type {?} */
-        const componentTag = /** @type {?} */ (((/** @type {?} */ ((this.componentDef.selectors))[0]))[0]);
-        /** @type {?} */
-        const rootContext = /** @type {?} */ ((ngModule)).injector.get(ROOT_CONTEXT);
-        /** @type {?} */
-        const rootView = createLViewData(rendererFactory.createRenderer(hostNode, this.componentDef.rendererType), createTView(-1, null, null, null, null), null, this.componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
-        rootView[INJECTOR$1] = ngModule && ngModule.injector || null;
-        /** @type {?} */
-        const oldView = enterView(rootView, /** @type {?} */ ((null)));
-        /** @type {?} */
-        let component;
-        /** @type {?} */
-        let elementNode;
-        try {
-            if (rendererFactory.begin)
-                rendererFactory.begin();
-            // Create element node at index 0 in data array
-            elementNode = hostElement(componentTag, hostNode, this.componentDef);
-            // Create directive instance with factory() and store at index 0 in directives array
-            rootContext.components.push(component = /** @type {?} */ (baseDirectiveCreate(0, this.componentDef.factory(), this.componentDef)));
-            initChangeDetectorIfExisting(elementNode.nodeInjector, component, /** @type {?} */ ((elementNode.data)));
-        }
-        finally {
-            enterView(oldView, null);
-            if (rendererFactory.end)
-                rendererFactory.end();
-        }
-        // TODO(misko): this is the wrong injector here.
-        return new ComponentRef$1(this.componentType, component, rootView, /** @type {?} */ ((ngModule)).injector, /** @type {?} */ ((hostNode)));
-    }
-}
-/**
- * Represents an instance of a Component created via a {\@link ComponentFactory}.
- *
- * `ComponentRef` provides access to the Component Instance as well other objects related to this
- * Component Instance and allows you to destroy the Component Instance via the {\@link #destroy}
- * method.
- *
- * @template T
- */
-class ComponentRef$1 extends ComponentRef {
-    /**
-     * @param {?} componentType
-     * @param {?} instance
-     * @param {?} rootView
-     * @param {?} injector
-     * @param {?} hostNode
-     */
-    constructor(componentType, instance, rootView, injector, hostNode) {
-        super();
-        this.destroyCbs = [];
-        this.instance = instance;
-        /* TODO(jasonaden): This is incomplete, to be adjusted in follow-up PR. Notes from Kara:When
-             * ViewRef.detectChanges is called from ApplicationRef.tick, it will call detectChanges at the
-             * component instance level. I suspect this means that lifecycle hooks and host bindings on the
-             * given component won't work (as these are always called at the level above a component).
-             *
-             * In render2, ViewRef.detectChanges uses the root view instance for view checks, not the
-             * component instance. So passing in the root view (1 level above the component) is sufficient.
-             * We might  want to think about creating a fake component for the top level? Or overwrite
-             * detectChanges with a function that calls tickRootContext? */
-        this.hostView = this.changeDetectorRef = new ViewRef$1(rootView, instance);
-        this.injector = injector;
-        this.location = new ElementRef(hostNode);
-        this.componentType = componentType;
-    }
-    /**
-     * @return {?}
-     */
-    destroy() {
-        ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed'); /** @type {?} */
-        ((this.destroyCbs)).forEach(fn => fn());
-        this.destroyCbs = null;
-    }
-    /**
-     * @param {?} callback
-     * @return {?}
-     */
-    onDestroy(callback) {
-        ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed'); /** @type {?} */
-        ((this.destroyCbs)).push(callback);
-    }
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
 /** @type {?} */
-const i18nTagRegex = /\{\$([^}]+)\}/g;
+const i18nTagRegex = /{\$([^}]+)}/g;
 /**
  * Takes a translation string, the initial list of placeholders (elements and expressions) and the
  * indexes of their corresponding expression nodes to return a list of instructions for each
@@ -21622,19 +21808,21 @@ const i18nTagRegex = /\{\$([^}]+)\}/g;
  * their indexes.
  * @param {?=} expressions An array containing, for each template, the maps of expression placeholders
  * and their indexes.
- * @param {?=} tmplContainers An array of template container placeholders whose content should be ignored
- * when generating the instructions for their parent template.
+ * @param {?=} templateRoots An array of template roots whose content should be ignored when
+ * generating the instructions for their parent template.
  * @param {?=} lastChildIndex The index of the last child of the i18n node. Used when the i18n block is
  * an ng-container.
  *
  * @return {?} A list of instructions used to translate each template.
  */
-function i18nMapping(translation, elements, expressions, tmplContainers, lastChildIndex) {
+function i18nMapping(translation, elements, expressions, templateRoots, lastChildIndex) {
     /** @type {?} */
     const translationParts = translation.split(i18nTagRegex);
     /** @type {?} */
-    const instructions = [];
-    generateMappingInstructions(0, translationParts, instructions, elements, expressions, tmplContainers, lastChildIndex);
+    const nbTemplates = templateRoots ? templateRoots.length + 1 : 1;
+    /** @type {?} */
+    const instructions = (new Array(nbTemplates)).fill(undefined);
+    generateMappingInstructions(0, 0, translationParts, instructions, elements, expressions, templateRoots, lastChildIndex);
     return instructions;
 }
 /**
@@ -21643,7 +21831,9 @@ function i18nMapping(translation, elements, expressions, tmplContainers, lastChi
  *
  * See `i18nMapping()` for more details.
  *
- * @param {?} index The current index in `translationParts`.
+ * @param {?} tmplIndex The order of appearance of the template.
+ * 0 for the root template, following indexes match the order in `templateRoots`.
+ * @param {?} partIndex The current index in `translationParts`.
  * @param {?} translationParts The translation string split into an array of placeholders and text
  * elements.
  * @param {?} instructions The current list of instructions to update.
@@ -21651,15 +21841,14 @@ function i18nMapping(translation, elements, expressions, tmplContainers, lastChi
  * their indexes.
  * @param {?=} expressions An array containing, for each template, the maps of expression placeholders
  * and their indexes.
- * @param {?=} tmplContainers An array of template container placeholders whose content should be ignored
- * when generating the instructions for their parent template.
+ * @param {?=} templateRoots An array of template roots whose content should be ignored when
+ * generating the instructions for their parent template.
  * @param {?=} lastChildIndex The index of the last child of the i18n node. Used when the i18n block is
  * an ng-container.
+ *
  * @return {?} the current index in `translationParts`
  */
-function generateMappingInstructions(index, translationParts, instructions, elements, expressions, tmplContainers, lastChildIndex) {
-    /** @type {?} */
-    const tmplIndex = instructions.length;
+function generateMappingInstructions(tmplIndex, partIndex, translationParts, instructions, elements, expressions, templateRoots, lastChildIndex) {
     /** @type {?} */
     const tmplInstructions = [];
     /** @type {?} */
@@ -21668,32 +21857,41 @@ function generateMappingInstructions(index, translationParts, instructions, elem
     let openedTagCount = 0;
     /** @type {?} */
     let maxIndex = 0;
-    instructions.push(tmplInstructions);
-    for (; index < translationParts.length; index++) {
+    /** @type {?} */
+    let currentElements = elements && elements[tmplIndex] ? elements[tmplIndex] : null;
+    /** @type {?} */
+    let currentExpressions = expressions && expressions[tmplIndex] ? expressions[tmplIndex] : null;
+    instructions[tmplIndex] = tmplInstructions;
+    for (; partIndex < translationParts.length; partIndex++) {
         /** @type {?} */
-        const value = translationParts[index];
+        const value = translationParts[partIndex];
         // Odd indexes are placeholders
-        if (index & 1) {
+        if (partIndex & 1) {
             /** @type {?} */
             let phIndex;
-            if (elements && elements[tmplIndex] &&
-                typeof (phIndex = /** @type {?} */ ((elements[tmplIndex]))[value]) !== 'undefined') {
-                // The placeholder represents a DOM element
-                // Add an instruction to move the element
-                tmplInstructions.push(phIndex | 1073741824 /* Element */);
+            if (currentElements && currentElements[value] !== undefined) {
+                phIndex = currentElements[value];
+                /** @type {?} */
+                let templateRootIndex = templateRoots ? templateRoots.indexOf(value) : -1;
+                if (templateRootIndex !== -1 && (templateRootIndex + 1) !== tmplIndex) {
+                    // This is a template root, it has no closing tag, not treating it as an element
+                    tmplInstructions.push(phIndex | -2147483648 /* TemplateRoot */);
+                }
+                else {
+                    tmplInstructions.push(phIndex | 1073741824 /* Element */);
+                    openedTagCount++;
+                }
                 phVisited.push(value);
-                openedTagCount++;
             }
-            else if (expressions && expressions[tmplIndex] &&
-                typeof (phIndex = /** @type {?} */ ((expressions[tmplIndex]))[value]) !== 'undefined') {
-                // The placeholder represents an expression
-                // Add an instruction to move the expression
+            else if (currentExpressions && currentExpressions[value] !== undefined) {
+                phIndex = currentExpressions[value];
+                // The placeholder represents an expression, add an instruction to move it
                 tmplInstructions.push(phIndex | 1610612736 /* Expression */);
                 phVisited.push(value);
             }
-            else { // It is a closing tag
+            else {
                 // It is a closing tag
-                tmplInstructions.push(-2147483648 /* CloseNode */);
+                tmplInstructions.push(-1073741824 /* CloseNode */);
                 if (tmplIndex > 0) {
                     openedTagCount--;
                     // If we have reached the closing tag for this template, exit the loop
@@ -21702,12 +21900,15 @@ function generateMappingInstructions(index, translationParts, instructions, elem
                     }
                 }
             }
-            if (typeof phIndex !== 'undefined' && phIndex > maxIndex) {
+            if (phIndex !== undefined && phIndex > maxIndex) {
                 maxIndex = phIndex;
             }
-            if (tmplContainers && tmplContainers.indexOf(value) !== -1 &&
-                tmplContainers.indexOf(value) >= tmplIndex) {
-                index = generateMappingInstructions(index, translationParts, instructions, elements, expressions, tmplContainers, lastChildIndex);
+            if (templateRoots) {
+                /** @type {?} */
+                const newTmplIndex = templateRoots.indexOf(value) + 1;
+                if (newTmplIndex !== 0 && newTmplIndex !== tmplIndex) {
+                    partIndex = generateMappingInstructions(newTmplIndex, partIndex, translationParts, instructions, elements, expressions, templateRoots, lastChildIndex);
+                }
             }
         }
         else if (value) {
@@ -21715,7 +21916,7 @@ function generateMappingInstructions(index, translationParts, instructions, elem
             tmplInstructions.push(536870912 /* Text */, value);
         }
     }
-    // Check if some elements from the template are missing from the translation
+    // Add instructions to remove elements that are not used in the translation
     if (elements) {
         /** @type {?} */
         const tmplElements = elements[tmplIndex];
@@ -21729,7 +21930,7 @@ function generateMappingInstructions(index, translationParts, instructions, elem
                     /** @type {?} */
                     let index = tmplElements[ph];
                     // Add an instruction to remove the element
-                    tmplInstructions.push(index | -1610612736 /* RemoveNode */);
+                    tmplInstructions.push(index | -536870912 /* RemoveNode */);
                     if (index > maxIndex) {
                         maxIndex = index;
                     }
@@ -21737,7 +21938,7 @@ function generateMappingInstructions(index, translationParts, instructions, elem
             }
         }
     }
-    // Check if some expressions from the template are missing from the translation
+    // Add instructions to remove expressions that are not used in the translation
     if (expressions) {
         /** @type {?} */
         const tmplExpressions = expressions[tmplIndex];
@@ -21754,7 +21955,7 @@ function generateMappingInstructions(index, translationParts, instructions, elem
                         assertLessThan(index.toString(2).length, 28, `Index ${index} is too big and will overflow`);
                     }
                     // Add an instruction to remove the expression
-                    tmplInstructions.push(index | -1610612736 /* RemoveNode */);
+                    tmplInstructions.push(index | -536870912 /* RemoveNode */);
                     if (index > maxIndex) {
                         maxIndex = index;
                     }
@@ -21769,12 +21970,10 @@ function generateMappingInstructions(index, translationParts, instructions, elem
             if (ngDevMode) {
                 assertLessThan(i.toString(2).length, 28, `Index ${i} is too big and will overflow`);
             }
-            // We consider those additional placeholders as expressions because we don't care about
-            // their children, all we need to do is to append them
-            tmplInstructions.push(i | 1610612736 /* Expression */);
+            tmplInstructions.push(i | -1610612736 /* Any */);
         }
     }
-    return index;
+    return partIndex;
 }
 /**
  * @param {?} node
@@ -21808,8 +22007,6 @@ function appendI18nNode(node, parentNode, previousNode) {
     }
     // Template containers also have a comment node for the `ViewContainerRef` that should be moved
     if (node.tNode.type === 0 /* Container */ && node.dynamicLContainerNode) {
-        // (node.native as RComment).textContent = 'test';
-        // console.log(node.native);
         appendChild(parentNode, node.dynamicLContainerNode.native || null, viewData);
         if (firstTemplatePass) {
             node.tNode.dynamicContainerNode = node.dynamicLContainerNode.tNode;
@@ -21854,9 +22051,11 @@ function i18nApply(startIndex, instructions) {
                 localParentNode = element$$1;
                 break;
             case 1610612736 /* Expression */:
+            case -2147483648 /* TemplateRoot */:
+            case -1610612736 /* Any */:
                 /** @type {?} */
-                const expr = load(instruction & 536870911 /* IndexMask */);
-                localPreviousNode = appendI18nNode(expr, localParentNode, localPreviousNode);
+                const node = load(instruction & 536870911 /* IndexMask */);
+                localPreviousNode = appendI18nNode(node, localParentNode, localPreviousNode);
                 break;
             case 536870912 /* Text */:
                 if (ngDevMode) {
@@ -21871,11 +22070,11 @@ function i18nApply(startIndex, instructions) {
                 localPreviousNode = appendI18nNode(textLNode, localParentNode, localPreviousNode);
                 resetApplicationState();
                 break;
-            case -2147483648 /* CloseNode */:
+            case -1073741824 /* CloseNode */:
                 localPreviousNode = localParentNode;
                 localParentNode = /** @type {?} */ ((getParentLNode(localParentNode)));
                 break;
-            case -1610612736 /* RemoveNode */:
+            case -536870912 /* RemoveNode */:
                 if (ngDevMode) {
                     ngDevMode.rendererRemoveNode++;
                 }
@@ -21915,81 +22114,317 @@ function i18nExpMapping(translation, placeholders) {
     return staticText;
 }
 /**
- * Checks if the value of up to 8 expressions have changed and replaces them by their values in a
- * translation, or returns NO_CHANGE.
+ * Checks if the value of an expression has changed and replaces it by its value in a translation,
+ * or returns NO_CHANGE.
  *
- * @param {?} instructions
- * @param {?} numberOfExp
- * @param {?} v0
- * @param {?=} v1
- * @param {?=} v2
- * @param {?=} v3
- * @param {?=} v4
- * @param {?=} v5
- * @param {?=} v6
- * @param {?=} v7
+ * @param {?} instructions A list of instructions that will be used to translate an attribute.
+ * @param {?} v0 value checked for change.
+ *
  * @return {?} The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
  */
-function i18nInterpolation(instructions, numberOfExp, v0, v1, v2, v3, v4, v5, v6, v7) {
+function i18nInterpolation1(instructions, v0) {
     /** @type {?} */
-    let different = bindingUpdated(v0);
-    if (numberOfExp > 1) {
-        different = bindingUpdated(v1) || different;
-        if (numberOfExp > 2) {
-            different = bindingUpdated(v2) || different;
-            if (numberOfExp > 3) {
-                different = bindingUpdated(v3) || different;
-                if (numberOfExp > 4) {
-                    different = bindingUpdated(v4) || different;
-                    if (numberOfExp > 5) {
-                        different = bindingUpdated(v5) || different;
-                        if (numberOfExp > 6) {
-                            different = bindingUpdated(v6) || different;
-                            if (numberOfExp > 7) {
-                                different = bindingUpdated(v7) || different;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+    const different = bindingUpdated(v0);
     if (!different) {
         return NO_CHANGE;
     }
     /** @type {?} */
     let res = '';
     for (let i = 0; i < instructions.length; i++) {
-        /** @type {?} */
-        let value;
-        // Odd indexes are placeholders
+        // Odd indexes are bindings
         if (i & 1) {
-            switch (instructions[i]) {
-                case 0:
-                    value = v0;
-                    break;
-                case 1:
-                    value = v1;
-                    break;
-                case 2:
-                    value = v2;
-                    break;
-                case 3:
-                    value = v3;
-                    break;
-                case 4:
-                    value = v4;
-                    break;
-                case 5:
-                    value = v5;
-                    break;
-                case 6:
-                    value = v6;
-                    break;
-                case 7:
-                    value = v7;
-                    break;
-            }
+            res += stringify$1(v0);
+        }
+        else {
+            res += instructions[i];
+        }
+    }
+    return res;
+}
+/**
+ * Checks if the values of up to 2 expressions have changed and replaces them by their values in a
+ * translation, or returns NO_CHANGE.
+ *
+ * @param {?} instructions A list of instructions that will be used to translate an attribute.
+ * @param {?} v0 value checked for change.
+ * @param {?} v1 value checked for change.
+ *
+ * @return {?} The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+function i18nInterpolation2(instructions, v0, v1) {
+    /** @type {?} */
+    const different = bindingUpdated2(v0, v1);
+    if (!different) {
+        return NO_CHANGE;
+    }
+    /** @type {?} */
+    let res = '';
+    for (let i = 0; i < instructions.length; i++) {
+        // Odd indexes are bindings
+        if (i & 1) {
+            /** @type {?} */
+            const idx = /** @type {?} */ (instructions[i]);
+            /** @type {?} */
+            const b1 = idx & 1;
+            /** @type {?} */
+            const value = b1 ? v1 : v0;
+            res += stringify$1(value);
+        }
+        else {
+            res += instructions[i];
+        }
+    }
+    return res;
+}
+/**
+ * Checks if the values of up to 3 expressions have changed and replaces them by their values in a
+ * translation, or returns NO_CHANGE.
+ *
+ * @param {?} instructions A list of instructions that will be used to translate an attribute.
+ * @param {?} v0 value checked for change.
+ * @param {?} v1 value checked for change.
+ * @param {?} v2 value checked for change.
+ *
+ * @return {?} The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+function i18nInterpolation3(instructions, v0, v1, v2) {
+    /** @type {?} */
+    let different = bindingUpdated2(v0, v1);
+    different = bindingUpdated(v2) || different;
+    if (!different) {
+        return NO_CHANGE;
+    }
+    /** @type {?} */
+    let res = '';
+    for (let i = 0; i < instructions.length; i++) {
+        // Odd indexes are bindings
+        if (i & 1) {
+            /** @type {?} */
+            const idx = /** @type {?} */ (instructions[i]);
+            /** @type {?} */
+            const b2 = idx & 2;
+            /** @type {?} */
+            const b1 = idx & 1;
+            /** @type {?} */
+            const value = b2 ? v2 : (b1 ? v1 : v0);
+            res += stringify$1(value);
+        }
+        else {
+            res += instructions[i];
+        }
+    }
+    return res;
+}
+/**
+ * Checks if the values of up to 4 expressions have changed and replaces them by their values in a
+ * translation, or returns NO_CHANGE.
+ *
+ * @param {?} instructions A list of instructions that will be used to translate an attribute.
+ * @param {?} v0 value checked for change.
+ * @param {?} v1 value checked for change.
+ * @param {?} v2 value checked for change.
+ * @param {?} v3 value checked for change.
+ *
+ * @return {?} The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+function i18nInterpolation4(instructions, v0, v1, v2, v3) {
+    /** @type {?} */
+    const different = bindingUpdated4(v0, v1, v2, v3);
+    if (!different) {
+        return NO_CHANGE;
+    }
+    /** @type {?} */
+    let res = '';
+    for (let i = 0; i < instructions.length; i++) {
+        // Odd indexes are bindings
+        if (i & 1) {
+            /** @type {?} */
+            const idx = /** @type {?} */ (instructions[i]);
+            /** @type {?} */
+            const b2 = idx & 2;
+            /** @type {?} */
+            const b1 = idx & 1;
+            /** @type {?} */
+            const value = b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0);
+            res += stringify$1(value);
+        }
+        else {
+            res += instructions[i];
+        }
+    }
+    return res;
+}
+/**
+ * Checks if the values of up to 5 expressions have changed and replaces them by their values in a
+ * translation, or returns NO_CHANGE.
+ *
+ * @param {?} instructions A list of instructions that will be used to translate an attribute.
+ * @param {?} v0 value checked for change.
+ * @param {?} v1 value checked for change.
+ * @param {?} v2 value checked for change.
+ * @param {?} v3 value checked for change.
+ * @param {?} v4 value checked for change.
+ *
+ * @return {?} The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+function i18nInterpolation5(instructions, v0, v1, v2, v3, v4) {
+    /** @type {?} */
+    let different = bindingUpdated4(v0, v1, v2, v3);
+    different = bindingUpdated(v4) || different;
+    if (!different) {
+        return NO_CHANGE;
+    }
+    /** @type {?} */
+    let res = '';
+    for (let i = 0; i < instructions.length; i++) {
+        // Odd indexes are bindings
+        if (i & 1) {
+            /** @type {?} */
+            const idx = /** @type {?} */ (instructions[i]);
+            /** @type {?} */
+            const b4 = idx & 4;
+            /** @type {?} */
+            const b2 = idx & 2;
+            /** @type {?} */
+            const b1 = idx & 1;
+            /** @type {?} */
+            const value = b4 ? v4 : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
+            res += stringify$1(value);
+        }
+        else {
+            res += instructions[i];
+        }
+    }
+    return res;
+}
+/**
+ * Checks if the values of up to 6 expressions have changed and replaces them by their values in a
+ * translation, or returns NO_CHANGE.
+ *
+ * @param {?} instructions A list of instructions that will be used to translate an attribute.
+ * @param {?} v0 value checked for change.
+ * @param {?} v1 value checked for change.
+ * @param {?} v2 value checked for change.
+ * @param {?} v3 value checked for change.
+ * @param {?} v4 value checked for change.
+ * @param {?} v5 value checked for change.
+ *
+ * @return {?} The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+function i18nInterpolation6(instructions, v0, v1, v2, v3, v4, v5) {
+    /** @type {?} */
+    let different = bindingUpdated4(v0, v1, v2, v3);
+    different = bindingUpdated2(v4, v5) || different;
+    if (!different) {
+        return NO_CHANGE;
+    }
+    /** @type {?} */
+    let res = '';
+    for (let i = 0; i < instructions.length; i++) {
+        // Odd indexes are bindings
+        if (i & 1) {
+            /** @type {?} */
+            const idx = /** @type {?} */ (instructions[i]);
+            /** @type {?} */
+            const b4 = idx & 4;
+            /** @type {?} */
+            const b2 = idx & 2;
+            /** @type {?} */
+            const b1 = idx & 1;
+            /** @type {?} */
+            const value = b4 ? (b1 ? v5 : v4) : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
+            res += stringify$1(value);
+        }
+        else {
+            res += instructions[i];
+        }
+    }
+    return res;
+}
+/**
+ * Checks if the values of up to 7 expressions have changed and replaces them by their values in a
+ * translation, or returns NO_CHANGE.
+ *
+ * @param {?} instructions A list of instructions that will be used to translate an attribute.
+ * @param {?} v0 value checked for change.
+ * @param {?} v1 value checked for change.
+ * @param {?} v2 value checked for change.
+ * @param {?} v3 value checked for change.
+ * @param {?} v4 value checked for change.
+ * @param {?} v5 value checked for change.
+ * @param {?} v6 value checked for change.
+ *
+ * @return {?} The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+function i18nInterpolation7(instructions, v0, v1, v2, v3, v4, v5, v6) {
+    /** @type {?} */
+    let different = bindingUpdated4(v0, v1, v2, v3);
+    different = bindingUpdated2(v4, v5) || different;
+    different = bindingUpdated(v6) || different;
+    if (!different) {
+        return NO_CHANGE;
+    }
+    /** @type {?} */
+    let res = '';
+    for (let i = 0; i < instructions.length; i++) {
+        // Odd indexes are bindings
+        if (i & 1) {
+            /** @type {?} */
+            const idx = /** @type {?} */ (instructions[i]);
+            /** @type {?} */
+            const b4 = idx & 4;
+            /** @type {?} */
+            const b2 = idx & 2;
+            /** @type {?} */
+            const b1 = idx & 1;
+            /** @type {?} */
+            const value = b4 ? (b2 ? v6 : (b1 ? v5 : v4)) : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
+            res += stringify$1(value);
+        }
+        else {
+            res += instructions[i];
+        }
+    }
+    return res;
+}
+/**
+ * Checks if the values of up to 8 expressions have changed and replaces them by their values in a
+ * translation, or returns NO_CHANGE.
+ *
+ * @param {?} instructions A list of instructions that will be used to translate an attribute.
+ * @param {?} v0 value checked for change.
+ * @param {?} v1 value checked for change.
+ * @param {?} v2 value checked for change.
+ * @param {?} v3 value checked for change.
+ * @param {?} v4 value checked for change.
+ * @param {?} v5 value checked for change.
+ * @param {?} v6 value checked for change.
+ * @param {?} v7 value checked for change.
+ *
+ * @return {?} The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+function i18nInterpolation8(instructions, v0, v1, v2, v3, v4, v5, v6, v7) {
+    /** @type {?} */
+    let different = bindingUpdated4(v0, v1, v2, v3);
+    different = bindingUpdated4(v4, v5, v6, v7) || different;
+    if (!different) {
+        return NO_CHANGE;
+    }
+    /** @type {?} */
+    let res = '';
+    for (let i = 0; i < instructions.length; i++) {
+        // Odd indexes are bindings
+        if (i & 1) {
+            /** @type {?} */
+            const idx = /** @type {?} */ (instructions[i]);
+            /** @type {?} */
+            const b4 = idx & 4;
+            /** @type {?} */
+            const b2 = idx & 2;
+            /** @type {?} */
+            const b1 = idx & 1;
+            /** @type {?} */
+            const value = b4 ? (b2 ? (b1 ? v7 : v6) : (b1 ? v5 : v4)) : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
             res += stringify$1(value);
         }
         else {
@@ -23014,8 +23449,99 @@ function queryRefresh(queryList) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 /** @type {?} */
 const BRAND = '__SANITIZER_TRUSTED_BRAND__';
+/**
+ * @param {?} value
+ * @param {?} type
+ * @return {?}
+ */
+function allowSanitizationBypass(value, type) {
+    return (value instanceof String && (/** @type {?} */ (value))[BRAND] === type) ? true : false;
+}
+/**
+ * Mark `html` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {\@link htmlSanitizer} to be trusted implicitly.
+ *
+ * @param {?} trustedHtml `html` string which needs to be implicitly trusted.
+ * @return {?} a `html` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustHtml(trustedHtml) {
+    return bypassSanitizationTrustString(trustedHtml, "Html" /* Html */);
+}
+/**
+ * Mark `style` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {\@link styleSanitizer} to be trusted implicitly.
+ *
+ * @param {?} trustedStyle `style` string which needs to be implicitly trusted.
+ * @return {?} a `style` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustStyle(trustedStyle) {
+    return bypassSanitizationTrustString(trustedStyle, "Style" /* Style */);
+}
+/**
+ * Mark `script` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {\@link scriptSanitizer} to be trusted implicitly.
+ *
+ * @param {?} trustedScript `script` string which needs to be implicitly trusted.
+ * @return {?} a `script` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustScript(trustedScript) {
+    return bypassSanitizationTrustString(trustedScript, "Script" /* Script */);
+}
+/**
+ * Mark `url` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {\@link urlSanitizer} to be trusted implicitly.
+ *
+ * @param {?} trustedUrl `url` string which needs to be implicitly trusted.
+ * @return {?} a `url` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustUrl(trustedUrl) {
+    return bypassSanitizationTrustString(trustedUrl, "Url" /* Url */);
+}
+/**
+ * Mark `url` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {\@link resourceUrlSanitizer} to be trusted implicitly.
+ *
+ * @param {?} trustedResourceUrl `url` string which needs to be implicitly trusted.
+ * @return {?} a `url` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
+    return bypassSanitizationTrustString(trustedResourceUrl, "ResourceUrl" /* ResourceUrl */);
+}
+/**
+ * @param {?} trustedString
+ * @param {?} mode
+ * @return {?}
+ */
+function bypassSanitizationTrustString(trustedString, mode) {
+    /** @type {?} */
+    const trusted = /** @type {?} */ (new String(trustedString));
+    trusted[BRAND] = mode;
+    return trusted;
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
 /**
  * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
  * dangerous content.
@@ -23035,7 +23561,7 @@ function sanitizeHtml(unsafeHtml) {
     if (s) {
         return s.sanitize(SecurityContext.HTML, unsafeHtml) || '';
     }
-    if (unsafeHtml instanceof String && (/** @type {?} */ (unsafeHtml))[BRAND] === 'Html') {
+    if (allowSanitizationBypass(unsafeHtml, "Html" /* Html */)) {
         return unsafeHtml.toString();
     }
     return _sanitizeHtml(document, stringify$1(unsafeHtml));
@@ -23059,7 +23585,7 @@ function sanitizeStyle(unsafeStyle) {
     if (s) {
         return s.sanitize(SecurityContext.STYLE, unsafeStyle) || '';
     }
-    if (unsafeStyle instanceof String && (/** @type {?} */ (unsafeStyle))[BRAND] === 'Style') {
+    if (allowSanitizationBypass(unsafeStyle, "Style" /* Style */)) {
         return unsafeStyle.toString();
     }
     return _sanitizeStyle(stringify$1(unsafeStyle));
@@ -23084,7 +23610,7 @@ function sanitizeUrl(unsafeUrl) {
     if (s) {
         return s.sanitize(SecurityContext.URL, unsafeUrl) || '';
     }
-    if (unsafeUrl instanceof String && (/** @type {?} */ (unsafeUrl))[BRAND] === 'Url') {
+    if (allowSanitizationBypass(unsafeUrl, "Url" /* Url */)) {
         return unsafeUrl.toString();
     }
     return _sanitizeUrl(stringify$1(unsafeUrl));
@@ -23104,82 +23630,10 @@ function sanitizeResourceUrl(unsafeResourceUrl) {
     if (s) {
         return s.sanitize(SecurityContext.RESOURCE_URL, unsafeResourceUrl) || '';
     }
-    if (unsafeResourceUrl instanceof String &&
-        (/** @type {?} */ (unsafeResourceUrl))[BRAND] === 'ResourceUrl') {
+    if (allowSanitizationBypass(unsafeResourceUrl, "ResourceUrl" /* ResourceUrl */)) {
         return unsafeResourceUrl.toString();
     }
     throw new Error('unsafe value used in a resource URL context (see http://g.co/ng/security#xss)');
-}
-/**
- * Mark `html` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {\@link htmlSanitizer} to be trusted implicitly.
- *
- * @param {?} trustedHtml `html` string which needs to be implicitly trusted.
- * @return {?} a `html` `String` which has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustHtml(trustedHtml) {
-    return bypassSanitizationTrustString(trustedHtml, 'Html');
-}
-/**
- * Mark `style` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {\@link styleSanitizer} to be trusted implicitly.
- *
- * @param {?} trustedStyle `style` string which needs to be implicitly trusted.
- * @return {?} a `style` `String` which has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustStyle(trustedStyle) {
-    return bypassSanitizationTrustString(trustedStyle, 'Style');
-}
-/**
- * Mark `script` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {\@link scriptSanitizer} to be trusted implicitly.
- *
- * @param {?} trustedScript `script` string which needs to be implicitly trusted.
- * @return {?} a `script` `String` which has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustScript(trustedScript) {
-    return bypassSanitizationTrustString(trustedScript, 'Script');
-}
-/**
- * Mark `url` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {\@link urlSanitizer} to be trusted implicitly.
- *
- * @param {?} trustedUrl `url` string which needs to be implicitly trusted.
- * @return {?} a `url` `String` which has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustUrl(trustedUrl) {
-    return bypassSanitizationTrustString(trustedUrl, 'Url');
-}
-/**
- * Mark `url` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {\@link resourceUrlSanitizer} to be trusted implicitly.
- *
- * @param {?} trustedResourceUrl `url` string which needs to be implicitly trusted.
- * @return {?} a `url` `String` which has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
-    return bypassSanitizationTrustString(trustedResourceUrl, 'ResourceUrl');
-}
-/**
- * @param {?} trustedString
- * @param {?} mode
- * @return {?}
- */
-function bypassSanitizationTrustString(trustedString, mode) {
-    /** @type {?} */
-    const trusted = /** @type {?} */ (new String(trustedString));
-    trusted[BRAND] = mode;
-    return trusted;
 }
 
 /**
@@ -23213,5 +23667,5 @@ function bypassSanitizationTrustString(trustedString, mode) {
  * Generated bundle index. Do not edit.
  */
 
-export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_l, _iterableDiffersFactory as ɵangular_packages_core_core_i, _keyValueDiffersFactory as ɵangular_packages_core_core_j, _localeFactory as ɵangular_packages_core_core_k, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, DefaultIterableDifferFactory as ɵangular_packages_core_core_g, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_h, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, wtfEnabled as ɵangular_packages_core_core_m, createScope as ɵangular_packages_core_core_o, detectWTF as ɵangular_packages_core_core_n, endTimeRange as ɵangular_packages_core_core_r, leave as ɵangular_packages_core_core_p, startTimeRange as ɵangular_packages_core_core_q, getOrCreateChangeDetectorRef as ɵangular_packages_core_core_v, getOrCreateContainerRef as ɵangular_packages_core_core_y, getOrCreateElementRef as ɵangular_packages_core_core_x, getOrCreateInjectable as ɵangular_packages_core_core_w, getOrCreateNodeInjector as ɵangular_packages_core_core_u, getOrCreateTemplateRef as ɵangular_packages_core_core_z, bindingUpdated as ɵangular_packages_core_core_ba, loadInternal as ɵangular_packages_core_core_bb, makeParamDecorator as ɵangular_packages_core_core_a, makePropDecorator as ɵangular_packages_core_core_b, _def as ɵangular_packages_core_core_s, DebugContext as ɵangular_packages_core_core_t, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, inject, INJECTOR, Injector, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, directiveInject as ɵdirectiveInject, injectElementRef as ɵinjectElementRef, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, injectChangeDetectorRef as ɵinjectChangeDetectorRef, injectAttribute as ɵinjectAttribute, PublicFeature as ɵPublicFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, NgOnChangesFeature as ɵNgOnChangesFeature, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNC, container as ɵC, elementStart as ɵE, namespaceHTML as ɵNH, namespaceMathML as ɵNM, namespaceSVG as ɵNS, element as ɵEe, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, query as ɵQ, registerContentQuery as ɵQr, loadDirective as ɵd, projection as ɵP, bind as ɵb, interpolation1 as ɵi1, interpolation2 as ɵi2, interpolation3 as ɵi3, interpolation4 as ɵi4, interpolation5 as ɵi5, interpolation6 as ɵi6, interpolation7 as ɵi7, interpolation8 as ɵi8, interpolationV as ɵiV, pipeBind1 as ɵpb1, pipeBind2 as ɵpb2, pipeBind3 as ɵpb3, pipeBind4 as ɵpb4, pipeBindV as ɵpbV, pureFunction0 as ɵf0, pureFunction1 as ɵf1, pureFunction2 as ɵf2, pureFunction3 as ɵf3, pureFunction4 as ɵf4, pureFunction5 as ɵf5, pureFunction6 as ɵf6, pureFunction7 as ɵf7, pureFunction8 as ɵf8, pureFunctionV as ɵfV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, queryRefresh as ɵqR, loadQueryList as ɵql, elementEnd as ɵe, elementProperty as ɵp, projectionDef as ɵpD, reserveSlots as ɵrS, elementAttribute as ɵa, elementStyling as ɵs, elementStylingMap as ɵsm, elementStyleProp as ɵsp, elementStylingApply as ɵsa, elementClassProp as ɵcp, textBinding as ɵt, embeddedViewEnd as ɵv, store as ɵst, load as ɵld, pipe as ɵPp, whenRendered as ɵwhenRendered, i18nApply as ɵiA, i18nExpMapping as ɵiEM, i18nInterpolation as ɵiI, i18nInterpolationV as ɵIV, i18nMapping as ɵiM, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$2 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_l, _iterableDiffersFactory as ɵangular_packages_core_core_i, _keyValueDiffersFactory as ɵangular_packages_core_core_j, _localeFactory as ɵangular_packages_core_core_k, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, DefaultIterableDifferFactory as ɵangular_packages_core_core_g, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_h, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, wtfEnabled as ɵangular_packages_core_core_m, createScope as ɵangular_packages_core_core_o, detectWTF as ɵangular_packages_core_core_n, endTimeRange as ɵangular_packages_core_core_r, leave as ɵangular_packages_core_core_p, startTimeRange as ɵangular_packages_core_core_q, getOrCreateChangeDetectorRef as ɵangular_packages_core_core_v, getOrCreateContainerRef as ɵangular_packages_core_core_y, getOrCreateElementRef as ɵangular_packages_core_core_x, getOrCreateInjectable as ɵangular_packages_core_core_w, getOrCreateNodeInjector as ɵangular_packages_core_core_u, getOrCreateTemplateRef as ɵangular_packages_core_core_z, bindingUpdated as ɵangular_packages_core_core_ba, loadInternal as ɵangular_packages_core_core_bb, makeParamDecorator as ɵangular_packages_core_core_a, makePropDecorator as ɵangular_packages_core_core_b, _def as ɵangular_packages_core_core_s, DebugContext as ɵangular_packages_core_core_t, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, inject, INJECTOR, Injector, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, directiveInject as ɵdirectiveInject, injectElementRef as ɵinjectElementRef, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, injectChangeDetectorRef as ɵinjectChangeDetectorRef, injectAttribute as ɵinjectAttribute, PublicFeature as ɵPublicFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, NgOnChangesFeature as ɵNgOnChangesFeature, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNC, container as ɵC, elementStart as ɵE, namespaceHTML as ɵNH, namespaceMathML as ɵNM, namespaceSVG as ɵNS, element as ɵEe, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, query as ɵQ, registerContentQuery as ɵQr, loadDirective as ɵd, projection as ɵP, bind as ɵb, interpolation1 as ɵi1, interpolation2 as ɵi2, interpolation3 as ɵi3, interpolation4 as ɵi4, interpolation5 as ɵi5, interpolation6 as ɵi6, interpolation7 as ɵi7, interpolation8 as ɵi8, interpolationV as ɵiV, pipeBind1 as ɵpb1, pipeBind2 as ɵpb2, pipeBind3 as ɵpb3, pipeBind4 as ɵpb4, pipeBindV as ɵpbV, pureFunction0 as ɵf0, pureFunction1 as ɵf1, pureFunction2 as ɵf2, pureFunction3 as ɵf3, pureFunction4 as ɵf4, pureFunction5 as ɵf5, pureFunction6 as ɵf6, pureFunction7 as ɵf7, pureFunction8 as ɵf8, pureFunctionV as ɵfV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, queryRefresh as ɵqR, loadQueryList as ɵql, elementEnd as ɵe, elementProperty as ɵp, projectionDef as ɵpD, reserveSlots as ɵrS, elementAttribute as ɵa, elementStyling as ɵs, elementStylingMap as ɵsm, elementStyleProp as ɵsp, elementStylingApply as ɵsa, elementClassProp as ɵcp, textBinding as ɵt, embeddedViewEnd as ɵv, store as ɵst, load as ɵld, pipe as ɵPp, whenRendered as ɵwhenRendered, i18nApply as ɵiA, i18nExpMapping as ɵiEM, i18nInterpolation1 as ɵiI1, i18nInterpolation2 as ɵiI2, i18nInterpolation3 as ɵiI3, i18nInterpolation4 as ɵiI4, i18nInterpolation5 as ɵiI5, i18nInterpolation6 as ɵiI6, i18nInterpolation7 as ɵiI7, i18nInterpolation8 as ɵiI8, i18nInterpolationV as ɵIV, i18nMapping as ɵiM, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$2 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map
