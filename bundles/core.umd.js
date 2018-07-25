@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-rc.3+53.sha-169e9dd
+ * @license Angular v6.1.0-rc.3+64.sha-1ceddb6
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1519,15 +1519,6 @@
         if (value == null)
             return '';
         return '' + value;
-    }
-    /**
-     *  Function that throws a "not implemented" error so it's clear certain
-     *  behaviors/methods aren't yet ready.
-     *
-     * @returns Not implemented error
-     */
-    function notImplemented() {
-        return new Error('NotImplemented');
     }
     /**
      * Flattens an array in non-recursive way. Input arrays are not modified.
@@ -3270,26 +3261,32 @@
         var _isParent = isParent;
         var _previousOrParentNode = previousOrParentNode;
         var oldView;
-        try {
-            isParent = true;
-            previousOrParentNode = null;
-            oldView = enterView(viewNode.data, viewNode);
-            namespaceHTML();
-            tView.template(rf, context);
-            if (rf & 2 /* Update */) {
-                refreshView();
-            }
-            else {
-                viewNode.data[TVIEW].firstTemplatePass = firstTemplatePass = false;
-            }
+        if (viewNode.data[PARENT] == null && viewNode.data[CONTEXT] && !tView.template) {
+            // This is a root view inside the view tree
+            tickRootContext(viewNode.data[CONTEXT]);
         }
-        finally {
-            // renderEmbeddedTemplate() is called twice in fact, once for creation only and then once for
-            // update. When for creation only, leaveView() must not trigger view hooks, nor clean flags.
-            var isCreationOnly = (rf & 1 /* Create */) === 1 /* Create */;
-            leaveView(oldView, isCreationOnly);
-            isParent = _isParent;
-            previousOrParentNode = _previousOrParentNode;
+        else {
+            try {
+                isParent = true;
+                previousOrParentNode = null;
+                oldView = enterView(viewNode.data, viewNode);
+                namespaceHTML();
+                tView.template(rf, context);
+                if (rf & 2 /* Update */) {
+                    refreshView();
+                }
+                else {
+                    viewNode.data[TVIEW].firstTemplatePass = firstTemplatePass = false;
+                }
+            }
+            finally {
+                // renderEmbeddedTemplate() is called twice in fact, once for creation only and then once for
+                // update. When for creation only, leaveView() must not trigger view hooks, nor clean flags.
+                var isCreationOnly = (rf & 1 /* Create */) === 1 /* Create */;
+                leaveView(oldView, isCreationOnly);
+                isParent = _isParent;
+                previousOrParentNode = _previousOrParentNode;
+            }
         }
         return viewNode;
     }
@@ -3376,18 +3373,7 @@
         ngDevMode &&
             assertEqual(viewData[BINDING_INDEX], -1, 'elements should be created before any bindings');
         ngDevMode && ngDevMode.rendererCreateElement++;
-        var native;
-        if (isProceduralRenderer(renderer)) {
-            native = renderer.createElement(name, _currentNamespace);
-        }
-        else {
-            if (_currentNamespace === null) {
-                native = renderer.createElement(name);
-            }
-            else {
-                native = renderer.createElementNS(_currentNamespace, name);
-            }
-        }
+        var native = elementCreate(name);
         ngDevMode && assertDataInRange(index - 1);
         var node = createLNode(index, 3 /* Element */, native, name, attrs || null, null);
         currentElementNode = node;
@@ -3396,6 +3382,28 @@
         }
         appendChild(getParentLNode(node), native, viewData);
         createDirectivesAndLocals(localRefs);
+        return native;
+    }
+    /**
+     * Creates a native element from a tag name, using a renderer.
+     * @param name the tag name
+     * @param overriddenRenderer Optional A renderer to override the default one
+     * @returns the element created
+     */
+    function elementCreate(name, overriddenRenderer) {
+        var native;
+        var rendererToUse = overriddenRenderer || renderer;
+        if (isProceduralRenderer(rendererToUse)) {
+            native = rendererToUse.createElement(name, _currentNamespace);
+        }
+        else {
+            if (_currentNamespace === null) {
+                native = rendererToUse.createElement(name);
+            }
+            else {
+                native = rendererToUse.createElementNS(_currentNamespace, name);
+            }
+        }
         return native;
     }
     /**
@@ -4927,7 +4935,7 @@
         var different = bindingUpdated2(v0, v1);
         return different ? prefix + stringify$1(v0) + i0 + stringify$1(v1) + suffix : NO_CHANGE;
     }
-    /** Creates an interpolation bindings with 3 expressions. */
+    /** Creates an interpolation binding with 3 expressions. */
     function interpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
         var different = bindingUpdated2(v0, v1);
         different = bindingUpdated(v2) || different;
@@ -5167,6 +5175,26 @@
             scheduler: scheduler,
             clean: CLEAN_PROMISE,
         };
+    }
+    /**
+     * Used to enable lifecycle hooks on the root component.
+     *
+     * Include this feature when calling `renderComponent` if the root component
+     * you are rendering has lifecycle hooks defined. Otherwise, the hooks won't
+     * be called properly.
+     *
+     * Example:
+     *
+     * ```
+     * renderComponent(AppComponent, {features: [RootLifecycleHooks]});
+     * ```
+     */
+    function LifecycleHooksFeature(component, def) {
+        var elementNode = _getComponentHostLElementNode(component);
+        // Root component is always created at dir index 0
+        var tView = elementNode.view[TVIEW];
+        queueInitHooks(0, def.onInit, def.doCheck, tView);
+        queueLifecycleHooks(elementNode.tNode.flags, tView);
     }
     /**
      * Retrieve the root context for any component by walking the parent `LView` until
@@ -9092,9 +9120,265 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    /**
+     * Represents an instance of an NgModule created via a {@link NgModuleFactory}.
+     *
+     * `NgModuleRef` provides access to the NgModule Instance as well other objects related to this
+     * NgModule Instance.
+     *
+     *
+     */
+    var NgModuleRef = /** @class */ (function () {
+        function NgModuleRef() {
+        }
+        return NgModuleRef;
+    }());
+    /**
+     * @experimental
+     */
+    var NgModuleFactory = /** @class */ (function () {
+        function NgModuleFactory() {
+        }
+        return NgModuleFactory;
+    }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Represents an instance of a Component created via a {@link ComponentFactory}.
+     *
+     * `ComponentRef` provides access to the Component Instance as well other objects related to this
+     * Component Instance and allows you to destroy the Component Instance via the {@link #destroy}
+     * method.
+     *
+     */
+    var ComponentRef = /** @class */ (function () {
+        function ComponentRef() {
+        }
+        return ComponentRef;
+    }());
+    var ComponentFactory = /** @class */ (function () {
+        function ComponentFactory() {
+        }
+        return ComponentFactory;
+    }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    function noComponentFactoryError(component) {
+        var error = Error("No component factory found for " + stringify(component) + ". Did you add it to @NgModule.entryComponents?");
+        error[ERROR_COMPONENT] = component;
+        return error;
+    }
+    var ERROR_COMPONENT = 'ngComponent';
+    var _NullComponentFactoryResolver = /** @class */ (function () {
+        function _NullComponentFactoryResolver() {
+        }
+        _NullComponentFactoryResolver.prototype.resolveComponentFactory = function (component) {
+            throw noComponentFactoryError(component);
+        };
+        return _NullComponentFactoryResolver;
+    }());
+    var ComponentFactoryResolver = /** @class */ (function () {
+        function ComponentFactoryResolver() {
+        }
+        ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
+        return ComponentFactoryResolver;
+    }());
+    var CodegenComponentFactoryResolver = /** @class */ (function () {
+        function CodegenComponentFactoryResolver(factories, _parent, _ngModule) {
+            this._parent = _parent;
+            this._ngModule = _ngModule;
+            this._factories = new Map();
+            for (var i = 0; i < factories.length; i++) {
+                var factory = factories[i];
+                this._factories.set(factory.componentType, factory);
+            }
+        }
+        CodegenComponentFactoryResolver.prototype.resolveComponentFactory = function (component) {
+            var factory = this._factories.get(component);
+            if (!factory && this._parent) {
+                factory = this._parent.resolveComponentFactory(component);
+            }
+            if (!factory) {
+                throw noComponentFactoryError(component);
+            }
+            return new ComponentFactoryBoundToModule(factory, this._ngModule);
+        };
+        return CodegenComponentFactoryResolver;
+    }());
+    var ComponentFactoryBoundToModule = /** @class */ (function (_super) {
+        __extends(ComponentFactoryBoundToModule, _super);
+        function ComponentFactoryBoundToModule(factory, ngModule) {
+            var _this = _super.call(this) || this;
+            _this.factory = factory;
+            _this.ngModule = ngModule;
+            _this.selector = factory.selector;
+            _this.componentType = factory.componentType;
+            _this.ngContentSelectors = factory.ngContentSelectors;
+            _this.inputs = factory.inputs;
+            _this.outputs = factory.outputs;
+            return _this;
+        }
+        ComponentFactoryBoundToModule.prototype.create = function (injector, projectableNodes, rootSelectorOrNode, ngModule) {
+            return this.factory.create(injector, projectableNodes, rootSelectorOrNode, ngModule || this.ngModule);
+        };
+        return ComponentFactoryBoundToModule;
+    }(ComponentFactory));
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * A wrapper around a native element inside of a View.
+     *
+     * An `ElementRef` is backed by a render-specific element. In the browser, this is usually a DOM
+     * element.
+     *
+     * @security Permitting direct access to the DOM can make your application more vulnerable to
+     * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
+     * [Security Guide](http://g.co/ng/security).
+     *
+     *
+     */
+    // Note: We don't expose things like `Injector`, `ViewContainer`, ... here,
+    // i.e. users have to ask for what they need. With that, we can build better analysis tools
+    // and could do better codegen in the future.
+    var ElementRef = /** @class */ (function () {
+        function ElementRef(nativeElement) {
+            this.nativeElement = nativeElement;
+        }
+        return ElementRef;
+    }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * @deprecated Use `RendererType2` (and `Renderer2`) instead.
+     */
+    var RenderComponentType = /** @class */ (function () {
+        function RenderComponentType(id, templateUrl, slotCount, encapsulation, styles, animations) {
+            this.id = id;
+            this.templateUrl = templateUrl;
+            this.slotCount = slotCount;
+            this.encapsulation = encapsulation;
+            this.styles = styles;
+            this.animations = animations;
+        }
+        return RenderComponentType;
+    }());
+    /**
+     * @deprecated Debug info is handeled internally in the view engine now.
+     */
+    var RenderDebugInfo = /** @class */ (function () {
+        function RenderDebugInfo() {
+        }
+        return RenderDebugInfo;
+    }());
+    /**
+     * @deprecated Use the `Renderer2` instead.
+     */
+    var Renderer = /** @class */ (function () {
+        function Renderer() {
+        }
+        return Renderer;
+    }());
+    var Renderer2Interceptor = new InjectionToken('Renderer2Interceptor');
+    /**
+     * Injectable service that provides a low-level interface for modifying the UI.
+     *
+     * Use this service to bypass Angular's templating and make custom UI changes that can't be
+     * expressed declaratively. For example if you need to set a property or an attribute whose name is
+     * not statically known, use {@link Renderer#setElementProperty setElementProperty} or
+     * {@link Renderer#setElementAttribute setElementAttribute} respectively.
+     *
+     * If you are implementing a custom renderer, you must implement this interface.
+     *
+     * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
+     *
+     * @deprecated Use `RendererFactory2` instead.
+     */
+    var RootRenderer = /** @class */ (function () {
+        function RootRenderer() {
+        }
+        return RootRenderer;
+    }());
+    /**
+     * Creates and initializes a custom renderer that implements the `Renderer2` base class.
+     *
+     * @experimental
+     */
+    var RendererFactory2 = /** @class */ (function () {
+        function RendererFactory2() {
+        }
+        return RendererFactory2;
+    }());
+    (function (RendererStyleFlags2) {
+        /**
+         * Marks a style as important.
+         */
+        RendererStyleFlags2[RendererStyleFlags2["Important"] = 1] = "Important";
+        /**
+         * Marks a style as using dash case naming (this-is-dash-case).
+         */
+        RendererStyleFlags2[RendererStyleFlags2["DashCase"] = 2] = "DashCase";
+    })(exports.RendererStyleFlags2 || (exports.RendererStyleFlags2 = {}));
+    /**
+     * Extend this base class to implement custom rendering. By default, Angular
+     * renders a template into DOM. You can use custom rendering to intercept
+     * rendering calls, or to render to something other than DOM.
+     *
+     * Create your custom renderer using `RendererFactory2`.
+     *
+     * Use a custom renderer to bypass Angular's templating and
+     * make custom UI changes that can't be expressed declaratively.
+     * For example if you need to set a property or an attribute whose name is
+     * not statically known, use the `setProperty()` or
+     * `setAttribute()` method.
+     *
+     * @experimental
+     */
+    var Renderer2 = /** @class */ (function () {
+        function Renderer2() {
+        }
+        return Renderer2;
+    }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     var ViewRef = /** @class */ (function () {
         function ViewRef(_view, context) {
             this._view = _view;
+            this._appRef = null;
+            this._viewContainerRef = null;
+            /**
+             * @internal
+             */
+            this._lViewNode = null;
             this.context = context;
         }
         /** @internal */
@@ -9109,7 +9393,13 @@
             enumerable: true,
             configurable: true
         });
-        ViewRef.prototype.destroy = function () { destroyLView(this._view); };
+        ViewRef.prototype.destroy = function () {
+            if (this._viewContainerRef && viewAttached(this._view)) {
+                this._viewContainerRef.detach(this._viewContainerRef.indexOf(this));
+                this._viewContainerRef = null;
+            }
+            destroyLView(this._view);
+        };
         ViewRef.prototype.onDestroy = function (callback) { storeCleanupFn(this._view, callback); };
         /**
          * Marks a view and all of its ancestors dirty.
@@ -9286,28 +9576,188 @@
          * introduce other changes.
          */
         ViewRef.prototype.checkNoChanges = function () { checkNoChanges(this.context); };
+        ViewRef.prototype.attachToViewContainerRef = function (vcRef) { this._viewContainerRef = vcRef; };
         ViewRef.prototype.detachFromAppRef = function () { this._appRef = null; };
         ViewRef.prototype.attachToAppRef = function (appRef) { this._appRef = appRef; };
         return ViewRef;
     }());
-    var EmbeddedViewRef = /** @class */ (function (_super) {
-        __extends(EmbeddedViewRef, _super);
-        function EmbeddedViewRef(viewNode, template, context) {
-            var _this = _super.call(this, viewNode.data, context) || this;
-            _this._viewContainerRef = null;
-            _this._lViewNode = viewNode;
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var ComponentFactoryResolver$1 = /** @class */ (function (_super) {
+        __extends(ComponentFactoryResolver$$1, _super);
+        function ComponentFactoryResolver$$1() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        ComponentFactoryResolver$$1.prototype.resolveComponentFactory = function (component) {
+            ngDevMode && assertComponentType(component);
+            var componentDef = component.ngComponentDef;
+            return new ComponentFactory$1(componentDef);
+        };
+        return ComponentFactoryResolver$$1;
+    }(ComponentFactoryResolver));
+    function toRefArray(map) {
+        var array = [];
+        for (var nonMinified in map) {
+            if (map.hasOwnProperty(nonMinified)) {
+                var minified = map[nonMinified];
+                array.push({ propName: minified, templateName: nonMinified });
+            }
+        }
+        return array;
+    }
+    /**
+     * Default {@link RootContext} for all components rendered with {@link renderComponent}.
+     */
+    var ROOT_CONTEXT = new InjectionToken('ROOT_CONTEXT_TOKEN', { providedIn: 'root', factory: function () { return createRootContext(inject(SCHEDULER)); } });
+    /**
+     * A change detection scheduler token for {@link RootContext}. This token is the default value used
+     * for the default `RootContext` found in the {@link ROOT_CONTEXT} token.
+     */
+    var SCHEDULER = new InjectionToken('SCHEDULER_TOKEN', { providedIn: 'root', factory: function () { return requestAnimationFrame.bind(window); } });
+    /**
+     * Render3 implementation of {@link viewEngine_ComponentFactory}.
+     */
+    var ComponentFactory$1 = /** @class */ (function (_super) {
+        __extends(ComponentFactory$$1, _super);
+        function ComponentFactory$$1(componentDef) {
+            var _this = _super.call(this) || this;
+            _this.componentDef = componentDef;
+            _this.componentType = componentDef.type;
+            _this.selector = componentDef.selectors[0][0];
+            _this.ngContentSelectors = [];
             return _this;
         }
-        EmbeddedViewRef.prototype.destroy = function () {
-            if (this._viewContainerRef && viewAttached(this._view)) {
-                this._viewContainerRef.detach(this._viewContainerRef.indexOf(this));
-                this._viewContainerRef = null;
+        Object.defineProperty(ComponentFactory$$1.prototype, "inputs", {
+            get: function () {
+                return toRefArray(this.componentDef.inputs);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ComponentFactory$$1.prototype, "outputs", {
+            get: function () {
+                return toRefArray(this.componentDef.outputs);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        ComponentFactory$$1.prototype.create = function (injector, projectableNodes, rootSelectorOrNode, ngModule) {
+            var isInternalRootView = rootSelectorOrNode === undefined;
+            var rendererFactory = ngModule ? ngModule.injector.get(RendererFactory2) : domRendererFactory3;
+            var hostNode = isInternalRootView ?
+                elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef.rendererType)) :
+                locateHostElement(rendererFactory, rootSelectorOrNode);
+            // The first index of the first selector is the tag name.
+            var componentTag = this.componentDef.selectors[0][0];
+            var rootContext = ngModule && !isInternalRootView ?
+                ngModule.injector.get(ROOT_CONTEXT) :
+                createRootContext(requestAnimationFrame.bind(window));
+            // Create the root view. Uses empty TView and ContentTemplate.
+            var rootView = createLViewData(rendererFactory.createRenderer(hostNode, this.componentDef.rendererType), createTView(-1, null, null, null, null), rootContext, this.componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
+            rootView[INJECTOR$1] = ngModule && ngModule.injector || null;
+            // rootView is the parent when bootstrapping
+            var oldView = enterView(rootView, null);
+            var component;
+            var elementNode;
+            try {
+                if (rendererFactory.begin)
+                    rendererFactory.begin();
+                // Create element node at index 0 in data array
+                elementNode = hostElement(componentTag, hostNode, this.componentDef);
+                // Create directive instance with factory() and store at index 0 in directives array
+                rootContext.components.push(component = baseDirectiveCreate(0, this.componentDef.factory(), this.componentDef));
+                initChangeDetectorIfExisting(elementNode.nodeInjector, component, elementNode.data);
+                // TODO: should LifecycleHooksFeature and other host features be generated by the compiler and
+                // executed here?
+                // Angular 5 reference: https://stackblitz.com/edit/lifecycle-hooks-vcref
+                LifecycleHooksFeature(component, this.componentDef);
+                // Transform the arrays of native nodes into a LNode structure that can be consumed by the
+                // projection instruction. This is needed to support the reprojection of these nodes.
+                if (projectableNodes) {
+                    var index = 0;
+                    var projection$$1 = elementNode.tNode.projection = [];
+                    for (var i = 0; i < projectableNodes.length; i++) {
+                        var nodeList = projectableNodes[i];
+                        var firstTNode = null;
+                        var previousTNode = null;
+                        for (var j = 0; j < nodeList.length; j++) {
+                            var lNode = createLNode(++index, 3 /* Element */, nodeList[j], null, null);
+                            if (previousTNode) {
+                                previousTNode.next = lNode.tNode;
+                            }
+                            else {
+                                firstTNode = lNode.tNode;
+                            }
+                            previousTNode = lNode.tNode;
+                        }
+                        projection$$1.push(firstTNode);
+                    }
+                }
+                // Execute the template in creation mode only, and then turn off the CreationMode flag
+                renderEmbeddedTemplate(elementNode, elementNode.data[TVIEW], component, 1 /* Create */);
+                elementNode.data[FLAGS] &= ~1 /* CreationMode */;
             }
-            _super.prototype.destroy.call(this);
+            finally {
+                enterView(oldView, null);
+                if (rendererFactory.end)
+                    rendererFactory.end();
+            }
+            var componentRef = new ComponentRef$1(this.componentType, component, rootView, injector, hostNode);
+            if (isInternalRootView) {
+                // The host element of the internal root view is attached to the component's host view node
+                componentRef.hostView._lViewNode.tNode.child = elementNode.tNode;
+            }
+            return componentRef;
         };
-        EmbeddedViewRef.prototype.attachToViewContainerRef = function (vcRef) { this._viewContainerRef = vcRef; };
-        return EmbeddedViewRef;
-    }(ViewRef));
+        return ComponentFactory$$1;
+    }(ComponentFactory));
+    /**
+     * Represents an instance of a Component created via a {@link ComponentFactory}.
+     *
+     * `ComponentRef` provides access to the Component Instance as well other objects related to this
+     * Component Instance and allows you to destroy the Component Instance via the {@link #destroy}
+     * method.
+     *
+     */
+    var ComponentRef$1 = /** @class */ (function (_super) {
+        __extends(ComponentRef$$1, _super);
+        function ComponentRef$$1(componentType, instance, rootView, injector, hostNode) {
+            var _this = _super.call(this) || this;
+            _this.destroyCbs = [];
+            _this.instance = instance;
+            /* TODO(jasonaden): This is incomplete, to be adjusted in follow-up PR. Notes from Kara:When
+             * ViewRef.detectChanges is called from ApplicationRef.tick, it will call detectChanges at the
+             * component instance level. I suspect this means that lifecycle hooks and host bindings on the
+             * given component won't work (as these are always called at the level above a component).
+             *
+             * In render2, ViewRef.detectChanges uses the root view instance for view checks, not the
+             * component instance. So passing in the root view (1 level above the component) is sufficient.
+             * We might  want to think about creating a fake component for the top level? Or overwrite
+             * detectChanges with a function that calls tickRootContext? */
+            _this.hostView = _this.changeDetectorRef = new ViewRef(rootView, instance);
+            _this.hostView._lViewNode = createLNode(-1, 2 /* View */, null, null, null, rootView);
+            _this.injector = injector;
+            _this.location = new ElementRef(hostNode);
+            _this.componentType = componentType;
+            return _this;
+        }
+        ComponentRef$$1.prototype.destroy = function () {
+            ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
+            this.destroyCbs.forEach(function (fn) { return fn(); });
+            this.destroyCbs = null;
+        };
+        ComponentRef$$1.prototype.onDestroy = function (callback) {
+            ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
+            this.destroyCbs.push(callback);
+        };
+        return ComponentRef$$1;
+    }(ComponentRef));
 
     /**
      * @license
@@ -9404,7 +9854,7 @@
             templateRef: null,
             viewContainerRef: null,
             elementRef: null,
-            changeDetectorRef: null
+            changeDetectorRef: null,
         };
     }
     /**
@@ -9459,6 +9909,7 @@
     function injectChangeDetectorRef() {
         return getOrCreateChangeDetectorRef(getOrCreateNodeInjector(), null);
     }
+    var componentFactoryResolver = new ComponentFactoryResolver$1();
     /**
      * Inject static attribute value into directive constructor.
      *
@@ -9746,10 +10197,10 @@
      * @returns The ElementRef instance to use
      */
     function getOrCreateElementRef(di) {
-        return di.elementRef || (di.elementRef = new ElementRef(di.node.native));
+        return di.elementRef || (di.elementRef = new ElementRef$1(di.node.native));
     }
     /** A ref to a node's native element. */
-    var ElementRef = /** @class */ (function () {
+    var ElementRef$1 = /** @class */ (function () {
         function ElementRef(nativeElement) {
             this.nativeElement = nativeElement;
         }
@@ -9817,8 +10268,14 @@
             this._viewRefs.splice(adjustedIdx, 0, viewRef);
             return viewRef;
         };
-        ViewContainerRef.prototype.createComponent = function (componentFactory, index, injector, projectableNodes, ngModule) {
-            throw notImplemented();
+        ViewContainerRef.prototype.createComponent = function (componentFactory, index, injector, projectableNodes, ngModuleRef) {
+            var contextInjector = injector || this.parentInjector;
+            if (!ngModuleRef && contextInjector) {
+                ngModuleRef = contextInjector.get(NgModuleRef);
+            }
+            var componentRef = componentFactory.create(contextInjector, projectableNodes, undefined, ngModuleRef);
+            this.insert(componentRef.hostView, index);
+            return componentRef;
         };
         ViewContainerRef.prototype.insert = function (viewRef, index) {
             if (viewRef.destroyed) {
@@ -9897,7 +10354,9 @@
                 insertView(containerNode, viewNode, index);
             }
             renderEmbeddedTemplate(viewNode, this._tView, context, 1 /* Create */);
-            return new EmbeddedViewRef(viewNode, this._tView.template, context);
+            var viewRef = new ViewRef(viewNode.data, context);
+            viewRef._lViewNode = viewNode;
+            return viewRef;
         };
         return TemplateRef;
     }());
@@ -9926,367 +10385,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    /**
-     * Represents an instance of a Component created via a {@link ComponentFactory}.
-     *
-     * `ComponentRef` provides access to the Component Instance as well other objects related to this
-     * Component Instance and allows you to destroy the Component Instance via the {@link #destroy}
-     * method.
-     *
-     */
-    var ComponentRef = /** @class */ (function () {
-        function ComponentRef() {
-        }
-        return ComponentRef;
-    }());
-    var ComponentFactory = /** @class */ (function () {
-        function ComponentFactory() {
-        }
-        return ComponentFactory;
-    }());
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    function noComponentFactoryError(component) {
-        var error = Error("No component factory found for " + stringify(component) + ". Did you add it to @NgModule.entryComponents?");
-        error[ERROR_COMPONENT] = component;
-        return error;
-    }
-    var ERROR_COMPONENT = 'ngComponent';
-    var _NullComponentFactoryResolver = /** @class */ (function () {
-        function _NullComponentFactoryResolver() {
-        }
-        _NullComponentFactoryResolver.prototype.resolveComponentFactory = function (component) {
-            throw noComponentFactoryError(component);
-        };
-        return _NullComponentFactoryResolver;
-    }());
-    var ComponentFactoryResolver = /** @class */ (function () {
-        function ComponentFactoryResolver() {
-        }
-        ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
-        return ComponentFactoryResolver;
-    }());
-    var CodegenComponentFactoryResolver = /** @class */ (function () {
-        function CodegenComponentFactoryResolver(factories, _parent, _ngModule) {
-            this._parent = _parent;
-            this._ngModule = _ngModule;
-            this._factories = new Map();
-            for (var i = 0; i < factories.length; i++) {
-                var factory = factories[i];
-                this._factories.set(factory.componentType, factory);
-            }
-        }
-        CodegenComponentFactoryResolver.prototype.resolveComponentFactory = function (component) {
-            var factory = this._factories.get(component);
-            if (!factory && this._parent) {
-                factory = this._parent.resolveComponentFactory(component);
-            }
-            if (!factory) {
-                throw noComponentFactoryError(component);
-            }
-            return new ComponentFactoryBoundToModule(factory, this._ngModule);
-        };
-        return CodegenComponentFactoryResolver;
-    }());
-    var ComponentFactoryBoundToModule = /** @class */ (function (_super) {
-        __extends(ComponentFactoryBoundToModule, _super);
-        function ComponentFactoryBoundToModule(factory, ngModule) {
-            var _this = _super.call(this) || this;
-            _this.factory = factory;
-            _this.ngModule = ngModule;
-            _this.selector = factory.selector;
-            _this.componentType = factory.componentType;
-            _this.ngContentSelectors = factory.ngContentSelectors;
-            _this.inputs = factory.inputs;
-            _this.outputs = factory.outputs;
-            return _this;
-        }
-        ComponentFactoryBoundToModule.prototype.create = function (injector, projectableNodes, rootSelectorOrNode, ngModule) {
-            return this.factory.create(injector, projectableNodes, rootSelectorOrNode, ngModule || this.ngModule);
-        };
-        return ComponentFactoryBoundToModule;
-    }(ComponentFactory));
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * A wrapper around a native element inside of a View.
-     *
-     * An `ElementRef` is backed by a render-specific element. In the browser, this is usually a DOM
-     * element.
-     *
-     * @security Permitting direct access to the DOM can make your application more vulnerable to
-     * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
-     * [Security Guide](http://g.co/ng/security).
-     *
-     *
-     */
-    // Note: We don't expose things like `Injector`, `ViewContainer`, ... here,
-    // i.e. users have to ask for what they need. With that, we can build better analysis tools
-    // and could do better codegen in the future.
-    var ElementRef$1 = /** @class */ (function () {
-        function ElementRef(nativeElement) {
-            this.nativeElement = nativeElement;
-        }
-        return ElementRef;
-    }());
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * @deprecated Use `RendererType2` (and `Renderer2`) instead.
-     */
-    var RenderComponentType = /** @class */ (function () {
-        function RenderComponentType(id, templateUrl, slotCount, encapsulation, styles, animations) {
-            this.id = id;
-            this.templateUrl = templateUrl;
-            this.slotCount = slotCount;
-            this.encapsulation = encapsulation;
-            this.styles = styles;
-            this.animations = animations;
-        }
-        return RenderComponentType;
-    }());
-    /**
-     * @deprecated Debug info is handeled internally in the view engine now.
-     */
-    var RenderDebugInfo = /** @class */ (function () {
-        function RenderDebugInfo() {
-        }
-        return RenderDebugInfo;
-    }());
-    /**
-     * @deprecated Use the `Renderer2` instead.
-     */
-    var Renderer = /** @class */ (function () {
-        function Renderer() {
-        }
-        return Renderer;
-    }());
-    var Renderer2Interceptor = new InjectionToken('Renderer2Interceptor');
-    /**
-     * Injectable service that provides a low-level interface for modifying the UI.
-     *
-     * Use this service to bypass Angular's templating and make custom UI changes that can't be
-     * expressed declaratively. For example if you need to set a property or an attribute whose name is
-     * not statically known, use {@link Renderer#setElementProperty setElementProperty} or
-     * {@link Renderer#setElementAttribute setElementAttribute} respectively.
-     *
-     * If you are implementing a custom renderer, you must implement this interface.
-     *
-     * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
-     *
-     * @deprecated Use `RendererFactory2` instead.
-     */
-    var RootRenderer = /** @class */ (function () {
-        function RootRenderer() {
-        }
-        return RootRenderer;
-    }());
-    /**
-     * Creates and initializes a custom renderer that implements the `Renderer2` base class.
-     *
-     * @experimental
-     */
-    var RendererFactory2 = /** @class */ (function () {
-        function RendererFactory2() {
-        }
-        return RendererFactory2;
-    }());
-    (function (RendererStyleFlags2) {
-        /**
-         * Marks a style as important.
-         */
-        RendererStyleFlags2[RendererStyleFlags2["Important"] = 1] = "Important";
-        /**
-         * Marks a style as using dash case naming (this-is-dash-case).
-         */
-        RendererStyleFlags2[RendererStyleFlags2["DashCase"] = 2] = "DashCase";
-    })(exports.RendererStyleFlags2 || (exports.RendererStyleFlags2 = {}));
-    /**
-     * Extend this base class to implement custom rendering. By default, Angular
-     * renders a template into DOM. You can use custom rendering to intercept
-     * rendering calls, or to render to something other than DOM.
-     *
-     * Create your custom renderer using `RendererFactory2`.
-     *
-     * Use a custom renderer to bypass Angular's templating and
-     * make custom UI changes that can't be expressed declaratively.
-     * For example if you need to set a property or an attribute whose name is
-     * not statically known, use the `setProperty()` or
-     * `setAttribute()` method.
-     *
-     * @experimental
-     */
-    var Renderer2 = /** @class */ (function () {
-        function Renderer2() {
-        }
-        return Renderer2;
-    }());
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var ComponentFactoryResolver$1 = /** @class */ (function (_super) {
-        __extends(ComponentFactoryResolver$$1, _super);
-        function ComponentFactoryResolver$$1() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        ComponentFactoryResolver$$1.prototype.resolveComponentFactory = function (component) {
-            ngDevMode && assertComponentType(component);
-            var componentDef = component.ngComponentDef;
-            return new ComponentFactory$1(componentDef);
-        };
-        return ComponentFactoryResolver$$1;
-    }(ComponentFactoryResolver));
-    function toRefArray(map) {
-        var array = [];
-        for (var nonMinified in map) {
-            if (map.hasOwnProperty(nonMinified)) {
-                var minified = map[nonMinified];
-                array.push({ propName: minified, templateName: nonMinified });
-            }
-        }
-        return array;
-    }
-    /**
-     * Default {@link RootContext} for all components rendered with {@link renderComponent}.
-     */
-    var ROOT_CONTEXT = new InjectionToken('ROOT_CONTEXT_TOKEN', { providedIn: 'root', factory: function () { return createRootContext(inject(SCHEDULER)); } });
-    /**
-     * A change detection scheduler token for {@link RootContext}. This token is the default value used
-     * for the default `RootContext` found in the {@link ROOT_CONTEXT} token.
-     */
-    var SCHEDULER = new InjectionToken('SCHEDULER_TOKEN', { providedIn: 'root', factory: function () { return requestAnimationFrame.bind(window); } });
-    /**
-     * Render3 implementation of {@link viewEngine_ComponentFactory}.
-     */
-    var ComponentFactory$1 = /** @class */ (function (_super) {
-        __extends(ComponentFactory$$1, _super);
-        function ComponentFactory$$1(componentDef) {
-            var _this = _super.call(this) || this;
-            _this.componentDef = componentDef;
-            _this.componentType = componentDef.type;
-            _this.selector = componentDef.selectors[0][0];
-            _this.ngContentSelectors = [];
-            return _this;
-        }
-        Object.defineProperty(ComponentFactory$$1.prototype, "inputs", {
-            get: function () {
-                return toRefArray(this.componentDef.inputs);
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(ComponentFactory$$1.prototype, "outputs", {
-            get: function () {
-                return toRefArray(this.componentDef.outputs);
-            },
-            enumerable: true,
-            configurable: true
-        });
-        ComponentFactory$$1.prototype.create = function (parentComponentInjector, projectableNodes, rootSelectorOrNode, ngModule) {
-            ngDevMode && assertDefined(ngModule, 'ngModule should always be defined');
-            var rendererFactory = ngModule ? ngModule.injector.get(RendererFactory2) : document;
-            var hostNode = locateHostElement(rendererFactory, rootSelectorOrNode);
-            // The first index of the first selector is the tag name.
-            var componentTag = this.componentDef.selectors[0][0];
-            var rootContext = ngModule.injector.get(ROOT_CONTEXT);
-            // Create the root view. Uses empty TView and ContentTemplate.
-            var rootView = createLViewData(rendererFactory.createRenderer(hostNode, this.componentDef.rendererType), createTView(-1, null, null, null, null), null, this.componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
-            rootView[INJECTOR$1] = ngModule && ngModule.injector || null;
-            // rootView is the parent when bootstrapping
-            var oldView = enterView(rootView, null);
-            var component;
-            var elementNode;
-            try {
-                if (rendererFactory.begin)
-                    rendererFactory.begin();
-                // Create element node at index 0 in data array
-                elementNode = hostElement(componentTag, hostNode, this.componentDef);
-                // Create directive instance with factory() and store at index 0 in directives array
-                rootContext.components.push(component = baseDirectiveCreate(0, this.componentDef.factory(), this.componentDef));
-                initChangeDetectorIfExisting(elementNode.nodeInjector, component, elementNode.data);
-            }
-            finally {
-                enterView(oldView, null);
-                if (rendererFactory.end)
-                    rendererFactory.end();
-            }
-            // TODO(misko): this is the wrong injector here.
-            return new ComponentRef$1(this.componentType, component, rootView, ngModule.injector, hostNode);
-        };
-        return ComponentFactory$$1;
-    }(ComponentFactory));
-    /**
-     * Represents an instance of a Component created via a {@link ComponentFactory}.
-     *
-     * `ComponentRef` provides access to the Component Instance as well other objects related to this
-     * Component Instance and allows you to destroy the Component Instance via the {@link #destroy}
-     * method.
-     *
-     */
-    var ComponentRef$1 = /** @class */ (function (_super) {
-        __extends(ComponentRef$$1, _super);
-        function ComponentRef$$1(componentType, instance, rootView, injector, hostNode) {
-            var _this = _super.call(this) || this;
-            _this.destroyCbs = [];
-            _this.instance = instance;
-            /* TODO(jasonaden): This is incomplete, to be adjusted in follow-up PR. Notes from Kara:When
-             * ViewRef.detectChanges is called from ApplicationRef.tick, it will call detectChanges at the
-             * component instance level. I suspect this means that lifecycle hooks and host bindings on the
-             * given component won't work (as these are always called at the level above a component).
-             *
-             * In render2, ViewRef.detectChanges uses the root view instance for view checks, not the
-             * component instance. So passing in the root view (1 level above the component) is sufficient.
-             * We might  want to think about creating a fake component for the top level? Or overwrite
-             * detectChanges with a function that calls tickRootContext? */
-            _this.hostView = _this.changeDetectorRef = new ViewRef(rootView, instance);
-            _this.injector = injector;
-            _this.location = new ElementRef$1(hostNode);
-            _this.componentType = componentType;
-            return _this;
-        }
-        ComponentRef$$1.prototype.destroy = function () {
-            ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
-            this.destroyCbs.forEach(function (fn) { return fn(); });
-            this.destroyCbs = null;
-        };
-        ComponentRef$$1.prototype.onDestroy = function (callback) {
-            ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
-            this.destroyCbs.push(callback);
-        };
-        return ComponentRef$$1;
-    }(ComponentRef));
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var i18nTagRegex = /\{\$([^}]+)\}/g;
+    var i18nTagRegex = /{\$([^}]+)}/g;
     /**
      * Takes a translation string, the initial list of placeholders (elements and expressions) and the
      * indexes of their corresponding expression nodes to return a list of instructions for each
@@ -10301,17 +10400,18 @@
      * their indexes.
      * @param expressions An array containing, for each template, the maps of expression placeholders
      * and their indexes.
-     * @param tmplContainers An array of template container placeholders whose content should be ignored
-     * when generating the instructions for their parent template.
+     * @param templateRoots An array of template roots whose content should be ignored when
+     * generating the instructions for their parent template.
      * @param lastChildIndex The index of the last child of the i18n node. Used when the i18n block is
      * an ng-container.
      *
      * @returns A list of instructions used to translate each template.
      */
-    function i18nMapping(translation, elements, expressions, tmplContainers, lastChildIndex) {
+    function i18nMapping(translation, elements, expressions, templateRoots, lastChildIndex) {
         var translationParts = translation.split(i18nTagRegex);
-        var instructions = [];
-        generateMappingInstructions(0, translationParts, instructions, elements, expressions, tmplContainers, lastChildIndex);
+        var nbTemplates = templateRoots ? templateRoots.length + 1 : 1;
+        var instructions = (new Array(nbTemplates)).fill(undefined);
+        generateMappingInstructions(0, 0, translationParts, instructions, elements, expressions, templateRoots, lastChildIndex);
         return instructions;
     }
     /**
@@ -10320,7 +10420,9 @@
      *
      * See `i18nMapping()` for more details.
      *
-     * @param index The current index in `translationParts`.
+     * @param tmplIndex The order of appearance of the template.
+     * 0 for the root template, following indexes match the order in `templateRoots`.
+     * @param partIndex The current index in `translationParts`.
      * @param translationParts The translation string split into an array of placeholders and text
      * elements.
      * @param instructions The current list of instructions to update.
@@ -10328,41 +10430,50 @@
      * their indexes.
      * @param expressions An array containing, for each template, the maps of expression placeholders
      * and their indexes.
-     * @param tmplContainers An array of template container placeholders whose content should be ignored
-     * when generating the instructions for their parent template.
+     * @param templateRoots An array of template roots whose content should be ignored when
+     * generating the instructions for their parent template.
      * @param lastChildIndex The index of the last child of the i18n node. Used when the i18n block is
      * an ng-container.
+     *
      * @returns the current index in `translationParts`
      */
-    function generateMappingInstructions(index, translationParts, instructions, elements, expressions, tmplContainers, lastChildIndex) {
-        var tmplIndex = instructions.length;
+    function generateMappingInstructions(tmplIndex, partIndex, translationParts, instructions, elements, expressions, templateRoots, lastChildIndex) {
         var tmplInstructions = [];
         var phVisited = [];
         var openedTagCount = 0;
         var maxIndex = 0;
-        instructions.push(tmplInstructions);
-        for (; index < translationParts.length; index++) {
-            var value = translationParts[index];
+        var currentElements = elements && elements[tmplIndex] ? elements[tmplIndex] : null;
+        var currentExpressions = expressions && expressions[tmplIndex] ? expressions[tmplIndex] : null;
+        instructions[tmplIndex] = tmplInstructions;
+        for (; partIndex < translationParts.length; partIndex++) {
+            // The value can either be text or the name of a placeholder (element/template root/expression)
+            var value = translationParts[partIndex];
             // Odd indexes are placeholders
-            if (index & 1) {
+            if (partIndex & 1) {
                 var phIndex = void 0;
-                if (elements && elements[tmplIndex] &&
-                    typeof (phIndex = elements[tmplIndex][value]) !== 'undefined') {
-                    // The placeholder represents a DOM element
-                    // Add an instruction to move the element
-                    tmplInstructions.push(phIndex | 1073741824 /* Element */);
+                if (currentElements && currentElements[value] !== undefined) {
+                    phIndex = currentElements[value];
+                    // The placeholder represents a DOM element, add an instruction to move it
+                    var templateRootIndex = templateRoots ? templateRoots.indexOf(value) : -1;
+                    if (templateRootIndex !== -1 && (templateRootIndex + 1) !== tmplIndex) {
+                        // This is a template root, it has no closing tag, not treating it as an element
+                        tmplInstructions.push(phIndex | -2147483648 /* TemplateRoot */);
+                    }
+                    else {
+                        tmplInstructions.push(phIndex | 1073741824 /* Element */);
+                        openedTagCount++;
+                    }
                     phVisited.push(value);
-                    openedTagCount++;
                 }
-                else if (expressions && expressions[tmplIndex] &&
-                    typeof (phIndex = expressions[tmplIndex][value]) !== 'undefined') {
-                    // The placeholder represents an expression
-                    // Add an instruction to move the expression
+                else if (currentExpressions && currentExpressions[value] !== undefined) {
+                    phIndex = currentExpressions[value];
+                    // The placeholder represents an expression, add an instruction to move it
                     tmplInstructions.push(phIndex | 1610612736 /* Expression */);
                     phVisited.push(value);
                 }
-                else { // It is a closing tag
-                    tmplInstructions.push(-2147483648 /* CloseNode */);
+                else {
+                    // It is a closing tag
+                    tmplInstructions.push(-1073741824 /* CloseNode */);
                     if (tmplIndex > 0) {
                         openedTagCount--;
                         // If we have reached the closing tag for this template, exit the loop
@@ -10371,12 +10482,14 @@
                         }
                     }
                 }
-                if (typeof phIndex !== 'undefined' && phIndex > maxIndex) {
+                if (phIndex !== undefined && phIndex > maxIndex) {
                     maxIndex = phIndex;
                 }
-                if (tmplContainers && tmplContainers.indexOf(value) !== -1 &&
-                    tmplContainers.indexOf(value) >= tmplIndex) {
-                    index = generateMappingInstructions(index, translationParts, instructions, elements, expressions, tmplContainers, lastChildIndex);
+                if (templateRoots) {
+                    var newTmplIndex = templateRoots.indexOf(value) + 1;
+                    if (newTmplIndex !== 0 && newTmplIndex !== tmplIndex) {
+                        partIndex = generateMappingInstructions(newTmplIndex, partIndex, translationParts, instructions, elements, expressions, templateRoots, lastChildIndex);
+                    }
                 }
             }
             else if (value) {
@@ -10384,7 +10497,7 @@
                 tmplInstructions.push(536870912 /* Text */, value);
             }
         }
-        // Check if some elements from the template are missing from the translation
+        // Add instructions to remove elements that are not used in the translation
         if (elements) {
             var tmplElements = elements[tmplIndex];
             if (tmplElements) {
@@ -10392,17 +10505,17 @@
                 for (var i = 0; i < phKeys.length; i++) {
                     var ph = phKeys[i];
                     if (phVisited.indexOf(ph) === -1) {
-                        var index_1 = tmplElements[ph];
+                        var index = tmplElements[ph];
                         // Add an instruction to remove the element
-                        tmplInstructions.push(index_1 | -1610612736 /* RemoveNode */);
-                        if (index_1 > maxIndex) {
-                            maxIndex = index_1;
+                        tmplInstructions.push(index | -536870912 /* RemoveNode */);
+                        if (index > maxIndex) {
+                            maxIndex = index;
                         }
                     }
                 }
             }
         }
-        // Check if some expressions from the template are missing from the translation
+        // Add instructions to remove expressions that are not used in the translation
         if (expressions) {
             var tmplExpressions = expressions[tmplIndex];
             if (tmplExpressions) {
@@ -10410,14 +10523,14 @@
                 for (var i = 0; i < phKeys.length; i++) {
                     var ph = phKeys[i];
                     if (phVisited.indexOf(ph) === -1) {
-                        var index_2 = tmplExpressions[ph];
+                        var index = tmplExpressions[ph];
                         if (ngDevMode) {
-                            assertLessThan(index_2.toString(2).length, 28, "Index " + index_2 + " is too big and will overflow");
+                            assertLessThan(index.toString(2).length, 28, "Index " + index + " is too big and will overflow");
                         }
                         // Add an instruction to remove the expression
-                        tmplInstructions.push(index_2 | -1610612736 /* RemoveNode */);
-                        if (index_2 > maxIndex) {
-                            maxIndex = index_2;
+                        tmplInstructions.push(index | -536870912 /* RemoveNode */);
+                        if (index > maxIndex) {
+                            maxIndex = index;
                         }
                     }
                 }
@@ -10430,12 +10543,10 @@
                 if (ngDevMode) {
                     assertLessThan(i.toString(2).length, 28, "Index " + i + " is too big and will overflow");
                 }
-                // We consider those additional placeholders as expressions because we don't care about
-                // their children, all we need to do is to append them
-                tmplInstructions.push(i | 1610612736 /* Expression */);
+                tmplInstructions.push(i | -1610612736 /* Any */);
             }
         }
-        return index;
+        return partIndex;
     }
     function appendI18nNode(node, parentNode, previousNode) {
         if (ngDevMode) {
@@ -10462,8 +10573,6 @@
         }
         // Template containers also have a comment node for the `ViewContainerRef` that should be moved
         if (node.tNode.type === 0 /* Container */ && node.dynamicLContainerNode) {
-            // (node.native as RComment).textContent = 'test';
-            // console.log(node.native);
             appendChild(parentNode, node.dynamicLContainerNode.native || null, viewData);
             if (firstTemplatePass) {
                 node.tNode.dynamicContainerNode = node.dynamicLContainerNode.tNode;
@@ -10501,8 +10610,10 @@
                     localParentNode = element$$1;
                     break;
                 case 1610612736 /* Expression */:
-                    var expr = load(instruction & 536870911 /* IndexMask */);
-                    localPreviousNode = appendI18nNode(expr, localParentNode, localPreviousNode);
+                case -2147483648 /* TemplateRoot */:
+                case -1610612736 /* Any */:
+                    var node = load(instruction & 536870911 /* IndexMask */);
+                    localPreviousNode = appendI18nNode(node, localParentNode, localPreviousNode);
                     break;
                 case 536870912 /* Text */:
                     if (ngDevMode) {
@@ -10517,11 +10628,11 @@
                     localPreviousNode = appendI18nNode(textLNode, localParentNode, localPreviousNode);
                     resetApplicationState();
                     break;
-                case -2147483648 /* CloseNode */:
+                case -1073741824 /* CloseNode */:
                     localPreviousNode = localParentNode;
                     localParentNode = getParentLNode(localParentNode);
                     break;
-                case -1610612736 /* RemoveNode */:
+                case -536870912 /* RemoveNode */:
                     if (ngDevMode) {
                         ngDevMode.rendererRemoveNode++;
                     }
@@ -10554,68 +10665,283 @@
         return staticText;
     }
     /**
-     * Checks if the value of up to 8 expressions have changed and replaces them by their values in a
-     * translation, or returns NO_CHANGE.
+     * Checks if the value of an expression has changed and replaces it by its value in a translation,
+     * or returns NO_CHANGE.
+     *
+     * @param instructions A list of instructions that will be used to translate an attribute.
+     * @param v0 value checked for change.
      *
      * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
      */
-    function i18nInterpolation(instructions, numberOfExp, v0, v1, v2, v3, v4, v5, v6, v7) {
+    function i18nInterpolation1(instructions, v0) {
         var different = bindingUpdated(v0);
-        if (numberOfExp > 1) {
-            different = bindingUpdated(v1) || different;
-            if (numberOfExp > 2) {
-                different = bindingUpdated(v2) || different;
-                if (numberOfExp > 3) {
-                    different = bindingUpdated(v3) || different;
-                    if (numberOfExp > 4) {
-                        different = bindingUpdated(v4) || different;
-                        if (numberOfExp > 5) {
-                            different = bindingUpdated(v5) || different;
-                            if (numberOfExp > 6) {
-                                different = bindingUpdated(v6) || different;
-                                if (numberOfExp > 7) {
-                                    different = bindingUpdated(v7) || different;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
         if (!different) {
             return NO_CHANGE;
         }
         var res = '';
         for (var i = 0; i < instructions.length; i++) {
-            var value = void 0;
-            // Odd indexes are placeholders
+            // Odd indexes are bindings
             if (i & 1) {
-                switch (instructions[i]) {
-                    case 0:
-                        value = v0;
-                        break;
-                    case 1:
-                        value = v1;
-                        break;
-                    case 2:
-                        value = v2;
-                        break;
-                    case 3:
-                        value = v3;
-                        break;
-                    case 4:
-                        value = v4;
-                        break;
-                    case 5:
-                        value = v5;
-                        break;
-                    case 6:
-                        value = v6;
-                        break;
-                    case 7:
-                        value = v7;
-                        break;
-                }
+                res += stringify$1(v0);
+            }
+            else {
+                res += instructions[i];
+            }
+        }
+        return res;
+    }
+    /**
+     * Checks if the values of up to 2 expressions have changed and replaces them by their values in a
+     * translation, or returns NO_CHANGE.
+     *
+     * @param instructions A list of instructions that will be used to translate an attribute.
+     * @param v0 value checked for change.
+     * @param v1 value checked for change.
+     *
+     * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+     */
+    function i18nInterpolation2(instructions, v0, v1) {
+        var different = bindingUpdated2(v0, v1);
+        if (!different) {
+            return NO_CHANGE;
+        }
+        var res = '';
+        for (var i = 0; i < instructions.length; i++) {
+            // Odd indexes are bindings
+            if (i & 1) {
+                // Extract bits
+                var idx = instructions[i];
+                var b1 = idx & 1;
+                // Get the value from the argument vx where x = idx
+                var value = b1 ? v1 : v0;
+                res += stringify$1(value);
+            }
+            else {
+                res += instructions[i];
+            }
+        }
+        return res;
+    }
+    /**
+     * Checks if the values of up to 3 expressions have changed and replaces them by their values in a
+     * translation, or returns NO_CHANGE.
+     *
+     * @param instructions A list of instructions that will be used to translate an attribute.
+     * @param v0 value checked for change.
+     * @param v1 value checked for change.
+     * @param v2 value checked for change.
+     *
+     * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+     */
+    function i18nInterpolation3(instructions, v0, v1, v2) {
+        var different = bindingUpdated2(v0, v1);
+        different = bindingUpdated(v2) || different;
+        if (!different) {
+            return NO_CHANGE;
+        }
+        var res = '';
+        for (var i = 0; i < instructions.length; i++) {
+            // Odd indexes are bindings
+            if (i & 1) {
+                // Extract bits
+                var idx = instructions[i];
+                var b2 = idx & 2;
+                var b1 = idx & 1;
+                // Get the value from the argument vx where x = idx
+                var value = b2 ? v2 : (b1 ? v1 : v0);
+                res += stringify$1(value);
+            }
+            else {
+                res += instructions[i];
+            }
+        }
+        return res;
+    }
+    /**
+     * Checks if the values of up to 4 expressions have changed and replaces them by their values in a
+     * translation, or returns NO_CHANGE.
+     *
+     * @param instructions A list of instructions that will be used to translate an attribute.
+     * @param v0 value checked for change.
+     * @param v1 value checked for change.
+     * @param v2 value checked for change.
+     * @param v3 value checked for change.
+     *
+     * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+     */
+    function i18nInterpolation4(instructions, v0, v1, v2, v3) {
+        var different = bindingUpdated4(v0, v1, v2, v3);
+        if (!different) {
+            return NO_CHANGE;
+        }
+        var res = '';
+        for (var i = 0; i < instructions.length; i++) {
+            // Odd indexes are bindings
+            if (i & 1) {
+                // Extract bits
+                var idx = instructions[i];
+                var b2 = idx & 2;
+                var b1 = idx & 1;
+                // Get the value from the argument vx where x = idx
+                var value = b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0);
+                res += stringify$1(value);
+            }
+            else {
+                res += instructions[i];
+            }
+        }
+        return res;
+    }
+    /**
+     * Checks if the values of up to 5 expressions have changed and replaces them by their values in a
+     * translation, or returns NO_CHANGE.
+     *
+     * @param instructions A list of instructions that will be used to translate an attribute.
+     * @param v0 value checked for change.
+     * @param v1 value checked for change.
+     * @param v2 value checked for change.
+     * @param v3 value checked for change.
+     * @param v4 value checked for change.
+     *
+     * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+     */
+    function i18nInterpolation5(instructions, v0, v1, v2, v3, v4) {
+        var different = bindingUpdated4(v0, v1, v2, v3);
+        different = bindingUpdated(v4) || different;
+        if (!different) {
+            return NO_CHANGE;
+        }
+        var res = '';
+        for (var i = 0; i < instructions.length; i++) {
+            // Odd indexes are bindings
+            if (i & 1) {
+                // Extract bits
+                var idx = instructions[i];
+                var b4 = idx & 4;
+                var b2 = idx & 2;
+                var b1 = idx & 1;
+                // Get the value from the argument vx where x = idx
+                var value = b4 ? v4 : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
+                res += stringify$1(value);
+            }
+            else {
+                res += instructions[i];
+            }
+        }
+        return res;
+    }
+    /**
+     * Checks if the values of up to 6 expressions have changed and replaces them by their values in a
+     * translation, or returns NO_CHANGE.
+     *
+     * @param instructions A list of instructions that will be used to translate an attribute.
+     * @param v0 value checked for change.
+     * @param v1 value checked for change.
+     * @param v2 value checked for change.
+     * @param v3 value checked for change.
+     * @param v4 value checked for change.
+     * @param v5 value checked for change.
+     *
+     * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+     */ function i18nInterpolation6(instructions, v0, v1, v2, v3, v4, v5) {
+        var different = bindingUpdated4(v0, v1, v2, v3);
+        different = bindingUpdated2(v4, v5) || different;
+        if (!different) {
+            return NO_CHANGE;
+        }
+        var res = '';
+        for (var i = 0; i < instructions.length; i++) {
+            // Odd indexes are bindings
+            if (i & 1) {
+                // Extract bits
+                var idx = instructions[i];
+                var b4 = idx & 4;
+                var b2 = idx & 2;
+                var b1 = idx & 1;
+                // Get the value from the argument vx where x = idx
+                var value = b4 ? (b1 ? v5 : v4) : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
+                res += stringify$1(value);
+            }
+            else {
+                res += instructions[i];
+            }
+        }
+        return res;
+    }
+    /**
+     * Checks if the values of up to 7 expressions have changed and replaces them by their values in a
+     * translation, or returns NO_CHANGE.
+     *
+     * @param instructions A list of instructions that will be used to translate an attribute.
+     * @param v0 value checked for change.
+     * @param v1 value checked for change.
+     * @param v2 value checked for change.
+     * @param v3 value checked for change.
+     * @param v4 value checked for change.
+     * @param v5 value checked for change.
+     * @param v6 value checked for change.
+     *
+     * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+     */
+    function i18nInterpolation7(instructions, v0, v1, v2, v3, v4, v5, v6) {
+        var different = bindingUpdated4(v0, v1, v2, v3);
+        different = bindingUpdated2(v4, v5) || different;
+        different = bindingUpdated(v6) || different;
+        if (!different) {
+            return NO_CHANGE;
+        }
+        var res = '';
+        for (var i = 0; i < instructions.length; i++) {
+            // Odd indexes are bindings
+            if (i & 1) {
+                // Extract bits
+                var idx = instructions[i];
+                var b4 = idx & 4;
+                var b2 = idx & 2;
+                var b1 = idx & 1;
+                // Get the value from the argument vx where x = idx
+                var value = b4 ? (b2 ? v6 : (b1 ? v5 : v4)) : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
+                res += stringify$1(value);
+            }
+            else {
+                res += instructions[i];
+            }
+        }
+        return res;
+    }
+    /**
+     * Checks if the values of up to 8 expressions have changed and replaces them by their values in a
+     * translation, or returns NO_CHANGE.
+     *
+     * @param instructions A list of instructions that will be used to translate an attribute.
+     * @param v0 value checked for change.
+     * @param v1 value checked for change.
+     * @param v2 value checked for change.
+     * @param v3 value checked for change.
+     * @param v4 value checked for change.
+     * @param v5 value checked for change.
+     * @param v6 value checked for change.
+     * @param v7 value checked for change.
+     *
+     * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+     */
+    function i18nInterpolation8(instructions, v0, v1, v2, v3, v4, v5, v6, v7) {
+        var different = bindingUpdated4(v0, v1, v2, v3);
+        different = bindingUpdated4(v4, v5, v6, v7) || different;
+        if (!different) {
+            return NO_CHANGE;
+        }
+        var res = '';
+        for (var i = 0; i < instructions.length; i++) {
+            // Odd indexes are bindings
+            if (i & 1) {
+                // Extract bits
+                var idx = instructions[i];
+                var b4 = idx & 4;
+                var b2 = idx & 2;
+                var b1 = idx & 1;
+                // Get the value from the argument vx where x = idx
+                var value = b4 ? (b2 ? (b1 ? v7 : v6) : (b1 ? v5 : v4)) : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
                 res += stringify$1(value);
             }
             else {
@@ -10653,35 +10979,6 @@
         }
         return res;
     }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Represents an instance of an NgModule created via a {@link NgModuleFactory}.
-     *
-     * `NgModuleRef` provides access to the NgModule Instance as well other objects related to this
-     * NgModule Instance.
-     *
-     *
-     */
-    var NgModuleRef = /** @class */ (function () {
-        function NgModuleRef() {
-        }
-        return NgModuleRef;
-    }());
-    /**
-     * @experimental
-     */
-    var NgModuleFactory = /** @class */ (function () {
-        function NgModuleFactory() {
-        }
-        return NgModuleFactory;
-    }());
 
     /**
      * @license
@@ -14012,7 +14309,7 @@
             skipSelf: false,
         };
         function setTokenAndResolvedType(token) {
-            if (token === ElementRef$1) {
+            if (token === ElementRef) {
                 meta.resolved = compiler.R3ResolvedDependencyType.ElementRef;
             }
             else if (token === Injector) {
@@ -14819,7 +15116,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('6.1.0-rc.3+53.sha-169e9dd');
+    var VERSION = new Version('6.1.0-rc.3+64.sha-1ceddb6');
 
     /**
      * @license
@@ -15125,7 +15422,7 @@
      * ```
      * @experimental
      */
-    var EmbeddedViewRef$1 = /** @class */ (function (_super) {
+    var EmbeddedViewRef = /** @class */ (function (_super) {
         __extends(EmbeddedViewRef, _super);
         function EmbeddedViewRef() {
             return _super !== null && _super.apply(this, arguments) || this;
@@ -16194,7 +16491,7 @@
         }
         Object.defineProperty(ComponentRef_.prototype, "location", {
             get: function () {
-                return new ElementRef$1(asElementData(this._view, this._elDef.nodeIndex).renderElement);
+                return new ElementRef(asElementData(this._view, this._elDef.nodeIndex).renderElement);
             },
             enumerable: true,
             configurable: true
@@ -16227,7 +16524,7 @@
             this._embeddedViews = [];
         }
         Object.defineProperty(ViewContainerRef_.prototype, "element", {
-            get: function () { return new ElementRef$1(this._data.renderElement); },
+            get: function () { return new ElementRef(this._data.renderElement); },
             enumerable: true,
             configurable: true
         });
@@ -16409,7 +16706,7 @@
         };
         Object.defineProperty(TemplateRef_.prototype, "elementRef", {
             get: function () {
-                return new ElementRef$1(asElementData(this._parentView, this._def.nodeIndex).renderElement);
+                return new ElementRef(asElementData(this._parentView, this._def.nodeIndex).renderElement);
             },
             enumerable: true,
             configurable: true
@@ -16601,7 +16898,7 @@
      */
     var RendererV1TokenKey = tokenKey(Renderer);
     var Renderer2TokenKey = tokenKey(Renderer2);
-    var ElementRefTokenKey = tokenKey(ElementRef$1);
+    var ElementRefTokenKey = tokenKey(ElementRef);
     var ViewContainerRefTokenKey = tokenKey(ViewContainerRef$1);
     var TemplateRefTokenKey = tokenKey(TemplateRef$1);
     var ChangeDetectorRefTokenKey = tokenKey(ChangeDetectorRef);
@@ -16887,7 +17184,7 @@
                         return compView.renderer;
                     }
                     case ElementRefTokenKey:
-                        return new ElementRef$1(asElementData(searchView, elDef.nodeIndex).renderElement);
+                        return new ElementRef(asElementData(searchView, elDef.nodeIndex).renderElement);
                     case ViewContainerRefTokenKey:
                         return asElementData(searchView, elDef.nodeIndex).viewContainer;
                     case TemplateRefTokenKey: {
@@ -17245,7 +17542,7 @@
                 case 1 /* RenderElement */:
                     return asElementData(view, nodeDef.nodeIndex).renderElement;
                 case 0 /* ElementRef */:
-                    return new ElementRef$1(asElementData(view, nodeDef.nodeIndex).renderElement);
+                    return new ElementRef(asElementData(view, nodeDef.nodeIndex).renderElement);
                 case 2 /* TemplateRef */:
                     return asElementData(view, nodeDef.nodeIndex).template;
                 case 3 /* ViewContainerRef */:
@@ -19236,7 +19533,7 @@
     exports.ComponentFactory = ComponentFactory;
     exports.ComponentRef = ComponentRef;
     exports.ComponentFactoryResolver = ComponentFactoryResolver;
-    exports.ElementRef = ElementRef$1;
+    exports.ElementRef = ElementRef;
     exports.NgModuleFactory = NgModuleFactory;
     exports.NgModuleRef = NgModuleRef;
     exports.NgModuleFactoryLoader = NgModuleFactoryLoader;
@@ -19246,7 +19543,7 @@
     exports.SystemJsNgModuleLoaderConfig = SystemJsNgModuleLoaderConfig;
     exports.TemplateRef = TemplateRef$1;
     exports.ViewContainerRef = ViewContainerRef$1;
-    exports.EmbeddedViewRef = EmbeddedViewRef$1;
+    exports.EmbeddedViewRef = EmbeddedViewRef;
     exports.ViewRef = ViewRef$1;
     exports.ChangeDetectorRef = ChangeDetectorRef;
     exports.DefaultIterableDiffer = DefaultIterableDiffer;
@@ -19364,7 +19661,14 @@
     exports.ɵwhenRendered = whenRendered;
     exports.ɵiA = i18nApply;
     exports.ɵiEM = i18nExpMapping;
-    exports.ɵiI = i18nInterpolation;
+    exports.ɵiI1 = i18nInterpolation1;
+    exports.ɵiI2 = i18nInterpolation2;
+    exports.ɵiI3 = i18nInterpolation3;
+    exports.ɵiI4 = i18nInterpolation4;
+    exports.ɵiI5 = i18nInterpolation5;
+    exports.ɵiI6 = i18nInterpolation6;
+    exports.ɵiI7 = i18nInterpolation7;
+    exports.ɵiI8 = i18nInterpolation8;
     exports.ɵIV = i18nInterpolationV;
     exports.ɵiM = i18nMapping;
     exports.ɵsanitizeHtml = sanitizeHtml;

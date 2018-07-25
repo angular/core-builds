@@ -128,7 +128,7 @@ export declare function createEmbeddedViewNode<T>(tView: TView, context: T, rend
  * can't store TViews in the template function itself (as we do for comps). Instead, we store the
  * TView for dynamically created views on their host TNode, which only has one instance.
  */
-export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode, tView: TView, context: T, rf: RenderFlags): LViewNode;
+export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | LElementNode, tView: TView, context: T, rf: RenderFlags): LViewNode | LElementNode;
 export declare function renderComponentOrTemplate<T>(node: LElementNode, hostView: LViewData, componentOrContext: T, template?: ComponentTemplate<T>): void;
 export declare function namespaceSVG(): void;
 export declare function namespaceMathML(): void;
@@ -155,6 +155,13 @@ export declare function element(index: number, name: string, attrs?: TAttributes
  * ['id', 'warning5', 'class', 'alert']
  */
 export declare function elementStart(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): RElement;
+/**
+ * Creates a native element from a tag name, using a renderer.
+ * @param name the tag name
+ * @param overriddenRenderer Optional A renderer to override the default one
+ * @returns the element created
+ */
+export declare function elementCreate(name: string, overriddenRenderer?: Renderer3): RElement;
 export declare function resolveDirective(def: DirectiveDefInternal<any>, valueIndex: number, matches: CurrentMatchesList, tView: TView): any;
 /** Sets the context for a ChangeDetectorRef to the given instance. */
 export declare function initChangeDetectorIfExisting(injector: LInjector | null, instance: any, view: LViewData): void;
@@ -631,7 +638,7 @@ export declare function interpolationV(values: any[]): string | NO_CHANGE;
 export declare function interpolation1(prefix: string, v0: any, suffix: string): string | NO_CHANGE;
 /** Creates an interpolation binding with 2 expressions. */
 export declare function interpolation2(prefix: string, v0: any, i0: string, v1: any, suffix: string): string | NO_CHANGE;
-/** Creates an interpolation bindings with 3 expressions. */
+/** Creates an interpolation binding with 3 expressions. */
 export declare function interpolation3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): string | NO_CHANGE;
 /** Create an interpolation binding with 4 expressions. */
 export declare function interpolation4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): string | NO_CHANGE;
