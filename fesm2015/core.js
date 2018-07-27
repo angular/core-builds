@@ -1,11 +1,11 @@
 /**
- * @license Angular v6.1.0-rc.3+75.sha-e1c6fd5
+ * @license Angular v6.1.0+8.sha-3169edd
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
 import { Subject, Subscription, Observable, merge } from 'rxjs';
-import { __decorate, __param, __metadata } from 'tslib';
+import { __decorate, __metadata, __param } from 'tslib';
 import { share } from 'rxjs/operators';
 import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compileInjectable, compilePipeFromMetadata } from '@angular/compiler';
 
@@ -13974,9 +13974,13 @@ function compileNgModule$1(type, ngModule) {
                 const meta = {
                     type: wrap(type),
                     bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$3).map(wrap),
-                    declarations: declarations.map(wrap),
-                    imports: flatten$1(ngModule.imports || EMPTY_ARRAY$3).map(expandModuleWithProviders).map(wrap),
-                    exports: flatten$1(ngModule.exports || EMPTY_ARRAY$3).map(expandModuleWithProviders).map(wrap),
+                    declarations: declarations.map(wrapReference),
+                    imports: flatten$1(ngModule.imports || EMPTY_ARRAY$3)
+                        .map(expandModuleWithProviders)
+                        .map(wrapReference),
+                    exports: flatten$1(ngModule.exports || EMPTY_ARRAY$3)
+                        .map(expandModuleWithProviders)
+                        .map(wrapReference),
                     emitInline: true,
                 };
                 const res = compileNgModule(meta);
@@ -14126,6 +14130,10 @@ function expandModuleWithProviders(value) {
 }
 function wrap(value) {
     return new WrappedNodeExpr(value);
+}
+function wrapReference(value) {
+    const wrapped = wrap(value);
+    return { value: wrapped, type: wrapped };
 }
 function isModuleWithProviders(value) {
     return value.ngModule !== undefined;
@@ -14693,7 +14701,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.0-rc.3+75.sha-e1c6fd5');
+const VERSION = new Version('6.1.0+8.sha-3169edd');
 
 /**
  * @license
