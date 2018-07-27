@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/// <reference types="jasmine" />
 export { AsyncTestCompleter } from './async_test_completer';
 export { inject } from './test_bed';
 export * from './logger';
