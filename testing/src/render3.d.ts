@@ -34,7 +34,7 @@
 * @param blockFn function to wrap. The function can return promise or be `async`.
 * @experimental
 */
-export declare function withBody<T>(html: string, blockFn: T): T;
+export declare function withBody<T extends Function>(html: string, blockFn: T): T;
 /**
  * Ensure that global has `Document` if we are in node.js
  * @experimental
