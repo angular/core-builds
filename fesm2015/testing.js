@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0+9.sha-36a7705
+ * @license Angular v6.1.0+10.sha-39abe7b
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1578,9 +1578,9 @@ function withBody(html, blockFn) {
         if (typeof blockFn === 'function') {
             document.body.innerHTML = html;
             /** @type {?} */
-            let blockReturn = (/** @type {?} */ (blockFn))();
+            const blockReturn = blockFn();
             if (blockReturn instanceof Promise) {
-                blockReturn = blockReturn.then(done, done.fail);
+                blockReturn.then(done, done.fail);
             }
             else {
                 done();
