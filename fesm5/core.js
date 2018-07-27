@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0+19.sha-ce98634
+ * @license Angular v6.1.0+25.sha-8e65891
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1642,7 +1642,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0+19.sha-ce98634');
+var VERSION = new Version('6.1.0+25.sha-8e65891');
 
 /**
  * @license
@@ -16489,7 +16489,7 @@ var ComponentRef$1 = /** @class */ (function (_super) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * If a directive is diPublic, bloomAdd sets a property on the instance with this constant as
+ * If a directive is diPublic, bloomAdd sets a property on the type with this constant as
  * the key and the directive's unique ID as the value. This allows us to map directives to their
  * bloom filter bit for DI.
  */
@@ -16500,6 +16500,7 @@ var NG_ELEMENT_ID = '__NG_ELEMENT_ID__';
  * the existence of a directive.
  */
 var BLOOM_SIZE = 256;
+var BLOOM_MASK = BLOOM_SIZE - 1;
 /** Counter used to generate unique IDs for directives. */
 var nextNgElementId = 0;
 /**
@@ -16518,23 +16519,23 @@ function bloomAdd(injector, type) {
     }
     // We only have BLOOM_SIZE (256) slots in our bloom filter (8 buckets * 32 bits each),
     // so all unique IDs must be modulo-ed into a number from 0 - 255 to fit into the filter.
-    // This means that after 255, some directives will share slots, leading to some false positives
-    // when checking for a directive's presence.
-    var bloomBit = id % BLOOM_SIZE;
+    var bloomBit = id & BLOOM_MASK;
     // Create a mask that targets the specific bit associated with the directive.
     // JS bit operations are 32 bits, so this will be a number between 2^0 and 2^31, corresponding
     // to bit positions 0 - 31 in a 32 bit integer.
     var mask = 1 << bloomBit;
     // Use the raw bloomBit number to determine which bloom filter bucket we should check
     // e.g: bf0 = [0 - 31], bf1 = [32 - 63], bf2 = [64 - 95], bf3 = [96 - 127], etc
-    if (bloomBit < 128) {
-        // Then use the mask to flip on the bit (0-31) associated with the directive in that bucket
-        bloomBit < 64 ? (bloomBit < 32 ? (injector.bf0 |= mask) : (injector.bf1 |= mask)) :
-            (bloomBit < 96 ? (injector.bf2 |= mask) : (injector.bf3 |= mask));
+    var b7 = bloomBit & 0x80;
+    var b6 = bloomBit & 0x40;
+    var b5 = bloomBit & 0x20;
+    if (b7) {
+        b6 ? (b5 ? (injector.bf7 |= mask) : (injector.bf6 |= mask)) :
+            (b5 ? (injector.bf5 |= mask) : (injector.bf4 |= mask));
     }
     else {
-        bloomBit < 192 ? (bloomBit < 160 ? (injector.bf4 |= mask) : (injector.bf5 |= mask)) :
-            (bloomBit < 224 ? (injector.bf6 |= mask) : (injector.bf7 |= mask));
+        b6 ? (b5 ? (injector.bf3 |= mask) : (injector.bf2 |= mask)) :
+            (b5 ? (injector.bf1 |= mask) : (injector.bf0 |= mask));
     }
 }
 function getOrCreateNodeInjector() {
@@ -16722,39 +16723,23 @@ function getClosestComponentAncestor(node) {
     return node;
 }
 /**
- * Searches for an instance of the given directive type up the injector tree and returns
- * that instance if found.
+ * Returns the value associated to the given token from the injectors.
  *
- * Specifically, it gets the bloom filter bit associated with the directive (see bloomHashBit),
- * checks that bit against the bloom filter structure to identify an injector that might have
- * the directive (see bloomFindPossibleInjector), then searches the directives on that injector
- * for a match.
+ * Look for the injector providing the token by walking up the node injector tree and then
+ * the module injector tree.
  *
- * If not found, it will propagate up to the next parent injector until the token
- * is found or the top is reached.
- *
- * @param di Node injector where the search should start
- * @param token The directive type to search for
- * @param flags Injection flags (e.g. CheckParent)
- * @returns The instance found
+ * @param nodeInjector Node injector where the search should start
+ * @param token The token to look for
+ * @param flags Injection flags
+ * @returns the value from the injector or `null` when not found
  */
-function getOrCreateInjectable(di, token, flags) {
+function getOrCreateInjectable(nodeInjector, token, flags) {
     if (flags === void 0) { flags = 0 /* Default */; }
     var bloomHash = bloomHashBit(token);
     // If the token has a bloom hash, then it is a directive that is public to the injection system
-    // (diPublic). If there is no hash, fall back to the module injector.
-    if (bloomHash === null) {
-        var moduleInjector = getPreviousOrParentNode().view[INJECTOR$1];
-        var formerInjector = setCurrentInjector(moduleInjector);
-        try {
-            return inject(token, flags);
-        }
-        finally {
-            setCurrentInjector(formerInjector);
-        }
-    }
-    else {
-        var injector = di;
+    // (diPublic) otherwise fall back to the module injector.
+    if (bloomHash !== null) {
+        var injector = nodeInjector;
         while (injector) {
             // Get the closest potential matching injector (upwards in the injector tree) that
             // *potentially* has the token.
@@ -16785,7 +16770,8 @@ function getOrCreateInjectable(di, token, flags) {
             // If we *didn't* find the directive for the token and we are searching the current node's
             // injector, it's possible the directive is on this node and hasn't been created yet.
             var instance = void 0;
-            if (injector === di && (instance = searchMatchesQueuedForCreation(node, token))) {
+            if (injector === nodeInjector &&
+                (instance = searchMatchesQueuedForCreation(node, token))) {
                 return instance;
             }
             // The def wasn't found anywhere on this node, so it was a false positive.
@@ -16798,10 +16784,14 @@ function getOrCreateInjectable(di, token, flags) {
             }
         }
     }
-    // No directive was found for the given token.
-    if (flags & 8 /* Optional */)
-        return null;
-    throw new Error("Injector: NOT_FOUND [" + stringify$1(token) + "]");
+    var moduleInjector = getPreviousOrParentNode().view[INJECTOR$1];
+    var formerInjector = setCurrentInjector(moduleInjector);
+    try {
+        return inject(token, flags);
+    }
+    finally {
+        setCurrentInjector(formerInjector);
+    }
 }
 function searchMatchesQueuedForCreation(node, token) {
     var matches = node.view[TVIEW].currentMatches;
@@ -16816,20 +16806,19 @@ function searchMatchesQueuedForCreation(node, token) {
     return null;
 }
 /**
- * Given a directive type, this function returns the bit in an injector's bloom filter
- * that should be used to determine whether or not the directive is present.
+ * Returns the bit in an injector's bloom filter that should be used to determine whether or not
+ * the directive might be provided by the injector.
  *
- * When the directive was added to the bloom filter, it was given a unique ID that can be
- * retrieved on the class. Since there are only BLOOM_SIZE slots per bloom filter, the directive's
- * ID must be modulo-ed by BLOOM_SIZE to get the correct bloom bit (directives share slots after
- * BLOOM_SIZE is reached).
+ * When a directive is public, it is added to the bloom filter and given a unique ID that can be
+ * retrieved on the Type. When the directive isn't public or the token is not a directive `null`
+ * is returned as the node injector can not possibly provide that token.
  *
- * @param type The directive type
- * @returns The bloom bit to check for the directive
+ * @param token the injection token
+ * @returns the matching bit to check in the bloom filter or `null` if the token is not known.
  */
-function bloomHashBit(type) {
-    var id = type[NG_ELEMENT_ID];
-    return typeof id === 'number' ? id % BLOOM_SIZE : null;
+function bloomHashBit(token) {
+    var id = token[NG_ELEMENT_ID];
+    return typeof id === 'number' ? id & BLOOM_MASK : null;
 }
 /**
  * Finds the closest injector that might have a certain directive.
@@ -16856,6 +16845,9 @@ function bloomFindPossibleInjector(startInjector, bloomBit, flags) {
     // JS bit operations are 32 bits, so this will be a number between 2^0 and 2^31, corresponding
     // to bit positions 0 - 31 in a 32 bit integer.
     var mask = 1 << bloomBit;
+    var b7 = bloomBit & 0x80;
+    var b6 = bloomBit & 0x40;
+    var b5 = bloomBit & 0x20;
     // Traverse up the injector tree until we find a potential match or until we know there *isn't* a
     // match.
     var injector = flags & 4 /* SkipSelf */ ? startInjector.parent : startInjector;
@@ -16864,35 +16856,36 @@ function bloomFindPossibleInjector(startInjector, bloomBit, flags) {
         // bf0 = [0 - 31], bf1 = [32 - 63], bf2 = [64 - 95], bf3 = [96 - 127], etc.
         // Get the bloom filter value from the appropriate bucket based on the directive's bloomBit.
         var value = void 0;
-        if (bloomBit < 128) {
-            value = bloomBit < 64 ? (bloomBit < 32 ? injector.bf0 : injector.bf1) :
-                (bloomBit < 96 ? injector.bf2 : injector.bf3);
+        if (b7) {
+            value = b6 ? (b5 ? injector.bf7 : injector.bf6) : (b5 ? injector.bf5 : injector.bf4);
         }
         else {
-            value = bloomBit < 192 ? (bloomBit < 160 ? injector.bf4 : injector.bf5) :
-                (bloomBit < 224 ? injector.bf6 : injector.bf7);
+            value = b6 ? (b5 ? injector.bf3 : injector.bf2) : (b5 ? injector.bf1 : injector.bf0);
         }
         // If the bloom filter value has the bit corresponding to the directive's bloomBit flipped on,
         // this injector is a potential match.
-        if ((value & mask) === mask) {
+        if (value & mask) {
             return injector;
         }
-        else if (flags & 2 /* Self */ || flags & 1 /* Host */ && !sameHostView(injector)) {
+        if (flags & 2 /* Self */ || flags & 1 /* Host */ && !sameHostView(injector)) {
             return null;
         }
         // If the current injector does not have the directive, check the bloom filters for the ancestor
         // injectors (cbf0 - cbf7). These filters capture *all* ancestor injectors.
-        if (bloomBit < 128) {
-            value = bloomBit < 64 ? (bloomBit < 32 ? injector.cbf0 : injector.cbf1) :
-                (bloomBit < 96 ? injector.cbf2 : injector.cbf3);
+        if (b7) {
+            value = b6 ? (b5 ? injector.cbf7 : injector.cbf6) : (b5 ? injector.cbf5 : injector.cbf4);
         }
         else {
-            value = bloomBit < 192 ? (bloomBit < 160 ? injector.cbf4 : injector.cbf5) :
-                (bloomBit < 224 ? injector.cbf6 : injector.cbf7);
+            value = b6 ? (b5 ? injector.cbf3 : injector.cbf2) : (b5 ? injector.cbf1 : injector.cbf0);
         }
         // If the ancestor bloom filter value has the bit corresponding to the directive, traverse up to
         // find the specific injector. If the ancestor bloom filter does not have the bit, we can abort.
-        injector = (value & mask) ? injector.parent : null;
+        if (value & mask) {
+            injector = injector.parent;
+        }
+        else {
+            return null;
+        }
     }
     return null;
 }
@@ -16923,10 +16916,10 @@ function getOrCreateElementRef(di) {
 }
 /** A ref to a node's native element. */
 var ElementRef$1 = /** @class */ (function () {
-    function ElementRef(nativeElement) {
+    function ElementRef$$1(nativeElement) {
         this.nativeElement = nativeElement;
     }
-    return ElementRef;
+    return ElementRef$$1;
 }());
 /**
  * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
@@ -16963,18 +16956,18 @@ function getOrCreateContainerRef(di) {
  * imperatively.
  */
 var ViewContainerRef$1 = /** @class */ (function () {
-    function ViewContainerRef(_lContainerNode) {
+    function ViewContainerRef$$1(_lContainerNode) {
         this._lContainerNode = _lContainerNode;
         this._viewRefs = [];
     }
-    ViewContainerRef.prototype.clear = function () {
+    ViewContainerRef$$1.prototype.clear = function () {
         var lContainer = this._lContainerNode.data;
         while (lContainer[VIEWS].length) {
             this.remove(0);
         }
     };
-    ViewContainerRef.prototype.get = function (index) { return this._viewRefs[index] || null; };
-    Object.defineProperty(ViewContainerRef.prototype, "length", {
+    ViewContainerRef$$1.prototype.get = function (index) { return this._viewRefs[index] || null; };
+    Object.defineProperty(ViewContainerRef$$1.prototype, "length", {
         get: function () {
             var lContainer = this._lContainerNode.data;
             return lContainer[VIEWS].length;
@@ -16982,7 +16975,7 @@ var ViewContainerRef$1 = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
-    ViewContainerRef.prototype.createEmbeddedView = function (templateRef, context, index) {
+    ViewContainerRef$$1.prototype.createEmbeddedView = function (templateRef, context, index) {
         var adjustedIdx = this._adjustIndex(index);
         var viewRef = templateRef
             .createEmbeddedView(context || {}, this._lContainerNode, adjustedIdx);
@@ -16990,7 +16983,7 @@ var ViewContainerRef$1 = /** @class */ (function () {
         this._viewRefs.splice(adjustedIdx, 0, viewRef);
         return viewRef;
     };
-    ViewContainerRef.prototype.createComponent = function (componentFactory, index, injector, projectableNodes, ngModuleRef) {
+    ViewContainerRef$$1.prototype.createComponent = function (componentFactory, index, injector, projectableNodes, ngModuleRef) {
         var contextInjector = injector || this.parentInjector;
         if (!ngModuleRef && contextInjector) {
             ngModuleRef = contextInjector.get(NgModuleRef);
@@ -16999,7 +16992,7 @@ var ViewContainerRef$1 = /** @class */ (function () {
         this.insert(componentRef.hostView, index);
         return componentRef;
     };
-    ViewContainerRef.prototype.insert = function (viewRef, index) {
+    ViewContainerRef$$1.prototype.insert = function (viewRef, index) {
         if (viewRef.destroyed) {
             throw new Error('Cannot insert a destroyed View in a ViewContainer!');
         }
@@ -17015,24 +17008,24 @@ var ViewContainerRef$1 = /** @class */ (function () {
         this._viewRefs.splice(adjustedIdx, 0, viewRef);
         return viewRef;
     };
-    ViewContainerRef.prototype.move = function (viewRef, newIndex) {
+    ViewContainerRef$$1.prototype.move = function (viewRef, newIndex) {
         var index = this.indexOf(viewRef);
         this.detach(index);
         this.insert(viewRef, this._adjustIndex(newIndex));
         return viewRef;
     };
-    ViewContainerRef.prototype.indexOf = function (viewRef) { return this._viewRefs.indexOf(viewRef); };
-    ViewContainerRef.prototype.remove = function (index) {
+    ViewContainerRef$$1.prototype.indexOf = function (viewRef) { return this._viewRefs.indexOf(viewRef); };
+    ViewContainerRef$$1.prototype.remove = function (index) {
         var adjustedIdx = this._adjustIndex(index, -1);
         removeView(this._lContainerNode, adjustedIdx);
         this._viewRefs.splice(adjustedIdx, 1);
     };
-    ViewContainerRef.prototype.detach = function (index) {
+    ViewContainerRef$$1.prototype.detach = function (index) {
         var adjustedIdx = this._adjustIndex(index, -1);
-        var lViewNode = detachView(this._lContainerNode, adjustedIdx);
+        detachView(this._lContainerNode, adjustedIdx);
         return this._viewRefs.splice(adjustedIdx, 1)[0] || null;
     };
-    ViewContainerRef.prototype._adjustIndex = function (index, shift) {
+    ViewContainerRef$$1.prototype._adjustIndex = function (index, shift) {
         if (shift === void 0) { shift = 0; }
         if (index == null) {
             return this._lContainerNode.data[VIEWS].length + shift;
@@ -17044,7 +17037,7 @@ var ViewContainerRef$1 = /** @class */ (function () {
         }
         return index;
     };
-    return ViewContainerRef;
+    return ViewContainerRef$$1;
 }());
 /**
  * Creates a TemplateRef and stores it on the injector. Or, if the TemplateRef already
@@ -17064,13 +17057,13 @@ function getOrCreateTemplateRef(di) {
     return di.templateRef;
 }
 var TemplateRef$1 = /** @class */ (function () {
-    function TemplateRef(elementRef, _tView, _renderer, _queries) {
+    function TemplateRef$$1(elementRef, _tView, _renderer, _queries) {
         this._tView = _tView;
         this._renderer = _renderer;
         this._queries = _queries;
         this.elementRef = elementRef;
     }
-    TemplateRef.prototype.createEmbeddedView = function (context, containerNode, index) {
+    TemplateRef$$1.prototype.createEmbeddedView = function (context, containerNode, index) {
         var viewNode = createEmbeddedViewNode(this._tView, context, this._renderer, this._queries);
         if (containerNode) {
             insertView(containerNode, viewNode, index);
@@ -17080,7 +17073,7 @@ var TemplateRef$1 = /** @class */ (function () {
         viewRef._lViewNode = viewNode;
         return viewRef;
     };
-    return TemplateRef;
+    return TemplateRef$$1;
 }());
 
 /**
