@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0
+ * @license Angular v6.1.0+13.sha-601064e
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -13922,9 +13922,13 @@ function compileNgModule$1(type, ngModule) {
                 const meta = {
                     type: wrap(type),
                     bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$3).map(wrap),
-                    declarations: declarations.map(wrap),
-                    imports: flatten$1(ngModule.imports || EMPTY_ARRAY$3).map(expandModuleWithProviders).map(wrap),
-                    exports: flatten$1(ngModule.exports || EMPTY_ARRAY$3).map(expandModuleWithProviders).map(wrap),
+                    declarations: declarations.map(wrapReference),
+                    imports: flatten$1(ngModule.imports || EMPTY_ARRAY$3)
+                        .map(expandModuleWithProviders)
+                        .map(wrapReference),
+                    exports: flatten$1(ngModule.exports || EMPTY_ARRAY$3)
+                        .map(expandModuleWithProviders)
+                        .map(wrapReference),
                     emitInline: true,
                 };
                 const res = compileNgModule(meta);
@@ -14074,6 +14078,10 @@ function expandModuleWithProviders(value) {
 }
 function wrap(value) {
     return new WrappedNodeExpr(value);
+}
+function wrapReference(value) {
+    const wrapped = wrap(value);
+    return { value: wrapped, type: wrapped };
 }
 function isModuleWithProviders(value) {
     return value.ngModule !== undefined;
@@ -14641,7 +14649,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.0');
+const VERSION = new Version('6.1.0+13.sha-601064e');
 
 /**
  * @license
