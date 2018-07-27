@@ -1,10 +1,10 @@
 /**
- * @license Angular v6.1.0+15.sha-70174d1
+ * @license Angular v6.1.0+28.sha-dad1d3d
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __decorate, __metadata, __assign, __param, __extends, __spread, __read, __values } from 'tslib';
+import { __decorate, __param, __metadata, __assign, __extends, __spread, __read, __values } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { share } from 'rxjs/operators';
 import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compileInjectable, compilePipeFromMetadata } from '@angular/compiler';
@@ -14331,9 +14331,13 @@ function compileNgModule$1(type, ngModule) {
                 var meta = {
                     type: wrap(type),
                     bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$3).map(wrap),
-                    declarations: declarations.map(wrap),
-                    imports: flatten$1(ngModule.imports || EMPTY_ARRAY$3).map(expandModuleWithProviders).map(wrap),
-                    exports: flatten$1(ngModule.exports || EMPTY_ARRAY$3).map(expandModuleWithProviders).map(wrap),
+                    declarations: declarations.map(wrapReference),
+                    imports: flatten$1(ngModule.imports || EMPTY_ARRAY$3)
+                        .map(expandModuleWithProviders)
+                        .map(wrapReference),
+                    exports: flatten$1(ngModule.exports || EMPTY_ARRAY$3)
+                        .map(expandModuleWithProviders)
+                        .map(wrapReference),
                     emitInline: true,
                 };
                 var res = compileNgModule(meta);
@@ -14485,6 +14489,10 @@ function expandModuleWithProviders(value) {
 }
 function wrap(value) {
     return new WrappedNodeExpr(value);
+}
+function wrapReference(value) {
+    var wrapped = wrap(value);
+    return { value: wrapped, type: wrapped };
 }
 function isModuleWithProviders(value) {
     return value.ngModule !== undefined;
@@ -15065,7 +15073,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0+15.sha-70174d1');
+var VERSION = new Version('6.1.0+28.sha-dad1d3d');
 
 /**
  * @license
