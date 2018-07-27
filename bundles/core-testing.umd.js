@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0+17.sha-e8d4211
+ * @license Angular v6.1.0+18.sha-3426784
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1396,12 +1396,9 @@
             ensureDocument();
             if (typeof blockFn === 'function') {
                 document.body.innerHTML = html;
-                // TODO(i): I'm not sure why a cast is required here but otherwise I get
-                //   TS2349: Cannot invoke an expression whose type lacks a call signature. Type 'never' has
-                //   no compatible call signatures.
                 var blockReturn = blockFn();
                 if (blockReturn instanceof Promise) {
-                    blockReturn = blockReturn.then(done, done.fail);
+                    blockReturn.then(done, done.fail);
                 }
                 else {
                     done();
