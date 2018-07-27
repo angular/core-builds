@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0+5.sha-f2bf828
+ * @license Angular v6.1.0+1.sha-514d03f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -614,12 +614,9 @@
     ***************************************************************************** */
     /* global Reflect, Promise */
 
-    var extendStatics = function(d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
 
     function __extends(d, b) {
         extendStatics(d, b);
