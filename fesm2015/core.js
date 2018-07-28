@@ -1,10 +1,10 @@
 /**
- * @license Angular v6.1.0+41.sha-f82b6b2
+ * @license Angular v6.1.0+43.sha-6a797d5
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __decorate, __metadata, __param } from 'tslib';
+import { __decorate, __param, __metadata } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { share } from 'rxjs/operators';
 import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compileInjectable, compilePipeFromMetadata } from '@angular/compiler';
@@ -3256,7 +3256,6 @@ function elementStart(index, name, attrs, localRefs) {
     }
     appendChild(getParentLNode(node), native, viewData);
     createDirectivesAndLocals(localRefs);
-    return native;
 }
 /**
  * Creates a native element from a tag name, using a renderer.
@@ -14979,7 +14978,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.0+41.sha-f82b6b2');
+const VERSION = new Version('6.1.0+43.sha-6a797d5');
 
 /**
  * @license
