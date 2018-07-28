@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0+41.sha-f82b6b2
+ * @license Angular v6.1.0+43.sha-6a797d5
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -3255,7 +3255,6 @@ function elementStart(index, name, attrs, localRefs) {
     }
     appendChild(getParentLNode(node), native, viewData);
     createDirectivesAndLocals(localRefs);
-    return native;
 }
 /**
  * Creates a native element from a tag name, using a renderer.
@@ -14916,7 +14915,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.0+41.sha-f82b6b2');
+const VERSION = new Version('6.1.0+43.sha-6a797d5');
 
 /**
  * @license

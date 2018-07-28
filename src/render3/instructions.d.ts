@@ -154,7 +154,7 @@ export declare function element(index: number, name: string, attrs?: TAttributes
  * hold an attribute name and elements with an odd index hold an attribute value, ex.:
  * ['id', 'warning5', 'class', 'alert']
  */
-export declare function elementStart(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): RElement;
+export declare function elementStart(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
 /**
  * Creates a native element from a tag name, using a renderer.
  * @param name the tag name
