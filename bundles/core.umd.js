@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0+44.sha-9a6d26e
+ * @license Angular v6.1.0+47.sha-2ef777b
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1700,7 +1700,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('6.1.0+44.sha-9a6d26e');
+    var VERSION = new Version('6.1.0+47.sha-2ef777b');
 
     /**
      * @license
@@ -11678,7 +11678,7 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /** Size of LViewData's header. Necessary to adjust for it when setting slots.  */
-    var HEADER_OFFSET = 16;
+    var HEADER_OFFSET = 17;
     // Below are constants for LViewData indices to help us look up LViewData members
     // without having to remember the specific indices.
     // Uglify will inline these when minifying so there shouldn't be a cost.
@@ -11698,6 +11698,7 @@
     var TAIL = 13;
     var CONTAINER_INDEX = 14;
     var CONTENT_QUERIES = 15;
+    var DECLARATION_VIEW = 16;
 
     /**
      * @license
@@ -13462,6 +13463,13 @@
      */
     var viewData;
     /**
+     * The last viewData retrieved by nextContext().
+     * Allows building nextContext() and reference() calls.
+     *
+     * e.g. const inner = x().$implicit; const outer = x().$implicit;
+     */
+    var contextViewData = null;
+    /**
      * An array of directive instances in the current view.
      *
      * These must be stored separately from LNodes because their presence is
@@ -13506,7 +13514,7 @@
             previousOrParentNode = host;
             isParent = true;
         }
-        viewData = newView;
+        viewData = contextViewData = newView;
         currentQueries = newView && newView[QUERIES];
         return oldView;
     }
@@ -13533,11 +13541,12 @@
     /**
      * Refreshes the view, executing the following steps in that order:
      * triggers init hooks, refreshes dynamic embedded views, triggers content hooks, sets host
-     * bindings,
-     * refreshes child components.
+     * bindings, refreshes child components.
      * Note: view hooks are triggered later when leaving the view.
      */
-    function refreshView() {
+    function refreshDescendantViews() {
+        // This needs to be set before children are processed to support recursive components
+        tView.firstTemplatePass = firstTemplatePass = false;
         if (!checkNoChangesMode) {
             executeInitHooks(viewData, tView, creationMode);
         }
@@ -13545,8 +13554,6 @@
         if (!checkNoChangesMode) {
             executeHooks(directives, tView.contentHooks, tView.contentCheckHooks, creationMode);
         }
-        // This needs to be set before children are processed to support recursive components
-        tView.firstTemplatePass = firstTemplatePass = false;
         setHostBindings(tView.hostBindings);
         refreshContentQueries(tView);
         refreshChildComponents(tView.components);
@@ -13575,8 +13582,8 @@
     /** Refreshes child components in the current view. */
     function refreshChildComponents(components) {
         if (components != null) {
-            for (var i = 0; i < components.length; i += 2) {
-                componentRefresh(components[i], components[i + 1]);
+            for (var i = 0; i < components.length; i++) {
+                componentRefresh(components[i]);
             }
         }
     }
@@ -13604,6 +13611,7 @@
             null,
             -1,
             null,
+            null // declarationView
         ];
     }
     /**
@@ -13693,12 +13701,13 @@
      * either through ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
      * Such lViewNode will then be renderer with renderEmbeddedTemplate() (see below).
      */
-    function createEmbeddedViewNode(tView, context, renderer, queries) {
+    function createEmbeddedViewNode(tView, context, declarationView, renderer, queries) {
         var _isParent = isParent;
         var _previousOrParentNode = previousOrParentNode;
         isParent = true;
         previousOrParentNode = null;
         var lView = createLViewData(renderer, tView, context, 2 /* CheckAlways */, getCurrentSanitizer());
+        lView[DECLARATION_VIEW] = declarationView;
         if (queries) {
             lView[QUERIES] = queries.createView();
         }
@@ -13733,7 +13742,7 @@
                 namespaceHTML();
                 tView.template(rf, context);
                 if (rf & 2 /* Update */) {
-                    refreshView();
+                    refreshDescendantViews();
                 }
                 else {
                     viewNode.data[TVIEW].firstTemplatePass = firstTemplatePass = false;
@@ -13750,6 +13759,21 @@
         }
         return viewNode;
     }
+    /**
+     * Retrieves a context at the level specified and saves it as the global, contextViewData.
+     * Will get the next level up if level is not specified.
+     *
+     * This is used to save contexts of parent views so they can be bound in embedded views, or
+     * in conjunction with reference() to bind a ref from a parent view.
+     *
+     * @param level The relative level of the view from which to grab context compared to contextVewData
+     * @returns context
+     */
+    function nextContext(level) {
+        if (level === void 0) { level = 1; }
+        contextViewData = walkUpViews(level, contextViewData);
+        return contextViewData[CONTEXT];
+    }
     function renderComponentOrTemplate(node, hostView, componentOrContext, template) {
         var oldView = enterView(hostView, node);
         try {
@@ -13759,14 +13783,14 @@
             if (template) {
                 namespaceHTML();
                 template(getRenderFlags(hostView), componentOrContext);
-                refreshView();
+                refreshDescendantViews();
             }
             else {
                 executeInitAndContentHooks();
                 // Element was stored at 0 in data and directive was stored at 0 in directives
                 // in renderComponent()
                 setHostBindings(_ROOT_DIRECTIVE_INDICES);
-                componentRefresh(0, HEADER_OFFSET);
+                componentRefresh(HEADER_OFFSET);
             }
         }
         finally {
@@ -13936,9 +13960,9 @@
         return null;
     }
     /** Stores index of component's host element so it will be queued for view refresh during CD. */
-    function queueComponentIndexForCheck(dirIndex) {
+    function queueComponentIndexForCheck() {
         if (firstTemplatePass) {
-            (tView.components || (tView.components = [])).push(dirIndex, viewData.length - 1);
+            (tView.components || (tView.components = [])).push(viewData.length - 1);
         }
     }
     /** Stores index of directive and host element so it will be queued for binding refresh during CD.
@@ -14624,14 +14648,14 @@
         var tView = getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs, def.viewQuery);
         // Only component views should be added to the view tree directly. Embedded views are
         // accessed through their containers because they may be removed / re-added later.
-        var componentView = addToViewTree(viewData, previousOrParentNode.tNode.index, createLViewData(rendererFactory.createRenderer(previousOrParentNode.native, def.rendererType), tView, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, getCurrentSanitizer()));
+        var componentView = addToViewTree(viewData, previousOrParentNode.tNode.index, createLViewData(rendererFactory.createRenderer(previousOrParentNode.native, def.rendererType), tView, instance, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, getCurrentSanitizer()));
         // We need to set the host node/data here because when the component LNode was created,
         // we didn't yet know it was a component (just an element).
         previousOrParentNode.data = componentView;
         componentView[HOST_NODE] = previousOrParentNode;
         initChangeDetectorIfExisting(previousOrParentNode.nodeInjector, instance, componentView);
         if (firstTemplatePass)
-            queueComponentIndexForCheck(directiveIndex);
+            queueComponentIndexForCheck();
     }
     /**
      * A lighter version of directiveCreate() that is used for the root component
@@ -14945,7 +14969,7 @@
     }
     /** Marks the end of an embedded view. */
     function embeddedViewEnd() {
-        refreshView();
+        refreshDescendantViews();
         isParent = false;
         previousOrParentNode = viewData[HOST_NODE];
         leaveView(viewData[PARENT]);
@@ -14956,10 +14980,9 @@
     /**
      * Refreshes components by entering the component view and processing its bindings, queries, etc.
      *
-     * @param directiveIndex Directive index in LViewData[DIRECTIVES]
      * @param adjustedElementIndex  Element index in LViewData[] (adjusted for HEADER_OFFSET)
      */
-    function componentRefresh(directiveIndex, adjustedElementIndex) {
+    function componentRefresh(adjustedElementIndex) {
         ngDevMode && assertDataInRange(adjustedElementIndex);
         var element = viewData[adjustedElementIndex];
         ngDevMode && assertNodeType(element, 3 /* Element */);
@@ -14968,8 +14991,7 @@
         var hostView = element.data;
         // Only attached CheckAlways components or attached, dirty OnPush components should be checked
         if (viewAttached(hostView) && hostView[FLAGS] & (2 /* CheckAlways */ | 4 /* Dirty */)) {
-            ngDevMode && assertDataInRange(directiveIndex, directives);
-            detectChangesInternal(hostView, element, directives[directiveIndex]);
+            detectChangesInternal(hostView, element, hostView[CONTEXT]);
         }
     }
     /** Returns a boolean for whether the view is attached */
@@ -15241,7 +15263,7 @@
             namespaceHTML();
             createViewQuery(viewQuery, hostView[FLAGS], component);
             template(getRenderFlags(hostView), component);
-            refreshView();
+            refreshDescendantViews();
             updateViewQuery(viewQuery, component);
         }
         finally {
@@ -15456,6 +15478,25 @@
         }
         viewData[adjustedIndex] = value;
     }
+    /**
+     * Retrieves a local reference from the current contextViewData.
+     *
+     * If the reference to retrieve is in a parent view, this instruction is used in conjunction
+     * with a nextContext() call, which walks up the tree and updates the contextViewData instance.
+     *
+     * @param index The index of the local ref in contextViewData.
+     */
+    function reference(index) {
+        return loadInternal(index, contextViewData);
+    }
+    function walkUpViews(nestingLevel, currentView) {
+        while (nestingLevel > 0) {
+            ngDevMode && assertDefined(currentView[DECLARATION_VIEW], 'Declaration view should be defined if nesting level is greater than 0.');
+            currentView = currentView[DECLARATION_VIEW];
+            nestingLevel--;
+        }
+        return currentView;
+    }
     /** Retrieves a value from the `directives` array. */
     function loadDirective(index) {
         ngDevMode && assertDefined(directives, 'Directives array should be defined if reading a dir.');
@@ -15615,6 +15656,7 @@
             elementNode = hostElement(componentTag, hostNode, componentDef, sanitizer);
             // Create directive instance with factory() and store at index 0 in directives array
             rootContext.components.push(component = baseDirectiveCreate(0, componentDef.factory(), componentDef));
+            elementNode.data[CONTEXT] = component;
             initChangeDetectorIfExisting(elementNode.nodeInjector, component, elementNode.data);
             opts.hostFeatures && opts.hostFeatures.forEach(function (feature) { return feature(component, componentDef); });
             executeInitAndContentHooks();
@@ -16413,6 +16455,7 @@
                 // Create directive instance with factory() and store at index 0 in directives array
                 rootContext.components.push(component = baseDirectiveCreate(0, this.componentDef.factory(), this.componentDef));
                 initChangeDetectorIfExisting(elementNode.nodeInjector, component, elementNode.data);
+                elementNode.data[CONTEXT] = component;
                 // TODO: should LifecycleHooksFeature and other host features be generated by the compiler and
                 // executed here?
                 // Angular 5 reference: https://stackblitz.com/edit/lifecycle-hooks-vcref
@@ -17070,19 +17113,20 @@
             var hostNode = di.node;
             var hostTNode = hostNode.tNode;
             ngDevMode && assertDefined(hostTNode.tViews, 'TView must be allocated');
-            di.templateRef = new TemplateRef$1(getOrCreateElementRef(di), hostTNode.tViews, getRenderer(), hostNode.data[QUERIES]);
+            di.templateRef = new TemplateRef$1(hostNode.view, getOrCreateElementRef(di), hostTNode.tViews, getRenderer(), hostNode.data[QUERIES]);
         }
         return di.templateRef;
     }
     var TemplateRef$1 = /** @class */ (function () {
-        function TemplateRef$$1(elementRef, _tView, _renderer, _queries) {
+        function TemplateRef$$1(_declarationParentView, elementRef, _tView, _renderer, _queries) {
+            this._declarationParentView = _declarationParentView;
             this._tView = _tView;
             this._renderer = _renderer;
             this._queries = _queries;
             this.elementRef = elementRef;
         }
         TemplateRef$$1.prototype.createEmbeddedView = function (context, containerNode, index) {
-            var viewNode = createEmbeddedViewNode(this._tView, context, this._renderer, this._queries);
+            var viewNode = createEmbeddedViewNode(this._tView, context, this._declarationParentView, this._renderer, this._queries);
             if (containerNode) {
                 insertView(containerNode, viewNode, index);
             }
@@ -18913,6 +18957,7 @@
     exports.ɵNgModuleFactory = NgModuleFactory$1;
     exports.ɵNC = NO_CHANGE;
     exports.ɵC = container;
+    exports.ɵx = nextContext;
     exports.ɵE = elementStart;
     exports.ɵNH = namespaceHTML;
     exports.ɵNM = namespaceMathML;
@@ -18957,6 +19002,7 @@
     exports.ɵe = elementEnd;
     exports.ɵp = elementProperty;
     exports.ɵpD = projectionDef;
+    exports.ɵr = reference;
     exports.ɵrS = reserveSlots;
     exports.ɵa = elementAttribute;
     exports.ɵs = elementStyling;
