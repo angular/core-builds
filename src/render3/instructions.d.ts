@@ -117,7 +117,7 @@ export declare function renderTemplate<T>(hostNode: RElement, template: Componen
  * either through ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
  * Such lViewNode will then be renderer with renderEmbeddedTemplate() (see below).
  */
-export declare function createEmbeddedViewNode<T>(tView: TView, context: T, renderer: Renderer3, queries?: LQueries | null): LViewNode;
+export declare function createEmbeddedViewNode<T>(tView: TView, context: T, declarationView: LViewData, renderer: Renderer3, queries?: LQueries | null): LViewNode;
 /**
  * Used for rendering embedded views (e.g. dynamically created views)
  *
@@ -129,6 +129,17 @@ export declare function createEmbeddedViewNode<T>(tView: TView, context: T, rend
  * TView for dynamically created views on their host TNode, which only has one instance.
  */
 export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | LElementNode, tView: TView, context: T, rf: RenderFlags): LViewNode | LElementNode;
+/**
+ * Retrieves a context at the level specified and saves it as the global, contextViewData.
+ * Will get the next level up if level is not specified.
+ *
+ * This is used to save contexts of parent views so they can be bound in embedded views, or
+ * in conjunction with reference() to bind a ref from a parent view.
+ *
+ * @param level The relative level of the view from which to grab context compared to contextVewData
+ * @returns context
+ */
+export declare function nextContext(level?: number): any;
 export declare function renderComponentOrTemplate<T>(node: LElementNode, hostView: LViewData, componentOrContext: T, template?: ComponentTemplate<T>): void;
 export declare function namespaceSVG(): void;
 export declare function namespaceMathML(): void;
@@ -437,10 +448,9 @@ export declare function embeddedViewEnd(): void;
 /**
  * Refreshes components by entering the component view and processing its bindings, queries, etc.
  *
- * @param directiveIndex Directive index in LViewData[DIRECTIVES]
  * @param adjustedElementIndex  Element index in LViewData[] (adjusted for HEADER_OFFSET)
  */
-export declare function componentRefresh<T>(directiveIndex: number, adjustedElementIndex: number): void;
+export declare function componentRefresh<T>(adjustedElementIndex: number): void;
 /** Returns a boolean for whether the view is attached */
 export declare function viewAttached(view: LViewData): boolean;
 /**
@@ -652,6 +662,15 @@ export declare function interpolation7(prefix: string, v0: any, i0: string, v1: 
 export declare function interpolation8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): string | NO_CHANGE;
 /** Store a value in the `data` at a given `index`. */
 export declare function store<T>(index: number, value: T): void;
+/**
+ * Retrieves a local reference from the current contextViewData.
+ *
+ * If the reference to retrieve is in a parent view, this instruction is used in conjunction
+ * with a nextContext() call, which walks up the tree and updates the contextViewData instance.
+ *
+ * @param index The index of the local ref in contextViewData.
+ */
+export declare function reference<T>(index: number): T;
 /** Retrieves a value from the `directives` array. */
 export declare function loadDirective<T>(index: number): T;
 export declare function loadQueryList<T>(queryListIdx: number): QueryList<T>;

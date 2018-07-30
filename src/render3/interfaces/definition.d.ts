@@ -10,7 +10,7 @@ import { RendererType2 } from '../../render/api';
 import { Type } from '../../type';
 import { CssSelectorList } from './projection';
 /**
- * Definition of what a template rendering function should look like.
+ * Definition of what a template rendering function should look like for a component.
  */
 export declare type ComponentTemplate<T> = {
     (rf: RenderFlags, ctx: T): void;
