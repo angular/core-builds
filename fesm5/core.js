@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0+52.sha-e99d860
+ * @license Angular v6.1.0+54.sha-3664829
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1642,7 +1642,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0+52.sha-e99d860');
+var VERSION = new Version('6.1.0+54.sha-3664829');
 
 /**
  * @license
@@ -8731,6 +8731,7 @@ var ViewContainerRef_ = /** @class */ (function () {
         configurable: true
     });
     Object.defineProperty(ViewContainerRef_.prototype, "parentInjector", {
+        /** @deprecated No replacement */
         get: function () {
             var view = this._view;
             var elDef = this._elDef.parent;
@@ -13586,7 +13587,7 @@ function createLViewData(renderer, tView, context, flags, sanitizer) {
         null,
         null,
         context,
-        viewData && viewData[INJECTOR$1],
+        viewData ? viewData[INJECTOR$1] : null,
         renderer,
         sanitizer || null,
         null,
@@ -16989,19 +16990,66 @@ function getOrCreateContainerRef(di) {
         lContainerNode.tNode = hostTNode.dynamicContainerNode;
         vcRefHost.dynamicLContainerNode = lContainerNode;
         addToViewTree(vcRefHost.view, hostTNode.index, lContainer);
-        di.viewContainerRef = new ViewContainerRef$1(lContainerNode);
+        di.viewContainerRef = new ViewContainerRef$1(lContainerNode, vcRefHost);
     }
     return di.viewContainerRef;
 }
+var NodeInjector = /** @class */ (function () {
+    function NodeInjector(_lInjector) {
+        this._lInjector = _lInjector;
+    }
+    NodeInjector.prototype.get = function (token) {
+        if (token === TemplateRef) {
+            return getOrCreateTemplateRef(this._lInjector);
+        }
+        if (token === ViewContainerRef) {
+            return getOrCreateContainerRef(this._lInjector);
+        }
+        if (token === ElementRef) {
+            return getOrCreateElementRef(this._lInjector);
+        }
+        if (token === ChangeDetectorRef) {
+            return getOrCreateChangeDetectorRef(this._lInjector, null);
+        }
+        return getOrCreateInjectable(this._lInjector, token);
+    };
+    return NodeInjector;
+}());
 /**
  * A ref to a container that enables adding and removing views from that container
  * imperatively.
  */
 var ViewContainerRef$1 = /** @class */ (function () {
-    function ViewContainerRef$$1(_lContainerNode) {
+    function ViewContainerRef$$1(_lContainerNode, _hostNode) {
         this._lContainerNode = _lContainerNode;
+        this._hostNode = _hostNode;
         this._viewRefs = [];
     }
+    Object.defineProperty(ViewContainerRef$$1.prototype, "element", {
+        get: function () {
+            var injector = getOrCreateNodeInjectorForNode(this._hostNode);
+            return getOrCreateElementRef(injector);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ViewContainerRef$$1.prototype, "injector", {
+        get: function () {
+            var injector = getOrCreateNodeInjectorForNode(this._hostNode);
+            return new NodeInjector(injector);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ViewContainerRef$$1.prototype, "parentInjector", {
+        /** @deprecated No replacement */
+        get: function () {
+            var parentLInjector = getParentLNode(this._hostNode).nodeInjector;
+            return parentLInjector ? new NodeInjector(parentLInjector) : new NullInjector();
+        },
+        enumerable: true,
+        configurable: true
+    });
     ViewContainerRef$$1.prototype.clear = function () {
         var lContainer = this._lContainerNode.data;
         while (lContainer[VIEWS].length) {
@@ -17028,7 +17076,7 @@ var ViewContainerRef$1 = /** @class */ (function () {
     ViewContainerRef$$1.prototype.createComponent = function (componentFactory, index, injector, projectableNodes, ngModuleRef) {
         var contextInjector = injector || this.parentInjector;
         if (!ngModuleRef && contextInjector) {
-            ngModuleRef = contextInjector.get(NgModuleRef);
+            ngModuleRef = contextInjector.get(NgModuleRef, null);
         }
         var componentRef = componentFactory.create(contextInjector, projectableNodes, undefined, ngModuleRef);
         this.insert(componentRef.hostView, index);

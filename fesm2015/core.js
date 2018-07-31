@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0+52.sha-e99d860
+ * @license Angular v6.1.0+54.sha-3664829
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1951,7 +1951,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('6.1.0+52.sha-e99d860');
+const VERSION = new Version('6.1.0+54.sha-3664829');
 
 /**
  * @fileoverview added by tsickle
@@ -10785,6 +10785,7 @@ class ViewContainerRef_ {
      */
     get injector() { return new Injector_(this._view, this._elDef); }
     /**
+     * @deprecated No replacement
      * @return {?}
      */
     get parentInjector() {
@@ -17447,7 +17448,7 @@ function createLViewData(renderer, tView, context, flags, sanitizer) {
         null,
         context,
         // context
-        viewData && viewData[INJECTOR$1],
+        viewData ? viewData[INJECTOR$1] : null,
         renderer,
         // renderer
         sanitizer || null,
@@ -21609,9 +21610,36 @@ function getOrCreateContainerRef(di) {
         lContainerNode.tNode = hostTNode.dynamicContainerNode;
         vcRefHost.dynamicLContainerNode = lContainerNode;
         addToViewTree(vcRefHost.view, /** @type {?} */ (hostTNode.index), lContainer);
-        di.viewContainerRef = new ViewContainerRef$1(lContainerNode);
+        di.viewContainerRef = new ViewContainerRef$1(lContainerNode, vcRefHost);
     }
     return di.viewContainerRef;
+}
+class NodeInjector {
+    /**
+     * @param {?} _lInjector
+     */
+    constructor(_lInjector) {
+        this._lInjector = _lInjector;
+    }
+    /**
+     * @param {?} token
+     * @return {?}
+     */
+    get(token) {
+        if (token === TemplateRef) {
+            return getOrCreateTemplateRef(this._lInjector);
+        }
+        if (token === ViewContainerRef) {
+            return getOrCreateContainerRef(this._lInjector);
+        }
+        if (token === ElementRef) {
+            return getOrCreateElementRef(this._lInjector);
+        }
+        if (token === ChangeDetectorRef) {
+            return getOrCreateChangeDetectorRef(this._lInjector, null);
+        }
+        return getOrCreateInjectable(this._lInjector, token);
+    }
 }
 /**
  * A ref to a container that enables adding and removing views from that container
@@ -21620,10 +21648,37 @@ function getOrCreateContainerRef(di) {
 class ViewContainerRef$1 {
     /**
      * @param {?} _lContainerNode
+     * @param {?} _hostNode
      */
-    constructor(_lContainerNode) {
+    constructor(_lContainerNode, _hostNode) {
         this._lContainerNode = _lContainerNode;
+        this._hostNode = _hostNode;
         this._viewRefs = [];
+    }
+    /**
+     * @return {?}
+     */
+    get element() {
+        /** @type {?} */
+        const injector = getOrCreateNodeInjectorForNode(this._hostNode);
+        return getOrCreateElementRef(injector);
+    }
+    /**
+     * @return {?}
+     */
+    get injector() {
+        /** @type {?} */
+        const injector = getOrCreateNodeInjectorForNode(this._hostNode);
+        return new NodeInjector(injector);
+    }
+    /**
+     * @deprecated No replacement
+     * @return {?}
+     */
+    get parentInjector() {
+        /** @type {?} */
+        const parentLInjector = getParentLNode(this._hostNode).nodeInjector;
+        return parentLInjector ? new NodeInjector(parentLInjector) : new NullInjector();
     }
     /**
      * @return {?}
@@ -21678,7 +21733,7 @@ class ViewContainerRef$1 {
         /** @type {?} */
         const contextInjector = injector || this.parentInjector;
         if (!ngModuleRef && contextInjector) {
-            ngModuleRef = contextInjector.get(NgModuleRef);
+            ngModuleRef = contextInjector.get(NgModuleRef, null);
         }
         /** @type {?} */
         const componentRef = componentFactory.create(contextInjector, projectableNodes, undefined, ngModuleRef);

@@ -36,6 +36,7 @@ export declare abstract class ViewContainerRef {
      */
     abstract readonly element: ElementRef;
     abstract readonly injector: Injector;
+    /** @deprecated No replacement */
     abstract readonly parentInjector: Injector;
     /**
      * Destroys all Views in this container.
