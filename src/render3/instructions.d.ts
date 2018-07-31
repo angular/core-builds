@@ -558,12 +558,28 @@ export declare function getRootView(component: any): LViewData;
  */
 export declare function detectChanges<T>(component: T): void;
 /**
+ * Synchronously perform change detection on a root view and its components.
+ *
+ * @param lViewData The view which the change detection should be performed on.
+ */
+export declare function detectChangesInRootView(lViewData: LViewData): void;
+/**
  * Checks the change detector and its children, and throws if any changes are detected.
  *
  * This is used in development mode to verify that running change detection doesn't
  * introduce other changes.
  */
 export declare function checkNoChanges<T>(component: T): void;
+/**
+ * Checks the change detector on a root view and its components, and throws if any changes are
+ * detected.
+ *
+ * This is used in development mode to verify that running change detection doesn't
+ * introduce other changes.
+ *
+ * @param lViewData The view which the change detection should be checked on.
+ */
+export declare function checkNoChangesInRootView(lViewData: LViewData): void;
 /** Checks the view of the component provided. Does not gate on dirty checks or execute doCheck. */
 export declare function detectChangesInternal<T>(hostView: LViewData, hostNode: LElementNode, component: T): void;
 /**
