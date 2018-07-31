@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0+54.sha-3664829
+ * @license Angular v6.1.0+56.sha-3f20a2f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -4770,6 +4770,14 @@
         detectChangesInternal(hostNode.data, hostNode, component);
     }
     /**
+     * Synchronously perform change detection on a root view and its components.
+     *
+     * @param lViewData The view which the change detection should be performed on.
+     */
+    function detectChangesInRootView(lViewData) {
+        tickRootContext(lViewData[CONTEXT]);
+    }
+    /**
      * Checks the change detector and its children, and throws if any changes are detected.
      *
      * This is used in development mode to verify that running change detection doesn't
@@ -4779,6 +4787,24 @@
         checkNoChangesMode = true;
         try {
             detectChanges(component);
+        }
+        finally {
+            checkNoChangesMode = false;
+        }
+    }
+    /**
+     * Checks the change detector on a root view and its components, and throws if any changes are
+     * detected.
+     *
+     * This is used in development mode to verify that running change detection doesn't
+     * introduce other changes.
+     *
+     * @param lViewData The view which the change detection should be checked on.
+     */
+    function checkNoChangesInRootView(lViewData) {
+        checkNoChangesMode = true;
+        try {
+            detectChangesInRootView(lViewData);
         }
         finally {
             checkNoChangesMode = false;
@@ -10176,6 +10202,18 @@
         ViewRef.prototype.attachToAppRef = function (appRef) { this._appRef = appRef; };
         return ViewRef;
     }());
+    /** @internal */
+    var RootViewRef = /** @class */ (function (_super) {
+        __extends(RootViewRef, _super);
+        function RootViewRef(_view) {
+            var _this = _super.call(this, _view, null) || this;
+            _this._view = _view;
+            return _this;
+        }
+        RootViewRef.prototype.detectChanges = function () { detectChangesInRootView(this._view); };
+        RootViewRef.prototype.checkNoChanges = function () { checkNoChangesInRootView(this._view); };
+        return RootViewRef;
+    }(ViewRef$1));
 
     /**
      * @license
@@ -10327,16 +10365,7 @@
             var _this = _super.call(this) || this;
             _this.destroyCbs = [];
             _this.instance = instance;
-            /* TODO(jasonaden): This is incomplete, to be adjusted in follow-up PR. Notes from Kara:When
-             * ViewRef.detectChanges is called from ApplicationRef.tick, it will call detectChanges at the
-             * component instance level. I suspect this means that lifecycle hooks and host bindings on the
-             * given component won't work (as these are always called at the level above a component).
-             *
-             * In render2, ViewRef.detectChanges uses the root view instance for view checks, not the
-             * component instance. So passing in the root view (1 level above the component) is sufficient.
-             * We might  want to think about creating a fake component for the top level? Or overwrite
-             * detectChanges with a function that calls tickRootContext? */
-            _this.hostView = _this.changeDetectorRef = new ViewRef$1(rootView, instance);
+            _this.hostView = _this.changeDetectorRef = new RootViewRef(rootView);
             _this.hostView._lViewNode = createLNode(-1, 2 /* View */, null, null, null, rootView);
             _this.injector = injector;
             _this.location = new ElementRef(hostNode);
@@ -15441,7 +15470,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('6.1.0+54.sha-3664829');
+    var VERSION = new Version('6.1.0+56.sha-3f20a2f');
 
     /**
      * @license
