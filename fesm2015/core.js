@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0+52.sha-e99d860
+ * @license Angular v6.1.0+54.sha-3664829
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -3018,7 +3018,7 @@ function createLViewData(renderer, tView, context, flags, sanitizer) {
         null,
         null,
         context,
-        viewData && viewData[INJECTOR$1],
+        viewData ? viewData[INJECTOR$1] : null,
         renderer,
         sanitizer || null,
         null,
@@ -10494,18 +10494,52 @@ function getOrCreateContainerRef(di) {
         lContainerNode.tNode = hostTNode.dynamicContainerNode;
         vcRefHost.dynamicLContainerNode = lContainerNode;
         addToViewTree(vcRefHost.view, hostTNode.index, lContainer);
-        di.viewContainerRef = new ViewContainerRef$1(lContainerNode);
+        di.viewContainerRef = new ViewContainerRef$1(lContainerNode, vcRefHost);
     }
     return di.viewContainerRef;
+}
+class NodeInjector {
+    constructor(_lInjector) {
+        this._lInjector = _lInjector;
+    }
+    get(token) {
+        if (token === TemplateRef) {
+            return getOrCreateTemplateRef(this._lInjector);
+        }
+        if (token === ViewContainerRef) {
+            return getOrCreateContainerRef(this._lInjector);
+        }
+        if (token === ElementRef) {
+            return getOrCreateElementRef(this._lInjector);
+        }
+        if (token === ChangeDetectorRef) {
+            return getOrCreateChangeDetectorRef(this._lInjector, null);
+        }
+        return getOrCreateInjectable(this._lInjector, token);
+    }
 }
 /**
  * A ref to a container that enables adding and removing views from that container
  * imperatively.
  */
 class ViewContainerRef$1 {
-    constructor(_lContainerNode) {
+    constructor(_lContainerNode, _hostNode) {
         this._lContainerNode = _lContainerNode;
+        this._hostNode = _hostNode;
         this._viewRefs = [];
+    }
+    get element() {
+        const injector = getOrCreateNodeInjectorForNode(this._hostNode);
+        return getOrCreateElementRef(injector);
+    }
+    get injector() {
+        const injector = getOrCreateNodeInjectorForNode(this._hostNode);
+        return new NodeInjector(injector);
+    }
+    /** @deprecated No replacement */
+    get parentInjector() {
+        const parentLInjector = getParentLNode(this._hostNode).nodeInjector;
+        return parentLInjector ? new NodeInjector(parentLInjector) : new NullInjector();
     }
     clear() {
         const lContainer = this._lContainerNode.data;
@@ -10529,7 +10563,7 @@ class ViewContainerRef$1 {
     createComponent(componentFactory, index, injector, projectableNodes, ngModuleRef) {
         const contextInjector = injector || this.parentInjector;
         if (!ngModuleRef && contextInjector) {
-            ngModuleRef = contextInjector.get(NgModuleRef);
+            ngModuleRef = contextInjector.get(NgModuleRef, null);
         }
         const componentRef = componentFactory.create(contextInjector, projectableNodes, undefined, ngModuleRef);
         this.insert(componentRef.hostView, index);
@@ -14960,7 +14994,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.0+52.sha-e99d860');
+const VERSION = new Version('6.1.0+54.sha-3664829');
 
 /**
  * @license
@@ -16016,6 +16050,7 @@ class ViewContainerRef_ {
     }
     get element() { return new ElementRef(this._data.renderElement); }
     get injector() { return new Injector_(this._view, this._elDef); }
+    /** @deprecated No replacement */
     get parentInjector() {
         let view = this._view;
         let elDef = this._elDef.parent;
