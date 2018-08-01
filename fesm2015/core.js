@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0+62.sha-aafd502
+ * @license Angular v6.1.0+64.sha-64516da
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -143,14 +143,15 @@ const PARAMETERS = '__parameters__';
 const PROP_METADATA = '__prop__metadata__';
 /**
  * @suppress {globalThis}
+ * @template T
  * @param {?} name
  * @param {?=} props
  * @param {?=} parentClass
- * @param {?=} chainFn
+ * @param {?=} additionalProcessing
  * @param {?=} typeFn
  * @return {?}
  */
-function makeDecorator(name, props, parentClass, chainFn, typeFn) {
+function makeDecorator(name, props, parentClass, additionalProcessing, typeFn) {
     /** @type {?} */
     const metaCtor = makeMetadataCtor(props);
     /**
@@ -164,19 +165,18 @@ function makeDecorator(name, props, parentClass, chainFn, typeFn) {
         }
         /** @type {?} */
         const annotationInstance = new (/** @type {?} */ (DecoratorFactory))(...args);
-        /** @type {?} */
-        const TypeDecorator = /** @type {?} */ (function TypeDecorator(cls) {
-            typeFn && typeFn(cls, ...args);
+        return function TypeDecorator(cls) {
+            if (typeFn)
+                typeFn(cls, ...args);
             /** @type {?} */
             const annotations = cls.hasOwnProperty(ANNOTATIONS) ?
                 (/** @type {?} */ (cls))[ANNOTATIONS] :
                 Object.defineProperty(cls, ANNOTATIONS, { value: [] })[ANNOTATIONS];
             annotations.push(annotationInstance);
+            if (additionalProcessing)
+                additionalProcessing(cls);
             return cls;
-        });
-        if (chainFn)
-            chainFn(TypeDecorator);
-        return TypeDecorator;
+        };
     }
     if (parentClass) {
         DecoratorFactory.prototype = Object.create(parentClass.prototype);
@@ -253,9 +253,10 @@ function makeParamDecorator(name, props, parentClass) {
  * @param {?} name
  * @param {?=} props
  * @param {?=} parentClass
+ * @param {?=} additionalProcessing
  * @return {?}
  */
-function makePropDecorator(name, props, parentClass) {
+function makePropDecorator(name, props, parentClass, additionalProcessing) {
     /** @type {?} */
     const metaCtor = makeMetadataCtor(props);
     /**
@@ -269,7 +270,12 @@ function makePropDecorator(name, props, parentClass) {
         }
         /** @type {?} */
         const decoratorInstance = new (/** @type {?} */ (PropDecoratorFactory))(...args);
-        return function PropDecorator(target, name) {
+        /**
+         * @param {?} target
+         * @param {?} name
+         * @return {?}
+         */
+        function PropDecorator(target, name) {
             /** @type {?} */
             const constructor = target.constructor;
             /** @type {?} */
@@ -278,7 +284,10 @@ function makePropDecorator(name, props, parentClass) {
                 Object.defineProperty(constructor, PROP_METADATA, { value: {} })[PROP_METADATA];
             meta[name] = meta.hasOwnProperty(name) && meta[name] || [];
             meta[name].unshift(decoratorInstance);
-        };
+            if (additionalProcessing)
+                additionalProcessing(target, name, ...args);
+        }
+        return PropDecorator;
     }
     if (parentClass) {
         PropDecoratorFactory.prototype = Object.create(parentClass.prototype);
@@ -473,6 +482,46 @@ const ivyEnabled = false;
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * @template T
+ * @param {?} objWithPropertyToExtract
+ * @param {?} target
+ * @return {?}
+ */
+function getClosureSafeProperty(objWithPropertyToExtract, target) {
+    for (let key in objWithPropertyToExtract) {
+        if (objWithPropertyToExtract[key] === target) {
+            return key;
+        }
+    }
+    throw Error('Could not find renamed property on target object.');
+}
+/**
+ * Sets properties on a target object from a source object, but only if
+ * the property doesn't already exist on the target object.
+ * @param {?} target The target to set properties on
+ * @param {?} source The source of the property keys and values to set
+ * @return {?}
+ */
+function fillProperties(target, source) {
+    for (const key in source) {
+        if (source.hasOwnProperty(key) && !target.hasOwnProperty(key)) {
+            target[key] = source[key];
+        }
+    }
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
 /** *
  * Type of the Directive metadata.
   @type {?} */
@@ -572,16 +621,50 @@ const Component = makeDecorator('Component', (c = {}) => (Object.assign({ change
  * \@Annotation
   @type {?} */
 const Pipe = makeDecorator('Pipe', (p) => (Object.assign({ pure: true }, p)), undefined, undefined, (type, meta) => (() => { })(type, meta));
+/** @type {?} */
+const initializeBaseDef = (target) => {
+    /** @type {?} */
+    const constructor = target.constructor;
+    /** @type {?} */
+    const inheritedBaseDef = constructor.ngBaseDef;
+    /** @type {?} */
+    const baseDef = constructor.ngBaseDef = {
+        inputs: {},
+        outputs: {},
+        declaredInputs: {},
+    };
+    if (inheritedBaseDef) {
+        fillProperties(baseDef.inputs, inheritedBaseDef.inputs);
+        fillProperties(baseDef.outputs, inheritedBaseDef.outputs);
+        fillProperties(baseDef.declaredInputs, inheritedBaseDef.declaredInputs);
+    }
+};
+/** *
+ * Does the work of creating the `ngBaseDef` property for the \@Input and \@Output decorators.
+ * \@param key "inputs" or "outputs"
+  @type {?} */
+const updateBaseDefFromIOProp = (getProp) => (target, name, ...args) => {
+    /** @type {?} */
+    const constructor = target.constructor;
+    if (!constructor.hasOwnProperty('ngBaseDef')) {
+        initializeBaseDef(target);
+    }
+    /** @type {?} */
+    const baseDef = constructor.ngBaseDef;
+    /** @type {?} */
+    const defProp = getProp(baseDef);
+    defProp[name] = args[0];
+};
 /** *
  *
  * \@Annotation
   @type {?} */
-const Input = makePropDecorator('Input', (bindingPropertyName) => ({ bindingPropertyName }));
+const Input = makePropDecorator('Input', (bindingPropertyName) => ({ bindingPropertyName }), undefined, updateBaseDefFromIOProp(baseDef => baseDef.inputs || {}));
 /** *
  *
  * \@Annotation
   @type {?} */
-const Output = makePropDecorator('Output', (bindingPropertyName) => ({ bindingPropertyName }));
+const Output = makePropDecorator('Output', (bindingPropertyName) => ({ bindingPropertyName }), undefined, updateBaseDefFromIOProp(baseDef => baseDef.outputs || {}));
 /** *
  *
  * \@Annotation
@@ -1086,32 +1169,6 @@ function getParentCtor(ctor) {
     // Note: We always use `Object` as the null value
     // to simplify checking later on.
     return parentCtor || Object;
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * @template T
- * @param {?} objWithPropertyToExtract
- * @param {?} target
- * @return {?}
- */
-function getClosureSafeProperty(objWithPropertyToExtract, target) {
-    for (let key in objWithPropertyToExtract) {
-        if (objWithPropertyToExtract[key] === target) {
-            return key;
-        }
-    }
-    throw Error('Could not find renamed property on target object.');
 }
 
 /**
@@ -1732,9 +1789,9 @@ function injectArgs(types) {
  */
 /** @type {?} */
 const GET_PROPERTY_NAME$1 = /** @type {?} */ ({});
-const ɵ0$1 = GET_PROPERTY_NAME$1;
+const ɵ0$2 = GET_PROPERTY_NAME$1;
 /** @type {?} */
-const USE_VALUE$1 = getClosureSafeProperty({ provide: String, useValue: ɵ0$1 }, GET_PROPERTY_NAME$1);
+const USE_VALUE$1 = getClosureSafeProperty({ provide: String, useValue: ɵ0$2 }, GET_PROPERTY_NAME$1);
 /** @type {?} */
 const EMPTY_ARRAY = [];
 /**
@@ -1951,7 +2008,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('6.1.0+62.sha-aafd502');
+const VERSION = new Version('6.1.0+64.sha-64516da');
 
 /**
  * @fileoverview added by tsickle
@@ -20416,27 +20473,6 @@ function definePipe(pipeDef) {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Sets properties on a target object from a source object, but only if
- * the property doesn't already exist on the target object.
- * @param {?} target The target to set properties on
- * @param {?} source The source of the property keys and values to set
- * @return {?}
- */
-function fillProperties(target, source) {
-    for (const key in source) {
-        if (source.hasOwnProperty(key) && !target.hasOwnProperty(key)) {
-            target[key] = source[key];
-        }
-    }
-}
-/**
  * Determines if a definition is a {\@link ComponentDefInternal} or a {\@link DirectiveDefInternal}
  * @template T
  * @param {?} definition The definition to examine
@@ -20462,9 +20498,9 @@ function getSuperType(type) {
 function InheritDefinitionFeature(definition) {
     /** @type {?} */
     let superType = getSuperType(definition.type);
-    /** @type {?} */
-    let superDef = undefined;
-    while (superType && !superDef) {
+    while (superType) {
+        /** @type {?} */
+        let superDef = undefined;
         if (isComponentDef(definition)) {
             superDef = superType.ngComponentDef || superType.ngDirectiveDef;
         }
@@ -20474,11 +20510,15 @@ function InheritDefinitionFeature(definition) {
             }
             superDef = superType.ngDirectiveDef;
         }
-        if (superDef) {
+        /** @type {?} */
+        const baseDef = (/** @type {?} */ (superType)).ngBaseDef;
+        if (baseDef) {
             // Merge inputs and outputs
-            fillProperties(definition.inputs, superDef.inputs);
-            fillProperties(definition.declaredInputs, superDef.declaredInputs);
-            fillProperties(definition.outputs, superDef.outputs);
+            fillProperties(definition.inputs, baseDef.inputs);
+            fillProperties(definition.declaredInputs, baseDef.declaredInputs);
+            fillProperties(definition.outputs, baseDef.outputs);
+        }
+        if (superDef) {
             /** @type {?} */
             const prevHostBindings = definition.hostBindings;
             /** @type {?} */
@@ -20494,6 +20534,10 @@ function InheritDefinitionFeature(definition) {
                     definition.hostBindings = superHostBindings;
                 }
             }
+            // Merge inputs and outputs
+            fillProperties(definition.inputs, superDef.inputs);
+            fillProperties(definition.declaredInputs, superDef.declaredInputs);
+            fillProperties(definition.outputs, superDef.outputs);
             // Inherit hooks
             // Assume super class inheritance feature has already run.
             definition.afterContentChecked =
@@ -20513,6 +20557,7 @@ function InheritDefinitionFeature(definition) {
                     }
                 }
             }
+            break;
         }
         else {
             /** @type {?} */

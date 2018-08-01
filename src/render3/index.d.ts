@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { LifecycleHooksFeature, getHostElement, getRenderedText, renderComponent, whenRendered } from './component';
-import { defineComponent, defineDirective, defineNgModule, definePipe } from './definition';
+import { defineBase, defineComponent, defineDirective, defineNgModule, definePipe } from './definition';
 import { InheritDefinitionFeature } from './features/inherit_definition_feature';
 import { NgOnChangesFeature } from './features/ng_onchanges_feature';
 import { PublicFeature } from './features/public_feature';
@@ -23,4 +23,4 @@ export { pipe as Pp, pipeBind1 as pb1, pipeBind2 as pb2, pipeBind3 as pb3, pipeB
 export { QueryList, query as Q, queryRefresh as qR, } from './query';
 export { registerContentQuery as Qr, loadQueryList as ql, } from './instructions';
 export { pureFunction0 as f0, pureFunction1 as f1, pureFunction2 as f2, pureFunction3 as f3, pureFunction4 as f4, pureFunction5 as f5, pureFunction6 as f6, pureFunction7 as f7, pureFunction8 as f8, pureFunctionV as fV, } from './pure_function';
-export { ComponentDef, ComponentDefInternal, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFlags, DirectiveDefInternal, DirectiveType, NgOnChangesFeature, InheritDefinitionFeature, PublicFeature, PipeDef, LifecycleHooksFeature, defineComponent, defineDirective, defineNgModule, definePipe, getHostElement, getRenderedText, renderComponent, whenRendered, };
+export { ComponentDef, ComponentDefInternal, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFlags, DirectiveDefInternal, DirectiveType, NgOnChangesFeature, InheritDefinitionFeature, PublicFeature, PipeDef, LifecycleHooksFeature, defineComponent, defineDirective, defineNgModule, defineBase, definePipe, getHostElement, getRenderedText, renderComponent, whenRendered, };
