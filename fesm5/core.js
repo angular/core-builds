@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0+33.sha-3d3a1a4
+ * @license Angular v6.1.0+37.sha-fe5e8b7
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1642,7 +1642,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0+33.sha-3d3a1a4');
+var VERSION = new Version('6.1.0+37.sha-fe5e8b7');
 
 /**
  * @license
@@ -2997,13 +2997,10 @@ function isObservable(obj) {
  */
 /**
  * A function that will be executed when an application is initialized.
- * @experimental
  */
 var APP_INITIALIZER = new InjectionToken('Application Initializer');
 /**
  * A class that reflects the state of running {@link APP_INITIALIZER}s.
- *
- * @experimental
  */
 var ApplicationInitStatus = /** @class */ (function () {
     function ApplicationInitStatus(appInits) {
