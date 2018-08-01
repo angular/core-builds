@@ -32,6 +32,9 @@ export declare const TAIL = 13;
 export declare const CONTAINER_INDEX = 14;
 export declare const CONTENT_QUERIES = 15;
 export declare const DECLARATION_VIEW = 16;
+export interface OpaqueViewState {
+    '__brand__': 'Brand for OpaqueViewState that nothing will match';
+}
 /**
  * `LViewData` stores all of the information needed to process the instructions as
  * they are invoked from the template. Each embedded view and component view has its

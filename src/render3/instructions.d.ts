@@ -16,7 +16,7 @@ import { LContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewN
 import { CssSelectorList } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
-import { CurrentMatchesList, LViewData, LViewFlags, RootContext, TView } from './interfaces/view';
+import { CurrentMatchesList, LViewData, LViewFlags, OpaqueViewState, RootContext, TView } from './interfaces/view';
 /**
  * Directive (D) sets a property on all component instances using this constant as a key and the
  * component's host node (LElement) as the value. This is used in methods like detectChanges to
@@ -36,7 +36,30 @@ export declare type SanitizerFn = (value: any) => string;
 export declare const CIRCULAR = "__CIRCULAR__";
 export declare function getRenderer(): Renderer3;
 export declare function getCurrentSanitizer(): Sanitizer | null;
-export declare function getViewData(): LViewData;
+/**
+ * Returns the current OpaqueViewState instance.
+ *
+ * Used in conjunction with the restoreView() instruction to save a snapshot
+ * of the current view and restore it when listeners are invoked. This allows
+ * walking the declaration view tree in listeners to get vars from parent views.
+ */
+export declare function getCurrentView(): OpaqueViewState;
+/**
+ * Internal function that returns the current LViewData instance.
+ *
+ * The getCurrentView() instruction should be used for anything public.
+ */
+export declare function _getViewData(): LViewData;
+/**
+ * Restores `contextViewData` to the given OpaqueViewState instance.
+ *
+ * Used in conjunction with the getCurrentView() instruction to save a snapshot
+ * of the current view and restore it when listeners are invoked. This allows
+ * walking the declaration view tree in listeners to get vars from parent views.
+ *
+ * @param viewToRestore The LViewData instance to restore.
+ */
+export declare function restoreView(viewToRestore: OpaqueViewState): void;
 export declare function getPreviousOrParentNode(): LNode;
 /**
  * Query instructions can ask for "current queries" in 2 different cases:
@@ -139,7 +162,7 @@ export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | LElement
  * @param level The relative level of the view from which to grab context compared to contextVewData
  * @returns context
  */
-export declare function nextContext(level?: number): any;
+export declare function nextContext<T = any>(level?: number): T;
 export declare function renderComponentOrTemplate<T>(node: LElementNode, hostView: LViewData, componentOrContext: T, template?: ComponentTemplate<T>): void;
 export declare function namespaceSVG(): void;
 export declare function namespaceMathML(): void;
