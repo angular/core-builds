@@ -1,10 +1,10 @@
 /**
- * @license Angular v6.1.0+77.sha-7a4fb44
+ * @license Angular v6.1.0+79.sha-af07ffc
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __decorate, __param, __metadata } from 'tslib';
+import { __decorate, __metadata, __param } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { share } from 'rxjs/operators';
 import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compileInjectable, compilePipeFromMetadata } from '@angular/compiler';
@@ -12241,13 +12241,10 @@ function isObservable(obj) {
  */
 /**
  * A function that will be executed when an application is initialized.
- * @experimental
  */
 const APP_INITIALIZER = new InjectionToken('Application Initializer');
 /**
  * A class that reflects the state of running {@link APP_INITIALIZER}s.
- *
- * @experimental
  */
 let ApplicationInitStatus = class ApplicationInitStatus {
     constructor(appInits) {
@@ -15158,7 +15155,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.0+77.sha-7a4fb44');
+const VERSION = new Version('6.1.0+79.sha-af07ffc');
 
 /**
  * @license
