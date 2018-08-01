@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0+62.sha-aafd502
+ * @license Angular v6.1.0+64.sha-64516da
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -136,7 +136,7 @@ const PROP_METADATA = '__prop__metadata__';
 /**
  * @suppress {globalThis}
  */
-function makeDecorator(name, props, parentClass, chainFn, typeFn) {
+function makeDecorator(name, props, parentClass, additionalProcessing, typeFn) {
     const metaCtor = makeMetadataCtor(props);
     function DecoratorFactory(...args) {
         if (this instanceof DecoratorFactory) {
@@ -144,19 +144,19 @@ function makeDecorator(name, props, parentClass, chainFn, typeFn) {
             return this;
         }
         const annotationInstance = new DecoratorFactory(...args);
-        const TypeDecorator = function TypeDecorator(cls) {
-            typeFn && typeFn(cls, ...args);
+        return function TypeDecorator(cls) {
+            if (typeFn)
+                typeFn(cls, ...args);
             // Use of Object.defineProperty is important since it creates non-enumerable property which
             // prevents the property is copied during subclassing.
             const annotations = cls.hasOwnProperty(ANNOTATIONS) ?
                 cls[ANNOTATIONS] :
                 Object.defineProperty(cls, ANNOTATIONS, { value: [] })[ANNOTATIONS];
             annotations.push(annotationInstance);
+            if (additionalProcessing)
+                additionalProcessing(cls);
             return cls;
         };
-        if (chainFn)
-            chainFn(TypeDecorator);
-        return TypeDecorator;
     }
     if (parentClass) {
         DecoratorFactory.prototype = Object.create(parentClass.prototype);
@@ -207,7 +207,7 @@ function makeParamDecorator(name, props, parentClass) {
     ParamDecoratorFactory.annotationCls = ParamDecoratorFactory;
     return ParamDecoratorFactory;
 }
-function makePropDecorator(name, props, parentClass) {
+function makePropDecorator(name, props, parentClass, additionalProcessing) {
     const metaCtor = makeMetadataCtor(props);
     function PropDecoratorFactory(...args) {
         if (this instanceof PropDecoratorFactory) {
@@ -215,7 +215,7 @@ function makePropDecorator(name, props, parentClass) {
             return this;
         }
         const decoratorInstance = new PropDecoratorFactory(...args);
-        return function PropDecorator(target, name) {
+        function PropDecorator(target, name) {
             const constructor = target.constructor;
             // Use of Object.defineProperty is important since it creates non-enumerable property which
             // prevents the property is copied during subclassing.
@@ -224,7 +224,10 @@ function makePropDecorator(name, props, parentClass) {
                 Object.defineProperty(constructor, PROP_METADATA, { value: {} })[PROP_METADATA];
             meta[name] = meta.hasOwnProperty(name) && meta[name] || [];
             meta[name].unshift(decoratorInstance);
-        };
+            if (additionalProcessing)
+                additionalProcessing(target, name, ...args);
+        }
+        return PropDecorator;
     }
     if (parentClass) {
         PropDecoratorFactory.prototype = Object.create(parentClass.prototype);
@@ -6520,6 +6523,19 @@ function getClosureSafeProperty$1(objWithPropertyToExtract, target) {
     }
     throw Error('Could not find renamed property on target object.');
 }
+/**
+ * Sets properties on a target object from a source object, but only if
+ * the property doesn't already exist on the target object.
+ * @param target The target to set properties on
+ * @param source The source of the property keys and values to set
+ */
+function fillProperties(target, source) {
+    for (const key in source) {
+        if (source.hasOwnProperty(key) && !target.hasOwnProperty(key)) {
+            target[key] = source[key];
+        }
+    }
+}
 
 /**
  * @license
@@ -8757,19 +8773,6 @@ function definePipe(pipeDef) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Sets properties on a target object from a source object, but only if
- * the property doesn't already exist on the target object.
- * @param target The target to set properties on
- * @param source The source of the property keys and values to set
- */
-function fillProperties(target, source) {
-    for (const key in source) {
-        if (source.hasOwnProperty(key) && !target.hasOwnProperty(key)) {
-            target[key] = source[key];
-        }
-    }
-}
-/**
  * Determines if a definition is a {@link ComponentDefInternal} or a {@link DirectiveDefInternal}
  * @param definition The definition to examine
  */
@@ -8786,8 +8789,8 @@ function getSuperType(type) {
  */
 function InheritDefinitionFeature(definition) {
     let superType = getSuperType(definition.type);
-    let superDef = undefined;
-    while (superType && !superDef) {
+    while (superType) {
+        let superDef = undefined;
         if (isComponentDef(definition)) {
             superDef = superType.ngComponentDef || superType.ngDirectiveDef;
         }
@@ -8797,11 +8800,14 @@ function InheritDefinitionFeature(definition) {
             }
             superDef = superType.ngDirectiveDef;
         }
-        if (superDef) {
+        const baseDef = superType.ngBaseDef;
+        if (baseDef) {
             // Merge inputs and outputs
-            fillProperties(definition.inputs, superDef.inputs);
-            fillProperties(definition.declaredInputs, superDef.declaredInputs);
-            fillProperties(definition.outputs, superDef.outputs);
+            fillProperties(definition.inputs, baseDef.inputs);
+            fillProperties(definition.declaredInputs, baseDef.declaredInputs);
+            fillProperties(definition.outputs, baseDef.outputs);
+        }
+        if (superDef) {
             // Merge hostBindings
             const prevHostBindings = definition.hostBindings;
             const superHostBindings = superDef.hostBindings;
@@ -8816,6 +8822,10 @@ function InheritDefinitionFeature(definition) {
                     definition.hostBindings = superHostBindings;
                 }
             }
+            // Merge inputs and outputs
+            fillProperties(definition.inputs, superDef.inputs);
+            fillProperties(definition.declaredInputs, superDef.declaredInputs);
+            fillProperties(definition.outputs, superDef.outputs);
             // Inherit hooks
             // Assume super class inheritance feature has already run.
             definition.afterContentChecked =
@@ -8835,6 +8845,7 @@ function InheritDefinitionFeature(definition) {
                     }
                 }
             }
+            break;
         }
         else {
             // Even if we don't have a definition, check the type for the hooks and use those if need be
@@ -14898,16 +14909,43 @@ const Component = makeDecorator('Component', (c = {}) => (Object.assign({ change
  * @Annotation
  */
 const Pipe = makeDecorator('Pipe', (p) => (Object.assign({ pure: true }, p)), undefined, undefined, (type, meta) => (R3_COMPILE_PIPE || (() => { }))(type, meta));
+const initializeBaseDef = (target) => {
+    const constructor = target.constructor;
+    const inheritedBaseDef = constructor.ngBaseDef;
+    const baseDef = constructor.ngBaseDef = {
+        inputs: {},
+        outputs: {},
+        declaredInputs: {},
+    };
+    if (inheritedBaseDef) {
+        fillProperties(baseDef.inputs, inheritedBaseDef.inputs);
+        fillProperties(baseDef.outputs, inheritedBaseDef.outputs);
+        fillProperties(baseDef.declaredInputs, inheritedBaseDef.declaredInputs);
+    }
+};
+/**
+ * Does the work of creating the `ngBaseDef` property for the @Input and @Output decorators.
+ * @param key "inputs" or "outputs"
+ */
+const updateBaseDefFromIOProp = (getProp) => (target, name, ...args) => {
+    const constructor = target.constructor;
+    if (!constructor.hasOwnProperty('ngBaseDef')) {
+        initializeBaseDef(target);
+    }
+    const baseDef = constructor.ngBaseDef;
+    const defProp = getProp(baseDef);
+    defProp[name] = args[0];
+};
 /**
  *
  * @Annotation
  */
-const Input = makePropDecorator('Input', (bindingPropertyName) => ({ bindingPropertyName }));
+const Input = makePropDecorator('Input', (bindingPropertyName) => ({ bindingPropertyName }), undefined, updateBaseDefFromIOProp(baseDef => baseDef.inputs || {}));
 /**
  *
  * @Annotation
  */
-const Output = makePropDecorator('Output', (bindingPropertyName) => ({ bindingPropertyName }));
+const Output = makePropDecorator('Output', (bindingPropertyName) => ({ bindingPropertyName }), undefined, updateBaseDefFromIOProp(baseDef => baseDef.outputs || {}));
 /**
  *
  * @Annotation
@@ -15028,7 +15066,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.0+62.sha-aafd502');
+const VERSION = new Version('6.1.0+64.sha-64516da');
 
 /**
  * @license
