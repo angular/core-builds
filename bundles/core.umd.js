@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0+64.sha-64516da
+ * @license Angular v6.1.0+65.sha-c8a4fb1
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1749,7 +1749,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('6.1.0+64.sha-64516da');
+    var VERSION = new Version('6.1.0+65.sha-c8a4fb1');
 
     /**
      * @license
@@ -13473,9 +13473,36 @@
     function getCurrentSanitizer() {
         return viewData && viewData[SANITIZER];
     }
-    function getViewData() {
+    /**
+     * Returns the current OpaqueViewState instance.
+     *
+     * Used in conjunction with the restoreView() instruction to save a snapshot
+     * of the current view and restore it when listeners are invoked. This allows
+     * walking the declaration view tree in listeners to get vars from parent views.
+     */
+    function getCurrentView() {
+        return viewData;
+    }
+    /**
+     * Internal function that returns the current LViewData instance.
+     *
+     * The getCurrentView() instruction should be used for anything public.
+     */
+    function _getViewData() {
         // top level variables should not be exported for performance reasons (PERF_NOTES.md)
         return viewData;
+    }
+    /**
+     * Restores `contextViewData` to the given OpaqueViewState instance.
+     *
+     * Used in conjunction with the getCurrentView() instruction to save a snapshot
+     * of the current view and restore it when listeners are invoked. This allows
+     * walking the declaration view tree in listeners to get vars from parent views.
+     *
+     * @param viewToRestore The LViewData instance to restore.
+     */
+    function restoreView(viewToRestore) {
+        contextViewData = viewToRestore;
     }
     /** Used to set the parent property when nodes are created. */
     var previousOrParentNode;
@@ -17460,7 +17487,7 @@
         if (ngDevMode) {
             ngDevMode.rendererMoveNode++;
         }
-        var viewData = getViewData();
+        var viewData = _getViewData();
         appendChild(parentNode, node.native || null, viewData);
         // On first pass, re-organize node tree to put this node in the correct position.
         var firstTemplatePass = node.view[TVIEW].firstTemplatePass;
@@ -17498,7 +17525,7 @@
      * @param instructions The list of instructions to apply on the current view.
      */
     function i18nApply(startIndex, instructions) {
-        var viewData = getViewData();
+        var viewData = _getViewData();
         if (ngDevMode) {
             assertEqual(viewData[BINDING_INDEX], -1, 'i18nApply should be called before any binding');
         }
@@ -19126,6 +19153,8 @@
     exports.ɵf7 = pureFunction7;
     exports.ɵf8 = pureFunction8;
     exports.ɵfV = pureFunctionV;
+    exports.ɵgV = getCurrentView;
+    exports.ɵrV = restoreView;
     exports.ɵcR = containerRefreshStart;
     exports.ɵcr = containerRefreshEnd;
     exports.ɵqR = queryRefresh;
