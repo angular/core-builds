@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0+33.sha-3d3a1a4
+ * @license Angular v6.1.0+37.sha-fe5e8b7
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -11682,13 +11682,10 @@ function isObservable(obj) {
 
 /**
  * A function that will be executed when an application is initialized.
- * @experimental
  */
 const APP_INITIALIZER = new InjectionToken('Application Initializer');
 /**
  * A class that reflects the state of running {@link APP_INITIALIZER}s.
- *
- * @experimental
  */
 class ApplicationInitStatus {
     constructor(appInits) {
@@ -14641,7 +14638,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.0+33.sha-3d3a1a4');
+const VERSION = new Version('6.1.0+37.sha-fe5e8b7');
 
 /**
  * @license
