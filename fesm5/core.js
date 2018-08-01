@@ -1,10 +1,10 @@
 /**
- * @license Angular v6.1.0+62.sha-aafd502
+ * @license Angular v6.1.0+64.sha-64516da
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __decorate, __metadata, __assign, __param, __extends, __spread, __read, __values } from 'tslib';
+import { __decorate, __param, __metadata, __extends, __spread, __assign, __read, __values } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { share } from 'rxjs/operators';
 import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compileInjectable, compilePipeFromMetadata } from '@angular/compiler';
@@ -138,7 +138,7 @@ var PROP_METADATA = '__prop__metadata__';
 /**
  * @suppress {globalThis}
  */
-function makeDecorator(name, props, parentClass, chainFn, typeFn) {
+function makeDecorator(name, props, parentClass, additionalProcessing, typeFn) {
     var metaCtor = makeMetadataCtor(props);
     function DecoratorFactory() {
         var args = [];
@@ -151,19 +151,19 @@ function makeDecorator(name, props, parentClass, chainFn, typeFn) {
             return this;
         }
         var annotationInstance = new ((_a = DecoratorFactory).bind.apply(_a, __spread([void 0], args)))();
-        var TypeDecorator = function TypeDecorator(cls) {
-            typeFn && typeFn.apply(void 0, __spread([cls], args));
+        return function TypeDecorator(cls) {
+            if (typeFn)
+                typeFn.apply(void 0, __spread([cls], args));
             // Use of Object.defineProperty is important since it creates non-enumerable property which
             // prevents the property is copied during subclassing.
             var annotations = cls.hasOwnProperty(ANNOTATIONS) ?
                 cls[ANNOTATIONS] :
                 Object.defineProperty(cls, ANNOTATIONS, { value: [] })[ANNOTATIONS];
             annotations.push(annotationInstance);
+            if (additionalProcessing)
+                additionalProcessing(cls);
             return cls;
         };
-        if (chainFn)
-            chainFn(TypeDecorator);
-        return TypeDecorator;
     }
     if (parentClass) {
         DecoratorFactory.prototype = Object.create(parentClass.prototype);
@@ -223,7 +223,7 @@ function makeParamDecorator(name, props, parentClass) {
     ParamDecoratorFactory.annotationCls = ParamDecoratorFactory;
     return ParamDecoratorFactory;
 }
-function makePropDecorator(name, props, parentClass) {
+function makePropDecorator(name, props, parentClass, additionalProcessing) {
     var metaCtor = makeMetadataCtor(props);
     function PropDecoratorFactory() {
         var args = [];
@@ -236,7 +236,7 @@ function makePropDecorator(name, props, parentClass) {
             return this;
         }
         var decoratorInstance = new ((_a = PropDecoratorFactory).bind.apply(_a, __spread([void 0], args)))();
-        return function PropDecorator(target, name) {
+        function PropDecorator(target, name) {
             var constructor = target.constructor;
             // Use of Object.defineProperty is important since it creates non-enumerable property which
             // prevents the property is copied during subclassing.
@@ -245,7 +245,10 @@ function makePropDecorator(name, props, parentClass) {
                 Object.defineProperty(constructor, PROP_METADATA, { value: {} })[PROP_METADATA];
             meta[name] = meta.hasOwnProperty(name) && meta[name] || [];
             meta[name].unshift(decoratorInstance);
-        };
+            if (additionalProcessing)
+                additionalProcessing.apply(void 0, __spread([target, name], args));
+        }
+        return PropDecorator;
     }
     if (parentClass) {
         PropDecoratorFactory.prototype = Object.create(parentClass.prototype);
@@ -6619,6 +6622,19 @@ function getClosureSafeProperty$1(objWithPropertyToExtract, target) {
     }
     throw Error('Could not find renamed property on target object.');
 }
+/**
+ * Sets properties on a target object from a source object, but only if
+ * the property doesn't already exist on the target object.
+ * @param target The target to set properties on
+ * @param source The source of the property keys and values to set
+ */
+function fillProperties(target, source) {
+    for (var key in source) {
+        if (source.hasOwnProperty(key) && !target.hasOwnProperty(key)) {
+            target[key] = source[key];
+        }
+    }
+}
 
 /**
  * @license
@@ -8907,19 +8923,6 @@ function definePipe(pipeDef) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Sets properties on a target object from a source object, but only if
- * the property doesn't already exist on the target object.
- * @param target The target to set properties on
- * @param source The source of the property keys and values to set
- */
-function fillProperties(target, source) {
-    for (var key in source) {
-        if (source.hasOwnProperty(key) && !target.hasOwnProperty(key)) {
-            target[key] = source[key];
-        }
-    }
-}
-/**
  * Determines if a definition is a {@link ComponentDefInternal} or a {@link DirectiveDefInternal}
  * @param definition The definition to examine
  */
@@ -8936,9 +8939,9 @@ function getSuperType(type) {
  */
 function InheritDefinitionFeature(definition) {
     var superType = getSuperType(definition.type);
-    var superDef = undefined;
     var _loop_1 = function () {
         var e_1, _a;
+        var superDef = undefined;
         if (isComponentDef(definition)) {
             superDef = superType.ngComponentDef || superType.ngDirectiveDef;
         }
@@ -8948,11 +8951,14 @@ function InheritDefinitionFeature(definition) {
             }
             superDef = superType.ngDirectiveDef;
         }
-        if (superDef) {
+        var baseDef = superType.ngBaseDef;
+        if (baseDef) {
             // Merge inputs and outputs
-            fillProperties(definition.inputs, superDef.inputs);
-            fillProperties(definition.declaredInputs, superDef.declaredInputs);
-            fillProperties(definition.outputs, superDef.outputs);
+            fillProperties(definition.inputs, baseDef.inputs);
+            fillProperties(definition.declaredInputs, baseDef.declaredInputs);
+            fillProperties(definition.outputs, baseDef.outputs);
+        }
+        if (superDef) {
             // Merge hostBindings
             var prevHostBindings_1 = definition.hostBindings;
             var superHostBindings_1 = superDef.hostBindings;
@@ -8967,6 +8973,10 @@ function InheritDefinitionFeature(definition) {
                     definition.hostBindings = superHostBindings_1;
                 }
             }
+            // Merge inputs and outputs
+            fillProperties(definition.inputs, superDef.inputs);
+            fillProperties(definition.declaredInputs, superDef.declaredInputs);
+            fillProperties(definition.outputs, superDef.outputs);
             // Inherit hooks
             // Assume super class inheritance feature has already run.
             definition.afterContentChecked =
@@ -8996,6 +9006,7 @@ function InheritDefinitionFeature(definition) {
                     finally { if (e_1) throw e_1.error; }
                 }
             }
+            return "break";
         }
         else {
             // Even if we don't have a definition, check the type for the hooks and use those if need be
@@ -9015,8 +9026,10 @@ function InheritDefinitionFeature(definition) {
         }
         superType = Object.getPrototypeOf(superType);
     };
-    while (superType && !superDef) {
-        _loop_1();
+    while (superType) {
+        var state_1 = _loop_1();
+        if (state_1 === "break")
+            break;
     }
 }
 
@@ -15368,16 +15381,49 @@ var Component = makeDecorator('Component', function (c) {
  * @Annotation
  */
 var Pipe = makeDecorator('Pipe', function (p) { return (__assign({ pure: true }, p)); }, undefined, undefined, function (type, meta) { return (R3_COMPILE_PIPE || (function () { }))(type, meta); });
+var initializeBaseDef = function (target) {
+    var constructor = target.constructor;
+    var inheritedBaseDef = constructor.ngBaseDef;
+    var baseDef = constructor.ngBaseDef = {
+        inputs: {},
+        outputs: {},
+        declaredInputs: {},
+    };
+    if (inheritedBaseDef) {
+        fillProperties(baseDef.inputs, inheritedBaseDef.inputs);
+        fillProperties(baseDef.outputs, inheritedBaseDef.outputs);
+        fillProperties(baseDef.declaredInputs, inheritedBaseDef.declaredInputs);
+    }
+};
+/**
+ * Does the work of creating the `ngBaseDef` property for the @Input and @Output decorators.
+ * @param key "inputs" or "outputs"
+ */
+var updateBaseDefFromIOProp = function (getProp) {
+    return function (target, name) {
+        var args = [];
+        for (var _i = 2; _i < arguments.length; _i++) {
+            args[_i - 2] = arguments[_i];
+        }
+        var constructor = target.constructor;
+        if (!constructor.hasOwnProperty('ngBaseDef')) {
+            initializeBaseDef(target);
+        }
+        var baseDef = constructor.ngBaseDef;
+        var defProp = getProp(baseDef);
+        defProp[name] = args[0];
+    };
+};
 /**
  *
  * @Annotation
  */
-var Input = makePropDecorator('Input', function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); });
+var Input = makePropDecorator('Input', function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); }, undefined, updateBaseDefFromIOProp(function (baseDef) { return baseDef.inputs || {}; }));
 /**
  *
  * @Annotation
  */
-var Output = makePropDecorator('Output', function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); });
+var Output = makePropDecorator('Output', function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); }, undefined, updateBaseDefFromIOProp(function (baseDef) { return baseDef.outputs || {}; }));
 /**
  *
  * @Annotation
@@ -15499,7 +15545,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0+62.sha-aafd502');
+var VERSION = new Version('6.1.0+64.sha-64516da');
 
 /**
  * @license
