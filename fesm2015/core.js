@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0+98.sha-74bce18
+ * @license Angular v6.1.0+100.sha-183757d
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2008,7 +2008,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('6.1.0+98.sha-74bce18');
+const VERSION = new Version('6.1.0+100.sha-183757d');
 
 /**
  * @fileoverview added by tsickle
@@ -3714,7 +3714,8 @@ function isPromise(obj) {
  * @return {?}
  */
 function isObservable(obj) {
-    // TODO: use Symbol.observable when https://github.com/ReactiveX/rxjs/issues/2415 will be resolved
+    // TODO: use isObservable once we update pass rxjs 6.1
+    // https://github.com/ReactiveX/rxjs/blob/master/CHANGELOG.md#610-2018-05-03
     return !!obj && typeof obj.subscribe === 'function';
 }
 
@@ -11613,8 +11614,15 @@ function createDirectiveInstance(view, def) {
             /** @type {?} */
             const output = def.outputs[i];
             /** @type {?} */
-            const subscription = instance[/** @type {?} */ ((output.propName))].subscribe(eventHandlerClosure(view, /** @type {?} */ ((def.parent)).nodeIndex, output.eventName)); /** @type {?} */
-            ((view.disposables))[def.outputIndex + i] = subscription.unsubscribe.bind(subscription);
+            const outputObservable = instance[/** @type {?} */ ((output.propName))];
+            if (isObservable(outputObservable)) {
+                /** @type {?} */
+                const subscription = outputObservable.subscribe(eventHandlerClosure(view, /** @type {?} */ ((def.parent)).nodeIndex, output.eventName)); /** @type {?} */
+                ((view.disposables))[def.outputIndex + i] = subscription.unsubscribe.bind(subscription);
+            }
+            else {
+                throw new Error(`@Output ${output.propName} not initialized in '${instance.constructor.name}'.`);
+            }
         }
     }
     return instance;
