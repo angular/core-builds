@@ -1,10 +1,10 @@
 /**
- * @license Angular v6.1.0+90.sha-a224df4
+ * @license Angular v6.1.0+93.sha-7b89711
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __spread, __read, __assign, __extends, __values } from 'tslib';
+import { __spread, __read, __extends, __assign, __values } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { share } from 'rxjs/operators';
 
@@ -1691,7 +1691,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0+90.sha-a224df4');
+var VERSION = new Version('6.1.0+93.sha-7b89711');
 
 /**
  * @license
