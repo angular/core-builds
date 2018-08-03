@@ -35,6 +35,7 @@ export declare type SanitizerFn = (value: any) => string;
  */
 export declare const CIRCULAR = "__CIRCULAR__";
 export declare function getRenderer(): Renderer3;
+export declare function getRendererFactory(): RendererFactory3;
 export declare function getCurrentSanitizer(): Sanitizer | null;
 /**
  * Returns the current OpaqueViewState instance.
@@ -57,7 +58,7 @@ export declare function _getViewData(): LViewData;
  * of the current view and restore it when listeners are invoked. This allows
  * walking the declaration view tree in listeners to get vars from parent views.
  *
- * @param viewToRestore The LViewData instance to restore.
+ * @param viewToRestore The OpaqueViewState instance to restore.
  */
 export declare function restoreView(viewToRestore: OpaqueViewState): void;
 export declare function getPreviousOrParentNode(): LNode;
