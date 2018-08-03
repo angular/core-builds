@@ -6,11 +6,9 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { ChangeDetectorRef as viewEngine_ChangeDetectorRef } from '../change_detection/change_detector_ref';
+import { InjectionToken } from '../di/injection_token';
 import { InjectFlags } from '../di/injector';
-import { ComponentFactoryResolver as viewEngine_ComponentFactoryResolver } from '../linker/component_factory_resolver';
-import { ElementRef as viewEngine_ElementRef } from '../linker/element_ref';
-import { TemplateRef as viewEngine_TemplateRef } from '../linker/template_ref';
-import { ViewContainerRef as viewEngine_ViewContainerRef } from '../linker/view_container_ref';
+import * as viewEngine from '../linker';
 import { Type } from '../type';
 import { DirectiveDefInternal } from './interfaces/definition';
 import { LInjector } from './interfaces/injector';
@@ -46,11 +44,10 @@ export declare function diPublicInInjector(di: LInjector, def: DirectiveDefInter
  */
 export declare function diPublic(def: DirectiveDefInternal<any>): void;
 /**
- * Searches for an instance of the given type up the injector tree and returns
- * that instance if found.
+ * Returns the value associated to the given token from the injectors.
  *
- * If not found, it will propagate up to the next parent injector until the token
- * is found or the top is reached.
+ * `directiveInject` is intended to be used for directive, component and pipe factories.
+ *  All other injection use `inject` which does not walk the node injector tree.
  *
  * Usage example (in factory function):
  *
@@ -63,37 +60,33 @@ export declare function diPublic(def: DirectiveDefInternal<any>): void;
  *   });
  * }
  *
- * NOTE: use `directiveInject` with `@Directive`, `@Component`, and `@Pipe`. For
- * all other injection use `inject` which does not walk the DOM render tree.
- *
- * @param token The directive type to search for
- * @param flags Injection flags (e.g. CheckParent)
- * @returns The instance found
+ * @param token the type or token to inject
+ * @param flags Injection flags
+ * @returns the value from the injector or `null` when not found
  */
-export declare function directiveInject<T>(token: Type<T>): T;
-export declare function directiveInject<T>(token: Type<T>, flags: InjectFlags.Optional): T | null;
-export declare function directiveInject<T>(token: Type<T>, flags: InjectFlags): T;
+export declare function directiveInject<T>(token: Type<T> | InjectionToken<T>): T;
+export declare function directiveInject<T>(token: Type<T> | InjectionToken<T>, flags: InjectFlags): T;
 /**
  * Creates an ElementRef and stores it on the injector.
  * Or, if the ElementRef already exists, retrieves the existing ElementRef.
  *
  * @returns The ElementRef instance to use
  */
-export declare function injectElementRef(): viewEngine_ElementRef;
+export declare function injectElementRef(): viewEngine.ElementRef;
 /**
  * Creates a TemplateRef and stores it on the injector. Or, if the TemplateRef already
  * exists, retrieves the existing TemplateRef.
  *
  * @returns The TemplateRef instance to use
  */
-export declare function injectTemplateRef<T>(): viewEngine_TemplateRef<T>;
+export declare function injectTemplateRef<T>(): viewEngine.TemplateRef<T>;
 /**
  * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
  * already exists, retrieves the existing ViewContainerRef.
  *
  * @returns The ViewContainerRef instance to use
  */
-export declare function injectViewContainerRef(): viewEngine_ViewContainerRef;
+export declare function injectViewContainerRef(): viewEngine.ViewContainerRef;
 /** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
 export declare function injectChangeDetectorRef(): viewEngine_ChangeDetectorRef;
 /**
@@ -103,7 +96,7 @@ export declare function injectChangeDetectorRef(): viewEngine_ChangeDetectorRef;
  *
  * @returns The ComponentFactoryResolver instance to use
  */
-export declare function injectComponentFactoryResolver(): viewEngine_ComponentFactoryResolver;
+export declare function injectComponentFactoryResolver(): viewEngine.ComponentFactoryResolver;
 /**
  * Inject static attribute value into directive constructor.
  *
@@ -144,23 +137,17 @@ export declare function injectAttribute(attrNameToInject: string): string | unde
  */
 export declare function getOrCreateChangeDetectorRef(di: LInjector, context: any): viewEngine_ChangeDetectorRef;
 /**
- * Searches for an instance of the given directive type up the injector tree and returns
- * that instance if found.
+ * Returns the value associated to the given token from the injectors.
  *
- * Specifically, it gets the bloom filter bit associated with the directive (see bloomHashBit),
- * checks that bit against the bloom filter structure to identify an injector that might have
- * the directive (see bloomFindPossibleInjector), then searches the directives on that injector
- * for a match.
+ * Look for the injector providing the token by walking up the node injector tree and then
+ * the module injector tree.
  *
- * If not found, it will propagate up to the next parent injector until the token
- * is found or the top is reached.
- *
- * @param di Node injector where the search should start
- * @param token The directive type to search for
- * @param flags Injection flags (e.g. CheckParent)
- * @returns The instance found
+ * @param nodeInjector Node injector where the search should start
+ * @param token The token to look for
+ * @param flags Injection flags
+ * @returns the value from the injector or `null` when not found
  */
-export declare function getOrCreateInjectable<T>(di: LInjector, token: Type<T>, flags?: InjectFlags): T | null;
+export declare function getOrCreateInjectable<T>(nodeInjector: LInjector, token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
 /**
  * Finds the closest injector that might have a certain directive.
  *
@@ -193,10 +180,10 @@ export declare class ReadFromInjectorFn<T> {
  * @param di The node injector where we should store a created ElementRef
  * @returns The ElementRef instance to use
  */
-export declare function getOrCreateElementRef(di: LInjector): viewEngine_ElementRef;
-export declare const QUERY_READ_TEMPLATE_REF: QueryReadType<viewEngine_TemplateRef<any>>;
-export declare const QUERY_READ_CONTAINER_REF: QueryReadType<viewEngine_ViewContainerRef>;
-export declare const QUERY_READ_ELEMENT_REF: QueryReadType<viewEngine_ElementRef<any>>;
+export declare function getOrCreateElementRef(di: LInjector): viewEngine.ElementRef;
+export declare const QUERY_READ_TEMPLATE_REF: QueryReadType<viewEngine.TemplateRef<any>>;
+export declare const QUERY_READ_CONTAINER_REF: QueryReadType<viewEngine.ViewContainerRef>;
+export declare const QUERY_READ_ELEMENT_REF: QueryReadType<viewEngine.ElementRef<any>>;
 export declare const QUERY_READ_FROM_NODE: QueryReadType<any>;
 /**
  * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
@@ -204,7 +191,7 @@ export declare const QUERY_READ_FROM_NODE: QueryReadType<any>;
  *
  * @returns The ViewContainerRef instance to use
  */
-export declare function getOrCreateContainerRef(di: LInjector): viewEngine_ViewContainerRef;
+export declare function getOrCreateContainerRef(di: LInjector): viewEngine.ViewContainerRef;
 /**
  * Creates a TemplateRef and stores it on the injector. Or, if the TemplateRef already
  * exists, retrieves the existing TemplateRef.
@@ -212,4 +199,4 @@ export declare function getOrCreateContainerRef(di: LInjector): viewEngine_ViewC
  * @param di The node injector where we should store a created TemplateRef
  * @returns The TemplateRef instance to use
  */
-export declare function getOrCreateTemplateRef<T>(di: LInjector): viewEngine_TemplateRef<T>;
+export declare function getOrCreateTemplateRef<T>(di: LInjector): viewEngine.TemplateRef<T>;
