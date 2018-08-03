@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.0+9.sha-0822dc7
+ * @license Angular v7.0.0-beta.0+15.sha-4e26478
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2008,7 +2008,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-beta.0+9.sha-0822dc7');
+const VERSION = new Version('7.0.0-beta.0+15.sha-4e26478');
 
 /**
  * @fileoverview added by tsickle
@@ -17300,10 +17300,6 @@ const CIRCULAR$2 = '__CIRCULAR__';
  * Renderer2.
   @type {?} */
 let renderer;
-/** @type {?} */
-let rendererFactory;
-/** @type {?} */
-let currentElementNode = null;
 /**
  * @return {?}
  */
@@ -17311,6 +17307,17 @@ function getRenderer() {
     // top level variables should not be exported for performance reasons (PERF_NOTES.md)
     return renderer;
 }
+/** @type {?} */
+let rendererFactory;
+/**
+ * @return {?}
+ */
+function getRendererFactory() {
+    // top level variables should not be exported for performance reasons (PERF_NOTES.md)
+    return rendererFactory;
+}
+/** @type {?} */
+let currentElementNode = null;
 /**
  * @return {?}
  */
@@ -17326,7 +17333,7 @@ function getCurrentSanitizer() {
  * @return {?}
  */
 function getCurrentView() {
-    return /** @type {?} */ ((/** @type {?} */ (viewData)));
+    return /** @type {?} */ ((viewData));
 }
 /**
  * Internal function that returns the current LViewData instance.
@@ -17345,11 +17352,11 @@ function _getViewData() {
  * of the current view and restore it when listeners are invoked. This allows
  * walking the declaration view tree in listeners to get vars from parent views.
  *
- * @param {?} viewToRestore The LViewData instance to restore.
+ * @param {?} viewToRestore The OpaqueViewState instance to restore.
  * @return {?}
  */
 function restoreView(viewToRestore) {
-    contextViewData = /** @type {?} */ ((/** @type {?} */ (viewToRestore)));
+    contextViewData = /** @type {?} */ ((viewToRestore));
 }
 /** *
  * Used to set the parent property when nodes are created.
@@ -21008,7 +21015,17 @@ class ViewRef$1 {
      * See {\@link ChangeDetectorRef#detach detach} for more information.
      * @return {?}
      */
-    detectChanges() { detectChanges(this.context); }
+    detectChanges() {
+        /** @type {?} */
+        const rendererFactory = getRendererFactory();
+        if (rendererFactory.begin) {
+            rendererFactory.begin();
+        }
+        detectChanges(this.context);
+        if (rendererFactory.end) {
+            rendererFactory.end();
+        }
+    }
     /**
      * Checks the change detector and its children, and throws if any changes are detected.
      *
