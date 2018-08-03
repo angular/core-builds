@@ -692,7 +692,7 @@ export interface Input {
      *   selector: 'bank-account',
      *   template: `
      *     Bank Name: {{bankName}}
-    *      Account Id: {{id}}
+     *     Account Id: {{id}}
      *   `
      * })
      * class BankAccount {

@@ -10,7 +10,7 @@ import { RendererType2 } from '../../render/api';
 import { Type } from '../../type';
 import { CssSelectorList } from './projection';
 /**
- * Definition of what a template rendering function should look like.
+ * Definition of what a template rendering function should look like for a component.
  */
 export declare type ComponentTemplate<T> = {
     (rf: RenderFlags, ctx: T): void;
@@ -62,26 +62,15 @@ export interface PipeType<T> extends Type<T> {
  */
 export declare type DirectiveDefInternal<T> = DirectiveDef<T, string>;
 /**
- * Runtime link information for Directives.
+ * Runtime information for classes that are inherited by components or directives
+ * that aren't defined as components or directives.
  *
- * This is internal data structure used by the render to link
- * directives into templates.
+ * This is an internal data structure used by the render to determine what inputs
+ * and outputs should be inherited.
  *
- * NOTE: Always use `defineDirective` function to create this object,
- * never create the object directly since the shape of this object
- * can change between versions.
- *
- * @param Selector type metadata specifying the selector of the directive or component
- *
- * See: {@link defineDirective}
+ * See: {@link defineBase}
  */
-export interface DirectiveDef<T, Selector extends string> {
-    /** Token representing the directive. Used by DI. */
-    type: Type<T>;
-    /** Function that makes a directive public to the DI system. */
-    diPublic: ((def: DirectiveDef<T, string>) => void) | null;
-    /** The selectors that will be used to match nodes to this directive. */
-    selectors: CssSelectorList;
+export interface BaseDef<T> {
     /**
      * A dictionary mapping the inputs' minified property names to their public API names, which
      * are their aliases if any, or their original unminified property names
@@ -105,6 +94,28 @@ export interface DirectiveDef<T, Selector extends string> {
     readonly outputs: {
         [P in keyof T]: P;
     };
+}
+/**
+ * Runtime link information for Directives.
+ *
+ * This is internal data structure used by the render to link
+ * directives into templates.
+ *
+ * NOTE: Always use `defineDirective` function to create this object,
+ * never create the object directly since the shape of this object
+ * can change between versions.
+ *
+ * @param Selector type metadata specifying the selector of the directive or component
+ *
+ * See: {@link defineDirective}
+ */
+export interface DirectiveDef<T, Selector extends string> extends BaseDef<T> {
+    /** Token representing the directive. Used by DI. */
+    type: Type<T>;
+    /** Function that makes a directive public to the DI system. */
+    diPublic: ((def: DirectiveDef<T, string>) => void) | null;
+    /** The selectors that will be used to match nodes to this directive. */
+    selectors: CssSelectorList;
     /**
      * Name under which the directive is exported (for use with local references in template)
      */
