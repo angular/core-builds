@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.0+1.sha-4f741e7
+ * @license Angular v7.0.0-beta.0+3.sha-c2c12e5
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1261,6 +1261,7 @@ function ngDevModeResetPerfCounters() {
         rendererDestroyNode: 0,
         rendererMoveNode: 0,
         rendererRemoveNode: 0,
+        rendererCreateComment: 0,
     };
 }
 /**
@@ -1483,6 +1484,14 @@ function getParentLNode(node) {
     }
     const parent = node.tNode.parent;
     return readElementValue(parent ? node.view[parent.index] : node.view[HOST_NODE]);
+}
+/**
+ * Retrieves render parent LElementNode for a given view.
+ * Might be null if a view is not yet attatched to any container.
+ */
+function getRenderParent(viewNode) {
+    const container = getParentLNode(viewNode);
+    return container ? container.data[RENDER_PARENT] : null;
 }
 /**
  * Stack used to keep track of projection nodes in walkLNodeTree.
@@ -1885,8 +1894,8 @@ function executePipeOnDestroys(viewData) {
  */
 function canInsertNativeNode(parent, currentView) {
     // We can only insert into a Component or View. Any other type should be an Error.
-    ngDevMode && assertNodeOfPossibleTypes(parent, 3 /* Element */, 2 /* View */);
-    if (parent.tNode.type === 3 /* Element */) {
+    ngDevMode && assertNodeOfPossibleTypes(parent, 3 /* Element */, 4 /* ElementContainer */, 2 /* View */);
+    if (parent.tNode.type === 3 /* Element */ || parent.tNode.type === 4 /* ElementContainer */) {
         // Parent is an element.
         if (parent.view !== currentView) {
             // If the Parent view is not the same as current view than we are inserting across
@@ -1929,6 +1938,19 @@ function canInsertNativeNode(parent, currentView) {
     }
 }
 /**
+ * Inserts a native node before another native node for a given parent using {@link Renderer3}.
+ * This is a utility function that can be used when native nodes were determined - it abstracts an
+ * actual renderer being used.
+ */
+function nativeInsertBefore(renderer, parent, child, beforeNode) {
+    if (isProceduralRenderer(renderer)) {
+        renderer.insertBefore(parent, child, beforeNode);
+    }
+    else {
+        parent.insertBefore(child, beforeNode, true);
+    }
+}
+/**
  * Appends the `child` element to the `parent`.
  *
  * The element insertion might be delayed {@link canInsertNativeNode}.
@@ -1947,9 +1969,18 @@ function appendChild(parent, child, currentView) {
             const views = container.data[VIEWS];
             const index = views.indexOf(parent);
             const beforeNode = index + 1 < views.length ? (getChildLNode(views[index + 1])).native : container.native;
-            isProceduralRenderer(renderer) ?
-                renderer.insertBefore(renderParent.native, child, beforeNode) :
-                renderParent.native.insertBefore(child, beforeNode, true);
+            nativeInsertBefore(renderer, renderParent.native, child, beforeNode);
+        }
+        else if (parent.tNode.type === 4 /* ElementContainer */) {
+            const beforeNode = parent.native;
+            const grandParent = getParentLNode(parent);
+            if (grandParent.tNode.type === 2 /* View */) {
+                const renderParent = getRenderParent(grandParent);
+                nativeInsertBefore(renderer, renderParent.native, child, beforeNode);
+            }
+            else {
+                nativeInsertBefore(renderer, grandParent.native, child, beforeNode);
+            }
         }
         else {
             isProceduralRenderer(renderer) ? renderer.appendChild(parent.native, child) :
@@ -3638,6 +3669,7 @@ function hostElement(tag, rNode, def, sanitizer) {
  */
 function listener(eventName, listenerFn, useCapture = false) {
     ngDevMode && assertPreviousIsParent();
+    ngDevMode && assertNodeOfPossibleTypes(previousOrParentNode, 3 /* Element */);
     const node = previousOrParentNode;
     const native = node.native;
     ngDevMode && ngDevMode.rendererAddEventListener++;
@@ -4249,6 +4281,7 @@ function container(index, template, tagName, attrs, localRefs) {
         assertEqual(viewData[BINDING_INDEX], -1, 'container nodes should be created before any bindings');
     const currentParent = isParent ? previousOrParentNode : getParentLNode(previousOrParentNode);
     const lContainer = createLContainer(currentParent, viewData);
+    ngDevMode && ngDevMode.rendererCreateComment++;
     const comment = renderer.createComment(ngDevMode ? 'container' : '');
     const node = createLNode(index, 0 /* Container */, comment, tagName || null, attrs || null, lContainer);
     appendChild(getParentLNode(node), comment, viewData);
@@ -15093,7 +15126,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('7.0.0-beta.0+1.sha-4f741e7');
+const VERSION = new Version('7.0.0-beta.0+3.sha-c2c12e5');
 
 /**
  * @license

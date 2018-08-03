@@ -20,7 +20,8 @@ export declare const enum TNodeType {
     Projection = 1,
     View = 2,
     Element = 3,
-    ViewOrElement = 2
+    ViewOrElement = 2,
+    ElementContainer = 4
 }
 /**
  * Corresponds to the TNode.flags property.
@@ -95,6 +96,12 @@ export interface LElementNode extends LNode {
     readonly native: RElement;
     /** If Component then data has LView (light DOM) */
     readonly data: LViewData | null;
+}
+/** LNode representing <ng-container>. */
+export interface LElementContainerNode extends LNode {
+    /** The DOM comment associated with this node. */
+    readonly native: RComment;
+    readonly data: null;
 }
 /** LNode representing a #text node. */
 export interface LTextNode extends LNode {
