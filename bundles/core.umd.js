@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.0+3.sha-c2c12e5
+ * @license Angular v7.0.0-beta.0+4.sha-1fb7111
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -3166,11 +3166,12 @@
             executeInitHooks(viewData, tView, creationMode);
         }
         refreshDynamicEmbeddedViews(viewData);
+        // Content query results must be refreshed before content hooks are called.
+        refreshContentQueries(tView);
         if (!checkNoChangesMode) {
             executeHooks(directives, tView.contentHooks, tView.contentCheckHooks, creationMode);
         }
         setHostBindings(tView.hostBindings);
-        refreshContentQueries(tView);
         refreshChildComponents(tView.components);
     }
     /** Sets the host bindings for the current view. */
@@ -15662,7 +15663,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-beta.0+3.sha-c2c12e5');
+    var VERSION = new Version('7.0.0-beta.0+4.sha-1fb7111');
 
     /**
      * @license

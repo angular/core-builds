@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.0.0-beta.0+3.sha-c2c12e5
+ * @license Angular v7.0.0-beta.0+4.sha-1fb7111
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __decorate, __metadata, __param } from 'tslib';
+import { __decorate, __param, __metadata } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { share } from 'rxjs/operators';
 import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compileInjectable, compilePipeFromMetadata } from '@angular/compiler';
@@ -3034,11 +3034,12 @@ function refreshDescendantViews() {
         executeInitHooks(viewData, tView, creationMode);
     }
     refreshDynamicEmbeddedViews(viewData);
+    // Content query results must be refreshed before content hooks are called.
+    refreshContentQueries(tView);
     if (!checkNoChangesMode) {
         executeHooks(directives, tView.contentHooks, tView.contentCheckHooks, creationMode);
     }
     setHostBindings(tView.hostBindings);
-    refreshContentQueries(tView);
     refreshChildComponents(tView.components);
 }
 /** Sets the host bindings for the current view. */
@@ -15189,7 +15190,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('7.0.0-beta.0+3.sha-c2c12e5');
+const VERSION = new Version('7.0.0-beta.0+4.sha-1fb7111');
 
 /**
  * @license
