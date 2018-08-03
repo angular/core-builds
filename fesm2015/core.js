@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.0+4.sha-1fb7111
+ * @license Angular v7.0.0-beta.0+8.sha-728d98d
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2008,7 +2008,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-beta.0+4.sha-1fb7111');
+const VERSION = new Version('7.0.0-beta.0+8.sha-728d98d');
 
 /**
  * @fileoverview added by tsickle
@@ -15420,12 +15420,18 @@ function typeName(type) {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * Must use this method for CD (instead of === ) since NaN !== NaN
+ * Returns wether the values are different from a change detection stand point.
+ *
+ * Constraints are relaxed in checkNoChanges mode. See `devModeEqual` for details.
  * @param {?} a
  * @param {?} b
+ * @param {?} checkNoChangesMode
  * @return {?}
  */
-function isDifferent(a, b) {
+function isDifferent(a, b, checkNoChangesMode) {
+    if (ngDevMode && checkNoChangesMode) {
+        return !devModeEqual(a, b);
+    }
     // NaN is the only value that is not equal to itself so the first
     // test checks if both a and b are not NaN
     return !(a !== a && b !== b) && a !== b;
@@ -20053,7 +20059,7 @@ function bindingUpdated(value) {
     if (bindingIndex >= viewData.length) {
         viewData[viewData[BINDING_INDEX]++] = value;
     }
-    else if (isDifferent(viewData[bindingIndex], value)) {
+    else if (isDifferent(viewData[bindingIndex], value, checkNoChangesMode)) {
         throwErrorIfNoChangesMode(creationMode, checkNoChangesMode, viewData[bindingIndex], value);
         viewData[viewData[BINDING_INDEX]++] = value;
     }
