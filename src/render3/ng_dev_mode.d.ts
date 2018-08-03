@@ -27,6 +27,7 @@ declare global {
         rendererDestroyNode: number;
         rendererMoveNode: number;
         rendererRemoveNode: number;
+        rendererCreateComment: number;
     }
 }
 export declare function ngDevModeResetPerfCounters(): void;
