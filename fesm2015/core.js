@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.1+14.sha-0c028a0
+ * @license Angular v6.1.1+17.sha-66547d8
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -98,11 +98,13 @@ function defineInjector(options) {
  * @usageNotes
  * ### Basic Example
  *
+ * #### Plain InjectionToken
+ *
  * {@example core/di/ts/injector_spec.ts region='InjectionToken'}
  *
- * ### Tree-shakeable Example
+ * #### Tree-shakable InjectionToken
  *
- * {@example core/di/ts/injector_spec.ts region='ShakeableInjectionToken'}
+ * {@example core/di/ts/injector_spec.ts region='ShakableInjectionToken'}
  *
  */
 class InjectionToken {
@@ -14638,7 +14640,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.1+14.sha-0c028a0');
+const VERSION = new Version('6.1.1+17.sha-66547d8');
 
 /**
  * @license
