@@ -25,7 +25,7 @@ export declare function _appIdRandomProviderFactory(): string;
  */
 export declare const APP_ID_RANDOM_PROVIDER: {
     provide: InjectionToken<string>;
-    useFactory: () => string;
+    useFactory: typeof _appIdRandomProviderFactory;
     deps: any[];
 };
 /**

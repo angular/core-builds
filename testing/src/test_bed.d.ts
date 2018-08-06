@@ -35,13 +35,13 @@ export declare type TestModuleMetadata = {
     aotSummaries?: () => any[];
 };
 /**
- * @whatItDoes Configures and initializes environment for unit testing and provides methods for
- * creating components and services in unit tests.
  * @description
+ * Configures and initializes environment for unit testing and provides methods for
+ * creating components and services in unit tests.
  *
  * TestBed is the primary api for writing unit tests for Angular applications and libraries.
  *
- * @stable
+ *
  */
 export declare class TestBed implements Injector {
     /**
@@ -139,6 +139,8 @@ export declare class TestBed implements Injector {
     private _testEnvAotSummaries;
     private _aotSummaries;
     private _templateOverrides;
+    private _isRoot;
+    private _rootProviderOverrides;
     platform: PlatformRef;
     ngModule: Type<any> | Type<any>[];
     /**
@@ -168,9 +170,9 @@ export declare class TestBed implements Injector {
     }): void;
     configureTestingModule(moduleDef: TestModuleMetadata): void;
     compileComponents(): Promise<any>;
-    private _initIfNeeded();
-    private _createCompilerAndModule();
-    private _assertNotInstantiated(methodName, methodDescription);
+    private _initIfNeeded;
+    private _createCompilerAndModule;
+    private _assertNotInstantiated;
     get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function, context?: any): any;
     overrideModule(ngModule: Type<any>, override: MetadataOverride<NgModule>): void;
@@ -199,7 +201,7 @@ export declare class TestBed implements Injector {
     deprecatedOverrideProvider(token: any, provider: {
         useValue: any;
     }): void;
-    private overrideProviderImpl(token, provider, deprecated?);
+    private overrideProviderImpl;
     overrideTemplateUsingTestingModule(component: Type<any>, template: string): void;
     createComponent<T>(component: Type<T>): ComponentFixture<T>;
 }
@@ -229,7 +231,7 @@ export declare function getTestBed(): TestBed;
  * eventually
  *   becomes `it('...', @Inject (object: AClass, async: AsyncTestCompleter) => { ... });`
  *
- * @stable
+ *
  */
 export declare function inject(tokens: any[], fn: Function): () => any;
 /**
@@ -238,7 +240,7 @@ export declare function inject(tokens: any[], fn: Function): () => any;
 export declare class InjectSetupWrapper {
     private _moduleDef;
     constructor(_moduleDef: () => TestModuleMetadata);
-    private _addModule();
+    private _addModule;
     inject(tokens: any[], fn: Function): () => any;
 }
 /**

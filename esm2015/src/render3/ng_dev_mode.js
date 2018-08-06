@@ -1,0 +1,54 @@
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/** @type {?} */
+const __global = typeof window != 'undefined' && window || typeof self != 'undefined' && self ||
+    typeof global != 'undefined' && global;
+/**
+ * @return {?}
+ */
+export function ngDevModeResetPerfCounters() {
+    __global.ngDevMode = {
+        firstTemplatePass: 0,
+        tNode: 0,
+        tView: 0,
+        rendererCreateTextNode: 0,
+        rendererSetText: 0,
+        rendererCreateElement: 0,
+        rendererAddEventListener: 0,
+        rendererSetAttribute: 0,
+        rendererRemoveAttribute: 0,
+        rendererSetProperty: 0,
+        rendererSetClassName: 0,
+        rendererAddClass: 0,
+        rendererRemoveClass: 0,
+        rendererSetStyle: 0,
+        rendererRemoveStyle: 0,
+        rendererDestroy: 0,
+        rendererDestroyNode: 0,
+        rendererMoveNode: 0,
+        rendererRemoveNode: 0,
+        rendererCreateComment: 0,
+    };
+}
+/**
+ * This checks to see if the `ngDevMode` has been set. If yes,
+ * than we honor it, otherwise we default to dev mode with additional checks.
+ *
+ * The idea is that unless we are doing production build where we explicitly
+ * set `ngDevMode == false` we should be helping the developer by providing
+ * as much early warning and errors as possible.
+ */
+if (typeof ngDevMode === 'undefined' || ngDevMode) {
+    ngDevModeResetPerfCounters();
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibmdfZGV2X21vZGUuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi8uLi8uLi9wYWNrYWdlcy9jb3JlL3NyYy9yZW5kZXIzL25nX2Rldl9tb2RlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7OztBQXVDQSxNQUFNLFFBQVEsR0FDVixPQUFPLE1BQU0sSUFBSSxXQUFXLElBQUksTUFBTSxJQUFJLE9BQU8sSUFBSSxJQUFJLFdBQVcsSUFBSSxJQUFJO0lBQzVFLE9BQU8sTUFBTSxJQUFJLFdBQVcsSUFBSSxNQUFNLENBQUM7Ozs7QUFFM0MsTUFBTTtJQUNKLFFBQVEsQ0FBQyxTQUFTLEdBQUc7UUFDbkIsaUJBQWlCLEVBQUUsQ0FBQztRQUNwQixLQUFLLEVBQUUsQ0FBQztRQUNSLEtBQUssRUFBRSxDQUFDO1FBQ1Isc0JBQXNCLEVBQUUsQ0FBQztRQUN6QixlQUFlLEVBQUUsQ0FBQztRQUNsQixxQkFBcUIsRUFBRSxDQUFDO1FBQ3hCLHdCQUF3QixFQUFFLENBQUM7UUFDM0Isb0JBQW9CLEVBQUUsQ0FBQztRQUN2Qix1QkFBdUIsRUFBRSxDQUFDO1FBQzFCLG1CQUFtQixFQUFFLENBQUM7UUFDdEIsb0JBQW9CLEVBQUUsQ0FBQztRQUN2QixnQkFBZ0IsRUFBRSxDQUFDO1FBQ25CLG1CQUFtQixFQUFFLENBQUM7UUFDdEIsZ0JBQWdCLEVBQUUsQ0FBQztRQUNuQixtQkFBbUIsRUFBRSxDQUFDO1FBQ3RCLGVBQWUsRUFBRSxDQUFDO1FBQ2xCLG1CQUFtQixFQUFFLENBQUM7UUFDdEIsZ0JBQWdCLEVBQUUsQ0FBQztRQUNuQixrQkFBa0IsRUFBRSxDQUFDO1FBQ3JCLHFCQUFxQixFQUFFLENBQUM7S0FDekIsQ0FBQztDQUNIOzs7Ozs7Ozs7QUFVRCxJQUFJLE9BQU8sU0FBUyxLQUFLLFdBQVcsSUFBSSxTQUFTLEVBQUU7SUFDakQsMEJBQTBCLEVBQUUsQ0FBQztDQUM5QiIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQGxpY2Vuc2VcbiAqIENvcHlyaWdodCBHb29nbGUgSW5jLiBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIFVzZSBvZiB0aGlzIHNvdXJjZSBjb2RlIGlzIGdvdmVybmVkIGJ5IGFuIE1JVC1zdHlsZSBsaWNlbnNlIHRoYXQgY2FuIGJlXG4gKiBmb3VuZCBpbiB0aGUgTElDRU5TRSBmaWxlIGF0IGh0dHBzOi8vYW5ndWxhci5pby9saWNlbnNlXG4gKi9cblxuXG5kZWNsYXJlIGdsb2JhbCB7XG4gIGNvbnN0IG5nRGV2TW9kZTogbnVsbHxOZ0Rldk1vZGVQZXJmQ291bnRlcnM7XG4gIGludGVyZmFjZSBOZ0Rldk1vZGVQZXJmQ291bnRlcnMge1xuICAgIGZpcnN0VGVtcGxhdGVQYXNzOiBudW1iZXI7XG4gICAgdE5vZGU6IG51bWJlcjtcbiAgICB0VmlldzogbnVtYmVyO1xuICAgIHJlbmRlcmVyQ3JlYXRlVGV4dE5vZGU6IG51bWJlcjtcbiAgICByZW5kZXJlclNldFRleHQ6IG51bWJlcjtcbiAgICByZW5kZXJlckNyZWF0ZUVsZW1lbnQ6IG51bWJlcjtcbiAgICByZW5kZXJlckFkZEV2ZW50TGlzdGVuZXI6IG51bWJlcjtcbiAgICByZW5kZXJlclNldEF0dHJpYnV0ZTogbnVtYmVyO1xuICAgIHJlbmRlcmVyUmVtb3ZlQXR0cmlidXRlOiBudW1iZXI7XG4gICAgcmVuZGVyZXJTZXRQcm9wZXJ0eTogbnVtYmVyO1xuICAgIHJlbmRlcmVyU2V0Q2xhc3NOYW1lOiBudW1iZXI7XG4gICAgcmVuZGVyZXJBZGRDbGFzczogbnVtYmVyO1xuICAgIHJlbmRlcmVyUmVtb3ZlQ2xhc3M6IG51bWJlcjtcbiAgICByZW5kZXJlclNldFN0eWxlOiBudW1iZXI7XG4gICAgcmVuZGVyZXJSZW1vdmVTdHlsZTogbnVtYmVyO1xuICAgIHJlbmRlcmVyRGVzdHJveTogbnVtYmVyO1xuICAgIHJlbmRlcmVyRGVzdHJveU5vZGU6IG51bWJlcjtcbiAgICByZW5kZXJlck1vdmVOb2RlOiBudW1iZXI7XG4gICAgcmVuZGVyZXJSZW1vdmVOb2RlOiBudW1iZXI7XG4gICAgcmVuZGVyZXJDcmVhdGVDb21tZW50OiBudW1iZXI7XG4gIH1cbn1cblxuXG5cbmRlY2xhcmUgbGV0IGdsb2JhbDogYW55O1xuXG5jb25zdCBfX2dsb2JhbDoge25nRGV2TW9kZTogTmdEZXZNb2RlUGVyZkNvdW50ZXJzIHwgYm9vbGVhbn0gPVxuICAgIHR5cGVvZiB3aW5kb3cgIT0gJ3VuZGVmaW5lZCcgJiYgd2luZG93IHx8IHR5cGVvZiBzZWxmICE9ICd1bmRlZmluZWQnICYmIHNlbGYgfHxcbiAgICB0eXBlb2YgZ2xvYmFsICE9ICd1bmRlZmluZWQnICYmIGdsb2JhbDtcblxuZXhwb3J0IGZ1bmN0aW9uIG5nRGV2TW9kZVJlc2V0UGVyZkNvdW50ZXJzKCkge1xuICBfX2dsb2JhbC5uZ0Rldk1vZGUgPSB7XG4gICAgZmlyc3RUZW1wbGF0ZVBhc3M6IDAsXG4gICAgdE5vZGU6IDAsXG4gICAgdFZpZXc6IDAsXG4gICAgcmVuZGVyZXJDcmVhdGVUZXh0Tm9kZTogMCxcbiAgICByZW5kZXJlclNldFRleHQ6IDAsXG4gICAgcmVuZGVyZXJDcmVhdGVFbGVtZW50OiAwLFxuICAgIHJlbmRlcmVyQWRkRXZlbnRMaXN0ZW5lcjogMCxcbiAgICByZW5kZXJlclNldEF0dHJpYnV0ZTogMCxcbiAgICByZW5kZXJlclJlbW92ZUF0dHJpYnV0ZTogMCxcbiAgICByZW5kZXJlclNldFByb3BlcnR5OiAwLFxuICAgIHJlbmRlcmVyU2V0Q2xhc3NOYW1lOiAwLFxuICAgIHJlbmRlcmVyQWRkQ2xhc3M6IDAsXG4gICAgcmVuZGVyZXJSZW1vdmVDbGFzczogMCxcbiAgICByZW5kZXJlclNldFN0eWxlOiAwLFxuICAgIHJlbmRlcmVyUmVtb3ZlU3R5bGU6IDAsXG4gICAgcmVuZGVyZXJEZXN0cm95OiAwLFxuICAgIHJlbmRlcmVyRGVzdHJveU5vZGU6IDAsXG4gICAgcmVuZGVyZXJNb3ZlTm9kZTogMCxcbiAgICByZW5kZXJlclJlbW92ZU5vZGU6IDAsXG4gICAgcmVuZGVyZXJDcmVhdGVDb21tZW50OiAwLFxuICB9O1xufVxuXG4vKipcbiAqIFRoaXMgY2hlY2tzIHRvIHNlZSBpZiB0aGUgYG5nRGV2TW9kZWAgaGFzIGJlZW4gc2V0LiBJZiB5ZXMsXG4gKiB0aGFuIHdlIGhvbm9yIGl0LCBvdGhlcndpc2Ugd2UgZGVmYXVsdCB0byBkZXYgbW9kZSB3aXRoIGFkZGl0aW9uYWwgY2hlY2tzLlxuICpcbiAqIFRoZSBpZGVhIGlzIHRoYXQgdW5sZXNzIHdlIGFyZSBkb2luZyBwcm9kdWN0aW9uIGJ1aWxkIHdoZXJlIHdlIGV4cGxpY2l0bHlcbiAqIHNldCBgbmdEZXZNb2RlID09IGZhbHNlYCB3ZSBzaG91bGQgYmUgaGVscGluZyB0aGUgZGV2ZWxvcGVyIGJ5IHByb3ZpZGluZ1xuICogYXMgbXVjaCBlYXJseSB3YXJuaW5nIGFuZCBlcnJvcnMgYXMgcG9zc2libGUuXG4gKi9cbmlmICh0eXBlb2YgbmdEZXZNb2RlID09PSAndW5kZWZpbmVkJyB8fCBuZ0Rldk1vZGUpIHtcbiAgbmdEZXZNb2RlUmVzZXRQZXJmQ291bnRlcnMoKTtcbn1cbiJdfQ==

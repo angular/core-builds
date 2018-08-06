@@ -5,16 +5,10 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Type } from '../type';
+import { InjectionToken } from './injection_token';
 /**
- * A scope which targets the root injector.
- *
- * When specified as the `scope` parameter to `@Injectable` or `InjectionToken`, this special
- * scope indicates the provider for the service or token being configured belongs in the root
- * injector. This is loosely equivalent to the convention of having a `forRoot()` static
- * function within a module that configures the provider, and expecting users to only import that
- * module via its `forRoot()` function in the root injector.
- *
- * @experimental
+ * An internal token whose presence in an injector indicates that the injector should treat itself
+ * as a root scoped injector when processing requests for unknown tokens which may indicate
+ * they are provided in the root scope.
  */
-export declare const APP_ROOT_SCOPE: Type<any>;
+export declare const APP_ROOT: InjectionToken<boolean>;

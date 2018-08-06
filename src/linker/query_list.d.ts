@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 /**
  * An unmodifiable list of items that Angular keeps up to date when the state
  * of the application changes.
@@ -21,14 +21,14 @@ import { Observable } from 'rxjs/Observable';
  *
  * NOTE: In the future this class will implement an `Observable` interface.
  *
- * ### Example ([live demo](http://plnkr.co/edit/RX8sJnQYl9FWuSCWme5z?p=preview))
+ * @usageNotes
+ * ### Example
  * ```typescript
  * @Component({...})
  * class Container {
  *   @ViewChildren(Item) items:QueryList<Item>;
  * }
  * ```
- * @stable
  */
 export declare class QueryList<T> {
     readonly dirty: boolean;

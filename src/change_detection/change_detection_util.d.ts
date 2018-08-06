@@ -1,3 +1,10 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 export declare function devModeEqual(a: any, b: any): boolean;
 /**
  * Indicates that the result of a {@link Pipe} transformation has changed even though the
@@ -16,7 +23,7 @@ export declare function devModeEqual(a: any, b: any): boolean;
  *    return WrappedValue.wrap(this._latestValue); // this will force update
  *  }
  * ```
- * @stable
+ *
  */
 export declare class WrappedValue {
     /** @deprecated from 5.3, use `unwrap()` instead - will switch to protected */
@@ -34,7 +41,7 @@ export declare class WrappedValue {
 }
 /**
  * Represents a basic change from a previous to a new value.
- * @stable
+ *
  */
 export declare class SimpleChange {
     previousValue: any;

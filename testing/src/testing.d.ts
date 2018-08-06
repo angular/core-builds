@@ -17,4 +17,3 @@ export * from './test_bed';
 export * from './before_each';
 export * from './metadata_override';
 export * from './private_export_testing';
-export * from './render3';

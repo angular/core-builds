@@ -17,7 +17,7 @@ import { EmbeddedViewRef } from './view_ref';
  *
  * To instantiate Embedded Views based on a Template, use {@link ViewContainerRef#
  * createEmbeddedView}, which will create the View and attach it to the View Container.
- * @stable
+ *
  */
 export declare abstract class TemplateRef<C> {
     /**
@@ -31,6 +31,6 @@ export declare abstract class TemplateRef<C> {
      * data-binding and injection context from the original location.
      *
      */
-    readonly abstract elementRef: ElementRef;
+    abstract readonly elementRef: ElementRef;
     abstract createEmbeddedView(context: C): EmbeddedViewRef<C>;
 }

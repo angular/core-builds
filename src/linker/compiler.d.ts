@@ -29,7 +29,7 @@ export declare class ModuleWithComponentFactories<T> {
  * Each `@NgModule` provides an own `Compiler` to its injector,
  * that will use the directives/pipes of the ng module for compilation
  * of components.
- * @stable
+ *
  */
 export declare class Compiler {
     /**
@@ -57,6 +57,10 @@ export declare class Compiler {
      * Clears the cache for the given component/ngModule.
      */
     clearCacheFor(type: Type<any>): void;
+    /**
+     * Returns the id for a given NgModule, if one is defined and known to the compiler.
+     */
+    getModuleId(moduleType: Type<any>): string | undefined;
 }
 /**
  * Options for creating a compiler
@@ -68,7 +72,6 @@ export declare type CompilerOptions = {
     defaultEncapsulation?: ViewEncapsulation;
     providers?: StaticProvider[];
     missingTranslation?: MissingTranslationStrategy;
-    enableLegacyTemplate?: boolean;
     preserveWhitespaces?: boolean;
 };
 /**

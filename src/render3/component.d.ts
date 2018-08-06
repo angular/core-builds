@@ -5,14 +5,18 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { Type } from '../core';
 import { Injector } from '../di/injector';
-import { ComponentRef as viewEngine_ComponentRef } from '../linker/component_factory';
-import { ComponentDef, ComponentType } from './interfaces/definition';
+import { Sanitizer } from '../sanitization/security';
+import { ComponentDef, ComponentDefInternal, ComponentType } from './interfaces/definition';
 import { RElement, RendererFactory3 } from './interfaces/renderer';
+import { RootContext } from './interfaces/view';
 /** Options that control how the component should be bootstrapped. */
 export interface CreateComponentOptions {
     /** Which renderer factory to use. */
     rendererFactory?: RendererFactory3;
+    /** A custom sanitizer instance */
+    sanitizer?: Sanitizer;
     /**
      * Host element on which the component will be bootstrapped. If not specified,
      * the component definition's `tag` is used to query the existing DOM for the
@@ -25,9 +29,15 @@ export interface CreateComponentOptions {
      * List of features to be applied to the created component. Features are simply
      * functions that decorate a component with a certain behavior.
      *
-     * Example: PublicFeature is a function that makes the component public to the DI system.
+     * Typically, the features in this list are features that cannot be added to the
+     * other features list in the component definition because they rely on other factors.
+     *
+     * Example: `RootLifecycleHooks` is a function that adds lifecycle hook capabilities
+     * to root components in a tree-shakable way. It cannot be added to the component
+     * features list because there's no way of knowing when the component will be used as
+     * a root component.
      */
-    features?: (<T>(component: T, componentDef: ComponentDef<T>) => void)[];
+    hostFeatures?: (<T>(component: T, componentDef: ComponentDef<T, string>) => void)[];
     /**
      * A function which is used to schedule change detection work in the future.
      *
@@ -41,13 +51,6 @@ export interface CreateComponentOptions {
      */
     scheduler?: (work: () => void) => void;
 }
-/**
- * Bootstraps a component, then creates and returns a `ComponentRef` for that component.
- *
- * @param componentType Component to bootstrap
- * @param options Optional parameters which control bootstrapping
- */
-export declare function createComponentRef<T>(componentType: ComponentType<T>, opts: CreateComponentOptions): viewEngine_ComponentRef<T>;
 export declare const NULL_INJECTOR: Injector;
 /**
  * Bootstraps a Component into an existing host element and returns an instance
@@ -62,7 +65,22 @@ export declare const NULL_INJECTOR: Injector;
  * @param componentType Component to bootstrap
  * @param options Optional parameters which control bootstrapping
  */
-export declare function renderComponent<T>(componentType: ComponentType<T>, opts?: CreateComponentOptions): T;
+export declare function renderComponent<T>(componentType: ComponentType<T> | Type<T>, opts?: CreateComponentOptions): T;
+export declare function createRootContext(scheduler: (workFn: () => void) => void): RootContext;
+/**
+ * Used to enable lifecycle hooks on the root component.
+ *
+ * Include this feature when calling `renderComponent` if the root component
+ * you are rendering has lifecycle hooks defined. Otherwise, the hooks won't
+ * be called properly.
+ *
+ * Example:
+ *
+ * ```
+ * renderComponent(AppComponent, {features: [RootLifecycleHooks]});
+ * ```
+ */
+export declare function LifecycleHooksFeature(component: any, def: ComponentDefInternal<any>): void;
 /**
  * Retrieve the host element of the component.
  *

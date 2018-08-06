@@ -7,7 +7,7 @@
  */
 import './ng_dev_mode';
 import { TNode } from './interfaces/node';
-import { CssSelector, CssSelectorWithNegations, SimpleCssSelector } from './interfaces/projection';
+import { CssSelector, CssSelectorList } from './interfaces/projection';
 /**
  * A utility function to match an Ivy node static data against a simple CSS selector
  *
@@ -15,9 +15,8 @@ import { CssSelector, CssSelectorWithNegations, SimpleCssSelector } from './inte
  * @param selector
  * @returns true if node matches the selector.
  */
-export declare function isNodeMatchingSimpleSelector(tNode: TNode, selector: SimpleCssSelector): boolean;
-export declare function isNodeMatchingSelectorWithNegations(tNode: TNode, selector: CssSelectorWithNegations): boolean;
 export declare function isNodeMatchingSelector(tNode: TNode, selector: CssSelector): boolean;
+export declare function isNodeMatchingSelectorList(tNode: TNode, selector: CssSelectorList): boolean;
 export declare function getProjectAsAttrValue(tNode: TNode): string | null;
 /**
  * Checks a given node against matching selectors and returns
@@ -26,4 +25,4 @@ export declare function getProjectAsAttrValue(tNode: TNode): string | null;
  * This function takes into account the ngProjectAs attribute: if present its value will be compared
  * to the raw (un-parsed) CSS selector instead of using standard selector matching logic.
  */
-export declare function matchingSelectorIndex(tNode: TNode, selectors: CssSelector[], textSelectors: string[]): number;
+export declare function matchingSelectorIndex(tNode: TNode, selectors: CssSelectorList[], textSelectors: string[]): number;

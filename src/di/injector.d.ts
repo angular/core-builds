@@ -11,34 +11,40 @@ import { StaticProvider } from './provider';
 export declare const SOURCE = "__source";
 export declare const THROW_IF_NOT_FOUND: Object;
 /**
- * @whatItDoes Injector interface
- * @howToUse
- * ```
- * const injector: Injector = ...;
- * injector.get(...);
- * ```
+ * An InjectionToken that gets the current `Injector` for `createInjector()`-style injectors.
  *
- * @description
- * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
+ * Requesting this token instead of `Injector` allows `StaticInjector` to be tree-shaken from a
+ * project.
  *
+ * @experimental
+ */
+export declare const INJECTOR: InjectionToken<Injector>;
+export declare class NullInjector implements Injector {
+    get(token: any, notFoundValue?: any): any;
+}
+/**
+ * Concrete injectors implement this interface.
+ *
+ * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ *
+ * @usageNotes
  * ### Example
  *
  * {@example core/di/ts/injector_spec.ts region='Injector'}
  *
  * `Injector` returns itself when given `Injector` as a token:
+ *
  * {@example core/di/ts/injector_spec.ts region='injectInjector'}
  *
- * @stable
+ *
  */
 export declare abstract class Injector {
     static THROW_IF_NOT_FOUND: Object;
     static NULL: Injector;
     /**
      * Retrieves an instance from the injector based on the provided token.
-     * If not found:
-     * - Throws an error if no `notFoundValue` that is not equal to
-     * Injector.THROW_IF_NOT_FOUND is given
-     * - Returns the `notFoundValue` otherwise
+     * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
+     * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
      */
     abstract get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
     /**
@@ -55,7 +61,9 @@ export declare abstract class Injector {
         parent?: Injector;
         name?: string;
     }): Injector;
+    static ngInjectableDef: never;
 }
+export declare const USE_VALUE: string;
 export declare class StaticInjector implements Injector {
     readonly parent: Injector;
     readonly source: string | null;
@@ -67,22 +75,30 @@ export declare class StaticInjector implements Injector {
 }
 /**
  * Injection flags for DI.
- *
- * @stable
  */
 export declare const enum InjectFlags {
     Default = 0,
-    /** Skip the node that is requesting injection. */
-    SkipSelf = 1,
+    /**
+     * Specifies that an injector should retrieve a dependency from any injector until reaching the
+     * host element of the current component. (Only used with Element Injector)
+     */
+    Host = 1,
     /** Don't descend into ancestors of the node requesting injection. */
     Self = 2,
+    /** Skip the node that is requesting injection. */
+    SkipSelf = 4,
+    /** Inject `defaultValue` instead if token not found. */
+    Optional = 8
 }
-export declare function setCurrentInjector(injector: Injector | null): Injector | null;
+export declare function setCurrentInjector(injector: Injector | null | undefined): Injector | undefined | null;
 /**
  * Injects a token from the currently active injector.
  *
  * This function must be used in the context of a factory function such as one defined for an
- * `InjectionToken`, and will throw an error if not called from such a context. For example:
+ * `InjectionToken`, and will throw an error if not called from such a context.
+ *
+ * @usageNotes
+ * ### Example
  *
  * {@example core/di/ts/injector_spec.ts region='ShakeableInjectionToken'}
  *
@@ -92,6 +108,6 @@ export declare function setCurrentInjector(injector: Injector | null): Injector 
  *
  * @experimental
  */
-export declare function inject<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: undefined, flags?: InjectFlags): T;
-export declare function inject<T>(token: Type<T> | InjectionToken<T>, notFoundValue: T | null, flags?: InjectFlags): T | null;
+export declare function inject<T>(token: Type<T> | InjectionToken<T>): T;
+export declare function inject<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
 export declare function injectArgs(types: (Type<any> | InjectionToken<any> | any[])[]): any[];
