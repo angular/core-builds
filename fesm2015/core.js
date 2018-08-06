@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.0+18.sha-26a15cc
+ * @license Angular v7.0.0-beta.0+22.sha-97b5cb2
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2008,7 +2008,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-beta.0+18.sha-26a15cc');
+const VERSION = new Version('7.0.0-beta.0+22.sha-97b5cb2');
 
 /**
  * @fileoverview added by tsickle
@@ -6312,15 +6312,13 @@ class DebugNode {
      * @param {?} _debugContext
      */
     constructor(nativeNode, parent, _debugContext) {
-        this._debugContext = _debugContext;
         this.nativeNode = nativeNode;
+        this._debugContext = _debugContext;
+        this.listeners = [];
+        this.parent = null;
         if (parent && parent instanceof DebugElement) {
             parent.addChild(this);
         }
-        else {
-            this.parent = null;
-        }
-        this.listeners = [];
     }
     /**
      * @return {?}
@@ -20233,8 +20231,6 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     if (componentDef.type != componentType)
         componentDef.type = componentType;
     /** @type {?} */
-    let component;
-    /** @type {?} */
     const componentTag = /** @type {?} */ (((/** @type {?} */ ((componentDef.selectors))[0]))[0]);
     /** @type {?} */
     const hostNode = locateHostElement(rendererFactory, opts.host || componentTag);
@@ -20247,13 +20243,16 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     const oldView = enterView(rootView, /** @type {?} */ ((null)));
     /** @type {?} */
     let elementNode;
+    /** @type {?} */
+    let component;
     try {
         if (rendererFactory.begin)
             rendererFactory.begin();
         // Create element node at index 0 in data array
         elementNode = hostElement(componentTag, hostNode, componentDef, sanitizer);
         // Create directive instance with factory() and store at index 0 in directives array
-        rootContext.components.push(component = /** @type {?} */ (baseDirectiveCreate(0, componentDef.factory(), componentDef)));
+        component = baseDirectiveCreate(0, /** @type {?} */ (componentDef.factory()), componentDef);
+        rootContext.components.push(component);
         (/** @type {?} */ (elementNode.data))[CONTEXT] = component;
         initChangeDetectorIfExisting(elementNode.nodeInjector, component, /** @type {?} */ ((elementNode.data)));
         opts.hostFeatures && opts.hostFeatures.forEach((feature) => feature(component, componentDef));
@@ -22047,10 +22046,10 @@ class TemplateRef$1 {
      */
     constructor(_declarationParentView, elementRef, _tView, _renderer, _queries) {
         this._declarationParentView = _declarationParentView;
+        this.elementRef = elementRef;
         this._tView = _tView;
         this._renderer = _renderer;
         this._queries = _queries;
-        this.elementRef = elementRef;
     }
     /**
      * @param {?} context
