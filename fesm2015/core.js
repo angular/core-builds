@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.0+37.sha-3355502
+ * @license Angular v7.0.0-beta.0+41.sha-2505c07
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2010,7 +2010,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-beta.0+37.sha-3355502');
+const VERSION = new Version('7.0.0-beta.0+41.sha-2505c07');
 
 /**
  * @fileoverview added by tsickle
@@ -4873,17 +4873,14 @@ class Testability {
         if (!this.taskTrackingZone) {
             return [];
         }
+        // Copy the tasks data so that we don't leak tasks.
         return this.taskTrackingZone.macroTasks.map((t) => {
             return {
                 source: t.source,
-                isPeriodic: t.data.isPeriodic,
-                delay: t.data.delay,
                 // From TaskTrackingZone:
                 // https://github.com/angular/zone.js/blob/master/lib/zone-spec/task-tracking.ts#L40
                 creationLocation: /** @type {?} */ ((/** @type {?} */ (t)).creationLocation),
-                // Added by Zones for XHRs
-                // https://github.com/angular/zone.js/blob/master/lib/browser/browser.ts#L133
-                xhr: (/** @type {?} */ (t.data)).target
+                data: t.data
             };
         });
     }

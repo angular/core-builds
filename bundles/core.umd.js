@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.0+37.sha-3355502
+ * @license Angular v7.0.0-beta.0+41.sha-2505c07
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1751,7 +1751,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-beta.0+37.sha-3355502');
+    var VERSION = new Version('7.0.0-beta.0+41.sha-2505c07');
 
     /**
      * @license
@@ -4095,17 +4095,14 @@
             if (!this.taskTrackingZone) {
                 return [];
             }
+            // Copy the tasks data so that we don't leak tasks.
             return this.taskTrackingZone.macroTasks.map(function (t) {
                 return {
                     source: t.source,
-                    isPeriodic: t.data.isPeriodic,
-                    delay: t.data.delay,
                     // From TaskTrackingZone:
                     // https://github.com/angular/zone.js/blob/master/lib/zone-spec/task-tracking.ts#L40
                     creationLocation: t.creationLocation,
-                    // Added by Zones for XHRs
-                    // https://github.com/angular/zone.js/blob/master/lib/browser/browser.ts#L133
-                    xhr: t.data.target
+                    data: t.data
                 };
             });
         };
