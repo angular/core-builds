@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.0.0-beta.0+38.sha-16c03c0
+ * @license Angular v7.0.0-beta.0+37.sha-3355502
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __spread, __read, __extends, __assign, __values } from 'tslib';
+import { __spread, __read, __assign, __extends, __values } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { share } from 'rxjs/operators';
 
@@ -1693,7 +1693,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('7.0.0-beta.0+38.sha-16c03c0');
+var VERSION = new Version('7.0.0-beta.0+37.sha-3355502');
 
 /**
  * @license
@@ -4037,14 +4037,17 @@ var Testability = /** @class */ (function () {
         if (!this.taskTrackingZone) {
             return [];
         }
-        // Copy the tasks data so that we don't leak tasks.
         return this.taskTrackingZone.macroTasks.map(function (t) {
             return {
                 source: t.source,
+                isPeriodic: t.data.isPeriodic,
+                delay: t.data.delay,
                 // From TaskTrackingZone:
                 // https://github.com/angular/zone.js/blob/master/lib/zone-spec/task-tracking.ts#L40
                 creationLocation: t.creationLocation,
-                data: t.data
+                // Added by Zones for XHRs
+                // https://github.com/angular/zone.js/blob/master/lib/browser/browser.ts#L133
+                xhr: t.data.target
             };
         });
     };

@@ -19,14 +19,10 @@ export declare interface PublicTestability {
 }
 export interface PendingMacrotask {
     source: string;
-    creationLocation: Error;
-    runCount?: number;
-    data: TaskData;
-}
-export interface TaskData {
-    target?: XMLHttpRequest;
+    isPeriodic: boolean;
     delay?: number;
-    isPeriodic?: boolean;
+    creationLocation: Error;
+    xhr?: XMLHttpRequest;
 }
 export declare type DoneCallback = (didWork: boolean, tasks?: PendingMacrotask[]) => void;
 export declare type UpdateCallback = (tasks: PendingMacrotask[]) => boolean;
