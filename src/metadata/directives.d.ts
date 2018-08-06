@@ -128,7 +128,7 @@ export interface Directive {
      * Enumerates the set of event-bound output properties.
      *
      * When an output property emits an event, an event handler attached to that event
-     * in the template is invoked.
+     * the template is invoked.
      *
      * The `outputs` property defines a set of `directiveProperty` to `bindingProperty`
      * configuration:
