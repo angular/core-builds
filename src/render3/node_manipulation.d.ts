@@ -16,6 +16,7 @@ export declare function getChildLNode(node: LNode): LNode | null;
 /** Retrieves the parent LNode of a given node. */
 export declare function getParentLNode(node: LContainerNode | LElementNode | LElementContainerNode | LTextNode | LProjectionNode): LElementNode | LElementContainerNode | LViewNode;
 export declare function getParentLNode(node: LViewNode): LContainerNode | null;
+export declare function getParentLNode(node: LElementContainerNode): LElementNode | LElementContainerNode | LViewNode;
 export declare function getParentLNode(node: LNode): LElementNode | LElementContainerNode | LContainerNode | LViewNode | null;
 /**
  * Given a current view, finds the nearest component's host (LElement).
