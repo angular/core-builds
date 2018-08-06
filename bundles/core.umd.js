@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.0+28.sha-c158702
+ * @license Angular v7.0.0-beta.0+32.sha-7d006c5
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -174,11 +174,13 @@
      * @usageNotes
      * ### Basic Example
      *
+     * #### Plain InjectionToken
+     *
      * {@example core/di/ts/injector_spec.ts region='InjectionToken'}
      *
-     * ### Tree-shakeable Example
+     * #### Tree-shakable InjectionToken
      *
-     * {@example core/di/ts/injector_spec.ts region='ShakeableInjectionToken'}
+     * {@example core/di/ts/injector_spec.ts region='ShakableInjectionToken'}
      *
      */
     var InjectionToken = /** @class */ (function () {
@@ -15603,7 +15605,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-beta.0+28.sha-c158702');
+    var VERSION = new Version('7.0.0-beta.0+32.sha-7d006c5');
 
     /**
      * @license
