@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.0.0-beta.0+18.sha-26a15cc
+ * @license Angular v7.0.0-beta.0+22.sha-97b5cb2
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __decorate, __metadata, __param } from 'tslib';
+import { __decorate, __param, __metadata } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { share } from 'rxjs/operators';
 import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compileInjectable, compilePipeFromMetadata } from '@angular/compiler';
@@ -8001,7 +8001,6 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     const componentDef = componentType.ngComponentDef;
     if (componentDef.type != componentType)
         componentDef.type = componentType;
-    let component;
     // The first index of the first selector is the tag name.
     const componentTag = componentDef.selectors[0][0];
     const hostNode = locateHostElement(rendererFactory, opts.host || componentTag);
@@ -8010,13 +8009,15 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     rootView[INJECTOR$1] = opts.injector || null;
     const oldView = enterView(rootView, null);
     let elementNode;
+    let component;
     try {
         if (rendererFactory.begin)
             rendererFactory.begin();
         // Create element node at index 0 in data array
         elementNode = hostElement(componentTag, hostNode, componentDef, sanitizer);
         // Create directive instance with factory() and store at index 0 in directives array
-        rootContext.components.push(component = baseDirectiveCreate(0, componentDef.factory(), componentDef));
+        component = baseDirectiveCreate(0, componentDef.factory(), componentDef);
+        rootContext.components.push(component);
         elementNode.data[CONTEXT] = component;
         initChangeDetectorIfExisting(elementNode.nodeInjector, component, elementNode.data);
         opts.hostFeatures && opts.hostFeatures.forEach((feature) => feature(component, componentDef));
@@ -10771,10 +10772,10 @@ function getOrCreateTemplateRef(di) {
 class TemplateRef$1 {
     constructor(_declarationParentView, elementRef, _tView, _renderer, _queries) {
         this._declarationParentView = _declarationParentView;
+        this.elementRef = elementRef;
         this._tView = _tView;
         this._renderer = _renderer;
         this._queries = _queries;
-        this.elementRef = elementRef;
     }
     createEmbeddedView(context, containerNode, index) {
         const viewNode = createEmbeddedViewNode(this._tView, context, this._declarationParentView, this._renderer, this._queries);
@@ -14270,6 +14271,7 @@ const angularCoreEnv = {
     'ɵinjectTemplateRef': injectTemplateRef,
     'ɵinjectViewContainerRef': injectViewContainerRef,
     'ɵNgOnChangesFeature': NgOnChangesFeature,
+    'ɵPublicFeature': PublicFeature,
     'ɵInheritDefinitionFeature': InheritDefinitionFeature,
     'ɵa': elementAttribute,
     'ɵb': bind,
@@ -14801,11 +14803,9 @@ function parseInputOutputs(values) {
  * Compile an Angular injectable according to its `Injectable` metadata, and patch the resulting
  * `ngInjectableDef` onto the injectable type.
  */
-function compileInjectable$1(type, meta) {
-    // TODO(alxhub): handle JIT of bare @Injectable().
-    if (!meta) {
-        return;
-    }
+function compileInjectable$1(type, srcMeta) {
+    // Allow the compilation of a class with a `@Injectable()` decorator without parameters
+    const meta = srcMeta || { providedIn: null };
     let def = null;
     Object.defineProperty(type, NG_INJECTABLE_DEF, {
         get: () => {
@@ -15208,7 +15208,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('7.0.0-beta.0+18.sha-26a15cc');
+const VERSION = new Version('7.0.0-beta.0+22.sha-97b5cb2');
 
 /**
  * @license
@@ -15244,15 +15244,13 @@ class EventListener {
  */
 class DebugNode {
     constructor(nativeNode, parent, _debugContext) {
-        this._debugContext = _debugContext;
         this.nativeNode = nativeNode;
+        this._debugContext = _debugContext;
+        this.listeners = [];
+        this.parent = null;
         if (parent && parent instanceof DebugElement) {
             parent.addChild(this);
         }
-        else {
-            this.parent = null;
-        }
-        this.listeners = [];
     }
     get injector() { return this._debugContext.injector; }
     get componentInstance() { return this._debugContext.component; }

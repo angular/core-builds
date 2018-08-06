@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.0.0-beta.0+18.sha-26a15cc
+ * @license Angular v7.0.0-beta.0+22.sha-97b5cb2
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __decorate, __param, __metadata, __assign, __extends, __spread, __read, __values } from 'tslib';
+import { __extends, __spread, __decorate, __metadata, __assign, __param, __read, __values } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { share } from 'rxjs/operators';
 import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compileInjectable, compilePipeFromMetadata } from '@angular/compiler';
@@ -8148,7 +8148,6 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     var componentDef = componentType.ngComponentDef;
     if (componentDef.type != componentType)
         componentDef.type = componentType;
-    var component;
     // The first index of the first selector is the tag name.
     var componentTag = componentDef.selectors[0][0];
     var hostNode = locateHostElement(rendererFactory, opts.host || componentTag);
@@ -8157,13 +8156,15 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     rootView[INJECTOR$1] = opts.injector || null;
     var oldView = enterView(rootView, null);
     var elementNode;
+    var component;
     try {
         if (rendererFactory.begin)
             rendererFactory.begin();
         // Create element node at index 0 in data array
         elementNode = hostElement(componentTag, hostNode, componentDef, sanitizer);
         // Create directive instance with factory() and store at index 0 in directives array
-        rootContext.components.push(component = baseDirectiveCreate(0, componentDef.factory(), componentDef));
+        component = baseDirectiveCreate(0, componentDef.factory(), componentDef);
+        rootContext.components.push(component);
         elementNode.data[CONTEXT] = component;
         initChangeDetectorIfExisting(elementNode.nodeInjector, component, elementNode.data);
         opts.hostFeatures && opts.hostFeatures.forEach(function (feature) { return feature(component, componentDef); });
@@ -11069,10 +11070,10 @@ function getOrCreateTemplateRef(di) {
 var TemplateRef$1 = /** @class */ (function () {
     function TemplateRef$$1(_declarationParentView, elementRef, _tView, _renderer, _queries) {
         this._declarationParentView = _declarationParentView;
+        this.elementRef = elementRef;
         this._tView = _tView;
         this._renderer = _renderer;
         this._queries = _queries;
-        this.elementRef = elementRef;
     }
     TemplateRef$$1.prototype.createEmbeddedView = function (context, containerNode, index) {
         var viewNode = createEmbeddedViewNode(this._tView, context, this._declarationParentView, this._renderer, this._queries);
@@ -14665,6 +14666,7 @@ var angularCoreEnv = {
     'ɵinjectTemplateRef': injectTemplateRef,
     'ɵinjectViewContainerRef': injectViewContainerRef,
     'ɵNgOnChangesFeature': NgOnChangesFeature,
+    'ɵPublicFeature': PublicFeature,
     'ɵInheritDefinitionFeature': InheritDefinitionFeature,
     'ɵa': elementAttribute,
     'ɵb': bind,
@@ -15204,11 +15206,9 @@ function parseInputOutputs(values) {
  * Compile an Angular injectable according to its `Injectable` metadata, and patch the resulting
  * `ngInjectableDef` onto the injectable type.
  */
-function compileInjectable$1(type, meta) {
-    // TODO(alxhub): handle JIT of bare @Injectable().
-    if (!meta) {
-        return;
-    }
+function compileInjectable$1(type, srcMeta) {
+    // Allow the compilation of a class with a `@Injectable()` decorator without parameters
+    var meta = srcMeta || { providedIn: null };
     var def = null;
     Object.defineProperty(type, NG_INJECTABLE_DEF, {
         get: function () {
@@ -15624,7 +15624,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('7.0.0-beta.0+18.sha-26a15cc');
+var VERSION = new Version('7.0.0-beta.0+22.sha-97b5cb2');
 
 /**
  * @license
@@ -15661,15 +15661,13 @@ var EventListener = /** @class */ (function () {
  */
 var DebugNode = /** @class */ (function () {
     function DebugNode(nativeNode, parent, _debugContext) {
-        this._debugContext = _debugContext;
         this.nativeNode = nativeNode;
+        this._debugContext = _debugContext;
+        this.listeners = [];
+        this.parent = null;
         if (parent && parent instanceof DebugElement) {
             parent.addChild(this);
         }
-        else {
-            this.parent = null;
-        }
-        this.listeners = [];
     }
     Object.defineProperty(DebugNode.prototype, "injector", {
         get: function () { return this._debugContext.injector; },
