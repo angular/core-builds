@@ -1,9 +1,11 @@
 import { LElementNode } from './interfaces/node';
 import { LViewData } from './interfaces/view';
 /**
-* Must use this method for CD (instead of === ) since NaN !== NaN
-*/
-export declare function isDifferent(a: any, b: any): boolean;
+ * Returns wether the values are different from a change detection stand point.
+ *
+ * Constraints are relaxed in checkNoChanges mode. See `devModeEqual` for details.
+ */
+export declare function isDifferent(a: any, b: any, checkNoChangesMode: boolean): boolean;
 export declare function stringify(value: any): string;
 /**
  *  Function that throws a "not implemented" error so it's clear certain
