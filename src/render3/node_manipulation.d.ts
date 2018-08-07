@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { LContainer } from './interfaces/container';
-import { LContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode } from './interfaces/node';
+import { LContainerNode, LElementContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode } from './interfaces/node';
 import { RNode, RText, Renderer3 } from './interfaces/renderer';
 import { LViewData } from './interfaces/view';
 /** Retrieves the sibling node for the given node. */
@@ -14,9 +14,10 @@ export declare function getNextLNode(node: LNode): LNode | null;
 /** Retrieves the first child of a given node */
 export declare function getChildLNode(node: LNode): LNode | null;
 /** Retrieves the parent LNode of a given node. */
-export declare function getParentLNode(node: LContainerNode | LElementNode | LTextNode | LProjectionNode): LElementNode | LViewNode;
+export declare function getParentLNode(node: LContainerNode | LElementNode | LElementContainerNode | LTextNode | LProjectionNode): LElementNode | LElementContainerNode | LViewNode;
 export declare function getParentLNode(node: LViewNode): LContainerNode | null;
-export declare function getParentLNode(node: LNode): LElementNode | LContainerNode | LViewNode | null;
+export declare function getParentLNode(node: LElementContainerNode): LElementNode | LElementContainerNode | LViewNode;
+export declare function getParentLNode(node: LNode): LElementNode | LElementContainerNode | LContainerNode | LViewNode | null;
 /**
  * Given a current view, finds the nearest component's host (LElement).
  *
@@ -155,4 +156,4 @@ export declare function removeChild(parent: LNode, child: RNode | null, currentV
  * @param currentParent The last parent element to be processed
  * @param currentView Current LView
  */
-export declare function appendProjectedNode(node: LElementNode | LTextNode | LContainerNode, currentParent: LElementNode | LViewNode, currentView: LViewData, renderParent: LElementNode): void;
+export declare function appendProjectedNode(node: LElementNode | LElementContainerNode | LTextNode | LContainerNode, currentParent: LElementNode | LElementContainerNode | LViewNode, currentView: LViewData, renderParent: LElementNode): void;

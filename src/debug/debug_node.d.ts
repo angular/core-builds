@@ -16,8 +16,8 @@ export declare class EventListener {
  * @experimental All debugging apis are currently experimental.
  */
 export declare class DebugNode {
-    private _debugContext;
     nativeNode: any;
+    private _debugContext;
     listeners: EventListener[];
     parent: DebugElement | null;
     constructor(nativeNode: any, parent: DebugNode | null, _debugContext: DebugContext);
