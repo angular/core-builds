@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0+100.sha-183757d
+ * @license Angular v7.0.0-beta.0+38.sha-16c03c0
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -96,11 +96,13 @@ function defineInjector(options) {
  * \@usageNotes
  * ### Basic Example
  *
+ * #### Plain InjectionToken
+ *
  * {\@example core/di/ts/injector_spec.ts region='InjectionToken'}
  *
- * ### Tree-shakeable Example
+ * #### Tree-shakable InjectionToken
  *
- * {\@example core/di/ts/injector_spec.ts region='ShakeableInjectionToken'}
+ * {\@example core/di/ts/injector_spec.ts region='ShakableInjectionToken'}
  *
  * @template T
  */
@@ -2008,7 +2010,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('6.1.0+100.sha-183757d');
+const VERSION = new Version('7.0.0-beta.0+38.sha-16c03c0');
 
 /**
  * @fileoverview added by tsickle
@@ -4871,17 +4873,14 @@ class Testability {
         if (!this.taskTrackingZone) {
             return [];
         }
+        // Copy the tasks data so that we don't leak tasks.
         return this.taskTrackingZone.macroTasks.map((t) => {
             return {
                 source: t.source,
-                isPeriodic: t.data.isPeriodic,
-                delay: t.data.delay,
                 // From TaskTrackingZone:
                 // https://github.com/angular/zone.js/blob/master/lib/zone-spec/task-tracking.ts#L40
                 creationLocation: /** @type {?} */ ((/** @type {?} */ (t)).creationLocation),
-                // Added by Zones for XHRs
-                // https://github.com/angular/zone.js/blob/master/lib/browser/browser.ts#L133
-                xhr: (/** @type {?} */ (t.data)).target
+                data: t.data
             };
         });
     }
@@ -6312,15 +6311,13 @@ class DebugNode {
      * @param {?} _debugContext
      */
     constructor(nativeNode, parent, _debugContext) {
-        this._debugContext = _debugContext;
         this.nativeNode = nativeNode;
+        this._debugContext = _debugContext;
+        this.listeners = [];
+        this.parent = null;
         if (parent && parent instanceof DebugElement) {
             parent.addChild(this);
         }
-        else {
-            this.parent = null;
-        }
-        this.listeners = [];
     }
     /**
      * @return {?}
@@ -15260,6 +15257,7 @@ function ngDevModeResetPerfCounters() {
         rendererDestroyNode: 0,
         rendererMoveNode: 0,
         rendererRemoveNode: 0,
+        rendererCreateComment: 0,
     };
 }
 /**
@@ -15419,12 +15417,18 @@ function typeName(type) {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * Must use this method for CD (instead of === ) since NaN !== NaN
+ * Returns wether the values are different from a change detection stand point.
+ *
+ * Constraints are relaxed in checkNoChanges mode. See `devModeEqual` for details.
  * @param {?} a
  * @param {?} b
+ * @param {?} checkNoChangesMode
  * @return {?}
  */
-function isDifferent(a, b) {
+function isDifferent(a, b, checkNoChangesMode) {
+    if (ngDevMode && checkNoChangesMode) {
+        return !devModeEqual(a, b);
+    }
     // NaN is the only value that is not equal to itself so the first
     // test checks if both a and b are not NaN
     return !(a !== a && b !== b) && a !== b;
@@ -15556,6 +15560,17 @@ function getParentLNode(node) {
     /** @type {?} */
     const parent = node.tNode.parent;
     return readElementValue(parent ? node.view[parent.index] : node.view[HOST_NODE]);
+}
+/**
+ * Retrieves render parent LElementNode for a given view.
+ * Might be null if a view is not yet attatched to any container.
+ * @param {?} viewNode
+ * @return {?}
+ */
+function getRenderParent(viewNode) {
+    /** @type {?} */
+    const container = getParentLNode(viewNode);
+    return container ? container.data[RENDER_PARENT] : null;
 }
 /** *
  * Stack used to keep track of projection nodes in walkLNodeTree.
@@ -16006,6 +16021,50 @@ function executePipeOnDestroys(viewData) {
     }
 }
 /**
+ * @param {?} parent
+ * @param {?} currentView
+ * @return {?}
+ */
+function canInsertNativeChildOfElement(parent, currentView) {
+    if (parent.view !== currentView) {
+        // If the Parent view is not the same as current view than we are inserting across
+        // Views. This happens when we insert a root element of the component view into
+        // the component host element and it should always be eager.
+        return true;
+    }
+    // Parent elements can be a component which may have projection.
+    if (parent.data === null) {
+        // Parent is a regular non-component element. We should eagerly insert into it
+        // since we know that this relationship will never be broken.
+        return true;
+    }
+    // Parent is a Component. Component's content nodes are not inserted immediately
+    // because they will be projected, and so doing insert at this point would be wasteful.
+    // Since the projection would than move it to its final destination.
+    return false;
+}
+/**
+ * @param {?} parent
+ * @return {?}
+ */
+function canInsertNativeChildOfView(parent) {
+    ngDevMode && assertNodeType(parent, 2 /* View */);
+    /** @type {?} */
+    const grandParentContainer = /** @type {?} */ (getParentLNode(parent));
+    if (grandParentContainer == null) {
+        // The `View` is not inserted into a `Container` we have to delay insertion.
+        return false;
+    }
+    ngDevMode && assertNodeType(grandParentContainer, 0 /* Container */);
+    if (grandParentContainer.data[RENDER_PARENT] == null) {
+        // The parent `Container` itself is disconnected. So we have to delay.
+        return false;
+    }
+    // The parent `Container` is in inserted state, so we can eagerly insert into
+    // this location.
+    return true;
+}
+/**
  * Returns whether a native element can be inserted into the given parent.
  *
  * There are two reasons why we may not be able to insert a element immediately.
@@ -16024,47 +16083,48 @@ function executePipeOnDestroys(viewData) {
  */
 function canInsertNativeNode(parent, currentView) {
     // We can only insert into a Component or View. Any other type should be an Error.
-    ngDevMode && assertNodeOfPossibleTypes(parent, 3 /* Element */, 2 /* View */);
+    ngDevMode && assertNodeOfPossibleTypes(parent, 3 /* Element */, 4 /* ElementContainer */, 2 /* View */);
     if (parent.tNode.type === 3 /* Element */) {
-        // Parent is an element.
-        if (parent.view !== currentView) {
-            // If the Parent view is not the same as current view than we are inserting across
-            // Views. This happens when we insert a root element of the component view into
-            // the component host element and it should always be eager.
-            return true;
+        // Parent is a regular element or a component
+        return canInsertNativeChildOfElement(/** @type {?} */ (parent), currentView);
+    }
+    else if (parent.tNode.type === 4 /* ElementContainer */) {
+        /** @type {?} */
+        let grandParent = getParentLNode(parent);
+        while (grandParent !== null && grandParent.tNode.type === 4 /* ElementContainer */) {
+            grandParent = getParentLNode(grandParent);
         }
-        // Parent elements can be a component which may have projection.
-        if (parent.data === null) {
-            // Parent is a regular non-component element. We should eagerly insert into it
-            // since we know that this relationship will never be broken.
-            return true;
+        if (grandParent === null) {
+            return false;
+        }
+        else if (grandParent.tNode.type === 3 /* Element */) {
+            return canInsertNativeChildOfElement(/** @type {?} */ (grandParent), currentView);
         }
         else {
-            // Parent is a Component. Component's content nodes are not inserted immediately
-            // because they will be projected, and so doing insert at this point would be wasteful.
-            // Since the projection would than move it to its final destination.
-            return false;
+            return canInsertNativeChildOfView(/** @type {?} */ (grandParent));
         }
     }
     else {
         // Parent is a View.
-        ngDevMode && assertNodeType(parent, 2 /* View */);
-        /** @type {?} */
-        const grandParentContainer = /** @type {?} */ (getParentLNode(parent));
-        if (grandParentContainer == null) {
-            // The `View` is not inserted into a `Container` we have to delay insertion.
-            return false;
-        }
-        ngDevMode && assertNodeType(grandParentContainer, 0 /* Container */);
-        if (grandParentContainer.data[RENDER_PARENT] == null) {
-            // The parent `Container` itself is disconnected. So we have to delay.
-            return false;
-        }
-        else {
-            // The parent `Container` is in inserted state, so we can eagerly insert into
-            // this location.
-            return true;
-        }
+        return canInsertNativeChildOfView(/** @type {?} */ (parent));
+    }
+}
+/**
+ * Inserts a native node before another native node for a given parent using {\@link Renderer3}.
+ * This is a utility function that can be used when native nodes were determined - it abstracts an
+ * actual renderer being used.
+ * @param {?} renderer
+ * @param {?} parent
+ * @param {?} child
+ * @param {?} beforeNode
+ * @return {?}
+ */
+function nativeInsertBefore(renderer, parent, child, beforeNode) {
+    if (isProceduralRenderer(renderer)) {
+        renderer.insertBefore(parent, child, beforeNode);
+    }
+    else {
+        parent.insertBefore(child, beforeNode, true);
     }
 }
 /**
@@ -16092,8 +16152,21 @@ function appendChild(parent, child, currentView) {
             const index = views.indexOf(/** @type {?} */ (parent));
             /** @type {?} */
             const beforeNode = index + 1 < views.length ? (/** @type {?} */ ((getChildLNode(views[index + 1])))).native : container.native;
-            isProceduralRenderer(renderer) ?
-                renderer.insertBefore(/** @type {?} */ ((renderParent)).native, child, beforeNode) : /** @type {?} */ ((renderParent)).native.insertBefore(child, beforeNode, true);
+            nativeInsertBefore(renderer, /** @type {?} */ ((renderParent)).native, child, beforeNode);
+        }
+        else if (parent.tNode.type === 4 /* ElementContainer */) {
+            /** @type {?} */
+            const beforeNode = parent.native;
+            /** @type {?} */
+            const grandParent = /** @type {?} */ (getParentLNode(parent));
+            if (grandParent.tNode.type === 2 /* View */) {
+                /** @type {?} */
+                const renderParent = getRenderParent(/** @type {?} */ (grandParent));
+                nativeInsertBefore(renderer, /** @type {?} */ ((renderParent)).native, child, beforeNode);
+            }
+            else {
+                nativeInsertBefore(renderer, (/** @type {?} */ (grandParent)).native, child, beforeNode);
+            }
         }
         else {
             isProceduralRenderer(renderer) ? renderer.appendChild(/** @type {?} */ (((parent.native))), child) : /** @type {?} */ ((parent.native)).appendChild(child);
@@ -17251,10 +17324,6 @@ const CIRCULAR$2 = '__CIRCULAR__';
  * Renderer2.
   @type {?} */
 let renderer;
-/** @type {?} */
-let rendererFactory;
-/** @type {?} */
-let currentElementNode = null;
 /**
  * @return {?}
  */
@@ -17262,6 +17331,17 @@ function getRenderer() {
     // top level variables should not be exported for performance reasons (PERF_NOTES.md)
     return renderer;
 }
+/** @type {?} */
+let rendererFactory;
+/**
+ * @return {?}
+ */
+function getRendererFactory() {
+    // top level variables should not be exported for performance reasons (PERF_NOTES.md)
+    return rendererFactory;
+}
+/** @type {?} */
+let currentElementNode = null;
 /**
  * @return {?}
  */
@@ -17277,7 +17357,7 @@ function getCurrentSanitizer() {
  * @return {?}
  */
 function getCurrentView() {
-    return /** @type {?} */ ((/** @type {?} */ (viewData)));
+    return /** @type {?} */ ((viewData));
 }
 /**
  * Internal function that returns the current LViewData instance.
@@ -17296,11 +17376,11 @@ function _getViewData() {
  * of the current view and restore it when listeners are invoked. This allows
  * walking the declaration view tree in listeners to get vars from parent views.
  *
- * @param {?} viewToRestore The LViewData instance to restore.
+ * @param {?} viewToRestore The OpaqueViewState instance to restore.
  * @return {?}
  */
 function restoreView(viewToRestore) {
-    contextViewData = /** @type {?} */ ((/** @type {?} */ (viewToRestore)));
+    contextViewData = /** @type {?} */ ((viewToRestore));
 }
 /** *
  * Used to set the parent property when nodes are created.
@@ -17459,11 +17539,12 @@ function refreshDescendantViews() {
         executeInitHooks(viewData, tView, creationMode);
     }
     refreshDynamicEmbeddedViews(viewData);
+    // Content query results must be refreshed before content hooks are called.
+    refreshContentQueries(tView);
     if (!checkNoChangesMode) {
         executeHooks(/** @type {?} */ ((directives)), tView.contentHooks, tView.contentCheckHooks, creationMode);
     }
     setHostBindings(tView.hostBindings);
-    refreshContentQueries(tView);
     refreshChildComponents(tView.components);
 }
 /**
@@ -18285,6 +18366,7 @@ function hostElement(tag, rNode, def, sanitizer) {
  */
 function listener(eventName, listenerFn, useCapture = false) {
     ngDevMode && assertPreviousIsParent();
+    ngDevMode && assertNodeOfPossibleTypes(previousOrParentNode, 3 /* Element */);
     /** @type {?} */
     const node = previousOrParentNode;
     /** @type {?} */
@@ -18986,6 +19068,7 @@ function container(index, template, tagName, attrs, localRefs) {
     const currentParent = isParent ? previousOrParentNode : /** @type {?} */ ((getParentLNode(previousOrParentNode)));
     /** @type {?} */
     const lContainer = createLContainer(currentParent, viewData);
+    ngDevMode && ngDevMode.rendererCreateComment++;
     /** @type {?} */
     const comment = renderer.createComment(ngDevMode ? 'container' : '');
     /** @type {?} */
@@ -20007,7 +20090,7 @@ function bindingUpdated(value) {
     if (bindingIndex >= viewData.length) {
         viewData[viewData[BINDING_INDEX]++] = value;
     }
-    else if (isDifferent(viewData[bindingIndex], value)) {
+    else if (isDifferent(viewData[bindingIndex], value, checkNoChangesMode)) {
         throwErrorIfNoChangesMode(creationMode, checkNoChangesMode, viewData[bindingIndex], value);
         viewData[viewData[BINDING_INDEX]++] = value;
     }
@@ -20174,8 +20257,6 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     if (componentDef.type != componentType)
         componentDef.type = componentType;
     /** @type {?} */
-    let component;
-    /** @type {?} */
     const componentTag = /** @type {?} */ (((/** @type {?} */ ((componentDef.selectors))[0]))[0]);
     /** @type {?} */
     const hostNode = locateHostElement(rendererFactory, opts.host || componentTag);
@@ -20188,13 +20269,16 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     const oldView = enterView(rootView, /** @type {?} */ ((null)));
     /** @type {?} */
     let elementNode;
+    /** @type {?} */
+    let component;
     try {
         if (rendererFactory.begin)
             rendererFactory.begin();
         // Create element node at index 0 in data array
         elementNode = hostElement(componentTag, hostNode, componentDef, sanitizer);
         // Create directive instance with factory() and store at index 0 in directives array
-        rootContext.components.push(component = /** @type {?} */ (baseDirectiveCreate(0, componentDef.factory(), componentDef)));
+        component = baseDirectiveCreate(0, /** @type {?} */ (componentDef.factory()), componentDef);
+        rootContext.components.push(component);
         (/** @type {?} */ (elementNode.data))[CONTEXT] = component;
         initChangeDetectorIfExisting(elementNode.nodeInjector, component, /** @type {?} */ ((elementNode.data)));
         opts.hostFeatures && opts.hostFeatures.forEach((feature) => feature(component, componentDef));
@@ -20956,7 +21040,17 @@ class ViewRef$1 {
      * See {\@link ChangeDetectorRef#detach detach} for more information.
      * @return {?}
      */
-    detectChanges() { detectChanges(this.context); }
+    detectChanges() {
+        /** @type {?} */
+        const rendererFactory = getRendererFactory();
+        if (rendererFactory.begin) {
+            rendererFactory.begin();
+        }
+        detectChanges(this.context);
+        if (rendererFactory.end) {
+            rendererFactory.end();
+        }
+    }
     /**
      * Checks the change detector and its children, and throws if any changes are detected.
      *
@@ -21978,10 +22072,10 @@ class TemplateRef$1 {
      */
     constructor(_declarationParentView, elementRef, _tView, _renderer, _queries) {
         this._declarationParentView = _declarationParentView;
+        this.elementRef = elementRef;
         this._tView = _tView;
         this._renderer = _renderer;
         this._queries = _queries;
-        this.elementRef = elementRef;
     }
     /**
      * @param {?} context

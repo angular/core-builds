@@ -12,7 +12,7 @@ import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
 import { LContainer } from './interfaces/container';
 import { ComponentDefInternal, ComponentQuery, ComponentTemplate, DirectiveDefInternal, DirectiveDefListOrFactory, InitialStylingFlags, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { LInjector } from './interfaces/injector';
-import { LContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode, TAttributes, TContainerNode, TElementNode, TNode, TNodeType } from './interfaces/node';
+import { LContainerNode, LElementContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode, TAttributes, TContainerNode, TElementNode, TNode, TNodeType } from './interfaces/node';
 import { CssSelectorList } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
@@ -35,6 +35,7 @@ export declare type SanitizerFn = (value: any) => string;
  */
 export declare const CIRCULAR = "__CIRCULAR__";
 export declare function getRenderer(): Renderer3;
+export declare function getRendererFactory(): RendererFactory3;
 export declare function getCurrentSanitizer(): Sanitizer | null;
 /**
  * Returns the current OpaqueViewState instance.
@@ -57,7 +58,7 @@ export declare function _getViewData(): LViewData;
  * of the current view and restore it when listeners are invoked. This allows
  * walking the declaration view tree in listeners to get vars from parent views.
  *
- * @param viewToRestore The LViewData instance to restore.
+ * @param viewToRestore The OpaqueViewState instance to restore.
  */
 export declare function restoreView(viewToRestore: OpaqueViewState): void;
 export declare function getPreviousOrParentNode(): LNode;
@@ -120,6 +121,7 @@ export declare function createLNode(index: number, type: TNodeType.Element, nati
 export declare function createLNode(index: number, type: TNodeType.View, native: null, name: null, attrs: null, lViewData: LViewData): LViewNode;
 export declare function createLNode(index: number, type: TNodeType.Container, native: RComment, name: string | null, attrs: TAttributes | null, lContainer: LContainer): LContainerNode;
 export declare function createLNode(index: number, type: TNodeType.Projection, native: null, name: null, attrs: TAttributes | null, lProjection: null): LProjectionNode;
+export declare function createLNode(index: number, type: TNodeType.ElementContainer, native: RComment, name: null, attrs: TAttributes | null, data: null): LElementContainerNode;
 /**
  * Resets the application state.
  */
@@ -176,6 +178,21 @@ export declare function namespaceHTML(): void;
  * @param localRefs A set of local reference bindings on the element.
  */
 export declare function element(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+/**
+ * Creates a logical container for other nodes (<ng-container>) backed by a comment node in the DOM.
+ * The instruction must later be followed by `elementContainerEnd()` call.
+ *
+ * @param index Index of the element in the LViewData array
+ * @param attrs Set of attributes to be used when matching directives.
+ * @param localRefs A set of local reference bindings on the element.
+ *
+ * Even if this instruction accepts a set of attributes no actual attribute values are propagated to
+ * the DOM (as a comment node can't have attributes). Attributes are here only for directive
+ * matching purposes and setting initial inputs of directives.
+ */
+export declare function elementContainerStart(index: number, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+/** Mark the end of the <ng-container>. */
+export declare function elementContainerEnd(): void;
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
  *
