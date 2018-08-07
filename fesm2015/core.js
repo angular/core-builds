@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.0+45.sha-fefc860
+ * @license Angular v7.0.0-beta.0+50.sha-732026c
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -4743,6 +4743,16 @@ function canInsertNativeChildOfElement(parent, currentView) {
     // Since the projection would than move it to its final destination.
     return false;
 }
+/**
+ * We might delay insertion of children for a given view if it is disconnected.
+ * This might happen for 2 main reason:
+ * - view is not inserted into any container (view was created but not iserted yet)
+ * - view is inserted into a container but the container itself is not inserted into the DOM
+ * (container might be part of projection or child of a view that is not inserted yet).
+ *
+ * In other words we can insert children of a given view this view was inserted into a container and
+ * the container itself has it render parent determined.
+ */
 function canInsertNativeChildOfView(parent) {
     ngDevMode && assertNodeType(parent, 2 /* View */);
     // Because we are inserting into a `View` the `View` may be disconnected.
@@ -4843,7 +4853,10 @@ function appendChild(parent, child, currentView) {
         }
         else if (parent.tNode.type === 4 /* ElementContainer */) {
             const beforeNode = parent.native;
-            const grandParent = getParentLNode(parent);
+            let grandParent = getParentLNode(parent);
+            while (grandParent.tNode.type === 4 /* ElementContainer */) {
+                grandParent = getParentLNode(grandParent);
+            }
             if (grandParent.tNode.type === 2 /* View */) {
                 const renderParent = getRenderParent(grandParent);
                 nativeInsertBefore(renderer, renderParent.native, child, beforeNode);
@@ -4899,6 +4912,13 @@ function appendProjectedNode(node, currentParent, currentView, renderParent) {
         const views = lContainer[VIEWS];
         for (let i = 0; i < views.length; i++) {
             addRemoveViewFromContainer(node, views[i], true, node.native);
+        }
+    }
+    else if (node.tNode.type === 4 /* ElementContainer */) {
+        let ngContainerChild = getChildLNode(node);
+        while (ngContainerChild) {
+            appendProjectedNode(ngContainerChild, currentParent, currentView, renderParent);
+            ngContainerChild = getNextLNode(ngContainerChild);
         }
     }
     if (node.dynamicLContainerNode) {
@@ -15163,7 +15183,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('7.0.0-beta.0+45.sha-fefc860');
+const VERSION = new Version('7.0.0-beta.0+50.sha-732026c');
 
 /**
  * @license
