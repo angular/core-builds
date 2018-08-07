@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.0+45.sha-fefc860
+ * @license Angular v7.0.0-beta.0+50.sha-732026c
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1751,7 +1751,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-beta.0+45.sha-fefc860');
+    var VERSION = new Version('7.0.0-beta.0+50.sha-732026c');
 
     /**
      * @license
@@ -12532,6 +12532,16 @@
         // Since the projection would than move it to its final destination.
         return false;
     }
+    /**
+     * We might delay insertion of children for a given view if it is disconnected.
+     * This might happen for 2 main reason:
+     * - view is not inserted into any container (view was created but not iserted yet)
+     * - view is inserted into a container but the container itself is not inserted into the DOM
+     * (container might be part of projection or child of a view that is not inserted yet).
+     *
+     * In other words we can insert children of a given view this view was inserted into a container and
+     * the container itself has it render parent determined.
+     */
     function canInsertNativeChildOfView(parent) {
         ngDevMode && assertNodeType(parent, 2 /* View */);
         // Because we are inserting into a `View` the `View` may be disconnected.
@@ -12633,6 +12643,9 @@
             else if (parent.tNode.type === 4 /* ElementContainer */) {
                 var beforeNode = parent.native;
                 var grandParent = getParentLNode(parent);
+                while (grandParent.tNode.type === 4 /* ElementContainer */) {
+                    grandParent = getParentLNode(grandParent);
+                }
                 if (grandParent.tNode.type === 2 /* View */) {
                     var renderParent = getRenderParent(grandParent);
                     nativeInsertBefore(renderer, renderParent.native, child, beforeNode);
@@ -12688,6 +12701,13 @@
             var views = lContainer[VIEWS];
             for (var i = 0; i < views.length; i++) {
                 addRemoveViewFromContainer(node, views[i], true, node.native);
+            }
+        }
+        else if (node.tNode.type === 4 /* ElementContainer */) {
+            var ngContainerChild = getChildLNode(node);
+            while (ngContainerChild) {
+                appendProjectedNode(ngContainerChild, currentParent, currentView, renderParent);
+                ngContainerChild = getNextLNode(ngContainerChild);
             }
         }
         if (node.dynamicLContainerNode) {
