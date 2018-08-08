@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.1+10.sha-b64fed1
+ * @license Angular v7.0.0-beta.1+9.sha-8bbce3f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1293,7 +1293,7 @@ function callHooks(data, arr) {
 var __global$1 = typeof window != 'undefined' && window || typeof self != 'undefined' && self ||
     typeof global != 'undefined' && global;
 function ngDevModeResetPerfCounters() {
-    return __global$1.ngDevMode = {
+    __global$1.ngDevMode = {
         firstTemplatePass: 0,
         tNode: 0,
         tView: 0,
@@ -1325,7 +1325,7 @@ function ngDevModeResetPerfCounters() {
  * as much early warning and errors as possible.
  */
 if (typeof ngDevMode === 'undefined' || ngDevMode) {
-    __global$1.ngDevMode = ngDevModeResetPerfCounters();
+    ngDevModeResetPerfCounters();
 }
 
 /** Called when directives inject each other (creating a circular dependency) */
@@ -15662,7 +15662,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('7.0.0-beta.1+10.sha-b64fed1');
+var VERSION = new Version('7.0.0-beta.1+9.sha-8bbce3f');
 
 /**
  * @license
