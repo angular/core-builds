@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.1+8.sha-6c359af
+ * @license Angular v7.0.0-beta.1+10.sha-b64fed1
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2010,7 +2010,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-beta.1+8.sha-6c359af');
+const VERSION = new Version('7.0.0-beta.1+10.sha-b64fed1');
 
 /**
  * @fileoverview added by tsickle
@@ -15237,7 +15237,7 @@ const __global$1 = typeof window != 'undefined' && window || typeof self != 'und
  * @return {?}
  */
 function ngDevModeResetPerfCounters() {
-    __global$1.ngDevMode = {
+    return __global$1.ngDevMode = {
         firstTemplatePass: 0,
         tNode: 0,
         tView: 0,
@@ -15269,7 +15269,7 @@ function ngDevModeResetPerfCounters() {
  * as much early warning and errors as possible.
  */
 if (typeof ngDevMode === 'undefined' || ngDevMode) {
-    ngDevModeResetPerfCounters();
+    __global$1.ngDevMode = ngDevModeResetPerfCounters();
 }
 
 /**
