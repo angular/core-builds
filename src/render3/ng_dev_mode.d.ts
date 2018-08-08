@@ -30,4 +30,4 @@ declare global {
         rendererCreateComment: number;
     }
 }
-export declare function ngDevModeResetPerfCounters(): void;
+export declare function ngDevModeResetPerfCounters(): NgDevModePerfCounters;
