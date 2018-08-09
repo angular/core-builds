@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.0.0-beta.1+12.sha-9c92a6f
+ * @license Angular v7.0.0-beta.1+18.sha-7058072
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { RendererFactory2, getDebugNode, InjectionToken, Injector, ɵclearOverrides, ɵstringify, ɵoverrideComponentView, NgZone, ApplicationInitStatus, NgModule, ɵAPP_ROOT, Optional, SkipSelf, ɵoverrideProvider, Component, defineInjectable, Compiler } from '@angular/core';
+import { RendererFactory2, getDebugNode, Compiler, InjectionToken, Injector, ɵclearOverrides, ɵstringify, ɵoverrideComponentView, NgZone, ApplicationInitStatus, NgModule, ɵAPP_ROOT, Optional, SkipSelf, ɵoverrideProvider, Component, defineInjectable, ɵgetInheritedFactory } from '@angular/core';
 import { __spread, __values, __decorate, __extends } from 'tslib';
 
 /**
@@ -668,9 +668,10 @@ var TestingCompiler = /** @class */ (function (_super) {
      * This can be used for errors created by compileModule...
      */
     TestingCompiler.prototype.getComponentFromError = function (error) { throw unimplemented(); };
-    TestingCompiler.ngInjectableDef = defineInjectable({ token: TestingCompiler, factory: function TestingCompiler_Factory() { return new TestingCompiler(); }, providedIn: null });
+    TestingCompiler.ngInjectableDef = defineInjectable({ token: TestingCompiler, factory: function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory((t || TestingCompiler)); }, providedIn: null });
     return TestingCompiler;
 }(Compiler));
+var ɵTestingCompiler_BaseFactory = ɵgetInheritedFactory(TestingCompiler);
 /**
  * A factory for creating a Compiler
  *
