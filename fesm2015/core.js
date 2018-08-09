@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.0.0-beta.1+9.sha-8bbce3f
+ * @license Angular v7.0.0-beta.1+12.sha-9c92a6f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __decorate, __metadata, __param } from 'tslib';
+import { __decorate, __param, __metadata } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { share } from 'rxjs/operators';
 import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compileInjectable, compilePipeFromMetadata } from '@angular/compiler';
@@ -1244,7 +1244,7 @@ function callHooks(data, arr) {
 const __global$1 = typeof window != 'undefined' && window || typeof self != 'undefined' && self ||
     typeof global != 'undefined' && global;
 function ngDevModeResetPerfCounters() {
-    __global$1.ngDevMode = {
+    return __global$1.ngDevMode = {
         firstTemplatePass: 0,
         tNode: 0,
         tView: 0,
@@ -1276,7 +1276,7 @@ function ngDevModeResetPerfCounters() {
  * as much early warning and errors as possible.
  */
 if (typeof ngDevMode === 'undefined' || ngDevMode) {
-    ngDevModeResetPerfCounters();
+    __global$1.ngDevMode = ngDevModeResetPerfCounters();
 }
 
 /** Called when directives inject each other (creating a circular dependency) */
@@ -15246,7 +15246,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('7.0.0-beta.1+9.sha-8bbce3f');
+const VERSION = new Version('7.0.0-beta.1+12.sha-9c92a6f');
 
 /**
  * @license
