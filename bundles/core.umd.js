@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.1+12.sha-9c92a6f
+ * @license Angular v7.0.0-beta.1+18.sha-7058072
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1751,7 +1751,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-beta.1+12.sha-9c92a6f');
+    var VERSION = new Version('7.0.0-beta.1+18.sha-7058072');
 
     /**
      * @license
@@ -17368,6 +17368,24 @@
         }
         return di.templateRef;
     }
+    function getFactoryOf(type) {
+        var typeAny = type;
+        var def = typeAny.ngComponentDef || typeAny.ngDirectiveDef || typeAny.ngPipeDef ||
+            typeAny.ngInjectableDef || typeAny.ngInjectorDef;
+        if (def === undefined || def.factory === undefined) {
+            return null;
+        }
+        return def.factory;
+    }
+    function getInheritedFactory(type) {
+        debugger;
+        var proto = Object.getPrototypeOf(type.prototype).constructor;
+        var factory = getFactoryOf(proto);
+        if (factory === null) {
+            throw new Error("Type " + proto.name + " does not support inheritance");
+        }
+        return factory;
+    }
     var TemplateRef$1 = /** @class */ (function () {
         function TemplateRef$$1(_declarationParentView, elementRef, _tView, _renderer, _queries) {
             this._declarationParentView = _declarationParentView;
@@ -19201,6 +19219,8 @@
     exports.ɵinjectViewContainerRef = injectViewContainerRef;
     exports.ɵinjectChangeDetectorRef = injectChangeDetectorRef;
     exports.ɵinjectAttribute = injectAttribute;
+    exports.ɵgetFactoryOf = getFactoryOf;
+    exports.ɵgetInheritedFactory = getInheritedFactory;
     exports.ɵPublicFeature = PublicFeature;
     exports.ɵInheritDefinitionFeature = InheritDefinitionFeature;
     exports.ɵNgOnChangesFeature = NgOnChangesFeature;
