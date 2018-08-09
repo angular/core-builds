@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.1+18.sha-7058072
+ * @license Angular v7.0.0-beta.1+19.sha-2d75992
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -6217,6 +6217,42 @@ function namespaceHTML() {
 function element(index, name, attrs, localRefs) {
     elementStart(index, name, attrs, localRefs);
     elementEnd();
+}
+/**
+ * Creates a logical container for other nodes (<ng-container>) backed by a comment node in the DOM.
+ * The instruction must later be followed by `elementContainerEnd()` call.
+ *
+ * @param index Index of the element in the LViewData array
+ * @param attrs Set of attributes to be used when matching directives.
+ * @param localRefs A set of local reference bindings on the element.
+ *
+ * Even if this instruction accepts a set of attributes no actual attribute values are propagated to
+ * the DOM (as a comment node can't have attributes). Attributes are here only for directive
+ * matching purposes and setting initial inputs of directives.
+ */
+function elementContainerStart(index, attrs, localRefs) {
+    ngDevMode &&
+        assertEqual(viewData[BINDING_INDEX], -1, 'elements should be created before any bindings');
+    ngDevMode && ngDevMode.rendererCreateComment++;
+    const native = renderer.createComment(ngDevMode ? 'ng-container' : '');
+    ngDevMode && assertDataInRange(index - 1);
+    const node = createLNode(index, 4 /* ElementContainer */, native, null, attrs || null, null);
+    appendChild(getParentLNode(node), native, viewData);
+    createDirectivesAndLocals(localRefs);
+}
+/** Mark the end of the <ng-container>. */
+function elementContainerEnd() {
+    if (isParent) {
+        isParent = false;
+    }
+    else {
+        ngDevMode && assertHasParent();
+        previousOrParentNode = getParentLNode(previousOrParentNode);
+    }
+    ngDevMode && assertNodeType(previousOrParentNode, 4 /* ElementContainer */);
+    const queries = previousOrParentNode.queries;
+    queries && queries.addNode(previousOrParentNode);
+    queueLifecycleHooks(previousOrParentNode.tNode.flags, tView);
 }
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
@@ -14345,6 +14381,8 @@ const angularCoreEnv = {
     'ɵE': elementStart,
     'ɵe': elementEnd,
     'ɵEe': element,
+    'ɵEC': elementContainerStart,
+    'ɵeC': elementContainerEnd,
     'ɵf0': pureFunction0,
     'ɵf1': pureFunction1,
     'ɵf2': pureFunction2,
@@ -15264,7 +15302,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('7.0.0-beta.1+18.sha-7058072');
+const VERSION = new Version('7.0.0-beta.1+19.sha-2d75992');
 
 /**
  * @license
