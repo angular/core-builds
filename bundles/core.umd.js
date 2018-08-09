@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.1+12.sha-9c92a6f
+ * @license Angular v7.0.0-beta.1+18.sha-7058072
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -11175,6 +11175,24 @@
         }
         return di.templateRef;
     }
+    function getFactoryOf(type) {
+        var typeAny = type;
+        var def = typeAny.ngComponentDef || typeAny.ngDirectiveDef || typeAny.ngPipeDef ||
+            typeAny.ngInjectableDef || typeAny.ngInjectorDef;
+        if (def === undefined || def.factory === undefined) {
+            return null;
+        }
+        return def.factory;
+    }
+    function getInheritedFactory(type) {
+        debugger;
+        var proto = Object.getPrototypeOf(type.prototype).constructor;
+        var factory = getFactoryOf(proto);
+        if (factory === null) {
+            throw new Error("Type " + proto.name + " does not support inheritance");
+        }
+        return factory;
+    }
     var TemplateRef$1 = /** @class */ (function () {
         function TemplateRef$$1(_declarationParentView, elementRef, _tView, _renderer, _queries) {
             this._declarationParentView = _declarationParentView;
@@ -14754,6 +14772,8 @@
         'ɵdefineNgModule': defineNgModule,
         'ɵdefinePipe': definePipe,
         'ɵdirectiveInject': directiveInject,
+        'ɵgetFactoryOf': getFactoryOf,
+        'ɵgetInheritedFactory': getInheritedFactory,
         'inject': inject,
         'ɵinjectAttribute': injectAttribute,
         'ɵinjectChangeDetectorRef': injectChangeDetectorRef,
@@ -14957,7 +14977,7 @@
                     };
                     var res = compiler.compileNgModule(meta);
                     ngModuleDef =
-                        compiler.jitExpression(res.expression, angularCoreEnv, "ng://" + type.name + "/ngModuleDef.js");
+                        compiler.jitExpression(res.expression, angularCoreEnv, "ng://" + type.name + "/ngModuleDef.js", []);
                 }
                 return ngModuleDef;
             },
@@ -14977,8 +14997,7 @@
                         ]),
                     };
                     var res = compiler.compileInjector(meta);
-                    ngInjectorDef =
-                        compiler.jitExpression(res.expression, angularCoreEnv, "ng://" + type.name + "/ngInjectorDef.js");
+                    ngInjectorDef = compiler.jitExpression(res.expression, angularCoreEnv, "ng://" + type.name + "/ngInjectorDef.js", res.statements);
                 }
                 return ngInjectorDef;
             },
@@ -15162,8 +15181,9 @@
                     }
                     // Compile the component metadata, including template, into an expression.
                     // TODO(alxhub): implement inputs, outputs, queries, etc.
-                    var res = compiler.compileComponentFromMetadata(__assign({}, directiveMetadata(type, metadata), { template: template, directives: new Map(), pipes: new Map(), viewQueries: [] }), constantPool, compiler.makeBindingParser());
-                    def = compiler.jitExpression(res.expression, angularCoreEnv, "ng://" + type.name + "/ngComponentDef.js", constantPool);
+                    var res = compiler.compileComponentFromMetadata(__assign({}, directiveMetadata(type, metadata), { template: template, directives: new Map(), pipes: new Map(), viewQueries: [], wrapDirectivesInClosure: false }), constantPool, compiler.makeBindingParser());
+                    var preStatements = __spread(constantPool.statements, res.statements);
+                    def = compiler.jitExpression(res.expression, angularCoreEnv, "ng://" + type.name + "/ngComponentDef.js", preStatements);
                     // If component compilation is async, then the @NgModule annotation which declares the
                     // component may execute and set an ngSelectorScope property on the component type. This
                     // allows the component to patch itself with directiveDefs from the module after it finishes
@@ -15194,7 +15214,8 @@
                     var constantPool = new compiler.ConstantPool();
                     var sourceMapUrl = "ng://" + (type && type.name) + "/ngDirectiveDef.js";
                     var res = compiler.compileDirectiveFromMetadata(directiveMetadata(type, directive), constantPool, compiler.makeBindingParser());
-                    def = compiler.jitExpression(res.expression, angularCoreEnv, sourceMapUrl, constantPool);
+                    var preStatements = __spread(constantPool.statements, res.statements);
+                    def = compiler.jitExpression(res.expression, angularCoreEnv, sourceMapUrl, preStatements);
                 }
                 return def;
             },
@@ -15244,6 +15265,7 @@
             },
             typeSourceSpan: null,
             usesInheritance: !extendsDirectlyFromObject(type),
+            exportAs: metadata.exportAs || null,
         };
     }
     function extractHostBindings(metadata, propMetadata) {
@@ -15311,15 +15333,10 @@
                     // Check whether the injectable metadata includes a provider specification.
                     var hasAProvider = isUseClassProvider(meta) || isUseFactoryProvider(meta) ||
                         isUseValueProvider(meta) || isUseExistingProvider(meta);
-                    var deps = undefined;
-                    if (!hasAProvider || (isUseClassProvider(meta) && type === meta.useClass)) {
-                        deps = reflectDependencies(type);
-                    }
-                    else if (isUseClassProvider(meta)) {
-                        deps = meta.deps && convertDependencies(meta.deps);
-                    }
-                    else if (isUseFactoryProvider(meta)) {
-                        deps = meta.deps && convertDependencies(meta.deps) || [];
+                    var ctorDeps = reflectDependencies(type);
+                    var userDeps = undefined;
+                    if ((isUseClassProvider(meta) || isUseFactoryProvider(meta)) && meta.deps !== undefined) {
+                        userDeps = convertDependencies(meta.deps);
                     }
                     // Decide which flavor of factory to generate, based on the provider specified.
                     // Only one of the use* fields should be set.
@@ -15354,7 +15371,7 @@
                         // Can't happen - either hasAProvider will be false, or one of the providers will be set.
                         throw new Error("Unreachable state.");
                     }
-                    var expression = compiler.compileInjectable({
+                    var _a = compiler.compileInjectable({
                         name: type.name,
                         type: new compiler.WrappedNodeExpr(type),
                         providedIn: computeProvidedIn(meta.providedIn),
@@ -15362,9 +15379,10 @@
                         useFactory: useFactory,
                         useValue: useValue,
                         useExisting: useExisting,
-                        deps: deps,
-                    }).expression;
-                    def = compiler.jitExpression(expression, angularCoreEnv, "ng://" + type.name + "/ngInjectableDef.js");
+                        ctorDeps: ctorDeps,
+                        userDeps: userDeps,
+                    }), expression = _a.expression, statements = _a.statements;
+                    def = compiler.jitExpression(expression, angularCoreEnv, "ng://" + type.name + "/ngInjectableDef.js", statements);
                 }
                 return def;
             },
@@ -15414,7 +15432,7 @@
                         pipeName: meta.name,
                         pure: meta.pure !== undefined ? meta.pure : true,
                     });
-                    def = compiler.jitExpression(res.expression, angularCoreEnv, sourceMapUrl);
+                    def = compiler.jitExpression(res.expression, angularCoreEnv, sourceMapUrl, res.statements);
                 }
                 return def;
             }
@@ -15719,7 +15737,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-beta.1+12.sha-9c92a6f');
+    var VERSION = new Version('7.0.0-beta.1+18.sha-7058072');
 
     /**
      * @license
@@ -19899,6 +19917,8 @@
     exports.ɵinjectViewContainerRef = injectViewContainerRef;
     exports.ɵinjectChangeDetectorRef = injectChangeDetectorRef;
     exports.ɵinjectAttribute = injectAttribute;
+    exports.ɵgetFactoryOf = getFactoryOf;
+    exports.ɵgetInheritedFactory = getInheritedFactory;
     exports.ɵPublicFeature = PublicFeature;
     exports.ɵInheritDefinitionFeature = InheritDefinitionFeature;
     exports.ɵNgOnChangesFeature = NgOnChangesFeature;

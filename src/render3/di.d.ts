@@ -200,3 +200,5 @@ export declare function getOrCreateContainerRef(di: LInjector): viewEngine.ViewC
  * @returns The TemplateRef instance to use
  */
 export declare function getOrCreateTemplateRef<T>(di: LInjector): viewEngine.TemplateRef<T>;
+export declare function getFactoryOf<T>(type: Type<any>): ((type?: Type<T>) => T) | null;
+export declare function getInheritedFactory<T>(type: Type<any>): (type: Type<T>) => T;
