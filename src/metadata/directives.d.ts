@@ -128,7 +128,7 @@ export interface Directive {
      * Enumerates the set of event-bound output properties.
      *
      * When an output property emits an event, an event handler attached to that event
-     * the template is invoked.
+     * in the template is invoked.
      *
      * The `outputs` property defines a set of `directiveProperty` to `bindingProperty`
      * configuration:
@@ -692,7 +692,7 @@ export interface Input {
      *   selector: 'bank-account',
      *   template: `
      *     Bank Name: {{bankName}}
-    *      Account Id: {{id}}
+     *     Account Id: {{id}}
      *   `
      * })
      * class BankAccount {

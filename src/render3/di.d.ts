@@ -12,7 +12,7 @@ import * as viewEngine from '../linker';
 import { Type } from '../type';
 import { DirectiveDefInternal } from './interfaces/definition';
 import { LInjector } from './interfaces/injector';
-import { LContainerNode, LElementNode, LNode } from './interfaces/node';
+import { LContainerNode, LElementContainerNode, LElementNode, LNode } from './interfaces/node';
 import { QueryReadType } from './interfaces/query';
 /**
  * Registers this directive as present in its node's injector by flipping the directive's
@@ -29,7 +29,7 @@ export declare function getOrCreateNodeInjector(): LInjector;
  * @param node for which an injector should be retrieved / created.
  * @returns Node injector
  */
-export declare function getOrCreateNodeInjectorForNode(node: LElementNode | LContainerNode): LInjector;
+export declare function getOrCreateNodeInjectorForNode(node: LElementNode | LElementContainerNode | LContainerNode): LInjector;
 /**
  * Makes a directive public to the DI system by adding it to an injector's bloom filter.
  *
@@ -200,3 +200,5 @@ export declare function getOrCreateContainerRef(di: LInjector): viewEngine.ViewC
  * @returns The TemplateRef instance to use
  */
 export declare function getOrCreateTemplateRef<T>(di: LInjector): viewEngine.TemplateRef<T>;
+export declare function getFactoryOf<T>(type: Type<any>): ((type?: Type<T>) => T) | null;
+export declare function getInheritedFactory<T>(type: Type<any>): (type: Type<T>) => T;

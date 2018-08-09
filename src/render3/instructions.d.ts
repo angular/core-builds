@@ -12,11 +12,11 @@ import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
 import { LContainer } from './interfaces/container';
 import { ComponentDefInternal, ComponentQuery, ComponentTemplate, DirectiveDefInternal, DirectiveDefListOrFactory, InitialStylingFlags, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { LInjector } from './interfaces/injector';
-import { LContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode, TAttributes, TContainerNode, TElementNode, TNode, TNodeType } from './interfaces/node';
+import { LContainerNode, LElementContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode, TAttributes, TContainerNode, TElementNode, TNode, TNodeType } from './interfaces/node';
 import { CssSelectorList } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
-import { CurrentMatchesList, LViewData, LViewFlags, RootContext, TView } from './interfaces/view';
+import { CurrentMatchesList, LViewData, LViewFlags, OpaqueViewState, RootContext, TView } from './interfaces/view';
 /**
  * Directive (D) sets a property on all component instances using this constant as a key and the
  * component's host node (LElement) as the value. This is used in methods like detectChanges to
@@ -35,8 +35,32 @@ export declare type SanitizerFn = (value: any) => string;
  */
 export declare const CIRCULAR = "__CIRCULAR__";
 export declare function getRenderer(): Renderer3;
+export declare function getRendererFactory(): RendererFactory3;
 export declare function getCurrentSanitizer(): Sanitizer | null;
-export declare function getViewData(): LViewData;
+/**
+ * Returns the current OpaqueViewState instance.
+ *
+ * Used in conjunction with the restoreView() instruction to save a snapshot
+ * of the current view and restore it when listeners are invoked. This allows
+ * walking the declaration view tree in listeners to get vars from parent views.
+ */
+export declare function getCurrentView(): OpaqueViewState;
+/**
+ * Internal function that returns the current LViewData instance.
+ *
+ * The getCurrentView() instruction should be used for anything public.
+ */
+export declare function _getViewData(): LViewData;
+/**
+ * Restores `contextViewData` to the given OpaqueViewState instance.
+ *
+ * Used in conjunction with the getCurrentView() instruction to save a snapshot
+ * of the current view and restore it when listeners are invoked. This allows
+ * walking the declaration view tree in listeners to get vars from parent views.
+ *
+ * @param viewToRestore The OpaqueViewState instance to restore.
+ */
+export declare function restoreView(viewToRestore: OpaqueViewState): void;
 export declare function getPreviousOrParentNode(): LNode;
 /**
  * Query instructions can ask for "current queries" in 2 different cases:
@@ -97,6 +121,7 @@ export declare function createLNode(index: number, type: TNodeType.Element, nati
 export declare function createLNode(index: number, type: TNodeType.View, native: null, name: null, attrs: null, lViewData: LViewData): LViewNode;
 export declare function createLNode(index: number, type: TNodeType.Container, native: RComment, name: string | null, attrs: TAttributes | null, lContainer: LContainer): LContainerNode;
 export declare function createLNode(index: number, type: TNodeType.Projection, native: null, name: null, attrs: TAttributes | null, lProjection: null): LProjectionNode;
+export declare function createLNode(index: number, type: TNodeType.ElementContainer, native: RComment, name: null, attrs: TAttributes | null, data: null): LElementContainerNode;
 /**
  * Resets the application state.
  */
@@ -117,7 +142,7 @@ export declare function renderTemplate<T>(hostNode: RElement, template: Componen
  * either through ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
  * Such lViewNode will then be renderer with renderEmbeddedTemplate() (see below).
  */
-export declare function createEmbeddedViewNode<T>(tView: TView, context: T, renderer: Renderer3, queries?: LQueries | null): LViewNode;
+export declare function createEmbeddedViewNode<T>(tView: TView, context: T, declarationView: LViewData, renderer: Renderer3, queries?: LQueries | null): LViewNode;
 /**
  * Used for rendering embedded views (e.g. dynamically created views)
  *
@@ -129,6 +154,17 @@ export declare function createEmbeddedViewNode<T>(tView: TView, context: T, rend
  * TView for dynamically created views on their host TNode, which only has one instance.
  */
 export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | LElementNode, tView: TView, context: T, rf: RenderFlags): LViewNode | LElementNode;
+/**
+ * Retrieves a context at the level specified and saves it as the global, contextViewData.
+ * Will get the next level up if level is not specified.
+ *
+ * This is used to save contexts of parent views so they can be bound in embedded views, or
+ * in conjunction with reference() to bind a ref from a parent view.
+ *
+ * @param level The relative level of the view from which to grab context compared to contextVewData
+ * @returns context
+ */
+export declare function nextContext<T = any>(level?: number): T;
 export declare function renderComponentOrTemplate<T>(node: LElementNode, hostView: LViewData, componentOrContext: T, template?: ComponentTemplate<T>): void;
 export declare function namespaceSVG(): void;
 export declare function namespaceMathML(): void;
@@ -142,6 +178,21 @@ export declare function namespaceHTML(): void;
  * @param localRefs A set of local reference bindings on the element.
  */
 export declare function element(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+/**
+ * Creates a logical container for other nodes (<ng-container>) backed by a comment node in the DOM.
+ * The instruction must later be followed by `elementContainerEnd()` call.
+ *
+ * @param index Index of the element in the LViewData array
+ * @param attrs Set of attributes to be used when matching directives.
+ * @param localRefs A set of local reference bindings on the element.
+ *
+ * Even if this instruction accepts a set of attributes no actual attribute values are propagated to
+ * the DOM (as a comment node can't have attributes). Attributes are here only for directive
+ * matching purposes and setting initial inputs of directives.
+ */
+export declare function elementContainerStart(index: number, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+/** Mark the end of the <ng-container>. */
+export declare function elementContainerEnd(): void;
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
  *
@@ -437,10 +488,9 @@ export declare function embeddedViewEnd(): void;
 /**
  * Refreshes components by entering the component view and processing its bindings, queries, etc.
  *
- * @param directiveIndex Directive index in LViewData[DIRECTIVES]
  * @param adjustedElementIndex  Element index in LViewData[] (adjusted for HEADER_OFFSET)
  */
-export declare function componentRefresh<T>(directiveIndex: number, adjustedElementIndex: number): void;
+export declare function componentRefresh<T>(adjustedElementIndex: number): void;
 /** Returns a boolean for whether the view is attached */
 export declare function viewAttached(view: LViewData): boolean;
 /**
@@ -548,12 +598,28 @@ export declare function getRootView(component: any): LViewData;
  */
 export declare function detectChanges<T>(component: T): void;
 /**
+ * Synchronously perform change detection on a root view and its components.
+ *
+ * @param lViewData The view which the change detection should be performed on.
+ */
+export declare function detectChangesInRootView(lViewData: LViewData): void;
+/**
  * Checks the change detector and its children, and throws if any changes are detected.
  *
  * This is used in development mode to verify that running change detection doesn't
  * introduce other changes.
  */
 export declare function checkNoChanges<T>(component: T): void;
+/**
+ * Checks the change detector on a root view and its components, and throws if any changes are
+ * detected.
+ *
+ * This is used in development mode to verify that running change detection doesn't
+ * introduce other changes.
+ *
+ * @param lViewData The view which the change detection should be checked on.
+ */
+export declare function checkNoChangesInRootView(lViewData: LViewData): void;
 /** Checks the view of the component provided. Does not gate on dirty checks or execute doCheck. */
 export declare function detectChangesInternal<T>(hostView: LViewData, hostNode: LElementNode, component: T): void;
 /**
@@ -652,6 +718,15 @@ export declare function interpolation7(prefix: string, v0: any, i0: string, v1: 
 export declare function interpolation8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): string | NO_CHANGE;
 /** Store a value in the `data` at a given `index`. */
 export declare function store<T>(index: number, value: T): void;
+/**
+ * Retrieves a local reference from the current contextViewData.
+ *
+ * If the reference to retrieve is in a parent view, this instruction is used in conjunction
+ * with a nextContext() call, which walks up the tree and updates the contextViewData instance.
+ *
+ * @param index The index of the local ref in contextViewData.
+ */
+export declare function reference<T>(index: number): T;
 /** Retrieves a value from the `directives` array. */
 export declare function loadDirective<T>(index: number): T;
 export declare function loadQueryList<T>(queryListIdx: number): QueryList<T>;

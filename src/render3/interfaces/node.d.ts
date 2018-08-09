@@ -20,7 +20,8 @@ export declare const enum TNodeType {
     Projection = 1,
     View = 2,
     Element = 3,
-    ViewOrElement = 2
+    ViewOrElement = 2,
+    ElementContainer = 4
 }
 /**
  * Corresponds to the TNode.flags property.
@@ -59,11 +60,10 @@ export interface LNode {
      */
     readonly native: RComment | RElement | RText | null;
     /**
-     * If regular LElementNode, then `data` will be null.
-     * If LElementNode with component, then `data` contains LView.
-     * If LViewNode, then `data` contains the LView.
+     * If regular LElementNode, LTextNode, and LProjectionNode then `data` will be null.
+     * If LElementNode with component, then `data` contains LViewData.
+     * If LViewNode, then `data` contains the LViewData.
      * If LContainerNode, then `data` contains LContainer.
-     * If LProjectionNode, then `data` contains LProjection.
      */
     readonly data: LViewData | LContainer | null;
     /**
@@ -96,6 +96,12 @@ export interface LElementNode extends LNode {
     readonly native: RElement;
     /** If Component then data has LView (light DOM) */
     readonly data: LViewData | null;
+}
+/** LNode representing <ng-container>. */
+export interface LElementContainerNode extends LNode {
+    /** The DOM comment associated with this node. */
+    readonly native: RComment;
+    readonly data: null;
 }
 /** LNode representing a #text node. */
 export interface LTextNode extends LNode {

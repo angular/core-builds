@@ -14,7 +14,7 @@ import { LElementNode, LViewNode, TNode } from './node';
 import { LQueries } from './query';
 import { Renderer3 } from './renderer';
 /** Size of LViewData's header. Necessary to adjust for it when setting slots.  */
-export declare const HEADER_OFFSET = 16;
+export declare const HEADER_OFFSET = 17;
 export declare const TVIEW = 0;
 export declare const PARENT = 1;
 export declare const NEXT = 2;
@@ -31,6 +31,10 @@ export declare const SANITIZER = 12;
 export declare const TAIL = 13;
 export declare const CONTAINER_INDEX = 14;
 export declare const CONTENT_QUERIES = 15;
+export declare const DECLARATION_VIEW = 16;
+export interface OpaqueViewState {
+    '__brand__': 'Brand for OpaqueViewState that nothing will match';
+}
 /**
  * `LViewData` stores all of the information needed to process the instructions as
  * they are invoked from the template. Each embedded view and component view has its
@@ -52,6 +56,9 @@ export interface LViewData extends Array<any> {
      * The parent view is needed when we exit the view and must restore the previous
      * `LViewData`. Without this, the render method would have to keep a stack of
      * views as it is recursively rendering templates.
+     *
+     * This is the "insertion" view for embedded views. This allows us to properly
+     * destroy embedded views.
      */
     [PARENT]: LViewData | null;
     /**
@@ -102,9 +109,11 @@ export interface LViewData extends Array<any> {
      */
     [CLEANUP]: any[] | null;
     /**
-     * - For embedded views, the context with which to render the template.
+     * - For dynamic views, this is the context with which to render the template (e.g.
+     *   `NgForContext`), or `{}` if not defined explicitly.
      * - For root view of the root component the context contains change detection data.
-     * - `null` otherwise.
+     * - For non-root components, the context is the component instance,
+     * - For inline views, the context is null.
      */
     [CONTEXT]: {} | RootContext | null;
     /** An optional Module Injector to be used as fall back after Element Injectors are consulted. */
@@ -135,6 +144,31 @@ export interface LViewData extends Array<any> {
      * be refreshed.
      */
     [CONTENT_QUERIES]: QueryList<any>[] | null;
+    /**
+     * View where this view's template was declared.
+     *
+     * Only applicable for dynamically created views. Will be null for inline/component views.
+     *
+     * The template for a dynamically created view may be declared in a different view than
+     * it is inserted. We already track the "insertion view" (view where the template was
+     * inserted) in LViewData[PARENT], but we also need access to the "declaration view"
+     * (view where the template was declared). Otherwise, we wouldn't be able to call the
+     * view's template function with the proper contexts. Context should be inherited from
+     * the declaration view tree, not the insertion view tree.
+     *
+     * Example (AppComponent template):
+     *
+     * <ng-template #foo></ng-template>       <-- declared here -->
+     * <some-comp [tpl]="foo"></some-comp>    <-- inserted inside this component -->
+     *
+     * The <ng-template> above is declared in the AppComponent template, but it will be passed into
+     * SomeComp and inserted there. In this case, the declaration view would be the AppComponent,
+     * but the insertion view would be SomeComp. When we are removing views, we would want to
+     * traverse through the insertion view to clean up listeners. When we are calling the
+     * template function during change detection, we need the declaration view to get inherited
+     * context.
+     */
+    [DECLARATION_VIEW]: LViewData | null;
 }
 /** Flags associated with an LView (saved in LViewData[FLAGS]) */
 export declare const enum LViewFlags {
@@ -349,11 +383,10 @@ export interface TView {
      */
     cleanup: any[] | null;
     /**
-     * A list of directive and element indices for child components that will need to be
-     * refreshed when the current view has finished its check.
+     * A list of element indices for child components that will need to be
+     * refreshed when the current view has finished its check. These indices have
+     * already been adjusted for the HEADER_OFFSET.
      *
-     * Even indices: Directive indices
-     * Odd indices: Element indices (adjusted for LViewData header offset)
      */
     components: number[] | null;
     /**
