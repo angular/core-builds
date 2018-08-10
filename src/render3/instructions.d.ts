@@ -69,8 +69,8 @@ export declare function getPreviousOrParentNode(): LNode;
  * - when creating content queries (inb this previousOrParentNode points to a node on which we
  * create content queries).
  */
-export declare function getCurrentQueries(QueryType: {
-    new (): LQueries;
+export declare function getOrCreateCurrentQueries(QueryType: {
+    new (parent: null, shallow: null, deep: null): LQueries;
 }): LQueries;
 export declare function getCreationMode(): boolean;
 /**
@@ -104,7 +104,7 @@ export declare function createLViewData<T>(renderer: Renderer3, tView: TView, co
  * with the same shape
  * (same properties assigned in the same order).
  */
-export declare function createLNodeObject(type: TNodeType, currentView: LViewData, parent: LNode | null, native: RText | RElement | RComment | null, state: any, queries: LQueries | null): LElementNode & LTextNode & LViewNode & LContainerNode & LProjectionNode;
+export declare function createLNodeObject(type: TNodeType, currentView: LViewData, parent: LNode | null, native: RText | RElement | RComment | null, state: any): LElementNode & LTextNode & LViewNode & LContainerNode & LProjectionNode;
 /**
  * A common way of creating the LNode to make sure that all of them have same shape to
  * keep the execution code monomorphic and fast.
@@ -216,6 +216,7 @@ export declare function elementCreate(name: string, overriddenRenderer?: Rendere
 export declare function resolveDirective(def: DirectiveDefInternal<any>, valueIndex: number, matches: CurrentMatchesList, tView: TView): any;
 /** Sets the context for a ChangeDetectorRef to the given instance. */
 export declare function initChangeDetectorIfExisting(injector: LInjector | null, instance: any, view: LViewData): void;
+export declare function isContentQueryHost(tNode: TNode): boolean;
 export declare function isComponent(tNode: TNode): boolean;
 /**
  * Creates a TView instance
