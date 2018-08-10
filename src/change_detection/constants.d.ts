@@ -6,53 +6,64 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Describes within the change detector which strategy will be used the next time change
- * detection is triggered.
+ * The strategy that the default change detector uses to detect changes.
+ * When set, takes effect the next time change detection is triggered.
  *
  */
 export declare enum ChangeDetectionStrategy {
     /**
-     * `OnPush` means that the change detector's mode will be initially set to `CheckOnce`.
+     * Use the `CheckOnce` strategy, meaning that automatic change detection is deactivated
+     * until reactivated by setting the strategy to `Default` (`CheckAlways`).
+     * Change detection can still be explictly invoked.
      */
     OnPush = 0,
     /**
-     * `Default` means that the change detector's mode will be initially set to `CheckAlways`.
+     * Use the default `CheckAlways` strategy, in which change detection is automatic until
+     * explicitly deactivated.
      */
-    Default = 1,
+    Default = 1
 }
 /**
- * Describes the status of the detector.
+ * Defines the possible states of the default change detector.
+ * @see `ChangeDetectorRef`
  */
 export declare enum ChangeDetectorStatus {
     /**
-     * `CheckOnce` means that after calling detectChanges the mode of the change detector
-     * will become `Checked`.
+     * A state in which, after calling `detectChanges()`, the change detector
+     * state becomes `Checked`, and must be explicitly invoked or reactivated.
      */
     CheckOnce = 0,
     /**
-     * `Checked` means that the change detector should be skipped until its mode changes to
-     * `CheckOnce`.
+     * A state in which change detection is skipped until the change detector mode
+     * becomes `CheckOnce`.
      */
     Checked = 1,
     /**
-     * `CheckAlways` means that after calling detectChanges the mode of the change detector
-     * will remain `CheckAlways`.
+     * A state in which change detection continues automatically until explictly
+     * deactivated.
      */
     CheckAlways = 2,
     /**
-     * `Detached` means that the change detector sub tree is not a part of the main tree and
+     * A state in which a change detector sub tree is not a part of the main tree and
      * should be skipped.
      */
     Detached = 3,
     /**
-     * `Errored` means that the change detector encountered an error checking a binding
+     * Indicates that the change detector encountered an error checking a binding
      * or calling a directive lifecycle method and is now in an inconsistent state. Change
-     * detectors in this state will no longer detect changes.
+     * detectors in this state do not detect changes.
      */
     Errored = 4,
     /**
-     * `Destroyed` means that the change detector is destroyed.
+     * Indicates that the change detector has been destroyed.
      */
-    Destroyed = 5,
+    Destroyed = 5
 }
+/**
+ * Reports whether a given strategy is currently the default for change detection.
+ * @param changeDetectionStrategy The strategy to check.
+ * @returns True if the given strategy is the current default, false otherwise.
+ * @see `ChangeDetectorStatus`
+ * @see `ChangeDetectorRef`
+ */
 export declare function isDefaultChangeDetectionStrategy(changeDetectionStrategy: ChangeDetectionStrategy): boolean;

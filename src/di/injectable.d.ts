@@ -1,3 +1,10 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 import { Type } from '../type';
 import { InjectableDef } from './defs';
 import { ClassSansProvider, ConstructorSansProvider, ExistingSansProvider, FactorySansProvider, StaticClassSansProvider, ValueSansProvider } from './provider';
@@ -9,31 +16,22 @@ import { ClassSansProvider, ConstructorSansProvider, ExistingSansProvider, Facto
 export declare type InjectableProvider = ValueSansProvider | ExistingSansProvider | StaticClassSansProvider | ConstructorSansProvider | FactorySansProvider | ClassSansProvider;
 /**
  * Type of the Injectable decorator / constructor function.
- *
- *
  */
 export interface InjectableDecorator {
     /**
+     * A marker metadata that marks a class as available to `Injector` for creation.
+     *
+     * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+     *
      * @usageNotes
-     * ```
-     * @Injectable()
-     * class Car {}
-     * ```
-     *
-     * @description
-     * A marker metadata that marks a class as available to {@link Injector} for creation.
-     *
-     * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
-     *
      * ### Example
      *
      * {@example core/di/ts/metadata_spec.ts region='Injectable'}
      *
-     * {@link Injector} will throw an error when trying to instantiate a class that
+     * `Injector` will throw an error when trying to instantiate a class that
      * does not have `@Injectable` marker, as shown in the example below.
      *
      * {@example core/di/ts/metadata_spec.ts region='InjectableThrows'}
-     *
      *
      */
     (): any;
@@ -52,12 +50,10 @@ export interface InjectableDecorator {
  */
 export interface Injectable {
     providedIn?: Type<any> | 'root' | null;
-    factory: () => any;
 }
 export declare function convertInjectableProviderToFactory(type: Type<any>, provider?: InjectableProvider): () => any;
 /**
 * Injectable decorator and metadata.
-*
 *
 * @Annotation
 */

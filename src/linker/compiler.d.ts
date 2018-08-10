@@ -57,6 +57,10 @@ export declare class Compiler {
      * Clears the cache for the given component/ngModule.
      */
     clearCacheFor(type: Type<any>): void;
+    /**
+     * Returns the id for a given NgModule, if one is defined and known to the compiler.
+     */
+    getModuleId(moduleType: Type<any>): string | undefined;
 }
 /**
  * Options for creating a compiler

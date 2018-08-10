@@ -1,13 +1,21 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 import { Type } from '../type';
 import { InjectorType } from './defs';
 import { InjectionToken } from './injection_token';
 import { InjectFlags, Injector } from './injector';
+import { StaticProvider } from './provider';
 /**
- * Create a new `Injector` which is configured using `InjectorType`s.
+ * Create a new `Injector` which is configured using a `defType` of `InjectorType<any>`s.
  *
  * @experimental
  */
-export declare function createInjector(defType: any, parent?: Injector | null): Injector;
+export declare function createInjector(defType: any, parent?: Injector | null, additionalProviders?: StaticProvider[] | null): Injector;
 export declare class R3Injector {
     readonly parent: Injector;
     /**
@@ -31,7 +39,7 @@ export declare class R3Injector {
      * Flag indicating that this injector was previously destroyed.
      */
     private destroyed;
-    constructor(def: InjectorType<any>, parent: Injector);
+    constructor(def: InjectorType<any>, additionalProviders: StaticProvider[] | null, parent: Injector);
     /**
      * Destroy the injector and release references to every instance or provider associated with it.
      *
@@ -40,16 +48,16 @@ export declare class R3Injector {
      */
     destroy(): void;
     get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: any, flags?: InjectFlags): T;
-    private assertNotDestroyed();
+    private assertNotDestroyed;
     /**
      * Add an `InjectorType` or `InjectorDefTypeWithProviders` and all of its transitive providers
      * to this injector.
      */
-    private processInjectorType(defOrWrappedDef, parents);
+    private processInjectorType;
     /**
      * Process a `SingleProvider` and add it.
      */
-    private processProvider(provider);
-    private hydrate<T>(token, record);
-    private injectableDefInScope(def);
+    private processProvider;
+    private hydrate;
+    private injectableDefInScope;
 }

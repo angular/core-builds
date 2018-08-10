@@ -1,7 +1,14 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 import { RendererStyleFlags2, RendererType2 } from '../../render/api';
 export declare enum RendererStyleFlags3 {
     Important = 1,
-    DashCase = 2,
+    DashCase = 2
 }
 export declare type Renderer3 = ObjectOrientedRenderer3 | ProceduralRenderer3;
 /**
@@ -12,7 +19,9 @@ export declare type Renderer3 = ObjectOrientedRenderer3 | ProceduralRenderer3;
  * (reducing payload size).
  * */
 export interface ObjectOrientedRenderer3 {
+    createComment(data: string): RComment;
     createElement(tagName: string): RElement;
+    createElementNS(namespace: string, tagName: string): RElement;
     createTextNode(data: string): RText;
     querySelector(selectors: string): RElement | null;
 }
@@ -27,6 +36,7 @@ export declare function isProceduralRenderer(renderer: ProceduralRenderer3 | Obj
  */
 export interface ProceduralRenderer3 {
     destroy(): void;
+    createComment(value: string): RComment;
     createElement(name: string, namespace?: string | null): RElement;
     createText(value: string): RText;
     /**
@@ -96,5 +106,7 @@ export interface RDomTokenList {
 }
 export interface RText extends RNode {
     textContent: string | null;
+}
+export interface RComment extends RNode {
 }
 export declare const unusedValueExportToPlacateAjd = 1;

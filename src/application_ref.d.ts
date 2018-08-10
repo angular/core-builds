@@ -97,8 +97,6 @@ export interface BootstrapOptions {
  *
  * A page's platform is initialized implicitly when a platform is created via a platform factory
  * (e.g. {@link platformBrowser}), or explicitly by calling the {@link createPlatform} function.
- *
- *
  */
 export declare class PlatformRef {
     private _injector;
@@ -109,7 +107,8 @@ export declare class PlatformRef {
      * Creates an instance of an `@NgModule` for the given platform
      * for offline compilation.
      *
-     * ## Simple Example
+     * @usageNotes
+     * ### Simple Example
      *
      * ```typescript
      * my_module.ts:
@@ -132,7 +131,8 @@ export declare class PlatformRef {
     /**
      * Creates an instance of an `@NgModule` for a given platform using the given runtime compiler.
      *
-     * ## Simple Example
+     * @usageNotes
+     * ### Simple Example
      *
      * ```typescript
      * @NgModule({
@@ -145,7 +145,7 @@ export declare class PlatformRef {
      *
      */
     bootstrapModule<M>(moduleType: Type<M>, compilerOptions?: (CompilerOptions & BootstrapOptions) | Array<CompilerOptions & BootstrapOptions>): Promise<NgModuleRef<M>>;
-    private _moduleDoBootstrap(moduleRef);
+    private _moduleDoBootstrap;
     /**
      * Register a listener to be called when the platform is disposed.
      */
@@ -163,8 +163,6 @@ export declare class PlatformRef {
 }
 /**
  * A reference to an Angular application running on a page.
- *
- *
  */
 export declare class ApplicationRef {
     private _zone;
@@ -194,14 +192,15 @@ export declare class ApplicationRef {
     /**
      * Bootstrap a new component at the root level of the application.
      *
+     * @usageNotes
      * ### Bootstrap process
      *
      * When bootstrapping a new root component into an application, Angular mounts the
-     * specified application component onto DOM elements identified by the [componentType]'s
+     * specified application component onto DOM elements identified by the componentType's
      * selector and kicks off automatic change detection to finish initializing the component.
      *
      * Optionally, a component can be mounted onto a DOM element that does not match the
-     * [componentType]'s selector.
+     * componentType's selector.
      *
      * ### Example
      * {@example core/ts/platform/platform.ts region='longform'}
@@ -228,8 +227,8 @@ export declare class ApplicationRef {
      * Detaches a view from dirty checking again.
      */
     detachView(viewRef: ViewRef): void;
-    private _loadComponent(componentRef);
-    private _unloadComponent(componentRef);
+    private _loadComponent;
+    private _unloadComponent;
     /**
      * Returns the number of attached views.
      */

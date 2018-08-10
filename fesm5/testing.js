@@ -1,11 +1,11 @@
 /**
- * @license Angular v6.0.0-rc.5+145.sha-741fa9e
+ * @license Angular v7.0.0-beta.1+25.sha-ca8c683
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { ApplicationInitStatus, Compiler, Component, Injectable, InjectionToken, Injector, NgModule, NgZone, Optional, RendererFactory2, SkipSelf, getDebugNode, ɵAPP_ROOT, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify } from '@angular/core';
-import { __extends, __spread, __values } from 'tslib';
+import { RendererFactory2, getDebugNode, Compiler, Injectable, ApplicationInitStatus, Component, InjectionToken, Injector, NgModule, NgZone, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify } from '@angular/core';
+import { __spread, __values, __extends } from 'tslib';
 
 /**
  * @license
@@ -194,8 +194,6 @@ var ComponentFixture = /** @class */ (function () {
                         if (_this._autoDetect) {
                             // Do a change detection run with checkNoChanges set to true to check
                             // there are no changes on the second run.
-                            // Do a change detection run with checkNoChanges set to true to check
-                            // there are no changes on the second run.
                             _this.detectChanges(true);
                         }
                     }
@@ -234,13 +232,7 @@ var ComponentFixture = /** @class */ (function () {
     /**
      * Trigger a change detection cycle for the component.
      */
-    /**
-       * Trigger a change detection cycle for the component.
-       */
-    ComponentFixture.prototype.detectChanges = /**
-       * Trigger a change detection cycle for the component.
-       */
-    function (checkNoChanges) {
+    ComponentFixture.prototype.detectChanges = function (checkNoChanges) {
         var _this = this;
         if (checkNoChanges === void 0) { checkNoChanges = true; }
         if (this.ngZone != null) {
@@ -256,29 +248,13 @@ var ComponentFixture = /** @class */ (function () {
     /**
      * Do a change detection run to make sure there were no changes.
      */
-    /**
-       * Do a change detection run to make sure there were no changes.
-       */
-    ComponentFixture.prototype.checkNoChanges = /**
-       * Do a change detection run to make sure there were no changes.
-       */
-    function () { this.changeDetectorRef.checkNoChanges(); };
+    ComponentFixture.prototype.checkNoChanges = function () { this.changeDetectorRef.checkNoChanges(); };
     /**
      * Set whether the fixture should autodetect changes.
      *
      * Also runs detectChanges once so that any existing change is detected.
      */
-    /**
-       * Set whether the fixture should autodetect changes.
-       *
-       * Also runs detectChanges once so that any existing change is detected.
-       */
-    ComponentFixture.prototype.autoDetectChanges = /**
-       * Set whether the fixture should autodetect changes.
-       *
-       * Also runs detectChanges once so that any existing change is detected.
-       */
-    function (autoDetect) {
+    ComponentFixture.prototype.autoDetectChanges = function (autoDetect) {
         if (autoDetect === void 0) { autoDetect = true; }
         if (this.ngZone == null) {
             throw new Error('Cannot call autoDetectChanges when ComponentFixtureNoNgZone is set');
@@ -290,34 +266,14 @@ var ComponentFixture = /** @class */ (function () {
      * Return whether the fixture is currently stable or has async tasks that have not been completed
      * yet.
      */
-    /**
-       * Return whether the fixture is currently stable or has async tasks that have not been completed
-       * yet.
-       */
-    ComponentFixture.prototype.isStable = /**
-       * Return whether the fixture is currently stable or has async tasks that have not been completed
-       * yet.
-       */
-    function () { return this._isStable && !this.ngZone.hasPendingMacrotasks; };
+    ComponentFixture.prototype.isStable = function () { return this._isStable && !this.ngZone.hasPendingMacrotasks; };
     /**
      * Get a promise that resolves when the fixture is stable.
      *
      * This can be used to resume testing after events have triggered asynchronous activity or
      * asynchronous change detection.
      */
-    /**
-       * Get a promise that resolves when the fixture is stable.
-       *
-       * This can be used to resume testing after events have triggered asynchronous activity or
-       * asynchronous change detection.
-       */
-    ComponentFixture.prototype.whenStable = /**
-       * Get a promise that resolves when the fixture is stable.
-       *
-       * This can be used to resume testing after events have triggered asynchronous activity or
-       * asynchronous change detection.
-       */
-    function () {
+    ComponentFixture.prototype.whenStable = function () {
         var _this = this;
         if (this.isStable()) {
             return Promise.resolve(false);
@@ -339,13 +295,7 @@ var ComponentFixture = /** @class */ (function () {
     /**
       * Get a promise that resolves when the ui state is stable following animations.
       */
-    /**
-        * Get a promise that resolves when the ui state is stable following animations.
-        */
-    ComponentFixture.prototype.whenRenderingDone = /**
-        * Get a promise that resolves when the ui state is stable following animations.
-        */
-    function () {
+    ComponentFixture.prototype.whenRenderingDone = function () {
         var renderer = this._getRenderer();
         if (renderer && renderer.whenRenderingDone) {
             return renderer.whenRenderingDone();
@@ -355,13 +305,7 @@ var ComponentFixture = /** @class */ (function () {
     /**
      * Trigger component destruction.
      */
-    /**
-       * Trigger component destruction.
-       */
-    ComponentFixture.prototype.destroy = /**
-       * Trigger component destruction.
-       */
-    function () {
+    ComponentFixture.prototype.destroy = function () {
         if (!this._isDestroyed) {
             this.componentRef.destroy();
             if (this._onUnstableSubscription != null) {
@@ -400,9 +344,9 @@ function scheduleMicroTask(fn) {
  * fakeAsync has been moved to zone.js
  * this file is for fallback in case old version of zone.js is used
  */
-var _Zone$1 = typeof Zone !== 'undefined' ? Zone : null;
-var FakeAsyncTestZoneSpec = _Zone$1 && _Zone$1['FakeAsyncTestZoneSpec'];
-var ProxyZoneSpec = _Zone$1 && _Zone$1['ProxyZoneSpec'];
+var _Zone = typeof Zone !== 'undefined' ? Zone : null;
+var FakeAsyncTestZoneSpec = _Zone && _Zone['FakeAsyncTestZoneSpec'];
+var ProxyZoneSpec = _Zone && _Zone['ProxyZoneSpec'];
 var _fakeAsyncTestZoneSpec = null;
 /**
  * Clears out the shared fake async zone for a test.
@@ -425,7 +369,8 @@ var _inFakeAsyncCall = false;
  *
  * Can be used to wrap inject() calls.
  *
- * ## Example
+ * @usageNotes
+ * ### Example
  *
  * {@example core/testing/ts/fake_async.ts region='basic'}
  *
@@ -490,7 +435,8 @@ function _getFakeAsyncZoneSpec() {
  * The microtasks queue is drained at the very start of this function and after any timer callback
  * has been executed.
  *
- * ## Example
+ * @usageNotes
+ * ### Example
  *
  * {@example core/testing/ts/fake_async.ts region='basic'}
  *
@@ -520,7 +466,6 @@ function flushFallback(maxTurns) {
  */
 function discardPeriodicTasksFallback() {
     var zoneSpec = _getFakeAsyncZoneSpec();
-    var pendingTimers = zoneSpec.pendingPeriodicTimers;
     zoneSpec.pendingPeriodicTimers.length = 0;
 }
 /**
@@ -532,8 +477,15 @@ function flushMicrotasksFallback() {
     _getFakeAsyncZoneSpec().flushMicrotasks();
 }
 
-var _Zone = typeof Zone !== 'undefined' ? Zone : null;
-var fakeAsyncTestModule = _Zone && _Zone[_Zone.__symbol__('fakeAsyncTest')];
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+var _Zone$1 = typeof Zone !== 'undefined' ? Zone : null;
+var fakeAsyncTestModule = _Zone$1 && _Zone$1[_Zone$1.__symbol__('fakeAsyncTest')];
 /**
  * Clears out the shared fake async zone for a test.
  * To be called in a global `beforeEach`.
@@ -557,7 +509,8 @@ function resetFakeAsyncZone() {
  *
  * Can be used to wrap inject() calls.
  *
- * ## Example
+ * @usageNotes
+ * ### Example
  *
  * {@example core/testing/ts/fake_async.ts region='basic'}
  *
@@ -580,7 +533,8 @@ function fakeAsync(fn) {
  * The microtasks queue is drained at the very start of this function and after any timer callback
  * has been executed.
  *
- * ## Example
+ * @usageNotes
+ * ### Example
  *
  * {@example core/testing/ts/fake_async.ts region='basic'}
  *
@@ -709,49 +663,21 @@ var TestingCompiler = /** @class */ (function (_super) {
      * Allows to pass the compile summary from AOT compilation to the JIT compiler,
      * so that it can use the code generated by AOT.
      */
-    /**
-       * Allows to pass the compile summary from AOT compilation to the JIT compiler,
-       * so that it can use the code generated by AOT.
-       */
-    TestingCompiler.prototype.loadAotSummaries = /**
-       * Allows to pass the compile summary from AOT compilation to the JIT compiler,
-       * so that it can use the code generated by AOT.
-       */
-    function (summaries) { throw unimplemented(); };
+    TestingCompiler.prototype.loadAotSummaries = function (summaries) { throw unimplemented(); };
     /**
      * Gets the component factory for the given component.
      * This assumes that the component has been compiled before calling this call using
      * `compileModuleAndAllComponents*`.
      */
-    /**
-       * Gets the component factory for the given component.
-       * This assumes that the component has been compiled before calling this call using
-       * `compileModuleAndAllComponents*`.
-       */
-    TestingCompiler.prototype.getComponentFactory = /**
-       * Gets the component factory for the given component.
-       * This assumes that the component has been compiled before calling this call using
-       * `compileModuleAndAllComponents*`.
-       */
-    function (component) { throw unimplemented(); };
+    TestingCompiler.prototype.getComponentFactory = function (component) { throw unimplemented(); };
     /**
      * Returns the component type that is stored in the given error.
      * This can be used for errors created by compileModule...
      */
-    /**
-       * Returns the component type that is stored in the given error.
-       * This can be used for errors created by compileModule...
-       */
-    TestingCompiler.prototype.getComponentFromError = /**
-       * Returns the component type that is stored in the given error.
-       * This can be used for errors created by compileModule...
-       */
-    function (error) { throw unimplemented(); };
+    TestingCompiler.prototype.getComponentFromError = function (error) { throw unimplemented(); };
     TestingCompiler.decorators = [
         { type: Injectable }
     ];
-    /** @nocollapse */
-    TestingCompiler.ctorParameters = function () { return []; };
     return TestingCompiler;
 }(Compiler));
 /**
@@ -839,33 +765,7 @@ var TestBed = /** @class */ (function () {
      *
      * @experimental
      */
-    /**
-       * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
-       * angular module. These are common to every test in the suite.
-       *
-       * This may only be called once, to set up the common providers for the current test
-       * suite on the current platform. If you absolutely need to change the providers,
-       * first use `resetTestEnvironment`.
-       *
-       * Test modules and platforms for individual platforms are available from
-       * '@angular/<platform_name>/testing'.
-       *
-       * @experimental
-       */
-    TestBed.initTestEnvironment = /**
-       * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
-       * angular module. These are common to every test in the suite.
-       *
-       * This may only be called once, to set up the common providers for the current test
-       * suite on the current platform. If you absolutely need to change the providers,
-       * first use `resetTestEnvironment`.
-       *
-       * Test modules and platforms for individual platforms are available from
-       * '@angular/<platform_name>/testing'.
-       *
-       * @experimental
-       */
-    function (ngModule, platform, aotSummaries) {
+    TestBed.initTestEnvironment = function (ngModule, platform, aotSummaries) {
         var testBed = getTestBed();
         testBed.initTestEnvironment(ngModule, platform, aotSummaries);
         return testBed;
@@ -875,17 +775,7 @@ var TestBed = /** @class */ (function () {
      *
      * @experimental
      */
-    /**
-       * Reset the providers for the test injector.
-       *
-       * @experimental
-       */
-    TestBed.resetTestEnvironment = /**
-       * Reset the providers for the test injector.
-       *
-       * @experimental
-       */
-    function () { getTestBed().resetTestEnvironment(); };
+    TestBed.resetTestEnvironment = function () { getTestBed().resetTestEnvironment(); };
     TestBed.resetTestingModule = function () {
         getTestBed().resetTestingModule();
         return TestBed;
@@ -894,15 +784,7 @@ var TestBed = /** @class */ (function () {
      * Allows overriding default compiler providers and settings
      * which are defined in test_injector.js
      */
-    /**
-       * Allows overriding default compiler providers and settings
-       * which are defined in test_injector.js
-       */
-    TestBed.configureCompiler = /**
-       * Allows overriding default compiler providers and settings
-       * which are defined in test_injector.js
-       */
-    function (config) {
+    TestBed.configureCompiler = function (config) {
         getTestBed().configureCompiler(config);
         return TestBed;
     };
@@ -910,15 +792,7 @@ var TestBed = /** @class */ (function () {
      * Allows overriding default providers, directives, pipes, modules of the test injector,
      * which are defined in test_injector.js
      */
-    /**
-       * Allows overriding default providers, directives, pipes, modules of the test injector,
-       * which are defined in test_injector.js
-       */
-    TestBed.configureTestingModule = /**
-       * Allows overriding default providers, directives, pipes, modules of the test injector,
-       * which are defined in test_injector.js
-       */
-    function (moduleDef) {
+    TestBed.configureTestingModule = function (moduleDef) {
         getTestBed().configureTestingModule(moduleDef);
         return TestBed;
     };
@@ -927,17 +801,7 @@ var TestBed = /** @class */ (function () {
      * It is necessary to call this function
      * as fetching urls is asynchronous.
      */
-    /**
-       * Compile components with a `templateUrl` for the test's NgModule.
-       * It is necessary to call this function
-       * as fetching urls is asynchronous.
-       */
-    TestBed.compileComponents = /**
-       * Compile components with a `templateUrl` for the test's NgModule.
-       * It is necessary to call this function
-       * as fetching urls is asynchronous.
-       */
-    function () { return getTestBed().compileComponents(); };
+    TestBed.compileComponents = function () { return getTestBed().compileComponents(); };
     TestBed.overrideModule = function (ngModule, override) {
         getTestBed().overrideModule(ngModule, override);
         return TestBed;
@@ -955,7 +819,7 @@ var TestBed = /** @class */ (function () {
         return TestBed;
     };
     TestBed.overrideTemplate = function (component, template) {
-        getTestBed().overrideComponent(component, { set: { template: template, templateUrl: (null) } });
+        getTestBed().overrideComponent(component, { set: { template: template, templateUrl: null } });
         return TestBed;
     };
     /**
@@ -964,19 +828,7 @@ var TestBed = /** @class */ (function () {
      *
      * Note: This works for JIT and AOTed components as well.
      */
-    /**
-       * Overrides the template of the given component, compiling the template
-       * in the context of the TestingModule.
-       *
-       * Note: This works for JIT and AOTed components as well.
-       */
-    TestBed.overrideTemplateUsingTestingModule = /**
-       * Overrides the template of the given component, compiling the template
-       * in the context of the TestingModule.
-       *
-       * Note: This works for JIT and AOTed components as well.
-       */
-    function (component, template) {
+    TestBed.overrideTemplateUsingTestingModule = function (component, template) {
         getTestBed().overrideTemplateUsingTestingModule(component, template);
         return TestBed;
     };
@@ -1008,33 +860,7 @@ var TestBed = /** @class */ (function () {
      *
      * @experimental
      */
-    /**
-       * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
-       * angular module. These are common to every test in the suite.
-       *
-       * This may only be called once, to set up the common providers for the current test
-       * suite on the current platform. If you absolutely need to change the providers,
-       * first use `resetTestEnvironment`.
-       *
-       * Test modules and platforms for individual platforms are available from
-       * '@angular/<platform_name>/testing'.
-       *
-       * @experimental
-       */
-    TestBed.prototype.initTestEnvironment = /**
-       * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
-       * angular module. These are common to every test in the suite.
-       *
-       * This may only be called once, to set up the common providers for the current test
-       * suite on the current platform. If you absolutely need to change the providers,
-       * first use `resetTestEnvironment`.
-       *
-       * Test modules and platforms for individual platforms are available from
-       * '@angular/<platform_name>/testing'.
-       *
-       * @experimental
-       */
-    function (ngModule, platform, aotSummaries) {
+    TestBed.prototype.initTestEnvironment = function (ngModule, platform, aotSummaries) {
         if (this.platform || this.ngModule) {
             throw new Error('Cannot set base providers because it has already been called');
         }
@@ -1049,35 +875,25 @@ var TestBed = /** @class */ (function () {
      *
      * @experimental
      */
-    /**
-       * Reset the providers for the test injector.
-       *
-       * @experimental
-       */
-    TestBed.prototype.resetTestEnvironment = /**
-       * Reset the providers for the test injector.
-       *
-       * @experimental
-       */
-    function () {
+    TestBed.prototype.resetTestEnvironment = function () {
         this.resetTestingModule();
-        this.platform = (null);
-        this.ngModule = (null);
+        this.platform = null;
+        this.ngModule = null;
         this._testEnvAotSummaries = function () { return []; };
     };
     TestBed.prototype.resetTestingModule = function () {
         ɵclearOverrides();
         this._aotSummaries = [];
         this._templateOverrides = [];
-        this._compiler = (null);
+        this._compiler = null;
         this._moduleOverrides = [];
         this._componentOverrides = [];
         this._directiveOverrides = [];
         this._pipeOverrides = [];
         this._isRoot = true;
         this._rootProviderOverrides = [];
-        this._moduleRef = (null);
-        this._moduleFactory = (null);
+        this._moduleRef = null;
+        this._moduleFactory = null;
         this._compilerOptions = [];
         this._providers = [];
         this._declarations = [];
@@ -1102,6 +918,7 @@ var TestBed = /** @class */ (function () {
         this._compilerOptions.push(config);
     };
     TestBed.prototype.configureTestingModule = function (moduleDef) {
+        var _a, _b, _c, _d;
         this._assertNotInstantiated('TestBed.configureTestingModule', 'configure the test module');
         if (moduleDef.providers) {
             (_a = this._providers).push.apply(_a, __spread(moduleDef.providers));
@@ -1118,7 +935,6 @@ var TestBed = /** @class */ (function () {
         if (moduleDef.aotSummaries) {
             this._aotSummaries.push(moduleDef.aotSummaries);
         }
-        var _a, _b, _c, _d;
     };
     TestBed.prototype.compileComponents = function () {
         var _this = this;
@@ -1132,6 +948,7 @@ var TestBed = /** @class */ (function () {
         });
     };
     TestBed.prototype._initIfNeeded = function () {
+        var e_1, _a;
         if (this._instantiated) {
             return;
         }
@@ -1153,8 +970,8 @@ var TestBed = /** @class */ (function () {
             }
         }
         try {
-            for (var _a = __values(this._templateOverrides), _b = _a.next(); !_b.done; _b = _a.next()) {
-                var _c = _b.value, component = _c.component, templateOf = _c.templateOf;
+            for (var _b = __values(this._templateOverrides), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var _d = _c.value, component = _d.component, templateOf = _d.templateOf;
                 var compFactory = this._compiler.getComponentFactory(templateOf);
                 ɵoverrideComponentView(component, compFactory);
             }
@@ -1162,7 +979,7 @@ var TestBed = /** @class */ (function () {
         catch (e_1_1) { e_1 = { error: e_1_1 }; }
         finally {
             try {
-                if (_b && !_b.done && (_d = _a.return)) _d.call(_a);
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
             }
             finally { if (e_1) throw e_1.error; }
         }
@@ -1176,14 +993,12 @@ var TestBed = /** @class */ (function () {
         this._moduleRef = this._moduleFactory.create(ngZoneInjector);
         // ApplicationInitStatus.runInitializers() is marked @internal to core. So casting to any
         // before accessing it.
-        // ApplicationInitStatus.runInitializers() is marked @internal to core. So casting to any
-        // before accessing it.
         this._moduleRef.injector.get(ApplicationInitStatus).runInitializers();
         this._instantiated = true;
-        var e_1, _d;
     };
     TestBed.prototype._createCompilerAndModule = function () {
         var _this = this;
+        var e_2, _a;
         var providers = this._providers.concat([{ provide: TestBed, useValue: this }]);
         var declarations = __spread(this._declarations, this._templateOverrides.map(function (entry) { return entry.templateOf; }));
         var rootScopeImports = [];
@@ -1195,10 +1010,9 @@ var TestBed = /** @class */ (function () {
                 RootScopeModule.decorators = [
                     { type: NgModule, args: [{
                                 providers: __spread(rootProviderOverrides),
+                                jit: true,
                             },] },
                 ];
-                /** @nocollapse */
-                RootScopeModule.ctorParameters = function () { return []; };
                 return RootScopeModule;
             }());
             rootScopeImports.push(RootScopeModule);
@@ -1210,24 +1024,22 @@ var TestBed = /** @class */ (function () {
             function DynamicTestModule() {
             }
             DynamicTestModule.decorators = [
-                { type: NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas },] },
+                { type: NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas, jit: true },] },
             ];
-            /** @nocollapse */
-            DynamicTestModule.ctorParameters = function () { return []; };
             return DynamicTestModule;
         }());
         var compilerFactory = this.platform.injector.get(TestingCompilerFactory);
         this._compiler = compilerFactory.createTestingCompiler(this._compilerOptions);
         try {
-            for (var _a = __values(__spread([this._testEnvAotSummaries], this._aotSummaries)), _b = _a.next(); !_b.done; _b = _a.next()) {
-                var summary = _b.value;
+            for (var _b = __values(__spread([this._testEnvAotSummaries], this._aotSummaries)), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var summary = _c.value;
                 this._compiler.loadAotSummaries(summary);
             }
         }
         catch (e_2_1) { e_2 = { error: e_2_1 }; }
         finally {
             try {
-                if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
             }
             finally { if (e_2) throw e_2.error; }
         }
@@ -1236,7 +1048,6 @@ var TestBed = /** @class */ (function () {
         this._directiveOverrides.forEach(function (entry) { return _this._compiler.overrideDirective(entry[0], entry[1]); });
         this._pipeOverrides.forEach(function (entry) { return _this._compiler.overridePipe(entry[0], entry[1]); });
         return DynamicTestModule;
-        var e_2, _c;
     };
     TestBed.prototype._assertNotInstantiated = function (methodName, methodDescription) {
         if (this._instantiated) {
@@ -1281,7 +1092,7 @@ var TestBed = /** @class */ (function () {
         this.overrideProviderImpl(token, provider);
     };
     TestBed.prototype.deprecatedOverrideProvider = function (token, provider) {
-        this.overrideProviderImpl(token, provider, /* deprecated */ /* deprecated */ true);
+        this.overrideProviderImpl(token, provider, /* deprecated */ true);
     };
     TestBed.prototype.overrideProviderImpl = function (token, provider, deprecated) {
         if (deprecated === void 0) { deprecated = false; }
@@ -1305,7 +1116,7 @@ var TestBed = /** @class */ (function () {
             value = provider.useValue;
         }
         var deps = (provider.deps || []).map(function (dep) {
-            var depFlags = 0;
+            var depFlags = 0 /* None */;
             var depToken;
             if (Array.isArray(dep)) {
                 dep.forEach(function (entry) {
@@ -1333,10 +1144,8 @@ var TestBed = /** @class */ (function () {
             function OverrideComponent() {
             }
             OverrideComponent.decorators = [
-                { type: Component, args: [{ selector: 'empty', template: template },] },
+                { type: Component, args: [{ selector: 'empty', template: template, jit: true },] },
             ];
-            /** @nocollapse */
-            OverrideComponent.ctorParameters = function () { return []; };
             return OverrideComponent;
         }());
         this._templateOverrides.push({ component: component, templateOf: OverrideComponent });
@@ -1364,7 +1173,7 @@ var TestBed = /** @class */ (function () {
     };
     return TestBed;
 }());
-var _testBed = (null);
+var _testBed = null;
 /**
  * @experimental
  */
@@ -1486,127 +1295,6 @@ var __core_private_testing_placeholder__ = '';
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
-* Wraps a function in a new function which sets up document and HTML for running a test.
-*
-* This function is intended to wrap an existing testing function. The wrapper
-* adds HTML to the `body` element of the `document` and subsequently tears it down.
-*
-* This function is intended to be used with `async await` and `Promise`s. If the wrapped
-* function returns a promise (or is `async`) then the teardown is delayed until that `Promise`
-* is resolved.
-*
-* On `node` this function detects if `document` is present and if not it will create one by
-* loading `domino` and installing it.
-*
-* Example:
-*
-* ```
-* describe('something', () => {
-*   it('should do something', withBody('<my-app></my-app>', async () => {
-*     const myApp = renderComponent(MyApp);
-*     await whenRendered(myApp);
-*     expect(getRenderedText(myApp)).toEqual('Hello World!');
-*   }));
-* });
-* ```
-*
-* @param html HTML which should be inserted into `body` of the `document`.
-* @param blockFn function to wrap. The function can return promise or be `async`.
-* @experimental
-*/
-function withBody(html, blockFn) {
-    return function (done) {
-        ensureDocument();
-        if (typeof blockFn === 'function') {
-            document.body.innerHTML = html;
-            // TODO(i): I'm not sure why a cast is required here but otherwise I get
-            //   TS2349: Cannot invoke an expression whose type lacks a call signature. Type 'never' has
-            //   no compatible call signatures.
-            var blockReturn = blockFn();
-            if (blockReturn instanceof Promise) {
-                blockReturn = blockReturn.then(done, done.fail);
-            }
-            else {
-                done();
-            }
-        }
-    };
-}
-var savedDocument = undefined;
-var savedRequestAnimationFrame = undefined;
-var savedNode = undefined;
-var requestAnimationFrameCount = 0;
-var ɵ0 = function (domino) {
-    if (typeof global == 'object' && global.process && typeof require == 'function') {
-        try {
-            return require(domino);
-        }
-        catch (e) {
-            // It is possible that we don't have domino available in which case just give up.
-        }
-    }
-    // Seems like we don't have domino, give up.
-    return null;
-};
-/**
- * System.js uses regexp to look for `require` statements. `domino` has to be
- * extracted into a constant so that the regexp in the System.js does not match
- * and does not try to load domino in the browser.
- */
-var domino = (ɵ0)('domino');
-/**
- * Ensure that global has `Document` if we are in node.js
- * @experimental
- */
-function ensureDocument() {
-    if (domino) {
-        // we are in node.js.
-        var window_1 = domino.createWindow('', 'http://localhost');
-        savedDocument = global.document;
-        global.window = window_1;
-        global.document = window_1.document;
-        // Trick to avoid Event patching from
-        // https://github.com/angular/angular/blob/7cf5e95ac9f0f2648beebf0d5bd9056b79946970/packages/platform-browser/src/dom/events/dom_events.ts#L112-L132
-        // It fails with Domino with TypeError: Cannot assign to read only property
-        // 'stopImmediatePropagation' of object '#<Event>'
-        // Trick to avoid Event patching from
-        // https://github.com/angular/angular/blob/7cf5e95ac9f0f2648beebf0d5bd9056b79946970/packages/platform-browser/src/dom/events/dom_events.ts#L112-L132
-        // It fails with Domino with TypeError: Cannot assign to read only property
-        // 'stopImmediatePropagation' of object '#<Event>'
-        global.Event = null;
-        savedNode = global.Node;
-        global.Node = domino.impl.Node;
-        savedRequestAnimationFrame = global.requestAnimationFrame;
-        global.requestAnimationFrame = function (cb) {
-            setImmediate(cb);
-            return requestAnimationFrameCount++;
-        };
-    }
-}
-/**
- * Restore the state of `Document` between tests.
- * @experimental
- */
-function cleanupDocument() {
-    if (savedDocument) {
-        global.document = savedDocument;
-        global.window = undefined;
-        savedDocument = undefined;
-    }
-    if (savedNode) {
-        global.Node = savedNode;
-        savedNode = undefined;
-    }
-    if (savedRequestAnimationFrame) {
-        global.requestAnimationFrame = savedRequestAnimationFrame;
-        savedRequestAnimationFrame = undefined;
-    }
-}
-if (typeof beforeEach == 'function')
-    beforeEach(ensureDocument);
-if (typeof afterEach == 'function')
-    beforeEach(cleanupDocument);
 
 /**
  * @license
@@ -1615,15 +1303,6 @@ if (typeof afterEach == 'function')
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-
 // This file only reexports content of the `src` folder. Keep it that way.
 
 /**
@@ -1638,5 +1317,5 @@ if (typeof afterEach == 'function')
  * Generated bundle index. Do not edit.
  */
 
-export { async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, flush, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestBed, getTestBed, inject, InjectSetupWrapper, withModule, __core_private_testing_placeholder__, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory, withBody, ensureDocument, cleanupDocument, ɵ0 };
+export { async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, flush, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestBed, getTestBed, inject, InjectSetupWrapper, withModule, __core_private_testing_placeholder__, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory };
 //# sourceMappingURL=testing.js.map

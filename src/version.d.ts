@@ -17,7 +17,4 @@ export declare class Version {
     readonly patch: string;
     constructor(full: string);
 }
-/**
- *
- */
 export declare const VERSION: Version;

@@ -7,13 +7,16 @@
  */
 import { Type } from '../core';
 import { Injector } from '../di/injector';
-import { ComponentRef as viewEngine_ComponentRef } from '../linker/component_factory';
-import { ComponentDef, ComponentType } from './interfaces/definition';
+import { Sanitizer } from '../sanitization/security';
+import { ComponentDef, ComponentDefInternal, ComponentType } from './interfaces/definition';
 import { RElement, RendererFactory3 } from './interfaces/renderer';
+import { RootContext } from './interfaces/view';
 /** Options that control how the component should be bootstrapped. */
 export interface CreateComponentOptions {
     /** Which renderer factory to use. */
     rendererFactory?: RendererFactory3;
+    /** A custom sanitizer instance */
+    sanitizer?: Sanitizer;
     /**
      * Host element on which the component will be bootstrapped. If not specified,
      * the component definition's `tag` is used to query the existing DOM for the
@@ -34,7 +37,7 @@ export interface CreateComponentOptions {
      * features list because there's no way of knowing when the component will be used as
      * a root component.
      */
-    hostFeatures?: (<T>(component: T, componentDef: ComponentDef<T>) => void)[];
+    hostFeatures?: (<T>(component: T, componentDef: ComponentDef<T, string>) => void)[];
     /**
      * A function which is used to schedule change detection work in the future.
      *
@@ -48,13 +51,6 @@ export interface CreateComponentOptions {
      */
     scheduler?: (work: () => void) => void;
 }
-/**
- * Bootstraps a component, then creates and returns a `ComponentRef` for that component.
- *
- * @param componentType Component to bootstrap
- * @param options Optional parameters which control bootstrapping
- */
-export declare function createComponentRef<T>(componentType: ComponentType<T>, opts: CreateComponentOptions): viewEngine_ComponentRef<T>;
 export declare const NULL_INJECTOR: Injector;
 /**
  * Bootstraps a Component into an existing host element and returns an instance
@@ -70,6 +66,7 @@ export declare const NULL_INJECTOR: Injector;
  * @param options Optional parameters which control bootstrapping
  */
 export declare function renderComponent<T>(componentType: ComponentType<T> | Type<T>, opts?: CreateComponentOptions): T;
+export declare function createRootContext(scheduler: (workFn: () => void) => void): RootContext;
 /**
  * Used to enable lifecycle hooks on the root component.
  *
@@ -83,7 +80,7 @@ export declare function renderComponent<T>(componentType: ComponentType<T> | Typ
  * renderComponent(AppComponent, {features: [RootLifecycleHooks]});
  * ```
  */
-export declare function LifecycleHooksFeature(component: any, def: ComponentDef<any>): void;
+export declare function LifecycleHooksFeature(component: any, def: ComponentDefInternal<any>): void;
 /**
  * Retrieve the host element of the component.
  *

@@ -1,3 +1,10 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 import { EventEmitter } from '../event_emitter';
 /**
  * An injectable service for executing work inside or outside of the Angular zone.
@@ -12,6 +19,7 @@ import { EventEmitter } from '../event_emitter';
  *   - link to runOutsideAngular/run (throughout this file!)
  *   -->
  *
+ * @usageNotes
  * ### Example
  *
  * ```
@@ -99,7 +107,7 @@ export declare class NgZone {
      * Notifies that an error has been delivered.
      */
     readonly onError: EventEmitter<any>;
-    constructor({enableLongStackTrace}: {
+    constructor({ enableLongStackTrace }: {
         enableLongStackTrace?: boolean;
     });
     static isInAngularZone(): boolean;
