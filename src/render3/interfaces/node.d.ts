@@ -8,6 +8,7 @@
 import { StylingContext } from '../styling';
 import { LContainer } from './container';
 import { LInjector } from './injector';
+import { LQueries } from './query';
 import { RComment, RElement, RText } from './renderer';
 import { LViewData, TView } from './view';
 /**
@@ -32,10 +33,8 @@ export declare const enum TNodeFlags {
     isComponent = 4096,
     /** This bit is set if the node has been projected */
     isProjected = 8192,
-    /** This bit is set if the node has any content queries */
-    hasContentQuery = 16384,
     /** The index of the first directive on this node is encoded on the most significant bits  */
-    DirectiveStartingIndexShift = 15
+    DirectiveStartingIndexShift = 14
 }
 /**
  * LNode is an internal data structure which is used for the incremental DOM algorithm.
@@ -75,6 +74,12 @@ export interface LNode {
     readonly view: LViewData;
     /** The injector associated with this node. Necessary for DI. */
     nodeInjector: LInjector | null;
+    /**
+     * Optional set of queries that track query-related events for this node.
+     *
+     * If present the node creation/updates are reported to the `LQueries`.
+     */
+    queries: LQueries | null;
     /**
      * Pointer to the corresponding TNode object, which stores static
      * data about this node.
