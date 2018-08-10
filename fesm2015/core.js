@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.1+40.sha-99b2e7e
+ * @license Angular v7.0.0-beta.1+43.sha-82c8052
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -14098,15 +14098,20 @@ function getFactoryOf(type) {
  * @return {?}
  */
 function getInheritedFactory(type) {
-    debugger;
     /** @type {?} */
     const proto = /** @type {?} */ (Object.getPrototypeOf(type.prototype).constructor);
     /** @type {?} */
     const factory = getFactoryOf(proto);
-    if (factory === null) {
-        throw new Error(`Type ${proto.name} does not support inheritance`);
+    if (factory !== null) {
+        return factory;
     }
-    return factory;
+    else {
+        // There is no factory defined. Either this was improper usage of inheritance
+        // (no Angular decorator on the superclass) or there is no constructor at all
+        // in the inheritance chain. Since the two cases cannot be distinguished, the
+        // latter has to be assumed.
+        return (t) => new t();
+    }
 }
 /**
  * @template T
@@ -19348,7 +19353,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-beta.1+40.sha-99b2e7e');
+const VERSION = new Version('7.0.0-beta.1+43.sha-82c8052');
 
 /**
  * @fileoverview added by tsickle
