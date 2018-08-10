@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.0.0-beta.1+40.sha-99b2e7e
+ * @license Angular v7.0.0-beta.1+43.sha-82c8052
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __decorate, __metadata, __assign, __extends, __spread, __param, __read, __values } from 'tslib';
+import { __decorate, __metadata, __assign, __param, __extends, __spread, __read, __values } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { share } from 'rxjs/operators';
 import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compileInjectable, compilePipeFromMetadata } from '@angular/compiler';
@@ -11118,13 +11118,18 @@ function getFactoryOf(type) {
     return def.factory;
 }
 function getInheritedFactory(type) {
-    debugger;
     var proto = Object.getPrototypeOf(type.prototype).constructor;
     var factory = getFactoryOf(proto);
-    if (factory === null) {
-        throw new Error("Type " + proto.name + " does not support inheritance");
+    if (factory !== null) {
+        return factory;
     }
-    return factory;
+    else {
+        // There is no factory defined. Either this was improper usage of inheritance
+        // (no Angular decorator on the superclass) or there is no constructor at all
+        // in the inheritance chain. Since the two cases cannot be distinguished, the
+        // latter has to be assumed.
+        return function (t) { return new t(); };
+    }
 }
 var TemplateRef$1 = /** @class */ (function () {
     function TemplateRef$$1(_declarationParentView, elementRef, _tView, _renderer, _queries) {
@@ -15680,7 +15685,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('7.0.0-beta.1+40.sha-99b2e7e');
+var VERSION = new Version('7.0.0-beta.1+43.sha-82c8052');
 
 /**
  * @license
