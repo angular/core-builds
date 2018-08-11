@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.1+20.sha-209cc7e
+ * @license Angular v7.0.0-beta.1+25.sha-4a4d6fb
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2010,7 +2010,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-beta.1+20.sha-209cc7e');
+const VERSION = new Version('7.0.0-beta.1+25.sha-4a4d6fb');
 
 /**
  * @fileoverview added by tsickle
@@ -15114,7 +15114,7 @@ function queueInitHooks(index, onInit, doCheck, tView) {
 function queueLifecycleHooks(flags, tView) {
     if (tView.firstTemplatePass) {
         /** @type {?} */
-        const start = flags >> 14 /* DirectiveStartingIndexShift */;
+        const start = flags >> 15 /* DirectiveStartingIndexShift */;
         /** @type {?} */
         const count = flags & 4095 /* DirectiveCountMask */;
         /** @type {?} */
@@ -15237,7 +15237,8 @@ const __global$1 = typeof window != 'undefined' && window || typeof self != 'und
  * @return {?}
  */
 function ngDevModeResetPerfCounters() {
-    return __global$1.ngDevMode = {
+    // Make sure to refer to ngDevMode as ['ngDevMode'] for clousre.
+    return __global$1['ngDevMode'] = {
         firstTemplatePass: 0,
         tNode: 0,
         tView: 0,
@@ -15269,7 +15270,8 @@ function ngDevModeResetPerfCounters() {
  * as much early warning and errors as possible.
  */
 if (typeof ngDevMode === 'undefined' || ngDevMode) {
-    __global$1.ngDevMode = ngDevModeResetPerfCounters();
+    // Make sure to refer to ngDevMode as ['ngDevMode'] for clousre.
+    __global$1['ngDevMode'] = ngDevModeResetPerfCounters();
 }
 
 /**
@@ -17431,12 +17433,16 @@ let currentQueries;
  * @param {?} QueryType
  * @return {?}
  */
-function getCurrentQueries(QueryType) {
-    // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-    return currentQueries ||
-        (currentQueries =
-            (previousOrParentNode.queries && previousOrParentNode.queries.clone() ||
-                new QueryType()));
+function getOrCreateCurrentQueries(QueryType) {
+    /** @type {?} */
+    const tNode = previousOrParentNode.tNode;
+    // if this is the first content query on a node, any existing LQueries needs to be cloned
+    // in subsequent template passes, the cloning occurs before directive instantiation.
+    if (previousOrParentNode.data !== viewData && !isContentQueryHost(tNode)) {
+        currentQueries && (currentQueries = currentQueries.clone());
+        tNode.flags |= 16384 /* hasContentQuery */;
+    }
+    return currentQueries || (currentQueries = new QueryType(null, null, null));
 }
 /** *
  * This property gets set before entering a template.
@@ -17520,6 +17526,7 @@ function enterView(newView, host) {
         isParent = true;
     }
     viewData = contextViewData = newView;
+    oldView && (oldView[QUERIES] = currentQueries);
     currentQueries = newView && newView[QUERIES];
     return oldView;
 }
@@ -17665,16 +17672,14 @@ function createLViewData(renderer, tView, context, flags, sanitizer) {
  * @param {?} parent
  * @param {?} native
  * @param {?} state
- * @param {?} queries
  * @return {?}
  */
-function createLNodeObject(type, currentView, parent, native, state, queries) {
+function createLNodeObject(type, currentView, parent, native, state) {
     return {
         native: /** @type {?} */ (native),
         view: currentView,
         nodeInjector: parent ? parent.nodeInjector : null,
         data: state,
-        queries: queries,
         tNode: /** @type {?} */ ((null)),
         dynamicLContainerNode: null
     };
@@ -17695,12 +17700,9 @@ function createLNode(index, type, native, name, attrs, state) {
     /** @type {?} */
     const tParent = parent && parent.view === viewData ? /** @type {?} */ (parent.tNode) : null;
     /** @type {?} */
-    let queries = (isParent ? currentQueries : previousOrParentNode && previousOrParentNode.queries) ||
-        parent && parent.queries && parent.queries.child();
-    /** @type {?} */
     const isState = state != null;
     /** @type {?} */
-    const node = createLNodeObject(type, viewData, parent, native, isState ? /** @type {?} */ (state) : null, queries);
+    const node = createLNodeObject(type, viewData, parent, native, isState ? /** @type {?} */ (state) : null);
     if (index === -1 || type === 2 /* View */) {
         // View nodes are not stored in data because they can be added / removed at runtime (which
         // would cause indices to change). Their TNodes are instead stored in TView.node.
@@ -17731,7 +17733,6 @@ function createLNode(index, type, native, name, attrs, state) {
         node.tNode = /** @type {?} */ (tData[adjustedIndex]);
         // Now link ourselves into the tree.
         if (isParent) {
-            currentQueries = null;
             if (previousOrParentNode.tNode.child == null && previousOrParentNode.view === viewData ||
                 previousOrParentNode.tNode.type === 2 /* View */) {
                 // We are in the same view, which means we are adding content node to the parent View.
@@ -18124,6 +18125,13 @@ function initChangeDetectorIfExisting(injector, instance, view) {
  * @param {?} tNode
  * @return {?}
  */
+function isContentQueryHost(tNode) {
+    return (tNode.flags & 16384 /* hasContentQuery */) !== 0;
+}
+/**
+ * @param {?} tNode
+ * @return {?}
+ */
 function isComponent(tNode) {
     return (tNode.flags & 4096 /* isComponent */) === 4096 /* isComponent */;
 }
@@ -18132,13 +18140,17 @@ function isComponent(tNode) {
  * @return {?}
  */
 function instantiateDirectivesDirectly() {
+    ngDevMode && assertEqual(firstTemplatePass, false, `Directives should only be instantiated directly after first template pass`);
     /** @type {?} */
     const tNode = previousOrParentNode.tNode;
     /** @type {?} */
     const count = tNode.flags & 4095 /* DirectiveCountMask */;
+    if (isContentQueryHost(tNode) && currentQueries) {
+        currentQueries = currentQueries.clone();
+    }
     if (count > 0) {
         /** @type {?} */
-        const start = tNode.flags >> 14 /* DirectiveStartingIndexShift */;
+        const start = tNode.flags >> 15 /* DirectiveStartingIndexShift */;
         /** @type {?} */
         const end = start + count;
         /** @type {?} */
@@ -18490,9 +18502,7 @@ function elementEnd() {
         previousOrParentNode = /** @type {?} */ (getParentLNode(previousOrParentNode));
     }
     ngDevMode && assertNodeType(previousOrParentNode, 3 /* Element */);
-    /** @type {?} */
-    const queries = previousOrParentNode.queries;
-    queries && queries.addNode(previousOrParentNode);
+    currentQueries && (currentQueries = currentQueries.addNode(previousOrParentNode));
     queueLifecycleHooks(previousOrParentNode.tNode.flags, tView);
     currentElementNode = null;
 }
@@ -18632,7 +18642,7 @@ function generatePropertyAliases(tNodeFlags, direction) {
     let propStore = null;
     if (count > 0) {
         /** @type {?} */
-        const start = tNodeFlags >> 14 /* DirectiveStartingIndexShift */;
+        const start = tNodeFlags >> 15 /* DirectiveStartingIndexShift */;
         /** @type {?} */
         const end = start + count;
         /** @type {?} */
@@ -18915,7 +18925,7 @@ function addComponentLogic(directiveIndex, instance, def) {
     /** @type {?} */
     const tView = getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs, def.viewQuery);
     /** @type {?} */
-    const componentView = addToViewTree(viewData, /** @type {?} */ (previousOrParentNode.tNode.index), createLViewData(rendererFactory.createRenderer(/** @type {?} */ (previousOrParentNode.native), def.rendererType), tView, instance, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, getCurrentSanitizer()));
+    const componentView = addToViewTree(viewData, /** @type {?} */ (previousOrParentNode.tNode.index), createLViewData(rendererFactory.createRenderer(/** @type {?} */ (previousOrParentNode.native), def), tView, instance, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, getCurrentSanitizer()));
     // We need to set the host node/data here because when the component LNode was created,
     // we didn't yet know it was a component (just an element).
     (/** @type {?} */ (previousOrParentNode)).data = componentView;
@@ -18952,7 +18962,7 @@ function baseDirectiveCreate(index, directive, directiveDef) {
             // - save the index,
             // - set the number of directives to 1
             previousOrParentNode.tNode.flags =
-                index << 14 /* DirectiveStartingIndexShift */ | flags & 4096 /* isComponent */ | 1;
+                index << 15 /* DirectiveStartingIndexShift */ | flags & 4096 /* isComponent */ | 1;
         }
         else {
             // Only need to bump the size when subsequent directives are created
@@ -19101,16 +19111,15 @@ function container(index, template, tagName, attrs, localRefs) {
     // Containers are added to the current view tree instead of their embedded views
     // because views can be removed and re-inserted.
     addToViewTree(viewData, index + HEADER_OFFSET, node.data);
-    /** @type {?} */
-    const queries = node.queries;
-    if (queries) {
+    if (currentQueries) {
         // prepare place for matching nodes from views inserted into a given container
-        lContainer[QUERIES] = queries.container();
+        lContainer[QUERIES] = currentQueries.container();
     }
     createDirectivesAndLocals(localRefs);
     isParent = false;
     ngDevMode && assertNodeType(previousOrParentNode, 0 /* Container */);
-    queries && queries.addNode(node); // check if a given container node matches
+    // check if a given container node matches
+    currentQueries && (currentQueries = currentQueries.addNode(node));
     queueLifecycleHooks(node.tNode.flags, tView);
 }
 /**
@@ -20282,7 +20291,7 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     /** @type {?} */
     const rootContext = createRootContext(opts.scheduler || requestAnimationFrame.bind(window));
     /** @type {?} */
-    const rootView = createLViewData(rendererFactory.createRenderer(hostNode, componentDef.rendererType), createTView(-1, null, null, null, null), rootContext, componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
+    const rootView = createLViewData(rendererFactory.createRenderer(hostNode, componentDef), createTView(-1, null, null, null, null), rootContext, componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
     rootView[INJECTOR$1] = opts.injector || null;
     /** @type {?} */
     const oldView = enterView(rootView, /** @type {?} */ ((null)));
@@ -20384,6 +20393,14 @@ function whenRendered(component) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
+/** @type {?} */
+const EMPTY$1 = {};
+/** @type {?} */
+const EMPTY_ARRAY$3 = [];
+ngDevMode && Object.freeze(EMPTY$1);
+ngDevMode && Object.freeze(EMPTY_ARRAY$3);
+/** @type {?} */
+let _renderCompCount$1 = 0;
 /**
  * Create a component definition object.
  *
@@ -20412,6 +20429,8 @@ function defineComponent(componentDefinition) {
     /** @type {?} */
     const declaredInputs = /** @type {?} */ ({});
     /** @type {?} */
+    const encapsulation = componentDefinition.encapsulation;
+    /** @type {?} */
     const def = {
         type: type,
         diPublic: null,
@@ -20424,7 +20443,6 @@ function defineComponent(componentDefinition) {
         inputs: invertObject(componentDefinition.inputs, declaredInputs),
         declaredInputs: declaredInputs,
         outputs: invertObject(componentDefinition.outputs),
-        rendererType: resolveRendererType2(componentDefinition.rendererType) || null,
         exportAs: componentDefinition.exportAs || null,
         onInit: type.prototype.ngOnInit || null,
         doCheck: type.prototype.ngDoCheck || null,
@@ -20444,6 +20462,12 @@ function defineComponent(componentDefinition) {
         selectors: componentDefinition.selectors,
         viewQuery: componentDefinition.viewQuery || null,
         features: componentDefinition.features || null,
+        data: componentDefinition.data || EMPTY$1,
+        // TODO(misko): convert ViewEncapsulation into const enum so that it can be used directly in the
+        // next line. Also `None` should be 0 not 2.
+        encapsulation: encapsulation == null ? 2 : encapsulation,
+        id: `c${_renderCompCount$1++}`,
+        styles: EMPTY_ARRAY$3,
     };
     /** @type {?} */
     const feature = componentDefinition.features;
@@ -20483,16 +20507,14 @@ function defineNgModule(def) {
     /** @type {?} */
     const res = {
         type: def.type,
-        bootstrap: def.bootstrap || [],
-        declarations: def.declarations || [],
-        imports: def.imports || [],
-        exports: def.exports || [],
+        bootstrap: def.bootstrap || EMPTY_ARRAY$3,
+        declarations: def.declarations || EMPTY_ARRAY$3,
+        imports: def.imports || EMPTY_ARRAY$3,
+        exports: def.exports || EMPTY_ARRAY$3,
         transitiveCompileScopes: null,
     };
     return /** @type {?} */ (res);
 }
-/** @type {?} */
-const EMPTY$1 = {};
 /**
  * Inverts an inputs or outputs lookup such that the keys, which were the
  * minified keys, are part of the values, and the values are parsed so that
@@ -21198,7 +21220,7 @@ class ComponentFactory$1 extends ComponentFactory {
         const rendererFactory = ngModule ? ngModule.injector.get(RendererFactory2) : domRendererFactory3;
         /** @type {?} */
         const hostNode = isInternalRootView ?
-            elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef.rendererType)) :
+            elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef)) :
             locateHostElement(rendererFactory, rootSelectorOrNode);
         /** @type {?} */
         const componentTag = /** @type {?} */ (((/** @type {?} */ ((this.componentDef.selectors))[0]))[0]);
@@ -21207,7 +21229,7 @@ class ComponentFactory$1 extends ComponentFactory {
             ngModule.injector.get(ROOT_CONTEXT) :
             createRootContext(requestAnimationFrame.bind(window));
         /** @type {?} */
-        const rootView = createLViewData(rendererFactory.createRenderer(hostNode, this.componentDef.rendererType), createTView(-1, null, null, null, null), rootContext, this.componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
+        const rootView = createLViewData(rendererFactory.createRenderer(hostNode, this.componentDef), createTView(-1, null, null, null, null), rootContext, this.componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
         rootView[INJECTOR$1] = ngModule && ngModule.injector || null;
         /** @type {?} */
         const oldView = enterView(rootView, /** @type {?} */ ((null)));
@@ -21580,7 +21602,7 @@ function getOrCreateHostChangeDetector(currentNode) {
     return existingRef ?
         existingRef :
         new ViewRef$1(/** @type {?} */ (hostNode.data), /** @type {?} */ ((hostNode
-            .view[DIRECTIVES]))[hostNode.tNode.flags >> 14 /* DirectiveStartingIndexShift */]);
+            .view[DIRECTIVES]))[hostNode.tNode.flags >> 15 /* DirectiveStartingIndexShift */]);
 }
 /**
  * If the node is an embedded view, traverses up the view tree to return the closest
@@ -21632,7 +21654,7 @@ function getOrCreateInjectable(nodeInjector, token, flags = 0 /* Default */) {
             const count = nodeFlags & 4095 /* DirectiveCountMask */;
             if (count !== 0) {
                 /** @type {?} */
-                const start = nodeFlags >> 14 /* DirectiveStartingIndexShift */;
+                const start = nodeFlags >> 15 /* DirectiveStartingIndexShift */;
                 /** @type {?} */
                 const end = start + count;
                 /** @type {?} */
@@ -21835,11 +21857,8 @@ function getOrCreateContainerRef(di) {
         /** @type {?} */
         const comment = vcRefHost.view[RENDERER].createComment(ngDevMode ? 'container' : '');
         /** @type {?} */
-        const lContainerNode = createLNodeObject(0 /* Container */, vcRefHost.view, hostParent, comment, lContainer, null);
+        const lContainerNode = createLNodeObject(0 /* Container */, vcRefHost.view, hostParent, comment, lContainer);
         appendChild(hostParent, comment, vcRefHost.view);
-        if (vcRefHost.queries) {
-            lContainerNode.queries = vcRefHost.queries.container();
-        }
         /** @type {?} */
         const hostTNode = /** @type {?} */ (vcRefHost.tNode);
         if (!hostTNode.dynamicContainerNode) {
@@ -23357,12 +23376,14 @@ function isPure(index) {
  */
 class LQueries_ {
     /**
-     * @param {?=} deep
+     * @param {?} parent
+     * @param {?} shallow
+     * @param {?} deep
      */
-    constructor(deep) {
-        this.shallow = null;
-        this.deep = null;
-        this.deep = deep == null ? null : deep;
+    constructor(parent, shallow, deep) {
+        this.parent = parent;
+        this.shallow = shallow;
+        this.deep = deep;
     }
     /**
      * @template T
@@ -23383,118 +23404,146 @@ class LQueries_ {
     /**
      * @return {?}
      */
-    clone() { return this.deep ? new LQueries_(this.deep) : null; }
-    /**
-     * @return {?}
-     */
-    child() {
-        if (this.deep === null) {
-            // if we don't have any deep queries then no need to track anything more.
-            return null;
-        }
-        if (this.shallow === null) {
-            // DeepQuery: We can reuse the current state if the child state would be same as current
-            // state.
-            return this;
-        }
-        else {
-            // We need to create new state
-            return new LQueries_(this.deep);
-        }
-    }
+    clone() { return new LQueries_(this, null, this.deep); }
     /**
      * @return {?}
      */
     container() {
         /** @type {?} */
-        let result = null;
+        const shallowResults = copyQueriesToContainer(this.shallow);
         /** @type {?} */
-        let query = this.deep;
-        while (query) {
-            /** @type {?} */
-            const containerValues = []; // prepare room for views
-            query.values.push(containerValues);
-            /** @type {?} */
-            const clonedQuery = {
-                next: null,
-                list: query.list,
-                predicate: query.predicate,
-                values: containerValues,
-                containerValues: null
-            };
-            clonedQuery.next = result;
-            result = clonedQuery;
-            query = query.next;
-        }
-        return result ? new LQueries_(result) : null;
+        const deepResults = copyQueriesToContainer(this.deep);
+        return shallowResults || deepResults ? new LQueries_(this, shallowResults, deepResults) : null;
     }
     /**
      * @return {?}
      */
     createView() {
         /** @type {?} */
-        let result = null;
+        const shallowResults = copyQueriesToView(this.shallow);
         /** @type {?} */
-        let query = this.deep;
-        while (query) {
-            /** @type {?} */
-            const clonedQuery = {
-                next: null,
-                list: query.list,
-                predicate: query.predicate,
-                values: [],
-                containerValues: query.values
-            };
-            clonedQuery.next = result;
-            result = clonedQuery;
-            query = query.next;
-        }
-        return result ? new LQueries_(result) : null;
+        const deepResults = copyQueriesToView(this.deep);
+        return shallowResults || deepResults ? new LQueries_(this, shallowResults, deepResults) : null;
     }
     /**
      * @param {?} index
      * @return {?}
      */
     insertView(index) {
-        /** @type {?} */
-        let query = this.deep;
-        while (query) {
-            ngDevMode &&
-                assertDefined(query.containerValues, 'View queries need to have a pointer to container values.'); /** @type {?} */
-            ((query.containerValues)).splice(index, 0, query.values);
-            query = query.next;
-        }
+        insertView$1(index, this.shallow);
+        insertView$1(index, this.deep);
     }
     /**
      * @param {?} node
      * @return {?}
      */
     addNode(node) {
-        add(this.shallow, node);
         add(this.deep, node);
+        if (isContentQueryHost(node.tNode)) {
+            add(this.shallow, node);
+            if (node.tNode.parent && isContentQueryHost(node.tNode.parent)) {
+                // if node has a content query and parent also has a content query
+                // both queries need to check this node for shallow matches
+                add(/** @type {?} */ ((this.parent)).shallow, node);
+            }
+            return this.parent;
+        }
+        isRootNodeOfQuery(node.tNode) && add(this.shallow, node);
+        return this;
     }
     /**
      * @return {?}
      */
     removeView() {
+        removeView$1(this.shallow);
+        removeView$1(this.deep);
+    }
+}
+/**
+ * @param {?} tNode
+ * @return {?}
+ */
+function isRootNodeOfQuery(tNode) {
+    return tNode.parent === null || isContentQueryHost(tNode.parent);
+}
+/**
+ * @param {?} query
+ * @return {?}
+ */
+function copyQueriesToContainer(query) {
+    /** @type {?} */
+    let result = null;
+    while (query) {
         /** @type {?} */
-        let query = this.deep;
-        while (query) {
-            ngDevMode &&
-                assertDefined(query.containerValues, 'View queries need to have a pointer to container values.');
-            /** @type {?} */
-            const containerValues = /** @type {?} */ ((query.containerValues));
-            /** @type {?} */
-            const viewValuesIdx = containerValues.indexOf(query.values);
-            /** @type {?} */
-            const removed = containerValues.splice(viewValuesIdx, 1);
-            // mark a query as dirty only when removed view had matching modes
-            ngDevMode && assertEqual(removed.length, 1, 'removed.length');
-            if (removed[0].length) {
-                query.list.setDirty();
-            }
-            query = query.next;
+        const containerValues = []; // prepare room for views
+        query.values.push(containerValues);
+        /** @type {?} */
+        const clonedQuery = {
+            next: result,
+            list: query.list,
+            predicate: query.predicate,
+            values: containerValues,
+            containerValues: null
+        };
+        result = clonedQuery;
+        query = query.next;
+    }
+    return result;
+}
+/**
+ * @param {?} query
+ * @return {?}
+ */
+function copyQueriesToView(query) {
+    /** @type {?} */
+    let result = null;
+    while (query) {
+        /** @type {?} */
+        const clonedQuery = {
+            next: result,
+            list: query.list,
+            predicate: query.predicate,
+            values: [],
+            containerValues: query.values
+        };
+        result = clonedQuery;
+        query = query.next;
+    }
+    return result;
+}
+/**
+ * @param {?} index
+ * @param {?} query
+ * @return {?}
+ */
+function insertView$1(index, query) {
+    while (query) {
+        ngDevMode &&
+            assertDefined(query.containerValues, 'View queries need to have a pointer to container values.'); /** @type {?} */
+        ((query.containerValues)).splice(index, 0, query.values);
+        query = query.next;
+    }
+}
+/**
+ * @param {?} query
+ * @return {?}
+ */
+function removeView$1(query) {
+    while (query) {
+        ngDevMode &&
+            assertDefined(query.containerValues, 'View queries need to have a pointer to container values.');
+        /** @type {?} */
+        const containerValues = /** @type {?} */ ((query.containerValues));
+        /** @type {?} */
+        const viewValuesIdx = containerValues.indexOf(query.values);
+        /** @type {?} */
+        const removed = containerValues.splice(viewValuesIdx, 1);
+        // mark a query as dirty only when removed view had matching modes
+        ngDevMode && assertEqual(removed.length, 1, 'removed.length');
+        if (removed[0].length) {
+            query.list.setDirty();
         }
+        query = query.next;
     }
 }
 /**
@@ -23532,7 +23581,7 @@ function getIdxOfMatchingDirective(node, type) {
     /** @type {?} */
     const count = flags & 4095 /* DirectiveCountMask */;
     /** @type {?} */
-    const start = flags >> 14 /* DirectiveStartingIndexShift */;
+    const start = flags >> 15 /* DirectiveStartingIndexShift */;
     /** @type {?} */
     const end = start + count;
     for (let i = start; i < end; i++) {
@@ -23790,7 +23839,7 @@ function query(memoryIndex, predicate, descend, read) {
     /** @type {?} */
     const queryList = new QueryList$1();
     /** @type {?} */
-    const queries = getCurrentQueries(LQueries_);
+    const queries = getOrCreateCurrentQueries(LQueries_);
     queries.track(queryList, predicate, descend, read);
     storeCleanupWithContext(null, queryList, queryList.destroy);
     if (memoryIndex != null) {
