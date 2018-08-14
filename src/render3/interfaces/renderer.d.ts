@@ -5,6 +5,14 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * The goal here is to make sure that the browser DOM API is the Renderer.
+ * We do this by defining a subset of DOM API to be the renderer and than
+ * use that time for rendering.
+ *
+ * At runtime we can than use the DOM api directly, in server or web-worker
+ * it will be easy to implement such API.
+ */
 import { RendererStyleFlags2, RendererType2 } from '../../render/api';
 export declare enum RendererStyleFlags3 {
     Important = 1,
