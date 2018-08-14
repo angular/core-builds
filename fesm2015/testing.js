@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.1+43.sha-c13901f
+ * @license Angular v7.0.0-beta.1+46.sha-26066f2
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1686,7 +1686,7 @@ TestingCompiler.decorators = [
     { type: Injectable },
 ];
 TestingCompiler.ngInjectableDef = defineInjectable({ token: TestingCompiler, factory: function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory((t || TestingCompiler)); }, providedIn: null });
-var ɵTestingCompiler_BaseFactory = ɵgetInheritedFactory(TestingCompiler);
+const ɵTestingCompiler_BaseFactory = ɵgetInheritedFactory(TestingCompiler);
 /**
  * A factory for creating a Compiler
  *
