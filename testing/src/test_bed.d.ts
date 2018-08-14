@@ -5,22 +5,45 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Component, Directive, Injector, NgModule, Pipe, PlatformRef, Type } from '@angular/core';
+import { Component, Directive, InjectionToken, Injector, NgModule, Pipe, PlatformRef, SchemaMetadata, Type } from '@angular/core';
 import { ComponentFixture } from './component_fixture';
 import { MetadataOverride } from './metadata_override';
-import { TestBedRender3 } from './r3_test_bed';
-import { TestModuleMetadata } from './test_bed_common';
+/**
+ * An abstract class for inserting the root test component element in a platform independent way.
+ *
+ * @experimental
+ */
+export declare class TestComponentRenderer {
+    insertRootElement(rootElementId: string): void;
+}
+/**
+ * @experimental
+ */
+export declare const ComponentFixtureAutoDetect: InjectionToken<boolean[]>;
+/**
+ * @experimental
+ */
+export declare const ComponentFixtureNoNgZone: InjectionToken<boolean[]>;
+/**
+ * @experimental
+ */
+export declare type TestModuleMetadata = {
+    providers?: any[];
+    declarations?: any[];
+    imports?: any[];
+    schemas?: Array<SchemaMetadata | any[]>;
+    aotSummaries?: () => any[];
+};
 /**
  * @description
  * Configures and initializes environment for unit testing and provides methods for
  * creating components and services in unit tests.
  *
- * `TestBed` is the primary api for writing unit tests for Angular applications and libraries.
+ * TestBed is the primary api for writing unit tests for Angular applications and libraries.
  *
- * Note: Use `TestBed` in tests. It will be set to either `TestBedViewEngine` or `TestBedRender3`
- * according to the compiler used.
+ *
  */
-export declare class TestBedViewEngine implements Injector {
+export declare class TestBed implements Injector {
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
      * angular module. These are common to every test in the suite.
@@ -34,7 +57,7 @@ export declare class TestBedViewEngine implements Injector {
      *
      * @experimental
      */
-    static initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): TestBedViewEngine;
+    static initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): TestBed;
     /**
      * Reset the providers for the test injector.
      *
@@ -183,24 +206,9 @@ export declare class TestBedViewEngine implements Injector {
     createComponent<T>(component: Type<T>): ComponentFixture<T>;
 }
 /**
- * @description
- * Configures and initializes environment for unit testing and provides methods for
- * creating components and services in unit tests.
- *
- * `TestBed` is the primary api for writing unit tests for Angular applications and libraries.
- *
- * Note: Use `TestBed` in tests. It will be set to either `TestBedViewEngine` or `TestBedRender3`
- * according to the compiler used.
- */
-export declare const TestBed: typeof TestBedRender3 | typeof TestBedViewEngine;
-/**
- * Returns a singleton of the applicable `TestBed`.
- *
- * It will be either an instance of `TestBedViewEngine` or `TestBedRender3`.
- *
  * @experimental
  */
-export declare const getTestBed: () => TestBedRender3 | TestBedViewEngine;
+export declare function getTestBed(): TestBed;
 /**
  * Allows injecting dependencies in `beforeEach()` and `it()`.
  *
