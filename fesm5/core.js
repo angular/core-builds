@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.1+43.sha-c13901f
+ * @license Angular v7.0.0-beta.1+46.sha-26066f2
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1694,7 +1694,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('7.0.0-beta.1+43.sha-c13901f');
+var VERSION = new Version('7.0.0-beta.1+46.sha-26066f2');
 
 /**
  * @license
@@ -17457,13 +17457,18 @@ function getFactoryOf(type) {
     return def.factory;
 }
 function getInheritedFactory(type) {
-    debugger;
     var proto = Object.getPrototypeOf(type.prototype).constructor;
     var factory = getFactoryOf(proto);
-    if (factory === null) {
-        throw new Error("Type " + proto.name + " does not support inheritance");
+    if (factory !== null) {
+        return factory;
     }
-    return factory;
+    else {
+        // There is no factory defined. Either this was improper usage of inheritance
+        // (no Angular decorator on the superclass) or there is no constructor at all
+        // in the inheritance chain. Since the two cases cannot be distinguished, the
+        // latter has to be assumed.
+        return function (t) { return new t(); };
+    }
 }
 var TemplateRef$1 = /** @class */ (function () {
     function TemplateRef$$1(_declarationParentView, elementRef, _tView, _renderer, _queries) {
