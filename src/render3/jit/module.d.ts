@@ -8,12 +8,21 @@
 import { NgModule, NgModuleTransitiveScopes } from '../../metadata/ng_module';
 import { Type } from '../../type';
 import { ComponentDefInternal } from '../interfaces/definition';
-export declare function compileNgModule(type: Type<any>, ngModule: NgModule): void;
+/**
+ * Compiles a module in JIT mode.
+ *
+ * This function automatically gets called when a class has a `@NgModule` decorator.
+ */
+export declare function compileNgModule(moduleType: Type<any>, ngModule: NgModule): void;
+/**
+ * Compiles and adds the `ngModuleDef` and `ngInjectorDef` properties to the module class.
+ */
+export declare function compileNgModuleDefs(moduleType: Type<any>, ngModule: NgModule): void;
 /**
  * Patch the definition of a component with directives and pipes from the compilation scope of
  * a given module.
  */
-export declare function patchComponentDefWithScope<C, M>(componentDef: ComponentDefInternal<C>, module: Type<M>): void;
+export declare function patchComponentDefWithScope<C>(componentDef: ComponentDefInternal<C>, transitiveScopes: NgModuleTransitiveScopes): void;
 /**
  * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
  *
