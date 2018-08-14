@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.1+25.sha-4a4d6fb
+ * @license Angular v7.0.0-beta.1+26.sha-97d8b5e
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2010,7 +2010,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-beta.1+25.sha-4a4d6fb');
+const VERSION = new Version('7.0.0-beta.1+26.sha-97d8b5e');
 
 /**
  * @fileoverview added by tsickle
@@ -15231,8 +15231,8 @@ function callHooks(data, arr) {
  * found in the LICENSE file at https://angular.io/license
  */
 /** @type {?} */
-const __global$1 = typeof window != 'undefined' && window || typeof self != 'undefined' && self ||
-    typeof global != 'undefined' && global;
+const __global$1 = typeof window != 'undefined' && window || typeof global != 'undefined' && global ||
+    typeof self != 'undefined' && self;
 /**
  * @return {?}
  */
