@@ -5,13 +5,14 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { ChangeDetectorRef } from '../change_detection/change_detector_ref';
+import { ChangeDetectorRef as ViewEngine_ChangeDetectorRef } from '../change_detection/change_detector_ref';
 import { InjectionToken } from '../di/injection_token';
 import { Injector } from '../di/injector';
 import { ComponentFactory as viewEngine_ComponentFactory, ComponentRef as viewEngine_ComponentRef } from '../linker/component_factory';
 import { ComponentFactoryResolver as viewEngine_ComponentFactoryResolver } from '../linker/component_factory_resolver';
-import { ElementRef } from '../linker/element_ref';
+import { ElementRef as viewEngine_ElementRef } from '../linker/element_ref';
 import { NgModuleRef as viewEngine_NgModuleRef } from '../linker/ng_module_factory';
+import { RendererFactory2 } from '../render/api';
 import { Type } from '../type';
 import { ComponentDefInternal } from './interfaces/definition';
 import { RElement } from './interfaces/renderer';
@@ -29,6 +30,11 @@ export declare const ROOT_CONTEXT: InjectionToken<RootContext>;
  * for the default `RootContext` found in the {@link ROOT_CONTEXT} token.
  */
 export declare const SCHEDULER: InjectionToken<(fn: () => void) => void>;
+/**
+ * A function used to wrap the `RendererFactory2`.
+ * Used in tests to change the `RendererFactory2` into a `DebugRendererFactory2`.
+ */
+export declare const WRAP_RENDERER_FACTORY2: InjectionToken<(rf: RendererFactory2) => RendererFactory2>;
 /**
  * Render3 implementation of {@link viewEngine_ComponentFactory}.
  */
@@ -58,11 +64,11 @@ export declare class ComponentFactory<T> extends viewEngine_ComponentFactory<T> 
  */
 export declare class ComponentRef<T> extends viewEngine_ComponentRef<T> {
     destroyCbs: (() => void)[] | null;
-    location: ElementRef<any>;
+    location: viewEngine_ElementRef<any>;
     injector: Injector;
     instance: T;
     hostView: ViewRef<T>;
-    changeDetectorRef: ChangeDetectorRef;
+    changeDetectorRef: ViewEngine_ChangeDetectorRef;
     componentType: Type<T>;
     constructor(componentType: Type<T>, instance: T, rootView: LViewData, injector: Injector, hostNode: RElement);
     destroy(): void;
