@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.1+51.sha-01ec5fd
+ * @license Angular v7.0.0-beta.1+52.sha-1f11039
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1375,7 +1375,7 @@ class TestBedViewEngine {
     static resetTestEnvironment() { _getTestBedViewEngine().resetTestEnvironment(); }
     static resetTestingModule() {
         _getTestBedViewEngine().resetTestingModule();
-        return TestBed;
+        return TestBedViewEngine;
     }
     /**
      * Allows overriding default compiler providers and settings
@@ -1383,7 +1383,7 @@ class TestBedViewEngine {
      */
     static configureCompiler(config) {
         _getTestBedViewEngine().configureCompiler(config);
-        return TestBed;
+        return TestBedViewEngine;
     }
     /**
      * Allows overriding default providers, directives, pipes, modules of the test injector,
@@ -1391,7 +1391,7 @@ class TestBedViewEngine {
      */
     static configureTestingModule(moduleDef) {
         _getTestBedViewEngine().configureTestingModule(moduleDef);
-        return TestBed;
+        return TestBedViewEngine;
     }
     /**
      * Compile components with a `templateUrl` for the test's NgModule.
@@ -1401,23 +1401,23 @@ class TestBedViewEngine {
     static compileComponents() { return getTestBed().compileComponents(); }
     static overrideModule(ngModule, override) {
         _getTestBedViewEngine().overrideModule(ngModule, override);
-        return TestBed;
+        return TestBedViewEngine;
     }
     static overrideComponent(component, override) {
         _getTestBedViewEngine().overrideComponent(component, override);
-        return TestBed;
+        return TestBedViewEngine;
     }
     static overrideDirective(directive, override) {
         _getTestBedViewEngine().overrideDirective(directive, override);
-        return TestBed;
+        return TestBedViewEngine;
     }
     static overridePipe(pipe, override) {
         _getTestBedViewEngine().overridePipe(pipe, override);
-        return TestBed;
+        return TestBedViewEngine;
     }
     static overrideTemplate(component, template) {
         _getTestBedViewEngine().overrideComponent(component, { set: { template, templateUrl: null } });
-        return TestBed;
+        return TestBedViewEngine;
     }
     /**
      * Overrides the template of the given component, compiling the template
@@ -1427,15 +1427,15 @@ class TestBedViewEngine {
      */
     static overrideTemplateUsingTestingModule(component, template) {
         _getTestBedViewEngine().overrideTemplateUsingTestingModule(component, template);
-        return TestBed;
+        return TestBedViewEngine;
     }
     static overrideProvider(token, provider) {
         _getTestBedViewEngine().overrideProvider(token, provider);
-        return TestBed;
+        return TestBedViewEngine;
     }
     static deprecatedOverrideProvider(token, provider) {
         _getTestBedViewEngine().deprecatedOverrideProvider(token, provider);
-        return TestBed;
+        return TestBedViewEngine;
     }
     static get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND) {
         return _getTestBedViewEngine().get(token, notFoundValue);
@@ -1886,5 +1886,5 @@ const __core_private_testing_placeholder__ = '';
  * found in the LICENSE file at https://angular.io/license
  */
 
-export { async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, flush, discardPeriodicTasks, flushMicrotasks, TestBedViewEngine, TestBed, getTestBed, inject, InjectSetupWrapper, withModule, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestBedRender3, _getTestBedRender3, __core_private_testing_placeholder__, MetadataOverrider, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory };
+export { TestBed, getTestBed, inject, InjectSetupWrapper, withModule, MetadataOverrider as ɵMetadataOverrider, async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, flush, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, __core_private_testing_placeholder__, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory };
 //# sourceMappingURL=testing.js.map
