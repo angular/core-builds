@@ -1,11 +1,11 @@
 /**
- * @license Angular v7.0.0-beta.1+51.sha-01ec5fd
+ * @license Angular v7.0.0-beta.1+52.sha-1f11039
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
 import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, Injector, ɵRender3ComponentFactory, ɵRender3DebugRendererFactory2, ɵRender3NgModuleRef, ɵWRAP_RENDERER_FACTORY2, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵpatchComponentDefWithScope, Compiler, ɵclearOverrides, ɵoverrideComponentView, NgZone, ApplicationInitStatus, ɵAPP_ROOT, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled, defineInjectable, ɵgetInheritedFactory } from '@angular/core';
-import { __spread, __decorate, __values, __read, __extends } from 'tslib';
+import { __spread, __values, __decorate, __extends, __read } from 'tslib';
 
 /**
  * @license
@@ -1461,7 +1461,7 @@ var TestBedViewEngine = /** @class */ (function () {
     TestBedViewEngine.resetTestEnvironment = function () { _getTestBedViewEngine().resetTestEnvironment(); };
     TestBedViewEngine.resetTestingModule = function () {
         _getTestBedViewEngine().resetTestingModule();
-        return TestBed;
+        return TestBedViewEngine;
     };
     /**
      * Allows overriding default compiler providers and settings
@@ -1469,7 +1469,7 @@ var TestBedViewEngine = /** @class */ (function () {
      */
     TestBedViewEngine.configureCompiler = function (config) {
         _getTestBedViewEngine().configureCompiler(config);
-        return TestBed;
+        return TestBedViewEngine;
     };
     /**
      * Allows overriding default providers, directives, pipes, modules of the test injector,
@@ -1477,7 +1477,7 @@ var TestBedViewEngine = /** @class */ (function () {
      */
     TestBedViewEngine.configureTestingModule = function (moduleDef) {
         _getTestBedViewEngine().configureTestingModule(moduleDef);
-        return TestBed;
+        return TestBedViewEngine;
     };
     /**
      * Compile components with a `templateUrl` for the test's NgModule.
@@ -1487,23 +1487,23 @@ var TestBedViewEngine = /** @class */ (function () {
     TestBedViewEngine.compileComponents = function () { return getTestBed().compileComponents(); };
     TestBedViewEngine.overrideModule = function (ngModule, override) {
         _getTestBedViewEngine().overrideModule(ngModule, override);
-        return TestBed;
+        return TestBedViewEngine;
     };
     TestBedViewEngine.overrideComponent = function (component, override) {
         _getTestBedViewEngine().overrideComponent(component, override);
-        return TestBed;
+        return TestBedViewEngine;
     };
     TestBedViewEngine.overrideDirective = function (directive, override) {
         _getTestBedViewEngine().overrideDirective(directive, override);
-        return TestBed;
+        return TestBedViewEngine;
     };
     TestBedViewEngine.overridePipe = function (pipe, override) {
         _getTestBedViewEngine().overridePipe(pipe, override);
-        return TestBed;
+        return TestBedViewEngine;
     };
     TestBedViewEngine.overrideTemplate = function (component, template) {
         _getTestBedViewEngine().overrideComponent(component, { set: { template: template, templateUrl: null } });
-        return TestBed;
+        return TestBedViewEngine;
     };
     /**
      * Overrides the template of the given component, compiling the template
@@ -1513,15 +1513,15 @@ var TestBedViewEngine = /** @class */ (function () {
      */
     TestBedViewEngine.overrideTemplateUsingTestingModule = function (component, template) {
         _getTestBedViewEngine().overrideTemplateUsingTestingModule(component, template);
-        return TestBed;
+        return TestBedViewEngine;
     };
     TestBedViewEngine.overrideProvider = function (token, provider) {
         _getTestBedViewEngine().overrideProvider(token, provider);
-        return TestBed;
+        return TestBedViewEngine;
     };
     TestBedViewEngine.deprecatedOverrideProvider = function (token, provider) {
         _getTestBedViewEngine().deprecatedOverrideProvider(token, provider);
-        return TestBed;
+        return TestBedViewEngine;
     };
     TestBedViewEngine.get = function (token, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
@@ -2012,5 +2012,5 @@ var __core_private_testing_placeholder__ = '';
  * found in the LICENSE file at https://angular.io/license
  */
 
-export { async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, flush, discardPeriodicTasks, flushMicrotasks, TestBedViewEngine, TestBed, getTestBed, inject, InjectSetupWrapper, withModule, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestBedRender3, _getTestBedRender3, __core_private_testing_placeholder__, MetadataOverrider, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory };
+export { TestBed, getTestBed, inject, InjectSetupWrapper, withModule, MetadataOverrider as ɵMetadataOverrider, async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, flush, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, __core_private_testing_placeholder__, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory };
 //# sourceMappingURL=testing.js.map
