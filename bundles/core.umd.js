@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.1+46.sha-26066f2
+ * @license Angular v7.0.0-beta.1+48.sha-b5f354f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -664,6 +664,10 @@
         }
     };
     /**
+     * Used to get the minified alias of ngBaseDef
+     */
+    var NG_BASE_DEF = Object.keys({ ngBaseDef: true })[0];
+    /**
      * Does the work of creating the `ngBaseDef` property for the @Input and @Output decorators.
      * @param key "inputs" or "outputs"
      */
@@ -674,7 +678,7 @@
                 args[_i - 2] = arguments[_i];
             }
             var constructor = target.constructor;
-            if (!constructor.hasOwnProperty('ngBaseDef')) {
+            if (!constructor.hasOwnProperty(NG_BASE_DEF)) {
                 initializeBaseDef(target);
             }
             var baseDef = constructor.ngBaseDef;
@@ -1751,7 +1755,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-beta.1+46.sha-26066f2');
+    var VERSION = new Version('7.0.0-beta.1+48.sha-b5f354f');
 
     /**
      * @license
@@ -16159,6 +16163,26 @@
         return newLookup;
     }
     /**
+     * Create a base definition
+     *
+     * # Example
+     * ```
+     * class ShouldBeInherited {
+     *   static ngBaseDef = defineBase({
+     *      ...
+     *   })
+     * }
+     * @param baseDefinition The base definition parameters
+     */
+    function defineBase(baseDefinition) {
+        var declaredInputs = {};
+        return {
+            inputs: invertObject(baseDefinition.inputs, declaredInputs),
+            declaredInputs: declaredInputs,
+            outputs: invertObject(baseDefinition.outputs),
+        };
+    }
+    /**
      * Create a directive definition object.
      *
      * # Example
@@ -19285,6 +19309,7 @@
      * This should be kept up to date with the public exports of @angular/core.
      */
     var angularCoreEnv = {
+        'ɵdefineBase': defineBase,
         'ɵdefineComponent': defineComponent,
         'ɵdefineDirective': defineDirective,
         'defineInjectable': defineInjectable,
@@ -20073,6 +20098,7 @@
     exports.ɵoverrideComponentView = overrideComponentView;
     exports.ɵoverrideProvider = overrideProvider;
     exports.ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR;
+    exports.ɵdefineBase = defineBase;
     exports.ɵdefineComponent = defineComponent;
     exports.ɵdefineDirective = defineDirective;
     exports.ɵdefinePipe = definePipe;
