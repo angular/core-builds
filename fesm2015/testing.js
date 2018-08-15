@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.1+51.sha-01ec5fd
+ * @license Angular v7.0.0-beta.1+52.sha-1f11039
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1019,7 +1019,7 @@ class TestBedRender3 {
      */
     static configureCompiler(config) {
         _getTestBedRender3().configureCompiler(config);
-        return TestBedRender3;
+        return /** @type {?} */ ((TestBedRender3));
     }
     /**
      * Allows overriding default providers, directives, pipes, modules of the test injector,
@@ -1029,7 +1029,7 @@ class TestBedRender3 {
      */
     static configureTestingModule(moduleDef) {
         _getTestBedRender3().configureTestingModule(moduleDef);
-        return TestBedRender3;
+        return /** @type {?} */ ((TestBedRender3));
     }
     /**
      * Compile components with a `templateUrl` for the test's NgModule.
@@ -1045,7 +1045,7 @@ class TestBedRender3 {
      */
     static overrideModule(ngModule, override) {
         _getTestBedRender3().overrideModule(ngModule, override);
-        return TestBedRender3;
+        return /** @type {?} */ ((TestBedRender3));
     }
     /**
      * @param {?} component
@@ -1054,7 +1054,7 @@ class TestBedRender3 {
      */
     static overrideComponent(component, override) {
         _getTestBedRender3().overrideComponent(component, override);
-        return TestBedRender3;
+        return /** @type {?} */ ((TestBedRender3));
     }
     /**
      * @param {?} directive
@@ -1063,7 +1063,7 @@ class TestBedRender3 {
      */
     static overrideDirective(directive, override) {
         _getTestBedRender3().overrideDirective(directive, override);
-        return TestBedRender3;
+        return /** @type {?} */ ((TestBedRender3));
     }
     /**
      * @param {?} pipe
@@ -1072,7 +1072,7 @@ class TestBedRender3 {
      */
     static overridePipe(pipe, override) {
         _getTestBedRender3().overridePipe(pipe, override);
-        return TestBedRender3;
+        return /** @type {?} */ ((TestBedRender3));
     }
     /**
      * @param {?} component
@@ -1081,7 +1081,7 @@ class TestBedRender3 {
      */
     static overrideTemplate(component, template) {
         _getTestBedRender3().overrideComponent(component, { set: { template, templateUrl: /** @type {?} */ ((null)) } });
-        return TestBedRender3;
+        return /** @type {?} */ ((TestBedRender3));
     }
     /**
      * Overrides the template of the given component, compiling the template
@@ -1094,7 +1094,7 @@ class TestBedRender3 {
      */
     static overrideTemplateUsingTestingModule(component, template) {
         _getTestBedRender3().overrideTemplateUsingTestingModule(component, template);
-        return TestBedRender3;
+        return /** @type {?} */ ((TestBedRender3));
     }
     /**
      * @param {?} component
@@ -1111,7 +1111,7 @@ class TestBedRender3 {
      */
     static overrideProvider(token, provider) {
         _getTestBedRender3().overrideProvider(token, provider);
-        return TestBedRender3;
+        return /** @type {?} */ ((TestBedRender3));
     }
     /**
      * @param {?} token
@@ -1142,7 +1142,7 @@ class TestBedRender3 {
      */
     static resetTestingModule() {
         _getTestBedRender3().resetTestingModule();
-        return TestBedRender3;
+        return /** @type {?} */ ((TestBedRender3));
     }
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
@@ -1764,7 +1764,7 @@ class TestBedViewEngine {
      */
     static resetTestingModule() {
         _getTestBedViewEngine().resetTestingModule();
-        return TestBed;
+        return /** @type {?} */ ((TestBedViewEngine));
     }
     /**
      * Allows overriding default compiler providers and settings
@@ -1774,7 +1774,7 @@ class TestBedViewEngine {
      */
     static configureCompiler(config) {
         _getTestBedViewEngine().configureCompiler(config);
-        return TestBed;
+        return /** @type {?} */ ((TestBedViewEngine));
     }
     /**
      * Allows overriding default providers, directives, pipes, modules of the test injector,
@@ -1784,7 +1784,7 @@ class TestBedViewEngine {
      */
     static configureTestingModule(moduleDef) {
         _getTestBedViewEngine().configureTestingModule(moduleDef);
-        return TestBed;
+        return /** @type {?} */ ((TestBedViewEngine));
     }
     /**
      * Compile components with a `templateUrl` for the test's NgModule.
@@ -1800,7 +1800,7 @@ class TestBedViewEngine {
      */
     static overrideModule(ngModule, override) {
         _getTestBedViewEngine().overrideModule(ngModule, override);
-        return TestBed;
+        return /** @type {?} */ ((TestBedViewEngine));
     }
     /**
      * @param {?} component
@@ -1809,7 +1809,7 @@ class TestBedViewEngine {
      */
     static overrideComponent(component, override) {
         _getTestBedViewEngine().overrideComponent(component, override);
-        return TestBed;
+        return /** @type {?} */ ((TestBedViewEngine));
     }
     /**
      * @param {?} directive
@@ -1818,7 +1818,7 @@ class TestBedViewEngine {
      */
     static overrideDirective(directive, override) {
         _getTestBedViewEngine().overrideDirective(directive, override);
-        return TestBed;
+        return /** @type {?} */ ((TestBedViewEngine));
     }
     /**
      * @param {?} pipe
@@ -1827,7 +1827,7 @@ class TestBedViewEngine {
      */
     static overridePipe(pipe, override) {
         _getTestBedViewEngine().overridePipe(pipe, override);
-        return TestBed;
+        return /** @type {?} */ ((TestBedViewEngine));
     }
     /**
      * @param {?} component
@@ -1836,7 +1836,7 @@ class TestBedViewEngine {
      */
     static overrideTemplate(component, template) {
         _getTestBedViewEngine().overrideComponent(component, { set: { template, templateUrl: /** @type {?} */ ((null)) } });
-        return TestBed;
+        return /** @type {?} */ ((TestBedViewEngine));
     }
     /**
      * Overrides the template of the given component, compiling the template
@@ -1849,7 +1849,7 @@ class TestBedViewEngine {
      */
     static overrideTemplateUsingTestingModule(component, template) {
         _getTestBedViewEngine().overrideTemplateUsingTestingModule(component, template);
-        return TestBed;
+        return /** @type {?} */ ((TestBedViewEngine));
     }
     /**
      * @param {?} token
@@ -1858,7 +1858,7 @@ class TestBedViewEngine {
      */
     static overrideProvider(token, provider) {
         _getTestBedViewEngine().overrideProvider(token, /** @type {?} */ (provider));
-        return TestBed;
+        return /** @type {?} */ ((TestBedViewEngine));
     }
     /**
      * @param {?} token
@@ -1867,7 +1867,7 @@ class TestBedViewEngine {
      */
     static deprecatedOverrideProvider(token, provider) {
         _getTestBedViewEngine().deprecatedOverrideProvider(token, /** @type {?} */ (provider));
-        return TestBed;
+        return /** @type {?} */ ((TestBedViewEngine));
     }
     /**
      * @param {?} token
@@ -2299,7 +2299,7 @@ class TestBedViewEngine {
  * Note: Use `TestBed` in tests. It will be set to either `TestBedViewEngine` or `TestBedRender3`
  * according to the compiler used.
   @type {?} */
-const TestBed = ɵivyEnabled ? TestBedRender3 : TestBedViewEngine;
+const TestBed = ɵivyEnabled ? /** @type {?} */ ((TestBedRender3)) : /** @type {?} */ ((TestBedViewEngine));
 /** *
  * Returns a singleton of the applicable `TestBed`.
  *
@@ -2460,5 +2460,5 @@ const __core_private_testing_placeholder__ = '';
  * Generated bundle index. Do not edit.
  */
 
-export { async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, flush, discardPeriodicTasks, flushMicrotasks, inject, withModule, TestBedViewEngine, TestBed, getTestBed, InjectSetupWrapper, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, _getTestBedRender3, TestBedRender3, __core_private_testing_placeholder__, MetadataOverrider, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory };
+export { TestBedRender3 as ɵangular_packages_core_testing_testing_b, _getTestBedRender3 as ɵangular_packages_core_testing_testing_c, TestBedViewEngine as ɵangular_packages_core_testing_testing_a, TestBed, getTestBed, inject, InjectSetupWrapper, withModule, MetadataOverrider as ɵMetadataOverrider, async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, flush, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, __core_private_testing_placeholder__, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory };
 //# sourceMappingURL=testing.js.map
