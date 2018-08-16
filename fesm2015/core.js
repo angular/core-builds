@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.1+10.sha-b64fed1
+ * @license Angular v7.0.0-beta.1+52.sha-1f11039
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1159,7 +1159,7 @@ function queueInitHooks(index, onInit, doCheck, tView) {
  */
 function queueLifecycleHooks(flags, tView) {
     if (tView.firstTemplatePass) {
-        const start = flags >> 14 /* DirectiveStartingIndexShift */;
+        const start = flags >> 15 /* DirectiveStartingIndexShift */;
         const count = flags & 4095 /* DirectiveCountMask */;
         const end = start + count;
         // It's necessary to loop through the directives at elementEnd() (rather than processing in
@@ -1241,10 +1241,13 @@ function callHooks(data, arr) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-const __global$1 = typeof window != 'undefined' && window || typeof self != 'undefined' && self ||
-    typeof global != 'undefined' && global;
+// NOTE: The order here matters: Checking window, then global, then self is important.
+//   checking them in another order can result in errors in some Node environments.
+const __global$1 = typeof window != 'undefined' && window || typeof global != 'undefined' && global ||
+    typeof self != 'undefined' && self;
 function ngDevModeResetPerfCounters() {
-    return __global$1.ngDevMode = {
+    // Make sure to refer to ngDevMode as ['ngDevMode'] for clousre.
+    return __global$1['ngDevMode'] = {
         firstTemplatePass: 0,
         tNode: 0,
         tView: 0,
@@ -1276,7 +1279,8 @@ function ngDevModeResetPerfCounters() {
  * as much early warning and errors as possible.
  */
 if (typeof ngDevMode === 'undefined' || ngDevMode) {
-    __global$1.ngDevMode = ngDevModeResetPerfCounters();
+    // Make sure to refer to ngDevMode as ['ngDevMode'] for clousre.
+    __global$1['ngDevMode'] = ngDevModeResetPerfCounters();
 }
 
 /** Called when directives inject each other (creating a circular dependency) */
@@ -5776,15 +5780,6 @@ function getCurrentView() {
     return viewData;
 }
 /**
- * Internal function that returns the current LViewData instance.
- *
- * The getCurrentView() instruction should be used for anything public.
- */
-function _getViewData() {
-    // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-    return viewData;
-}
-/**
  * Restores `contextViewData` to the given OpaqueViewState instance.
  *
  * Used in conjunction with the getCurrentView() instruction to save a snapshot
@@ -5817,12 +5812,15 @@ let currentQueries;
  * - when creating content queries (inb this previousOrParentNode points to a node on which we
  * create content queries).
  */
-function getCurrentQueries(QueryType) {
-    // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-    return currentQueries ||
-        (currentQueries =
-            (previousOrParentNode.queries && previousOrParentNode.queries.clone() ||
-                new QueryType()));
+function getOrCreateCurrentQueries(QueryType) {
+    const tNode = previousOrParentNode.tNode;
+    // if this is the first content query on a node, any existing LQueries needs to be cloned
+    // in subsequent template passes, the cloning occurs before directive instantiation.
+    if (previousOrParentNode.data !== viewData && !isContentQueryHost(tNode)) {
+        currentQueries && (currentQueries = currentQueries.clone());
+        tNode.flags |= 16384 /* hasContentQuery */;
+    }
+    return currentQueries || (currentQueries = new QueryType(null, null, null));
 }
 /**
  * This property gets set before entering a template.
@@ -5839,6 +5837,15 @@ function getCreationMode() {
  * any local variables that need to be stored between invocations.
  */
 let viewData;
+/**
+ * Internal function that returns the current LViewData instance.
+ *
+ * The getCurrentView() instruction should be used for anything public.
+ */
+function _getViewData() {
+    // top level variables should not be exported for performance reasons (PERF_NOTES.md)
+    return viewData;
+}
 /**
  * The last viewData retrieved by nextContext().
  * Allows building nextContext() and reference() calls.
@@ -5892,6 +5899,7 @@ function enterView(newView, host) {
         isParent = true;
     }
     viewData = contextViewData = newView;
+    oldView && (oldView[QUERIES] = currentQueries);
     currentQueries = newView && newView[QUERIES];
     return oldView;
 }
@@ -5997,13 +6005,12 @@ function createLViewData(renderer, tView, context, flags, sanitizer) {
  * with the same shape
  * (same properties assigned in the same order).
  */
-function createLNodeObject(type, currentView, parent, native, state, queries) {
+function createLNodeObject(type, currentView, parent, native, state) {
     return {
         native: native,
         view: currentView,
         nodeInjector: parent ? parent.nodeInjector : null,
         data: state,
-        queries: queries,
         tNode: null,
         dynamicLContainerNode: null
     };
@@ -6014,10 +6021,8 @@ function createLNode(index, type, native, name, attrs, state) {
     // Parents cannot cross component boundaries because components will be used in multiple places,
     // so it's only set if the view is the same.
     const tParent = parent && parent.view === viewData ? parent.tNode : null;
-    let queries = (isParent ? currentQueries : previousOrParentNode && previousOrParentNode.queries) ||
-        parent && parent.queries && parent.queries.child();
     const isState = state != null;
-    const node = createLNodeObject(type, viewData, parent, native, isState ? state : null, queries);
+    const node = createLNodeObject(type, viewData, parent, native, isState ? state : null);
     if (index === -1 || type === 2 /* View */) {
         // View nodes are not stored in data because they can be added / removed at runtime (which
         // would cause indices to change). Their TNodes are instead stored in TView.node.
@@ -6044,7 +6049,6 @@ function createLNode(index, type, native, name, attrs, state) {
         node.tNode = tData[adjustedIndex];
         // Now link ourselves into the tree.
         if (isParent) {
-            currentQueries = null;
             if (previousOrParentNode.tNode.child == null && previousOrParentNode.view === viewData ||
                 previousOrParentNode.tNode.type === 2 /* View */) {
                 // We are in the same view, which means we are adding content node to the parent View.
@@ -6219,6 +6223,41 @@ function element(index, name, attrs, localRefs) {
     elementEnd();
 }
 /**
+ * Creates a logical container for other nodes (<ng-container>) backed by a comment node in the DOM.
+ * The instruction must later be followed by `elementContainerEnd()` call.
+ *
+ * @param index Index of the element in the LViewData array
+ * @param attrs Set of attributes to be used when matching directives.
+ * @param localRefs A set of local reference bindings on the element.
+ *
+ * Even if this instruction accepts a set of attributes no actual attribute values are propagated to
+ * the DOM (as a comment node can't have attributes). Attributes are here only for directive
+ * matching purposes and setting initial inputs of directives.
+ */
+function elementContainerStart(index, attrs, localRefs) {
+    ngDevMode &&
+        assertEqual(viewData[BINDING_INDEX], -1, 'elements should be created before any bindings');
+    ngDevMode && ngDevMode.rendererCreateComment++;
+    const native = renderer.createComment(ngDevMode ? 'ng-container' : '');
+    ngDevMode && assertDataInRange(index - 1);
+    const node = createLNode(index, 4 /* ElementContainer */, native, null, attrs || null, null);
+    appendChild(getParentLNode(node), native, viewData);
+    createDirectivesAndLocals(localRefs);
+}
+/** Mark the end of the <ng-container>. */
+function elementContainerEnd() {
+    if (isParent) {
+        isParent = false;
+    }
+    else {
+        ngDevMode && assertHasParent();
+        previousOrParentNode = getParentLNode(previousOrParentNode);
+    }
+    ngDevMode && assertNodeType(previousOrParentNode, 4 /* ElementContainer */);
+    currentQueries && (currentQueries = currentQueries.addNode(previousOrParentNode));
+    queueLifecycleHooks(previousOrParentNode.tNode.flags, tView);
+}
+/**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
  *
  * @param index Index of the element in the LViewData array
@@ -6357,6 +6396,9 @@ function initChangeDetectorIfExisting(injector, instance, view) {
         injector.changeDetectorRef._setComponentContext(view, instance);
     }
 }
+function isContentQueryHost(tNode) {
+    return (tNode.flags & 16384 /* hasContentQuery */) !== 0;
+}
 function isComponent(tNode) {
     return (tNode.flags & 4096 /* isComponent */) === 4096 /* isComponent */;
 }
@@ -6364,10 +6406,14 @@ function isComponent(tNode) {
  * This function instantiates the given directives.
  */
 function instantiateDirectivesDirectly() {
+    ngDevMode && assertEqual(firstTemplatePass, false, `Directives should only be instantiated directly after first template pass`);
     const tNode = previousOrParentNode.tNode;
     const count = tNode.flags & 4095 /* DirectiveCountMask */;
+    if (isContentQueryHost(tNode) && currentQueries) {
+        currentQueries = currentQueries.clone();
+    }
     if (count > 0) {
-        const start = tNode.flags >> 14 /* DirectiveStartingIndexShift */;
+        const start = tNode.flags >> 15 /* DirectiveStartingIndexShift */;
         const end = start + count;
         const tDirectives = tView.directives;
         for (let i = start; i < end; i++) {
@@ -6647,8 +6693,7 @@ function elementEnd() {
         previousOrParentNode = getParentLNode(previousOrParentNode);
     }
     ngDevMode && assertNodeType(previousOrParentNode, 3 /* Element */);
-    const queries = previousOrParentNode.queries;
-    queries && queries.addNode(previousOrParentNode);
+    currentQueries && (currentQueries = currentQueries.addNode(previousOrParentNode));
     queueLifecycleHooks(previousOrParentNode.tNode.flags, tView);
     currentElementNode = null;
 }
@@ -6772,7 +6817,7 @@ function generatePropertyAliases(tNodeFlags, direction) {
     const count = tNodeFlags & 4095 /* DirectiveCountMask */;
     let propStore = null;
     if (count > 0) {
-        const start = tNodeFlags >> 14 /* DirectiveStartingIndexShift */;
+        const start = tNodeFlags >> 15 /* DirectiveStartingIndexShift */;
         const end = start + count;
         const isInput = direction === 0 /* Input */;
         const defs = tView.directives;
@@ -7025,7 +7070,7 @@ function addComponentLogic(directiveIndex, instance, def) {
     const tView = getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs, def.viewQuery);
     // Only component views should be added to the view tree directly. Embedded views are
     // accessed through their containers because they may be removed / re-added later.
-    const componentView = addToViewTree(viewData, previousOrParentNode.tNode.index, createLViewData(rendererFactory.createRenderer(previousOrParentNode.native, def.rendererType), tView, instance, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, getCurrentSanitizer()));
+    const componentView = addToViewTree(viewData, previousOrParentNode.tNode.index, createLViewData(rendererFactory.createRenderer(previousOrParentNode.native, def), tView, instance, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, getCurrentSanitizer()));
     // We need to set the host node/data here because when the component LNode was created,
     // we didn't yet know it was a component (just an element).
     previousOrParentNode.data = componentView;
@@ -7056,7 +7101,7 @@ function baseDirectiveCreate(index, directive, directiveDef) {
             // - save the index,
             // - set the number of directives to 1
             previousOrParentNode.tNode.flags =
-                index << 14 /* DirectiveStartingIndexShift */ | flags & 4096 /* isComponent */ | 1;
+                index << 15 /* DirectiveStartingIndexShift */ | flags & 4096 /* isComponent */ | 1;
         }
         else {
             // Only need to bump the size when subsequent directives are created
@@ -7189,15 +7234,15 @@ function container(index, template, tagName, attrs, localRefs) {
     // Containers are added to the current view tree instead of their embedded views
     // because views can be removed and re-inserted.
     addToViewTree(viewData, index + HEADER_OFFSET, node.data);
-    const queries = node.queries;
-    if (queries) {
+    if (currentQueries) {
         // prepare place for matching nodes from views inserted into a given container
-        lContainer[QUERIES] = queries.container();
+        lContainer[QUERIES] = currentQueries.container();
     }
     createDirectivesAndLocals(localRefs);
     isParent = false;
     ngDevMode && assertNodeType(previousOrParentNode, 0 /* Container */);
-    queries && queries.addNode(node); // check if a given container node matches
+    // check if a given container node matches
+    currentQueries && (currentQueries = currentQueries.addNode(node));
     queueLifecycleHooks(node.tNode.flags, tView);
 }
 /**
@@ -8046,7 +8091,7 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     const componentTag = componentDef.selectors[0][0];
     const hostNode = locateHostElement(rendererFactory, opts.host || componentTag);
     const rootContext = createRootContext(opts.scheduler || requestAnimationFrame.bind(window));
-    const rootView = createLViewData(rendererFactory.createRenderer(hostNode, componentDef.rendererType), createTView(-1, null, null, null, null), rootContext, componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
+    const rootView = createLViewData(rendererFactory.createRenderer(hostNode, componentDef), createTView(-1, null, null, null, null), rootContext, componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
     rootView[INJECTOR$1] = opts.injector || null;
     const oldView = enterView(rootView, null);
     let elementNode;
@@ -8138,559 +8183,13 @@ function whenRendered(component) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * Defines template and style encapsulation options available for Component's {@link Component}.
- *
- * See {@link Component#encapsulation encapsulation}.
- *
- */
-var ViewEncapsulation;
-(function (ViewEncapsulation) {
-    /**
-     * Emulate `Native` scoping of styles by adding an attribute containing surrogate id to the Host
-     * Element and pre-processing the style rules provided via {@link Component#styles styles} or
-     * {@link Component#styleUrls styleUrls}, and adding the new Host Element attribute to all
-     * selectors.
-     *
-     * This is the default option.
-     */
-    ViewEncapsulation[ViewEncapsulation["Emulated"] = 0] = "Emulated";
-    /**
-     * @deprecated v6.1.0 - use {ViewEncapsulation.ShadowDom} instead.
-     * Use the native encapsulation mechanism of the renderer.
-     *
-     * For the DOM this means using the deprecated [Shadow DOM
-     * v0](https://w3c.github.io/webcomponents/spec/shadow/) and
-     * creating a ShadowRoot for Component's Host Element.
-     */
-    ViewEncapsulation[ViewEncapsulation["Native"] = 1] = "Native";
-    /**
-     * Don't provide any template or style encapsulation.
-     */
-    ViewEncapsulation[ViewEncapsulation["None"] = 2] = "None";
-    /**
-     * Use Shadow DOM to encapsulate styles.
-     *
-     * For the DOM this means using modern [Shadow
-     * DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
-     * creating a ShadowRoot for Component's Host Element.
-     *
-     * ### Example
-     * {@example core/ts/metadata/encapsulation.ts region='longform'}
-     */
-    ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
-})(ViewEncapsulation || (ViewEncapsulation = {}));
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-function expressionChangedAfterItHasBeenCheckedError(context, oldValue, currValue, isFirstCheck) {
-    let msg = `ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value: '${oldValue}'. Current value: '${currValue}'.`;
-    if (isFirstCheck) {
-        msg +=
-            ` It seems like the view has been created after its parent and its children have been dirty checked.` +
-                ` Has it been created in a change detection hook ?`;
-    }
-    return viewDebugError(msg, context);
-}
-function viewWrappedDebugError(err, context) {
-    if (!(err instanceof Error)) {
-        // errors that are not Error instances don't have a stack,
-        // so it is ok to wrap them into a new Error object...
-        err = new Error(err.toString());
-    }
-    _addDebugContext(err, context);
-    return err;
-}
-function viewDebugError(msg, context) {
-    const err = new Error(msg);
-    _addDebugContext(err, context);
-    return err;
-}
-function _addDebugContext(err, context) {
-    err[ERROR_DEBUG_CONTEXT] = context;
-    err[ERROR_LOGGER] = context.logError.bind(context);
-}
-function isViewDebugError(err) {
-    return !!getDebugContext(err);
-}
-function viewDestroyedError(action) {
-    return new Error(`ViewDestroyedError: Attempt to use a destroyed view: ${action}`);
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-// Called before each cycle of a view's check to detect whether this is in the
-// initState for which we need to call ngOnInit, ngAfterContentInit or ngAfterViewInit
-// lifecycle methods. Returns true if this check cycle should call lifecycle
-// methods.
-function shiftInitState(view, priorInitState, newInitState) {
-    // Only update the InitState if we are currently in the prior state.
-    // For example, only move into CallingInit if we are in BeforeInit. Only
-    // move into CallingContentInit if we are in CallingInit. Normally this will
-    // always be true because of how checkCycle is called in checkAndUpdateView.
-    // However, if checkAndUpdateView is called recursively or if an exception is
-    // thrown while checkAndUpdateView is running, checkAndUpdateView starts over
-    // from the beginning. This ensures the state is monotonically increasing,
-    // terminating in the AfterInit state, which ensures the Init methods are called
-    // at least once and only once.
-    const state = view.state;
-    const initState = state & 1792 /* InitState_Mask */;
-    if (initState === priorInitState) {
-        view.state = (state & ~1792 /* InitState_Mask */) | newInitState;
-        view.initIndex = -1;
-        return true;
-    }
-    return initState === newInitState;
-}
-// Returns true if the lifecycle init method should be called for the node with
-// the given init index.
-function shouldCallLifecycleInitHook(view, initState, index) {
-    if ((view.state & 1792 /* InitState_Mask */) === initState && view.initIndex <= index) {
-        view.initIndex = index + 1;
-        return true;
-    }
-    return false;
-}
-/**
- * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
- */
-function asTextData(view, index) {
-    return view.nodes[index];
-}
-/**
- * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
- */
-function asElementData(view, index) {
-    return view.nodes[index];
-}
-/**
- * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
- */
-function asProviderData(view, index) {
-    return view.nodes[index];
-}
-/**
- * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
- */
-function asPureExpressionData(view, index) {
-    return view.nodes[index];
-}
-/**
- * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
- */
-function asQueryList(view, index) {
-    return view.nodes[index];
-}
-/**
- * This object is used to prevent cycles in the source files and to have a place where
- * debug mode can hook it. It is lazily filled when `isDevMode` is known.
- */
-const Services = {
-    setCurrentNode: undefined,
-    createRootView: undefined,
-    createEmbeddedView: undefined,
-    createComponentView: undefined,
-    createNgModuleRef: undefined,
-    overrideProvider: undefined,
-    overrideComponentView: undefined,
-    clearOverrides: undefined,
-    checkAndUpdateView: undefined,
-    checkNoChangesView: undefined,
-    destroyView: undefined,
-    resolveDep: undefined,
-    createDebugContext: undefined,
-    handleEvent: undefined,
-    updateDirectives: undefined,
-    updateRenderer: undefined,
-    dirtyParentQueries: undefined,
-};
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-const NOOP = () => { };
-const _tokenKeyCache = new Map();
-function tokenKey(token) {
-    let key = _tokenKeyCache.get(token);
-    if (!key) {
-        key = stringify(token) + '_' + _tokenKeyCache.size;
-        _tokenKeyCache.set(token, key);
-    }
-    return key;
-}
-function unwrapValue(view, nodeIdx, bindingIdx, value) {
-    if (WrappedValue.isWrapped(value)) {
-        value = WrappedValue.unwrap(value);
-        const globalBindingIdx = view.def.nodes[nodeIdx].bindingIndex + bindingIdx;
-        const oldValue = WrappedValue.unwrap(view.oldValues[globalBindingIdx]);
-        view.oldValues[globalBindingIdx] = new WrappedValue(oldValue);
-    }
-    return value;
-}
-const UNDEFINED_RENDERER_TYPE_ID = '$$undefined';
-const EMPTY_RENDERER_TYPE_ID = '$$empty';
-// Attention: this function is called as top level function.
-// Putting any logic in here will destroy closure tree shaking!
-function createRendererType2(values) {
-    return {
-        id: UNDEFINED_RENDERER_TYPE_ID,
-        styles: values.styles,
-        encapsulation: values.encapsulation,
-        data: values.data
-    };
+const EMPTY$1 = {};
+const EMPTY_ARRAY$2 = [];
+if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+    Object.freeze(EMPTY$1);
+    Object.freeze(EMPTY_ARRAY$2);
 }
 let _renderCompCount = 0;
-function resolveRendererType2(type) {
-    if (type && type.id === UNDEFINED_RENDERER_TYPE_ID) {
-        // first time we see this RendererType2. Initialize it...
-        const isFilled = ((type.encapsulation != null && type.encapsulation !== ViewEncapsulation.None) ||
-            type.styles.length || Object.keys(type.data).length);
-        if (isFilled) {
-            type.id = `c${_renderCompCount++}`;
-        }
-        else {
-            type.id = EMPTY_RENDERER_TYPE_ID;
-        }
-    }
-    if (type && type.id === EMPTY_RENDERER_TYPE_ID) {
-        type = null;
-    }
-    return type || null;
-}
-function checkBinding(view, def, bindingIdx, value) {
-    const oldValues = view.oldValues;
-    if ((view.state & 2 /* FirstCheck */) ||
-        !looseIdentical(oldValues[def.bindingIndex + bindingIdx], value)) {
-        return true;
-    }
-    return false;
-}
-function checkAndUpdateBinding$1(view, def, bindingIdx, value) {
-    if (checkBinding(view, def, bindingIdx, value)) {
-        view.oldValues[def.bindingIndex + bindingIdx] = value;
-        return true;
-    }
-    return false;
-}
-function checkBindingNoChanges(view, def, bindingIdx, value) {
-    const oldValue = view.oldValues[def.bindingIndex + bindingIdx];
-    if ((view.state & 1 /* BeforeFirstCheck */) || !devModeEqual(oldValue, value)) {
-        const bindingName = def.bindings[bindingIdx].name;
-        throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, def.nodeIndex), `${bindingName}: ${oldValue}`, `${bindingName}: ${value}`, (view.state & 1 /* BeforeFirstCheck */) !== 0);
-    }
-}
-function markParentViewsForCheck(view) {
-    let currView = view;
-    while (currView) {
-        if (currView.def.flags & 2 /* OnPush */) {
-            currView.state |= 8 /* ChecksEnabled */;
-        }
-        currView = currView.viewContainerParent || currView.parent;
-    }
-}
-function markParentViewsForCheckProjectedViews(view, endView) {
-    let currView = view;
-    while (currView && currView !== endView) {
-        currView.state |= 64 /* CheckProjectedViews */;
-        currView = currView.viewContainerParent || currView.parent;
-    }
-}
-function dispatchEvent(view, nodeIndex, eventName, event) {
-    try {
-        const nodeDef = view.def.nodes[nodeIndex];
-        const startView = nodeDef.flags & 33554432 /* ComponentView */ ?
-            asElementData(view, nodeIndex).componentView :
-            view;
-        markParentViewsForCheck(startView);
-        return Services.handleEvent(view, nodeIndex, eventName, event);
-    }
-    catch (e) {
-        // Attention: Don't rethrow, as it would cancel Observable subscriptions!
-        view.root.errorHandler.handleError(e);
-    }
-}
-function declaredViewContainer(view) {
-    if (view.parent) {
-        const parentView = view.parent;
-        return asElementData(parentView, view.parentNodeDef.nodeIndex);
-    }
-    return null;
-}
-/**
- * for component views, this is the host element.
- * for embedded views, this is the index of the parent node
- * that contains the view container.
- */
-function viewParentEl(view) {
-    const parentView = view.parent;
-    if (parentView) {
-        return view.parentNodeDef.parent;
-    }
-    else {
-        return null;
-    }
-}
-function renderNode(view, def) {
-    switch (def.flags & 201347067 /* Types */) {
-        case 1 /* TypeElement */:
-            return asElementData(view, def.nodeIndex).renderElement;
-        case 2 /* TypeText */:
-            return asTextData(view, def.nodeIndex).renderText;
-    }
-}
-function elementEventFullName(target, name) {
-    return target ? `${target}:${name}` : name;
-}
-function isComponentView(view) {
-    return !!view.parent && !!(view.parentNodeDef.flags & 32768 /* Component */);
-}
-function isEmbeddedView(view) {
-    return !!view.parent && !(view.parentNodeDef.flags & 32768 /* Component */);
-}
-function filterQueryId(queryId) {
-    return 1 << (queryId % 32);
-}
-function splitMatchedQueriesDsl(matchedQueriesDsl) {
-    const matchedQueries = {};
-    let matchedQueryIds = 0;
-    const references = {};
-    if (matchedQueriesDsl) {
-        matchedQueriesDsl.forEach(([queryId, valueType]) => {
-            if (typeof queryId === 'number') {
-                matchedQueries[queryId] = valueType;
-                matchedQueryIds |= filterQueryId(queryId);
-            }
-            else {
-                references[queryId] = valueType;
-            }
-        });
-    }
-    return { matchedQueries, references, matchedQueryIds };
-}
-function splitDepsDsl(deps, sourceName) {
-    return deps.map(value => {
-        let token;
-        let flags;
-        if (Array.isArray(value)) {
-            [flags, token] = value;
-        }
-        else {
-            flags = 0 /* None */;
-            token = value;
-        }
-        if (token && (typeof token === 'function' || typeof token === 'object') && sourceName) {
-            Object.defineProperty(token, SOURCE, { value: sourceName, configurable: true });
-        }
-        return { flags, token, tokenKey: tokenKey(token) };
-    });
-}
-function getParentRenderElement(view, renderHost, def) {
-    let renderParent = def.renderParent;
-    if (renderParent) {
-        if ((renderParent.flags & 1 /* TypeElement */) === 0 ||
-            (renderParent.flags & 33554432 /* ComponentView */) === 0 ||
-            (renderParent.element.componentRendererType &&
-                renderParent.element.componentRendererType.encapsulation ===
-                    ViewEncapsulation.Native)) {
-            // only children of non components, or children of components with native encapsulation should
-            // be attached.
-            return asElementData(view, def.renderParent.nodeIndex).renderElement;
-        }
-    }
-    else {
-        return renderHost;
-    }
-}
-const DEFINITION_CACHE = new WeakMap();
-function resolveDefinition(factory) {
-    let value = DEFINITION_CACHE.get(factory);
-    if (!value) {
-        value = factory(() => NOOP);
-        value.factory = factory;
-        DEFINITION_CACHE.set(factory, value);
-    }
-    return value;
-}
-function rootRenderNodes(view) {
-    const renderNodes = [];
-    visitRootRenderNodes(view, 0 /* Collect */, undefined, undefined, renderNodes);
-    return renderNodes;
-}
-function visitRootRenderNodes(view, action, parentNode, nextSibling, target) {
-    // We need to re-compute the parent node in case the nodes have been moved around manually
-    if (action === 3 /* RemoveChild */) {
-        parentNode = view.renderer.parentNode(renderNode(view, view.def.lastRenderRootNode));
-    }
-    visitSiblingRenderNodes(view, action, 0, view.def.nodes.length - 1, parentNode, nextSibling, target);
-}
-function visitSiblingRenderNodes(view, action, startIndex, endIndex, parentNode, nextSibling, target) {
-    for (let i = startIndex; i <= endIndex; i++) {
-        const nodeDef = view.def.nodes[i];
-        if (nodeDef.flags & (1 /* TypeElement */ | 2 /* TypeText */ | 8 /* TypeNgContent */)) {
-            visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target);
-        }
-        // jump to next sibling
-        i += nodeDef.childCount;
-    }
-}
-function visitProjectedRenderNodes(view, ngContentIndex, action, parentNode, nextSibling, target) {
-    let compView = view;
-    while (compView && !isComponentView(compView)) {
-        compView = compView.parent;
-    }
-    const hostView = compView.parent;
-    const hostElDef = viewParentEl(compView);
-    const startIndex = hostElDef.nodeIndex + 1;
-    const endIndex = hostElDef.nodeIndex + hostElDef.childCount;
-    for (let i = startIndex; i <= endIndex; i++) {
-        const nodeDef = hostView.def.nodes[i];
-        if (nodeDef.ngContentIndex === ngContentIndex) {
-            visitRenderNode(hostView, nodeDef, action, parentNode, nextSibling, target);
-        }
-        // jump to next sibling
-        i += nodeDef.childCount;
-    }
-    if (!hostView.parent) {
-        // a root view
-        const projectedNodes = view.root.projectableNodes[ngContentIndex];
-        if (projectedNodes) {
-            for (let i = 0; i < projectedNodes.length; i++) {
-                execRenderNodeAction(view, projectedNodes[i], action, parentNode, nextSibling, target);
-            }
-        }
-    }
-}
-function visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target) {
-    if (nodeDef.flags & 8 /* TypeNgContent */) {
-        visitProjectedRenderNodes(view, nodeDef.ngContent.index, action, parentNode, nextSibling, target);
-    }
-    else {
-        const rn = renderNode(view, nodeDef);
-        if (action === 3 /* RemoveChild */ && (nodeDef.flags & 33554432 /* ComponentView */) &&
-            (nodeDef.bindingFlags & 48 /* CatSyntheticProperty */)) {
-            // Note: we might need to do both actions.
-            if (nodeDef.bindingFlags & (16 /* SyntheticProperty */)) {
-                execRenderNodeAction(view, rn, action, parentNode, nextSibling, target);
-            }
-            if (nodeDef.bindingFlags & (32 /* SyntheticHostProperty */)) {
-                const compView = asElementData(view, nodeDef.nodeIndex).componentView;
-                execRenderNodeAction(compView, rn, action, parentNode, nextSibling, target);
-            }
-        }
-        else {
-            execRenderNodeAction(view, rn, action, parentNode, nextSibling, target);
-        }
-        if (nodeDef.flags & 16777216 /* EmbeddedViews */) {
-            const embeddedViews = asElementData(view, nodeDef.nodeIndex).viewContainer._embeddedViews;
-            for (let k = 0; k < embeddedViews.length; k++) {
-                visitRootRenderNodes(embeddedViews[k], action, parentNode, nextSibling, target);
-            }
-        }
-        if (nodeDef.flags & 1 /* TypeElement */ && !nodeDef.element.name) {
-            visitSiblingRenderNodes(view, action, nodeDef.nodeIndex + 1, nodeDef.nodeIndex + nodeDef.childCount, parentNode, nextSibling, target);
-        }
-    }
-}
-function execRenderNodeAction(view, renderNode, action, parentNode, nextSibling, target) {
-    const renderer = view.renderer;
-    switch (action) {
-        case 1 /* AppendChild */:
-            renderer.appendChild(parentNode, renderNode);
-            break;
-        case 2 /* InsertBefore */:
-            renderer.insertBefore(parentNode, renderNode, nextSibling);
-            break;
-        case 3 /* RemoveChild */:
-            renderer.removeChild(parentNode, renderNode);
-            break;
-        case 0 /* Collect */:
-            target.push(renderNode);
-            break;
-    }
-}
-const NS_PREFIX_RE = /^:([^:]+):(.+)$/;
-function splitNamespace(name) {
-    if (name[0] === ':') {
-        const match = name.match(NS_PREFIX_RE);
-        return [match[1], match[2]];
-    }
-    return ['', name];
-}
-function calcBindingFlags(bindings) {
-    let flags = 0;
-    for (let i = 0; i < bindings.length; i++) {
-        flags |= bindings[i].flags;
-    }
-    return flags;
-}
-function interpolate(valueCount, constAndInterp) {
-    let result = '';
-    for (let i = 0; i < valueCount * 2; i = i + 2) {
-        result = result + constAndInterp[i] + _toStringWithNull(constAndInterp[i + 1]);
-    }
-    return result + constAndInterp[valueCount * 2];
-}
-function inlineInterpolate(valueCount, c0, a1, c1, a2, c2, a3, c3, a4, c4, a5, c5, a6, c6, a7, c7, a8, c8, a9, c9) {
-    switch (valueCount) {
-        case 1:
-            return c0 + _toStringWithNull(a1) + c1;
-        case 2:
-            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2;
-        case 3:
-            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
-                c3;
-        case 4:
-            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
-                c3 + _toStringWithNull(a4) + c4;
-        case 5:
-            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
-                c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5;
-        case 6:
-            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
-                c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) + c6;
-        case 7:
-            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
-                c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) +
-                c6 + _toStringWithNull(a7) + c7;
-        case 8:
-            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
-                c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) +
-                c6 + _toStringWithNull(a7) + c7 + _toStringWithNull(a8) + c8;
-        case 9:
-            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
-                c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) +
-                c6 + _toStringWithNull(a7) + c7 + _toStringWithNull(a8) + c8 + _toStringWithNull(a9) + c9;
-        default:
-            throw new Error(`Does not support more than 9 expressions`);
-    }
-}
-function _toStringWithNull(v) {
-    return v != null ? v.toString() : '';
-}
-const EMPTY_ARRAY$2 = [];
-const EMPTY_MAP = {};
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Create a component definition object.
  *
@@ -8711,6 +8210,7 @@ function defineComponent(componentDefinition) {
     const pipeTypes = componentDefinition.pipes;
     const directiveTypes = componentDefinition.directives;
     const declaredInputs = {};
+    const encapsulation = componentDefinition.encapsulation;
     const def = {
         type: type,
         diPublic: null,
@@ -8723,7 +8223,6 @@ function defineComponent(componentDefinition) {
         inputs: invertObject(componentDefinition.inputs, declaredInputs),
         declaredInputs: declaredInputs,
         outputs: invertObject(componentDefinition.outputs),
-        rendererType: resolveRendererType2(componentDefinition.rendererType) || null,
         exportAs: componentDefinition.exportAs || null,
         onInit: type.prototype.ngOnInit || null,
         doCheck: type.prototype.ngDoCheck || null,
@@ -8743,6 +8242,12 @@ function defineComponent(componentDefinition) {
         selectors: componentDefinition.selectors,
         viewQuery: componentDefinition.viewQuery || null,
         features: componentDefinition.features || null,
+        data: componentDefinition.data || EMPTY$1,
+        // TODO(misko): convert ViewEncapsulation into const enum so that it can be used directly in the
+        // next line. Also `None` should be 0 not 2.
+        encapsulation: encapsulation == null ? 2 /* ViewEncapsulation.None */ : encapsulation,
+        id: `c${_renderCompCount++}`,
+        styles: EMPTY_ARRAY$2,
     };
     const feature = componentDefinition.features;
     feature && feature.forEach((fn) => fn(def));
@@ -8765,15 +8270,14 @@ function extractPipeDef(type) {
 function defineNgModule(def) {
     const res = {
         type: def.type,
-        bootstrap: def.bootstrap || [],
-        declarations: def.declarations || [],
-        imports: def.imports || [],
-        exports: def.exports || [],
+        bootstrap: def.bootstrap || EMPTY_ARRAY$2,
+        declarations: def.declarations || EMPTY_ARRAY$2,
+        imports: def.imports || EMPTY_ARRAY$2,
+        exports: def.exports || EMPTY_ARRAY$2,
         transitiveCompileScopes: null,
     };
     return res;
 }
-const EMPTY$1 = {};
 /**
  * Inverts an inputs or outputs lookup such that the keys, which were the
  * minified keys, are part of the values, and the values are parsed so that
@@ -8839,6 +8343,26 @@ function invertObject(obj, secondary) {
         }
     }
     return newLookup;
+}
+/**
+ * Create a base definition
+ *
+ * # Example
+ * ```
+ * class ShouldBeInherited {
+ *   static ngBaseDef = defineBase({
+ *      ...
+ *   })
+ * }
+ * @param baseDefinition The base definition parameters
+ */
+function defineBase(baseDefinition) {
+    const declaredInputs = {};
+    return {
+        inputs: invertObject(baseDefinition.inputs, declaredInputs),
+        declaredInputs: declaredInputs,
+        outputs: invertObject(baseDefinition.outputs),
+    };
 }
 /**
  * Create a directive definition object.
@@ -9055,7 +8579,9 @@ function NgOnChangesFeature(definition) {
                     }
                     if (setter)
                         setter.call(this, value);
-                }
+                },
+                // Make the property configurable in dev mode to allow overriding in tests
+                configurable: !!ngDevMode
             });
         }
     }
@@ -10096,7 +9622,18 @@ const ROOT_CONTEXT = new InjectionToken('ROOT_CONTEXT_TOKEN', { providedIn: 'roo
  * A change detection scheduler token for {@link RootContext}. This token is the default value used
  * for the default `RootContext` found in the {@link ROOT_CONTEXT} token.
  */
-const SCHEDULER = new InjectionToken('SCHEDULER_TOKEN', { providedIn: 'root', factory: () => requestAnimationFrame.bind(window) });
+const SCHEDULER = new InjectionToken('SCHEDULER_TOKEN', {
+    providedIn: 'root',
+    factory: () => {
+        const useRaf = typeof requestAnimationFrame !== 'undefined' && typeof window !== 'undefined';
+        return useRaf ? requestAnimationFrame.bind(window) : setTimeout;
+    },
+});
+/**
+ * A function used to wrap the `RendererFactory2`.
+ * Used in tests to change the `RendererFactory2` into a `DebugRendererFactory2`.
+ */
+const WRAP_RENDERER_FACTORY2 = new InjectionToken('WRAP_RENDERER_FACTORY2');
 /**
  * Render3 implementation of {@link viewEngine_ComponentFactory}.
  */
@@ -10116,9 +9653,16 @@ class ComponentFactory$1 extends ComponentFactory {
     }
     create(injector, projectableNodes, rootSelectorOrNode, ngModule) {
         const isInternalRootView = rootSelectorOrNode === undefined;
-        const rendererFactory = ngModule ? ngModule.injector.get(RendererFactory2) : domRendererFactory3;
+        let rendererFactory;
+        if (ngModule) {
+            const wrapper = ngModule.injector.get(WRAP_RENDERER_FACTORY2, (v) => v);
+            rendererFactory = wrapper(ngModule.injector.get(RendererFactory2));
+        }
+        else {
+            rendererFactory = domRendererFactory3;
+        }
         const hostNode = isInternalRootView ?
-            elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef.rendererType)) :
+            elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef)) :
             locateHostElement(rendererFactory, rootSelectorOrNode);
         // The first index of the first selector is the tag name.
         const componentTag = this.componentDef.selectors[0][0];
@@ -10126,7 +9670,7 @@ class ComponentFactory$1 extends ComponentFactory {
             ngModule.injector.get(ROOT_CONTEXT) :
             createRootContext(requestAnimationFrame.bind(window));
         // Create the root view. Uses empty TView and ContentTemplate.
-        const rootView = createLViewData(rendererFactory.createRenderer(hostNode, this.componentDef.rendererType), createTView(-1, null, null, null, null), rootContext, this.componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
+        const rootView = createLViewData(rendererFactory.createRenderer(hostNode, this.componentDef), createTView(-1, null, null, null, null), rootContext, this.componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
         rootView[INJECTOR$1] = ngModule && ngModule.injector || null;
         // rootView is the parent when bootstrapping
         const oldView = enterView(rootView, null);
@@ -10138,7 +9682,8 @@ class ComponentFactory$1 extends ComponentFactory {
             // Create element node at index 0 in data array
             elementNode = hostElement(componentTag, hostNode, this.componentDef);
             // Create directive instance with factory() and store at index 0 in directives array
-            rootContext.components.push(component = baseDirectiveCreate(0, this.componentDef.factory(), this.componentDef));
+            component = baseDirectiveCreate(0, this.componentDef.factory(), this.componentDef);
+            rootContext.components.push(component);
             initChangeDetectorIfExisting(elementNode.nodeInjector, component, elementNode.data);
             elementNode.data[CONTEXT] = component;
             // TODO: should LifecycleHooksFeature and other host features be generated by the compiler and
@@ -10440,7 +9985,7 @@ function getOrCreateHostChangeDetector(currentNode) {
     return existingRef ?
         existingRef :
         new ViewRef$1(hostNode.data, hostNode
-            .view[DIRECTIVES][hostNode.tNode.flags >> 14 /* DirectiveStartingIndexShift */]);
+            .view[DIRECTIVES][hostNode.tNode.flags >> 15 /* DirectiveStartingIndexShift */]);
 }
 /**
  * If the node is an embedded view, traverses up the view tree to return the closest
@@ -10485,7 +10030,7 @@ function getOrCreateInjectable(nodeInjector, token, flags = 0 /* Default */) {
             const nodeFlags = node.tNode.flags;
             const count = nodeFlags & 4095 /* DirectiveCountMask */;
             if (count !== 0) {
-                const start = nodeFlags >> 14 /* DirectiveStartingIndexShift */;
+                const start = nodeFlags >> 15 /* DirectiveStartingIndexShift */;
                 const end = start + count;
                 const defs = node.view[TVIEW].directives;
                 for (let i = start; i < end; i++) {
@@ -10660,11 +10205,8 @@ function getOrCreateContainerRef(di) {
         const hostParent = getParentLNode(vcRefHost);
         const lContainer = createLContainer(hostParent, vcRefHost.view, true);
         const comment = vcRefHost.view[RENDERER].createComment(ngDevMode ? 'container' : '');
-        const lContainerNode = createLNodeObject(0 /* Container */, vcRefHost.view, hostParent, comment, lContainer, null);
+        const lContainerNode = createLNodeObject(0 /* Container */, vcRefHost.view, hostParent, comment, lContainer);
         appendChild(hostParent, comment, vcRefHost.view);
-        if (vcRefHost.queries) {
-            lContainerNode.queries = vcRefHost.queries.container();
-        }
         const hostTNode = vcRefHost.tNode;
         if (!hostTNode.dynamicContainerNode) {
             hostTNode.dynamicContainerNode =
@@ -10810,6 +10352,29 @@ function getOrCreateTemplateRef(di) {
     }
     return di.templateRef;
 }
+function getFactoryOf(type) {
+    const typeAny = type;
+    const def = typeAny.ngComponentDef || typeAny.ngDirectiveDef || typeAny.ngPipeDef ||
+        typeAny.ngInjectableDef || typeAny.ngInjectorDef;
+    if (def === undefined || def.factory === undefined) {
+        return null;
+    }
+    return def.factory;
+}
+function getInheritedFactory(type) {
+    const proto = Object.getPrototypeOf(type.prototype).constructor;
+    const factory = getFactoryOf(proto);
+    if (factory !== null) {
+        return factory;
+    }
+    else {
+        // There is no factory defined. Either this was improper usage of inheritance
+        // (no Angular decorator on the superclass) or there is no constructor at all
+        // in the inheritance chain. Since the two cases cannot be distinguished, the
+        // latter has to be assumed.
+        return (t) => new t();
+    }
+}
 class TemplateRef$1 {
     constructor(_declarationParentView, elementRef, _tView, _renderer, _queries) {
         this._declarationParentView = _declarationParentView;
@@ -10845,1462 +10410,6 @@ class TemplateRef$1 {
  */
 function PublicFeature(definition) {
     definition.diPublic = diPublic;
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-const i18nTagRegex = /{\$([^}]+)}/g;
-/**
- * Takes a translation string, the initial list of placeholders (elements and expressions) and the
- * indexes of their corresponding expression nodes to return a list of instructions for each
- * template function.
- *
- * Because embedded templates have different indexes for each placeholder, each parameter (except
- * the translation) is an array, where each value corresponds to a different template, by order of
- * appearance.
- *
- * @param translation A translation string where placeholders are represented by `{$name}`
- * @param elements An array containing, for each template, the maps of element placeholders and
- * their indexes.
- * @param expressions An array containing, for each template, the maps of expression placeholders
- * and their indexes.
- * @param templateRoots An array of template roots whose content should be ignored when
- * generating the instructions for their parent template.
- * @param lastChildIndex The index of the last child of the i18n node. Used when the i18n block is
- * an ng-container.
- *
- * @returns A list of instructions used to translate each template.
- */
-function i18nMapping(translation, elements, expressions, templateRoots, lastChildIndex) {
-    const translationParts = translation.split(i18nTagRegex);
-    const nbTemplates = templateRoots ? templateRoots.length + 1 : 1;
-    const instructions = (new Array(nbTemplates)).fill(undefined);
-    generateMappingInstructions(0, 0, translationParts, instructions, elements, expressions, templateRoots, lastChildIndex);
-    return instructions;
-}
-/**
- * Internal function that reads the translation parts and generates a set of instructions for each
- * template.
- *
- * See `i18nMapping()` for more details.
- *
- * @param tmplIndex The order of appearance of the template.
- * 0 for the root template, following indexes match the order in `templateRoots`.
- * @param partIndex The current index in `translationParts`.
- * @param translationParts The translation string split into an array of placeholders and text
- * elements.
- * @param instructions The current list of instructions to update.
- * @param elements An array containing, for each template, the maps of element placeholders and
- * their indexes.
- * @param expressions An array containing, for each template, the maps of expression placeholders
- * and their indexes.
- * @param templateRoots An array of template roots whose content should be ignored when
- * generating the instructions for their parent template.
- * @param lastChildIndex The index of the last child of the i18n node. Used when the i18n block is
- * an ng-container.
- *
- * @returns the current index in `translationParts`
- */
-function generateMappingInstructions(tmplIndex, partIndex, translationParts, instructions, elements, expressions, templateRoots, lastChildIndex) {
-    const tmplInstructions = [];
-    const phVisited = [];
-    let openedTagCount = 0;
-    let maxIndex = 0;
-    let currentElements = elements && elements[tmplIndex] ? elements[tmplIndex] : null;
-    let currentExpressions = expressions && expressions[tmplIndex] ? expressions[tmplIndex] : null;
-    instructions[tmplIndex] = tmplInstructions;
-    for (; partIndex < translationParts.length; partIndex++) {
-        // The value can either be text or the name of a placeholder (element/template root/expression)
-        const value = translationParts[partIndex];
-        // Odd indexes are placeholders
-        if (partIndex & 1) {
-            let phIndex;
-            if (currentElements && currentElements[value] !== undefined) {
-                phIndex = currentElements[value];
-                // The placeholder represents a DOM element, add an instruction to move it
-                let templateRootIndex = templateRoots ? templateRoots.indexOf(value) : -1;
-                if (templateRootIndex !== -1 && (templateRootIndex + 1) !== tmplIndex) {
-                    // This is a template root, it has no closing tag, not treating it as an element
-                    tmplInstructions.push(phIndex | -2147483648 /* TemplateRoot */);
-                }
-                else {
-                    tmplInstructions.push(phIndex | 1073741824 /* Element */);
-                    openedTagCount++;
-                }
-                phVisited.push(value);
-            }
-            else if (currentExpressions && currentExpressions[value] !== undefined) {
-                phIndex = currentExpressions[value];
-                // The placeholder represents an expression, add an instruction to move it
-                tmplInstructions.push(phIndex | 1610612736 /* Expression */);
-                phVisited.push(value);
-            }
-            else {
-                // It is a closing tag
-                tmplInstructions.push(-1073741824 /* CloseNode */);
-                if (tmplIndex > 0) {
-                    openedTagCount--;
-                    // If we have reached the closing tag for this template, exit the loop
-                    if (openedTagCount === 0) {
-                        break;
-                    }
-                }
-            }
-            if (phIndex !== undefined && phIndex > maxIndex) {
-                maxIndex = phIndex;
-            }
-            if (templateRoots) {
-                const newTmplIndex = templateRoots.indexOf(value) + 1;
-                if (newTmplIndex !== 0 && newTmplIndex !== tmplIndex) {
-                    partIndex = generateMappingInstructions(newTmplIndex, partIndex, translationParts, instructions, elements, expressions, templateRoots, lastChildIndex);
-                }
-            }
-        }
-        else if (value) {
-            // It's a non-empty string, create a text node
-            tmplInstructions.push(536870912 /* Text */, value);
-        }
-    }
-    // Add instructions to remove elements that are not used in the translation
-    if (elements) {
-        const tmplElements = elements[tmplIndex];
-        if (tmplElements) {
-            const phKeys = Object.keys(tmplElements);
-            for (let i = 0; i < phKeys.length; i++) {
-                const ph = phKeys[i];
-                if (phVisited.indexOf(ph) === -1) {
-                    let index = tmplElements[ph];
-                    // Add an instruction to remove the element
-                    tmplInstructions.push(index | -536870912 /* RemoveNode */);
-                    if (index > maxIndex) {
-                        maxIndex = index;
-                    }
-                }
-            }
-        }
-    }
-    // Add instructions to remove expressions that are not used in the translation
-    if (expressions) {
-        const tmplExpressions = expressions[tmplIndex];
-        if (tmplExpressions) {
-            const phKeys = Object.keys(tmplExpressions);
-            for (let i = 0; i < phKeys.length; i++) {
-                const ph = phKeys[i];
-                if (phVisited.indexOf(ph) === -1) {
-                    let index = tmplExpressions[ph];
-                    if (ngDevMode) {
-                        assertLessThan(index.toString(2).length, 28, `Index ${index} is too big and will overflow`);
-                    }
-                    // Add an instruction to remove the expression
-                    tmplInstructions.push(index | -536870912 /* RemoveNode */);
-                    if (index > maxIndex) {
-                        maxIndex = index;
-                    }
-                }
-            }
-        }
-    }
-    if (tmplIndex === 0 && typeof lastChildIndex === 'number') {
-        // The current parent is an ng-container and it has more children after the translation that we
-        // need to append to keep the order of the DOM nodes correct
-        for (let i = maxIndex + 1; i <= lastChildIndex; i++) {
-            if (ngDevMode) {
-                assertLessThan(i.toString(2).length, 28, `Index ${i} is too big and will overflow`);
-            }
-            tmplInstructions.push(i | -1610612736 /* Any */);
-        }
-    }
-    return partIndex;
-}
-function appendI18nNode(node, parentNode, previousNode) {
-    if (ngDevMode) {
-        ngDevMode.rendererMoveNode++;
-    }
-    const viewData = _getViewData();
-    appendChild(parentNode, node.native || null, viewData);
-    // On first pass, re-organize node tree to put this node in the correct position.
-    const firstTemplatePass = node.view[TVIEW].firstTemplatePass;
-    if (firstTemplatePass) {
-        if (previousNode === parentNode && node.tNode !== parentNode.tNode.child) {
-            node.tNode.next = parentNode.tNode.child;
-            parentNode.tNode.child = node.tNode;
-        }
-        else if (previousNode !== parentNode && node.tNode !== previousNode.tNode.next) {
-            node.tNode.next = previousNode.tNode.next;
-            previousNode.tNode.next = node.tNode;
-        }
-        else {
-            node.tNode.next = null;
-        }
-        if (parentNode.view === node.view)
-            node.tNode.parent = parentNode.tNode;
-    }
-    // Template containers also have a comment node for the `ViewContainerRef` that should be moved
-    if (node.tNode.type === 0 /* Container */ && node.dynamicLContainerNode) {
-        appendChild(parentNode, node.dynamicLContainerNode.native || null, viewData);
-        if (firstTemplatePass) {
-            node.tNode.dynamicContainerNode = node.dynamicLContainerNode.tNode;
-            node.dynamicLContainerNode.tNode.parent = node.tNode;
-        }
-        return node.dynamicLContainerNode;
-    }
-    return node;
-}
-/**
- * Takes a list of instructions generated by `i18nMapping()` to transform the template accordingly.
- *
- * @param startIndex Index of the first element to translate (for instance the first child of the
- * element with the i18n attribute).
- * @param instructions The list of instructions to apply on the current view.
- */
-function i18nApply(startIndex, instructions) {
-    const viewData = _getViewData();
-    if (ngDevMode) {
-        assertEqual(viewData[BINDING_INDEX], -1, 'i18nApply should be called before any binding');
-    }
-    if (!instructions) {
-        return;
-    }
-    const renderer = getRenderer();
-    let localParentNode = getParentLNode(load(startIndex)) || getPreviousOrParentNode();
-    let localPreviousNode = localParentNode;
-    resetApplicationState(); // We don't want to add to the tree with the wrong previous node
-    for (let i = 0; i < instructions.length; i++) {
-        const instruction = instructions[i];
-        switch (instruction & -536870912 /* InstructionMask */) {
-            case 1073741824 /* Element */:
-                const element$$1 = load(instruction & 536870911 /* IndexMask */);
-                localPreviousNode = appendI18nNode(element$$1, localParentNode, localPreviousNode);
-                localParentNode = element$$1;
-                break;
-            case 1610612736 /* Expression */:
-            case -2147483648 /* TemplateRoot */:
-            case -1610612736 /* Any */:
-                const node = load(instruction & 536870911 /* IndexMask */);
-                localPreviousNode = appendI18nNode(node, localParentNode, localPreviousNode);
-                break;
-            case 536870912 /* Text */:
-                if (ngDevMode) {
-                    ngDevMode.rendererCreateTextNode++;
-                }
-                const value = instructions[++i];
-                const textRNode = createTextNode(value, renderer);
-                // If we were to only create a `RNode` then projections won't move the text.
-                // Create text node at the current end of viewData. Must subtract header offset because
-                // createLNode takes a raw index (not adjusted by header offset).
-                const textLNode = createLNode(viewData.length - HEADER_OFFSET, 3 /* Element */, textRNode, null, null);
-                localPreviousNode = appendI18nNode(textLNode, localParentNode, localPreviousNode);
-                resetApplicationState();
-                break;
-            case -1073741824 /* CloseNode */:
-                localPreviousNode = localParentNode;
-                localParentNode = getParentLNode(localParentNode);
-                break;
-            case -536870912 /* RemoveNode */:
-                if (ngDevMode) {
-                    ngDevMode.rendererRemoveNode++;
-                }
-                const index = instruction & 536870911 /* IndexMask */;
-                const removedNode = load(index);
-                const parentNode = getParentLNode(removedNode);
-                removeChild(parentNode, removedNode.native || null, viewData);
-                // For template containers we also need to remove their `ViewContainerRef` from the DOM
-                if (removedNode.tNode.type === 0 /* Container */ && removedNode.dynamicLContainerNode) {
-                    removeChild(parentNode, removedNode.dynamicLContainerNode.native || null, viewData);
-                    removedNode.dynamicLContainerNode.tNode.detached = true;
-                    removedNode.dynamicLContainerNode.data[RENDER_PARENT] = null;
-                }
-                break;
-        }
-    }
-}
-/**
- * Takes a translation string and the initial list of expressions and returns a list of instructions
- * that will be used to translate an attribute.
- * Even indexes contain static strings, while odd indexes contain the index of the expression whose
- * value will be concatenated into the final translation.
- */
-function i18nExpMapping(translation, placeholders) {
-    const staticText = translation.split(i18nTagRegex);
-    // odd indexes are placeholders
-    for (let i = 1; i < staticText.length; i += 2) {
-        staticText[i] = placeholders[staticText[i]];
-    }
-    return staticText;
-}
-/**
- * Checks if the value of an expression has changed and replaces it by its value in a translation,
- * or returns NO_CHANGE.
- *
- * @param instructions A list of instructions that will be used to translate an attribute.
- * @param v0 value checked for change.
- *
- * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
- */
-function i18nInterpolation1(instructions, v0) {
-    const different = bindingUpdated(v0);
-    if (!different) {
-        return NO_CHANGE;
-    }
-    let res = '';
-    for (let i = 0; i < instructions.length; i++) {
-        // Odd indexes are bindings
-        if (i & 1) {
-            res += stringify$1(v0);
-        }
-        else {
-            res += instructions[i];
-        }
-    }
-    return res;
-}
-/**
- * Checks if the values of up to 2 expressions have changed and replaces them by their values in a
- * translation, or returns NO_CHANGE.
- *
- * @param instructions A list of instructions that will be used to translate an attribute.
- * @param v0 value checked for change.
- * @param v1 value checked for change.
- *
- * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
- */
-function i18nInterpolation2(instructions, v0, v1) {
-    const different = bindingUpdated2(v0, v1);
-    if (!different) {
-        return NO_CHANGE;
-    }
-    let res = '';
-    for (let i = 0; i < instructions.length; i++) {
-        // Odd indexes are bindings
-        if (i & 1) {
-            // Extract bits
-            const idx = instructions[i];
-            const b1 = idx & 1;
-            // Get the value from the argument vx where x = idx
-            const value = b1 ? v1 : v0;
-            res += stringify$1(value);
-        }
-        else {
-            res += instructions[i];
-        }
-    }
-    return res;
-}
-/**
- * Checks if the values of up to 3 expressions have changed and replaces them by their values in a
- * translation, or returns NO_CHANGE.
- *
- * @param instructions A list of instructions that will be used to translate an attribute.
- * @param v0 value checked for change.
- * @param v1 value checked for change.
- * @param v2 value checked for change.
- *
- * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
- */
-function i18nInterpolation3(instructions, v0, v1, v2) {
-    let different = bindingUpdated2(v0, v1);
-    different = bindingUpdated(v2) || different;
-    if (!different) {
-        return NO_CHANGE;
-    }
-    let res = '';
-    for (let i = 0; i < instructions.length; i++) {
-        // Odd indexes are bindings
-        if (i & 1) {
-            // Extract bits
-            const idx = instructions[i];
-            const b2 = idx & 2;
-            const b1 = idx & 1;
-            // Get the value from the argument vx where x = idx
-            const value = b2 ? v2 : (b1 ? v1 : v0);
-            res += stringify$1(value);
-        }
-        else {
-            res += instructions[i];
-        }
-    }
-    return res;
-}
-/**
- * Checks if the values of up to 4 expressions have changed and replaces them by their values in a
- * translation, or returns NO_CHANGE.
- *
- * @param instructions A list of instructions that will be used to translate an attribute.
- * @param v0 value checked for change.
- * @param v1 value checked for change.
- * @param v2 value checked for change.
- * @param v3 value checked for change.
- *
- * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
- */
-function i18nInterpolation4(instructions, v0, v1, v2, v3) {
-    const different = bindingUpdated4(v0, v1, v2, v3);
-    if (!different) {
-        return NO_CHANGE;
-    }
-    let res = '';
-    for (let i = 0; i < instructions.length; i++) {
-        // Odd indexes are bindings
-        if (i & 1) {
-            // Extract bits
-            const idx = instructions[i];
-            const b2 = idx & 2;
-            const b1 = idx & 1;
-            // Get the value from the argument vx where x = idx
-            const value = b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0);
-            res += stringify$1(value);
-        }
-        else {
-            res += instructions[i];
-        }
-    }
-    return res;
-}
-/**
- * Checks if the values of up to 5 expressions have changed and replaces them by their values in a
- * translation, or returns NO_CHANGE.
- *
- * @param instructions A list of instructions that will be used to translate an attribute.
- * @param v0 value checked for change.
- * @param v1 value checked for change.
- * @param v2 value checked for change.
- * @param v3 value checked for change.
- * @param v4 value checked for change.
- *
- * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
- */
-function i18nInterpolation5(instructions, v0, v1, v2, v3, v4) {
-    let different = bindingUpdated4(v0, v1, v2, v3);
-    different = bindingUpdated(v4) || different;
-    if (!different) {
-        return NO_CHANGE;
-    }
-    let res = '';
-    for (let i = 0; i < instructions.length; i++) {
-        // Odd indexes are bindings
-        if (i & 1) {
-            // Extract bits
-            const idx = instructions[i];
-            const b4 = idx & 4;
-            const b2 = idx & 2;
-            const b1 = idx & 1;
-            // Get the value from the argument vx where x = idx
-            const value = b4 ? v4 : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
-            res += stringify$1(value);
-        }
-        else {
-            res += instructions[i];
-        }
-    }
-    return res;
-}
-/**
- * Checks if the values of up to 6 expressions have changed and replaces them by their values in a
- * translation, or returns NO_CHANGE.
- *
- * @param instructions A list of instructions that will be used to translate an attribute.
- * @param v0 value checked for change.
- * @param v1 value checked for change.
- * @param v2 value checked for change.
- * @param v3 value checked for change.
- * @param v4 value checked for change.
- * @param v5 value checked for change.
- *
- * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
- */ function i18nInterpolation6(instructions, v0, v1, v2, v3, v4, v5) {
-    let different = bindingUpdated4(v0, v1, v2, v3);
-    different = bindingUpdated2(v4, v5) || different;
-    if (!different) {
-        return NO_CHANGE;
-    }
-    let res = '';
-    for (let i = 0; i < instructions.length; i++) {
-        // Odd indexes are bindings
-        if (i & 1) {
-            // Extract bits
-            const idx = instructions[i];
-            const b4 = idx & 4;
-            const b2 = idx & 2;
-            const b1 = idx & 1;
-            // Get the value from the argument vx where x = idx
-            const value = b4 ? (b1 ? v5 : v4) : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
-            res += stringify$1(value);
-        }
-        else {
-            res += instructions[i];
-        }
-    }
-    return res;
-}
-/**
- * Checks if the values of up to 7 expressions have changed and replaces them by their values in a
- * translation, or returns NO_CHANGE.
- *
- * @param instructions A list of instructions that will be used to translate an attribute.
- * @param v0 value checked for change.
- * @param v1 value checked for change.
- * @param v2 value checked for change.
- * @param v3 value checked for change.
- * @param v4 value checked for change.
- * @param v5 value checked for change.
- * @param v6 value checked for change.
- *
- * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
- */
-function i18nInterpolation7(instructions, v0, v1, v2, v3, v4, v5, v6) {
-    let different = bindingUpdated4(v0, v1, v2, v3);
-    different = bindingUpdated2(v4, v5) || different;
-    different = bindingUpdated(v6) || different;
-    if (!different) {
-        return NO_CHANGE;
-    }
-    let res = '';
-    for (let i = 0; i < instructions.length; i++) {
-        // Odd indexes are bindings
-        if (i & 1) {
-            // Extract bits
-            const idx = instructions[i];
-            const b4 = idx & 4;
-            const b2 = idx & 2;
-            const b1 = idx & 1;
-            // Get the value from the argument vx where x = idx
-            const value = b4 ? (b2 ? v6 : (b1 ? v5 : v4)) : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
-            res += stringify$1(value);
-        }
-        else {
-            res += instructions[i];
-        }
-    }
-    return res;
-}
-/**
- * Checks if the values of up to 8 expressions have changed and replaces them by their values in a
- * translation, or returns NO_CHANGE.
- *
- * @param instructions A list of instructions that will be used to translate an attribute.
- * @param v0 value checked for change.
- * @param v1 value checked for change.
- * @param v2 value checked for change.
- * @param v3 value checked for change.
- * @param v4 value checked for change.
- * @param v5 value checked for change.
- * @param v6 value checked for change.
- * @param v7 value checked for change.
- *
- * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
- */
-function i18nInterpolation8(instructions, v0, v1, v2, v3, v4, v5, v6, v7) {
-    let different = bindingUpdated4(v0, v1, v2, v3);
-    different = bindingUpdated4(v4, v5, v6, v7) || different;
-    if (!different) {
-        return NO_CHANGE;
-    }
-    let res = '';
-    for (let i = 0; i < instructions.length; i++) {
-        // Odd indexes are bindings
-        if (i & 1) {
-            // Extract bits
-            const idx = instructions[i];
-            const b4 = idx & 4;
-            const b2 = idx & 2;
-            const b1 = idx & 1;
-            // Get the value from the argument vx where x = idx
-            const value = b4 ? (b2 ? (b1 ? v7 : v6) : (b1 ? v5 : v4)) : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
-            res += stringify$1(value);
-        }
-        else {
-            res += instructions[i];
-        }
-    }
-    return res;
-}
-/**
- * Create a translated interpolation binding with a variable number of expressions.
- *
- * If there are 1 to 8 expressions then `i18nInterpolation()` should be used instead. It is faster
- * because there is no need to create an array of expressions and iterate over it.
- *
- * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
- */
-function i18nInterpolationV(instructions, values) {
-    let different = false;
-    for (let i = 0; i < values.length; i++) {
-        // Check if bindings have changed
-        bindingUpdated(values[i]) && (different = true);
-    }
-    if (!different) {
-        return NO_CHANGE;
-    }
-    let res = '';
-    for (let i = 0; i < instructions.length; i++) {
-        // Odd indexes are placeholders
-        if (i & 1) {
-            res += stringify$1(values[instructions[i]]);
-        }
-        else {
-            res += instructions[i];
-        }
-    }
-    return res;
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-const COMPONENT_FACTORY_RESOLVER = {
-    provide: ComponentFactoryResolver,
-    useFactory: () => new ComponentFactoryResolver$1(),
-    deps: [],
-};
-class NgModuleRef$1 extends NgModuleRef {
-    constructor(ngModuleType, parentInjector) {
-        super();
-        // tslint:disable-next-line:require-internal-with-underscore
-        this._bootstrapComponents = [];
-        this.destroyCbs = [];
-        const ngModuleDef = ngModuleType.ngModuleDef;
-        ngDevMode && assertDefined(ngModuleDef, `NgModule '${stringify(ngModuleType)}' is not a subtype of 'NgModuleType'.`);
-        this._bootstrapComponents = ngModuleDef.bootstrap;
-        const additionalProviders = [
-            COMPONENT_FACTORY_RESOLVER, {
-                provide: NgModuleRef,
-                useValue: this,
-            }
-        ];
-        this.injector = createInjector(ngModuleType, parentInjector, additionalProviders);
-        this.instance = this.injector.get(ngModuleType);
-        this.componentFactoryResolver = new ComponentFactoryResolver$1();
-    }
-    destroy() {
-        ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
-        this.destroyCbs.forEach(fn => fn());
-        this.destroyCbs = null;
-    }
-    onDestroy(callback) {
-        ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
-        this.destroyCbs.push(callback);
-    }
-}
-class NgModuleFactory$1 extends NgModuleFactory {
-    constructor(moduleType) {
-        super();
-        this.moduleType = moduleType;
-    }
-    create(parentInjector) {
-        return new NgModuleRef$1(this.moduleType, parentInjector);
-    }
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * If the value hasn't been saved, calls the pure function to store and return the
- * value. If it has been saved, returns the saved value.
- *
- * @param pureFn Function that returns a value
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
- * @param thisArg Optional calling context of pureFn
- * @returns value
- */
-function pureFunction0(slotOffset, pureFn, thisArg) {
-    ngDevMode && assertReservedSlotInitialized(slotOffset, 1);
-    const index = moveBindingIndexToReservedSlot(slotOffset);
-    const value = getCreationMode() ?
-        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg) : pureFn()) :
-        consumeBinding();
-    restoreBindingIndex(index);
-    return value;
-}
-/**
- * If the value of the provided exp has changed, calls the pure function to return
- * an updated value. Or if the value has not changed, returns cached value.
- *
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
- * @param pureFn Function that returns an updated value
- * @param exp Updated expression value
- * @param thisArg Optional calling context of pureFn
- * @returns Updated or cached value
- */
-function pureFunction1(slotOffset, pureFn, exp, thisArg) {
-    ngDevMode && assertReservedSlotInitialized(slotOffset, 2);
-    const index = moveBindingIndexToReservedSlot(slotOffset);
-    const value = bindingUpdated(exp) ?
-        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg, exp) : pureFn(exp)) :
-        consumeBinding();
-    restoreBindingIndex(index);
-    return value;
-}
-/**
- * If the value of any provided exp has changed, calls the pure function to return
- * an updated value. Or if no values have changed, returns cached value.
- *
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
- * @param pureFn
- * @param exp1
- * @param exp2
- * @param thisArg Optional calling context of pureFn
- * @returns Updated or cached value
- */
-function pureFunction2(slotOffset, pureFn, exp1, exp2, thisArg) {
-    ngDevMode && assertReservedSlotInitialized(slotOffset, 3);
-    const index = moveBindingIndexToReservedSlot(slotOffset);
-    const value = bindingUpdated2(exp1, exp2) ?
-        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg, exp1, exp2) : pureFn(exp1, exp2)) :
-        consumeBinding();
-    restoreBindingIndex(index);
-    return value;
-}
-/**
- * If the value of any provided exp has changed, calls the pure function to return
- * an updated value. Or if no values have changed, returns cached value.
- *
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
- * @param pureFn
- * @param exp1
- * @param exp2
- * @param exp3
- * @param thisArg Optional calling context of pureFn
- * @returns Updated or cached value
- */
-function pureFunction3(slotOffset, pureFn, exp1, exp2, exp3, thisArg) {
-    ngDevMode && assertReservedSlotInitialized(slotOffset, 4);
-    const index = moveBindingIndexToReservedSlot(slotOffset);
-    const different = bindingUpdated2(exp1, exp2);
-    const value = bindingUpdated(exp3) || different ?
-        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3) : pureFn(exp1, exp2, exp3)) :
-        consumeBinding();
-    restoreBindingIndex(index);
-    return value;
-}
-/**
- * If the value of any provided exp has changed, calls the pure function to return
- * an updated value. Or if no values have changed, returns cached value.
- *
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
- * @param pureFn
- * @param exp1
- * @param exp2
- * @param exp3
- * @param exp4
- * @param thisArg Optional calling context of pureFn
- * @returns Updated or cached value
- */
-function pureFunction4(slotOffset, pureFn, exp1, exp2, exp3, exp4, thisArg) {
-    ngDevMode && assertReservedSlotInitialized(slotOffset, 5);
-    const index = moveBindingIndexToReservedSlot(slotOffset);
-    const value = bindingUpdated4(exp1, exp2, exp3, exp4) ?
-        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4) : pureFn(exp1, exp2, exp3, exp4)) :
-        consumeBinding();
-    restoreBindingIndex(index);
-    return value;
-}
-/**
- * If the value of any provided exp has changed, calls the pure function to return
- * an updated value. Or if no values have changed, returns cached value.
- *
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
- * @param pureFn
- * @param exp1
- * @param exp2
- * @param exp3
- * @param exp4
- * @param exp5
- * @param thisArg Optional calling context of pureFn
- * @returns Updated or cached value
- */
-function pureFunction5(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, thisArg) {
-    ngDevMode && assertReservedSlotInitialized(slotOffset, 6);
-    const index = moveBindingIndexToReservedSlot(slotOffset);
-    const different = bindingUpdated4(exp1, exp2, exp3, exp4);
-    const value = bindingUpdated(exp5) || different ?
-        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5) :
-            pureFn(exp1, exp2, exp3, exp4, exp5)) :
-        consumeBinding();
-    restoreBindingIndex(index);
-    return value;
-}
-/**
- * If the value of any provided exp has changed, calls the pure function to return
- * an updated value. Or if no values have changed, returns cached value.
- *
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
- * @param pureFn
- * @param exp1
- * @param exp2
- * @param exp3
- * @param exp4
- * @param exp5
- * @param exp6
- * @param thisArg Optional calling context of pureFn
- * @returns Updated or cached value
- */
-function pureFunction6(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, thisArg) {
-    ngDevMode && assertReservedSlotInitialized(slotOffset, 7);
-    const index = moveBindingIndexToReservedSlot(slotOffset);
-    const different = bindingUpdated4(exp1, exp2, exp3, exp4);
-    const value = bindingUpdated2(exp5, exp6) || different ?
-        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5, exp6) :
-            pureFn(exp1, exp2, exp3, exp4, exp5, exp6)) :
-        consumeBinding();
-    restoreBindingIndex(index);
-    return value;
-}
-/**
- * If the value of any provided exp has changed, calls the pure function to return
- * an updated value. Or if no values have changed, returns cached value.
- *
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
- * @param pureFn
- * @param exp1
- * @param exp2
- * @param exp3
- * @param exp4
- * @param exp5
- * @param exp6
- * @param exp7
- * @param thisArg Optional calling context of pureFn
- * @returns Updated or cached value
- */
-function pureFunction7(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, thisArg) {
-    ngDevMode && assertReservedSlotInitialized(slotOffset, 8);
-    const index = moveBindingIndexToReservedSlot(slotOffset);
-    let different = bindingUpdated4(exp1, exp2, exp3, exp4);
-    different = bindingUpdated2(exp5, exp6) || different;
-    const value = bindingUpdated(exp7) || different ?
-        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5, exp6, exp7) :
-            pureFn(exp1, exp2, exp3, exp4, exp5, exp6, exp7)) :
-        consumeBinding();
-    restoreBindingIndex(index);
-    return value;
-}
-/**
- * If the value of any provided exp has changed, calls the pure function to return
- * an updated value. Or if no values have changed, returns cached value.
- *
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
- * @param pureFn
- * @param exp1
- * @param exp2
- * @param exp3
- * @param exp4
- * @param exp5
- * @param exp6
- * @param exp7
- * @param exp8
- * @param thisArg Optional calling context of pureFn
- * @returns Updated or cached value
- */
-function pureFunction8(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, thisArg) {
-    ngDevMode && assertReservedSlotInitialized(slotOffset, 9);
-    const index = moveBindingIndexToReservedSlot(slotOffset);
-    const different = bindingUpdated4(exp1, exp2, exp3, exp4);
-    const value = bindingUpdated4(exp5, exp6, exp7, exp8) || different ?
-        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8) :
-            pureFn(exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8)) :
-        consumeBinding();
-    restoreBindingIndex(index);
-    return value;
-}
-/**
- * pureFunction instruction that can support any number of bindings.
- *
- * If the value of any provided exp has changed, calls the pure function to return
- * an updated value. Or if no values have changed, returns cached value.
- *
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
- * @param pureFn A pure function that takes binding values and builds an object or array
- * containing those values.
- * @param exps An array of binding values
- * @param thisArg Optional calling context of pureFn
- * @returns Updated or cached value
- */
-function pureFunctionV(slotOffset, pureFn, exps, thisArg) {
-    ngDevMode && assertReservedSlotInitialized(slotOffset, exps.length + 1);
-    const index = moveBindingIndexToReservedSlot(slotOffset);
-    let different = false;
-    for (let i = 0; i < exps.length; i++) {
-        bindingUpdated(exps[i]) && (different = true);
-    }
-    const value = different ? checkAndUpdateBinding(pureFn.apply(thisArg, exps)) : consumeBinding();
-    restoreBindingIndex(index);
-    return value;
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Create a pipe.
- *
- * @param index Pipe index where the pipe will be stored.
- * @param pipeName The name of the pipe
- * @returns T the instance of the pipe.
- */
-function pipe(index, pipeName) {
-    const tView = getTView();
-    let pipeDef;
-    const adjustedIndex = index + HEADER_OFFSET;
-    if (tView.firstTemplatePass) {
-        pipeDef = getPipeDef(pipeName, tView.pipeRegistry);
-        tView.data[adjustedIndex] = pipeDef;
-        if (pipeDef.onDestroy) {
-            (tView.pipeDestroyHooks || (tView.pipeDestroyHooks = [])).push(adjustedIndex, pipeDef.onDestroy);
-        }
-    }
-    else {
-        pipeDef = tView.data[adjustedIndex];
-    }
-    const pipeInstance = pipeDef.factory();
-    store(index, pipeInstance);
-    return pipeInstance;
-}
-/**
- * Searches the pipe registry for a pipe with the given name. If one is found,
- * returns the pipe. Otherwise, an error is thrown because the pipe cannot be resolved.
- *
- * @param name Name of pipe to resolve
- * @param registry Full list of available pipes
- * @returns Matching PipeDef
- */
-function getPipeDef(name, registry) {
-    if (registry) {
-        for (let i = 0; i < registry.length; i++) {
-            const pipeDef = registry[i];
-            if (name === pipeDef.name) {
-                return pipeDef;
-            }
-        }
-    }
-    throw new Error(`Pipe with name '${name}' not found!`);
-}
-/**
- * Invokes a pipe with 1 arguments.
- *
- * This instruction acts as a guard to {@link PipeTransform#transform} invoking
- * the pipe only when an input to the pipe changes.
- *
- * @param index Pipe index where the pipe was stored on creation.
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
- * @param v1 1st argument to {@link PipeTransform#transform}.
- */
-function pipeBind1(index, slotOffset, v1) {
-    const pipeInstance = load(index);
-    return isPure(index) ? pureFunction1(slotOffset, pipeInstance.transform, v1, pipeInstance) :
-        pipeInstance.transform(v1);
-}
-/**
- * Invokes a pipe with 2 arguments.
- *
- * This instruction acts as a guard to {@link PipeTransform#transform} invoking
- * the pipe only when an input to the pipe changes.
- *
- * @param index Pipe index where the pipe was stored on creation.
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
- * @param v1 1st argument to {@link PipeTransform#transform}.
- * @param v2 2nd argument to {@link PipeTransform#transform}.
- */
-function pipeBind2(index, slotOffset, v1, v2) {
-    const pipeInstance = load(index);
-    return isPure(index) ? pureFunction2(slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
-        pipeInstance.transform(v1, v2);
-}
-/**
- * Invokes a pipe with 3 arguments.
- *
- * This instruction acts as a guard to {@link PipeTransform#transform} invoking
- * the pipe only when an input to the pipe changes.
- *
- * @param index Pipe index where the pipe was stored on creation.
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
- * @param v1 1st argument to {@link PipeTransform#transform}.
- * @param v2 2nd argument to {@link PipeTransform#transform}.
- * @param v3 4rd argument to {@link PipeTransform#transform}.
- */
-function pipeBind3(index, slotOffset, v1, v2, v3) {
-    const pipeInstance = load(index);
-    return isPure(index) ?
-        pureFunction3(slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
-        pipeInstance.transform(v1, v2, v3);
-}
-/**
- * Invokes a pipe with 4 arguments.
- *
- * This instruction acts as a guard to {@link PipeTransform#transform} invoking
- * the pipe only when an input to the pipe changes.
- *
- * @param index Pipe index where the pipe was stored on creation.
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
- * @param v1 1st argument to {@link PipeTransform#transform}.
- * @param v2 2nd argument to {@link PipeTransform#transform}.
- * @param v3 3rd argument to {@link PipeTransform#transform}.
- * @param v4 4th argument to {@link PipeTransform#transform}.
- */
-function pipeBind4(index, slotOffset, v1, v2, v3, v4) {
-    const pipeInstance = load(index);
-    return isPure(index) ?
-        pureFunction4(slotOffset, pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
-        pipeInstance.transform(v1, v2, v3, v4);
-}
-/**
- * Invokes a pipe with variable number of arguments.
- *
- * This instruction acts as a guard to {@link PipeTransform#transform} invoking
- * the pipe only when an input to the pipe changes.
- *
- * @param index Pipe index where the pipe was stored on creation.
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
- * @param values Array of arguments to pass to {@link PipeTransform#transform} method.
- */
-function pipeBindV(index, slotOffset, values) {
-    const pipeInstance = load(index);
-    return isPure(index) ? pureFunctionV(slotOffset, pipeInstance.transform, values, pipeInstance) :
-        pipeInstance.transform.apply(pipeInstance, values);
-}
-function isPure(index) {
-    return getTView().data[index + HEADER_OFFSET].pure;
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-class LQueries_ {
-    constructor(deep) {
-        this.shallow = null;
-        this.deep = null;
-        this.deep = deep == null ? null : deep;
-    }
-    track(queryList, predicate, descend, read) {
-        if (descend) {
-            this.deep = createQuery(this.deep, queryList, predicate, read != null ? read : null);
-        }
-        else {
-            this.shallow = createQuery(this.shallow, queryList, predicate, read != null ? read : null);
-        }
-    }
-    clone() { return this.deep ? new LQueries_(this.deep) : null; }
-    child() {
-        if (this.deep === null) {
-            // if we don't have any deep queries then no need to track anything more.
-            return null;
-        }
-        if (this.shallow === null) {
-            // DeepQuery: We can reuse the current state if the child state would be same as current
-            // state.
-            return this;
-        }
-        else {
-            // We need to create new state
-            return new LQueries_(this.deep);
-        }
-    }
-    container() {
-        let result = null;
-        let query = this.deep;
-        while (query) {
-            const containerValues = []; // prepare room for views
-            query.values.push(containerValues);
-            const clonedQuery = {
-                next: null,
-                list: query.list,
-                predicate: query.predicate,
-                values: containerValues,
-                containerValues: null
-            };
-            clonedQuery.next = result;
-            result = clonedQuery;
-            query = query.next;
-        }
-        return result ? new LQueries_(result) : null;
-    }
-    createView() {
-        let result = null;
-        let query = this.deep;
-        while (query) {
-            const clonedQuery = {
-                next: null,
-                list: query.list,
-                predicate: query.predicate,
-                values: [],
-                containerValues: query.values
-            };
-            clonedQuery.next = result;
-            result = clonedQuery;
-            query = query.next;
-        }
-        return result ? new LQueries_(result) : null;
-    }
-    insertView(index) {
-        let query = this.deep;
-        while (query) {
-            ngDevMode &&
-                assertDefined(query.containerValues, 'View queries need to have a pointer to container values.');
-            query.containerValues.splice(index, 0, query.values);
-            query = query.next;
-        }
-    }
-    addNode(node) {
-        add(this.shallow, node);
-        add(this.deep, node);
-    }
-    removeView() {
-        let query = this.deep;
-        while (query) {
-            ngDevMode &&
-                assertDefined(query.containerValues, 'View queries need to have a pointer to container values.');
-            const containerValues = query.containerValues;
-            const viewValuesIdx = containerValues.indexOf(query.values);
-            const removed = containerValues.splice(viewValuesIdx, 1);
-            // mark a query as dirty only when removed view had matching modes
-            ngDevMode && assertEqual(removed.length, 1, 'removed.length');
-            if (removed[0].length) {
-                query.list.setDirty();
-            }
-            query = query.next;
-        }
-    }
-}
-/**
- * Iterates over local names for a given node and returns directive index
- * (or -1 if a local name points to an element).
- *
- * @param tNode static data of a node to check
- * @param selector selector to match
- * @returns directive index, -1 or null if a selector didn't match any of the local names
- */
-function getIdxOfMatchingSelector(tNode, selector) {
-    const localNames = tNode.localNames;
-    if (localNames) {
-        for (let i = 0; i < localNames.length; i += 2) {
-            if (localNames[i] === selector) {
-                return localNames[i + 1];
-            }
-        }
-    }
-    return null;
-}
-/**
- * Iterates over all the directives for a node and returns index of a directive for a given type.
- *
- * @param node Node on which directives are present.
- * @param type Type of a directive to look for.
- * @returns Index of a found directive or null when none found.
- */
-function getIdxOfMatchingDirective(node, type) {
-    const defs = node.view[TVIEW].directives;
-    const flags = node.tNode.flags;
-    const count = flags & 4095 /* DirectiveCountMask */;
-    const start = flags >> 14 /* DirectiveStartingIndexShift */;
-    const end = start + count;
-    for (let i = start; i < end; i++) {
-        const def = defs[i];
-        if (def.type === type && def.diPublic) {
-            return i;
-        }
-    }
-    return null;
-}
-function readFromNodeInjector(nodeInjector, node, read, directiveIdx) {
-    if (read instanceof ReadFromInjectorFn) {
-        return read.read(nodeInjector, node, directiveIdx);
-    }
-    else {
-        const matchingIdx = getIdxOfMatchingDirective(node, read);
-        if (matchingIdx !== null) {
-            return node.view[DIRECTIVES][matchingIdx];
-        }
-    }
-    return null;
-}
-function add(query, node) {
-    const nodeInjector = getOrCreateNodeInjectorForNode(node);
-    while (query) {
-        const predicate = query.predicate;
-        const type = predicate.type;
-        if (type) {
-            const directiveIdx = getIdxOfMatchingDirective(node, type);
-            if (directiveIdx !== null) {
-                // a node is matching a predicate - determine what to read
-                // if read token and / or strategy is not specified, use type as read token
-                const result = readFromNodeInjector(nodeInjector, node, predicate.read || type, directiveIdx);
-                if (result !== null) {
-                    addMatch(query, result);
-                }
-            }
-        }
-        else {
-            const selector = predicate.selector;
-            for (let i = 0; i < selector.length; i++) {
-                const directiveIdx = getIdxOfMatchingSelector(node.tNode, selector[i]);
-                if (directiveIdx !== null) {
-                    // a node is matching a predicate - determine what to read
-                    // note that queries using name selector must specify read strategy
-                    ngDevMode && assertDefined(predicate.read, 'the node should have a predicate');
-                    const result = readFromNodeInjector(nodeInjector, node, predicate.read, directiveIdx);
-                    if (result !== null) {
-                        addMatch(query, result);
-                    }
-                }
-            }
-        }
-        query = query.next;
-    }
-}
-function addMatch(query, matchingValue) {
-    query.values.push(matchingValue);
-    query.list.setDirty();
-}
-function createPredicate(predicate, read) {
-    const isArray = Array.isArray(predicate);
-    return {
-        type: isArray ? null : predicate,
-        selector: isArray ? predicate : null,
-        read: read
-    };
-}
-function createQuery(previous, queryList, predicate, read) {
-    return {
-        next: previous,
-        list: queryList,
-        predicate: createPredicate(predicate, read),
-        values: queryList._valuesTree,
-        containerValues: null
-    };
-}
-class QueryList_ {
-    constructor() {
-        this.dirty = true;
-        this.changes = new EventEmitter();
-        this._values = [];
-        /** @internal */
-        this._valuesTree = [];
-    }
-    get length() { return this._values.length; }
-    get first() {
-        let values = this._values;
-        return values.length ? values[0] : null;
-    }
-    get last() {
-        let values = this._values;
-        return values.length ? values[values.length - 1] : null;
-    }
-    /**
-     * See
-     * [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
-     */
-    map(fn) { return this._values.map(fn); }
-    /**
-     * See
-     * [Array.filter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter)
-     */
-    filter(fn) {
-        return this._values.filter(fn);
-    }
-    /**
-     * See
-     * [Array.find](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find)
-     */
-    find(fn) {
-        return this._values.find(fn);
-    }
-    /**
-     * See
-     * [Array.reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)
-     */
-    reduce(fn, init) {
-        return this._values.reduce(fn, init);
-    }
-    /**
-     * See
-     * [Array.forEach](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach)
-     */
-    forEach(fn) { this._values.forEach(fn); }
-    /**
-     * See
-     * [Array.some](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
-     */
-    some(fn) {
-        return this._values.some(fn);
-    }
-    toArray() { return this._values.slice(0); }
-    [getSymbolIterator()]() { return this._values[getSymbolIterator()](); }
-    toString() { return this._values.toString(); }
-    reset(res) {
-        this._values = flatten(res);
-        this.dirty = false;
-    }
-    notifyOnChanges() { this.changes.emit(this); }
-    setDirty() { this.dirty = true; }
-    destroy() {
-        this.changes.complete();
-        this.changes.unsubscribe();
-    }
-}
-const QueryList$1 = QueryList_;
-/**
- * Creates and returns a QueryList.
- *
- * @param memoryIndex The index in memory where the QueryList should be saved. If null,
- * this is is a content query and the QueryList will be saved later through directiveCreate.
- * @param predicate The type for which the query will search
- * @param descend Whether or not to descend into children
- * @param read What to save in the query
- * @returns QueryList<T>
- */
-function query(memoryIndex, predicate, descend, read) {
-    ngDevMode && assertPreviousIsParent();
-    const queryList = new QueryList$1();
-    const queries = getCurrentQueries(LQueries_);
-    queries.track(queryList, predicate, descend, read);
-    storeCleanupWithContext(null, queryList, queryList.destroy);
-    if (memoryIndex != null) {
-        store(memoryIndex, queryList);
-    }
-    return queryList;
-}
-/**
- * Refreshes a query by combining matches from all active views and removing matches from deleted
- * views.
- * Returns true if a query got dirty during change detection, false otherwise.
- */
-function queryRefresh(queryList) {
-    const queryListImpl = queryList;
-    if (queryList.dirty) {
-        queryList.reset(queryListImpl._valuesTree);
-        queryList.notifyOnChanges();
-        return true;
-    }
-    return false;
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-const BRAND = '__SANITIZER_TRUSTED_BRAND__';
-function allowSanitizationBypass(value, type) {
-    return (value instanceof String && value[BRAND] === type) ? true : false;
-}
-/**
- * Mark `html` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {@link htmlSanitizer} to be trusted implicitly.
- *
- * @param trustedHtml `html` string which needs to be implicitly trusted.
- * @returns a `html` `String` which has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustHtml(trustedHtml) {
-    return bypassSanitizationTrustString(trustedHtml, "Html" /* Html */);
-}
-/**
- * Mark `style` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {@link styleSanitizer} to be trusted implicitly.
- *
- * @param trustedStyle `style` string which needs to be implicitly trusted.
- * @returns a `style` `String` which has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustStyle(trustedStyle) {
-    return bypassSanitizationTrustString(trustedStyle, "Style" /* Style */);
-}
-/**
- * Mark `script` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {@link scriptSanitizer} to be trusted implicitly.
- *
- * @param trustedScript `script` string which needs to be implicitly trusted.
- * @returns a `script` `String` which has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustScript(trustedScript) {
-    return bypassSanitizationTrustString(trustedScript, "Script" /* Script */);
-}
-/**
- * Mark `url` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {@link urlSanitizer} to be trusted implicitly.
- *
- * @param trustedUrl `url` string which needs to be implicitly trusted.
- * @returns a `url` `String` which has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustUrl(trustedUrl) {
-    return bypassSanitizationTrustString(trustedUrl, "Url" /* Url */);
-}
-/**
- * Mark `url` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {@link resourceUrlSanitizer} to be trusted implicitly.
- *
- * @param trustedResourceUrl `url` string which needs to be implicitly trusted.
- * @returns a `url` `String` which has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
-    return bypassSanitizationTrustString(trustedResourceUrl, "ResourceUrl" /* ResourceUrl */);
-}
-function bypassSanitizationTrustString(trustedString, mode) {
-    const trusted = new String(trustedString);
-    trusted[BRAND] = mode;
-    return trusted;
 }
 
 /**
@@ -13605,1672 +11714,6 @@ function remove(list, el) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * This helper class is used to get hold of an inert tree of DOM elements containing dirty HTML
- * that needs sanitizing.
- * Depending upon browser support we must use one of three strategies for doing this.
- * Support: Safari 10.x -> XHR strategy
- * Support: Firefox -> DomParser strategy
- * Default: InertDocument strategy
- */
-class InertBodyHelper {
-    constructor(defaultDoc) {
-        this.defaultDoc = defaultDoc;
-        this.inertDocument = this.defaultDoc.implementation.createHTMLDocument('sanitization-inert');
-        this.inertBodyElement = this.inertDocument.body;
-        if (this.inertBodyElement == null) {
-            // usually there should be only one body element in the document, but IE doesn't have any, so
-            // we need to create one.
-            const inertHtml = this.inertDocument.createElement('html');
-            this.inertDocument.appendChild(inertHtml);
-            this.inertBodyElement = this.inertDocument.createElement('body');
-            inertHtml.appendChild(this.inertBodyElement);
-        }
-        this.inertBodyElement.innerHTML = '<svg><g onload="this.parentNode.remove()"></g></svg>';
-        if (this.inertBodyElement.querySelector && !this.inertBodyElement.querySelector('svg')) {
-            // We just hit the Safari 10.1 bug - which allows JS to run inside the SVG G element
-            // so use the XHR strategy.
-            this.getInertBodyElement = this.getInertBodyElement_XHR;
-            return;
-        }
-        this.inertBodyElement.innerHTML =
-            '<svg><p><style><img src="</style><img src=x onerror=alert(1)//">';
-        if (this.inertBodyElement.querySelector && this.inertBodyElement.querySelector('svg img')) {
-            // We just hit the Firefox bug - which prevents the inner img JS from being sanitized
-            // so use the DOMParser strategy, if it is available.
-            // If the DOMParser is not available then we are not in Firefox (Server/WebWorker?) so we
-            // fall through to the default strategy below.
-            if (isDOMParserAvailable()) {
-                this.getInertBodyElement = this.getInertBodyElement_DOMParser;
-                return;
-            }
-        }
-        // None of the bugs were hit so it is safe for us to use the default InertDocument strategy
-        this.getInertBodyElement = this.getInertBodyElement_InertDocument;
-    }
-    /**
-     * Use XHR to create and fill an inert body element (on Safari 10.1)
-     * See
-     * https://github.com/cure53/DOMPurify/blob/a992d3a75031cb8bb032e5ea8399ba972bdf9a65/src/purify.js#L439-L449
-     */
-    getInertBodyElement_XHR(html) {
-        // We add these extra elements to ensure that the rest of the content is parsed as expected
-        // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
-        // `<head>` tag.
-        html = '<body><remove></remove>' + html + '</body>';
-        try {
-            html = encodeURI(html);
-        }
-        catch (e) {
-            return null;
-        }
-        const xhr = new XMLHttpRequest();
-        xhr.responseType = 'document';
-        xhr.open('GET', 'data:text/html;charset=utf-8,' + html, false);
-        xhr.send(null);
-        const body = xhr.response.body;
-        body.removeChild(body.firstChild);
-        return body;
-    }
-    /**
-     * Use DOMParser to create and fill an inert body element (on Firefox)
-     * See https://github.com/cure53/DOMPurify/releases/tag/0.6.7
-     *
-     */
-    getInertBodyElement_DOMParser(html) {
-        // We add these extra elements to ensure that the rest of the content is parsed as expected
-        // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
-        // `<head>` tag.
-        html = '<body><remove></remove>' + html + '</body>';
-        try {
-            const body = new window
-                .DOMParser()
-                .parseFromString(html, 'text/html')
-                .body;
-            body.removeChild(body.firstChild);
-            return body;
-        }
-        catch (e) {
-            return null;
-        }
-    }
-    /**
-     * Use an HTML5 `template` element, if supported, or an inert body element created via
-     * `createHtmlDocument` to create and fill an inert DOM element.
-     * This is the default sane strategy to use if the browser does not require one of the specialised
-     * strategies above.
-     */
-    getInertBodyElement_InertDocument(html) {
-        // Prefer using <template> element if supported.
-        const templateEl = this.inertDocument.createElement('template');
-        if ('content' in templateEl) {
-            templateEl.innerHTML = html;
-            return templateEl;
-        }
-        this.inertBodyElement.innerHTML = html;
-        // Support: IE 9-11 only
-        // strip custom-namespaced attributes on IE<=11
-        if (this.defaultDoc.documentMode) {
-            this.stripCustomNsAttrs(this.inertBodyElement);
-        }
-        return this.inertBodyElement;
-    }
-    /**
-     * When IE9-11 comes across an unknown namespaced attribute e.g. 'xlink:foo' it adds 'xmlns:ns1'
-     * attribute to declare ns1 namespace and prefixes the attribute with 'ns1' (e.g.
-     * 'ns1:xlink:foo').
-     *
-     * This is undesirable since we don't want to allow any of these custom attributes. This method
-     * strips them all.
-     */
-    stripCustomNsAttrs(el) {
-        const elAttrs = el.attributes;
-        // loop backwards so that we can support removals.
-        for (let i = elAttrs.length - 1; 0 < i; i--) {
-            const attrib = elAttrs.item(i);
-            const attrName = attrib.name;
-            if (attrName === 'xmlns:ns1' || attrName.indexOf('ns1:') === 0) {
-                el.removeAttribute(attrName);
-            }
-        }
-        let childNode = el.firstChild;
-        while (childNode) {
-            if (childNode.nodeType === Node.ELEMENT_NODE)
-                this.stripCustomNsAttrs(childNode);
-            childNode = childNode.nextSibling;
-        }
-    }
-}
-/**
- * We need to determine whether the DOMParser exists in the global context.
- * The try-catch is because, on some browsers, trying to access this property
- * on window can actually throw an error.
- *
- * @suppress {uselessCode}
- */
-function isDOMParserAvailable() {
-    try {
-        return !!window.DOMParser;
-    }
-    catch (e) {
-        return false;
-    }
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * A pattern that recognizes a commonly useful subset of URLs that are safe.
- *
- * This regular expression matches a subset of URLs that will not cause script
- * execution if used in URL context within a HTML document. Specifically, this
- * regular expression matches if (comment from here on and regex copied from
- * Soy's EscapingConventions):
- * (1) Either a protocol in a whitelist (http, https, mailto or ftp).
- * (2) or no protocol.  A protocol must be followed by a colon. The below
- *     allows that by allowing colons only after one of the characters [/?#].
- *     A colon after a hash (#) must be in the fragment.
- *     Otherwise, a colon after a (?) must be in a query.
- *     Otherwise, a colon after a single solidus (/) must be in a path.
- *     Otherwise, a colon after a double solidus (//) must be in the authority
- *     (before port).
- *
- * The pattern disallows &, used in HTML entity declarations before
- * one of the characters in [/?#]. This disallows HTML entities used in the
- * protocol name, which should never happen, e.g. "h&#116;tp" for "http".
- * It also disallows HTML entities in the first path part of a relative path,
- * e.g. "foo&lt;bar/baz".  Our existing escaping functions should not produce
- * that. More importantly, it disallows masking of a colon,
- * e.g. "javascript&#58;...".
- *
- * This regular expression was taken from the Closure sanitization library.
- */
-const SAFE_URL_PATTERN = /^(?:(?:https?|mailto|ftp|tel|file):|[^&:/?#]*(?:[/?#]|$))/gi;
-/** A pattern that matches safe data URLs. Only matches image, video and audio types. */
-const DATA_URL_PATTERN = /^data:(?:image\/(?:bmp|gif|jpeg|jpg|png|tiff|webp)|video\/(?:mpeg|mp4|ogg|webm)|audio\/(?:mp3|oga|ogg|opus));base64,[a-z0-9+\/]+=*$/i;
-function _sanitizeUrl(url) {
-    url = String(url);
-    if (url.match(SAFE_URL_PATTERN) || url.match(DATA_URL_PATTERN))
-        return url;
-    if (isDevMode()) {
-        console.warn(`WARNING: sanitizing unsafe URL value ${url} (see http://g.co/ng/security#xss)`);
-    }
-    return 'unsafe:' + url;
-}
-function sanitizeSrcset(srcset) {
-    srcset = String(srcset);
-    return srcset.split(',').map((srcset) => _sanitizeUrl(srcset.trim())).join(', ');
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-function tagSet(tags) {
-    const res = {};
-    for (const t of tags.split(','))
-        res[t] = true;
-    return res;
-}
-function merge$1(...sets) {
-    const res = {};
-    for (const s of sets) {
-        for (const v in s) {
-            if (s.hasOwnProperty(v))
-                res[v] = true;
-        }
-    }
-    return res;
-}
-// Good source of info about elements and attributes
-// http://dev.w3.org/html5/spec/Overview.html#semantics
-// http://simon.html5.org/html-elements
-// Safe Void Elements - HTML5
-// http://dev.w3.org/html5/spec/Overview.html#void-elements
-const VOID_ELEMENTS = tagSet('area,br,col,hr,img,wbr');
-// Elements that you can, intentionally, leave open (and which close themselves)
-// http://dev.w3.org/html5/spec/Overview.html#optional-tags
-const OPTIONAL_END_TAG_BLOCK_ELEMENTS = tagSet('colgroup,dd,dt,li,p,tbody,td,tfoot,th,thead,tr');
-const OPTIONAL_END_TAG_INLINE_ELEMENTS = tagSet('rp,rt');
-const OPTIONAL_END_TAG_ELEMENTS = merge$1(OPTIONAL_END_TAG_INLINE_ELEMENTS, OPTIONAL_END_TAG_BLOCK_ELEMENTS);
-// Safe Block Elements - HTML5
-const BLOCK_ELEMENTS = merge$1(OPTIONAL_END_TAG_BLOCK_ELEMENTS, tagSet('address,article,' +
-    'aside,blockquote,caption,center,del,details,dialog,dir,div,dl,figure,figcaption,footer,h1,h2,h3,h4,h5,' +
-    'h6,header,hgroup,hr,ins,main,map,menu,nav,ol,pre,section,summary,table,ul'));
-// Inline Elements - HTML5
-const INLINE_ELEMENTS = merge$1(OPTIONAL_END_TAG_INLINE_ELEMENTS, tagSet('a,abbr,acronym,audio,b,' +
-    'bdi,bdo,big,br,cite,code,del,dfn,em,font,i,img,ins,kbd,label,map,mark,picture,q,ruby,rp,rt,s,' +
-    'samp,small,source,span,strike,strong,sub,sup,time,track,tt,u,var,video'));
-const VALID_ELEMENTS = merge$1(VOID_ELEMENTS, BLOCK_ELEMENTS, INLINE_ELEMENTS, OPTIONAL_END_TAG_ELEMENTS);
-// Attributes that have href and hence need to be sanitized
-const URI_ATTRS = tagSet('background,cite,href,itemtype,longdesc,poster,src,xlink:href');
-// Attributes that have special href set hence need to be sanitized
-const SRCSET_ATTRS = tagSet('srcset');
-const HTML_ATTRS = tagSet('abbr,accesskey,align,alt,autoplay,axis,bgcolor,border,cellpadding,cellspacing,class,clear,color,cols,colspan,' +
-    'compact,controls,coords,datetime,default,dir,download,face,headers,height,hidden,hreflang,hspace,' +
-    'ismap,itemscope,itemprop,kind,label,lang,language,loop,media,muted,nohref,nowrap,open,preload,rel,rev,role,rows,rowspan,rules,' +
-    'scope,scrolling,shape,size,sizes,span,srclang,start,summary,tabindex,target,title,translate,type,usemap,' +
-    'valign,value,vspace,width');
-// NB: This currently consciously doesn't support SVG. SVG sanitization has had several security
-// issues in the past, so it seems safer to leave it out if possible. If support for binding SVG via
-// innerHTML is required, SVG attributes should be added here.
-// NB: Sanitization does not allow <form> elements or other active elements (<button> etc). Those
-// can be sanitized, but they increase security surface area without a legitimate use case, so they
-// are left out here.
-const VALID_ATTRS = merge$1(URI_ATTRS, SRCSET_ATTRS, HTML_ATTRS);
-/**
- * SanitizingHtmlSerializer serializes a DOM fragment, stripping out any unsafe elements and unsafe
- * attributes.
- */
-class SanitizingHtmlSerializer {
-    constructor() {
-        // Explicitly track if something was stripped, to avoid accidentally warning of sanitization just
-        // because characters were re-encoded.
-        this.sanitizedSomething = false;
-        this.buf = [];
-    }
-    sanitizeChildren(el) {
-        // This cannot use a TreeWalker, as it has to run on Angular's various DOM adapters.
-        // However this code never accesses properties off of `document` before deleting its contents
-        // again, so it shouldn't be vulnerable to DOM clobbering.
-        let current = el.firstChild;
-        while (current) {
-            if (current.nodeType === Node.ELEMENT_NODE) {
-                this.startElement(current);
-            }
-            else if (current.nodeType === Node.TEXT_NODE) {
-                this.chars(current.nodeValue);
-            }
-            else {
-                // Strip non-element, non-text nodes.
-                this.sanitizedSomething = true;
-            }
-            if (current.firstChild) {
-                current = current.firstChild;
-                continue;
-            }
-            while (current) {
-                // Leaving the element. Walk up and to the right, closing tags as we go.
-                if (current.nodeType === Node.ELEMENT_NODE) {
-                    this.endElement(current);
-                }
-                let next = this.checkClobberedElement(current, current.nextSibling);
-                if (next) {
-                    current = next;
-                    break;
-                }
-                current = this.checkClobberedElement(current, current.parentNode);
-            }
-        }
-        return this.buf.join('');
-    }
-    startElement(element) {
-        const tagName = element.nodeName.toLowerCase();
-        if (!VALID_ELEMENTS.hasOwnProperty(tagName)) {
-            this.sanitizedSomething = true;
-            return;
-        }
-        this.buf.push('<');
-        this.buf.push(tagName);
-        const elAttrs = element.attributes;
-        for (let i = 0; i < elAttrs.length; i++) {
-            const elAttr = elAttrs.item(i);
-            const attrName = elAttr.name;
-            const lower = attrName.toLowerCase();
-            if (!VALID_ATTRS.hasOwnProperty(lower)) {
-                this.sanitizedSomething = true;
-                continue;
-            }
-            let value = elAttr.value;
-            // TODO(martinprobst): Special case image URIs for data:image/...
-            if (URI_ATTRS[lower])
-                value = _sanitizeUrl(value);
-            if (SRCSET_ATTRS[lower])
-                value = sanitizeSrcset(value);
-            this.buf.push(' ', attrName, '="', encodeEntities(value), '"');
-        }
-        this.buf.push('>');
-    }
-    endElement(current) {
-        const tagName = current.nodeName.toLowerCase();
-        if (VALID_ELEMENTS.hasOwnProperty(tagName) && !VOID_ELEMENTS.hasOwnProperty(tagName)) {
-            this.buf.push('</');
-            this.buf.push(tagName);
-            this.buf.push('>');
-        }
-    }
-    chars(chars) { this.buf.push(encodeEntities(chars)); }
-    checkClobberedElement(node, nextNode) {
-        if (nextNode &&
-            (node.compareDocumentPosition(nextNode) &
-                Node.DOCUMENT_POSITION_CONTAINED_BY) === Node.DOCUMENT_POSITION_CONTAINED_BY) {
-            throw new Error(`Failed to sanitize html because the element is clobbered: ${node.outerHTML}`);
-        }
-        return nextNode;
-    }
-}
-// Regular Expressions for parsing tags and attributes
-const SURROGATE_PAIR_REGEXP = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
-// ! to ~ is the ASCII range.
-const NON_ALPHANUMERIC_REGEXP = /([^\#-~ |!])/g;
-/**
- * Escapes all potentially dangerous characters, so that the
- * resulting string can be safely inserted into attribute or
- * element text.
- * @param value
- */
-function encodeEntities(value) {
-    return value.replace(/&/g, '&amp;')
-        .replace(SURROGATE_PAIR_REGEXP, function (match) {
-        const hi = match.charCodeAt(0);
-        const low = match.charCodeAt(1);
-        return '&#' + (((hi - 0xD800) * 0x400) + (low - 0xDC00) + 0x10000) + ';';
-    })
-        .replace(NON_ALPHANUMERIC_REGEXP, function (match) { return '&#' + match.charCodeAt(0) + ';'; })
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-}
-let inertBodyHelper;
-/**
- * Sanitizes the given unsafe, untrusted HTML fragment, and returns HTML text that is safe to add to
- * the DOM in a browser environment.
- */
-function _sanitizeHtml(defaultDoc, unsafeHtmlInput) {
-    let inertBodyElement = null;
-    try {
-        inertBodyHelper = inertBodyHelper || new InertBodyHelper(defaultDoc);
-        // Make sure unsafeHtml is actually a string (TypeScript types are not enforced at runtime).
-        let unsafeHtml = unsafeHtmlInput ? String(unsafeHtmlInput) : '';
-        inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
-        // mXSS protection. Repeatedly parse the document to make sure it stabilizes, so that a browser
-        // trying to auto-correct incorrect HTML cannot cause formerly inert HTML to become dangerous.
-        let mXSSAttempts = 5;
-        let parsedHtml = unsafeHtml;
-        do {
-            if (mXSSAttempts === 0) {
-                throw new Error('Failed to sanitize html because the input is unstable');
-            }
-            mXSSAttempts--;
-            unsafeHtml = parsedHtml;
-            parsedHtml = inertBodyElement.innerHTML;
-            inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
-        } while (unsafeHtml !== parsedHtml);
-        const sanitizer = new SanitizingHtmlSerializer();
-        const safeHtml = sanitizer.sanitizeChildren(getTemplateContent(inertBodyElement) || inertBodyElement);
-        if (isDevMode() && sanitizer.sanitizedSomething) {
-            console.warn('WARNING: sanitizing HTML stripped some content (see http://g.co/ng/security#xss).');
-        }
-        return safeHtml;
-    }
-    finally {
-        // In case anything goes wrong, clear out inertElement to reset the entire DOM structure.
-        if (inertBodyElement) {
-            const parent = getTemplateContent(inertBodyElement) || inertBodyElement;
-            while (parent.firstChild) {
-                parent.removeChild(parent.firstChild);
-            }
-        }
-    }
-}
-function getTemplateContent(el) {
-    return 'content' in el /** Microsoft/TypeScript#21517 */ && isTemplateElement(el) ?
-        el.content :
-        null;
-}
-function isTemplateElement(el) {
-    return el.nodeType === Node.ELEMENT_NODE && el.nodeName === 'TEMPLATE';
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * A SecurityContext marks a location that has dangerous security implications, e.g. a DOM property
- * like `innerHTML` that could cause Cross Site Scripting (XSS) security bugs when improperly
- * handled.
- *
- * See DomSanitizer for more details on security in Angular applications.
- *
- *
- */
-var SecurityContext;
-(function (SecurityContext) {
-    SecurityContext[SecurityContext["NONE"] = 0] = "NONE";
-    SecurityContext[SecurityContext["HTML"] = 1] = "HTML";
-    SecurityContext[SecurityContext["STYLE"] = 2] = "STYLE";
-    SecurityContext[SecurityContext["SCRIPT"] = 3] = "SCRIPT";
-    SecurityContext[SecurityContext["URL"] = 4] = "URL";
-    SecurityContext[SecurityContext["RESOURCE_URL"] = 5] = "RESOURCE_URL";
-})(SecurityContext || (SecurityContext = {}));
-/**
- * Sanitizer is used by the views to sanitize potentially dangerous values.
- *
- *
- */
-class Sanitizer {
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Regular expression for safe style values.
- *
- * Quotes (" and ') are allowed, but a check must be done elsewhere to ensure they're balanced.
- *
- * ',' allows multiple values to be assigned to the same property (e.g. background-attachment or
- * font-family) and hence could allow multiple values to get injected, but that should pose no risk
- * of XSS.
- *
- * The function expression checks only for XSS safety, not for CSS validity.
- *
- * This regular expression was taken from the Closure sanitization library, and augmented for
- * transformation values.
- */
-const VALUES = '[-,."\'%_!# a-zA-Z0-9]+';
-const TRANSFORMATION_FNS = '(?:matrix|translate|scale|rotate|skew|perspective)(?:X|Y|3d)?';
-const COLOR_FNS = '(?:rgb|hsl)a?';
-const GRADIENTS = '(?:repeating-)?(?:linear|radial)-gradient';
-const CSS3_FNS = '(?:calc|attr)';
-const FN_ARGS = '\\([-0-9.%, #a-zA-Z]+\\)';
-const SAFE_STYLE_VALUE = new RegExp(`^(${VALUES}|` +
-    `(?:${TRANSFORMATION_FNS}|${COLOR_FNS}|${GRADIENTS}|${CSS3_FNS})` +
-    `${FN_ARGS})$`, 'g');
-/**
- * Matches a `url(...)` value with an arbitrary argument as long as it does
- * not contain parentheses.
- *
- * The URL value still needs to be sanitized separately.
- *
- * `url(...)` values are a very common use case, e.g. for `background-image`. With carefully crafted
- * CSS style rules, it is possible to construct an information leak with `url` values in CSS, e.g.
- * by observing whether scroll bars are displayed, or character ranges used by a font face
- * definition.
- *
- * Angular only allows binding CSS values (as opposed to entire CSS rules), so it is unlikely that
- * binding a URL value without further cooperation from the page will cause an information leak, and
- * if so, it is just a leak, not a full blown XSS vulnerability.
- *
- * Given the common use case, low likelihood of attack vector, and low impact of an attack, this
- * code is permissive and allows URLs that sanitize otherwise.
- */
-const URL_RE = /^url\(([^)]+)\)$/;
-/**
- * Checks that quotes (" and ') are properly balanced inside a string. Assumes
- * that neither escape (\) nor any other character that could result in
- * breaking out of a string parsing context are allowed;
- * see http://www.w3.org/TR/css3-syntax/#string-token-diagram.
- *
- * This code was taken from the Closure sanitization library.
- */
-function hasBalancedQuotes(value) {
-    let outsideSingle = true;
-    let outsideDouble = true;
-    for (let i = 0; i < value.length; i++) {
-        const c = value.charAt(i);
-        if (c === '\'' && outsideDouble) {
-            outsideSingle = !outsideSingle;
-        }
-        else if (c === '"' && outsideSingle) {
-            outsideDouble = !outsideDouble;
-        }
-    }
-    return outsideSingle && outsideDouble;
-}
-/**
- * Sanitizes the given untrusted CSS style property value (i.e. not an entire object, just a single
- * value) and returns a value that is safe to use in a browser environment.
- */
-function _sanitizeStyle(value) {
-    value = String(value).trim(); // Make sure it's actually a string.
-    if (!value)
-        return '';
-    // Single url(...) values are supported, but only for URLs that sanitize cleanly. See above for
-    // reasoning behind this.
-    const urlMatch = value.match(URL_RE);
-    if ((urlMatch && _sanitizeUrl(urlMatch[1]) === urlMatch[1]) ||
-        value.match(SAFE_STYLE_VALUE) && hasBalancedQuotes(value)) {
-        return value; // Safe style values.
-    }
-    if (isDevMode()) {
-        console.warn(`WARNING: sanitizing unsafe style value ${value} (see http://g.co/ng/security#xss).`);
-    }
-    return 'unsafe';
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
- * dangerous content.
- *
- * This method parses the `html` and locates potentially dangerous content (such as urls and
- * javascript) and removes it.
- *
- * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustHtml}.
- *
- * @param unsafeHtml untrusted `html`, typically from the user.
- * @returns `html` string which is safe to display to user, because all of the dangerous javascript
- * and urls have been removed.
- */
-function sanitizeHtml(unsafeHtml) {
-    const s = getCurrentSanitizer();
-    if (s) {
-        return s.sanitize(SecurityContext.HTML, unsafeHtml) || '';
-    }
-    if (allowSanitizationBypass(unsafeHtml, "Html" /* Html */)) {
-        return unsafeHtml.toString();
-    }
-    return _sanitizeHtml(document, stringify$1(unsafeHtml));
-}
-/**
- * A `style` sanitizer which converts untrusted `style` **string** into trusted string by removing
- * dangerous content.
- *
- * This method parses the `style` and locates potentially dangerous content (such as urls and
- * javascript) and removes it.
- *
- * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustStyle}.
- *
- * @param unsafeStyle untrusted `style`, typically from the user.
- * @returns `style` string which is safe to bind to the `style` properties, because all of the
- * dangerous javascript and urls have been removed.
- */
-function sanitizeStyle(unsafeStyle) {
-    const s = getCurrentSanitizer();
-    if (s) {
-        return s.sanitize(SecurityContext.STYLE, unsafeStyle) || '';
-    }
-    if (allowSanitizationBypass(unsafeStyle, "Style" /* Style */)) {
-        return unsafeStyle.toString();
-    }
-    return _sanitizeStyle(stringify$1(unsafeStyle));
-}
-/**
- * A `url` sanitizer which converts untrusted `url` **string** into trusted string by removing
- * dangerous
- * content.
- *
- * This method parses the `url` and locates potentially dangerous content (such as javascript) and
- * removes it.
- *
- * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustUrl}.
- *
- * @param unsafeUrl untrusted `url`, typically from the user.
- * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
- * all of the dangerous javascript has been removed.
- */
-function sanitizeUrl(unsafeUrl) {
-    const s = getCurrentSanitizer();
-    if (s) {
-        return s.sanitize(SecurityContext.URL, unsafeUrl) || '';
-    }
-    if (allowSanitizationBypass(unsafeUrl, "Url" /* Url */)) {
-        return unsafeUrl.toString();
-    }
-    return _sanitizeUrl(stringify$1(unsafeUrl));
-}
-/**
- * A `url` sanitizer which only lets trusted `url`s through.
- *
- * This passes only `url`s marked trusted by calling {@link bypassSanitizationTrustResourceUrl}.
- *
- * @param unsafeResourceUrl untrusted `url`, typically from the user.
- * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
- * only trusted `url`s have been allowed to pass.
- */
-function sanitizeResourceUrl(unsafeResourceUrl) {
-    const s = getCurrentSanitizer();
-    if (s) {
-        return s.sanitize(SecurityContext.RESOURCE_URL, unsafeResourceUrl) || '';
-    }
-    if (allowSanitizationBypass(unsafeResourceUrl, "ResourceUrl" /* ResourceUrl */)) {
-        return unsafeResourceUrl.toString();
-    }
-    throw new Error('unsafe value used in a resource URL context (see http://g.co/ng/security#xss)');
-}
-/**
- * A `script` sanitizer which only lets trusted javascript through.
- *
- * This passes only `script`s marked trusted by calling {@link bypassSanitizationTrustScript}.
- *
- * @param unsafeScript untrusted `script`, typically from the user.
- * @returns `url` string which is safe to bind to the `<script>` element such as `<img src>`,
- * because only trusted `scripts`s have been allowed to pass.
- */
-function sanitizeScript(unsafeScript) {
-    const s = getCurrentSanitizer();
-    if (s) {
-        return s.sanitize(SecurityContext.SCRIPT, unsafeScript) || '';
-    }
-    if (allowSanitizationBypass(unsafeScript, "Script" /* Script */)) {
-        return unsafeScript.toString();
-    }
-    throw new Error('unsafe value used in a script context');
-}
-/**
- * The default style sanitizer will handle sanitization for style properties by
- * sanitizing any CSS property that can include a `url` value (usually image-based properties)
- */
-const defaultStyleSanitizer = function (prop, value) {
-    if (value === undefined) {
-        return prop === 'background-image' || prop === 'background' || prop === 'border-image' ||
-            prop === 'filter' || prop === 'filter' || prop === 'list-style' ||
-            prop === 'list-style-image';
-    }
-    return sanitizeStyle(value);
-};
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * A mapping of the @angular/core API surface used in generated expressions to the actual symbols.
- *
- * This should be kept up to date with the public exports of @angular/core.
- */
-const angularCoreEnv = {
-    'ɵdefineComponent': defineComponent,
-    'ɵdefineDirective': defineDirective,
-    'defineInjectable': defineInjectable,
-    'defineInjector': defineInjector,
-    'ɵdefineNgModule': defineNgModule,
-    'ɵdefinePipe': definePipe,
-    'ɵdirectiveInject': directiveInject,
-    'inject': inject,
-    'ɵinjectAttribute': injectAttribute,
-    'ɵinjectChangeDetectorRef': injectChangeDetectorRef,
-    'ɵinjectElementRef': injectElementRef,
-    'ɵinjectTemplateRef': injectTemplateRef,
-    'ɵinjectViewContainerRef': injectViewContainerRef,
-    'ɵNgOnChangesFeature': NgOnChangesFeature,
-    'ɵPublicFeature': PublicFeature,
-    'ɵInheritDefinitionFeature': InheritDefinitionFeature,
-    'ɵa': elementAttribute,
-    'ɵb': bind,
-    'ɵC': container,
-    'ɵx': nextContext,
-    'ɵcR': containerRefreshStart,
-    'ɵcr': containerRefreshEnd,
-    'ɵd': loadDirective,
-    'ɵql': loadQueryList,
-    'ɵNH': namespaceHTML,
-    'ɵNM': namespaceMathML,
-    'ɵNS': namespaceSVG,
-    'ɵE': elementStart,
-    'ɵe': elementEnd,
-    'ɵEe': element,
-    'ɵf0': pureFunction0,
-    'ɵf1': pureFunction1,
-    'ɵf2': pureFunction2,
-    'ɵf3': pureFunction3,
-    'ɵf4': pureFunction4,
-    'ɵf5': pureFunction5,
-    'ɵf6': pureFunction6,
-    'ɵf7': pureFunction7,
-    'ɵf8': pureFunction8,
-    'ɵfV': pureFunctionV,
-    'ɵgV': getCurrentView,
-    'ɵrV': restoreView,
-    'ɵi1': interpolation1,
-    'ɵi2': interpolation2,
-    'ɵi3': interpolation3,
-    'ɵi4': interpolation4,
-    'ɵi5': interpolation5,
-    'ɵi6': interpolation6,
-    'ɵi7': interpolation7,
-    'ɵi8': interpolation8,
-    'ɵiV': interpolationV,
-    'ɵcp': elementClassProp,
-    'ɵL': listener,
-    'ɵld': load,
-    'ɵP': projection,
-    'ɵp': elementProperty,
-    'ɵpb1': pipeBind1,
-    'ɵpb2': pipeBind2,
-    'ɵpb3': pipeBind3,
-    'ɵpb4': pipeBind4,
-    'ɵpbV': pipeBindV,
-    'ɵpD': projectionDef,
-    'ɵPp': pipe,
-    'ɵQ': query,
-    'ɵqR': queryRefresh,
-    'ɵQr': registerContentQuery,
-    'ɵrS': reserveSlots,
-    'ɵr': reference,
-    'ɵs': elementStyling,
-    'ɵsm': elementStylingMap,
-    'ɵsp': elementStyleProp,
-    'ɵsa': elementStylingApply,
-    'ɵT': text,
-    'ɵt': textBinding,
-    'ɵV': embeddedViewStart,
-    'ɵv': embeddedViewEnd,
-    'ɵzh': sanitizeHtml,
-    'ɵzs': sanitizeStyle,
-    'ɵzss': defaultStyleSanitizer,
-    'ɵzr': sanitizeResourceUrl,
-    'ɵzc': sanitizeScript,
-    'ɵzu': sanitizeUrl
-};
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-const TARGET = {};
-const NG_COMPONENT_DEF = getClosureSafeProperty$1({ ngComponentDef: TARGET }, TARGET);
-const NG_DIRECTIVE_DEF = getClosureSafeProperty$1({ ngDirectiveDef: TARGET }, TARGET);
-const NG_INJECTABLE_DEF = getClosureSafeProperty$1({ ngInjectableDef: TARGET }, TARGET);
-const NG_INJECTOR_DEF = getClosureSafeProperty$1({ ngInjectorDef: TARGET }, TARGET);
-const NG_PIPE_DEF = getClosureSafeProperty$1({ ngPipeDef: TARGET }, TARGET);
-const NG_MODULE_DEF = getClosureSafeProperty$1({ ngModuleDef: TARGET }, TARGET);
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-let _reflect = null;
-function getReflect() {
-    return (_reflect = _reflect || new ReflectionCapabilities());
-}
-function reflectDependencies(type) {
-    return convertDependencies(getReflect().parameters(type));
-}
-function convertDependencies(deps) {
-    return deps.map(dep => reflectDependency(dep));
-}
-function reflectDependency(dep) {
-    const meta = {
-        token: new LiteralExpr(null),
-        host: false,
-        optional: false,
-        resolved: R3ResolvedDependencyType.Token,
-        self: false,
-        skipSelf: false,
-    };
-    function setTokenAndResolvedType(token) {
-        if (token === ElementRef) {
-            meta.resolved = R3ResolvedDependencyType.ElementRef;
-        }
-        else if (token === Injector) {
-            meta.resolved = R3ResolvedDependencyType.Injector;
-        }
-        else if (token === TemplateRef) {
-            meta.resolved = R3ResolvedDependencyType.TemplateRef;
-        }
-        else if (token === ViewContainerRef) {
-            meta.resolved = R3ResolvedDependencyType.ViewContainerRef;
-        }
-        else {
-            meta.resolved = R3ResolvedDependencyType.Token;
-        }
-        meta.token = new WrappedNodeExpr(token);
-    }
-    if (Array.isArray(dep)) {
-        if (dep.length === 0) {
-            throw new Error('Dependency array must have arguments.');
-        }
-        for (let j = 0; j < dep.length; j++) {
-            const param = dep[j];
-            if (param instanceof Optional || param.__proto__.ngMetadataName === 'Optional') {
-                meta.optional = true;
-            }
-            else if (param instanceof SkipSelf || param.__proto__.ngMetadataName === 'SkipSelf') {
-                meta.skipSelf = true;
-            }
-            else if (param instanceof Self || param.__proto__.ngMetadataName === 'Self') {
-                meta.self = true;
-            }
-            else if (param instanceof Host || param.__proto__.ngMetadataName === 'Host') {
-                meta.host = true;
-            }
-            else if (param instanceof Inject) {
-                meta.token = new WrappedNodeExpr(param.token);
-            }
-            else if (param instanceof Attribute) {
-                if (param.attributeName === undefined) {
-                    throw new Error(`Attribute name must be defined.`);
-                }
-                meta.token = new LiteralExpr(param.attributeName);
-                meta.resolved = R3ResolvedDependencyType.Attribute;
-            }
-            else {
-                setTokenAndResolvedType(param);
-            }
-        }
-    }
-    else {
-        setTokenAndResolvedType(dep);
-    }
-    return meta;
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-const EMPTY_ARRAY$3 = [];
-function compileNgModule$1(type, ngModule) {
-    const declarations = flatten$2(ngModule.declarations || EMPTY_ARRAY$3);
-    let ngModuleDef = null;
-    Object.defineProperty(type, NG_MODULE_DEF, {
-        get: () => {
-            if (ngModuleDef === null) {
-                const meta = {
-                    type: wrap(type),
-                    bootstrap: flatten$2(ngModule.bootstrap || EMPTY_ARRAY$3).map(wrap),
-                    declarations: declarations.map(wrapReference),
-                    imports: flatten$2(ngModule.imports || EMPTY_ARRAY$3)
-                        .map(expandModuleWithProviders)
-                        .map(wrapReference),
-                    exports: flatten$2(ngModule.exports || EMPTY_ARRAY$3)
-                        .map(expandModuleWithProviders)
-                        .map(wrapReference),
-                    emitInline: true,
-                };
-                const res = compileNgModule(meta);
-                ngModuleDef =
-                    jitExpression(res.expression, angularCoreEnv, `ng://${type.name}/ngModuleDef.js`);
-            }
-            return ngModuleDef;
-        },
-    });
-    let ngInjectorDef = null;
-    Object.defineProperty(type, NG_INJECTOR_DEF, {
-        get: () => {
-            if (ngInjectorDef === null) {
-                const meta = {
-                    name: type.name,
-                    type: wrap(type),
-                    deps: reflectDependencies(type),
-                    providers: new WrappedNodeExpr(ngModule.providers || EMPTY_ARRAY$3),
-                    imports: new WrappedNodeExpr([
-                        ngModule.imports || EMPTY_ARRAY$3,
-                        ngModule.exports || EMPTY_ARRAY$3,
-                    ]),
-                };
-                const res = compileInjector(meta);
-                ngInjectorDef =
-                    jitExpression(res.expression, angularCoreEnv, `ng://${type.name}/ngInjectorDef.js`);
-            }
-            return ngInjectorDef;
-        },
-    });
-    declarations.forEach(declaration => {
-        // Some declared components may be compiled asynchronously, and thus may not have their
-        // ngComponentDef set yet. If this is the case, then a reference to the module is written into
-        // the `ngSelectorScope` property of the declared type.
-        if (declaration.hasOwnProperty(NG_COMPONENT_DEF)) {
-            // An `ngComponentDef` field exists - go ahead and patch the component directly.
-            patchComponentDefWithScope(declaration.ngComponentDef, type);
-        }
-        else if (!declaration.hasOwnProperty(NG_DIRECTIVE_DEF) && !declaration.hasOwnProperty(NG_PIPE_DEF)) {
-            // Set `ngSelectorScope` for future reference when the component compilation finishes.
-            declaration.ngSelectorScope = type;
-        }
-    });
-}
-/**
- * Patch the definition of a component with directives and pipes from the compilation scope of
- * a given module.
- */
-function patchComponentDefWithScope(componentDef, module) {
-    componentDef.directiveDefs = () => Array.from(transitiveScopesFor(module).compilation.directives)
-        .map(dir => dir.ngDirectiveDef || dir.ngComponentDef)
-        .filter(def => !!def);
-    componentDef.pipeDefs = () => Array.from(transitiveScopesFor(module).compilation.pipes).map(pipe => pipe.ngPipeDef);
-}
-/**
- * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
- *
- * This operation is memoized and the result is cached on the module's definition. It can be called
- * on modules with components that have not fully compiled yet, but the result should not be used
- * until they have.
- */
-function transitiveScopesFor(moduleType) {
-    if (!isNgModule(moduleType)) {
-        throw new Error(`${moduleType.name} does not have an ngModuleDef`);
-    }
-    const def = moduleType.ngModuleDef;
-    if (def.transitiveCompileScopes !== null) {
-        return def.transitiveCompileScopes;
-    }
-    const scopes = {
-        compilation: {
-            directives: new Set(),
-            pipes: new Set(),
-        },
-        exported: {
-            directives: new Set(),
-            pipes: new Set(),
-        },
-    };
-    def.declarations.forEach(declared => {
-        const declaredWithDefs = declared;
-        if (declaredWithDefs.ngPipeDef !== undefined) {
-            scopes.compilation.pipes.add(declared);
-        }
-        else {
-            // Either declared has an ngComponentDef or ngDirectiveDef, or it's a component which hasn't
-            // had its template compiled yet. In either case, it gets added to the compilation's
-            // directives.
-            scopes.compilation.directives.add(declared);
-        }
-    });
-    def.imports.forEach((imported) => {
-        let importedTyped = imported;
-        if (!isNgModule(importedTyped)) {
-            throw new Error(`Importing ${importedTyped.name} which does not have an ngModuleDef`);
-        }
-        // When this module imports another, the imported module's exported directives and pipes are
-        // added to the compilation scope of this module.
-        const importedScope = transitiveScopesFor(importedTyped);
-        importedScope.exported.directives.forEach(entry => scopes.compilation.directives.add(entry));
-        importedScope.exported.pipes.forEach(entry => scopes.compilation.pipes.add(entry));
-    });
-    def.exports.forEach((exported) => {
-        const exportedTyped = exported;
-        // Either the type is a module, a pipe, or a component/directive (which may not have an
-        // ngComponentDef as it might be compiled asynchronously).
-        if (isNgModule(exportedTyped)) {
-            // When this module exports another, the exported module's exported directives and pipes are
-            // added to both the compilation and exported scopes of this module.
-            const exportedScope = transitiveScopesFor(exportedTyped);
-            exportedScope.exported.directives.forEach(entry => {
-                scopes.compilation.directives.add(entry);
-                scopes.exported.directives.add(entry);
-            });
-            exportedScope.exported.pipes.forEach(entry => {
-                scopes.compilation.pipes.add(entry);
-                scopes.exported.pipes.add(entry);
-            });
-        }
-        else if (exportedTyped.ngPipeDef !== undefined) {
-            scopes.exported.pipes.add(exportedTyped);
-        }
-        else {
-            scopes.exported.directives.add(exportedTyped);
-        }
-    });
-    def.transitiveCompileScopes = scopes;
-    return scopes;
-}
-function flatten$2(values) {
-    const out = [];
-    values.forEach(value => {
-        if (Array.isArray(value)) {
-            out.push(...flatten$2(value));
-        }
-        else {
-            out.push(value);
-        }
-    });
-    return out;
-}
-function expandModuleWithProviders(value) {
-    if (isModuleWithProviders(value)) {
-        return value.ngModule;
-    }
-    return value;
-}
-function wrap(value) {
-    return new WrappedNodeExpr(value);
-}
-function wrapReference(value) {
-    const wrapped = wrap(value);
-    return { value: wrapped, type: wrapped };
-}
-function isModuleWithProviders(value) {
-    return value.ngModule !== undefined;
-}
-function isNgModule(value) {
-    return value.ngModuleDef !== undefined;
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Compile an Angular component according to its decorator metadata, and patch the resulting
- * ngComponentDef onto the component type.
- *
- * Compilation may be asynchronous (due to the need to resolve URLs for the component template or
- * other resources, for example). In the event that compilation is not immediate, `compileComponent`
- * will enqueue resource resolution into a global queue and will fail to return the `ngComponentDef`
- * until the global queue has been resolved with a call to `resolveComponentResources`.
- */
-function compileComponent(type, metadata) {
-    let def = null;
-    // Metadata may have resources which need to be resolved.
-    maybeQueueResolutionOfComponentResources(metadata);
-    Object.defineProperty(type, NG_COMPONENT_DEF, {
-        get: () => {
-            if (def === null) {
-                if (componentNeedsResolution(metadata)) {
-                    const error = [`Component '${stringify(type)}' is not resolved:`];
-                    if (metadata.templateUrl) {
-                        error.push(` - templateUrl: ${stringify(metadata.templateUrl)}`);
-                    }
-                    if (metadata.styleUrls && metadata.styleUrls.length) {
-                        error.push(` - styleUrls: ${JSON.stringify(metadata.styleUrls)}`);
-                    }
-                    error.push(`Did you run and wait for 'resolveComponentResources()'?`);
-                    throw new Error(error.join('\n'));
-                }
-                // The ConstantPool is a requirement of the JIT'er.
-                const constantPool = new ConstantPool();
-                // Parse the template and check for errors.
-                const template = parseTemplate(metadata.template, `ng://${stringify(type)}/template.html`, {
-                    preserveWhitespaces: metadata.preserveWhitespaces || false,
-                });
-                if (template.errors !== undefined) {
-                    const errors = template.errors.map(err => err.toString()).join(', ');
-                    throw new Error(`Errors during JIT compilation of template for ${stringify(type)}: ${errors}`);
-                }
-                // Compile the component metadata, including template, into an expression.
-                // TODO(alxhub): implement inputs, outputs, queries, etc.
-                const res = compileComponentFromMetadata(Object.assign({}, directiveMetadata(type, metadata), { template, directives: new Map(), pipes: new Map(), viewQueries: [] }), constantPool, makeBindingParser());
-                def = jitExpression(res.expression, angularCoreEnv, `ng://${type.name}/ngComponentDef.js`, constantPool);
-                // If component compilation is async, then the @NgModule annotation which declares the
-                // component may execute and set an ngSelectorScope property on the component type. This
-                // allows the component to patch itself with directiveDefs from the module after it finishes
-                // compiling.
-                if (hasSelectorScope(type)) {
-                    patchComponentDefWithScope(def, type.ngSelectorScope);
-                }
-            }
-            return def;
-        },
-    });
-}
-function hasSelectorScope(component) {
-    return component.ngSelectorScope !== undefined;
-}
-/**
- * Compile an Angular directive according to its decorator metadata, and patch the resulting
- * ngDirectiveDef onto the component type.
- *
- * In the event that compilation is not immediate, `compileDirective` will return a `Promise` which
- * will resolve when compilation completes and the directive becomes usable.
- */
-function compileDirective(type, directive) {
-    let def = null;
-    Object.defineProperty(type, NG_DIRECTIVE_DEF, {
-        get: () => {
-            if (def === null) {
-                const constantPool = new ConstantPool();
-                const sourceMapUrl = `ng://${type && type.name}/ngDirectiveDef.js`;
-                const res = compileDirectiveFromMetadata(directiveMetadata(type, directive), constantPool, makeBindingParser());
-                def = jitExpression(res.expression, angularCoreEnv, sourceMapUrl, constantPool);
-            }
-            return def;
-        },
-    });
-}
-function extendsDirectlyFromObject(type) {
-    return Object.getPrototypeOf(type.prototype) === Object.prototype;
-}
-/**
- * Extract the `R3DirectiveMetadata` for a particular directive (either a `Directive` or a
- * `Component`).
- */
-function directiveMetadata(type, metadata) {
-    // Reflect inputs and outputs.
-    const propMetadata = getReflect().propMetadata(type);
-    const host = extractHostBindings(metadata, propMetadata);
-    const inputsFromMetadata = parseInputOutputs(metadata.inputs || []);
-    const outputsFromMetadata = parseInputOutputs(metadata.outputs || []);
-    const inputsFromType = {};
-    const outputsFromType = {};
-    for (const field in propMetadata) {
-        if (propMetadata.hasOwnProperty(field)) {
-            propMetadata[field].forEach(ann => {
-                if (isInput(ann)) {
-                    inputsFromType[field] = ann.bindingPropertyName || field;
-                }
-                else if (isOutput(ann)) {
-                    outputsFromType[field] = ann.bindingPropertyName || field;
-                }
-            });
-        }
-    }
-    return {
-        name: type.name,
-        type: new WrappedNodeExpr(type),
-        typeArgumentCount: 0,
-        selector: metadata.selector,
-        deps: reflectDependencies(type), host,
-        inputs: Object.assign({}, inputsFromMetadata, inputsFromType),
-        outputs: Object.assign({}, outputsFromMetadata, outputsFromType),
-        queries: [],
-        lifecycle: {
-            usesOnChanges: type.prototype.ngOnChanges !== undefined,
-        },
-        typeSourceSpan: null,
-        usesInheritance: !extendsDirectlyFromObject(type),
-    };
-}
-function extractHostBindings(metadata, propMetadata) {
-    // First parse the declarations from the metadata.
-    const { attributes, listeners, properties, animations } = parseHostBindings(metadata.host || {});
-    if (Object.keys(animations).length > 0) {
-        throw new Error(`Animation bindings are as-of-yet unsupported in Ivy`);
-    }
-    // Next, loop over the properties of the object, looking for @HostBinding and @HostListener.
-    for (const field in propMetadata) {
-        if (propMetadata.hasOwnProperty(field)) {
-            propMetadata[field].forEach(ann => {
-                if (isHostBinding(ann)) {
-                    properties[ann.hostPropertyName || field] = field;
-                }
-                else if (isHostListener(ann)) {
-                    listeners[ann.eventName || field] = `${field}(${(ann.args || []).join(',')})`;
-                }
-            });
-        }
-    }
-    return { attributes, listeners, properties };
-}
-function isInput(value) {
-    return value.ngMetadataName === 'Input';
-}
-function isOutput(value) {
-    return value.ngMetadataName === 'Output';
-}
-function isHostBinding(value) {
-    return value.ngMetadataName === 'HostBinding';
-}
-function isHostListener(value) {
-    return value.ngMetadataName === 'HostListener';
-}
-function parseInputOutputs(values) {
-    return values.reduce((map, value) => {
-        const [field, property] = value.split(',').map(piece => piece.trim());
-        map[field] = property || field;
-        return map;
-    }, {});
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Compile an Angular injectable according to its `Injectable` metadata, and patch the resulting
- * `ngInjectableDef` onto the injectable type.
- */
-function compileInjectable$1(type, srcMeta) {
-    // Allow the compilation of a class with a `@Injectable()` decorator without parameters
-    const meta = srcMeta || { providedIn: null };
-    let def = null;
-    Object.defineProperty(type, NG_INJECTABLE_DEF, {
-        get: () => {
-            if (def === null) {
-                // Check whether the injectable metadata includes a provider specification.
-                const hasAProvider = isUseClassProvider(meta) || isUseFactoryProvider(meta) ||
-                    isUseValueProvider(meta) || isUseExistingProvider(meta);
-                let deps = undefined;
-                if (!hasAProvider || (isUseClassProvider(meta) && type === meta.useClass)) {
-                    deps = reflectDependencies(type);
-                }
-                else if (isUseClassProvider(meta)) {
-                    deps = meta.deps && convertDependencies(meta.deps);
-                }
-                else if (isUseFactoryProvider(meta)) {
-                    deps = meta.deps && convertDependencies(meta.deps) || [];
-                }
-                // Decide which flavor of factory to generate, based on the provider specified.
-                // Only one of the use* fields should be set.
-                let useClass = undefined;
-                let useFactory = undefined;
-                let useValue = undefined;
-                let useExisting = undefined;
-                if (!hasAProvider) {
-                    // In the case the user specifies a type provider, treat it as {provide: X, useClass: X}.
-                    // The deps will have been reflected above, causing the factory to create the class by
-                    // calling
-                    // its constructor with injected deps.
-                    useClass = new WrappedNodeExpr(type);
-                }
-                else if (isUseClassProvider(meta)) {
-                    // The user explicitly specified useClass, and may or may not have provided deps.
-                    useClass = new WrappedNodeExpr(meta.useClass);
-                }
-                else if (isUseValueProvider(meta)) {
-                    // The user explicitly specified useValue.
-                    useValue = new WrappedNodeExpr(meta.useValue);
-                }
-                else if (isUseFactoryProvider(meta)) {
-                    // The user explicitly specified useFactory.
-                    useFactory = new WrappedNodeExpr(meta.useFactory);
-                }
-                else if (isUseExistingProvider(meta)) {
-                    // The user explicitly specified useExisting.
-                    useExisting = new WrappedNodeExpr(meta.useExisting);
-                }
-                else {
-                    // Can't happen - either hasAProvider will be false, or one of the providers will be set.
-                    throw new Error(`Unreachable state.`);
-                }
-                const { expression } = compileInjectable({
-                    name: type.name,
-                    type: new WrappedNodeExpr(type),
-                    providedIn: computeProvidedIn(meta.providedIn),
-                    useClass,
-                    useFactory,
-                    useValue,
-                    useExisting,
-                    deps,
-                });
-                def = jitExpression(expression, angularCoreEnv, `ng://${type.name}/ngInjectableDef.js`);
-            }
-            return def;
-        },
-    });
-}
-function computeProvidedIn(providedIn) {
-    if (providedIn == null || typeof providedIn === 'string') {
-        return new LiteralExpr(providedIn);
-    }
-    else {
-        return new WrappedNodeExpr(providedIn);
-    }
-}
-function isUseClassProvider(meta) {
-    return meta.useClass !== undefined;
-}
-const GET_PROPERTY_NAME$2 = {};
-const USE_VALUE$2 = getClosureSafeProperty$1({ provide: String, useValue: GET_PROPERTY_NAME$2 }, GET_PROPERTY_NAME$2);
-function isUseValueProvider(meta) {
-    return USE_VALUE$2 in meta;
-}
-function isUseFactoryProvider(meta) {
-    return meta.useFactory !== undefined;
-}
-function isUseExistingProvider(meta) {
-    return meta.useExisting !== undefined;
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-function compilePipe(type, meta) {
-    let def = null;
-    Object.defineProperty(type, NG_PIPE_DEF, {
-        get: () => {
-            if (def === null) {
-                const sourceMapUrl = `ng://${stringify$1(type)}/ngPipeDef.js`;
-                const name = type.name;
-                const res = compilePipeFromMetadata({
-                    name,
-                    type: new WrappedNodeExpr(type),
-                    deps: reflectDependencies(type),
-                    pipeName: meta.name,
-                    pure: meta.pure !== undefined ? meta.pure : true,
-                });
-                def = jitExpression(res.expression, angularCoreEnv, sourceMapUrl);
-            }
-            return def;
-        }
-    });
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-const ivyEnabled = true;
-const R3_COMPILE_COMPONENT = compileComponent;
-const R3_COMPILE_DIRECTIVE = compileDirective;
-const R3_COMPILE_INJECTABLE = compileInjectable$1;
-const R3_COMPILE_NGMODULE = compileNgModule$1;
-const R3_COMPILE_PIPE = compilePipe;
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Type of the Directive metadata.
- */
-const Directive = makeDecorator('Directive', (dir = {}) => dir, undefined, undefined, (type, meta) => (R3_COMPILE_DIRECTIVE || (() => { }))(type, meta));
-/**
- * Component decorator and metadata.
- *
- * @usageNotes
- *
- * ### Using animations
- *
- * The following snippet shows an animation trigger in a component's
- * metadata. The trigger is attached to an element in the component's
- * template, using "@_trigger_name_", and a state expression that is evaluated
- * at run time to determine whether the animation should start.
- *
- * ```typescript
- * @Component({
- *   selector: 'animation-cmp',
- *   templateUrl: 'animation-cmp.html',
- *   animations: [
- *     trigger('myTriggerName', [
- *       state('on', style({ opacity: 1 }),
- *       state('off', style({ opacity: 0 }),
- *       transition('on => off', [
- *         animate("1s")
- *       ])
- *     ])
- *   ]
- * })
- * ```
- *
- * ```html
- * <!-- animation-cmp.html -->
- * <div @myTriggerName="expression">...</div>
- * ```
- *
- * ### Preserving whitespace
- *
- * Removing whitespace can greatly reduce AOT-generated code size, and speed up view creation.
- * As of Angular 6, default for `preserveWhitespaces` is false (whitespace is removed).
- * To change the default setting for all components in your application, set
- * the `preserveWhitespaces` option of the AOT compiler.
- *
- * Current implementation removes whitespace characters as follows:
- * - Trims all whitespaces at the beginning and the end of a template.
- * - Removes whitespace-only text nodes. For example,
- * `<button>Action 1</button>  <button>Action 2</button>` becomes
- * `<button>Action 1</button><button>Action 2</button>`.
- * - Replaces a series of whitespace characters in text nodes with a single space.
- * For example, `<span>\n some text\n</span>` becomes `<span> some text </span>`.
- * - Does NOT alter text nodes inside HTML tags such as `<pre>` or `<textarea>`,
- * where whitespace characters are significant.
- *
- * Note that these transformations can influence DOM nodes layout, although impact
- * should be minimal.
- *
- * You can override the default behavior to preserve whitespace characters
- * in certain fragments of a template. For example, you can exclude an entire
- * DOM sub-tree by using the `ngPreserveWhitespaces` attribute:
- *
- * ```html
- * <div ngPreserveWhitespaces>
- *     whitespaces are preserved here
- *     <span>    and here </span>
- * </div>
- * ```
- *
- * You can force a single space to be preserved in a text node by using `&ngsp;`,
- * which is replaced with a space character by Angular's template
- * compiler:
- *
- * ```html
- * <a>Spaces</a>&ngsp;<a>between</a>&ngsp;<a>links.</a>
- * <!-->compiled to be equivalent to:</>
- *  <a>Spaces</a> <a>between</a> <a>links.</a>
- * ```
- *
- * Note that sequences of `&ngsp;` are still collapsed to just one space character when
- * the `preserveWhitespaces` option is set to `false`.
- *
- * ```html
- * <a>before</a>&ngsp;&ngsp;&ngsp;<a>after</a>
- * <!-->compiled to be equivalent to:</>
- *  <a>Spaces</a> <a>between</a> <a>links.</a>
- * ```
- *
- * To preserve sequences of whitespace characters, use the
- * `ngPreserveWhitespaces` attribute.
- *
- * @Annotation
- */
-const Component = makeDecorator('Component', (c = {}) => (Object.assign({ changeDetection: ChangeDetectionStrategy.Default }, c)), Directive, undefined, (type, meta) => (R3_COMPILE_COMPONENT || (() => { }))(type, meta));
-/**
- *
- *
- * @Annotation
- */
-const Pipe = makeDecorator('Pipe', (p) => (Object.assign({ pure: true }, p)), undefined, undefined, (type, meta) => (R3_COMPILE_PIPE || (() => { }))(type, meta));
-const initializeBaseDef = (target) => {
-    const constructor = target.constructor;
-    const inheritedBaseDef = constructor.ngBaseDef;
-    const baseDef = constructor.ngBaseDef = {
-        inputs: {},
-        outputs: {},
-        declaredInputs: {},
-    };
-    if (inheritedBaseDef) {
-        fillProperties(baseDef.inputs, inheritedBaseDef.inputs);
-        fillProperties(baseDef.outputs, inheritedBaseDef.outputs);
-        fillProperties(baseDef.declaredInputs, inheritedBaseDef.declaredInputs);
-    }
-};
-/**
- * Does the work of creating the `ngBaseDef` property for the @Input and @Output decorators.
- * @param key "inputs" or "outputs"
- */
-const updateBaseDefFromIOProp = (getProp) => (target, name, ...args) => {
-    const constructor = target.constructor;
-    if (!constructor.hasOwnProperty('ngBaseDef')) {
-        initializeBaseDef(target);
-    }
-    const baseDef = constructor.ngBaseDef;
-    const defProp = getProp(baseDef);
-    defProp[name] = args[0];
-};
-/**
- *
- * @Annotation
- */
-const Input = makePropDecorator('Input', (bindingPropertyName) => ({ bindingPropertyName }), undefined, updateBaseDefFromIOProp(baseDef => baseDef.inputs || {}));
-/**
- *
- * @Annotation
- */
-const Output = makePropDecorator('Output', (bindingPropertyName) => ({ bindingPropertyName }), undefined, updateBaseDefFromIOProp(baseDef => baseDef.outputs || {}));
-/**
- *
- * @Annotation
- */
-const HostBinding = makePropDecorator('HostBinding', (hostPropertyName) => ({ hostPropertyName }));
-/**
- * Binds a CSS event to a host listener and supplies configuration metadata.
- * Angular invokes the supplied handler method when the host element emits the specified event,
- * and updates the bound element with the result.
- * If the handler method returns false, applies `preventDefault` on the bound element.
- *
- * @usageNotes
- *
- * The following example declares a directive
- * that attaches a click listener to a button and counts clicks.
- *
- * ```
- * @Directive({selector: 'button[counting]'})
- * class CountClicks {
- *   numberOfClicks = 0;
- *
- *   @HostListener('click', ['$event.target'])
- *   onClick(btn) {
- *     console.log('button', btn, 'number of clicks:', this.numberOfClicks++);
- *  }
- * }
- *
- * @Component({
- *   selector: 'app',
- *   template: '<button counting>Increment</button>',
- * })
- * class App {}
- * ```
- *
- * @Annotation
- */
-const HostListener = makePropDecorator('HostListener', (eventName, args) => ({ eventName, args }));
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Defines a schema that allows an NgModule to contain the following:
- * - Non-Angular elements named with dash case (`-`).
- * - Element properties named with dash case (`-`).
- * Dash case is the naming convention for custom elements.
- *
- *
- */
-const CUSTOM_ELEMENTS_SCHEMA = {
-    name: 'custom-elements'
-};
-/**
- * Defines a schema that allows any property on any element.
- *
- * @experimental
- */
-const NO_ERRORS_SCHEMA = {
-    name: 'no-errors-schema'
-};
-function preR3NgModuleCompile(moduleType, metadata) {
-    let imports = (metadata && metadata.imports) || [];
-    if (metadata && metadata.exports) {
-        imports = [...imports, metadata.exports];
-    }
-    moduleType.ngInjectorDef = defineInjector({
-        factory: convertInjectableProviderToFactory(moduleType, { useClass: moduleType }),
-        providers: metadata && metadata.providers,
-        imports: imports,
-    });
-}
-/**
- * @Annotation
- */
-const NgModule = makeDecorator('NgModule', (ngModule) => ngModule, undefined, undefined, 
-/**
- * Decorator that marks the following class as an NgModule, and supplies
- * configuration metadata for it.
- *
- * * The `declarations` and `entryComponents` options configure the compiler
- * with information about what belongs to the NgModule.
- * * The `providers` options configures the NgModule's injector to provide
- * dependencies the NgModule members.
- * * The `imports` and `exports` options bring in members from other modules, and make
- * this module's members available to others.
- */
-(type, meta) => (R3_COMPILE_NGMODULE || preR3NgModuleCompile)(type, meta));
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * @description Represents the version of Angular
- *
- *
- */
-class Version {
-    constructor(full) {
-        this.full = full;
-        this.major = full.split('.')[0];
-        this.minor = full.split('.')[1];
-        this.patch = full.split('.').slice(2).join('.');
-    }
-}
-const VERSION = new Version('7.0.0-beta.1+10.sha-b64fed1');
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 class EventListener {
     constructor(name, callback) {
         this.name = name;
@@ -15422,6 +11865,31 @@ function removeDebugNodeFromIndex(node) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * A SecurityContext marks a location that has dangerous security implications, e.g. a DOM property
+ * like `innerHTML` that could cause Cross Site Scripting (XSS) security bugs when improperly
+ * handled.
+ *
+ * See DomSanitizer for more details on security in Angular applications.
+ *
+ *
+ */
+var SecurityContext;
+(function (SecurityContext) {
+    SecurityContext[SecurityContext["NONE"] = 0] = "NONE";
+    SecurityContext[SecurityContext["HTML"] = 1] = "HTML";
+    SecurityContext[SecurityContext["STYLE"] = 2] = "STYLE";
+    SecurityContext[SecurityContext["SCRIPT"] = 3] = "SCRIPT";
+    SecurityContext[SecurityContext["URL"] = 4] = "URL";
+    SecurityContext[SecurityContext["RESOURCE_URL"] = 5] = "RESOURCE_URL";
+})(SecurityContext || (SecurityContext = {}));
+/**
+ * Sanitizer is used by the views to sanitize potentially dangerous values.
+ *
+ *
+ */
+class Sanitizer {
+}
 
 /**
  * @license
@@ -15430,19 +11898,48 @@ function removeDebugNodeFromIndex(node) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-const _CORE_PLATFORM_PROVIDERS = [
-    // Set a default platform name for platforms that don't set it explicitly.
-    { provide: PLATFORM_ID, useValue: 'unknown' },
-    { provide: PlatformRef, deps: [Injector] },
-    { provide: TestabilityRegistry, deps: [] },
-    { provide: Console, deps: [] },
-];
 /**
- * This platform has to be included in any other platform
+ * Defines template and style encapsulation options available for Component's {@link Component}.
  *
- * @experimental
+ * See {@link Component#encapsulation encapsulation}.
+ *
  */
-const platformCore = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDERS);
+var ViewEncapsulation;
+(function (ViewEncapsulation) {
+    /**
+     * Emulate `Native` scoping of styles by adding an attribute containing surrogate id to the Host
+     * Element and pre-processing the style rules provided via {@link Component#styles styles} or
+     * {@link Component#styleUrls styleUrls}, and adding the new Host Element attribute to all
+     * selectors.
+     *
+     * This is the default option.
+     */
+    ViewEncapsulation[ViewEncapsulation["Emulated"] = 0] = "Emulated";
+    /**
+     * @deprecated v6.1.0 - use {ViewEncapsulation.ShadowDom} instead.
+     * Use the native encapsulation mechanism of the renderer.
+     *
+     * For the DOM this means using the deprecated [Shadow DOM
+     * v0](https://w3c.github.io/webcomponents/spec/shadow/) and
+     * creating a ShadowRoot for Component's Host Element.
+     */
+    ViewEncapsulation[ViewEncapsulation["Native"] = 1] = "Native";
+    /**
+     * Don't provide any template or style encapsulation.
+     */
+    ViewEncapsulation[ViewEncapsulation["None"] = 2] = "None";
+    /**
+     * Use Shadow DOM to encapsulate styles.
+     *
+     * For the DOM this means using modern [Shadow
+     * DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
+     * creating a ShadowRoot for Component's Host Element.
+     *
+     * ### Example
+     * {@example core/ts/metadata/encapsulation.ts region='longform'}
+     */
+    ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
+})(ViewEncapsulation || (ViewEncapsulation = {}));
 
 /**
  * @license
@@ -15451,105 +11948,39 @@ const platformCore = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDER
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * Provide this token to set the locale of your application.
- * It is used for i18n extraction, by i18n pipes (DatePipe, I18nPluralPipe, CurrencyPipe,
- * DecimalPipe and PercentPipe) and by ICU expressions.
- *
- * See the [i18n guide](guide/i18n#setting-up-locale) for more information.
- *
- * @usageNotes
- * ### Example
- *
- * ```typescript
- * import { LOCALE_ID } from '@angular/core';
- * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
- * import { AppModule } from './app/app.module';
- *
- * platformBrowserDynamic().bootstrapModule(AppModule, {
- *   providers: [{provide: LOCALE_ID, useValue: 'en-US' }]
- * });
- * ```
- *
- * @experimental i18n support is experimental.
- */
-const LOCALE_ID = new InjectionToken('LocaleId');
-/**
- * Use this token at bootstrap to provide the content of your translation file (`xtb`,
- * `xlf` or `xlf2`) when you want to translate your application in another language.
- *
- * See the [i18n guide](guide/i18n#merge) for more information.
- *
- * @usageNotes
- * ### Example
- *
- * ```typescript
- * import { TRANSLATIONS } from '@angular/core';
- * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
- * import { AppModule } from './app/app.module';
- *
- * // content of your translation file
- * const translations = '....';
- *
- * platformBrowserDynamic().bootstrapModule(AppModule, {
- *   providers: [{provide: TRANSLATIONS, useValue: translations }]
- * });
- * ```
- *
- * @experimental i18n support is experimental.
- */
-const TRANSLATIONS = new InjectionToken('Translations');
-/**
- * Provide this token at bootstrap to set the format of your {@link TRANSLATIONS}: `xtb`,
- * `xlf` or `xlf2`.
- *
- * See the [i18n guide](guide/i18n#merge) for more information.
- *
- * @usageNotes
- * ### Example
- *
- * ```typescript
- * import { TRANSLATIONS_FORMAT } from '@angular/core';
- * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
- * import { AppModule } from './app/app.module';
- *
- * platformBrowserDynamic().bootstrapModule(AppModule, {
- *   providers: [{provide: TRANSLATIONS_FORMAT, useValue: 'xlf' }]
- * });
- * ```
- *
- * @experimental i18n support is experimental.
- */
-const TRANSLATIONS_FORMAT = new InjectionToken('TranslationsFormat');
-/**
- * Use this enum at bootstrap as an option of `bootstrapModule` to define the strategy
- * that the compiler should use in case of missing translations:
- * - Error: throw if you have missing translations.
- * - Warning (default): show a warning in the console and/or shell.
- * - Ignore: do nothing.
- *
- * See the [i18n guide](guide/i18n#missing-translation) for more information.
- *
- * @usageNotes
- * ### Example
- * ```typescript
- * import { MissingTranslationStrategy } from '@angular/core';
- * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
- * import { AppModule } from './app/app.module';
- *
- * platformBrowserDynamic().bootstrapModule(AppModule, {
- *   missingTranslation: MissingTranslationStrategy.Error
- * });
- * ```
- *
- * @experimental i18n support is experimental.
- */
-var MissingTranslationStrategy;
-(function (MissingTranslationStrategy) {
-    MissingTranslationStrategy[MissingTranslationStrategy["Error"] = 0] = "Error";
-    MissingTranslationStrategy[MissingTranslationStrategy["Warning"] = 1] = "Warning";
-    MissingTranslationStrategy[MissingTranslationStrategy["Ignore"] = 2] = "Ignore";
-})(MissingTranslationStrategy || (MissingTranslationStrategy = {}));
+function expressionChangedAfterItHasBeenCheckedError(context, oldValue, currValue, isFirstCheck) {
+    let msg = `ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value: '${oldValue}'. Current value: '${currValue}'.`;
+    if (isFirstCheck) {
+        msg +=
+            ` It seems like the view has been created after its parent and its children have been dirty checked.` +
+                ` Has it been created in a change detection hook ?`;
+    }
+    return viewDebugError(msg, context);
+}
+function viewWrappedDebugError(err, context) {
+    if (!(err instanceof Error)) {
+        // errors that are not Error instances don't have a stack,
+        // so it is ok to wrap them into a new Error object...
+        err = new Error(err.toString());
+    }
+    _addDebugContext(err, context);
+    return err;
+}
+function viewDebugError(msg, context) {
+    const err = new Error(msg);
+    _addDebugContext(err, context);
+    return err;
+}
+function _addDebugContext(err, context) {
+    err[ERROR_DEBUG_CONTEXT] = context;
+    err[ERROR_LOGGER] = context.logError.bind(context);
+}
+function isViewDebugError(err) {
+    return !!getDebugContext(err);
+}
+function viewDestroyedError(action) {
+    return new Error(`ViewDestroyedError: Attempt to use a destroyed view: ${action}`);
+}
 
 /**
  * @license
@@ -15558,50 +11989,91 @@ var MissingTranslationStrategy;
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-function _iterableDiffersFactory() {
-    return defaultIterableDiffers;
+// Called before each cycle of a view's check to detect whether this is in the
+// initState for which we need to call ngOnInit, ngAfterContentInit or ngAfterViewInit
+// lifecycle methods. Returns true if this check cycle should call lifecycle
+// methods.
+function shiftInitState(view, priorInitState, newInitState) {
+    // Only update the InitState if we are currently in the prior state.
+    // For example, only move into CallingInit if we are in BeforeInit. Only
+    // move into CallingContentInit if we are in CallingInit. Normally this will
+    // always be true because of how checkCycle is called in checkAndUpdateView.
+    // However, if checkAndUpdateView is called recursively or if an exception is
+    // thrown while checkAndUpdateView is running, checkAndUpdateView starts over
+    // from the beginning. This ensures the state is monotonically increasing,
+    // terminating in the AfterInit state, which ensures the Init methods are called
+    // at least once and only once.
+    const state = view.state;
+    const initState = state & 1792 /* InitState_Mask */;
+    if (initState === priorInitState) {
+        view.state = (state & ~1792 /* InitState_Mask */) | newInitState;
+        view.initIndex = -1;
+        return true;
+    }
+    return initState === newInitState;
 }
-function _keyValueDiffersFactory() {
-    return defaultKeyValueDiffers;
+// Returns true if the lifecycle init method should be called for the node with
+// the given init index.
+function shouldCallLifecycleInitHook(view, initState, index) {
+    if ((view.state & 1792 /* InitState_Mask */) === initState && view.initIndex <= index) {
+        view.initIndex = index + 1;
+        return true;
+    }
+    return false;
 }
-function _localeFactory(locale) {
-    return locale || 'en-US';
-}
-const APPLICATION_MODULE_PROVIDERS = [
-    {
-        provide: ApplicationRef,
-        useClass: ApplicationRef,
-        deps: [NgZone, Console, Injector, ErrorHandler, ComponentFactoryResolver, ApplicationInitStatus]
-    },
-    {
-        provide: ApplicationInitStatus,
-        useClass: ApplicationInitStatus,
-        deps: [[new Optional(), APP_INITIALIZER]]
-    },
-    { provide: Compiler, useClass: Compiler, deps: [] },
-    APP_ID_RANDOM_PROVIDER,
-    { provide: IterableDiffers, useFactory: _iterableDiffersFactory, deps: [] },
-    { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory, deps: [] },
-    {
-        provide: LOCALE_ID,
-        useFactory: _localeFactory,
-        deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
-    },
-];
 /**
- * This module includes the providers of @angular/core that are needed
- * to bootstrap components via `ApplicationRef`.
- *
- * @experimental
+ * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
  */
-let ApplicationModule = class ApplicationModule {
-    // Inject ApplicationRef to make it eager...
-    constructor(appRef) { }
+function asTextData(view, index) {
+    return view.nodes[index];
+}
+/**
+ * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
+ */
+function asElementData(view, index) {
+    return view.nodes[index];
+}
+/**
+ * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
+ */
+function asProviderData(view, index) {
+    return view.nodes[index];
+}
+/**
+ * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
+ */
+function asPureExpressionData(view, index) {
+    return view.nodes[index];
+}
+/**
+ * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
+ */
+function asQueryList(view, index) {
+    return view.nodes[index];
+}
+/**
+ * This object is used to prevent cycles in the source files and to have a place where
+ * debug mode can hook it. It is lazily filled when `isDevMode` is known.
+ */
+const Services = {
+    setCurrentNode: undefined,
+    createRootView: undefined,
+    createEmbeddedView: undefined,
+    createComponentView: undefined,
+    createNgModuleRef: undefined,
+    overrideProvider: undefined,
+    overrideComponentView: undefined,
+    clearOverrides: undefined,
+    checkAndUpdateView: undefined,
+    checkNoChangesView: undefined,
+    destroyView: undefined,
+    resolveDep: undefined,
+    createDebugContext: undefined,
+    handleEvent: undefined,
+    updateDirectives: undefined,
+    updateRenderer: undefined,
+    dirtyParentQueries: undefined,
 };
-ApplicationModule = __decorate([
-    NgModule({ providers: APPLICATION_MODULE_PROVIDERS }),
-    __metadata("design:paramtypes", [ApplicationRef])
-], ApplicationModule);
 
 /**
  * @license
@@ -15610,279 +12082,389 @@ ApplicationModule = __decorate([
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-function anchorDef(flags, matchedQueriesDsl, ngContentIndex, childCount, handleEvent, templateFactory) {
-    flags |= 1 /* TypeElement */;
-    const { matchedQueries, references, matchedQueryIds } = splitMatchedQueriesDsl(matchedQueriesDsl);
-    const template = templateFactory ? resolveDefinition(templateFactory) : null;
+const NOOP = () => { };
+const _tokenKeyCache = new Map();
+function tokenKey(token) {
+    let key = _tokenKeyCache.get(token);
+    if (!key) {
+        key = stringify(token) + '_' + _tokenKeyCache.size;
+        _tokenKeyCache.set(token, key);
+    }
+    return key;
+}
+function unwrapValue(view, nodeIdx, bindingIdx, value) {
+    if (WrappedValue.isWrapped(value)) {
+        value = WrappedValue.unwrap(value);
+        const globalBindingIdx = view.def.nodes[nodeIdx].bindingIndex + bindingIdx;
+        const oldValue = WrappedValue.unwrap(view.oldValues[globalBindingIdx]);
+        view.oldValues[globalBindingIdx] = new WrappedValue(oldValue);
+    }
+    return value;
+}
+const UNDEFINED_RENDERER_TYPE_ID = '$$undefined';
+const EMPTY_RENDERER_TYPE_ID = '$$empty';
+// Attention: this function is called as top level function.
+// Putting any logic in here will destroy closure tree shaking!
+function createRendererType2(values) {
     return {
-        // will bet set by the view definition
-        nodeIndex: -1,
-        parent: null,
-        renderParent: null,
-        bindingIndex: -1,
-        outputIndex: -1,
-        // regular values
-        flags,
-        checkIndex: -1,
-        childFlags: 0,
-        directChildFlags: 0,
-        childMatchedQueries: 0, matchedQueries, matchedQueryIds, references, ngContentIndex, childCount,
-        bindings: [],
-        bindingFlags: 0,
-        outputs: [],
-        element: {
-            ns: null,
-            name: null,
-            attrs: null, template,
-            componentProvider: null,
-            componentView: null,
-            componentRendererType: null,
-            publicProviders: null,
-            allProviders: null,
-            handleEvent: handleEvent || NOOP
-        },
-        provider: null,
-        text: null,
-        query: null,
-        ngContent: null
+        id: UNDEFINED_RENDERER_TYPE_ID,
+        styles: values.styles,
+        encapsulation: values.encapsulation,
+        data: values.data
     };
 }
-function elementDef(checkIndex, flags, matchedQueriesDsl, ngContentIndex, childCount, namespaceAndName, fixedAttrs = [], bindings, outputs, handleEvent, componentView, componentRendererType) {
-    if (!handleEvent) {
-        handleEvent = NOOP;
-    }
-    const { matchedQueries, references, matchedQueryIds } = splitMatchedQueriesDsl(matchedQueriesDsl);
-    let ns = null;
-    let name = null;
-    if (namespaceAndName) {
-        [ns, name] = splitNamespace(namespaceAndName);
-    }
-    bindings = bindings || [];
-    const bindingDefs = new Array(bindings.length);
-    for (let i = 0; i < bindings.length; i++) {
-        const [bindingFlags, namespaceAndName, suffixOrSecurityContext] = bindings[i];
-        const [ns, name] = splitNamespace(namespaceAndName);
-        let securityContext = undefined;
-        let suffix = undefined;
-        switch (bindingFlags & 15 /* Types */) {
-            case 4 /* TypeElementStyle */:
-                suffix = suffixOrSecurityContext;
-                break;
-            case 1 /* TypeElementAttribute */:
-            case 8 /* TypeProperty */:
-                securityContext = suffixOrSecurityContext;
-                break;
-        }
-        bindingDefs[i] =
-            { flags: bindingFlags, ns, name, nonMinifiedName: name, securityContext, suffix };
-    }
-    outputs = outputs || [];
-    const outputDefs = new Array(outputs.length);
-    for (let i = 0; i < outputs.length; i++) {
-        const [target, eventName] = outputs[i];
-        outputDefs[i] = {
-            type: 0 /* ElementOutput */,
-            target: target, eventName,
-            propName: null
-        };
-    }
-    fixedAttrs = fixedAttrs || [];
-    const attrs = fixedAttrs.map(([namespaceAndName, value]) => {
-        const [ns, name] = splitNamespace(namespaceAndName);
-        return [ns, name, value];
-    });
-    componentRendererType = resolveRendererType2(componentRendererType);
-    if (componentView) {
-        flags |= 33554432 /* ComponentView */;
-    }
-    flags |= 1 /* TypeElement */;
-    return {
-        // will bet set by the view definition
-        nodeIndex: -1,
-        parent: null,
-        renderParent: null,
-        bindingIndex: -1,
-        outputIndex: -1,
-        // regular values
-        checkIndex,
-        flags,
-        childFlags: 0,
-        directChildFlags: 0,
-        childMatchedQueries: 0, matchedQueries, matchedQueryIds, references, ngContentIndex, childCount,
-        bindings: bindingDefs,
-        bindingFlags: calcBindingFlags(bindingDefs),
-        outputs: outputDefs,
-        element: {
-            ns,
-            name,
-            attrs,
-            template: null,
-            // will bet set by the view definition
-            componentProvider: null,
-            componentView: componentView || null,
-            componentRendererType: componentRendererType,
-            publicProviders: null,
-            allProviders: null,
-            handleEvent: handleEvent || NOOP,
-        },
-        provider: null,
-        text: null,
-        query: null,
-        ngContent: null
-    };
-}
-function createElement(view, renderHost, def) {
-    const elDef = def.element;
-    const rootSelectorOrNode = view.root.selectorOrNode;
-    const renderer = view.renderer;
-    let el;
-    if (view.parent || !rootSelectorOrNode) {
-        if (elDef.name) {
-            el = renderer.createElement(elDef.name, elDef.ns);
+let _renderCompCount$1 = 0;
+function resolveRendererType2(type) {
+    if (type && type.id === UNDEFINED_RENDERER_TYPE_ID) {
+        // first time we see this RendererType2. Initialize it...
+        const isFilled = ((type.encapsulation != null && type.encapsulation !== ViewEncapsulation.None) ||
+            type.styles.length || Object.keys(type.data).length);
+        if (isFilled) {
+            type.id = `c${_renderCompCount$1++}`;
         }
         else {
-            el = renderer.createComment('');
+            type.id = EMPTY_RENDERER_TYPE_ID;
         }
-        const parentEl = getParentRenderElement(view, renderHost, def);
-        if (parentEl) {
-            renderer.appendChild(parentEl, el);
+    }
+    if (type && type.id === EMPTY_RENDERER_TYPE_ID) {
+        type = null;
+    }
+    return type || null;
+}
+function checkBinding(view, def, bindingIdx, value) {
+    const oldValues = view.oldValues;
+    if ((view.state & 2 /* FirstCheck */) ||
+        !looseIdentical(oldValues[def.bindingIndex + bindingIdx], value)) {
+        return true;
+    }
+    return false;
+}
+function checkAndUpdateBinding$1(view, def, bindingIdx, value) {
+    if (checkBinding(view, def, bindingIdx, value)) {
+        view.oldValues[def.bindingIndex + bindingIdx] = value;
+        return true;
+    }
+    return false;
+}
+function checkBindingNoChanges(view, def, bindingIdx, value) {
+    const oldValue = view.oldValues[def.bindingIndex + bindingIdx];
+    if ((view.state & 1 /* BeforeFirstCheck */) || !devModeEqual(oldValue, value)) {
+        const bindingName = def.bindings[bindingIdx].name;
+        throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, def.nodeIndex), `${bindingName}: ${oldValue}`, `${bindingName}: ${value}`, (view.state & 1 /* BeforeFirstCheck */) !== 0);
+    }
+}
+function markParentViewsForCheck(view) {
+    let currView = view;
+    while (currView) {
+        if (currView.def.flags & 2 /* OnPush */) {
+            currView.state |= 8 /* ChecksEnabled */;
+        }
+        currView = currView.viewContainerParent || currView.parent;
+    }
+}
+function markParentViewsForCheckProjectedViews(view, endView) {
+    let currView = view;
+    while (currView && currView !== endView) {
+        currView.state |= 64 /* CheckProjectedViews */;
+        currView = currView.viewContainerParent || currView.parent;
+    }
+}
+function dispatchEvent(view, nodeIndex, eventName, event) {
+    try {
+        const nodeDef = view.def.nodes[nodeIndex];
+        const startView = nodeDef.flags & 33554432 /* ComponentView */ ?
+            asElementData(view, nodeIndex).componentView :
+            view;
+        markParentViewsForCheck(startView);
+        return Services.handleEvent(view, nodeIndex, eventName, event);
+    }
+    catch (e) {
+        // Attention: Don't rethrow, as it would cancel Observable subscriptions!
+        view.root.errorHandler.handleError(e);
+    }
+}
+function declaredViewContainer(view) {
+    if (view.parent) {
+        const parentView = view.parent;
+        return asElementData(parentView, view.parentNodeDef.nodeIndex);
+    }
+    return null;
+}
+/**
+ * for component views, this is the host element.
+ * for embedded views, this is the index of the parent node
+ * that contains the view container.
+ */
+function viewParentEl(view) {
+    const parentView = view.parent;
+    if (parentView) {
+        return view.parentNodeDef.parent;
+    }
+    else {
+        return null;
+    }
+}
+function renderNode(view, def) {
+    switch (def.flags & 201347067 /* Types */) {
+        case 1 /* TypeElement */:
+            return asElementData(view, def.nodeIndex).renderElement;
+        case 2 /* TypeText */:
+            return asTextData(view, def.nodeIndex).renderText;
+    }
+}
+function elementEventFullName(target, name) {
+    return target ? `${target}:${name}` : name;
+}
+function isComponentView(view) {
+    return !!view.parent && !!(view.parentNodeDef.flags & 32768 /* Component */);
+}
+function isEmbeddedView(view) {
+    return !!view.parent && !(view.parentNodeDef.flags & 32768 /* Component */);
+}
+function filterQueryId(queryId) {
+    return 1 << (queryId % 32);
+}
+function splitMatchedQueriesDsl(matchedQueriesDsl) {
+    const matchedQueries = {};
+    let matchedQueryIds = 0;
+    const references = {};
+    if (matchedQueriesDsl) {
+        matchedQueriesDsl.forEach(([queryId, valueType]) => {
+            if (typeof queryId === 'number') {
+                matchedQueries[queryId] = valueType;
+                matchedQueryIds |= filterQueryId(queryId);
+            }
+            else {
+                references[queryId] = valueType;
+            }
+        });
+    }
+    return { matchedQueries, references, matchedQueryIds };
+}
+function splitDepsDsl(deps, sourceName) {
+    return deps.map(value => {
+        let token;
+        let flags;
+        if (Array.isArray(value)) {
+            [flags, token] = value;
+        }
+        else {
+            flags = 0 /* None */;
+            token = value;
+        }
+        if (token && (typeof token === 'function' || typeof token === 'object') && sourceName) {
+            Object.defineProperty(token, SOURCE, { value: sourceName, configurable: true });
+        }
+        return { flags, token, tokenKey: tokenKey(token) };
+    });
+}
+function getParentRenderElement(view, renderHost, def) {
+    let renderParent = def.renderParent;
+    if (renderParent) {
+        if ((renderParent.flags & 1 /* TypeElement */) === 0 ||
+            (renderParent.flags & 33554432 /* ComponentView */) === 0 ||
+            (renderParent.element.componentRendererType &&
+                renderParent.element.componentRendererType.encapsulation ===
+                    ViewEncapsulation.Native)) {
+            // only children of non components, or children of components with native encapsulation should
+            // be attached.
+            return asElementData(view, def.renderParent.nodeIndex).renderElement;
         }
     }
     else {
-        el = renderer.selectRootElement(rootSelectorOrNode);
+        return renderHost;
     }
-    if (elDef.attrs) {
-        for (let i = 0; i < elDef.attrs.length; i++) {
-            const [ns, name, value] = elDef.attrs[i];
-            renderer.setAttribute(el, name, value, ns);
+}
+const DEFINITION_CACHE = new WeakMap();
+function resolveDefinition(factory) {
+    let value = DEFINITION_CACHE.get(factory);
+    if (!value) {
+        value = factory(() => NOOP);
+        value.factory = factory;
+        DEFINITION_CACHE.set(factory, value);
+    }
+    return value;
+}
+function rootRenderNodes(view) {
+    const renderNodes = [];
+    visitRootRenderNodes(view, 0 /* Collect */, undefined, undefined, renderNodes);
+    return renderNodes;
+}
+function visitRootRenderNodes(view, action, parentNode, nextSibling, target) {
+    // We need to re-compute the parent node in case the nodes have been moved around manually
+    if (action === 3 /* RemoveChild */) {
+        parentNode = view.renderer.parentNode(renderNode(view, view.def.lastRenderRootNode));
+    }
+    visitSiblingRenderNodes(view, action, 0, view.def.nodes.length - 1, parentNode, nextSibling, target);
+}
+function visitSiblingRenderNodes(view, action, startIndex, endIndex, parentNode, nextSibling, target) {
+    for (let i = startIndex; i <= endIndex; i++) {
+        const nodeDef = view.def.nodes[i];
+        if (nodeDef.flags & (1 /* TypeElement */ | 2 /* TypeText */ | 8 /* TypeNgContent */)) {
+            visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target);
+        }
+        // jump to next sibling
+        i += nodeDef.childCount;
+    }
+}
+function visitProjectedRenderNodes(view, ngContentIndex, action, parentNode, nextSibling, target) {
+    let compView = view;
+    while (compView && !isComponentView(compView)) {
+        compView = compView.parent;
+    }
+    const hostView = compView.parent;
+    const hostElDef = viewParentEl(compView);
+    const startIndex = hostElDef.nodeIndex + 1;
+    const endIndex = hostElDef.nodeIndex + hostElDef.childCount;
+    for (let i = startIndex; i <= endIndex; i++) {
+        const nodeDef = hostView.def.nodes[i];
+        if (nodeDef.ngContentIndex === ngContentIndex) {
+            visitRenderNode(hostView, nodeDef, action, parentNode, nextSibling, target);
+        }
+        // jump to next sibling
+        i += nodeDef.childCount;
+    }
+    if (!hostView.parent) {
+        // a root view
+        const projectedNodes = view.root.projectableNodes[ngContentIndex];
+        if (projectedNodes) {
+            for (let i = 0; i < projectedNodes.length; i++) {
+                execRenderNodeAction(view, projectedNodes[i], action, parentNode, nextSibling, target);
+            }
         }
     }
-    return el;
 }
-function listenToElementOutputs(view, compView, def, el) {
-    for (let i = 0; i < def.outputs.length; i++) {
-        const output = def.outputs[i];
-        const handleEventClosure = renderEventHandlerClosure(view, def.nodeIndex, elementEventFullName(output.target, output.eventName));
-        let listenTarget = output.target;
-        let listenerView = view;
-        if (output.target === 'component') {
-            listenTarget = null;
-            listenerView = compView;
+function visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target) {
+    if (nodeDef.flags & 8 /* TypeNgContent */) {
+        visitProjectedRenderNodes(view, nodeDef.ngContent.index, action, parentNode, nextSibling, target);
+    }
+    else {
+        const rn = renderNode(view, nodeDef);
+        if (action === 3 /* RemoveChild */ && (nodeDef.flags & 33554432 /* ComponentView */) &&
+            (nodeDef.bindingFlags & 48 /* CatSyntheticProperty */)) {
+            // Note: we might need to do both actions.
+            if (nodeDef.bindingFlags & (16 /* SyntheticProperty */)) {
+                execRenderNodeAction(view, rn, action, parentNode, nextSibling, target);
+            }
+            if (nodeDef.bindingFlags & (32 /* SyntheticHostProperty */)) {
+                const compView = asElementData(view, nodeDef.nodeIndex).componentView;
+                execRenderNodeAction(compView, rn, action, parentNode, nextSibling, target);
+            }
         }
-        const disposable = listenerView.renderer.listen(listenTarget || el, output.eventName, handleEventClosure);
-        view.disposables[def.outputIndex + i] = disposable;
+        else {
+            execRenderNodeAction(view, rn, action, parentNode, nextSibling, target);
+        }
+        if (nodeDef.flags & 16777216 /* EmbeddedViews */) {
+            const embeddedViews = asElementData(view, nodeDef.nodeIndex).viewContainer._embeddedViews;
+            for (let k = 0; k < embeddedViews.length; k++) {
+                visitRootRenderNodes(embeddedViews[k], action, parentNode, nextSibling, target);
+            }
+        }
+        if (nodeDef.flags & 1 /* TypeElement */ && !nodeDef.element.name) {
+            visitSiblingRenderNodes(view, action, nodeDef.nodeIndex + 1, nodeDef.nodeIndex + nodeDef.childCount, parentNode, nextSibling, target);
+        }
     }
 }
-function renderEventHandlerClosure(view, index, eventName) {
-    return (event) => dispatchEvent(view, index, eventName, event);
-}
-function checkAndUpdateElementInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
-    const bindLen = def.bindings.length;
-    let changed = false;
-    if (bindLen > 0 && checkAndUpdateElementValue(view, def, 0, v0))
-        changed = true;
-    if (bindLen > 1 && checkAndUpdateElementValue(view, def, 1, v1))
-        changed = true;
-    if (bindLen > 2 && checkAndUpdateElementValue(view, def, 2, v2))
-        changed = true;
-    if (bindLen > 3 && checkAndUpdateElementValue(view, def, 3, v3))
-        changed = true;
-    if (bindLen > 4 && checkAndUpdateElementValue(view, def, 4, v4))
-        changed = true;
-    if (bindLen > 5 && checkAndUpdateElementValue(view, def, 5, v5))
-        changed = true;
-    if (bindLen > 6 && checkAndUpdateElementValue(view, def, 6, v6))
-        changed = true;
-    if (bindLen > 7 && checkAndUpdateElementValue(view, def, 7, v7))
-        changed = true;
-    if (bindLen > 8 && checkAndUpdateElementValue(view, def, 8, v8))
-        changed = true;
-    if (bindLen > 9 && checkAndUpdateElementValue(view, def, 9, v9))
-        changed = true;
-    return changed;
-}
-function checkAndUpdateElementDynamic(view, def, values) {
-    let changed = false;
-    for (let i = 0; i < values.length; i++) {
-        if (checkAndUpdateElementValue(view, def, i, values[i]))
-            changed = true;
-    }
-    return changed;
-}
-function checkAndUpdateElementValue(view, def, bindingIdx, value) {
-    if (!checkAndUpdateBinding$1(view, def, bindingIdx, value)) {
-        return false;
-    }
-    const binding = def.bindings[bindingIdx];
-    const elData = asElementData(view, def.nodeIndex);
-    const renderNode$$1 = elData.renderElement;
-    const name = binding.name;
-    switch (binding.flags & 15 /* Types */) {
-        case 1 /* TypeElementAttribute */:
-            setElementAttribute(view, binding, renderNode$$1, binding.ns, name, value);
-            break;
-        case 2 /* TypeElementClass */:
-            setElementClass(view, renderNode$$1, name, value);
-            break;
-        case 4 /* TypeElementStyle */:
-            setElementStyle(view, binding, renderNode$$1, name, value);
-            break;
-        case 8 /* TypeProperty */:
-            const bindView = (def.flags & 33554432 /* ComponentView */ &&
-                binding.flags & 32 /* SyntheticHostProperty */) ?
-                elData.componentView :
-                view;
-            setElementProperty(bindView, binding, renderNode$$1, name, value);
-            break;
-    }
-    return true;
-}
-function setElementAttribute(view, binding, renderNode$$1, ns, name, value) {
-    const securityContext = binding.securityContext;
-    let renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
-    renderValue = renderValue != null ? renderValue.toString() : null;
+function execRenderNodeAction(view, renderNode, action, parentNode, nextSibling, target) {
     const renderer = view.renderer;
-    if (value != null) {
-        renderer.setAttribute(renderNode$$1, name, renderValue, ns);
-    }
-    else {
-        renderer.removeAttribute(renderNode$$1, name, ns);
-    }
-}
-function setElementClass(view, renderNode$$1, name, value) {
-    const renderer = view.renderer;
-    if (value) {
-        renderer.addClass(renderNode$$1, name);
-    }
-    else {
-        renderer.removeClass(renderNode$$1, name);
-    }
-}
-function setElementStyle(view, binding, renderNode$$1, name, value) {
-    let renderValue = view.root.sanitizer.sanitize(SecurityContext.STYLE, value);
-    if (renderValue != null) {
-        renderValue = renderValue.toString();
-        const unit = binding.suffix;
-        if (unit != null) {
-            renderValue = renderValue + unit;
-        }
-    }
-    else {
-        renderValue = null;
-    }
-    const renderer = view.renderer;
-    if (renderValue != null) {
-        renderer.setStyle(renderNode$$1, name, renderValue);
-    }
-    else {
-        renderer.removeStyle(renderNode$$1, name);
+    switch (action) {
+        case 1 /* AppendChild */:
+            renderer.appendChild(parentNode, renderNode);
+            break;
+        case 2 /* InsertBefore */:
+            renderer.insertBefore(parentNode, renderNode, nextSibling);
+            break;
+        case 3 /* RemoveChild */:
+            renderer.removeChild(parentNode, renderNode);
+            break;
+        case 0 /* Collect */:
+            target.push(renderNode);
+            break;
     }
 }
-function setElementProperty(view, binding, renderNode$$1, name, value) {
-    const securityContext = binding.securityContext;
-    let renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
-    view.renderer.setProperty(renderNode$$1, name, renderValue);
+const NS_PREFIX_RE = /^:([^:]+):(.+)$/;
+function splitNamespace(name) {
+    if (name[0] === ':') {
+        const match = name.match(NS_PREFIX_RE);
+        return [match[1], match[2]];
+    }
+    return ['', name];
 }
+function calcBindingFlags(bindings) {
+    let flags = 0;
+    for (let i = 0; i < bindings.length; i++) {
+        flags |= bindings[i].flags;
+    }
+    return flags;
+}
+function interpolate(valueCount, constAndInterp) {
+    let result = '';
+    for (let i = 0; i < valueCount * 2; i = i + 2) {
+        result = result + constAndInterp[i] + _toStringWithNull(constAndInterp[i + 1]);
+    }
+    return result + constAndInterp[valueCount * 2];
+}
+function inlineInterpolate(valueCount, c0, a1, c1, a2, c2, a3, c3, a4, c4, a5, c5, a6, c6, a7, c7, a8, c8, a9, c9) {
+    switch (valueCount) {
+        case 1:
+            return c0 + _toStringWithNull(a1) + c1;
+        case 2:
+            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2;
+        case 3:
+            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
+                c3;
+        case 4:
+            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
+                c3 + _toStringWithNull(a4) + c4;
+        case 5:
+            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
+                c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5;
+        case 6:
+            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
+                c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) + c6;
+        case 7:
+            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
+                c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) +
+                c6 + _toStringWithNull(a7) + c7;
+        case 8:
+            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
+                c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) +
+                c6 + _toStringWithNull(a7) + c7 + _toStringWithNull(a8) + c8;
+        case 9:
+            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
+                c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) +
+                c6 + _toStringWithNull(a7) + c7 + _toStringWithNull(a8) + c8 + _toStringWithNull(a9) + c9;
+        default:
+            throw new Error(`Does not support more than 9 expressions`);
+    }
+}
+function _toStringWithNull(v) {
+    return v != null ? v.toString() : '';
+}
+const EMPTY_ARRAY$3 = [];
+const EMPTY_MAP = {};
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * @description Represents the version of Angular
+ *
+ *
+ */
+class Version {
+    constructor(full) {
+        this.full = full;
+        this.major = full.split('.')[0];
+        this.minor = full.split('.')[1];
+        this.patch = full.split('.').slice(2).join('.');
+    }
+}
+const VERSION = new Version('7.0.0-beta.1+52.sha-1f11039');
 
 /**
  * @license
@@ -17158,7 +13740,7 @@ function queryDef(flags, id, bindings) {
         ngContent: null
     };
 }
-function createQuery$1() {
+function createQuery() {
     return new QueryList();
 }
 function dirtyParentQueries(view) {
@@ -17290,6 +13872,287 @@ function getQueryValue(view, nodeDef, queryValueType) {
                 return asProviderData(view, nodeDef.nodeIndex).instance;
         }
     }
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function anchorDef(flags, matchedQueriesDsl, ngContentIndex, childCount, handleEvent, templateFactory) {
+    flags |= 1 /* TypeElement */;
+    const { matchedQueries, references, matchedQueryIds } = splitMatchedQueriesDsl(matchedQueriesDsl);
+    const template = templateFactory ? resolveDefinition(templateFactory) : null;
+    return {
+        // will bet set by the view definition
+        nodeIndex: -1,
+        parent: null,
+        renderParent: null,
+        bindingIndex: -1,
+        outputIndex: -1,
+        // regular values
+        flags,
+        checkIndex: -1,
+        childFlags: 0,
+        directChildFlags: 0,
+        childMatchedQueries: 0, matchedQueries, matchedQueryIds, references, ngContentIndex, childCount,
+        bindings: [],
+        bindingFlags: 0,
+        outputs: [],
+        element: {
+            ns: null,
+            name: null,
+            attrs: null, template,
+            componentProvider: null,
+            componentView: null,
+            componentRendererType: null,
+            publicProviders: null,
+            allProviders: null,
+            handleEvent: handleEvent || NOOP
+        },
+        provider: null,
+        text: null,
+        query: null,
+        ngContent: null
+    };
+}
+function elementDef(checkIndex, flags, matchedQueriesDsl, ngContentIndex, childCount, namespaceAndName, fixedAttrs = [], bindings, outputs, handleEvent, componentView, componentRendererType) {
+    if (!handleEvent) {
+        handleEvent = NOOP;
+    }
+    const { matchedQueries, references, matchedQueryIds } = splitMatchedQueriesDsl(matchedQueriesDsl);
+    let ns = null;
+    let name = null;
+    if (namespaceAndName) {
+        [ns, name] = splitNamespace(namespaceAndName);
+    }
+    bindings = bindings || [];
+    const bindingDefs = new Array(bindings.length);
+    for (let i = 0; i < bindings.length; i++) {
+        const [bindingFlags, namespaceAndName, suffixOrSecurityContext] = bindings[i];
+        const [ns, name] = splitNamespace(namespaceAndName);
+        let securityContext = undefined;
+        let suffix = undefined;
+        switch (bindingFlags & 15 /* Types */) {
+            case 4 /* TypeElementStyle */:
+                suffix = suffixOrSecurityContext;
+                break;
+            case 1 /* TypeElementAttribute */:
+            case 8 /* TypeProperty */:
+                securityContext = suffixOrSecurityContext;
+                break;
+        }
+        bindingDefs[i] =
+            { flags: bindingFlags, ns, name, nonMinifiedName: name, securityContext, suffix };
+    }
+    outputs = outputs || [];
+    const outputDefs = new Array(outputs.length);
+    for (let i = 0; i < outputs.length; i++) {
+        const [target, eventName] = outputs[i];
+        outputDefs[i] = {
+            type: 0 /* ElementOutput */,
+            target: target, eventName,
+            propName: null
+        };
+    }
+    fixedAttrs = fixedAttrs || [];
+    const attrs = fixedAttrs.map(([namespaceAndName, value]) => {
+        const [ns, name] = splitNamespace(namespaceAndName);
+        return [ns, name, value];
+    });
+    componentRendererType = resolveRendererType2(componentRendererType);
+    if (componentView) {
+        flags |= 33554432 /* ComponentView */;
+    }
+    flags |= 1 /* TypeElement */;
+    return {
+        // will bet set by the view definition
+        nodeIndex: -1,
+        parent: null,
+        renderParent: null,
+        bindingIndex: -1,
+        outputIndex: -1,
+        // regular values
+        checkIndex,
+        flags,
+        childFlags: 0,
+        directChildFlags: 0,
+        childMatchedQueries: 0, matchedQueries, matchedQueryIds, references, ngContentIndex, childCount,
+        bindings: bindingDefs,
+        bindingFlags: calcBindingFlags(bindingDefs),
+        outputs: outputDefs,
+        element: {
+            ns,
+            name,
+            attrs,
+            template: null,
+            // will bet set by the view definition
+            componentProvider: null,
+            componentView: componentView || null,
+            componentRendererType: componentRendererType,
+            publicProviders: null,
+            allProviders: null,
+            handleEvent: handleEvent || NOOP,
+        },
+        provider: null,
+        text: null,
+        query: null,
+        ngContent: null
+    };
+}
+function createElement(view, renderHost, def) {
+    const elDef = def.element;
+    const rootSelectorOrNode = view.root.selectorOrNode;
+    const renderer = view.renderer;
+    let el;
+    if (view.parent || !rootSelectorOrNode) {
+        if (elDef.name) {
+            el = renderer.createElement(elDef.name, elDef.ns);
+        }
+        else {
+            el = renderer.createComment('');
+        }
+        const parentEl = getParentRenderElement(view, renderHost, def);
+        if (parentEl) {
+            renderer.appendChild(parentEl, el);
+        }
+    }
+    else {
+        el = renderer.selectRootElement(rootSelectorOrNode);
+    }
+    if (elDef.attrs) {
+        for (let i = 0; i < elDef.attrs.length; i++) {
+            const [ns, name, value] = elDef.attrs[i];
+            renderer.setAttribute(el, name, value, ns);
+        }
+    }
+    return el;
+}
+function listenToElementOutputs(view, compView, def, el) {
+    for (let i = 0; i < def.outputs.length; i++) {
+        const output = def.outputs[i];
+        const handleEventClosure = renderEventHandlerClosure(view, def.nodeIndex, elementEventFullName(output.target, output.eventName));
+        let listenTarget = output.target;
+        let listenerView = view;
+        if (output.target === 'component') {
+            listenTarget = null;
+            listenerView = compView;
+        }
+        const disposable = listenerView.renderer.listen(listenTarget || el, output.eventName, handleEventClosure);
+        view.disposables[def.outputIndex + i] = disposable;
+    }
+}
+function renderEventHandlerClosure(view, index, eventName) {
+    return (event) => dispatchEvent(view, index, eventName, event);
+}
+function checkAndUpdateElementInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
+    const bindLen = def.bindings.length;
+    let changed = false;
+    if (bindLen > 0 && checkAndUpdateElementValue(view, def, 0, v0))
+        changed = true;
+    if (bindLen > 1 && checkAndUpdateElementValue(view, def, 1, v1))
+        changed = true;
+    if (bindLen > 2 && checkAndUpdateElementValue(view, def, 2, v2))
+        changed = true;
+    if (bindLen > 3 && checkAndUpdateElementValue(view, def, 3, v3))
+        changed = true;
+    if (bindLen > 4 && checkAndUpdateElementValue(view, def, 4, v4))
+        changed = true;
+    if (bindLen > 5 && checkAndUpdateElementValue(view, def, 5, v5))
+        changed = true;
+    if (bindLen > 6 && checkAndUpdateElementValue(view, def, 6, v6))
+        changed = true;
+    if (bindLen > 7 && checkAndUpdateElementValue(view, def, 7, v7))
+        changed = true;
+    if (bindLen > 8 && checkAndUpdateElementValue(view, def, 8, v8))
+        changed = true;
+    if (bindLen > 9 && checkAndUpdateElementValue(view, def, 9, v9))
+        changed = true;
+    return changed;
+}
+function checkAndUpdateElementDynamic(view, def, values) {
+    let changed = false;
+    for (let i = 0; i < values.length; i++) {
+        if (checkAndUpdateElementValue(view, def, i, values[i]))
+            changed = true;
+    }
+    return changed;
+}
+function checkAndUpdateElementValue(view, def, bindingIdx, value) {
+    if (!checkAndUpdateBinding$1(view, def, bindingIdx, value)) {
+        return false;
+    }
+    const binding = def.bindings[bindingIdx];
+    const elData = asElementData(view, def.nodeIndex);
+    const renderNode$$1 = elData.renderElement;
+    const name = binding.name;
+    switch (binding.flags & 15 /* Types */) {
+        case 1 /* TypeElementAttribute */:
+            setElementAttribute(view, binding, renderNode$$1, binding.ns, name, value);
+            break;
+        case 2 /* TypeElementClass */:
+            setElementClass(view, renderNode$$1, name, value);
+            break;
+        case 4 /* TypeElementStyle */:
+            setElementStyle(view, binding, renderNode$$1, name, value);
+            break;
+        case 8 /* TypeProperty */:
+            const bindView = (def.flags & 33554432 /* ComponentView */ &&
+                binding.flags & 32 /* SyntheticHostProperty */) ?
+                elData.componentView :
+                view;
+            setElementProperty(bindView, binding, renderNode$$1, name, value);
+            break;
+    }
+    return true;
+}
+function setElementAttribute(view, binding, renderNode$$1, ns, name, value) {
+    const securityContext = binding.securityContext;
+    let renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
+    renderValue = renderValue != null ? renderValue.toString() : null;
+    const renderer = view.renderer;
+    if (value != null) {
+        renderer.setAttribute(renderNode$$1, name, renderValue, ns);
+    }
+    else {
+        renderer.removeAttribute(renderNode$$1, name, ns);
+    }
+}
+function setElementClass(view, renderNode$$1, name, value) {
+    const renderer = view.renderer;
+    if (value) {
+        renderer.addClass(renderNode$$1, name);
+    }
+    else {
+        renderer.removeClass(renderNode$$1, name);
+    }
+}
+function setElementStyle(view, binding, renderNode$$1, name, value) {
+    let renderValue = view.root.sanitizer.sanitize(SecurityContext.STYLE, value);
+    if (renderValue != null) {
+        renderValue = renderValue.toString();
+        const unit = binding.suffix;
+        if (unit != null) {
+            renderValue = renderValue + unit;
+        }
+    }
+    else {
+        renderValue = null;
+    }
+    const renderer = view.renderer;
+    if (renderValue != null) {
+        renderer.setStyle(renderNode$$1, name, renderValue);
+    }
+    else {
+        renderer.removeStyle(renderNode$$1, name);
+    }
+}
+function setElementProperty(view, binding, renderNode$$1, name, value) {
+    const securityContext = binding.securityContext;
+    let renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
+    view.renderer.setProperty(renderNode$$1, name, renderValue);
 }
 
 /**
@@ -17960,7 +14823,7 @@ function createViewNodes(view) {
                 break;
             case 67108864 /* TypeContentQuery */:
             case 134217728 /* TypeViewQuery */:
-                nodeData = createQuery$1();
+                nodeData = createQuery();
                 break;
             case 8 /* TypeNgContent */:
                 appendNgContent(view, renderHost, nodeDef);
@@ -18878,8 +15741,18 @@ class DebugRendererFactory2 {
 class DebugRenderer2 {
     constructor(delegate) {
         this.delegate = delegate;
+        /**
+         * Factory function used to create a `DebugContext` when a node is created.
+         *
+         * The `DebugContext` allows to retrieve information about the nodes that are useful in tests.
+         *
+         * The factory is configurable so that the `DebugRenderer2` could instantiate either a View Engine
+         * or a Render context.
+         */
+        this.debugContextFactory = getCurrentDebugContext;
         this.data = this.delegate.data;
     }
+    get debugContext() { return this.debugContextFactory(); }
     destroyNode(node) {
         removeDebugNodeFromIndex(getDebugNode(node));
         if (this.delegate.destroyNode) {
@@ -18889,7 +15762,7 @@ class DebugRenderer2 {
     destroy() { this.delegate.destroy(); }
     createElement(name, namespace) {
         const el = this.delegate.createElement(name, namespace);
-        const debugCtx = getCurrentDebugContext();
+        const debugCtx = this.debugContext;
         if (debugCtx) {
             const debugEl = new DebugElement(el, null, debugCtx);
             debugEl.name = name;
@@ -18899,7 +15772,7 @@ class DebugRenderer2 {
     }
     createComment(value) {
         const comment = this.delegate.createComment(value);
-        const debugCtx = getCurrentDebugContext();
+        const debugCtx = this.debugContext;
         if (debugCtx) {
             indexDebugNode(new DebugNode(comment, null, debugCtx));
         }
@@ -18907,7 +15780,7 @@ class DebugRenderer2 {
     }
     createText(value) {
         const text = this.delegate.createText(value);
-        const debugCtx = getCurrentDebugContext();
+        const debugCtx = this.debugContext;
         if (debugCtx) {
             indexDebugNode(new DebugNode(text, null, debugCtx));
         }
@@ -18940,7 +15813,7 @@ class DebugRenderer2 {
     }
     selectRootElement(selectorOrNode) {
         const el = this.delegate.selectRootElement(selectorOrNode);
-        const debugCtx = getCurrentDebugContext();
+        const debugCtx = this.debugContext;
         if (debugCtx) {
             indexDebugNode(new DebugElement(el, null, debugCtx));
         }
@@ -19010,6 +15883,3396 @@ class DebugRenderer2 {
     nextSibling(node) { return this.delegate.nextSibling(node); }
     setValue(node, value) { return this.delegate.setValue(node, value); }
 }
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Adapts the DebugRendererFactory2 to create a DebugRenderer2 specific for IVY.
+ *
+ * The created DebugRenderer know how to create a Debug Context specific to IVY.
+ */
+class Render3DebugRendererFactory2 extends DebugRendererFactory2 {
+    createRenderer(element$$1, renderData) {
+        const renderer = super.createRenderer(element$$1, renderData);
+        renderer.debugContextFactory = () => new Render3DebugContext(_getViewData());
+        return renderer;
+    }
+}
+/**
+ * Stores context information about view nodes.
+ *
+ * Used in tests to retrieve information those nodes.
+ */
+class Render3DebugContext {
+    constructor(viewData) {
+        this.viewData = viewData;
+        // The LNode will be created next and appended to viewData
+        this.nodeIndex = viewData ? viewData.length : null;
+    }
+    get view() { return this.viewData; }
+    get injector() {
+        if (this.nodeIndex !== null) {
+            const lElementNode = this.view[this.nodeIndex];
+            const nodeInjector = lElementNode.nodeInjector;
+            if (nodeInjector) {
+                return new NodeInjector(nodeInjector);
+            }
+        }
+        return Injector.NULL;
+    }
+    get component() {
+        // TODO(vicb): why/when
+        if (this.nodeIndex === null) {
+            return null;
+        }
+        const tView = this.view[TVIEW];
+        const components = tView.components;
+        return (components && components.indexOf(this.nodeIndex) == -1) ?
+            null :
+            this.view[this.nodeIndex].data[CONTEXT];
+    }
+    // TODO(vicb): add view providers when supported
+    get providerTokens() {
+        const matchedDirectives = [];
+        // TODO(vicb): why/when
+        if (this.nodeIndex === null) {
+            return matchedDirectives;
+        }
+        const directives = this.view[DIRECTIVES];
+        if (directives) {
+            const currentNode = this.view[this.nodeIndex];
+            for (let dirIndex = 0; dirIndex < directives.length; dirIndex++) {
+                const directive = directives[dirIndex];
+                if (directive[NG_HOST_SYMBOL] === currentNode) {
+                    matchedDirectives.push(directive.constructor);
+                }
+            }
+        }
+        return matchedDirectives;
+    }
+    get references() {
+        // TODO(vicb): implement retrieving references
+        throw new Error('Not implemented yet in ivy');
+    }
+    get context() {
+        if (this.nodeIndex === null) {
+            return null;
+        }
+        const lNode = this.view[this.nodeIndex];
+        return lNode.view[CONTEXT];
+    }
+    get componentRenderElement() { throw new Error('Not implemented in ivy'); }
+    get renderNode() { throw new Error('Not implemented in ivy'); }
+    // TODO(vicb): check previous implementation
+    logError(console, ...values) { console.error(...values); }
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const i18nTagRegex = /{\$([^}]+)}/g;
+/**
+ * Takes a translation string, the initial list of placeholders (elements and expressions) and the
+ * indexes of their corresponding expression nodes to return a list of instructions for each
+ * template function.
+ *
+ * Because embedded templates have different indexes for each placeholder, each parameter (except
+ * the translation) is an array, where each value corresponds to a different template, by order of
+ * appearance.
+ *
+ * @param translation A translation string where placeholders are represented by `{$name}`
+ * @param elements An array containing, for each template, the maps of element placeholders and
+ * their indexes.
+ * @param expressions An array containing, for each template, the maps of expression placeholders
+ * and their indexes.
+ * @param templateRoots An array of template roots whose content should be ignored when
+ * generating the instructions for their parent template.
+ * @param lastChildIndex The index of the last child of the i18n node. Used when the i18n block is
+ * an ng-container.
+ *
+ * @returns A list of instructions used to translate each template.
+ */
+function i18nMapping(translation, elements, expressions, templateRoots, lastChildIndex) {
+    const translationParts = translation.split(i18nTagRegex);
+    const nbTemplates = templateRoots ? templateRoots.length + 1 : 1;
+    const instructions = (new Array(nbTemplates)).fill(undefined);
+    generateMappingInstructions(0, 0, translationParts, instructions, elements, expressions, templateRoots, lastChildIndex);
+    return instructions;
+}
+/**
+ * Internal function that reads the translation parts and generates a set of instructions for each
+ * template.
+ *
+ * See `i18nMapping()` for more details.
+ *
+ * @param tmplIndex The order of appearance of the template.
+ * 0 for the root template, following indexes match the order in `templateRoots`.
+ * @param partIndex The current index in `translationParts`.
+ * @param translationParts The translation string split into an array of placeholders and text
+ * elements.
+ * @param instructions The current list of instructions to update.
+ * @param elements An array containing, for each template, the maps of element placeholders and
+ * their indexes.
+ * @param expressions An array containing, for each template, the maps of expression placeholders
+ * and their indexes.
+ * @param templateRoots An array of template roots whose content should be ignored when
+ * generating the instructions for their parent template.
+ * @param lastChildIndex The index of the last child of the i18n node. Used when the i18n block is
+ * an ng-container.
+ *
+ * @returns the current index in `translationParts`
+ */
+function generateMappingInstructions(tmplIndex, partIndex, translationParts, instructions, elements, expressions, templateRoots, lastChildIndex) {
+    const tmplInstructions = [];
+    const phVisited = [];
+    let openedTagCount = 0;
+    let maxIndex = 0;
+    let currentElements = elements && elements[tmplIndex] ? elements[tmplIndex] : null;
+    let currentExpressions = expressions && expressions[tmplIndex] ? expressions[tmplIndex] : null;
+    instructions[tmplIndex] = tmplInstructions;
+    for (; partIndex < translationParts.length; partIndex++) {
+        // The value can either be text or the name of a placeholder (element/template root/expression)
+        const value = translationParts[partIndex];
+        // Odd indexes are placeholders
+        if (partIndex & 1) {
+            let phIndex;
+            if (currentElements && currentElements[value] !== undefined) {
+                phIndex = currentElements[value];
+                // The placeholder represents a DOM element, add an instruction to move it
+                let templateRootIndex = templateRoots ? templateRoots.indexOf(value) : -1;
+                if (templateRootIndex !== -1 && (templateRootIndex + 1) !== tmplIndex) {
+                    // This is a template root, it has no closing tag, not treating it as an element
+                    tmplInstructions.push(phIndex | -2147483648 /* TemplateRoot */);
+                }
+                else {
+                    tmplInstructions.push(phIndex | 1073741824 /* Element */);
+                    openedTagCount++;
+                }
+                phVisited.push(value);
+            }
+            else if (currentExpressions && currentExpressions[value] !== undefined) {
+                phIndex = currentExpressions[value];
+                // The placeholder represents an expression, add an instruction to move it
+                tmplInstructions.push(phIndex | 1610612736 /* Expression */);
+                phVisited.push(value);
+            }
+            else {
+                // It is a closing tag
+                tmplInstructions.push(-1073741824 /* CloseNode */);
+                if (tmplIndex > 0) {
+                    openedTagCount--;
+                    // If we have reached the closing tag for this template, exit the loop
+                    if (openedTagCount === 0) {
+                        break;
+                    }
+                }
+            }
+            if (phIndex !== undefined && phIndex > maxIndex) {
+                maxIndex = phIndex;
+            }
+            if (templateRoots) {
+                const newTmplIndex = templateRoots.indexOf(value) + 1;
+                if (newTmplIndex !== 0 && newTmplIndex !== tmplIndex) {
+                    partIndex = generateMappingInstructions(newTmplIndex, partIndex, translationParts, instructions, elements, expressions, templateRoots, lastChildIndex);
+                }
+            }
+        }
+        else if (value) {
+            // It's a non-empty string, create a text node
+            tmplInstructions.push(536870912 /* Text */, value);
+        }
+    }
+    // Add instructions to remove elements that are not used in the translation
+    if (elements) {
+        const tmplElements = elements[tmplIndex];
+        if (tmplElements) {
+            const phKeys = Object.keys(tmplElements);
+            for (let i = 0; i < phKeys.length; i++) {
+                const ph = phKeys[i];
+                if (phVisited.indexOf(ph) === -1) {
+                    let index = tmplElements[ph];
+                    // Add an instruction to remove the element
+                    tmplInstructions.push(index | -536870912 /* RemoveNode */);
+                    if (index > maxIndex) {
+                        maxIndex = index;
+                    }
+                }
+            }
+        }
+    }
+    // Add instructions to remove expressions that are not used in the translation
+    if (expressions) {
+        const tmplExpressions = expressions[tmplIndex];
+        if (tmplExpressions) {
+            const phKeys = Object.keys(tmplExpressions);
+            for (let i = 0; i < phKeys.length; i++) {
+                const ph = phKeys[i];
+                if (phVisited.indexOf(ph) === -1) {
+                    let index = tmplExpressions[ph];
+                    if (ngDevMode) {
+                        assertLessThan(index.toString(2).length, 28, `Index ${index} is too big and will overflow`);
+                    }
+                    // Add an instruction to remove the expression
+                    tmplInstructions.push(index | -536870912 /* RemoveNode */);
+                    if (index > maxIndex) {
+                        maxIndex = index;
+                    }
+                }
+            }
+        }
+    }
+    if (tmplIndex === 0 && typeof lastChildIndex === 'number') {
+        // The current parent is an ng-container and it has more children after the translation that we
+        // need to append to keep the order of the DOM nodes correct
+        for (let i = maxIndex + 1; i <= lastChildIndex; i++) {
+            if (ngDevMode) {
+                assertLessThan(i.toString(2).length, 28, `Index ${i} is too big and will overflow`);
+            }
+            tmplInstructions.push(i | -1610612736 /* Any */);
+        }
+    }
+    return partIndex;
+}
+function appendI18nNode(node, parentNode, previousNode) {
+    if (ngDevMode) {
+        ngDevMode.rendererMoveNode++;
+    }
+    const viewData = _getViewData();
+    appendChild(parentNode, node.native || null, viewData);
+    // On first pass, re-organize node tree to put this node in the correct position.
+    const firstTemplatePass = node.view[TVIEW].firstTemplatePass;
+    if (firstTemplatePass) {
+        if (previousNode === parentNode && node.tNode !== parentNode.tNode.child) {
+            node.tNode.next = parentNode.tNode.child;
+            parentNode.tNode.child = node.tNode;
+        }
+        else if (previousNode !== parentNode && node.tNode !== previousNode.tNode.next) {
+            node.tNode.next = previousNode.tNode.next;
+            previousNode.tNode.next = node.tNode;
+        }
+        else {
+            node.tNode.next = null;
+        }
+        if (parentNode.view === node.view)
+            node.tNode.parent = parentNode.tNode;
+    }
+    // Template containers also have a comment node for the `ViewContainerRef` that should be moved
+    if (node.tNode.type === 0 /* Container */ && node.dynamicLContainerNode) {
+        appendChild(parentNode, node.dynamicLContainerNode.native || null, viewData);
+        if (firstTemplatePass) {
+            node.tNode.dynamicContainerNode = node.dynamicLContainerNode.tNode;
+            node.dynamicLContainerNode.tNode.parent = node.tNode;
+        }
+        return node.dynamicLContainerNode;
+    }
+    return node;
+}
+/**
+ * Takes a list of instructions generated by `i18nMapping()` to transform the template accordingly.
+ *
+ * @param startIndex Index of the first element to translate (for instance the first child of the
+ * element with the i18n attribute).
+ * @param instructions The list of instructions to apply on the current view.
+ */
+function i18nApply(startIndex, instructions) {
+    const viewData = _getViewData();
+    if (ngDevMode) {
+        assertEqual(viewData[BINDING_INDEX], -1, 'i18nApply should be called before any binding');
+    }
+    if (!instructions) {
+        return;
+    }
+    const renderer = getRenderer();
+    let localParentNode = getParentLNode(load(startIndex)) || getPreviousOrParentNode();
+    let localPreviousNode = localParentNode;
+    resetApplicationState(); // We don't want to add to the tree with the wrong previous node
+    for (let i = 0; i < instructions.length; i++) {
+        const instruction = instructions[i];
+        switch (instruction & -536870912 /* InstructionMask */) {
+            case 1073741824 /* Element */:
+                const element$$1 = load(instruction & 536870911 /* IndexMask */);
+                localPreviousNode = appendI18nNode(element$$1, localParentNode, localPreviousNode);
+                localParentNode = element$$1;
+                break;
+            case 1610612736 /* Expression */:
+            case -2147483648 /* TemplateRoot */:
+            case -1610612736 /* Any */:
+                const node = load(instruction & 536870911 /* IndexMask */);
+                localPreviousNode = appendI18nNode(node, localParentNode, localPreviousNode);
+                break;
+            case 536870912 /* Text */:
+                if (ngDevMode) {
+                    ngDevMode.rendererCreateTextNode++;
+                }
+                const value = instructions[++i];
+                const textRNode = createTextNode(value, renderer);
+                // If we were to only create a `RNode` then projections won't move the text.
+                // Create text node at the current end of viewData. Must subtract header offset because
+                // createLNode takes a raw index (not adjusted by header offset).
+                const textLNode = createLNode(viewData.length - HEADER_OFFSET, 3 /* Element */, textRNode, null, null);
+                localPreviousNode = appendI18nNode(textLNode, localParentNode, localPreviousNode);
+                resetApplicationState();
+                break;
+            case -1073741824 /* CloseNode */:
+                localPreviousNode = localParentNode;
+                localParentNode = getParentLNode(localParentNode);
+                break;
+            case -536870912 /* RemoveNode */:
+                if (ngDevMode) {
+                    ngDevMode.rendererRemoveNode++;
+                }
+                const index = instruction & 536870911 /* IndexMask */;
+                const removedNode = load(index);
+                const parentNode = getParentLNode(removedNode);
+                removeChild(parentNode, removedNode.native || null, viewData);
+                // For template containers we also need to remove their `ViewContainerRef` from the DOM
+                if (removedNode.tNode.type === 0 /* Container */ && removedNode.dynamicLContainerNode) {
+                    removeChild(parentNode, removedNode.dynamicLContainerNode.native || null, viewData);
+                    removedNode.dynamicLContainerNode.tNode.detached = true;
+                    removedNode.dynamicLContainerNode.data[RENDER_PARENT] = null;
+                }
+                break;
+        }
+    }
+}
+/**
+ * Takes a translation string and the initial list of expressions and returns a list of instructions
+ * that will be used to translate an attribute.
+ * Even indexes contain static strings, while odd indexes contain the index of the expression whose
+ * value will be concatenated into the final translation.
+ */
+function i18nExpMapping(translation, placeholders) {
+    const staticText = translation.split(i18nTagRegex);
+    // odd indexes are placeholders
+    for (let i = 1; i < staticText.length; i += 2) {
+        staticText[i] = placeholders[staticText[i]];
+    }
+    return staticText;
+}
+/**
+ * Checks if the value of an expression has changed and replaces it by its value in a translation,
+ * or returns NO_CHANGE.
+ *
+ * @param instructions A list of instructions that will be used to translate an attribute.
+ * @param v0 value checked for change.
+ *
+ * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+function i18nInterpolation1(instructions, v0) {
+    const different = bindingUpdated(v0);
+    if (!different) {
+        return NO_CHANGE;
+    }
+    let res = '';
+    for (let i = 0; i < instructions.length; i++) {
+        // Odd indexes are bindings
+        if (i & 1) {
+            res += stringify$1(v0);
+        }
+        else {
+            res += instructions[i];
+        }
+    }
+    return res;
+}
+/**
+ * Checks if the values of up to 2 expressions have changed and replaces them by their values in a
+ * translation, or returns NO_CHANGE.
+ *
+ * @param instructions A list of instructions that will be used to translate an attribute.
+ * @param v0 value checked for change.
+ * @param v1 value checked for change.
+ *
+ * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+function i18nInterpolation2(instructions, v0, v1) {
+    const different = bindingUpdated2(v0, v1);
+    if (!different) {
+        return NO_CHANGE;
+    }
+    let res = '';
+    for (let i = 0; i < instructions.length; i++) {
+        // Odd indexes are bindings
+        if (i & 1) {
+            // Extract bits
+            const idx = instructions[i];
+            const b1 = idx & 1;
+            // Get the value from the argument vx where x = idx
+            const value = b1 ? v1 : v0;
+            res += stringify$1(value);
+        }
+        else {
+            res += instructions[i];
+        }
+    }
+    return res;
+}
+/**
+ * Checks if the values of up to 3 expressions have changed and replaces them by their values in a
+ * translation, or returns NO_CHANGE.
+ *
+ * @param instructions A list of instructions that will be used to translate an attribute.
+ * @param v0 value checked for change.
+ * @param v1 value checked for change.
+ * @param v2 value checked for change.
+ *
+ * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+function i18nInterpolation3(instructions, v0, v1, v2) {
+    let different = bindingUpdated2(v0, v1);
+    different = bindingUpdated(v2) || different;
+    if (!different) {
+        return NO_CHANGE;
+    }
+    let res = '';
+    for (let i = 0; i < instructions.length; i++) {
+        // Odd indexes are bindings
+        if (i & 1) {
+            // Extract bits
+            const idx = instructions[i];
+            const b2 = idx & 2;
+            const b1 = idx & 1;
+            // Get the value from the argument vx where x = idx
+            const value = b2 ? v2 : (b1 ? v1 : v0);
+            res += stringify$1(value);
+        }
+        else {
+            res += instructions[i];
+        }
+    }
+    return res;
+}
+/**
+ * Checks if the values of up to 4 expressions have changed and replaces them by their values in a
+ * translation, or returns NO_CHANGE.
+ *
+ * @param instructions A list of instructions that will be used to translate an attribute.
+ * @param v0 value checked for change.
+ * @param v1 value checked for change.
+ * @param v2 value checked for change.
+ * @param v3 value checked for change.
+ *
+ * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+function i18nInterpolation4(instructions, v0, v1, v2, v3) {
+    const different = bindingUpdated4(v0, v1, v2, v3);
+    if (!different) {
+        return NO_CHANGE;
+    }
+    let res = '';
+    for (let i = 0; i < instructions.length; i++) {
+        // Odd indexes are bindings
+        if (i & 1) {
+            // Extract bits
+            const idx = instructions[i];
+            const b2 = idx & 2;
+            const b1 = idx & 1;
+            // Get the value from the argument vx where x = idx
+            const value = b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0);
+            res += stringify$1(value);
+        }
+        else {
+            res += instructions[i];
+        }
+    }
+    return res;
+}
+/**
+ * Checks if the values of up to 5 expressions have changed and replaces them by their values in a
+ * translation, or returns NO_CHANGE.
+ *
+ * @param instructions A list of instructions that will be used to translate an attribute.
+ * @param v0 value checked for change.
+ * @param v1 value checked for change.
+ * @param v2 value checked for change.
+ * @param v3 value checked for change.
+ * @param v4 value checked for change.
+ *
+ * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+function i18nInterpolation5(instructions, v0, v1, v2, v3, v4) {
+    let different = bindingUpdated4(v0, v1, v2, v3);
+    different = bindingUpdated(v4) || different;
+    if (!different) {
+        return NO_CHANGE;
+    }
+    let res = '';
+    for (let i = 0; i < instructions.length; i++) {
+        // Odd indexes are bindings
+        if (i & 1) {
+            // Extract bits
+            const idx = instructions[i];
+            const b4 = idx & 4;
+            const b2 = idx & 2;
+            const b1 = idx & 1;
+            // Get the value from the argument vx where x = idx
+            const value = b4 ? v4 : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
+            res += stringify$1(value);
+        }
+        else {
+            res += instructions[i];
+        }
+    }
+    return res;
+}
+/**
+ * Checks if the values of up to 6 expressions have changed and replaces them by their values in a
+ * translation, or returns NO_CHANGE.
+ *
+ * @param instructions A list of instructions that will be used to translate an attribute.
+ * @param v0 value checked for change.
+ * @param v1 value checked for change.
+ * @param v2 value checked for change.
+ * @param v3 value checked for change.
+ * @param v4 value checked for change.
+ * @param v5 value checked for change.
+ *
+ * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */ function i18nInterpolation6(instructions, v0, v1, v2, v3, v4, v5) {
+    let different = bindingUpdated4(v0, v1, v2, v3);
+    different = bindingUpdated2(v4, v5) || different;
+    if (!different) {
+        return NO_CHANGE;
+    }
+    let res = '';
+    for (let i = 0; i < instructions.length; i++) {
+        // Odd indexes are bindings
+        if (i & 1) {
+            // Extract bits
+            const idx = instructions[i];
+            const b4 = idx & 4;
+            const b2 = idx & 2;
+            const b1 = idx & 1;
+            // Get the value from the argument vx where x = idx
+            const value = b4 ? (b1 ? v5 : v4) : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
+            res += stringify$1(value);
+        }
+        else {
+            res += instructions[i];
+        }
+    }
+    return res;
+}
+/**
+ * Checks if the values of up to 7 expressions have changed and replaces them by their values in a
+ * translation, or returns NO_CHANGE.
+ *
+ * @param instructions A list of instructions that will be used to translate an attribute.
+ * @param v0 value checked for change.
+ * @param v1 value checked for change.
+ * @param v2 value checked for change.
+ * @param v3 value checked for change.
+ * @param v4 value checked for change.
+ * @param v5 value checked for change.
+ * @param v6 value checked for change.
+ *
+ * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+function i18nInterpolation7(instructions, v0, v1, v2, v3, v4, v5, v6) {
+    let different = bindingUpdated4(v0, v1, v2, v3);
+    different = bindingUpdated2(v4, v5) || different;
+    different = bindingUpdated(v6) || different;
+    if (!different) {
+        return NO_CHANGE;
+    }
+    let res = '';
+    for (let i = 0; i < instructions.length; i++) {
+        // Odd indexes are bindings
+        if (i & 1) {
+            // Extract bits
+            const idx = instructions[i];
+            const b4 = idx & 4;
+            const b2 = idx & 2;
+            const b1 = idx & 1;
+            // Get the value from the argument vx where x = idx
+            const value = b4 ? (b2 ? v6 : (b1 ? v5 : v4)) : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
+            res += stringify$1(value);
+        }
+        else {
+            res += instructions[i];
+        }
+    }
+    return res;
+}
+/**
+ * Checks if the values of up to 8 expressions have changed and replaces them by their values in a
+ * translation, or returns NO_CHANGE.
+ *
+ * @param instructions A list of instructions that will be used to translate an attribute.
+ * @param v0 value checked for change.
+ * @param v1 value checked for change.
+ * @param v2 value checked for change.
+ * @param v3 value checked for change.
+ * @param v4 value checked for change.
+ * @param v5 value checked for change.
+ * @param v6 value checked for change.
+ * @param v7 value checked for change.
+ *
+ * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+function i18nInterpolation8(instructions, v0, v1, v2, v3, v4, v5, v6, v7) {
+    let different = bindingUpdated4(v0, v1, v2, v3);
+    different = bindingUpdated4(v4, v5, v6, v7) || different;
+    if (!different) {
+        return NO_CHANGE;
+    }
+    let res = '';
+    for (let i = 0; i < instructions.length; i++) {
+        // Odd indexes are bindings
+        if (i & 1) {
+            // Extract bits
+            const idx = instructions[i];
+            const b4 = idx & 4;
+            const b2 = idx & 2;
+            const b1 = idx & 1;
+            // Get the value from the argument vx where x = idx
+            const value = b4 ? (b2 ? (b1 ? v7 : v6) : (b1 ? v5 : v4)) : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
+            res += stringify$1(value);
+        }
+        else {
+            res += instructions[i];
+        }
+    }
+    return res;
+}
+/**
+ * Create a translated interpolation binding with a variable number of expressions.
+ *
+ * If there are 1 to 8 expressions then `i18nInterpolation()` should be used instead. It is faster
+ * because there is no need to create an array of expressions and iterate over it.
+ *
+ * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+function i18nInterpolationV(instructions, values) {
+    let different = false;
+    for (let i = 0; i < values.length; i++) {
+        // Check if bindings have changed
+        bindingUpdated(values[i]) && (different = true);
+    }
+    if (!different) {
+        return NO_CHANGE;
+    }
+    let res = '';
+    for (let i = 0; i < instructions.length; i++) {
+        // Odd indexes are placeholders
+        if (i & 1) {
+            res += stringify$1(values[instructions[i]]);
+        }
+        else {
+            res += instructions[i];
+        }
+    }
+    return res;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const COMPONENT_FACTORY_RESOLVER = {
+    provide: ComponentFactoryResolver,
+    useFactory: () => new ComponentFactoryResolver$1(),
+    deps: [],
+};
+class NgModuleRef$1 extends NgModuleRef {
+    constructor(ngModuleType, parentInjector) {
+        super();
+        // tslint:disable-next-line:require-internal-with-underscore
+        this._bootstrapComponents = [];
+        this.destroyCbs = [];
+        const ngModuleDef = ngModuleType.ngModuleDef;
+        ngDevMode && assertDefined(ngModuleDef, `NgModule '${stringify(ngModuleType)}' is not a subtype of 'NgModuleType'.`);
+        this._bootstrapComponents = ngModuleDef.bootstrap;
+        const additionalProviders = [
+            COMPONENT_FACTORY_RESOLVER, {
+                provide: NgModuleRef,
+                useValue: this,
+            }
+        ];
+        this.injector = createInjector(ngModuleType, parentInjector, additionalProviders);
+        this.instance = this.injector.get(ngModuleType);
+        this.componentFactoryResolver = new ComponentFactoryResolver$1();
+    }
+    destroy() {
+        ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
+        this.destroyCbs.forEach(fn => fn());
+        this.destroyCbs = null;
+    }
+    onDestroy(callback) {
+        ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
+        this.destroyCbs.push(callback);
+    }
+}
+class NgModuleFactory$1 extends NgModuleFactory {
+    constructor(moduleType) {
+        super();
+        this.moduleType = moduleType;
+    }
+    create(parentInjector) {
+        return new NgModuleRef$1(this.moduleType, parentInjector);
+    }
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * If the value hasn't been saved, calls the pure function to store and return the
+ * value. If it has been saved, returns the saved value.
+ *
+ * @param pureFn Function that returns a value
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+ * @param thisArg Optional calling context of pureFn
+ * @returns value
+ */
+function pureFunction0(slotOffset, pureFn, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 1);
+    const index = moveBindingIndexToReservedSlot(slotOffset);
+    const value = getCreationMode() ?
+        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg) : pureFn()) :
+        consumeBinding();
+    restoreBindingIndex(index);
+    return value;
+}
+/**
+ * If the value of the provided exp has changed, calls the pure function to return
+ * an updated value. Or if the value has not changed, returns cached value.
+ *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+ * @param pureFn Function that returns an updated value
+ * @param exp Updated expression value
+ * @param thisArg Optional calling context of pureFn
+ * @returns Updated or cached value
+ */
+function pureFunction1(slotOffset, pureFn, exp, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 2);
+    const index = moveBindingIndexToReservedSlot(slotOffset);
+    const value = bindingUpdated(exp) ?
+        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg, exp) : pureFn(exp)) :
+        consumeBinding();
+    restoreBindingIndex(index);
+    return value;
+}
+/**
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+ * @param pureFn
+ * @param exp1
+ * @param exp2
+ * @param thisArg Optional calling context of pureFn
+ * @returns Updated or cached value
+ */
+function pureFunction2(slotOffset, pureFn, exp1, exp2, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 3);
+    const index = moveBindingIndexToReservedSlot(slotOffset);
+    const value = bindingUpdated2(exp1, exp2) ?
+        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg, exp1, exp2) : pureFn(exp1, exp2)) :
+        consumeBinding();
+    restoreBindingIndex(index);
+    return value;
+}
+/**
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+ * @param pureFn
+ * @param exp1
+ * @param exp2
+ * @param exp3
+ * @param thisArg Optional calling context of pureFn
+ * @returns Updated or cached value
+ */
+function pureFunction3(slotOffset, pureFn, exp1, exp2, exp3, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 4);
+    const index = moveBindingIndexToReservedSlot(slotOffset);
+    const different = bindingUpdated2(exp1, exp2);
+    const value = bindingUpdated(exp3) || different ?
+        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3) : pureFn(exp1, exp2, exp3)) :
+        consumeBinding();
+    restoreBindingIndex(index);
+    return value;
+}
+/**
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+ * @param pureFn
+ * @param exp1
+ * @param exp2
+ * @param exp3
+ * @param exp4
+ * @param thisArg Optional calling context of pureFn
+ * @returns Updated or cached value
+ */
+function pureFunction4(slotOffset, pureFn, exp1, exp2, exp3, exp4, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 5);
+    const index = moveBindingIndexToReservedSlot(slotOffset);
+    const value = bindingUpdated4(exp1, exp2, exp3, exp4) ?
+        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4) : pureFn(exp1, exp2, exp3, exp4)) :
+        consumeBinding();
+    restoreBindingIndex(index);
+    return value;
+}
+/**
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+ * @param pureFn
+ * @param exp1
+ * @param exp2
+ * @param exp3
+ * @param exp4
+ * @param exp5
+ * @param thisArg Optional calling context of pureFn
+ * @returns Updated or cached value
+ */
+function pureFunction5(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 6);
+    const index = moveBindingIndexToReservedSlot(slotOffset);
+    const different = bindingUpdated4(exp1, exp2, exp3, exp4);
+    const value = bindingUpdated(exp5) || different ?
+        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5) :
+            pureFn(exp1, exp2, exp3, exp4, exp5)) :
+        consumeBinding();
+    restoreBindingIndex(index);
+    return value;
+}
+/**
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+ * @param pureFn
+ * @param exp1
+ * @param exp2
+ * @param exp3
+ * @param exp4
+ * @param exp5
+ * @param exp6
+ * @param thisArg Optional calling context of pureFn
+ * @returns Updated or cached value
+ */
+function pureFunction6(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 7);
+    const index = moveBindingIndexToReservedSlot(slotOffset);
+    const different = bindingUpdated4(exp1, exp2, exp3, exp4);
+    const value = bindingUpdated2(exp5, exp6) || different ?
+        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5, exp6) :
+            pureFn(exp1, exp2, exp3, exp4, exp5, exp6)) :
+        consumeBinding();
+    restoreBindingIndex(index);
+    return value;
+}
+/**
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+ * @param pureFn
+ * @param exp1
+ * @param exp2
+ * @param exp3
+ * @param exp4
+ * @param exp5
+ * @param exp6
+ * @param exp7
+ * @param thisArg Optional calling context of pureFn
+ * @returns Updated or cached value
+ */
+function pureFunction7(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 8);
+    const index = moveBindingIndexToReservedSlot(slotOffset);
+    let different = bindingUpdated4(exp1, exp2, exp3, exp4);
+    different = bindingUpdated2(exp5, exp6) || different;
+    const value = bindingUpdated(exp7) || different ?
+        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5, exp6, exp7) :
+            pureFn(exp1, exp2, exp3, exp4, exp5, exp6, exp7)) :
+        consumeBinding();
+    restoreBindingIndex(index);
+    return value;
+}
+/**
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+ * @param pureFn
+ * @param exp1
+ * @param exp2
+ * @param exp3
+ * @param exp4
+ * @param exp5
+ * @param exp6
+ * @param exp7
+ * @param exp8
+ * @param thisArg Optional calling context of pureFn
+ * @returns Updated or cached value
+ */
+function pureFunction8(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 9);
+    const index = moveBindingIndexToReservedSlot(slotOffset);
+    const different = bindingUpdated4(exp1, exp2, exp3, exp4);
+    const value = bindingUpdated4(exp5, exp6, exp7, exp8) || different ?
+        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8) :
+            pureFn(exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8)) :
+        consumeBinding();
+    restoreBindingIndex(index);
+    return value;
+}
+/**
+ * pureFunction instruction that can support any number of bindings.
+ *
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+ * @param pureFn A pure function that takes binding values and builds an object or array
+ * containing those values.
+ * @param exps An array of binding values
+ * @param thisArg Optional calling context of pureFn
+ * @returns Updated or cached value
+ */
+function pureFunctionV(slotOffset, pureFn, exps, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, exps.length + 1);
+    const index = moveBindingIndexToReservedSlot(slotOffset);
+    let different = false;
+    for (let i = 0; i < exps.length; i++) {
+        bindingUpdated(exps[i]) && (different = true);
+    }
+    const value = different ? checkAndUpdateBinding(pureFn.apply(thisArg, exps)) : consumeBinding();
+    restoreBindingIndex(index);
+    return value;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Create a pipe.
+ *
+ * @param index Pipe index where the pipe will be stored.
+ * @param pipeName The name of the pipe
+ * @returns T the instance of the pipe.
+ */
+function pipe(index, pipeName) {
+    const tView = getTView();
+    let pipeDef;
+    const adjustedIndex = index + HEADER_OFFSET;
+    if (tView.firstTemplatePass) {
+        pipeDef = getPipeDef(pipeName, tView.pipeRegistry);
+        tView.data[adjustedIndex] = pipeDef;
+        if (pipeDef.onDestroy) {
+            (tView.pipeDestroyHooks || (tView.pipeDestroyHooks = [])).push(adjustedIndex, pipeDef.onDestroy);
+        }
+    }
+    else {
+        pipeDef = tView.data[adjustedIndex];
+    }
+    const pipeInstance = pipeDef.factory();
+    store(index, pipeInstance);
+    return pipeInstance;
+}
+/**
+ * Searches the pipe registry for a pipe with the given name. If one is found,
+ * returns the pipe. Otherwise, an error is thrown because the pipe cannot be resolved.
+ *
+ * @param name Name of pipe to resolve
+ * @param registry Full list of available pipes
+ * @returns Matching PipeDef
+ */
+function getPipeDef(name, registry) {
+    if (registry) {
+        for (let i = 0; i < registry.length; i++) {
+            const pipeDef = registry[i];
+            if (name === pipeDef.name) {
+                return pipeDef;
+            }
+        }
+    }
+    throw new Error(`Pipe with name '${name}' not found!`);
+}
+/**
+ * Invokes a pipe with 1 arguments.
+ *
+ * This instruction acts as a guard to {@link PipeTransform#transform} invoking
+ * the pipe only when an input to the pipe changes.
+ *
+ * @param index Pipe index where the pipe was stored on creation.
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+ * @param v1 1st argument to {@link PipeTransform#transform}.
+ */
+function pipeBind1(index, slotOffset, v1) {
+    const pipeInstance = load(index);
+    return isPure(index) ? pureFunction1(slotOffset, pipeInstance.transform, v1, pipeInstance) :
+        pipeInstance.transform(v1);
+}
+/**
+ * Invokes a pipe with 2 arguments.
+ *
+ * This instruction acts as a guard to {@link PipeTransform#transform} invoking
+ * the pipe only when an input to the pipe changes.
+ *
+ * @param index Pipe index where the pipe was stored on creation.
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+ * @param v1 1st argument to {@link PipeTransform#transform}.
+ * @param v2 2nd argument to {@link PipeTransform#transform}.
+ */
+function pipeBind2(index, slotOffset, v1, v2) {
+    const pipeInstance = load(index);
+    return isPure(index) ? pureFunction2(slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
+        pipeInstance.transform(v1, v2);
+}
+/**
+ * Invokes a pipe with 3 arguments.
+ *
+ * This instruction acts as a guard to {@link PipeTransform#transform} invoking
+ * the pipe only when an input to the pipe changes.
+ *
+ * @param index Pipe index where the pipe was stored on creation.
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+ * @param v1 1st argument to {@link PipeTransform#transform}.
+ * @param v2 2nd argument to {@link PipeTransform#transform}.
+ * @param v3 4rd argument to {@link PipeTransform#transform}.
+ */
+function pipeBind3(index, slotOffset, v1, v2, v3) {
+    const pipeInstance = load(index);
+    return isPure(index) ?
+        pureFunction3(slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
+        pipeInstance.transform(v1, v2, v3);
+}
+/**
+ * Invokes a pipe with 4 arguments.
+ *
+ * This instruction acts as a guard to {@link PipeTransform#transform} invoking
+ * the pipe only when an input to the pipe changes.
+ *
+ * @param index Pipe index where the pipe was stored on creation.
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+ * @param v1 1st argument to {@link PipeTransform#transform}.
+ * @param v2 2nd argument to {@link PipeTransform#transform}.
+ * @param v3 3rd argument to {@link PipeTransform#transform}.
+ * @param v4 4th argument to {@link PipeTransform#transform}.
+ */
+function pipeBind4(index, slotOffset, v1, v2, v3, v4) {
+    const pipeInstance = load(index);
+    return isPure(index) ?
+        pureFunction4(slotOffset, pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
+        pipeInstance.transform(v1, v2, v3, v4);
+}
+/**
+ * Invokes a pipe with variable number of arguments.
+ *
+ * This instruction acts as a guard to {@link PipeTransform#transform} invoking
+ * the pipe only when an input to the pipe changes.
+ *
+ * @param index Pipe index where the pipe was stored on creation.
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+ * @param values Array of arguments to pass to {@link PipeTransform#transform} method.
+ */
+function pipeBindV(index, slotOffset, values) {
+    const pipeInstance = load(index);
+    return isPure(index) ? pureFunctionV(slotOffset, pipeInstance.transform, values, pipeInstance) :
+        pipeInstance.transform.apply(pipeInstance, values);
+}
+function isPure(index) {
+    return getTView().data[index + HEADER_OFFSET].pure;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+class LQueries_ {
+    constructor(parent, shallow, deep) {
+        this.parent = parent;
+        this.shallow = shallow;
+        this.deep = deep;
+    }
+    track(queryList, predicate, descend, read) {
+        if (descend) {
+            this.deep = createQuery$1(this.deep, queryList, predicate, read != null ? read : null);
+        }
+        else {
+            this.shallow = createQuery$1(this.shallow, queryList, predicate, read != null ? read : null);
+        }
+    }
+    clone() { return new LQueries_(this, null, this.deep); }
+    container() {
+        const shallowResults = copyQueriesToContainer(this.shallow);
+        const deepResults = copyQueriesToContainer(this.deep);
+        return shallowResults || deepResults ? new LQueries_(this, shallowResults, deepResults) : null;
+    }
+    createView() {
+        const shallowResults = copyQueriesToView(this.shallow);
+        const deepResults = copyQueriesToView(this.deep);
+        return shallowResults || deepResults ? new LQueries_(this, shallowResults, deepResults) : null;
+    }
+    insertView(index) {
+        insertView$1(index, this.shallow);
+        insertView$1(index, this.deep);
+    }
+    addNode(node) {
+        add(this.deep, node);
+        if (isContentQueryHost(node.tNode)) {
+            add(this.shallow, node);
+            if (node.tNode.parent && isContentQueryHost(node.tNode.parent)) {
+                // if node has a content query and parent also has a content query
+                // both queries need to check this node for shallow matches
+                add(this.parent.shallow, node);
+            }
+            return this.parent;
+        }
+        isRootNodeOfQuery(node.tNode) && add(this.shallow, node);
+        return this;
+    }
+    removeView() {
+        removeView$1(this.shallow);
+        removeView$1(this.deep);
+    }
+}
+function isRootNodeOfQuery(tNode) {
+    return tNode.parent === null || isContentQueryHost(tNode.parent);
+}
+function copyQueriesToContainer(query) {
+    let result = null;
+    while (query) {
+        const containerValues = []; // prepare room for views
+        query.values.push(containerValues);
+        const clonedQuery = {
+            next: result,
+            list: query.list,
+            predicate: query.predicate,
+            values: containerValues,
+            containerValues: null
+        };
+        result = clonedQuery;
+        query = query.next;
+    }
+    return result;
+}
+function copyQueriesToView(query) {
+    let result = null;
+    while (query) {
+        const clonedQuery = {
+            next: result,
+            list: query.list,
+            predicate: query.predicate,
+            values: [],
+            containerValues: query.values
+        };
+        result = clonedQuery;
+        query = query.next;
+    }
+    return result;
+}
+function insertView$1(index, query) {
+    while (query) {
+        ngDevMode &&
+            assertDefined(query.containerValues, 'View queries need to have a pointer to container values.');
+        query.containerValues.splice(index, 0, query.values);
+        query = query.next;
+    }
+}
+function removeView$1(query) {
+    while (query) {
+        ngDevMode &&
+            assertDefined(query.containerValues, 'View queries need to have a pointer to container values.');
+        const containerValues = query.containerValues;
+        const viewValuesIdx = containerValues.indexOf(query.values);
+        const removed = containerValues.splice(viewValuesIdx, 1);
+        // mark a query as dirty only when removed view had matching modes
+        ngDevMode && assertEqual(removed.length, 1, 'removed.length');
+        if (removed[0].length) {
+            query.list.setDirty();
+        }
+        query = query.next;
+    }
+}
+/**
+ * Iterates over local names for a given node and returns directive index
+ * (or -1 if a local name points to an element).
+ *
+ * @param tNode static data of a node to check
+ * @param selector selector to match
+ * @returns directive index, -1 or null if a selector didn't match any of the local names
+ */
+function getIdxOfMatchingSelector(tNode, selector) {
+    const localNames = tNode.localNames;
+    if (localNames) {
+        for (let i = 0; i < localNames.length; i += 2) {
+            if (localNames[i] === selector) {
+                return localNames[i + 1];
+            }
+        }
+    }
+    return null;
+}
+/**
+ * Iterates over all the directives for a node and returns index of a directive for a given type.
+ *
+ * @param node Node on which directives are present.
+ * @param type Type of a directive to look for.
+ * @returns Index of a found directive or null when none found.
+ */
+function getIdxOfMatchingDirective(node, type) {
+    const defs = node.view[TVIEW].directives;
+    const flags = node.tNode.flags;
+    const count = flags & 4095 /* DirectiveCountMask */;
+    const start = flags >> 15 /* DirectiveStartingIndexShift */;
+    const end = start + count;
+    for (let i = start; i < end; i++) {
+        const def = defs[i];
+        if (def.type === type && def.diPublic) {
+            return i;
+        }
+    }
+    return null;
+}
+function readFromNodeInjector(nodeInjector, node, read, directiveIdx) {
+    if (read instanceof ReadFromInjectorFn) {
+        return read.read(nodeInjector, node, directiveIdx);
+    }
+    else {
+        const matchingIdx = getIdxOfMatchingDirective(node, read);
+        if (matchingIdx !== null) {
+            return node.view[DIRECTIVES][matchingIdx];
+        }
+    }
+    return null;
+}
+function add(query, node) {
+    const nodeInjector = getOrCreateNodeInjectorForNode(node);
+    while (query) {
+        const predicate = query.predicate;
+        const type = predicate.type;
+        if (type) {
+            const directiveIdx = getIdxOfMatchingDirective(node, type);
+            if (directiveIdx !== null) {
+                // a node is matching a predicate - determine what to read
+                // if read token and / or strategy is not specified, use type as read token
+                const result = readFromNodeInjector(nodeInjector, node, predicate.read || type, directiveIdx);
+                if (result !== null) {
+                    addMatch(query, result);
+                }
+            }
+        }
+        else {
+            const selector = predicate.selector;
+            for (let i = 0; i < selector.length; i++) {
+                const directiveIdx = getIdxOfMatchingSelector(node.tNode, selector[i]);
+                if (directiveIdx !== null) {
+                    // a node is matching a predicate - determine what to read
+                    // note that queries using name selector must specify read strategy
+                    ngDevMode && assertDefined(predicate.read, 'the node should have a predicate');
+                    const result = readFromNodeInjector(nodeInjector, node, predicate.read, directiveIdx);
+                    if (result !== null) {
+                        addMatch(query, result);
+                    }
+                }
+            }
+        }
+        query = query.next;
+    }
+}
+function addMatch(query, matchingValue) {
+    query.values.push(matchingValue);
+    query.list.setDirty();
+}
+function createPredicate(predicate, read) {
+    const isArray = Array.isArray(predicate);
+    return {
+        type: isArray ? null : predicate,
+        selector: isArray ? predicate : null,
+        read: read
+    };
+}
+function createQuery$1(previous, queryList, predicate, read) {
+    return {
+        next: previous,
+        list: queryList,
+        predicate: createPredicate(predicate, read),
+        values: queryList._valuesTree,
+        containerValues: null
+    };
+}
+class QueryList_ {
+    constructor() {
+        this.dirty = true;
+        this.changes = new EventEmitter();
+        this._values = [];
+        /** @internal */
+        this._valuesTree = [];
+    }
+    get length() { return this._values.length; }
+    get first() {
+        let values = this._values;
+        return values.length ? values[0] : null;
+    }
+    get last() {
+        let values = this._values;
+        return values.length ? values[values.length - 1] : null;
+    }
+    /**
+     * See
+     * [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
+     */
+    map(fn) { return this._values.map(fn); }
+    /**
+     * See
+     * [Array.filter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter)
+     */
+    filter(fn) {
+        return this._values.filter(fn);
+    }
+    /**
+     * See
+     * [Array.find](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find)
+     */
+    find(fn) {
+        return this._values.find(fn);
+    }
+    /**
+     * See
+     * [Array.reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)
+     */
+    reduce(fn, init) {
+        return this._values.reduce(fn, init);
+    }
+    /**
+     * See
+     * [Array.forEach](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach)
+     */
+    forEach(fn) { this._values.forEach(fn); }
+    /**
+     * See
+     * [Array.some](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
+     */
+    some(fn) {
+        return this._values.some(fn);
+    }
+    toArray() { return this._values.slice(0); }
+    [getSymbolIterator()]() { return this._values[getSymbolIterator()](); }
+    toString() { return this._values.toString(); }
+    reset(res) {
+        this._values = flatten(res);
+        this.dirty = false;
+    }
+    notifyOnChanges() { this.changes.emit(this); }
+    setDirty() { this.dirty = true; }
+    destroy() {
+        this.changes.complete();
+        this.changes.unsubscribe();
+    }
+}
+const QueryList$1 = QueryList_;
+/**
+ * Creates and returns a QueryList.
+ *
+ * @param memoryIndex The index in memory where the QueryList should be saved. If null,
+ * this is is a content query and the QueryList will be saved later through directiveCreate.
+ * @param predicate The type for which the query will search
+ * @param descend Whether or not to descend into children
+ * @param read What to save in the query
+ * @returns QueryList<T>
+ */
+function query(memoryIndex, predicate, descend, read) {
+    ngDevMode && assertPreviousIsParent();
+    const queryList = new QueryList$1();
+    const queries = getOrCreateCurrentQueries(LQueries_);
+    queries.track(queryList, predicate, descend, read);
+    storeCleanupWithContext(null, queryList, queryList.destroy);
+    if (memoryIndex != null) {
+        store(memoryIndex, queryList);
+    }
+    return queryList;
+}
+/**
+ * Refreshes a query by combining matches from all active views and removing matches from deleted
+ * views.
+ * Returns true if a query got dirty during change detection, false otherwise.
+ */
+function queryRefresh(queryList) {
+    const queryListImpl = queryList;
+    if (queryList.dirty) {
+        queryList.reset(queryListImpl._valuesTree);
+        queryList.notifyOnChanges();
+        return true;
+    }
+    return false;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const BRAND = '__SANITIZER_TRUSTED_BRAND__';
+function allowSanitizationBypass(value, type) {
+    return (value instanceof String && value[BRAND] === type) ? true : false;
+}
+/**
+ * Mark `html` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {@link htmlSanitizer} to be trusted implicitly.
+ *
+ * @param trustedHtml `html` string which needs to be implicitly trusted.
+ * @returns a `html` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustHtml(trustedHtml) {
+    return bypassSanitizationTrustString(trustedHtml, "Html" /* Html */);
+}
+/**
+ * Mark `style` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {@link styleSanitizer} to be trusted implicitly.
+ *
+ * @param trustedStyle `style` string which needs to be implicitly trusted.
+ * @returns a `style` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustStyle(trustedStyle) {
+    return bypassSanitizationTrustString(trustedStyle, "Style" /* Style */);
+}
+/**
+ * Mark `script` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {@link scriptSanitizer} to be trusted implicitly.
+ *
+ * @param trustedScript `script` string which needs to be implicitly trusted.
+ * @returns a `script` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustScript(trustedScript) {
+    return bypassSanitizationTrustString(trustedScript, "Script" /* Script */);
+}
+/**
+ * Mark `url` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {@link urlSanitizer} to be trusted implicitly.
+ *
+ * @param trustedUrl `url` string which needs to be implicitly trusted.
+ * @returns a `url` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustUrl(trustedUrl) {
+    return bypassSanitizationTrustString(trustedUrl, "Url" /* Url */);
+}
+/**
+ * Mark `url` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {@link resourceUrlSanitizer} to be trusted implicitly.
+ *
+ * @param trustedResourceUrl `url` string which needs to be implicitly trusted.
+ * @returns a `url` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
+    return bypassSanitizationTrustString(trustedResourceUrl, "ResourceUrl" /* ResourceUrl */);
+}
+function bypassSanitizationTrustString(trustedString, mode) {
+    const trusted = new String(trustedString);
+    trusted[BRAND] = mode;
+    return trusted;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * This helper class is used to get hold of an inert tree of DOM elements containing dirty HTML
+ * that needs sanitizing.
+ * Depending upon browser support we must use one of three strategies for doing this.
+ * Support: Safari 10.x -> XHR strategy
+ * Support: Firefox -> DomParser strategy
+ * Default: InertDocument strategy
+ */
+class InertBodyHelper {
+    constructor(defaultDoc) {
+        this.defaultDoc = defaultDoc;
+        this.inertDocument = this.defaultDoc.implementation.createHTMLDocument('sanitization-inert');
+        this.inertBodyElement = this.inertDocument.body;
+        if (this.inertBodyElement == null) {
+            // usually there should be only one body element in the document, but IE doesn't have any, so
+            // we need to create one.
+            const inertHtml = this.inertDocument.createElement('html');
+            this.inertDocument.appendChild(inertHtml);
+            this.inertBodyElement = this.inertDocument.createElement('body');
+            inertHtml.appendChild(this.inertBodyElement);
+        }
+        this.inertBodyElement.innerHTML = '<svg><g onload="this.parentNode.remove()"></g></svg>';
+        if (this.inertBodyElement.querySelector && !this.inertBodyElement.querySelector('svg')) {
+            // We just hit the Safari 10.1 bug - which allows JS to run inside the SVG G element
+            // so use the XHR strategy.
+            this.getInertBodyElement = this.getInertBodyElement_XHR;
+            return;
+        }
+        this.inertBodyElement.innerHTML =
+            '<svg><p><style><img src="</style><img src=x onerror=alert(1)//">';
+        if (this.inertBodyElement.querySelector && this.inertBodyElement.querySelector('svg img')) {
+            // We just hit the Firefox bug - which prevents the inner img JS from being sanitized
+            // so use the DOMParser strategy, if it is available.
+            // If the DOMParser is not available then we are not in Firefox (Server/WebWorker?) so we
+            // fall through to the default strategy below.
+            if (isDOMParserAvailable()) {
+                this.getInertBodyElement = this.getInertBodyElement_DOMParser;
+                return;
+            }
+        }
+        // None of the bugs were hit so it is safe for us to use the default InertDocument strategy
+        this.getInertBodyElement = this.getInertBodyElement_InertDocument;
+    }
+    /**
+     * Use XHR to create and fill an inert body element (on Safari 10.1)
+     * See
+     * https://github.com/cure53/DOMPurify/blob/a992d3a75031cb8bb032e5ea8399ba972bdf9a65/src/purify.js#L439-L449
+     */
+    getInertBodyElement_XHR(html) {
+        // We add these extra elements to ensure that the rest of the content is parsed as expected
+        // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
+        // `<head>` tag.
+        html = '<body><remove></remove>' + html + '</body>';
+        try {
+            html = encodeURI(html);
+        }
+        catch (e) {
+            return null;
+        }
+        const xhr = new XMLHttpRequest();
+        xhr.responseType = 'document';
+        xhr.open('GET', 'data:text/html;charset=utf-8,' + html, false);
+        xhr.send(null);
+        const body = xhr.response.body;
+        body.removeChild(body.firstChild);
+        return body;
+    }
+    /**
+     * Use DOMParser to create and fill an inert body element (on Firefox)
+     * See https://github.com/cure53/DOMPurify/releases/tag/0.6.7
+     *
+     */
+    getInertBodyElement_DOMParser(html) {
+        // We add these extra elements to ensure that the rest of the content is parsed as expected
+        // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
+        // `<head>` tag.
+        html = '<body><remove></remove>' + html + '</body>';
+        try {
+            const body = new window
+                .DOMParser()
+                .parseFromString(html, 'text/html')
+                .body;
+            body.removeChild(body.firstChild);
+            return body;
+        }
+        catch (e) {
+            return null;
+        }
+    }
+    /**
+     * Use an HTML5 `template` element, if supported, or an inert body element created via
+     * `createHtmlDocument` to create and fill an inert DOM element.
+     * This is the default sane strategy to use if the browser does not require one of the specialised
+     * strategies above.
+     */
+    getInertBodyElement_InertDocument(html) {
+        // Prefer using <template> element if supported.
+        const templateEl = this.inertDocument.createElement('template');
+        if ('content' in templateEl) {
+            templateEl.innerHTML = html;
+            return templateEl;
+        }
+        this.inertBodyElement.innerHTML = html;
+        // Support: IE 9-11 only
+        // strip custom-namespaced attributes on IE<=11
+        if (this.defaultDoc.documentMode) {
+            this.stripCustomNsAttrs(this.inertBodyElement);
+        }
+        return this.inertBodyElement;
+    }
+    /**
+     * When IE9-11 comes across an unknown namespaced attribute e.g. 'xlink:foo' it adds 'xmlns:ns1'
+     * attribute to declare ns1 namespace and prefixes the attribute with 'ns1' (e.g.
+     * 'ns1:xlink:foo').
+     *
+     * This is undesirable since we don't want to allow any of these custom attributes. This method
+     * strips them all.
+     */
+    stripCustomNsAttrs(el) {
+        const elAttrs = el.attributes;
+        // loop backwards so that we can support removals.
+        for (let i = elAttrs.length - 1; 0 < i; i--) {
+            const attrib = elAttrs.item(i);
+            const attrName = attrib.name;
+            if (attrName === 'xmlns:ns1' || attrName.indexOf('ns1:') === 0) {
+                el.removeAttribute(attrName);
+            }
+        }
+        let childNode = el.firstChild;
+        while (childNode) {
+            if (childNode.nodeType === Node.ELEMENT_NODE)
+                this.stripCustomNsAttrs(childNode);
+            childNode = childNode.nextSibling;
+        }
+    }
+}
+/**
+ * We need to determine whether the DOMParser exists in the global context.
+ * The try-catch is because, on some browsers, trying to access this property
+ * on window can actually throw an error.
+ *
+ * @suppress {uselessCode}
+ */
+function isDOMParserAvailable() {
+    try {
+        return !!window.DOMParser;
+    }
+    catch (e) {
+        return false;
+    }
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * A pattern that recognizes a commonly useful subset of URLs that are safe.
+ *
+ * This regular expression matches a subset of URLs that will not cause script
+ * execution if used in URL context within a HTML document. Specifically, this
+ * regular expression matches if (comment from here on and regex copied from
+ * Soy's EscapingConventions):
+ * (1) Either a protocol in a whitelist (http, https, mailto or ftp).
+ * (2) or no protocol.  A protocol must be followed by a colon. The below
+ *     allows that by allowing colons only after one of the characters [/?#].
+ *     A colon after a hash (#) must be in the fragment.
+ *     Otherwise, a colon after a (?) must be in a query.
+ *     Otherwise, a colon after a single solidus (/) must be in a path.
+ *     Otherwise, a colon after a double solidus (//) must be in the authority
+ *     (before port).
+ *
+ * The pattern disallows &, used in HTML entity declarations before
+ * one of the characters in [/?#]. This disallows HTML entities used in the
+ * protocol name, which should never happen, e.g. "h&#116;tp" for "http".
+ * It also disallows HTML entities in the first path part of a relative path,
+ * e.g. "foo&lt;bar/baz".  Our existing escaping functions should not produce
+ * that. More importantly, it disallows masking of a colon,
+ * e.g. "javascript&#58;...".
+ *
+ * This regular expression was taken from the Closure sanitization library.
+ */
+const SAFE_URL_PATTERN = /^(?:(?:https?|mailto|ftp|tel|file):|[^&:/?#]*(?:[/?#]|$))/gi;
+/** A pattern that matches safe data URLs. Only matches image, video and audio types. */
+const DATA_URL_PATTERN = /^data:(?:image\/(?:bmp|gif|jpeg|jpg|png|tiff|webp)|video\/(?:mpeg|mp4|ogg|webm)|audio\/(?:mp3|oga|ogg|opus));base64,[a-z0-9+\/]+=*$/i;
+function _sanitizeUrl(url) {
+    url = String(url);
+    if (url.match(SAFE_URL_PATTERN) || url.match(DATA_URL_PATTERN))
+        return url;
+    if (isDevMode()) {
+        console.warn(`WARNING: sanitizing unsafe URL value ${url} (see http://g.co/ng/security#xss)`);
+    }
+    return 'unsafe:' + url;
+}
+function sanitizeSrcset(srcset) {
+    srcset = String(srcset);
+    return srcset.split(',').map((srcset) => _sanitizeUrl(srcset.trim())).join(', ');
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function tagSet(tags) {
+    const res = {};
+    for (const t of tags.split(','))
+        res[t] = true;
+    return res;
+}
+function merge$1(...sets) {
+    const res = {};
+    for (const s of sets) {
+        for (const v in s) {
+            if (s.hasOwnProperty(v))
+                res[v] = true;
+        }
+    }
+    return res;
+}
+// Good source of info about elements and attributes
+// http://dev.w3.org/html5/spec/Overview.html#semantics
+// http://simon.html5.org/html-elements
+// Safe Void Elements - HTML5
+// http://dev.w3.org/html5/spec/Overview.html#void-elements
+const VOID_ELEMENTS = tagSet('area,br,col,hr,img,wbr');
+// Elements that you can, intentionally, leave open (and which close themselves)
+// http://dev.w3.org/html5/spec/Overview.html#optional-tags
+const OPTIONAL_END_TAG_BLOCK_ELEMENTS = tagSet('colgroup,dd,dt,li,p,tbody,td,tfoot,th,thead,tr');
+const OPTIONAL_END_TAG_INLINE_ELEMENTS = tagSet('rp,rt');
+const OPTIONAL_END_TAG_ELEMENTS = merge$1(OPTIONAL_END_TAG_INLINE_ELEMENTS, OPTIONAL_END_TAG_BLOCK_ELEMENTS);
+// Safe Block Elements - HTML5
+const BLOCK_ELEMENTS = merge$1(OPTIONAL_END_TAG_BLOCK_ELEMENTS, tagSet('address,article,' +
+    'aside,blockquote,caption,center,del,details,dialog,dir,div,dl,figure,figcaption,footer,h1,h2,h3,h4,h5,' +
+    'h6,header,hgroup,hr,ins,main,map,menu,nav,ol,pre,section,summary,table,ul'));
+// Inline Elements - HTML5
+const INLINE_ELEMENTS = merge$1(OPTIONAL_END_TAG_INLINE_ELEMENTS, tagSet('a,abbr,acronym,audio,b,' +
+    'bdi,bdo,big,br,cite,code,del,dfn,em,font,i,img,ins,kbd,label,map,mark,picture,q,ruby,rp,rt,s,' +
+    'samp,small,source,span,strike,strong,sub,sup,time,track,tt,u,var,video'));
+const VALID_ELEMENTS = merge$1(VOID_ELEMENTS, BLOCK_ELEMENTS, INLINE_ELEMENTS, OPTIONAL_END_TAG_ELEMENTS);
+// Attributes that have href and hence need to be sanitized
+const URI_ATTRS = tagSet('background,cite,href,itemtype,longdesc,poster,src,xlink:href');
+// Attributes that have special href set hence need to be sanitized
+const SRCSET_ATTRS = tagSet('srcset');
+const HTML_ATTRS = tagSet('abbr,accesskey,align,alt,autoplay,axis,bgcolor,border,cellpadding,cellspacing,class,clear,color,cols,colspan,' +
+    'compact,controls,coords,datetime,default,dir,download,face,headers,height,hidden,hreflang,hspace,' +
+    'ismap,itemscope,itemprop,kind,label,lang,language,loop,media,muted,nohref,nowrap,open,preload,rel,rev,role,rows,rowspan,rules,' +
+    'scope,scrolling,shape,size,sizes,span,srclang,start,summary,tabindex,target,title,translate,type,usemap,' +
+    'valign,value,vspace,width');
+// NB: This currently consciously doesn't support SVG. SVG sanitization has had several security
+// issues in the past, so it seems safer to leave it out if possible. If support for binding SVG via
+// innerHTML is required, SVG attributes should be added here.
+// NB: Sanitization does not allow <form> elements or other active elements (<button> etc). Those
+// can be sanitized, but they increase security surface area without a legitimate use case, so they
+// are left out here.
+const VALID_ATTRS = merge$1(URI_ATTRS, SRCSET_ATTRS, HTML_ATTRS);
+/**
+ * SanitizingHtmlSerializer serializes a DOM fragment, stripping out any unsafe elements and unsafe
+ * attributes.
+ */
+class SanitizingHtmlSerializer {
+    constructor() {
+        // Explicitly track if something was stripped, to avoid accidentally warning of sanitization just
+        // because characters were re-encoded.
+        this.sanitizedSomething = false;
+        this.buf = [];
+    }
+    sanitizeChildren(el) {
+        // This cannot use a TreeWalker, as it has to run on Angular's various DOM adapters.
+        // However this code never accesses properties off of `document` before deleting its contents
+        // again, so it shouldn't be vulnerable to DOM clobbering.
+        let current = el.firstChild;
+        while (current) {
+            if (current.nodeType === Node.ELEMENT_NODE) {
+                this.startElement(current);
+            }
+            else if (current.nodeType === Node.TEXT_NODE) {
+                this.chars(current.nodeValue);
+            }
+            else {
+                // Strip non-element, non-text nodes.
+                this.sanitizedSomething = true;
+            }
+            if (current.firstChild) {
+                current = current.firstChild;
+                continue;
+            }
+            while (current) {
+                // Leaving the element. Walk up and to the right, closing tags as we go.
+                if (current.nodeType === Node.ELEMENT_NODE) {
+                    this.endElement(current);
+                }
+                let next = this.checkClobberedElement(current, current.nextSibling);
+                if (next) {
+                    current = next;
+                    break;
+                }
+                current = this.checkClobberedElement(current, current.parentNode);
+            }
+        }
+        return this.buf.join('');
+    }
+    startElement(element) {
+        const tagName = element.nodeName.toLowerCase();
+        if (!VALID_ELEMENTS.hasOwnProperty(tagName)) {
+            this.sanitizedSomething = true;
+            return;
+        }
+        this.buf.push('<');
+        this.buf.push(tagName);
+        const elAttrs = element.attributes;
+        for (let i = 0; i < elAttrs.length; i++) {
+            const elAttr = elAttrs.item(i);
+            const attrName = elAttr.name;
+            const lower = attrName.toLowerCase();
+            if (!VALID_ATTRS.hasOwnProperty(lower)) {
+                this.sanitizedSomething = true;
+                continue;
+            }
+            let value = elAttr.value;
+            // TODO(martinprobst): Special case image URIs for data:image/...
+            if (URI_ATTRS[lower])
+                value = _sanitizeUrl(value);
+            if (SRCSET_ATTRS[lower])
+                value = sanitizeSrcset(value);
+            this.buf.push(' ', attrName, '="', encodeEntities(value), '"');
+        }
+        this.buf.push('>');
+    }
+    endElement(current) {
+        const tagName = current.nodeName.toLowerCase();
+        if (VALID_ELEMENTS.hasOwnProperty(tagName) && !VOID_ELEMENTS.hasOwnProperty(tagName)) {
+            this.buf.push('</');
+            this.buf.push(tagName);
+            this.buf.push('>');
+        }
+    }
+    chars(chars) { this.buf.push(encodeEntities(chars)); }
+    checkClobberedElement(node, nextNode) {
+        if (nextNode &&
+            (node.compareDocumentPosition(nextNode) &
+                Node.DOCUMENT_POSITION_CONTAINED_BY) === Node.DOCUMENT_POSITION_CONTAINED_BY) {
+            throw new Error(`Failed to sanitize html because the element is clobbered: ${node.outerHTML}`);
+        }
+        return nextNode;
+    }
+}
+// Regular Expressions for parsing tags and attributes
+const SURROGATE_PAIR_REGEXP = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
+// ! to ~ is the ASCII range.
+const NON_ALPHANUMERIC_REGEXP = /([^\#-~ |!])/g;
+/**
+ * Escapes all potentially dangerous characters, so that the
+ * resulting string can be safely inserted into attribute or
+ * element text.
+ * @param value
+ */
+function encodeEntities(value) {
+    return value.replace(/&/g, '&amp;')
+        .replace(SURROGATE_PAIR_REGEXP, function (match) {
+        const hi = match.charCodeAt(0);
+        const low = match.charCodeAt(1);
+        return '&#' + (((hi - 0xD800) * 0x400) + (low - 0xDC00) + 0x10000) + ';';
+    })
+        .replace(NON_ALPHANUMERIC_REGEXP, function (match) { return '&#' + match.charCodeAt(0) + ';'; })
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+let inertBodyHelper;
+/**
+ * Sanitizes the given unsafe, untrusted HTML fragment, and returns HTML text that is safe to add to
+ * the DOM in a browser environment.
+ */
+function _sanitizeHtml(defaultDoc, unsafeHtmlInput) {
+    let inertBodyElement = null;
+    try {
+        inertBodyHelper = inertBodyHelper || new InertBodyHelper(defaultDoc);
+        // Make sure unsafeHtml is actually a string (TypeScript types are not enforced at runtime).
+        let unsafeHtml = unsafeHtmlInput ? String(unsafeHtmlInput) : '';
+        inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
+        // mXSS protection. Repeatedly parse the document to make sure it stabilizes, so that a browser
+        // trying to auto-correct incorrect HTML cannot cause formerly inert HTML to become dangerous.
+        let mXSSAttempts = 5;
+        let parsedHtml = unsafeHtml;
+        do {
+            if (mXSSAttempts === 0) {
+                throw new Error('Failed to sanitize html because the input is unstable');
+            }
+            mXSSAttempts--;
+            unsafeHtml = parsedHtml;
+            parsedHtml = inertBodyElement.innerHTML;
+            inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
+        } while (unsafeHtml !== parsedHtml);
+        const sanitizer = new SanitizingHtmlSerializer();
+        const safeHtml = sanitizer.sanitizeChildren(getTemplateContent(inertBodyElement) || inertBodyElement);
+        if (isDevMode() && sanitizer.sanitizedSomething) {
+            console.warn('WARNING: sanitizing HTML stripped some content (see http://g.co/ng/security#xss).');
+        }
+        return safeHtml;
+    }
+    finally {
+        // In case anything goes wrong, clear out inertElement to reset the entire DOM structure.
+        if (inertBodyElement) {
+            const parent = getTemplateContent(inertBodyElement) || inertBodyElement;
+            while (parent.firstChild) {
+                parent.removeChild(parent.firstChild);
+            }
+        }
+    }
+}
+function getTemplateContent(el) {
+    return 'content' in el /** Microsoft/TypeScript#21517 */ && isTemplateElement(el) ?
+        el.content :
+        null;
+}
+function isTemplateElement(el) {
+    return el.nodeType === Node.ELEMENT_NODE && el.nodeName === 'TEMPLATE';
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Regular expression for safe style values.
+ *
+ * Quotes (" and ') are allowed, but a check must be done elsewhere to ensure they're balanced.
+ *
+ * ',' allows multiple values to be assigned to the same property (e.g. background-attachment or
+ * font-family) and hence could allow multiple values to get injected, but that should pose no risk
+ * of XSS.
+ *
+ * The function expression checks only for XSS safety, not for CSS validity.
+ *
+ * This regular expression was taken from the Closure sanitization library, and augmented for
+ * transformation values.
+ */
+const VALUES = '[-,."\'%_!# a-zA-Z0-9]+';
+const TRANSFORMATION_FNS = '(?:matrix|translate|scale|rotate|skew|perspective)(?:X|Y|3d)?';
+const COLOR_FNS = '(?:rgb|hsl)a?';
+const GRADIENTS = '(?:repeating-)?(?:linear|radial)-gradient';
+const CSS3_FNS = '(?:calc|attr)';
+const FN_ARGS = '\\([-0-9.%, #a-zA-Z]+\\)';
+const SAFE_STYLE_VALUE = new RegExp(`^(${VALUES}|` +
+    `(?:${TRANSFORMATION_FNS}|${COLOR_FNS}|${GRADIENTS}|${CSS3_FNS})` +
+    `${FN_ARGS})$`, 'g');
+/**
+ * Matches a `url(...)` value with an arbitrary argument as long as it does
+ * not contain parentheses.
+ *
+ * The URL value still needs to be sanitized separately.
+ *
+ * `url(...)` values are a very common use case, e.g. for `background-image`. With carefully crafted
+ * CSS style rules, it is possible to construct an information leak with `url` values in CSS, e.g.
+ * by observing whether scroll bars are displayed, or character ranges used by a font face
+ * definition.
+ *
+ * Angular only allows binding CSS values (as opposed to entire CSS rules), so it is unlikely that
+ * binding a URL value without further cooperation from the page will cause an information leak, and
+ * if so, it is just a leak, not a full blown XSS vulnerability.
+ *
+ * Given the common use case, low likelihood of attack vector, and low impact of an attack, this
+ * code is permissive and allows URLs that sanitize otherwise.
+ */
+const URL_RE = /^url\(([^)]+)\)$/;
+/**
+ * Checks that quotes (" and ') are properly balanced inside a string. Assumes
+ * that neither escape (\) nor any other character that could result in
+ * breaking out of a string parsing context are allowed;
+ * see http://www.w3.org/TR/css3-syntax/#string-token-diagram.
+ *
+ * This code was taken from the Closure sanitization library.
+ */
+function hasBalancedQuotes(value) {
+    let outsideSingle = true;
+    let outsideDouble = true;
+    for (let i = 0; i < value.length; i++) {
+        const c = value.charAt(i);
+        if (c === '\'' && outsideDouble) {
+            outsideSingle = !outsideSingle;
+        }
+        else if (c === '"' && outsideSingle) {
+            outsideDouble = !outsideDouble;
+        }
+    }
+    return outsideSingle && outsideDouble;
+}
+/**
+ * Sanitizes the given untrusted CSS style property value (i.e. not an entire object, just a single
+ * value) and returns a value that is safe to use in a browser environment.
+ */
+function _sanitizeStyle(value) {
+    value = String(value).trim(); // Make sure it's actually a string.
+    if (!value)
+        return '';
+    // Single url(...) values are supported, but only for URLs that sanitize cleanly. See above for
+    // reasoning behind this.
+    const urlMatch = value.match(URL_RE);
+    if ((urlMatch && _sanitizeUrl(urlMatch[1]) === urlMatch[1]) ||
+        value.match(SAFE_STYLE_VALUE) && hasBalancedQuotes(value)) {
+        return value; // Safe style values.
+    }
+    if (isDevMode()) {
+        console.warn(`WARNING: sanitizing unsafe style value ${value} (see http://g.co/ng/security#xss).`);
+    }
+    return 'unsafe';
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
+ * dangerous content.
+ *
+ * This method parses the `html` and locates potentially dangerous content (such as urls and
+ * javascript) and removes it.
+ *
+ * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustHtml}.
+ *
+ * @param unsafeHtml untrusted `html`, typically from the user.
+ * @returns `html` string which is safe to display to user, because all of the dangerous javascript
+ * and urls have been removed.
+ */
+function sanitizeHtml(unsafeHtml) {
+    const s = getCurrentSanitizer();
+    if (s) {
+        return s.sanitize(SecurityContext.HTML, unsafeHtml) || '';
+    }
+    if (allowSanitizationBypass(unsafeHtml, "Html" /* Html */)) {
+        return unsafeHtml.toString();
+    }
+    return _sanitizeHtml(document, stringify$1(unsafeHtml));
+}
+/**
+ * A `style` sanitizer which converts untrusted `style` **string** into trusted string by removing
+ * dangerous content.
+ *
+ * This method parses the `style` and locates potentially dangerous content (such as urls and
+ * javascript) and removes it.
+ *
+ * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustStyle}.
+ *
+ * @param unsafeStyle untrusted `style`, typically from the user.
+ * @returns `style` string which is safe to bind to the `style` properties, because all of the
+ * dangerous javascript and urls have been removed.
+ */
+function sanitizeStyle(unsafeStyle) {
+    const s = getCurrentSanitizer();
+    if (s) {
+        return s.sanitize(SecurityContext.STYLE, unsafeStyle) || '';
+    }
+    if (allowSanitizationBypass(unsafeStyle, "Style" /* Style */)) {
+        return unsafeStyle.toString();
+    }
+    return _sanitizeStyle(stringify$1(unsafeStyle));
+}
+/**
+ * A `url` sanitizer which converts untrusted `url` **string** into trusted string by removing
+ * dangerous
+ * content.
+ *
+ * This method parses the `url` and locates potentially dangerous content (such as javascript) and
+ * removes it.
+ *
+ * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustUrl}.
+ *
+ * @param unsafeUrl untrusted `url`, typically from the user.
+ * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
+ * all of the dangerous javascript has been removed.
+ */
+function sanitizeUrl(unsafeUrl) {
+    const s = getCurrentSanitizer();
+    if (s) {
+        return s.sanitize(SecurityContext.URL, unsafeUrl) || '';
+    }
+    if (allowSanitizationBypass(unsafeUrl, "Url" /* Url */)) {
+        return unsafeUrl.toString();
+    }
+    return _sanitizeUrl(stringify$1(unsafeUrl));
+}
+/**
+ * A `url` sanitizer which only lets trusted `url`s through.
+ *
+ * This passes only `url`s marked trusted by calling {@link bypassSanitizationTrustResourceUrl}.
+ *
+ * @param unsafeResourceUrl untrusted `url`, typically from the user.
+ * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
+ * only trusted `url`s have been allowed to pass.
+ */
+function sanitizeResourceUrl(unsafeResourceUrl) {
+    const s = getCurrentSanitizer();
+    if (s) {
+        return s.sanitize(SecurityContext.RESOURCE_URL, unsafeResourceUrl) || '';
+    }
+    if (allowSanitizationBypass(unsafeResourceUrl, "ResourceUrl" /* ResourceUrl */)) {
+        return unsafeResourceUrl.toString();
+    }
+    throw new Error('unsafe value used in a resource URL context (see http://g.co/ng/security#xss)');
+}
+/**
+ * A `script` sanitizer which only lets trusted javascript through.
+ *
+ * This passes only `script`s marked trusted by calling {@link bypassSanitizationTrustScript}.
+ *
+ * @param unsafeScript untrusted `script`, typically from the user.
+ * @returns `url` string which is safe to bind to the `<script>` element such as `<img src>`,
+ * because only trusted `scripts`s have been allowed to pass.
+ */
+function sanitizeScript(unsafeScript) {
+    const s = getCurrentSanitizer();
+    if (s) {
+        return s.sanitize(SecurityContext.SCRIPT, unsafeScript) || '';
+    }
+    if (allowSanitizationBypass(unsafeScript, "Script" /* Script */)) {
+        return unsafeScript.toString();
+    }
+    throw new Error('unsafe value used in a script context');
+}
+/**
+ * The default style sanitizer will handle sanitization for style properties by
+ * sanitizing any CSS property that can include a `url` value (usually image-based properties)
+ */
+const defaultStyleSanitizer = function (prop, value) {
+    if (value === undefined) {
+        return prop === 'background-image' || prop === 'background' || prop === 'border-image' ||
+            prop === 'filter' || prop === 'filter' || prop === 'list-style' ||
+            prop === 'list-style-image';
+    }
+    return sanitizeStyle(value);
+};
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * A mapping of the @angular/core API surface used in generated expressions to the actual symbols.
+ *
+ * This should be kept up to date with the public exports of @angular/core.
+ */
+const angularCoreEnv = {
+    'ɵdefineBase': defineBase,
+    'ɵdefineComponent': defineComponent,
+    'ɵdefineDirective': defineDirective,
+    'defineInjectable': defineInjectable,
+    'defineInjector': defineInjector,
+    'ɵdefineNgModule': defineNgModule,
+    'ɵdefinePipe': definePipe,
+    'ɵdirectiveInject': directiveInject,
+    'ɵgetFactoryOf': getFactoryOf,
+    'ɵgetInheritedFactory': getInheritedFactory,
+    'inject': inject,
+    'ɵinjectAttribute': injectAttribute,
+    'ɵinjectChangeDetectorRef': injectChangeDetectorRef,
+    'ɵinjectElementRef': injectElementRef,
+    'ɵinjectTemplateRef': injectTemplateRef,
+    'ɵinjectViewContainerRef': injectViewContainerRef,
+    'ɵNgOnChangesFeature': NgOnChangesFeature,
+    'ɵPublicFeature': PublicFeature,
+    'ɵInheritDefinitionFeature': InheritDefinitionFeature,
+    'ɵa': elementAttribute,
+    'ɵb': bind,
+    'ɵC': container,
+    'ɵx': nextContext,
+    'ɵcR': containerRefreshStart,
+    'ɵcr': containerRefreshEnd,
+    'ɵd': loadDirective,
+    'ɵql': loadQueryList,
+    'ɵNH': namespaceHTML,
+    'ɵNM': namespaceMathML,
+    'ɵNS': namespaceSVG,
+    'ɵE': elementStart,
+    'ɵe': elementEnd,
+    'ɵEe': element,
+    'ɵEC': elementContainerStart,
+    'ɵeC': elementContainerEnd,
+    'ɵf0': pureFunction0,
+    'ɵf1': pureFunction1,
+    'ɵf2': pureFunction2,
+    'ɵf3': pureFunction3,
+    'ɵf4': pureFunction4,
+    'ɵf5': pureFunction5,
+    'ɵf6': pureFunction6,
+    'ɵf7': pureFunction7,
+    'ɵf8': pureFunction8,
+    'ɵfV': pureFunctionV,
+    'ɵgV': getCurrentView,
+    'ɵrV': restoreView,
+    'ɵi1': interpolation1,
+    'ɵi2': interpolation2,
+    'ɵi3': interpolation3,
+    'ɵi4': interpolation4,
+    'ɵi5': interpolation5,
+    'ɵi6': interpolation6,
+    'ɵi7': interpolation7,
+    'ɵi8': interpolation8,
+    'ɵiV': interpolationV,
+    'ɵcp': elementClassProp,
+    'ɵL': listener,
+    'ɵld': load,
+    'ɵP': projection,
+    'ɵp': elementProperty,
+    'ɵpb1': pipeBind1,
+    'ɵpb2': pipeBind2,
+    'ɵpb3': pipeBind3,
+    'ɵpb4': pipeBind4,
+    'ɵpbV': pipeBindV,
+    'ɵpD': projectionDef,
+    'ɵPp': pipe,
+    'ɵQ': query,
+    'ɵqR': queryRefresh,
+    'ɵQr': registerContentQuery,
+    'ɵrS': reserveSlots,
+    'ɵr': reference,
+    'ɵs': elementStyling,
+    'ɵsm': elementStylingMap,
+    'ɵsp': elementStyleProp,
+    'ɵsa': elementStylingApply,
+    'ɵT': text,
+    'ɵt': textBinding,
+    'ɵV': embeddedViewStart,
+    'ɵv': embeddedViewEnd,
+    'ɵzh': sanitizeHtml,
+    'ɵzs': sanitizeStyle,
+    'ɵzss': defaultStyleSanitizer,
+    'ɵzr': sanitizeResourceUrl,
+    'ɵzc': sanitizeScript,
+    'ɵzu': sanitizeUrl
+};
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const TARGET = {};
+const NG_COMPONENT_DEF = getClosureSafeProperty$1({ ngComponentDef: TARGET }, TARGET);
+const NG_DIRECTIVE_DEF = getClosureSafeProperty$1({ ngDirectiveDef: TARGET }, TARGET);
+const NG_INJECTABLE_DEF = getClosureSafeProperty$1({ ngInjectableDef: TARGET }, TARGET);
+const NG_INJECTOR_DEF = getClosureSafeProperty$1({ ngInjectorDef: TARGET }, TARGET);
+const NG_PIPE_DEF = getClosureSafeProperty$1({ ngPipeDef: TARGET }, TARGET);
+const NG_MODULE_DEF = getClosureSafeProperty$1({ ngModuleDef: TARGET }, TARGET);
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+let _reflect = null;
+function getReflect() {
+    return (_reflect = _reflect || new ReflectionCapabilities());
+}
+function reflectDependencies(type) {
+    return convertDependencies(getReflect().parameters(type));
+}
+function convertDependencies(deps) {
+    return deps.map(dep => reflectDependency(dep));
+}
+function reflectDependency(dep) {
+    const meta = {
+        token: new LiteralExpr(null),
+        host: false,
+        optional: false,
+        resolved: R3ResolvedDependencyType.Token,
+        self: false,
+        skipSelf: false,
+    };
+    function setTokenAndResolvedType(token) {
+        if (token === ElementRef) {
+            meta.resolved = R3ResolvedDependencyType.ElementRef;
+        }
+        else if (token === Injector) {
+            meta.resolved = R3ResolvedDependencyType.Injector;
+        }
+        else if (token === TemplateRef) {
+            meta.resolved = R3ResolvedDependencyType.TemplateRef;
+        }
+        else if (token === ViewContainerRef) {
+            meta.resolved = R3ResolvedDependencyType.ViewContainerRef;
+        }
+        else {
+            meta.resolved = R3ResolvedDependencyType.Token;
+        }
+        meta.token = new WrappedNodeExpr(token);
+    }
+    if (Array.isArray(dep)) {
+        if (dep.length === 0) {
+            throw new Error('Dependency array must have arguments.');
+        }
+        for (let j = 0; j < dep.length; j++) {
+            const param = dep[j];
+            if (param instanceof Optional || param.__proto__.ngMetadataName === 'Optional') {
+                meta.optional = true;
+            }
+            else if (param instanceof SkipSelf || param.__proto__.ngMetadataName === 'SkipSelf') {
+                meta.skipSelf = true;
+            }
+            else if (param instanceof Self || param.__proto__.ngMetadataName === 'Self') {
+                meta.self = true;
+            }
+            else if (param instanceof Host || param.__proto__.ngMetadataName === 'Host') {
+                meta.host = true;
+            }
+            else if (param instanceof Inject) {
+                meta.token = new WrappedNodeExpr(param.token);
+            }
+            else if (param instanceof Attribute) {
+                if (param.attributeName === undefined) {
+                    throw new Error(`Attribute name must be defined.`);
+                }
+                meta.token = new LiteralExpr(param.attributeName);
+                meta.resolved = R3ResolvedDependencyType.Attribute;
+            }
+            else {
+                setTokenAndResolvedType(param);
+            }
+        }
+    }
+    else {
+        setTokenAndResolvedType(dep);
+    }
+    return meta;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const EMPTY_ARRAY$4 = [];
+/**
+ * Compiles a module in JIT mode.
+ *
+ * This function automatically gets called when a class has a `@NgModule` decorator.
+ */
+function compileNgModule$1(moduleType, ngModule) {
+    compileNgModuleDefs(moduleType, ngModule);
+    setScopeOnDeclaredComponents(moduleType, ngModule);
+}
+/**
+ * Compiles and adds the `ngModuleDef` and `ngInjectorDef` properties to the module class.
+ */
+function compileNgModuleDefs(moduleType, ngModule) {
+    const declarations = flatten$2(ngModule.declarations || EMPTY_ARRAY$4);
+    let ngModuleDef = null;
+    Object.defineProperty(moduleType, NG_MODULE_DEF, {
+        get: () => {
+            if (ngModuleDef === null) {
+                const meta = {
+                    type: wrap(moduleType),
+                    bootstrap: flatten$2(ngModule.bootstrap || EMPTY_ARRAY$4).map(wrap),
+                    declarations: declarations.map(wrapReference),
+                    imports: flatten$2(ngModule.imports || EMPTY_ARRAY$4)
+                        .map(expandModuleWithProviders)
+                        .map(wrapReference),
+                    exports: flatten$2(ngModule.exports || EMPTY_ARRAY$4)
+                        .map(expandModuleWithProviders)
+                        .map(wrapReference),
+                    emitInline: true,
+                };
+                const res = compileNgModule(meta);
+                ngModuleDef = jitExpression(res.expression, angularCoreEnv, `ng://${moduleType.name}/ngModuleDef.js`, []);
+            }
+            return ngModuleDef;
+        },
+        // Make the property configurable in dev mode to allow overriding in tests
+        configurable: !!ngDevMode,
+    });
+    let ngInjectorDef = null;
+    Object.defineProperty(moduleType, NG_INJECTOR_DEF, {
+        get: () => {
+            if (ngInjectorDef === null) {
+                const meta = {
+                    name: moduleType.name,
+                    type: wrap(moduleType),
+                    deps: reflectDependencies(moduleType),
+                    providers: new WrappedNodeExpr(ngModule.providers || EMPTY_ARRAY$4),
+                    imports: new WrappedNodeExpr([
+                        ngModule.imports || EMPTY_ARRAY$4,
+                        ngModule.exports || EMPTY_ARRAY$4,
+                    ]),
+                };
+                const res = compileInjector(meta);
+                ngInjectorDef = jitExpression(res.expression, angularCoreEnv, `ng://${moduleType.name}/ngInjectorDef.js`, res.statements);
+            }
+            return ngInjectorDef;
+        },
+        // Make the property configurable in dev mode to allow overriding in tests
+        configurable: !!ngDevMode,
+    });
+}
+/**
+ * Some declared components may be compiled asynchronously, and thus may not have their
+ * ngComponentDef set yet. If this is the case, then a reference to the module is written into
+ * the `ngSelectorScope` property of the declared type.
+ */
+function setScopeOnDeclaredComponents(moduleType, ngModule) {
+    const declarations = flatten$2(ngModule.declarations || EMPTY_ARRAY$4);
+    const transitiveScopes = transitiveScopesFor(moduleType);
+    declarations.forEach(declaration => {
+        if (declaration.hasOwnProperty(NG_COMPONENT_DEF)) {
+            // An `ngComponentDef` field exists - go ahead and patch the component directly.
+            const component = declaration;
+            const componentDef = component.ngComponentDef;
+            patchComponentDefWithScope(componentDef, transitiveScopes);
+        }
+        else if (!declaration.hasOwnProperty(NG_DIRECTIVE_DEF) && !declaration.hasOwnProperty(NG_PIPE_DEF)) {
+            // Set `ngSelectorScope` for future reference when the component compilation finishes.
+            declaration.ngSelectorScope = moduleType;
+        }
+    });
+}
+/**
+ * Patch the definition of a component with directives and pipes from the compilation scope of
+ * a given module.
+ */
+function patchComponentDefWithScope(componentDef, transitiveScopes) {
+    componentDef.directiveDefs = () => Array.from(transitiveScopes.compilation.directives)
+        .map(dir => dir.ngDirectiveDef || dir.ngComponentDef)
+        .filter(def => !!def);
+    componentDef.pipeDefs = () => Array.from(transitiveScopes.compilation.pipes).map(pipe => pipe.ngPipeDef);
+}
+/**
+ * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
+ *
+ * This operation is memoized and the result is cached on the module's definition. It can be called
+ * on modules with components that have not fully compiled yet, but the result should not be used
+ * until they have.
+ */
+function transitiveScopesFor(moduleType) {
+    if (!isNgModule(moduleType)) {
+        throw new Error(`${moduleType.name} does not have an ngModuleDef`);
+    }
+    const def = moduleType.ngModuleDef;
+    if (def.transitiveCompileScopes !== null) {
+        return def.transitiveCompileScopes;
+    }
+    const scopes = {
+        compilation: {
+            directives: new Set(),
+            pipes: new Set(),
+        },
+        exported: {
+            directives: new Set(),
+            pipes: new Set(),
+        },
+    };
+    def.declarations.forEach(declared => {
+        const declaredWithDefs = declared;
+        if (declaredWithDefs.ngPipeDef !== undefined) {
+            scopes.compilation.pipes.add(declared);
+        }
+        else {
+            // Either declared has an ngComponentDef or ngDirectiveDef, or it's a component which hasn't
+            // had its template compiled yet. In either case, it gets added to the compilation's
+            // directives.
+            scopes.compilation.directives.add(declared);
+        }
+    });
+    def.imports.forEach((imported) => {
+        const importedTyped = imported;
+        if (!isNgModule(importedTyped)) {
+            throw new Error(`Importing ${importedTyped.name} which does not have an ngModuleDef`);
+        }
+        // When this module imports another, the imported module's exported directives and pipes are
+        // added to the compilation scope of this module.
+        const importedScope = transitiveScopesFor(importedTyped);
+        importedScope.exported.directives.forEach(entry => scopes.compilation.directives.add(entry));
+        importedScope.exported.pipes.forEach(entry => scopes.compilation.pipes.add(entry));
+    });
+    def.exports.forEach((exported) => {
+        const exportedTyped = exported;
+        // Either the type is a module, a pipe, or a component/directive (which may not have an
+        // ngComponentDef as it might be compiled asynchronously).
+        if (isNgModule(exportedTyped)) {
+            // When this module exports another, the exported module's exported directives and pipes are
+            // added to both the compilation and exported scopes of this module.
+            const exportedScope = transitiveScopesFor(exportedTyped);
+            exportedScope.exported.directives.forEach(entry => {
+                scopes.compilation.directives.add(entry);
+                scopes.exported.directives.add(entry);
+            });
+            exportedScope.exported.pipes.forEach(entry => {
+                scopes.compilation.pipes.add(entry);
+                scopes.exported.pipes.add(entry);
+            });
+        }
+        else if (exportedTyped.ngPipeDef !== undefined) {
+            scopes.exported.pipes.add(exportedTyped);
+        }
+        else {
+            scopes.exported.directives.add(exportedTyped);
+        }
+    });
+    def.transitiveCompileScopes = scopes;
+    return scopes;
+}
+function flatten$2(values) {
+    const out = [];
+    values.forEach(value => {
+        if (Array.isArray(value)) {
+            out.push(...flatten$2(value));
+        }
+        else {
+            out.push(value);
+        }
+    });
+    return out;
+}
+function expandModuleWithProviders(value) {
+    if (isModuleWithProviders(value)) {
+        return value.ngModule;
+    }
+    return value;
+}
+function wrap(value) {
+    return new WrappedNodeExpr(value);
+}
+function wrapReference(value) {
+    const wrapped = wrap(value);
+    return { value: wrapped, type: wrapped };
+}
+function isModuleWithProviders(value) {
+    return value.ngModule !== undefined;
+}
+function isNgModule(value) {
+    return value.ngModuleDef !== undefined;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Compile an Angular component according to its decorator metadata, and patch the resulting
+ * ngComponentDef onto the component type.
+ *
+ * Compilation may be asynchronous (due to the need to resolve URLs for the component template or
+ * other resources, for example). In the event that compilation is not immediate, `compileComponent`
+ * will enqueue resource resolution into a global queue and will fail to return the `ngComponentDef`
+ * until the global queue has been resolved with a call to `resolveComponentResources`.
+ */
+function compileComponent(type, metadata) {
+    let ngComponentDef = null;
+    // Metadata may have resources which need to be resolved.
+    maybeQueueResolutionOfComponentResources(metadata);
+    Object.defineProperty(type, NG_COMPONENT_DEF, {
+        get: () => {
+            if (ngComponentDef === null) {
+                if (componentNeedsResolution(metadata)) {
+                    const error = [`Component '${stringify(type)}' is not resolved:`];
+                    if (metadata.templateUrl) {
+                        error.push(` - templateUrl: ${stringify(metadata.templateUrl)}`);
+                    }
+                    if (metadata.styleUrls && metadata.styleUrls.length) {
+                        error.push(` - styleUrls: ${JSON.stringify(metadata.styleUrls)}`);
+                    }
+                    error.push(`Did you run and wait for 'resolveComponentResources()'?`);
+                    throw new Error(error.join('\n'));
+                }
+                // The ConstantPool is a requirement of the JIT'er.
+                const constantPool = new ConstantPool();
+                // Parse the template and check for errors.
+                const template = parseTemplate(metadata.template, `ng://${stringify(type)}/template.html`, {
+                    preserveWhitespaces: metadata.preserveWhitespaces || false,
+                });
+                if (template.errors !== undefined) {
+                    const errors = template.errors.map(err => err.toString()).join(', ');
+                    throw new Error(`Errors during JIT compilation of template for ${stringify(type)}: ${errors}`);
+                }
+                // Compile the component metadata, including template, into an expression.
+                // TODO(alxhub): implement inputs, outputs, queries, etc.
+                const res = compileComponentFromMetadata(Object.assign({}, directiveMetadata(type, metadata), { template, directives: new Map(), pipes: new Map(), viewQueries: [], wrapDirectivesInClosure: false }), constantPool, makeBindingParser());
+                const preStatements = [...constantPool.statements, ...res.statements];
+                ngComponentDef = jitExpression(res.expression, angularCoreEnv, `ng://${type.name}/ngComponentDef.js`, preStatements);
+                // If component compilation is async, then the @NgModule annotation which declares the
+                // component may execute and set an ngSelectorScope property on the component type. This
+                // allows the component to patch itself with directiveDefs from the module after it finishes
+                // compiling.
+                if (hasSelectorScope(type)) {
+                    const scopes = transitiveScopesFor(type.ngSelectorScope);
+                    patchComponentDefWithScope(ngComponentDef, scopes);
+                }
+            }
+            return ngComponentDef;
+        },
+        // Make the property configurable in dev mode to allow overriding in tests
+        configurable: !!ngDevMode,
+    });
+}
+function hasSelectorScope(component) {
+    return component.ngSelectorScope !== undefined;
+}
+/**
+ * Compile an Angular directive according to its decorator metadata, and patch the resulting
+ * ngDirectiveDef onto the component type.
+ *
+ * In the event that compilation is not immediate, `compileDirective` will return a `Promise` which
+ * will resolve when compilation completes and the directive becomes usable.
+ */
+function compileDirective(type, directive) {
+    let ngDirectiveDef = null;
+    Object.defineProperty(type, NG_DIRECTIVE_DEF, {
+        get: () => {
+            if (ngDirectiveDef === null) {
+                const constantPool = new ConstantPool();
+                const sourceMapUrl = `ng://${type && type.name}/ngDirectiveDef.js`;
+                const res = compileDirectiveFromMetadata(directiveMetadata(type, directive), constantPool, makeBindingParser());
+                const preStatements = [...constantPool.statements, ...res.statements];
+                ngDirectiveDef = jitExpression(res.expression, angularCoreEnv, sourceMapUrl, preStatements);
+            }
+            return ngDirectiveDef;
+        },
+        // Make the property configurable in dev mode to allow overriding in tests
+        configurable: !!ngDevMode,
+    });
+}
+function extendsDirectlyFromObject(type) {
+    return Object.getPrototypeOf(type.prototype) === Object.prototype;
+}
+/**
+ * Extract the `R3DirectiveMetadata` for a particular directive (either a `Directive` or a
+ * `Component`).
+ */
+function directiveMetadata(type, metadata) {
+    // Reflect inputs and outputs.
+    const propMetadata = getReflect().propMetadata(type);
+    const host = extractHostBindings(metadata, propMetadata);
+    const inputsFromMetadata = parseInputOutputs(metadata.inputs || []);
+    const outputsFromMetadata = parseInputOutputs(metadata.outputs || []);
+    const inputsFromType = {};
+    const outputsFromType = {};
+    for (const field in propMetadata) {
+        if (propMetadata.hasOwnProperty(field)) {
+            propMetadata[field].forEach(ann => {
+                if (isInput(ann)) {
+                    inputsFromType[field] = ann.bindingPropertyName || field;
+                }
+                else if (isOutput(ann)) {
+                    outputsFromType[field] = ann.bindingPropertyName || field;
+                }
+            });
+        }
+    }
+    return {
+        name: type.name,
+        type: new WrappedNodeExpr(type),
+        typeArgumentCount: 0,
+        selector: metadata.selector,
+        deps: reflectDependencies(type), host,
+        inputs: Object.assign({}, inputsFromMetadata, inputsFromType),
+        outputs: Object.assign({}, outputsFromMetadata, outputsFromType),
+        queries: [],
+        lifecycle: {
+            usesOnChanges: type.prototype.ngOnChanges !== undefined,
+        },
+        typeSourceSpan: null,
+        usesInheritance: !extendsDirectlyFromObject(type),
+        exportAs: metadata.exportAs || null,
+    };
+}
+function extractHostBindings(metadata, propMetadata) {
+    // First parse the declarations from the metadata.
+    const { attributes, listeners, properties, animations } = parseHostBindings(metadata.host || {});
+    if (Object.keys(animations).length > 0) {
+        throw new Error(`Animation bindings are as-of-yet unsupported in Ivy`);
+    }
+    // Next, loop over the properties of the object, looking for @HostBinding and @HostListener.
+    for (const field in propMetadata) {
+        if (propMetadata.hasOwnProperty(field)) {
+            propMetadata[field].forEach(ann => {
+                if (isHostBinding(ann)) {
+                    properties[ann.hostPropertyName || field] = field;
+                }
+                else if (isHostListener(ann)) {
+                    listeners[ann.eventName || field] = `${field}(${(ann.args || []).join(',')})`;
+                }
+            });
+        }
+    }
+    return { attributes, listeners, properties };
+}
+function isInput(value) {
+    return value.ngMetadataName === 'Input';
+}
+function isOutput(value) {
+    return value.ngMetadataName === 'Output';
+}
+function isHostBinding(value) {
+    return value.ngMetadataName === 'HostBinding';
+}
+function isHostListener(value) {
+    return value.ngMetadataName === 'HostListener';
+}
+function parseInputOutputs(values) {
+    return values.reduce((map, value) => {
+        const [field, property] = value.split(',').map(piece => piece.trim());
+        map[field] = property || field;
+        return map;
+    }, {});
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Compile an Angular injectable according to its `Injectable` metadata, and patch the resulting
+ * `ngInjectableDef` onto the injectable type.
+ */
+function compileInjectable$1(type, srcMeta) {
+    // Allow the compilation of a class with a `@Injectable()` decorator without parameters
+    const meta = srcMeta || { providedIn: null };
+    let def = null;
+    Object.defineProperty(type, NG_INJECTABLE_DEF, {
+        get: () => {
+            if (def === null) {
+                // Check whether the injectable metadata includes a provider specification.
+                const hasAProvider = isUseClassProvider(meta) || isUseFactoryProvider(meta) ||
+                    isUseValueProvider(meta) || isUseExistingProvider(meta);
+                const ctorDeps = reflectDependencies(type);
+                let userDeps = undefined;
+                if ((isUseClassProvider(meta) || isUseFactoryProvider(meta)) && meta.deps !== undefined) {
+                    userDeps = convertDependencies(meta.deps);
+                }
+                // Decide which flavor of factory to generate, based on the provider specified.
+                // Only one of the use* fields should be set.
+                let useClass = undefined;
+                let useFactory = undefined;
+                let useValue = undefined;
+                let useExisting = undefined;
+                if (!hasAProvider) {
+                    // In the case the user specifies a type provider, treat it as {provide: X, useClass: X}.
+                    // The deps will have been reflected above, causing the factory to create the class by
+                    // calling
+                    // its constructor with injected deps.
+                    useClass = new WrappedNodeExpr(type);
+                }
+                else if (isUseClassProvider(meta)) {
+                    // The user explicitly specified useClass, and may or may not have provided deps.
+                    useClass = new WrappedNodeExpr(meta.useClass);
+                }
+                else if (isUseValueProvider(meta)) {
+                    // The user explicitly specified useValue.
+                    useValue = new WrappedNodeExpr(meta.useValue);
+                }
+                else if (isUseFactoryProvider(meta)) {
+                    // The user explicitly specified useFactory.
+                    useFactory = new WrappedNodeExpr(meta.useFactory);
+                }
+                else if (isUseExistingProvider(meta)) {
+                    // The user explicitly specified useExisting.
+                    useExisting = new WrappedNodeExpr(meta.useExisting);
+                }
+                else {
+                    // Can't happen - either hasAProvider will be false, or one of the providers will be set.
+                    throw new Error(`Unreachable state.`);
+                }
+                const { expression, statements } = compileInjectable({
+                    name: type.name,
+                    type: new WrappedNodeExpr(type),
+                    providedIn: computeProvidedIn(meta.providedIn),
+                    useClass,
+                    useFactory,
+                    useValue,
+                    useExisting,
+                    ctorDeps,
+                    userDeps,
+                });
+                def = jitExpression(expression, angularCoreEnv, `ng://${type.name}/ngInjectableDef.js`, statements);
+            }
+            return def;
+        },
+    });
+}
+function computeProvidedIn(providedIn) {
+    if (providedIn == null || typeof providedIn === 'string') {
+        return new LiteralExpr(providedIn);
+    }
+    else {
+        return new WrappedNodeExpr(providedIn);
+    }
+}
+function isUseClassProvider(meta) {
+    return meta.useClass !== undefined;
+}
+const GET_PROPERTY_NAME$2 = {};
+const USE_VALUE$2 = getClosureSafeProperty$1({ provide: String, useValue: GET_PROPERTY_NAME$2 }, GET_PROPERTY_NAME$2);
+function isUseValueProvider(meta) {
+    return USE_VALUE$2 in meta;
+}
+function isUseFactoryProvider(meta) {
+    return meta.useFactory !== undefined;
+}
+function isUseExistingProvider(meta) {
+    return meta.useExisting !== undefined;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function compilePipe(type, meta) {
+    let ngPipeDef = null;
+    Object.defineProperty(type, NG_PIPE_DEF, {
+        get: () => {
+            if (ngPipeDef === null) {
+                const sourceMapUrl = `ng://${stringify$1(type)}/ngPipeDef.js`;
+                const name = type.name;
+                const res = compilePipeFromMetadata({
+                    name,
+                    type: new WrappedNodeExpr(type),
+                    deps: reflectDependencies(type),
+                    pipeName: meta.name,
+                    pure: meta.pure !== undefined ? meta.pure : true,
+                });
+                ngPipeDef = jitExpression(res.expression, angularCoreEnv, sourceMapUrl, res.statements);
+            }
+            return ngPipeDef;
+        },
+        // Make the property configurable in dev mode to allow overriding in tests
+        configurable: !!ngDevMode,
+    });
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const ivyEnabled = true;
+const R3_COMPILE_COMPONENT = compileComponent;
+const R3_COMPILE_DIRECTIVE = compileDirective;
+const R3_COMPILE_INJECTABLE = compileInjectable$1;
+const R3_COMPILE_NGMODULE = compileNgModule$1;
+const R3_COMPILE_PIPE = compilePipe;
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Type of the Directive metadata.
+ */
+const Directive = makeDecorator('Directive', (dir = {}) => dir, undefined, undefined, (type, meta) => (R3_COMPILE_DIRECTIVE || (() => { }))(type, meta));
+/**
+ * Component decorator and metadata.
+ *
+ * @usageNotes
+ *
+ * ### Using animations
+ *
+ * The following snippet shows an animation trigger in a component's
+ * metadata. The trigger is attached to an element in the component's
+ * template, using "@_trigger_name_", and a state expression that is evaluated
+ * at run time to determine whether the animation should start.
+ *
+ * ```typescript
+ * @Component({
+ *   selector: 'animation-cmp',
+ *   templateUrl: 'animation-cmp.html',
+ *   animations: [
+ *     trigger('myTriggerName', [
+ *       state('on', style({ opacity: 1 }),
+ *       state('off', style({ opacity: 0 }),
+ *       transition('on => off', [
+ *         animate("1s")
+ *       ])
+ *     ])
+ *   ]
+ * })
+ * ```
+ *
+ * ```html
+ * <!-- animation-cmp.html -->
+ * <div @myTriggerName="expression">...</div>
+ * ```
+ *
+ * ### Preserving whitespace
+ *
+ * Removing whitespace can greatly reduce AOT-generated code size, and speed up view creation.
+ * As of Angular 6, default for `preserveWhitespaces` is false (whitespace is removed).
+ * To change the default setting for all components in your application, set
+ * the `preserveWhitespaces` option of the AOT compiler.
+ *
+ * Current implementation removes whitespace characters as follows:
+ * - Trims all whitespaces at the beginning and the end of a template.
+ * - Removes whitespace-only text nodes. For example,
+ * `<button>Action 1</button>  <button>Action 2</button>` becomes
+ * `<button>Action 1</button><button>Action 2</button>`.
+ * - Replaces a series of whitespace characters in text nodes with a single space.
+ * For example, `<span>\n some text\n</span>` becomes `<span> some text </span>`.
+ * - Does NOT alter text nodes inside HTML tags such as `<pre>` or `<textarea>`,
+ * where whitespace characters are significant.
+ *
+ * Note that these transformations can influence DOM nodes layout, although impact
+ * should be minimal.
+ *
+ * You can override the default behavior to preserve whitespace characters
+ * in certain fragments of a template. For example, you can exclude an entire
+ * DOM sub-tree by using the `ngPreserveWhitespaces` attribute:
+ *
+ * ```html
+ * <div ngPreserveWhitespaces>
+ *     whitespaces are preserved here
+ *     <span>    and here </span>
+ * </div>
+ * ```
+ *
+ * You can force a single space to be preserved in a text node by using `&ngsp;`,
+ * which is replaced with a space character by Angular's template
+ * compiler:
+ *
+ * ```html
+ * <a>Spaces</a>&ngsp;<a>between</a>&ngsp;<a>links.</a>
+ * <!-->compiled to be equivalent to:</>
+ *  <a>Spaces</a> <a>between</a> <a>links.</a>
+ * ```
+ *
+ * Note that sequences of `&ngsp;` are still collapsed to just one space character when
+ * the `preserveWhitespaces` option is set to `false`.
+ *
+ * ```html
+ * <a>before</a>&ngsp;&ngsp;&ngsp;<a>after</a>
+ * <!-->compiled to be equivalent to:</>
+ *  <a>Spaces</a> <a>between</a> <a>links.</a>
+ * ```
+ *
+ * To preserve sequences of whitespace characters, use the
+ * `ngPreserveWhitespaces` attribute.
+ *
+ * @Annotation
+ */
+const Component = makeDecorator('Component', (c = {}) => (Object.assign({ changeDetection: ChangeDetectionStrategy.Default }, c)), Directive, undefined, (type, meta) => (R3_COMPILE_COMPONENT || (() => { }))(type, meta));
+/**
+ *
+ *
+ * @Annotation
+ */
+const Pipe = makeDecorator('Pipe', (p) => (Object.assign({ pure: true }, p)), undefined, undefined, (type, meta) => (R3_COMPILE_PIPE || (() => { }))(type, meta));
+const initializeBaseDef = (target) => {
+    const constructor = target.constructor;
+    const inheritedBaseDef = constructor.ngBaseDef;
+    const baseDef = constructor.ngBaseDef = {
+        inputs: {},
+        outputs: {},
+        declaredInputs: {},
+    };
+    if (inheritedBaseDef) {
+        fillProperties(baseDef.inputs, inheritedBaseDef.inputs);
+        fillProperties(baseDef.outputs, inheritedBaseDef.outputs);
+        fillProperties(baseDef.declaredInputs, inheritedBaseDef.declaredInputs);
+    }
+};
+/**
+ * Used to get the minified alias of ngBaseDef
+ */
+const NG_BASE_DEF = Object.keys({ ngBaseDef: true })[0];
+/**
+ * Does the work of creating the `ngBaseDef` property for the @Input and @Output decorators.
+ * @param key "inputs" or "outputs"
+ */
+const updateBaseDefFromIOProp = (getProp) => (target, name, ...args) => {
+    const constructor = target.constructor;
+    if (!constructor.hasOwnProperty(NG_BASE_DEF)) {
+        initializeBaseDef(target);
+    }
+    const baseDef = constructor.ngBaseDef;
+    const defProp = getProp(baseDef);
+    defProp[name] = args[0];
+};
+/**
+ *
+ * @Annotation
+ */
+const Input = makePropDecorator('Input', (bindingPropertyName) => ({ bindingPropertyName }), undefined, updateBaseDefFromIOProp(baseDef => baseDef.inputs || {}));
+/**
+ *
+ * @Annotation
+ */
+const Output = makePropDecorator('Output', (bindingPropertyName) => ({ bindingPropertyName }), undefined, updateBaseDefFromIOProp(baseDef => baseDef.outputs || {}));
+/**
+ *
+ * @Annotation
+ */
+const HostBinding = makePropDecorator('HostBinding', (hostPropertyName) => ({ hostPropertyName }));
+/**
+ * Binds a CSS event to a host listener and supplies configuration metadata.
+ * Angular invokes the supplied handler method when the host element emits the specified event,
+ * and updates the bound element with the result.
+ * If the handler method returns false, applies `preventDefault` on the bound element.
+ *
+ * @usageNotes
+ *
+ * The following example declares a directive
+ * that attaches a click listener to a button and counts clicks.
+ *
+ * ```
+ * @Directive({selector: 'button[counting]'})
+ * class CountClicks {
+ *   numberOfClicks = 0;
+ *
+ *   @HostListener('click', ['$event.target'])
+ *   onClick(btn) {
+ *     console.log('button', btn, 'number of clicks:', this.numberOfClicks++);
+ *  }
+ * }
+ *
+ * @Component({
+ *   selector: 'app',
+ *   template: '<button counting>Increment</button>',
+ * })
+ * class App {}
+ * ```
+ *
+ * @Annotation
+ */
+const HostListener = makePropDecorator('HostListener', (eventName, args) => ({ eventName, args }));
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Defines a schema that allows an NgModule to contain the following:
+ * - Non-Angular elements named with dash case (`-`).
+ * - Element properties named with dash case (`-`).
+ * Dash case is the naming convention for custom elements.
+ *
+ *
+ */
+const CUSTOM_ELEMENTS_SCHEMA = {
+    name: 'custom-elements'
+};
+/**
+ * Defines a schema that allows any property on any element.
+ *
+ * @experimental
+ */
+const NO_ERRORS_SCHEMA = {
+    name: 'no-errors-schema'
+};
+function preR3NgModuleCompile(moduleType, metadata) {
+    let imports = (metadata && metadata.imports) || [];
+    if (metadata && metadata.exports) {
+        imports = [...imports, metadata.exports];
+    }
+    moduleType.ngInjectorDef = defineInjector({
+        factory: convertInjectableProviderToFactory(moduleType, { useClass: moduleType }),
+        providers: metadata && metadata.providers,
+        imports: imports,
+    });
+}
+/**
+ * @Annotation
+ */
+const NgModule = makeDecorator('NgModule', (ngModule) => ngModule, undefined, undefined, 
+/**
+ * Decorator that marks the following class as an NgModule, and supplies
+ * configuration metadata for it.
+ *
+ * * The `declarations` and `entryComponents` options configure the compiler
+ * with information about what belongs to the NgModule.
+ * * The `providers` options configures the NgModule's injector to provide
+ * dependencies the NgModule members.
+ * * The `imports` and `exports` options bring in members from other modules, and make
+ * this module's members available to others.
+ */
+(type, meta) => (R3_COMPILE_NGMODULE || preR3NgModuleCompile)(type, meta));
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const _CORE_PLATFORM_PROVIDERS = [
+    // Set a default platform name for platforms that don't set it explicitly.
+    { provide: PLATFORM_ID, useValue: 'unknown' },
+    { provide: PlatformRef, deps: [Injector] },
+    { provide: TestabilityRegistry, deps: [] },
+    { provide: Console, deps: [] },
+];
+/**
+ * This platform has to be included in any other platform
+ *
+ * @experimental
+ */
+const platformCore = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDERS);
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Provide this token to set the locale of your application.
+ * It is used for i18n extraction, by i18n pipes (DatePipe, I18nPluralPipe, CurrencyPipe,
+ * DecimalPipe and PercentPipe) and by ICU expressions.
+ *
+ * See the [i18n guide](guide/i18n#setting-up-locale) for more information.
+ *
+ * @usageNotes
+ * ### Example
+ *
+ * ```typescript
+ * import { LOCALE_ID } from '@angular/core';
+ * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+ * import { AppModule } from './app/app.module';
+ *
+ * platformBrowserDynamic().bootstrapModule(AppModule, {
+ *   providers: [{provide: LOCALE_ID, useValue: 'en-US' }]
+ * });
+ * ```
+ *
+ * @experimental i18n support is experimental.
+ */
+const LOCALE_ID = new InjectionToken('LocaleId');
+/**
+ * Use this token at bootstrap to provide the content of your translation file (`xtb`,
+ * `xlf` or `xlf2`) when you want to translate your application in another language.
+ *
+ * See the [i18n guide](guide/i18n#merge) for more information.
+ *
+ * @usageNotes
+ * ### Example
+ *
+ * ```typescript
+ * import { TRANSLATIONS } from '@angular/core';
+ * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+ * import { AppModule } from './app/app.module';
+ *
+ * // content of your translation file
+ * const translations = '....';
+ *
+ * platformBrowserDynamic().bootstrapModule(AppModule, {
+ *   providers: [{provide: TRANSLATIONS, useValue: translations }]
+ * });
+ * ```
+ *
+ * @experimental i18n support is experimental.
+ */
+const TRANSLATIONS = new InjectionToken('Translations');
+/**
+ * Provide this token at bootstrap to set the format of your {@link TRANSLATIONS}: `xtb`,
+ * `xlf` or `xlf2`.
+ *
+ * See the [i18n guide](guide/i18n#merge) for more information.
+ *
+ * @usageNotes
+ * ### Example
+ *
+ * ```typescript
+ * import { TRANSLATIONS_FORMAT } from '@angular/core';
+ * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+ * import { AppModule } from './app/app.module';
+ *
+ * platformBrowserDynamic().bootstrapModule(AppModule, {
+ *   providers: [{provide: TRANSLATIONS_FORMAT, useValue: 'xlf' }]
+ * });
+ * ```
+ *
+ * @experimental i18n support is experimental.
+ */
+const TRANSLATIONS_FORMAT = new InjectionToken('TranslationsFormat');
+/**
+ * Use this enum at bootstrap as an option of `bootstrapModule` to define the strategy
+ * that the compiler should use in case of missing translations:
+ * - Error: throw if you have missing translations.
+ * - Warning (default): show a warning in the console and/or shell.
+ * - Ignore: do nothing.
+ *
+ * See the [i18n guide](guide/i18n#missing-translation) for more information.
+ *
+ * @usageNotes
+ * ### Example
+ * ```typescript
+ * import { MissingTranslationStrategy } from '@angular/core';
+ * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+ * import { AppModule } from './app/app.module';
+ *
+ * platformBrowserDynamic().bootstrapModule(AppModule, {
+ *   missingTranslation: MissingTranslationStrategy.Error
+ * });
+ * ```
+ *
+ * @experimental i18n support is experimental.
+ */
+var MissingTranslationStrategy;
+(function (MissingTranslationStrategy) {
+    MissingTranslationStrategy[MissingTranslationStrategy["Error"] = 0] = "Error";
+    MissingTranslationStrategy[MissingTranslationStrategy["Warning"] = 1] = "Warning";
+    MissingTranslationStrategy[MissingTranslationStrategy["Ignore"] = 2] = "Ignore";
+})(MissingTranslationStrategy || (MissingTranslationStrategy = {}));
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function _iterableDiffersFactory() {
+    return defaultIterableDiffers;
+}
+function _keyValueDiffersFactory() {
+    return defaultKeyValueDiffers;
+}
+function _localeFactory(locale) {
+    return locale || 'en-US';
+}
+const APPLICATION_MODULE_PROVIDERS = [
+    {
+        provide: ApplicationRef,
+        useClass: ApplicationRef,
+        deps: [NgZone, Console, Injector, ErrorHandler, ComponentFactoryResolver, ApplicationInitStatus]
+    },
+    {
+        provide: ApplicationInitStatus,
+        useClass: ApplicationInitStatus,
+        deps: [[new Optional(), APP_INITIALIZER]]
+    },
+    { provide: Compiler, useClass: Compiler, deps: [] },
+    APP_ID_RANDOM_PROVIDER,
+    { provide: IterableDiffers, useFactory: _iterableDiffersFactory, deps: [] },
+    { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory, deps: [] },
+    {
+        provide: LOCALE_ID,
+        useFactory: _localeFactory,
+        deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
+    },
+];
+/**
+ * This module includes the providers of @angular/core that are needed
+ * to bootstrap components via `ApplicationRef`.
+ *
+ * @experimental
+ */
+let ApplicationModule = class ApplicationModule {
+    // Inject ApplicationRef to make it eager...
+    constructor(appRef) { }
+};
+ApplicationModule = __decorate([
+    NgModule({ providers: APPLICATION_MODULE_PROVIDERS }),
+    __metadata("design:paramtypes", [ApplicationRef])
+], ApplicationModule);
 
 /**
  * @license
@@ -19124,5 +19387,5 @@ class NgModuleFactory_ extends NgModuleFactory {
  * found in the LICENSE file at https://angular.io/license
  */
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, inject, INJECTOR, Injector, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, directiveInject as ɵdirectiveInject, injectElementRef as ɵinjectElementRef, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, injectChangeDetectorRef as ɵinjectChangeDetectorRef, injectAttribute as ɵinjectAttribute, PublicFeature as ɵPublicFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, NgOnChangesFeature as ɵNgOnChangesFeature, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNC, container as ɵC, nextContext as ɵx, elementStart as ɵE, namespaceHTML as ɵNH, namespaceMathML as ɵNM, namespaceSVG as ɵNS, element as ɵEe, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, query as ɵQ, registerContentQuery as ɵQr, loadDirective as ɵd, projection as ɵP, bind as ɵb, interpolation1 as ɵi1, interpolation2 as ɵi2, interpolation3 as ɵi3, interpolation4 as ɵi4, interpolation5 as ɵi5, interpolation6 as ɵi6, interpolation7 as ɵi7, interpolation8 as ɵi8, interpolationV as ɵiV, pipeBind1 as ɵpb1, pipeBind2 as ɵpb2, pipeBind3 as ɵpb3, pipeBind4 as ɵpb4, pipeBindV as ɵpbV, pureFunction0 as ɵf0, pureFunction1 as ɵf1, pureFunction2 as ɵf2, pureFunction3 as ɵf3, pureFunction4 as ɵf4, pureFunction5 as ɵf5, pureFunction6 as ɵf6, pureFunction7 as ɵf7, pureFunction8 as ɵf8, pureFunctionV as ɵfV, getCurrentView as ɵgV, restoreView as ɵrV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, queryRefresh as ɵqR, loadQueryList as ɵql, elementEnd as ɵe, elementProperty as ɵp, projectionDef as ɵpD, reference as ɵr, reserveSlots as ɵrS, elementAttribute as ɵa, elementStyling as ɵs, elementStylingMap as ɵsm, elementStyleProp as ɵsp, elementStylingApply as ɵsa, elementClassProp as ɵcp, textBinding as ɵt, embeddedViewEnd as ɵv, store as ɵst, load as ɵld, pipe as ɵPp, whenRendered as ɵwhenRendered, i18nApply as ɵiA, i18nExpMapping as ɵiEM, i18nInterpolation1 as ɵiI1, i18nInterpolation2 as ɵiI2, i18nInterpolation3 as ɵiI3, i18nInterpolation4 as ɵiI4, i18nInterpolation5 as ɵiI5, i18nInterpolation6 as ɵiI6, i18nInterpolation7 as ɵiI7, i18nInterpolation8 as ɵiI8, i18nInterpolationV as ɵIV, i18nMapping as ɵiM, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$2 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, inject, INJECTOR, Injector, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineBase as ɵdefineBase, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, directiveInject as ɵdirectiveInject, injectElementRef as ɵinjectElementRef, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, injectChangeDetectorRef as ɵinjectChangeDetectorRef, injectAttribute as ɵinjectAttribute, getFactoryOf as ɵgetFactoryOf, getInheritedFactory as ɵgetInheritedFactory, PublicFeature as ɵPublicFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, NgOnChangesFeature as ɵNgOnChangesFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNC, container as ɵC, nextContext as ɵx, elementStart as ɵE, namespaceHTML as ɵNH, namespaceMathML as ɵNM, namespaceSVG as ɵNS, element as ɵEe, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, query as ɵQ, registerContentQuery as ɵQr, loadDirective as ɵd, projection as ɵP, bind as ɵb, interpolation1 as ɵi1, interpolation2 as ɵi2, interpolation3 as ɵi3, interpolation4 as ɵi4, interpolation5 as ɵi5, interpolation6 as ɵi6, interpolation7 as ɵi7, interpolation8 as ɵi8, interpolationV as ɵiV, pipeBind1 as ɵpb1, pipeBind2 as ɵpb2, pipeBind3 as ɵpb3, pipeBind4 as ɵpb4, pipeBindV as ɵpbV, pureFunction0 as ɵf0, pureFunction1 as ɵf1, pureFunction2 as ɵf2, pureFunction3 as ɵf3, pureFunction4 as ɵf4, pureFunction5 as ɵf5, pureFunction6 as ɵf6, pureFunction7 as ɵf7, pureFunction8 as ɵf8, pureFunctionV as ɵfV, getCurrentView as ɵgV, restoreView as ɵrV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, queryRefresh as ɵqR, loadQueryList as ɵql, elementEnd as ɵe, elementProperty as ɵp, projectionDef as ɵpD, reference as ɵr, reserveSlots as ɵrS, elementAttribute as ɵa, elementStyling as ɵs, elementStylingMap as ɵsm, elementStyleProp as ɵsp, elementStylingApply as ɵsa, elementClassProp as ɵcp, textBinding as ɵt, embeddedViewEnd as ɵv, store as ɵst, load as ɵld, pipe as ɵPp, whenRendered as ɵwhenRendered, i18nApply as ɵiA, i18nExpMapping as ɵiEM, i18nInterpolation1 as ɵiI1, i18nInterpolation2 as ɵiI2, i18nInterpolation3 as ɵiI3, i18nInterpolation4 as ɵiI4, i18nInterpolation5 as ɵiI5, i18nInterpolation6 as ɵiI6, i18nInterpolation7 as ɵiI7, i18nInterpolation8 as ɵiI8, i18nInterpolationV as ɵIV, i18nMapping as ɵiM, WRAP_RENDERER_FACTORY2 as ɵWRAP_RENDERER_FACTORY2, Render3DebugRendererFactory2 as ɵRender3DebugRendererFactory2, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compilePipe as ɵcompilePipe, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$3 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map
