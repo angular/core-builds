@@ -129,14 +129,14 @@ export declare function resetApplicationState(): void;
 /**
  *
  * @param hostNode Existing node to render into.
- * @param template Template function with the instructions.
+ * @param templateFn Template function with the instructions.
  * @param context to pass into the template.
  * @param providedRendererFactory renderer factory to use
  * @param host The host element node to use
  * @param directives Directive defs that should be used for matching
  * @param pipes Pipe defs that should be used for matching
  */
-export declare function renderTemplate<T>(hostNode: RElement, template: ComponentTemplate<T>, context: T, providedRendererFactory: RendererFactory3, host: LElementNode | null, directives?: DirectiveDefListOrFactory | null, pipes?: PipeDefListOrFactory | null, sanitizer?: Sanitizer | null): LElementNode;
+export declare function renderTemplate<T>(hostNode: RElement, templateFn: ComponentTemplate<T>, context: T, providedRendererFactory: RendererFactory3, host: LElementNode | null, directives?: DirectiveDefListOrFactory | null, pipes?: PipeDefListOrFactory | null, sanitizer?: Sanitizer | null): LElementNode;
 /**
  * Used for creating the LViewNode of a dynamic embedded view,
  * either through ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
@@ -165,7 +165,7 @@ export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | LElement
  * @returns context
  */
 export declare function nextContext<T = any>(level?: number): T;
-export declare function renderComponentOrTemplate<T>(node: LElementNode, hostView: LViewData, componentOrContext: T, template?: ComponentTemplate<T>): void;
+export declare function renderComponentOrTemplate<T>(node: LElementNode, hostView: LViewData, componentOrContext: T, templateFn?: ComponentTemplate<T>): void;
 export declare function namespaceSVG(): void;
 export declare function namespaceMathML(): void;
 export declare function namespaceHTML(): void;
@@ -225,7 +225,7 @@ export declare function isComponent(tNode: TNode): boolean;
  * @param directives Registry of directives for this view
  * @param pipes Registry of pipes for this view
  */
-export declare function createTView(viewIndex: number, template: ComponentTemplate<any> | null, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null, viewQuery: ComponentQuery<any> | null): TView;
+export declare function createTView(viewIndex: number, templateFn: ComponentTemplate<any> | null, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null, viewQuery: ComponentQuery<any> | null): TView;
 export declare function createError(text: string, token: any): Error;
 /**
  * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.
@@ -454,17 +454,29 @@ export declare function baseDirectiveCreate<T>(index: number, directive: T, dire
  */
 export declare function createLContainer(parentLNode: LNode, currentView: LViewData, isForViewContainerRef?: boolean): LContainer;
 /**
- * Creates an LContainerNode.
+ * Creates an LContainerNode for an ng-template (dynamically-inserted view), e.g.
  *
- * Only `LViewNodes` can go into `LContainerNodes`.
+ * <ng-template #foo>
+ *    <div></div>
+ * </ng-template>
  *
  * @param index The index of the container in the data array
- * @param template Optional inline template
+ * @param templateFn Inline template
  * @param tagName The name of the container element, if applicable
  * @param attrs The attrs attached to the container, if applicable
  * @param localRefs A set of local reference bindings on the element.
  */
-export declare function container(index: number, template?: ComponentTemplate<any> | null, tagName?: string | null, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+export declare function template(index: number, templateFn: ComponentTemplate<any> | null, tagName?: string | null, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+/**
+ * Creates an LContainerNode for inline views, e.g.
+ *
+ * % if (showing) {
+ *   <div></div>
+ * % }
+ *
+ * @param index The index of the container in the data array
+ */
+export declare function container(index: number): void;
 /**
  * Sets a container up to receive views.
  *
