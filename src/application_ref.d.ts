@@ -16,26 +16,6 @@ import { Type } from './type';
 import { NgZone } from './zone/ng_zone';
 export declare const ALLOW_MULTIPLE_PLATFORMS: InjectionToken<boolean>;
 /**
- * Disable Angular's development mode, which turns off assertions and other
- * checks within the framework.
- *
- * One important assertion this disables verifies that a change detection pass
- * does not result in additional changes to any bindings (also known as
- * unidirectional data flow).
- *
- *
- */
-export declare function enableProdMode(): void;
-/**
- * Returns whether Angular is in development mode. After called once,
- * the value is locked and won't change any more.
- *
- * By default, this is true, unless a user calls `enableProdMode` before calling this.
- *
- * @experimental APIs related to application bootstrap are currently under review.
- */
-export declare function isDevMode(): boolean;
-/**
  * A token for third-party components that can register themselves with NgProbe.
  *
  * @experimental

@@ -14,3 +14,4 @@ export declare function assertGreaterThan<T>(actual: T, expected: T, msg: string
 export declare function assertNotDefined<T>(actual: T, msg: string): void;
 export declare function assertDefined<T>(actual: T, msg: string): void;
 export declare function assertComponentType(actual: any, msg?: string): void;
+export declare function assertNgModuleType(actual: any, msg?: string): void;
