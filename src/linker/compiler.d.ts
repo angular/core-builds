@@ -5,7 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { InjectionToken, StaticProvider } from '../di';
+import { InjectionToken } from '../di/injection_token';
+import { StaticProvider } from '../di/provider';
 import { MissingTranslationStrategy } from '../i18n/tokens';
 import { ViewEncapsulation } from '../metadata';
 import { Type } from '../type';
