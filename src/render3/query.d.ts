@@ -60,16 +60,16 @@ export interface LQuery<T> {
     containerValues: any[] | null;
 }
 export declare class LQueries_ implements LQueries {
-    shallow: LQuery<any> | null;
-    deep: LQuery<any> | null;
-    constructor(deep?: LQuery<any>);
+    parent: LQueries_ | null;
+    private shallow;
+    private deep;
+    constructor(parent: LQueries_ | null, shallow: LQuery<any> | null, deep: LQuery<any> | null);
     track<T>(queryList: viewEngine_QueryList<T>, predicate: Type<T> | string[], descend?: boolean, read?: QueryReadType<T> | Type<T>): void;
-    clone(): LQueries | null;
-    child(): LQueries | null;
+    clone(): LQueries;
     container(): LQueries | null;
     createView(): LQueries | null;
     insertView(index: number): void;
-    addNode(node: LNode): void;
+    addNode(node: LNode): LQueries | null;
     removeView(): void;
 }
 export declare type QueryList<T> = viewEngine_QueryList<T>;

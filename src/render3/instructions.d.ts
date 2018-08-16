@@ -46,12 +46,6 @@ export declare function getCurrentSanitizer(): Sanitizer | null;
  */
 export declare function getCurrentView(): OpaqueViewState;
 /**
- * Internal function that returns the current LViewData instance.
- *
- * The getCurrentView() instruction should be used for anything public.
- */
-export declare function _getViewData(): LViewData;
-/**
  * Restores `contextViewData` to the given OpaqueViewState instance.
  *
  * Used in conjunction with the getCurrentView() instruction to save a snapshot
@@ -69,10 +63,16 @@ export declare function getPreviousOrParentNode(): LNode;
  * - when creating content queries (inb this previousOrParentNode points to a node on which we
  * create content queries).
  */
-export declare function getCurrentQueries(QueryType: {
-    new (): LQueries;
+export declare function getOrCreateCurrentQueries(QueryType: {
+    new (parent: null, shallow: null, deep: null): LQueries;
 }): LQueries;
 export declare function getCreationMode(): boolean;
+/**
+ * Internal function that returns the current LViewData instance.
+ *
+ * The getCurrentView() instruction should be used for anything public.
+ */
+export declare function _getViewData(): LViewData;
 /**
  * Swap the current state with a new state.
  *
@@ -104,7 +104,7 @@ export declare function createLViewData<T>(renderer: Renderer3, tView: TView, co
  * with the same shape
  * (same properties assigned in the same order).
  */
-export declare function createLNodeObject(type: TNodeType, currentView: LViewData, parent: LNode | null, native: RText | RElement | RComment | null, state: any, queries: LQueries | null): LElementNode & LTextNode & LViewNode & LContainerNode & LProjectionNode;
+export declare function createLNodeObject(type: TNodeType, currentView: LViewData, parent: LNode | null, native: RText | RElement | RComment | null, state: any): LElementNode & LTextNode & LViewNode & LContainerNode & LProjectionNode;
 /**
  * A common way of creating the LNode to make sure that all of them have same shape to
  * keep the execution code monomorphic and fast.
@@ -216,6 +216,7 @@ export declare function elementCreate(name: string, overriddenRenderer?: Rendere
 export declare function resolveDirective(def: DirectiveDefInternal<any>, valueIndex: number, matches: CurrentMatchesList, tView: TView): any;
 /** Sets the context for a ChangeDetectorRef to the given instance. */
 export declare function initChangeDetectorIfExisting(injector: LInjector | null, instance: any, view: LViewData): void;
+export declare function isContentQueryHost(tNode: TNode): boolean;
 export declare function isComponent(tNode: TNode): boolean;
 /**
  * Creates a TView instance
@@ -463,7 +464,7 @@ export declare function createLContainer(parentLNode: LNode, currentView: LViewD
  * @param attrs The attrs attached to the container, if applicable
  * @param localRefs A set of local reference bindings on the element.
  */
-export declare function container(index: number, template?: ComponentTemplate<any>, tagName?: string | null, attrs?: TAttributes, localRefs?: string[] | null): void;
+export declare function container(index: number, template?: ComponentTemplate<any> | null, tagName?: string | null, attrs?: TAttributes | null, localRefs?: string[] | null): void;
 /**
  * Sets a container up to receive views.
  *
