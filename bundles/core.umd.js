@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.2+18.sha-503905c
+ * @license Angular v7.0.0-beta.2+19.sha-116946f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1216,6 +1216,7 @@
         }
     }
     function throwError(msg) {
+        // tslint:disable-next-line
         debugger; // Left intentionally for better debugger experience.
         throw new Error("ASSERTION ERROR: " + msg);
     }
@@ -11565,7 +11566,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-beta.2+18.sha-503905c');
+    var VERSION = new Version('7.0.0-beta.2+19.sha-116946f');
 
     /**
      * @license
@@ -11579,10 +11580,7 @@
     *
     * @Annotation
     */
-    var Injectable = makeDecorator('Injectable', undefined, undefined, undefined, function (type, meta) {
-        debugger;
-        return R3_COMPILE_INJECTABLE(type, meta);
-    });
+    var Injectable = makeDecorator('Injectable', undefined, undefined, undefined, function (type, meta) { return R3_COMPILE_INJECTABLE(type, meta); });
 
     /**
      * @license

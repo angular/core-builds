@@ -1,12 +1,12 @@
 /**
- * @license Angular v7.0.0-beta.2+18.sha-503905c
+ * @license Angular v7.0.0-beta.2+19.sha-116946f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compileInjectable, compilePipeFromMetadata } from '@angular/compiler';
-import { __decorate, __metadata, __param } from 'tslib';
+import { __decorate, __param, __metadata } from 'tslib';
 import { share } from 'rxjs/operators';
 
 /**
@@ -1088,6 +1088,7 @@ function assertComponentType(actual, msg = 'Type passed in is not ComponentType,
     }
 }
 function throwError(msg) {
+    // tslint:disable-next-line
     debugger; // Left intentionally for better debugger experience.
     throw new Error(`ASSERTION ERROR: ${msg}`);
 }
@@ -11228,7 +11229,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('7.0.0-beta.2+18.sha-503905c');
+const VERSION = new Version('7.0.0-beta.2+19.sha-116946f');
 
 /**
  * @license
@@ -11242,10 +11243,7 @@ const VERSION = new Version('7.0.0-beta.2+18.sha-503905c');
 *
 * @Annotation
 */
-const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, (type, meta) => {
-    debugger;
-    return R3_COMPILE_INJECTABLE(type, meta);
-});
+const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, (type, meta) => R3_COMPILE_INJECTABLE(type, meta));
 
 /**
  * @license
