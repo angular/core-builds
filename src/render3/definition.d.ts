@@ -39,6 +39,13 @@ export declare function defineComponent<T>(componentDefinition: {
      */
     factory: () => T;
     /**
+     * The number of nodes, local refs, and pipes in this component template.
+     *
+     * Used to calculate the length of the component's LViewData array, so we
+     * can pre-fill the array and set the binding start index.
+     */
+    consts: number;
+    /**
      * Static attributes to set on host element.
      *
      * Even indices: attribute name

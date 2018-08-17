@@ -6,11 +6,24 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /**
+ * Bindings for pure functions are stored after regular bindings.
+ *
+ *  ----------------------------------------------------------------------------
+ *  |  LNodes / local refs / pipes ... | regular bindings / interpolations | pure function bindings
+ *  ----------------------------------------------------------------------------
+ *                                     ^
+ *                          TView.bindingStartIndex
+ *
+ * Pure function instructions are given an offset from TView.bindingStartIndex.
+ * Adding the offset to TView.bindingStartIndex gives the first index where the bindings
+ * are stored.
+ */
+/**
  * If the value hasn't been saved, calls the pure function to store and return the
  * value. If it has been saved, returns the saved value.
  *
+ * @param slotOffset the offset from binding root to the reserved slot
  * @param pureFn Function that returns a value
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param thisArg Optional calling context of pureFn
  * @returns value
  */
@@ -19,7 +32,7 @@ export declare function pureFunction0<T>(slotOffset: number, pureFn: () => T, th
  * If the value of the provided exp has changed, calls the pure function to return
  * an updated value. Or if the value has not changed, returns cached value.
  *
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+ * @param slotOffset the offset from binding root to the reserved slot
  * @param pureFn Function that returns an updated value
  * @param exp Updated expression value
  * @param thisArg Optional calling context of pureFn
@@ -30,7 +43,7 @@ export declare function pureFunction1(slotOffset: number, pureFn: (v: any) => an
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+ * @param slotOffset the offset from binding root to the reserved slot
  * @param pureFn
  * @param exp1
  * @param exp2
@@ -42,7 +55,7 @@ export declare function pureFunction2(slotOffset: number, pureFn: (v1: any, v2: 
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+ * @param slotOffset the offset from binding root to the reserved slot
  * @param pureFn
  * @param exp1
  * @param exp2
@@ -55,7 +68,7 @@ export declare function pureFunction3(slotOffset: number, pureFn: (v1: any, v2: 
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+ * @param slotOffset the offset from binding root to the reserved slot
  * @param pureFn
  * @param exp1
  * @param exp2
@@ -69,7 +82,7 @@ export declare function pureFunction4(slotOffset: number, pureFn: (v1: any, v2: 
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+ * @param slotOffset the offset from binding root to the reserved slot
  * @param pureFn
  * @param exp1
  * @param exp2
@@ -84,7 +97,7 @@ export declare function pureFunction5(slotOffset: number, pureFn: (v1: any, v2: 
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+ * @param slotOffset the offset from binding root to the reserved slot
  * @param pureFn
  * @param exp1
  * @param exp2
@@ -100,7 +113,7 @@ export declare function pureFunction6(slotOffset: number, pureFn: (v1: any, v2: 
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+ * @param slotOffset the offset from binding root to the reserved slot
  * @param pureFn
  * @param exp1
  * @param exp2
@@ -117,7 +130,7 @@ export declare function pureFunction7(slotOffset: number, pureFn: (v1: any, v2: 
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+ * @param slotOffset the offset from binding root to the reserved slot
  * @param pureFn
  * @param exp1
  * @param exp2
@@ -137,7 +150,7 @@ export declare function pureFunction8(slotOffset: number, pureFn: (v1: any, v2: 
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
- * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+ * @param slotOffset the offset from binding root to the reserved slot
  * @param pureFn A pure function that takes binding values and builds an object or array
  * containing those values.
  * @param exps An array of binding values
