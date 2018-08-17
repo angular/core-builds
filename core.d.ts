@@ -10,11 +10,11 @@ export { ReflectiveInjector_ as ɵangular_packages_core_core_c } from './src/di/
 export { ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e } from './src/di/reflective_provider';
 export { wtfEnabled as ɵangular_packages_core_core_m } from './src/profile/profile';
 export { createScope as ɵangular_packages_core_core_o, detectWTF as ɵangular_packages_core_core_n, endTimeRange as ɵangular_packages_core_core_r, leave as ɵangular_packages_core_core_p, startTimeRange as ɵangular_packages_core_core_q } from './src/profile/wtf_impl';
-export { getOrCreateChangeDetectorRef as ɵangular_packages_core_core_w, getOrCreateContainerRef as ɵangular_packages_core_core_z, getOrCreateElementRef as ɵangular_packages_core_core_y, getOrCreateInjectable as ɵangular_packages_core_core_x, getOrCreateNodeInjector as ɵangular_packages_core_core_v, getOrCreateTemplateRef as ɵangular_packages_core_core_ba } from './src/render3/di';
-export { bindingUpdated as ɵangular_packages_core_core_bb } from './src/render3/instructions';
-export { RElement as ɵangular_packages_core_core_bd } from './src/render3/interfaces/renderer';
-export { LViewData as ɵangular_packages_core_core_bc } from './src/render3/interfaces/view';
-export { loadInternal as ɵangular_packages_core_core_be } from './src/render3/util';
+export { getOrCreateChangeDetectorRef as ɵangular_packages_core_core_x, getOrCreateContainerRef as ɵangular_packages_core_core_ba, getOrCreateElementRef as ɵangular_packages_core_core_z, getOrCreateInjectable as ɵangular_packages_core_core_y, getOrCreateNodeInjector as ɵangular_packages_core_core_v, getOrCreateNodeInjectorForNode as ɵangular_packages_core_core_w, getOrCreateTemplateRef as ɵangular_packages_core_core_bb } from './src/render3/di';
+export { bindingUpdated as ɵangular_packages_core_core_bc } from './src/render3/instructions';
+export { RElement as ɵangular_packages_core_core_be } from './src/render3/interfaces/renderer';
+export { LViewData as ɵangular_packages_core_core_bd } from './src/render3/interfaces/view';
+export { loadInternal as ɵangular_packages_core_core_bf } from './src/render3/util';
 export { makeParamDecorator as ɵangular_packages_core_core_a, makePropDecorator as ɵangular_packages_core_core_b } from './src/util/decorators';
 export { _def as ɵangular_packages_core_core_s } from './src/view/provider';
 export { DebugRendererFactory2 as ɵangular_packages_core_core_t } from './src/view/services';
