@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.2+22.sha-f053a3f
+ * @license Angular v7.0.0-beta.2+26.sha-f2aa9c6
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -4159,6 +4159,7 @@ function executeInitAndContentHooks() {
  * @return {?}
  */
 function createLViewData(renderer, tView, context, flags, sanitizer) {
+    // TODO(kara): create from blueprint
     return [
         tView,
         viewData,
@@ -4345,7 +4346,8 @@ function renderEmbeddedTemplate(viewNode, tView, context, rf) {
             isParent = true;
             previousOrParentNode = /** @type {?} */ ((null));
             oldView = enterView(/** @type {?} */ ((viewNode.data)), viewNode);
-            namespaceHTML(); /** @type {?} */
+            namespaceHTML();
+            viewData[BINDING_INDEX] = tView.bindingStartIndex; /** @type {?} */
             ((tView.template))(rf, context);
             if (rf & 2 /* Update */) {
                 refreshDescendantViews();
@@ -4396,6 +4398,7 @@ function renderComponentOrTemplate(node, hostView, componentOrContext, templateF
         }
         if (templateFn) {
             namespaceHTML();
+            viewData[BINDING_INDEX] = tView.bindingStartIndex;
             templateFn(getRenderFlags(hostView), /** @type {?} */ ((componentOrContext)));
             refreshDescendantViews();
         }
@@ -4476,8 +4479,7 @@ function element(index, name, attrs, localRefs) {
  * @return {?}
  */
 function elementContainerStart(index, attrs, localRefs) {
-    ngDevMode &&
-        assertEqual(viewData[BINDING_INDEX], -1, 'elements should be created before any bindings');
+    ngDevMode && assertEqual(viewData[BINDING_INDEX], tView.bindingStartIndex, 'element containers should be created before any bindings');
     ngDevMode && ngDevMode.rendererCreateComment++;
     /** @type {?} */
     const native = renderer.createComment(ngDevMode ? 'ng-container' : '');
@@ -4517,8 +4519,7 @@ function elementContainerEnd() {
  * @return {?}
  */
 function elementStart(index, name, attrs, localRefs) {
-    ngDevMode &&
-        assertEqual(viewData[BINDING_INDEX], -1, 'elements should be created before any bindings');
+    ngDevMode && assertEqual(viewData[BINDING_INDEX], tView.bindingStartIndex, 'elements should be created before any bindings ');
     ngDevMode && ngDevMode.rendererCreateElement++;
     /** @type {?} */
     const native = elementCreate(name);
@@ -4795,31 +4796,34 @@ function saveResolvedLocalsInData(lNode, localRefExtractor) {
  * if it doesn't already exist.
  *
  * @param {?} templateFn The template from which to get static data
+ * @param {?} consts
  * @param {?} directives Directive defs that should be saved on TView
  * @param {?} pipes Pipe defs that should be saved on TView
  * @param {?} viewQuery
  * @return {?} TView
  */
-function getOrCreateTView(templateFn, directives, pipes, viewQuery) {
+function getOrCreateTView(templateFn, consts, directives, pipes, viewQuery) {
     // TODO(misko): reading `ngPrivateData` here is problematic for two reasons
     // 1. It is a megamorphic call on each invocation.
     // 2. For nested embedded views (ngFor inside ngFor) the template instance is per
     //    outer template invocation, which means that no such property will exist
     // Correct solution is to only put `ngPrivateData` on the Component template
     // and not on embedded templates.
-    return templateFn.ngPrivateData || (templateFn.ngPrivateData = /** @type {?} */ (createTView(-1, templateFn, directives, pipes, viewQuery)));
+    return templateFn.ngPrivateData ||
+        (templateFn.ngPrivateData = /** @type {?} */ (createTView(-1, templateFn, consts, directives, pipes, viewQuery)));
 }
 /**
  * Creates a TView instance
  *
  * @param {?} viewIndex The viewBlockId for inline views, or -1 if it's a component/dynamic
- * @param {?} templateFn
+ * @param {?} templateFn Template function
+ * @param {?} consts The number of nodes, local refs, and pipes in this template
  * @param {?} directives Registry of directives for this view
  * @param {?} pipes Registry of pipes for this view
  * @param {?} viewQuery
  * @return {?}
  */
-function createTView(viewIndex, templateFn, directives, pipes, viewQuery) {
+function createTView(viewIndex, templateFn, consts, directives, pipes, viewQuery) {
     ngDevMode && ngDevMode.tView++;
     return {
         id: viewIndex,
@@ -4830,8 +4834,7 @@ function createTView(viewIndex, templateFn, directives, pipes, viewQuery) {
         // Fill in to match HEADER_OFFSET in LViewData
         childIndex: -1,
         // Children set in addToViewTree(), if any
-        bindingStartIndex: -1,
-        // Set in initBindings()
+        bindingStartIndex: HEADER_OFFSET + consts,
         directives: null,
         firstTemplatePass: true,
         initHooks: null,
@@ -4945,7 +4948,7 @@ function locateHostElement(factory, elementOrSelector) {
 function hostElement(tag, rNode, def, sanitizer) {
     resetApplicationState();
     /** @type {?} */
-    const node = createLNode(0, 3 /* Element */, rNode, null, null, createLViewData(renderer, getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs, def.viewQuery), null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, sanitizer));
+    const node = createLNode(0, 3 /* Element */, rNode, null, null, createLViewData(renderer, getOrCreateTView(def.template, def.consts, def.directiveDefs, def.pipeDefs, def.viewQuery), null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, sanitizer));
     if (firstTemplatePass) {
         node.tNode.flags = 4096 /* isComponent */;
         if (def.diPublic)
@@ -5414,8 +5417,7 @@ function elementStylingMap(index, classes, styles) {
  * @return {?}
  */
 function text(index, value) {
-    ngDevMode &&
-        assertEqual(viewData[BINDING_INDEX], -1, 'text nodes should be created before bindings');
+    ngDevMode && assertEqual(viewData[BINDING_INDEX], tView.bindingStartIndex, 'text nodes should be created before any bindings');
     ngDevMode && ngDevMode.rendererCreateTextNode++;
     /** @type {?} */
     const textNode = createTextNode(value, renderer);
@@ -5493,7 +5495,7 @@ function directiveCreate(directiveDefIdx, directive, directiveDef) {
  */
 function addComponentLogic(directiveIndex, instance, def) {
     /** @type {?} */
-    const tView = getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs, def.viewQuery);
+    const tView = getOrCreateTView(def.template, def.consts, def.directiveDefs, def.pipeDefs, def.viewQuery);
     /** @type {?} */
     const componentView = addToViewTree(viewData, /** @type {?} */ (previousOrParentNode.tNode.index), createLViewData(rendererFactory.createRenderer(/** @type {?} */ (previousOrParentNode.native), def), tView, instance, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, getCurrentSanitizer()));
     // We need to set the host node/data here because when the component LNode was created,
@@ -5516,8 +5518,7 @@ function addComponentLogic(directiveIndex, instance, def) {
  * @return {?}
  */
 function baseDirectiveCreate(index, directive, directiveDef) {
-    ngDevMode &&
-        assertEqual(viewData[BINDING_INDEX], -1, 'directives should be created before any bindings');
+    ngDevMode && assertEqual(viewData[BINDING_INDEX], tView.bindingStartIndex, 'directives should be created before any bindings');
     ngDevMode && assertPreviousIsParent();
     Object.defineProperty(directive, NG_HOST_SYMBOL, { enumerable: false, value: previousOrParentNode });
     if (directives == null)
@@ -5657,6 +5658,7 @@ function createLContainer(parentLNode, currentView, isForViewContainerRef) {
  *
  * @param {?} index The index of the container in the data array
  * @param {?} templateFn Inline template
+ * @param {?} consts The number of nodes, local refs, and pipes for this template
  * @param {?=} tagName The name of the container element, if applicable
  * @param {?=} attrs The attrs attached to the container, if applicable
  * @param {?=} localRefs A set of local reference bindings on the element.
@@ -5664,12 +5666,12 @@ function createLContainer(parentLNode, currentView, isForViewContainerRef) {
  *        Defaults to the current element associated with the local-ref.
  * @return {?}
  */
-function template(index, templateFn, tagName, attrs, localRefs, localRefExtractor) {
+function template(index, templateFn, consts, tagName, attrs, localRefs, localRefExtractor) {
     /** @type {?} */
     const node = containerInternal(index, tagName || null, attrs || null, localRefs || null);
     if (firstTemplatePass) {
         node.tNode.tViews =
-            createTView(-1, templateFn, tView.directiveRegistry, tView.pipeRegistry, null);
+            createTView(-1, templateFn, consts, tView.directiveRegistry, tView.pipeRegistry, null);
     }
     createDirectivesAndLocals(node, localRefs, localRefExtractor);
     currentQueries && (currentQueries = currentQueries.addNode(node));
@@ -5700,8 +5702,7 @@ function container(index) {
  * @return {?}
  */
 function containerInternal(index, tagName, attrs, localRefs) {
-    ngDevMode &&
-        assertEqual(viewData[BINDING_INDEX], -1, 'container nodes should be created before any bindings');
+    ngDevMode && assertEqual(viewData[BINDING_INDEX], tView.bindingStartIndex, 'container nodes should be created before any bindings');
     /** @type {?} */
     const currentParent = isParent ? previousOrParentNode : /** @type {?} */ ((getParentLNode(previousOrParentNode)));
     /** @type {?} */
@@ -5825,9 +5826,10 @@ function scanForView(containerNode, startIdx, viewBlockId) {
  * Marks the start of an embedded view.
  *
  * @param {?} viewBlockId The ID of this view
+ * @param {?} consts
  * @return {?} boolean Whether or not this view is in creation mode
  */
-function embeddedViewStart(viewBlockId) {
+function embeddedViewStart(viewBlockId, consts) {
     /** @type {?} */
     const container = /** @type {?} */ ((isParent ? previousOrParentNode : getParentLNode(previousOrParentNode)));
     ngDevMode && assertNodeType(container, 0 /* Container */);
@@ -5843,7 +5845,7 @@ function embeddedViewStart(viewBlockId) {
     }
     else {
         /** @type {?} */
-        const newView = createLViewData(renderer, getOrCreateEmbeddedTView(viewBlockId, container), null, 2 /* CheckAlways */, getCurrentSanitizer());
+        const newView = createLViewData(renderer, getOrCreateEmbeddedTView(viewBlockId, consts, container), null, 2 /* CheckAlways */, getCurrentSanitizer());
         if (lContainer[QUERIES]) {
             newView[QUERIES] = /** @type {?} */ ((lContainer[QUERIES])).createView();
         }
@@ -5856,6 +5858,7 @@ function embeddedViewStart(viewBlockId) {
         } /** @type {?} */
         ((lContainer[ACTIVE_INDEX]))++;
     }
+    viewData[BINDING_INDEX] = tView.bindingStartIndex;
     return getRenderFlags(viewNode.data);
 }
 /**
@@ -5866,10 +5869,11 @@ function embeddedViewStart(viewBlockId) {
  * it with the same index (since it's in the same template).
  *
  * @param {?} viewIndex The index of the TView in TNode.tViews
+ * @param {?} consts The number of nodes, local refs, and pipes in this template
  * @param {?} parent The parent container in which to look for the view's static data
  * @return {?} TView
  */
-function getOrCreateEmbeddedTView(viewIndex, parent) {
+function getOrCreateEmbeddedTView(viewIndex, consts, parent) {
     ngDevMode && assertNodeType(parent, 0 /* Container */);
     /** @type {?} */
     const containerTViews = /** @type {?} */ ((/** @type {?} */ (((parent)).tNode)).tViews);
@@ -5877,7 +5881,7 @@ function getOrCreateEmbeddedTView(viewIndex, parent) {
     ngDevMode && assertEqual(Array.isArray(containerTViews), true, 'TViews should be in an array');
     if (viewIndex >= containerTViews.length || containerTViews[viewIndex] == null) {
         containerTViews[viewIndex] =
-            createTView(viewIndex, null, tView.directiveRegistry, tView.pipeRegistry, null);
+            createTView(viewIndex, null, consts, tView.directiveRegistry, tView.pipeRegistry, null);
     }
     return containerTViews[viewIndex];
 }
@@ -6269,6 +6273,7 @@ function detectChangesInternal(hostView, hostNode, component) {
     const templateFn = /** @type {?} */ ((hostTView.template));
     /** @type {?} */
     const viewQuery = hostTView.viewQuery;
+    viewData[BINDING_INDEX] = tView.bindingStartIndex;
     try {
         namespaceHTML();
         createViewQuery(viewQuery, hostView[FLAGS], component);
@@ -6330,20 +6335,6 @@ function markDirty(component) {
   @type {?} */
 const NO_CHANGE = /** @type {?} */ ({});
 /**
- *  Initializes the binding start index. Will get inlined.
- *
- *  This function must be called before any binding related function is called
- *  (ie `bind()`, `interpolationX()`, `pureFunctionX()`)
- * @return {?}
- */
-function initBindings() {
-    ngDevMode && assertEqual(viewData[BINDING_INDEX], -1, 'Binding index should not yet be set ' + viewData[BINDING_INDEX]);
-    if (tView.bindingStartIndex === -1) {
-        tView.bindingStartIndex = viewData.length;
-    }
-    viewData[BINDING_INDEX] = tView.bindingStartIndex;
-}
-/**
  * Creates a single value binding.
  *
  * @template T
@@ -6351,63 +6342,13 @@ function initBindings() {
  * @return {?}
  */
 function bind(value) {
-    return bindingUpdated(value) ? value : NO_CHANGE;
+    return bindingUpdated(viewData[BINDING_INDEX]++, value) ? value : NO_CHANGE;
 }
 /**
- * Reserves slots for pure functions (`pureFunctionX` instructions)
- *
- * Bindings for pure functions are stored after the LNodes in the data array but before the binding.
- *
- *  ----------------------------------------------------------------------------
- *  |  LNodes ... | pure function bindings | regular bindings / interpolations |
- *  ----------------------------------------------------------------------------
- *                                         ^
- *                                         TView.bindingStartIndex
- *
- * Pure function instructions are given an offset from TView.bindingStartIndex.
- * Subtracting the offset from TView.bindingStartIndex gives the first index where the bindings
- * are stored.
- *
- * NOTE: reserveSlots instructions are only ever allowed at the very end of the creation block
  * @param {?} numSlots
  * @return {?}
  */
-function reserveSlots(numSlots) {
-    // Init the slots with a unique `NO_CHANGE` value so that the first change is always detected
-    // whether it happens or not during the first change detection pass - pure functions checks
-    // might be skipped when short-circuited.
-    viewData.length += numSlots;
-    viewData.fill(NO_CHANGE, -numSlots);
-    // We need to initialize the binding in case a `pureFunctionX` kind of binding instruction is
-    // called first in the update section.
-    initBindings();
-}
-/**
- * Sets up the binding index before executing any `pureFunctionX` instructions.
- *
- * The index must be restored after the pure function is executed
- *
- * {\@link reserveSlots}
- * @param {?} offset
- * @return {?}
- */
-function moveBindingIndexToReservedSlot(offset) {
-    /** @type {?} */
-    const currentSlot = viewData[BINDING_INDEX];
-    viewData[BINDING_INDEX] = tView.bindingStartIndex - offset;
-    return currentSlot;
-}
-/**
- * Restores the binding index to the given value.
- *
- * This function is typically used to restore the index after a `pureFunctionX` has
- * been executed.
- * @param {?} index
- * @return {?}
- */
-function restoreBindingIndex(index) {
-    viewData[BINDING_INDEX] = index;
-}
+function reserveSlots(numSlots) { }
 /**
  * Create interpolation bindings with a variable number of expressions.
  *
@@ -6429,7 +6370,7 @@ function interpolationV(values) {
     let different = false;
     for (let i = 1; i < values.length; i += 2) {
         // Check if bindings (odd indexes) have changed
-        bindingUpdated(values[i]) && (different = true);
+        bindingUpdated(viewData[BINDING_INDEX]++, values[i]) && (different = true);
     }
     if (!different) {
         return NO_CHANGE;
@@ -6451,7 +6392,7 @@ function interpolationV(values) {
  */
 function interpolation1(prefix, v0, suffix) {
     /** @type {?} */
-    const different = bindingUpdated(v0);
+    const different = bindingUpdated(viewData[BINDING_INDEX]++, v0);
     return different ? prefix + stringify$1(v0) + suffix : NO_CHANGE;
 }
 /**
@@ -6465,7 +6406,8 @@ function interpolation1(prefix, v0, suffix) {
  */
 function interpolation2(prefix, v0, i0, v1, suffix) {
     /** @type {?} */
-    const different = bindingUpdated2(v0, v1);
+    const different = bindingUpdated2(viewData[BINDING_INDEX], v0, v1);
+    viewData[BINDING_INDEX] += 2;
     return different ? prefix + stringify$1(v0) + i0 + stringify$1(v1) + suffix : NO_CHANGE;
 }
 /**
@@ -6481,8 +6423,8 @@ function interpolation2(prefix, v0, i0, v1, suffix) {
  */
 function interpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
     /** @type {?} */
-    let different = bindingUpdated2(v0, v1);
-    different = bindingUpdated(v2) || different;
+    const different = bindingUpdated3(viewData[BINDING_INDEX], v0, v1, v2);
+    viewData[BINDING_INDEX] += 3;
     return different ? prefix + stringify$1(v0) + i0 + stringify$1(v1) + i1 + stringify$1(v2) + suffix :
         NO_CHANGE;
 }
@@ -6501,7 +6443,8 @@ function interpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
  */
 function interpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
     /** @type {?} */
-    const different = bindingUpdated4(v0, v1, v2, v3);
+    const different = bindingUpdated4(viewData[BINDING_INDEX], v0, v1, v2, v3);
+    viewData[BINDING_INDEX] += 4;
     return different ?
         prefix + stringify$1(v0) + i0 + stringify$1(v1) + i1 + stringify$1(v2) + i2 + stringify$1(v3) +
             suffix :
@@ -6524,8 +6467,9 @@ function interpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
  */
 function interpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
     /** @type {?} */
-    let different = bindingUpdated4(v0, v1, v2, v3);
-    different = bindingUpdated(v4) || different;
+    let different = bindingUpdated4(viewData[BINDING_INDEX], v0, v1, v2, v3);
+    different = bindingUpdated(viewData[BINDING_INDEX] + 4, v4) || different;
+    viewData[BINDING_INDEX] += 5;
     return different ?
         prefix + stringify$1(v0) + i0 + stringify$1(v1) + i1 + stringify$1(v2) + i2 + stringify$1(v3) + i3 +
             stringify$1(v4) + suffix :
@@ -6550,8 +6494,9 @@ function interpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
  */
 function interpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
     /** @type {?} */
-    let different = bindingUpdated4(v0, v1, v2, v3);
-    different = bindingUpdated2(v4, v5) || different;
+    let different = bindingUpdated4(viewData[BINDING_INDEX], v0, v1, v2, v3);
+    different = bindingUpdated2(viewData[BINDING_INDEX] + 4, v4, v5) || different;
+    viewData[BINDING_INDEX] += 6;
     return different ?
         prefix + stringify$1(v0) + i0 + stringify$1(v1) + i1 + stringify$1(v2) + i2 + stringify$1(v3) + i3 +
             stringify$1(v4) + i4 + stringify$1(v5) + suffix :
@@ -6578,9 +6523,9 @@ function interpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suff
  */
 function interpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
     /** @type {?} */
-    let different = bindingUpdated4(v0, v1, v2, v3);
-    different = bindingUpdated2(v4, v5) || different;
-    different = bindingUpdated(v6) || different;
+    let different = bindingUpdated4(viewData[BINDING_INDEX], v0, v1, v2, v3);
+    different = bindingUpdated3(viewData[BINDING_INDEX] + 4, v4, v5, v6) || different;
+    viewData[BINDING_INDEX] += 7;
     return different ?
         prefix + stringify$1(v0) + i0 + stringify$1(v1) + i1 + stringify$1(v2) + i2 + stringify$1(v3) + i3 +
             stringify$1(v4) + i4 + stringify$1(v5) + i5 + stringify$1(v6) + suffix :
@@ -6609,8 +6554,9 @@ function interpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, 
  */
 function interpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
     /** @type {?} */
-    let different = bindingUpdated4(v0, v1, v2, v3);
-    different = bindingUpdated4(v4, v5, v6, v7) || different;
+    let different = bindingUpdated4(viewData[BINDING_INDEX], v0, v1, v2, v3);
+    different = bindingUpdated4(viewData[BINDING_INDEX] + 4, v4, v5, v6, v7) || different;
+    viewData[BINDING_INDEX] += 8;
     return different ?
         prefix + stringify$1(v0) + i0 + stringify$1(v1) + i1 + stringify$1(v2) + i2 + stringify$1(v3) + i3 +
             stringify$1(v4) + i4 + stringify$1(v5) + i5 + stringify$1(v6) + i6 + stringify$1(v7) + suffix :
@@ -6695,71 +6641,83 @@ function loadElement(index) {
     return loadElementInternal(index, viewData);
 }
 /**
- * Gets the current binding value and increments the binding index.
+ * Gets the current binding value.
+ * @param {?} bindingIndex
  * @return {?}
  */
-function consumeBinding() {
-    ngDevMode && assertDataInRange(viewData[BINDING_INDEX]);
+function getBinding(bindingIndex) {
+    ngDevMode && assertDataInRange(viewData[bindingIndex]);
     ngDevMode &&
-        assertNotEqual(viewData[viewData[BINDING_INDEX]], NO_CHANGE, 'Stored value should never be NO_CHANGE.');
-    return viewData[viewData[BINDING_INDEX]++];
+        assertNotEqual(viewData[bindingIndex], NO_CHANGE, 'Stored value should never be NO_CHANGE.');
+    return viewData[bindingIndex];
 }
 /**
  * Updates binding if changed, then returns whether it was updated.
+ * @param {?} bindingIndex
  * @param {?} value
  * @return {?}
  */
-function bindingUpdated(value) {
+function bindingUpdated(bindingIndex, value) {
     ngDevMode && assertNotEqual(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
-    if (viewData[BINDING_INDEX] === -1)
-        initBindings();
-    /** @type {?} */
-    const bindingIndex = viewData[BINDING_INDEX];
     if (bindingIndex >= viewData.length) {
-        viewData[viewData[BINDING_INDEX]++] = value;
+        viewData[bindingIndex] = value;
     }
     else if (isDifferent(viewData[bindingIndex], value, checkNoChangesMode)) {
         throwErrorIfNoChangesMode(creationMode, checkNoChangesMode, viewData[bindingIndex], value);
-        viewData[viewData[BINDING_INDEX]++] = value;
+        viewData[bindingIndex] = value;
     }
     else {
-        viewData[BINDING_INDEX]++;
         return false;
     }
     return true;
 }
 /**
- * Updates binding if changed, then returns the latest value.
+ * Updates binding and returns the value.
+ * @param {?} bindingIndex
  * @param {?} value
  * @return {?}
  */
-function checkAndUpdateBinding(value) {
-    bindingUpdated(value);
-    return value;
+function updateBinding(bindingIndex, value) {
+    return viewData[bindingIndex] = value;
 }
 /**
  * Updates 2 bindings if changed, then returns whether either was updated.
+ * @param {?} bindingIndex
  * @param {?} exp1
  * @param {?} exp2
  * @return {?}
  */
-function bindingUpdated2(exp1, exp2) {
+function bindingUpdated2(bindingIndex, exp1, exp2) {
     /** @type {?} */
-    const different = bindingUpdated(exp1);
-    return bindingUpdated(exp2) || different;
+    const different = bindingUpdated(bindingIndex, exp1);
+    return bindingUpdated(bindingIndex + 1, exp2) || different;
+}
+/**
+ * Updates 3 bindings if changed, then returns whether any was updated.
+ * @param {?} bindingIndex
+ * @param {?} exp1
+ * @param {?} exp2
+ * @param {?} exp3
+ * @return {?}
+ */
+function bindingUpdated3(bindingIndex, exp1, exp2, exp3) {
+    /** @type {?} */
+    const different = bindingUpdated2(bindingIndex, exp1, exp2);
+    return bindingUpdated(bindingIndex + 2, exp3) || different;
 }
 /**
  * Updates 4 bindings if changed, then returns whether any was updated.
+ * @param {?} bindingIndex
  * @param {?} exp1
  * @param {?} exp2
  * @param {?} exp3
  * @param {?} exp4
  * @return {?}
  */
-function bindingUpdated4(exp1, exp2, exp3, exp4) {
+function bindingUpdated4(bindingIndex, exp1, exp2, exp3, exp4) {
     /** @type {?} */
-    const different = bindingUpdated2(exp1, exp2);
-    return bindingUpdated2(exp3, exp4) || different;
+    const different = bindingUpdated2(bindingIndex, exp1, exp2);
+    return bindingUpdated2(bindingIndex + 2, exp3, exp4) || different;
 }
 /**
  * @return {?}
@@ -6822,23 +6780,6 @@ function assertDataNext(index, arr) {
     assertEqual(arr.length, index, `index ${index} expected to be at the end of arr (length ${arr.length})`);
 }
 /**
- * On the first template pass, the reserved slots should be set `NO_CHANGE`.
- *
- * If not, they might not have been actually reserved.
- * @param {?} slotOffset
- * @param {?} numSlots
- * @return {?}
- */
-function assertReservedSlotInitialized(slotOffset, numSlots) {
-    if (firstTemplatePass) {
-        /** @type {?} */
-        const startIndex = tView.bindingStartIndex - slotOffset;
-        for (let i = 0; i < numSlots; i++) {
-            assertEqual(viewData[startIndex + i], NO_CHANGE, 'The reserved slots should be set to `NO_CHANGE` on first template pass');
-        }
-    }
-}
-/**
  * @template T
  * @param {?} component
  * @return {?}
@@ -6891,10 +6832,11 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     /** @type {?} */
     const rootContext = createRootContext(opts.scheduler || requestAnimationFrame.bind(window));
     /** @type {?} */
-    const rootView = createLViewData(rendererFactory.createRenderer(hostNode, componentDef), createTView(-1, null, null, null, null), rootContext, componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
+    const rootView = createLViewData(rendererFactory.createRenderer(hostNode, componentDef), createTView(-1, null, 1, null, null, null), rootContext, componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
     rootView[INJECTOR$1] = opts.injector || null;
     /** @type {?} */
     const oldView = enterView(rootView, /** @type {?} */ ((null)));
+    rootView[BINDING_INDEX] = rootView[TVIEW].bindingStartIndex;
     /** @type {?} */
     let elementNode;
     /** @type {?} */
@@ -7036,6 +6978,7 @@ function defineComponent(componentDefinition) {
     const def = {
         type: type,
         diPublic: null,
+        consts: componentDefinition.consts,
         factory: componentDefinition.factory,
         template: componentDefinition.template || /** @type {?} */ ((null)),
         hostBindings: componentDefinition.hostBindings || null,
@@ -8316,10 +8259,11 @@ class ComponentFactory$1 extends ComponentFactory {
             ngModule.injector.get(ROOT_CONTEXT) :
             createRootContext(requestAnimationFrame.bind(window));
         /** @type {?} */
-        const rootView = createLViewData(rendererFactory.createRenderer(hostNode, this.componentDef), createTView(-1, null, null, null, null), rootContext, this.componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
+        const rootView = createLViewData(rendererFactory.createRenderer(hostNode, this.componentDef), createTView(-1, null, 1, null, null, null), rootContext, this.componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
         rootView[INJECTOR$1] = ngModule && ngModule.injector || null;
         /** @type {?} */
         const oldView = enterView(rootView, /** @type {?} */ ((null)));
+        rootView[BINDING_INDEX] = rootView[TVIEW].bindingStartIndex;
         /** @type {?} */
         let component;
         /** @type {?} */
@@ -9525,7 +9469,7 @@ function i18nApply(startIndex, instructions) {
     /** @type {?} */
     const viewData = _getViewData();
     if (ngDevMode) {
-        assertEqual(viewData[BINDING_INDEX], -1, 'i18nApply should be called before any binding');
+        assertEqual(viewData[BINDING_INDEX], viewData[TVIEW].bindingStartIndex, 'i18nApply should be called before any binding');
     }
     if (!instructions) {
         return;
@@ -9621,7 +9565,7 @@ function i18nExpMapping(translation, placeholders) {
  */
 function i18nInterpolation1(instructions, v0) {
     /** @type {?} */
-    const different = bindingUpdated(v0);
+    const different = bindingUpdated(_getViewData()[BINDING_INDEX]++, v0);
     if (!different) {
         return NO_CHANGE;
     }
@@ -9650,7 +9594,10 @@ function i18nInterpolation1(instructions, v0) {
  */
 function i18nInterpolation2(instructions, v0, v1) {
     /** @type {?} */
-    const different = bindingUpdated2(v0, v1);
+    const viewData = _getViewData();
+    /** @type {?} */
+    const different = bindingUpdated2(viewData[BINDING_INDEX], v0, v1);
+    viewData[BINDING_INDEX] += 2;
     if (!different) {
         return NO_CHANGE;
     }
@@ -9686,8 +9633,10 @@ function i18nInterpolation2(instructions, v0, v1) {
  */
 function i18nInterpolation3(instructions, v0, v1, v2) {
     /** @type {?} */
-    let different = bindingUpdated2(v0, v1);
-    different = bindingUpdated(v2) || different;
+    const viewData = _getViewData();
+    /** @type {?} */
+    const different = bindingUpdated3(viewData[BINDING_INDEX], v0, v1, v2);
+    viewData[BINDING_INDEX] += 3;
     if (!different) {
         return NO_CHANGE;
     }
@@ -9726,7 +9675,10 @@ function i18nInterpolation3(instructions, v0, v1, v2) {
  */
 function i18nInterpolation4(instructions, v0, v1, v2, v3) {
     /** @type {?} */
-    const different = bindingUpdated4(v0, v1, v2, v3);
+    const viewData = _getViewData();
+    /** @type {?} */
+    const different = bindingUpdated4(viewData[BINDING_INDEX], v0, v1, v2, v3);
+    viewData[BINDING_INDEX] += 4;
     if (!different) {
         return NO_CHANGE;
     }
@@ -9766,8 +9718,11 @@ function i18nInterpolation4(instructions, v0, v1, v2, v3) {
  */
 function i18nInterpolation5(instructions, v0, v1, v2, v3, v4) {
     /** @type {?} */
-    let different = bindingUpdated4(v0, v1, v2, v3);
-    different = bindingUpdated(v4) || different;
+    const viewData = _getViewData();
+    /** @type {?} */
+    let different = bindingUpdated4(viewData[BINDING_INDEX], v0, v1, v2, v3);
+    different = bindingUpdated(viewData[BINDING_INDEX] + 4, v4) || different;
+    viewData[BINDING_INDEX] += 5;
     if (!different) {
         return NO_CHANGE;
     }
@@ -9810,8 +9765,11 @@ function i18nInterpolation5(instructions, v0, v1, v2, v3, v4) {
  */
 function i18nInterpolation6(instructions, v0, v1, v2, v3, v4, v5) {
     /** @type {?} */
-    let different = bindingUpdated4(v0, v1, v2, v3);
-    different = bindingUpdated2(v4, v5) || different;
+    const viewData = _getViewData();
+    /** @type {?} */
+    let different = bindingUpdated4(viewData[BINDING_INDEX], v0, v1, v2, v3);
+    different = bindingUpdated2(viewData[BINDING_INDEX] + 4, v4, v5) || different;
+    viewData[BINDING_INDEX] += 6;
     if (!different) {
         return NO_CHANGE;
     }
@@ -9855,9 +9813,11 @@ function i18nInterpolation6(instructions, v0, v1, v2, v3, v4, v5) {
  */
 function i18nInterpolation7(instructions, v0, v1, v2, v3, v4, v5, v6) {
     /** @type {?} */
-    let different = bindingUpdated4(v0, v1, v2, v3);
-    different = bindingUpdated2(v4, v5) || different;
-    different = bindingUpdated(v6) || different;
+    const viewData = _getViewData();
+    /** @type {?} */
+    let different = bindingUpdated4(viewData[BINDING_INDEX], v0, v1, v2, v3);
+    different = bindingUpdated3(viewData[BINDING_INDEX] + 4, v4, v5, v6) || different;
+    viewData[BINDING_INDEX] += 7;
     if (!different) {
         return NO_CHANGE;
     }
@@ -9902,8 +9862,11 @@ function i18nInterpolation7(instructions, v0, v1, v2, v3, v4, v5, v6) {
  */
 function i18nInterpolation8(instructions, v0, v1, v2, v3, v4, v5, v6, v7) {
     /** @type {?} */
-    let different = bindingUpdated4(v0, v1, v2, v3);
-    different = bindingUpdated4(v4, v5, v6, v7) || different;
+    const viewData = _getViewData();
+    /** @type {?} */
+    let different = bindingUpdated4(viewData[BINDING_INDEX], v0, v1, v2, v3);
+    different = bindingUpdated4(viewData[BINDING_INDEX] + 4, v4, v5, v6, v7) || different;
+    viewData[BINDING_INDEX] += 8;
     if (!different) {
         return NO_CHANGE;
     }
@@ -9942,10 +9905,12 @@ function i18nInterpolation8(instructions, v0, v1, v2, v3, v4, v5, v6, v7) {
  */
 function i18nInterpolationV(instructions, values) {
     /** @type {?} */
+    const viewData = _getViewData();
+    /** @type {?} */
     let different = false;
     for (let i = 0; i < values.length; i++) {
         // Check if bindings have changed
-        bindingUpdated(values[i]) && (different = true);
+        bindingUpdated(viewData[BINDING_INDEX]++, values[i]) && (different = true);
     }
     if (!different) {
         return NO_CHANGE;
@@ -10471,48 +10436,40 @@ class NgModuleFactory$1 extends NgModuleFactory {
  * value. If it has been saved, returns the saved value.
  *
  * @template T
- * @param {?} slotOffset the offset in the reserved slot space {\@link reserveSlots}
+ * @param {?} slotOffset the offset from binding root to the reserved slot
  * @param {?} pureFn Function that returns a value
  * @param {?=} thisArg Optional calling context of pureFn
  * @return {?} value
  */
 function pureFunction0(slotOffset, pureFn, thisArg) {
-    ngDevMode && assertReservedSlotInitialized(slotOffset, 1);
     /** @type {?} */
-    const index = moveBindingIndexToReservedSlot(slotOffset);
-    /** @type {?} */
-    const value = getCreationMode() ?
-        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg) : pureFn()) :
-        consumeBinding();
-    restoreBindingIndex(index);
-    return value;
+    const bindingIndex = getTView().bindingStartIndex + slotOffset;
+    return getCreationMode() ?
+        updateBinding(bindingIndex, thisArg ? pureFn.call(thisArg) : pureFn()) :
+        getBinding(bindingIndex);
 }
 /**
  * If the value of the provided exp has changed, calls the pure function to return
  * an updated value. Or if the value has not changed, returns cached value.
  *
- * @param {?} slotOffset the offset in the reserved slot space {\@link reserveSlots}
+ * @param {?} slotOffset the offset from binding root to the reserved slot
  * @param {?} pureFn Function that returns an updated value
  * @param {?} exp Updated expression value
  * @param {?=} thisArg Optional calling context of pureFn
  * @return {?} Updated or cached value
  */
 function pureFunction1(slotOffset, pureFn, exp, thisArg) {
-    ngDevMode && assertReservedSlotInitialized(slotOffset, 2);
     /** @type {?} */
-    const index = moveBindingIndexToReservedSlot(slotOffset);
-    /** @type {?} */
-    const value = bindingUpdated(exp) ?
-        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg, exp) : pureFn(exp)) :
-        consumeBinding();
-    restoreBindingIndex(index);
-    return value;
+    const bindingIndex = getTView().bindingStartIndex + slotOffset;
+    return bindingUpdated(bindingIndex, exp) ?
+        updateBinding(bindingIndex + 1, thisArg ? pureFn.call(thisArg, exp) : pureFn(exp)) :
+        getBinding(bindingIndex + 1);
 }
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
- * @param {?} slotOffset the offset in the reserved slot space {\@link reserveSlots}
+ * @param {?} slotOffset the offset from binding root to the reserved slot
  * @param {?} pureFn
  * @param {?} exp1
  * @param {?} exp2
@@ -10520,21 +10477,17 @@ function pureFunction1(slotOffset, pureFn, exp, thisArg) {
  * @return {?} Updated or cached value
  */
 function pureFunction2(slotOffset, pureFn, exp1, exp2, thisArg) {
-    ngDevMode && assertReservedSlotInitialized(slotOffset, 3);
     /** @type {?} */
-    const index = moveBindingIndexToReservedSlot(slotOffset);
-    /** @type {?} */
-    const value = bindingUpdated2(exp1, exp2) ?
-        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg, exp1, exp2) : pureFn(exp1, exp2)) :
-        consumeBinding();
-    restoreBindingIndex(index);
-    return value;
+    const bindingIndex = getTView().bindingStartIndex + slotOffset;
+    return bindingUpdated2(bindingIndex, exp1, exp2) ?
+        updateBinding(bindingIndex + 2, thisArg ? pureFn.call(thisArg, exp1, exp2) : pureFn(exp1, exp2)) :
+        getBinding(bindingIndex + 2);
 }
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
- * @param {?} slotOffset the offset in the reserved slot space {\@link reserveSlots}
+ * @param {?} slotOffset the offset from binding root to the reserved slot
  * @param {?} pureFn
  * @param {?} exp1
  * @param {?} exp2
@@ -10543,23 +10496,17 @@ function pureFunction2(slotOffset, pureFn, exp1, exp2, thisArg) {
  * @return {?} Updated or cached value
  */
 function pureFunction3(slotOffset, pureFn, exp1, exp2, exp3, thisArg) {
-    ngDevMode && assertReservedSlotInitialized(slotOffset, 4);
     /** @type {?} */
-    const index = moveBindingIndexToReservedSlot(slotOffset);
-    /** @type {?} */
-    const different = bindingUpdated2(exp1, exp2);
-    /** @type {?} */
-    const value = bindingUpdated(exp3) || different ?
-        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3) : pureFn(exp1, exp2, exp3)) :
-        consumeBinding();
-    restoreBindingIndex(index);
-    return value;
+    const bindingIndex = getTView().bindingStartIndex + slotOffset;
+    return bindingUpdated3(bindingIndex, exp1, exp2, exp3) ?
+        updateBinding(bindingIndex + 3, thisArg ? pureFn.call(thisArg, exp1, exp2, exp3) : pureFn(exp1, exp2, exp3)) :
+        getBinding(bindingIndex + 3);
 }
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
- * @param {?} slotOffset the offset in the reserved slot space {\@link reserveSlots}
+ * @param {?} slotOffset the offset from binding root to the reserved slot
  * @param {?} pureFn
  * @param {?} exp1
  * @param {?} exp2
@@ -10569,21 +10516,17 @@ function pureFunction3(slotOffset, pureFn, exp1, exp2, exp3, thisArg) {
  * @return {?} Updated or cached value
  */
 function pureFunction4(slotOffset, pureFn, exp1, exp2, exp3, exp4, thisArg) {
-    ngDevMode && assertReservedSlotInitialized(slotOffset, 5);
     /** @type {?} */
-    const index = moveBindingIndexToReservedSlot(slotOffset);
-    /** @type {?} */
-    const value = bindingUpdated4(exp1, exp2, exp3, exp4) ?
-        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4) : pureFn(exp1, exp2, exp3, exp4)) :
-        consumeBinding();
-    restoreBindingIndex(index);
-    return value;
+    const bindingIndex = getTView().bindingStartIndex + slotOffset;
+    return bindingUpdated4(bindingIndex, exp1, exp2, exp3, exp4) ?
+        updateBinding(bindingIndex + 4, thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4) : pureFn(exp1, exp2, exp3, exp4)) :
+        getBinding(bindingIndex + 4);
 }
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
- * @param {?} slotOffset the offset in the reserved slot space {\@link reserveSlots}
+ * @param {?} slotOffset the offset from binding root to the reserved slot
  * @param {?} pureFn
  * @param {?} exp1
  * @param {?} exp2
@@ -10594,24 +10537,20 @@ function pureFunction4(slotOffset, pureFn, exp1, exp2, exp3, exp4, thisArg) {
  * @return {?} Updated or cached value
  */
 function pureFunction5(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, thisArg) {
-    ngDevMode && assertReservedSlotInitialized(slotOffset, 6);
     /** @type {?} */
-    const index = moveBindingIndexToReservedSlot(slotOffset);
+    const bindingIndex = getTView().bindingStartIndex + slotOffset;
     /** @type {?} */
-    const different = bindingUpdated4(exp1, exp2, exp3, exp4);
-    /** @type {?} */
-    const value = bindingUpdated(exp5) || different ?
-        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5) :
+    const different = bindingUpdated4(bindingIndex, exp1, exp2, exp3, exp4);
+    return bindingUpdated(bindingIndex + 4, exp5) || different ?
+        updateBinding(bindingIndex + 5, thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5) :
             pureFn(exp1, exp2, exp3, exp4, exp5)) :
-        consumeBinding();
-    restoreBindingIndex(index);
-    return value;
+        getBinding(bindingIndex + 5);
 }
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
- * @param {?} slotOffset the offset in the reserved slot space {\@link reserveSlots}
+ * @param {?} slotOffset the offset from binding root to the reserved slot
  * @param {?} pureFn
  * @param {?} exp1
  * @param {?} exp2
@@ -10623,24 +10562,20 @@ function pureFunction5(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, thisArg
  * @return {?} Updated or cached value
  */
 function pureFunction6(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, thisArg) {
-    ngDevMode && assertReservedSlotInitialized(slotOffset, 7);
     /** @type {?} */
-    const index = moveBindingIndexToReservedSlot(slotOffset);
+    const bindingIndex = getTView().bindingStartIndex + slotOffset;
     /** @type {?} */
-    const different = bindingUpdated4(exp1, exp2, exp3, exp4);
-    /** @type {?} */
-    const value = bindingUpdated2(exp5, exp6) || different ?
-        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5, exp6) :
+    const different = bindingUpdated4(bindingIndex, exp1, exp2, exp3, exp4);
+    return bindingUpdated2(bindingIndex + 4, exp5, exp6) || different ?
+        updateBinding(bindingIndex + 6, thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5, exp6) :
             pureFn(exp1, exp2, exp3, exp4, exp5, exp6)) :
-        consumeBinding();
-    restoreBindingIndex(index);
-    return value;
+        getBinding(bindingIndex + 6);
 }
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
- * @param {?} slotOffset the offset in the reserved slot space {\@link reserveSlots}
+ * @param {?} slotOffset the offset from binding root to the reserved slot
  * @param {?} pureFn
  * @param {?} exp1
  * @param {?} exp2
@@ -10653,25 +10588,21 @@ function pureFunction6(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, t
  * @return {?} Updated or cached value
  */
 function pureFunction7(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, thisArg) {
-    ngDevMode && assertReservedSlotInitialized(slotOffset, 8);
     /** @type {?} */
-    const index = moveBindingIndexToReservedSlot(slotOffset);
+    const bindingIndex = getTView().bindingStartIndex + slotOffset;
     /** @type {?} */
-    let different = bindingUpdated4(exp1, exp2, exp3, exp4);
-    different = bindingUpdated2(exp5, exp6) || different;
-    /** @type {?} */
-    const value = bindingUpdated(exp7) || different ?
-        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5, exp6, exp7) :
+    let different = bindingUpdated4(bindingIndex, exp1, exp2, exp3, exp4);
+    return bindingUpdated3(bindingIndex + 4, exp5, exp6, exp7) || different ?
+        updateBinding(bindingIndex + 7, thisArg ?
+            pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5, exp6, exp7) :
             pureFn(exp1, exp2, exp3, exp4, exp5, exp6, exp7)) :
-        consumeBinding();
-    restoreBindingIndex(index);
-    return value;
+        getBinding(bindingIndex + 7);
 }
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
- * @param {?} slotOffset the offset in the reserved slot space {\@link reserveSlots}
+ * @param {?} slotOffset the offset from binding root to the reserved slot
  * @param {?} pureFn
  * @param {?} exp1
  * @param {?} exp2
@@ -10685,18 +10616,15 @@ function pureFunction7(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, e
  * @return {?} Updated or cached value
  */
 function pureFunction8(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, thisArg) {
-    ngDevMode && assertReservedSlotInitialized(slotOffset, 9);
     /** @type {?} */
-    const index = moveBindingIndexToReservedSlot(slotOffset);
+    const bindingIndex = getTView().bindingStartIndex + slotOffset;
     /** @type {?} */
-    const different = bindingUpdated4(exp1, exp2, exp3, exp4);
-    /** @type {?} */
-    const value = bindingUpdated4(exp5, exp6, exp7, exp8) || different ?
-        checkAndUpdateBinding(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8) :
+    const different = bindingUpdated4(bindingIndex, exp1, exp2, exp3, exp4);
+    return bindingUpdated4(bindingIndex + 4, exp5, exp6, exp7, exp8) || different ?
+        updateBinding(bindingIndex + 8, thisArg ?
+            pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8) :
             pureFn(exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8)) :
-        consumeBinding();
-    restoreBindingIndex(index);
-    return value;
+        getBinding(bindingIndex + 8);
 }
 /**
  * pureFunction instruction that can support any number of bindings.
@@ -10704,7 +10632,7 @@ function pureFunction8(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, e
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
- * @param {?} slotOffset the offset in the reserved slot space {\@link reserveSlots}
+ * @param {?} slotOffset the offset from binding root to the reserved slot
  * @param {?} pureFn A pure function that takes binding values and builds an object or array
  * containing those values.
  * @param {?} exps An array of binding values
@@ -10712,18 +10640,15 @@ function pureFunction8(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, e
  * @return {?} Updated or cached value
  */
 function pureFunctionV(slotOffset, pureFn, exps, thisArg) {
-    ngDevMode && assertReservedSlotInitialized(slotOffset, exps.length + 1);
     /** @type {?} */
-    const index = moveBindingIndexToReservedSlot(slotOffset);
+    let bindingIndex = getTView().bindingStartIndex + slotOffset;
     /** @type {?} */
     let different = false;
     for (let i = 0; i < exps.length; i++) {
-        bindingUpdated(exps[i]) && (different = true);
+        bindingUpdated(bindingIndex++, exps[i]) && (different = true);
     }
-    /** @type {?} */
-    const value = different ? checkAndUpdateBinding(pureFn.apply(thisArg, exps)) : consumeBinding();
-    restoreBindingIndex(index);
-    return value;
+    return different ? updateBinding(bindingIndex, pureFn.apply(thisArg, exps)) :
+        getBinding(bindingIndex);
 }
 
 /**
@@ -14016,7 +13941,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-beta.2+22.sha-f053a3f');
+const VERSION = new Version('7.0.0-beta.2+26.sha-f2aa9c6');
 
 /**
  * @fileoverview added by tsickle
@@ -19472,7 +19397,7 @@ function checkBinding(view, def, bindingIdx, value) {
  * @param {?} value
  * @return {?}
  */
-function checkAndUpdateBinding$1(view, def, bindingIdx, value) {
+function checkAndUpdateBinding(view, def, bindingIdx, value) {
     if (checkBinding(view, def, bindingIdx, value)) {
         view.oldValues[def.bindingIndex + bindingIdx] = value;
         return true;
@@ -20265,7 +20190,7 @@ function checkAndUpdateElementDynamic(view, def, values) {
  * @return {?}
  */
 function checkAndUpdateElementValue(view, def, bindingIdx, value) {
-    if (!checkAndUpdateBinding$1(view, def, bindingIdx, value)) {
+    if (!checkAndUpdateBinding(view, def, bindingIdx, value)) {
         return false;
     }
     /** @type {?} */
@@ -22663,25 +22588,25 @@ function checkAndUpdatePureExpressionInline(view, def, v0, v1, v2, v3, v4, v5, v
     let changed = false;
     /** @type {?} */
     const bindLen = bindings.length;
-    if (bindLen > 0 && checkAndUpdateBinding$1(view, def, 0, v0))
+    if (bindLen > 0 && checkAndUpdateBinding(view, def, 0, v0))
         changed = true;
-    if (bindLen > 1 && checkAndUpdateBinding$1(view, def, 1, v1))
+    if (bindLen > 1 && checkAndUpdateBinding(view, def, 1, v1))
         changed = true;
-    if (bindLen > 2 && checkAndUpdateBinding$1(view, def, 2, v2))
+    if (bindLen > 2 && checkAndUpdateBinding(view, def, 2, v2))
         changed = true;
-    if (bindLen > 3 && checkAndUpdateBinding$1(view, def, 3, v3))
+    if (bindLen > 3 && checkAndUpdateBinding(view, def, 3, v3))
         changed = true;
-    if (bindLen > 4 && checkAndUpdateBinding$1(view, def, 4, v4))
+    if (bindLen > 4 && checkAndUpdateBinding(view, def, 4, v4))
         changed = true;
-    if (bindLen > 5 && checkAndUpdateBinding$1(view, def, 5, v5))
+    if (bindLen > 5 && checkAndUpdateBinding(view, def, 5, v5))
         changed = true;
-    if (bindLen > 6 && checkAndUpdateBinding$1(view, def, 6, v6))
+    if (bindLen > 6 && checkAndUpdateBinding(view, def, 6, v6))
         changed = true;
-    if (bindLen > 7 && checkAndUpdateBinding$1(view, def, 7, v7))
+    if (bindLen > 7 && checkAndUpdateBinding(view, def, 7, v7))
         changed = true;
-    if (bindLen > 8 && checkAndUpdateBinding$1(view, def, 8, v8))
+    if (bindLen > 8 && checkAndUpdateBinding(view, def, 8, v8))
         changed = true;
-    if (bindLen > 9 && checkAndUpdateBinding$1(view, def, 9, v9))
+    if (bindLen > 9 && checkAndUpdateBinding(view, def, 9, v9))
         changed = true;
     if (changed) {
         /** @type {?} */
@@ -22790,7 +22715,7 @@ function checkAndUpdatePureExpressionDynamic(view, def, values) {
     for (let i = 0; i < values.length; i++) {
         // Note: We need to loop over all values, so that
         // the old values are updates as well!
-        if (checkAndUpdateBinding$1(view, def, i, values[i])) {
+        if (checkAndUpdateBinding(view, def, i, values[i])) {
             changed = true;
         }
     }
@@ -22912,25 +22837,25 @@ function checkAndUpdateTextInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7, v8,
     const bindings = def.bindings;
     /** @type {?} */
     const bindLen = bindings.length;
-    if (bindLen > 0 && checkAndUpdateBinding$1(view, def, 0, v0))
+    if (bindLen > 0 && checkAndUpdateBinding(view, def, 0, v0))
         changed = true;
-    if (bindLen > 1 && checkAndUpdateBinding$1(view, def, 1, v1))
+    if (bindLen > 1 && checkAndUpdateBinding(view, def, 1, v1))
         changed = true;
-    if (bindLen > 2 && checkAndUpdateBinding$1(view, def, 2, v2))
+    if (bindLen > 2 && checkAndUpdateBinding(view, def, 2, v2))
         changed = true;
-    if (bindLen > 3 && checkAndUpdateBinding$1(view, def, 3, v3))
+    if (bindLen > 3 && checkAndUpdateBinding(view, def, 3, v3))
         changed = true;
-    if (bindLen > 4 && checkAndUpdateBinding$1(view, def, 4, v4))
+    if (bindLen > 4 && checkAndUpdateBinding(view, def, 4, v4))
         changed = true;
-    if (bindLen > 5 && checkAndUpdateBinding$1(view, def, 5, v5))
+    if (bindLen > 5 && checkAndUpdateBinding(view, def, 5, v5))
         changed = true;
-    if (bindLen > 6 && checkAndUpdateBinding$1(view, def, 6, v6))
+    if (bindLen > 6 && checkAndUpdateBinding(view, def, 6, v6))
         changed = true;
-    if (bindLen > 7 && checkAndUpdateBinding$1(view, def, 7, v7))
+    if (bindLen > 7 && checkAndUpdateBinding(view, def, 7, v7))
         changed = true;
-    if (bindLen > 8 && checkAndUpdateBinding$1(view, def, 8, v8))
+    if (bindLen > 8 && checkAndUpdateBinding(view, def, 8, v8))
         changed = true;
-    if (bindLen > 9 && checkAndUpdateBinding$1(view, def, 9, v9))
+    if (bindLen > 9 && checkAndUpdateBinding(view, def, 9, v9))
         changed = true;
     if (changed) {
         /** @type {?} */
@@ -22975,7 +22900,7 @@ function checkAndUpdateTextDynamic(view, def, values) {
     for (let i = 0; i < values.length; i++) {
         // Note: We need to loop over all values, so that
         // the old values are updates as well!
-        if (checkAndUpdateBinding$1(view, def, i, values[i])) {
+        if (checkAndUpdateBinding(view, def, i, values[i])) {
             changed = true;
         }
     }
