@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.2+20.sha-07d8d39
+ * @license Angular v7.0.0-beta.2+22.sha-f053a3f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -3629,7 +3629,7 @@
         ngDevMode && assertDataInRange(index - 1);
         var node = createLNode(index, 4 /* ElementContainer */, native, null, attrs || null, null);
         appendChild(getParentLNode(node), native, viewData);
-        createDirectivesAndLocals(localRefs);
+        createDirectivesAndLocals(node, localRefs);
     }
     /** Mark the end of the <ng-container>. */
     function elementContainerEnd() {
@@ -3668,7 +3668,7 @@
             setUpAttributes(native, attrs);
         }
         appendChild(getParentLNode(node), native, viewData);
-        createDirectivesAndLocals(localRefs);
+        createDirectivesAndLocals(node, localRefs);
     }
     /**
      * Creates a native element from a tag name, using a renderer.
@@ -3692,21 +3692,26 @@
         }
         return native;
     }
+    function nativeNodeLocalRefExtractor(lNode) {
+        return lNode.native;
+    }
     /**
      * Creates directive instances and populates local refs.
      *
-     * @param localRefs Local refs of the current node
+     * @param lNode LNode for which directive and locals should be created
+     * @param localRefs Local refs of the node in question
+     * @param localRefExtractor mapping function that extracts local ref value from LNode
      */
-    function createDirectivesAndLocals(localRefs) {
-        var node = previousOrParentNode;
+    function createDirectivesAndLocals(lNode, localRefs, localRefExtractor) {
+        if (localRefExtractor === void 0) { localRefExtractor = nativeNodeLocalRefExtractor; }
         if (firstTemplatePass) {
             ngDevMode && ngDevMode.firstTemplatePass++;
-            cacheMatchingDirectivesForNode(node.tNode, tView, localRefs || null);
+            cacheMatchingDirectivesForNode(lNode.tNode, tView, localRefs || null);
         }
         else {
             instantiateDirectivesDirectly();
         }
-        saveResolvedLocalsInData();
+        saveResolvedLocalsInData(lNode, localRefExtractor);
     }
     /**
      * On first template pass, we match each node against available directive selectors and save
@@ -3840,12 +3845,12 @@
      * Takes a list of local names and indices and pushes the resolved local variable values
      * to LViewData in the same order as they are loaded in the template with load().
      */
-    function saveResolvedLocalsInData() {
-        var localNames = previousOrParentNode.tNode.localNames;
+    function saveResolvedLocalsInData(lNode, localRefExtractor) {
+        var localNames = lNode.tNode.localNames;
         if (localNames) {
             for (var i = 0; i < localNames.length; i += 2) {
                 var index = localNames[i + 1];
-                var value = index === -1 ? previousOrParentNode.native : directives[index];
+                var value = index === -1 ? localRefExtractor(lNode) : directives[index];
                 viewData.push(value);
             }
         }
@@ -4605,15 +4610,17 @@
      * @param tagName The name of the container element, if applicable
      * @param attrs The attrs attached to the container, if applicable
      * @param localRefs A set of local reference bindings on the element.
+     * @param localRefExtractor A function which extracts local-refs values from the template.
+     *        Defaults to the current element associated with the local-ref.
      */
-    function template(index, templateFn, tagName, attrs, localRefs) {
+    function template(index, templateFn, tagName, attrs, localRefs, localRefExtractor) {
         // TODO: consider a separate node type for templates
         var node = containerInternal(index, tagName || null, attrs || null, localRefs || null);
         if (firstTemplatePass) {
             node.tNode.tViews =
                 createTView(-1, templateFn, tView.directiveRegistry, tView.pipeRegistry, null);
         }
-        createDirectivesAndLocals(localRefs);
+        createDirectivesAndLocals(node, localRefs, localRefExtractor);
         currentQueries && (currentQueries = currentQueries.addNode(node));
         queueLifecycleHooks(node.tNode.flags, tView);
         isParent = false;
@@ -7511,6 +7518,13 @@
         };
         return TemplateRef$$1;
     }());
+    /**
+     * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
+     * `<ng-template>` element.
+     */
+    function templateRefExtractor(lNode) {
+        return getOrCreateTemplateRef(getOrCreateNodeInjectorForNode(lNode));
+    }
 
     /**
      * @license
@@ -11551,7 +11565,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-beta.2+20.sha-07d8d39');
+    var VERSION = new Version('7.0.0-beta.2+22.sha-f053a3f');
 
     /**
      * @license
@@ -20131,6 +20145,7 @@
     exports.ɵinjectAttribute = injectAttribute;
     exports.ɵgetFactoryOf = getFactoryOf;
     exports.ɵgetInheritedFactory = getInheritedFactory;
+    exports.ɵtemplateRefExtractor = templateRefExtractor;
     exports.ɵPublicFeature = PublicFeature;
     exports.ɵInheritDefinitionFeature = InheritDefinitionFeature;
     exports.ɵNgOnChangesFeature = NgOnChangesFeature;

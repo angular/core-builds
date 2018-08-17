@@ -15,7 +15,7 @@ import { ViewContainerRef as viewEngine_ViewContainerRef } from '../linker/view_
 import { Type } from '../type';
 import { DirectiveDefInternal } from './interfaces/definition';
 import { LInjector } from './interfaces/injector';
-import { LContainerNode, LElementContainerNode, LElementNode, LNode } from './interfaces/node';
+import { LContainerNode, LElementContainerNode, LElementNode, LNode, LNodeWithLocalRefs } from './interfaces/node';
 import { QueryReadType } from './interfaces/query';
 /**
  * Registers this directive as present in its node's injector by flipping the directive's
@@ -210,3 +210,8 @@ export declare class NodeInjector implements Injector {
 export declare function getOrCreateTemplateRef<T>(di: LInjector): viewEngine_TemplateRef<T>;
 export declare function getFactoryOf<T>(type: Type<any>): ((type?: Type<T>) => T) | null;
 export declare function getInheritedFactory<T>(type: Type<any>): (type: Type<T>) => T;
+/**
+ * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
+ * `<ng-template>` element.
+ */
+export declare function templateRefExtractor(lNode: LNodeWithLocalRefs): viewEngine_TemplateRef<{}>;
