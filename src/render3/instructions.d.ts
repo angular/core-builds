@@ -12,7 +12,7 @@ import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
 import { LContainer } from './interfaces/container';
 import { ComponentDefInternal, ComponentQuery, ComponentTemplate, DirectiveDefInternal, DirectiveDefListOrFactory, InitialStylingFlags, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { LInjector } from './interfaces/injector';
-import { LContainerNode, LElementContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode, TAttributes, TContainerNode, TElementNode, TNode, TNodeType } from './interfaces/node';
+import { LContainerNode, LElementContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode, LocalRefExtractor, TAttributes, TContainerNode, TElementNode, TNode, TNodeType } from './interfaces/node';
 import { CssSelectorList } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
@@ -465,8 +465,10 @@ export declare function createLContainer(parentLNode: LNode, currentView: LViewD
  * @param tagName The name of the container element, if applicable
  * @param attrs The attrs attached to the container, if applicable
  * @param localRefs A set of local reference bindings on the element.
+ * @param localRefExtractor A function which extracts local-refs values from the template.
+ *        Defaults to the current element associated with the local-ref.
  */
-export declare function template(index: number, templateFn: ComponentTemplate<any> | null, tagName?: string | null, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+export declare function template(index: number, templateFn: ComponentTemplate<any> | null, tagName?: string | null, attrs?: TAttributes | null, localRefs?: string[] | null, localRefExtractor?: LocalRefExtractor): void;
 /**
  * Creates an LContainerNode for inline views, e.g.
  *
