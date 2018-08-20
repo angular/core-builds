@@ -137,7 +137,7 @@ export declare function resetApplicationState(): void;
  * @param directives Directive defs that should be used for matching
  * @param pipes Pipe defs that should be used for matching
  */
-export declare function renderTemplate<T>(hostNode: RElement, templateFn: ComponentTemplate<T>, consts: number, context: T, providedRendererFactory: RendererFactory3, host: LElementNode | null, directives?: DirectiveDefListOrFactory | null, pipes?: PipeDefListOrFactory | null, sanitizer?: Sanitizer | null): LElementNode;
+export declare function renderTemplate<T>(hostNode: RElement, templateFn: ComponentTemplate<T>, consts: number, vars: number, context: T, providedRendererFactory: RendererFactory3, host: LElementNode | null, directives?: DirectiveDefListOrFactory | null, pipes?: PipeDefListOrFactory | null, sanitizer?: Sanitizer | null): LElementNode;
 /**
  * Used for creating the LViewNode of a dynamic embedded view,
  * either through ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
@@ -228,7 +228,7 @@ export declare function isComponent(tNode: TNode): boolean;
  * @param directives Registry of directives for this view
  * @param pipes Registry of pipes for this view
  */
-export declare function createTView(viewIndex: number, templateFn: ComponentTemplate<any> | null, consts: number, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null, viewQuery: ComponentQuery<any> | null): TView;
+export declare function createTView(viewIndex: number, templateFn: ComponentTemplate<any> | null, consts: number, vars: number, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null, viewQuery: ComponentQuery<any> | null): TView;
 export declare function createError(text: string, token: any): Error;
 /**
  * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.
@@ -466,13 +466,14 @@ export declare function createLContainer(parentLNode: LNode, currentView: LViewD
  * @param index The index of the container in the data array
  * @param templateFn Inline template
  * @param consts The number of nodes, local refs, and pipes for this template
+ * @param vars The number of bindings for this template
  * @param tagName The name of the container element, if applicable
  * @param attrs The attrs attached to the container, if applicable
  * @param localRefs A set of local reference bindings on the element.
  * @param localRefExtractor A function which extracts local-refs values from the template.
  *        Defaults to the current element associated with the local-ref.
  */
-export declare function template(index: number, templateFn: ComponentTemplate<any> | null, consts: number, tagName?: string | null, attrs?: TAttributes | null, localRefs?: string[] | null, localRefExtractor?: LocalRefExtractor): void;
+export declare function template(index: number, templateFn: ComponentTemplate<any> | null, consts: number, vars: number, tagName?: string | null, attrs?: TAttributes | null, localRefs?: string[] | null, localRefExtractor?: LocalRefExtractor): void;
 /**
  * Creates an LContainerNode for inline views, e.g.
  *
@@ -501,7 +502,7 @@ export declare function containerRefreshEnd(): void;
  * @param viewBlockId The ID of this view
  * @return boolean Whether or not this view is in creation mode
  */
-export declare function embeddedViewStart(viewBlockId: number, consts: number): RenderFlags;
+export declare function embeddedViewStart(viewBlockId: number, consts: number, vars: number): RenderFlags;
 /** Marks the end of an embedded view. */
 export declare function embeddedViewEnd(): void;
 /**
