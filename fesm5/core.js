@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.0.0-beta.2+26.sha-f2aa9c6
+ * @license Angular v7.0.0-beta.2+28.sha-21a1440
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __assign, __extends, __spread, __read, __values } from 'tslib';
+import { __extends, __spread, __assign, __read, __values } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compileInjectable, compilePipeFromMetadata } from '@angular/compiler';
 import { share } from 'rxjs/operators';
@@ -3797,11 +3797,13 @@ function saveResolvedLocalsInData(lNode, localRefExtractor) {
  * if it doesn't already exist.
  *
  * @param templateFn The template from which to get static data
+ * @param consts The number of nodes, local refs, and pipes in this view
+ * @param vars The number of bindings and pure function bindings in this view
  * @param directives Directive defs that should be saved on TView
  * @param pipes Pipe defs that should be saved on TView
  * @returns TView
  */
-function getOrCreateTView(templateFn, consts, directives, pipes, viewQuery) {
+function getOrCreateTView(templateFn, consts, vars, directives, pipes, viewQuery) {
     // TODO(misko): reading `ngPrivateData` here is problematic for two reasons
     // 1. It is a megamorphic call on each invocation.
     // 2. For nested embedded views (ngFor inside ngFor) the template instance is per
@@ -3810,7 +3812,7 @@ function getOrCreateTView(templateFn, consts, directives, pipes, viewQuery) {
     // and not on embedded templates.
     return templateFn.ngPrivateData ||
         (templateFn.ngPrivateData =
-            createTView(-1, templateFn, consts, directives, pipes, viewQuery));
+            createTView(-1, templateFn, consts, vars, directives, pipes, viewQuery));
 }
 /**
  * Creates a TView instance
@@ -3821,7 +3823,7 @@ function getOrCreateTView(templateFn, consts, directives, pipes, viewQuery) {
  * @param directives Registry of directives for this view
  * @param pipes Registry of pipes for this view
  */
-function createTView(viewIndex, templateFn, consts, directives, pipes, viewQuery) {
+function createTView(viewIndex, templateFn, consts, vars, directives, pipes, viewQuery) {
     ngDevMode && ngDevMode.tView++;
     return {
         id: viewIndex,
@@ -3922,7 +3924,7 @@ function locateHostElement(factory, elementOrSelector) {
  */
 function hostElement(tag, rNode, def, sanitizer) {
     resetApplicationState();
-    var node = createLNode(0, 3 /* Element */, rNode, null, null, createLViewData(renderer, getOrCreateTView(def.template, def.consts, def.directiveDefs, def.pipeDefs, def.viewQuery), null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, sanitizer));
+    var node = createLNode(0, 3 /* Element */, rNode, null, null, createLViewData(renderer, getOrCreateTView(def.template, def.consts, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery), null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, sanitizer));
     if (firstTemplatePass) {
         node.tNode.flags = 4096 /* isComponent */;
         if (def.diPublic)
@@ -4399,7 +4401,7 @@ function directiveCreate(directiveDefIdx, directive, directiveDef) {
     return instance;
 }
 function addComponentLogic(directiveIndex, instance, def) {
-    var tView = getOrCreateTView(def.template, def.consts, def.directiveDefs, def.pipeDefs, def.viewQuery);
+    var tView = getOrCreateTView(def.template, def.consts, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery);
     // Only component views should be added to the view tree directly. Embedded views are
     // accessed through their containers because they may be removed / re-added later.
     var componentView = addToViewTree(viewData, previousOrParentNode.tNode.index, createLViewData(rendererFactory.createRenderer(previousOrParentNode.native, def), tView, instance, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, getCurrentSanitizer()));
@@ -4547,18 +4549,18 @@ function createLContainer(parentLNode, currentView, isForViewContainerRef) {
  * @param index The index of the container in the data array
  * @param templateFn Inline template
  * @param consts The number of nodes, local refs, and pipes for this template
+ * @param vars The number of bindings for this template
  * @param tagName The name of the container element, if applicable
  * @param attrs The attrs attached to the container, if applicable
  * @param localRefs A set of local reference bindings on the element.
  * @param localRefExtractor A function which extracts local-refs values from the template.
  *        Defaults to the current element associated with the local-ref.
  */
-function template(index, templateFn, consts, tagName, attrs, localRefs, localRefExtractor) {
+function template(index, templateFn, consts, vars, tagName, attrs, localRefs, localRefExtractor) {
     // TODO: consider a separate node type for templates
     var node = containerInternal(index, tagName || null, attrs || null, localRefs || null);
     if (firstTemplatePass) {
-        node.tNode.tViews =
-            createTView(-1, templateFn, consts, tView.directiveRegistry, tView.pipeRegistry, null);
+        node.tNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null);
     }
     createDirectivesAndLocals(node, localRefs, localRefExtractor);
     currentQueries && (currentQueries = currentQueries.addNode(node));
@@ -4692,7 +4694,7 @@ function scanForView(containerNode, startIdx, viewBlockId) {
  * @param viewBlockId The ID of this view
  * @return boolean Whether or not this view is in creation mode
  */
-function embeddedViewStart(viewBlockId, consts) {
+function embeddedViewStart(viewBlockId, consts, vars) {
     var container = (isParent ? previousOrParentNode : getParentLNode(previousOrParentNode));
     ngDevMode && assertNodeType(container, 0 /* Container */);
     var lContainer = container.data;
@@ -4705,7 +4707,7 @@ function embeddedViewStart(viewBlockId, consts) {
     }
     else {
         // When we create a new LView, we always reset the state of the instructions.
-        var newView = createLViewData(renderer, getOrCreateEmbeddedTView(viewBlockId, consts, container), null, 2 /* CheckAlways */, getCurrentSanitizer());
+        var newView = createLViewData(renderer, getOrCreateEmbeddedTView(viewBlockId, consts, vars, container), null, 2 /* CheckAlways */, getCurrentSanitizer());
         if (lContainer[QUERIES]) {
             newView[QUERIES] = lContainer[QUERIES].createView();
         }
@@ -4730,17 +4732,17 @@ function embeddedViewStart(viewBlockId, consts) {
  *
  * @param viewIndex The index of the TView in TNode.tViews
  * @param consts The number of nodes, local refs, and pipes in this template
+ * @param vars The number of bindings and pure function bindings in this template
  * @param parent The parent container in which to look for the view's static data
  * @returns TView
  */
-function getOrCreateEmbeddedTView(viewIndex, consts, parent) {
+function getOrCreateEmbeddedTView(viewIndex, consts, vars, parent) {
     ngDevMode && assertNodeType(parent, 0 /* Container */);
     var containerTViews = parent.tNode.tViews;
     ngDevMode && assertDefined(containerTViews, 'TView expected');
     ngDevMode && assertEqual(Array.isArray(containerTViews), true, 'TViews should be in an array');
     if (viewIndex >= containerTViews.length || containerTViews[viewIndex] == null) {
-        containerTViews[viewIndex] =
-            createTView(viewIndex, null, consts, tView.directiveRegistry, tView.pipeRegistry, null);
+        containerTViews[viewIndex] = createTView(viewIndex, null, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null);
     }
     return containerTViews[viewIndex];
 }
@@ -5381,7 +5383,7 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     var componentTag = componentDef.selectors[0][0];
     var hostNode = locateHostElement(rendererFactory, opts.host || componentTag);
     var rootContext = createRootContext(opts.scheduler || requestAnimationFrame.bind(window));
-    var rootView = createLViewData(rendererFactory.createRenderer(hostNode, componentDef), createTView(-1, null, 1, null, null, null), rootContext, componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
+    var rootView = createLViewData(rendererFactory.createRenderer(hostNode, componentDef), createTView(-1, null, 1, 0, null, null, null), rootContext, componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
     rootView[INJECTOR$1] = opts.injector || null;
     var oldView = enterView(rootView, null);
     rootView[BINDING_INDEX] = rootView[TVIEW].bindingStartIndex;
@@ -5506,6 +5508,7 @@ function defineComponent(componentDefinition) {
         type: type,
         diPublic: null,
         consts: componentDefinition.consts,
+        vars: componentDefinition.vars,
         factory: componentDefinition.factory,
         template: componentDefinition.template || null,
         hostBindings: componentDefinition.hostBindings || null,
@@ -6645,7 +6648,7 @@ var ComponentFactory$1 = /** @class */ (function (_super) {
             ngModule.injector.get(ROOT_CONTEXT) :
             createRootContext(requestAnimationFrame.bind(window));
         // Create the root view. Uses empty TView and ContentTemplate.
-        var rootView = createLViewData(rendererFactory.createRenderer(hostNode, this.componentDef), createTView(-1, null, 1, null, null, null), rootContext, this.componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
+        var rootView = createLViewData(rendererFactory.createRenderer(hostNode, this.componentDef), createTView(-1, null, 1, 0, null, null, null), rootContext, this.componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
         rootView[INJECTOR$1] = ngModule && ngModule.injector || null;
         // rootView is the parent when bootstrapping
         var oldView = enterView(rootView, null);
@@ -11472,7 +11475,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('7.0.0-beta.2+26.sha-f2aa9c6');
+var VERSION = new Version('7.0.0-beta.2+28.sha-21a1440');
 
 /**
  * @license
