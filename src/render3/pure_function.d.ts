@@ -8,15 +8,17 @@
 /**
  * Bindings for pure functions are stored after regular bindings.
  *
- *  ----------------------------------------------------------------------------
- *  |  LNodes / local refs / pipes ... | regular bindings / interpolations | pure function bindings
- *  ----------------------------------------------------------------------------
- *                                     ^
- *                          TView.bindingStartIndex
+ * |--------consts--------|----------------vars----------------|------ hostVars (dir1) ------|
+ * ---------------------------------------------------------------------------------------------
+ * | nodes / refs / pipes | bindings | pure function bindings  | host bindings  | host slots |
+ * ---------------------------------------------------------------------------------------------
+ *                        ^                                    ^
+ *             TView.bindingStartIndex            TView.hostBindingStartIndex
  *
- * Pure function instructions are given an offset from TView.bindingStartIndex.
- * Adding the offset to TView.bindingStartIndex gives the first index where the bindings
- * are stored.
+ * Pure function instructions are given an offset from the binding root. Adding the offset to the
+ * binding root gives the first index where the bindings are stored. In component views, the binding
+ * root is the bindingStartIndex. In host bindings, the binding root is the hostBindingStartIndex +
+ * any hostVars in directives evaluated before it.
  */
 /**
  * If the value hasn't been saved, calls the pure function to store and return the
