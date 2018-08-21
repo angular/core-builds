@@ -73,6 +73,7 @@ export declare function getCreationMode(): boolean;
  * The getCurrentView() instruction should be used for anything public.
  */
 export declare function _getViewData(): LViewData;
+export declare function getBindingRoot(): number;
 /**
  * Swap the current state with a new state.
  *

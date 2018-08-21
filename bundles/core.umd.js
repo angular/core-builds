@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.2+30.sha-b05d4a5
+ * @license Angular v7.0.0-beta.2+38.sha-6176974
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -3277,6 +3277,16 @@
     /** Whether or not this is the first time the current view has been processed. */
     var firstTemplatePass = true;
     /**
+     * The root index from which pure function instructions should calculate their binding
+     * indices. In component views, this is TView.bindingStartIndex. In a host binding
+     * context, this is the TView.hostBindingStartIndex + any hostVars before the given dir.
+     */
+    var bindingRootIndex = -1;
+    // top level variables should not be exported for performance reasons (PERF_NOTES.md)
+    function getBindingRoot() {
+        return bindingRootIndex;
+    }
+    /**
      * Swap the current state with a new state.
      *
      * For performance reasons we store the state in the top level of the module.
@@ -3294,6 +3304,7 @@
         tView = newView && newView[TVIEW];
         creationMode = newView && (newView[FLAGS] & 1 /* CreationMode */) === 1 /* CreationMode */;
         firstTemplatePass = newView && tView.firstTemplatePass;
+        bindingRootIndex = newView && tView.bindingStartIndex;
         renderer = newView && newView[RENDERER];
         if (host != null) {
             previousOrParentNode = host;
@@ -3321,7 +3332,7 @@
             viewData[FLAGS] &= ~(1 /* CreationMode */ | 4 /* Dirty */);
         }
         viewData[FLAGS] |= 16 /* RunInit */;
-        viewData[BINDING_INDEX] = -1;
+        viewData[BINDING_INDEX] = tView.bindingStartIndex;
         enterView(newView, null);
     }
     /**
@@ -3348,11 +3359,13 @@
     /** Sets the host bindings for the current view. */
     function setHostBindings(bindings) {
         if (bindings != null) {
+            bindingRootIndex = viewData[BINDING_INDEX] = tView.hostBindingStartIndex;
             var defs = tView.directives;
             for (var i = 0; i < bindings.length; i += 2) {
                 var dirIndex = bindings[i];
                 var def = defs[dirIndex];
                 def.hostBindings && def.hostBindings(dirIndex, bindings[i + 1]);
+                bindingRootIndex = viewData[BINDING_INDEX] = bindingRootIndex + def.hostVars;
             }
         }
     }
@@ -3389,7 +3402,7 @@
             null,
             flags | 1 /* CreationMode */ | 8 /* Attached */ | 16 /* RunInit */,
             null,
-            -1,
+            tView.bindingStartIndex,
             null,
             null,
             context,
@@ -3524,7 +3537,6 @@
                 previousOrParentNode = null;
                 oldView = enterView(viewNode.data, viewNode);
                 namespaceHTML();
-                viewData[BINDING_INDEX] = tView.bindingStartIndex;
                 tView.template(rf, context);
                 if (rf & 2 /* Update */) {
                     refreshDescendantViews();
@@ -3567,7 +3579,6 @@
             }
             if (templateFn) {
                 namespaceHTML();
-                viewData[BINDING_INDEX] = tView.bindingStartIndex;
                 templateFn(getRenderFlags(hostView), componentOrContext);
                 refreshDescendantViews();
             }
@@ -3904,6 +3915,7 @@
      */
     function createTView(viewIndex, templateFn, consts, vars, directives, pipes, viewQuery) {
         ngDevMode && ngDevMode.tView++;
+        var bindingStartIndex = HEADER_OFFSET + consts;
         return {
             id: viewIndex,
             template: templateFn,
@@ -3911,7 +3923,8 @@
             node: null,
             data: HEADER_FILLER.slice(),
             childIndex: -1,
-            bindingStartIndex: HEADER_OFFSET + consts,
+            bindingStartIndex: bindingStartIndex,
+            hostBindingStartIndex: bindingStartIndex + vars,
             directives: null,
             firstTemplatePass: true,
             initHooks: null,
@@ -4799,7 +4812,6 @@
             }
             lContainer[ACTIVE_INDEX]++;
         }
-        viewData[BINDING_INDEX] = tView.bindingStartIndex;
         return getRenderFlags(viewNode.data);
     }
     /**
@@ -5143,7 +5155,6 @@
         var hostTView = hostView[TVIEW];
         var templateFn = hostTView.template;
         var viewQuery = hostTView.viewQuery;
-        viewData[BINDING_INDEX] = tView.bindingStartIndex;
         try {
             namespaceHTML();
             createViewQuery(viewQuery, hostView[FLAGS], component);
@@ -5465,7 +5476,6 @@
         var rootView = createLViewData(rendererFactory.createRenderer(hostNode, componentDef), createTView(-1, null, 1, 0, null, null, null), rootContext, componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
         rootView[INJECTOR$1] = opts.injector || null;
         var oldView = enterView(rootView, null);
-        rootView[BINDING_INDEX] = rootView[TVIEW].bindingStartIndex;
         var elementNode;
         var component;
         try {
@@ -5588,6 +5598,7 @@
             diPublic: null,
             consts: componentDefinition.consts,
             vars: componentDefinition.vars,
+            hostVars: componentDefinition.hostVars || 0,
             factory: componentDefinition.factory,
             template: componentDefinition.template || null,
             hostBindings: componentDefinition.hostBindings || null,
@@ -5861,6 +5872,50 @@
                     }
                     else {
                         definition.hostBindings = superHostBindings_1;
+                    }
+                }
+                // Merge View Queries
+                if (isComponentDef(definition) && isComponentDef(superDef)) {
+                    var prevViewQuery_1 = definition.viewQuery;
+                    var superViewQuery_1 = superDef.viewQuery;
+                    if (superViewQuery_1) {
+                        if (prevViewQuery_1) {
+                            definition.viewQuery = function (rf, ctx) {
+                                superViewQuery_1(rf, ctx);
+                                prevViewQuery_1(rf, ctx);
+                            };
+                        }
+                        else {
+                            definition.viewQuery = superViewQuery_1;
+                        }
+                    }
+                }
+                // Merge Content Queries
+                var prevContentQueries_1 = definition.contentQueries;
+                var superContentQueries_1 = superDef.contentQueries;
+                if (superContentQueries_1) {
+                    if (prevContentQueries_1) {
+                        definition.contentQueries = function () {
+                            superContentQueries_1();
+                            prevContentQueries_1();
+                        };
+                    }
+                    else {
+                        definition.contentQueries = superContentQueries_1;
+                    }
+                }
+                // Merge Content Queries Refresh
+                var prevContentQueriesRefresh_1 = definition.contentQueriesRefresh;
+                var superContentQueriesRefresh_1 = superDef.contentQueriesRefresh;
+                if (superContentQueriesRefresh_1) {
+                    if (prevContentQueriesRefresh_1) {
+                        definition.contentQueriesRefresh = function (directiveIndex, queryIndex) {
+                            superContentQueriesRefresh_1(directiveIndex, queryIndex);
+                            prevContentQueriesRefresh_1(directiveIndex, queryIndex);
+                        };
+                    }
+                    else {
+                        definition.contentQueriesRefresh = superContentQueriesRefresh_1;
                     }
                 }
                 // Merge inputs and outputs
@@ -6726,7 +6781,6 @@
             rootView[INJECTOR$1] = ngModule && ngModule.injector || null;
             // rootView is the parent when bootstrapping
             var oldView = enterView(rootView, null);
-            rootView[BINDING_INDEX] = rootView[TVIEW].bindingStartIndex;
             var component;
             var elementNode;
             try {
@@ -8537,15 +8591,17 @@
     /**
      * Bindings for pure functions are stored after regular bindings.
      *
-     *  ----------------------------------------------------------------------------
-     *  |  LNodes / local refs / pipes ... | regular bindings / interpolations | pure function bindings
-     *  ----------------------------------------------------------------------------
-     *                                     ^
-     *                          TView.bindingStartIndex
+     * |--------consts--------|----------------vars----------------|------ hostVars (dir1) ------|
+     * ---------------------------------------------------------------------------------------------
+     * | nodes / refs / pipes | bindings | pure function bindings  | host bindings  | host slots |
+     * ---------------------------------------------------------------------------------------------
+     *                        ^                                    ^
+     *             TView.bindingStartIndex            TView.hostBindingStartIndex
      *
-     * Pure function instructions are given an offset from TView.bindingStartIndex.
-     * Adding the offset to TView.bindingStartIndex gives the first index where the bindings
-     * are stored.
+     * Pure function instructions are given an offset from the binding root. Adding the offset to the
+     * binding root gives the first index where the bindings are stored. In component views, the binding
+     * root is the bindingStartIndex. In host bindings, the binding root is the hostBindingStartIndex +
+     * any hostVars in directives evaluated before it.
      */
     /**
      * If the value hasn't been saved, calls the pure function to store and return the
@@ -8558,7 +8614,7 @@
      */
     function pureFunction0(slotOffset, pureFn, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
-        var bindingIndex = getTView().bindingStartIndex + slotOffset;
+        var bindingIndex = getBindingRoot() + slotOffset;
         return getCreationMode() ?
             updateBinding(bindingIndex, thisArg ? pureFn.call(thisArg) : pureFn()) :
             getBinding(bindingIndex);
@@ -8575,7 +8631,7 @@
      */
     function pureFunction1(slotOffset, pureFn, exp, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
-        var bindingIndex = getTView().bindingStartIndex + slotOffset;
+        var bindingIndex = getBindingRoot() + slotOffset;
         return bindingUpdated(bindingIndex, exp) ?
             updateBinding(bindingIndex + 1, thisArg ? pureFn.call(thisArg, exp) : pureFn(exp)) :
             getBinding(bindingIndex + 1);
@@ -8593,7 +8649,7 @@
      */
     function pureFunction2(slotOffset, pureFn, exp1, exp2, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
-        var bindingIndex = getTView().bindingStartIndex + slotOffset;
+        var bindingIndex = getBindingRoot() + slotOffset;
         return bindingUpdated2(bindingIndex, exp1, exp2) ?
             updateBinding(bindingIndex + 2, thisArg ? pureFn.call(thisArg, exp1, exp2) : pureFn(exp1, exp2)) :
             getBinding(bindingIndex + 2);
@@ -8612,7 +8668,7 @@
      */
     function pureFunction3(slotOffset, pureFn, exp1, exp2, exp3, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
-        var bindingIndex = getTView().bindingStartIndex + slotOffset;
+        var bindingIndex = getBindingRoot() + slotOffset;
         return bindingUpdated3(bindingIndex, exp1, exp2, exp3) ?
             updateBinding(bindingIndex + 3, thisArg ? pureFn.call(thisArg, exp1, exp2, exp3) : pureFn(exp1, exp2, exp3)) :
             getBinding(bindingIndex + 3);
@@ -8632,7 +8688,7 @@
      */
     function pureFunction4(slotOffset, pureFn, exp1, exp2, exp3, exp4, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
-        var bindingIndex = getTView().bindingStartIndex + slotOffset;
+        var bindingIndex = getBindingRoot() + slotOffset;
         return bindingUpdated4(bindingIndex, exp1, exp2, exp3, exp4) ?
             updateBinding(bindingIndex + 4, thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4) : pureFn(exp1, exp2, exp3, exp4)) :
             getBinding(bindingIndex + 4);
@@ -8653,7 +8709,7 @@
      */
     function pureFunction5(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
-        var bindingIndex = getTView().bindingStartIndex + slotOffset;
+        var bindingIndex = getBindingRoot() + slotOffset;
         var different = bindingUpdated4(bindingIndex, exp1, exp2, exp3, exp4);
         return bindingUpdated(bindingIndex + 4, exp5) || different ?
             updateBinding(bindingIndex + 5, thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5) :
@@ -8677,7 +8733,7 @@
      */
     function pureFunction6(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
-        var bindingIndex = getTView().bindingStartIndex + slotOffset;
+        var bindingIndex = getBindingRoot() + slotOffset;
         var different = bindingUpdated4(bindingIndex, exp1, exp2, exp3, exp4);
         return bindingUpdated2(bindingIndex + 4, exp5, exp6) || different ?
             updateBinding(bindingIndex + 6, thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5, exp6) :
@@ -8702,7 +8758,7 @@
      */
     function pureFunction7(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
-        var bindingIndex = getTView().bindingStartIndex + slotOffset;
+        var bindingIndex = getBindingRoot() + slotOffset;
         var different = bindingUpdated4(bindingIndex, exp1, exp2, exp3, exp4);
         return bindingUpdated3(bindingIndex + 4, exp5, exp6, exp7) || different ?
             updateBinding(bindingIndex + 7, thisArg ?
@@ -8729,7 +8785,7 @@
      */
     function pureFunction8(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
-        var bindingIndex = getTView().bindingStartIndex + slotOffset;
+        var bindingIndex = getBindingRoot() + slotOffset;
         var different = bindingUpdated4(bindingIndex, exp1, exp2, exp3, exp4);
         return bindingUpdated4(bindingIndex + 4, exp5, exp6, exp7, exp8) || different ?
             updateBinding(bindingIndex + 8, thisArg ?
@@ -8752,7 +8808,7 @@
      */
     function pureFunctionV(slotOffset, pureFn, exps, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
-        var bindingIndex = getTView().bindingStartIndex + slotOffset;
+        var bindingIndex = getBindingRoot() + slotOffset;
         var different = false;
         for (var i = 0; i < exps.length; i++) {
             bindingUpdated(bindingIndex++, exps[i]) && (different = true);
@@ -10250,6 +10306,7 @@
         'ɵinjectElementRef': injectElementRef,
         'ɵinjectTemplateRef': injectTemplateRef,
         'ɵinjectViewContainerRef': injectViewContainerRef,
+        'ɵtemplateRefExtractor': templateRefExtractor,
         'ɵNgOnChangesFeature': NgOnChangesFeature,
         'ɵPublicFeature': PublicFeature,
         'ɵInheritDefinitionFeature': InheritDefinitionFeature,
@@ -11532,7 +11589,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-beta.2+30.sha-b05d4a5');
+    var VERSION = new Version('7.0.0-beta.2+38.sha-6176974');
 
     /**
      * @license
