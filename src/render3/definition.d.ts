@@ -41,17 +41,24 @@ export declare function defineComponent<T>(componentDefinition: {
     /**
      * The number of nodes, local refs, and pipes in this component template.
      *
-     * Used to calculate the length of the component's LViewData array, so we
+     * Used to calculate the length of this component's LViewData array, so we
      * can pre-fill the array and set the binding start index.
      */
     consts: number;
     /**
      * The number of bindings in this component template (including pure fn bindings).
      *
-     * Used to calculate the length of the component's LViewData array, so we
+     * Used to calculate the length of this component's LViewData array, so we
      * can pre-fill the array and set the host binding start index.
      */
     vars: number;
+    /**
+     * The number of host bindings (including pure fn bindings) in this component.
+     *
+     * Used to calculate the length of the LViewData array for the *parent* component
+     * of this component.
+     */
+    hostVars?: number;
     /**
      * Static attributes to set on host element.
      *
@@ -398,6 +405,13 @@ export declare const defineDirective: <T>(directiveDefinition: {
      * See: {@link NgOnChangesFeature}, {@link PublicFeature}, {@link InheritDefinitionFeature}
      */
     features?: DirectiveDefFeature[] | undefined;
+    /**
+     * The number of host bindings (including pure fn bindings) in this directive.
+     *
+     * Used to calculate the length of the LViewData array for the *parent* component
+     * of this directive.
+     */
+    hostVars?: number | undefined;
     /**
      * Function executed by the parent template to allow child directive to apply host bindings.
      */

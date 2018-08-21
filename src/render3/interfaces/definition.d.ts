@@ -132,6 +132,13 @@ export interface DirectiveDef<T, Selector extends string> extends BaseDef<T> {
     contentQueries: (() => void) | null;
     /** Refreshes content queries associated with directives in a given view */
     contentQueriesRefresh: ((directiveIndex: number, queryIndex: number) => void) | null;
+    /**
+     * The number of host bindings (including pure fn bindings) in this directive/component.
+     *
+     * Used to calculate the length of the LViewData array for the *parent* component
+     * of this directive/component.
+     */
+    hostVars: number;
     /** Refreshes host bindings on the associated directive. */
     hostBindings: ((directiveIndex: number, elementIndex: number) => void) | null;
     /**
@@ -200,7 +207,7 @@ export interface ComponentDef<T, Selector extends string> extends DirectiveDef<T
     /**
      * Query-related instructions for a component.
      */
-    readonly viewQuery: ComponentQuery<T> | null;
+    viewQuery: ComponentQuery<T> | null;
     /**
      * The view encapsulation type, which determines how styles are applied to
      * DOM elements. One of

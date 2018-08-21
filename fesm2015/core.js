@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.2+30.sha-b05d4a5
+ * @license Angular v7.0.0-beta.2+38.sha-6176974
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -4022,6 +4022,18 @@ let checkNoChangesMode = false;
  * Whether or not this is the first time the current view has been processed.
   @type {?} */
 let firstTemplatePass = true;
+/** *
+ * The root index from which pure function instructions should calculate their binding
+ * indices. In component views, this is TView.bindingStartIndex. In a host binding
+ * context, this is the TView.hostBindingStartIndex + any hostVars before the given dir.
+  @type {?} */
+let bindingRootIndex = -1;
+/**
+ * @return {?}
+ */
+function getBindingRoot() {
+    return bindingRootIndex;
+}
 /**
  * Swap the current state with a new state.
  *
@@ -4041,6 +4053,7 @@ function enterView(newView, host) {
     tView = newView && newView[TVIEW];
     creationMode = newView && (newView[FLAGS] & 1 /* CreationMode */) === 1 /* CreationMode */;
     firstTemplatePass = newView && tView.firstTemplatePass;
+    bindingRootIndex = newView && tView.bindingStartIndex;
     renderer = newView && newView[RENDERER];
     if (host != null) {
         previousOrParentNode = host;
@@ -4069,7 +4082,7 @@ function leaveView(newView, creationOnly) {
         viewData[FLAGS] &= ~(1 /* CreationMode */ | 4 /* Dirty */);
     }
     viewData[FLAGS] |= 16 /* RunInit */;
-    viewData[BINDING_INDEX] = -1;
+    viewData[BINDING_INDEX] = tView.bindingStartIndex;
     enterView(newView, null);
 }
 /**
@@ -4101,6 +4114,7 @@ function refreshDescendantViews() {
  */
 function setHostBindings(bindings) {
     if (bindings != null) {
+        bindingRootIndex = viewData[BINDING_INDEX] = tView.hostBindingStartIndex;
         /** @type {?} */
         const defs = /** @type {?} */ ((tView.directives));
         for (let i = 0; i < bindings.length; i += 2) {
@@ -4109,6 +4123,7 @@ function setHostBindings(bindings) {
             /** @type {?} */
             const def = /** @type {?} */ (defs[dirIndex]);
             def.hostBindings && def.hostBindings(dirIndex, bindings[i + 1]);
+            bindingRootIndex = viewData[BINDING_INDEX] = bindingRootIndex + def.hostVars;
         }
     }
 }
@@ -4169,7 +4184,7 @@ function createLViewData(renderer, tView, context, flags, sanitizer) {
         flags | 1 /* CreationMode */ | 8 /* Attached */ | 16 /* RunInit */,
         /** @type {?} */ ((null)),
         // hostNode
-        -1,
+        tView.bindingStartIndex,
         null,
         null,
         context,
@@ -4346,8 +4361,7 @@ function renderEmbeddedTemplate(viewNode, tView, context, rf) {
             isParent = true;
             previousOrParentNode = /** @type {?} */ ((null));
             oldView = enterView(/** @type {?} */ ((viewNode.data)), viewNode);
-            namespaceHTML();
-            viewData[BINDING_INDEX] = tView.bindingStartIndex; /** @type {?} */
+            namespaceHTML(); /** @type {?} */
             ((tView.template))(rf, context);
             if (rf & 2 /* Update */) {
                 refreshDescendantViews();
@@ -4398,7 +4412,6 @@ function renderComponentOrTemplate(node, hostView, componentOrContext, templateF
         }
         if (templateFn) {
             namespaceHTML();
-            viewData[BINDING_INDEX] = tView.bindingStartIndex;
             templateFn(getRenderFlags(hostView), /** @type {?} */ ((componentOrContext)));
             refreshDescendantViews();
         }
@@ -4827,6 +4840,8 @@ function getOrCreateTView(templateFn, consts, vars, directives, pipes, viewQuery
  */
 function createTView(viewIndex, templateFn, consts, vars, directives, pipes, viewQuery) {
     ngDevMode && ngDevMode.tView++;
+    /** @type {?} */
+    const bindingStartIndex = HEADER_OFFSET + consts;
     return {
         id: viewIndex,
         template: templateFn,
@@ -4836,7 +4851,8 @@ function createTView(viewIndex, templateFn, consts, vars, directives, pipes, vie
         // Fill in to match HEADER_OFFSET in LViewData
         childIndex: -1,
         // Children set in addToViewTree(), if any
-        bindingStartIndex: HEADER_OFFSET + consts,
+        bindingStartIndex: bindingStartIndex,
+        hostBindingStartIndex: bindingStartIndex + vars,
         directives: null,
         firstTemplatePass: true,
         initHooks: null,
@@ -5861,7 +5877,6 @@ function embeddedViewStart(viewBlockId, consts, vars) {
         } /** @type {?} */
         ((lContainer[ACTIVE_INDEX]))++;
     }
-    viewData[BINDING_INDEX] = tView.bindingStartIndex;
     return getRenderFlags(viewNode.data);
 }
 /**
@@ -6276,7 +6291,6 @@ function detectChangesInternal(hostView, hostNode, component) {
     const templateFn = /** @type {?} */ ((hostTView.template));
     /** @type {?} */
     const viewQuery = hostTView.viewQuery;
-    viewData[BINDING_INDEX] = tView.bindingStartIndex;
     try {
         namespaceHTML();
         createViewQuery(viewQuery, hostView[FLAGS], component);
@@ -6839,7 +6853,6 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     rootView[INJECTOR$1] = opts.injector || null;
     /** @type {?} */
     const oldView = enterView(rootView, /** @type {?} */ ((null)));
-    rootView[BINDING_INDEX] = rootView[TVIEW].bindingStartIndex;
     /** @type {?} */
     let elementNode;
     /** @type {?} */
@@ -6983,6 +6996,7 @@ function defineComponent(componentDefinition) {
         diPublic: null,
         consts: componentDefinition.consts,
         vars: componentDefinition.vars,
+        hostVars: componentDefinition.hostVars || 0,
         factory: componentDefinition.factory,
         template: componentDefinition.template || /** @type {?} */ ((null)),
         hostBindings: componentDefinition.hostBindings || null,
@@ -7302,6 +7316,54 @@ function InheritDefinitionFeature(definition) {
                 }
                 else {
                     definition.hostBindings = superHostBindings;
+                }
+            }
+            // Merge View Queries
+            if (isComponentDef(definition) && isComponentDef(superDef)) {
+                /** @type {?} */
+                const prevViewQuery = definition.viewQuery;
+                /** @type {?} */
+                const superViewQuery = superDef.viewQuery;
+                if (superViewQuery) {
+                    if (prevViewQuery) {
+                        definition.viewQuery = (rf, ctx) => {
+                            superViewQuery(rf, ctx);
+                            prevViewQuery(rf, ctx);
+                        };
+                    }
+                    else {
+                        definition.viewQuery = superViewQuery;
+                    }
+                }
+            }
+            /** @type {?} */
+            const prevContentQueries = definition.contentQueries;
+            /** @type {?} */
+            const superContentQueries = superDef.contentQueries;
+            if (superContentQueries) {
+                if (prevContentQueries) {
+                    definition.contentQueries = () => {
+                        superContentQueries();
+                        prevContentQueries();
+                    };
+                }
+                else {
+                    definition.contentQueries = superContentQueries;
+                }
+            }
+            /** @type {?} */
+            const prevContentQueriesRefresh = definition.contentQueriesRefresh;
+            /** @type {?} */
+            const superContentQueriesRefresh = superDef.contentQueriesRefresh;
+            if (superContentQueriesRefresh) {
+                if (prevContentQueriesRefresh) {
+                    definition.contentQueriesRefresh = (directiveIndex, queryIndex) => {
+                        superContentQueriesRefresh(directiveIndex, queryIndex);
+                        prevContentQueriesRefresh(directiveIndex, queryIndex);
+                    };
+                }
+                else {
+                    definition.contentQueriesRefresh = superContentQueriesRefresh;
                 }
             }
             // Merge inputs and outputs
@@ -8267,7 +8329,6 @@ class ComponentFactory$1 extends ComponentFactory {
         rootView[INJECTOR$1] = ngModule && ngModule.injector || null;
         /** @type {?} */
         const oldView = enterView(rootView, /** @type {?} */ ((null)));
-        rootView[BINDING_INDEX] = rootView[TVIEW].bindingStartIndex;
         /** @type {?} */
         let component;
         /** @type {?} */
@@ -10447,7 +10508,7 @@ class NgModuleFactory$1 extends NgModuleFactory {
  */
 function pureFunction0(slotOffset, pureFn, thisArg) {
     /** @type {?} */
-    const bindingIndex = getTView().bindingStartIndex + slotOffset;
+    const bindingIndex = getBindingRoot() + slotOffset;
     return getCreationMode() ?
         updateBinding(bindingIndex, thisArg ? pureFn.call(thisArg) : pureFn()) :
         getBinding(bindingIndex);
@@ -10464,7 +10525,7 @@ function pureFunction0(slotOffset, pureFn, thisArg) {
  */
 function pureFunction1(slotOffset, pureFn, exp, thisArg) {
     /** @type {?} */
-    const bindingIndex = getTView().bindingStartIndex + slotOffset;
+    const bindingIndex = getBindingRoot() + slotOffset;
     return bindingUpdated(bindingIndex, exp) ?
         updateBinding(bindingIndex + 1, thisArg ? pureFn.call(thisArg, exp) : pureFn(exp)) :
         getBinding(bindingIndex + 1);
@@ -10482,7 +10543,7 @@ function pureFunction1(slotOffset, pureFn, exp, thisArg) {
  */
 function pureFunction2(slotOffset, pureFn, exp1, exp2, thisArg) {
     /** @type {?} */
-    const bindingIndex = getTView().bindingStartIndex + slotOffset;
+    const bindingIndex = getBindingRoot() + slotOffset;
     return bindingUpdated2(bindingIndex, exp1, exp2) ?
         updateBinding(bindingIndex + 2, thisArg ? pureFn.call(thisArg, exp1, exp2) : pureFn(exp1, exp2)) :
         getBinding(bindingIndex + 2);
@@ -10501,7 +10562,7 @@ function pureFunction2(slotOffset, pureFn, exp1, exp2, thisArg) {
  */
 function pureFunction3(slotOffset, pureFn, exp1, exp2, exp3, thisArg) {
     /** @type {?} */
-    const bindingIndex = getTView().bindingStartIndex + slotOffset;
+    const bindingIndex = getBindingRoot() + slotOffset;
     return bindingUpdated3(bindingIndex, exp1, exp2, exp3) ?
         updateBinding(bindingIndex + 3, thisArg ? pureFn.call(thisArg, exp1, exp2, exp3) : pureFn(exp1, exp2, exp3)) :
         getBinding(bindingIndex + 3);
@@ -10521,7 +10582,7 @@ function pureFunction3(slotOffset, pureFn, exp1, exp2, exp3, thisArg) {
  */
 function pureFunction4(slotOffset, pureFn, exp1, exp2, exp3, exp4, thisArg) {
     /** @type {?} */
-    const bindingIndex = getTView().bindingStartIndex + slotOffset;
+    const bindingIndex = getBindingRoot() + slotOffset;
     return bindingUpdated4(bindingIndex, exp1, exp2, exp3, exp4) ?
         updateBinding(bindingIndex + 4, thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4) : pureFn(exp1, exp2, exp3, exp4)) :
         getBinding(bindingIndex + 4);
@@ -10542,7 +10603,7 @@ function pureFunction4(slotOffset, pureFn, exp1, exp2, exp3, exp4, thisArg) {
  */
 function pureFunction5(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, thisArg) {
     /** @type {?} */
-    const bindingIndex = getTView().bindingStartIndex + slotOffset;
+    const bindingIndex = getBindingRoot() + slotOffset;
     /** @type {?} */
     const different = bindingUpdated4(bindingIndex, exp1, exp2, exp3, exp4);
     return bindingUpdated(bindingIndex + 4, exp5) || different ?
@@ -10567,7 +10628,7 @@ function pureFunction5(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, thisArg
  */
 function pureFunction6(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, thisArg) {
     /** @type {?} */
-    const bindingIndex = getTView().bindingStartIndex + slotOffset;
+    const bindingIndex = getBindingRoot() + slotOffset;
     /** @type {?} */
     const different = bindingUpdated4(bindingIndex, exp1, exp2, exp3, exp4);
     return bindingUpdated2(bindingIndex + 4, exp5, exp6) || different ?
@@ -10593,7 +10654,7 @@ function pureFunction6(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, t
  */
 function pureFunction7(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, thisArg) {
     /** @type {?} */
-    const bindingIndex = getTView().bindingStartIndex + slotOffset;
+    const bindingIndex = getBindingRoot() + slotOffset;
     /** @type {?} */
     let different = bindingUpdated4(bindingIndex, exp1, exp2, exp3, exp4);
     return bindingUpdated3(bindingIndex + 4, exp5, exp6, exp7) || different ?
@@ -10621,7 +10682,7 @@ function pureFunction7(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, e
  */
 function pureFunction8(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, thisArg) {
     /** @type {?} */
-    const bindingIndex = getTView().bindingStartIndex + slotOffset;
+    const bindingIndex = getBindingRoot() + slotOffset;
     /** @type {?} */
     const different = bindingUpdated4(bindingIndex, exp1, exp2, exp3, exp4);
     return bindingUpdated4(bindingIndex + 4, exp5, exp6, exp7, exp8) || different ?
@@ -10645,7 +10706,7 @@ function pureFunction8(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, e
  */
 function pureFunctionV(slotOffset, pureFn, exps, thisArg) {
     /** @type {?} */
-    let bindingIndex = getTView().bindingStartIndex + slotOffset;
+    let bindingIndex = getBindingRoot() + slotOffset;
     /** @type {?} */
     let different = false;
     for (let i = 0; i < exps.length; i++) {
@@ -12389,6 +12450,7 @@ const angularCoreEnv = {
     'ɵinjectElementRef': injectElementRef,
     'ɵinjectTemplateRef': injectTemplateRef,
     'ɵinjectViewContainerRef': injectViewContainerRef,
+    'ɵtemplateRefExtractor': templateRefExtractor,
     'ɵNgOnChangesFeature': NgOnChangesFeature,
     'ɵPublicFeature': PublicFeature,
     'ɵInheritDefinitionFeature': InheritDefinitionFeature,
@@ -13945,7 +14007,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-beta.2+30.sha-b05d4a5');
+const VERSION = new Version('7.0.0-beta.2+38.sha-6176974');
 
 /**
  * @fileoverview added by tsickle
