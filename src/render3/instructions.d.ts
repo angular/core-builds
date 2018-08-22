@@ -124,6 +124,12 @@ export declare function createLNode(index: number, type: TNodeType.Container, na
 export declare function createLNode(index: number, type: TNodeType.Projection, native: null, name: null, attrs: TAttributes | null, lProjection: null): LProjectionNode;
 export declare function createLNode(index: number, type: TNodeType.ElementContainer, native: RComment, name: null, attrs: TAttributes | null, data: null): LElementContainerNode;
 /**
+ * When LNodes are created dynamically after a view blueprint is created (e.g. through
+ * i18nApply() or ComponentFactory.create), we need to adjust the blueprint for future
+ * template passes.
+ */
+export declare function adjustBlueprintForNewNode(view: LViewData): void;
+/**
  * Resets the application state.
  */
 export declare function resetApplicationState(): void;
@@ -216,6 +222,9 @@ export declare function elementStart(index: number, name: string, attrs?: TAttri
  */
 export declare function elementCreate(name: string, overriddenRenderer?: Renderer3): RElement;
 export declare function resolveDirective(def: DirectiveDefInternal<any>, valueIndex: number, matches: CurrentMatchesList, tView: TView): any;
+/** Stores index of directive and host element so it will be queued for binding refresh during CD.
+ */
+export declare function queueHostBindingForCheck(dirIndex: number, hostVars: number): void;
 /** Sets the context for a ChangeDetectorRef to the given instance. */
 export declare function initChangeDetectorIfExisting(injector: LInjector | null, instance: any, view: LViewData): void;
 export declare function isContentQueryHost(tNode: TNode): boolean;
@@ -743,4 +752,3 @@ export declare function registerContentQuery<Q>(queryList: QueryList<Q>): void;
 export declare function assertPreviousIsParent(): void;
 export declare function _getComponentHostLElementNode<T>(component: T): LElementNode;
 export declare const CLEAN_PROMISE: Promise<null>;
-export declare const ROOT_DIRECTIVE_INDICES: number[];
