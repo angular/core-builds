@@ -8,11 +8,14 @@
 import { ChangeDetectorRef as viewEngine_ChangeDetectorRef } from '../change_detection/change_detector_ref';
 import { InjectionToken } from '../di/injection_token';
 import { InjectFlags, Injector } from '../di/injector';
-import * as viewEngine from '../linker';
+import { ComponentFactoryResolver as viewEngine_ComponentFactoryResolver } from '../linker/component_factory_resolver';
+import { ElementRef as viewEngine_ElementRef } from '../linker/element_ref';
+import { TemplateRef as viewEngine_TemplateRef } from '../linker/template_ref';
+import { ViewContainerRef as viewEngine_ViewContainerRef } from '../linker/view_container_ref';
 import { Type } from '../type';
 import { DirectiveDefInternal } from './interfaces/definition';
 import { LInjector } from './interfaces/injector';
-import { LContainerNode, LElementContainerNode, LElementNode, LNode } from './interfaces/node';
+import { LContainerNode, LElementContainerNode, LElementNode, LNode, LNodeWithLocalRefs } from './interfaces/node';
 import { QueryReadType } from './interfaces/query';
 /**
  * Registers this directive as present in its node's injector by flipping the directive's
@@ -72,21 +75,21 @@ export declare function directiveInject<T>(token: Type<T> | InjectionToken<T>, f
  *
  * @returns The ElementRef instance to use
  */
-export declare function injectElementRef(): viewEngine.ElementRef;
+export declare function injectElementRef(): viewEngine_ElementRef;
 /**
  * Creates a TemplateRef and stores it on the injector. Or, if the TemplateRef already
  * exists, retrieves the existing TemplateRef.
  *
  * @returns The TemplateRef instance to use
  */
-export declare function injectTemplateRef<T>(): viewEngine.TemplateRef<T>;
+export declare function injectTemplateRef<T>(): viewEngine_TemplateRef<T>;
 /**
  * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
  * already exists, retrieves the existing ViewContainerRef.
  *
  * @returns The ViewContainerRef instance to use
  */
-export declare function injectViewContainerRef(): viewEngine.ViewContainerRef;
+export declare function injectViewContainerRef(): viewEngine_ViewContainerRef;
 /** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
 export declare function injectChangeDetectorRef(): viewEngine_ChangeDetectorRef;
 /**
@@ -96,7 +99,7 @@ export declare function injectChangeDetectorRef(): viewEngine_ChangeDetectorRef;
  *
  * @returns The ComponentFactoryResolver instance to use
  */
-export declare function injectComponentFactoryResolver(): viewEngine.ComponentFactoryResolver;
+export declare function injectComponentFactoryResolver(): viewEngine_ComponentFactoryResolver;
 /**
  * Inject static attribute value into directive constructor.
  *
@@ -180,10 +183,10 @@ export declare class ReadFromInjectorFn<T> {
  * @param di The node injector where we should store a created ElementRef
  * @returns The ElementRef instance to use
  */
-export declare function getOrCreateElementRef(di: LInjector): viewEngine.ElementRef;
-export declare const QUERY_READ_TEMPLATE_REF: QueryReadType<viewEngine.TemplateRef<any>>;
-export declare const QUERY_READ_CONTAINER_REF: QueryReadType<viewEngine.ViewContainerRef>;
-export declare const QUERY_READ_ELEMENT_REF: QueryReadType<viewEngine.ElementRef<any>>;
+export declare function getOrCreateElementRef(di: LInjector): viewEngine_ElementRef;
+export declare const QUERY_READ_TEMPLATE_REF: QueryReadType<viewEngine_TemplateRef<any>>;
+export declare const QUERY_READ_CONTAINER_REF: QueryReadType<viewEngine_ViewContainerRef>;
+export declare const QUERY_READ_ELEMENT_REF: QueryReadType<viewEngine_ElementRef<any>>;
 export declare const QUERY_READ_FROM_NODE: QueryReadType<any>;
 /**
  * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
@@ -191,7 +194,7 @@ export declare const QUERY_READ_FROM_NODE: QueryReadType<any>;
  *
  * @returns The ViewContainerRef instance to use
  */
-export declare function getOrCreateContainerRef(di: LInjector): viewEngine.ViewContainerRef;
+export declare function getOrCreateContainerRef(di: LInjector): viewEngine_ViewContainerRef;
 export declare class NodeInjector implements Injector {
     private _lInjector;
     constructor(_lInjector: LInjector);
@@ -204,6 +207,11 @@ export declare class NodeInjector implements Injector {
  * @param di The node injector where we should store a created TemplateRef
  * @returns The TemplateRef instance to use
  */
-export declare function getOrCreateTemplateRef<T>(di: LInjector): viewEngine.TemplateRef<T>;
+export declare function getOrCreateTemplateRef<T>(di: LInjector): viewEngine_TemplateRef<T>;
 export declare function getFactoryOf<T>(type: Type<any>): ((type?: Type<T>) => T) | null;
 export declare function getInheritedFactory<T>(type: Type<any>): (type: Type<T>) => T;
+/**
+ * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
+ * `<ng-template>` element.
+ */
+export declare function templateRefExtractor(lNode: LNodeWithLocalRefs): viewEngine_TemplateRef<{}>;
