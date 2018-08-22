@@ -5,7 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { InjectionToken, Injector } from '../di';
+import { InjectionToken } from '../di/injection_token';
+import { Injector } from '../di/injector';
 import { ViewEncapsulation } from '../metadata/view';
 /**
  * @deprecated Use `RendererType2` (and `Renderer2`) instead.

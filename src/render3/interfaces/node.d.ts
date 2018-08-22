@@ -453,3 +453,14 @@ export declare type InitialInputData = (InitialInputs | null)[];
  */
 export declare type InitialInputs = string[];
 export declare const unusedValueExportToPlacateAjd = 1;
+/**
+ * Type representing a set of LNodes that can have local refs (`#foo`) placed on them.
+ */
+export declare type LNodeWithLocalRefs = LContainerNode | LElementNode | LElementContainerNode;
+/**
+ * Type for a function that extracts a value for a local refs.
+ * Example:
+ * - `<div #nativeDivEl>` - `nativeDivEl` should point to the native `<div>` element;
+ * - `<ng-template #tplRef>` - `tplRef` should point to the `TemplateRef` instance;
+ */
+export declare type LocalRefExtractor = (lNode: LNodeWithLocalRefs) => any;
