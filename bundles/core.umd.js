@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.3+24.sha-61218f5
+ * @license Angular v7.0.0-beta.3+27.sha-22d58fc
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -5210,8 +5210,6 @@
     function bind(value) {
         return bindingUpdated(viewData[BINDING_INDEX]++, value) ? value : NO_CHANGE;
     }
-    // TODO(kara): Remove this when updating the compiler (cannot remove without breaking JIT test)
-    function reserveSlots(numSlots) { }
     /**
      * Create interpolation bindings with a variable number of expressions.
      *
@@ -8886,7 +8884,7 @@
      * the pipe only when an input to the pipe changes.
      *
      * @param index Pipe index where the pipe was stored on creation.
-     * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+     * @param slotOffset the offset in the reserved slot space
      * @param v1 1st argument to {@link PipeTransform#transform}.
      */
     function pipeBind1(index, slotOffset, v1) {
@@ -8901,7 +8899,7 @@
      * the pipe only when an input to the pipe changes.
      *
      * @param index Pipe index where the pipe was stored on creation.
-     * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+     * @param slotOffset the offset in the reserved slot space
      * @param v1 1st argument to {@link PipeTransform#transform}.
      * @param v2 2nd argument to {@link PipeTransform#transform}.
      */
@@ -8917,7 +8915,7 @@
      * the pipe only when an input to the pipe changes.
      *
      * @param index Pipe index where the pipe was stored on creation.
-     * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+     * @param slotOffset the offset in the reserved slot space
      * @param v1 1st argument to {@link PipeTransform#transform}.
      * @param v2 2nd argument to {@link PipeTransform#transform}.
      * @param v3 4rd argument to {@link PipeTransform#transform}.
@@ -8935,7 +8933,7 @@
      * the pipe only when an input to the pipe changes.
      *
      * @param index Pipe index where the pipe was stored on creation.
-     * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+     * @param slotOffset the offset in the reserved slot space
      * @param v1 1st argument to {@link PipeTransform#transform}.
      * @param v2 2nd argument to {@link PipeTransform#transform}.
      * @param v3 3rd argument to {@link PipeTransform#transform}.
@@ -8954,7 +8952,7 @@
      * the pipe only when an input to the pipe changes.
      *
      * @param index Pipe index where the pipe was stored on creation.
-     * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
+     * @param slotOffset the offset in the reserved slot space
      * @param values Array of arguments to pass to {@link PipeTransform#transform} method.
      */
     function pipeBindV(index, slotOffset, values) {
@@ -10373,7 +10371,6 @@
         'ɵquery': query,
         'ɵqueryRefresh': queryRefresh,
         'ɵregisterContentQuery': registerContentQuery,
-        'ɵreserveSlots': reserveSlots,
         'ɵreference': reference,
         'ɵelementStyling': elementStyling,
         'ɵelementStylingMap': elementStylingMap,
@@ -11600,7 +11597,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-beta.3+24.sha-61218f5');
+    var VERSION = new Version('7.0.0-beta.3+27.sha-22d58fc');
 
     /**
      * @license
@@ -20274,7 +20271,6 @@
     exports.ɵelementProperty = elementProperty;
     exports.ɵprojectionDef = projectionDef;
     exports.ɵreference = reference;
-    exports.ɵreserveSlots = reserveSlots;
     exports.ɵelementAttribute = elementAttribute;
     exports.ɵelementStyling = elementStyling;
     exports.ɵelementStylingMap = elementStylingMap;

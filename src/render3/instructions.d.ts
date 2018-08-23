@@ -678,7 +678,6 @@ export declare const NO_CHANGE: NO_CHANGE;
  * @param value Value to diff
  */
 export declare function bind<T>(value: T): T | NO_CHANGE;
-export declare function reserveSlots(numSlots: number): void;
 /**
  * Create interpolation bindings with a variable number of expressions.
  *
