@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.0.0-beta.3+30.sha-3d41739
+ * @license Angular v7.0.0-beta.3+39.sha-9bcd8c2
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __spread, __read, __assign, __extends, __values } from 'tslib';
+import { __decorate, __metadata, __spread, __read, __param, __assign, __extends, __values } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compilePipeFromMetadata } from '@angular/compiler';
 import { share } from 'rxjs/operators';
@@ -1100,6 +1100,56 @@ function unwrapResponse(response) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * Defines template and style encapsulation options available for Component's {@link Component}.
+ *
+ * See {@link Component#encapsulation encapsulation}.
+ *
+ */
+var ViewEncapsulation;
+(function (ViewEncapsulation) {
+    /**
+     * Emulate `Native` scoping of styles by adding an attribute containing surrogate id to the Host
+     * Element and pre-processing the style rules provided via {@link Component#styles styles} or
+     * {@link Component#styleUrls styleUrls}, and adding the new Host Element attribute to all
+     * selectors.
+     *
+     * This is the default option.
+     */
+    ViewEncapsulation[ViewEncapsulation["Emulated"] = 0] = "Emulated";
+    /**
+     * @deprecated v6.1.0 - use {ViewEncapsulation.ShadowDom} instead.
+     * Use the native encapsulation mechanism of the renderer.
+     *
+     * For the DOM this means using the deprecated [Shadow DOM
+     * v0](https://w3c.github.io/webcomponents/spec/shadow/) and
+     * creating a ShadowRoot for Component's Host Element.
+     */
+    ViewEncapsulation[ViewEncapsulation["Native"] = 1] = "Native";
+    /**
+     * Don't provide any template or style encapsulation.
+     */
+    ViewEncapsulation[ViewEncapsulation["None"] = 2] = "None";
+    /**
+     * Use Shadow DOM to encapsulate styles.
+     *
+     * For the DOM this means using modern [Shadow
+     * DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
+     * creating a ShadowRoot for Component's Host Element.
+     *
+     * ### Example
+     * {@example core/ts/metadata/encapsulation.ts region='longform'}
+     */
+    ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
+})(ViewEncapsulation || (ViewEncapsulation = {}));
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 function assertEqual(actual, expected, msg) {
     if (actual != expected) {
         throwError(msg);
@@ -1415,7 +1465,7 @@ function assertNodeOfPossibleTypes(node) {
     }
     assertDefined(node, 'should be called with a node');
     var found = types.some(function (type) { return node.tNode.type === type; });
-    assertEqual(found, true, "Should be one of " + types.map(typeName).join(', '));
+    assertEqual(found, true, "Should be one of " + types.map(typeName).join(', ') + " but got " + typeName(node.tNode.type));
 }
 function typeName(type) {
     if (type == 1 /* Projection */)
@@ -1426,6 +1476,8 @@ function typeName(type) {
         return 'View';
     if (type == 3 /* Element */)
         return 'Element';
+    if (type == 4 /* ElementContainer */)
+        return 'ElementContainer';
     return '<unknown>';
 }
 
@@ -4249,7 +4301,7 @@ function elementStyling(classDeclarations, styleDeclarations, styleSanitizer) {
  *
  * This method lazily creates the `StylingContext`. This is because in most cases
  * we have styling without any bindings. Creating `StylingContext` eagerly would mean that
- * every style declaration such as `<div style="color: 'red' ">` would result `StyleContext`
+ * every style declaration such as `<div style="color: red">` would result `StyleContext`
  * which would create unnecessary memory pressure.
  *
  * @param index Index of the style allocation. See: `elementStyling`.
@@ -5519,7 +5571,8 @@ function defineComponent(componentDefinition) {
     var pipeTypes = componentDefinition.pipes;
     var directiveTypes = componentDefinition.directives;
     var declaredInputs = {};
-    var encapsulation = componentDefinition.encapsulation;
+    var encapsulation = componentDefinition.encapsulation || ViewEncapsulation.Emulated;
+    var styles = componentDefinition.styles || EMPTY_ARRAY;
     var def = {
         type: type,
         diPublic: null,
@@ -5557,9 +5610,10 @@ function defineComponent(componentDefinition) {
         data: componentDefinition.data || EMPTY$1,
         // TODO(misko): convert ViewEncapsulation into const enum so that it can be used directly in the
         // next line. Also `None` should be 0 not 2.
-        encapsulation: encapsulation == null ? 2 /* ViewEncapsulation.None */ : encapsulation,
-        id: "c" + _renderCompCount++,
-        styles: EMPTY_ARRAY,
+        encapsulation: encapsulation,
+        providers: EMPTY_ARRAY,
+        viewProviders: EMPTY_ARRAY,
+        id: "c" + _renderCompCount++, styles: styles,
     };
     var feature = componentDefinition.features;
     feature && feature.forEach(function (fn) { return fn(def); });
@@ -7252,7 +7306,7 @@ var ElementRef$1 = /** @class */ (function () {
 function getOrCreateContainerRef(di) {
     if (!di.viewContainerRef) {
         var vcRefHost = di.node;
-        ngDevMode && assertNodeOfPossibleTypes(vcRefHost, 0 /* Container */, 3 /* Element */);
+        ngDevMode && assertNodeOfPossibleTypes(vcRefHost, 0 /* Container */, 3 /* Element */, 4 /* ElementContainer */);
         var hostParent = getParentLNode(vcRefHost);
         var lContainer = createLContainer(hostParent, vcRefHost.view, true);
         var comment = vcRefHost.view[RENDERER].createComment(ngDevMode ? 'container' : '');
@@ -10904,7 +10958,7 @@ function compileComponent(type, metadata) {
                 }
                 // Compile the component metadata, including template, into an expression.
                 // TODO(alxhub): implement inputs, outputs, queries, etc.
-                var res = compileComponentFromMetadata(__assign({}, directiveMetadata(type, metadata), { template: template, directives: new Map(), pipes: new Map(), viewQueries: [], wrapDirectivesInClosure: false }), constantPool, makeBindingParser());
+                var res = compileComponentFromMetadata(__assign({}, directiveMetadata(type, metadata), { template: template, directives: new Map(), pipes: new Map(), viewQueries: [], wrapDirectivesInClosure: false, styles: metadata.styles || [], encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated }), constantPool, makeBindingParser());
                 var preStatements = __spread(constantPool.statements, res.statements);
                 ngComponentDef = jitExpression(res.expression, angularCoreEnv, "ng://" + type.name + "/ngComponentDef.js", preStatements);
                 // If component compilation is async, then the @NgModule annotation which declares the
@@ -11426,56 +11480,6 @@ function (type, meta) { return R3_COMPILE_NGMODULE$1(type, meta); });
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * Defines template and style encapsulation options available for Component's {@link Component}.
- *
- * See {@link Component#encapsulation encapsulation}.
- *
- */
-var ViewEncapsulation;
-(function (ViewEncapsulation) {
-    /**
-     * Emulate `Native` scoping of styles by adding an attribute containing surrogate id to the Host
-     * Element and pre-processing the style rules provided via {@link Component#styles styles} or
-     * {@link Component#styleUrls styleUrls}, and adding the new Host Element attribute to all
-     * selectors.
-     *
-     * This is the default option.
-     */
-    ViewEncapsulation[ViewEncapsulation["Emulated"] = 0] = "Emulated";
-    /**
-     * @deprecated v6.1.0 - use {ViewEncapsulation.ShadowDom} instead.
-     * Use the native encapsulation mechanism of the renderer.
-     *
-     * For the DOM this means using the deprecated [Shadow DOM
-     * v0](https://w3c.github.io/webcomponents/spec/shadow/) and
-     * creating a ShadowRoot for Component's Host Element.
-     */
-    ViewEncapsulation[ViewEncapsulation["Native"] = 1] = "Native";
-    /**
-     * Don't provide any template or style encapsulation.
-     */
-    ViewEncapsulation[ViewEncapsulation["None"] = 2] = "None";
-    /**
-     * Use Shadow DOM to encapsulate styles.
-     *
-     * For the DOM this means using modern [Shadow
-     * DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
-     * creating a ShadowRoot for Component's Host Element.
-     *
-     * ### Example
-     * {@example core/ts/metadata/encapsulation.ts region='longform'}
-     */
-    ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
-})(ViewEncapsulation || (ViewEncapsulation = {}));
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 
 /**
  * @license
@@ -11498,7 +11502,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('7.0.0-beta.3+30.sha-3d41739');
+var VERSION = new Version('7.0.0-beta.3+39.sha-9bcd8c2');
 
 /**
  * @license
@@ -12557,13 +12561,11 @@ var ApplicationInitStatus = /** @class */ (function () {
         }
         this.initialized = true;
     };
-    ApplicationInitStatus.decorators = [
-        { type: Injectable }
-    ];
-    /** @nocollapse */
-    ApplicationInitStatus.ctorParameters = function () { return [
-        { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional }] }
-    ]; };
+    ApplicationInitStatus = __decorate([
+        Injectable(),
+        __param(0, Inject(APP_INITIALIZER)), __param(0, Optional()),
+        __metadata("design:paramtypes", [Array])
+    ], ApplicationInitStatus);
     return ApplicationInitStatus;
 }());
 
@@ -12644,9 +12646,9 @@ var Console = /** @class */ (function () {
         // tslint:disable-next-line:no-console
         console.warn(message);
     };
-    Console.decorators = [
-        { type: Injectable }
-    ];
+    Console = __decorate([
+        Injectable()
+    ], Console);
     return Console;
 }());
 
@@ -12718,9 +12720,9 @@ var Compiler = /** @class */ (function () {
      * Returns the id for a given NgModule, if one is defined and known to the compiler.
      */
     Compiler.prototype.getModuleId = function (moduleType) { return undefined; };
-    Compiler.decorators = [
-        { type: Injectable }
-    ];
+    Compiler = __decorate([
+        Injectable()
+    ], Compiler);
     return Compiler;
 }());
 /**
@@ -13314,13 +13316,10 @@ var Testability = /** @class */ (function () {
         // TODO(juliemr): implement.
         return [];
     };
-    Testability.decorators = [
-        { type: Injectable }
-    ];
-    /** @nocollapse */
-    Testability.ctorParameters = function () { return [
-        { type: NgZone }
-    ]; };
+    Testability = __decorate([
+        Injectable(),
+        __metadata("design:paramtypes", [NgZone])
+    ], Testability);
     return Testability;
 }());
 /**
@@ -13373,11 +13372,10 @@ var TestabilityRegistry = /** @class */ (function () {
         if (findInAncestors === void 0) { findInAncestors = true; }
         return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
     };
-    TestabilityRegistry.decorators = [
-        { type: Injectable }
-    ];
-    /** @nocollapse */
-    TestabilityRegistry.ctorParameters = function () { return []; };
+    TestabilityRegistry = __decorate([
+        Injectable(),
+        __metadata("design:paramtypes", [])
+    ], TestabilityRegistry);
     return TestabilityRegistry;
 }());
 var _NoopGetTestability = /** @class */ (function () {
@@ -13635,13 +13633,10 @@ var PlatformRef = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
-    PlatformRef.decorators = [
-        { type: Injectable }
-    ];
-    /** @nocollapse */
-    PlatformRef.ctorParameters = function () { return [
-        { type: Injector }
-    ]; };
+    PlatformRef = __decorate([
+        Injectable(),
+        __metadata("design:paramtypes", [Injector])
+    ], PlatformRef);
     return PlatformRef;
 }());
 function getNgZone(ngZoneOption) {
@@ -13752,6 +13747,7 @@ var ApplicationRef = /** @class */ (function () {
         this.isStable =
             merge(isCurrentlyStable, isStable.pipe(share()));
     }
+    ApplicationRef_1 = ApplicationRef;
     /**
      * Bootstrap a new component at the root level of the application.
      *
@@ -13815,7 +13811,7 @@ var ApplicationRef = /** @class */ (function () {
         if (this._runningTick) {
             throw new Error('ApplicationRef.tick is called recursively');
         }
-        var scope = ApplicationRef._tickScope();
+        var scope = ApplicationRef_1._tickScope();
         try {
             this._runningTick = true;
             this._views.forEach(function (view) { return view.detectChanges(); });
@@ -13875,20 +13871,16 @@ var ApplicationRef = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
+    var ApplicationRef_1;
     /** @internal */
     ApplicationRef._tickScope = wtfCreateScope('ApplicationRef#tick()');
-    ApplicationRef.decorators = [
-        { type: Injectable }
-    ];
-    /** @nocollapse */
-    ApplicationRef.ctorParameters = function () { return [
-        { type: NgZone },
-        { type: Console },
-        { type: Injector },
-        { type: ErrorHandler },
-        { type: ComponentFactoryResolver },
-        { type: ApplicationInitStatus }
-    ]; };
+    ApplicationRef = ApplicationRef_1 = __decorate([
+        Injectable(),
+        __metadata("design:paramtypes", [NgZone, Console, Injector,
+            ErrorHandler,
+            ComponentFactoryResolver,
+            ApplicationInitStatus])
+    ], ApplicationRef);
     return ApplicationRef;
 }());
 function remove(list, el) {
@@ -14117,14 +14109,11 @@ var SystemJsNgModuleLoader = /** @class */ (function () {
             .then(function (module) { return module[exportName + factoryClassSuffix]; })
             .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
     };
-    SystemJsNgModuleLoader.decorators = [
-        { type: Injectable }
-    ];
-    /** @nocollapse */
-    SystemJsNgModuleLoader.ctorParameters = function () { return [
-        { type: Compiler },
-        { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional }] }
-    ]; };
+    SystemJsNgModuleLoader = __decorate([
+        Injectable(),
+        __param(1, Optional()),
+        __metadata("design:paramtypes", [Compiler, SystemJsNgModuleLoaderConfig])
+    ], SystemJsNgModuleLoader);
     return SystemJsNgModuleLoader;
 }());
 function checkNotEmpty(value, modulePath, exportName) {
@@ -15677,13 +15666,10 @@ var ApplicationModule = /** @class */ (function () {
     // Inject ApplicationRef to make it eager...
     function ApplicationModule(appRef) {
     }
-    ApplicationModule.decorators = [
-        { type: NgModule, args: [{ providers: APPLICATION_MODULE_PROVIDERS },] }
-    ];
-    /** @nocollapse */
-    ApplicationModule.ctorParameters = function () { return [
-        { type: ApplicationRef }
-    ]; };
+    ApplicationModule = __decorate([
+        NgModule({ providers: APPLICATION_MODULE_PROVIDERS }),
+        __metadata("design:paramtypes", [ApplicationRef])
+    ], ApplicationModule);
     return ApplicationModule;
 }());
 

@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.3+30.sha-3d41739
+ * @license Angular v7.0.0-beta.3+39.sha-9bcd8c2
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -626,6 +626,13 @@
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     }
 
+    function __decorate(decorators, target, key, desc) {
+        var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+        if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+        else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+        return c > 3 && r && Object.defineProperty(target, key, r), r;
+    }
+
     function __values(o) {
         var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
         if (m) return m.call(o);
@@ -1245,12 +1252,12 @@
             var RootScopeModule = /** @class */ (function () {
                 function RootScopeModule() {
                 }
-                RootScopeModule.decorators = [
-                    { type: core.NgModule, args: [{
-                                providers: __spread(rootProviderOverrides, [rendererFactoryWrapper]),
-                                jit: true,
-                            },] },
-                ];
+                RootScopeModule = __decorate([
+                    core.NgModule({
+                        providers: __spread(rootProviderOverrides, [rendererFactoryWrapper]),
+                        jit: true,
+                    })
+                ], RootScopeModule);
                 return RootScopeModule;
             }());
             var providers = __spread(this._providers, this._providerOverrides);
@@ -1260,9 +1267,9 @@
             var DynamicTestModule = /** @class */ (function () {
                 function DynamicTestModule() {
                 }
-                DynamicTestModule.decorators = [
-                    { type: core.NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas, jit: true },] },
-                ];
+                DynamicTestModule = __decorate([
+                    core.NgModule({ providers: providers, declarations: declarations, imports: imports, schemas: schemas, jit: true })
+                ], DynamicTestModule);
                 return DynamicTestModule;
             }());
             return DynamicTestModule;
@@ -1450,9 +1457,9 @@
          * This can be used for errors created by compileModule...
          */
         TestingCompiler.prototype.getComponentFromError = function (error) { throw unimplemented(); };
-        TestingCompiler.decorators = [
-            { type: core.Injectable }
-        ];
+        TestingCompiler = __decorate([
+            core.Injectable()
+        ], TestingCompiler);
         return TestingCompiler;
     }(core.Compiler));
     /**
@@ -1764,12 +1771,12 @@
                 var RootScopeModule = /** @class */ (function () {
                     function RootScopeModule() {
                     }
-                    RootScopeModule.decorators = [
-                        { type: core.NgModule, args: [{
-                                    providers: __spread(rootProviderOverrides),
-                                    jit: true,
-                                },] },
-                    ];
+                    RootScopeModule = __decorate([
+                        core.NgModule({
+                            providers: __spread(rootProviderOverrides),
+                            jit: true,
+                        })
+                    ], RootScopeModule);
                     return RootScopeModule;
                 }());
                 rootScopeImports.push(RootScopeModule);
@@ -1780,9 +1787,9 @@
             var DynamicTestModule = /** @class */ (function () {
                 function DynamicTestModule() {
                 }
-                DynamicTestModule.decorators = [
-                    { type: core.NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas, jit: true },] },
-                ];
+                DynamicTestModule = __decorate([
+                    core.NgModule({ providers: providers, declarations: declarations, imports: imports, schemas: schemas, jit: true })
+                ], DynamicTestModule);
                 return DynamicTestModule;
             }());
             var compilerFactory = this.platform.injector.get(TestingCompilerFactory);
@@ -1900,9 +1907,9 @@
             var OverrideComponent = /** @class */ (function () {
                 function OverrideComponent() {
                 }
-                OverrideComponent.decorators = [
-                    { type: core.Component, args: [{ selector: 'empty', template: template, jit: true },] },
-                ];
+                OverrideComponent = __decorate([
+                    core.Component({ selector: 'empty', template: template, jit: true })
+                ], OverrideComponent);
                 return OverrideComponent;
             }());
             this._templateOverrides.push({ component: component, templateOf: OverrideComponent });
