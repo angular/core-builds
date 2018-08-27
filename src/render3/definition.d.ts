@@ -7,8 +7,9 @@
  */
 import './ng_dev_mode';
 import { ChangeDetectionStrategy } from '../change_detection/constants';
-import { Provider, ViewEncapsulation } from '../core';
+import { Provider } from '../di/provider';
 import { NgModuleDef } from '../metadata/ng_module';
+import { ViewEncapsulation } from '../metadata/view';
 import { Type } from '../type';
 import { BaseDef, ComponentDefFeature, ComponentDefInternal, ComponentQuery, ComponentTemplate, ComponentType, DirectiveDefFeature, DirectiveDefInternal, DirectiveType, DirectiveTypesOrFactory, PipeDefInternal, PipeType, PipeTypesOrFactory } from './interfaces/definition';
 import { CssSelectorList, SelectorFlags } from './interfaces/projection';

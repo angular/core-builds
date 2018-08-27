@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.3+30.sha-3d41739
+ * @license Angular v7.0.0-beta.3+39.sha-9bcd8c2
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -578,6 +578,58 @@ function componentNeedsResolution(component) {
 function unwrapResponse(response) {
     return typeof response == 'string' ? response : response.text();
 }
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/** @enum {number} */
+const ViewEncapsulation = {
+    /**
+       * Emulate `Native` scoping of styles by adding an attribute containing surrogate id to the Host
+       * Element and pre-processing the style rules provided via {@link Component#styles styles} or
+       * {@link Component#styleUrls styleUrls}, and adding the new Host Element attribute to all
+       * selectors.
+       *
+       * This is the default option.
+       */
+    Emulated: 0,
+    /**
+       * @deprecated v6.1.0 - use {ViewEncapsulation.ShadowDom} instead.
+       * Use the native encapsulation mechanism of the renderer.
+       *
+       * For the DOM this means using the deprecated [Shadow DOM
+       * v0](https://w3c.github.io/webcomponents/spec/shadow/) and
+       * creating a ShadowRoot for Component's Host Element.
+       */
+    Native: 1,
+    /**
+       * Don't provide any template or style encapsulation.
+       */
+    None: 2,
+    /**
+       * Use Shadow DOM to encapsulate styles.
+       *
+       * For the DOM this means using modern [Shadow
+       * DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
+       * creating a ShadowRoot for Component's Host Element.
+       *
+       * ### Example
+       * {@example core/ts/metadata/encapsulation.ts region='longform'}
+       */
+    ShadowDom: 3,
+};
+ViewEncapsulation[ViewEncapsulation.Emulated] = 'Emulated';
+ViewEncapsulation[ViewEncapsulation.Native] = 'Native';
+ViewEncapsulation[ViewEncapsulation.None] = 'None';
+ViewEncapsulation[ViewEncapsulation.ShadowDom] = 'ShadowDom';
 
 /**
  * @fileoverview added by tsickle
@@ -1740,7 +1792,7 @@ function assertNodeOfPossibleTypes(node, ...types) {
     assertDefined(node, 'should be called with a node');
     /** @type {?} */
     const found = types.some(type => node.tNode.type === type);
-    assertEqual(found, true, `Should be one of ${types.map(typeName).join(', ')}`);
+    assertEqual(found, true, `Should be one of ${types.map(typeName).join(', ')} but got ${typeName(node.tNode.type)}`);
 }
 /**
  * @param {?} type
@@ -1755,6 +1807,8 @@ function typeName(type) {
         return 'View';
     if (type == 3 /* Element */)
         return 'Element';
+    if (type == 4 /* ElementContainer */)
+        return 'ElementContainer';
     return '<unknown>';
 }
 
@@ -5324,7 +5378,7 @@ function elementStyling(classDeclarations, styleDeclarations, styleSanitizer) {
  *
  * This method lazily creates the `StylingContext`. This is because in most cases
  * we have styling without any bindings. Creating `StylingContext` eagerly would mean that
- * every style declaration such as `<div style="color: 'red' ">` would result `StyleContext`
+ * every style declaration such as `<div style="color: red">` would result `StyleContext`
  * which would create unnecessary memory pressure.
  *
  * @param {?} index Index of the style allocation. See: `elementStyling`.
@@ -6990,7 +7044,9 @@ function defineComponent(componentDefinition) {
     /** @type {?} */
     const declaredInputs = /** @type {?} */ ({});
     /** @type {?} */
-    const encapsulation = componentDefinition.encapsulation;
+    const encapsulation = componentDefinition.encapsulation || ViewEncapsulation.Emulated;
+    /** @type {?} */
+    const styles = componentDefinition.styles || EMPTY_ARRAY;
     /** @type {?} */
     const def = {
         type: type,
@@ -7029,9 +7085,10 @@ function defineComponent(componentDefinition) {
         data: componentDefinition.data || EMPTY$1,
         // TODO(misko): convert ViewEncapsulation into const enum so that it can be used directly in the
         // next line. Also `None` should be 0 not 2.
-        encapsulation: encapsulation == null ? 2 : encapsulation,
-        id: `c${_renderCompCount++}`,
-        styles: EMPTY_ARRAY,
+        encapsulation,
+        providers: EMPTY_ARRAY,
+        viewProviders: EMPTY_ARRAY,
+        id: `c${_renderCompCount++}`, styles,
     };
     /** @type {?} */
     const feature = componentDefinition.features;
@@ -8948,7 +9005,7 @@ function getOrCreateContainerRef(di) {
     if (!di.viewContainerRef) {
         /** @type {?} */
         const vcRefHost = di.node;
-        ngDevMode && assertNodeOfPossibleTypes(vcRefHost, 0 /* Container */, 3 /* Element */);
+        ngDevMode && assertNodeOfPossibleTypes(vcRefHost, 0 /* Container */, 3 /* Element */, 4 /* ElementContainer */);
         /** @type {?} */
         const hostParent = /** @type {?} */ ((getParentLNode(vcRefHost)));
         /** @type {?} */
@@ -13331,7 +13388,7 @@ function compileComponent(type, metadata) {
                     throw new Error(`Errors during JIT compilation of template for ${stringify(type)}: ${errors}`);
                 }
                 /** @type {?} */
-                const res = compileComponentFromMetadata(Object.assign({}, directiveMetadata(type, metadata), { template, directives: new Map(), pipes: new Map(), viewQueries: [], wrapDirectivesInClosure: false }), constantPool, makeBindingParser());
+                const res = compileComponentFromMetadata(Object.assign({}, directiveMetadata(type, metadata), { template, directives: new Map(), pipes: new Map(), viewQueries: [], wrapDirectivesInClosure: false, styles: metadata.styles || [], encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated }), constantPool, makeBindingParser());
                 /** @type {?} */
                 const preStatements = [...constantPool.statements, ...res.statements];
                 ngComponentDef = jitExpression(res.expression, angularCoreEnv, `ng://${type.name}/ngComponentDef.js`, preStatements);
@@ -13933,58 +13990,6 @@ const NgModule = makeDecorator('NgModule', (ngModule) => ngModule, undefined, un
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/** @enum {number} */
-const ViewEncapsulation = {
-    /**
-       * Emulate `Native` scoping of styles by adding an attribute containing surrogate id to the Host
-       * Element and pre-processing the style rules provided via {@link Component#styles styles} or
-       * {@link Component#styleUrls styleUrls}, and adding the new Host Element attribute to all
-       * selectors.
-       *
-       * This is the default option.
-       */
-    Emulated: 0,
-    /**
-       * @deprecated v6.1.0 - use {ViewEncapsulation.ShadowDom} instead.
-       * Use the native encapsulation mechanism of the renderer.
-       *
-       * For the DOM this means using the deprecated [Shadow DOM
-       * v0](https://w3c.github.io/webcomponents/spec/shadow/) and
-       * creating a ShadowRoot for Component's Host Element.
-       */
-    Native: 1,
-    /**
-       * Don't provide any template or style encapsulation.
-       */
-    None: 2,
-    /**
-       * Use Shadow DOM to encapsulate styles.
-       *
-       * For the DOM this means using modern [Shadow
-       * DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
-       * creating a ShadowRoot for Component's Host Element.
-       *
-       * ### Example
-       * {@example core/ts/metadata/encapsulation.ts region='longform'}
-       */
-    ShadowDom: 3,
-};
-ViewEncapsulation[ViewEncapsulation.Emulated] = 'Emulated';
-ViewEncapsulation[ViewEncapsulation.Native] = 'Native';
-ViewEncapsulation[ViewEncapsulation.None] = 'None';
-ViewEncapsulation[ViewEncapsulation.ShadowDom] = 'ShadowDom';
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
 
 /**
  * @fileoverview added by tsickle
@@ -14014,7 +14019,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-beta.3+30.sha-3d41739');
+const VERSION = new Version('7.0.0-beta.3+39.sha-9bcd8c2');
 
 /**
  * @fileoverview added by tsickle
