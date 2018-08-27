@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.3+57.sha-3634575
+ * @license Angular v7.0.0-beta.3+58.sha-6a0f78f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -11050,8 +11050,8 @@
                     ngComponentDef = compiler.jitExpression(res.expression, angularCoreEnv, "ng://" + type.name + "/ngComponentDef.js", preStatements);
                     // If component compilation is async, then the @NgModule annotation which declares the
                     // component may execute and set an ngSelectorScope property on the component type. This
-                    // allows the component to patch itself with directiveDefs from the module after it finishes
-                    // compiling.
+                    // allows the component to patch itself with directiveDefs from the module after it
+                    // finishes compiling.
                     if (hasSelectorScope(type)) {
                         var scopes = transitiveScopesFor(type.ngSelectorScope);
                         patchComponentDefWithScope(ngComponentDef, scopes);
@@ -11601,7 +11601,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-beta.3+57.sha-3634575');
+    var VERSION = new Version('7.0.0-beta.3+58.sha-6a0f78f');
 
     /**
      * @license
