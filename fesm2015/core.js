@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.3+69.sha-0fe708f
+ * @license Angular v7.0.0-beta.3+70.sha-0386c44
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -8811,15 +8811,14 @@ function injectChangeDetectorRef() {
  * @return {?}
  */
 function injectAttribute(attrNameToInject) {
-    ngDevMode && assertPreviousIsParent();
     /** @type {?} */
-    const lElement = /** @type {?} */ (getPreviousOrParentNode());
-    ngDevMode && assertNodeType(lElement, 3 /* Element */);
+    const lNode = getPreviousOrParentNode();
+    ngDevMode && assertNodeOfPossibleTypes(lNode, 0 /* Container */, 3 /* Element */, 4 /* ElementContainer */);
     /** @type {?} */
-    const tElement = lElement.tNode;
-    ngDevMode && assertDefined(tElement, 'expecting tNode');
+    const tNode = lNode.tNode;
+    ngDevMode && assertDefined(tNode, 'expecting tNode');
     /** @type {?} */
-    const attrs = tElement.attrs;
+    const attrs = tNode.attrs;
     if (attrs) {
         for (let i = 0; i < attrs.length; i = i + 2) {
             /** @type {?} */
@@ -14081,7 +14080,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-beta.3+69.sha-0fe708f');
+const VERSION = new Version('7.0.0-beta.3+70.sha-0386c44');
 
 /**
  * @fileoverview added by tsickle
