@@ -132,7 +132,7 @@ export declare function adjustBlueprintForNewNode(view: LViewData): void;
 /**
  * Resets the application state.
  */
-export declare function resetApplicationState(): void;
+export declare function resetComponentState(): void;
 /**
  *
  * @param hostNode Existing node to render into.

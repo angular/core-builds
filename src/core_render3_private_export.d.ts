@@ -13,3 +13,4 @@ export { compilePipe as ɵcompilePipe, } from './render3/jit/pipe';
 export { NgModuleDef as ɵNgModuleDef, NgModuleDefInternal as ɵNgModuleDefInternal, NgModuleTransitiveScopes as ɵNgModuleTransitiveScopes, } from './metadata/ng_module';
 export { sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, } from './sanitization/sanitization';
 export { bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, } from './sanitization/bypass';
+export { ElementContext as ɵElementContext, getElementContext as ɵgetElementContext } from './render3/element_discovery';

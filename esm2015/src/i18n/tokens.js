@@ -81,7 +81,7 @@ export const TRANSLATIONS = new InjectionToken('Translations');
   @type {?} */
 export const TRANSLATIONS_FORMAT = new InjectionToken('TranslationsFormat');
 /** @enum {number} */
-const MissingTranslationStrategy = {
+var MissingTranslationStrategy = {
     Error: 0,
     Warning: 1,
     Ignore: 2,

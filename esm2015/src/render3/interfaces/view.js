@@ -66,7 +66,7 @@ OpaqueViewState.prototype.__brand__;
  */
 export function LViewData() { }
 /** @enum {number} */
-const LViewFlags = {
+var LViewFlags = {
     /**
        * Whether or not the view is in creationMode.
        *
