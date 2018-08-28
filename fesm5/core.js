@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.0.0-beta.3+69.sha-0fe708f
+ * @license Angular v7.0.0-beta.3+70.sha-0386c44
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __decorate, __param, __metadata, __extends, __spread, __assign, __read, __values } from 'tslib';
+import { __decorate, __metadata, __assign, __param, __extends, __spread, __read, __values } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compileInjectable, compilePipeFromMetadata } from '@angular/compiler';
 import { share } from 'rxjs/operators';
@@ -7123,12 +7123,11 @@ var componentFactoryResolver = new ComponentFactoryResolver$1();
  * @experimental
  */
 function injectAttribute(attrNameToInject) {
-    ngDevMode && assertPreviousIsParent();
-    var lElement = getPreviousOrParentNode();
-    ngDevMode && assertNodeType(lElement, 3 /* Element */);
-    var tElement = lElement.tNode;
-    ngDevMode && assertDefined(tElement, 'expecting tNode');
-    var attrs = tElement.attrs;
+    var lNode = getPreviousOrParentNode();
+    ngDevMode && assertNodeOfPossibleTypes(lNode, 0 /* Container */, 3 /* Element */, 4 /* ElementContainer */);
+    var tNode = lNode.tNode;
+    ngDevMode && assertDefined(tNode, 'expecting tNode');
+    var attrs = tNode.attrs;
     if (attrs) {
         for (var i = 0; i < attrs.length; i = i + 2) {
             var attrName = attrs[i];
@@ -11626,7 +11625,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('7.0.0-beta.3+69.sha-0fe708f');
+var VERSION = new Version('7.0.0-beta.3+70.sha-0386c44');
 
 /**
  * @license

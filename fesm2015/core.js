@@ -1,12 +1,12 @@
 /**
- * @license Angular v7.0.0-beta.3+69.sha-0fe708f
+ * @license Angular v7.0.0-beta.3+70.sha-0386c44
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compileInjectable, compilePipeFromMetadata } from '@angular/compiler';
-import { __decorate, __metadata, __param } from 'tslib';
+import { __decorate, __param, __metadata } from 'tslib';
 import { share } from 'rxjs/operators';
 
 /**
@@ -6963,12 +6963,11 @@ function injectChangeDetectorRef() {
  * @experimental
  */
 function injectAttribute(attrNameToInject) {
-    ngDevMode && assertPreviousIsParent();
-    const lElement = getPreviousOrParentNode();
-    ngDevMode && assertNodeType(lElement, 3 /* Element */);
-    const tElement = lElement.tNode;
-    ngDevMode && assertDefined(tElement, 'expecting tNode');
-    const attrs = tElement.attrs;
+    const lNode = getPreviousOrParentNode();
+    ngDevMode && assertNodeOfPossibleTypes(lNode, 0 /* Container */, 3 /* Element */, 4 /* ElementContainer */);
+    const tNode = lNode.tNode;
+    ngDevMode && assertDefined(tNode, 'expecting tNode');
+    const attrs = tNode.attrs;
     if (attrs) {
         for (let i = 0; i < attrs.length; i = i + 2) {
             const attrName = attrs[i];
@@ -11345,7 +11344,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('7.0.0-beta.3+69.sha-0fe708f');
+const VERSION = new Version('7.0.0-beta.3+70.sha-0386c44');
 
 /**
  * @license
