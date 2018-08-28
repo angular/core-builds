@@ -16,7 +16,7 @@ export { ComponentTemplate };
 var ComponentQuery;
 export { ComponentQuery };
 /** @enum {number} */
-const RenderFlags = {
+var RenderFlags = {
     /* Whether to run the creation block (e.g. create elements and directives) */
     Create: 1,
     /* Whether to run the update block (e.g. refresh bindings) */
@@ -42,7 +42,7 @@ export function DirectiveType() { }
 /** @type {?} */
 DirectiveType.prototype.ngDirectiveDef;
 /** @enum {number} */
-const DirectiveDefFlags = {
+var DirectiveDefFlags = {
     ContentQuery: 2,
 };
 export { DirectiveDefFlags };
@@ -365,7 +365,7 @@ export { PipeTypeList };
 /** @type {?} */
 export const unusedValueExportToPlacateAjd = 1;
 /** @enum {number} */
-const InitialStylingFlags = {
+var InitialStylingFlags = {
     VALUES_MODE: 1,
 };
 export { InitialStylingFlags };

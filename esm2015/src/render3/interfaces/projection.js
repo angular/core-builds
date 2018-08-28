@@ -16,7 +16,7 @@ export { CssSelector };
 var CssSelectorList;
 export { CssSelectorList };
 /** @enum {number} */
-const SelectorFlags = {
+var SelectorFlags = {
     /** Indicates this is the beginning of a new negative selector */
     NOT: 1,
     /** Mode for matching attributes */

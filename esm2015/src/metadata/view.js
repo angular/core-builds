@@ -10,7 +10,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /** @enum {number} */
-const ViewEncapsulation = {
+var ViewEncapsulation = {
     /**
        * Emulate `Native` scoping of styles by adding an attribute containing surrogate id to the Host
        * Element and pre-processing the style rules provided via {@link Component#styles styles} or

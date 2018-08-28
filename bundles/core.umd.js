@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.3+63.sha-c230173
+ * @license Angular v7.0.0-beta.3+67.sha-0024d68
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1434,6 +1434,68 @@
         __global$1['ngDevMode'] = ngDevModeResetPerfCounters();
     }
 
+    var MONKEY_PATCH_KEY_NAME = '__ng_data__';
+    /** Returns the matching `ElementContext` data for a given DOM node.
+     *
+     * This function will examine the provided DOM element's monkey-patched property to figure out the
+     * associated index and view data (`LViewData`).
+     *
+     * If the monkey-patched value is the `LViewData` instance then the element context for that
+     * element will be created and the monkey-patch reference will be updated. Therefore when this
+     * function is called it may mutate the provided element\'s monkey-patch value.
+     *
+     * If the monkey-patch value is not detected then the code will walk up the DOM until an element
+     * is found which contains a monkey-patch reference. When that occurs then the provided element
+     * will be updated with a new context (which is then returned).
+     */
+    function getElementContext(element) {
+        var context = element[MONKEY_PATCH_KEY_NAME];
+        if (context) {
+            if (Array.isArray(context)) {
+                var lViewData = context;
+                var index = findMatchingElement(element, lViewData);
+                context = { index: index, native: element, lViewData: lViewData };
+                attachLViewDataToNode(element, context);
+            }
+        }
+        else {
+            var parent_1 = element;
+            while (parent_1 = parent_1.parentNode) {
+                var parentContext = parent_1[MONKEY_PATCH_KEY_NAME];
+                if (parentContext) {
+                    var lViewData = Array.isArray(parentContext) ? parentContext : parentContext.lViewData;
+                    var index = findMatchingElement(element, lViewData);
+                    if (index >= 0) {
+                        context = { index: index, native: element, lViewData: lViewData };
+                        attachLViewDataToNode(element, context);
+                        break;
+                    }
+                }
+            }
+        }
+        return context || null;
+    }
+    /** Locates the element within the given LViewData and returns the matching index */
+    function findMatchingElement(element, lViewData) {
+        for (var i = HEADER_OFFSET; i < lViewData.length; i++) {
+            var result = lViewData[i];
+            if (result) {
+                // special case for styling since when [class] and [style] bindings
+                // are used they will wrap the element into a StylingContext array
+                if (Array.isArray(result)) {
+                    result = result[0 /* ElementPosition */];
+                }
+                if (result.native === element)
+                    return i;
+            }
+        }
+        return -1;
+    }
+    /** Assigns the given data to a DOM element using monkey-patching */
+    function attachLViewDataToNode(node, data) {
+        node[MONKEY_PATCH_KEY_NAME] = data;
+    }
+
     /** Called when directives inject each other (creating a circular dependency) */
     function throwCyclicDependencyError(token) {
         throw new Error("Cannot instantiate cyclic dependency! " + token);
@@ -2330,8 +2392,12 @@
      * @param currentParent The last parent element to be processed
      * @param currentView Current LView
      */
-    function appendProjectedNode(node, currentParent, currentView, renderParent) {
+    function appendProjectedNode(node, currentParent, currentView, renderParent, parentView) {
         appendChild(currentParent, node.native, currentView);
+        // the projected contents are processed while in the shadow view (which is the currentView)
+        // therefore we need to extract the view where the host element lives since it's the
+        // logical container of the content projected views
+        attachLViewDataToNode(node.native, parentView);
         if (node.tNode.type === 0 /* Container */) {
             // The node we are adding is a container and we are adding it to an element which
             // is not a component (no more re-projection).
@@ -2347,8 +2413,9 @@
         }
         else if (node.tNode.type === 4 /* ElementContainer */) {
             var ngContainerChild = getChildLNode(node);
+            var parentView_1 = currentView[HOST_NODE].view;
             while (ngContainerChild) {
-                appendProjectedNode(ngContainerChild, currentParent, currentView, renderParent);
+                appendProjectedNode(ngContainerChild, currentParent, currentView, renderParent, parentView_1);
                 ngContainerChild = getNextLNode(ngContainerChild);
             }
         }
@@ -3186,6 +3253,11 @@
         return viewData && viewData[SANITIZER];
     }
     /**
+     * Store the element depth count. This is used to identify the root elements of the template
+     * so that we can than attach `LViewData` to only those elements.
+     */
+    var elementDepthCount;
+    /**
      * Returns the current OpaqueViewState instance.
      *
      * Used in conjunction with the restoreView() instruction to save a snapshot
@@ -3505,9 +3577,10 @@
     /**
      * Resets the application state.
      */
-    function resetApplicationState() {
+    function resetComponentState() {
         isParent = false;
         previousOrParentNode = null;
+        elementDepthCount = 0;
     }
     /**
      * Used for creating the LViewNode of a dynamic embedded view,
@@ -3712,6 +3785,13 @@
         }
         appendChild(getParentLNode(node), native, viewData);
         createDirectivesAndLocals(node, localRefs);
+        // any immediate children of a component or template container must be pre-emptively
+        // monkey-patched with the component view data so that the element can be inspected
+        // later on using any element discovery utility methods (see `element_discovery.ts`)
+        if (elementDepthCount === 0) {
+            attachLViewDataToNode(native, viewData);
+        }
+        elementDepthCount++;
     }
     /**
      * Creates a native element from a tag name, using a renderer.
@@ -4050,7 +4130,7 @@
      * @returns LElementNode created
      */
     function hostElement(tag, rNode, def, sanitizer) {
-        resetApplicationState();
+        resetComponentState();
         var node = createLNode(0, 3 /* Element */, rNode, null, null, createLViewData(renderer, getOrCreateTView(def.template, def.consts, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery), null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, sanitizer));
         if (firstTemplatePass) {
             node.tNode.flags = 4096 /* isComponent */;
@@ -4158,6 +4238,7 @@
         currentQueries && (currentQueries = currentQueries.addNode(previousOrParentNode));
         queueLifecycleHooks(previousOrParentNode.tNode.flags, tView);
         currentElementNode = null;
+        elementDepthCount--;
     }
     /**
      * Updates the value of removes an attribute on an Element.
@@ -4984,6 +5065,7 @@
                 (grandparent = getParentLNode(parent)) &&
                     grandparent.data[RENDER_PARENT] :
                 parent;
+            var parentView = viewData[HOST_NODE].view;
             while (nodeToProject) {
                 if (nodeToProject.type === 1 /* Projection */) {
                     // This node is re-projected, so we must go up the tree to get its projected nodes.
@@ -4999,7 +5081,7 @@
                 else {
                     var lNode = projectedView[nodeToProject.index];
                     lNode.tNode.flags |= 8192 /* isProjected */;
-                    appendProjectedNode(lNode, parent, viewData, renderParent);
+                    appendProjectedNode(lNode, parent, viewData, renderParent, parentView);
                 }
                 // If we are finished with a list of re-projected nodes, we need to get
                 // back to the root projection node that was re-projected.
@@ -7818,7 +7900,7 @@
         var renderer = getRenderer();
         var localParentNode = getParentLNode(load(startIndex)) || getPreviousOrParentNode();
         var localPreviousNode = localParentNode;
-        resetApplicationState(); // We don't want to add to the tree with the wrong previous node
+        resetComponentState(); // We don't want to add to the tree with the wrong previous node
         for (var i = 0; i < instructions.length; i++) {
             var instruction = instructions[i];
             switch (instruction & -536870912 /* InstructionMask */) {
@@ -7846,7 +7928,7 @@
                     var lastNodeIndex = viewData.length - 1;
                     var textLNode = createLNode(lastNodeIndex - HEADER_OFFSET, 3 /* Element */, textRNode, null, null);
                     localPreviousNode = appendI18nNode(textLNode, localParentNode, localPreviousNode);
-                    resetApplicationState();
+                    resetComponentState();
                     break;
                 case -1073741824 /* CloseNode */:
                     localPreviousNode = localParentNode;
@@ -9681,7 +9763,7 @@
             var xhr = new XMLHttpRequest();
             xhr.responseType = 'document';
             xhr.open('GET', 'data:text/html;charset=utf-8,' + html, false);
-            xhr.send(null);
+            xhr.send(undefined);
             var body = xhr.response.body;
             body.removeChild(body.firstChild);
             return body;
@@ -11586,7 +11668,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-beta.3+63.sha-c230173');
+    var VERSION = new Version('7.0.0-beta.3+67.sha-0024d68');
 
     /**
      * @license
@@ -20264,6 +20346,7 @@
     exports.ɵbypassSanitizationTrustScript = bypassSanitizationTrustScript;
     exports.ɵbypassSanitizationTrustUrl = bypassSanitizationTrustUrl;
     exports.ɵbypassSanitizationTrustResourceUrl = bypassSanitizationTrustResourceUrl;
+    exports.ɵgetElementContext = getElementContext;
     exports.ɵregisterModuleFactory = registerModuleFactory;
     exports.ɵEMPTY_ARRAY = EMPTY_ARRAY$3;
     exports.ɵEMPTY_MAP = EMPTY_MAP;

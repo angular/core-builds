@@ -156,4 +156,4 @@ export declare function removeChild(parent: LNode, child: RNode | null, currentV
  * @param currentParent The last parent element to be processed
  * @param currentView Current LView
  */
-export declare function appendProjectedNode(node: LElementNode | LElementContainerNode | LTextNode | LContainerNode, currentParent: LElementNode | LElementContainerNode | LViewNode, currentView: LViewData, renderParent: LElementNode): void;
+export declare function appendProjectedNode(node: LElementNode | LElementContainerNode | LTextNode | LContainerNode, currentParent: LElementNode | LElementContainerNode | LViewNode, currentView: LViewData, renderParent: LElementNode, parentView: LViewData): void;
