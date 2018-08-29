@@ -1,52 +1,11 @@
 /**
- * A branded trusted string used with sanitization.
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
  *
- * See: {@link TrustedHtmlString}, {@link TrustedResourceUrlString}, {@link TrustedScriptString},
- * {@link TrustedStyleString}, {@link TrustedUrlString}
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
  */
-export interface TrustedString extends String {
-    '__SANITIZER_TRUSTED_BRAND__': 'Html' | 'Style' | 'Script' | 'Url' | 'ResourceUrl';
-}
-/**
- * A branded trusted string used with sanitization of `html` strings.
- *
- * See: {@link bypassSanitizationTrustHtml} and {@link htmlSanitizer}.
- */
-export interface TrustedHtmlString extends TrustedString {
-    '__SANITIZER_TRUSTED_BRAND__': 'Html';
-}
-/**
- * A branded trusted string used with sanitization of `style` strings.
- *
- * See: {@link bypassSanitizationTrustStyle} and {@link styleSanitizer}.
- */
-export interface TrustedStyleString extends TrustedString {
-    '__SANITIZER_TRUSTED_BRAND__': 'Style';
-}
-/**
- * A branded trusted string used with sanitization of `url` strings.
- *
- * See: {@link bypassSanitizationTrustScript} and {@link scriptSanitizer}.
- */
-export interface TrustedScriptString extends TrustedString {
-    '__SANITIZER_TRUSTED_BRAND__': 'Script';
-}
-/**
- * A branded trusted string used with sanitization of `url` strings.
- *
- * See: {@link bypassSanitizationTrustUrl} and {@link urlSanitizer}.
- */
-export interface TrustedUrlString extends TrustedString {
-    '__SANITIZER_TRUSTED_BRAND__': 'Url';
-}
-/**
- * A branded trusted string used with sanitization of `resourceUrl` strings.
- *
- * See: {@link bypassSanitizationTrustResourceUrl} and {@link resourceUrlSanitizer}.
- */
-export interface TrustedResourceUrlString extends TrustedString {
-    '__SANITIZER_TRUSTED_BRAND__': 'ResourceUrl';
-}
+import { StyleSanitizeFn } from './style_sanitizer';
 /**
  * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
  * dangerous content.
@@ -111,52 +70,7 @@ export declare function sanitizeResourceUrl(unsafeResourceUrl: any): string;
  */
 export declare function sanitizeScript(unsafeScript: any): string;
 /**
- * Mark `html` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {@link htmlSanitizer} to be trusted implicitly.
- *
- * @param trustedHtml `html` string which needs to be implicitly trusted.
- * @returns a `html` `String` which has been branded to be implicitly trusted.
+ * The default style sanitizer will handle sanitization for style properties by
+ * sanitizing any CSS property that can include a `url` value (usually image-based properties)
  */
-export declare function bypassSanitizationTrustHtml(trustedHtml: string): TrustedHtmlString;
-/**
- * Mark `style` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {@link styleSanitizer} to be trusted implicitly.
- *
- * @param trustedStyle `style` string which needs to be implicitly trusted.
- * @returns a `style` `String` which has been branded to be implicitly trusted.
- */
-export declare function bypassSanitizationTrustStyle(trustedStyle: string): TrustedStyleString;
-/**
- * Mark `script` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {@link scriptSanitizer} to be trusted implicitly.
- *
- * @param trustedScript `script` string which needs to be implicitly trusted.
- * @returns a `script` `String` which has been branded to be implicitly trusted.
- */
-export declare function bypassSanitizationTrustScript(trustedScript: string): TrustedScriptString;
-/**
- * Mark `url` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {@link urlSanitizer} to be trusted implicitly.
- *
- * @param trustedUrl `url` string which needs to be implicitly trusted.
- * @returns a `url` `String` which has been branded to be implicitly trusted.
- */
-export declare function bypassSanitizationTrustUrl(trustedUrl: string): TrustedUrlString;
-/**
- * Mark `url` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {@link resourceUrlSanitizer} to be trusted implicitly.
- *
- * @param trustedResourceUrl `url` string which needs to be implicitly trusted.
- * @returns a `url` `String` which has been branded to be implicitly trusted.
- */
-export declare function bypassSanitizationTrustResourceUrl(trustedResourceUrl: string): TrustedResourceUrlString;
+export declare const defaultStyleSanitizer: StyleSanitizeFn;

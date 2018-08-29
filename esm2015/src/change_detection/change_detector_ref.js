@@ -1,6 +1,6 @@
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -10,118 +10,88 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /**
+ * Base class for Angular Views, provides change detection functionality.
+ * A change-detection tree collects all views that are to be checked for changes.
+ * Use the methods to add and remove views from the tree, initiate change-detection,
+ * and explicitly mark views as _dirty_, meaning that they have changed and need to be rerendered.
+ *
+ * \@usageNotes
+ *
+ * The following examples demonstrate how to modify default change-detection behavior
+ * to perform explicit detection when needed.
+ *
+ * ### Use `markForCheck()` with `CheckOnce` strategy
+ *
+ * The following example sets the `OnPush` change-detection strategy for a component
+ * (`CheckOnce`, rather than the default `CheckAlways`), then forces a second check
+ * after an interval. See [live demo](http://plnkr.co/edit/GC512b?p=preview).
+ *
+ * <code-example path="core/ts/change_detect/change-detection.ts"
+ * region="mark-for-check"></code-example>
+ *
+ * ### Detach change detector to limit how often check occurs
+ *
+ * The following example defines a component with a large list of read-only data
+ * that is expected to change constantly, many times per second.
+ * To improve performance, we want to check and update the list
+ * less often than the changes actually occur. To do that, we detach
+ * the component's change detector and perform an explicit local check every five seconds.
+ *
+ * <code-example path="core/ts/change_detect/change-detection.ts" region="detach"></code-example>
+ *
+ *
+ * ### Reattaching a detached component
+ *
+ * The following example creates a component displaying live data.
+ * The component detaches its change detector from the main change detector tree
+ * when the `live` property is set to false, and reattaches it when the property
+ * becomes true.
+ *
+ * <code-example path="core/ts/change_detect/change-detection.ts" region="detach"></code-example>
+ *
  * @abstract
  */
 export class ChangeDetectorRef {
 }
-function ChangeDetectorRef_tsickle_Closure_declarations() {
+if (false) {
     /**
-     * Marks a view and all of its ancestors dirty.
+     * When a view uses the {\@link ChangeDetectionStrategy#OnPush OnPush} (checkOnce)
+     * change detection strategy, explicitly marks the view as changed so that
+     * it can be checked again.
      *
-     * This can be used to ensure an {\@link ChangeDetectionStrategy#OnPush OnPush} component is
-     * checked when it needs to be re-rendered but the two normal triggers haven't marked it
-     * dirty (i.e. inputs haven't changed and events haven't fired in the view).
+     * Components are normally marked as dirty (in need of rerendering) when inputs
+     * have changed or events have fired in the view. Call this method to ensure that
+     * a component is checked even if these triggers have not occured.
      *
      * <!-- TODO: Add a link to a chapter on OnPush components -->
      *
-     * ### Example ([live demo](https://stackblitz.com/edit/angular-kx7rrw))
-     *
-     * ```typescript
-     * \@Component({
-     *   selector: 'my-app',
-     *   template: `Number of ticks: {{numberOfTicks}}`
-     *   changeDetection: ChangeDetectionStrategy.OnPush,
-     * })
-     * class AppComponent {
-     *   numberOfTicks = 0;
-     *
-     *   constructor(private ref: ChangeDetectorRef) {
-     *     setInterval(() => {
-     *       this.numberOfTicks++;
-     *       // the following is required, otherwise the view will not be updated
-     *       this.ref.markForCheck();
-     *     }, 1000);
-     *   }
-     * }
-     * ```
      * @abstract
      * @return {?}
      */
     ChangeDetectorRef.prototype.markForCheck = function () { };
     /**
-     * Detaches the view from the change detection tree.
+     * Detaches this view from the change-detection tree.
+     * A detached view is  not checked until it is reattached.
+     * Use in combination with `detectChanges()` to implement local change detection checks.
      *
-     * Detached views will not be checked during change detection runs until they are
-     * re-attached, even if they are dirty. `detach` can be used in combination with
-     * {\@link ChangeDetectorRef#detectChanges detectChanges} to implement local change
-     * detection checks.
+     * Detached views are not checked during change detection runs until they are
+     * re-attached, even if they are marked as dirty.
      *
      * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
      * <!-- TODO: Add a live demo once ref.detectChanges is merged into master -->
      *
-     * ### Example
-     *
-     * The following example defines a component with a large list of readonly data.
-     * Imagine the data changes constantly, many times per second. For performance reasons,
-     * we want to check and update the list every five seconds. We can do that by detaching
-     * the component's change detector and doing a local check every five seconds.
-     *
-     * ```typescript
-     * class DataProvider {
-     *   // in a real application the returned data will be different every time
-     *   get data() {
-     *     return [1,2,3,4,5];
-     *   }
-     * }
-     *
-     * \@Component({
-     *   selector: 'giant-list',
-     *   template: `
-     *     <li *ngFor="let d of dataProvider.data">Data {{d}}</li>
-     *   `,
-     * })
-     * class GiantList {
-     *   constructor(private ref: ChangeDetectorRef, private dataProvider: DataProvider) {
-     *     ref.detach();
-     *     setInterval(() => {
-     *       this.ref.detectChanges();
-     *     }, 5000);
-     *   }
-     * }
-     *
-     * \@Component({
-     *   selector: 'app',
-     *   providers: [DataProvider],
-     *   template: `
-     *     <giant-list><giant-list>
-     *   `,
-     * })
-     * class App {
-     * }
-     * ```
      * @abstract
      * @return {?}
      */
     ChangeDetectorRef.prototype.detach = function () { };
     /**
-     * Checks the view and its children.
-     *
-     * This can also be used in combination with {\@link ChangeDetectorRef#detach detach} to implement
-     * local change detection checks.
+     * Checks this view and its children. Use in combination with {\@link ChangeDetectorRef#detach
+     * detach}
+     * to implement local change detection checks.
      *
      * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
      * <!-- TODO: Add a live demo once ref.detectChanges is merged into master -->
      *
-     * ### Example
-     *
-     * The following example defines a component with a large list of readonly data.
-     * Imagine, the data changes constantly, many times per second. For performance reasons,
-     * we want to check and update the list every five seconds.
-     *
-     * We can do that by detaching the component's change detector and doing a local change detection
-     * check every five seconds.
-     *
-     * See {\@link ChangeDetectorRef#detach detach} for more information.
      * @abstract
      * @return {?}
      */
@@ -129,70 +99,22 @@ function ChangeDetectorRef_tsickle_Closure_declarations() {
     /**
      * Checks the change detector and its children, and throws if any changes are detected.
      *
-     * This is used in development mode to verify that running change detection doesn't introduce
+     * Use in development mode to verify that running change detection doesn't introduce
      * other changes.
      * @abstract
      * @return {?}
      */
     ChangeDetectorRef.prototype.checkNoChanges = function () { };
     /**
-     * Re-attaches the view to the change detection tree.
-     *
-     * This can be used to re-attach views that were previously detached from the tree
-     * using {\@link ChangeDetectorRef#detach detach}. Views are attached to the tree by default.
+     * Re-attaches the previously detached view to the change detection tree.
+     * Views are attached to the tree by default.
      *
      * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
      *
-     * ### Example ([live demo](https://stackblitz.com/edit/angular-ymgsxw))
-     *
-     * The following example creates a component displaying `live` data. The component will detach
-     * its change detector from the main change detector tree when the component's live property
-     * is set to false.
-     *
-     * ```typescript
-     * class DataProvider {
-     *   data = 1;
-     *
-     *   constructor() {
-     *     setInterval(() => {
-     *       this.data = this.data * 2;
-     *     }, 500);
-     *   }
-     * }
-     *
-     * \@Component({
-     *   selector: 'live-data',
-     *   inputs: ['live'],
-     *   template: 'Data: {{dataProvider.data}}'
-     * })
-     * class LiveData {
-     *   constructor(private ref: ChangeDetectorRef, private dataProvider: DataProvider) {}
-     *
-     *   set live(value) {
-     *     if (value) {
-     *       this.ref.reattach();
-     *     } else {
-     *       this.ref.detach();
-     *     }
-     *   }
-     * }
-     *
-     * \@Component({
-     *   selector: 'my-app',
-     *   providers: [DataProvider],
-     *   template: `
-     *     Live Update: <input type="checkbox" [(ngModel)]="live">
-     *     <live-data [live]="live"><live-data>
-     *   `,
-     * })
-     * class AppComponent {
-     *   live = true;
-     * }
-     * ```
      * @abstract
      * @return {?}
      */
     ChangeDetectorRef.prototype.reattach = function () { };
 }
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY2hhbmdlX2RldGVjdG9yX3JlZi5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uLy4uLy4uL3BhY2thZ2VzL2NvcmUvc3JjL2NoYW5nZV9kZXRlY3Rpb24vY2hhbmdlX2RldGVjdG9yX3JlZi50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7OztBQVFBLE1BQU07Q0E2S0wiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIEBsaWNlbnNlXG4gKiBDb3B5cmlnaHQgR29vZ2xlIEluYy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBVc2Ugb2YgdGhpcyBzb3VyY2UgY29kZSBpcyBnb3Zlcm5lZCBieSBhbiBNSVQtc3R5bGUgbGljZW5zZSB0aGF0IGNhbiBiZVxuICogZm91bmQgaW4gdGhlIExJQ0VOU0UgZmlsZSBhdCBodHRwczovL2FuZ3VsYXIuaW8vbGljZW5zZVxuICovXG5cbmV4cG9ydCBhYnN0cmFjdCBjbGFzcyBDaGFuZ2VEZXRlY3RvclJlZiB7XG4gIC8qKlxuICAgKiBNYXJrcyBhIHZpZXcgYW5kIGFsbCBvZiBpdHMgYW5jZXN0b3JzIGRpcnR5LlxuICAgKlxuICAgKiBUaGlzIGNhbiBiZSB1c2VkIHRvIGVuc3VyZSBhbiB7QGxpbmsgQ2hhbmdlRGV0ZWN0aW9uU3RyYXRlZ3kjT25QdXNoIE9uUHVzaH0gY29tcG9uZW50IGlzXG4gICAqIGNoZWNrZWQgd2hlbiBpdCBuZWVkcyB0byBiZSByZS1yZW5kZXJlZCBidXQgdGhlIHR3byBub3JtYWwgdHJpZ2dlcnMgaGF2ZW4ndCBtYXJrZWQgaXRcbiAgICogZGlydHkgKGkuZS4gaW5wdXRzIGhhdmVuJ3QgY2hhbmdlZCBhbmQgZXZlbnRzIGhhdmVuJ3QgZmlyZWQgaW4gdGhlIHZpZXcpLlxuICAgKlxuICAgKiA8IS0tIFRPRE86IEFkZCBhIGxpbmsgdG8gYSBjaGFwdGVyIG9uIE9uUHVzaCBjb21wb25lbnRzIC0tPlxuICAgKlxuICAgKiAjIyMgRXhhbXBsZSAoW2xpdmUgZGVtb10oaHR0cHM6Ly9zdGFja2JsaXR6LmNvbS9lZGl0L2FuZ3VsYXIta3g3cnJ3KSlcbiAgICpcbiAgICogYGBgdHlwZXNjcmlwdFxuICAgKiBAQ29tcG9uZW50KHtcbiAgICogICBzZWxlY3RvcjogJ215LWFwcCcsXG4gICAqICAgdGVtcGxhdGU6IGBOdW1iZXIgb2YgdGlja3M6IHt7bnVtYmVyT2ZUaWNrc319YFxuICAgKiAgIGNoYW5nZURldGVjdGlvbjogQ2hhbmdlRGV0ZWN0aW9uU3RyYXRlZ3kuT25QdXNoLFxuICAgKiB9KVxuICAgKiBjbGFzcyBBcHBDb21wb25lbnQge1xuICAgKiAgIG51bWJlck9mVGlja3MgPSAwO1xuICAgKlxuICAgKiAgIGNvbnN0cnVjdG9yKHByaXZhdGUgcmVmOiBDaGFuZ2VEZXRlY3RvclJlZikge1xuICAgKiAgICAgc2V0SW50ZXJ2YWwoKCkgPT4ge1xuICAgKiAgICAgICB0aGlzLm51bWJlck9mVGlja3MrKztcbiAgICogICAgICAgLy8gdGhlIGZvbGxvd2luZyBpcyByZXF1aXJlZCwgb3RoZXJ3aXNlIHRoZSB2aWV3IHdpbGwgbm90IGJlIHVwZGF0ZWRcbiAgICogICAgICAgdGhpcy5yZWYubWFya0ZvckNoZWNrKCk7XG4gICAqICAgICB9LCAxMDAwKTtcbiAgICogICB9XG4gICAqIH1cbiAgICogYGBgXG4gICAqL1xuICBhYnN0cmFjdCBtYXJrRm9yQ2hlY2soKTogdm9pZDtcblxuICAvKipcbiAgICogRGV0YWNoZXMgdGhlIHZpZXcgZnJvbSB0aGUgY2hhbmdlIGRldGVjdGlvbiB0cmVlLlxuICAgKlxuICAgKiBEZXRhY2hlZCB2aWV3cyB3aWxsIG5vdCBiZSBjaGVja2VkIGR1cmluZyBjaGFuZ2UgZGV0ZWN0aW9uIHJ1bnMgdW50aWwgdGhleSBhcmVcbiAgICogcmUtYXR0YWNoZWQsIGV2ZW4gaWYgdGhleSBhcmUgZGlydHkuIGBkZXRhY2hgIGNhbiBiZSB1c2VkIGluIGNvbWJpbmF0aW9uIHdpdGhcbiAgICoge0BsaW5rIENoYW5nZURldGVjdG9yUmVmI2RldGVjdENoYW5nZXMgZGV0ZWN0Q2hhbmdlc30gdG8gaW1wbGVtZW50IGxvY2FsIGNoYW5nZVxuICAgKiBkZXRlY3Rpb24gY2hlY2tzLlxuICAgKlxuICAgKiA8IS0tIFRPRE86IEFkZCBhIGxpbmsgdG8gYSBjaGFwdGVyIG9uIGRldGFjaC9yZWF0dGFjaC9sb2NhbCBkaWdlc3QgLS0+XG4gICAqIDwhLS0gVE9ETzogQWRkIGEgbGl2ZSBkZW1vIG9uY2UgcmVmLmRldGVjdENoYW5nZXMgaXMgbWVyZ2VkIGludG8gbWFzdGVyIC0tPlxuICAgKlxuICAgKiAjIyMgRXhhbXBsZVxuICAgKlxuICAgKiBUaGUgZm9sbG93aW5nIGV4YW1wbGUgZGVmaW5lcyBhIGNvbXBvbmVudCB3aXRoIGEgbGFyZ2UgbGlzdCBvZiByZWFkb25seSBkYXRhLlxuICAgKiBJbWFnaW5lIHRoZSBkYXRhIGNoYW5nZXMgY29uc3RhbnRseSwgbWFueSB0aW1lcyBwZXIgc2Vjb25kLiBGb3IgcGVyZm9ybWFuY2UgcmVhc29ucyxcbiAgICogd2Ugd2FudCB0byBjaGVjayBhbmQgdXBkYXRlIHRoZSBsaXN0IGV2ZXJ5IGZpdmUgc2Vjb25kcy4gV2UgY2FuIGRvIHRoYXQgYnkgZGV0YWNoaW5nXG4gICAqIHRoZSBjb21wb25lbnQncyBjaGFuZ2UgZGV0ZWN0b3IgYW5kIGRvaW5nIGEgbG9jYWwgY2hlY2sgZXZlcnkgZml2ZSBzZWNvbmRzLlxuICAgKlxuICAgKiBgYGB0eXBlc2NyaXB0XG4gICAqIGNsYXNzIERhdGFQcm92aWRlciB7XG4gICAqICAgLy8gaW4gYSByZWFsIGFwcGxpY2F0aW9uIHRoZSByZXR1cm5lZCBkYXRhIHdpbGwgYmUgZGlmZmVyZW50IGV2ZXJ5IHRpbWVcbiAgICogICBnZXQgZGF0YSgpIHtcbiAgICogICAgIHJldHVybiBbMSwyLDMsNCw1XTtcbiAgICogICB9XG4gICAqIH1cbiAgICpcbiAgICogQENvbXBvbmVudCh7XG4gICAqICAgc2VsZWN0b3I6ICdnaWFudC1saXN0JyxcbiAgICogICB0ZW1wbGF0ZTogYFxuICAgKiAgICAgPGxpICpuZ0Zvcj1cImxldCBkIG9mIGRhdGFQcm92aWRlci5kYXRhXCI+RGF0YSB7e2R9fTwvbGk+XG4gICAqICAgYCxcbiAgICogfSlcbiAgICogY2xhc3MgR2lhbnRMaXN0IHtcbiAgICogICBjb25zdHJ1Y3Rvcihwcml2YXRlIHJlZjogQ2hhbmdlRGV0ZWN0b3JSZWYsIHByaXZhdGUgZGF0YVByb3ZpZGVyOiBEYXRhUHJvdmlkZXIpIHtcbiAgICogICAgIHJlZi5kZXRhY2goKTtcbiAgICogICAgIHNldEludGVydmFsKCgpID0+IHtcbiAgICogICAgICAgdGhpcy5yZWYuZGV0ZWN0Q2hhbmdlcygpO1xuICAgKiAgICAgfSwgNTAwMCk7XG4gICAqICAgfVxuICAgKiB9XG4gICAqXG4gICAqIEBDb21wb25lbnQoe1xuICAgKiAgIHNlbGVjdG9yOiAnYXBwJyxcbiAgICogICBwcm92aWRlcnM6IFtEYXRhUHJvdmlkZXJdLFxuICAgKiAgIHRlbXBsYXRlOiBgXG4gICAqICAgICA8Z2lhbnQtbGlzdD48Z2lhbnQtbGlzdD5cbiAgICogICBgLFxuICAgKiB9KVxuICAgKiBjbGFzcyBBcHAge1xuICAgKiB9XG4gICAqIGBgYFxuICAgKi9cbiAgYWJzdHJhY3QgZGV0YWNoKCk6IHZvaWQ7XG5cbiAgLyoqXG4gICAqIENoZWNrcyB0aGUgdmlldyBhbmQgaXRzIGNoaWxkcmVuLlxuICAgKlxuICAgKiBUaGlzIGNhbiBhbHNvIGJlIHVzZWQgaW4gY29tYmluYXRpb24gd2l0aCB7QGxpbmsgQ2hhbmdlRGV0ZWN0b3JSZWYjZGV0YWNoIGRldGFjaH0gdG8gaW1wbGVtZW50XG4gICAqIGxvY2FsIGNoYW5nZSBkZXRlY3Rpb24gY2hlY2tzLlxuICAgKlxuICAgKiA8IS0tIFRPRE86IEFkZCBhIGxpbmsgdG8gYSBjaGFwdGVyIG9uIGRldGFjaC9yZWF0dGFjaC9sb2NhbCBkaWdlc3QgLS0+XG4gICAqIDwhLS0gVE9ETzogQWRkIGEgbGl2ZSBkZW1vIG9uY2UgcmVmLmRldGVjdENoYW5nZXMgaXMgbWVyZ2VkIGludG8gbWFzdGVyIC0tPlxuICAgKlxuICAgKiAjIyMgRXhhbXBsZVxuICAgKlxuICAgKiBUaGUgZm9sbG93aW5nIGV4YW1wbGUgZGVmaW5lcyBhIGNvbXBvbmVudCB3aXRoIGEgbGFyZ2UgbGlzdCBvZiByZWFkb25seSBkYXRhLlxuICAgKiBJbWFnaW5lLCB0aGUgZGF0YSBjaGFuZ2VzIGNvbnN0YW50bHksIG1hbnkgdGltZXMgcGVyIHNlY29uZC4gRm9yIHBlcmZvcm1hbmNlIHJlYXNvbnMsXG4gICAqIHdlIHdhbnQgdG8gY2hlY2sgYW5kIHVwZGF0ZSB0aGUgbGlzdCBldmVyeSBmaXZlIHNlY29uZHMuXG4gICAqXG4gICAqIFdlIGNhbiBkbyB0aGF0IGJ5IGRldGFjaGluZyB0aGUgY29tcG9uZW50J3MgY2hhbmdlIGRldGVjdG9yIGFuZCBkb2luZyBhIGxvY2FsIGNoYW5nZSBkZXRlY3Rpb25cbiAgICogY2hlY2sgZXZlcnkgZml2ZSBzZWNvbmRzLlxuICAgKlxuICAgKiBTZWUge0BsaW5rIENoYW5nZURldGVjdG9yUmVmI2RldGFjaCBkZXRhY2h9IGZvciBtb3JlIGluZm9ybWF0aW9uLlxuICAgKi9cbiAgYWJzdHJhY3QgZGV0ZWN0Q2hhbmdlcygpOiB2b2lkO1xuXG4gIC8qKlxuICAgKiBDaGVja3MgdGhlIGNoYW5nZSBkZXRlY3RvciBhbmQgaXRzIGNoaWxkcmVuLCBhbmQgdGhyb3dzIGlmIGFueSBjaGFuZ2VzIGFyZSBkZXRlY3RlZC5cbiAgICpcbiAgICogVGhpcyBpcyB1c2VkIGluIGRldmVsb3BtZW50IG1vZGUgdG8gdmVyaWZ5IHRoYXQgcnVubmluZyBjaGFuZ2UgZGV0ZWN0aW9uIGRvZXNuJ3QgaW50cm9kdWNlXG4gICAqIG90aGVyIGNoYW5nZXMuXG4gICAqL1xuICBhYnN0cmFjdCBjaGVja05vQ2hhbmdlcygpOiB2b2lkO1xuXG4gIC8qKlxuICAgKiBSZS1hdHRhY2hlcyB0aGUgdmlldyB0byB0aGUgY2hhbmdlIGRldGVjdGlvbiB0cmVlLlxuICAgKlxuICAgKiBUaGlzIGNhbiBiZSB1c2VkIHRvIHJlLWF0dGFjaCB2aWV3cyB0aGF0IHdlcmUgcHJldmlvdXNseSBkZXRhY2hlZCBmcm9tIHRoZSB0cmVlXG4gICAqIHVzaW5nIHtAbGluayBDaGFuZ2VEZXRlY3RvclJlZiNkZXRhY2ggZGV0YWNofS4gVmlld3MgYXJlIGF0dGFjaGVkIHRvIHRoZSB0cmVlIGJ5IGRlZmF1bHQuXG4gICAqXG4gICAqIDwhLS0gVE9ETzogQWRkIGEgbGluayB0byBhIGNoYXB0ZXIgb24gZGV0YWNoL3JlYXR0YWNoL2xvY2FsIGRpZ2VzdCAtLT5cbiAgICpcbiAgICogIyMjIEV4YW1wbGUgKFtsaXZlIGRlbW9dKGh0dHBzOi8vc3RhY2tibGl0ei5jb20vZWRpdC9hbmd1bGFyLXltZ3N4dykpXG4gICAqXG4gICAqIFRoZSBmb2xsb3dpbmcgZXhhbXBsZSBjcmVhdGVzIGEgY29tcG9uZW50IGRpc3BsYXlpbmcgYGxpdmVgIGRhdGEuIFRoZSBjb21wb25lbnQgd2lsbCBkZXRhY2hcbiAgICogaXRzIGNoYW5nZSBkZXRlY3RvciBmcm9tIHRoZSBtYWluIGNoYW5nZSBkZXRlY3RvciB0cmVlIHdoZW4gdGhlIGNvbXBvbmVudCdzIGxpdmUgcHJvcGVydHlcbiAgICogaXMgc2V0IHRvIGZhbHNlLlxuICAgKlxuICAgKiBgYGB0eXBlc2NyaXB0XG4gICAqIGNsYXNzIERhdGFQcm92aWRlciB7XG4gICAqICAgZGF0YSA9IDE7XG4gICAqXG4gICAqICAgY29uc3RydWN0b3IoKSB7XG4gICAqICAgICBzZXRJbnRlcnZhbCgoKSA9PiB7XG4gICAqICAgICAgIHRoaXMuZGF0YSA9IHRoaXMuZGF0YSAqIDI7XG4gICAqICAgICB9LCA1MDApO1xuICAgKiAgIH1cbiAgICogfVxuICAgKlxuICAgKiBAQ29tcG9uZW50KHtcbiAgICogICBzZWxlY3RvcjogJ2xpdmUtZGF0YScsXG4gICAqICAgaW5wdXRzOiBbJ2xpdmUnXSxcbiAgICogICB0ZW1wbGF0ZTogJ0RhdGE6IHt7ZGF0YVByb3ZpZGVyLmRhdGF9fSdcbiAgICogfSlcbiAgICogY2xhc3MgTGl2ZURhdGEge1xuICAgKiAgIGNvbnN0cnVjdG9yKHByaXZhdGUgcmVmOiBDaGFuZ2VEZXRlY3RvclJlZiwgcHJpdmF0ZSBkYXRhUHJvdmlkZXI6IERhdGFQcm92aWRlcikge31cbiAgICpcbiAgICogICBzZXQgbGl2ZSh2YWx1ZSkge1xuICAgKiAgICAgaWYgKHZhbHVlKSB7XG4gICAqICAgICAgIHRoaXMucmVmLnJlYXR0YWNoKCk7XG4gICAqICAgICB9IGVsc2Uge1xuICAgKiAgICAgICB0aGlzLnJlZi5kZXRhY2goKTtcbiAgICogICAgIH1cbiAgICogICB9XG4gICAqIH1cbiAgICpcbiAgICogQENvbXBvbmVudCh7XG4gICAqICAgc2VsZWN0b3I6ICdteS1hcHAnLFxuICAgKiAgIHByb3ZpZGVyczogW0RhdGFQcm92aWRlcl0sXG4gICAqICAgdGVtcGxhdGU6IGBcbiAgICogICAgIExpdmUgVXBkYXRlOiA8aW5wdXQgdHlwZT1cImNoZWNrYm94XCIgWyhuZ01vZGVsKV09XCJsaXZlXCI+XG4gICAqICAgICA8bGl2ZS1kYXRhIFtsaXZlXT1cImxpdmVcIj48bGl2ZS1kYXRhPlxuICAgKiAgIGAsXG4gICAqIH0pXG4gICAqIGNsYXNzIEFwcENvbXBvbmVudCB7XG4gICAqICAgbGl2ZSA9IHRydWU7XG4gICAqIH1cbiAgICogYGBgXG4gICAqL1xuICBhYnN0cmFjdCByZWF0dGFjaCgpOiB2b2lkO1xufVxuIl19
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY2hhbmdlX2RldGVjdG9yX3JlZi5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uLy4uLy4uL3BhY2thZ2VzL2NvcmUvc3JjL2NoYW5nZV9kZXRlY3Rpb24vY2hhbmdlX2RldGVjdG9yX3JlZi50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQWlEQSxNQUFNLE9BQWdCLGlCQUFpQjtDQXdEdEMiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIEBsaWNlbnNlXG4gKiBDb3B5cmlnaHQgR29vZ2xlIEluYy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBVc2Ugb2YgdGhpcyBzb3VyY2UgY29kZSBpcyBnb3Zlcm5lZCBieSBhbiBNSVQtc3R5bGUgbGljZW5zZSB0aGF0IGNhbiBiZVxuICogZm91bmQgaW4gdGhlIExJQ0VOU0UgZmlsZSBhdCBodHRwczovL2FuZ3VsYXIuaW8vbGljZW5zZVxuICovXG5cbi8qKlxuICogQmFzZSBjbGFzcyBmb3IgQW5ndWxhciBWaWV3cywgcHJvdmlkZXMgY2hhbmdlIGRldGVjdGlvbiBmdW5jdGlvbmFsaXR5LlxuICogQSBjaGFuZ2UtZGV0ZWN0aW9uIHRyZWUgY29sbGVjdHMgYWxsIHZpZXdzIHRoYXQgYXJlIHRvIGJlIGNoZWNrZWQgZm9yIGNoYW5nZXMuXG4gKiBVc2UgdGhlIG1ldGhvZHMgdG8gYWRkIGFuZCByZW1vdmUgdmlld3MgZnJvbSB0aGUgdHJlZSwgaW5pdGlhdGUgY2hhbmdlLWRldGVjdGlvbixcbiAqIGFuZCBleHBsaWNpdGx5IG1hcmsgdmlld3MgYXMgX2RpcnR5XywgbWVhbmluZyB0aGF0IHRoZXkgaGF2ZSBjaGFuZ2VkIGFuZCBuZWVkIHRvIGJlIHJlcmVuZGVyZWQuXG4gKlxuICogQHVzYWdlTm90ZXNcbiAqXG4gKiBUaGUgZm9sbG93aW5nIGV4YW1wbGVzIGRlbW9uc3RyYXRlIGhvdyB0byBtb2RpZnkgZGVmYXVsdCBjaGFuZ2UtZGV0ZWN0aW9uIGJlaGF2aW9yXG4gKiB0byBwZXJmb3JtIGV4cGxpY2l0IGRldGVjdGlvbiB3aGVuIG5lZWRlZC5cbiAqXG4gKiAjIyMgVXNlIGBtYXJrRm9yQ2hlY2soKWAgd2l0aCBgQ2hlY2tPbmNlYCBzdHJhdGVneVxuICpcbiAqIFRoZSBmb2xsb3dpbmcgZXhhbXBsZSBzZXRzIHRoZSBgT25QdXNoYCBjaGFuZ2UtZGV0ZWN0aW9uIHN0cmF0ZWd5IGZvciBhIGNvbXBvbmVudFxuICogKGBDaGVja09uY2VgLCByYXRoZXIgdGhhbiB0aGUgZGVmYXVsdCBgQ2hlY2tBbHdheXNgKSwgdGhlbiBmb3JjZXMgYSBzZWNvbmQgY2hlY2tcbiAqIGFmdGVyIGFuIGludGVydmFsLiBTZWUgW2xpdmUgZGVtb10oaHR0cDovL3BsbmtyLmNvL2VkaXQvR0M1MTJiP3A9cHJldmlldykuXG4gKlxuICogPGNvZGUtZXhhbXBsZSBwYXRoPVwiY29yZS90cy9jaGFuZ2VfZGV0ZWN0L2NoYW5nZS1kZXRlY3Rpb24udHNcIlxuICogcmVnaW9uPVwibWFyay1mb3ItY2hlY2tcIj48L2NvZGUtZXhhbXBsZT5cbiAqXG4gKiAjIyMgRGV0YWNoIGNoYW5nZSBkZXRlY3RvciB0byBsaW1pdCBob3cgb2Z0ZW4gY2hlY2sgb2NjdXJzXG4gKlxuICogVGhlIGZvbGxvd2luZyBleGFtcGxlIGRlZmluZXMgYSBjb21wb25lbnQgd2l0aCBhIGxhcmdlIGxpc3Qgb2YgcmVhZC1vbmx5IGRhdGFcbiAqIHRoYXQgaXMgZXhwZWN0ZWQgdG8gY2hhbmdlIGNvbnN0YW50bHksIG1hbnkgdGltZXMgcGVyIHNlY29uZC5cbiAqIFRvIGltcHJvdmUgcGVyZm9ybWFuY2UsIHdlIHdhbnQgdG8gY2hlY2sgYW5kIHVwZGF0ZSB0aGUgbGlzdFxuICogbGVzcyBvZnRlbiB0aGFuIHRoZSBjaGFuZ2VzIGFjdHVhbGx5IG9jY3VyLiBUbyBkbyB0aGF0LCB3ZSBkZXRhY2hcbiAqIHRoZSBjb21wb25lbnQncyBjaGFuZ2UgZGV0ZWN0b3IgYW5kIHBlcmZvcm0gYW4gZXhwbGljaXQgbG9jYWwgY2hlY2sgZXZlcnkgZml2ZSBzZWNvbmRzLlxuICpcbiAqIDxjb2RlLWV4YW1wbGUgcGF0aD1cImNvcmUvdHMvY2hhbmdlX2RldGVjdC9jaGFuZ2UtZGV0ZWN0aW9uLnRzXCIgcmVnaW9uPVwiZGV0YWNoXCI+PC9jb2RlLWV4YW1wbGU+XG4gKlxuICpcbiAqICMjIyBSZWF0dGFjaGluZyBhIGRldGFjaGVkIGNvbXBvbmVudFxuICpcbiAqIFRoZSBmb2xsb3dpbmcgZXhhbXBsZSBjcmVhdGVzIGEgY29tcG9uZW50IGRpc3BsYXlpbmcgbGl2ZSBkYXRhLlxuICogVGhlIGNvbXBvbmVudCBkZXRhY2hlcyBpdHMgY2hhbmdlIGRldGVjdG9yIGZyb20gdGhlIG1haW4gY2hhbmdlIGRldGVjdG9yIHRyZWVcbiAqIHdoZW4gdGhlIGBsaXZlYCBwcm9wZXJ0eSBpcyBzZXQgdG8gZmFsc2UsIGFuZCByZWF0dGFjaGVzIGl0IHdoZW4gdGhlIHByb3BlcnR5XG4gKiBiZWNvbWVzIHRydWUuXG4gKlxuICogPGNvZGUtZXhhbXBsZSBwYXRoPVwiY29yZS90cy9jaGFuZ2VfZGV0ZWN0L2NoYW5nZS1kZXRlY3Rpb24udHNcIiByZWdpb249XCJkZXRhY2hcIj48L2NvZGUtZXhhbXBsZT5cbiAqXG4gKi9cbmV4cG9ydCBhYnN0cmFjdCBjbGFzcyBDaGFuZ2VEZXRlY3RvclJlZiB7XG4gIC8qKlxuICAgKiBXaGVuIGEgdmlldyB1c2VzIHRoZSB7QGxpbmsgQ2hhbmdlRGV0ZWN0aW9uU3RyYXRlZ3kjT25QdXNoIE9uUHVzaH0gKGNoZWNrT25jZSlcbiAgICogY2hhbmdlIGRldGVjdGlvbiBzdHJhdGVneSwgZXhwbGljaXRseSBtYXJrcyB0aGUgdmlldyBhcyBjaGFuZ2VkIHNvIHRoYXRcbiAgICogaXQgY2FuIGJlIGNoZWNrZWQgYWdhaW4uXG4gICAqXG4gICAqIENvbXBvbmVudHMgYXJlIG5vcm1hbGx5IG1hcmtlZCBhcyBkaXJ0eSAoaW4gbmVlZCBvZiByZXJlbmRlcmluZykgd2hlbiBpbnB1dHNcbiAgICogaGF2ZSBjaGFuZ2VkIG9yIGV2ZW50cyBoYXZlIGZpcmVkIGluIHRoZSB2aWV3LiBDYWxsIHRoaXMgbWV0aG9kIHRvIGVuc3VyZSB0aGF0XG4gICAqIGEgY29tcG9uZW50IGlzIGNoZWNrZWQgZXZlbiBpZiB0aGVzZSB0cmlnZ2VycyBoYXZlIG5vdCBvY2N1cmVkLlxuICAgKlxuICAgKiA8IS0tIFRPRE86IEFkZCBhIGxpbmsgdG8gYSBjaGFwdGVyIG9uIE9uUHVzaCBjb21wb25lbnRzIC0tPlxuICAgKlxuICAgKi9cbiAgYWJzdHJhY3QgbWFya0ZvckNoZWNrKCk6IHZvaWQ7XG5cbiAgLyoqXG4gICAqIERldGFjaGVzIHRoaXMgdmlldyBmcm9tIHRoZSBjaGFuZ2UtZGV0ZWN0aW9uIHRyZWUuXG4gICAqIEEgZGV0YWNoZWQgdmlldyBpcyAgbm90IGNoZWNrZWQgdW50aWwgaXQgaXMgcmVhdHRhY2hlZC5cbiAgICogVXNlIGluIGNvbWJpbmF0aW9uIHdpdGggYGRldGVjdENoYW5nZXMoKWAgdG8gaW1wbGVtZW50IGxvY2FsIGNoYW5nZSBkZXRlY3Rpb24gY2hlY2tzLlxuICAgKlxuICAgKiBEZXRhY2hlZCB2aWV3cyBhcmUgbm90IGNoZWNrZWQgZHVyaW5nIGNoYW5nZSBkZXRlY3Rpb24gcnVucyB1bnRpbCB0aGV5IGFyZVxuICAgKiByZS1hdHRhY2hlZCwgZXZlbiBpZiB0aGV5IGFyZSBtYXJrZWQgYXMgZGlydHkuXG4gICAqXG4gICAqIDwhLS0gVE9ETzogQWRkIGEgbGluayB0byBhIGNoYXB0ZXIgb24gZGV0YWNoL3JlYXR0YWNoL2xvY2FsIGRpZ2VzdCAtLT5cbiAgICogPCEtLSBUT0RPOiBBZGQgYSBsaXZlIGRlbW8gb25jZSByZWYuZGV0ZWN0Q2hhbmdlcyBpcyBtZXJnZWQgaW50byBtYXN0ZXIgLS0+XG4gICAqXG4gICAqL1xuICBhYnN0cmFjdCBkZXRhY2goKTogdm9pZDtcblxuICAvKipcbiAgICogQ2hlY2tzIHRoaXMgdmlldyBhbmQgaXRzIGNoaWxkcmVuLiBVc2UgaW4gY29tYmluYXRpb24gd2l0aCB7QGxpbmsgQ2hhbmdlRGV0ZWN0b3JSZWYjZGV0YWNoXG4gICAqIGRldGFjaH1cbiAgICogdG8gaW1wbGVtZW50IGxvY2FsIGNoYW5nZSBkZXRlY3Rpb24gY2hlY2tzLlxuICAgKlxuICAgKiA8IS0tIFRPRE86IEFkZCBhIGxpbmsgdG8gYSBjaGFwdGVyIG9uIGRldGFjaC9yZWF0dGFjaC9sb2NhbCBkaWdlc3QgLS0+XG4gICAqIDwhLS0gVE9ETzogQWRkIGEgbGl2ZSBkZW1vIG9uY2UgcmVmLmRldGVjdENoYW5nZXMgaXMgbWVyZ2VkIGludG8gbWFzdGVyIC0tPlxuICAgKlxuICAgKi9cbiAgYWJzdHJhY3QgZGV0ZWN0Q2hhbmdlcygpOiB2b2lkO1xuXG4gIC8qKlxuICAgKiBDaGVja3MgdGhlIGNoYW5nZSBkZXRlY3RvciBhbmQgaXRzIGNoaWxkcmVuLCBhbmQgdGhyb3dzIGlmIGFueSBjaGFuZ2VzIGFyZSBkZXRlY3RlZC5cbiAgICpcbiAgICogVXNlIGluIGRldmVsb3BtZW50IG1vZGUgdG8gdmVyaWZ5IHRoYXQgcnVubmluZyBjaGFuZ2UgZGV0ZWN0aW9uIGRvZXNuJ3QgaW50cm9kdWNlXG4gICAqIG90aGVyIGNoYW5nZXMuXG4gICAqL1xuICBhYnN0cmFjdCBjaGVja05vQ2hhbmdlcygpOiB2b2lkO1xuXG4gIC8qKlxuICAgKiBSZS1hdHRhY2hlcyB0aGUgcHJldmlvdXNseSBkZXRhY2hlZCB2aWV3IHRvIHRoZSBjaGFuZ2UgZGV0ZWN0aW9uIHRyZWUuXG4gICAqIFZpZXdzIGFyZSBhdHRhY2hlZCB0byB0aGUgdHJlZSBieSBkZWZhdWx0LlxuICAgKlxuICAgKiA8IS0tIFRPRE86IEFkZCBhIGxpbmsgdG8gYSBjaGFwdGVyIG9uIGRldGFjaC9yZWF0dGFjaC9sb2NhbCBkaWdlc3QgLS0+XG4gICAqXG4gICAqL1xuICBhYnN0cmFjdCByZWF0dGFjaCgpOiB2b2lkO1xufVxuIl19

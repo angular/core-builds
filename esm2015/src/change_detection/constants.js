@@ -1,6 +1,6 @@
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -10,66 +10,72 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /** @enum {number} */
-const ChangeDetectionStrategy = {
+var ChangeDetectionStrategy = {
     /**
-       * `OnPush` means that the change detector's mode will be initially set to `CheckOnce`.
+       * Use the `CheckOnce` strategy, meaning that automatic change detection is deactivated
+       * until reactivated by setting the strategy to `Default` (`CheckAlways`).
+       * Change detection can still be explictly invoked.
        */
     OnPush: 0,
     /**
-       * `Default` means that the change detector's mode will be initially set to `CheckAlways`.
+       * Use the default `CheckAlways` strategy, in which change detection is automatic until
+       * explicitly deactivated.
        */
     Default: 1,
 };
 export { ChangeDetectionStrategy };
-ChangeDetectionStrategy[ChangeDetectionStrategy.OnPush] = "OnPush";
-ChangeDetectionStrategy[ChangeDetectionStrategy.Default] = "Default";
+ChangeDetectionStrategy[ChangeDetectionStrategy.OnPush] = 'OnPush';
+ChangeDetectionStrategy[ChangeDetectionStrategy.Default] = 'Default';
 /** @enum {number} */
-const ChangeDetectorStatus = {
+var ChangeDetectorStatus = {
     /**
-       * `CheckOnce` means that after calling detectChanges the mode of the change detector
-       * will become `Checked`.
+       * A state in which, after calling `detectChanges()`, the change detector
+       * state becomes `Checked`, and must be explicitly invoked or reactivated.
        */
     CheckOnce: 0,
     /**
-       * `Checked` means that the change detector should be skipped until its mode changes to
-       * `CheckOnce`.
+       * A state in which change detection is skipped until the change detector mode
+       * becomes `CheckOnce`.
        */
     Checked: 1,
     /**
-       * `CheckAlways` means that after calling detectChanges the mode of the change detector
-       * will remain `CheckAlways`.
+       * A state in which change detection continues automatically until explictly
+       * deactivated.
        */
     CheckAlways: 2,
     /**
-       * `Detached` means that the change detector sub tree is not a part of the main tree and
+       * A state in which a change detector sub tree is not a part of the main tree and
        * should be skipped.
        */
     Detached: 3,
     /**
-       * `Errored` means that the change detector encountered an error checking a binding
+       * Indicates that the change detector encountered an error checking a binding
        * or calling a directive lifecycle method and is now in an inconsistent state. Change
-       * detectors in this state will no longer detect changes.
+       * detectors in this state do not detect changes.
        */
     Errored: 4,
     /**
-       * `Destroyed` means that the change detector is destroyed.
+       * Indicates that the change detector has been destroyed.
        */
     Destroyed: 5,
 };
 export { ChangeDetectorStatus };
-ChangeDetectorStatus[ChangeDetectorStatus.CheckOnce] = "CheckOnce";
-ChangeDetectorStatus[ChangeDetectorStatus.Checked] = "Checked";
-ChangeDetectorStatus[ChangeDetectorStatus.CheckAlways] = "CheckAlways";
-ChangeDetectorStatus[ChangeDetectorStatus.Detached] = "Detached";
-ChangeDetectorStatus[ChangeDetectorStatus.Errored] = "Errored";
-ChangeDetectorStatus[ChangeDetectorStatus.Destroyed] = "Destroyed";
+ChangeDetectorStatus[ChangeDetectorStatus.CheckOnce] = 'CheckOnce';
+ChangeDetectorStatus[ChangeDetectorStatus.Checked] = 'Checked';
+ChangeDetectorStatus[ChangeDetectorStatus.CheckAlways] = 'CheckAlways';
+ChangeDetectorStatus[ChangeDetectorStatus.Detached] = 'Detached';
+ChangeDetectorStatus[ChangeDetectorStatus.Errored] = 'Errored';
+ChangeDetectorStatus[ChangeDetectorStatus.Destroyed] = 'Destroyed';
 /**
- * @param {?} changeDetectionStrategy
- * @return {?}
+ * Reports whether a given strategy is currently the default for change detection.
+ * @see `ChangeDetectorStatus`
+ * @see `ChangeDetectorRef`
+ * @param {?} changeDetectionStrategy The strategy to check.
+ * @return {?} True if the given strategy is the current default, false otherwise.
  */
 export function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
     return changeDetectionStrategy == null ||
         changeDetectionStrategy === ChangeDetectionStrategy.Default;
 }
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29uc3RhbnRzLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vLi4vLi4vLi4vcGFja2FnZXMvY29yZS9zcmMvY2hhbmdlX2RldGVjdGlvbi9jb25zdGFudHMudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBbUVBLE1BQU0sMkNBQTJDLHVCQUFnRDtJQUUvRixPQUFPLHVCQUF1QixJQUFJLElBQUk7UUFDbEMsdUJBQXVCLEtBQUssdUJBQXVCLENBQUMsT0FBTyxDQUFDO0NBQ2pFIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBAbGljZW5zZVxuICogQ29weXJpZ2h0IEdvb2dsZSBJbmMuIEFsbCBSaWdodHMgUmVzZXJ2ZWQuXG4gKlxuICogVXNlIG9mIHRoaXMgc291cmNlIGNvZGUgaXMgZ292ZXJuZWQgYnkgYW4gTUlULXN0eWxlIGxpY2Vuc2UgdGhhdCBjYW4gYmVcbiAqIGZvdW5kIGluIHRoZSBMSUNFTlNFIGZpbGUgYXQgaHR0cHM6Ly9hbmd1bGFyLmlvL2xpY2Vuc2VcbiAqL1xuXG5cbi8qKlxuICogRGVzY3JpYmVzIHdpdGhpbiB0aGUgY2hhbmdlIGRldGVjdG9yIHdoaWNoIHN0cmF0ZWd5IHdpbGwgYmUgdXNlZCB0aGUgbmV4dCB0aW1lIGNoYW5nZVxuICogZGV0ZWN0aW9uIGlzIHRyaWdnZXJlZC5cbiAqXG4gKi9cbmV4cG9ydCBlbnVtIENoYW5nZURldGVjdGlvblN0cmF0ZWd5IHtcbiAgLyoqXG4gICAqIGBPblB1c2hgIG1lYW5zIHRoYXQgdGhlIGNoYW5nZSBkZXRlY3RvcidzIG1vZGUgd2lsbCBiZSBpbml0aWFsbHkgc2V0IHRvIGBDaGVja09uY2VgLlxuICAgKi9cbiAgT25QdXNoID0gMCxcblxuICAvKipcbiAgICogYERlZmF1bHRgIG1lYW5zIHRoYXQgdGhlIGNoYW5nZSBkZXRlY3RvcidzIG1vZGUgd2lsbCBiZSBpbml0aWFsbHkgc2V0IHRvIGBDaGVja0Fsd2F5c2AuXG4gICAqL1xuICBEZWZhdWx0ID0gMSxcbn1cblxuLyoqXG4gKiBEZXNjcmliZXMgdGhlIHN0YXR1cyBvZiB0aGUgZGV0ZWN0b3IuXG4gKi9cbmV4cG9ydCBlbnVtIENoYW5nZURldGVjdG9yU3RhdHVzIHtcbiAgLyoqXG4gICAqIGBDaGVja09uY2VgIG1lYW5zIHRoYXQgYWZ0ZXIgY2FsbGluZyBkZXRlY3RDaGFuZ2VzIHRoZSBtb2RlIG9mIHRoZSBjaGFuZ2UgZGV0ZWN0b3JcbiAgICogd2lsbCBiZWNvbWUgYENoZWNrZWRgLlxuICAgKi9cbiAgQ2hlY2tPbmNlLFxuXG4gIC8qKlxuICAgKiBgQ2hlY2tlZGAgbWVhbnMgdGhhdCB0aGUgY2hhbmdlIGRldGVjdG9yIHNob3VsZCBiZSBza2lwcGVkIHVudGlsIGl0cyBtb2RlIGNoYW5nZXMgdG9cbiAgICogYENoZWNrT25jZWAuXG4gICAqL1xuICBDaGVja2VkLFxuXG4gIC8qKlxuICAgKiBgQ2hlY2tBbHdheXNgIG1lYW5zIHRoYXQgYWZ0ZXIgY2FsbGluZyBkZXRlY3RDaGFuZ2VzIHRoZSBtb2RlIG9mIHRoZSBjaGFuZ2UgZGV0ZWN0b3JcbiAgICogd2lsbCByZW1haW4gYENoZWNrQWx3YXlzYC5cbiAgICovXG4gIENoZWNrQWx3YXlzLFxuXG4gIC8qKlxuICAgKiBgRGV0YWNoZWRgIG1lYW5zIHRoYXQgdGhlIGNoYW5nZSBkZXRlY3RvciBzdWIgdHJlZSBpcyBub3QgYSBwYXJ0IG9mIHRoZSBtYWluIHRyZWUgYW5kXG4gICAqIHNob3VsZCBiZSBza2lwcGVkLlxuICAgKi9cbiAgRGV0YWNoZWQsXG5cbiAgLyoqXG4gICAqIGBFcnJvcmVkYCBtZWFucyB0aGF0IHRoZSBjaGFuZ2UgZGV0ZWN0b3IgZW5jb3VudGVyZWQgYW4gZXJyb3IgY2hlY2tpbmcgYSBiaW5kaW5nXG4gICAqIG9yIGNhbGxpbmcgYSBkaXJlY3RpdmUgbGlmZWN5Y2xlIG1ldGhvZCBhbmQgaXMgbm93IGluIGFuIGluY29uc2lzdGVudCBzdGF0ZS4gQ2hhbmdlXG4gICAqIGRldGVjdG9ycyBpbiB0aGlzIHN0YXRlIHdpbGwgbm8gbG9uZ2VyIGRldGVjdCBjaGFuZ2VzLlxuICAgKi9cbiAgRXJyb3JlZCxcblxuICAvKipcbiAgICogYERlc3Ryb3llZGAgbWVhbnMgdGhhdCB0aGUgY2hhbmdlIGRldGVjdG9yIGlzIGRlc3Ryb3llZC5cbiAgICovXG4gIERlc3Ryb3llZCxcbn1cblxuZXhwb3J0IGZ1bmN0aW9uIGlzRGVmYXVsdENoYW5nZURldGVjdGlvblN0cmF0ZWd5KGNoYW5nZURldGVjdGlvblN0cmF0ZWd5OiBDaGFuZ2VEZXRlY3Rpb25TdHJhdGVneSk6XG4gICAgYm9vbGVhbiB7XG4gIHJldHVybiBjaGFuZ2VEZXRlY3Rpb25TdHJhdGVneSA9PSBudWxsIHx8XG4gICAgICBjaGFuZ2VEZXRlY3Rpb25TdHJhdGVneSA9PT0gQ2hhbmdlRGV0ZWN0aW9uU3RyYXRlZ3kuRGVmYXVsdDtcbn1cbiJdfQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29uc3RhbnRzLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vLi4vLi4vLi4vcGFja2FnZXMvY29yZS9zcmMvY2hhbmdlX2RldGVjdGlvbi9jb25zdGFudHMudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7O0lBb0JFLFNBQVU7Ozs7O0lBTVYsVUFBVzs7O2dEQU5YLE1BQU07Z0RBTU4sT0FBTzs7Ozs7OztJQVlQLFlBQVM7Ozs7O0lBTVQsVUFBTzs7Ozs7SUFNUCxjQUFXOzs7OztJQU1YLFdBQVE7Ozs7OztJQU9SLFVBQU87Ozs7SUFLUCxZQUFTOzs7MENBOUJULFNBQVM7MENBTVQsT0FBTzswQ0FNUCxXQUFXOzBDQU1YLFFBQVE7MENBT1IsT0FBTzswQ0FLUCxTQUFTOzs7Ozs7OztBQVVYLE1BQU0sVUFBVSxnQ0FBZ0MsQ0FBQyx1QkFBZ0Q7SUFFL0YsT0FBTyx1QkFBdUIsSUFBSSxJQUFJO1FBQ2xDLHVCQUF1QixLQUFLLHVCQUF1QixDQUFDLE9BQU8sQ0FBQztDQUNqRSIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQGxpY2Vuc2VcbiAqIENvcHlyaWdodCBHb29nbGUgSW5jLiBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIFVzZSBvZiB0aGlzIHNvdXJjZSBjb2RlIGlzIGdvdmVybmVkIGJ5IGFuIE1JVC1zdHlsZSBsaWNlbnNlIHRoYXQgY2FuIGJlXG4gKiBmb3VuZCBpbiB0aGUgTElDRU5TRSBmaWxlIGF0IGh0dHBzOi8vYW5ndWxhci5pby9saWNlbnNlXG4gKi9cblxuXG4vKipcbiAqIFRoZSBzdHJhdGVneSB0aGF0IHRoZSBkZWZhdWx0IGNoYW5nZSBkZXRlY3RvciB1c2VzIHRvIGRldGVjdCBjaGFuZ2VzLlxuICogV2hlbiBzZXQsIHRha2VzIGVmZmVjdCB0aGUgbmV4dCB0aW1lIGNoYW5nZSBkZXRlY3Rpb24gaXMgdHJpZ2dlcmVkLlxuICpcbiAqL1xuZXhwb3J0IGVudW0gQ2hhbmdlRGV0ZWN0aW9uU3RyYXRlZ3kge1xuICAvKipcbiAgICogVXNlIHRoZSBgQ2hlY2tPbmNlYCBzdHJhdGVneSwgbWVhbmluZyB0aGF0IGF1dG9tYXRpYyBjaGFuZ2UgZGV0ZWN0aW9uIGlzIGRlYWN0aXZhdGVkXG4gICAqIHVudGlsIHJlYWN0aXZhdGVkIGJ5IHNldHRpbmcgdGhlIHN0cmF0ZWd5IHRvIGBEZWZhdWx0YCAoYENoZWNrQWx3YXlzYCkuXG4gICAqIENoYW5nZSBkZXRlY3Rpb24gY2FuIHN0aWxsIGJlIGV4cGxpY3RseSBpbnZva2VkLlxuICAgKi9cbiAgT25QdXNoID0gMCxcblxuICAvKipcbiAgICogVXNlIHRoZSBkZWZhdWx0IGBDaGVja0Fsd2F5c2Agc3RyYXRlZ3ksIGluIHdoaWNoIGNoYW5nZSBkZXRlY3Rpb24gaXMgYXV0b21hdGljIHVudGlsXG4gICAqIGV4cGxpY2l0bHkgZGVhY3RpdmF0ZWQuXG4gICAqL1xuICBEZWZhdWx0ID0gMSxcbn1cblxuLyoqXG4gKiBEZWZpbmVzIHRoZSBwb3NzaWJsZSBzdGF0ZXMgb2YgdGhlIGRlZmF1bHQgY2hhbmdlIGRldGVjdG9yLlxuICogQHNlZSBgQ2hhbmdlRGV0ZWN0b3JSZWZgXG4gKi9cbmV4cG9ydCBlbnVtIENoYW5nZURldGVjdG9yU3RhdHVzIHtcbiAgLyoqXG4gICAqIEEgc3RhdGUgaW4gd2hpY2gsIGFmdGVyIGNhbGxpbmcgYGRldGVjdENoYW5nZXMoKWAsIHRoZSBjaGFuZ2UgZGV0ZWN0b3JcbiAgICogc3RhdGUgYmVjb21lcyBgQ2hlY2tlZGAsIGFuZCBtdXN0IGJlIGV4cGxpY2l0bHkgaW52b2tlZCBvciByZWFjdGl2YXRlZC5cbiAgICovXG4gIENoZWNrT25jZSxcblxuICAvKipcbiAgICogQSBzdGF0ZSBpbiB3aGljaCBjaGFuZ2UgZGV0ZWN0aW9uIGlzIHNraXBwZWQgdW50aWwgdGhlIGNoYW5nZSBkZXRlY3RvciBtb2RlXG4gICAqIGJlY29tZXMgYENoZWNrT25jZWAuXG4gICAqL1xuICBDaGVja2VkLFxuXG4gIC8qKlxuICAgKiBBIHN0YXRlIGluIHdoaWNoIGNoYW5nZSBkZXRlY3Rpb24gY29udGludWVzIGF1dG9tYXRpY2FsbHkgdW50aWwgZXhwbGljdGx5XG4gICAqIGRlYWN0aXZhdGVkLlxuICAgKi9cbiAgQ2hlY2tBbHdheXMsXG5cbiAgLyoqXG4gICAqIEEgc3RhdGUgaW4gd2hpY2ggYSBjaGFuZ2UgZGV0ZWN0b3Igc3ViIHRyZWUgaXMgbm90IGEgcGFydCBvZiB0aGUgbWFpbiB0cmVlIGFuZFxuICAgKiBzaG91bGQgYmUgc2tpcHBlZC5cbiAgICovXG4gIERldGFjaGVkLFxuXG4gIC8qKlxuICAgKiBJbmRpY2F0ZXMgdGhhdCB0aGUgY2hhbmdlIGRldGVjdG9yIGVuY291bnRlcmVkIGFuIGVycm9yIGNoZWNraW5nIGEgYmluZGluZ1xuICAgKiBvciBjYWxsaW5nIGEgZGlyZWN0aXZlIGxpZmVjeWNsZSBtZXRob2QgYW5kIGlzIG5vdyBpbiBhbiBpbmNvbnNpc3RlbnQgc3RhdGUuIENoYW5nZVxuICAgKiBkZXRlY3RvcnMgaW4gdGhpcyBzdGF0ZSBkbyBub3QgZGV0ZWN0IGNoYW5nZXMuXG4gICAqL1xuICBFcnJvcmVkLFxuXG4gIC8qKlxuICAgKiBJbmRpY2F0ZXMgdGhhdCB0aGUgY2hhbmdlIGRldGVjdG9yIGhhcyBiZWVuIGRlc3Ryb3llZC5cbiAgICovXG4gIERlc3Ryb3llZCxcbn1cblxuLyoqXG4gKiBSZXBvcnRzIHdoZXRoZXIgYSBnaXZlbiBzdHJhdGVneSBpcyBjdXJyZW50bHkgdGhlIGRlZmF1bHQgZm9yIGNoYW5nZSBkZXRlY3Rpb24uXG4gKiBAcGFyYW0gY2hhbmdlRGV0ZWN0aW9uU3RyYXRlZ3kgVGhlIHN0cmF0ZWd5IHRvIGNoZWNrLlxuICogQHJldHVybnMgVHJ1ZSBpZiB0aGUgZ2l2ZW4gc3RyYXRlZ3kgaXMgdGhlIGN1cnJlbnQgZGVmYXVsdCwgZmFsc2Ugb3RoZXJ3aXNlLlxuICogQHNlZSBgQ2hhbmdlRGV0ZWN0b3JTdGF0dXNgXG4gKiBAc2VlIGBDaGFuZ2VEZXRlY3RvclJlZmAgXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBpc0RlZmF1bHRDaGFuZ2VEZXRlY3Rpb25TdHJhdGVneShjaGFuZ2VEZXRlY3Rpb25TdHJhdGVneTogQ2hhbmdlRGV0ZWN0aW9uU3RyYXRlZ3kpOlxuICAgIGJvb2xlYW4ge1xuICByZXR1cm4gY2hhbmdlRGV0ZWN0aW9uU3RyYXRlZ3kgPT0gbnVsbCB8fFxuICAgICAgY2hhbmdlRGV0ZWN0aW9uU3RyYXRlZ3kgPT09IENoYW5nZURldGVjdGlvblN0cmF0ZWd5LkRlZmF1bHQ7XG59XG4iXX0=

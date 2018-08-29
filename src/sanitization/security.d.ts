@@ -20,7 +20,7 @@ export declare enum SecurityContext {
     STYLE = 2,
     SCRIPT = 3,
     URL = 4,
-    RESOURCE_URL = 5,
+    RESOURCE_URL = 5
 }
 /**
  * Sanitizer is used by the views to sanitize potentially dangerous values.

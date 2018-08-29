@@ -11,8 +11,9 @@ import { InjectionToken } from '../di/injection_token';
  * It is used for i18n extraction, by i18n pipes (DatePipe, I18nPluralPipe, CurrencyPipe,
  * DecimalPipe and PercentPipe) and by ICU expressions.
  *
- * See the {@linkDocs guide/i18n#setting-up-locale i18n guide} for more information.
+ * See the [i18n guide](guide/i18n#setting-up-locale) for more information.
  *
+ * @usageNotes
  * ### Example
  *
  * ```typescript
@@ -32,8 +33,9 @@ export declare const LOCALE_ID: InjectionToken<string>;
  * Use this token at bootstrap to provide the content of your translation file (`xtb`,
  * `xlf` or `xlf2`) when you want to translate your application in another language.
  *
- * See the {@linkDocs guide/i18n#merge i18n guide} for more information.
+ * See the [i18n guide](guide/i18n#merge) for more information.
  *
+ * @usageNotes
  * ### Example
  *
  * ```typescript
@@ -56,8 +58,9 @@ export declare const TRANSLATIONS: InjectionToken<string>;
  * Provide this token at bootstrap to set the format of your {@link TRANSLATIONS}: `xtb`,
  * `xlf` or `xlf2`.
  *
- * See the {@linkDocs guide/i18n#merge i18n guide} for more information.
+ * See the [i18n guide](guide/i18n#merge) for more information.
  *
+ * @usageNotes
  * ### Example
  *
  * ```typescript
@@ -80,8 +83,9 @@ export declare const TRANSLATIONS_FORMAT: InjectionToken<string>;
  * - Warning (default): show a warning in the console and/or shell.
  * - Ignore: do nothing.
  *
- * See the {@linkDocs guide/i18n#missing-translation i18n guide} for more information.
+ * See the [i18n guide](guide/i18n#missing-translation) for more information.
  *
+ * @usageNotes
  * ### Example
  * ```typescript
  * import { MissingTranslationStrategy } from '@angular/core';
@@ -98,5 +102,5 @@ export declare const TRANSLATIONS_FORMAT: InjectionToken<string>;
 export declare enum MissingTranslationStrategy {
     Error = 0,
     Warning = 1,
-    Ignore = 2,
+    Ignore = 2
 }

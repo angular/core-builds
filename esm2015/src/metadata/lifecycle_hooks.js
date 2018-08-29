@@ -1,6 +1,6 @@
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -10,178 +10,228 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * A `changes` object whose keys are property names and
- * values are instances of {\@link SimpleChange}. See {\@link OnChanges}
+ * Defines an object that associates properties with
+ * instances of `SimpleChange`.
+ *
+ * @see `OnChanges`
  *
  * @record
  */
 export function SimpleChanges() { }
-function SimpleChanges_tsickle_Closure_declarations() {
-    /* TODO: handle strange member:
-    [propName: string]: SimpleChange;
-    */
-}
 /**
- * \@usageNotes
- * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='OnChanges'}
- *
  * \@description
- * Lifecycle hook that is called when any data-bound property of a directive changes.
+ * A lifecycle hook that is called when any data-bound property of a directive changes.
+ * Define an `ngOnChanges()` method to handle the changes.
  *
- * `ngOnChanges` is called right after the data-bound properties have been checked and before view
- * and content children are checked if at least one of them has changed.
- * The `changes` parameter contains the changed properties.
+ * @see `DoCheck`
+ * @see `OnInit`
+ * @see [Lifecycle Hooks](guide/lifecycle-hooks#onchanges) guide
  *
- * See {\@linkDocs guide/lifecycle-hooks#onchanges "Lifecycle Hooks Guide"}.
+ * \@usageNotes
+ * The following snippet shows how a component can implement this interface to
+ * define an on-changes handler for an input property.
  *
+ * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='OnChanges'}
  *
  * @record
  */
 export function OnChanges() { }
-function OnChanges_tsickle_Closure_declarations() {
-    /** @type {?} */
-    OnChanges.prototype.ngOnChanges;
-}
 /**
- * \@usageNotes
- * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='OnInit'}
- *
+ * A callback method that is invoked immediately after the
+ * default change detector has checked data-bound properties
+ * if at least one has changed, and before the view and content
+ * children are checked.
+ * \@param changes The changed properties.
+ * @type {?}
+ */
+OnChanges.prototype.ngOnChanges;
+/**
  * \@description
- * Lifecycle hook that is called after data-bound properties of a directive are
- * initialized.
+ * A lifecycle hook that is called after Angular has initialized
+ * all data-bound properties of a directive.
+ * Define an `ngOnInit()` method to handle any additional initialization tasks.
  *
- * `ngOnInit` is called right after the directive's data-bound properties have been checked for the
- * first time, and before any of its children have been checked. It is invoked only once when the
- * directive is instantiated.
+ * @see `AfterContentInit`
+ * @see [Lifecycle Hooks](guide/lifecycle-hooks#onchanges) guide
  *
- * See {\@linkDocs guide/lifecycle-hooks "Lifecycle Hooks Guide"}.
+ * \@usageNotes
+ * The following snippet shows how a component can implement this interface to
+ * define its own initialization method.
+ *
+ * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='OnInit'}
  *
  *
  * @record
  */
 export function OnInit() { }
-function OnInit_tsickle_Closure_declarations() {
-    /** @type {?} */
-    OnInit.prototype.ngOnInit;
-}
 /**
+ * A callback method that is invoked immediately after the
+ * default change detector has checked the directive's
+ * data-bound properties for the first time,
+ * and before any of the view or content children have been checked.
+ * It is invoked only once when the directive is instantiated.
+ * @type {?}
+ */
+OnInit.prototype.ngOnInit;
+/**
+ * A lifecycle hook that invokes a custom change-detection function for a directive,
+ * in addition to the check performed by the default change-detector.
+ *
+ * The default change-detection algorithm looks for differences by comparing
+ * bound-property values by reference across change detection runs. You can use this
+ * hook to check for and respond to changes by some other means.
+ *
+ * When the default change detector detects changes, it invokes `ngOnChanges()` if supplied,
+ * regardless of whether you perform additional change detection.
+ * Typically, you should not use both `DoCheck` and `OnChanges` to respond to
+ * changes on the same input.
+ *
+ * @see `OnChanges`
+ * @see [Lifecycle Hooks](guide/lifecycle-hooks#onchanges) guide
+ *
  * \@usageNotes
+ * The following snippet shows how a component can implement this interface
+ * to invoke it own change-detection cycle.
+ *
  * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='DoCheck'}
- *
- * \@description
- * Lifecycle hook that is called when Angular dirty checks a directive.
- *
- * `ngDoCheck` gets called to check the changes in the directives in addition to the default
- * algorithm. The default change detection algorithm looks for differences by comparing
- * bound-property values by reference across change detection runs.
- *
- * Note that a directive typically should not use both `DoCheck` and {\@link OnChanges} to respond to
- * changes on the same input, as `ngOnChanges` will continue to be called when the default change
- * detector detects changes.
- *
- * See {\@link KeyValueDiffers} and {\@link IterableDiffers} for implementing custom dirty checking
- * for collections.
- *
- * See {\@linkDocs guide/lifecycle-hooks#docheck "Lifecycle Hooks Guide"}.
- *
  *
  * @record
  */
 export function DoCheck() { }
-function DoCheck_tsickle_Closure_declarations() {
-    /** @type {?} */
-    DoCheck.prototype.ngDoCheck;
-}
 /**
- * \@usageNotes
- * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='OnDestroy'}
+ * A callback method that performs change-detection, invoked
+ * after the default change-detector runs.
+ * See `KeyValueDiffers` and `IterableDiffers` for implementing
+ * custom change checking for collections.
  *
- * \@description
- * Lifecycle hook that is called when a directive, pipe or service is destroyed.
- *
- * `ngOnDestroy` callback is typically used for any custom cleanup that needs to occur when the
+ * @type {?}
+ */
+DoCheck.prototype.ngDoCheck;
+/**
+ * A lifecycle hook that is called when a directive, pipe, or service is destroyed.
+ * Use for any custom cleanup that needs to occur when the
  * instance is destroyed.
+ * @see [Lifecycle Hooks](guide/lifecycle-hooks#onchanges) guide
  *
- * See {\@linkDocs guide/lifecycle-hooks "Lifecycle Hooks Guide"}.
+ * \@usageNotes
+ * The following snippet shows how a component can implement this interface
+ * to define its own custom clean-up method.
  *
+ * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='OnDestroy'}
  *
  * @record
  */
 export function OnDestroy() { }
-function OnDestroy_tsickle_Closure_declarations() {
-    /** @type {?} */
-    OnDestroy.prototype.ngOnDestroy;
-}
 /**
+ * A callback method that performs custom clean-up, invoked immediately
+ * after a directive, pipe, or service instance is destroyed.
+ * @type {?}
+ */
+OnDestroy.prototype.ngOnDestroy;
+/**
+ * \@description
+ * A lifecycle hook that is called after Angular has fully initialized
+ * all content of a directive.
+ * Define an `ngAfterContentInit()` method to handle any additional initialization tasks.
+ *
+ * @see `OnInit`
+ * @see `AfterViewInit`
+ * @see [Lifecycle Hooks](guide/lifecycle-hooks#onchanges) guide
  *
  * \@usageNotes
+ * The following snippet shows how a component can implement this interface to
+ * define its own content initialization method.
+ *
  * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterContentInit'}
- *
- * \@description
- * Lifecycle hook that is called after a directive's content has been fully
- * initialized.
- *
- * See {\@linkDocs guide/lifecycle-hooks#aftercontent "Lifecycle Hooks Guide"}.
  *
  *
  * @record
  */
 export function AfterContentInit() { }
-function AfterContentInit_tsickle_Closure_declarations() {
-    /** @type {?} */
-    AfterContentInit.prototype.ngAfterContentInit;
-}
 /**
- * \@usageNotes
- * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterContentChecked'}
- *
+ * A callback method that is invoked immediately after
+ * Angular has completed initialization of all of the directive's
+ * content.
+ * It is invoked only once when the directive is instantiated.
+ * @type {?}
+ */
+AfterContentInit.prototype.ngAfterContentInit;
+/**
  * \@description
- * Lifecycle hook that is called after every check of a directive's content.
+ * A lifecycle hook that is called after the default change detector has
+ * completed checking all content of a directive.
  *
- * See {\@linkDocs guide/lifecycle-hooks#aftercontent "Lifecycle Hooks Guide"}.
+ * @see `AfterViewChecked`
+ * @see [Lifecycle Hooks](guide/lifecycle-hooks#onchanges) guide
+ *
+ * \@usageNotes
+ * The following snippet shows how a component can implement this interface to
+ * define its own after-check functionality.
+ *
+ * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterContentChecked'}
  *
  *
  * @record
  */
 export function AfterContentChecked() { }
-function AfterContentChecked_tsickle_Closure_declarations() {
-    /** @type {?} */
-    AfterContentChecked.prototype.ngAfterContentChecked;
-}
 /**
- * \@usageNotes
- * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterViewInit'}
- *
+ * A callback method that is invoked immediately after the
+ * default change detector has completed checking all of the directive's
+ * content.
+ * @type {?}
+ */
+AfterContentChecked.prototype.ngAfterContentChecked;
+/**
  * \@description
- * Lifecycle hook that is called after a component's view has been fully
- * initialized.
+ * A lifecycle hook that is called after Angular has fully initialized
+ * a component's view.
+ * Define an `ngAfterViewInit()` method to handle any additional initialization tasks.
  *
- * See {\@linkDocs guide/lifecycle-hooks#afterview "Lifecycle Hooks Guide"}.
+ * @see `OnInit`
+ * @see `AfterContentInit`
+ * @see [Lifecycle Hooks](guide/lifecycle-hooks#onchanges) guide
+ *
+ * \@usageNotes
+ * The following snippet shows how a component can implement this interface to
+ * define its own view initialization method.
+ *
+ * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterViewInit'}
  *
  *
  * @record
  */
 export function AfterViewInit() { }
-function AfterViewInit_tsickle_Closure_declarations() {
-    /** @type {?} */
-    AfterViewInit.prototype.ngAfterViewInit;
-}
 /**
- * \@usageNotes
- * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterViewChecked'}
+ * A callback method that is invoked immediately after
+ * Angular has completed initialization of a component's view.
+ * It is invoked only once when the view is instantiated.
  *
+ * @type {?}
+ */
+AfterViewInit.prototype.ngAfterViewInit;
+/**
  * \@description
- * Lifecycle hook that is called after every check of a component's view.
+ * A lifecycle hook that is called after the default change detector has
+ * completed checking a component's view for changes.
  *
- * See {\@linkDocs guide/lifecycle-hooks#afterview "Lifecycle Hooks Guide"}.
+ * @see `AfterContentChecked`
+ * @see [Lifecycle Hooks](guide/lifecycle-hooks#onchanges) guide
  *
+ * \@usageNotes
+ * The following snippet shows how a component can implement this interface to
+ * define its own after-check functionality.
+ *
+ * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterViewChecked'}
  *
  * @record
  */
 export function AfterViewChecked() { }
-function AfterViewChecked_tsickle_Closure_declarations() {
-    /** @type {?} */
-    AfterViewChecked.prototype.ngAfterViewChecked;
-}
+/**
+ * A callback method that is invoked immediately after the
+ * default change detector has completed one change-check cycle
+ * for a component's view.
+ * @type {?}
+ */
+AfterViewChecked.prototype.ngAfterViewChecked;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibGlmZWN5Y2xlX2hvb2tzLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vLi4vLi4vLi4vcGFja2FnZXMvY29yZS9zcmMvbWV0YWRhdGEvbGlmZWN5Y2xlX2hvb2tzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiIiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIEBsaWNlbnNlXG4gKiBDb3B5cmlnaHQgR29vZ2xlIEluYy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBVc2Ugb2YgdGhpcyBzb3VyY2UgY29kZSBpcyBnb3Zlcm5lZCBieSBhbiBNSVQtc3R5bGUgbGljZW5zZSB0aGF0IGNhbiBiZVxuICogZm91bmQgaW4gdGhlIExJQ0VOU0UgZmlsZSBhdCBodHRwczovL2FuZ3VsYXIuaW8vbGljZW5zZVxuICovXG5cbmltcG9ydCB7U2ltcGxlQ2hhbmdlfSBmcm9tICcuLi9jaGFuZ2VfZGV0ZWN0aW9uL2NoYW5nZV9kZXRlY3Rpb25fdXRpbCc7XG5cblxuLyoqXG4gKiBBIGBjaGFuZ2VzYCBvYmplY3Qgd2hvc2Uga2V5cyBhcmUgcHJvcGVydHkgbmFtZXMgYW5kXG4gKiB2YWx1ZXMgYXJlIGluc3RhbmNlcyBvZiB7QGxpbmsgU2ltcGxlQ2hhbmdlfS4gU2VlIHtAbGluayBPbkNoYW5nZXN9XG4gKlxuICovXG5leHBvcnQgaW50ZXJmYWNlIFNpbXBsZUNoYW5nZXMgeyBbcHJvcE5hbWU6IHN0cmluZ106IFNpbXBsZUNoYW5nZTsgfVxuXG4vKipcbiAqIEB1c2FnZU5vdGVzXG4gKiB7QGV4YW1wbGUgY29yZS90cy9tZXRhZGF0YS9saWZlY3ljbGVfaG9va3Nfc3BlYy50cyByZWdpb249J09uQ2hhbmdlcyd9XG4gKlxuICogQGRlc2NyaXB0aW9uXG4gKiBMaWZlY3ljbGUgaG9vayB0aGF0IGlzIGNhbGxlZCB3aGVuIGFueSBkYXRhLWJvdW5kIHByb3BlcnR5IG9mIGEgZGlyZWN0aXZlIGNoYW5nZXMuXG4gKlxuICogYG5nT25DaGFuZ2VzYCBpcyBjYWxsZWQgcmlnaHQgYWZ0ZXIgdGhlIGRhdGEtYm91bmQgcHJvcGVydGllcyBoYXZlIGJlZW4gY2hlY2tlZCBhbmQgYmVmb3JlIHZpZXdcbiAqIGFuZCBjb250ZW50IGNoaWxkcmVuIGFyZSBjaGVja2VkIGlmIGF0IGxlYXN0IG9uZSBvZiB0aGVtIGhhcyBjaGFuZ2VkLlxuICogVGhlIGBjaGFuZ2VzYCBwYXJhbWV0ZXIgY29udGFpbnMgdGhlIGNoYW5nZWQgcHJvcGVydGllcy5cbiAqXG4gKiBTZWUge0BsaW5rRG9jcyBndWlkZS9saWZlY3ljbGUtaG9va3Mjb25jaGFuZ2VzIFwiTGlmZWN5Y2xlIEhvb2tzIEd1aWRlXCJ9LlxuICpcbiAqXG4gKi9cbmV4cG9ydCBpbnRlcmZhY2UgT25DaGFuZ2VzIHsgbmdPbkNoYW5nZXMoY2hhbmdlczogU2ltcGxlQ2hhbmdlcyk6IHZvaWQ7IH1cblxuLyoqXG4gKiBAdXNhZ2VOb3Rlc1xuICoge0BleGFtcGxlIGNvcmUvdHMvbWV0YWRhdGEvbGlmZWN5Y2xlX2hvb2tzX3NwZWMudHMgcmVnaW9uPSdPbkluaXQnfVxuICpcbiAqIEBkZXNjcmlwdGlvblxuICogTGlmZWN5Y2xlIGhvb2sgdGhhdCBpcyBjYWxsZWQgYWZ0ZXIgZGF0YS1ib3VuZCBwcm9wZXJ0aWVzIG9mIGEgZGlyZWN0aXZlIGFyZVxuICogaW5pdGlhbGl6ZWQuXG4gKlxuICogYG5nT25Jbml0YCBpcyBjYWxsZWQgcmlnaHQgYWZ0ZXIgdGhlIGRpcmVjdGl2ZSdzIGRhdGEtYm91bmQgcHJvcGVydGllcyBoYXZlIGJlZW4gY2hlY2tlZCBmb3IgdGhlXG4gKiBmaXJzdCB0aW1lLCBhbmQgYmVmb3JlIGFueSBvZiBpdHMgY2hpbGRyZW4gaGF2ZSBiZWVuIGNoZWNrZWQuIEl0IGlzIGludm9rZWQgb25seSBvbmNlIHdoZW4gdGhlXG4gKiBkaXJlY3RpdmUgaXMgaW5zdGFudGlhdGVkLlxuICpcbiAqIFNlZSB7QGxpbmtEb2NzIGd1aWRlL2xpZmVjeWNsZS1ob29rcyBcIkxpZmVjeWNsZSBIb29rcyBHdWlkZVwifS5cbiAqXG4gKlxuICovXG5leHBvcnQgaW50ZXJmYWNlIE9uSW5pdCB7IG5nT25Jbml0KCk6IHZvaWQ7IH1cblxuLyoqXG4gKiBAdXNhZ2VOb3Rlc1xuICoge0BleGFtcGxlIGNvcmUvdHMvbWV0YWRhdGEvbGlmZWN5Y2xlX2hvb2tzX3NwZWMudHMgcmVnaW9uPSdEb0NoZWNrJ31cbiAqXG4gKiBAZGVzY3JpcHRpb25cbiAqIExpZmVjeWNsZSBob29rIHRoYXQgaXMgY2FsbGVkIHdoZW4gQW5ndWxhciBkaXJ0eSBjaGVja3MgYSBkaXJlY3RpdmUuXG4gKlxuICogYG5nRG9DaGVja2AgZ2V0cyBjYWxsZWQgdG8gY2hlY2sgdGhlIGNoYW5nZXMgaW4gdGhlIGRpcmVjdGl2ZXMgaW4gYWRkaXRpb24gdG8gdGhlIGRlZmF1bHRcbiAqIGFsZ29yaXRobS4gVGhlIGRlZmF1bHQgY2hhbmdlIGRldGVjdGlvbiBhbGdvcml0aG0gbG9va3MgZm9yIGRpZmZlcmVuY2VzIGJ5IGNvbXBhcmluZ1xuICogYm91bmQtcHJvcGVydHkgdmFsdWVzIGJ5IHJlZmVyZW5jZSBhY3Jvc3MgY2hhbmdlIGRldGVjdGlvbiBydW5zLlxuICpcbiAqIE5vdGUgdGhhdCBhIGRpcmVjdGl2ZSB0eXBpY2FsbHkgc2hvdWxkIG5vdCB1c2UgYm90aCBgRG9DaGVja2AgYW5kIHtAbGluayBPbkNoYW5nZXN9IHRvIHJlc3BvbmQgdG9cbiAqIGNoYW5nZXMgb24gdGhlIHNhbWUgaW5wdXQsIGFzIGBuZ09uQ2hhbmdlc2Agd2lsbCBjb250aW51ZSB0byBiZSBjYWxsZWQgd2hlbiB0aGUgZGVmYXVsdCBjaGFuZ2VcbiAqIGRldGVjdG9yIGRldGVjdHMgY2hhbmdlcy5cbiAqXG4gKiBTZWUge0BsaW5rIEtleVZhbHVlRGlmZmVyc30gYW5kIHtAbGluayBJdGVyYWJsZURpZmZlcnN9IGZvciBpbXBsZW1lbnRpbmcgY3VzdG9tIGRpcnR5IGNoZWNraW5nXG4gKiBmb3IgY29sbGVjdGlvbnMuXG4gKlxuICogU2VlIHtAbGlua0RvY3MgZ3VpZGUvbGlmZWN5Y2xlLWhvb2tzI2RvY2hlY2sgXCJMaWZlY3ljbGUgSG9va3MgR3VpZGVcIn0uXG4gKlxuICpcbiAqL1xuZXhwb3J0IGludGVyZmFjZSBEb0NoZWNrIHsgbmdEb0NoZWNrKCk6IHZvaWQ7IH1cblxuLyoqXG4gKiBAdXNhZ2VOb3Rlc1xuICoge0BleGFtcGxlIGNvcmUvdHMvbWV0YWRhdGEvbGlmZWN5Y2xlX2hvb2tzX3NwZWMudHMgcmVnaW9uPSdPbkRlc3Ryb3knfVxuICpcbiAqIEBkZXNjcmlwdGlvblxuICogTGlmZWN5Y2xlIGhvb2sgdGhhdCBpcyBjYWxsZWQgd2hlbiBhIGRpcmVjdGl2ZSwgcGlwZSBvciBzZXJ2aWNlIGlzIGRlc3Ryb3llZC5cbiAqXG4gKiBgbmdPbkRlc3Ryb3lgIGNhbGxiYWNrIGlzIHR5cGljYWxseSB1c2VkIGZvciBhbnkgY3VzdG9tIGNsZWFudXAgdGhhdCBuZWVkcyB0byBvY2N1ciB3aGVuIHRoZVxuICogaW5zdGFuY2UgaXMgZGVzdHJveWVkLlxuICpcbiAqIFNlZSB7QGxpbmtEb2NzIGd1aWRlL2xpZmVjeWNsZS1ob29rcyBcIkxpZmVjeWNsZSBIb29rcyBHdWlkZVwifS5cbiAqXG4gKlxuICovXG5leHBvcnQgaW50ZXJmYWNlIE9uRGVzdHJveSB7IG5nT25EZXN0cm95KCk6IHZvaWQ7IH1cblxuLyoqXG4gKlxuICogQHVzYWdlTm90ZXNcbiAqIHtAZXhhbXBsZSBjb3JlL3RzL21ldGFkYXRhL2xpZmVjeWNsZV9ob29rc19zcGVjLnRzIHJlZ2lvbj0nQWZ0ZXJDb250ZW50SW5pdCd9XG4gKlxuICogQGRlc2NyaXB0aW9uXG4gKiBMaWZlY3ljbGUgaG9vayB0aGF0IGlzIGNhbGxlZCBhZnRlciBhIGRpcmVjdGl2ZSdzIGNvbnRlbnQgaGFzIGJlZW4gZnVsbHlcbiAqIGluaXRpYWxpemVkLlxuICpcbiAqIFNlZSB7QGxpbmtEb2NzIGd1aWRlL2xpZmVjeWNsZS1ob29rcyNhZnRlcmNvbnRlbnQgXCJMaWZlY3ljbGUgSG9va3MgR3VpZGVcIn0uXG4gKlxuICpcbiAqL1xuZXhwb3J0IGludGVyZmFjZSBBZnRlckNvbnRlbnRJbml0IHsgbmdBZnRlckNvbnRlbnRJbml0KCk6IHZvaWQ7IH1cblxuLyoqXG4gKiBAdXNhZ2VOb3Rlc1xuICoge0BleGFtcGxlIGNvcmUvdHMvbWV0YWRhdGEvbGlmZWN5Y2xlX2hvb2tzX3NwZWMudHMgcmVnaW9uPSdBZnRlckNvbnRlbnRDaGVja2VkJ31cbiAqXG4gKiBAZGVzY3JpcHRpb25cbiAqIExpZmVjeWNsZSBob29rIHRoYXQgaXMgY2FsbGVkIGFmdGVyIGV2ZXJ5IGNoZWNrIG9mIGEgZGlyZWN0aXZlJ3MgY29udGVudC5cbiAqXG4gKiBTZWUge0BsaW5rRG9jcyBndWlkZS9saWZlY3ljbGUtaG9va3MjYWZ0ZXJjb250ZW50IFwiTGlmZWN5Y2xlIEhvb2tzIEd1aWRlXCJ9LlxuICpcbiAqXG4gKi9cbmV4cG9ydCBpbnRlcmZhY2UgQWZ0ZXJDb250ZW50Q2hlY2tlZCB7IG5nQWZ0ZXJDb250ZW50Q2hlY2tlZCgpOiB2b2lkOyB9XG5cbi8qKlxuICogQHVzYWdlTm90ZXNcbiAqIHtAZXhhbXBsZSBjb3JlL3RzL21ldGFkYXRhL2xpZmVjeWNsZV9ob29rc19zcGVjLnRzIHJlZ2lvbj0nQWZ0ZXJWaWV3SW5pdCd9XG4gKlxuICogQGRlc2NyaXB0aW9uXG4gKiBMaWZlY3ljbGUgaG9vayB0aGF0IGlzIGNhbGxlZCBhZnRlciBhIGNvbXBvbmVudCdzIHZpZXcgaGFzIGJlZW4gZnVsbHlcbiAqIGluaXRpYWxpemVkLlxuICpcbiAqIFNlZSB7QGxpbmtEb2NzIGd1aWRlL2xpZmVjeWNsZS1ob29rcyNhZnRlcnZpZXcgXCJMaWZlY3ljbGUgSG9va3MgR3VpZGVcIn0uXG4gKlxuICpcbiAqL1xuZXhwb3J0IGludGVyZmFjZSBBZnRlclZpZXdJbml0IHsgbmdBZnRlclZpZXdJbml0KCk6IHZvaWQ7IH1cblxuLyoqXG4gKiBAdXNhZ2VOb3Rlc1xuICoge0BleGFtcGxlIGNvcmUvdHMvbWV0YWRhdGEvbGlmZWN5Y2xlX2hvb2tzX3NwZWMudHMgcmVnaW9uPSdBZnRlclZpZXdDaGVja2VkJ31cbiAqXG4gKiBAZGVzY3JpcHRpb25cbiAqIExpZmVjeWNsZSBob29rIHRoYXQgaXMgY2FsbGVkIGFmdGVyIGV2ZXJ5IGNoZWNrIG9mIGEgY29tcG9uZW50J3Mgdmlldy5cbiAqXG4gKiBTZWUge0BsaW5rRG9jcyBndWlkZS9saWZlY3ljbGUtaG9va3MjYWZ0ZXJ2aWV3IFwiTGlmZWN5Y2xlIEhvb2tzIEd1aWRlXCJ9LlxuICpcbiAqXG4gKi9cbmV4cG9ydCBpbnRlcmZhY2UgQWZ0ZXJWaWV3Q2hlY2tlZCB7IG5nQWZ0ZXJWaWV3Q2hlY2tlZCgpOiB2b2lkOyB9XG4iXX0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibGlmZWN5Y2xlX2hvb2tzLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vLi4vLi4vLi4vcGFja2FnZXMvY29yZS9zcmMvbWV0YWRhdGEvbGlmZWN5Y2xlX2hvb2tzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiIiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIEBsaWNlbnNlXG4gKiBDb3B5cmlnaHQgR29vZ2xlIEluYy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBVc2Ugb2YgdGhpcyBzb3VyY2UgY29kZSBpcyBnb3Zlcm5lZCBieSBhbiBNSVQtc3R5bGUgbGljZW5zZSB0aGF0IGNhbiBiZVxuICogZm91bmQgaW4gdGhlIExJQ0VOU0UgZmlsZSBhdCBodHRwczovL2FuZ3VsYXIuaW8vbGljZW5zZVxuICovXG5cbmltcG9ydCB7U2ltcGxlQ2hhbmdlfSBmcm9tICcuLi9jaGFuZ2VfZGV0ZWN0aW9uL2NoYW5nZV9kZXRlY3Rpb25fdXRpbCc7XG5cblxuLyoqXG4gKiBEZWZpbmVzIGFuIG9iamVjdCB0aGF0IGFzc29jaWF0ZXMgcHJvcGVydGllcyB3aXRoXG4gKiBpbnN0YW5jZXMgb2YgYFNpbXBsZUNoYW5nZWAuXG4gKlxuICogQHNlZSBgT25DaGFuZ2VzYFxuICpcbiAqL1xuZXhwb3J0IGludGVyZmFjZSBTaW1wbGVDaGFuZ2VzIHsgW3Byb3BOYW1lOiBzdHJpbmddOiBTaW1wbGVDaGFuZ2U7IH1cblxuLyoqXG4gKiBAZGVzY3JpcHRpb25cbiAqIEEgbGlmZWN5Y2xlIGhvb2sgdGhhdCBpcyBjYWxsZWQgd2hlbiBhbnkgZGF0YS1ib3VuZCBwcm9wZXJ0eSBvZiBhIGRpcmVjdGl2ZSBjaGFuZ2VzLlxuICogRGVmaW5lIGFuIGBuZ09uQ2hhbmdlcygpYCBtZXRob2QgdG8gaGFuZGxlIHRoZSBjaGFuZ2VzLlxuICpcbiAqIEBzZWUgYERvQ2hlY2tgXG4gKiBAc2VlIGBPbkluaXRgXG4gKiBAc2VlIFtMaWZlY3ljbGUgSG9va3NdKGd1aWRlL2xpZmVjeWNsZS1ob29rcyNvbmNoYW5nZXMpIGd1aWRlXG4gKlxuICogQHVzYWdlTm90ZXNcbiAqIFRoZSBmb2xsb3dpbmcgc25pcHBldCBzaG93cyBob3cgYSBjb21wb25lbnQgY2FuIGltcGxlbWVudCB0aGlzIGludGVyZmFjZSB0b1xuICogZGVmaW5lIGFuIG9uLWNoYW5nZXMgaGFuZGxlciBmb3IgYW4gaW5wdXQgcHJvcGVydHkuXG4gKlxuICoge0BleGFtcGxlIGNvcmUvdHMvbWV0YWRhdGEvbGlmZWN5Y2xlX2hvb2tzX3NwZWMudHMgcmVnaW9uPSdPbkNoYW5nZXMnfVxuICpcbiAqL1xuZXhwb3J0IGludGVyZmFjZSBPbkNoYW5nZXMge1xuICAvKipcbiAgICogQSBjYWxsYmFjayBtZXRob2QgdGhhdCBpcyBpbnZva2VkIGltbWVkaWF0ZWx5IGFmdGVyIHRoZVxuICAgKiBkZWZhdWx0IGNoYW5nZSBkZXRlY3RvciBoYXMgY2hlY2tlZCBkYXRhLWJvdW5kIHByb3BlcnRpZXNcbiAgICogaWYgYXQgbGVhc3Qgb25lIGhhcyBjaGFuZ2VkLCBhbmQgYmVmb3JlIHRoZSB2aWV3IGFuZCBjb250ZW50XG4gICAqIGNoaWxkcmVuIGFyZSBjaGVja2VkLlxuICAgKiBAcGFyYW0gY2hhbmdlcyBUaGUgY2hhbmdlZCBwcm9wZXJ0aWVzLlxuICAgKi9cbiAgbmdPbkNoYW5nZXMoY2hhbmdlczogU2ltcGxlQ2hhbmdlcyk6IHZvaWQ7XG59XG5cbi8qKlxuICogQGRlc2NyaXB0aW9uXG4gKiBBIGxpZmVjeWNsZSBob29rIHRoYXQgaXMgY2FsbGVkIGFmdGVyIEFuZ3VsYXIgaGFzIGluaXRpYWxpemVkXG4gKiBhbGwgZGF0YS1ib3VuZCBwcm9wZXJ0aWVzIG9mIGEgZGlyZWN0aXZlLlxuICogRGVmaW5lIGFuIGBuZ09uSW5pdCgpYCBtZXRob2QgdG8gaGFuZGxlIGFueSBhZGRpdGlvbmFsIGluaXRpYWxpemF0aW9uIHRhc2tzLlxuICpcbiAqIEBzZWUgYEFmdGVyQ29udGVudEluaXRgXG4gKiBAc2VlIFtMaWZlY3ljbGUgSG9va3NdKGd1aWRlL2xpZmVjeWNsZS1ob29rcyNvbmNoYW5nZXMpIGd1aWRlXG4gKlxuICogQHVzYWdlTm90ZXNcbiAqIFRoZSBmb2xsb3dpbmcgc25pcHBldCBzaG93cyBob3cgYSBjb21wb25lbnQgY2FuIGltcGxlbWVudCB0aGlzIGludGVyZmFjZSB0b1xuICogZGVmaW5lIGl0cyBvd24gaW5pdGlhbGl6YXRpb24gbWV0aG9kLlxuICpcbiAqIHtAZXhhbXBsZSBjb3JlL3RzL21ldGFkYXRhL2xpZmVjeWNsZV9ob29rc19zcGVjLnRzIHJlZ2lvbj0nT25Jbml0J31cbiAqXG4gKlxuICovXG5leHBvcnQgaW50ZXJmYWNlIE9uSW5pdCB7XG4gIC8qKlxuICAgKiBBIGNhbGxiYWNrIG1ldGhvZCB0aGF0IGlzIGludm9rZWQgaW1tZWRpYXRlbHkgYWZ0ZXIgdGhlXG4gICAqIGRlZmF1bHQgY2hhbmdlIGRldGVjdG9yIGhhcyBjaGVja2VkIHRoZSBkaXJlY3RpdmUnc1xuICAgKiBkYXRhLWJvdW5kIHByb3BlcnRpZXMgZm9yIHRoZSBmaXJzdCB0aW1lLFxuICAgKiBhbmQgYmVmb3JlIGFueSBvZiB0aGUgdmlldyBvciBjb250ZW50IGNoaWxkcmVuIGhhdmUgYmVlbiBjaGVja2VkLlxuICAgKiBJdCBpcyBpbnZva2VkIG9ubHkgb25jZSB3aGVuIHRoZSBkaXJlY3RpdmUgaXMgaW5zdGFudGlhdGVkLlxuICAgKi9cbiAgbmdPbkluaXQoKTogdm9pZDtcbn1cblxuLyoqXG4gKiBBIGxpZmVjeWNsZSBob29rIHRoYXQgaW52b2tlcyBhIGN1c3RvbSBjaGFuZ2UtZGV0ZWN0aW9uIGZ1bmN0aW9uIGZvciBhIGRpcmVjdGl2ZSxcbiAqIGluIGFkZGl0aW9uIHRvIHRoZSBjaGVjayBwZXJmb3JtZWQgYnkgdGhlIGRlZmF1bHQgY2hhbmdlLWRldGVjdG9yLlxuICogXG4gKiBUaGUgZGVmYXVsdCBjaGFuZ2UtZGV0ZWN0aW9uIGFsZ29yaXRobSBsb29rcyBmb3IgZGlmZmVyZW5jZXMgYnkgY29tcGFyaW5nXG4gKiBib3VuZC1wcm9wZXJ0eSB2YWx1ZXMgYnkgcmVmZXJlbmNlIGFjcm9zcyBjaGFuZ2UgZGV0ZWN0aW9uIHJ1bnMuIFlvdSBjYW4gdXNlIHRoaXNcbiAqIGhvb2sgdG8gY2hlY2sgZm9yIGFuZCByZXNwb25kIHRvIGNoYW5nZXMgYnkgc29tZSBvdGhlciBtZWFucy5cbiAqXG4gKiBXaGVuIHRoZSBkZWZhdWx0IGNoYW5nZSBkZXRlY3RvciBkZXRlY3RzIGNoYW5nZXMsIGl0IGludm9rZXMgYG5nT25DaGFuZ2VzKClgIGlmIHN1cHBsaWVkLFxuICogcmVnYXJkbGVzcyBvZiB3aGV0aGVyIHlvdSBwZXJmb3JtIGFkZGl0aW9uYWwgY2hhbmdlIGRldGVjdGlvbi5cbiAqIFR5cGljYWxseSwgeW91IHNob3VsZCBub3QgdXNlIGJvdGggYERvQ2hlY2tgIGFuZCBgT25DaGFuZ2VzYCB0byByZXNwb25kIHRvXG4gKiBjaGFuZ2VzIG9uIHRoZSBzYW1lIGlucHV0LiBcbiAqIFxuICogQHNlZSBgT25DaGFuZ2VzYFxuICogQHNlZSBbTGlmZWN5Y2xlIEhvb2tzXShndWlkZS9saWZlY3ljbGUtaG9va3Mjb25jaGFuZ2VzKSBndWlkZVxuICpcbiAqIEB1c2FnZU5vdGVzXG4gKiBUaGUgZm9sbG93aW5nIHNuaXBwZXQgc2hvd3MgaG93IGEgY29tcG9uZW50IGNhbiBpbXBsZW1lbnQgdGhpcyBpbnRlcmZhY2VcbiAqIHRvIGludm9rZSBpdCBvd24gY2hhbmdlLWRldGVjdGlvbiBjeWNsZS4gIFxuICpcbiAqIHtAZXhhbXBsZSBjb3JlL3RzL21ldGFkYXRhL2xpZmVjeWNsZV9ob29rc19zcGVjLnRzIHJlZ2lvbj0nRG9DaGVjayd9XG4gKlxuICovXG5leHBvcnQgaW50ZXJmYWNlIERvQ2hlY2sge1xuICAvKipcbiAgICAgKiBBIGNhbGxiYWNrIG1ldGhvZCB0aGF0IHBlcmZvcm1zIGNoYW5nZS1kZXRlY3Rpb24sIGludm9rZWRcbiAgICAgKiBhZnRlciB0aGUgZGVmYXVsdCBjaGFuZ2UtZGV0ZWN0b3IgcnVucy5cbiAgICAgKiBTZWUgYEtleVZhbHVlRGlmZmVyc2AgYW5kIGBJdGVyYWJsZURpZmZlcnNgIGZvciBpbXBsZW1lbnRpbmdcbiAgICAgKiBjdXN0b20gY2hhbmdlIGNoZWNraW5nIGZvciBjb2xsZWN0aW9ucy5cbiAgICAgKlxuICAgICAqL1xuICBuZ0RvQ2hlY2soKTogdm9pZDtcbn1cblxuLyoqXG4gKiBBIGxpZmVjeWNsZSBob29rIHRoYXQgaXMgY2FsbGVkIHdoZW4gYSBkaXJlY3RpdmUsIHBpcGUsIG9yIHNlcnZpY2UgaXMgZGVzdHJveWVkLlxuICogVXNlIGZvciBhbnkgY3VzdG9tIGNsZWFudXAgdGhhdCBuZWVkcyB0byBvY2N1ciB3aGVuIHRoZVxuICogaW5zdGFuY2UgaXMgZGVzdHJveWVkLlxuICogQHNlZSBbTGlmZWN5Y2xlIEhvb2tzXShndWlkZS9saWZlY3ljbGUtaG9va3Mjb25jaGFuZ2VzKSBndWlkZVxuICpcbiAqIEB1c2FnZU5vdGVzXG4gKiBUaGUgZm9sbG93aW5nIHNuaXBwZXQgc2hvd3MgaG93IGEgY29tcG9uZW50IGNhbiBpbXBsZW1lbnQgdGhpcyBpbnRlcmZhY2VcbiAqIHRvIGRlZmluZSBpdHMgb3duIGN1c3RvbSBjbGVhbi11cCBtZXRob2QuXG4gKiAgXG4gKiB7QGV4YW1wbGUgY29yZS90cy9tZXRhZGF0YS9saWZlY3ljbGVfaG9va3Nfc3BlYy50cyByZWdpb249J09uRGVzdHJveSd9XG4gKlxuICovXG5leHBvcnQgaW50ZXJmYWNlIE9uRGVzdHJveSB7XG4gIC8qKlxuICAgKiBBIGNhbGxiYWNrIG1ldGhvZCB0aGF0IHBlcmZvcm1zIGN1c3RvbSBjbGVhbi11cCwgaW52b2tlZCBpbW1lZGlhdGVseVxuICAgKiBhZnRlciBhIGRpcmVjdGl2ZSwgcGlwZSwgb3Igc2VydmljZSBpbnN0YW5jZSBpcyBkZXN0cm95ZWQuXG4gICAqL1xuICBuZ09uRGVzdHJveSgpOiB2b2lkO1xufVxuXG4vKipcbiAqIEBkZXNjcmlwdGlvblxuICogQSBsaWZlY3ljbGUgaG9vayB0aGF0IGlzIGNhbGxlZCBhZnRlciBBbmd1bGFyIGhhcyBmdWxseSBpbml0aWFsaXplZFxuICogYWxsIGNvbnRlbnQgb2YgYSBkaXJlY3RpdmUuXG4gKiBEZWZpbmUgYW4gYG5nQWZ0ZXJDb250ZW50SW5pdCgpYCBtZXRob2QgdG8gaGFuZGxlIGFueSBhZGRpdGlvbmFsIGluaXRpYWxpemF0aW9uIHRhc2tzLlxuICpcbiAqIEBzZWUgYE9uSW5pdGBcbiAqIEBzZWUgYEFmdGVyVmlld0luaXRgXG4gKiBAc2VlIFtMaWZlY3ljbGUgSG9va3NdKGd1aWRlL2xpZmVjeWNsZS1ob29rcyNvbmNoYW5nZXMpIGd1aWRlXG4gKlxuICogQHVzYWdlTm90ZXNcbiAqIFRoZSBmb2xsb3dpbmcgc25pcHBldCBzaG93cyBob3cgYSBjb21wb25lbnQgY2FuIGltcGxlbWVudCB0aGlzIGludGVyZmFjZSB0b1xuICogZGVmaW5lIGl0cyBvd24gY29udGVudCBpbml0aWFsaXphdGlvbiBtZXRob2QuXG4gKlxuICoge0BleGFtcGxlIGNvcmUvdHMvbWV0YWRhdGEvbGlmZWN5Y2xlX2hvb2tzX3NwZWMudHMgcmVnaW9uPSdBZnRlckNvbnRlbnRJbml0J31cbiAqXG4gKlxuICovXG5leHBvcnQgaW50ZXJmYWNlIEFmdGVyQ29udGVudEluaXQge1xuICAvKipcbiAgICogQSBjYWxsYmFjayBtZXRob2QgdGhhdCBpcyBpbnZva2VkIGltbWVkaWF0ZWx5IGFmdGVyXG4gICAqIEFuZ3VsYXIgaGFzIGNvbXBsZXRlZCBpbml0aWFsaXphdGlvbiBvZiBhbGwgb2YgdGhlIGRpcmVjdGl2ZSdzXG4gICAqIGNvbnRlbnQuXG4gICAqIEl0IGlzIGludm9rZWQgb25seSBvbmNlIHdoZW4gdGhlIGRpcmVjdGl2ZSBpcyBpbnN0YW50aWF0ZWQuXG4gICAqL1xuICBuZ0FmdGVyQ29udGVudEluaXQoKTogdm9pZDtcbn1cblxuLyoqXG4gKiBAZGVzY3JpcHRpb25cbiAqIEEgbGlmZWN5Y2xlIGhvb2sgdGhhdCBpcyBjYWxsZWQgYWZ0ZXIgdGhlIGRlZmF1bHQgY2hhbmdlIGRldGVjdG9yIGhhc1xuICogY29tcGxldGVkIGNoZWNraW5nIGFsbCBjb250ZW50IG9mIGEgZGlyZWN0aXZlLlxuICpcbiAqIEBzZWUgYEFmdGVyVmlld0NoZWNrZWRgXG4gKiBAc2VlIFtMaWZlY3ljbGUgSG9va3NdKGd1aWRlL2xpZmVjeWNsZS1ob29rcyNvbmNoYW5nZXMpIGd1aWRlXG4gKlxuICogQHVzYWdlTm90ZXNcbiAqIFRoZSBmb2xsb3dpbmcgc25pcHBldCBzaG93cyBob3cgYSBjb21wb25lbnQgY2FuIGltcGxlbWVudCB0aGlzIGludGVyZmFjZSB0b1xuICogZGVmaW5lIGl0cyBvd24gYWZ0ZXItY2hlY2sgZnVuY3Rpb25hbGl0eS5cbiAqXG4gKiB7QGV4YW1wbGUgY29yZS90cy9tZXRhZGF0YS9saWZlY3ljbGVfaG9va3Nfc3BlYy50cyByZWdpb249J0FmdGVyQ29udGVudENoZWNrZWQnfVxuICpcbiAqXG4gKi9cbmV4cG9ydCBpbnRlcmZhY2UgQWZ0ZXJDb250ZW50Q2hlY2tlZCB7XG4gIC8qKlxuICAgKiBBIGNhbGxiYWNrIG1ldGhvZCB0aGF0IGlzIGludm9rZWQgaW1tZWRpYXRlbHkgYWZ0ZXIgdGhlXG4gICAqIGRlZmF1bHQgY2hhbmdlIGRldGVjdG9yIGhhcyBjb21wbGV0ZWQgY2hlY2tpbmcgYWxsIG9mIHRoZSBkaXJlY3RpdmUnc1xuICAgKiBjb250ZW50LlxuICAgKi9cbiAgbmdBZnRlckNvbnRlbnRDaGVja2VkKCk6IHZvaWQ7XG59XG5cbi8qKlxuICogQGRlc2NyaXB0aW9uXG4gKiBBIGxpZmVjeWNsZSBob29rIHRoYXQgaXMgY2FsbGVkIGFmdGVyIEFuZ3VsYXIgaGFzIGZ1bGx5IGluaXRpYWxpemVkXG4gKiBhIGNvbXBvbmVudCdzIHZpZXcuXG4gKiBEZWZpbmUgYW4gYG5nQWZ0ZXJWaWV3SW5pdCgpYCBtZXRob2QgdG8gaGFuZGxlIGFueSBhZGRpdGlvbmFsIGluaXRpYWxpemF0aW9uIHRhc2tzLlxuICpcbiAqIEBzZWUgYE9uSW5pdGBcbiAqIEBzZWUgYEFmdGVyQ29udGVudEluaXRgXG4gKiBAc2VlIFtMaWZlY3ljbGUgSG9va3NdKGd1aWRlL2xpZmVjeWNsZS1ob29rcyNvbmNoYW5nZXMpIGd1aWRlXG4gKlxuICogQHVzYWdlTm90ZXNcbiAqIFRoZSBmb2xsb3dpbmcgc25pcHBldCBzaG93cyBob3cgYSBjb21wb25lbnQgY2FuIGltcGxlbWVudCB0aGlzIGludGVyZmFjZSB0b1xuICogZGVmaW5lIGl0cyBvd24gdmlldyBpbml0aWFsaXphdGlvbiBtZXRob2QuXG4gKlxuICoge0BleGFtcGxlIGNvcmUvdHMvbWV0YWRhdGEvbGlmZWN5Y2xlX2hvb2tzX3NwZWMudHMgcmVnaW9uPSdBZnRlclZpZXdJbml0J31cbiAqXG4gKlxuICovXG5leHBvcnQgaW50ZXJmYWNlIEFmdGVyVmlld0luaXQge1xuICAvKipcbiAgICogQSBjYWxsYmFjayBtZXRob2QgdGhhdCBpcyBpbnZva2VkIGltbWVkaWF0ZWx5IGFmdGVyXG4gICAqIEFuZ3VsYXIgaGFzIGNvbXBsZXRlZCBpbml0aWFsaXphdGlvbiBvZiBhIGNvbXBvbmVudCdzIHZpZXcuXG4gICAqIEl0IGlzIGludm9rZWQgb25seSBvbmNlIHdoZW4gdGhlIHZpZXcgaXMgaW5zdGFudGlhdGVkLlxuICAgKlxuICAgKi9cbiAgbmdBZnRlclZpZXdJbml0KCk6IHZvaWQ7XG59XG5cbi8qKlxuICogQGRlc2NyaXB0aW9uXG4gKiBBIGxpZmVjeWNsZSBob29rIHRoYXQgaXMgY2FsbGVkIGFmdGVyIHRoZSBkZWZhdWx0IGNoYW5nZSBkZXRlY3RvciBoYXNcbiAqIGNvbXBsZXRlZCBjaGVja2luZyBhIGNvbXBvbmVudCdzIHZpZXcgZm9yIGNoYW5nZXMuXG4gKlxuICogQHNlZSBgQWZ0ZXJDb250ZW50Q2hlY2tlZGBcbiAqIEBzZWUgW0xpZmVjeWNsZSBIb29rc10oZ3VpZGUvbGlmZWN5Y2xlLWhvb2tzI29uY2hhbmdlcykgZ3VpZGVcbiAqXG4gKiBAdXNhZ2VOb3Rlc1xuICogVGhlIGZvbGxvd2luZyBzbmlwcGV0IHNob3dzIGhvdyBhIGNvbXBvbmVudCBjYW4gaW1wbGVtZW50IHRoaXMgaW50ZXJmYWNlIHRvXG4gKiBkZWZpbmUgaXRzIG93biBhZnRlci1jaGVjayBmdW5jdGlvbmFsaXR5LlxuICpcbiAqIHtAZXhhbXBsZSBjb3JlL3RzL21ldGFkYXRhL2xpZmVjeWNsZV9ob29rc19zcGVjLnRzIHJlZ2lvbj0nQWZ0ZXJWaWV3Q2hlY2tlZCd9XG4gKlxuICovXG5leHBvcnQgaW50ZXJmYWNlIEFmdGVyVmlld0NoZWNrZWQge1xuICAvKipcbiAgICogQSBjYWxsYmFjayBtZXRob2QgdGhhdCBpcyBpbnZva2VkIGltbWVkaWF0ZWx5IGFmdGVyIHRoZVxuICAgKiBkZWZhdWx0IGNoYW5nZSBkZXRlY3RvciBoYXMgY29tcGxldGVkIG9uZSBjaGFuZ2UtY2hlY2sgY3ljbGVcbiAgICogZm9yIGEgY29tcG9uZW50J3Mgdmlldy5cbiAgICovXG4gIG5nQWZ0ZXJWaWV3Q2hlY2tlZCgpOiB2b2lkO1xufVxuIl19

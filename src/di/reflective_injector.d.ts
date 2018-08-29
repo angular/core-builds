@@ -18,7 +18,8 @@ import { ResolvedReflectiveProvider } from './reflective_provider';
  * In typical use, application code asks for the dependencies in the constructor and they are
  * resolved by the `Injector`.
  *
- * ### Example ([live demo](http://plnkr.co/edit/jzjec0?p=preview))
+ * @usageNotes
+ * ### Example
  *
  * The following example creates an `Injector` configured to create `Engine` and `Car`.
  *
@@ -48,9 +49,10 @@ export declare abstract class ReflectiveInjector implements Injector {
      * Turns an array of provider definitions into an array of resolved providers.
      *
      * A resolution is a process of flattening multiple nested arrays and converting individual
-     * providers into an array of {@link ResolvedReflectiveProvider}s.
+     * providers into an array of `ResolvedReflectiveProvider`s.
      *
-     * ### Example ([live demo](http://plnkr.co/edit/AiXTHi?p=preview))
+     * @usageNotes
+     * ### Example
      *
      * ```typescript
      * @Injectable()
@@ -75,16 +77,16 @@ export declare abstract class ReflectiveInjector implements Injector {
      * });
      * ```
      *
-     * See {@link ReflectiveInjector#fromResolvedProviders fromResolvedProviders} for more info.
      */
     static resolve(providers: Provider[]): ResolvedReflectiveProvider[];
     /**
      * Resolves an array of providers and creates an injector from those providers.
      *
-     * The passed-in providers can be an array of `Type`, {@link Provider},
+     * The passed-in providers can be an array of `Type`, `Provider`,
      * or a recursive array of more providers.
      *
-     * ### Example ([live demo](http://plnkr.co/edit/ePOccA?p=preview))
+     * @usageNotes
+     * ### Example
      *
      * ```typescript
      * @Injectable()
@@ -99,11 +101,6 @@ export declare abstract class ReflectiveInjector implements Injector {
      * var injector = ReflectiveInjector.resolveAndCreate([Car, Engine]);
      * expect(injector.get(Car) instanceof Car).toBe(true);
      * ```
-     *
-     * This function is slower than the corresponding `fromResolvedProviders`
-     * because it needs to resolve the passed-in providers first.
-     * See {@link ReflectiveInjector#resolve resolve} and
-     * {@link ReflectiveInjector#fromResolvedProviders fromResolvedProviders}.
      */
     static resolveAndCreate(providers: Provider[], parent?: Injector): ReflectiveInjector;
     /**
@@ -111,7 +108,8 @@ export declare abstract class ReflectiveInjector implements Injector {
      *
      * This API is the recommended way to construct injectors in performance-sensitive parts.
      *
-     * ### Example ([live demo](http://plnkr.co/edit/KrSMci?p=preview))
+     * @usageNotes
+     * ### Example
      *
      * ```typescript
      * @Injectable()
@@ -136,7 +134,8 @@ export declare abstract class ReflectiveInjector implements Injector {
      * <!-- TODO: Add a link to the section of the user guide talking about hierarchical injection.
      * -->
      *
-     * ### Example ([live demo](http://plnkr.co/edit/eosMGo?p=preview))
+     * @usageNotes
+     * ### Example
      *
      * ```typescript
      * var parent = ReflectiveInjector.resolveAndCreate([]);
@@ -144,17 +143,18 @@ export declare abstract class ReflectiveInjector implements Injector {
      * expect(child.parent).toBe(parent);
      * ```
      */
-    readonly abstract parent: Injector | null;
+    abstract readonly parent: Injector | null;
     /**
      * Resolves an array of providers and creates a child injector from those providers.
      *
      * <!-- TODO: Add a link to the section of the user guide talking about hierarchical injection.
      * -->
      *
-     * The passed-in providers can be an array of `Type`, {@link Provider},
+     * The passed-in providers can be an array of `Type`, `Provider`,
      * or a recursive array of more providers.
      *
-     * ### Example ([live demo](http://plnkr.co/edit/opB3T4?p=preview))
+     * @usageNotes
+     * ### Example
      *
      * ```typescript
      * class ParentProvider {}
@@ -167,11 +167,6 @@ export declare abstract class ReflectiveInjector implements Injector {
      * expect(child.get(ChildProvider) instanceof ChildProvider).toBe(true);
      * expect(child.get(ParentProvider)).toBe(parent.get(ParentProvider));
      * ```
-     *
-     * This function is slower than the corresponding `createChildFromResolved`
-     * because it needs to resolve the passed-in providers first.
-     * See {@link ReflectiveInjector#resolve resolve} and
-     * {@link ReflectiveInjector#createChildFromResolved createChildFromResolved}.
      */
     abstract resolveAndCreateChild(providers: Provider[]): ReflectiveInjector;
     /**
@@ -182,7 +177,8 @@ export declare abstract class ReflectiveInjector implements Injector {
      *
      * This API is the recommended way to construct injectors in performance-sensitive parts.
      *
-     * ### Example ([live demo](http://plnkr.co/edit/VhyfjN?p=preview))
+     * @usageNotes
+     * ### Example
      *
      * ```typescript
      * class ParentProvider {}
@@ -205,7 +201,8 @@ export declare abstract class ReflectiveInjector implements Injector {
      *
      * The created object does not get cached by the injector.
      *
-     * ### Example ([live demo](http://plnkr.co/edit/yvVXoB?p=preview))
+     * @usageNotes
+     * ### Example
      *
      * ```typescript
      * @Injectable()
@@ -230,7 +227,8 @@ export declare abstract class ReflectiveInjector implements Injector {
      *
      * The created object does not get cached by the injector.
      *
-     * ### Example ([live demo](http://plnkr.co/edit/ptCImQ?p=preview))
+     * @usageNotes
+     * ### Example
      *
      * ```typescript
      * @Injectable()
@@ -267,12 +265,12 @@ export declare class ReflectiveInjector_ implements ReflectiveInjector {
     resolveAndInstantiate(provider: Provider): any;
     instantiateResolved(provider: ResolvedReflectiveProvider): any;
     getProviderAtIndex(index: number): ResolvedReflectiveProvider;
-    private _getMaxNumberOfObjects();
-    private _instantiateProvider(provider);
-    private _instantiate(provider, ResolvedReflectiveFactory);
-    private _getByReflectiveDependency(dep);
-    private _getByKey(key, visibility, notFoundValue);
-    private _getObjByKeyId(keyId);
+    private _getMaxNumberOfObjects;
+    private _instantiateProvider;
+    private _instantiate;
+    private _getByReflectiveDependency;
+    private _getByKey;
+    private _getObjByKeyId;
     readonly displayName: string;
     toString(): string;
 }

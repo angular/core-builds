@@ -12,8 +12,8 @@ export declare abstract class ViewRef extends ChangeDetectorRef {
      * Destroys the view and all of the data structures associated with it.
      */
     abstract destroy(): void;
-    readonly abstract destroyed: boolean;
-    abstract onDestroy(callback: Function): any;
+    abstract readonly destroyed: boolean;
+    abstract onDestroy(callback: Function): any /** TODO #9100 */;
 }
 /**
  * Represents an Angular View.
@@ -24,9 +24,10 @@ export declare abstract class ViewRef extends ChangeDetectorRef {
  *
  * Properties of elements in a View can change, but the structure (number and order) of elements in
  * a View cannot. Changing the structure of Elements can only be done by inserting, moving or
- * removing nested Views via a {@link ViewContainerRef}. Each View can contain many View Containers.
+ * removing nested Views via a `ViewContainerRef`. Each View can contain many View Containers.
  * <!-- /TODO -->
  *
+ * @usageNotes
  * ### Example
  *
  * Given this template...
@@ -38,9 +39,10 @@ export declare abstract class ViewRef extends ChangeDetectorRef {
  * </ul>
  * ```
  *
- * We have two {@link TemplateRef}s:
+ * We have two `TemplateRef`s:
  *
- * Outer {@link TemplateRef}:
+ * Outer `TemplateRef`:
+ *
  * ```
  * Count: {{items.length}}
  * <ul>
@@ -48,14 +50,15 @@ export declare abstract class ViewRef extends ChangeDetectorRef {
  * </ul>
  * ```
  *
- * Inner {@link TemplateRef}:
+ * Inner `TemplateRef`:
+ *
  * ```
  *   <li>{{item}}</li>
  * ```
  *
- * Notice that the original template is broken down into two separate {@link TemplateRef}s.
+ * Notice that the original template is broken down into two separate `TemplateRef`s.
  *
- * The outer/inner {@link TemplateRef}s are then assembled into views like so:
+ * The outer/inner `TemplateRef`s are then assembled into views like so:
  *
  * ```
  * <!-- ViewRef: outer-0 -->
@@ -70,8 +73,8 @@ export declare abstract class ViewRef extends ChangeDetectorRef {
  * @experimental
  */
 export declare abstract class EmbeddedViewRef<C> extends ViewRef {
-    readonly abstract context: C;
-    readonly abstract rootNodes: any[];
+    abstract readonly context: C;
+    abstract readonly rootNodes: any[];
 }
 export interface InternalViewRef extends ViewRef {
     detachFromAppRef(): void;

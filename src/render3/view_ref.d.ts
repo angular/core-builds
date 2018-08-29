@@ -5,17 +5,22 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { EmbeddedViewRef as viewEngine_EmbeddedViewRef } from '../linker/view_ref';
-import { ComponentTemplate } from './interfaces/definition';
-import { LViewNode } from './interfaces/node';
-import { LView } from './interfaces/view';
-export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T> {
-    private _view;
+import { ApplicationRef } from '../application_ref';
+import { ChangeDetectorRef as viewEngine_ChangeDetectorRef } from '../change_detection/change_detector_ref';
+import { ViewContainerRef as viewEngine_ViewContainerRef } from '../linker/view_container_ref';
+import { EmbeddedViewRef as viewEngine_EmbeddedViewRef, InternalViewRef as viewEngine_InternalViewRef } from '../linker/view_ref';
+import { LViewData } from './interfaces/view';
+export interface viewEngine_ChangeDetectorRef_interface extends viewEngine_ChangeDetectorRef {
+}
+export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T>, viewEngine_InternalViewRef, viewEngine_ChangeDetectorRef_interface {
+    protected _view: LViewData;
+    private _appRef;
+    private _viewContainerRef;
     context: T;
     rootNodes: any[];
-    constructor(_view: LView, context: T | null);
+    constructor(_view: LViewData, context: T | null);
+    readonly destroyed: boolean;
     destroy(): void;
-    destroyed: boolean;
     onDestroy(callback: Function): void;
     /**
      * Marks a view and all of its ancestors dirty.
@@ -29,7 +34,8 @@ export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T> {
      *
      * <!-- TODO: Add a link to a chapter on OnPush components -->
      *
-     * ### Example ([live demo](https://stackblitz.com/edit/angular-kx7rrw))
+     * @usageNotes
+     * ### Example
      *
      * ```typescript
      * @Component({
@@ -62,6 +68,7 @@ export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T> {
      * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
      * <!-- TODO: Add a live demo once ref.detectChanges is merged into master -->
      *
+     * @usageNotes
      * ### Example
      *
      * The following example defines a component with a large list of readonly data.
@@ -112,7 +119,8 @@ export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T> {
      *
      * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
      *
-     * ### Example ([live demo](https://stackblitz.com/edit/angular-ymgsxw))
+     * @usageNotes
+     * ### Example
      *
      * The following example creates a component displaying `live` data. The component will detach
      * its change detector from the main change detector tree when the component's live property
@@ -169,6 +177,7 @@ export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T> {
      * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
      * <!-- TODO: Add a live demo once ref.detectChanges is merged into master -->
      *
+     * @usageNotes
      * ### Example
      *
      * The following example defines a component with a large list of readonly data.
@@ -188,31 +197,7 @@ export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T> {
      * introduce other changes.
      */
     checkNoChanges(): void;
+    attachToViewContainerRef(vcRef: viewEngine_ViewContainerRef): void;
+    detachFromAppRef(): void;
+    attachToAppRef(appRef: ApplicationRef): void;
 }
-export declare class EmbeddedViewRef<T> extends ViewRef<T> {
-    constructor(viewNode: LViewNode, template: ComponentTemplate<T>, context: T);
-}
-/**
- * Creates a ViewRef bundled with destroy functionality.
- *
- * @param context The context for this view
- * @returns The ViewRef
- */
-export declare function createViewRef<T>(view: LView | null, context: T): ViewRef<T>;
-/** Interface for destroy logic. Implemented by addDestroyable. */
-export interface DestroyRef<T> {
-    /** Whether or not this object has been destroyed */
-    destroyed: boolean;
-    /** Destroy the instance and call all onDestroy callbacks. */
-    destroy(): void;
-    /** Register callbacks that should be called onDestroy */
-    onDestroy(cb: Function): void;
-}
-/**
- * Decorates an object with destroy logic (implementing the DestroyRef interface)
- * and returns the enhanced object.
- *
- * @param obj The object to decorate
- * @returns The object with destroy logic
- */
-export declare function addDestroyable<T, C>(obj: any): T & DestroyRef<C>;

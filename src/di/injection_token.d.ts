@@ -32,16 +32,16 @@ import { Type } from '../type';
  * overrides the above behavior and marks the token as belonging to a particular `@NgModule`. As
  * mentioned above, `'root'` is the default value for `providedIn`.
  *
- * ### Example
- *
- * #### Tree-shakeable InjectionToken
- *
- * {@example core/di/ts/injector_spec.ts region='ShakeableInjectionToken'}
+ * @usageNotes
+ * ### Basic Example
  *
  * #### Plain InjectionToken
  *
  * {@example core/di/ts/injector_spec.ts region='InjectionToken'}
  *
+ * #### Tree-shakable InjectionToken
+ *
+ * {@example core/di/ts/injector_spec.ts region='ShakableInjectionToken'}
  *
  */
 export declare class InjectionToken<T> {
