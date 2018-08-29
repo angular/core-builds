@@ -1,0 +1,18 @@
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+import { diPublic } from '../di';
+/**
+ * This feature publishes the directive (or component) into the DI system, making it visible to
+ * others for injection.
+ *
+ * @template T
+ * @param {?} definition
+ * @return {?}
+ */
+export function PublicFeature(definition) {
+    definition.diPublic = diPublic;
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHVibGljX2ZlYXR1cmUuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi8uLi8uLi8uLi9wYWNrYWdlcy9jb3JlL3NyYy9yZW5kZXIzL2ZlYXR1cmVzL3B1YmxpY19mZWF0dXJlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7QUFPQSxPQUFPLEVBQUMsUUFBUSxFQUFDLE1BQU0sT0FBTyxDQUFDOzs7Ozs7Ozs7QUFTL0IsTUFBTSxVQUFVLGFBQWEsQ0FBSSxVQUFtQztJQUNsRSxVQUFVLENBQUMsUUFBUSxHQUFHLFFBQVEsQ0FBQztDQUNoQyIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQGxpY2Vuc2VcbiAqIENvcHlyaWdodCBHb29nbGUgSW5jLiBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIFVzZSBvZiB0aGlzIHNvdXJjZSBjb2RlIGlzIGdvdmVybmVkIGJ5IGFuIE1JVC1zdHlsZSBsaWNlbnNlIHRoYXQgY2FuIGJlXG4gKiBmb3VuZCBpbiB0aGUgTElDRU5TRSBmaWxlIGF0IGh0dHBzOi8vYW5ndWxhci5pby9saWNlbnNlXG4gKi9cbmltcG9ydCB7ZGlQdWJsaWN9IGZyb20gJy4uL2RpJztcbmltcG9ydCB7RGlyZWN0aXZlRGVmSW50ZXJuYWx9IGZyb20gJy4uL2ludGVyZmFjZXMvZGVmaW5pdGlvbic7XG5cbi8qKlxuICogVGhpcyBmZWF0dXJlIHB1Ymxpc2hlcyB0aGUgZGlyZWN0aXZlIChvciBjb21wb25lbnQpIGludG8gdGhlIERJIHN5c3RlbSwgbWFraW5nIGl0IHZpc2libGUgdG9cbiAqIG90aGVycyBmb3IgaW5qZWN0aW9uLlxuICpcbiAqIEBwYXJhbSBkZWZpbml0aW9uXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBQdWJsaWNGZWF0dXJlPFQ+KGRlZmluaXRpb246IERpcmVjdGl2ZURlZkludGVybmFsPFQ+KSB7XG4gIGRlZmluaXRpb24uZGlQdWJsaWMgPSBkaVB1YmxpYztcbn1cbiJdfQ==
