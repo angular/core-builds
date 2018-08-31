@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.4
+ * @license Angular v7.0.0-beta.4+20.sha-00f1311
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -3263,7 +3263,6 @@
         // top level variables should not be exported for performance reasons (PERF_NOTES.md)
         return rendererFactory;
     }
-    var currentElementNode = null;
     function getCurrentSanitizer() {
         return viewData && viewData[SANITIZER];
     }
@@ -3794,7 +3793,6 @@
         var native = elementCreate(name);
         ngDevMode && assertDataInRange(index - 1);
         var node = createLNode(index, 3 /* Element */, native, name, attrs || null, null);
-        currentElementNode = node;
         if (attrs) {
             setUpAttributes(native, attrs);
         }
@@ -4167,27 +4165,31 @@
      */
     function listener(eventName, listenerFn, useCapture) {
         if (useCapture === void 0) { useCapture = false; }
-        ngDevMode && assertPreviousIsParent();
-        ngDevMode && assertNodeOfPossibleTypes(previousOrParentNode, 3 /* Element */);
+        ngDevMode &&
+            assertNodeOfPossibleTypes(previousOrParentNode, 3 /* Element */, 0 /* Container */, 4 /* ElementContainer */);
         var node = previousOrParentNode;
-        var native = node.native;
-        ngDevMode && ngDevMode.rendererAddEventListener++;
-        // In order to match current behavior, native DOM event listeners must be added for all
-        // events (including outputs).
-        if (isProceduralRenderer(renderer)) {
-            var wrappedListener = wrapListenerWithDirtyLogic(viewData, listenerFn);
-            var cleanupFn = renderer.listen(native, eventName, wrappedListener);
-            storeCleanupFn(viewData, cleanupFn);
-        }
-        else {
-            var wrappedListener = wrapListenerWithDirtyAndDefault(viewData, listenerFn);
-            native.addEventListener(eventName, wrappedListener, useCapture);
-            var cleanupInstances = getCleanup(viewData);
-            cleanupInstances.push(wrappedListener);
-            if (firstTemplatePass) {
-                getTViewCleanup(viewData).push(eventName, node.tNode.index, cleanupInstances.length - 1, useCapture);
+        // add native event listener - applicable to elements only
+        if (previousOrParentNode.tNode.type === 3 /* Element */) {
+            var native = node.native;
+            ngDevMode && ngDevMode.rendererAddEventListener++;
+            // In order to match current behavior, native DOM event listeners must be added for all
+            // events (including outputs).
+            if (isProceduralRenderer(renderer)) {
+                var wrappedListener = wrapListenerWithDirtyLogic(viewData, listenerFn);
+                var cleanupFn = renderer.listen(native, eventName, wrappedListener);
+                storeCleanupFn(viewData, cleanupFn);
+            }
+            else {
+                var wrappedListener = wrapListenerWithDirtyAndDefault(viewData, listenerFn);
+                native.addEventListener(eventName, wrappedListener, useCapture);
+                var cleanupInstances = getCleanup(viewData);
+                cleanupInstances.push(wrappedListener);
+                if (firstTemplatePass) {
+                    getTViewCleanup(viewData).push(eventName, node.tNode.index, cleanupInstances.length - 1, useCapture);
+                }
             }
         }
+        // subscribe to directive outputs
         var tNode = node.tNode;
         if (tNode.outputs === undefined) {
             // if we create TNode here, inputs must be undefined so we know they still need to be
@@ -4252,7 +4254,6 @@
         ngDevMode && assertNodeType(previousOrParentNode, 3 /* Element */);
         currentQueries && (currentQueries = currentQueries.addNode(previousOrParentNode));
         queueLifecycleHooks(previousOrParentNode.tNode.flags, tView);
-        currentElementNode = null;
         elementDepthCount--;
     }
     /**
@@ -4437,8 +4438,7 @@
      *   to sanitize the any CSS property values that are applied to the element (during rendering).
      */
     function elementStyling(classDeclarations, styleDeclarations, styleSanitizer) {
-        var lElement = currentElementNode;
-        var tNode = lElement.tNode;
+        var tNode = previousOrParentNode.tNode;
         if (!tNode.stylingTemplate) {
             // initialize the styling template.
             tNode.stylingTemplate =
@@ -6393,100 +6393,6 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * Represents an instance of a Component created via a {@link ComponentFactory}.
-     *
-     * `ComponentRef` provides access to the Component Instance as well other objects related to this
-     * Component Instance and allows you to destroy the Component Instance via the {@link #destroy}
-     * method.
-     *
-     */
-    var ComponentRef = /** @class */ (function () {
-        function ComponentRef() {
-        }
-        return ComponentRef;
-    }());
-    var ComponentFactory = /** @class */ (function () {
-        function ComponentFactory() {
-        }
-        return ComponentFactory;
-    }());
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    function noComponentFactoryError(component) {
-        var error = Error("No component factory found for " + stringify(component) + ". Did you add it to @NgModule.entryComponents?");
-        error[ERROR_COMPONENT] = component;
-        return error;
-    }
-    var ERROR_COMPONENT = 'ngComponent';
-    var _NullComponentFactoryResolver = /** @class */ (function () {
-        function _NullComponentFactoryResolver() {
-        }
-        _NullComponentFactoryResolver.prototype.resolveComponentFactory = function (component) {
-            throw noComponentFactoryError(component);
-        };
-        return _NullComponentFactoryResolver;
-    }());
-    var ComponentFactoryResolver = /** @class */ (function () {
-        function ComponentFactoryResolver() {
-        }
-        ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
-        return ComponentFactoryResolver;
-    }());
-    var CodegenComponentFactoryResolver = /** @class */ (function () {
-        function CodegenComponentFactoryResolver(factories, _parent, _ngModule) {
-            this._parent = _parent;
-            this._ngModule = _ngModule;
-            this._factories = new Map();
-            for (var i = 0; i < factories.length; i++) {
-                var factory = factories[i];
-                this._factories.set(factory.componentType, factory);
-            }
-        }
-        CodegenComponentFactoryResolver.prototype.resolveComponentFactory = function (component) {
-            var factory = this._factories.get(component);
-            if (!factory && this._parent) {
-                factory = this._parent.resolveComponentFactory(component);
-            }
-            if (!factory) {
-                throw noComponentFactoryError(component);
-            }
-            return new ComponentFactoryBoundToModule(factory, this._ngModule);
-        };
-        return CodegenComponentFactoryResolver;
-    }());
-    var ComponentFactoryBoundToModule = /** @class */ (function (_super) {
-        __extends(ComponentFactoryBoundToModule, _super);
-        function ComponentFactoryBoundToModule(factory, ngModule) {
-            var _this = _super.call(this) || this;
-            _this.factory = factory;
-            _this.ngModule = ngModule;
-            _this.selector = factory.selector;
-            _this.componentType = factory.componentType;
-            _this.ngContentSelectors = factory.ngContentSelectors;
-            _this.inputs = factory.inputs;
-            _this.outputs = factory.outputs;
-            return _this;
-        }
-        ComponentFactoryBoundToModule.prototype.create = function (injector, projectableNodes, rootSelectorOrNode, ngModule) {
-            return this.factory.create(injector, projectableNodes, rootSelectorOrNode, ngModule || this.ngModule);
-        };
-        return ComponentFactoryBoundToModule;
-    }(ComponentFactory));
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
      * @deprecated Use `RendererType2` (and `Renderer2`) instead.
      */
     var RenderComponentType = /** @class */ (function () {
@@ -6576,6 +6482,108 @@
         }
         return Renderer2;
     }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Represents an instance of a Component created via a {@link ComponentFactory}.
+     *
+     * `ComponentRef` provides access to the Component Instance as well other objects related to this
+     * Component Instance and allows you to destroy the Component Instance via the {@link #destroy}
+     * method.
+     *
+     */
+    var ComponentRef = /** @class */ (function () {
+        function ComponentRef() {
+        }
+        return ComponentRef;
+    }());
+    var ComponentFactory = /** @class */ (function () {
+        function ComponentFactory() {
+        }
+        return ComponentFactory;
+    }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    function noComponentFactoryError(component) {
+        var error = Error("No component factory found for " + stringify(component) + ". Did you add it to @NgModule.entryComponents?");
+        error[ERROR_COMPONENT] = component;
+        return error;
+    }
+    var ERROR_COMPONENT = 'ngComponent';
+    var _NullComponentFactoryResolver = /** @class */ (function () {
+        function _NullComponentFactoryResolver() {
+        }
+        _NullComponentFactoryResolver.prototype.resolveComponentFactory = function (component) {
+            throw noComponentFactoryError(component);
+        };
+        return _NullComponentFactoryResolver;
+    }());
+    var ComponentFactoryResolver = /** @class */ (function () {
+        function ComponentFactoryResolver() {
+        }
+        ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
+        return ComponentFactoryResolver;
+    }());
+    var CodegenComponentFactoryResolver = /** @class */ (function () {
+        function CodegenComponentFactoryResolver(factories, _parent, _ngModule) {
+            this._parent = _parent;
+            this._ngModule = _ngModule;
+            this._factories = new Map();
+            for (var i = 0; i < factories.length; i++) {
+                var factory = factories[i];
+                this._factories.set(factory.componentType, factory);
+            }
+        }
+        CodegenComponentFactoryResolver.prototype.resolveComponentFactory = function (component) {
+            var factory = this._factories.get(component);
+            if (!factory && this._parent) {
+                factory = this._parent.resolveComponentFactory(component);
+            }
+            if (!factory) {
+                throw noComponentFactoryError(component);
+            }
+            return new ComponentFactoryBoundToModule(factory, this._ngModule);
+        };
+        return CodegenComponentFactoryResolver;
+    }());
+    var ComponentFactoryBoundToModule = /** @class */ (function (_super) {
+        __extends(ComponentFactoryBoundToModule, _super);
+        function ComponentFactoryBoundToModule(factory, ngModule) {
+            var _this = _super.call(this) || this;
+            _this.factory = factory;
+            _this.ngModule = ngModule;
+            _this.selector = factory.selector;
+            _this.componentType = factory.componentType;
+            _this.ngContentSelectors = factory.ngContentSelectors;
+            _this.inputs = factory.inputs;
+            _this.outputs = factory.outputs;
+            return _this;
+        }
+        ComponentFactoryBoundToModule.prototype.create = function (injector, projectableNodes, rootSelectorOrNode, ngModule) {
+            return this.factory.create(injector, projectableNodes, rootSelectorOrNode, ngModule || this.ngModule);
+        };
+        return ComponentFactoryBoundToModule;
+    }(ComponentFactory));
 
     /**
      * @license
@@ -7158,6 +7166,9 @@
         return getOrCreateChangeDetectorRef(getOrCreateNodeInjector(), null);
     }
     var componentFactoryResolver = new ComponentFactoryResolver$1();
+    function injectRenderer2() {
+        return getOrCreateRenderer2(getOrCreateNodeInjector());
+    }
     /**
      * Inject static attribute value into directive constructor.
      *
@@ -7234,6 +7245,15 @@
             existingRef :
             new ViewRef(hostNode.data, hostNode
                 .view[DIRECTIVES][hostNode.tNode.flags >> 15 /* DirectiveStartingIndexShift */]);
+    }
+    function getOrCreateRenderer2(di) {
+        var renderer = di.node.view[RENDERER];
+        if (isProceduralRenderer(renderer)) {
+            return renderer;
+        }
+        else {
+            throw new Error('Cannot inject Renderer2 when the application uses Renderer3!');
+        }
     }
     /**
      * If the node is an embedded view, traverses up the view tree to return the closest
@@ -7488,6 +7508,9 @@
             }
             if (token === ChangeDetectorRef) {
                 return getOrCreateChangeDetectorRef(this._lInjector, null);
+            }
+            if (token === Renderer2) {
+                return getOrCreateRenderer2(this._lInjector);
             }
             return getOrCreateInjectable(this._lInjector, token);
         };
@@ -10444,6 +10467,7 @@
         'ɵinjectTemplateRef': injectTemplateRef,
         'ɵinjectViewContainerRef': injectViewContainerRef,
         'ɵtemplateRefExtractor': templateRefExtractor,
+        'ɵinjectRenderer2': injectRenderer2,
         'ɵNgOnChangesFeature': NgOnChangesFeature,
         'ɵPublicFeature': PublicFeature,
         'ɵInheritDefinitionFeature': InheritDefinitionFeature,
@@ -11640,7 +11664,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-beta.4');
+    var VERSION = new Version('7.0.0-beta.4+20.sha-00f1311');
 
     /**
      * @license
@@ -14027,14 +14051,6 @@
             list.splice(index, 1);
         }
     }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
 
     /**
      * @license
@@ -16446,7 +16462,10 @@
             }
         }
         else {
-            el = renderer.selectRootElement(rootSelectorOrNode);
+            // when using native Shadow DOM, do not clear the root element contents to allow slot projection
+            var preserveContent = (!!elDef.componentRendererType &&
+                elDef.componentRendererType.encapsulation === exports.ViewEncapsulation.ShadowDom);
+            el = renderer.selectRootElement(rootSelectorOrNode, preserveContent);
         }
         if (elDef.attrs) {
             for (var i = 0; i < elDef.attrs.length; i++) {
@@ -19786,9 +19805,9 @@
             }
             this.delegate.removeChild(parent, oldChild);
         };
-        DebugRenderer2.prototype.selectRootElement = function (selectorOrNode) {
-            var el = this.delegate.selectRootElement(selectorOrNode);
-            var debugCtx = this.debugContext;
+        DebugRenderer2.prototype.selectRootElement = function (selectorOrNode, preserveContent) {
+            var el = this.delegate.selectRootElement(selectorOrNode, preserveContent);
+            var debugCtx = getCurrentDebugContext();
             if (debugCtx) {
                 indexDebugNode(new DebugElement(el, null, debugCtx));
             }
@@ -20293,6 +20312,7 @@
     exports.ɵinjectTemplateRef = injectTemplateRef;
     exports.ɵinjectViewContainerRef = injectViewContainerRef;
     exports.ɵinjectChangeDetectorRef = injectChangeDetectorRef;
+    exports.ɵinjectRenderer2 = injectRenderer2;
     exports.ɵinjectAttribute = injectAttribute;
     exports.ɵgetFactoryOf = getFactoryOf;
     exports.ɵgetInheritedFactory = getInheritedFactory;
