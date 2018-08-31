@@ -335,9 +335,7 @@ export declare const defineDirective: <T>(directiveDefinition: {
     /**
      * Factory method used to create an instance of directive.
      */
-    factory: () => T | ({
-        0: T;
-    } & any[]);
+    factory: () => T;
     /**
      * Static attributes to set on host element.
      *
