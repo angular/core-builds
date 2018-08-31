@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.4+35.sha-abd29f5
+ * @license Angular v7.0.0-beta.4+32.sha-1e3460b
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -6712,9 +6712,6 @@ class ComponentFactory$1 extends ComponentFactory {
             elementNode = hostElement(componentTag, hostNode, this.componentDef);
             // Create directive instance with factory() and store at index 0 in directives array
             component = baseDirectiveCreate(0, this.componentDef.factory(), this.componentDef);
-            if (this.componentDef.hostBindings) {
-                queueHostBindingForCheck(0, this.componentDef.hostVars);
-            }
             rootContext.components.push(component);
             initChangeDetectorIfExisting(elementNode.nodeInjector, component, elementNode.data);
             elementNode.data[CONTEXT] = component;
@@ -6722,7 +6719,6 @@ class ComponentFactory$1 extends ComponentFactory {
             // executed here?
             // Angular 5 reference: https://stackblitz.com/edit/lifecycle-hooks-vcref
             LifecycleHooksFeature(component, this.componentDef);
-            setHostBindings(rootView[TVIEW].hostBindings);
             // Transform the arrays of native nodes into a LNode structure that can be consumed by the
             // projection instruction. This is needed to support the reprojection of these nodes.
             if (projectableNodes) {
@@ -11372,7 +11368,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('7.0.0-beta.4+35.sha-abd29f5');
+const VERSION = new Version('7.0.0-beta.4+32.sha-1e3460b');
 
 /**
  * @license
