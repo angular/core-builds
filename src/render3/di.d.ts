@@ -12,6 +12,7 @@ import { ComponentFactoryResolver as viewEngine_ComponentFactoryResolver } from 
 import { ElementRef as viewEngine_ElementRef } from '../linker/element_ref';
 import { TemplateRef as viewEngine_TemplateRef } from '../linker/template_ref';
 import { ViewContainerRef as viewEngine_ViewContainerRef } from '../linker/view_container_ref';
+import { Renderer2 } from '../render';
 import { Type } from '../type';
 import { DirectiveDefInternal } from './interfaces/definition';
 import { LInjector } from './interfaces/injector';
@@ -100,6 +101,7 @@ export declare function injectChangeDetectorRef(): viewEngine_ChangeDetectorRef;
  * @returns The ComponentFactoryResolver instance to use
  */
 export declare function injectComponentFactoryResolver(): viewEngine_ComponentFactoryResolver;
+export declare function injectRenderer2(): Renderer2;
 /**
  * Inject static attribute value into directive constructor.
  *
