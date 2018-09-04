@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.4+33.sha-34be518
+ * @license Angular v7.0.0-beta.4+38.sha-cc29b9c
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -11117,7 +11117,7 @@
                     // Parse the template and check for errors.
                     var template = compiler.parseTemplate(metadata.template, "ng://" + stringify(type) + "/template.html", {
                         preserveWhitespaces: metadata.preserveWhitespaces || false,
-                    });
+                    }, '');
                     if (template.errors !== undefined) {
                         var errors = template.errors.map(function (err) { return err.toString(); }).join(', ');
                         throw new Error("Errors during JIT compilation of template for " + stringify(type) + ": " + errors);
@@ -11668,7 +11668,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-beta.4+33.sha-34be518');
+    var VERSION = new Version('7.0.0-beta.4+38.sha-cc29b9c');
 
     /**
      * @license
