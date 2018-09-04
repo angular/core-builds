@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.6+11.sha-d8930bb
+ * @license Angular v6.1.6+12.sha-4fe369e
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -14692,7 +14692,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.6+11.sha-d8930bb');
+const VERSION = new Version('6.1.6+12.sha-4fe369e');
 
 /**
  * @license
