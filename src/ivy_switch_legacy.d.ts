@@ -8,6 +8,12 @@
 export interface DirectiveCompiler {
     (type: any, meta: any): void;
 }
+export declare const R3_COMPILE_COMPONENT__POST_NGCC__: DirectiveCompiler;
+export declare const R3_COMPILE_DIRECTIVE__POST_NGCC__: DirectiveCompiler;
+export declare const R3_COMPILE_INJECTABLE__POST_NGCC__: DirectiveCompiler;
+export declare const R3_COMPILE_NGMODULE__POST_NGCC__: DirectiveCompiler;
+export declare const R3_COMPILE_PIPE__POST_NGCC__: DirectiveCompiler;
+export declare const ivyEnable__POST_NGCC__: boolean;
 export declare const ivyEnabled: boolean;
 export declare let R3_COMPILE_COMPONENT: DirectiveCompiler;
 export declare let R3_COMPILE_DIRECTIVE: DirectiveCompiler;
