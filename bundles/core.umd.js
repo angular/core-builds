@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.4+41.sha-51c0d9c
+ * @license Angular v7.0.0-beta.4+36.sha-e84da19
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -11132,7 +11132,7 @@
                     // Parse the template and check for errors.
                     var template = compiler.parseTemplate(metadata.template, "ng://" + stringify(type) + "/template.html", {
                         preserveWhitespaces: metadata.preserveWhitespaces || false,
-                    }, '');
+                    });
                     if (template.errors !== undefined) {
                         var errors = template.errors.map(function (err) { return err.toString(); }).join(', ');
                         throw new Error("Errors during JIT compilation of template for " + stringify(type) + ": " + errors);
@@ -11695,7 +11695,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-beta.4+41.sha-51c0d9c');
+    var VERSION = new Version('7.0.0-beta.4+36.sha-e84da19');
 
     /**
      * @license
@@ -20082,22 +20082,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var R3_COMPILE_COMPONENT__POST_NGCC__ = R3_COMPILE_COMPONENT;
-    var R3_COMPILE_DIRECTIVE__POST_NGCC__ = R3_COMPILE_DIRECTIVE;
-    var R3_COMPILE_INJECTABLE__POST_NGCC__ = R3_COMPILE_INJECTABLE;
-    var R3_COMPILE_NGMODULE__POST_NGCC__ = R3_COMPILE_NGMODULE;
-    var R3_COMPILE_PIPE__POST_NGCC__ = R3_COMPILE_PIPE;
-    var ivyEnable__POST_NGCC__ = ivyEnabled;
-    var GET_PROPERTY_NAME$2 = {};
-    var USE_VALUE$2 = getClosureSafeProperty$1({ provide: String, useValue: GET_PROPERTY_NAME$2 }, GET_PROPERTY_NAME$2);
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     // clang-format on
 
     /**
@@ -20386,12 +20370,6 @@
     exports.ɵbypassSanitizationTrustUrl = bypassSanitizationTrustUrl;
     exports.ɵbypassSanitizationTrustResourceUrl = bypassSanitizationTrustResourceUrl;
     exports.ɵgetElementContext = getElementContext;
-    exports.ɵR3_COMPILE_COMPONENT__POST_NGCC__ = R3_COMPILE_COMPONENT__POST_NGCC__;
-    exports.ɵR3_COMPILE_DIRECTIVE__POST_NGCC__ = R3_COMPILE_DIRECTIVE__POST_NGCC__;
-    exports.ɵR3_COMPILE_INJECTABLE__POST_NGCC__ = R3_COMPILE_INJECTABLE__POST_NGCC__;
-    exports.ɵR3_COMPILE_NGMODULE__POST_NGCC__ = R3_COMPILE_NGMODULE__POST_NGCC__;
-    exports.ɵR3_COMPILE_PIPE__POST_NGCC__ = R3_COMPILE_PIPE__POST_NGCC__;
-    exports.ɵivyEnable__POST_NGCC__ = ivyEnable__POST_NGCC__;
     exports.ɵregisterModuleFactory = registerModuleFactory;
     exports.ɵEMPTY_ARRAY = EMPTY_ARRAY$3;
     exports.ɵEMPTY_MAP = EMPTY_MAP;
