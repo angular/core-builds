@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.6+23.sha-f0bcfd0
+ * @license Angular v6.1.6+27.sha-3a0b735
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1702,7 +1702,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('6.1.6+23.sha-f0bcfd0');
+    var VERSION = new Version('6.1.6+27.sha-3a0b735');
 
     /**
      * @license
@@ -14450,7 +14450,7 @@
      *
      * This method lazily creates the `StylingContext`. This is because in most cases
      * we have styling without any bindings. Creating `StylingContext` eagerly would mean that
-     * every style declaration such as `<div style="color: 'red' ">` would result `StyleContext`
+     * every style declaration such as `<div style="color: red">` would result `StyleContext`
      * which would create unnecessary memory pressure.
      *
      * @param index Index of the style allocation. See: `elementStyling`.
