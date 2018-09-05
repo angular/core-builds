@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.4+36.sha-e84da19
+ * @license Angular v7.0.0-beta.4+42.sha-c1ae3c1
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -10908,6 +10908,15 @@
      */
     var EMPTY_ARRAY$2 = [];
     /**
+     * Compiles a module in JIT mode.
+     *
+     * This function automatically gets called when a class has a `@NgModule` decorator.
+     */
+    function compileNgModule(moduleType, ngModule) {
+        compileNgModuleDefs(moduleType, ngModule);
+        setScopeOnDeclaredComponents(moduleType, ngModule);
+    }
+    /**
      * Compiles and adds the `ngModuleDef` and `ngInjectorDef` properties to the module class.
      */
     function compileNgModuleDefs(moduleType, ngModule) {
@@ -10957,6 +10966,27 @@
             },
             // Make the property configurable in dev mode to allow overriding in tests
             configurable: !!ngDevMode,
+        });
+    }
+    /**
+     * Some declared components may be compiled asynchronously, and thus may not have their
+     * ngComponentDef set yet. If this is the case, then a reference to the module is written into
+     * the `ngSelectorScope` property of the declared type.
+     */
+    function setScopeOnDeclaredComponents(moduleType, ngModule) {
+        var declarations = flatten$1(ngModule.declarations || EMPTY_ARRAY$2);
+        var transitiveScopes = transitiveScopesFor(moduleType);
+        declarations.forEach(function (declaration) {
+            if (declaration.hasOwnProperty(NG_COMPONENT_DEF)) {
+                // An `ngComponentDef` field exists - go ahead and patch the component directly.
+                var component = declaration;
+                var componentDef = component.ngComponentDef;
+                patchComponentDefWithScope(componentDef, transitiveScopes);
+            }
+            else if (!declaration.hasOwnProperty(NG_DIRECTIVE_DEF) && !declaration.hasOwnProperty(NG_PIPE_DEF)) {
+                // Set `ngSelectorScope` for future reference when the component compilation finishes.
+                declaration.ngSelectorScope = moduleType;
+            }
         });
     }
     /**
@@ -11117,7 +11147,7 @@
                     // Parse the template and check for errors.
                     var template = compiler.parseTemplate(metadata.template, "ng://" + stringify(type) + "/template.html", {
                         preserveWhitespaces: metadata.preserveWhitespaces || false,
-                    });
+                    }, '');
                     if (template.errors !== undefined) {
                         var errors = template.errors.map(function (err) { return err.toString(); }).join(', ');
                         throw new Error("Errors during JIT compilation of template for " + stringify(type) + ": " + errors);
@@ -11267,9 +11297,98 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    /**
+     * Compile an Angular injectable according to its `Injectable` metadata, and patch the resulting
+     * `ngInjectableDef` onto the injectable type.
+     */
+    function compileInjectable(type, srcMeta) {
+        // Allow the compilation of a class with a `@Injectable()` decorator without parameters
+        var meta = srcMeta || { providedIn: null };
+        var def = null;
+        Object.defineProperty(type, NG_INJECTABLE_DEF, {
+            get: function () {
+                if (def === null) {
+                    // Check whether the injectable metadata includes a provider specification.
+                    var hasAProvider = isUseClassProvider(meta) || isUseFactoryProvider(meta) ||
+                        isUseValueProvider(meta) || isUseExistingProvider(meta);
+                    var ctorDeps = reflectDependencies(type);
+                    var userDeps = undefined;
+                    if ((isUseClassProvider(meta) || isUseFactoryProvider(meta)) && meta.deps !== undefined) {
+                        userDeps = convertDependencies(meta.deps);
+                    }
+                    // Decide which flavor of factory to generate, based on the provider specified.
+                    // Only one of the use* fields should be set.
+                    var useClass = undefined;
+                    var useFactory = undefined;
+                    var useValue = undefined;
+                    var useExisting = undefined;
+                    if (!hasAProvider) {
+                        // In the case the user specifies a type provider, treat it as {provide: X, useClass: X}.
+                        // The deps will have been reflected above, causing the factory to create the class by
+                        // calling
+                        // its constructor with injected deps.
+                        useClass = new compiler.WrappedNodeExpr(type);
+                    }
+                    else if (isUseClassProvider(meta)) {
+                        // The user explicitly specified useClass, and may or may not have provided deps.
+                        useClass = new compiler.WrappedNodeExpr(meta.useClass);
+                    }
+                    else if (isUseValueProvider(meta)) {
+                        // The user explicitly specified useValue.
+                        useValue = new compiler.WrappedNodeExpr(meta.useValue);
+                    }
+                    else if (isUseFactoryProvider(meta)) {
+                        // The user explicitly specified useFactory.
+                        useFactory = new compiler.WrappedNodeExpr(meta.useFactory);
+                    }
+                    else if (isUseExistingProvider(meta)) {
+                        // The user explicitly specified useExisting.
+                        useExisting = new compiler.WrappedNodeExpr(meta.useExisting);
+                    }
+                    else {
+                        // Can't happen - either hasAProvider will be false, or one of the providers will be set.
+                        throw new Error("Unreachable state.");
+                    }
+                    var _a = compiler.compileInjectable({
+                        name: type.name,
+                        type: new compiler.WrappedNodeExpr(type),
+                        providedIn: computeProvidedIn(meta.providedIn),
+                        useClass: useClass,
+                        useFactory: useFactory,
+                        useValue: useValue,
+                        useExisting: useExisting,
+                        ctorDeps: ctorDeps,
+                        userDeps: userDeps,
+                    }), expression = _a.expression, statements = _a.statements;
+                    def = compiler.jitExpression(expression, angularCoreEnv, "ng://" + type.name + "/ngInjectableDef.js", statements);
+                }
+                return def;
+            },
+        });
+    }
+    function computeProvidedIn(providedIn) {
+        if (providedIn == null || typeof providedIn === 'string') {
+            return new compiler.LiteralExpr(providedIn);
+        }
+        else {
+            return new compiler.WrappedNodeExpr(providedIn);
+        }
+    }
+    function isUseClassProvider(meta) {
+        return meta.useClass !== undefined;
+    }
     var GET_PROPERTY_NAME$1 = {};
     var ɵ0$1 = GET_PROPERTY_NAME$1;
     var USE_VALUE$1 = getClosureSafeProperty$1({ provide: String, useValue: ɵ0$1 }, GET_PROPERTY_NAME$1);
+    function isUseValueProvider(meta) {
+        return USE_VALUE$1 in meta;
+    }
+    function isUseFactoryProvider(meta) {
+        return meta.useFactory !== undefined;
+    }
+    function isUseExistingProvider(meta) {
+        return meta.useExisting !== undefined;
+    }
 
     /**
      * @license
@@ -11308,6 +11427,12 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    var ivyEnabled = true;
+    var R3_COMPILE_COMPONENT = compileComponent;
+    var R3_COMPILE_DIRECTIVE = compileDirective;
+    var R3_COMPILE_INJECTABLE = compileInjectable;
+    var R3_COMPILE_NGMODULE = compileNgModule;
+    var R3_COMPILE_PIPE = compilePipe;
 
     /**
      * @license
@@ -11317,6 +11442,12 @@
      * found in the LICENSE file at https://angular.io/license
      */
     function noop() { }
+    var R3_COMPILE_COMPONENT__POST_NGCC__ = R3_COMPILE_COMPONENT;
+    var R3_COMPILE_DIRECTIVE__POST_NGCC__ = R3_COMPILE_DIRECTIVE;
+    var R3_COMPILE_INJECTABLE__POST_NGCC__ = R3_COMPILE_INJECTABLE;
+    var R3_COMPILE_NGMODULE__POST_NGCC__ = R3_COMPILE_NGMODULE;
+    var R3_COMPILE_PIPE__POST_NGCC__ = R3_COMPILE_PIPE;
+    var ivyEnable__POST_NGCC__ = ivyEnabled;
     var R3_COMPILE_COMPONENT__PRE_NGCC__ = noop;
     var R3_COMPILE_DIRECTIVE__PRE_NGCC__ = noop;
     var R3_COMPILE_INJECTABLE__PRE_NGCC__ = preR3InjectableCompile;
@@ -11668,7 +11799,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-beta.4+36.sha-e84da19');
+    var VERSION = new Version('7.0.0-beta.4+42.sha-c1ae3c1');
 
     /**
      * @license
@@ -20419,6 +20550,12 @@
     exports.ɵbypassSanitizationTrustUrl = bypassSanitizationTrustUrl;
     exports.ɵbypassSanitizationTrustResourceUrl = bypassSanitizationTrustResourceUrl;
     exports.ɵgetElementContext = getElementContext;
+    exports.ɵR3_COMPILE_COMPONENT__POST_NGCC__ = R3_COMPILE_COMPONENT__POST_NGCC__;
+    exports.ɵR3_COMPILE_DIRECTIVE__POST_NGCC__ = R3_COMPILE_DIRECTIVE__POST_NGCC__;
+    exports.ɵR3_COMPILE_INJECTABLE__POST_NGCC__ = R3_COMPILE_INJECTABLE__POST_NGCC__;
+    exports.ɵR3_COMPILE_NGMODULE__POST_NGCC__ = R3_COMPILE_NGMODULE__POST_NGCC__;
+    exports.ɵR3_COMPILE_PIPE__POST_NGCC__ = R3_COMPILE_PIPE__POST_NGCC__;
+    exports.ɵivyEnable__POST_NGCC__ = ivyEnable__POST_NGCC__;
     exports.ɵregisterModuleFactory = registerModuleFactory;
     exports.ɵEMPTY_ARRAY = EMPTY_ARRAY$4;
     exports.ɵEMPTY_MAP = EMPTY_MAP;
