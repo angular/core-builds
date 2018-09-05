@@ -13,6 +13,8 @@ import { ViewEncapsulation } from '../metadata/view';
 import { Type } from '../type';
 import { BaseDef, ComponentDefFeature, ComponentDefInternal, ComponentQuery, ComponentTemplate, ComponentType, DirectiveDefFeature, DirectiveDefInternal, DirectiveType, DirectiveTypesOrFactory, PipeDefInternal, PipeType, PipeTypesOrFactory } from './interfaces/definition';
 import { CssSelectorList, SelectorFlags } from './interfaces/projection';
+export declare const EMPTY: {};
+export declare const EMPTY_ARRAY: any[];
 /**
  * Create a component definition object.
  *
