@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.6+16.sha-27f0817
+ * @license Angular v6.1.6+20.sha-8f8c390
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -15121,7 +15121,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('6.1.6+16.sha-27f0817');
+    var VERSION = new Version('6.1.6+20.sha-8f8c390');
 
     /**
      * @license
@@ -19526,6 +19526,7 @@
     exports.SkipSelf = SkipSelf;
     exports.Host = Host;
     exports.NgZone = NgZone;
+    exports.ɵNoopNgZone = NoopNgZone;
     exports.RenderComponentType = RenderComponentType;
     exports.Renderer = Renderer;
     exports.Renderer2 = Renderer2;
