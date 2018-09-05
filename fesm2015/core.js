@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.4+44.sha-25c1f33
+ * @license Angular v7.0.0-beta.4+46.sha-a417b2b
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -5853,6 +5853,14 @@ function InheritDefinitionFeature(definition) {
             superDef = superType.ngDirectiveDef;
         }
         const baseDef = superType.ngBaseDef;
+        // Some fields in the definition may be empty, if there were no values to put in them that
+        // would've justified object creation. Unwrap them if necessary.
+        if (baseDef || superDef) {
+            const writeableDef = definition;
+            writeableDef.inputs = maybeUnwrapEmpty(definition.inputs);
+            writeableDef.declaredInputs = maybeUnwrapEmpty(definition.declaredInputs);
+            writeableDef.outputs = maybeUnwrapEmpty(definition.outputs);
+        }
         if (baseDef) {
             // Merge inputs and outputs
             fillProperties(definition.inputs, baseDef.inputs);
@@ -5960,6 +5968,17 @@ function InheritDefinitionFeature(definition) {
             }
         }
         superType = Object.getPrototypeOf(superType);
+    }
+}
+function maybeUnwrapEmpty(value) {
+    if (value === EMPTY$1) {
+        return {};
+    }
+    else if (Array.isArray(value) && value === EMPTY_ARRAY) {
+        return [];
+    }
+    else {
+        return value;
     }
 }
 
@@ -11372,7 +11391,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('7.0.0-beta.4+44.sha-25c1f33');
+const VERSION = new Version('7.0.0-beta.4+46.sha-a417b2b');
 
 /**
  * @license
