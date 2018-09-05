@@ -1,10 +1,10 @@
 /**
- * @license Angular v6.1.6+27.sha-3a0b735
+ * @license Angular v6.1.6+22.sha-82e0676
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __decorate, __metadata, __assign, __param, __extends, __spread, __read, __values } from 'tslib';
+import { __decorate, __param, __metadata, __extends, __spread, __assign, __read, __values } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { share } from 'rxjs/operators';
 import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compileInjectable, compilePipeFromMetadata } from '@angular/compiler';
@@ -3920,7 +3920,7 @@ function elementStyling(classDeclarations, styleDeclarations, styleSanitizer) {
  *
  * This method lazily creates the `StylingContext`. This is because in most cases
  * we have styling without any bindings. Creating `StylingContext` eagerly would mean that
- * every style declaration such as `<div style="color: red">` would result `StyleContext`
+ * every style declaration such as `<div style="color: 'red' ">` would result `StyleContext`
  * which would create unnecessary memory pressure.
  *
  * @param index Index of the style allocation. See: `elementStyling`.
@@ -15064,7 +15064,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.6+27.sha-3a0b735');
+var VERSION = new Version('6.1.6+22.sha-82e0676');
 
 /**
  * @license
