@@ -1,11 +1,11 @@
 /**
- * @license Angular v6.1.6+28.sha-d1063c6
+ * @license Angular v6.1.7+8.sha-b9a5ce1
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
 import { RendererFactory2, getDebugNode, Compiler, Injectable, ApplicationInitStatus, Component, InjectionToken, Injector, NgModule, NgZone, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify } from '@angular/core';
-import { __spread, __values, __extends } from 'tslib';
+import { __spread, __values, __decorate, __extends } from 'tslib';
 
 /**
  * @license
@@ -675,9 +675,9 @@ var TestingCompiler = /** @class */ (function (_super) {
      * This can be used for errors created by compileModule...
      */
     TestingCompiler.prototype.getComponentFromError = function (error) { throw unimplemented(); };
-    TestingCompiler.decorators = [
-        { type: Injectable }
-    ];
+    TestingCompiler = __decorate([
+        Injectable()
+    ], TestingCompiler);
     return TestingCompiler;
 }(Compiler));
 /**
@@ -1007,12 +1007,12 @@ var TestBed = /** @class */ (function () {
             var RootScopeModule = /** @class */ (function () {
                 function RootScopeModule() {
                 }
-                RootScopeModule.decorators = [
-                    { type: NgModule, args: [{
-                                providers: __spread(rootProviderOverrides),
-                                jit: true,
-                            },] },
-                ];
+                RootScopeModule = __decorate([
+                    NgModule({
+                        providers: __spread(rootProviderOverrides),
+                        jit: true,
+                    })
+                ], RootScopeModule);
                 return RootScopeModule;
             }());
             rootScopeImports.push(RootScopeModule);
@@ -1023,9 +1023,9 @@ var TestBed = /** @class */ (function () {
         var DynamicTestModule = /** @class */ (function () {
             function DynamicTestModule() {
             }
-            DynamicTestModule.decorators = [
-                { type: NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas, jit: true },] },
-            ];
+            DynamicTestModule = __decorate([
+                NgModule({ providers: providers, declarations: declarations, imports: imports, schemas: schemas, jit: true })
+            ], DynamicTestModule);
             return DynamicTestModule;
         }());
         var compilerFactory = this.platform.injector.get(TestingCompilerFactory);
@@ -1143,9 +1143,9 @@ var TestBed = /** @class */ (function () {
         var OverrideComponent = /** @class */ (function () {
             function OverrideComponent() {
             }
-            OverrideComponent.decorators = [
-                { type: Component, args: [{ selector: 'empty', template: template, jit: true },] },
-            ];
+            OverrideComponent = __decorate([
+                Component({ selector: 'empty', template: template, jit: true })
+            ], OverrideComponent);
             return OverrideComponent;
         }());
         this._templateOverrides.push({ component: component, templateOf: OverrideComponent });

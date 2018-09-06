@@ -1,10 +1,10 @@
 /**
- * @license Angular v6.1.6+28.sha-d1063c6
+ * @license Angular v6.1.7+8.sha-b9a5ce1
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __spread, __read, __assign, __extends, __values } from 'tslib';
+import { __decorate, __metadata, __spread, __param, __read, __extends, __assign, __values } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { share } from 'rxjs/operators';
 
@@ -1644,7 +1644,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.6+28.sha-d1063c6');
+var VERSION = new Version('6.1.7+8.sha-b9a5ce1');
 
 /**
  * @license
@@ -3040,13 +3040,11 @@ var ApplicationInitStatus = /** @class */ (function () {
         }
         this.initialized = true;
     };
-    ApplicationInitStatus.decorators = [
-        { type: Injectable }
-    ];
-    /** @nocollapse */
-    ApplicationInitStatus.ctorParameters = function () { return [
-        { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional }] }
-    ]; };
+    ApplicationInitStatus = __decorate([
+        Injectable(),
+        __param(0, Inject(APP_INITIALIZER)), __param(0, Optional()),
+        __metadata("design:paramtypes", [Array])
+    ], ApplicationInitStatus);
     return ApplicationInitStatus;
 }());
 
@@ -3127,9 +3125,9 @@ var Console = /** @class */ (function () {
         // tslint:disable-next-line:no-console
         console.warn(message);
     };
-    Console.decorators = [
-        { type: Injectable }
-    ];
+    Console = __decorate([
+        Injectable()
+    ], Console);
     return Console;
 }());
 
@@ -3201,9 +3199,9 @@ var Compiler = /** @class */ (function () {
      * Returns the id for a given NgModule, if one is defined and known to the compiler.
      */
     Compiler.prototype.getModuleId = function (moduleType) { return undefined; };
-    Compiler.decorators = [
-        { type: Injectable }
-    ];
+    Compiler = __decorate([
+        Injectable()
+    ], Compiler);
     return Compiler;
 }());
 /**
@@ -4048,13 +4046,10 @@ var Testability = /** @class */ (function () {
         // TODO(juliemr): implement.
         return [];
     };
-    Testability.decorators = [
-        { type: Injectable }
-    ];
-    /** @nocollapse */
-    Testability.ctorParameters = function () { return [
-        { type: NgZone }
-    ]; };
+    Testability = __decorate([
+        Injectable(),
+        __metadata("design:paramtypes", [NgZone])
+    ], Testability);
     return Testability;
 }());
 /**
@@ -4107,11 +4102,10 @@ var TestabilityRegistry = /** @class */ (function () {
         if (findInAncestors === void 0) { findInAncestors = true; }
         return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
     };
-    TestabilityRegistry.decorators = [
-        { type: Injectable }
-    ];
-    /** @nocollapse */
-    TestabilityRegistry.ctorParameters = function () { return []; };
+    TestabilityRegistry = __decorate([
+        Injectable(),
+        __metadata("design:paramtypes", [])
+    ], TestabilityRegistry);
     return TestabilityRegistry;
 }());
 var _NoopGetTestability = /** @class */ (function () {
@@ -4395,13 +4389,10 @@ var PlatformRef = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
-    PlatformRef.decorators = [
-        { type: Injectable }
-    ];
-    /** @nocollapse */
-    PlatformRef.ctorParameters = function () { return [
-        { type: Injector }
-    ]; };
+    PlatformRef = __decorate([
+        Injectable(),
+        __metadata("design:paramtypes", [Injector])
+    ], PlatformRef);
     return PlatformRef;
 }());
 function getNgZone(ngZoneOption) {
@@ -4512,6 +4503,7 @@ var ApplicationRef = /** @class */ (function () {
         this.isStable =
             merge(isCurrentlyStable, isStable.pipe(share()));
     }
+    ApplicationRef_1 = ApplicationRef;
     /**
      * Bootstrap a new component at the root level of the application.
      *
@@ -4575,7 +4567,7 @@ var ApplicationRef = /** @class */ (function () {
         if (this._runningTick) {
             throw new Error('ApplicationRef.tick is called recursively');
         }
-        var scope = ApplicationRef._tickScope();
+        var scope = ApplicationRef_1._tickScope();
         try {
             this._runningTick = true;
             this._views.forEach(function (view) { return view.detectChanges(); });
@@ -4635,20 +4627,16 @@ var ApplicationRef = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
+    var ApplicationRef_1;
     /** @internal */
     ApplicationRef._tickScope = wtfCreateScope('ApplicationRef#tick()');
-    ApplicationRef.decorators = [
-        { type: Injectable }
-    ];
-    /** @nocollapse */
-    ApplicationRef.ctorParameters = function () { return [
-        { type: NgZone },
-        { type: Console },
-        { type: Injector },
-        { type: ErrorHandler },
-        { type: ComponentFactoryResolver },
-        { type: ApplicationInitStatus }
-    ]; };
+    ApplicationRef = ApplicationRef_1 = __decorate([
+        Injectable(),
+        __metadata("design:paramtypes", [NgZone, Console, Injector,
+            ErrorHandler,
+            ComponentFactoryResolver,
+            ApplicationInitStatus])
+    ], ApplicationRef);
     return ApplicationRef;
 }());
 function remove(list, el) {
@@ -5009,14 +4997,11 @@ var SystemJsNgModuleLoader = /** @class */ (function () {
             .then(function (module) { return module[exportName + factoryClassSuffix]; })
             .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
     };
-    SystemJsNgModuleLoader.decorators = [
-        { type: Injectable }
-    ];
-    /** @nocollapse */
-    SystemJsNgModuleLoader.ctorParameters = function () { return [
-        { type: Compiler },
-        { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional }] }
-    ]; };
+    SystemJsNgModuleLoader = __decorate([
+        Injectable(),
+        __param(1, Optional()),
+        __metadata("design:paramtypes", [Compiler, SystemJsNgModuleLoaderConfig])
+    ], SystemJsNgModuleLoader);
     return SystemJsNgModuleLoader;
 }());
 function checkNotEmpty(value, modulePath, exportName) {
@@ -6794,13 +6779,10 @@ var ApplicationModule = /** @class */ (function () {
     // Inject ApplicationRef to make it eager...
     function ApplicationModule(appRef) {
     }
-    ApplicationModule.decorators = [
-        { type: NgModule, args: [{ providers: APPLICATION_MODULE_PROVIDERS },] }
-    ];
-    /** @nocollapse */
-    ApplicationModule.ctorParameters = function () { return [
-        { type: ApplicationRef }
-    ]; };
+    ApplicationModule = __decorate([
+        NgModule({ providers: APPLICATION_MODULE_PROVIDERS }),
+        __metadata("design:paramtypes", [ApplicationRef])
+    ], ApplicationModule);
     return ApplicationModule;
 }());
 

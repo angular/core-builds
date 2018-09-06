@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.6+28.sha-d1063c6
+ * @license Angular v6.1.7+8.sha-b9a5ce1
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -49,6 +49,21 @@
         };
         return __assign.apply(this, arguments);
     };
+
+    function __decorate(decorators, target, key, desc) {
+        var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+        if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+        else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+        return c > 3 && r && Object.defineProperty(target, key, r), r;
+    }
+
+    function __param(paramIndex, decorator) {
+        return function (target, key) { decorator(target, key, paramIndex); }
+    }
+
+    function __metadata(metadataKey, metadataValue) {
+        if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
+    }
 
     function __values(o) {
         var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -1702,7 +1717,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('6.1.6+28.sha-d1063c6');
+    var VERSION = new Version('6.1.7+8.sha-b9a5ce1');
 
     /**
      * @license
@@ -3098,13 +3113,11 @@
             }
             this.initialized = true;
         };
-        ApplicationInitStatus.decorators = [
-            { type: Injectable }
-        ];
-        /** @nocollapse */
-        ApplicationInitStatus.ctorParameters = function () { return [
-            { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional }] }
-        ]; };
+        ApplicationInitStatus = __decorate([
+            Injectable(),
+            __param(0, Inject(APP_INITIALIZER)), __param(0, Optional()),
+            __metadata("design:paramtypes", [Array])
+        ], ApplicationInitStatus);
         return ApplicationInitStatus;
     }());
 
@@ -3185,9 +3198,9 @@
             // tslint:disable-next-line:no-console
             console.warn(message);
         };
-        Console.decorators = [
-            { type: Injectable }
-        ];
+        Console = __decorate([
+            Injectable()
+        ], Console);
         return Console;
     }());
 
@@ -3259,9 +3272,9 @@
          * Returns the id for a given NgModule, if one is defined and known to the compiler.
          */
         Compiler.prototype.getModuleId = function (moduleType) { return undefined; };
-        Compiler.decorators = [
-            { type: Injectable }
-        ];
+        Compiler = __decorate([
+            Injectable()
+        ], Compiler);
         return Compiler;
     }());
     /**
@@ -4106,13 +4119,10 @@
             // TODO(juliemr): implement.
             return [];
         };
-        Testability.decorators = [
-            { type: Injectable }
-        ];
-        /** @nocollapse */
-        Testability.ctorParameters = function () { return [
-            { type: NgZone }
-        ]; };
+        Testability = __decorate([
+            Injectable(),
+            __metadata("design:paramtypes", [NgZone])
+        ], Testability);
         return Testability;
     }());
     /**
@@ -4165,11 +4175,10 @@
             if (findInAncestors === void 0) { findInAncestors = true; }
             return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
         };
-        TestabilityRegistry.decorators = [
-            { type: Injectable }
-        ];
-        /** @nocollapse */
-        TestabilityRegistry.ctorParameters = function () { return []; };
+        TestabilityRegistry = __decorate([
+            Injectable(),
+            __metadata("design:paramtypes", [])
+        ], TestabilityRegistry);
         return TestabilityRegistry;
     }());
     var _NoopGetTestability = /** @class */ (function () {
@@ -4453,13 +4462,10 @@
             enumerable: true,
             configurable: true
         });
-        PlatformRef.decorators = [
-            { type: Injectable }
-        ];
-        /** @nocollapse */
-        PlatformRef.ctorParameters = function () { return [
-            { type: Injector }
-        ]; };
+        PlatformRef = __decorate([
+            Injectable(),
+            __metadata("design:paramtypes", [Injector])
+        ], PlatformRef);
         return PlatformRef;
     }());
     function getNgZone(ngZoneOption) {
@@ -4570,6 +4576,7 @@
             this.isStable =
                 rxjs.merge(isCurrentlyStable, isStable.pipe(operators.share()));
         }
+        ApplicationRef_1 = ApplicationRef;
         /**
          * Bootstrap a new component at the root level of the application.
          *
@@ -4633,7 +4640,7 @@
             if (this._runningTick) {
                 throw new Error('ApplicationRef.tick is called recursively');
             }
-            var scope = ApplicationRef._tickScope();
+            var scope = ApplicationRef_1._tickScope();
             try {
                 this._runningTick = true;
                 this._views.forEach(function (view) { return view.detectChanges(); });
@@ -4693,20 +4700,16 @@
             enumerable: true,
             configurable: true
         });
+        var ApplicationRef_1;
         /** @internal */
         ApplicationRef._tickScope = wtfCreateScope('ApplicationRef#tick()');
-        ApplicationRef.decorators = [
-            { type: Injectable }
-        ];
-        /** @nocollapse */
-        ApplicationRef.ctorParameters = function () { return [
-            { type: NgZone },
-            { type: Console },
-            { type: Injector },
-            { type: ErrorHandler },
-            { type: ComponentFactoryResolver },
-            { type: ApplicationInitStatus }
-        ]; };
+        ApplicationRef = ApplicationRef_1 = __decorate([
+            Injectable(),
+            __metadata("design:paramtypes", [NgZone, Console, Injector,
+                ErrorHandler,
+                ComponentFactoryResolver,
+                ApplicationInitStatus])
+        ], ApplicationRef);
         return ApplicationRef;
     }());
     function remove(list, el) {
@@ -5062,14 +5065,11 @@
                 .then(function (module) { return module[exportName + factoryClassSuffix]; })
                 .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
         };
-        SystemJsNgModuleLoader.decorators = [
-            { type: Injectable }
-        ];
-        /** @nocollapse */
-        SystemJsNgModuleLoader.ctorParameters = function () { return [
-            { type: Compiler },
-            { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional }] }
-        ]; };
+        SystemJsNgModuleLoader = __decorate([
+            Injectable(),
+            __param(1, Optional()),
+            __metadata("design:paramtypes", [Compiler, SystemJsNgModuleLoaderConfig])
+        ], SystemJsNgModuleLoader);
         return SystemJsNgModuleLoader;
     }());
     function checkNotEmpty(value, modulePath, exportName) {
@@ -6823,13 +6823,10 @@
         // Inject ApplicationRef to make it eager...
         function ApplicationModule(appRef) {
         }
-        ApplicationModule.decorators = [
-            { type: NgModule, args: [{ providers: APPLICATION_MODULE_PROVIDERS },] }
-        ];
-        /** @nocollapse */
-        ApplicationModule.ctorParameters = function () { return [
-            { type: ApplicationRef }
-        ]; };
+        ApplicationModule = __decorate([
+            NgModule({ providers: APPLICATION_MODULE_PROVIDERS }),
+            __metadata("design:paramtypes", [ApplicationRef])
+        ], ApplicationModule);
         return ApplicationModule;
     }());
 
