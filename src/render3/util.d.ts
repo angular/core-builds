@@ -1,5 +1,5 @@
 import { LElementNode } from './interfaces/node';
-import { LViewData } from './interfaces/view';
+import { LViewData, TData } from './interfaces/view';
 /**
  * Returns wether the values are different from a change detection stand point.
  *
@@ -18,8 +18,8 @@ export declare function notImplemented(): Error;
  * Flattens an array in non-recursive way. Input arrays are not modified.
  */
 export declare function flatten(list: any[]): any[];
-/** Retrieves a value from any `LViewData`. */
-export declare function loadInternal<T>(index: number, arr: LViewData): T;
+/** Retrieves a value from any `LViewData` or `TData`. */
+export declare function loadInternal<T>(index: number, arr: LViewData | TData): T;
 export declare function assertDataInRangeInternal(index: number, arr: any[]): void;
 /** Retrieves an element value from the provided `viewData`.
   *
