@@ -12,7 +12,7 @@ import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
 import { LContainer } from './interfaces/container';
 import { ComponentDefInternal, ComponentQuery, ComponentTemplate, DirectiveDefInternal, DirectiveDefListOrFactory, InitialStylingFlags, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { LInjector } from './interfaces/injector';
-import { LContainerNode, LElementContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode, LocalRefExtractor, TAttributes, TContainerNode, TElementNode, TNode, TNodeType } from './interfaces/node';
+import { LContainerNode, LElementContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode, LocalRefExtractor, TAttributes, TContainerNode, TElementNode, TNode, TNodeType, TViewNode } from './interfaces/node';
 import { CssSelectorList } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
@@ -50,11 +50,12 @@ export declare function getCurrentView(): OpaqueViewState;
  */
 export declare function restoreView(viewToRestore: OpaqueViewState): void;
 export declare function getPreviousOrParentNode(): LNode;
+export declare function getPreviousOrParentTNode(): TNode;
 /**
  * Query instructions can ask for "current queries" in 2 different cases:
  * - when creating view queries (at the root of a component view, before any node is created - in
  * this case currentQueries points to view queries)
- * - when creating content queries (inb this previousOrParentNode points to a node on which we
+ * - when creating content queries (i.e. this previousOrParentTNode points to a node on which we
  * create content queries).
  */
 export declare function getOrCreateCurrentQueries(QueryType: {
@@ -80,7 +81,7 @@ export declare function getBindingRoot(): number;
  * @param host Element to which the View is a child of
  * @returns the previous state;
  */
-export declare function enterView(newView: LViewData, host: LElementNode | LViewNode | null): LViewData;
+export declare function enterView(newView: LViewData, hostTNode: TElementNode | TViewNode | null): LViewData;
 /**
  * Used in lieu of enterView to make it clear when we are exiting a child view. This makes
  * the direction of traversal (up or down the view tree) a bit clearer.
@@ -99,7 +100,7 @@ export declare function createLViewData<T>(renderer: Renderer3, tView: TView, co
  * with the same shape
  * (same properties assigned in the same order).
  */
-export declare function createLNodeObject(type: TNodeType, currentView: LViewData, parent: LNode | null, native: RText | RElement | RComment | null, state: any): LElementNode & LTextNode & LViewNode & LContainerNode & LProjectionNode;
+export declare function createLNodeObject(type: TNodeType, currentView: LViewData, nodeInjector: LInjector | null, native: RText | RElement | RComment | null, state: any): LElementNode & LTextNode & LViewNode & LContainerNode & LProjectionNode;
 /**
  * A common way of creating the LNode to make sure that all of them have same shape to
  * keep the execution code monomorphic and fast.
@@ -167,7 +168,7 @@ export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | LElement
  * @returns context
  */
 export declare function nextContext<T = any>(level?: number): T;
-export declare function renderComponentOrTemplate<T>(node: LElementNode, hostView: LViewData, componentOrContext: T, templateFn?: ComponentTemplate<T>): void;
+export declare function renderComponentOrTemplate<T>(hostView: LViewData, componentOrContext: T, templateFn?: ComponentTemplate<T>): void;
 export declare function namespaceSVG(): void;
 export declare function namespaceMathML(): void;
 export declare function namespaceHTML(): void;
@@ -450,7 +451,7 @@ export declare function directiveCreate<T>(directiveDefIdx: number, directive: T
  * This version does not contain features that we don't already support at root in
  * current Angular. Example: local refs and inputs on root component.
  */
-export declare function baseDirectiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDefInternal<T> | ComponentDefInternal<T>): T;
+export declare function baseDirectiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDefInternal<T> | ComponentDefInternal<T>, hostNode: LNode): T;
 /**
  * Creates a LContainer, either from a container instruction, or for a ViewContainerRef.
  *
