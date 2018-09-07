@@ -18,12 +18,6 @@ import { LQueries } from './interfaces/query';
 import { RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 import { CurrentMatchesList, LViewData, LViewFlags, OpaqueViewState, RootContext, TView } from './interfaces/view';
 /**
- * Directive (D) sets a property on all component instances using this constant as a key and the
- * component's host node (LElement) as the value. This is used in methods like detectChanges to
- * facilitate jumping from an instance to the host node.
- */
-export declare const NG_HOST_SYMBOL = "__ngHostLNode__";
-/**
  * Function used to sanitize the value before writing it into the renderer.
  */
 export declare type SanitizerFn = (value: any) => string;
@@ -749,5 +743,5 @@ export declare function getTView(): TView;
  */
 export declare function registerContentQuery<Q>(queryList: QueryList<Q>): void;
 export declare function assertPreviousIsParent(): void;
-export declare function _getComponentHostLElementNode<T>(component: T): LElementNode;
+export declare function _getComponentHostLElementNode<T>(component: T, isRootComponent?: boolean): LElementNode;
 export declare const CLEAN_PROMISE: Promise<null>;
