@@ -9,8 +9,6 @@ import { LContainer } from './interfaces/container';
 import { LContainerNode, LElementContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode } from './interfaces/node';
 import { RNode, RText, Renderer3 } from './interfaces/renderer';
 import { LViewData } from './interfaces/view';
-/** Retrieves the sibling node for the given node. */
-export declare function getNextLNode(node: LNode): LNode | null;
 /** Retrieves the first child of a given node */
 export declare function getChildLNode(node: LNode): LNode | null;
 /** Retrieves the parent LNode of a given node. */
@@ -34,12 +32,12 @@ export declare function createTextNode(value: any, renderer: Renderer3): RText;
  * views beneath it.
  *
  * @param container The container to which the root view belongs
- * @param rootNode The view from which elements should be added or removed
+ * @param viewToWalk The view from which elements should be added or removed
  * @param insertMode Whether or not elements should be added (if false, removing)
  * @param beforeNode The node before which elements should be added, if insert mode
  */
-export declare function addRemoveViewFromContainer(container: LContainerNode, rootNode: LViewNode, insertMode: true, beforeNode: RNode | null): void;
-export declare function addRemoveViewFromContainer(container: LContainerNode, rootNode: LViewNode, insertMode: false): void;
+export declare function addRemoveViewFromContainer(container: LContainerNode, viewToWalk: LViewData, insertMode: true, beforeNode: RNode | null): void;
+export declare function addRemoveViewFromContainer(container: LContainerNode, viewToWalk: LViewData, insertMode: false): void;
 /**
  * Traverses down and up the tree of views and containers to remove listeners and
  * call onDestroy callbacks.
