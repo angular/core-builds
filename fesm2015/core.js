@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.5+10.sha-96eb79b
+ * @license Angular v7.0.0-beta.5+11.sha-91d7993
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1960,15 +1960,6 @@ function typeName(type) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/** Retrieves the sibling node for the given node. */
-function getNextLNode(node) {
-    // View nodes don't have TNodes, so their next must be retrieved through their LView.
-    if (node.tNode.type === 2 /* View */) {
-        const viewData = node.data;
-        return viewData[NEXT] ? viewData[NEXT][HOST_NODE] : null;
-    }
-    return node.tNode.next ? node.view[node.tNode.next.index] : null;
-}
 /** Retrieves the first child of a given node */
 function getChildLNode(node) {
     if (node.tNode.child) {
@@ -1996,19 +1987,18 @@ function getRenderParent(viewNode) {
     return container ? container.data[RENDER_PARENT] : null;
 }
 /**
- * Stack used to keep track of projection nodes in walkLNodeTree.
+ * Stack used to keep track of projection nodes in walkTNodeTree.
  *
- * This is deliberately created outside of walkLNodeTree to avoid allocating
+ * This is deliberately created outside of walkTNodeTree to avoid allocating
  * a new array each time the function is called. Instead the array will be
  * re-used by each invocation. This works because the function is not reentrant.
  */
 const projectionNodeStack = [];
 /**
- * Walks a tree of LNodes, applying a transformation on the LElement nodes, either only on the first
+ * Walks a tree of TNodes, applying a transformation on the element nodes, either only on the first
  * one found, or on all of them.
  *
- * @param startingNode the node from which the walk is started.
- * @param rootNode the root node considered. This prevents walking past that node.
+ * @param viewToWalk the view to walk
  * @param action identifies the action to be performed on the LElement nodes.
  * @param renderer the current renderer.
  * @param renderParentNode Optional the render parent node to be set in all LContainerNodes found,
@@ -2016,32 +2006,33 @@ const projectionNodeStack = [];
  * @param beforeNode Optional the node before which elements should be added, required for action
  * Insert.
  */
-function walkLNodeTree(startingNode, rootNode, action, renderer, renderParentNode, beforeNode) {
-    let node = startingNode;
+function walkTNodeTree(viewToWalk, action, renderer, renderParentNode, beforeNode) {
+    const rootTNode = viewToWalk[TVIEW].node;
     let projectionNodeIndex = -1;
-    while (node) {
-        let nextNode = null;
+    let currentView = viewToWalk;
+    let tNode = rootTNode.child;
+    while (tNode) {
+        let nextTNode = null;
         const parent = renderParentNode ? renderParentNode.native : null;
-        const nodeType = node.tNode.type;
-        if (nodeType === 3 /* Element */) {
-            // Execute the action
-            executeNodeAction(action, renderer, parent, node.native, beforeNode);
-            if (node.dynamicLContainerNode) {
-                executeNodeAction(action, renderer, parent, node.dynamicLContainerNode.native, beforeNode);
+        if (tNode.type === 3 /* Element */) {
+            const elementNode = readElementValue(currentView[tNode.index]);
+            executeNodeAction(action, renderer, parent, elementNode.native, beforeNode);
+            if (elementNode.dynamicLContainerNode) {
+                executeNodeAction(action, renderer, parent, elementNode.dynamicLContainerNode.native, beforeNode);
             }
         }
-        else if (nodeType === 0 /* Container */) {
-            executeNodeAction(action, renderer, parent, node.native, beforeNode);
-            const lContainerNode = node;
+        else if (tNode.type === 0 /* Container */) {
+            const lContainerNode = currentView[tNode.index];
+            executeNodeAction(action, renderer, parent, lContainerNode.native, beforeNode);
             const childContainerData = lContainerNode.dynamicLContainerNode ?
                 lContainerNode.dynamicLContainerNode.data :
                 lContainerNode.data;
             if (renderParentNode) {
                 childContainerData[RENDER_PARENT] = renderParentNode;
             }
-            nextNode =
-                childContainerData[VIEWS].length ? getChildLNode(childContainerData[VIEWS][0]) : null;
-            if (nextNode) {
+            if (childContainerData[VIEWS].length) {
+                currentView = childContainerData[VIEWS][0].data;
+                nextTNode = currentView[TVIEW].node;
                 // When the walker enters a container, then the beforeNode has to become the local native
                 // comment node.
                 beforeNode = lContainerNode.dynamicLContainerNode ?
@@ -2049,22 +2040,29 @@ function walkLNodeTree(startingNode, rootNode, action, renderer, renderParentNod
                     lContainerNode.native;
             }
         }
-        else if (nodeType === 1 /* Projection */) {
-            const componentHost = findComponentHost(node.view);
-            const head = componentHost.tNode.projection[node.tNode.projection];
-            projectionNodeStack[++projectionNodeIndex] = node;
-            nextNode = head ? componentHost.data[PARENT][head.index] : null;
+        else if (tNode.type === 1 /* Projection */) {
+            const componentHost = findComponentHost(currentView);
+            const head = componentHost.tNode.projection[tNode.projection];
+            // Must store both the TNode and the view because this projection node could be nested
+            // deeply inside embedded views, and we need to get back down to this particular nested view.
+            projectionNodeStack[++projectionNodeIndex] = tNode;
+            projectionNodeStack[++projectionNodeIndex] = currentView;
+            if (head) {
+                currentView = componentHost.data[PARENT];
+                nextTNode = currentView[TVIEW].data[head.index];
+            }
         }
         else {
-            // Otherwise look at the first child
-            nextNode = getChildLNode(node);
+            // Otherwise, this is a View or an ElementContainer
+            nextTNode = tNode.child;
         }
-        if (nextNode === null) {
-            nextNode = getNextLNode(node);
+        if (nextTNode === null) {
             // this last node was projected, we need to get back down to its projection node
-            if (nextNode === null && (node.tNode.flags & 8192 /* isProjected */)) {
-                nextNode = getNextLNode(projectionNodeStack[projectionNodeIndex--]);
+            if (tNode.next === null && (tNode.flags & 8192 /* isProjected */)) {
+                currentView = projectionNodeStack[projectionNodeIndex--];
+                tNode = projectionNodeStack[projectionNodeIndex--];
             }
+            nextTNode = tNode.next;
             /**
              * Find the next node in the LNode tree, taking into account the place where a node is
              * projected (in the shadow DOM) rather than where it comes from (in the light DOM).
@@ -2072,18 +2070,26 @@ function walkLNodeTree(startingNode, rootNode, action, renderer, renderParentNod
              * If there is no sibling node, then it goes to the next sibling of the parent node...
              * until it reaches rootNode (at which point null is returned).
              */
-            while (node && !nextNode) {
-                node = getParentLNode(node);
-                if (node === null || node === rootNode)
+            while (!nextTNode) {
+                // If parent is null, we're crossing the view boundary, so we should get the host TNode.
+                tNode = tNode.parent || currentView[TVIEW].node;
+                if (tNode === null || tNode === rootTNode)
                     return null;
                 // When exiting a container, the beforeNode must be restored to the previous value
-                if (!node.tNode.next && nodeType === 0 /* Container */) {
-                    beforeNode = node.native;
+                if (tNode.type === 0 /* Container */) {
+                    currentView = currentView[PARENT];
+                    beforeNode = currentView[tNode.index].native;
                 }
-                nextNode = getNextLNode(node);
+                if (tNode.type === 2 /* View */ && currentView[NEXT]) {
+                    currentView = currentView[NEXT];
+                    nextTNode = currentView[TVIEW].node;
+                }
+                else {
+                    nextTNode = tNode.next;
+                }
             }
         }
-        node = nextNode;
+        tNode = nextTNode;
     }
 }
 /**
@@ -2127,15 +2133,13 @@ function createTextNode(value, renderer) {
     return isProceduralRenderer(renderer) ? renderer.createText(stringify$1(value)) :
         renderer.createTextNode(stringify$1(value));
 }
-function addRemoveViewFromContainer(container, rootNode, insertMode, beforeNode) {
-    ngDevMode && assertNodeType(container.tNode, 0 /* Container */);
-    ngDevMode && assertNodeType(rootNode.tNode, 2 /* View */);
+function addRemoveViewFromContainer(container, viewToWalk, insertMode, beforeNode) {
     const parentNode = container.data[RENDER_PARENT];
     const parent = parentNode ? parentNode.native : null;
+    ngDevMode && assertNodeType(viewToWalk[TVIEW].node, 2 /* View */);
     if (parent) {
-        let node = getChildLNode(rootNode);
         const renderer = container.view[RENDERER];
-        walkLNodeTree(node, rootNode, insertMode ? 0 /* Insert */ : 1 /* Detach */, renderer, parentNode, beforeNode);
+        walkTNodeTree(viewToWalk, insertMode ? 0 /* Insert */ : 1 /* Detach */, renderer, parentNode, beforeNode);
     }
 }
 /**
@@ -2245,7 +2249,7 @@ function detachView(container, removeIndex) {
     }
     views.splice(removeIndex, 1);
     if (!container.tNode.detached) {
-        addRemoveViewFromContainer(container, viewNode, false);
+        addRemoveViewFromContainer(container, viewNode.data, false);
     }
     // Notify query that view has been removed
     const removedLView = viewNode.data;
@@ -2267,8 +2271,8 @@ function detachView(container, removeIndex) {
  */
 function removeView(container, removeIndex) {
     const viewNode = container.data[VIEWS][removeIndex];
-    detachView(container, removeIndex);
     destroyLView(viewNode.data);
+    detachView(container, removeIndex);
     return viewNode;
 }
 /** Gets the child of the given LViewData */
@@ -2287,7 +2291,7 @@ function getLViewChild(viewData) {
 function destroyLView(view) {
     const renderer = view[RENDERER];
     if (isProceduralRenderer(renderer) && renderer.destroyNode) {
-        walkLNodeTree(view[HOST_NODE], view[HOST_NODE], 2 /* Destroy */, renderer);
+        walkTNodeTree(view, 2 /* Destroy */, renderer);
     }
     destroyViewTree(view);
     // Sets the destroyed flag
@@ -2566,15 +2570,18 @@ function appendProjectedNode(node, currentParent, currentView, renderParent, par
         lContainer[RENDER_PARENT] = renderParent;
         const views = lContainer[VIEWS];
         for (let i = 0; i < views.length; i++) {
-            addRemoveViewFromContainer(node, views[i], true, node.native);
+            const viewNode = views[i];
+            addRemoveViewFromContainer(node, viewNode.data, true, node.native);
         }
     }
     else if (node.tNode.type === 4 /* ElementContainer */) {
         let ngContainerChild = getChildLNode(node);
-        const parentView = currentView[HOST_NODE].view;
+        const parentView = currentView[PARENT];
         while (ngContainerChild) {
             appendProjectedNode(ngContainerChild, currentParent, currentView, renderParent, parentView);
-            ngContainerChild = getNextLNode(ngContainerChild);
+            ngContainerChild = ngContainerChild.tNode.next ?
+                readElementValue(ngContainerChild.view[ngContainerChild.tNode.next.index]) :
+                null;
         }
     }
     if (node.dynamicLContainerNode) {
@@ -5219,44 +5226,48 @@ function projection(nodeIndex, selectorIndex = 0, attrs) {
     isParent = false;
     // re-distribution of projectable nodes is stored on a component's view level
     const parent = getParentLNode(node);
-    if (canInsertNativeNode(parent, viewData)) {
-        const componentNode = findComponentHost(viewData);
-        let nodeToProject = componentNode.tNode.projection[selectorIndex];
-        let projectedView = componentNode.view;
-        let projectionNodeIndex = -1;
-        let grandparent;
-        const renderParent = parent.tNode.type === 2 /* View */ ?
-            (grandparent = getParentLNode(parent)) &&
-                grandparent.data[RENDER_PARENT] :
-            parent;
-        const parentView = viewData[HOST_NODE].view;
-        while (nodeToProject) {
-            if (nodeToProject.type === 1 /* Projection */) {
-                // This node is re-projected, so we must go up the tree to get its projected nodes.
-                const currentComponentHost = findComponentHost(projectedView);
-                const firstProjectedNode = currentComponentHost.tNode.projection[nodeToProject.projection];
-                if (firstProjectedNode) {
-                    projectionNodeStack$1[++projectionNodeIndex] = projectedView[nodeToProject.index];
-                    nodeToProject = firstProjectedNode;
-                    projectedView = currentComponentHost.view;
-                    continue;
-                }
+    const componentNode = findComponentHost(viewData);
+    let nodeToProject = componentNode.tNode.projection[selectorIndex];
+    let projectedView = componentNode.view;
+    let projectionNodeIndex = -1;
+    let renderParent = null;
+    while (nodeToProject) {
+        if (nodeToProject.type === 1 /* Projection */) {
+            // This node is re-projected, so we must go up the tree to get its projected nodes.
+            const currentComponentHost = findComponentHost(projectedView);
+            const firstProjectedNode = currentComponentHost.tNode.projection[nodeToProject.projection];
+            if (firstProjectedNode) {
+                projectionNodeStack$1[++projectionNodeIndex] = projectedView[nodeToProject.index];
+                nodeToProject = firstProjectedNode;
+                projectedView = currentComponentHost.view;
+                continue;
             }
-            else {
-                const lNode = projectedView[nodeToProject.index];
-                lNode.tNode.flags |= 8192 /* isProjected */;
-                appendProjectedNode(lNode, parent, viewData, renderParent, parentView);
-            }
-            // If we are finished with a list of re-projected nodes, we need to get
-            // back to the root projection node that was re-projected.
-            if (nodeToProject.next === null && projectedView !== componentNode.view) {
-                // move down into the view of the component we're projecting right now
-                const lNode = projectionNodeStack$1[projectionNodeIndex--];
-                nodeToProject = lNode.tNode;
-                projectedView = lNode.view;
-            }
-            nodeToProject = nodeToProject.next;
         }
+        else {
+            const lNode = projectedView[nodeToProject.index];
+            // This flag must be set now or we won't know that this node is projected
+            // if the nodes are inserted into a container later.
+            lNode.tNode.flags |= 8192 /* isProjected */;
+            if (canInsertNativeNode(parent, viewData)) {
+                let grandparent;
+                if (renderParent == null) {
+                    renderParent = parent.tNode.type === 2 /* View */ ?
+                        (grandparent = getParentLNode(parent)) &&
+                            grandparent.data[RENDER_PARENT] :
+                        parent;
+                }
+                appendProjectedNode(lNode, parent, viewData, renderParent, projectedView);
+            }
+        }
+        // If we are finished with a list of re-projected nodes, we need to get
+        // back to the root projection node that was re-projected.
+        if (nodeToProject.next === null && projectedView !== componentNode.view) {
+            // move down into the view of the component we're projecting right now
+            const lNode = projectionNodeStack$1[projectionNodeIndex--];
+            nodeToProject = lNode.tNode;
+            projectedView = lNode.view;
+        }
+        nodeToProject = nodeToProject.next;
     }
 }
 /**
@@ -7654,7 +7665,7 @@ class ViewContainerRef$1 {
         const beforeNode = adjustedIdx + 1 < views.length ?
             (getChildLNode(views[adjustedIdx + 1])).native :
             this._lContainerNode.native;
-        addRemoveViewFromContainer(this._lContainerNode, lViewNode, true, beforeNode);
+        addRemoveViewFromContainer(this._lContainerNode, lViewNode.data, true, beforeNode);
         viewRef.attachToViewContainerRef(this);
         this._viewRefs.splice(adjustedIdx, 0, viewRef);
         return viewRef;
@@ -11677,7 +11688,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('7.0.0-beta.5+10.sha-96eb79b');
+const VERSION = new Version('7.0.0-beta.5+11.sha-91d7993');
 
 /**
  * @license
