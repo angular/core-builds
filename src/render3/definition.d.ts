@@ -8,7 +8,7 @@
 import './ng_dev_mode';
 import { ChangeDetectionStrategy } from '../change_detection/constants';
 import { Provider } from '../di/provider';
-import { NgModuleDef } from '../metadata/ng_module';
+import { NgModuleDef, NgModuleDefInternal } from '../metadata/ng_module';
 import { ViewEncapsulation } from '../metadata/view';
 import { Type } from '../type';
 import { BaseDef, ComponentDefFeature, ComponentDefInternal, ComponentQuery, ComponentTemplate, ComponentType, DirectiveDefFeature, DirectiveDefInternal, DirectiveType, DirectiveTypesOrFactory, PipeDefInternal, PipeType, PipeTypesOrFactory } from './interfaces/definition';
@@ -458,3 +458,12 @@ export declare function definePipe<T>(pipeDef: {
     /** Whether the pipe is pure. */
     pure?: boolean;
 }): never;
+/**
+ * The following getter methods retrieve the definition form the type. Currently the retrieval
+ * honors inheritance, but in the future we may change the rule to require that definitions are
+ * explicit. This would require some sort of migration strategy.
+ */
+export declare function getComponentDef<T>(type: any): ComponentDefInternal<T> | null;
+export declare function getDirectiveDef<T>(type: any): DirectiveDefInternal<T> | null;
+export declare function getPipeDef<T>(type: any): PipeDefInternal<T> | null;
+export declare function getNgModuleDef<T>(type: any): NgModuleDefInternal<T> | null;

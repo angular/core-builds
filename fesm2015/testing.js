@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.0.0-beta.5+20.sha-a9099e8
+ * @license Angular v7.0.0-beta.5+21.sha-d5bd86a
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, Injector, ɵRender3ComponentFactory, ɵRender3DebugRendererFactory2, ɵRender3NgModuleRef, ɵWRAP_RENDERER_FACTORY2, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵpatchComponentDefWithScope, Compiler, Injectable, ApplicationInitStatus, NgZone, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵivyEnabled, ɵoverrideComponentView, ɵoverrideProvider } from '@angular/core';
+import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, Injector, ɵRender3ComponentFactory, ɵRender3DebugRendererFactory2, ɵRender3NgModuleRef, ɵWRAP_RENDERER_FACTORY2, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, Compiler, Injectable, ApplicationInitStatus, NgZone, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵivyEnabled, ɵoverrideComponentView, ɵoverrideProvider } from '@angular/core';
 
 /**
  * @fileoverview added by tsickle
@@ -1310,8 +1310,10 @@ class TestBedRender3 {
      */
     overrideProvider(token, provider) {
         /** @type {?} */
-        const isRoot = (typeof token !== 'string' && token.ngInjectableDef &&
-            token.ngInjectableDef.providedIn === 'root');
+        let injectableDef;
+        /** @type {?} */
+        const isRoot = (typeof token !== 'string' && (injectableDef = ɵgetInjectableDef(token)) &&
+            injectableDef.providedIn === 'root');
         /** @type {?} */
         const overrides = isRoot ? this._rootProviderOverrides : this._providerOverrides;
         if (provider.useFactory) {
@@ -2193,8 +2195,9 @@ class TestBedViewEngine {
      * @return {?}
      */
     overrideProviderImpl(token, provider, deprecated = false) {
-        if (typeof token !== 'string' && token.ngInjectableDef &&
-            token.ngInjectableDef.providedIn === 'root') {
+        /** @type {?} */
+        let def = null;
+        if (typeof token !== 'string' && (def = ɵgetInjectableDef(token)) && def.providedIn === 'root') {
             if (provider.useFactory) {
                 this._rootProviderOverrides.push({ provide: token, useFactory: provider.useFactory, deps: provider.deps || [] });
             }
