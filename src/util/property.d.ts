@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-export declare function getClosureSafeProperty<T>(objWithPropertyToExtract: T, target: any): string;
+export declare function getClosureSafeProperty<T>(objWithPropertyToExtract: T): string;
 /**
  * Sets properties on a target object from a source object, but only if
  * the property doesn't already exist on the target object.
