@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.5+16.sha-7ba0cb7
+ * @license Angular v7.0.0-beta.5+20.sha-a9099e8
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -9509,11 +9509,7 @@ function getOrCreateElementRef(di) {
 /**
  * A ref to a node's native element.
  */
-class ElementRef$1 {
-    /**
-     * @param {?} nativeElement
-     */
-    constructor(nativeElement) { this.nativeElement = nativeElement; }
+class ElementRef$1 extends ElementRef {
 }
 /**
  * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
@@ -9583,12 +9579,13 @@ class NodeInjector {
  * A ref to a container that enables adding and removing views from that container
  * imperatively.
  */
-class ViewContainerRef$1 {
+class ViewContainerRef$1 extends ViewContainerRef {
     /**
      * @param {?} _lContainerNode
      * @param {?} _hostNode
      */
     constructor(_lContainerNode, _hostNode) {
+        super();
         this._lContainerNode = _lContainerNode;
         this._hostNode = _hostNode;
         this._viewRefs = [];
@@ -9817,7 +9814,7 @@ function getInheritedFactory(type) {
 /**
  * @template T
  */
-class TemplateRef$1 {
+class TemplateRef$1 extends TemplateRef {
     /**
      * @param {?} _declarationParentView
      * @param {?} elementRef
@@ -9826,6 +9823,7 @@ class TemplateRef$1 {
      * @param {?} _queries
      */
     constructor(_declarationParentView, elementRef, _tView, _renderer, _queries) {
+        super();
         this._declarationParentView = _declarationParentView;
         this.elementRef = elementRef;
         this._tView = _tView;
@@ -13638,7 +13636,7 @@ function compileNgModuleDefs(moduleType, ngModule) {
                 /** @type {?} */
                 const meta = {
                     type: wrap(moduleType),
-                    bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$2).map(wrap),
+                    bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$2).map(wrapReference),
                     declarations: declarations.map(wrapReference),
                     imports: flatten$1(ngModule.imports || EMPTY_ARRAY$2)
                         .map(expandModuleWithProviders)
@@ -14544,7 +14542,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-beta.5+16.sha-7ba0cb7');
+const VERSION = new Version('7.0.0-beta.5+20.sha-a9099e8');
 
 /**
  * @fileoverview added by tsickle
