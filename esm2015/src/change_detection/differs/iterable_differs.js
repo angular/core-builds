@@ -227,7 +227,7 @@ export class IterableDiffers {
     factory: () => new IterableDiffers([new DefaultIterableDifferFactory()])
 });
 if (false) {
-    /** @type {?} */
+    /** @nocollapse @type {?} */
     IterableDiffers.ngInjectableDef;
     /**
      * @deprecated v4.0.0 - Should be private

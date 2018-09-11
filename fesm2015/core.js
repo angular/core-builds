@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.5+16.sha-7ba0cb7
+ * @license Angular v7.0.0-beta.5+20.sha-a9099e8
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1098,7 +1098,7 @@ let _currentInjector = undefined;
  * @return {?}
  */
 function setCurrentInjector(injector) {
-    /** @type {?} */
+    /** @nocollapse @type {?} */
     const former = _currentInjector;
     _currentInjector = injector;
     return former;
@@ -7582,7 +7582,7 @@ function extractDirectiveDef(type) {
  * @return {?}
  */
 function extractPipeDef(type) {
-    /** @type {?} */
+    /** @nocollapse @type {?} */
     const def = type.ngPipeDef;
     if (ngDevMode && !def) {
         throw new Error(`'${type.name}' is not a 'PipeType'.`);
@@ -7822,7 +7822,7 @@ function InheritDefinitionFeature(definition) {
             }
             superDef = superType.ngDirectiveDef;
         }
-        /** @type {?} */
+        /** @nocollapse @type {?} */
         const baseDef = (/** @type {?} */ (superType)).ngBaseDef;
         // Some fields in the definition may be empty, if there were no values to put in them that
         // would've justified object creation. Unwrap them if necessary.
@@ -8782,7 +8782,7 @@ class ComponentFactoryResolver$1 extends ComponentFactoryResolver {
      */
     resolveComponentFactory(component) {
         ngDevMode && assertComponentType(component);
-        /** @type {?} */
+        /** @nocollapse @type {?} */
         const componentDef = (/** @type {?} */ (component)).ngComponentDef;
         return new ComponentFactory$1(componentDef);
     }
@@ -9509,11 +9509,7 @@ function getOrCreateElementRef(di) {
 /**
  * A ref to a node's native element.
  */
-class ElementRef$1 {
-    /**
-     * @param {?} nativeElement
-     */
-    constructor(nativeElement) { this.nativeElement = nativeElement; }
+class ElementRef$1 extends ElementRef {
 }
 /**
  * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
@@ -9583,12 +9579,13 @@ class NodeInjector {
  * A ref to a container that enables adding and removing views from that container
  * imperatively.
  */
-class ViewContainerRef$1 {
+class ViewContainerRef$1 extends ViewContainerRef {
     /**
      * @param {?} _lContainerNode
      * @param {?} _hostNode
      */
     constructor(_lContainerNode, _hostNode) {
+        super();
         this._lContainerNode = _lContainerNode;
         this._hostNode = _hostNode;
         this._viewRefs = [];
@@ -9817,7 +9814,7 @@ function getInheritedFactory(type) {
 /**
  * @template T
  */
-class TemplateRef$1 {
+class TemplateRef$1 extends TemplateRef {
     /**
      * @param {?} _declarationParentView
      * @param {?} elementRef
@@ -9826,6 +9823,7 @@ class TemplateRef$1 {
      * @param {?} _queries
      */
     constructor(_declarationParentView, elementRef, _tView, _renderer, _queries) {
+        super();
         this._declarationParentView = _declarationParentView;
         this.elementRef = elementRef;
         this._tView = _tView;
@@ -11029,8 +11027,8 @@ class NgModuleRef$1 extends NgModuleRef {
         // tslint:disable-next-line:require-internal-with-underscore
         this._bootstrapComponents = [];
         this.destroyCbs = [];
-        /** @type {?} */
-        const ngModuleDef = (/** @type {?} */ ((ngModuleType))).ngModuleDef;
+        /** @nocollapse @type {?} */
+        /** @nocollapse */ const ngModuleDef = (/** @type {?} */ ((ngModuleType))).ngModuleDef;
         ngDevMode && assertDefined(ngModuleDef, `NgModule '${stringify(ngModuleType)}' is not a subtype of 'NgModuleType'.`);
         this._bootstrapComponents = ngModuleDef.bootstrap;
         /** @type {?} */
@@ -13631,14 +13629,14 @@ function compileNgModuleDefs(moduleType, ngModule) {
     /** @type {?} */
     const declarations = flatten$1(ngModule.declarations || EMPTY_ARRAY$2);
     /** @type {?} */
-    let ngModuleDef = null;
+    /** @nocollapse */ let ngModuleDef = null;
     Object.defineProperty(moduleType, NG_MODULE_DEF, {
         get: () => {
             if (ngModuleDef === null) {
                 /** @type {?} */
                 const meta = {
                     type: wrap(moduleType),
-                    bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$2).map(wrap),
+                    bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$2).map(wrapReference),
                     declarations: declarations.map(wrapReference),
                     imports: flatten$1(ngModule.imports || EMPTY_ARRAY$2)
                         .map(expandModuleWithProviders)
@@ -13658,7 +13656,7 @@ function compileNgModuleDefs(moduleType, ngModule) {
         configurable: !!ngDevMode,
     });
     /** @type {?} */
-    let ngInjectorDef = null;
+    /** @nocollapse */ let ngInjectorDef = null;
     Object.defineProperty(moduleType, NG_INJECTOR_DEF, {
         get: () => {
             if (ngInjectorDef === null) {
@@ -13698,7 +13696,7 @@ function setScopeOnDeclaredComponents(moduleType, ngModule) {
     const transitiveScopes = transitiveScopesFor(moduleType);
     declarations.forEach(declaration => {
         if (declaration.hasOwnProperty(NG_COMPONENT_DEF)) {
-            /** @type {?} */
+            /** @nocollapse @type {?} */
             const component = /** @type {?} */ (declaration);
             /** @type {?} */
             const componentDef = component.ngComponentDef;
@@ -13738,7 +13736,7 @@ function transitiveScopesFor(moduleType) {
     if (!isNgModule(moduleType)) {
         throw new Error(`${moduleType.name} does not have an ngModuleDef`);
     }
-    /** @type {?} */
+    /** @nocollapse @type {?} */
     const def = moduleType.ngModuleDef;
     if (def.transitiveCompileScopes !== null) {
         return def.transitiveCompileScopes;
@@ -13883,7 +13881,7 @@ function isNgModule(value) {
  */
 function compileComponent(type, metadata) {
     /** @type {?} */
-    let ngComponentDef = null;
+    /** @nocollapse */ let ngComponentDef = null;
     // Metadata may have resources which need to be resolved.
     maybeQueueResolutionOfComponentResources(metadata);
     Object.defineProperty(type, NG_COMPONENT_DEF, {
@@ -13953,7 +13951,7 @@ function hasSelectorScope(component) {
  */
 function compileDirective(type, directive) {
     /** @type {?} */
-    let ngDirectiveDef = null;
+    /** @nocollapse */ let ngDirectiveDef = null;
     Object.defineProperty(type, NG_DIRECTIVE_DEF, {
         get: () => {
             if (ngDirectiveDef === null) {
@@ -14232,7 +14230,7 @@ function isUseExistingProvider(meta) {
  */
 function compilePipe(type, meta) {
     /** @type {?} */
-    let ngPipeDef = null;
+    /** @nocollapse */ let ngPipeDef = null;
     Object.defineProperty(type, NG_PIPE_DEF, {
         get: () => {
             if (ngPipeDef === null) {
@@ -14329,7 +14327,7 @@ function preR3NgModuleCompile(moduleType, metadata) {
     if (metadata && metadata.exports) {
         imports = [...imports, metadata.exports];
     }
-    moduleType.ngInjectorDef = defineInjector({
+    /** @nocollapse */ moduleType.ngInjectorDef = defineInjector({
         factory: convertInjectableProviderToFactory(moduleType, { useClass: moduleType }),
         providers: metadata && metadata.providers,
         imports: imports,
@@ -14521,7 +14519,7 @@ const Pipe = makeDecorator('Pipe', (p) => (Object.assign({ pure: true }, p)), un
 const initializeBaseDef = (target) => {
     /** @type {?} */
     const constructor = target.constructor;
-    /** @type {?} */
+    /** @nocollapse @type {?} */
     const inheritedBaseDef = constructor.ngBaseDef;
     /** @type {?} */
     const baseDef = constructor.ngBaseDef = {
@@ -14549,7 +14547,7 @@ const updateBaseDefFromIOProp = (getProp) => (target, name, ...args) => {
     if (!constructor.hasOwnProperty(NG_BASE_DEF)) {
         initializeBaseDef(target);
     }
-    /** @type {?} */
+    /** @nocollapse @type {?} */
     const baseDef = constructor.ngBaseDef;
     /** @type {?} */
     const defProp = getProp(baseDef);
@@ -14675,7 +14673,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-beta.5+16.sha-7ba0cb7');
+const VERSION = new Version('7.0.0-beta.5+20.sha-a9099e8');
 
 /**
  * @fileoverview added by tsickle

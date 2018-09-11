@@ -33,7 +33,7 @@ var StringMap;
  */
 export function compileComponent(type, metadata) {
     /** @type {?} */
-    let ngComponentDef = null;
+    /** @nocollapse */ let ngComponentDef = null;
     // Metadata may have resources which need to be resolved.
     maybeQueueResolutionOfComponentResources(metadata);
     Object.defineProperty(type, NG_COMPONENT_DEF, {
@@ -103,7 +103,7 @@ function hasSelectorScope(component) {
  */
 export function compileDirective(type, directive) {
     /** @type {?} */
-    let ngDirectiveDef = null;
+    /** @nocollapse */ let ngDirectiveDef = null;
     Object.defineProperty(type, NG_DIRECTIVE_DEF, {
         get: () => {
             if (ngDirectiveDef === null) {

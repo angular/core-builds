@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.5+16.sha-7ba0cb7
+ * @license Angular v7.0.0-beta.5+20.sha-a9099e8
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -7779,12 +7779,13 @@
         return di.elementRef || (di.elementRef = new ElementRef$1(di.node.native));
     }
     /** A ref to a node's native element. */
-    var ElementRef$1 = /** @class */ (function () {
-        function ElementRef$$1(nativeElement) {
-            this.nativeElement = nativeElement;
+    var ElementRef$1 = /** @class */ (function (_super) {
+        __extends(ElementRef$$1, _super);
+        function ElementRef$$1() {
+            return _super !== null && _super.apply(this, arguments) || this;
         }
         return ElementRef$$1;
-    }());
+    }(ElementRef));
     /**
      * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
      * already exists, retrieves the existing ViewContainerRef.
@@ -7840,11 +7841,14 @@
      * A ref to a container that enables adding and removing views from that container
      * imperatively.
      */
-    var ViewContainerRef$1 = /** @class */ (function () {
+    var ViewContainerRef$1 = /** @class */ (function (_super) {
+        __extends(ViewContainerRef$$1, _super);
         function ViewContainerRef$$1(_lContainerNode, _hostNode) {
-            this._lContainerNode = _lContainerNode;
-            this._hostNode = _hostNode;
-            this._viewRefs = [];
+            var _this = _super.call(this) || this;
+            _this._lContainerNode = _lContainerNode;
+            _this._hostNode = _hostNode;
+            _this._viewRefs = [];
+            return _this;
         }
         Object.defineProperty(ViewContainerRef$$1.prototype, "element", {
             get: function () {
@@ -7949,7 +7953,7 @@
             return index;
         };
         return ViewContainerRef$$1;
-    }());
+    }(ViewContainerRef));
     /**
      * Creates a TemplateRef and stores it on the injector. Or, if the TemplateRef already
      * exists, retrieves the existing TemplateRef.
@@ -7990,13 +7994,16 @@
             return function (t) { return new t(); };
         }
     }
-    var TemplateRef$1 = /** @class */ (function () {
+    var TemplateRef$1 = /** @class */ (function (_super) {
+        __extends(TemplateRef$$1, _super);
         function TemplateRef$$1(_declarationParentView, elementRef, _tView, _renderer, _queries) {
-            this._declarationParentView = _declarationParentView;
-            this.elementRef = elementRef;
-            this._tView = _tView;
-            this._renderer = _renderer;
-            this._queries = _queries;
+            var _this = _super.call(this) || this;
+            _this._declarationParentView = _declarationParentView;
+            _this.elementRef = elementRef;
+            _this._tView = _tView;
+            _this._renderer = _renderer;
+            _this._queries = _queries;
+            return _this;
         }
         TemplateRef$$1.prototype.createEmbeddedView = function (context, containerNode, index) {
             var viewNode = createEmbeddedViewNode(this._tView, context, this._declarationParentView, this._renderer, this._queries);
@@ -8009,7 +8016,7 @@
             return viewRef;
         };
         return TemplateRef$$1;
-    }());
+    }(TemplateRef));
     /**
      * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
      * `<ng-template>` element.
@@ -11243,7 +11250,7 @@
                 if (ngModuleDef === null) {
                     var meta = {
                         type: wrap(moduleType),
-                        bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$2).map(wrap),
+                        bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$2).map(wrapReference),
                         declarations: declarations.map(wrapReference),
                         imports: flatten$1(ngModule.imports || EMPTY_ARRAY$2)
                             .map(expandModuleWithProviders)
@@ -12115,7 +12122,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-beta.5+16.sha-7ba0cb7');
+    var VERSION = new Version('7.0.0-beta.5+20.sha-a9099e8');
 
     /**
      * @license

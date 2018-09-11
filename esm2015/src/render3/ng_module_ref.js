@@ -40,8 +40,8 @@ export class NgModuleRef extends viewEngine_NgModuleRef {
         // tslint:disable-next-line:require-internal-with-underscore
         this._bootstrapComponents = [];
         this.destroyCbs = [];
-        /** @type {?} */
-        const ngModuleDef = (/** @type {?} */ ((ngModuleType))).ngModuleDef;
+        /** @nocollapse @type {?} */
+        /** @nocollapse */ const ngModuleDef = (/** @type {?} */ ((ngModuleType))).ngModuleDef;
         ngDevMode && assertDefined(ngModuleDef, `NgModule '${stringify(ngModuleType)}' is not a subtype of 'NgModuleType'.`);
         this._bootstrapComponents = ngModuleDef.bootstrap;
         /** @type {?} */

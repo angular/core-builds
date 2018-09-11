@@ -69,7 +69,7 @@ function preR3NgModuleCompile(moduleType, metadata) {
     if (metadata && metadata.exports) {
         imports = [...imports, metadata.exports];
     }
-    moduleType.ngInjectorDef = defineInjector({
+    /** @nocollapse */ moduleType.ngInjectorDef = defineInjector({
         factory: convertInjectableProviderToFactory(moduleType, { useClass: moduleType }),
         providers: metadata && metadata.providers,
         imports: imports,

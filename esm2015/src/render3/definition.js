@@ -125,7 +125,7 @@ export function extractDirectiveDef(type) {
  * @return {?}
  */
 export function extractPipeDef(type) {
-    /** @type {?} */
+    /** @nocollapse @type {?} */
     const def = type.ngPipeDef;
     if (ngDevMode && !def) {
         throw new Error(`'${type.name}' is not a 'PipeType'.`);

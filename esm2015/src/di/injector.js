@@ -95,7 +95,7 @@ if (false) {
     Injector.THROW_IF_NOT_FOUND;
     /** @type {?} */
     Injector.NULL;
-    /** @type {?} */
+    /** @nocollapse @type {?} */
     Injector.ngInjectableDef;
     /**
      * Retrieves an instance from the injector based on the provided token.
@@ -550,7 +550,7 @@ let _currentInjector = undefined;
  * @return {?}
  */
 export function setCurrentInjector(injector) {
-    /** @type {?} */
+    /** @nocollapse @type {?} */
     const former = _currentInjector;
     _currentInjector = injector;
     return former;

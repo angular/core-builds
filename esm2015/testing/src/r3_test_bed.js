@@ -402,7 +402,7 @@ export class TestBedRender3 {
         /** @type {?} */
         const rootElId = `root${_nextRootElementId++}`;
         testComponentRenderer.insertRootElement(rootElId);
-        /** @type {?} */
+        /** @nocollapse @type {?} */
         const componentDef = (/** @type {?} */ (type)).ngComponentDef;
         if (!componentDef) {
             throw new Error(`It looks like '${stringify(type)}' has not been IVY compiled - it has no 'ngComponentDef' field`);
@@ -600,7 +600,7 @@ function transitiveScopesFor(moduleType, resolvers) {
     if (!isNgModule(moduleType)) {
         throw new Error(`${moduleType.name} does not have an ngModuleDef`);
     }
-    /** @type {?} */
+    /** @nocollapse @type {?} */
     const def = moduleType.ngModuleDef;
     if (def.transitiveCompileScopes !== null) {
         return def.transitiveCompileScopes;

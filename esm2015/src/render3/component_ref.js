@@ -29,7 +29,7 @@ export class ComponentFactoryResolver extends viewEngine_ComponentFactoryResolve
      */
     resolveComponentFactory(component) {
         ngDevMode && assertComponentType(component);
-        /** @type {?} */
+        /** @nocollapse @type {?} */
         const componentDef = (/** @type {?} */ (component)).ngComponentDef;
         return new ComponentFactory(componentDef);
     }
