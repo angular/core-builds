@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.5+26.sha-21009b0
+ * @license Angular v7.0.0-beta.5+30.sha-10a656f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1956,11 +1956,6 @@ function getLElementNode(target) {
     const context = getContext(target);
     return context ? getLNodeFromViewData(context.lViewData, context.lNodeIndex) : null;
 }
-function getLElementFromRootComponent(componentInstance) {
-    // the host element for the root component is ALWAYS the first element
-    // in the lViewData array (which is where HEADER_OFFSET points to)
-    return getLElementFromComponent(componentInstance, HEADER_OFFSET);
-}
 /**
  * A simplified lookup function for finding the LElementNode from a component instance.
  *
@@ -1968,13 +1963,13 @@ function getLElementFromRootComponent(componentInstance) {
  * that `getContext` has in the event that an Angular application doesn't need to have
  * any programmatic access to an element's context (only change detection uses this function).
  */
-function getLElementFromComponent(componentInstance, expectedLNodeIndex) {
+function getLElementFromComponent(componentInstance) {
     let lViewData = readPatchedData(componentInstance);
     let lNode;
     if (Array.isArray(lViewData)) {
-        expectedLNodeIndex = expectedLNodeIndex || findViaComponent(lViewData, componentInstance);
-        lNode = readElementValue(lViewData[expectedLNodeIndex]);
-        const context = createLContext(lViewData, expectedLNodeIndex, lNode.native);
+        const lNodeIndex = findViaComponent(lViewData, componentInstance);
+        lNode = readElementValue(lViewData[lNodeIndex]);
+        const context = createLContext(lViewData, lNodeIndex, lNode.native);
         context.component = componentInstance;
         attachPatchData(componentInstance, context);
         attachPatchData(context.native, context);
@@ -1998,6 +1993,13 @@ function attachPatchData(target, data) {
  */
 function readPatchedData(target) {
     return target[MONKEY_PATCH_KEY_NAME];
+}
+function readPatchedLViewData(target) {
+    const value = readPatchedData(target);
+    if (value) {
+        return Array.isArray(value) ? value : value.lViewData;
+    }
+    return null;
 }
 function isComponentInstance(instance) {
     return instance && instance.constructor && instance.constructor.ngComponentDef;
@@ -5101,6 +5103,9 @@ function baseDirectiveCreate(index, directive, directiveDef, hostNode) {
     ngDevMode && assertEqual(viewData[BINDING_INDEX], tView.bindingStartIndex, 'directives should be created before any bindings');
     ngDevMode && assertPreviousIsParent();
     attachPatchData(directive, viewData);
+    if (hostNode) {
+        attachPatchData(hostNode.native, viewData);
+    }
     if (directives == null)
         viewData[DIRECTIVES] = directives = [];
     ngDevMode && assertDataNext(index, directives);
@@ -5453,7 +5458,7 @@ function componentRefresh(adjustedElementIndex) {
     const hostView = element.data;
     // Only attached CheckAlways components or attached, dirty OnPush components should be checked
     if (viewAttached(hostView) && hostView[FLAGS] & (2 /* CheckAlways */ | 4 /* Dirty */)) {
-        detectChangesInternal(hostView, element, hostView[CONTEXT]);
+        detectChangesInternal(hostView, hostView[CONTEXT]);
     }
 }
 /** Returns a boolean for whether the view is attached */
@@ -5665,7 +5670,7 @@ function scheduleTick(rootContext) {
 function tickRootContext(rootContext) {
     for (let i = 0; i < rootContext.components.length; i++) {
         const rootComponent = rootContext.components[i];
-        renderComponentOrTemplate(getRootView(rootComponent), rootComponent);
+        renderComponentOrTemplate(readPatchedLViewData(rootComponent), rootComponent);
     }
 }
 /**
@@ -5676,8 +5681,7 @@ function tickRootContext(rootContext) {
  */
 function getRootView(component) {
     ngDevMode && assertDefined(component, 'component');
-    const lElementNode = _getComponentHostLElementNode(component);
-    let lViewData = lElementNode.view;
+    let lViewData = readPatchedLViewData(component);
     while (lViewData[PARENT]) {
         lViewData = lViewData[PARENT];
     }
@@ -5697,10 +5701,10 @@ function getRootView(component) {
  * @param component The component which the change detection should be performed on.
  */
 function detectChanges(component) {
-    const hostNode = _getComponentHostLElementNode(component);
+    const hostNode = getLElementFromComponent(component);
     ngDevMode &&
-        assertDefined(hostNode.data, 'Component host node should be attached to an LViewData instance.');
-    detectChangesInternal(hostNode.data, hostNode, component);
+        assertDefined(hostNode, 'Component host node should be attached to an LViewData instance.');
+    detectChangesInternal(hostNode.data, component);
 }
 /**
  * Synchronously perform change detection on a root view and its components.
@@ -5744,7 +5748,7 @@ function checkNoChangesInRootView(lViewData) {
     }
 }
 /** Checks the view of the component provided. Does not gate on dirty checks or execute doCheck. */
-function detectChangesInternal(hostView, hostNode, component) {
+function detectChangesInternal(hostView, component) {
     const hostTView = hostView[TVIEW];
     const oldView = enterView(hostView, null);
     const templateFn = hostTView.template;
@@ -5786,8 +5790,8 @@ function updateViewQuery(viewQuery, component) {
  */
 function markDirty(component) {
     ngDevMode && assertDefined(component, 'component');
-    const lElementNode = _getComponentHostLElementNode(component);
-    markViewDirty(lElementNode.view);
+    const lViewData = readPatchedLViewData(component);
+    markViewDirty(lViewData);
 }
 /** A special value which designates that a value has not changed. */
 const NO_CHANGE = {};
@@ -6025,10 +6029,9 @@ function assertDataNext(index, arr) {
         arr = viewData;
     assertEqual(arr.length, index, `index ${index} expected to be at the end of arr (length ${arr.length})`);
 }
-function _getComponentHostLElementNode(component, isRootComponent) {
+function _getComponentHostLElementNode(component) {
     ngDevMode && assertDefined(component, 'expecting component got null');
-    const lElementNode = isRootComponent ? getLElementFromRootComponent(component) :
-        getLElementFromComponent(component);
+    const lElementNode = getLElementFromComponent(component);
     ngDevMode && assertDefined(component, 'object is not a component');
     return lElementNode;
 }
@@ -6086,7 +6089,7 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
         opts.hostFeatures && opts.hostFeatures.forEach((feature) => feature(component, componentDef));
         executeInitAndContentHooks();
         setHostBindings(rootView[TVIEW].hostBindings);
-        detectChangesInternal(elementNode.data, elementNode, component);
+        detectChangesInternal(elementNode.data, component);
     }
     finally {
         leaveView(oldView);
@@ -11708,7 +11711,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('7.0.0-beta.5+26.sha-21009b0');
+const VERSION = new Version('7.0.0-beta.5+30.sha-10a656f');
 
 /**
  * @license

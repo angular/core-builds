@@ -646,7 +646,7 @@ export declare function checkNoChanges<T>(component: T): void;
  */
 export declare function checkNoChangesInRootView(lViewData: LViewData): void;
 /** Checks the view of the component provided. Does not gate on dirty checks or execute doCheck. */
-export declare function detectChangesInternal<T>(hostView: LViewData, hostNode: LElementNode, component: T): void;
+export declare function detectChangesInternal<T>(hostView: LViewData, component: T): void;
 /**
  * Mark the component as dirty (needing change detection).
  *
@@ -744,5 +744,5 @@ export declare function getTView(): TView;
  */
 export declare function registerContentQuery<Q>(queryList: QueryList<Q>): void;
 export declare function assertPreviousIsParent(): void;
-export declare function _getComponentHostLElementNode<T>(component: T, isRootComponent?: boolean): LElementNode;
+export declare function _getComponentHostLElementNode(component: any): LElementNode;
 export declare const CLEAN_PROMISE: Promise<null>;
