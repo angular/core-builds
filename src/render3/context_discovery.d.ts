@@ -60,7 +60,7 @@ export declare function getContext(target: any): LContext | null;
  * from a given DOM element, component or directive.
  */
 export declare function getLElementNode(target: any): LElementNode | null;
-export declare function getLElementFromRootComponent(componentInstance: {}): LElementNode | null;
+export declare function getLElementFromRootComponent(rootComponentInstance: {}): LElementNode | null;
 /**
  * A simplified lookup function for finding the LElementNode from a component instance.
  *
@@ -68,7 +68,7 @@ export declare function getLElementFromRootComponent(componentInstance: {}): LEl
  * that `getContext` has in the event that an Angular application doesn't need to have
  * any programmatic access to an element's context (only change detection uses this function).
  */
-export declare function getLElementFromComponent(componentInstance: {}, expectedLNodeIndex?: number): LElementNode | null;
+export declare function getLElementFromComponent(componentInstance: {}): LElementNode | null;
 /**
  * Assigns the given data to the given target (which could be a component,
  * directive or DOM node instance) using monkey-patching.
@@ -79,5 +79,6 @@ export declare function attachPatchData(target: any, data: LViewData | LContext)
  * a component, directive or a DOM node).
  */
 export declare function readPatchedData(target: any): LViewData | LContext | null;
+export declare function readPatchedLViewData(target: any): LViewData | null;
 export declare function isComponentInstance(instance: any): boolean;
 export declare function isDirectiveInstance(instance: any): boolean;
