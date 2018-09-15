@@ -10,7 +10,7 @@ import { QueryList } from '../../linker';
 import { Sanitizer } from '../../sanitization/security';
 import { LContainer } from './container';
 import { ComponentQuery, ComponentTemplate, DirectiveDefInternal, DirectiveDefList, PipeDefInternal, PipeDefList } from './definition';
-import { LElementNode, LViewNode, TElementNode, TNode, TViewNode } from './node';
+import { TElementNode, TNode, TViewNode } from './node';
 import { LQueries } from './query';
 import { Renderer3 } from './renderer';
 /** Size of LViewData's header. Necessary to adjust for it when setting slots.  */
@@ -76,14 +76,16 @@ export interface LViewData extends Array<any> {
     /** Flags for this view. See LViewFlags for more info. */
     [FLAGS]: LViewFlags;
     /**
-     * Pointer to the `LViewNode` or `LElementNode` which represents the root of the view.
+     * Pointer to the `TViewNode` or `TElementNode` which represents the root of the view.
      *
-     * If `LViewNode`, this is an embedded view of a container. We need this to be able to
+     * If `TViewNode`, this is an embedded view of a container. We need this to be able to
      * efficiently find the `LViewNode` when inserting the view into an anchor.
      *
-     * If `LElementNode`, this is the LView of a component.
+     * If `TElementNode`, this is the LView of a component.
+     *
+     * If null, this is the root view of an application (root component is in this view).
      */
-    [HOST_NODE]: LViewNode | LElementNode;
+    [HOST_NODE]: TViewNode | TElementNode | null;
     /**
      * The binding index we should access next.
      *
@@ -196,7 +198,9 @@ export declare const enum LViewFlags {
      */
     RunInit = 16,
     /** Whether or not this view is destroyed. */
-    Destroyed = 32
+    Destroyed = 32,
+    /** Whether or not this view is the root view */
+    IsRoot = 64
 }
 /**
  * The static data for an LView (shared between all templates of a

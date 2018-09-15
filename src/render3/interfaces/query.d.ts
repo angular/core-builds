@@ -7,7 +7,7 @@
  */
 import { QueryList } from '../../linker';
 import { Type } from '../../type';
-import { LNode } from './node';
+import { TNode } from './node';
 /** Used for tracking queries (e.g. ViewChild, ContentChild). */
 export interface LQueries {
     /**
@@ -26,10 +26,10 @@ export interface LQueries {
      */
     clone(): LQueries;
     /**
-     * Notify `LQueries` that a new `LNode` has been created and needs to be added to query results
+     * Notify `LQueries` that a new `TNode` has been created and needs to be added to query results
      * if matching query predicate.
      */
-    addNode(node: LNode): LQueries | null;
+    addNode(tNode: TNode): LQueries | null;
     /**
      * Notify `LQueries` that a new LContainer was added to ivy data structures. As a result we need
      * to prepare room for views that might be inserted into this container.

@@ -13,7 +13,6 @@ import { LViewData } from './interfaces/view';
 export interface viewEngine_ChangeDetectorRef_interface extends viewEngine_ChangeDetectorRef {
 }
 export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T>, viewEngine_InternalViewRef, viewEngine_ChangeDetectorRef_interface {
-    protected _view: LViewData;
     private _appRef;
     private _viewContainerRef;
     context: T;
