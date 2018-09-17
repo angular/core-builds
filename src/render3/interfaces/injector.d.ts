@@ -9,7 +9,7 @@ import { ChangeDetectorRef } from '../../change_detection/change_detector_ref';
 import { ElementRef } from '../../linker/element_ref';
 import { TemplateRef } from '../../linker/template_ref';
 import { ViewContainerRef } from '../../linker/view_container_ref';
-import { LContainerNode, LElementContainerNode, LElementNode } from './node';
+import { LContainerNode, LElementContainerNode, LElementNode, TNode } from './node';
 export interface LInjector {
     /**
      * We need to store a reference to the injector's parent so DI can keep looking up
@@ -23,6 +23,7 @@ export interface LInjector {
      * it is there.
      */
     readonly node: LElementNode | LElementContainerNode | LContainerNode;
+    readonly tNode: TNode;
     /**
      * The following bloom filter determines whether a directive is available
      * on the associated node or not. This prevents us from searching the directives

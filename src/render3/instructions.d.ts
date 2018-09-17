@@ -12,7 +12,7 @@ import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
 import { LContainer } from './interfaces/container';
 import { ComponentDefInternal, ComponentQuery, ComponentTemplate, DirectiveDefInternal, DirectiveDefListOrFactory, InitialStylingFlags, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { LInjector } from './interfaces/injector';
-import { LContainerNode, LElementContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode, LocalRefExtractor, TAttributes, TContainerNode, TElementNode, TNode, TNodeType, TViewNode } from './interfaces/node';
+import { LContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode, LocalRefExtractor, TAttributes, TContainerNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from './interfaces/node';
 import { CssSelectorList } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
@@ -49,7 +49,7 @@ export declare function getCurrentView(): OpaqueViewState;
  * @param viewToRestore The OpaqueViewState instance to restore.
  */
 export declare function restoreView(viewToRestore: OpaqueViewState): void;
-export declare function getPreviousOrParentNode(): LNode;
+export declare function getPreviousOrParentNode(): LNode | null;
 export declare function getPreviousOrParentTNode(): TNode;
 /**
  * Query instructions can ask for "current queries" in 2 different cases:
@@ -113,11 +113,11 @@ export declare function createLNodeObject(type: TNodeType, currentView: LViewDat
  * @param attrs Any attrs for the native element, if applicable
  * @param data Any data that should be saved on the LNode
  */
-export declare function createLNode(index: number, type: TNodeType.Element, native: RElement | RText | null, name: string | null, attrs: TAttributes | null, lViewData?: LViewData | null): LElementNode;
-export declare function createLNode(index: number, type: TNodeType.View, native: null, name: null, attrs: null, lViewData: LViewData): LViewNode;
-export declare function createLNode(index: number, type: TNodeType.Container, native: RComment, name: string | null, attrs: TAttributes | null, lContainer: LContainer): LContainerNode;
-export declare function createLNode(index: number, type: TNodeType.Projection, native: null, name: null, attrs: TAttributes | null, lProjection: null): LProjectionNode;
-export declare function createLNode(index: number, type: TNodeType.ElementContainer, native: RComment, name: null, attrs: TAttributes | null, data: null): LElementContainerNode;
+export declare function createNodeAtIndex(index: number, type: TNodeType.Element, native: RElement | RText | null, name: string | null, attrs: TAttributes | null, lViewData?: LViewData | null): TElementNode;
+export declare function createNodeAtIndex(index: number, type: TNodeType.View, native: null, name: null, attrs: null, lViewData: LViewData): TViewNode;
+export declare function createNodeAtIndex(index: number, type: TNodeType.Container, native: RComment, name: string | null, attrs: TAttributes | null, lContainer: LContainer): TContainerNode;
+export declare function createNodeAtIndex(index: number, type: TNodeType.Projection, native: null, name: null, attrs: TAttributes | null, lProjection: null): TProjectionNode;
+export declare function createNodeAtIndex(index: number, type: TNodeType.ElementContainer, native: RComment, name: null, attrs: TAttributes | null, data: null): TElementContainerNode;
 /**
  * When LNodes are created dynamically after a view blueprint is created (e.g. through
  * i18nApply() or ComponentFactory.create), we need to adjust the blueprint for future
@@ -145,7 +145,7 @@ export declare function renderTemplate<T>(hostNode: RElement, templateFn: Compon
  * either through ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
  * Such lViewNode will then be renderer with renderEmbeddedTemplate() (see below).
  */
-export declare function createEmbeddedViewNode<T>(tView: TView, context: T, declarationView: LViewData, renderer: Renderer3, queries?: LQueries | null): LViewNode;
+export declare function createEmbeddedViewAndNode<T>(tView: TView, context: T, declarationView: LViewData, renderer: Renderer3, queries?: LQueries | null): LViewData;
 /**
  * Used for rendering embedded views (e.g. dynamically created views)
  *
@@ -222,8 +222,6 @@ export declare function resolveDirective(def: DirectiveDefInternal<any>, valueIn
 export declare function queueHostBindingForCheck(dirIndex: number, hostVars: number): void;
 /** Sets the context for a ChangeDetectorRef to the given instance. */
 export declare function initChangeDetectorIfExisting(injector: LInjector | null, instance: any, view: LViewData): void;
-export declare function isContentQueryHost(tNode: TNode): boolean;
-export declare function isComponent(tNode: TNode): boolean;
 /**
  * Creates a TView instance
  *
@@ -455,12 +453,11 @@ export declare function baseDirectiveCreate<T>(index: number, directive: T, dire
 /**
  * Creates a LContainer, either from a container instruction, or for a ViewContainerRef.
  *
- * @param parentLNode the LNode in which the container's content will be rendered
  * @param currentView The parent view of the LContainer
  * @param isForViewContainerRef Optional a flag indicating the ViewContainerRef case
  * @returns LContainer
  */
-export declare function createLContainer(parentLNode: LNode, currentView: LViewData, isForViewContainerRef?: boolean): LContainer;
+export declare function createLContainer(currentView: LViewData, isForViewContainerRef?: boolean): LContainer;
 /**
  * Creates an LContainerNode for an ng-template (dynamically-inserted view), e.g.
  *
@@ -725,6 +722,7 @@ export declare function loadQueryList<T>(queryListIdx: number): QueryList<T>;
 /** Retrieves a value from current `viewData`. */
 export declare function load<T>(index: number): T;
 export declare function loadElement(index: number): LElementNode;
+export declare function getTNode(index: number): TNode;
 /** Gets the current binding value. */
 export declare function getBinding(bindingIndex: number): any;
 /** Updates binding if changed, then returns whether it was updated. */
