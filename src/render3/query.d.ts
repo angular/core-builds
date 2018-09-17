@@ -7,7 +7,7 @@
  */
 import { QueryList as viewEngine_QueryList } from '../linker/query_list';
 import { Type } from '../type';
-import { LNode } from './interfaces/node';
+import { TNode } from './interfaces/node';
 import { LQueries, QueryReadType } from './interfaces/query';
 /**
  * A predicate which determines if a given element/directive should be included in the query
@@ -69,7 +69,7 @@ export declare class LQueries_ implements LQueries {
     container(): LQueries | null;
     createView(): LQueries | null;
     insertView(index: number): void;
-    addNode(node: LNode): LQueries | null;
+    addNode(tNode: TNode): LQueries | null;
     removeView(): void;
 }
 export declare type QueryList<T> = viewEngine_QueryList<T>;

@@ -9,8 +9,9 @@ import { Type } from '../core';
 import { Injector } from '../di/injector';
 import { Sanitizer } from '../sanitization/security';
 import { ComponentDef, ComponentDefInternal, ComponentType } from './interfaces/definition';
+import { LElementNode } from './interfaces/node';
 import { RElement, RendererFactory3 } from './interfaces/renderer';
-import { RootContext } from './interfaces/view';
+import { LViewData, RootContext } from './interfaces/view';
 /** Options that control how the component should be bootstrapped. */
 export interface CreateComponentOptions {
     /** Which renderer factory to use. */
@@ -37,7 +38,7 @@ export interface CreateComponentOptions {
      * features list because there's no way of knowing when the component will be used as
      * a root component.
      */
-    hostFeatures?: (<T>(component: T, componentDef: ComponentDef<T, string>) => void)[];
+    hostFeatures?: HostFeature[];
     /**
      * A function which is used to schedule change detection work in the future.
      *
@@ -51,6 +52,8 @@ export interface CreateComponentOptions {
      */
     scheduler?: (work: () => void) => void;
 }
+/** See CreateComponentOptions.hostFeatures */
+declare type HostFeature = (<T>(component: T, componentDef: ComponentDef<T, string>) => void);
 export declare const NULL_INJECTOR: Injector;
 /**
  * Bootstraps a Component into an existing host element and returns an instance
@@ -66,6 +69,11 @@ export declare const NULL_INJECTOR: Injector;
  * @param options Optional parameters which control bootstrapping
  */
 export declare function renderComponent<T>(componentType: ComponentType<T> | Type<T>, opts?: CreateComponentOptions): T;
+/**
+ * Creates a root component and sets it up with features and host bindings. Shared by
+ * renderComponent() and ViewContainerRef.createComponent().
+ */
+export declare function createRootComponent<T>(elementNode: LElementNode, componentDef: ComponentDef<T, string>, rootView: LViewData, rootContext: RootContext, hostFeatures: HostFeature[] | null): any;
 export declare function createRootContext(scheduler: (workFn: () => void) => void): RootContext;
 /**
  * Used to enable lifecycle hooks on the root component.
@@ -118,3 +126,4 @@ export declare function getRenderedText(component: any): string;
  * @returns Promise which resolves when the component is rendered.
  */
 export declare function whenRendered(component: any): Promise<null>;
+export {};
