@@ -561,8 +561,16 @@ export declare function projection(nodeIndex: number, selectorIndex?: number, at
 export declare function addToViewTree<T extends LViewData | LContainer>(currentView: LViewData, adjustedHostIndex: number, state: T): T;
 /** If node is an OnPush component, marks its LViewData dirty. */
 export declare function markDirtyIfOnPush(node: LElementNode): void;
-/** Wraps an event listener with preventDefault behavior. */
-export declare function wrapListenerWithPreventDefault(listenerFn: (e?: any) => any): EventListener;
+/**
+ * Wraps an event listener so its host view and its ancestor views will be marked dirty
+ * whenever the event fires. Necessary to support OnPush components.
+ */
+export declare function wrapListenerWithDirtyLogic(view: LViewData, listenerFn: (e?: any) => any): (e: Event) => any;
+/**
+ * Wraps an event listener so its host view and its ancestor views will be marked dirty
+ * whenever the event fires. Also wraps with preventDefault behavior.
+ */
+export declare function wrapListenerWithDirtyAndDefault(view: LViewData, listenerFn: (e?: any) => any): EventListener;
 /** Marks current view and all ancestors dirty */
 export declare function markViewDirty(view: LViewData): void;
 /**
