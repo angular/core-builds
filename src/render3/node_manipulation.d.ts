@@ -6,23 +6,34 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { LContainer } from './interfaces/container';
-import { LContainerNode, LElementContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode } from './interfaces/node';
-import { RNode, RText, Renderer3 } from './interfaces/renderer';
+import { LContainerNode, LElementContainerNode, LElementNode, LTextNode, TContainerNode, TNode, TViewNode } from './interfaces/node';
+import { RComment, RNode, RText, Renderer3 } from './interfaces/renderer';
 import { LViewData } from './interfaces/view';
-/** Retrieves the first child of a given node */
-export declare function getChildLNode(node: LNode): LNode | null;
 /** Retrieves the parent LNode of a given node. */
-export declare function getParentLNode(node: LContainerNode | LElementNode | LElementContainerNode | LTextNode | LProjectionNode): LElementNode | LElementContainerNode | LViewNode;
-export declare function getParentLNode(node: LViewNode): LContainerNode | null;
-export declare function getParentLNode(node: LElementContainerNode): LElementNode | LElementContainerNode | LViewNode;
-export declare function getParentLNode(node: LNode): LElementNode | LElementContainerNode | LContainerNode | LViewNode | null;
+export declare function getParentLNode(tNode: TNode, currentView: LViewData): LElementNode | LElementContainerNode | LContainerNode | null;
+/**
+ * Gets the host LElementNode given a view. Will return null if the host element is an
+ * LViewNode, since they are being phased out.
+ */
+export declare function getHostElementNode(currentView: LViewData): LElementNode | null;
+/**
+ * Gets the parent LNode if it's not a view. If it's a view, it will instead return the view's
+ * parent container node.
+ */
+export declare function getParentOrContainerNode(tNode: TNode, currentView: LViewData): LElementNode | LElementContainerNode | LContainerNode | null;
+export declare function getContainerNode(tNode: TNode, embeddedView: LViewData): LContainerNode | null;
+/**
+ * Retrieves render parent LElementNode for a given view.
+ * Might be null if a view is not yet attached to any container.
+ */
+export declare function getContainerRenderParent(tViewNode: TViewNode, view: LViewData): LElementNode | null;
 /**
  * Given a current view, finds the nearest component's host (LElement).
  *
  * @param lViewData LViewData for which we want a host element node
  * @returns The host node
  */
-export declare function findComponentHost(lViewData: LViewData): LElementNode;
+export declare function findComponentView(lViewData: LViewData): LViewData;
 export declare function createTextNode(value: any, renderer: Renderer3): RText;
 /**
  * Adds or removes all DOM elements associated with a view.
@@ -31,13 +42,12 @@ export declare function createTextNode(value: any, renderer: Renderer3): RText;
  * to propagate deeply into the nested containers to remove all elements in the
  * views beneath it.
  *
- * @param container The container to which the root view belongs
  * @param viewToWalk The view from which elements should be added or removed
  * @param insertMode Whether or not elements should be added (if false, removing)
  * @param beforeNode The node before which elements should be added, if insert mode
  */
-export declare function addRemoveViewFromContainer(container: LContainerNode, viewToWalk: LViewData, insertMode: true, beforeNode: RNode | null): void;
-export declare function addRemoveViewFromContainer(container: LContainerNode, viewToWalk: LViewData, insertMode: false): void;
+export declare function addRemoveViewFromContainer(viewToWalk: LViewData, insertMode: true, beforeNode: RNode | null): void;
+export declare function addRemoveViewFromContainer(viewToWalk: LViewData, insertMode: false): void;
 /**
  * Traverses down and up the tree of views and containers to remove listeners and
  * call onDestroy callbacks.
@@ -65,7 +75,7 @@ export declare function destroyViewTree(rootView: LViewData): void;
  * @param index The index at which to insert the view
  * @returns The inserted view
  */
-export declare function insertView(container: LContainerNode, viewNode: LViewNode, index: number): void;
+export declare function insertView(container: LContainerNode, lView: LViewData, index: number, containerIndex: number): void;
 /**
  * Detaches a view from a container.
  *
@@ -76,7 +86,7 @@ export declare function insertView(container: LContainerNode, viewNode: LViewNod
  * @param removeIndex The index of the view to detach
  * @returns The detached view
  */
-export declare function detachView(container: LContainerNode, removeIndex: number): void;
+export declare function detachView(container: LContainerNode, removeIndex: number, detached: boolean): void;
 /**
  * Removes a view from a container, i.e. detaches it and then destroys the underlying LView.
  *
@@ -84,7 +94,7 @@ export declare function detachView(container: LContainerNode, removeIndex: numbe
  * @param removeIndex The index of the view to remove
  * @returns The removed view
  */
-export declare function removeView(container: LContainerNode, removeIndex: number): void;
+export declare function removeView(container: LContainerNode, tContainer: TContainerNode, removeIndex: number): void;
 /** Gets the child of the given LViewData */
 export declare function getLViewChild(viewData: LViewData): LViewData | LContainer | null;
 /**
@@ -107,6 +117,7 @@ export declare function destroyLView(view: LViewData): void;
  * @returns The correct parent LViewOrLContainer
  */
 export declare function getParentState(state: LViewData | LContainer, rootView: LViewData): LViewData | LContainer | null;
+export declare function getRenderParent(tNode: TNode, currentView: LViewData): LElementNode | null;
 /**
  * Returns whether a native element can be inserted into the given parent.
  *
@@ -125,33 +136,36 @@ export declare function getParentState(state: LViewData | LContainer, rootView: 
  * @param currentView Current LView being processed.
  * @return boolean Whether the child should be inserted now (or delayed until later).
  */
-export declare function canInsertNativeNode(parent: LNode, currentView: LViewData): boolean;
+export declare function canInsertNativeNode(tNode: TNode, currentView: LViewData): boolean;
 /**
  * Appends the `child` element to the `parent`.
  *
  * The element insertion might be delayed {@link canInsertNativeNode}.
  *
- * @param parent The parent to which to append the child
- * @param child The child that should be appended
+ * @param childEl The child that should be appended
+ * @param childTNode The TNode of the child element
  * @param currentView The current LView
  * @returns Whether or not the child was appended
  */
-export declare function appendChild(parent: LNode, child: RNode | null, currentView: LViewData): boolean;
+export declare function appendChild(childEl: RNode | null, childTNode: TNode, currentView: LViewData): boolean;
+export declare function getBeforeNodeForView(index: number, views: LViewData[], container: LContainerNode): RComment;
 /**
  * Removes the `child` element of the `parent` from the DOM.
  *
- * @param parent The parent from which to remove the child
+ * @param parentEl The parent element from which to remove the child
  * @param child The child that should be removed
  * @param currentView The current LView
  * @returns Whether or not the child was removed
  */
-export declare function removeChild(parent: LNode, child: RNode | null, currentView: LViewData): boolean;
+export declare function removeChild(tNode: TNode, child: RNode | null, currentView: LViewData): boolean;
 /**
  * Appends a projected node to the DOM, or in the case of a projected container,
  * appends the nodes from all of the container's active views to the DOM.
  *
- * @param node The node to process
- * @param currentParent The last parent element to be processed
+ * @param projectedLNode The node to process
+ * @param parentNode The last parent element to be processed
+ * @param tProjectionNode
  * @param currentView Current LView
+ * @param projectionView Projection view
  */
-export declare function appendProjectedNode(node: LElementNode | LElementContainerNode | LTextNode | LContainerNode, currentParent: LElementNode | LElementContainerNode | LViewNode, currentView: LViewData, renderParent: LElementNode, parentView: LViewData): void;
+export declare function appendProjectedNode(projectedLNode: LElementNode | LElementContainerNode | LTextNode | LContainerNode, projectedTNode: TNode, tProjectionNode: TNode, currentView: LViewData, projectionView: LViewData): void;

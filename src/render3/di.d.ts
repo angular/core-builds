@@ -16,7 +16,7 @@ import { Renderer2 } from '../render';
 import { Type } from '../type';
 import { DirectiveDefInternal } from './interfaces/definition';
 import { LInjector } from './interfaces/injector';
-import { LContainerNode, LElementContainerNode, LElementNode, LNode, LNodeWithLocalRefs } from './interfaces/node';
+import { LContainerNode, LElementContainerNode, LElementNode, LNodeWithLocalRefs, TNode } from './interfaces/node';
 import { QueryReadType } from './interfaces/query';
 /**
  * Registers this directive as present in its node's injector by flipping the directive's
@@ -33,7 +33,7 @@ export declare function getOrCreateNodeInjector(): LInjector;
  * @param node for which an injector should be retrieved / created.
  * @returns Node injector
  */
-export declare function getOrCreateNodeInjectorForNode(node: LElementNode | LElementContainerNode | LContainerNode): LInjector;
+export declare function getOrCreateNodeInjectorForNode(node: LElementNode | LElementContainerNode | LContainerNode, tNode: TNode): LInjector;
 /**
  * Makes a directive public to the DI system by adding it to an injector's bloom filter.
  *
@@ -175,8 +175,8 @@ export declare function getOrCreateInjectable<T>(nodeInjector: LInjector, token:
  */
 export declare function bloomFindPossibleInjector(startInjector: LInjector, bloomBit: number, flags: InjectFlags): LInjector | null;
 export declare class ReadFromInjectorFn<T> {
-    readonly read: (injector: LInjector, node: LNode, directiveIndex?: number) => T;
-    constructor(read: (injector: LInjector, node: LNode, directiveIndex?: number) => T);
+    readonly read: (injector: LInjector, tNode: TNode, directiveIndex?: number) => T;
+    constructor(read: (injector: LInjector, tNode: TNode, directiveIndex?: number) => T);
 }
 /**
  * Creates an ElementRef for a given node injector and stores it on the injector.
@@ -216,4 +216,4 @@ export declare function getInheritedFactory<T>(type: Type<any>): (type: Type<T>)
  * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
  * `<ng-template>` element.
  */
-export declare function templateRefExtractor(lNode: LNodeWithLocalRefs): viewEngine_TemplateRef<{}>;
+export declare function templateRefExtractor(lNode: LNodeWithLocalRefs, tNode: TNode): viewEngine_TemplateRef<{}>;
