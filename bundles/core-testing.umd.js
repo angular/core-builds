@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.2+28.sha-21a1440
+ * @license Angular v7.0.0-beta.5+32.sha-47f4412
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1184,8 +1184,9 @@
          * Overwrites all providers for the given token with the given provider definition.
          */
         TestBedRender3.prototype.overrideProvider = function (token, provider) {
-            var isRoot = (typeof token !== 'string' && token.ngInjectableDef &&
-                token.ngInjectableDef.providedIn === 'root');
+            var injectableDef;
+            var isRoot = (typeof token !== 'string' && (injectableDef = core.ɵgetInjectableDef(token)) &&
+                injectableDef.providedIn === 'root');
             var overrides = isRoot ? this._rootProviderOverrides : this._providerOverrides;
             if (provider.useFactory) {
                 overrides.push({ provide: token, useFactory: provider.useFactory, deps: provider.deps || [] });
@@ -1860,8 +1861,8 @@
         };
         TestBedViewEngine.prototype.overrideProviderImpl = function (token, provider, deprecated) {
             if (deprecated === void 0) { deprecated = false; }
-            if (typeof token !== 'string' && token.ngInjectableDef &&
-                token.ngInjectableDef.providedIn === 'root') {
+            var def = null;
+            if (typeof token !== 'string' && (def = core.ɵgetInjectableDef(token)) && def.providedIn === 'root') {
                 if (provider.useFactory) {
                     this._rootProviderOverrides.push({ provide: token, useFactory: provider.useFactory, deps: provider.deps || [] });
                 }
