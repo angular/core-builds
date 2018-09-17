@@ -121,17 +121,21 @@ export interface DirectiveDef<T, Selector extends string> extends BaseDef<T> {
     readonly exportAs: string | null;
     /**
      * Factory function used to create a new directive instance.
-     *
-     * Usually returns the directive instance, but if the directive has a content query,
-     * it instead returns an array that contains the instance as well as content query data.
      */
-    factory(): T | [T];
+    factory(): T;
     /**
      * Function to create instances of content queries associated with a given directive.
      */
     contentQueries: (() => void) | null;
     /** Refreshes content queries associated with directives in a given view */
     contentQueriesRefresh: ((directiveIndex: number, queryIndex: number) => void) | null;
+    /**
+     * The number of host bindings (including pure fn bindings) in this directive/component.
+     *
+     * Used to calculate the length of the LViewData array for the *parent* component
+     * of this directive/component.
+     */
+    hostVars: number;
     /** Refreshes host bindings on the associated directive. */
     hostBindings: ((directiveIndex: number, elementIndex: number) => void) | null;
     /**
@@ -200,7 +204,7 @@ export interface ComponentDef<T, Selector extends string> extends DirectiveDef<T
     /**
      * Query-related instructions for a component.
      */
-    readonly viewQuery: ComponentQuery<T> | null;
+    viewQuery: ComponentQuery<T> | null;
     /**
      * The view encapsulation type, which determines how styles are applied to
      * DOM elements. One of
@@ -224,12 +228,12 @@ export interface ComponentDef<T, Selector extends string> extends DirectiveDef<T
      * Defines the set of injectable providers that are visible to a Directive and its content DOM
      * children.
      */
-    readonly providers?: Provider[];
+    readonly providers: Provider[] | null;
     /**
      * Defines the set of injectable providers that are visible to a Directive and its view DOM
      * children only.
      */
-    readonly viewProviders?: Provider[];
+    readonly viewProviders: Provider[] | null;
     /**
      * Registry of directives and components that may be found in this view.
      *

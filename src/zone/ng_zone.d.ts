@@ -108,7 +108,7 @@ export declare class NgZone {
      */
     readonly onError: EventEmitter<any>;
     constructor({ enableLongStackTrace }: {
-        enableLongStackTrace?: boolean;
+        enableLongStackTrace?: boolean | undefined;
     });
     static isInAngularZone(): boolean;
     static assertInAngularZone(): void;

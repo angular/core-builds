@@ -9,8 +9,6 @@ import { LContainer } from './interfaces/container';
 import { LContainerNode, LElementContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode } from './interfaces/node';
 import { RNode, RText, Renderer3 } from './interfaces/renderer';
 import { LViewData } from './interfaces/view';
-/** Retrieves the sibling node for the given node. */
-export declare function getNextLNode(node: LNode): LNode | null;
 /** Retrieves the first child of a given node */
 export declare function getChildLNode(node: LNode): LNode | null;
 /** Retrieves the parent LNode of a given node. */
@@ -34,12 +32,12 @@ export declare function createTextNode(value: any, renderer: Renderer3): RText;
  * views beneath it.
  *
  * @param container The container to which the root view belongs
- * @param rootNode The view from which elements should be added or removed
+ * @param viewToWalk The view from which elements should be added or removed
  * @param insertMode Whether or not elements should be added (if false, removing)
  * @param beforeNode The node before which elements should be added, if insert mode
  */
-export declare function addRemoveViewFromContainer(container: LContainerNode, rootNode: LViewNode, insertMode: true, beforeNode: RNode | null): void;
-export declare function addRemoveViewFromContainer(container: LContainerNode, rootNode: LViewNode, insertMode: false): void;
+export declare function addRemoveViewFromContainer(container: LContainerNode, viewToWalk: LViewData, insertMode: true, beforeNode: RNode | null): void;
+export declare function addRemoveViewFromContainer(container: LContainerNode, viewToWalk: LViewData, insertMode: false): void;
 /**
  * Traverses down and up the tree of views and containers to remove listeners and
  * call onDestroy callbacks.
@@ -67,7 +65,7 @@ export declare function destroyViewTree(rootView: LViewData): void;
  * @param index The index at which to insert the view
  * @returns The inserted view
  */
-export declare function insertView(container: LContainerNode, viewNode: LViewNode, index: number): LViewNode;
+export declare function insertView(container: LContainerNode, viewNode: LViewNode, index: number): void;
 /**
  * Detaches a view from a container.
  *
@@ -78,7 +76,7 @@ export declare function insertView(container: LContainerNode, viewNode: LViewNod
  * @param removeIndex The index of the view to detach
  * @returns The detached view
  */
-export declare function detachView(container: LContainerNode, removeIndex: number): LViewNode;
+export declare function detachView(container: LContainerNode, removeIndex: number): void;
 /**
  * Removes a view from a container, i.e. detaches it and then destroys the underlying LView.
  *
@@ -86,7 +84,7 @@ export declare function detachView(container: LContainerNode, removeIndex: numbe
  * @param removeIndex The index of the view to remove
  * @returns The removed view
  */
-export declare function removeView(container: LContainerNode, removeIndex: number): LViewNode;
+export declare function removeView(container: LContainerNode, removeIndex: number): void;
 /** Gets the child of the given LViewData */
 export declare function getLViewChild(viewData: LViewData): LViewData | LContainer | null;
 /**
@@ -156,4 +154,4 @@ export declare function removeChild(parent: LNode, child: RNode | null, currentV
  * @param currentParent The last parent element to be processed
  * @param currentView Current LView
  */
-export declare function appendProjectedNode(node: LElementNode | LElementContainerNode | LTextNode | LContainerNode, currentParent: LElementNode | LElementContainerNode | LViewNode, currentView: LViewData, renderParent: LElementNode): void;
+export declare function appendProjectedNode(node: LElementNode | LElementContainerNode | LTextNode | LContainerNode, currentParent: LElementNode | LElementContainerNode | LViewNode, currentView: LViewData, renderParent: LElementNode, parentView: LViewData): void;

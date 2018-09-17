@@ -7,11 +7,14 @@
  */
 import './ng_dev_mode';
 import { ChangeDetectionStrategy } from '../change_detection/constants';
-import { Provider, ViewEncapsulation } from '../core';
-import { NgModuleDef } from '../metadata/ng_module';
+import { Provider } from '../di/provider';
+import { NgModuleDef, NgModuleDefInternal } from '../metadata/ng_module';
+import { ViewEncapsulation } from '../metadata/view';
 import { Type } from '../type';
 import { BaseDef, ComponentDefFeature, ComponentDefInternal, ComponentQuery, ComponentTemplate, ComponentType, DirectiveDefFeature, DirectiveDefInternal, DirectiveType, DirectiveTypesOrFactory, PipeDefInternal, PipeType, PipeTypesOrFactory } from './interfaces/definition';
 import { CssSelectorList, SelectorFlags } from './interfaces/projection';
+export declare const EMPTY: {};
+export declare const EMPTY_ARRAY: any[];
 /**
  * Create a component definition object.
  *
@@ -41,17 +44,24 @@ export declare function defineComponent<T>(componentDefinition: {
     /**
      * The number of nodes, local refs, and pipes in this component template.
      *
-     * Used to calculate the length of the component's LViewData array, so we
+     * Used to calculate the length of this component's LViewData array, so we
      * can pre-fill the array and set the binding start index.
      */
     consts: number;
     /**
      * The number of bindings in this component template (including pure fn bindings).
      *
-     * Used to calculate the length of the component's LViewData array, so we
+     * Used to calculate the length of this component's LViewData array, so we
      * can pre-fill the array and set the host binding start index.
      */
     vars: number;
+    /**
+     * The number of host bindings (including pure fn bindings) in this component.
+     *
+     * Used to calculate the length of the LViewData array for the *parent* component
+     * of this component.
+     */
+    hostVars?: number;
     /**
      * Static attributes to set on host element.
      *
@@ -224,6 +234,10 @@ export declare function defineComponent<T>(componentDefinition: {
      * `PipeDefs`s. The function is necessary to be able to support forward declarations.
      */
     pipes?: PipeTypesOrFactory | null;
+    /**
+     * Registry of the animation triggers present on the component that will be used by the view.
+     */
+    animations?: any[] | null;
 }): never;
 export declare function extractDirectiveDef(type: DirectiveType<any> & ComponentType<any>): DirectiveDefInternal<any> | ComponentDefInternal<any>;
 export declare function extractPipeDef(type: PipeType<any>): PipeDefInternal<any>;
@@ -327,9 +341,7 @@ export declare const defineDirective: <T>(directiveDefinition: {
     /**
      * Factory method used to create an instance of directive.
      */
-    factory: () => T | ({
-        0: T;
-    } & any[]);
+    factory: () => T;
     /**
      * Static attributes to set on host element.
      *
@@ -399,6 +411,13 @@ export declare const defineDirective: <T>(directiveDefinition: {
      */
     features?: DirectiveDefFeature[] | undefined;
     /**
+     * The number of host bindings (including pure fn bindings) in this directive.
+     *
+     * Used to calculate the length of the LViewData array for the *parent* component
+     * of this directive.
+     */
+    hostVars?: number | undefined;
+    /**
      * Function executed by the parent template to allow child directive to apply host bindings.
      */
     hostBindings?: ((directiveIndex: number, elementIndex: number) => void) | undefined;
@@ -439,3 +458,12 @@ export declare function definePipe<T>(pipeDef: {
     /** Whether the pipe is pure. */
     pure?: boolean;
 }): never;
+/**
+ * The following getter methods retrieve the definition form the type. Currently the retrieval
+ * honors inheritance, but in the future we may change the rule to require that definitions are
+ * explicit. This would require some sort of migration strategy.
+ */
+export declare function getComponentDef<T>(type: any): ComponentDefInternal<T> | null;
+export declare function getDirectiveDef<T>(type: any): DirectiveDefInternal<T> | null;
+export declare function getPipeDef<T>(type: any): PipeDefInternal<T> | null;
+export declare function getNgModuleDef<T>(type: any): NgModuleDefInternal<T> | null;

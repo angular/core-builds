@@ -1,11 +1,11 @@
 /**
- * @license Angular v7.0.0-beta.2+28.sha-21a1440
+ * @license Angular v7.0.0-beta.5+32.sha-47f4412
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, Injector, ɵRender3ComponentFactory, ɵRender3DebugRendererFactory2, ɵRender3NgModuleRef, ɵWRAP_RENDERER_FACTORY2, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵpatchComponentDefWithScope, Compiler, Injectable, ApplicationInitStatus, NgZone, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵivyEnabled, ɵoverrideComponentView, ɵoverrideProvider } from '@angular/core';
-import { __spread, __values, __extends, __read } from 'tslib';
+import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, Injector, ɵRender3ComponentFactory, ɵRender3DebugRendererFactory2, ɵRender3NgModuleRef, ɵWRAP_RENDERER_FACTORY2, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, Compiler, Injectable, ApplicationInitStatus, NgZone, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵivyEnabled, ɵoverrideComponentView, ɵoverrideProvider } from '@angular/core';
+import { __spread, __decorate, __values, __read, __extends } from 'tslib';
 
 /**
  * @license
@@ -1111,8 +1111,9 @@ var TestBedRender3 = /** @class */ (function () {
      * Overwrites all providers for the given token with the given provider definition.
      */
     TestBedRender3.prototype.overrideProvider = function (token, provider) {
-        var isRoot = (typeof token !== 'string' && token.ngInjectableDef &&
-            token.ngInjectableDef.providedIn === 'root');
+        var injectableDef;
+        var isRoot = (typeof token !== 'string' && (injectableDef = ɵgetInjectableDef(token)) &&
+            injectableDef.providedIn === 'root');
         var overrides = isRoot ? this._rootProviderOverrides : this._providerOverrides;
         if (provider.useFactory) {
             overrides.push({ provide: token, useFactory: provider.useFactory, deps: provider.deps || [] });
@@ -1179,12 +1180,12 @@ var TestBedRender3 = /** @class */ (function () {
         var RootScopeModule = /** @class */ (function () {
             function RootScopeModule() {
             }
-            RootScopeModule.decorators = [
-                { type: NgModule, args: [{
-                            providers: __spread(rootProviderOverrides, [rendererFactoryWrapper]),
-                            jit: true,
-                        },] },
-            ];
+            RootScopeModule = __decorate([
+                NgModule({
+                    providers: __spread(rootProviderOverrides, [rendererFactoryWrapper]),
+                    jit: true,
+                })
+            ], RootScopeModule);
             return RootScopeModule;
         }());
         var providers = __spread(this._providers, this._providerOverrides);
@@ -1194,9 +1195,9 @@ var TestBedRender3 = /** @class */ (function () {
         var DynamicTestModule = /** @class */ (function () {
             function DynamicTestModule() {
             }
-            DynamicTestModule.decorators = [
-                { type: NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas, jit: true },] },
-            ];
+            DynamicTestModule = __decorate([
+                NgModule({ providers: providers, declarations: declarations, imports: imports, schemas: schemas, jit: true })
+            ], DynamicTestModule);
             return DynamicTestModule;
         }());
         return DynamicTestModule;
@@ -1384,9 +1385,9 @@ var TestingCompiler = /** @class */ (function (_super) {
      * This can be used for errors created by compileModule...
      */
     TestingCompiler.prototype.getComponentFromError = function (error) { throw unimplemented(); };
-    TestingCompiler.decorators = [
-        { type: Injectable }
-    ];
+    TestingCompiler = __decorate([
+        Injectable()
+    ], TestingCompiler);
     return TestingCompiler;
 }(Compiler));
 /**
@@ -1698,12 +1699,12 @@ var TestBedViewEngine = /** @class */ (function () {
             var RootScopeModule = /** @class */ (function () {
                 function RootScopeModule() {
                 }
-                RootScopeModule.decorators = [
-                    { type: NgModule, args: [{
-                                providers: __spread(rootProviderOverrides),
-                                jit: true,
-                            },] },
-                ];
+                RootScopeModule = __decorate([
+                    NgModule({
+                        providers: __spread(rootProviderOverrides),
+                        jit: true,
+                    })
+                ], RootScopeModule);
                 return RootScopeModule;
             }());
             rootScopeImports.push(RootScopeModule);
@@ -1714,9 +1715,9 @@ var TestBedViewEngine = /** @class */ (function () {
         var DynamicTestModule = /** @class */ (function () {
             function DynamicTestModule() {
             }
-            DynamicTestModule.decorators = [
-                { type: NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas, jit: true },] },
-            ];
+            DynamicTestModule = __decorate([
+                NgModule({ providers: providers, declarations: declarations, imports: imports, schemas: schemas, jit: true })
+            ], DynamicTestModule);
             return DynamicTestModule;
         }());
         var compilerFactory = this.platform.injector.get(TestingCompilerFactory);
@@ -1787,8 +1788,8 @@ var TestBedViewEngine = /** @class */ (function () {
     };
     TestBedViewEngine.prototype.overrideProviderImpl = function (token, provider, deprecated) {
         if (deprecated === void 0) { deprecated = false; }
-        if (typeof token !== 'string' && token.ngInjectableDef &&
-            token.ngInjectableDef.providedIn === 'root') {
+        var def = null;
+        if (typeof token !== 'string' && (def = ɵgetInjectableDef(token)) && def.providedIn === 'root') {
             if (provider.useFactory) {
                 this._rootProviderOverrides.push({ provide: token, useFactory: provider.useFactory, deps: provider.deps || [] });
             }
@@ -1834,9 +1835,9 @@ var TestBedViewEngine = /** @class */ (function () {
         var OverrideComponent = /** @class */ (function () {
             function OverrideComponent() {
             }
-            OverrideComponent.decorators = [
-                { type: Component, args: [{ selector: 'empty', template: template, jit: true },] },
-            ];
+            OverrideComponent = __decorate([
+                Component({ selector: 'empty', template: template, jit: true })
+            ], OverrideComponent);
             return OverrideComponent;
         }());
         this._templateOverrides.push({ component: component, templateOf: OverrideComponent });

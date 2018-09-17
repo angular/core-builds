@@ -10,7 +10,7 @@ import { QueryList } from '../../linker';
 import { Sanitizer } from '../../sanitization/security';
 import { LContainer } from './container';
 import { ComponentQuery, ComponentTemplate, DirectiveDefInternal, DirectiveDefList, PipeDefInternal, PipeDefList } from './definition';
-import { LElementNode, LViewNode, TNode } from './node';
+import { LElementNode, LViewNode, TElementNode, TNode, TViewNode } from './node';
 import { LQueries } from './query';
 import { Renderer3 } from './renderer';
 /** Size of LViewData's header. Necessary to adjust for it when setting slots.  */
@@ -214,6 +214,11 @@ export interface TView {
      */
     readonly id: number;
     /**
+     * This is a blueprint used to generate LViewData instances for this TView. Copying this
+     * blueprint is faster than creating a new LViewData from scratch.
+     */
+    blueprint: LViewData;
+    /**
      * The template function used to refresh the view of dynamically created views
      * and components. Will be null for inline views.
      */
@@ -229,9 +234,15 @@ export interface TView {
      * We need this pointer to be able to efficiently find this node when inserting the view
      * into an anchor.
      *
-     * If this is a `TNode` for an `LElementNode`, this is the TView of a component.
+     * If this is a `TElementNode`, this is the view of a root component. It has exactly one
+     * root TNode.
+     *
+     * If this is null, this is the view of a component that is not at root. We do not store
+     * the host TNodes for child component views because they can potentially have several
+     * different host TNodes, depending on where the component is being used. These host
+     * TNodes cannot be shared (due to different indices, etc).
      */
-    node: TNode;
+    node: TViewNode | TElementNode | null;
     /** Whether or not this template has been processed. */
     firstTemplatePass: boolean;
     /** Static data equivalent of LView.data[]. Contains TNodes. */
@@ -244,6 +255,12 @@ export interface TView {
      */
     bindingStartIndex: number;
     /**
+     * The index at which the data array begins to store host bindings for components
+     * or directives in its template. Saving this value ensures that we can set the
+     * binding root and binding index correctly before checking host bindings.
+     */
+    hostBindingStartIndex: number;
+    /**
      * Index of the host node of the first LView or LContainer beneath this LView in
      * the hierarchy.
      *
@@ -254,6 +271,10 @@ export interface TView {
      * LView to avoid managing splicing when views are added/removed.
      */
     childIndex: number;
+    /**
+     * A reference to the first child node located in the view.
+     */
+    firstChild: TNode | null;
     /**
      * Selector matches for a node are temporarily cached on the TView so the
      * DI system can eagerly instantiate directives on the same node if they are
