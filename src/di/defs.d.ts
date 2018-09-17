@@ -137,3 +137,15 @@ export declare function defineInjector(options: {
     providers?: any[];
     imports?: any[];
 }): never;
+/**
+ * Read the `ngInjectableDef` type in a way which is immune to accidentally reading inherited value.
+ *
+ * @param type type which may have `ngInjectableDef`
+ */
+export declare function getInjectableDef<T>(type: any): InjectableDef<T> | null;
+/**
+ * Read the `ngInjectorDef` type in a way which is immune to accidentally reading inherited value.
+ *
+ * @param type type which may have `ngInjectorDef`
+ */
+export declare function getInjectorDef<T>(type: any): InjectorDef<T> | null;

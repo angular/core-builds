@@ -10,7 +10,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /** @enum {number} */
-const TNodeType = {
+var TNodeType = {
     Container: 0,
     Projection: 1,
     View: 2,
@@ -20,7 +20,7 @@ const TNodeType = {
 };
 export { TNodeType };
 /** @enum {number} */
-const TNodeFlags = {
+var TNodeFlags = {
     /** The number of directives on this node is encoded on the least significant bits */
     DirectiveCountMask: 4095,
     /** This bit is set if the node is a component */
@@ -161,7 +161,7 @@ LProjectionNode.prototype.data;
 /** @type {?} */
 LProjectionNode.prototype.dynamicLContainerNode;
 /** @enum {number} */
-const AttributeMarker = {
+var AttributeMarker = {
     /**
        * Marker indicates that the following 3 values in the attributes array are:
        * namespaceUri, attributeName, attributeValue

@@ -41,7 +41,7 @@ export declare class DebugRenderer2 implements Renderer2 {
     appendChild(parent: any, newChild: any): void;
     insertBefore(parent: any, newChild: any, refChild: any): void;
     removeChild(parent: any, oldChild: any): void;
-    selectRootElement(selectorOrNode: string | any): any;
+    selectRootElement(selectorOrNode: string | any, preserveContent?: boolean): any;
     setAttribute(el: any, name: string, value: string, namespace?: string): void;
     removeAttribute(el: any, name: string, namespace?: string): void;
     addClass(el: any, name: string): void;
