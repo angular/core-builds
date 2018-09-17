@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.5+38.sha-5653874
+ * @license Angular v7.0.0-beta.5+37.sha-21e566d
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -4716,11 +4716,12 @@ function listener(eventName, listenerFn, useCapture) {
         // In order to match current behavior, native DOM event listeners must be added for all
         // events (including outputs).
         if (isProceduralRenderer(renderer)) {
-            var cleanupFn = renderer.listen(node.native, eventName, listenerFn);
+            var wrappedListener = wrapListenerWithDirtyLogic(viewData, listenerFn);
+            var cleanupFn = renderer.listen(node.native, eventName, wrappedListener);
             storeCleanupFn(viewData, cleanupFn);
         }
         else {
-            var wrappedListener = wrapListenerWithPreventDefault(listenerFn);
+            var wrappedListener = wrapListenerWithDirtyAndDefault(viewData, listenerFn);
             node.native.addEventListener(eventName, wrappedListener, useCapture);
             var cleanupInstances = getCleanup(viewData);
             cleanupInstances.push(wrappedListener);
@@ -5672,9 +5673,23 @@ function markDirtyIfOnPush(node) {
         node.data[FLAGS] |= 4 /* Dirty */;
     }
 }
-/** Wraps an event listener with preventDefault behavior. */
-function wrapListenerWithPreventDefault(listenerFn) {
-    return function wrapListenerIn_preventDefault(e) {
+/**
+ * Wraps an event listener so its host view and its ancestor views will be marked dirty
+ * whenever the event fires. Necessary to support OnPush components.
+ */
+function wrapListenerWithDirtyLogic(view, listenerFn) {
+    return function (e) {
+        markViewDirty(view);
+        return listenerFn(e);
+    };
+}
+/**
+ * Wraps an event listener so its host view and its ancestor views will be marked dirty
+ * whenever the event fires. Also wraps with preventDefault behavior.
+ */
+function wrapListenerWithDirtyAndDefault(view, listenerFn) {
+    return function wrapListenerIn_markViewDirty(e) {
+        markViewDirty(view);
         if (listenerFn(e) === false) {
             e.preventDefault();
             // Necessary for legacy browsers that don't support preventDefault (e.g. IE)
@@ -5838,8 +5853,8 @@ function updateViewQuery(viewQuery, component) {
  */
 function markDirty(component) {
     ngDevMode && assertDefined(component, 'component');
-    var elementNode = getLElementFromComponent(component);
-    markViewDirty(elementNode.data);
+    var lViewData = readPatchedLViewData(component);
+    markViewDirty(lViewData);
 }
 /** A special value which designates that a value has not changed. */
 var NO_CHANGE = {};
@@ -11987,7 +12002,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('7.0.0-beta.5+38.sha-5653874');
+var VERSION = new Version('7.0.0-beta.5+37.sha-21e566d');
 
 /**
  * @license
