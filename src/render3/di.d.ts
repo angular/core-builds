@@ -16,8 +16,9 @@ import { Renderer2 } from '../render';
 import { Type } from '../type';
 import { DirectiveDefInternal } from './interfaces/definition';
 import { LInjector } from './interfaces/injector';
-import { LContainerNode, LElementContainerNode, LElementNode, LNodeWithLocalRefs, TNode } from './interfaces/node';
+import { LContainerNode, LElementContainerNode, LElementNode, TContainerNode, TElementContainerNode, TElementNode, TNode } from './interfaces/node';
 import { QueryReadType } from './interfaces/query';
+import { LViewData } from './interfaces/view';
 /**
  * Registers this directive as present in its node's injector by flipping the directive's
  * corresponding bit in the injector's bloom filter.
@@ -31,9 +32,11 @@ export declare function getOrCreateNodeInjector(): LInjector;
  * Creates (or gets an existing) injector for a given element or container.
  *
  * @param node for which an injector should be retrieved / created.
+ * @param tNode for which an injector should be retrieved / created.
+ * @param hostView View where the node is stored
  * @returns Node injector
  */
-export declare function getOrCreateNodeInjectorForNode(node: LElementNode | LElementContainerNode | LContainerNode, tNode: TNode): LInjector;
+export declare function getOrCreateNodeInjectorForNode(node: LElementNode | LElementContainerNode | LContainerNode, tNode: TElementNode | TContainerNode | TElementContainerNode, hostView: LViewData): LInjector;
 /**
  * Makes a directive public to the DI system by adding it to an injector's bloom filter.
  *
@@ -216,4 +219,4 @@ export declare function getInheritedFactory<T>(type: Type<any>): (type: Type<T>)
  * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
  * `<ng-template>` element.
  */
-export declare function templateRefExtractor(lNode: LNodeWithLocalRefs, tNode: TNode): viewEngine_TemplateRef<{}>;
+export declare function templateRefExtractor(tNode: TContainerNode, currentView: LViewData): viewEngine_TemplateRef<{}>;
