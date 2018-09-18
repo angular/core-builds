@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.0.0-beta.5+39.sha-f47f262
+ * @license Angular v7.0.0-beta.5+50.sha-96ee898
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __decorate, __param, __metadata, __extends, __spread, __assign, __read, __values } from 'tslib';
+import { __decorate, __param, __metadata, __extends, __spread, __read, __assign, __values } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compileInjectable, compilePipeFromMetadata } from '@angular/compiler';
 import { share } from 'rxjs/operators';
@@ -1201,13 +1201,8 @@ function injectArgs(types) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-// NOTE: The order here matters: Checking window, then global, then self is important.
-//   checking them in another order can result in errors in some Node environments.
-var __global$1 = typeof window != 'undefined' && window || typeof global != 'undefined' && global ||
-    typeof self != 'undefined' && self;
 function ngDevModeResetPerfCounters() {
-    // Make sure to refer to ngDevMode as ['ngDevMode'] for clousre.
-    return __global$1['ngDevMode'] = {
+    var newCounters = {
         firstTemplatePass: 0,
         tNode: 0,
         tView: 0,
@@ -1229,6 +1224,21 @@ function ngDevModeResetPerfCounters() {
         rendererRemoveNode: 0,
         rendererCreateComment: 0,
     };
+    // NOTE: Under Ivy we may have both window & global defined in the Node
+    //    environment since ensureDocument() in render3.ts sets global.window.
+    if (typeof window != 'undefined') {
+        // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
+        window['ngDevMode'] = newCounters;
+    }
+    if (typeof global != 'undefined') {
+        // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
+        global['ngDevMode'] = newCounters;
+    }
+    if (typeof self != 'undefined') {
+        // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
+        self['ngDevMode'] = newCounters;
+    }
+    return newCounters;
 }
 /**
  * This checks to see if the `ngDevMode` has been set. If yes,
@@ -1239,8 +1249,7 @@ function ngDevModeResetPerfCounters() {
  * as much early warning and errors as possible.
  */
 if (typeof ngDevMode === 'undefined' || ngDevMode) {
-    // Make sure to refer to ngDevMode as ['ngDevMode'] for clousre.
-    __global$1['ngDevMode'] = ngDevModeResetPerfCounters();
+    ngDevModeResetPerfCounters();
 }
 
 /**
@@ -11989,7 +11998,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('7.0.0-beta.5+39.sha-f47f262');
+var VERSION = new Version('7.0.0-beta.5+50.sha-96ee898');
 
 /**
  * @license
