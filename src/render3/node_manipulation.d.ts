@@ -70,31 +70,32 @@ export declare function destroyViewTree(rootView: LViewData): void;
  * root node of another view (in that case, the view's elements will be added when
  * the container's parent view is added later).
  *
- * @param container The container into which the view should be inserted
- * @param viewNode The view to insert
+ * @param lView The view to insert
+ * @param lContainer The container into which the view should be inserted
+ * @param parentView The new parent of the inserted view
  * @param index The index at which to insert the view
- * @returns The inserted view
+ * @param containerIndex The index of the container node, if dynamic
  */
-export declare function insertView(container: LContainerNode, lView: LViewData, index: number, containerIndex: number): void;
+export declare function insertView(lView: LViewData, lContainer: LContainer, parentView: LViewData, index: number, containerIndex: number): void;
 /**
  * Detaches a view from a container.
  *
  * This method splices the view from the container's array of active views. It also
  * removes the view's elements from the DOM.
  *
- * @param container The container from which to detach a view
+ * @param lContainer The container from which to detach a view
  * @param removeIndex The index of the view to detach
- * @returns The detached view
+ * @param detached Whether or not this view is already detached.
  */
-export declare function detachView(container: LContainerNode, removeIndex: number, detached: boolean): void;
+export declare function detachView(lContainer: LContainer, removeIndex: number, detached: boolean): void;
 /**
  * Removes a view from a container, i.e. detaches it and then destroys the underlying LView.
  *
- * @param container The container from which to remove a view
+ * @param lContainer The container from which to remove a view
+ * @param tContainer The TContainer node associated with the LContainer
  * @param removeIndex The index of the view to remove
- * @returns The removed view
  */
-export declare function removeView(container: LContainerNode, tContainer: TContainerNode, removeIndex: number): void;
+export declare function removeView(lContainer: LContainer, tContainer: TContainerNode, removeIndex: number): void;
 /** Gets the child of the given LViewData */
 export declare function getLViewChild(viewData: LViewData): LViewData | LContainer | null;
 /**
