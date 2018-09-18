@@ -70,7 +70,7 @@ export interface NgModuleDef<T, Declarations, Imports, Exports> {
  * @param T the module type. In Ivy applications, this must be explicitly
  * provided.
  */
-export interface ModuleWithProviders<T = any> {
+export interface ModuleWithProviders<T = any /** TODO(alxhub): remove default when callers pass explicit type param */> {
     ngModule: Type<T>;
     providers?: Provider[];
 }
@@ -221,7 +221,7 @@ export interface NgModule {
      * ```
      *
      */
-    imports?: Array<Type<any> | ModuleWithProviders | any[]>;
+    imports?: Array<Type<any> | ModuleWithProviders<{}> | any[]>;
     /**
      * The set of components, directives, and pipes declared in this
      * NgModule that can be used in the template of any component that is part of an
