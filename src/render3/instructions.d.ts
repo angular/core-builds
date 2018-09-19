@@ -100,7 +100,7 @@ export declare function createLViewData<T>(renderer: Renderer3, tView: TView, co
  * with the same shape
  * (same properties assigned in the same order).
  */
-export declare function createLNodeObject(type: TNodeType, currentView: LViewData, nodeInjector: LInjector | null, native: RText | RElement | RComment | null, state: any): LElementNode & LTextNode & LViewNode & LContainerNode & LProjectionNode;
+export declare function createLNodeObject(type: TNodeType, nodeInjector: LInjector | null, native: RText | RElement | RComment | null, state: any): LElementNode & LTextNode & LViewNode & LContainerNode & LProjectionNode;
 /**
  * A common way of creating the LNode to make sure that all of them have same shape to
  * keep the execution code monomorphic and fast.
@@ -561,16 +561,8 @@ export declare function projection(nodeIndex: number, selectorIndex?: number, at
 export declare function addToViewTree<T extends LViewData | LContainer>(currentView: LViewData, adjustedHostIndex: number, state: T): T;
 /** If node is an OnPush component, marks its LViewData dirty. */
 export declare function markDirtyIfOnPush(node: LElementNode): void;
-/**
- * Wraps an event listener so its host view and its ancestor views will be marked dirty
- * whenever the event fires. Necessary to support OnPush components.
- */
-export declare function wrapListenerWithDirtyLogic(view: LViewData, listenerFn: (e?: any) => any): (e: Event) => any;
-/**
- * Wraps an event listener so its host view and its ancestor views will be marked dirty
- * whenever the event fires. Also wraps with preventDefault behavior.
- */
-export declare function wrapListenerWithDirtyAndDefault(view: LViewData, listenerFn: (e?: any) => any): EventListener;
+/** Wraps an event listener with preventDefault behavior. */
+export declare function wrapListenerWithPreventDefault(listenerFn: (e?: any) => any): EventListener;
 /** Marks current view and all ancestors dirty */
 export declare function markViewDirty(view: LViewData): void;
 /**
@@ -742,5 +734,4 @@ export declare function getTView(): TView;
  */
 export declare function registerContentQuery<Q>(queryList: QueryList<Q>): void;
 export declare function assertPreviousIsParent(): void;
-export declare function _getComponentHostLElementNode(component: any): LElementNode;
 export declare const CLEAN_PROMISE: Promise<null>;
