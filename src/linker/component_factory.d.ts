@@ -12,31 +12,32 @@ import { ElementRef } from './element_ref';
 import { NgModuleRef } from './ng_module_factory';
 import { ViewRef } from './view_ref';
 /**
- * Represents a component created by a `ComponentFactory`.
- * Provides access to the component instance and related objects,
- * and provides the means of destroying the instance.
+ * Represents an instance of a Component created via a {@link ComponentFactory}.
+ *
+ * `ComponentRef` provides access to the Component Instance as well other objects related to this
+ * Component Instance and allows you to destroy the Component Instance via the {@link #destroy}
+ * method.
  *
  */
 export declare abstract class ComponentRef<C> {
     /**
-     * The host or anchor [element](guide/glossary#element) for this component instance.
+     * Location of the Host Element of this Component Instance.
      */
     abstract readonly location: ElementRef;
     /**
-     * The [dependency injector](guide/glossary#injector) for this component instance.
+     * The injector on which the component instance exists.
      */
     abstract readonly injector: Injector;
     /**
-     * This component instance.
+     * The instance of the Component.
      */
     abstract readonly instance: C;
     /**
-     * The [host view](guide/glossary#view-tree) defined by the template
-     * for this component instance.
+     * The {@link ViewRef} of the Host View of this Component instance.
      */
     abstract readonly hostView: ViewRef;
     /**
-     * The change detector for this component instance.
+     * The {@link ChangeDetectorRef} of the Component instance.
      */
     abstract readonly changeDetectorRef: ChangeDetectorRef;
     /**
@@ -48,35 +49,26 @@ export declare abstract class ComponentRef<C> {
      */
     abstract destroy(): void;
     /**
-     * A lifecycle hook that provides additional developer-defined cleanup
-     * functionality for the component.
-     * @param callback A handler function that cleans up developer-defined data
-     * associated with this component. Called when the `destroy()` method is invoked.
+     * Allows to register a callback that will be called when the component is destroyed.
      */
     abstract onDestroy(callback: Function): void;
 }
 export declare abstract class ComponentFactory<C> {
-    /**
-     * The comonent's HTML selector.
-     */
     abstract readonly selector: string;
-    /**
-     * The component's type
-     */
     abstract readonly componentType: Type<any>;
     /**
-     * Selector for all <ng-content> elements in the component.
+     * selector for all <ng-content> elements in the component.
      */
     abstract readonly ngContentSelectors: string[];
     /**
-     * The inputs of the component.
+     * the inputs of the component.
      */
     abstract readonly inputs: {
         propName: string;
         templateName: string;
     }[];
     /**
-     * The outputs of the component.
+     * the outputs of the component.
      */
     abstract readonly outputs: {
         propName: string;
