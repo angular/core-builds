@@ -24,7 +24,7 @@ export declare const MONKEY_PATCH_KEY_NAME = "__ngContext__";
  * of the context.
  */
 export interface LContext {
-    /** The component\'s view data */
+    /** The component's parent view data */
     lViewData: LViewData;
     /** The index instance of the LNode */
     lNodeIndex: number;
@@ -68,7 +68,7 @@ export declare function getLElementFromRootComponent(rootComponentInstance: {}):
  * that `getContext` has in the event that an Angular application doesn't need to have
  * any programmatic access to an element's context (only change detection uses this function).
  */
-export declare function getLElementFromComponent(componentInstance: {}): LElementNode | null;
+export declare function getLElementFromComponent(componentInstance: {}): LElementNode;
 /**
  * Assigns the given data to the given target (which could be a component,
  * directive or DOM node instance) using monkey-patching.
