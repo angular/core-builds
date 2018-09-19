@@ -1,10 +1,10 @@
 /**
- * @license Angular v6.1.7+39.sha-a41f331
+ * @license Angular v6.1.8
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __extends, __spread, __read, __assign, __values } from 'tslib';
+import { __extends, __spread, __assign, __read, __values } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { share } from 'rxjs/operators';
 import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compileInjectable, compilePipeFromMetadata } from '@angular/compiler';
@@ -8071,7 +8071,7 @@ var KeyValueDiffers = /** @class */ (function () {
  * when the `live` property is set to false, and reattaches it when the property
  * becomes true.
  *
- * <code-example path="core/ts/change_detect/change-detection.ts" region="detach"></code-example>
+ * <code-example path="core/ts/change_detect/change-detection.ts" region="reattach"></code-example>
  *
  */
 var ChangeDetectorRef = /** @class */ (function () {
@@ -9107,11 +9107,9 @@ var NgModuleFactory = /** @class */ (function () {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Represents an instance of a Component created via a {@link ComponentFactory}.
- *
- * `ComponentRef` provides access to the Component Instance as well other objects related to this
- * Component Instance and allows you to destroy the Component Instance via the {@link #destroy}
- * method.
+ * Represents a component created by a `ComponentFactory`.
+ * Provides access to the component instance and related objects,
+ * and provides the means of destroying the instance.
  *
  */
 var ComponentRef = /** @class */ (function () {
@@ -14151,15 +14149,20 @@ var NG_MODULE_DEF = getClosureSafeProperty$1({ ngModuleDef: TARGET }, TARGET);
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Represents an Embedded Template that can be used to instantiate Embedded Views.
+ * Represents an embedded template that can be used to instantiate embedded views.
+ * To instantiate embedded views based on a template, use the `ViewContainerRef`
+ * method `createEmbeddedView()`.
  *
- * You can access a `TemplateRef`, in two ways. Via a directive placed on a `<ng-template>` element
- * (or directive prefixed with `*`) and have the `TemplateRef` for this Embedded View injected into
- * the constructor of the directive using the `TemplateRef` Token. Alternatively you can query for
- * the `TemplateRef` from a Component or a Directive via {@link Query}.
+ * Access a `TemplateRef` instance by placing a directive on an `<ng-template>`
+ * element (or directive prefixed with `*`). The `TemplateRef` for the embedded view
+ * is injected into the constructor of the directive,
+ * using the `TemplateRef` token.
  *
- * To instantiate Embedded Views based on a Template, use {@link ViewContainerRef#
- * createEmbeddedView}, which will create the View and attach it to the View Container.
+ * You can also use a `Query` to find a `TemplateRef` associated with
+ * a component or a directive.
+ *
+ * @see `ViewContainerRef`
+ * @see [Navigate the Component Tree with DI](guide/dependency-injection-navtree)
  *
  */
 var TemplateRef$1 = /** @class */ (function () {
@@ -14176,21 +14179,17 @@ var TemplateRef$1 = /** @class */ (function () {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Represents a container where one or more Views can be attached.
+ * Represents a container where one or more views can be attached to a component.
  *
- * The container can contain two kinds of Views. Host Views, created by instantiating a
- * {@link Component} via {@link #createComponent}, and Embedded Views, created by instantiating an
- * {@link TemplateRef Embedded Template} via {@link #createEmbeddedView}.
+ * Can contain *host views* (created by instantiating a
+ * component with the `createComponent()` method), and *embedded views*
+ * (created by instantiating a `TemplateRef` with the `createEmbeddedView()` method).
  *
- * The location of the View Container within the containing View is specified by the Anchor
- * `element`. Each View Container can have only one Anchor Element and each Anchor Element can only
- * have a single View Container.
+ * A view container instance can contain other view containers,
+ * creating a [view hierarchy](guide/glossary#view-tree).
  *
- * Root elements of Views attached to this container become siblings of the Anchor Element in
- * the Rendered View.
- *
- * To access a `ViewContainerRef` of an Element, you can either place a {@link Directive} injected
- * with `ViewContainerRef` on the Element, or you obtain it via a {@link ViewChild} query.
+ * @see `ComponentRef`
+ * @see `EmbeddedViewRef`
  *
  */
 var ViewContainerRef$1 = /** @class */ (function () {
@@ -15033,7 +15032,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.7+39.sha-a41f331');
+var VERSION = new Version('6.1.8');
 
 /**
  * @license
@@ -15264,6 +15263,14 @@ function checkNotEmpty(value, modulePath, exportName) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * Represents an Angular [view](guide/glossary#view),
+ * specifically the [host view](guide/glossary#view-tree) that is defined by a component.
+ * Also serves as the base class
+ * that adds destroy methods for [embedded views](guide/glossary#view-tree).
+ *
+ * @see `EmbeddedViewRef`
+ */
 var ViewRef$1 = /** @class */ (function (_super) {
     __extends(ViewRef, _super);
     function ViewRef() {
@@ -15272,21 +15279,21 @@ var ViewRef$1 = /** @class */ (function (_super) {
     return ViewRef;
 }(ChangeDetectorRef));
 /**
- * Represents an Angular View.
+ * Represents an Angular [view](guide/glossary#view) in a view container.
+ * An [embedded view](guide/glossary#view-tree) can be referenced from a component
+ * other than the hosting component whose template defines it, or it can be defined
+ * independently by a `TemplateRef`.
  *
- * <!-- TODO: move the next two paragraphs to the dev guide -->
- * A View is a fundamental building block of the application UI. It is the smallest grouping of
- * Elements which are created and destroyed together.
+ * Properties of elements in a view can change, but the structure (number and order) of elements in
+ * a view cannot. Change the structure of elements by inserting, moving, or
+ * removing nested views in a view container.
  *
- * Properties of elements in a View can change, but the structure (number and order) of elements in
- * a View cannot. Changing the structure of Elements can only be done by inserting, moving or
- * removing nested Views via a `ViewContainerRef`. Each View can contain many View Containers.
- * <!-- /TODO -->
+ * @see `ViewContainerRef`
  *
  * @usageNotes
- * ### Example
  *
- * Given this template...
+ * The following template breaks down into two separate `TemplateRef` instances,
+ * an outer one and an inner one.
  *
  * ```
  * Count: {{items.length}}
@@ -15295,9 +15302,7 @@ var ViewRef$1 = /** @class */ (function (_super) {
  * </ul>
  * ```
  *
- * We have two `TemplateRef`s:
- *
- * Outer `TemplateRef`:
+ * This is the outer `TemplateRef`:
  *
  * ```
  * Count: {{items.length}}
@@ -15306,15 +15311,13 @@ var ViewRef$1 = /** @class */ (function (_super) {
  * </ul>
  * ```
  *
- * Inner `TemplateRef`:
+ * This is the inner `TemplateRef`:
  *
  * ```
  *   <li>{{item}}</li>
  * ```
  *
- * Notice that the original template is broken down into two separate `TemplateRef`s.
- *
- * The outer/inner `TemplateRef`s are then assembled into views like so:
+ * The outer and inner `TemplateRef` instances are assembled into views as follows:
  *
  * ```
  * <!-- ViewRef: outer-0 -->
