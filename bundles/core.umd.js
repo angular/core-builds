@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.7+38.sha-71628f1
+ * @license Angular v6.1.7+39.sha-a41f331
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -15075,7 +15075,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('6.1.7+38.sha-71628f1');
+    var VERSION = new Version('6.1.7+39.sha-a41f331');
 
     /**
      * @license
@@ -15691,6 +15691,10 @@
     function _localeFactory(locale) {
         return locale || 'en-US';
     }
+    /**
+     * A built-in [dependency injection token](guide/glossary#di-token)
+     * that is used to configure the root injector for bootstrapping.
+     */
     var APPLICATION_MODULE_PROVIDERS = [
         {
             provide: ApplicationRef,
@@ -15713,8 +15717,12 @@
         },
     ];
     /**
-     * This module includes the providers of @angular/core that are needed
-     * to bootstrap components via `ApplicationRef`.
+     * Configures the root injector for an app with
+     * providers of `@angular/core` dependencies that `ApplicationRef` needs
+     * to bootstrap components.
+     *
+     * Re-exported by `BrowserModule`, which is included automatically in the root
+     * `AppModule` when you create a new app with the CLI `new` command.
      *
      * @experimental
      */
