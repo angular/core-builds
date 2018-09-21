@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.6+34.sha-a880686
+ * @license Angular v7.0.0-beta.6+35.sha-82a14dc
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1919,437 +1919,6 @@ const DECLARATION_VIEW = 16;
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * If this is the first template pass, any ngOnInit or ngDoCheck hooks will be queued into
- * TView.initHooks during directiveCreate.
- *
- * The directive index and hook type are encoded into one number (1st bit: type, remaining bits:
- * directive index), then saved in the even indices of the initHooks array. The odd indices
- * hold the hook functions themselves.
- *
- * @param {?} index The index of the directive in LViewData[DIRECTIVES]
- * @param {?} onInit
- * @param {?} doCheck
- * @param {?} tView The current TView
- * @return {?}
- */
-function queueInitHooks(index, onInit, doCheck, tView) {
-    ngDevMode &&
-        assertEqual(tView.firstTemplatePass, true, 'Should only be called on first template pass');
-    if (onInit) {
-        (tView.initHooks || (tView.initHooks = [])).push(index, onInit);
-    }
-    if (doCheck) {
-        (tView.initHooks || (tView.initHooks = [])).push(index, doCheck);
-        (tView.checkHooks || (tView.checkHooks = [])).push(index, doCheck);
-    }
-}
-/**
- * Loops through the directives on a node and queues all their hooks except ngOnInit
- * and ngDoCheck, which are queued separately in directiveCreate.
- * @param {?} flags
- * @param {?} tView
- * @return {?}
- */
-function queueLifecycleHooks(flags, tView) {
-    if (tView.firstTemplatePass) {
-        /** @type {?} */
-        const start = flags >> 15 /* DirectiveStartingIndexShift */;
-        /** @type {?} */
-        const count = flags & 4095 /* DirectiveCountMask */;
-        /** @type {?} */
-        const end = start + count;
-        // It's necessary to loop through the directives at elementEnd() (rather than processing in
-        // directiveCreate) so we can preserve the current hook order. Content, view, and destroy
-        // hooks for projected components and directives must be called *before* their hosts.
-        for (let i = start; i < end; i++) {
-            /** @type {?} */
-            const def = /** @type {?} */ ((tView.directives))[i];
-            queueContentHooks(def, tView, i);
-            queueViewHooks(def, tView, i);
-            queueDestroyHooks(def, tView, i);
-        }
-    }
-}
-/**
- * Queues afterContentInit and afterContentChecked hooks on TView
- * @param {?} def
- * @param {?} tView
- * @param {?} i
- * @return {?}
- */
-function queueContentHooks(def, tView, i) {
-    if (def.afterContentInit) {
-        (tView.contentHooks || (tView.contentHooks = [])).push(i, def.afterContentInit);
-    }
-    if (def.afterContentChecked) {
-        (tView.contentHooks || (tView.contentHooks = [])).push(i, def.afterContentChecked);
-        (tView.contentCheckHooks || (tView.contentCheckHooks = [])).push(i, def.afterContentChecked);
-    }
-}
-/**
- * Queues afterViewInit and afterViewChecked hooks on TView
- * @param {?} def
- * @param {?} tView
- * @param {?} i
- * @return {?}
- */
-function queueViewHooks(def, tView, i) {
-    if (def.afterViewInit) {
-        (tView.viewHooks || (tView.viewHooks = [])).push(i, def.afterViewInit);
-    }
-    if (def.afterViewChecked) {
-        (tView.viewHooks || (tView.viewHooks = [])).push(i, def.afterViewChecked);
-        (tView.viewCheckHooks || (tView.viewCheckHooks = [])).push(i, def.afterViewChecked);
-    }
-}
-/**
- * Queues onDestroy hooks on TView
- * @param {?} def
- * @param {?} tView
- * @param {?} i
- * @return {?}
- */
-function queueDestroyHooks(def, tView, i) {
-    if (def.onDestroy != null) {
-        (tView.destroyHooks || (tView.destroyHooks = [])).push(i, def.onDestroy);
-    }
-}
-/**
- * Calls onInit and doCheck calls if they haven't already been called.
- *
- * @param {?} currentView The current view
- * @param {?} tView
- * @param {?} creationMode
- * @return {?}
- */
-function executeInitHooks(currentView, tView, creationMode) {
-    if (currentView[FLAGS] & 16 /* RunInit */) {
-        executeHooks(/** @type {?} */ ((currentView[DIRECTIVES])), tView.initHooks, tView.checkHooks, creationMode);
-        currentView[FLAGS] &= ~16 /* RunInit */;
-    }
-}
-/**
- * Iterates over afterViewInit and afterViewChecked functions and calls them.
- *
- * @param {?} data
- * @param {?} allHooks
- * @param {?} checkHooks
- * @param {?} creationMode
- * @return {?}
- */
-function executeHooks(data, allHooks, checkHooks, creationMode) {
-    /** @type {?} */
-    const hooksToCall = creationMode ? allHooks : checkHooks;
-    if (hooksToCall) {
-        callHooks(data, hooksToCall);
-    }
-}
-/**
- * Calls lifecycle hooks with their contexts, skipping init hooks if it's not
- * creation mode.
- *
- * @param {?} data
- * @param {?} arr The array in which the hooks are found
- * @return {?}
- */
-function callHooks(data, arr) {
-    for (let i = 0; i < arr.length; i += 2) {
-        (/** @type {?} */ (arr[i + 1])).call(data[/** @type {?} */ (arr[i])]);
-    }
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @param {?} a
- * @param {?} b
- * @return {?}
- */
-function devModeEqual(a, b) {
-    /** @type {?} */
-    const isListLikeIterableA = isListLikeIterable(a);
-    /** @type {?} */
-    const isListLikeIterableB = isListLikeIterable(b);
-    if (isListLikeIterableA && isListLikeIterableB) {
-        return areIterablesEqual(a, b, devModeEqual);
-    }
-    else {
-        /** @type {?} */
-        const isAObject = a && (typeof a === 'object' || typeof a === 'function');
-        /** @type {?} */
-        const isBObject = b && (typeof b === 'object' || typeof b === 'function');
-        if (!isListLikeIterableA && isAObject && !isListLikeIterableB && isBObject) {
-            return true;
-        }
-        else {
-            return looseIdentical(a, b);
-        }
-    }
-}
-/**
- * Indicates that the result of a {\@link Pipe} transformation has changed even though the
- * reference has not changed.
- *
- * Wrapped values are unwrapped automatically during the change detection, and the unwrapped value
- * is stored.
- *
- * Example:
- *
- * ```
- * if (this._latestValue === this._latestReturnedValue) {
- *    return this._latestReturnedValue;
- *  } else {
- *    this._latestReturnedValue = this._latestValue;
- *    return WrappedValue.wrap(this._latestValue); // this will force update
- *  }
- * ```
- *
- */
-class WrappedValue {
-    /**
-     * @param {?} value
-     */
-    constructor(value) { this.wrapped = value; }
-    /**
-     * Creates a wrapped value.
-     * @param {?} value
-     * @return {?}
-     */
-    static wrap(value) { return new WrappedValue(value); }
-    /**
-     * Returns the underlying value of a wrapped value.
-     * Returns the given `value` when it is not wrapped.
-     *
-     * @param {?} value
-     * @return {?}
-     */
-    static unwrap(value) { return WrappedValue.isWrapped(value) ? value.wrapped : value; }
-    /**
-     * Returns true if `value` is a wrapped value.
-     * @param {?} value
-     * @return {?}
-     */
-    static isWrapped(value) { return value instanceof WrappedValue; }
-}
-/**
- * Represents a basic change from a previous to a new value.
- *
- */
-class SimpleChange {
-    /**
-     * @param {?} previousValue
-     * @param {?} currentValue
-     * @param {?} firstChange
-     */
-    constructor(previousValue, currentValue, firstChange) {
-        this.previousValue = previousValue;
-        this.currentValue = currentValue;
-        this.firstChange = firstChange;
-    }
-    /**
-     * Check whether the new value is the first value assigned.
-     * @return {?}
-     */
-    isFirstChange() { return this.firstChange; }
-}
-/**
- * @param {?} obj
- * @return {?}
- */
-function isListLikeIterable(obj) {
-    if (!isJsObject(obj))
-        return false;
-    return Array.isArray(obj) ||
-        (!(obj instanceof Map) && // JS Map are iterables but return entries as [k, v]
-            // JS Map are iterables but return entries as [k, v]
-            getSymbolIterator() in obj); // JS Iterable have a Symbol.iterator prop
-}
-/**
- * @param {?} a
- * @param {?} b
- * @param {?} comparator
- * @return {?}
- */
-function areIterablesEqual(a, b, comparator) {
-    /** @type {?} */
-    const iterator1 = a[getSymbolIterator()]();
-    /** @type {?} */
-    const iterator2 = b[getSymbolIterator()]();
-    while (true) {
-        /** @type {?} */
-        const item1 = iterator1.next();
-        /** @type {?} */
-        const item2 = iterator2.next();
-        if (item1.done && item2.done)
-            return true;
-        if (item1.done || item2.done)
-            return false;
-        if (!comparator(item1.value, item2.value))
-            return false;
-    }
-}
-/**
- * @param {?} obj
- * @param {?} fn
- * @return {?}
- */
-function iterateListLike(obj, fn) {
-    if (Array.isArray(obj)) {
-        for (let i = 0; i < obj.length; i++) {
-            fn(obj[i]);
-        }
-    }
-    else {
-        /** @type {?} */
-        const iterator = obj[getSymbolIterator()]();
-        /** @type {?} */
-        let item;
-        while (!((item = iterator.next()).done)) {
-            fn(item.value);
-        }
-    }
-}
-/**
- * @param {?} o
- * @return {?}
- */
-function isJsObject(o) {
-    return o !== null && (typeof o === 'function' || typeof o === 'object');
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * Returns whether the values are different from a change detection stand point.
- *
- * Constraints are relaxed in checkNoChanges mode. See `devModeEqual` for details.
- * @param {?} a
- * @param {?} b
- * @param {?} checkNoChangesMode
- * @return {?}
- */
-function isDifferent(a, b, checkNoChangesMode) {
-    if (ngDevMode && checkNoChangesMode) {
-        return !devModeEqual(a, b);
-    }
-    // NaN is the only value that is not equal to itself so the first
-    // test checks if both a and b are not NaN
-    return !(a !== a && b !== b) && a !== b;
-}
-/**
- * @param {?} value
- * @return {?}
- */
-function stringify$1(value) {
-    if (typeof value == 'function')
-        return value.name || value;
-    if (typeof value == 'string')
-        return value;
-    if (value == null)
-        return '';
-    return '' + value;
-}
-/**
- * Flattens an array in non-recursive way. Input arrays are not modified.
- * @param {?} list
- * @return {?}
- */
-function flatten(list) {
-    /** @type {?} */
-    const result = [];
-    /** @type {?} */
-    let i = 0;
-    while (i < list.length) {
-        /** @type {?} */
-        const item = list[i];
-        if (Array.isArray(item)) {
-            if (item.length > 0) {
-                list = item.concat(list.slice(i + 1));
-                i = 0;
-            }
-            else {
-                i++;
-            }
-        }
-        else {
-            result.push(item);
-            i++;
-        }
-    }
-    return result;
-}
-/**
- * Retrieves a value from any `LViewData` or `TData`.
- * @template T
- * @param {?} index
- * @param {?} arr
- * @return {?}
- */
-function loadInternal(index, arr) {
-    ngDevMode && assertDataInRangeInternal(index + HEADER_OFFSET, arr);
-    return arr[index + HEADER_OFFSET];
-}
-/**
- * @param {?} index
- * @param {?} arr
- * @return {?}
- */
-function assertDataInRangeInternal(index, arr) {
-    assertLessThan(index, arr ? arr.length : 0, 'index expected to be a valid data index');
-}
-/**
- * Retrieves an element value from the provided `viewData`.
- *
- * Elements that are read may be wrapped in a style context,
- * therefore reading the value may involve unwrapping that.
- * @param {?} index
- * @param {?} arr
- * @return {?}
- */
-function loadElementInternal(index, arr) {
-    /** @type {?} */
-    const value = loadInternal(index, arr);
-    return readElementValue(value);
-}
-/**
- * @param {?} value
- * @return {?}
- */
-function readElementValue(value) {
-    return /** @type {?} */ ((Array.isArray(value) ? (/** @type {?} */ ((value)))[0] : value));
-}
-/**
- * @param {?} tNode
- * @param {?} hostView
- * @return {?}
- */
-function getLNode(tNode, hostView) {
-    return readElementValue(hostView[tNode.index]);
-}
-/**
- * @param {?} tNode
- * @return {?}
- */
-function isContentQueryHost(tNode) {
-    return (tNode.flags & 16384 /* hasContentQuery */) !== 0;
-}
-/**
- * @param {?} tNode
- * @return {?}
- */
-function isComponent(tNode) {
-    return (tNode.flags & 4096 /* isComponent */) === 4096 /* isComponent */;
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
 /** *
  * This property will be monkey-patched on elements, components and directives
   @type {?} */
@@ -2770,6 +2339,157 @@ function getDirectiveEndIndex(tNode, startIndex) {
     const count = tNode.flags & 4095 /* DirectiveCountMask */;
     return count ? (startIndex + count) : -1;
 }
+/**
+ * @param {?} value
+ * @return {?}
+ */
+function readElementValue(value) {
+    return /** @type {?} */ ((Array.isArray(value) ? (/** @type {?} */ ((value)))[0] : value));
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/**
+ * If this is the first template pass, any ngOnInit or ngDoCheck hooks will be queued into
+ * TView.initHooks during directiveCreate.
+ *
+ * The directive index and hook type are encoded into one number (1st bit: type, remaining bits:
+ * directive index), then saved in the even indices of the initHooks array. The odd indices
+ * hold the hook functions themselves.
+ *
+ * @param {?} index The index of the directive in LViewData[DIRECTIVES]
+ * @param {?} onInit
+ * @param {?} doCheck
+ * @param {?} tView The current TView
+ * @return {?}
+ */
+function queueInitHooks(index, onInit, doCheck, tView) {
+    ngDevMode &&
+        assertEqual(tView.firstTemplatePass, true, 'Should only be called on first template pass');
+    if (onInit) {
+        (tView.initHooks || (tView.initHooks = [])).push(index, onInit);
+    }
+    if (doCheck) {
+        (tView.initHooks || (tView.initHooks = [])).push(index, doCheck);
+        (tView.checkHooks || (tView.checkHooks = [])).push(index, doCheck);
+    }
+}
+/**
+ * Loops through the directives on a node and queues all their hooks except ngOnInit
+ * and ngDoCheck, which are queued separately in directiveCreate.
+ * @param {?} flags
+ * @param {?} tView
+ * @return {?}
+ */
+function queueLifecycleHooks(flags, tView) {
+    if (tView.firstTemplatePass) {
+        /** @type {?} */
+        const start = flags >> 15 /* DirectiveStartingIndexShift */;
+        /** @type {?} */
+        const count = flags & 4095 /* DirectiveCountMask */;
+        /** @type {?} */
+        const end = start + count;
+        // It's necessary to loop through the directives at elementEnd() (rather than processing in
+        // directiveCreate) so we can preserve the current hook order. Content, view, and destroy
+        // hooks for projected components and directives must be called *before* their hosts.
+        for (let i = start; i < end; i++) {
+            /** @type {?} */
+            const def = /** @type {?} */ ((tView.directives))[i];
+            queueContentHooks(def, tView, i);
+            queueViewHooks(def, tView, i);
+            queueDestroyHooks(def, tView, i);
+        }
+    }
+}
+/**
+ * Queues afterContentInit and afterContentChecked hooks on TView
+ * @param {?} def
+ * @param {?} tView
+ * @param {?} i
+ * @return {?}
+ */
+function queueContentHooks(def, tView, i) {
+    if (def.afterContentInit) {
+        (tView.contentHooks || (tView.contentHooks = [])).push(i, def.afterContentInit);
+    }
+    if (def.afterContentChecked) {
+        (tView.contentHooks || (tView.contentHooks = [])).push(i, def.afterContentChecked);
+        (tView.contentCheckHooks || (tView.contentCheckHooks = [])).push(i, def.afterContentChecked);
+    }
+}
+/**
+ * Queues afterViewInit and afterViewChecked hooks on TView
+ * @param {?} def
+ * @param {?} tView
+ * @param {?} i
+ * @return {?}
+ */
+function queueViewHooks(def, tView, i) {
+    if (def.afterViewInit) {
+        (tView.viewHooks || (tView.viewHooks = [])).push(i, def.afterViewInit);
+    }
+    if (def.afterViewChecked) {
+        (tView.viewHooks || (tView.viewHooks = [])).push(i, def.afterViewChecked);
+        (tView.viewCheckHooks || (tView.viewCheckHooks = [])).push(i, def.afterViewChecked);
+    }
+}
+/**
+ * Queues onDestroy hooks on TView
+ * @param {?} def
+ * @param {?} tView
+ * @param {?} i
+ * @return {?}
+ */
+function queueDestroyHooks(def, tView, i) {
+    if (def.onDestroy != null) {
+        (tView.destroyHooks || (tView.destroyHooks = [])).push(i, def.onDestroy);
+    }
+}
+/**
+ * Calls onInit and doCheck calls if they haven't already been called.
+ *
+ * @param {?} currentView The current view
+ * @param {?} tView
+ * @param {?} creationMode
+ * @return {?}
+ */
+function executeInitHooks(currentView, tView, creationMode) {
+    if (currentView[FLAGS] & 16 /* RunInit */) {
+        executeHooks(/** @type {?} */ ((currentView[DIRECTIVES])), tView.initHooks, tView.checkHooks, creationMode);
+        currentView[FLAGS] &= ~16 /* RunInit */;
+    }
+}
+/**
+ * Iterates over afterViewInit and afterViewChecked functions and calls them.
+ *
+ * @param {?} data
+ * @param {?} allHooks
+ * @param {?} checkHooks
+ * @param {?} creationMode
+ * @return {?}
+ */
+function executeHooks(data, allHooks, checkHooks, creationMode) {
+    /** @type {?} */
+    const hooksToCall = creationMode ? allHooks : checkHooks;
+    if (hooksToCall) {
+        callHooks(data, hooksToCall);
+    }
+}
+/**
+ * Calls lifecycle hooks with their contexts, skipping init hooks if it's not
+ * creation mode.
+ *
+ * @param {?} data
+ * @param {?} arr The array in which the hooks are found
+ * @return {?}
+ */
+function callHooks(data, arr) {
+    for (let i = 0; i < arr.length; i += 2) {
+        (/** @type {?} */ (arr[i + 1])).call(data[/** @type {?} */ (arr[i])]);
+    }
+}
 
 /**
  * @fileoverview added by tsickle
@@ -2912,6 +2632,309 @@ function typeName(type) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/**
+ * @param {?} a
+ * @param {?} b
+ * @return {?}
+ */
+function devModeEqual(a, b) {
+    /** @type {?} */
+    const isListLikeIterableA = isListLikeIterable(a);
+    /** @type {?} */
+    const isListLikeIterableB = isListLikeIterable(b);
+    if (isListLikeIterableA && isListLikeIterableB) {
+        return areIterablesEqual(a, b, devModeEqual);
+    }
+    else {
+        /** @type {?} */
+        const isAObject = a && (typeof a === 'object' || typeof a === 'function');
+        /** @type {?} */
+        const isBObject = b && (typeof b === 'object' || typeof b === 'function');
+        if (!isListLikeIterableA && isAObject && !isListLikeIterableB && isBObject) {
+            return true;
+        }
+        else {
+            return looseIdentical(a, b);
+        }
+    }
+}
+/**
+ * Indicates that the result of a {\@link Pipe} transformation has changed even though the
+ * reference has not changed.
+ *
+ * Wrapped values are unwrapped automatically during the change detection, and the unwrapped value
+ * is stored.
+ *
+ * Example:
+ *
+ * ```
+ * if (this._latestValue === this._latestReturnedValue) {
+ *    return this._latestReturnedValue;
+ *  } else {
+ *    this._latestReturnedValue = this._latestValue;
+ *    return WrappedValue.wrap(this._latestValue); // this will force update
+ *  }
+ * ```
+ *
+ */
+class WrappedValue {
+    /**
+     * @param {?} value
+     */
+    constructor(value) { this.wrapped = value; }
+    /**
+     * Creates a wrapped value.
+     * @param {?} value
+     * @return {?}
+     */
+    static wrap(value) { return new WrappedValue(value); }
+    /**
+     * Returns the underlying value of a wrapped value.
+     * Returns the given `value` when it is not wrapped.
+     *
+     * @param {?} value
+     * @return {?}
+     */
+    static unwrap(value) { return WrappedValue.isWrapped(value) ? value.wrapped : value; }
+    /**
+     * Returns true if `value` is a wrapped value.
+     * @param {?} value
+     * @return {?}
+     */
+    static isWrapped(value) { return value instanceof WrappedValue; }
+}
+/**
+ * Represents a basic change from a previous to a new value.
+ *
+ */
+class SimpleChange {
+    /**
+     * @param {?} previousValue
+     * @param {?} currentValue
+     * @param {?} firstChange
+     */
+    constructor(previousValue, currentValue, firstChange) {
+        this.previousValue = previousValue;
+        this.currentValue = currentValue;
+        this.firstChange = firstChange;
+    }
+    /**
+     * Check whether the new value is the first value assigned.
+     * @return {?}
+     */
+    isFirstChange() { return this.firstChange; }
+}
+/**
+ * @param {?} obj
+ * @return {?}
+ */
+function isListLikeIterable(obj) {
+    if (!isJsObject(obj))
+        return false;
+    return Array.isArray(obj) ||
+        (!(obj instanceof Map) && // JS Map are iterables but return entries as [k, v]
+            // JS Map are iterables but return entries as [k, v]
+            getSymbolIterator() in obj); // JS Iterable have a Symbol.iterator prop
+}
+/**
+ * @param {?} a
+ * @param {?} b
+ * @param {?} comparator
+ * @return {?}
+ */
+function areIterablesEqual(a, b, comparator) {
+    /** @type {?} */
+    const iterator1 = a[getSymbolIterator()]();
+    /** @type {?} */
+    const iterator2 = b[getSymbolIterator()]();
+    while (true) {
+        /** @type {?} */
+        const item1 = iterator1.next();
+        /** @type {?} */
+        const item2 = iterator2.next();
+        if (item1.done && item2.done)
+            return true;
+        if (item1.done || item2.done)
+            return false;
+        if (!comparator(item1.value, item2.value))
+            return false;
+    }
+}
+/**
+ * @param {?} obj
+ * @param {?} fn
+ * @return {?}
+ */
+function iterateListLike(obj, fn) {
+    if (Array.isArray(obj)) {
+        for (let i = 0; i < obj.length; i++) {
+            fn(obj[i]);
+        }
+    }
+    else {
+        /** @type {?} */
+        const iterator = obj[getSymbolIterator()]();
+        /** @type {?} */
+        let item;
+        while (!((item = iterator.next()).done)) {
+            fn(item.value);
+        }
+    }
+}
+/**
+ * @param {?} o
+ * @return {?}
+ */
+function isJsObject(o) {
+    return o !== null && (typeof o === 'function' || typeof o === 'object');
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/**
+ * Returns whether the values are different from a change detection stand point.
+ *
+ * Constraints are relaxed in checkNoChanges mode. See `devModeEqual` for details.
+ * @param {?} a
+ * @param {?} b
+ * @param {?} checkNoChangesMode
+ * @return {?}
+ */
+function isDifferent(a, b, checkNoChangesMode) {
+    if (ngDevMode && checkNoChangesMode) {
+        return !devModeEqual(a, b);
+    }
+    // NaN is the only value that is not equal to itself so the first
+    // test checks if both a and b are not NaN
+    return !(a !== a && b !== b) && a !== b;
+}
+/**
+ * @param {?} value
+ * @return {?}
+ */
+function stringify$1(value) {
+    if (typeof value == 'function')
+        return value.name || value;
+    if (typeof value == 'string')
+        return value;
+    if (value == null)
+        return '';
+    return '' + value;
+}
+/**
+ * Flattens an array in non-recursive way. Input arrays are not modified.
+ * @param {?} list
+ * @return {?}
+ */
+function flatten(list) {
+    /** @type {?} */
+    const result = [];
+    /** @type {?} */
+    let i = 0;
+    while (i < list.length) {
+        /** @type {?} */
+        const item = list[i];
+        if (Array.isArray(item)) {
+            if (item.length > 0) {
+                list = item.concat(list.slice(i + 1));
+                i = 0;
+            }
+            else {
+                i++;
+            }
+        }
+        else {
+            result.push(item);
+            i++;
+        }
+    }
+    return result;
+}
+/**
+ * Retrieves a value from any `LViewData` or `TData`.
+ * @template T
+ * @param {?} index
+ * @param {?} arr
+ * @return {?}
+ */
+function loadInternal(index, arr) {
+    ngDevMode && assertDataInRangeInternal(index + HEADER_OFFSET, arr);
+    return arr[index + HEADER_OFFSET];
+}
+/**
+ * @param {?} index
+ * @param {?} arr
+ * @return {?}
+ */
+function assertDataInRangeInternal(index, arr) {
+    assertLessThan(index, arr ? arr.length : 0, 'index expected to be a valid data index');
+}
+/**
+ * Retrieves an element value from the provided `viewData`.
+ *
+ * Elements that are read may be wrapped in a style context,
+ * therefore reading the value may involve unwrapping that.
+ * @param {?} index
+ * @param {?} arr
+ * @return {?}
+ */
+function loadElementInternal(index, arr) {
+    /** @type {?} */
+    const value = loadInternal(index, arr);
+    return readElementValue(value);
+}
+/**
+ * @param {?} tNode
+ * @param {?} hostView
+ * @return {?}
+ */
+function getLNode(tNode, hostView) {
+    return readElementValue(hostView[tNode.index]);
+}
+/**
+ * @param {?} tNode
+ * @return {?}
+ */
+function isContentQueryHost(tNode) {
+    return (tNode.flags & 16384 /* hasContentQuery */) !== 0;
+}
+/**
+ * @param {?} tNode
+ * @return {?}
+ */
+function isComponent(tNode) {
+    return (tNode.flags & 4096 /* isComponent */) === 4096 /* isComponent */;
+}
+/**
+ * Retrieve the root view from any component by walking the parent `LViewData` until
+ * reaching the root `LViewData`.
+ *
+ * @param {?} target
+ * @return {?}
+ */
+function getRootView(target) {
+    ngDevMode && assertDefined(target, 'component');
+    /** @type {?} */
+    let lViewData = Array.isArray(target) ? (/** @type {?} */ (target)) : /** @type {?} */ ((readPatchedLViewData(target)));
+    while (lViewData && !(lViewData[FLAGS] & 64 /* IsRoot */)) {
+        lViewData = /** @type {?} */ ((lViewData[PARENT]));
+    }
+    return lViewData;
+}
+/**
+ * @param {?} viewOrComponent
+ * @return {?}
+ */
+function getRootContext(viewOrComponent) {
+    return /** @type {?} */ (getRootView(viewOrComponent)[CONTEXT]);
+}
 
 /**
  * @fileoverview added by tsickle
@@ -3916,6 +3939,15 @@ function allocStylingContext(lElement, templateStyleContext) {
     return context;
 }
 /**
+ * @param {?=} element
+ * @param {?=} sanitizer
+ * @param {?=} initialStylingValues
+ * @return {?}
+ */
+function createEmptyStylingContext(element, sanitizer, initialStylingValues) {
+    return [element || null, null, sanitizer || null, initialStylingValues || [null], 0, 0, null];
+}
+/**
  * Creates a styling context template where styling information is stored.
  * Any styles that are later referenced using `updateStyleProp` must be
  * passed in within this function. Initial values for those styles are to
@@ -3943,7 +3975,7 @@ function createStylingContextTemplate(initialClassDeclarations, initialStyleDecl
     /** @type {?} */
     const initialStylingValues = [null];
     /** @type {?} */
-    const context = [null, styleSanitizer || null, initialStylingValues, 0, 0, null];
+    const context = createEmptyStylingContext(null, styleSanitizer, initialStylingValues);
     /** @type {?} */
     const stylesLookup = {};
     /** @type {?} */
@@ -3977,7 +4009,7 @@ function createStylingContextTemplate(initialClassDeclarations, initialStyleDecl
         }
     }
     // make where the class offsets begin
-    context[4 /* ClassOffsetPosition */] = totalStyleDeclarations;
+    context[5 /* ClassOffsetPosition */] = totalStyleDeclarations;
     if (initialClassDeclarations) {
         /** @type {?} */
         let hasPassedDeclarations = false;
@@ -4012,16 +4044,16 @@ function createStylingContextTemplate(initialClassDeclarations, initialStyleDecl
     /** @type {?} */
     const totalProps = styleProps.length + classNames.length;
     /** @type {?} */
-    const maxLength = totalProps * 3 /* Size */ * 2 + 6 /* SingleStylesStartPosition */;
+    const maxLength = totalProps * 3 /* Size */ * 2 + 7 /* SingleStylesStartPosition */;
     // we need to fill the array from the start so that we can access
     // both the multi and the single array positions in the same loop block
-    for (let i = 6 /* SingleStylesStartPosition */; i < maxLength; i++) {
+    for (let i = 7 /* SingleStylesStartPosition */; i < maxLength; i++) {
         context.push(null);
     }
     /** @type {?} */
-    const singleStart = 6 /* SingleStylesStartPosition */;
+    const singleStart = 7 /* SingleStylesStartPosition */;
     /** @type {?} */
-    const multiStart = totalProps * 3 /* Size */ + 6 /* SingleStylesStartPosition */;
+    const multiStart = totalProps * 3 /* Size */ + 7 /* SingleStylesStartPosition */;
     // fill single and multi-level styles
     for (let i = 0; i < totalProps; i++) {
         /** @type {?} */
@@ -4049,7 +4081,7 @@ function createStylingContextTemplate(initialClassDeclarations, initialStyleDecl
     }
     // there is no initial value flag for the master index since it doesn't
     // reference an initial style value
-    setFlag(context, 3 /* MasterFlagPosition */, pointers(0, 0, multiStart));
+    setFlag(context, 4 /* MasterFlagPosition */, pointers(0, 0, multiStart));
     setContextDirty(context, initialStylingValues.length > 1);
     return context;
 }
@@ -4082,12 +4114,12 @@ function updateStylingMap(context, classes, styles) {
     // check of what's changed.
     if (typeof classes == 'string') {
         /** @type {?} */
-        const cachedClassString = /** @type {?} */ (context[5 /* CachedCssClassString */]);
+        const cachedClassString = /** @type {?} */ (context[6 /* CachedCssClassString */]);
         if (cachedClassString && cachedClassString === classes) {
             ignoreAllClassUpdates = true;
         }
         else {
-            context[5 /* CachedCssClassString */] = classes;
+            context[6 /* CachedCssClassString */] = classes;
             classNames = classes.split(/\s+/);
             // this boolean is used to avoid having to create a key/value map of `true` values
             // since a classname string implies that all those classes are added
@@ -4096,7 +4128,7 @@ function updateStylingMap(context, classes, styles) {
     }
     else {
         classNames = classes ? Object.keys(classes) : EMPTY_ARR;
-        context[5 /* CachedCssClassString */] = null;
+        context[6 /* CachedCssClassString */] = null;
     }
     classes = /** @type {?} */ ((classes || EMPTY_OBJ));
     /** @type {?} */
@@ -4239,7 +4271,7 @@ function updateStylingMap(context, classes, styles) {
  */
 function updateStyleProp(context, index, value) {
     /** @type {?} */
-    const singleIndex = 6 /* SingleStylesStartPosition */ + index * 3 /* Size */;
+    const singleIndex = 7 /* SingleStylesStartPosition */ + index * 3 /* Size */;
     /** @type {?} */
     const currValue = getValue(context, singleIndex);
     /** @type {?} */
@@ -4282,7 +4314,7 @@ function updateStyleProp(context, index, value) {
  */
 function updateClassProp(context, index, addOrRemove) {
     /** @type {?} */
-    const adjustedIndex = index + context[4 /* ClassOffsetPosition */];
+    const adjustedIndex = index + context[5 /* ClassOffsetPosition */];
     updateStyleProp(context, adjustedIndex, addOrRemove);
 }
 /**
@@ -4311,7 +4343,7 @@ function renderStyling(context, renderer, styleStore, classStore) {
         const multiStartIndex = getMultiStartIndex(context);
         /** @type {?} */
         const styleSanitizer = getStyleSanitizer(context);
-        for (let i = 6 /* SingleStylesStartPosition */; i < context.length; i += 3 /* Size */) {
+        for (let i = 7 /* SingleStylesStartPosition */; i < context.length; i += 3 /* Size */) {
             // there is no point in rendering styles that have not changed on screen
             if (isDirty(context, i)) {
                 /** @type {?} */
@@ -4425,7 +4457,7 @@ function setClass(native, className, add, renderer, store) {
  */
 function setDirty(context, index, isDirtyYes) {
     /** @type {?} */
-    const adjustedIndex = index >= 6 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
+    const adjustedIndex = index >= 7 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
     if (isDirtyYes) {
         (/** @type {?} */ (context[adjustedIndex])) |= 1 /* Dirty */;
     }
@@ -4440,7 +4472,7 @@ function setDirty(context, index, isDirtyYes) {
  */
 function isDirty(context, index) {
     /** @type {?} */
-    const adjustedIndex = index >= 6 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
+    const adjustedIndex = index >= 7 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
     return ((/** @type {?} */ (context[adjustedIndex])) & 1 /* Dirty */) == 1 /* Dirty */;
 }
 /**
@@ -4450,7 +4482,7 @@ function isDirty(context, index) {
  */
 function isClassBased(context, index) {
     /** @type {?} */
-    const adjustedIndex = index >= 6 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
+    const adjustedIndex = index >= 7 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
     return ((/** @type {?} */ (context[adjustedIndex])) & 2 /* Class */) == 2 /* Class */;
 }
 /**
@@ -4460,7 +4492,7 @@ function isClassBased(context, index) {
  */
 function isSanitizable(context, index) {
     /** @type {?} */
-    const adjustedIndex = index >= 6 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
+    const adjustedIndex = index >= 7 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
     return ((/** @type {?} */ (context[adjustedIndex])) & 4 /* Sanitize */) == 4 /* Sanitize */;
 }
 /**
@@ -4481,7 +4513,7 @@ function pointers(configFlag, staticIndex, dynamicIndex) {
 function getInitialValue(context, flag) {
     /** @type {?} */
     const index = getInitialIndex(flag);
-    return /** @type {?} */ (context[2 /* InitialStylesPosition */][index]);
+    return /** @type {?} */ (context[3 /* InitialStylesPosition */][index]);
 }
 /**
  * @param {?} flag
@@ -4497,21 +4529,21 @@ function getInitialIndex(flag) {
 function getMultiOrSingleIndex(flag) {
     /** @type {?} */
     const index = (flag >> (14 /* BitCountSize */ + 3 /* BitCountSize */)) & 16383 /* BitMask */;
-    return index >= 6 /* SingleStylesStartPosition */ ? index : -1;
+    return index >= 7 /* SingleStylesStartPosition */ ? index : -1;
 }
 /**
  * @param {?} context
  * @return {?}
  */
 function getMultiStartIndex(context) {
-    return /** @type {?} */ (getMultiOrSingleIndex(context[3 /* MasterFlagPosition */]));
+    return /** @type {?} */ (getMultiOrSingleIndex(context[4 /* MasterFlagPosition */]));
 }
 /**
  * @param {?} context
  * @return {?}
  */
 function getStyleSanitizer(context) {
-    return context[1 /* StyleSanitizerPosition */];
+    return context[2 /* StyleSanitizerPosition */];
 }
 /**
  * @param {?} context
@@ -4539,7 +4571,7 @@ function setValue(context, index, value) {
  */
 function setFlag(context, index, flag) {
     /** @type {?} */
-    const adjustedIndex = index === 3 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
+    const adjustedIndex = index === 4 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
     context[adjustedIndex] = flag;
 }
 /**
@@ -4549,7 +4581,7 @@ function setFlag(context, index, flag) {
  */
 function getPointers(context, index) {
     /** @type {?} */
-    const adjustedIndex = index === 3 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
+    const adjustedIndex = index === 4 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
     return /** @type {?} */ (context[adjustedIndex]);
 }
 /**
@@ -4573,7 +4605,7 @@ function getProp(context, index) {
  * @return {?}
  */
 function isContextDirty(context) {
-    return isDirty(context, 3 /* MasterFlagPosition */);
+    return isDirty(context, 4 /* MasterFlagPosition */);
 }
 /**
  * @param {?} context
@@ -4581,7 +4613,7 @@ function isContextDirty(context) {
  * @return {?}
  */
 function setContextDirty(context, isDirtyYes) {
-    setDirty(context, 3 /* MasterFlagPosition */, isDirtyYes);
+    setDirty(context, 4 /* MasterFlagPosition */, isDirtyYes);
 }
 /**
  * @param {?} context
@@ -7067,7 +7099,14 @@ function markViewDirty(view) {
     }
     currentView[FLAGS] |= 4 /* Dirty */;
     ngDevMode && assertDefined(currentView[CONTEXT], 'rootContext should be defined');
-    scheduleTick(/** @type {?} */ (currentView[CONTEXT]));
+    /** @type {?} */
+    const rootContext = /** @type {?} */ (currentView[CONTEXT]);
+    /** @type {?} */
+    const nothingScheduled = rootContext.flags === 0 /* Empty */;
+    rootContext.flags |= 1 /* DetectChanges */;
+    if (nothingScheduled) {
+        scheduleTick(rootContext);
+    }
 }
 /**
  * Used to schedule change detection on the whole application.
@@ -7089,9 +7128,20 @@ function scheduleTick(rootContext) {
         let res;
         rootContext.clean = new Promise((r) => res = r);
         rootContext.scheduler(() => {
-            tickRootContext(rootContext); /** @type {?} */
+            if (rootContext.flags & 1 /* DetectChanges */) {
+                rootContext.flags &= ~1 /* DetectChanges */;
+                tickRootContext(rootContext);
+            }
+            if (rootContext.flags & 2 /* FlushPlayers */) {
+                rootContext.flags &= ~2 /* FlushPlayers */;
+                /** @type {?} */
+                const playerHandler = rootContext.playerHandler;
+                if (playerHandler) {
+                    playerHandler.flushPlayers();
+                }
+            }
+            rootContext.clean = _CLEAN_PROMISE; /** @type {?} */
             ((res))(null);
-            rootContext.clean = _CLEAN_PROMISE;
         });
     }
 }
@@ -7105,22 +7155,6 @@ function tickRootContext(rootContext) {
         const rootComponent = rootContext.components[i];
         renderComponentOrTemplate(/** @type {?} */ ((readPatchedLViewData(rootComponent))), rootComponent);
     }
-}
-/**
- * Retrieve the root view from any component by walking the parent `LViewData` until
- * reaching the root `LViewData`.
- *
- * @param {?} component any component
- * @return {?}
- */
-function getRootView(component) {
-    ngDevMode && assertDefined(component, 'component');
-    /** @type {?} */
-    let lViewData = /** @type {?} */ ((readPatchedLViewData(component)));
-    while (lViewData && !(lViewData[FLAGS] & 64 /* IsRoot */)) {
-        lViewData = /** @type {?} */ ((lViewData[PARENT]));
-    }
-    return lViewData;
 }
 /**
  * Synchronously perform change detection on a component (and possibly its sub-components).
@@ -7754,7 +7788,7 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     const rootFlags = componentDef.onPush ? 4 /* Dirty */ | 64 /* IsRoot */ :
         2 /* CheckAlways */ | 64 /* IsRoot */;
     /** @type {?} */
-    const rootContext = createRootContext(opts.scheduler || requestAnimationFrame.bind(window));
+    const rootContext = createRootContext(opts.scheduler || requestAnimationFrame.bind(window), opts.playerHandler || null);
     /** @type {?} */
     const rootView = createLViewData(rendererFactory.createRenderer(hostNode, componentDef), createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags);
     rootView[INJECTOR$1] = opts.injector || null;
@@ -7804,13 +7838,16 @@ function createRootComponent(elementNode, componentDef, rootView, rootContext, h
 }
 /**
  * @param {?} scheduler
+ * @param {?=} playerHandler
  * @return {?}
  */
-function createRootContext(scheduler) {
+function createRootContext(scheduler, playerHandler) {
     return {
         components: [],
         scheduler: scheduler,
         clean: CLEAN_PROMISE,
+        playerHandler: playerHandler || null,
+        flags: 0 /* Empty */
     };
 }
 /**
@@ -7844,7 +7881,7 @@ function LifecycleHooksFeature(component, def) {
  * @param {?} component any component
  * @return {?}
  */
-function getRootContext(component) {
+function getRootContext$1(component) {
     /** @type {?} */
     const rootContext = /** @type {?} */ (getRootView(component)[CONTEXT]);
     ngDevMode && assertDefined(rootContext, 'rootContext');
@@ -7867,7 +7904,7 @@ function getRootContext(component) {
  * @return {?} Promise which resolves when the component is rendered.
  */
 function whenRendered(component) {
-    return getRootContext(component).clean;
+    return getRootContext$1(component).clean;
 }
 
 /**
@@ -14706,7 +14743,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-beta.6+34.sha-a880686');
+const VERSION = new Version('7.0.0-beta.6+35.sha-82a14dc');
 
 /**
  * @fileoverview added by tsickle
@@ -25922,6 +25959,106 @@ class Render3DebugContext {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
+class CorePlayerHandler {
+    constructor() {
+        this._players = [];
+    }
+    /**
+     * @return {?}
+     */
+    flushPlayers() {
+        for (let i = 0; i < this._players.length; i++) {
+            /** @type {?} */
+            const player = this._players[i];
+            if (!player.parent) {
+                player.play();
+            }
+        }
+        this._players.length = 0;
+    }
+    /**
+     * @param {?} player
+     * @return {?}
+     */
+    queuePlayer(player) { this._players.push(player); }
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/**
+ * @param {?} ref
+ * @param {?} player
+ * @return {?}
+ */
+function addPlayer(ref, player) {
+    /** @type {?} */
+    const elementContext = /** @type {?} */ ((getContext(ref)));
+    /** @type {?} */
+    const animationContext = /** @type {?} */ ((getOrCreateAnimationContext(elementContext.native, elementContext)));
+    animationContext.push(player);
+    player.addEventListener(200 /* Destroyed */, () => {
+        /** @type {?} */
+        const index = animationContext.indexOf(player);
+        if (index >= 0) {
+            animationContext.splice(index, 1);
+        }
+        player.destroy();
+    });
+    /** @type {?} */
+    const rootContext = getRootContext(elementContext.lViewData);
+    /** @type {?} */
+    const playerHandler = rootContext.playerHandler || (rootContext.playerHandler = new CorePlayerHandler());
+    playerHandler.queuePlayer(player, ref);
+    /** @type {?} */
+    const nothingScheduled = rootContext.flags === 0 /* Empty */;
+    // change detection may or may not happen therefore
+    // the core code needs to be kicked off to flush the animations
+    rootContext.flags |= 2 /* FlushPlayers */;
+    if (nothingScheduled) {
+        scheduleTick(rootContext);
+    }
+}
+/**
+ * @param {?} ref
+ * @return {?}
+ */
+function getPlayers(ref) {
+    return getOrCreateAnimationContext(ref);
+}
+/**
+ * @param {?} target
+ * @param {?=} context
+ * @return {?}
+ */
+function getOrCreateAnimationContext(target, context) {
+    context = context || /** @type {?} */ ((getContext(target)));
+    if (ngDevMode && !context) {
+        throw new Error('Only elements that exist in an Angular application can be used for animations');
+    }
+    const { lViewData, lNodeIndex } = context;
+    /** @type {?} */
+    const value = lViewData[lNodeIndex];
+    /** @type {?} */
+    let stylingContext = /** @type {?} */ (value);
+    if (!Array.isArray(value)) {
+        stylingContext = lViewData[lNodeIndex] = createEmptyStylingContext(/** @type {?} */ (value));
+    }
+    return stylingContext[1 /* AnimationContext */] || allocAnimationContext(stylingContext);
+}
+/**
+ * @param {?} data
+ * @return {?}
+ */
+function allocAnimationContext(data) {
+    return data[1 /* AnimationContext */] = [];
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
 // clang-format on
 
 /**
@@ -25949,5 +26086,5 @@ class Render3DebugContext {
  * Generated bundle index. Do not edit.
  */
 
-export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_l, _iterableDiffersFactory as ɵangular_packages_core_core_i, _keyValueDiffersFactory as ɵangular_packages_core_core_j, _localeFactory as ɵangular_packages_core_core_k, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, DefaultIterableDifferFactory as ɵangular_packages_core_core_g, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_h, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, wtfEnabled as ɵangular_packages_core_core_m, createScope as ɵangular_packages_core_core_o, detectWTF as ɵangular_packages_core_core_n, endTimeRange as ɵangular_packages_core_core_r, leave as ɵangular_packages_core_core_p, startTimeRange as ɵangular_packages_core_core_q, createElementRef as ɵangular_packages_core_core_y, createTemplateRef as ɵangular_packages_core_core_z, createViewRef as ɵangular_packages_core_core_w, getOrCreateInjectable as ɵangular_packages_core_core_x, getOrCreateNodeInjector as ɵangular_packages_core_core_v, NG_INJECTABLE_DEF as ɵangular_packages_core_core_bd, _getViewData as ɵangular_packages_core_core_bb, bindingUpdated as ɵangular_packages_core_core_bc, getPreviousOrParentTNode as ɵangular_packages_core_core_ba, loadInternal as ɵangular_packages_core_core_bh, makeParamDecorator as ɵangular_packages_core_core_a, makePropDecorator as ɵangular_packages_core_core_b, getClosureSafeProperty as ɵangular_packages_core_core_be, _def as ɵangular_packages_core_core_s, DebugRendererFactory2 as ɵangular_packages_core_core_t, DebugContext as ɵangular_packages_core_core_u, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, inject, INJECTOR, Injector, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList$1 as QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, getInjectableDef as ɵgetInjectableDef, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled$1 as ɵivyEnabled, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineBase as ɵdefineBase, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, directiveInject as ɵdirectiveInject, injectElementRef as ɵinjectElementRef, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, injectChangeDetectorRef as ɵinjectChangeDetectorRef, injectRenderer2 as ɵinjectRenderer2, injectAttribute as ɵinjectAttribute, getFactoryOf as ɵgetFactoryOf, getInheritedFactory as ɵgetInheritedFactory, templateRefExtractor as ɵtemplateRefExtractor, PublicFeature as ɵPublicFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, NgOnChangesFeature as ɵNgOnChangesFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, container as ɵcontainer, nextContext as ɵnextContext, elementStart as ɵelementStart, namespaceHTML as ɵnamespaceHTML, namespaceMathML as ɵnamespaceMathML, namespaceSVG as ɵnamespaceSVG, element as ɵelement, listener as ɵlistener, text as ɵtext, embeddedViewStart as ɵembeddedViewStart, query as ɵquery, registerContentQuery as ɵregisterContentQuery, loadDirective as ɵloadDirective, projection as ɵprojection, bind as ɵbind, interpolation1 as ɵinterpolation1, interpolation2 as ɵinterpolation2, interpolation3 as ɵinterpolation3, interpolation4 as ɵinterpolation4, interpolation5 as ɵinterpolation5, interpolation6 as ɵinterpolation6, interpolation7 as ɵinterpolation7, interpolation8 as ɵinterpolation8, interpolationV as ɵinterpolationV, pipeBind1 as ɵpipeBind1, pipeBind2 as ɵpipeBind2, pipeBind3 as ɵpipeBind3, pipeBind4 as ɵpipeBind4, pipeBindV as ɵpipeBindV, pureFunction0 as ɵpureFunction0, pureFunction1 as ɵpureFunction1, pureFunction2 as ɵpureFunction2, pureFunction3 as ɵpureFunction3, pureFunction4 as ɵpureFunction4, pureFunction5 as ɵpureFunction5, pureFunction6 as ɵpureFunction6, pureFunction7 as ɵpureFunction7, pureFunction8 as ɵpureFunction8, pureFunctionV as ɵpureFunctionV, getCurrentView as ɵgetCurrentView, restoreView as ɵrestoreView, containerRefreshStart as ɵcontainerRefreshStart, containerRefreshEnd as ɵcontainerRefreshEnd, queryRefresh as ɵqueryRefresh, loadQueryList as ɵloadQueryList, elementEnd as ɵelementEnd, elementProperty as ɵelementProperty, projectionDef as ɵprojectionDef, reference as ɵreference, elementAttribute as ɵelementAttribute, elementStyling as ɵelementStyling, elementStylingMap as ɵelementStylingMap, elementStyleProp as ɵelementStylingProp, elementStylingApply as ɵelementStylingApply, elementClassProp as ɵelementClassProp, textBinding as ɵtextBinding, template as ɵtemplate, embeddedViewEnd as ɵembeddedViewEnd, store as ɵstore, load as ɵload, pipe as ɵpipe, whenRendered as ɵwhenRendered, i18nApply as ɵi18nApply, i18nExpMapping as ɵi18nExpMapping, i18nInterpolation1 as ɵi18nInterpolation1, i18nInterpolation2 as ɵi18nInterpolation2, i18nInterpolation3 as ɵi18nInterpolation3, i18nInterpolation4 as ɵi18nInterpolation4, i18nInterpolation5 as ɵi18nInterpolation5, i18nInterpolation6 as ɵi18nInterpolation6, i18nInterpolation7 as ɵi18nInterpolation7, i18nInterpolation8 as ɵi18nInterpolation8, i18nInterpolationV as ɵi18nInterpolationV, i18nMapping as ɵi18nMapping, WRAP_RENDERER_FACTORY2 as ɵWRAP_RENDERER_FACTORY2, Render3DebugRendererFactory2 as ɵRender3DebugRendererFactory2, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compilePipe as ɵcompilePipe, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getContext as ɵgetContext, R3_COMPILE_COMPONENT__POST_NGCC__ as ɵR3_COMPILE_COMPONENT__POST_NGCC__, R3_COMPILE_DIRECTIVE__POST_NGCC__ as ɵR3_COMPILE_DIRECTIVE__POST_NGCC__, R3_COMPILE_INJECTABLE__POST_NGCC__ as ɵR3_COMPILE_INJECTABLE__POST_NGCC__, R3_COMPILE_NGMODULE__POST_NGCC__ as ɵR3_COMPILE_NGMODULE__POST_NGCC__, R3_COMPILE_PIPE__POST_NGCC__ as ɵR3_COMPILE_PIPE__POST_NGCC__, ivyEnable__POST_NGCC__ as ɵivyEnable__POST_NGCC__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$4 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_l, _iterableDiffersFactory as ɵangular_packages_core_core_i, _keyValueDiffersFactory as ɵangular_packages_core_core_j, _localeFactory as ɵangular_packages_core_core_k, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, DefaultIterableDifferFactory as ɵangular_packages_core_core_g, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_h, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, wtfEnabled as ɵangular_packages_core_core_m, createScope as ɵangular_packages_core_core_o, detectWTF as ɵangular_packages_core_core_n, endTimeRange as ɵangular_packages_core_core_r, leave as ɵangular_packages_core_core_p, startTimeRange as ɵangular_packages_core_core_q, getOrCreateAnimationContext as ɵangular_packages_core_core_bd, createElementRef as ɵangular_packages_core_core_y, createTemplateRef as ɵangular_packages_core_core_z, createViewRef as ɵangular_packages_core_core_w, getOrCreateInjectable as ɵangular_packages_core_core_x, getOrCreateNodeInjector as ɵangular_packages_core_core_v, NG_INJECTABLE_DEF as ɵangular_packages_core_core_be, _getViewData as ɵangular_packages_core_core_bb, bindingUpdated as ɵangular_packages_core_core_bc, getPreviousOrParentTNode as ɵangular_packages_core_core_ba, loadInternal as ɵangular_packages_core_core_bi, makeParamDecorator as ɵangular_packages_core_core_a, makePropDecorator as ɵangular_packages_core_core_b, getClosureSafeProperty as ɵangular_packages_core_core_bf, _def as ɵangular_packages_core_core_s, DebugRendererFactory2 as ɵangular_packages_core_core_t, DebugContext as ɵangular_packages_core_core_u, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, inject, INJECTOR, Injector, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList$1 as QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, getInjectableDef as ɵgetInjectableDef, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled$1 as ɵivyEnabled, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineBase as ɵdefineBase, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, directiveInject as ɵdirectiveInject, injectElementRef as ɵinjectElementRef, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, injectChangeDetectorRef as ɵinjectChangeDetectorRef, injectRenderer2 as ɵinjectRenderer2, injectAttribute as ɵinjectAttribute, getFactoryOf as ɵgetFactoryOf, getInheritedFactory as ɵgetInheritedFactory, templateRefExtractor as ɵtemplateRefExtractor, PublicFeature as ɵPublicFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, NgOnChangesFeature as ɵNgOnChangesFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, container as ɵcontainer, nextContext as ɵnextContext, elementStart as ɵelementStart, namespaceHTML as ɵnamespaceHTML, namespaceMathML as ɵnamespaceMathML, namespaceSVG as ɵnamespaceSVG, element as ɵelement, listener as ɵlistener, text as ɵtext, embeddedViewStart as ɵembeddedViewStart, query as ɵquery, registerContentQuery as ɵregisterContentQuery, loadDirective as ɵloadDirective, projection as ɵprojection, bind as ɵbind, interpolation1 as ɵinterpolation1, interpolation2 as ɵinterpolation2, interpolation3 as ɵinterpolation3, interpolation4 as ɵinterpolation4, interpolation5 as ɵinterpolation5, interpolation6 as ɵinterpolation6, interpolation7 as ɵinterpolation7, interpolation8 as ɵinterpolation8, interpolationV as ɵinterpolationV, pipeBind1 as ɵpipeBind1, pipeBind2 as ɵpipeBind2, pipeBind3 as ɵpipeBind3, pipeBind4 as ɵpipeBind4, pipeBindV as ɵpipeBindV, pureFunction0 as ɵpureFunction0, pureFunction1 as ɵpureFunction1, pureFunction2 as ɵpureFunction2, pureFunction3 as ɵpureFunction3, pureFunction4 as ɵpureFunction4, pureFunction5 as ɵpureFunction5, pureFunction6 as ɵpureFunction6, pureFunction7 as ɵpureFunction7, pureFunction8 as ɵpureFunction8, pureFunctionV as ɵpureFunctionV, getCurrentView as ɵgetCurrentView, restoreView as ɵrestoreView, containerRefreshStart as ɵcontainerRefreshStart, containerRefreshEnd as ɵcontainerRefreshEnd, queryRefresh as ɵqueryRefresh, loadQueryList as ɵloadQueryList, elementEnd as ɵelementEnd, elementProperty as ɵelementProperty, projectionDef as ɵprojectionDef, reference as ɵreference, elementAttribute as ɵelementAttribute, elementStyling as ɵelementStyling, elementStylingMap as ɵelementStylingMap, elementStyleProp as ɵelementStylingProp, elementStylingApply as ɵelementStylingApply, elementClassProp as ɵelementClassProp, textBinding as ɵtextBinding, template as ɵtemplate, embeddedViewEnd as ɵembeddedViewEnd, store as ɵstore, load as ɵload, pipe as ɵpipe, whenRendered as ɵwhenRendered, i18nApply as ɵi18nApply, i18nExpMapping as ɵi18nExpMapping, i18nInterpolation1 as ɵi18nInterpolation1, i18nInterpolation2 as ɵi18nInterpolation2, i18nInterpolation3 as ɵi18nInterpolation3, i18nInterpolation4 as ɵi18nInterpolation4, i18nInterpolation5 as ɵi18nInterpolation5, i18nInterpolation6 as ɵi18nInterpolation6, i18nInterpolation7 as ɵi18nInterpolation7, i18nInterpolation8 as ɵi18nInterpolation8, i18nInterpolationV as ɵi18nInterpolationV, i18nMapping as ɵi18nMapping, WRAP_RENDERER_FACTORY2 as ɵWRAP_RENDERER_FACTORY2, Render3DebugRendererFactory2 as ɵRender3DebugRendererFactory2, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compilePipe as ɵcompilePipe, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getContext as ɵgetContext, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, R3_COMPILE_COMPONENT__POST_NGCC__ as ɵR3_COMPILE_COMPONENT__POST_NGCC__, R3_COMPILE_DIRECTIVE__POST_NGCC__ as ɵR3_COMPILE_DIRECTIVE__POST_NGCC__, R3_COMPILE_INJECTABLE__POST_NGCC__ as ɵR3_COMPILE_INJECTABLE__POST_NGCC__, R3_COMPILE_NGMODULE__POST_NGCC__ as ɵR3_COMPILE_NGMODULE__POST_NGCC__, R3_COMPILE_PIPE__POST_NGCC__ as ɵR3_COMPILE_PIPE__POST_NGCC__, ivyEnable__POST_NGCC__ as ɵivyEnable__POST_NGCC__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$4 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map

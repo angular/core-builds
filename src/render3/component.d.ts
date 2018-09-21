@@ -8,6 +8,7 @@
 import { Type } from '../core';
 import { Injector } from '../di/injector';
 import { Sanitizer } from '../sanitization/security';
+import { PlayerHandler } from './animations/interfaces';
 import { ComponentDef, ComponentDefInternal, ComponentType } from './interfaces/definition';
 import { LElementNode } from './interfaces/node';
 import { RElement, RendererFactory3 } from './interfaces/renderer';
@@ -18,6 +19,8 @@ export interface CreateComponentOptions {
     rendererFactory?: RendererFactory3;
     /** A custom sanitizer instance */
     sanitizer?: Sanitizer;
+    /** A custom animation player handler */
+    playerHandler?: PlayerHandler;
     /**
      * Host element on which the component will be bootstrapped. If not specified,
      * the component definition's `tag` is used to query the existing DOM for the
@@ -74,7 +77,7 @@ export declare function renderComponent<T>(componentType: ComponentType<T> | Typ
  * renderComponent() and ViewContainerRef.createComponent().
  */
 export declare function createRootComponent<T>(elementNode: LElementNode, componentDef: ComponentDef<T, string>, rootView: LViewData, rootContext: RootContext, hostFeatures: HostFeature[] | null): any;
-export declare function createRootContext(scheduler: (workFn: () => void) => void): RootContext;
+export declare function createRootContext(scheduler: (workFn: () => void) => void, playerHandler?: PlayerHandler | null): RootContext;
 /**
  * Used to enable lifecycle hooks on the root component.
  *

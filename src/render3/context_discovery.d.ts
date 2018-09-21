@@ -82,3 +82,4 @@ export declare function readPatchedData(target: any): LViewData | LContext | nul
 export declare function readPatchedLViewData(target: any): LViewData | null;
 export declare function isComponentInstance(instance: any): boolean;
 export declare function isDirectiveInstance(instance: any): boolean;
+export declare function readElementValue(value: LElementNode | any[]): LElementNode;
