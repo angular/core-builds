@@ -139,11 +139,13 @@ export declare function injectRenderer2(): Renderer2;
 export declare function injectAttribute(attrNameToInject: string): string | undefined;
 /**
  * Creates a ViewRef and stores it on the injector as ChangeDetectorRef (public alias).
- * Or, if it already exists, retrieves the existing instance.
  *
+ * @param hostTNode The node that is requesting a ChangeDetectorRef
+ * @param hostView The view to which the node belongs
+ * @param context The context for this change detector ref
  * @returns The ChangeDetectorRef to use
  */
-export declare function getOrCreateChangeDetectorRef(di: LInjector, context: any): viewEngine_ChangeDetectorRef;
+export declare function createViewRef(hostTNode: TNode, hostView: LViewData, context: any): viewEngine_ChangeDetectorRef;
 /**
  * Returns the value associated to the given token from the injectors.
  *
@@ -178,41 +180,41 @@ export declare function getOrCreateInjectable<T>(nodeInjector: LInjector, token:
  */
 export declare function bloomFindPossibleInjector(startInjector: LInjector, bloomBit: number, flags: InjectFlags): LInjector | null;
 export declare class ReadFromInjectorFn<T> {
-    readonly read: (injector: LInjector, tNode: TNode, directiveIndex?: number) => T;
-    constructor(read: (injector: LInjector, tNode: TNode, directiveIndex?: number) => T);
+    readonly read: (tNode: TNode, view: LViewData, directiveIndex?: number) => T;
+    constructor(read: (tNode: TNode, view: LViewData, directiveIndex?: number) => T);
 }
 /**
  * Creates an ElementRef for a given node injector and stores it on the injector.
- * Or, if the ElementRef already exists, retrieves the existing ElementRef.
  *
  * @param di The node injector where we should store a created ElementRef
  * @returns The ElementRef instance to use
  */
-export declare function getOrCreateElementRef(di: LInjector): viewEngine_ElementRef;
+export declare function createElementRef(tNode: TNode, view: LViewData): viewEngine_ElementRef;
 export declare const QUERY_READ_TEMPLATE_REF: QueryReadType<viewEngine_TemplateRef<any>>;
 export declare const QUERY_READ_CONTAINER_REF: QueryReadType<viewEngine_ViewContainerRef>;
 export declare const QUERY_READ_ELEMENT_REF: QueryReadType<viewEngine_ElementRef<any>>;
 export declare const QUERY_READ_FROM_NODE: QueryReadType<any>;
 /**
- * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
- * already exists, retrieves the existing ViewContainerRef.
+ * Creates a ViewContainerRef and stores it on the injector.
  *
+ * @param hostTNode The node that is requesting a ViewContainerRef
+ * @param hostView The view to which the node belongs
  * @returns The ViewContainerRef instance to use
  */
-export declare function getOrCreateContainerRef(di: LInjector): viewEngine_ViewContainerRef;
+export declare function createContainerRef(hostTNode: TElementNode | TContainerNode | TElementContainerNode, hostView: LViewData): viewEngine_ViewContainerRef;
 export declare class NodeInjector implements Injector {
     private _lInjector;
     constructor(_lInjector: LInjector);
     get(token: any): any;
 }
 /**
- * Creates a TemplateRef and stores it on the injector. Or, if the TemplateRef already
- * exists, retrieves the existing TemplateRef.
+ * Creates a TemplateRef and stores it on the injector.
  *
- * @param di The node injector where we should store a created TemplateRef
+ * @param hostTNode The node that is requesting a TemplateRef
+ * @param hostView The view to which the node belongs
  * @returns The TemplateRef instance to use
  */
-export declare function getOrCreateTemplateRef<T>(di: LInjector): viewEngine_TemplateRef<T>;
+export declare function createTemplateRef<T>(hostTNode: TNode, hostView: LViewData): viewEngine_TemplateRef<T>;
 export declare function getFactoryOf<T>(type: Type<any>): ((type?: Type<T>) => T) | null;
 export declare function getInheritedFactory<T>(type: Type<any>): (type: Type<T>) => T;
 /**
