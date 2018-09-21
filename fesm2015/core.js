@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.6+25.sha-64aa670
+ * @license Angular v7.0.0-beta.6+26.sha-d5f47d6
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -5573,14 +5573,20 @@ function findDirectiveMatches(tNode) {
             /** @type {?} */
             const def = registry[i];
             if (isNodeMatchingSelectorList(tNode, /** @type {?} */ ((def.selectors)))) {
+                matches || (matches = []);
                 if ((/** @type {?} */ (def)).template) {
                     if (tNode.flags & 4096 /* isComponent */)
                         throwMultipleComponentError(tNode);
+                    addComponentLogic(/** @type {?} */ (def));
                     tNode.flags = 4096 /* isComponent */;
+                    // The component is always stored first with directives after.
+                    matches.unshift(def, null);
+                }
+                else {
+                    matches.push(def, null);
                 }
                 if (def.diPublic)
                     def.diPublic(def);
-                (matches || (matches = [])).push(def, null);
             }
         }
     }
@@ -5634,18 +5640,6 @@ function queueHostBindingForCheck(dirIndex, hostVars) {
     (tView.hostBindings || (tView.hostBindings = [])).push(dirIndex, previousOrParentTNode.index - HEADER_OFFSET);
 }
 /**
- * Sets the context for a ChangeDetectorRef to the given instance.
- * @param {?} injector
- * @param {?} instance
- * @param {?} view
- * @return {?}
- */
-function initChangeDetectorIfExisting(injector, instance, view) {
-    if (injector && injector.changeDetectorRef != null) {
-        (/** @type {?} */ (injector.changeDetectorRef))._setComponentContext(view, instance);
-    }
-}
-/**
  * This function instantiates the given directives.
  * @return {?}
  */
@@ -5666,6 +5660,11 @@ function instantiateDirectivesDirectly() {
         for (let i = start; i < end; i++) {
             /** @type {?} */
             const def = tDirectives[i];
+            // Component view must be set on node before the factory is created so
+            // ChangeDetectorRefs have a way to store component view on creation.
+            if ((/** @type {?} */ (def)).template) {
+                addComponentLogic(/** @type {?} */ (def));
+            }
             directiveCreate(i, def.factory(), def);
         }
     }
@@ -6426,13 +6425,11 @@ function textBinding(index, value) {
  */
 function directiveCreate(directiveDefIdx, directive, directiveDef) {
     /** @type {?} */
-    const hostNode = /** @type {?} */ ((getPreviousOrParentNode()));
+    const hostNode = getLNode(previousOrParentTNode, viewData);
     /** @type {?} */
     const instance = baseDirectiveCreate(directiveDefIdx, directive, directiveDef, hostNode);
-    /** @type {?} */
-    const isComponent$$1 = (/** @type {?} */ (directiveDef)).template;
-    if (isComponent$$1) {
-        addComponentLogic(directiveDefIdx, directive, /** @type {?} */ (directiveDef), hostNode);
+    if ((/** @type {?} */ (directiveDef)).template) {
+        /** @type {?} */ ((hostNode.data))[CONTEXT] = directive;
     }
     if (firstTemplatePass) {
         // Init hooks are queued now so ngOnInit is called in host components before
@@ -6452,22 +6449,20 @@ function directiveCreate(directiveDefIdx, directive, directiveDef) {
 }
 /**
  * @template T
- * @param {?} directiveIndex
- * @param {?} instance
  * @param {?} def
- * @param {?} hostNode
  * @return {?}
  */
-function addComponentLogic(directiveIndex, instance, def, hostNode) {
+function addComponentLogic(def) {
+    /** @type {?} */
+    const hostNode = getLNode(previousOrParentTNode, viewData);
     /** @type {?} */
     const tView = getOrCreateTView(def.template, def.consts, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery);
     /** @type {?} */
-    const componentView = addToViewTree(viewData, /** @type {?} */ (previousOrParentTNode.index), createLViewData(rendererFactory.createRenderer(/** @type {?} */ (hostNode.native), def), tView, instance, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, getCurrentSanitizer()));
+    const componentView = addToViewTree(viewData, /** @type {?} */ (previousOrParentTNode.index), createLViewData(rendererFactory.createRenderer(/** @type {?} */ (hostNode.native), def), tView, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, getCurrentSanitizer()));
     // We need to set the host node/data here because when the component LNode was created,
     // we didn't yet know it was a component (just an element).
     (/** @type {?} */ (hostNode)).data = componentView;
-    (/** @type {?} */ (componentView))[HOST_NODE] = /** @type {?} */ (getPreviousOrParentTNode());
-    initChangeDetectorIfExisting(hostNode.nodeInjector, instance, componentView);
+    (/** @type {?} */ (componentView))[HOST_NODE] = /** @type {?} */ (previousOrParentTNode);
     if (firstTemplatePass)
         queueComponentIndexForCheck();
 }
@@ -7803,7 +7798,6 @@ function createRootComponent(elementNode, componentDef, rootView, rootContext, h
         queueHostBindingForCheck(0, componentDef.hostVars);
     rootContext.components.push(component);
     (/** @type {?} */ (elementNode.data))[CONTEXT] = component;
-    initChangeDetectorIfExisting(elementNode.nodeInjector, component, /** @type {?} */ (elementNode.data));
     hostFeatures && hostFeatures.forEach((feature) => feature(component, componentDef));
     setHostBindings(rootView[TVIEW].hostBindings);
     return component;
@@ -8597,28 +8591,24 @@ class ComponentFactoryBoundToModule extends ComponentFactory {
 class ViewRef {
     /**
      * @param {?} _view
-     * @param {?} context
+     * @param {?} _context
+     * @param {?} _componentIndex
      */
-    constructor(_view, context) {
+    constructor(_view, _context, _componentIndex) {
+        this._context = _context;
+        this._componentIndex = _componentIndex;
         this._appRef = null;
         this._viewContainerRef = null;
         /**
          * \@internal
          */
         this._tViewNode = null;
-        this.context = /** @type {?} */ ((context));
         this._view = _view;
     }
     /**
-     * \@internal
-     * @param {?} view
-     * @param {?} context
      * @return {?}
      */
-    _setComponentContext(view, context) {
-        this._view = view;
-        this.context = context;
-    }
+    get context() { return this._context ? this._context : this._lookUpContext(); }
     /**
      * @return {?}
      */
@@ -8844,6 +8834,12 @@ class ViewRef {
      * @return {?}
      */
     attachToAppRef(appRef) { this._appRef = appRef; }
+    /**
+     * @return {?}
+     */
+    _lookUpContext() {
+        return this._context = /** @type {?} */ (((/** @type {?} */ ((this._view[PARENT]))[DIRECTIVES]))[this._componentIndex]);
+    }
 }
 /**
  * \@internal
@@ -8854,7 +8850,7 @@ class RootViewRef extends ViewRef {
      * @param {?} _view
      */
     constructor(_view) {
-        super(_view, null);
+        super(_view, null, -1);
         this._view = _view;
     }
     /**
@@ -9193,10 +9189,6 @@ function getOrCreateNodeInjectorForNode(node, tNode, hostView) {
         cbf5: parentInjector == null ? 0 : parentInjector.cbf5 | parentInjector.bf5,
         cbf6: parentInjector == null ? 0 : parentInjector.cbf6 | parentInjector.bf6,
         cbf7: parentInjector == null ? 0 : parentInjector.cbf7 | parentInjector.bf7,
-        templateRef: null,
-        viewContainerRef: null,
-        elementRef: null,
-        changeDetectorRef: null,
     };
 }
 /**
@@ -9234,7 +9226,7 @@ function directiveInject(token, flags = 0 /* Default */) {
  * @return {?} The ElementRef instance to use
  */
 function injectElementRef() {
-    return getOrCreateElementRef(getOrCreateNodeInjector());
+    return createElementRef(getPreviousOrParentTNode(), _getViewData());
 }
 /**
  * Creates a TemplateRef and stores it on the injector. Or, if the TemplateRef already
@@ -9244,7 +9236,7 @@ function injectElementRef() {
  * @return {?} The TemplateRef instance to use
  */
 function injectTemplateRef() {
-    return getOrCreateTemplateRef(getOrCreateNodeInjector());
+    return createTemplateRef(getPreviousOrParentTNode(), _getViewData());
 }
 /**
  * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
@@ -9253,14 +9245,16 @@ function injectTemplateRef() {
  * @return {?} The ViewContainerRef instance to use
  */
 function injectViewContainerRef() {
-    return getOrCreateContainerRef(getOrCreateNodeInjector());
+    /** @type {?} */
+    const previousTNode = /** @type {?} */ (getPreviousOrParentTNode());
+    return createContainerRef(previousTNode, _getViewData());
 }
 /**
  * Returns a ChangeDetectorRef (a.k.a. a ViewRef)
  * @return {?}
  */
 function injectChangeDetectorRef() {
-    return getOrCreateChangeDetectorRef(getOrCreateNodeInjector(), null);
+    return createViewRef(getPreviousOrParentTNode(), _getViewData(), null);
 }
 /**
  * @return {?}
@@ -9323,41 +9317,26 @@ function injectAttribute(attrNameToInject) {
 }
 /**
  * Creates a ViewRef and stores it on the injector as ChangeDetectorRef (public alias).
- * Or, if it already exists, retrieves the existing instance.
  *
- * @param {?} di
- * @param {?} context
+ * @param {?} hostTNode The node that is requesting a ChangeDetectorRef
+ * @param {?} hostView The view to which the node belongs
+ * @param {?} context The context for this change detector ref
  * @return {?} The ChangeDetectorRef to use
  */
-function getOrCreateChangeDetectorRef(di, context) {
-    if (di.changeDetectorRef)
-        return di.changeDetectorRef;
-    /** @type {?} */
-    const currentTNode = di.tNode;
-    if (isComponent(currentTNode)) {
-        return di.changeDetectorRef =
-            new ViewRef(/** @type {?} */ (getLNode(currentTNode, di.view).data), context);
+function createViewRef(hostTNode, hostView, context) {
+    if (isComponent(hostTNode)) {
+        /** @type {?} */
+        const componentIndex = hostTNode.flags >> 15 /* DirectiveStartingIndexShift */;
+        /** @type {?} */
+        const componentView = /** @type {?} */ (getLNode(hostTNode, hostView).data);
+        return new ViewRef(componentView, context, componentIndex);
     }
-    else if (currentTNode.type === 3 /* Element */) {
-        return di.changeDetectorRef = getOrCreateHostChangeDetector(di.view);
+    else if (hostTNode.type === 3 /* Element */) {
+        /** @type {?} */
+        const hostComponentView = findComponentView(hostView);
+        return new ViewRef(hostComponentView, hostComponentView[CONTEXT], -1);
     }
     return /** @type {?} */ ((null));
-}
-/**
- * Gets or creates ChangeDetectorRef for the closest host component
- * @param {?} currentView
- * @return {?}
- */
-function getOrCreateHostChangeDetector(currentView) {
-    /** @type {?} */
-    const hostComponentView = findComponentView(currentView);
-    /** @type {?} */
-    const hostNode = /** @type {?} */ ((getHostElementNode(hostComponentView)));
-    /** @type {?} */
-    const hostInjector = hostNode.nodeInjector;
-    /** @type {?} */
-    const existingRef = hostInjector && hostInjector.changeDetectorRef;
-    return existingRef ? existingRef : new ViewRef(hostComponentView, hostComponentView[CONTEXT]);
 }
 /**
  * @param {?} di
@@ -9579,13 +9558,13 @@ class ReadFromInjectorFn {
 }
 /**
  * Creates an ElementRef for a given node injector and stores it on the injector.
- * Or, if the ElementRef already exists, retrieves the existing ElementRef.
  *
- * @param {?} di The node injector where we should store a created ElementRef
+ * @param {?} tNode
+ * @param {?} view
  * @return {?} The ElementRef instance to use
  */
-function getOrCreateElementRef(di) {
-    return di.elementRef || (di.elementRef = new ElementRef$1(getLNode(di.tNode, di.view).native));
+function createElementRef(tNode, view) {
+    return new ElementRef$1(getLNode(tNode, view).native);
 }
 /**
  * A ref to a node's native element.
@@ -9593,38 +9572,31 @@ function getOrCreateElementRef(di) {
 class ElementRef$1 extends ElementRef {
 }
 /**
- * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
- * already exists, retrieves the existing ViewContainerRef.
+ * Creates a ViewContainerRef and stores it on the injector.
  *
- * @param {?} di
+ * @param {?} hostTNode The node that is requesting a ViewContainerRef
+ * @param {?} hostView The view to which the node belongs
  * @return {?} The ViewContainerRef instance to use
  */
-function getOrCreateContainerRef(di) {
-    if (!di.viewContainerRef) {
-        /** @type {?} */
-        const hostLNode = /** @type {?} */ (getPreviousOrParentNode());
-        /** @type {?} */
-        const hostTNode = /** @type {?} */ (getPreviousOrParentTNode());
-        ngDevMode && assertNodeOfPossibleTypes(hostTNode, 0 /* Container */, 3 /* Element */, 4 /* ElementContainer */);
-        /** @type {?} */
-        const hostView = di.view;
-        /** @type {?} */
-        const lContainer = createLContainer(hostView, true);
-        /** @type {?} */
-        const comment = hostView[RENDERER].createComment(ngDevMode ? 'container' : '');
-        /** @type {?} */
-        const lContainerNode = createLNodeObject(0 /* Container */, hostLNode.nodeInjector, comment, lContainer);
-        lContainer[RENDER_PARENT] = getRenderParent(hostTNode, hostView);
-        appendChild(comment, hostTNode, hostView);
-        if (!hostTNode.dynamicContainerNode) {
-            hostTNode.dynamicContainerNode =
-                createTNode(0 /* Container */, -1, null, null, hostTNode, null);
-        }
-        hostLNode.dynamicLContainerNode = lContainerNode;
-        addToViewTree(hostView, /** @type {?} */ (hostTNode.index), lContainer);
-        di.viewContainerRef = new ViewContainerRef$1(lContainer, /** @type {?} */ (hostTNode.dynamicContainerNode), hostTNode, hostView);
+function createContainerRef(hostTNode, hostView) {
+    /** @type {?} */
+    const hostLNode = getLNode(hostTNode, hostView);
+    ngDevMode && assertNodeOfPossibleTypes(hostTNode, 0 /* Container */, 3 /* Element */, 4 /* ElementContainer */);
+    /** @type {?} */
+    const lContainer = createLContainer(hostView, true);
+    /** @type {?} */
+    const comment = hostView[RENDERER].createComment(ngDevMode ? 'container' : '');
+    /** @type {?} */
+    const lContainerNode = createLNodeObject(0 /* Container */, hostLNode.nodeInjector, comment, lContainer);
+    lContainer[RENDER_PARENT] = getRenderParent(hostTNode, hostView);
+    appendChild(comment, hostTNode, hostView);
+    if (!hostTNode.dynamicContainerNode) {
+        hostTNode.dynamicContainerNode =
+            createTNode(0 /* Container */, -1, null, null, hostTNode, null);
     }
-    return di.viewContainerRef;
+    hostLNode.dynamicLContainerNode = lContainerNode;
+    addToViewTree(hostView, /** @type {?} */ (hostTNode.index), lContainer);
+    return new ViewContainerRef$1(lContainer, /** @type {?} */ (hostTNode.dynamicContainerNode), hostTNode, hostView);
 }
 class NodeInjector {
     /**
@@ -9639,16 +9611,16 @@ class NodeInjector {
      */
     get(token) {
         if (token === TemplateRef) {
-            return getOrCreateTemplateRef(this._lInjector);
+            return createTemplateRef(this._lInjector.tNode, this._lInjector.view);
         }
         if (token === ViewContainerRef) {
-            return getOrCreateContainerRef(this._lInjector);
+            return createContainerRef(this._lInjector.tNode, this._lInjector.view);
         }
         if (token === ElementRef) {
-            return getOrCreateElementRef(this._lInjector);
+            return createElementRef(this._lInjector.tNode, this._lInjector.view);
         }
         if (token === ChangeDetectorRef) {
-            return getOrCreateChangeDetectorRef(this._lInjector, null);
+            return createViewRef(this._lInjector.tNode, this._lInjector.view, null);
         }
         if (token === Renderer2) {
             return getOrCreateRenderer2(this._lInjector);
@@ -9681,7 +9653,7 @@ class ViewContainerRef$1 extends ViewContainerRef {
     get element() {
         /** @type {?} */
         const injector = getOrCreateNodeInjectorForNode(this._getHostNode(), this._hostTNode, this._hostView);
-        return getOrCreateElementRef(injector);
+        return createElementRef(injector.tNode, injector.view);
     }
     /**
      * @return {?}
@@ -9836,24 +9808,19 @@ class ViewContainerRef$1 extends ViewContainerRef {
     _getHostNode() { return getLNode(this._hostTNode, this._hostView); }
 }
 /**
- * Creates a TemplateRef and stores it on the injector. Or, if the TemplateRef already
- * exists, retrieves the existing TemplateRef.
+ * Creates a TemplateRef and stores it on the injector.
  *
  * @template T
- * @param {?} di The node injector where we should store a created TemplateRef
+ * @param {?} hostTNode The node that is requesting a TemplateRef
+ * @param {?} hostView The view to which the node belongs
  * @return {?} The TemplateRef instance to use
  */
-function getOrCreateTemplateRef(di) {
-    if (!di.templateRef) {
-        /** @type {?} */
-        const hostNode = /** @type {?} */ (getPreviousOrParentNode());
-        /** @type {?} */
-        const hostTNode = /** @type {?} */ (getPreviousOrParentTNode());
-        ngDevMode && assertNodeType(hostTNode, 0 /* Container */);
-        ngDevMode && assertDefined(hostTNode.tViews, 'TView must be allocated');
-        di.templateRef = new TemplateRef$1(di.view, getOrCreateElementRef(di), /** @type {?} */ (hostTNode.tViews), getRenderer(), /** @type {?} */ ((hostNode.data))[QUERIES]);
-    }
-    return di.templateRef;
+function createTemplateRef(hostTNode, hostView) {
+    /** @type {?} */
+    const hostNode = getLNode(hostTNode, hostView);
+    ngDevMode && assertNodeType(hostTNode, 0 /* Container */);
+    ngDevMode && assertDefined(hostTNode.tViews, 'TView must be allocated');
+    return new TemplateRef$1(hostView, createElementRef(hostTNode, hostView), /** @type {?} */ (hostTNode.tViews), getRenderer(), /** @type {?} */ ((hostNode.data))[QUERIES]);
 }
 /**
  * @template T
@@ -9927,7 +9894,7 @@ class TemplateRef$1 extends TemplateRef {
         }
         renderEmbeddedTemplate(lView, this._tView, context, 1 /* Create */);
         /** @type {?} */
-        const viewRef = new ViewRef(lView, context);
+        const viewRef = new ViewRef(lView, context, -1);
         viewRef._tViewNode = /** @type {?} */ (lView[HOST_NODE]);
         return viewRef;
     }
@@ -9940,9 +9907,7 @@ class TemplateRef$1 extends TemplateRef {
  * @return {?}
  */
 function templateRefExtractor(tNode, currentView) {
-    /** @type {?} */
-    const lNode = /** @type {?} */ (getLNode(tNode, currentView));
-    return getOrCreateTemplateRef(getOrCreateNodeInjectorForNode(lNode, tNode, currentView));
+    return createTemplateRef(tNode, currentView);
 }
 
 /**
@@ -11916,16 +11881,15 @@ function getIdxOfMatchingDirective(tNode, currentView, type) {
     return null;
 }
 /**
- * @param {?} nodeInjector
  * @param {?} tNode
  * @param {?} currentView
  * @param {?} read
  * @param {?} directiveIdx
  * @return {?}
  */
-function readFromNodeInjector(nodeInjector, tNode, currentView, read, directiveIdx) {
+function readFromNodeInjector(tNode, currentView, read, directiveIdx) {
     if (read instanceof ReadFromInjectorFn) {
-        return read.read(nodeInjector, tNode, directiveIdx);
+        return read.read(tNode, currentView, directiveIdx);
     }
     else {
         /** @type {?} */
@@ -11944,8 +11908,6 @@ function readFromNodeInjector(nodeInjector, tNode, currentView, read, directiveI
 function add(query, tNode) {
     /** @type {?} */
     const currentView = _getViewData();
-    /** @type {?} */
-    const nodeInjector = getOrCreateNodeInjectorForNode(getLNode(tNode, currentView), tNode, currentView);
     while (query) {
         /** @type {?} */
         const predicate = query.predicate;
@@ -11956,7 +11918,7 @@ function add(query, tNode) {
             const directiveIdx = getIdxOfMatchingDirective(tNode, currentView, type);
             if (directiveIdx !== null) {
                 /** @type {?} */
-                const result = readFromNodeInjector(nodeInjector, tNode, currentView, predicate.read || type, directiveIdx);
+                const result = readFromNodeInjector(tNode, currentView, predicate.read || type, directiveIdx);
                 if (result !== null) {
                     addMatch(query, result);
                 }
@@ -11973,7 +11935,7 @@ function add(query, tNode) {
                     // note that queries using name selector must specify read strategy
                     ngDevMode && assertDefined(predicate.read, 'the node should have a predicate');
                     /** @type {?} */
-                    const result = readFromNodeInjector(nodeInjector, tNode, currentView, /** @type {?} */ ((predicate.read)), directiveIdx);
+                    const result = readFromNodeInjector(tNode, currentView, /** @type {?} */ ((predicate.read)), directiveIdx);
                     if (result !== null) {
                         addMatch(query, result);
                     }
@@ -14615,7 +14577,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-beta.6+25.sha-64aa670');
+const VERSION = new Version('7.0.0-beta.6+26.sha-d5f47d6');
 
 /**
  * @fileoverview added by tsickle
