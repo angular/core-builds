@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
+import { AnimationContext } from './animations/interfaces';
 import { InitialStylingFlags } from './interfaces/definition';
 import { LElementNode } from './interfaces/node';
 import { Renderer3 } from './interfaces/renderer';
@@ -111,36 +112,41 @@ import { Renderer3 } from './interfaces/renderer';
  * `updateStyleProp` or `updateClassProp` cannot be called with a new property (only
  * `updateStylingMap` can include new CSS properties that will be added to the context).
  */
-export interface StylingContext extends Array<InitialStyles | number | string | boolean | LElementNode | StyleSanitizeFn | null> {
+export interface StylingContext extends Array<InitialStyles | number | string | boolean | LElementNode | StyleSanitizeFn | AnimationContext | null> {
     /**
      * Location of element that is used as a target for this context.
      */
-    [0]: LElementNode | null;
+    [StylingIndex.ElementPosition]: LElementNode | null;
+    /**
+     * Location of animation context (which contains the active players) for this element styling
+     * context.
+     */
+    [StylingIndex.AnimationContext]: AnimationContext | null;
     /**
      * The style sanitizer that is used within this context
      */
-    [1]: StyleSanitizeFn | null;
+    [StylingIndex.StyleSanitizerPosition]: StyleSanitizeFn | null;
     /**
      * Location of initial data shared by all instances of this style.
      */
-    [2]: InitialStyles;
+    [StylingIndex.InitialStylesPosition]: InitialStyles;
     /**
      * A numeric value representing the configuration status (whether the context is dirty or not)
      * mixed together (using bit shifting) with a index value which tells the starting index value
      * of where the multi style entries begin.
      */
-    [3]: number;
+    [StylingIndex.MasterFlagPosition]: number;
     /**
      * A numeric value representing the class index offset value. Whenever a single class is
      * applied (using `elementClassProp`) it should have an styling index value that doesn't
      * need to take into account any style values that exist in the context.
      */
-    [4]: number;
+    [StylingIndex.ClassOffsetPosition]: number;
     /**
      * The last CLASS STRING VALUE that was interpreted by elementStylingMap. This is cached
      * So that the algorithm can exit early incase the string has not changed.
      */
-    [5]: string | null;
+    [StylingIndex.CachedCssClassString]: string | null;
 }
 /**
  * The initial styles is populated whether or not there are any initial styles passed into
@@ -168,12 +174,13 @@ export declare const enum StylingFlags {
 /** Used as numeric pointer values to determine what cells to update in the `StylingContext` */
 export declare const enum StylingIndex {
     ElementPosition = 0,
-    StyleSanitizerPosition = 1,
-    InitialStylesPosition = 2,
-    MasterFlagPosition = 3,
-    ClassOffsetPosition = 4,
-    CachedCssClassString = 5,
-    SingleStylesStartPosition = 6,
+    AnimationContext = 1,
+    StyleSanitizerPosition = 2,
+    InitialStylesPosition = 3,
+    MasterFlagPosition = 4,
+    ClassOffsetPosition = 5,
+    CachedCssClassString = 6,
+    SingleStylesStartPosition = 7,
     FlagsOffset = 0,
     PropertyOffset = 1,
     ValueOffset = 2,
@@ -188,6 +195,7 @@ export declare const enum StylingIndex {
  * (instructions.ts has logic for caching this).
  */
 export declare function allocStylingContext(lElement: LElementNode | null, templateStyleContext: StylingContext): StylingContext;
+export declare function createEmptyStylingContext(element?: LElementNode | null, sanitizer?: StyleSanitizeFn | null, initialStylingValues?: InitialStyles): StylingContext;
 /**
  * Creates a styling context template where styling information is stored.
  * Any styles that are later referenced using `updateStyleProp` must be
