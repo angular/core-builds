@@ -589,13 +589,6 @@ export declare function scheduleTick<T>(rootContext: RootContext): void;
  */
 export declare function tick<T>(component: T): void;
 /**
- * Retrieve the root view from any component by walking the parent `LViewData` until
- * reaching the root `LViewData`.
- *
- * @param component any component
- */
-export declare function getRootView(component: any): LViewData;
-/**
  * Synchronously perform change detection on a component (and possibly its sub-components).
  *
  * This function triggers change detection in a synchronous way on a component. There should
