@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.6+37.sha-7f1cace
+ * @license Angular v7.0.0-beta.6+51.sha-b8422b4
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -159,11 +159,11 @@ function getInjectorDef(type) {
  * @usageNotes
  * ### Basic Example
  *
- * #### Plain InjectionToken
+ * ### Plain InjectionToken
  *
  * {@example core/di/ts/injector_spec.ts region='InjectionToken'}
  *
- * #### Tree-shakable InjectionToken
+ * ### Tree-shakable InjectionToken
  *
  * {@example core/di/ts/injector_spec.ts region='ShakableInjectionToken'}
  *
@@ -563,6 +563,9 @@ function unwrapResponse(response) {
  *
  * See {@link Component#encapsulation encapsulation}.
  *
+ * @usageNotes
+ * ### Example
+ * {@example core/ts/metadata/encapsulation.ts region='longform'}
  */
 var ViewEncapsulation;
 (function (ViewEncapsulation) {
@@ -594,9 +597,6 @@ var ViewEncapsulation;
      * For the DOM this means using modern [Shadow
      * DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
      * creating a ShadowRoot for Component's Host Element.
-     *
-     * ### Example
-     * {@example core/ts/metadata/encapsulation.ts region='longform'}
      */
     ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
 })(ViewEncapsulation || (ViewEncapsulation = {}));
@@ -11713,7 +11713,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('7.0.0-beta.6+37.sha-7f1cace');
+const VERSION = new Version('7.0.0-beta.6+51.sha-b8422b4');
 
 /**
  * @license
