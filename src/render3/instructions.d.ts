@@ -220,8 +220,6 @@ export declare function resolveDirective(def: DirectiveDefInternal<any>, valueIn
 /** Stores index of directive and host element so it will be queued for binding refresh during CD.
  */
 export declare function queueHostBindingForCheck(dirIndex: number, hostVars: number): void;
-/** Sets the context for a ChangeDetectorRef to the given instance. */
-export declare function initChangeDetectorIfExisting(injector: LInjector | null, instance: any, view: LViewData): void;
 /**
  * Creates a TView instance
  *
@@ -590,13 +588,6 @@ export declare function scheduleTick<T>(rootContext: RootContext): void;
  * be changed when calling `renderComponent` and providing the `scheduler` option.
  */
 export declare function tick<T>(component: T): void;
-/**
- * Retrieve the root view from any component by walking the parent `LViewData` until
- * reaching the root `LViewData`.
- *
- * @param component any component
- */
-export declare function getRootView(component: any): LViewData;
 /**
  * Synchronously perform change detection on a component (and possibly its sub-components).
  *

@@ -13,11 +13,13 @@ import { LViewData } from './interfaces/view';
 export interface viewEngine_ChangeDetectorRef_interface extends viewEngine_ChangeDetectorRef {
 }
 export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T>, viewEngine_InternalViewRef, viewEngine_ChangeDetectorRef_interface {
+    private _context;
+    private _componentIndex;
     private _appRef;
     private _viewContainerRef;
-    context: T;
     rootNodes: any[];
-    constructor(_view: LViewData, context: T | null);
+    constructor(_view: LViewData, _context: T | null, _componentIndex: number);
+    readonly context: T;
     readonly destroyed: boolean;
     destroy(): void;
     onDestroy(callback: Function): void;
@@ -199,4 +201,5 @@ export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T>, viewEn
     attachToViewContainerRef(vcRef: viewEngine_ViewContainerRef): void;
     detachFromAppRef(): void;
     attachToAppRef(appRef: ApplicationRef): void;
+    private _lookUpContext;
 }

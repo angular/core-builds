@@ -5,10 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { ChangeDetectorRef } from '../../change_detection/change_detector_ref';
-import { ElementRef } from '../../linker/element_ref';
-import { TemplateRef } from '../../linker/template_ref';
-import { ViewContainerRef } from '../../linker/view_container_ref';
 import { TContainerNode, TElementContainerNode, TElementNode } from './node';
 import { LViewData } from './view';
 export interface LInjector {
@@ -62,17 +58,5 @@ export interface LInjector {
     cbf5: number;
     cbf6: number;
     cbf7: number;
-    /** Stores the TemplateRef so subsequent injections of the TemplateRef get the same instance. */
-    templateRef: TemplateRef<any> | null;
-    /** Stores the ViewContainerRef so subsequent injections of the ViewContainerRef get the same
-     * instance. */
-    viewContainerRef: ViewContainerRef | null;
-    /** Stores the ElementRef so subsequent injections of the ElementRef get the same instance. */
-    elementRef: ElementRef | null;
-    /**
-     * Stores the ChangeDetectorRef so subsequent injections of the ChangeDetectorRef get the
-     * same instance.
-     */
-    changeDetectorRef: ChangeDetectorRef | null;
 }
 export declare const unusedValueExportToPlacateAjd = 1;
