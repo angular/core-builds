@@ -51,6 +51,7 @@ export declare function getCurrentView(): OpaqueViewState;
 export declare function restoreView(viewToRestore: OpaqueViewState): void;
 export declare function getPreviousOrParentNode(): LNode | null;
 export declare function getPreviousOrParentTNode(): TNode;
+export declare function setEnvironment(tNode: TNode, view: LViewData): void;
 /**
  * Query instructions can ask for "current queries" in 2 different cases:
  * - when creating view queries (at the root of a component view, before any node is created - in

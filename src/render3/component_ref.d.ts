@@ -15,7 +15,6 @@ import { NgModuleRef as viewEngine_NgModuleRef } from '../linker/ng_module_facto
 import { RendererFactory2 } from '../render/api';
 import { Type } from '../type';
 import { ComponentDefInternal } from './interfaces/definition';
-import { RElement } from './interfaces/renderer';
 import { LViewData, RootContext } from './interfaces/view';
 import { ViewRef } from './view_ref';
 export declare class ComponentFactoryResolver extends viewEngine_ComponentFactoryResolver {
@@ -55,6 +54,14 @@ export declare class ComponentFactory<T> extends viewEngine_ComponentFactory<T> 
     create(injector: Injector, projectableNodes?: any[][] | undefined, rootSelectorOrNode?: any, ngModule?: viewEngine_NgModuleRef<any> | undefined): viewEngine_ComponentRef<T>;
 }
 /**
+ * Creates a ComponentFactoryResolver and stores it on the injector. Or, if the
+ * ComponentFactoryResolver
+ * already exists, retrieves the existing ComponentFactoryResolver.
+ *
+ * @returns The ComponentFactoryResolver instance to use
+ */
+export declare function injectComponentFactoryResolver(): viewEngine_ComponentFactoryResolver;
+/**
  * Represents an instance of a Component created via a {@link ComponentFactory}.
  *
  * `ComponentRef` provides access to the Component Instance as well other objects related to this
@@ -63,14 +70,14 @@ export declare class ComponentFactory<T> extends viewEngine_ComponentFactory<T> 
  *
  */
 export declare class ComponentRef<T> extends viewEngine_ComponentRef<T> {
+    location: viewEngine_ElementRef;
     destroyCbs: (() => void)[] | null;
-    location: viewEngine_ElementRef<any>;
     injector: Injector;
     instance: T;
     hostView: ViewRef<T>;
     changeDetectorRef: ViewEngine_ChangeDetectorRef;
     componentType: Type<T>;
-    constructor(componentType: Type<T>, instance: T, rootView: LViewData, injector: Injector, hostNode: RElement);
+    constructor(componentType: Type<T>, instance: T, rootView: LViewData, injector: Injector, location: viewEngine_ElementRef);
     destroy(): void;
     onDestroy(callback: () => void): void;
 }
