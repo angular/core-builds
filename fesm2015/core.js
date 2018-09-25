@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.6+57.sha-cf095d9
+ * @license Angular v7.0.0-beta.6+58.sha-0c34471
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1819,7 +1819,7 @@ function getLNodeFromViewData(lViewData, lElementIndex) {
  * Returns a collection of directive index values that are used on the element
  * (which is referenced by the lNodeIndex)
  */
-function discoverDirectiveIndices(lViewData, lNodeIndex) {
+function discoverDirectiveIndices(lViewData, lNodeIndex, includeComponents) {
     const directivesAcrossView = lViewData[DIRECTIVES];
     const tNode = lViewData[TVIEW].data[lNodeIndex];
     if (directivesAcrossView && directivesAcrossView.length) {
@@ -1839,12 +1839,20 @@ function discoverDirectiveIndices(lViewData, lNodeIndex) {
     }
     return null;
 }
-function discoverDirectives(lViewData, directiveIndices) {
+/**
+ * Returns a list of directives extracted from the given view based on the
+ * provided list of directive index values.
+ *
+ * @param lViewData The target view data
+ * @param indices A collection of directive index values which will be used to
+ *    figure out the directive instances
+ */
+function discoverDirectives(lViewData, indices) {
     const directives = [];
     const directiveInstances = lViewData[DIRECTIVES];
     if (directiveInstances) {
-        for (let i = 0; i < directiveIndices.length; i++) {
-            const directiveIndex = directiveIndices[i];
+        for (let i = 0; i < indices.length; i++) {
+            const directiveIndex = indices[i];
             const directive = directiveInstances[directiveIndex];
             directives.push(directive);
         }
@@ -2281,7 +2289,7 @@ function isComponent(tNode) {
  *
  * @param component any component
  */
-function getRootView(target) {
+function getRootView$1(target) {
     ngDevMode && assertDefined(target, 'component');
     let lViewData = Array.isArray(target) ? target : readPatchedLViewData(target);
     while (lViewData && !(lViewData[FLAGS] & 64 /* IsRoot */)) {
@@ -2289,8 +2297,8 @@ function getRootView(target) {
     }
     return lViewData;
 }
-function getRootContext(viewOrComponent) {
-    return getRootView(viewOrComponent)[CONTEXT];
+function getRootContext$1(viewOrComponent) {
+    return getRootView$1(viewOrComponent)[CONTEXT];
 }
 
 /**
@@ -6164,8 +6172,8 @@ function LifecycleHooksFeature(component, def) {
  *
  * @param component any component
  */
-function getRootContext$1(component) {
-    const rootContext = getRootView(component)[CONTEXT];
+function getRootContext$2(component) {
+    const rootContext = getRootView$1(component)[CONTEXT];
     ngDevMode && assertDefined(rootContext, 'rootContext');
     return rootContext;
 }
@@ -6186,7 +6194,7 @@ function getRootContext$1(component) {
  * @returns Promise which resolves when the component is rendered.
  */
 function whenRendered(component) {
-    return getRootContext$1(component).clean;
+    return getRootContext$2(component).clean;
 }
 
 /**
@@ -11713,7 +11721,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('7.0.0-beta.6+57.sha-cf095d9');
+const VERSION = new Version('7.0.0-beta.6+58.sha-0c34471');
 
 /**
  * @license
@@ -19844,7 +19852,7 @@ function addPlayer(ref, player) {
         }
         player.destroy();
     });
-    const rootContext = getRootContext(elementContext.lViewData);
+    const rootContext = getRootContext$1(elementContext.lViewData);
     const playerHandler = rootContext.playerHandler || (rootContext.playerHandler = new CorePlayerHandler());
     playerHandler.queuePlayer(player, ref);
     const nothingScheduled = rootContext.flags === 0 /* Empty */;
