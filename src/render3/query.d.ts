@@ -5,10 +5,14 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { ElementRef as ViewEngine_ElementRef } from '../linker/element_ref';
 import { QueryList as viewEngine_QueryList } from '../linker/query_list';
+import { TemplateRef as ViewEngine_TemplateRef } from '../linker/template_ref';
+import { ViewContainerRef as ViewEngine_ViewContainerRef } from '../linker/view_container_ref';
 import { Type } from '../type';
-import { TContainerNode, TElementContainerNode, TElementNode } from './interfaces/node';
+import { TContainerNode, TElementContainerNode, TElementNode, TNode } from './interfaces/node';
 import { LQueries, QueryReadType } from './interfaces/query';
+import { LViewData } from './interfaces/view';
 /**
  * A predicate which determines if a given element/directive should be included in the query
  * results.
@@ -91,3 +95,11 @@ export declare function query<T>(memoryIndex: number | null, predicate: Type<any
  * Returns true if a query got dirty during change detection, false otherwise.
  */
 export declare function queryRefresh(queryList: QueryList<any>): boolean;
+export declare class ReadFromInjectorFn<T> {
+    readonly read: (tNode: TNode, view: LViewData, directiveIndex?: number) => T;
+    constructor(read: (tNode: TNode, view: LViewData, directiveIndex?: number) => T);
+}
+export declare const QUERY_READ_TEMPLATE_REF: (TemplateRefConstructor: typeof ViewEngine_TemplateRef, ElementRefConstructor: typeof ViewEngine_ElementRef) => any;
+export declare const QUERY_READ_CONTAINER_REF: (ViewContainerRefConstructor: typeof ViewEngine_ViewContainerRef, ElementRefConstructor: typeof ViewEngine_ElementRef) => QueryReadType<ViewEngine_ViewContainerRef>;
+export declare const QUERY_READ_ELEMENT_REF: (ElementRefConstructor: typeof ViewEngine_ElementRef) => QueryReadType<ViewEngine_ElementRef<any>>;
+export declare const QUERY_READ_FROM_NODE: (TemplateRefConstructor: typeof ViewEngine_TemplateRef, ElementRefConstructor: typeof ViewEngine_ElementRef) => QueryReadType<any>;
