@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.6+57.sha-cf095d9
+ * @license Angular v7.0.0-beta.6+58.sha-0c34471
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2269,9 +2269,10 @@ function getLNodeFromViewData(lViewData, lElementIndex) {
  * (which is referenced by the lNodeIndex)
  * @param {?} lViewData
  * @param {?} lNodeIndex
+ * @param {?=} includeComponents
  * @return {?}
  */
-function discoverDirectiveIndices(lViewData, lNodeIndex) {
+function discoverDirectiveIndices(lViewData, lNodeIndex, includeComponents) {
     /** @type {?} */
     const directivesAcrossView = lViewData[DIRECTIVES];
     /** @type {?} */
@@ -2296,19 +2297,23 @@ function discoverDirectiveIndices(lViewData, lNodeIndex) {
     return null;
 }
 /**
- * @param {?} lViewData
- * @param {?} directiveIndices
+ * Returns a list of directives extracted from the given view based on the
+ * provided list of directive index values.
+ *
+ * @param {?} lViewData The target view data
+ * @param {?} indices A collection of directive index values which will be used to
+ *    figure out the directive instances
  * @return {?}
  */
-function discoverDirectives(lViewData, directiveIndices) {
+function discoverDirectives(lViewData, indices) {
     /** @type {?} */
     const directives = [];
     /** @type {?} */
     const directiveInstances = lViewData[DIRECTIVES];
     if (directiveInstances) {
-        for (let i = 0; i < directiveIndices.length; i++) {
+        for (let i = 0; i < indices.length; i++) {
             /** @type {?} */
-            const directiveIndex = directiveIndices[i];
+            const directiveIndex = indices[i];
             /** @type {?} */
             const directive = directiveInstances[directiveIndex];
             directives.push(directive);
@@ -2487,6 +2492,11 @@ function callHooks(data, arr) {
         (/** @type {?} */ (arr[i + 1])).call(data[/** @type {?} */ (arr[i])]);
     }
 }
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
 
 /**
  * @fileoverview added by tsickle
@@ -2916,7 +2926,7 @@ function isComponent(tNode) {
  * @param {?} target
  * @return {?}
  */
-function getRootView(target) {
+function getRootView$1(target) {
     ngDevMode && assertDefined(target, 'component');
     /** @type {?} */
     let lViewData = Array.isArray(target) ? (/** @type {?} */ (target)) : /** @type {?} */ ((readPatchedLViewData(target)));
@@ -2929,8 +2939,8 @@ function getRootView(target) {
  * @param {?} viewOrComponent
  * @return {?}
  */
-function getRootContext(viewOrComponent) {
-    return /** @type {?} */ (getRootView(viewOrComponent)[CONTEXT]);
+function getRootContext$1(viewOrComponent) {
+    return /** @type {?} */ (getRootView$1(viewOrComponent)[CONTEXT]);
 }
 
 /**
@@ -7878,9 +7888,9 @@ function LifecycleHooksFeature(component, def) {
  * @param {?} component any component
  * @return {?}
  */
-function getRootContext$1(component) {
+function getRootContext$2(component) {
     /** @type {?} */
-    const rootContext = /** @type {?} */ (getRootView(component)[CONTEXT]);
+    const rootContext = /** @type {?} */ (getRootView$1(component)[CONTEXT]);
     ngDevMode && assertDefined(rootContext, 'rootContext');
     return rootContext;
 }
@@ -7901,7 +7911,7 @@ function getRootContext$1(component) {
  * @return {?} Promise which resolves when the component is rendered.
  */
 function whenRendered(component) {
-    return getRootContext$1(component).clean;
+    return getRootContext$2(component).clean;
 }
 
 /**
@@ -14740,7 +14750,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-beta.6+57.sha-cf095d9');
+const VERSION = new Version('7.0.0-beta.6+58.sha-0c34471');
 
 /**
  * @fileoverview added by tsickle
@@ -26004,7 +26014,7 @@ function addPlayer(ref, player) {
         player.destroy();
     });
     /** @type {?} */
-    const rootContext = getRootContext(elementContext.lViewData);
+    const rootContext = getRootContext$1(elementContext.lViewData);
     /** @type {?} */
     const playerHandler = rootContext.playerHandler || (rootContext.playerHandler = new CorePlayerHandler());
     playerHandler.queuePlayer(player, ref);
