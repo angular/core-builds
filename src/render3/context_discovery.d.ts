@@ -82,4 +82,18 @@ export declare function readPatchedData(target: any): LViewData | LContext | nul
 export declare function readPatchedLViewData(target: any): LViewData | null;
 export declare function isComponentInstance(instance: any): boolean;
 export declare function isDirectiveInstance(instance: any): boolean;
+/**
+ * Returns a collection of directive index values that are used on the element
+ * (which is referenced by the lNodeIndex)
+ */
+export declare function discoverDirectiveIndices(lViewData: LViewData, lNodeIndex: number, includeComponents?: boolean): number[] | null;
+/**
+ * Returns a list of directives extracted from the given view based on the
+ * provided list of directive index values.
+ *
+ * @param lViewData The target view data
+ * @param indices A collection of directive index values which will be used to
+ *    figure out the directive instances
+ */
+export declare function discoverDirectives(lViewData: LViewData, indices: number[]): number[] | null;
 export declare function readElementValue(value: LElementNode | any[]): LElementNode;
