@@ -7,8 +7,9 @@
  */
 import { QueryList as viewEngine_QueryList } from '../linker/query_list';
 import { Type } from '../type';
-import { TContainerNode, TElementContainerNode, TElementNode } from './interfaces/node';
+import { TContainerNode, TElementContainerNode, TElementNode, TNode } from './interfaces/node';
 import { LQueries, QueryReadType } from './interfaces/query';
+import { LViewData } from './interfaces/view';
 /**
  * A predicate which determines if a given element/directive should be included in the query
  * results.
@@ -91,3 +92,7 @@ export declare function query<T>(memoryIndex: number | null, predicate: Type<any
  * Returns true if a query got dirty during change detection, false otherwise.
  */
 export declare function queryRefresh(queryList: QueryList<any>): boolean;
+export declare class ReadFromInjectorFn<T> {
+    readonly read: (tNode: TNode, view: LViewData, directiveIndex?: number) => T;
+    constructor(read: (tNode: TNode, view: LViewData, directiveIndex?: number) => T);
+}
