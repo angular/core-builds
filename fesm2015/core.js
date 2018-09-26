@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.6+79.sha-d191085
+ * @license Angular v7.0.0-beta.6+80.sha-15a2b8f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -9343,18 +9343,6 @@ function createTemplateRef(TemplateRefToken, ElementRefToken, hostTNode, hostVie
     ngDevMode && assertDefined(hostTNode.tViews, 'TView must be allocated');
     return new R3TemplateRef(hostView, createElementRef(ElementRefToken, hostTNode, hostView), /** @type {?} */ (hostTNode.tViews), getRenderer(), /** @type {?} */ ((hostNode.data))[QUERIES]);
 }
-/**
- * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
- * `<ng-template>` element.
- * @param {?} TemplateRefToken
- * @param {?} ElementRefToken
- * @return {?}
- */
-function templateRefExtractor(TemplateRefToken, ElementRefToken) {
-    return (tNode, currentView) => {
-        return createTemplateRef(TemplateRefToken, ElementRefToken, tNode, currentView);
-    };
-}
 /** @type {?} */
 let R3ViewContainerRef;
 /**
@@ -12122,6 +12110,77 @@ class ReadFromInjectorFn {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
+/**
+ * Represents an embedded template that can be used to instantiate embedded views.
+ * To instantiate embedded views based on a template, use the `ViewContainerRef`
+ * method `createEmbeddedView()`.
+ *
+ * Access a `TemplateRef` instance by placing a directive on an `<ng-template>`
+ * element (or directive prefixed with `*`). The `TemplateRef` for the embedded view
+ * is injected into the constructor of the directive,
+ * using the `TemplateRef` token.
+ *
+ * You can also use a `Query` to find a `TemplateRef` associated with
+ * a component or a directive.
+ *
+ * @see `ViewContainerRef`
+ * @see [Navigate the Component Tree with DI](guide/dependency-injection-navtree)
+ *
+ * @abstract
+ * @template C
+ */
+class TemplateRef {
+}
+/**
+ * \@internal
+ */
+TemplateRef.__NG_ELEMENT_ID__ = () => R3_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef);
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/**
+ * Represents a container where one or more views can be attached to a component.
+ *
+ * Can contain *host views* (created by instantiating a
+ * component with the `createComponent()` method), and *embedded views*
+ * (created by instantiating a `TemplateRef` with the `createEmbeddedView()` method).
+ *
+ * A view container instance can contain other view containers,
+ * creating a [view hierarchy](guide/glossary#view-tree).
+ *
+ * @see `ComponentRef`
+ * @see `EmbeddedViewRef`
+ *
+ * @abstract
+ */
+class ViewContainerRef {
+}
+/**
+ * \@internal
+ */
+ViewContainerRef.__NG_ELEMENT_ID__ = () => R3_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef);
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/**
+ * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
+ * `<ng-template>` element.
+ * @param {?} tNode
+ * @param {?} currentView
+ * @return {?}
+ */
+function templateRefExtractor(tNode, currentView) {
+    return createTemplateRef(TemplateRef, ElementRef, tNode, currentView);
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
 
 /**
  * @fileoverview added by tsickle
@@ -14530,7 +14589,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-beta.6+79.sha-d191085');
+const VERSION = new Version('7.0.0-beta.6+80.sha-15a2b8f');
 
 /**
  * @fileoverview added by tsickle
@@ -17803,62 +17862,6 @@ function checkNotEmpty(value, modulePath, exportName) {
     }
     return value;
 }
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * Represents an embedded template that can be used to instantiate embedded views.
- * To instantiate embedded views based on a template, use the `ViewContainerRef`
- * method `createEmbeddedView()`.
- *
- * Access a `TemplateRef` instance by placing a directive on an `<ng-template>`
- * element (or directive prefixed with `*`). The `TemplateRef` for the embedded view
- * is injected into the constructor of the directive,
- * using the `TemplateRef` token.
- *
- * You can also use a `Query` to find a `TemplateRef` associated with
- * a component or a directive.
- *
- * @see `ViewContainerRef`
- * @see [Navigate the Component Tree with DI](guide/dependency-injection-navtree)
- *
- * @abstract
- * @template C
- */
-class TemplateRef {
-}
-/**
- * \@internal
- */
-TemplateRef.__NG_ELEMENT_ID__ = () => R3_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef);
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * Represents a container where one or more views can be attached to a component.
- *
- * Can contain *host views* (created by instantiating a
- * component with the `createComponent()` method), and *embedded views*
- * (created by instantiating a `TemplateRef` with the `createEmbeddedView()` method).
- *
- * A view container instance can contain other view containers,
- * creating a [view hierarchy](guide/glossary#view-tree).
- *
- * @see `ComponentRef`
- * @see `EmbeddedViewRef`
- *
- * @abstract
- */
-class ViewContainerRef {
-}
-/**
- * \@internal
- */
-ViewContainerRef.__NG_ELEMENT_ID__ = () => R3_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef);
 
 /**
  * @fileoverview added by tsickle
