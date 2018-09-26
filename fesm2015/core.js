@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.9+1.sha-5881f34
+ * @license Angular v6.1.9+18.sha-c12e553
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -14712,7 +14712,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.9+1.sha-5881f34');
+const VERSION = new Version('6.1.9+18.sha-c12e553');
 
 /**
  * @license
