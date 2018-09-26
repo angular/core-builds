@@ -1,0 +1,22 @@
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+import { injectChangeDetectorRef, injectElementRef, injectTemplateRef, injectViewContainerRef } from '../../render3/view_engine_compatibility';
+/** @type {?} */
+export const R3_ELEMENT_REF_FACTORY = injectElementRef;
+/** @type {?} */
+export const R3_TEMPLATE_REF_FACTORY = injectTemplateRef;
+/** @type {?} */
+export const R3_CHANGE_DETECTOR_REF_FACTORY = injectChangeDetectorRef;
+/** @type {?} */
+export const R3_VIEW_CONTAINER_REF_FACTORY = injectViewContainerRef;
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaXZ5X3N3aXRjaF9vbi5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uLy4uLy4uLy4uL3BhY2thZ2VzL2NvcmUvc3JjL2l2eV9zd2l0Y2gvcnVudGltZS9pdnlfc3dpdGNoX29uLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7O0FBUUEsT0FBTyxFQUFDLHVCQUF1QixFQUFFLGdCQUFnQixFQUFFLGlCQUFpQixFQUFFLHNCQUFzQixFQUFDLE1BQU0seUNBQXlDLENBQUM7O0FBRTdJLGFBQWEsc0JBQXNCLEdBQUcsZ0JBQWdCLENBQUM7O0FBQ3ZELGFBQWEsdUJBQXVCLEdBQUcsaUJBQWlCLENBQUM7O0FBQ3pELGFBQWEsOEJBQThCLEdBQUcsdUJBQXVCLENBQUM7O0FBQ3RFLGFBQWEsNkJBQTZCLEdBQUcsc0JBQXNCLENBQUMiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIEBsaWNlbnNlXG4gKiBDb3B5cmlnaHQgR29vZ2xlIEluYy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBVc2Ugb2YgdGhpcyBzb3VyY2UgY29kZSBpcyBnb3Zlcm5lZCBieSBhbiBNSVQtc3R5bGUgbGljZW5zZSB0aGF0IGNhbiBiZVxuICogZm91bmQgaW4gdGhlIExJQ0VOU0UgZmlsZSBhdCBodHRwczovL2FuZ3VsYXIuaW8vbGljZW5zZVxuICovXG5cbmltcG9ydCB7aW5qZWN0Q2hhbmdlRGV0ZWN0b3JSZWYsIGluamVjdEVsZW1lbnRSZWYsIGluamVjdFRlbXBsYXRlUmVmLCBpbmplY3RWaWV3Q29udGFpbmVyUmVmfSBmcm9tICcuLi8uLi9yZW5kZXIzL3ZpZXdfZW5naW5lX2NvbXBhdGliaWxpdHknO1xuXG5leHBvcnQgY29uc3QgUjNfRUxFTUVOVF9SRUZfRkFDVE9SWSA9IGluamVjdEVsZW1lbnRSZWY7XG5leHBvcnQgY29uc3QgUjNfVEVNUExBVEVfUkVGX0ZBQ1RPUlkgPSBpbmplY3RUZW1wbGF0ZVJlZjtcbmV4cG9ydCBjb25zdCBSM19DSEFOR0VfREVURUNUT1JfUkVGX0ZBQ1RPUlkgPSBpbmplY3RDaGFuZ2VEZXRlY3RvclJlZjtcbmV4cG9ydCBjb25zdCBSM19WSUVXX0NPTlRBSU5FUl9SRUZfRkFDVE9SWSA9IGluamVjdFZpZXdDb250YWluZXJSZWY7XG4iXX0=
