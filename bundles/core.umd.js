@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.6+79.sha-d191085
+ * @license Angular v7.0.0-beta.6+80.sha-15a2b8f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -7848,15 +7848,6 @@
         ngDevMode && assertDefined(hostTNode.tViews, 'TView must be allocated');
         return new R3TemplateRef(hostView, createElementRef(ElementRefToken, hostTNode, hostView), hostTNode.tViews, getRenderer(), hostNode.data[QUERIES]);
     }
-    /**
-     * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
-     * `<ng-template>` element.
-     */
-    function templateRefExtractor(TemplateRefToken, ElementRefToken) {
-        return function (tNode, currentView) {
-            return createTemplateRef(TemplateRefToken, ElementRefToken, tNode, currentView);
-        };
-    }
     var R3ViewContainerRef;
     /**
      * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
@@ -10192,6 +10183,82 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    /**
+     * Represents an embedded template that can be used to instantiate embedded views.
+     * To instantiate embedded views based on a template, use the `ViewContainerRef`
+     * method `createEmbeddedView()`.
+     *
+     * Access a `TemplateRef` instance by placing a directive on an `<ng-template>`
+     * element (or directive prefixed with `*`). The `TemplateRef` for the embedded view
+     * is injected into the constructor of the directive,
+     * using the `TemplateRef` token.
+     *
+     * You can also use a `Query` to find a `TemplateRef` associated with
+     * a component or a directive.
+     *
+     * @see `ViewContainerRef`
+     * @see [Navigate the Component Tree with DI](guide/dependency-injection-navtree)
+     *
+     */
+    var TemplateRef = /** @class */ (function () {
+        function TemplateRef() {
+        }
+        /** @internal */
+        TemplateRef.__NG_ELEMENT_ID__ = function () { return R3_TEMPLATE_REF_FACTORY$1(TemplateRef, ElementRef); };
+        return TemplateRef;
+    }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Represents a container where one or more views can be attached to a component.
+     *
+     * Can contain *host views* (created by instantiating a
+     * component with the `createComponent()` method), and *embedded views*
+     * (created by instantiating a `TemplateRef` with the `createEmbeddedView()` method).
+     *
+     * A view container instance can contain other view containers,
+     * creating a [view hierarchy](guide/glossary#view-tree).
+     *
+     * @see `ComponentRef`
+     * @see `EmbeddedViewRef`
+     *
+     */
+    var ViewContainerRef = /** @class */ (function () {
+        function ViewContainerRef() {
+        }
+        /** @internal */
+        ViewContainerRef.__NG_ELEMENT_ID__ = function () { return R3_VIEW_CONTAINER_REF_FACTORY$1(ViewContainerRef, ElementRef); };
+        return ViewContainerRef;
+    }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
+     * `<ng-template>` element.
+     */
+    function templateRefExtractor(tNode, currentView) {
+        return createTemplateRef(TemplateRef, ElementRef, tNode, currentView);
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
 
     /**
      * @license
@@ -12086,7 +12153,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-beta.6+79.sha-d191085');
+    var VERSION = new Version('7.0.0-beta.6+80.sha-15a2b8f');
 
     /**
      * @license
@@ -14698,67 +14765,6 @@
         }
         return value;
     }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Represents an embedded template that can be used to instantiate embedded views.
-     * To instantiate embedded views based on a template, use the `ViewContainerRef`
-     * method `createEmbeddedView()`.
-     *
-     * Access a `TemplateRef` instance by placing a directive on an `<ng-template>`
-     * element (or directive prefixed with `*`). The `TemplateRef` for the embedded view
-     * is injected into the constructor of the directive,
-     * using the `TemplateRef` token.
-     *
-     * You can also use a `Query` to find a `TemplateRef` associated with
-     * a component or a directive.
-     *
-     * @see `ViewContainerRef`
-     * @see [Navigate the Component Tree with DI](guide/dependency-injection-navtree)
-     *
-     */
-    var TemplateRef = /** @class */ (function () {
-        function TemplateRef() {
-        }
-        /** @internal */
-        TemplateRef.__NG_ELEMENT_ID__ = function () { return R3_TEMPLATE_REF_FACTORY$1(TemplateRef, ElementRef); };
-        return TemplateRef;
-    }());
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Represents a container where one or more views can be attached to a component.
-     *
-     * Can contain *host views* (created by instantiating a
-     * component with the `createComponent()` method), and *embedded views*
-     * (created by instantiating a `TemplateRef` with the `createEmbeddedView()` method).
-     *
-     * A view container instance can contain other view containers,
-     * creating a [view hierarchy](guide/glossary#view-tree).
-     *
-     * @see `ComponentRef`
-     * @see `EmbeddedViewRef`
-     *
-     */
-    var ViewContainerRef = /** @class */ (function () {
-        function ViewContainerRef() {
-        }
-        /** @internal */
-        ViewContainerRef.__NG_ELEMENT_ID__ = function () { return R3_VIEW_CONTAINER_REF_FACTORY$1(ViewContainerRef, ElementRef); };
-        return ViewContainerRef;
-    }());
 
     /**
      * @license
@@ -20766,7 +20772,7 @@
     exports.ɵangular_packages_core_core_r = endTimeRange;
     exports.ɵangular_packages_core_core_p = leave;
     exports.ɵangular_packages_core_core_q = startTimeRange;
-    exports.ɵangular_packages_core_core_bd = getOrCreateAnimationContext;
+    exports.ɵangular_packages_core_core_ba = getOrCreateAnimationContext;
     exports.ɵangular_packages_core_core_w = getOrCreateInjectable;
     exports.ɵangular_packages_core_core_v = getOrCreateNodeInjector;
     exports.ɵangular_packages_core_core_be = NG_INJECTABLE_DEF;
@@ -20774,9 +20780,9 @@
     exports.ɵangular_packages_core_core_z = bindingUpdated;
     exports.ɵangular_packages_core_core_x = getPreviousOrParentTNode;
     exports.ɵangular_packages_core_core_bh = loadInternal;
-    exports.ɵangular_packages_core_core_ba = createElementRef;
-    exports.ɵangular_packages_core_core_bb = createTemplateRef;
-    exports.ɵangular_packages_core_core_bc = createViewRef;
+    exports.ɵangular_packages_core_core_bb = createElementRef;
+    exports.ɵangular_packages_core_core_bc = createTemplateRef;
+    exports.ɵangular_packages_core_core_bd = createViewRef;
     exports.ɵangular_packages_core_core_a = makeParamDecorator;
     exports.ɵangular_packages_core_core_b = makePropDecorator;
     exports.ɵangular_packages_core_core_bf = getClosureSafeProperty;

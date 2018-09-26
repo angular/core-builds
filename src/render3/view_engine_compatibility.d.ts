@@ -43,11 +43,6 @@ export declare function injectTemplateRef<T>(TemplateRefToken: typeof ViewEngine
  */
 export declare function createTemplateRef<T>(TemplateRefToken: typeof ViewEngine_TemplateRef, ElementRefToken: typeof ViewEngine_ElementRef, hostTNode: TNode, hostView: LViewData): ViewEngine_TemplateRef<T>;
 /**
- * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
- * `<ng-template>` element.
- */
-export declare function templateRefExtractor(TemplateRefToken: typeof ViewEngine_TemplateRef, ElementRefToken: typeof ViewEngine_ElementRef): (tNode: TNode, currentView: LViewData) => ViewEngine_TemplateRef<{}>;
-/**
  * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
  * already exists, retrieves the existing ViewContainerRef.
  *
