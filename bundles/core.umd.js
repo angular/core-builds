@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.7+20.sha-eeebe28
+ * @license Angular v7.0.0-beta.7+28.sha-325e801
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -4176,6 +4176,25 @@
      */
     var elementDepthCount;
     /**
+     * Stores whether directives should be matched to elements.
+     *
+     * When template contains `ngNonBindable` than we need to prevent the runtime form matching
+     * directives on children of that element.
+     *
+     * Example:
+     * ```
+     * <my-comp my-directive>
+     *   Should match component / directive.
+     * </my-comp>
+     * <div ngNonBindable>
+     *   <my-comp my-directive>
+     *     Should not match component / directive because we are in ngNonBindable.
+     *   </my-comp>
+     * </div>
+     * ```
+     */
+    var bindingsEnabled;
+    /**
      * Returns the current OpaqueViewState instance.
      *
      * Used in conjunction with the restoreView() instruction to save a snapshot
@@ -4515,6 +4534,7 @@
         isParent = false;
         previousOrParentTNode = null;
         elementDepthCount = 0;
+        bindingsEnabled = true;
     }
     /**
      * Used for creating the LViewNode of a dynamic embedded view,
@@ -4760,6 +4780,8 @@
      */
     function createDirectivesAndLocals(localRefs, localRefExtractor) {
         if (localRefExtractor === void 0) { localRefExtractor = nativeNodeLocalRefExtractor; }
+        if (!bindingsEnabled)
+            return;
         if (firstTemplatePass) {
             ngDevMode && ngDevMode.firstTemplatePass++;
             cacheMatchingDirectivesForNode(previousOrParentTNode, tView, localRefs || null);
@@ -5239,6 +5261,46 @@
                 (native.setProperty ? native.setProperty(propName, value) :
                     native[propName] = value);
         }
+    }
+    /**
+     * Enables directive matching on elements.
+     *
+     *  * Example:
+     * ```
+     * <my-comp my-directive>
+     *   Should match component / directive.
+     * </my-comp>
+     * <div ngNonBindable>
+     *   <!-- disabledBindings() -->
+     *   <my-comp my-directive>
+     *     Should not match component / directive because we are in ngNonBindable.
+     *   </my-comp>
+     *   <!-- enableBindings() -->
+     * </div>
+     * ```
+     */
+    function enableBindings() {
+        bindingsEnabled = true;
+    }
+    /**
+     * Disables directive matching on element.
+     *
+     *  * Example:
+     * ```
+     * <my-comp my-directive>
+     *   Should match component / directive.
+     * </my-comp>
+     * <div ngNonBindable>
+     *   <!-- disabledBindings() -->
+     *   <my-comp my-directive>
+     *     Should not match component / directive because we are in ngNonBindable.
+     *   </my-comp>
+     *   <!-- enableBindings() -->
+     * </div>
+     * ```
+     */
+    function disableBindings() {
+        bindingsEnabled = false;
     }
     /**
      * Constructs a TNode object from the arguments.
@@ -11126,6 +11188,8 @@
         'ɵnamespaceHTML': namespaceHTML,
         'ɵnamespaceMathML': namespaceMathML,
         'ɵnamespaceSVG': namespaceSVG,
+        'ɵenableBindings': enableBindings,
+        'ɵdisableBindings': disableBindings,
         'ɵelementStart': elementStart,
         'ɵelementEnd': elementEnd,
         'ɵelement': element,
@@ -12153,7 +12217,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-beta.7+20.sha-eeebe28');
+    var VERSION = new Version('7.0.0-beta.7+28.sha-325e801');
 
     /**
      * @license
@@ -20998,6 +21062,8 @@
     exports.ɵelementProperty = elementProperty;
     exports.ɵprojectionDef = projectionDef;
     exports.ɵreference = reference;
+    exports.ɵenableBindings = enableBindings;
+    exports.ɵdisableBindings = disableBindings;
     exports.ɵelementAttribute = elementAttribute;
     exports.ɵelementStyling = elementStyling;
     exports.ɵelementStylingMap = elementStylingMap;
