@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.7+28.sha-325e801
+ * @license Angular v7.0.0-beta.7+29.sha-5f6900e
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1716,6 +1716,7 @@ function createLContext(lViewData, lNodeIndex, native) {
         component: undefined,
         directiveIndices: undefined,
         directives: undefined,
+        localRefs: undefined,
     };
 }
 /**
@@ -12057,7 +12058,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('7.0.0-beta.7+28.sha-325e801');
+var VERSION = new Version('7.0.0-beta.7+29.sha-5f6900e');
 
 /**
  * @license
