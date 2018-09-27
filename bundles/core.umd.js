@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-beta.7+29.sha-5f6900e
+ * @license Angular v7.0.0-beta.7+30.sha-63b795a
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -11857,6 +11857,8 @@
     var R3_COMPILE_INJECTABLE = compileInjectable;
     var R3_COMPILE_NGMODULE = compileNgModule;
     var R3_COMPILE_PIPE = compilePipe;
+    var R3_COMPILE_NGMODULE_DEFS = compileNgModuleDefs;
+    var R3_PATCH_COMPONENT_DEF_WTIH_SCOPE = patchComponentDefWithScope;
 
     /**
      * @license
@@ -12218,7 +12220,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-beta.7+29.sha-5f6900e');
+    var VERSION = new Version('7.0.0-beta.7+30.sha-63b795a');
 
     /**
      * @license
@@ -21092,11 +21094,11 @@
     exports.ɵi18nMapping = i18nMapping;
     exports.ɵWRAP_RENDERER_FACTORY2 = WRAP_RENDERER_FACTORY2;
     exports.ɵRender3DebugRendererFactory2 = Render3DebugRendererFactory2;
-    exports.ɵcompileNgModuleDefs = compileNgModuleDefs;
-    exports.ɵpatchComponentDefWithScope = patchComponentDefWithScope;
-    exports.ɵcompileComponent = compileComponent;
-    exports.ɵcompileDirective = compileDirective;
-    exports.ɵcompilePipe = compilePipe;
+    exports.ɵcompileNgModuleDefs = R3_COMPILE_NGMODULE_DEFS;
+    exports.ɵpatchComponentDefWithScope = R3_PATCH_COMPONENT_DEF_WTIH_SCOPE;
+    exports.ɵcompileComponent = R3_COMPILE_COMPONENT;
+    exports.ɵcompileDirective = R3_COMPILE_DIRECTIVE;
+    exports.ɵcompilePipe = R3_COMPILE_PIPE;
     exports.ɵsanitizeHtml = sanitizeHtml;
     exports.ɵsanitizeStyle = sanitizeStyle;
     exports.ɵsanitizeUrl = sanitizeUrl;
