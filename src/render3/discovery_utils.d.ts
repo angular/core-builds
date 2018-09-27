@@ -58,3 +58,9 @@ export declare function getDirectives(target: {}): Array<{}>;
  * @param componentOrView any component or view
  */
 export declare function getRootView(componentOrView: LViewData | {}): LViewData;
+/**
+ *  Retrieve map of local references (local reference name => element or directive instance).
+ */
+export declare function getLocalRefs(target: {}): {
+    [key: string]: any;
+};
