@@ -24,18 +24,37 @@ export declare const MONKEY_PATCH_KEY_NAME = "__ngContext__";
  * of the context.
  */
 export interface LContext {
-    /** The component's parent view data */
+    /**
+     * The component's parent view data.
+     */
     lViewData: LViewData;
-    /** The index instance of the LNode */
+    /**
+     * The index instance of the LNode.
+     */
     lNodeIndex: number;
-    /** The instance of the DOM node that is attached to the lNode */
+    /**
+     * The instance of the DOM node that is attached to the lNode.
+     */
     native: RElement;
-    /** The instance of the Component node */
+    /**
+     * The instance of the Component node.
+     */
     component: {} | null | undefined;
-    /** The list of indices for the active directives that exist on this element */
+    /**
+     * The list of indices for the active directives that exist on this element.
+     */
     directiveIndices: number[] | null | undefined;
-    /** The list of active directives that exist on this element */
-    directives: Array<{}> | null | undefined;
+    /**
+     * The list of active directives that exist on this element.
+     */
+    directives: any[] | null | undefined;
+    /**
+     * The map of local references (local reference name => element or directive instance) that exist
+     * on this element.
+     */
+    localRefs: {
+        [key: string]: any;
+    } | null | undefined;
 }
 /** Returns the matching `LContext` data for a given DOM node, directive or component instance.
  *
@@ -96,4 +115,11 @@ export declare function discoverDirectiveIndices(lViewData: LViewData, lNodeInde
  *    figure out the directive instances
  */
 export declare function discoverDirectives(lViewData: LViewData, indices: number[]): number[] | null;
+/**
+ * Returns a map of local references (local reference name => element or directive instance) that
+ * exist on a given element.
+ */
+export declare function discoverLocalRefs(lViewData: LViewData, lNodeIndex: number): {
+    [key: string]: any;
+} | null;
 export declare function readElementValue(value: LElementNode | any[]): LElementNode;
