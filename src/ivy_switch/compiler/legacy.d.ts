@@ -16,7 +16,7 @@ export declare const R3_COMPILE_PIPE__POST_NGCC__: DirectiveCompiler;
 export declare const R3_COMPILE_NGMODULE_DEFS__POST_NGCC__: DirectiveCompiler;
 export declare const R3_PATCH_COMPONENT_DEF_WTIH_SCOPE__POST_NGCC__: DirectiveCompiler;
 export declare const ivyEnable__POST_NGCC__: boolean;
-export declare const ivyEnabled: boolean;
+export declare const ivyEnabled = false;
 export declare let R3_COMPILE_COMPONENT: DirectiveCompiler;
 export declare let R3_COMPILE_DIRECTIVE: DirectiveCompiler;
 export declare let R3_COMPILE_INJECTABLE: DirectiveCompiler;

@@ -9,7 +9,7 @@ import { compileComponent, compileDirective } from '../../render3/jit/directive'
 import { compileInjectable } from '../../render3/jit/injectable';
 import { compileNgModule, compileNgModuleDefs, patchComponentDefWithScope } from '../../render3/jit/module';
 import { compilePipe } from '../../render3/jit/pipe';
-export declare const ivyEnabled: boolean;
+export declare const ivyEnabled = true;
 export declare const R3_COMPILE_COMPONENT: typeof compileComponent;
 export declare const R3_COMPILE_DIRECTIVE: typeof compileDirective;
 export declare const R3_COMPILE_INJECTABLE: typeof compileInjectable;
