@@ -8,7 +8,7 @@
 import { Injector } from '../../di/injector';
 import { QueryList } from '../../linker';
 import { Sanitizer } from '../../sanitization/security';
-import { PlayerHandler } from '../interfaces/player';
+import { PlayerHandler } from '../animations/interfaces';
 import { LContainer } from './container';
 import { ComponentQuery, ComponentTemplate, DirectiveDefInternal, DirectiveDefList, PipeDefInternal, PipeDefList } from './definition';
 import { TElementNode, TNode, TViewNode } from './node';
