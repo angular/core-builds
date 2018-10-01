@@ -11,7 +11,7 @@ import { Renderer2 } from '../render';
 import { Type } from '../type';
 import { DirectiveDefInternal } from './interfaces/definition';
 import { LInjector } from './interfaces/injector';
-import { LContainerNode, LElementContainerNode, LElementNode, TContainerNode, TElementContainerNode, TElementNode } from './interfaces/node';
+import { TContainerNode, TElementContainerNode, TElementNode, TNode } from './interfaces/node';
 import { LViewData } from './interfaces/view';
 /**
  * Registers this directive as present in its node's injector by flipping the directive's
@@ -25,12 +25,13 @@ export declare function getOrCreateNodeInjector(): LInjector;
 /**
  * Creates (or gets an existing) injector for a given element or container.
  *
- * @param node for which an injector should be retrieved / created.
  * @param tNode for which an injector should be retrieved / created.
  * @param hostView View where the node is stored
  * @returns Node injector
  */
-export declare function getOrCreateNodeInjectorForNode(node: LElementNode | LElementContainerNode | LContainerNode, tNode: TElementNode | TContainerNode | TElementContainerNode, hostView: LViewData): LInjector;
+export declare function getOrCreateNodeInjectorForNode(tNode: TElementNode | TContainerNode | TElementContainerNode, hostView: LViewData): LInjector;
+export declare function getInjector(tNode: TNode, view: LViewData): LInjector | null;
+export declare function getParentInjector(tNode: TNode, view: LViewData): LInjector;
 /**
  * Makes a directive public to the DI system by adding it to an injector's bloom filter.
  *

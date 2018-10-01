@@ -16,11 +16,6 @@ export declare function getParentLNode(tNode: TNode, currentView: LViewData): LE
  * LViewNode, since they are being phased out.
  */
 export declare function getHostElementNode(currentView: LViewData): LElementNode | null;
-/**
- * Gets the parent LNode if it's not a view. If it's a view, it will instead return the view's
- * parent container node.
- */
-export declare function getParentOrContainerNode(tNode: TNode, currentView: LViewData): LElementNode | LElementContainerNode | LContainerNode | null;
 export declare function getContainerNode(tNode: TNode, embeddedView: LViewData): LContainerNode | null;
 /**
  * Retrieves render parent LElementNode for a given view.
