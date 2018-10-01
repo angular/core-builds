@@ -8,7 +8,7 @@
 import { Type } from '../core';
 import { Injector } from '../di/injector';
 import { Sanitizer } from '../sanitization/security';
-import { PlayerHandler } from './interfaces/player';
+import { PlayerHandler } from './animations/interfaces';
 import { ComponentDef, ComponentDefInternal, ComponentType } from './interfaces/definition';
 import { LElementNode } from './interfaces/node';
 import { RElement, RendererFactory3 } from './interfaces/renderer';
