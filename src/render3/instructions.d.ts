@@ -11,7 +11,6 @@ import { Sanitizer } from '../sanitization/security';
 import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
 import { LContainer } from './interfaces/container';
 import { ComponentDefInternal, ComponentQuery, ComponentTemplate, DirectiveDefInternal, DirectiveDefListOrFactory, InitialStylingFlags, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
-import { LInjector } from './interfaces/injector';
 import { LContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode, LocalRefExtractor, TAttributes, TContainerNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from './interfaces/node';
 import { CssSelectorList } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
@@ -101,7 +100,7 @@ export declare function createLViewData<T>(renderer: Renderer3, tView: TView, co
  * with the same shape
  * (same properties assigned in the same order).
  */
-export declare function createLNodeObject(type: TNodeType, nodeInjector: LInjector | null, native: RText | RElement | RComment | null, state: any): LElementNode & LTextNode & LViewNode & LContainerNode & LProjectionNode;
+export declare function createLNodeObject(type: TNodeType, native: RText | RElement | RComment | null, state: any): LElementNode & LTextNode & LViewNode & LContainerNode & LProjectionNode;
 /**
  * A common way of creating the LNode to make sure that all of them have same shape to
  * keep the execution code monomorphic and fast.
@@ -146,7 +145,7 @@ export declare function renderTemplate<T>(hostNode: RElement, templateFn: Compon
  * either through ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
  * Such lViewNode will then be renderer with renderEmbeddedTemplate() (see below).
  */
-export declare function createEmbeddedViewAndNode<T>(tView: TView, context: T, declarationView: LViewData, renderer: Renderer3, queries?: LQueries | null): LViewData;
+export declare function createEmbeddedViewAndNode<T>(tView: TView, context: T, declarationView: LViewData, renderer: Renderer3, queries: LQueries | null, injectorIndex: number): LViewData;
 /**
  * Used for rendering embedded views (e.g. dynamically created views)
  *
