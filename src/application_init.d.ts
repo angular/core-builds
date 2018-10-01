@@ -20,7 +20,7 @@ export declare class ApplicationInitStatus {
     private reject;
     private initialized;
     readonly donePromise: Promise<any>;
-    readonly done: boolean;
+    readonly done = false;
     constructor(appInits: (() => any)[]);
     static ngInjectableDef: i0.ɵInjectableDef<ApplicationInitStatus>;
 }
