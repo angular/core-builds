@@ -14,4 +14,4 @@ export { NgModuleFactory as ɵNgModuleFactory } from './render3/ng_module_ref';
  * The existence of this constant (in this particular file) informs the Angular compiler that the
  * current program is actually @angular/core, which needs to be compiled specially.
  */
-export declare const ITS_JUST_ANGULAR: boolean;
+export declare const ITS_JUST_ANGULAR = true;
