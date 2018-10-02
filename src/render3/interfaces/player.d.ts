@@ -34,7 +34,7 @@ export declare const enum PlayState {
 /**
  * The context that stores all active animation players present on an element.
  */
-export declare type AnimationContext = Player[];
+export declare type PlayerContext = Player[];
 export declare type ComponentInstance = {};
 export declare type DirectiveInstance = {};
 /**
