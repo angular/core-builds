@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-rc.0+24.sha-d216a46
+ * @license Angular v7.0.0-rc.0+25.sha-cb59d87
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -11711,6 +11711,36 @@ class EventEmitter extends Subject {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
+/**
+ * Represents an embedded template that can be used to instantiate embedded views.
+ * To instantiate embedded views based on a template, use the `ViewContainerRef`
+ * method `createEmbeddedView()`.
+ *
+ * Access a `TemplateRef` instance by placing a directive on an `<ng-template>`
+ * element (or directive prefixed with `*`). The `TemplateRef` for the embedded view
+ * is injected into the constructor of the directive,
+ * using the `TemplateRef` token.
+ *
+ * You can also use a `Query` to find a `TemplateRef` associated with
+ * a component or a directive.
+ *
+ * @see `ViewContainerRef`
+ * @see [Navigate the Component Tree with DI](guide/dependency-injection-navtree)
+ *
+ * @abstract
+ * @template C
+ */
+class TemplateRef {
+}
+/**
+ * \@internal
+ */
+TemplateRef.__NG_ELEMENT_ID__ = () => R3_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef);
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
 
 /**
  * @fileoverview added by tsickle
@@ -11952,12 +11982,13 @@ function getIdxOfMatchingDirective(tNode, currentView, type) {
  * @param {?} tNode
  * @param {?} currentView
  * @param {?} read
- * @param {?} directiveIdx
  * @return {?}
  */
-function readFromNodeInjector(tNode, currentView, read, directiveIdx) {
-    if (read instanceof ReadFromInjectorFn) {
-        return read.read(tNode, currentView, directiveIdx);
+function queryRead(tNode, currentView, read) {
+    /** @type {?} */
+    const factoryFn = (/** @type {?} */ (read))[NG_ELEMENT_ID];
+    if (typeof factoryFn === 'function') {
+        return factoryFn();
     }
     else {
         /** @type {?} */
@@ -11965,6 +11996,20 @@ function readFromNodeInjector(tNode, currentView, read, directiveIdx) {
         if (matchingIdx !== null) {
             return /** @type {?} */ ((currentView[DIRECTIVES]))[matchingIdx];
         }
+    }
+    return null;
+}
+/**
+ * @param {?} tNode
+ * @param {?} currentView
+ * @return {?}
+ */
+function queryReadByTNodeType(tNode, currentView) {
+    if (tNode.type === 3 /* Element */ || tNode.type === 4 /* ElementContainer */) {
+        return createElementRef(ElementRef, tNode, currentView);
+    }
+    if (tNode.type === 0 /* Container */) {
+        return createTemplateRef(TemplateRef, ElementRef, tNode, currentView);
     }
     return null;
 }
@@ -11983,13 +12028,9 @@ function add(query, tNode) {
         const type = predicate.type;
         if (type) {
             /** @type {?} */
-            const directiveIdx = getIdxOfMatchingDirective(tNode, currentView, type);
-            if (directiveIdx !== null) {
-                /** @type {?} */
-                const result = readFromNodeInjector(tNode, currentView, predicate.read || type, directiveIdx);
-                if (result !== null) {
-                    addMatch(query, result);
-                }
+            const result = queryRead(tNode, currentView, predicate.read || type);
+            if (result !== null) {
+                addMatch(query, result);
             }
         }
         else {
@@ -11999,11 +12040,21 @@ function add(query, tNode) {
                 /** @type {?} */
                 const directiveIdx = getIdxOfMatchingSelector(tNode, selector[i]);
                 if (directiveIdx !== null) {
-                    // a node is matching a predicate - determine what to read
-                    // note that queries using name selector must specify read strategy
-                    ngDevMode && assertDefined(predicate.read, 'the node should have a predicate');
                     /** @type {?} */
-                    const result = readFromNodeInjector(tNode, currentView, /** @type {?} */ ((predicate.read)), directiveIdx);
+                    let result = null;
+                    if (predicate.read) {
+                        result = queryRead(tNode, currentView, predicate.read);
+                    }
+                    else {
+                        if (directiveIdx > -1) {
+                            result = /** @type {?} */ ((currentView[DIRECTIVES]))[directiveIdx];
+                        }
+                        else {
+                            // if read token and / or strategy is not specified,
+                            // detect it using appropriate tNode type
+                            result = queryReadByTNodeType(tNode, currentView);
+                        }
+                    }
                     if (result !== null) {
                         addMatch(query, result);
                     }
@@ -12189,7 +12240,9 @@ const QueryList = /** @type {?} */ (QueryList_);
  * @param {?=} read What to save in the query
  * @return {?} QueryList<T>
  */
-function query(memoryIndex, predicate, descend, read) {
+function query(memoryIndex, predicate, descend, 
+// TODO: "read" should be an AbstractType (FW-486)
+read) {
     ngDevMode && assertPreviousIsParent();
     /** @type {?} */
     const queryList = new QueryList();
@@ -12219,73 +12272,6 @@ function queryRefresh(queryList) {
     }
     return false;
 }
-/**
- * @template T
- */
-class ReadFromInjectorFn {
-    /**
-     * @param {?} read
-     */
-    constructor(read) {
-        this.read = read;
-    }
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * Represents an embedded template that can be used to instantiate embedded views.
- * To instantiate embedded views based on a template, use the `ViewContainerRef`
- * method `createEmbeddedView()`.
- *
- * Access a `TemplateRef` instance by placing a directive on an `<ng-template>`
- * element (or directive prefixed with `*`). The `TemplateRef` for the embedded view
- * is injected into the constructor of the directive,
- * using the `TemplateRef` token.
- *
- * You can also use a `Query` to find a `TemplateRef` associated with
- * a component or a directive.
- *
- * @see `ViewContainerRef`
- * @see [Navigate the Component Tree with DI](guide/dependency-injection-navtree)
- *
- * @abstract
- * @template C
- */
-class TemplateRef {
-}
-/**
- * \@internal
- */
-TemplateRef.__NG_ELEMENT_ID__ = () => R3_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef);
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * Represents a container where one or more views can be attached to a component.
- *
- * Can contain *host views* (created by instantiating a
- * component with the `createComponent()` method), and *embedded views*
- * (created by instantiating a `TemplateRef` with the `createEmbeddedView()` method).
- *
- * A view container instance can contain other view containers,
- * creating a [view hierarchy](guide/glossary#view-tree).
- *
- * @see `ComponentRef`
- * @see `EmbeddedViewRef`
- *
- * @abstract
- */
-class ViewContainerRef {
-}
-/**
- * \@internal
- */
-ViewContainerRef.__NG_ELEMENT_ID__ = () => R3_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef);
 
 /**
  * @fileoverview added by tsickle
@@ -14720,7 +14706,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-rc.0+24.sha-d216a46');
+const VERSION = new Version('7.0.0-rc.0+25.sha-cb59d87');
 
 /**
  * @fileoverview added by tsickle
@@ -17993,6 +17979,32 @@ function checkNotEmpty(value, modulePath, exportName) {
     }
     return value;
 }
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/**
+ * Represents a container where one or more views can be attached to a component.
+ *
+ * Can contain *host views* (created by instantiating a
+ * component with the `createComponent()` method), and *embedded views*
+ * (created by instantiating a `TemplateRef` with the `createEmbeddedView()` method).
+ *
+ * A view container instance can contain other view containers,
+ * creating a [view hierarchy](guide/glossary#view-tree).
+ *
+ * @see `ComponentRef`
+ * @see `EmbeddedViewRef`
+ *
+ * @abstract
+ */
+class ViewContainerRef {
+}
+/**
+ * \@internal
+ */
+ViewContainerRef.__NG_ELEMENT_ID__ = () => R3_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef);
 
 /**
  * @fileoverview added by tsickle
