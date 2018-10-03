@@ -479,11 +479,15 @@ export declare type HookData = (number | (() => void))[];
  * Static data that corresponds to the instance-specific data array on an LView.
  *
  * Each node's static data is stored in tData at the same index that it's stored
- * in the data array. Each pipe's definition is stored here at the same index
- * as its pipe instance in the data array. Any nodes that do not have static
- * data store a null value in tData to avoid a sparse array.
+ * in the data array.  Any nodes that do not have static data store a null value in
+ * tData to avoid a sparse array.
+ *
+ * Each pipe's definition is stored here at the same index as its pipe instance in
+ * the data array.
+ *
+ * Injector bloom filters are also stored here.
  */
-export declare type TData = (TNode | PipeDefInternal<any> | null)[];
+export declare type TData = (TNode | PipeDefInternal<any> | number | null)[];
 /** Type for TView.currentMatches */
 export declare type CurrentMatchesList = [DirectiveDefInternal<any>, (string | number | null)];
 export declare const unusedValueExportToPlacateAjd = 1;

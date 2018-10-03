@@ -9,82 +9,97 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * @record
- */
-export function LInjector() { }
-/**
- * We need to store a reference to the injector's parent so DI can keep looking up
- * the injector tree until it finds the dependency it's looking for.
- * @type {?}
- */
-LInjector.prototype.parent;
-/**
- * Necessary to find directive indices for a particular node and look up the LNode.
- * @type {?}
- */
-LInjector.prototype.tNode;
-/**
- * The view where the node is stored. Necessary because as we traverse up the injector
- * tree the view where we search directives may change.
- * @type {?}
- */
-LInjector.prototype.view;
-/**
- * The following bloom filter determines whether a directive is available
- * on the associated node or not. This prevents us from searching the directives
- * array at this level unless it's probable the directive is in it.
+/** @type {?} */
+export const TNODE = 8;
+/** @type {?} */
+export const PARENT_INJECTOR = 8;
+/** @type {?} */
+export const INJECTOR_SIZE = 9;
+/** @enum {number} */
+var InjectorLocationFlags = {
+    InjectorIndexMask: 32767,
+    ViewOffsetShift: 15,
+};
+export { InjectorLocationFlags };
+/** *
+ * Each injector is saved in 9 contiguous slots in `LViewData` and 9 contiguous slots in
+ * `TView.data`. This allows us to store information about the current node's tokens (which
+ * can be shared in `TView`) as well as the tokens of its ancestor nodes (which cannot be
+ * shared, so they live in `LViewData`).
  *
- * - bf0: Check directive IDs 0-31  (IDs are % 128)
- * - bf1: Check directive IDs 32-63
- * - bf2: Check directive IDs 64-95
- * - bf3: Check directive IDs 96-127
- * - bf4: Check directive IDs 128-159
- * - bf5: Check directive IDs 160 - 191
- * - bf6: Check directive IDs 192 - 223
- * - bf7: Check directive IDs 224 - 255
+ * Each of these slots (aside from the last slot) contains a bloom filter. This bloom filter
+ * determines whether a directive is available on the associated node or not. This prevents us
+ * from searching the directives array at this level unless it's probable the directive is in it.
  *
  * See: https://en.wikipedia.org/wiki/Bloom_filter for more about bloom filters.
- * @type {?}
- */
-LInjector.prototype.bf0;
-/** @type {?} */
-LInjector.prototype.bf1;
-/** @type {?} */
-LInjector.prototype.bf2;
-/** @type {?} */
-LInjector.prototype.bf3;
-/** @type {?} */
-LInjector.prototype.bf4;
-/** @type {?} */
-LInjector.prototype.bf5;
-/** @type {?} */
-LInjector.prototype.bf6;
-/** @type {?} */
-LInjector.prototype.bf7;
-/**
- * cbf0 - cbf7 properties determine whether a directive is available through a
- * parent injector. They refer to the merged values of parent bloom filters. This
- * allows us to skip looking up the chain unless it's probable that directive exists
- * up the chain.
- * @type {?}
- */
-LInjector.prototype.cbf0;
-/** @type {?} */
-LInjector.prototype.cbf1;
-/** @type {?} */
-LInjector.prototype.cbf2;
-/** @type {?} */
-LInjector.prototype.cbf3;
-/** @type {?} */
-LInjector.prototype.cbf4;
-/** @type {?} */
-LInjector.prototype.cbf5;
-/** @type {?} */
-LInjector.prototype.cbf6;
-/** @type {?} */
-LInjector.prototype.cbf7;
-/** @type {?} */
+ *
+ * Because all injectors have been flattened into `LViewData` and `TViewData`, they cannot typed
+ * using interfaces as they were previously. The start index of each `LInjector` and `TInjector`
+ * will differ based on where it is flattened into the main array, so it's not possible to know
+ * the indices ahead of time and save their types here. The interfaces are still included here
+ * for documentation purposes.
+ *
+ * export interface LInjector extends Array<any> {
+ *
+ *    // Cumulative bloom for directive IDs 0-31  (IDs are % BLOOM_SIZE)
+ *    [0]: number;
+ *
+ *    // Cumulative bloom for directive IDs 32-63
+ *    [1]: number;
+ *
+ *    // Cumulative bloom for directive IDs 64-95
+ *    [2]: number;
+ *
+ *    // Cumulative bloom for directive IDs 96-127
+ *    [3]: number;
+ *
+ *    // Cumulative bloom for directive IDs 128-159
+ *    [4]: number;
+ *
+ *    // Cumulative bloom for directive IDs 160 - 191
+ *    [5]: number;
+ *
+ *    // Cumulative bloom for directive IDs 192 - 223
+ *    [6]: number;
+ *
+ *    // Cumulative bloom for directive IDs 224 - 255
+ *    [7]: number;
+ *
+ *    // We need to store a reference to the injector's parent so DI can keep looking up
+ *    // the injector tree until it finds the dependency it's looking for.
+ *    [PARENT_INJECTOR]: number;
+ * }
+ *
+ * export interface TInjector extends Array<any> {
+ *
+ *    // Shared node bloom for directive IDs 0-31  (IDs are % BLOOM_SIZE)
+ *    [0]: number;
+ *
+ *    // Shared node bloom for directive IDs 32-63
+ *    [1]: number;
+ *
+ *    // Shared node bloom for directive IDs 64-95
+ *    [2]: number;
+ *
+ *    // Shared node bloom for directive IDs 96-127
+ *    [3]: number;
+ *
+ *    // Shared node bloom for directive IDs 128-159
+ *    [4]: number;
+ *
+ *    // Shared node bloom for directive IDs 160 - 191
+ *    [5]: number;
+ *
+ *    // Shared node bloom for directive IDs 192 - 223
+ *    [6]: number;
+ *
+ *    // Shared node bloom for directive IDs 224 - 255
+ *    [7]: number;
+ *
+ *    // Necessary to find directive indices for a particular node.
+ *    [TNODE]: TElementNode|TElementContainerNode|TContainerNode;
+ *  }
+  @type {?} */
 export const unusedValueExportToPlacateAjd = 1;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5qZWN0b3IuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi8uLi8uLi8uLi9wYWNrYWdlcy9jb3JlL3NyYy9yZW5kZXIzL2ludGVyZmFjZXMvaW5qZWN0b3IudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBNEVBLGFBQWEsNkJBQTZCLEdBQUcsQ0FBQyxDQUFDIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBAbGljZW5zZVxuICogQ29weXJpZ2h0IEdvb2dsZSBJbmMuIEFsbCBSaWdodHMgUmVzZXJ2ZWQuXG4gKlxuICogVXNlIG9mIHRoaXMgc291cmNlIGNvZGUgaXMgZ292ZXJuZWQgYnkgYW4gTUlULXN0eWxlIGxpY2Vuc2UgdGhhdCBjYW4gYmVcbiAqIGZvdW5kIGluIHRoZSBMSUNFTlNFIGZpbGUgYXQgaHR0cHM6Ly9hbmd1bGFyLmlvL2xpY2Vuc2VcbiAqL1xuXG5cbmltcG9ydCB7Q2hhbmdlRGV0ZWN0b3JSZWZ9IGZyb20gJy4uLy4uL2NoYW5nZV9kZXRlY3Rpb24vY2hhbmdlX2RldGVjdG9yX3JlZic7XG5pbXBvcnQge0VsZW1lbnRSZWZ9IGZyb20gJy4uLy4uL2xpbmtlci9lbGVtZW50X3JlZic7XG5pbXBvcnQge1RlbXBsYXRlUmVmfSBmcm9tICcuLi8uLi9saW5rZXIvdGVtcGxhdGVfcmVmJztcbmltcG9ydCB7Vmlld0NvbnRhaW5lclJlZn0gZnJvbSAnLi4vLi4vbGlua2VyL3ZpZXdfY29udGFpbmVyX3JlZic7XG5cbmltcG9ydCB7VENvbnRhaW5lck5vZGUsIFRFbGVtZW50Q29udGFpbmVyTm9kZSwgVEVsZW1lbnROb2RlLH0gZnJvbSAnLi9ub2RlJztcbmltcG9ydCB7TFZpZXdEYXRhfSBmcm9tICcuL3ZpZXcnO1xuXG5leHBvcnQgaW50ZXJmYWNlIExJbmplY3RvciB7XG4gIC8qKlxuICAgKiBXZSBuZWVkIHRvIHN0b3JlIGEgcmVmZXJlbmNlIHRvIHRoZSBpbmplY3RvcidzIHBhcmVudCBzbyBESSBjYW4ga2VlcCBsb29raW5nIHVwXG4gICAqIHRoZSBpbmplY3RvciB0cmVlIHVudGlsIGl0IGZpbmRzIHRoZSBkZXBlbmRlbmN5IGl0J3MgbG9va2luZyBmb3IuXG4gICAqL1xuICByZWFkb25seSBwYXJlbnQ6IExJbmplY3RvcnxudWxsO1xuXG4gIC8qKiBOZWNlc3NhcnkgdG8gZmluZCBkaXJlY3RpdmUgaW5kaWNlcyBmb3IgYSBwYXJ0aWN1bGFyIG5vZGUgYW5kIGxvb2sgdXAgdGhlIExOb2RlLiAqL1xuICByZWFkb25seSB0Tm9kZTogVEVsZW1lbnROb2RlfFRFbGVtZW50Q29udGFpbmVyTm9kZXxUQ29udGFpbmVyTm9kZTtcblxuICAvKipcbiAgICogVGhlIHZpZXcgd2hlcmUgdGhlIG5vZGUgaXMgc3RvcmVkLiBOZWNlc3NhcnkgYmVjYXVzZSBhcyB3ZSB0cmF2ZXJzZSB1cCB0aGUgaW5qZWN0b3JcbiAgICogdHJlZSB0aGUgdmlldyB3aGVyZSB3ZSBzZWFyY2ggZGlyZWN0aXZlcyBtYXkgY2hhbmdlLlxuICAgKi9cbiAgcmVhZG9ubHkgdmlldzogTFZpZXdEYXRhO1xuXG4gIC8qKlxuICAgKiBUaGUgZm9sbG93aW5nIGJsb29tIGZpbHRlciBkZXRlcm1pbmVzIHdoZXRoZXIgYSBkaXJlY3RpdmUgaXMgYXZhaWxhYmxlXG4gICAqIG9uIHRoZSBhc3NvY2lhdGVkIG5vZGUgb3Igbm90LiBUaGlzIHByZXZlbnRzIHVzIGZyb20gc2VhcmNoaW5nIHRoZSBkaXJlY3RpdmVzXG4gICAqIGFycmF5IGF0IHRoaXMgbGV2ZWwgdW5sZXNzIGl0J3MgcHJvYmFibGUgdGhlIGRpcmVjdGl2ZSBpcyBpbiBpdC5cbiAgICpcbiAgICogLSBiZjA6IENoZWNrIGRpcmVjdGl2ZSBJRHMgMC0zMSAgKElEcyBhcmUgJSAxMjgpXG4gICAqIC0gYmYxOiBDaGVjayBkaXJlY3RpdmUgSURzIDMyLTYzXG4gICAqIC0gYmYyOiBDaGVjayBkaXJlY3RpdmUgSURzIDY0LTk1XG4gICAqIC0gYmYzOiBDaGVjayBkaXJlY3RpdmUgSURzIDk2LTEyN1xuICAgKiAtIGJmNDogQ2hlY2sgZGlyZWN0aXZlIElEcyAxMjgtMTU5XG4gICAqIC0gYmY1OiBDaGVjayBkaXJlY3RpdmUgSURzIDE2MCAtIDE5MVxuICAgKiAtIGJmNjogQ2hlY2sgZGlyZWN0aXZlIElEcyAxOTIgLSAyMjNcbiAgICogLSBiZjc6IENoZWNrIGRpcmVjdGl2ZSBJRHMgMjI0IC0gMjU1XG4gICAqXG4gICAqIFNlZTogaHR0cHM6Ly9lbi53aWtpcGVkaWEub3JnL3dpa2kvQmxvb21fZmlsdGVyIGZvciBtb3JlIGFib3V0IGJsb29tIGZpbHRlcnMuXG4gICAqL1xuICBiZjA6IG51bWJlcjtcbiAgYmYxOiBudW1iZXI7XG4gIGJmMjogbnVtYmVyO1xuICBiZjM6IG51bWJlcjtcbiAgYmY0OiBudW1iZXI7XG4gIGJmNTogbnVtYmVyO1xuICBiZjY6IG51bWJlcjtcbiAgYmY3OiBudW1iZXI7XG5cbiAgLyoqXG4gICAqIGNiZjAgLSBjYmY3IHByb3BlcnRpZXMgZGV0ZXJtaW5lIHdoZXRoZXIgYSBkaXJlY3RpdmUgaXMgYXZhaWxhYmxlIHRocm91Z2ggYVxuICAgKiBwYXJlbnQgaW5qZWN0b3IuIFRoZXkgcmVmZXIgdG8gdGhlIG1lcmdlZCB2YWx1ZXMgb2YgcGFyZW50IGJsb29tIGZpbHRlcnMuIFRoaXNcbiAgICogYWxsb3dzIHVzIHRvIHNraXAgbG9va2luZyB1cCB0aGUgY2hhaW4gdW5sZXNzIGl0J3MgcHJvYmFibGUgdGhhdCBkaXJlY3RpdmUgZXhpc3RzXG4gICAqIHVwIHRoZSBjaGFpbi5cbiAgICovXG4gIGNiZjA6IG51bWJlcjtcbiAgY2JmMTogbnVtYmVyO1xuICBjYmYyOiBudW1iZXI7XG4gIGNiZjM6IG51bWJlcjtcbiAgY2JmNDogbnVtYmVyO1xuICBjYmY1OiBudW1iZXI7XG4gIGNiZjY6IG51bWJlcjtcbiAgY2JmNzogbnVtYmVyO1xufVxuXG4vLyBOb3RlOiBUaGlzIGhhY2sgaXMgbmVjZXNzYXJ5IHNvIHdlIGRvbid0IGVycm9uZW91c2x5IGdldCBhIGNpcmN1bGFyIGRlcGVuZGVuY3lcbi8vIGZhaWx1cmUgYmFzZWQgb24gdHlwZXMuXG5leHBvcnQgY29uc3QgdW51c2VkVmFsdWVFeHBvcnRUb1BsYWNhdGVBamQgPSAxO1xuIl19
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5qZWN0b3IuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi8uLi8uLi8uLi9wYWNrYWdlcy9jb3JlL3NyYy9yZW5kZXIzL2ludGVyZmFjZXMvaW5qZWN0b3IudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7O0FBV0EsYUFBYSxLQUFLLEdBQUcsQ0FBQyxDQUFDOztBQUN2QixhQUFhLGVBQWUsR0FBRyxDQUFDLENBQUM7O0FBQ2pDLGFBQWEsYUFBYSxHQUFHLENBQUMsQ0FBQzs7O0lBRzdCLHdCQUFxQztJQUNyQyxtQkFBb0I7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFxRnRCLGFBQWEsNkJBQTZCLEdBQUcsQ0FBQyxDQUFDIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBAbGljZW5zZVxuICogQ29weXJpZ2h0IEdvb2dsZSBJbmMuIEFsbCBSaWdodHMgUmVzZXJ2ZWQuXG4gKlxuICogVXNlIG9mIHRoaXMgc291cmNlIGNvZGUgaXMgZ292ZXJuZWQgYnkgYW4gTUlULXN0eWxlIGxpY2Vuc2UgdGhhdCBjYW4gYmVcbiAqIGZvdW5kIGluIHRoZSBMSUNFTlNFIGZpbGUgYXQgaHR0cHM6Ly9hbmd1bGFyLmlvL2xpY2Vuc2VcbiAqL1xuXG5cbmltcG9ydCB7VENvbnRhaW5lck5vZGUsIFRFbGVtZW50Q29udGFpbmVyTm9kZSwgVEVsZW1lbnROb2RlLH0gZnJvbSAnLi9ub2RlJztcblxuZXhwb3J0IGNvbnN0IFROT0RFID0gODtcbmV4cG9ydCBjb25zdCBQQVJFTlRfSU5KRUNUT1IgPSA4O1xuZXhwb3J0IGNvbnN0IElOSkVDVE9SX1NJWkUgPSA5O1xuXG5leHBvcnQgY29uc3QgZW51bSBJbmplY3RvckxvY2F0aW9uRmxhZ3Mge1xuICBJbmplY3RvckluZGV4TWFzayA9IDBiMTExMTExMTExMTExMTExLFxuICBWaWV3T2Zmc2V0U2hpZnQgPSAxNVxufVxuXG4vKipcbiAqIEVhY2ggaW5qZWN0b3IgaXMgc2F2ZWQgaW4gOSBjb250aWd1b3VzIHNsb3RzIGluIGBMVmlld0RhdGFgIGFuZCA5IGNvbnRpZ3VvdXMgc2xvdHMgaW5cbiAqIGBUVmlldy5kYXRhYC4gVGhpcyBhbGxvd3MgdXMgdG8gc3RvcmUgaW5mb3JtYXRpb24gYWJvdXQgdGhlIGN1cnJlbnQgbm9kZSdzIHRva2VucyAod2hpY2hcbiAqIGNhbiBiZSBzaGFyZWQgaW4gYFRWaWV3YCkgYXMgd2VsbCBhcyB0aGUgdG9rZW5zIG9mIGl0cyBhbmNlc3RvciBub2RlcyAod2hpY2ggY2Fubm90IGJlXG4gKiBzaGFyZWQsIHNvIHRoZXkgbGl2ZSBpbiBgTFZpZXdEYXRhYCkuXG4gKlxuICogRWFjaCBvZiB0aGVzZSBzbG90cyAoYXNpZGUgZnJvbSB0aGUgbGFzdCBzbG90KSBjb250YWlucyBhIGJsb29tIGZpbHRlci4gVGhpcyBibG9vbSBmaWx0ZXJcbiAqIGRldGVybWluZXMgd2hldGhlciBhIGRpcmVjdGl2ZSBpcyBhdmFpbGFibGUgb24gdGhlIGFzc29jaWF0ZWQgbm9kZSBvciBub3QuIFRoaXMgcHJldmVudHMgdXNcbiAqIGZyb20gc2VhcmNoaW5nIHRoZSBkaXJlY3RpdmVzIGFycmF5IGF0IHRoaXMgbGV2ZWwgdW5sZXNzIGl0J3MgcHJvYmFibGUgdGhlIGRpcmVjdGl2ZSBpcyBpbiBpdC5cbiAqXG4gKiBTZWU6IGh0dHBzOi8vZW4ud2lraXBlZGlhLm9yZy93aWtpL0Jsb29tX2ZpbHRlciBmb3IgbW9yZSBhYm91dCBibG9vbSBmaWx0ZXJzLlxuICpcbiAqIEJlY2F1c2UgYWxsIGluamVjdG9ycyBoYXZlIGJlZW4gZmxhdHRlbmVkIGludG8gYExWaWV3RGF0YWAgYW5kIGBUVmlld0RhdGFgLCB0aGV5IGNhbm5vdCB0eXBlZFxuICogdXNpbmcgaW50ZXJmYWNlcyBhcyB0aGV5IHdlcmUgcHJldmlvdXNseS4gVGhlIHN0YXJ0IGluZGV4IG9mIGVhY2ggYExJbmplY3RvcmAgYW5kIGBUSW5qZWN0b3JgXG4gKiB3aWxsIGRpZmZlciBiYXNlZCBvbiB3aGVyZSBpdCBpcyBmbGF0dGVuZWQgaW50byB0aGUgbWFpbiBhcnJheSwgc28gaXQncyBub3QgcG9zc2libGUgdG8ga25vd1xuICogdGhlIGluZGljZXMgYWhlYWQgb2YgdGltZSBhbmQgc2F2ZSB0aGVpciB0eXBlcyBoZXJlLiBUaGUgaW50ZXJmYWNlcyBhcmUgc3RpbGwgaW5jbHVkZWQgaGVyZVxuICogZm9yIGRvY3VtZW50YXRpb24gcHVycG9zZXMuXG4gKlxuICogZXhwb3J0IGludGVyZmFjZSBMSW5qZWN0b3IgZXh0ZW5kcyBBcnJheTxhbnk+IHtcbiAqXG4gKiAgICAvLyBDdW11bGF0aXZlIGJsb29tIGZvciBkaXJlY3RpdmUgSURzIDAtMzEgIChJRHMgYXJlICUgQkxPT01fU0laRSlcbiAqICAgIFswXTogbnVtYmVyO1xuICpcbiAqICAgIC8vIEN1bXVsYXRpdmUgYmxvb20gZm9yIGRpcmVjdGl2ZSBJRHMgMzItNjNcbiAqICAgIFsxXTogbnVtYmVyO1xuICpcbiAqICAgIC8vIEN1bXVsYXRpdmUgYmxvb20gZm9yIGRpcmVjdGl2ZSBJRHMgNjQtOTVcbiAqICAgIFsyXTogbnVtYmVyO1xuICpcbiAqICAgIC8vIEN1bXVsYXRpdmUgYmxvb20gZm9yIGRpcmVjdGl2ZSBJRHMgOTYtMTI3XG4gKiAgICBbM106IG51bWJlcjtcbiAqXG4gKiAgICAvLyBDdW11bGF0aXZlIGJsb29tIGZvciBkaXJlY3RpdmUgSURzIDEyOC0xNTlcbiAqICAgIFs0XTogbnVtYmVyO1xuICpcbiAqICAgIC8vIEN1bXVsYXRpdmUgYmxvb20gZm9yIGRpcmVjdGl2ZSBJRHMgMTYwIC0gMTkxXG4gKiAgICBbNV06IG51bWJlcjtcbiAqXG4gKiAgICAvLyBDdW11bGF0aXZlIGJsb29tIGZvciBkaXJlY3RpdmUgSURzIDE5MiAtIDIyM1xuICogICAgWzZdOiBudW1iZXI7XG4gKlxuICogICAgLy8gQ3VtdWxhdGl2ZSBibG9vbSBmb3IgZGlyZWN0aXZlIElEcyAyMjQgLSAyNTVcbiAqICAgIFs3XTogbnVtYmVyO1xuICpcbiAqICAgIC8vIFdlIG5lZWQgdG8gc3RvcmUgYSByZWZlcmVuY2UgdG8gdGhlIGluamVjdG9yJ3MgcGFyZW50IHNvIERJIGNhbiBrZWVwIGxvb2tpbmcgdXBcbiAqICAgIC8vIHRoZSBpbmplY3RvciB0cmVlIHVudGlsIGl0IGZpbmRzIHRoZSBkZXBlbmRlbmN5IGl0J3MgbG9va2luZyBmb3IuXG4gKiAgICBbUEFSRU5UX0lOSkVDVE9SXTogbnVtYmVyO1xuICogfVxuICpcbiAqIGV4cG9ydCBpbnRlcmZhY2UgVEluamVjdG9yIGV4dGVuZHMgQXJyYXk8YW55PiB7XG4gKlxuICogICAgLy8gU2hhcmVkIG5vZGUgYmxvb20gZm9yIGRpcmVjdGl2ZSBJRHMgMC0zMSAgKElEcyBhcmUgJSBCTE9PTV9TSVpFKVxuICogICAgWzBdOiBudW1iZXI7XG4gKlxuICogICAgLy8gU2hhcmVkIG5vZGUgYmxvb20gZm9yIGRpcmVjdGl2ZSBJRHMgMzItNjNcbiAqICAgIFsxXTogbnVtYmVyO1xuICpcbiAqICAgIC8vIFNoYXJlZCBub2RlIGJsb29tIGZvciBkaXJlY3RpdmUgSURzIDY0LTk1XG4gKiAgICBbMl06IG51bWJlcjtcbiAqXG4gKiAgICAvLyBTaGFyZWQgbm9kZSBibG9vbSBmb3IgZGlyZWN0aXZlIElEcyA5Ni0xMjdcbiAqICAgIFszXTogbnVtYmVyO1xuICpcbiAqICAgIC8vIFNoYXJlZCBub2RlIGJsb29tIGZvciBkaXJlY3RpdmUgSURzIDEyOC0xNTlcbiAqICAgIFs0XTogbnVtYmVyO1xuICpcbiAqICAgIC8vIFNoYXJlZCBub2RlIGJsb29tIGZvciBkaXJlY3RpdmUgSURzIDE2MCAtIDE5MVxuICogICAgWzVdOiBudW1iZXI7XG4gKlxuICogICAgLy8gU2hhcmVkIG5vZGUgYmxvb20gZm9yIGRpcmVjdGl2ZSBJRHMgMTkyIC0gMjIzXG4gKiAgICBbNl06IG51bWJlcjtcbiAqXG4gKiAgICAvLyBTaGFyZWQgbm9kZSBibG9vbSBmb3IgZGlyZWN0aXZlIElEcyAyMjQgLSAyNTVcbiAqICAgIFs3XTogbnVtYmVyO1xuICpcbiAqICAgIC8vIE5lY2Vzc2FyeSB0byBmaW5kIGRpcmVjdGl2ZSBpbmRpY2VzIGZvciBhIHBhcnRpY3VsYXIgbm9kZS5cbiAqICAgIFtUTk9ERV06IFRFbGVtZW50Tm9kZXxURWxlbWVudENvbnRhaW5lck5vZGV8VENvbnRhaW5lck5vZGU7XG4gKiAgfVxuICovXG5cbi8vIE5vdGU6IFRoaXMgaGFjayBpcyBuZWNlc3Nhcnkgc28gd2UgZG9uJ3QgZXJyb25lb3VzbHkgZ2V0IGEgY2lyY3VsYXIgZGVwZW5kZW5jeVxuLy8gZmFpbHVyZSBiYXNlZCBvbiB0eXBlcy5cbmV4cG9ydCBjb25zdCB1bnVzZWRWYWx1ZUV4cG9ydFRvUGxhY2F0ZUFqZCA9IDE7XG4iXX0=
