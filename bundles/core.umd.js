@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-rc.0+24.sha-d216a46
+ * @license Angular v7.0.0-rc.0+25.sha-cb59d87
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -9636,6 +9636,38 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    /**
+     * Represents an embedded template that can be used to instantiate embedded views.
+     * To instantiate embedded views based on a template, use the `ViewContainerRef`
+     * method `createEmbeddedView()`.
+     *
+     * Access a `TemplateRef` instance by placing a directive on an `<ng-template>`
+     * element (or directive prefixed with `*`). The `TemplateRef` for the embedded view
+     * is injected into the constructor of the directive,
+     * using the `TemplateRef` token.
+     *
+     * You can also use a `Query` to find a `TemplateRef` associated with
+     * a component or a directive.
+     *
+     * @see `ViewContainerRef`
+     * @see [Navigate the Component Tree with DI](guide/dependency-injection-navtree)
+     *
+     */
+    var TemplateRef = /** @class */ (function () {
+        function TemplateRef() {
+        }
+        /** @internal */
+        TemplateRef.__NG_ELEMENT_ID__ = function () { return R3_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef); };
+        return TemplateRef;
+    }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
 
     /**
      * @license
@@ -9810,9 +9842,11 @@
         }
         return null;
     }
-    function readFromNodeInjector(tNode, currentView, read, directiveIdx) {
-        if (read instanceof ReadFromInjectorFn) {
-            return read.read(tNode, currentView, directiveIdx);
+    // TODO: "read" should be an AbstractType (FW-486)
+    function queryRead(tNode, currentView, read) {
+        var factoryFn = read[NG_ELEMENT_ID];
+        if (typeof factoryFn === 'function') {
+            return factoryFn();
         }
         else {
             var matchingIdx = getIdxOfMatchingDirective(tNode, currentView, read);
@@ -9822,20 +9856,25 @@
         }
         return null;
     }
+    function queryReadByTNodeType(tNode, currentView) {
+        if (tNode.type === 3 /* Element */ || tNode.type === 4 /* ElementContainer */) {
+            return createElementRef(ElementRef, tNode, currentView);
+        }
+        if (tNode.type === 0 /* Container */) {
+            return createTemplateRef(TemplateRef, ElementRef, tNode, currentView);
+        }
+        return null;
+    }
     function add(query, tNode) {
         var currentView = _getViewData();
         while (query) {
             var predicate = query.predicate;
             var type = predicate.type;
             if (type) {
-                var directiveIdx = getIdxOfMatchingDirective(tNode, currentView, type);
-                if (directiveIdx !== null) {
-                    // a node is matching a predicate - determine what to read
-                    // if read token and / or strategy is not specified, use type as read token
-                    var result = readFromNodeInjector(tNode, currentView, predicate.read || type, directiveIdx);
-                    if (result !== null) {
-                        addMatch(query, result);
-                    }
+                // if read token and / or strategy is not specified, use type as read token
+                var result = queryRead(tNode, currentView, predicate.read || type);
+                if (result !== null) {
+                    addMatch(query, result);
                 }
             }
             else {
@@ -9843,10 +9882,20 @@
                 for (var i = 0; i < selector.length; i++) {
                     var directiveIdx = getIdxOfMatchingSelector(tNode, selector[i]);
                     if (directiveIdx !== null) {
-                        // a node is matching a predicate - determine what to read
-                        // note that queries using name selector must specify read strategy
-                        ngDevMode && assertDefined(predicate.read, 'the node should have a predicate');
-                        var result = readFromNodeInjector(tNode, currentView, predicate.read, directiveIdx);
+                        var result = null;
+                        if (predicate.read) {
+                            result = queryRead(tNode, currentView, predicate.read);
+                        }
+                        else {
+                            if (directiveIdx > -1) {
+                                result = currentView[DIRECTIVES][directiveIdx];
+                            }
+                            else {
+                                // if read token and / or strategy is not specified,
+                                // detect it using appropriate tNode type
+                                result = queryReadByTNodeType(tNode, currentView);
+                            }
+                        }
                         if (result !== null) {
                             addMatch(query, result);
                         }
@@ -9970,7 +10019,9 @@
      * @param read What to save in the query
      * @returns QueryList<T>
      */
-    function query(memoryIndex, predicate, descend, read) {
+    function query(memoryIndex, predicate, descend, 
+    // TODO: "read" should be an AbstractType (FW-486)
+    read) {
         ngDevMode && assertPreviousIsParent();
         var queryList = new QueryList();
         var queries = getOrCreateCurrentQueries(LQueries_);
@@ -9995,73 +10046,6 @@
         }
         return false;
     }
-    var ReadFromInjectorFn = /** @class */ (function () {
-        function ReadFromInjectorFn(read) {
-            this.read = read;
-        }
-        return ReadFromInjectorFn;
-    }());
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Represents an embedded template that can be used to instantiate embedded views.
-     * To instantiate embedded views based on a template, use the `ViewContainerRef`
-     * method `createEmbeddedView()`.
-     *
-     * Access a `TemplateRef` instance by placing a directive on an `<ng-template>`
-     * element (or directive prefixed with `*`). The `TemplateRef` for the embedded view
-     * is injected into the constructor of the directive,
-     * using the `TemplateRef` token.
-     *
-     * You can also use a `Query` to find a `TemplateRef` associated with
-     * a component or a directive.
-     *
-     * @see `ViewContainerRef`
-     * @see [Navigate the Component Tree with DI](guide/dependency-injection-navtree)
-     *
-     */
-    var TemplateRef = /** @class */ (function () {
-        function TemplateRef() {
-        }
-        /** @internal */
-        TemplateRef.__NG_ELEMENT_ID__ = function () { return R3_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef); };
-        return TemplateRef;
-    }());
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Represents a container where one or more views can be attached to a component.
-     *
-     * Can contain *host views* (created by instantiating a
-     * component with the `createComponent()` method), and *embedded views*
-     * (created by instantiating a `TemplateRef` with the `createEmbeddedView()` method).
-     *
-     * A view container instance can contain other view containers,
-     * creating a [view hierarchy](guide/glossary#view-tree).
-     *
-     * @see `ComponentRef`
-     * @see `EmbeddedViewRef`
-     *
-     */
-    var ViewContainerRef = /** @class */ (function () {
-        function ViewContainerRef() {
-        }
-        /** @internal */
-        ViewContainerRef.__NG_ELEMENT_ID__ = function () { return R3_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef); };
-        return ViewContainerRef;
-    }());
 
     /**
      * @license
@@ -12151,7 +12135,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-rc.0+24.sha-d216a46');
+    var VERSION = new Version('7.0.0-rc.0+25.sha-cb59d87');
 
     /**
      * @license
@@ -14763,6 +14747,35 @@
         }
         return value;
     }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Represents a container where one or more views can be attached to a component.
+     *
+     * Can contain *host views* (created by instantiating a
+     * component with the `createComponent()` method), and *embedded views*
+     * (created by instantiating a `TemplateRef` with the `createEmbeddedView()` method).
+     *
+     * A view container instance can contain other view containers,
+     * creating a [view hierarchy](guide/glossary#view-tree).
+     *
+     * @see `ComponentRef`
+     * @see `EmbeddedViewRef`
+     *
+     */
+    var ViewContainerRef = /** @class */ (function () {
+        function ViewContainerRef() {
+        }
+        /** @internal */
+        ViewContainerRef.__NG_ELEMENT_ID__ = function () { return R3_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef); };
+        return ViewContainerRef;
+    }());
 
     /**
      * @license
