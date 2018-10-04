@@ -9,7 +9,7 @@ import { InjectionToken } from '../di/injection_token';
 import { InjectFlags, Injector } from '../di/injector';
 import { Renderer2 } from '../render';
 import { Type } from '../type';
-import { DirectiveDefInternal } from './interfaces/definition';
+import { DirectiveDef } from './interfaces/definition';
 import { TContainerNode, TElementContainerNode, TElementNode, TNode } from './interfaces/node';
 import { LViewData, TData, TView } from './interfaces/view';
 /**
@@ -52,13 +52,13 @@ export declare function getParentInjectorView(location: number, startView: LView
  * @param di The node injector in which a directive will be added
  * @param def The definition of the directive to be made public
  */
-export declare function diPublicInInjector(injectorIndex: number, view: LViewData, def: DirectiveDefInternal<any>): void;
+export declare function diPublicInInjector(injectorIndex: number, view: LViewData, def: DirectiveDef<any>): void;
 /**
  * Makes a directive public to the DI system by adding it to an injector's bloom filter.
  *
  * @param def The definition of the directive to be made public
  */
-export declare function diPublic(def: DirectiveDefInternal<any>): void;
+export declare function diPublic(def: DirectiveDef<any>): void;
 /**
  * Returns the value associated to the given token from the injectors.
  *

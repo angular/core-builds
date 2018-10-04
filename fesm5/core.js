@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-rc.0+27.sha-aaaa340
+ * @license Angular v7.0.0-rc.0+46.sha-fdaf573
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2609,7 +2609,7 @@ function isComponent(tNode) {
  *
  * @param component any component
  */
-function getRootView$1(target) {
+function getRootView(target) {
     ngDevMode && assertDefined(target, 'component');
     var lViewData = Array.isArray(target) ? target : readPatchedLViewData(target);
     while (lViewData && !(lViewData[FLAGS] & 64 /* IsRoot */)) {
@@ -2617,8 +2617,8 @@ function getRootView$1(target) {
     }
     return lViewData;
 }
-function getRootContext$1(viewOrComponent) {
-    return getRootView$1(viewOrComponent)[CONTEXT];
+function getRootContext(viewOrComponent) {
+    return getRootView(viewOrComponent)[CONTEXT];
 }
 
 /**
@@ -6572,8 +6572,8 @@ function LifecycleHooksFeature(component, def) {
  *
  * @param component any component
  */
-function getRootContext$2(component) {
-    var rootContext = getRootView$1(component)[CONTEXT];
+function getRootContext$1(component) {
+    var rootContext = getRootView(component)[CONTEXT];
     ngDevMode && assertDefined(rootContext, 'rootContext');
     return rootContext;
 }
@@ -6594,7 +6594,7 @@ function getRootContext$2(component) {
  * @returns Promise which resolves when the component is rendered.
  */
 function whenRendered(component) {
-    return getRootContext$2(component).clean;
+    return getRootContext$1(component).clean;
 }
 
 /**
@@ -6605,7 +6605,7 @@ function whenRendered(component) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Determines if a definition is a {@link ComponentDefInternal} or a {@link DirectiveDefInternal}
+ * Determines if a definition is a {@link ComponentDef} or a {@link DirectiveDef}
  * @param definition The definition to examine
  */
 function isComponentDef(definition) {
@@ -12208,7 +12208,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('7.0.0-rc.0+27.sha-aaaa340');
+var VERSION = new Version('7.0.0-rc.0+46.sha-fdaf573');
 
 /**
  * @license
@@ -20784,7 +20784,7 @@ function addPlayer(ref, player) {
         }
         player.destroy();
     });
-    var rootContext = getRootContext$1(elementContext.lViewData);
+    var rootContext = getRootContext(elementContext.lViewData);
     var playerHandler = rootContext.playerHandler || (rootContext.playerHandler = new CorePlayerHandler());
     playerHandler.queuePlayer(player, ref);
     var nothingScheduled = rootContext.flags === 0 /* Empty */;

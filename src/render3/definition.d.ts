@@ -8,10 +8,10 @@
 import './ng_dev_mode';
 import { ChangeDetectionStrategy } from '../change_detection/constants';
 import { Provider } from '../di/provider';
-import { NgModuleDef, NgModuleDefInternal } from '../metadata/ng_module';
+import { NgModuleDef } from '../metadata/ng_module';
 import { ViewEncapsulation } from '../metadata/view';
 import { Type } from '../type';
-import { BaseDef, ComponentDefFeature, ComponentDefInternal, ComponentQuery, ComponentTemplate, ComponentType, DirectiveDefFeature, DirectiveDefInternal, DirectiveType, DirectiveTypesOrFactory, PipeDefInternal, PipeType, PipeTypesOrFactory } from './interfaces/definition';
+import { BaseDef, ComponentDef, ComponentDefFeature, ComponentQuery, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveTypesOrFactory, PipeDef, PipeType, PipeTypesOrFactory } from './interfaces/definition';
 import { CssSelectorList, SelectorFlags } from './interfaces/projection';
 export declare const EMPTY: {};
 export declare const EMPTY_ARRAY: any[];
@@ -239,11 +239,11 @@ export declare function defineComponent<T>(componentDefinition: {
      */
     animations?: any[] | null;
 }): never;
-export declare function extractDirectiveDef(type: DirectiveType<any> & ComponentType<any>): DirectiveDefInternal<any> | ComponentDefInternal<any>;
-export declare function extractPipeDef(type: PipeType<any>): PipeDefInternal<any>;
+export declare function extractDirectiveDef(type: DirectiveType<any> & ComponentType<any>): DirectiveDef<any> | ComponentDef<any>;
+export declare function extractPipeDef(type: PipeType<any>): PipeDef<any>;
 export declare function defineNgModule<T>(def: {
     type: T;
-} & Partial<NgModuleDef<T, any, any, any>>): never;
+} & Partial<NgModuleDef<T>>): never;
 /**
  * Create a base definition
  *
@@ -463,7 +463,7 @@ export declare function definePipe<T>(pipeDef: {
  * honors inheritance, but in the future we may change the rule to require that definitions are
  * explicit. This would require some sort of migration strategy.
  */
-export declare function getComponentDef<T>(type: any): ComponentDefInternal<T> | null;
-export declare function getDirectiveDef<T>(type: any): DirectiveDefInternal<T> | null;
-export declare function getPipeDef<T>(type: any): PipeDefInternal<T> | null;
-export declare function getNgModuleDef<T>(type: any): NgModuleDefInternal<T> | null;
+export declare function getComponentDef<T>(type: any): ComponentDef<T> | null;
+export declare function getDirectiveDef<T>(type: any): DirectiveDef<T> | null;
+export declare function getPipeDef<T>(type: any): PipeDef<T> | null;
+export declare function getNgModuleDef<T>(type: any): NgModuleDef<T> | null;
