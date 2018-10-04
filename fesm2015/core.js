@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-rc.0+31.sha-532e536
+ * @license Angular v7.0.0-rc.0+45.sha-35bf952
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -8020,7 +8020,7 @@ function whenRendered(component) {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * Determines if a definition is a {\@link ComponentDefInternal} or a {\@link DirectiveDefInternal}
+ * Determines if a definition is a {\@link ComponentDef} or a {\@link DirectiveDef}
  * @template T
  * @param {?} definition The definition to examine
  * @return {?}
@@ -14766,7 +14766,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-rc.0+31.sha-532e536');
+const VERSION = new Version('7.0.0-rc.0+45.sha-35bf952');
 
 /**
  * @fileoverview added by tsickle

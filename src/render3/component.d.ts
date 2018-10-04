@@ -9,7 +9,7 @@ import { Type } from '../core';
 import { Injector } from '../di/injector';
 import { Sanitizer } from '../sanitization/security';
 import { PlayerHandler } from './interfaces/player';
-import { ComponentDef, ComponentDefInternal, ComponentType } from './interfaces/definition';
+import { ComponentDef, ComponentType } from './interfaces/definition';
 import { LElementNode } from './interfaces/node';
 import { RElement, RendererFactory3 } from './interfaces/renderer';
 import { LViewData, RootContext } from './interfaces/view';
@@ -56,7 +56,7 @@ export interface CreateComponentOptions {
     scheduler?: (work: () => void) => void;
 }
 /** See CreateComponentOptions.hostFeatures */
-declare type HostFeature = (<T>(component: T, componentDef: ComponentDef<T, string>) => void);
+declare type HostFeature = (<T>(component: T, componentDef: ComponentDef<T>) => void);
 export declare const NULL_INJECTOR: Injector;
 /**
  * Bootstraps a Component into an existing host element and returns an instance
@@ -76,7 +76,7 @@ export declare function renderComponent<T>(componentType: ComponentType<T> | Typ
  * Creates a root component and sets it up with features and host bindings. Shared by
  * renderComponent() and ViewContainerRef.createComponent().
  */
-export declare function createRootComponent<T>(elementNode: LElementNode, componentDef: ComponentDef<T, string>, rootView: LViewData, rootContext: RootContext, hostFeatures: HostFeature[] | null): any;
+export declare function createRootComponent<T>(elementNode: LElementNode, componentDef: ComponentDef<T>, rootView: LViewData, rootContext: RootContext, hostFeatures: HostFeature[] | null): any;
 export declare function createRootContext(scheduler: (workFn: () => void) => void, playerHandler?: PlayerHandler | null): RootContext;
 /**
  * Used to enable lifecycle hooks on the root component.
@@ -91,7 +91,7 @@ export declare function createRootContext(scheduler: (workFn: () => void) => voi
  * renderComponent(AppComponent, {features: [RootLifecycleHooks]});
  * ```
  */
-export declare function LifecycleHooksFeature(component: any, def: ComponentDefInternal<any>): void;
+export declare function LifecycleHooksFeature(component: any, def: ComponentDef<any>): void;
 /**
  * Retrieve the host element of the component.
  *
