@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { DirectiveDefInternal } from '../interfaces/definition';
+import { DirectiveDef } from '../interfaces/definition';
 /**
  * The NgOnChangesFeature decorates a component with support for the ngOnChanges
  * lifecycle hook, so it should be included in any component that implements
@@ -26,4 +26,4 @@ import { DirectiveDefInternal } from '../interfaces/definition';
  * });
  * ```
  */
-export declare function NgOnChangesFeature<T>(definition: DirectiveDefInternal<T>): void;
+export declare function NgOnChangesFeature<T>(definition: DirectiveDef<T>): void;

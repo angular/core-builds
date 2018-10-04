@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-rc.0+27.sha-aaaa340
+ * @license Angular v7.0.0-rc.0+46.sha-fdaf573
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2504,11 +2504,6 @@ function callHooks(data, arr) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
 /**
  * Called when directives inject each other (creating a circular dependency)
  * @param {?} token
@@ -2933,7 +2928,7 @@ function isComponent(tNode) {
  * @param {?} target
  * @return {?}
  */
-function getRootView$1(target) {
+function getRootView(target) {
     ngDevMode && assertDefined(target, 'component');
     /** @type {?} */
     let lViewData = Array.isArray(target) ? (/** @type {?} */ (target)) : /** @type {?} */ ((readPatchedLViewData(target)));
@@ -2946,8 +2941,8 @@ function getRootView$1(target) {
  * @param {?} viewOrComponent
  * @return {?}
  */
-function getRootContext$1(viewOrComponent) {
-    return /** @type {?} */ (getRootView$1(viewOrComponent)[CONTEXT]);
+function getRootContext(viewOrComponent) {
+    return /** @type {?} */ (getRootView(viewOrComponent)[CONTEXT]);
 }
 
 /**
@@ -7989,9 +7984,9 @@ function LifecycleHooksFeature(component, def) {
  * @param {?} component any component
  * @return {?}
  */
-function getRootContext$2(component) {
+function getRootContext$1(component) {
     /** @type {?} */
-    const rootContext = /** @type {?} */ (getRootView$1(component)[CONTEXT]);
+    const rootContext = /** @type {?} */ (getRootView(component)[CONTEXT]);
     ngDevMode && assertDefined(rootContext, 'rootContext');
     return rootContext;
 }
@@ -8012,7 +8007,7 @@ function getRootContext$2(component) {
  * @return {?} Promise which resolves when the component is rendered.
  */
 function whenRendered(component) {
-    return getRootContext$2(component).clean;
+    return getRootContext$1(component).clean;
 }
 
 /**
@@ -8020,7 +8015,7 @@ function whenRendered(component) {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
- * Determines if a definition is a {\@link ComponentDefInternal} or a {\@link DirectiveDefInternal}
+ * Determines if a definition is a {\@link ComponentDef} or a {\@link DirectiveDef}
  * @template T
  * @param {?} definition The definition to examine
  * @return {?}
@@ -14766,7 +14761,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-rc.0+27.sha-aaaa340');
+const VERSION = new Version('7.0.0-rc.0+46.sha-fdaf573');
 
 /**
  * @fileoverview added by tsickle
@@ -26153,7 +26148,7 @@ function addPlayer(ref, player) {
         player.destroy();
     });
     /** @type {?} */
-    const rootContext = getRootContext$1(elementContext.lViewData);
+    const rootContext = getRootContext(elementContext.lViewData);
     /** @type {?} */
     const playerHandler = rootContext.playerHandler || (rootContext.playerHandler = new CorePlayerHandler());
     playerHandler.queuePlayer(player, ref);

@@ -10,7 +10,7 @@ import { QueryList } from '../../linker';
 import { Sanitizer } from '../../sanitization/security';
 import { PlayerHandler } from '../interfaces/player';
 import { LContainer } from './container';
-import { ComponentQuery, ComponentTemplate, DirectiveDefInternal, DirectiveDefList, PipeDefInternal, PipeDefList } from './definition';
+import { ComponentQuery, ComponentTemplate, DirectiveDef, DirectiveDefList, PipeDef, PipeDefList } from './definition';
 import { TElementNode, TNode, TViewNode } from './node';
 import { LQueries } from './query';
 import { Renderer3 } from './renderer';
@@ -487,7 +487,7 @@ export declare type HookData = (number | (() => void))[];
  *
  * Injector bloom filters are also stored here.
  */
-export declare type TData = (TNode | PipeDefInternal<any> | number | null)[];
+export declare type TData = (TNode | PipeDef<any> | number | null)[];
 /** Type for TView.currentMatches */
-export declare type CurrentMatchesList = [DirectiveDefInternal<any>, (string | number | null)];
+export declare type CurrentMatchesList = [DirectiveDef<any>, (string | number | null)];
 export declare const unusedValueExportToPlacateAjd = 1;

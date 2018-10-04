@@ -10,7 +10,7 @@ import { QueryList } from '../linker';
 import { Sanitizer } from '../sanitization/security';
 import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
 import { LContainer } from './interfaces/container';
-import { ComponentDefInternal, ComponentQuery, ComponentTemplate, DirectiveDefInternal, DirectiveDefListOrFactory, InitialStylingFlags, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
+import { ComponentDef, ComponentQuery, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, InitialStylingFlags, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { LContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode, LocalRefExtractor, TAttributes, TContainerNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from './interfaces/node';
 import { CssSelectorList } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
@@ -216,7 +216,7 @@ export declare function elementStart(index: number, name: string, attrs?: TAttri
  * @returns the element created
  */
 export declare function elementCreate(name: string, overriddenRenderer?: Renderer3): RElement;
-export declare function resolveDirective(def: DirectiveDefInternal<any>, valueIndex: number, matches: CurrentMatchesList, tView: TView): any;
+export declare function resolveDirective(def: DirectiveDef<any>, valueIndex: number, matches: CurrentMatchesList, tView: TView): any;
 /** Stores index of directive and host element so it will be queued for binding refresh during CD.
  */
 export declare function queueHostBindingForCheck(dirIndex: number, hostVars: number): void;
@@ -245,7 +245,7 @@ export declare function locateHostElement(factory: RendererFactory3, elementOrSe
  *
  * @returns LElementNode created
  */
-export declare function hostElement(tag: string, rNode: RElement | null, def: ComponentDefInternal<any>, sanitizer?: Sanitizer | null): LElementNode;
+export declare function hostElement(tag: string, rNode: RElement | null, def: ComponentDef<any>, sanitizer?: Sanitizer | null): LElementNode;
 /**
  * Adds an event listener to the current node.
  *
@@ -476,14 +476,14 @@ export declare function textBinding<T>(index: number, value: T | NO_CHANGE): voi
  * @param directive The directive instance.
  * @param directiveDef DirectiveDef object which contains information about the template.
  */
-export declare function directiveCreate<T>(directiveDefIdx: number, directive: T, directiveDef: DirectiveDefInternal<T> | ComponentDefInternal<T>): T;
+export declare function directiveCreate<T>(directiveDefIdx: number, directive: T, directiveDef: DirectiveDef<T> | ComponentDef<T>): T;
 /**
  * A lighter version of directiveCreate() that is used for the root component
  *
  * This version does not contain features that we don't already support at root in
  * current Angular. Example: local refs and inputs on root component.
  */
-export declare function baseDirectiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDefInternal<T> | ComponentDefInternal<T>, hostNode: LNode): T;
+export declare function baseDirectiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T> | ComponentDef<T>, hostNode: LNode): T;
 /**
  * Creates a LContainer, either from a container instruction, or for a ViewContainerRef.
  *
