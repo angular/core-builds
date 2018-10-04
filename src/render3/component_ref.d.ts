@@ -14,7 +14,7 @@ import { ElementRef as viewEngine_ElementRef } from '../linker/element_ref';
 import { NgModuleRef as viewEngine_NgModuleRef } from '../linker/ng_module_factory';
 import { RendererFactory2 } from '../render/api';
 import { Type } from '../type';
-import { ComponentDefInternal } from './interfaces/definition';
+import { ComponentDef } from './interfaces/definition';
 import { LViewData, RootContext } from './interfaces/view';
 import { ViewRef } from './view_ref';
 export declare class ComponentFactoryResolver extends viewEngine_ComponentFactoryResolver {
@@ -50,7 +50,7 @@ export declare class ComponentFactory<T> extends viewEngine_ComponentFactory<T> 
         propName: string;
         templateName: string;
     }[];
-    constructor(componentDef: ComponentDefInternal<any>);
+    constructor(componentDef: ComponentDef<any>);
     create(injector: Injector, projectableNodes?: any[][] | undefined, rootSelectorOrNode?: any, ngModule?: viewEngine_NgModuleRef<any> | undefined): viewEngine_ComponentRef<T>;
 }
 /**
