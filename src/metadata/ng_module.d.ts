@@ -28,11 +28,7 @@ export interface NgModuleTransitiveScopes {
         pipes: Set<any>;
     };
 }
-/**
- * A version of {@link NgModuleDef} that represents the runtime type shape only, and excludes
- * metadata parameters.
- */
-export declare type NgModuleDefInternal<T> = NgModuleDef<T, any, any, any>;
+export declare type NgModuleDefWithMeta<T, Declarations, Imports, Exports> = NgModuleDef<T>;
 /**
  * Runtime link information for NgModules.
  *
@@ -43,7 +39,7 @@ export declare type NgModuleDefInternal<T> = NgModuleDef<T, any, any, any>;
  * never create the object directly since the shape of this object
  * can change between versions.
  */
-export interface NgModuleDef<T, Declarations, Imports, Exports> {
+export interface NgModuleDef<T> {
     /** Token representing the module. Used by DI. */
     type: T;
     /** List of components to bootstrap. */

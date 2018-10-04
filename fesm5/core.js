@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-rc.0+32.sha-3593686
+ * @license Angular v7.0.0-rc.0+45.sha-35bf952
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -6605,7 +6605,7 @@ function whenRendered(component) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Determines if a definition is a {@link ComponentDefInternal} or a {@link DirectiveDefInternal}
+ * Determines if a definition is a {@link ComponentDef} or a {@link DirectiveDef}
  * @param definition The definition to examine
  */
 function isComponentDef(definition) {
@@ -12208,7 +12208,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('7.0.0-rc.0+32.sha-3593686');
+var VERSION = new Version('7.0.0-rc.0+45.sha-35bf952');
 
 /**
  * @license
