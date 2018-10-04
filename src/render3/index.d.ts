@@ -23,5 +23,5 @@ export { pipe, pipeBind1, pipeBind2, pipeBind3, pipeBind4, pipeBindV, } from './
 export { QueryList, query, queryRefresh, } from './query';
 export { registerContentQuery, loadQueryList, } from './instructions';
 export { pureFunction0, pureFunction1, pureFunction2, pureFunction3, pureFunction4, pureFunction5, pureFunction6, pureFunction7, pureFunction8, pureFunctionV, } from './pure_function';
-export { templateRefExtractor, QUERY_READ_ELEMENT_REF, QUERY_READ_CONTAINER_REF, QUERY_READ_FROM_NODE, QUERY_READ_TEMPLATE_REF } from './view_engine_compatibility_prebound';
+export { templateRefExtractor } from './view_engine_compatibility_prebound';
 export { BaseDef, ComponentDef, ComponentDefInternal, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFlags, DirectiveDefInternal, DirectiveType, NgOnChangesFeature, InheritDefinitionFeature, PublicFeature, PipeDef, LifecycleHooksFeature, defineComponent, defineDirective, defineNgModule, defineBase, definePipe, getHostElement, getRenderedText, renderComponent, whenRendered, };
