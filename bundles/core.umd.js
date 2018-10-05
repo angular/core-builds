@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-rc.0+45.sha-35bf952
+ * @license Angular v7.0.0-rc.0+47.sha-51dfdd5
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2422,7 +2422,7 @@
      *
      * @param component any component
      */
-    function getRootView$1(target) {
+    function getRootView(target) {
         ngDevMode && assertDefined(target, 'component');
         var lViewData = Array.isArray(target) ? target : readPatchedLViewData(target);
         while (lViewData && !(lViewData[FLAGS] & 64 /* IsRoot */)) {
@@ -2430,8 +2430,8 @@
         }
         return lViewData;
     }
-    function getRootContext$1(viewOrComponent) {
-        return getRootView$1(viewOrComponent)[CONTEXT];
+    function getRootContext(viewOrComponent) {
+        return getRootView(viewOrComponent)[CONTEXT];
     }
 
     /**
@@ -4134,6 +4134,7 @@
      */
     function refreshDescendantViews() {
         setHostBindings(tView.hostBindings);
+        var parentFirstTemplatePass = firstTemplatePass;
         // This needs to be set before children are processed to support recursive components
         tView.firstTemplatePass = firstTemplatePass = false;
         if (!checkNoChangesMode) {
@@ -4145,7 +4146,7 @@
         if (!checkNoChangesMode) {
             executeHooks(directives, tView.contentHooks, tView.contentCheckHooks, creationMode);
         }
-        refreshChildComponents(tView.components);
+        refreshChildComponents(tView.components, parentFirstTemplatePass);
     }
     /** Sets the host bindings for the current view. */
     function setHostBindings(bindings) {
@@ -4177,10 +4178,10 @@
         }
     }
     /** Refreshes child components in the current view. */
-    function refreshChildComponents(components) {
+    function refreshChildComponents(components, parentFirstTemplatePass) {
         if (components != null) {
             for (var i = 0; i < components.length; i++) {
-                componentRefresh(components[i]);
+                componentRefresh(components[i], parentFirstTemplatePass);
             }
         }
     }
@@ -4386,7 +4387,7 @@
                 // Element was stored at 0 in data and directive was stored at 0 in directives
                 // in renderComponent()
                 setHostBindings(tView.hostBindings);
-                componentRefresh(HEADER_OFFSET);
+                componentRefresh(HEADER_OFFSET, false);
             }
         }
         finally {
@@ -5717,7 +5718,7 @@
      *
      * @param adjustedElementIndex  Element index in LViewData[] (adjusted for HEADER_OFFSET)
      */
-    function componentRefresh(adjustedElementIndex) {
+    function componentRefresh(adjustedElementIndex, parentFirstTemplatePass) {
         ngDevMode && assertDataInRange(adjustedElementIndex);
         var element = readElementValue(viewData[adjustedElementIndex]);
         ngDevMode && assertNodeType(tView.data[adjustedElementIndex], 3 /* Element */);
@@ -5726,7 +5727,40 @@
         var hostView = element.data;
         // Only attached CheckAlways components or attached, dirty OnPush components should be checked
         if (viewAttached(hostView) && hostView[FLAGS] & (2 /* CheckAlways */ | 4 /* Dirty */)) {
+            parentFirstTemplatePass && syncViewWithBlueprint(hostView);
             detectChangesInternal(hostView, hostView[CONTEXT]);
+        }
+    }
+    /**
+     * Syncs an LViewData instance with its blueprint if they have gotten out of sync.
+     *
+     * Typically, blueprints and their view instances should always be in sync, so the loop here
+     * will be skipped. However, consider this case of two components side-by-side:
+     *
+     * App template:
+     * ```
+     * <comp></comp>
+     * <comp></comp>
+     * ```
+     *
+     * The following will happen:
+     * 1. App template begins processing.
+     * 2. First <comp> is matched as a component and its LViewData is created.
+     * 3. Second <comp> is matched as a component and its LViewData is created.
+     * 4. App template completes processing, so it's time to check child templates.
+     * 5. First <comp> template is checked. It has a directive, so its def is pushed to blueprint.
+     * 6. Second <comp> template is checked. Its blueprint has been updated by the first
+     * <comp> template, but its LViewData was created before this update, so it is out of sync.
+     *
+     * Note that embedded views inside ngFor loops will never be out of sync because these views
+     * are processed as soon as they are created.
+     *
+     * @param componentView The view to sync
+     */
+    function syncViewWithBlueprint(componentView) {
+        var componentTView = componentView[TVIEW];
+        for (var i = componentView.length; i < componentTView.blueprint.length; i++) {
+            componentView[i] = componentTView.blueprint[i];
         }
     }
     /** Returns a boolean for whether the view is attached */
@@ -6385,8 +6419,8 @@
      *
      * @param component any component
      */
-    function getRootContext$2(component) {
-        var rootContext = getRootView$1(component)[CONTEXT];
+    function getRootContext$1(component) {
+        var rootContext = getRootView(component)[CONTEXT];
         ngDevMode && assertDefined(rootContext, 'rootContext');
         return rootContext;
     }
@@ -6407,7 +6441,7 @@
      * @returns Promise which resolves when the component is rendered.
      */
     function whenRendered(component) {
-        return getRootContext$2(component).clean;
+        return getRootContext$1(component).clean;
     }
 
     /**
@@ -6889,8 +6923,9 @@
         if (tView.firstTemplatePass) {
             // TODO(kara): Store node injector with host bindings for that node (see VIEW_DATA.md)
             tNode.injectorIndex = hostView.length;
-            tView.blueprint.push(0, 0, 0, 0, 0, 0, 0, 0, null); // foundation for cumulative bloom
-            tView.data.push(0, 0, 0, 0, 0, 0, 0, 0, tNode); // foundation for node bloom
+            setUpBloom(tView.data, tNode); // foundation for node bloom
+            setUpBloom(hostView, null); // foundation for cumulative bloom
+            setUpBloom(tView.blueprint, null);
             tView.hostBindingStartIndex += INJECTOR_SIZE;
         }
         var parentLoc = getParentInjectorLocation(tNode, hostView);
@@ -6898,13 +6933,21 @@
         var parentView = getParentInjectorView(parentLoc, hostView);
         var parentData = parentView[TVIEW].data;
         var injectorIndex = tNode.injectorIndex;
-        for (var i = 0; i < PARENT_INJECTOR; i++) {
-            var bloomIndex = parentIndex + i;
-            hostView[injectorIndex + i] =
-                parentLoc === -1 ? 0 : parentView[bloomIndex] | parentData[bloomIndex];
+        // If a parent injector can't be found, its location is set to -1.
+        // In that case, we don't need to set up a cumulative bloom
+        if (parentLoc !== -1) {
+            for (var i = 0; i < PARENT_INJECTOR; i++) {
+                var bloomIndex = parentIndex + i;
+                // Creates a cumulative bloom filter that merges the parent's bloom filter
+                // and its own cumulative bloom (which contains tokens for all ancestors)
+                hostView[injectorIndex + i] = parentView[bloomIndex] | parentData[bloomIndex];
+            }
         }
         hostView[injectorIndex + PARENT_INJECTOR] = parentLoc;
         return injectorIndex;
+    }
+    function setUpBloom(arr, footer) {
+        arr.push(0, 0, 0, 0, 0, 0, 0, 0, footer);
     }
     function getInjectorIndex(tNode, hostView) {
         if (tNode.injectorIndex === -1 ||
@@ -12156,7 +12199,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-rc.0+45.sha-35bf952');
+    var VERSION = new Version('7.0.0-rc.0+47.sha-51dfdd5');
 
     /**
      * @license
@@ -20703,7 +20746,7 @@
             }
             player.destroy();
         });
-        var rootContext = getRootContext$1(elementContext.lViewData);
+        var rootContext = getRootContext(elementContext.lViewData);
         var playerHandler = rootContext.playerHandler || (rootContext.playerHandler = new CorePlayerHandler());
         playerHandler.queuePlayer(player, ref);
         var nothingScheduled = rootContext.flags === 0 /* Empty */;

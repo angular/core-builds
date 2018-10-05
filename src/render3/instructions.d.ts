@@ -546,7 +546,7 @@ export declare function embeddedViewEnd(): void;
  *
  * @param adjustedElementIndex  Element index in LViewData[] (adjusted for HEADER_OFFSET)
  */
-export declare function componentRefresh<T>(adjustedElementIndex: number): void;
+export declare function componentRefresh<T>(adjustedElementIndex: number, parentFirstTemplatePass: boolean): void;
 /** Returns a boolean for whether the view is attached */
 export declare function viewAttached(view: LViewData): boolean;
 /**
