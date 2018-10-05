@@ -45,7 +45,7 @@ export declare function getRootComponents(target: {}): any[];
  * Returns the injector instance that is associated with
  * the element, component or directive.
  */
-export declare function getInjector(target: {}): Injector | null;
+export declare function getInjector(target: {}): Injector;
 /**
  * Returns a list of all the directives that are associated
  * with the underlying target element.
