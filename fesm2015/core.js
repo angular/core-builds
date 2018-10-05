@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-rc.0+47.sha-51dfdd5
+ * @license Angular v7.0.0-rc.0+49.sha-3cce4af
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2324,50 +2324,46 @@ function getContext(target) {
             /** @type {?} */
             const lViewData = /** @type {?} */ ((mpValue));
             /** @type {?} */
-            let lNodeIndex;
+            let nodeIndex;
             /** @type {?} */
             let component = undefined;
             /** @type {?} */
-            let directiveIndices = undefined;
-            /** @type {?} */
             let directives = undefined;
             if (isComponentInstance(target)) {
-                lNodeIndex = findViaComponent(lViewData, target);
-                if (lNodeIndex == -1) {
+                nodeIndex = findViaComponent(lViewData, target);
+                if (nodeIndex == -1) {
                     throw new Error('The provided component was not found in the application');
                 }
                 component = target;
             }
             else if (isDirectiveInstance(target)) {
-                lNodeIndex = findViaDirective(lViewData, target);
-                if (lNodeIndex == -1) {
+                nodeIndex = findViaDirective(lViewData, target);
+                if (nodeIndex == -1) {
                     throw new Error('The provided directive was not found in the application');
                 }
-                directiveIndices = discoverDirectiveIndices(lViewData, lNodeIndex);
-                directives = directiveIndices ? discoverDirectives(lViewData, directiveIndices) : null;
+                directives = discoverDirectives(nodeIndex, lViewData);
             }
             else {
-                lNodeIndex = findViaNativeElement(lViewData, /** @type {?} */ (target));
-                if (lNodeIndex == -1) {
+                nodeIndex = findViaNativeElement(lViewData, /** @type {?} */ (target));
+                if (nodeIndex == -1) {
                     return null;
                 }
             }
             /** @type {?} */
-            const lNode = /** @type {?} */ ((getLNodeFromViewData(lViewData, lNodeIndex)));
+            const lNode = /** @type {?} */ ((getLNodeFromViewData(lViewData, nodeIndex)));
             /** @type {?} */
             const existingCtx = readPatchedData(lNode.native);
             /** @type {?} */
             const context = (existingCtx && !Array.isArray(existingCtx)) ?
                 existingCtx :
-                createLContext(lViewData, lNodeIndex, lNode.native);
+                createLContext(lViewData, nodeIndex, lNode.native);
             // only when the component has been discovered then update the monkey-patch
             if (component && context.component === undefined) {
                 context.component = component;
                 attachPatchData(context.component, context);
             }
             // only when the directives have been discovered then update the monkey-patch
-            if (directives && directiveIndices && context.directives === undefined) {
-                context.directiveIndices = directiveIndices;
+            if (directives && context.directives === undefined) {
                 context.directives = directives;
                 for (let i = 0; i < directives.length; i++) {
                     attachPatchData(directives[i], context);
@@ -2426,24 +2422,11 @@ function getContext(target) {
 function createLContext(lViewData, lNodeIndex, native) {
     return {
         lViewData,
-        lNodeIndex,
-        native,
+        nodeIndex: lNodeIndex, native,
         component: undefined,
-        directiveIndices: undefined,
         directives: undefined,
         localRefs: undefined,
     };
-}
-/**
- * A utility function for retrieving the matching lElementNode
- * from a given DOM element, component or directive.
- * @param {?} target
- * @return {?}
- */
-function getLElementNode(target) {
-    /** @type {?} */
-    const context = getContext(target);
-    return context ? getLNodeFromViewData(context.lViewData, context.lNodeIndex) : null;
 }
 /**
  * A simplified lookup function for finding the LElementNode from a component instance.
@@ -2472,7 +2455,7 @@ function getLElementFromComponent(componentInstance) {
     else {
         /** @type {?} */
         const context = /** @type {?} */ ((lViewData));
-        lNode = readElementValue(context.lViewData[context.lNodeIndex]);
+        lNode = readElementValue(context.lViewData[context.nodeIndex]);
     }
     return lNode;
 }
@@ -2600,17 +2583,17 @@ function findViaDirective(lViewData, directiveInstance) {
     /** @type {?} */
     const directivesAcrossView = lViewData[DIRECTIVES];
     /** @type {?} */
-    const directiveIndex = directivesAcrossView ? directivesAcrossView.indexOf(directiveInstance) : -1;
-    if (directiveIndex >= 0) {
-        /** @type {?} */
-        let tNode = lViewData[TVIEW].firstChild;
+    let tNode = lViewData[TVIEW].firstChild;
+    if (directivesAcrossView != null) {
         while (tNode) {
             /** @type {?} */
             const directiveIndexStart = getDirectiveStartIndex(tNode);
             /** @type {?} */
             const directiveIndexEnd = getDirectiveEndIndex(tNode, directiveIndexStart);
-            if (directiveIndex >= directiveIndexStart && directiveIndex < directiveIndexEnd) {
-                return tNode.index;
+            for (let i = directiveIndexStart; i < directiveIndexEnd; i++) {
+                if (directivesAcrossView[i] === directiveInstance) {
+                    return tNode.index;
+                }
             }
             tNode = traverseNextElement(tNode);
         }
@@ -2640,61 +2623,28 @@ function getLNodeFromViewData(lViewData, lElementIndex) {
     return value ? readElementValue(value) : null;
 }
 /**
- * Returns a collection of directive index values that are used on the element
- * (which is referenced by the lNodeIndex)
- * @param {?} lViewData
- * @param {?} lNodeIndex
- * @param {?=} includeComponents
+ * Returns a list of directives extracted from the given view. Does not contain
+ * the component.
+ *
+ * @param {?} nodeIndex
+ * @param {?} lViewData The target view data
  * @return {?}
  */
-function discoverDirectiveIndices(lViewData, lNodeIndex, includeComponents) {
+function discoverDirectives(nodeIndex, lViewData) {
     /** @type {?} */
     const directivesAcrossView = lViewData[DIRECTIVES];
-    /** @type {?} */
-    const tNode = /** @type {?} */ (lViewData[TVIEW].data[lNodeIndex]);
-    if (directivesAcrossView && directivesAcrossView.length) {
+    if (directivesAcrossView != null) {
         /** @type {?} */
-        const directiveIndexStart = getDirectiveStartIndex(tNode);
+        const tNode = /** @type {?} */ (lViewData[TVIEW].data[nodeIndex]);
         /** @type {?} */
-        const directiveIndexEnd = getDirectiveEndIndex(tNode, directiveIndexStart);
+        let directiveStartIndex = getDirectiveStartIndex(tNode);
         /** @type {?} */
-        const directiveIndices = [];
-        for (let i = directiveIndexStart; i < directiveIndexEnd; i++) {
-            // special case since the instance of the component (if it exists)
-            // is stored in the directives array.
-            if (i > directiveIndexStart ||
-                !isComponentInstance(directivesAcrossView[directiveIndexStart])) {
-                directiveIndices.push(i);
-            }
-        }
-        return directiveIndices.length ? directiveIndices : null;
+        const directiveEndIndex = getDirectiveEndIndex(tNode, directiveStartIndex);
+        if (tNode.flags & 4096 /* isComponent */)
+            directiveStartIndex++;
+        return directivesAcrossView.slice(directiveStartIndex, directiveEndIndex);
     }
     return null;
-}
-/**
- * Returns a list of directives extracted from the given view based on the
- * provided list of directive index values.
- *
- * @param {?} lViewData The target view data
- * @param {?} indices A collection of directive index values which will be used to
- *    figure out the directive instances
- * @return {?}
- */
-function discoverDirectives(lViewData, indices) {
-    /** @type {?} */
-    const directives = [];
-    /** @type {?} */
-    const directiveInstances = lViewData[DIRECTIVES];
-    if (directiveInstances) {
-        for (let i = 0; i < indices.length; i++) {
-            /** @type {?} */
-            const directiveIndex = indices[i];
-            /** @type {?} */
-            const directive = directiveInstances[directiveIndex];
-            directives.push(directive);
-        }
-    }
-    return directives;
 }
 /**
  * @param {?} tNode
@@ -4311,13 +4261,13 @@ function getOrCreatePlayerContext(target, context) {
     if (ngDevMode && !context) {
         throw new Error('Only elements that exist in an Angular application can be used for player access');
     }
-    const { lViewData, lNodeIndex } = context;
+    const { lViewData, nodeIndex } = context;
     /** @type {?} */
-    const value = lViewData[lNodeIndex];
+    const value = lViewData[nodeIndex];
     /** @type {?} */
     let stylingContext = /** @type {?} */ (value);
     if (!Array.isArray(value)) {
-        stylingContext = lViewData[lNodeIndex] = createEmptyStylingContext(/** @type {?} */ (value));
+        stylingContext = lViewData[nodeIndex] = createEmptyStylingContext(/** @type {?} */ (value));
     }
     return stylingContext[1 /* PlayerContext */] || allocPlayerContext(stylingContext);
 }
@@ -14972,7 +14922,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-rc.0+47.sha-51dfdd5');
+const VERSION = new Version('7.0.0-rc.0+49.sha-3cce4af');
 
 /**
  * @fileoverview added by tsickle
@@ -26205,25 +26155,17 @@ class Render3DebugContext {
      */
     get providerTokens() {
         /** @type {?} */
-        const matchedDirectives = [];
-        // TODO(vicb): why/when
-        if (this.nodeIndex === null) {
-            return matchedDirectives;
+        const directiveDefs = this.view[TVIEW].directives;
+        if (this.nodeIndex === null || directiveDefs == null) {
+            return [];
         }
         /** @type {?} */
-        const directives = this.view[DIRECTIVES];
-        if (directives) {
-            /** @type {?} */
-            const currentNode = this.view[this.nodeIndex];
-            for (let dirIndex = 0; dirIndex < directives.length; dirIndex++) {
-                /** @type {?} */
-                const directive = directives[dirIndex];
-                if (getLElementNode(directive) === currentNode) {
-                    matchedDirectives.push(directive.constructor);
-                }
-            }
-        }
-        return matchedDirectives;
+        const currentTNode = this.view[TVIEW].data[this.nodeIndex];
+        /** @type {?} */
+        const dirStart = currentTNode >> 15 /* DirectiveStartingIndexShift */;
+        /** @type {?} */
+        const dirEnd = dirStart + (currentTNode & 4095 /* DirectiveCountMask */);
+        return directiveDefs.slice(dirStart, dirEnd);
     }
     /**
      * @return {?}
