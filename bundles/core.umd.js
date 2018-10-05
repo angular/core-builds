@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-rc.0+48.sha-8f25321
+ * @license Angular v7.0.0-rc.0+55.sha-4006c9b
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1600,6 +1600,12 @@
     function assertComponentType(actual, msg) {
         if (msg === void 0) { msg = 'Type passed in is not ComponentType, it does not have \'ngComponentDef\' property.'; }
         if (!getComponentDef(actual)) {
+            throwError(msg);
+        }
+    }
+    function assertNgModuleType(actual, msg) {
+        if (msg === void 0) { msg = 'Type passed in is not NgModuleType, it does not have \'ngModuleDef\' property.'; }
+        if (!getNgModuleDef(actual)) {
             throwError(msg);
         }
     }
@@ -12145,7 +12151,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-rc.0+48.sha-8f25321');
+    var VERSION = new Version('7.0.0-rc.0+55.sha-4006c9b');
 
     /**
      * @license
@@ -14039,6 +14045,10 @@
         var compilerFactory = injector.get(CompilerFactory);
         var compiler$$1 = compilerFactory.createCompiler([options]);
         return compiler$$1.compileModuleAsync(moduleType);
+    }
+    function compileNgModuleFactory__POST_NGCC__(injector, options, moduleType) {
+        ngDevMode && assertNgModuleType(moduleType);
+        return Promise.resolve(new NgModuleFactory$1(moduleType));
     }
     var ALLOW_MULTIPLE_PLATFORMS = new InjectionToken('AllowMultipleToken');
     /**
@@ -20987,6 +20997,7 @@
     exports.ɵgetContext = getContext;
     exports.ɵaddPlayer = addPlayer;
     exports.ɵgetPlayers = getPlayers;
+    exports.ɵcompileNgModuleFactory__POST_NGCC__ = compileNgModuleFactory__POST_NGCC__;
     exports.ɵR3_COMPILE_COMPONENT__POST_NGCC__ = R3_COMPILE_COMPONENT__POST_NGCC__;
     exports.ɵR3_COMPILE_DIRECTIVE__POST_NGCC__ = R3_COMPILE_DIRECTIVE__POST_NGCC__;
     exports.ɵR3_COMPILE_INJECTABLE__POST_NGCC__ = R3_COMPILE_INJECTABLE__POST_NGCC__;
