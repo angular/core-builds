@@ -14,6 +14,5 @@ export { bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSan
 export { LContext as ɵLContext, getContext as ɵgetContext } from './render3/context_discovery';
 export { Player as ɵPlayer, PlayState as ɵPlayState, PlayerHandler as ɵPlayerHandler, } from './render3/interfaces/player';
 export { addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, } from './render3/player';
-export { compileNgModuleFactory__POST_NGCC__ as ɵcompileNgModuleFactory__POST_NGCC__ } from './application_ref';
 export { R3_COMPILE_COMPONENT__POST_NGCC__ as ɵR3_COMPILE_COMPONENT__POST_NGCC__, R3_COMPILE_DIRECTIVE__POST_NGCC__ as ɵR3_COMPILE_DIRECTIVE__POST_NGCC__, R3_COMPILE_INJECTABLE__POST_NGCC__ as ɵR3_COMPILE_INJECTABLE__POST_NGCC__, R3_COMPILE_NGMODULE__POST_NGCC__ as ɵR3_COMPILE_NGMODULE__POST_NGCC__, R3_COMPILE_PIPE__POST_NGCC__ as ɵR3_COMPILE_PIPE__POST_NGCC__, ivyEnable__POST_NGCC__ as ɵivyEnable__POST_NGCC__, } from './ivy_switch/compiler/legacy';
 export { R3_ELEMENT_REF_FACTORY__POST_NGCC__ as ɵR3_ELEMENT_REF_FACTORY__POST_NGCC__, R3_TEMPLATE_REF_FACTORY__POST_NGCC__ as ɵR3_TEMPLATE_REF_FACTORY__POST_NGCC__, R3_CHANGE_DETECTOR_REF_FACTORY__POST_NGCC__ as ɵR3_CHANGE_DETECTOR_REF_FACTORY__POST_NGCC__, R3_VIEW_CONTAINER_REF_FACTORY__POST_NGCC__ as ɵR3_VIEW_CONTAINER_REF_FACTORY__POST_NGCC__, } from './ivy_switch/runtime/legacy';
