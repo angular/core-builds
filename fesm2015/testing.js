@@ -1,10 +1,10 @@
 /**
- * @license Angular v6.1.9+78.sha-8a6f372
+ * @license Angular v6.1.9+79.sha-b22c376
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { RendererFactory2, getDebugNode, ApplicationInitStatus, Component, InjectionToken, Injector, NgModule, NgZone, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify, Compiler, Injectable, defineInjectable } from '@angular/core';
+import { RendererFactory2, getDebugNode, Compiler, Injectable, ApplicationInitStatus, Component, InjectionToken, Injector, NgModule, NgZone, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify, defineInjectable } from '@angular/core';
 
 /**
  * @fileoverview added by tsickle
