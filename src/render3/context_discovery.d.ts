@@ -29,9 +29,9 @@ export interface LContext {
      */
     lViewData: LViewData;
     /**
-     * The index instance of the LNode.
+     * The index instance of the node.
      */
-    lNodeIndex: number;
+    nodeIndex: number;
     /**
      * The instance of the DOM node that is attached to the lNode.
      */
@@ -40,10 +40,6 @@ export interface LContext {
      * The instance of the Component node.
      */
     component: {} | null | undefined;
-    /**
-     * The list of indices for the active directives that exist on this element.
-     */
-    directiveIndices: number[] | null | undefined;
     /**
      * The list of active directives that exist on this element.
      */
@@ -75,12 +71,6 @@ export interface LContext {
  */
 export declare function getContext(target: any): LContext | null;
 /**
- * A utility function for retrieving the matching lElementNode
- * from a given DOM element, component or directive.
- */
-export declare function getLElementNode(target: any): LElementNode | null;
-export declare function getLElementFromRootComponent(rootComponentInstance: {}): LElementNode | null;
-/**
  * A simplified lookup function for finding the LElementNode from a component instance.
  *
  * This function exists for tree-shaking purposes to avoid having to pull in everything
@@ -102,19 +92,12 @@ export declare function readPatchedLViewData(target: any): LViewData | null;
 export declare function isComponentInstance(instance: any): boolean;
 export declare function isDirectiveInstance(instance: any): boolean;
 /**
- * Returns a collection of directive index values that are used on the element
- * (which is referenced by the lNodeIndex)
- */
-export declare function discoverDirectiveIndices(lViewData: LViewData, lNodeIndex: number, includeComponents?: boolean): number[] | null;
-/**
- * Returns a list of directives extracted from the given view based on the
- * provided list of directive index values.
+ * Returns a list of directives extracted from the given view. Does not contain
+ * the component.
  *
  * @param lViewData The target view data
- * @param indices A collection of directive index values which will be used to
- *    figure out the directive instances
  */
-export declare function discoverDirectives(lViewData: LViewData, indices: number[]): number[] | null;
+export declare function discoverDirectives(nodeIndex: number, lViewData: LViewData): any[] | null;
 /**
  * Returns a map of local references (local reference name => element or directive instance) that
  * exist on a given element.
