@@ -1,6 +1,6 @@
 {
   "name": "@angular/core",
-  "version": "7.0.0-rc.0+83.sha-7ea5161",
+  "version": "7.0.0-rc.0+81.sha-456f23f",
   "description": "Angular - the core framework",
   "main": "./bundles/core.umd.js",
   "module": "./fesm5/core.js",
@@ -16,7 +16,7 @@
     "tslib": "^1.9.0"
   },
   "peerDependencies": {
-    "@angular/compiler": "7.0.0-rc.0+83.sha-7ea5161",
+    "@angular/compiler": "7.0.0-rc.0+81.sha-456f23f",
     "rxjs": "^6.0.0",
     "zone.js": "~0.8.26"
   },
