@@ -8,7 +8,7 @@
 import { QueryList as viewEngine_QueryList } from '../linker/query_list';
 import { Type } from '../type';
 import { TContainerNode, TElementContainerNode, TElementNode } from './interfaces/node';
-import { LQueries, QueryReadType } from './interfaces/query';
+import { LQueries } from './interfaces/query';
 /**
  * A predicate which determines if a given element/directive should be included in the query
  * results.
@@ -25,7 +25,7 @@ export interface QueryPredicate<T> {
     /**
      * Indicates which token should be read from DI for this query.
      */
-    read: QueryReadType<T> | Type<T> | null;
+    read: Type<T> | null;
 }
 /**
  * An object representing a query, which is a combination of:
@@ -64,7 +64,7 @@ export declare class LQueries_ implements LQueries {
     private shallow;
     private deep;
     constructor(parent: LQueries_ | null, shallow: LQuery<any> | null, deep: LQuery<any> | null);
-    track<T>(queryList: viewEngine_QueryList<T>, predicate: Type<T> | string[], descend?: boolean, read?: QueryReadType<T> | Type<T>): void;
+    track<T>(queryList: viewEngine_QueryList<T>, predicate: Type<T> | string[], descend?: boolean, read?: Type<T>): void;
     clone(): LQueries;
     container(): LQueries | null;
     createView(): LQueries | null;

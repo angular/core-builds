@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-rc.0+79.sha-83302d1
+ * @license Angular v7.0.0-rc.0+101.sha-be4edf1
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1894,7 +1894,7 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /** Size of LViewData's header. Necessary to adjust for it when setting slots.  */
-    var HEADER_OFFSET = 17;
+    var HEADER_OFFSET = 16;
     // Below are constants for LViewData indices to help us look up LViewData members
     // without having to remember the specific indices.
     // Uglify will inline these when minifying so there shouldn't be a cost.
@@ -1905,16 +1905,15 @@
     var FLAGS = 4;
     var HOST_NODE = 5;
     var BINDING_INDEX = 6;
-    var DIRECTIVES = 7;
-    var CLEANUP = 8;
-    var CONTEXT = 9;
-    var INJECTOR$1 = 10;
-    var RENDERER = 11;
-    var SANITIZER = 12;
-    var TAIL = 13;
-    var CONTAINER_INDEX = 14;
-    var CONTENT_QUERIES = 15;
-    var DECLARATION_VIEW = 16;
+    var CLEANUP = 7;
+    var CONTEXT = 8;
+    var INJECTOR$1 = 9;
+    var RENDERER = 10;
+    var SANITIZER = 11;
+    var TAIL = 12;
+    var CONTAINER_INDEX = 13;
+    var CONTENT_QUERIES = 14;
+    var DECLARATION_VIEW = 15;
 
     /**
      * @license
@@ -1966,7 +1965,7 @@
                     if (nodeIndex == -1) {
                         throw new Error('The provided directive was not found in the application');
                     }
-                    directives = discoverDirectives(nodeIndex, lViewData);
+                    directives = discoverDirectives(nodeIndex, lViewData, false);
                 }
                 else {
                     nodeIndex = findViaNativeElement(lViewData, target);
@@ -2159,19 +2158,16 @@
         // element bound to the directive being search lives somewhere
         // in the view data. We loop through the nodes and check their
         // list of directives for the instance.
-        var directivesAcrossView = lViewData[DIRECTIVES];
         var tNode = lViewData[TVIEW].firstChild;
-        if (directivesAcrossView != null) {
-            while (tNode) {
-                var directiveIndexStart = getDirectiveStartIndex(tNode);
-                var directiveIndexEnd = getDirectiveEndIndex(tNode, directiveIndexStart);
-                for (var i = directiveIndexStart; i < directiveIndexEnd; i++) {
-                    if (directivesAcrossView[i] === directiveInstance) {
-                        return tNode.index;
-                    }
+        while (tNode) {
+            var directiveIndexStart = getDirectiveStartIndex(tNode);
+            var directiveIndexEnd = getDirectiveEndIndex(tNode, directiveIndexStart);
+            for (var i = directiveIndexStart; i < directiveIndexEnd; i++) {
+                if (lViewData[i] === directiveInstance) {
+                    return tNode.index;
                 }
-                tNode = traverseNextElement(tNode);
             }
+            tNode = traverseNextElement(tNode);
         }
         return -1;
     }
@@ -2190,22 +2186,20 @@
         return value ? readElementValue(value) : null;
     }
     /**
-     * Returns a list of directives extracted from the given view. Does not contain
-     * the component.
+     * Returns a list of directives extracted from the given view based on the
+     * provided list of directive index values.
      *
+     * @param nodeIndex The node index
      * @param lViewData The target view data
+     * @param includeComponents Whether or not to include components in returned directives
      */
-    function discoverDirectives(nodeIndex, lViewData) {
-        var directivesAcrossView = lViewData[DIRECTIVES];
-        if (directivesAcrossView != null) {
-            var tNode = lViewData[TVIEW].data[nodeIndex];
-            var directiveStartIndex = getDirectiveStartIndex(tNode);
-            var directiveEndIndex = getDirectiveEndIndex(tNode, directiveStartIndex);
-            if (tNode.flags & 4096 /* isComponent */)
-                directiveStartIndex++;
-            return directivesAcrossView.slice(directiveStartIndex, directiveEndIndex);
-        }
-        return null;
+    function discoverDirectives(nodeIndex, lViewData, includeComponents) {
+        var tNode = lViewData[TVIEW].data[nodeIndex];
+        var directiveStartIndex = getDirectiveStartIndex(tNode);
+        var directiveEndIndex = getDirectiveEndIndex(tNode, directiveStartIndex);
+        if (!includeComponents && tNode.flags & 4096 /* isComponent */)
+            directiveStartIndex++;
+        return lViewData.slice(directiveStartIndex, directiveEndIndex);
     }
     function getDirectiveStartIndex(tNode) {
         // the tNode instances store a flag value which then has a
@@ -2239,7 +2233,7 @@
      * directive index), then saved in the even indices of the initHooks array. The odd indices
      * hold the hook functions themselves.
      *
-     * @param index The index of the directive in LViewData[DIRECTIVES]
+     * @param index The index of the directive in LViewData
      * @param hooks The static hooks map on the directive def
      * @param tView The current TView
      */
@@ -2267,7 +2261,7 @@
             // directiveCreate) so we can preserve the current hook order. Content, view, and destroy
             // hooks for projected components and directives must be called *before* their hosts.
             for (var i = start; i < end; i++) {
-                var def = tView.directives[i];
+                var def = tView.data[i];
                 queueContentHooks(def, tView, i);
                 queueViewHooks(def, tView, i);
                 queueDestroyHooks(def, tView, i);
@@ -2307,7 +2301,7 @@
      */
     function executeInitHooks(currentView, tView, creationMode) {
         if (currentView[FLAGS] & 16 /* RunInit */) {
-            executeHooks(currentView[DIRECTIVES], tView.initHooks, tView.checkHooks, creationMode);
+            executeHooks(currentView, tView.initHooks, tView.checkHooks, creationMode);
             currentView[FLAGS] &= ~16 /* RunInit */;
         }
     }
@@ -2329,9 +2323,9 @@
      * @param currentView The current view
      * @param arr The array in which the hooks are found
      */
-    function callHooks(data, arr) {
+    function callHooks(currentView, arr) {
         for (var i = 0; i < arr.length; i += 2) {
-            arr[i + 1].call(data[arr[i]]);
+            arr[i + 1].call(currentView[arr[i]]);
         }
     }
 
@@ -2374,6 +2368,17 @@
     // As we already have these constants in LViewData, we don't need to re-create them.
     var VIEWS = 4;
     var RENDER_PARENT = 5;
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var TNODE = 8;
+    var PARENT_INJECTOR = 8;
+    var INJECTOR_SIZE = 9;
 
     /**
      * @license
@@ -3079,7 +3084,7 @@
         var tView = view[TVIEW];
         var destroyHooks;
         if (tView != null && (destroyHooks = tView.destroyHooks) != null) {
-            callHooks(view[DIRECTIVES], destroyHooks);
+            callHooks(view, destroyHooks);
         }
     }
     /** Calls pipe destroy hooks for this view */
@@ -4109,14 +4114,6 @@
      */
     var _CLEAN_PROMISE = Promise.resolve(null);
     /**
-     * TView.data needs to fill the same number of slots as the LViewData header
-     * so the indices of nodes are consistent between LViewData and TView.data.
-     *
-     * It's much faster to keep a blueprint of the pre-filled array and slice it
-     * than it is to create a new array and fill it each time a TView is created.
-     */
-    var HEADER_FILLER = new Array(HEADER_OFFSET).fill(null);
-    /**
      * Token set in currentMatches while dependencies are being resolved.
      *
      * If we visit a directive that has a value set to CIRCULAR, we know we've
@@ -4270,13 +4267,6 @@
      * e.g. const inner = x().$implicit; const outer = x().$implicit;
      */
     var contextViewData = null;
-    /**
-     * An array of directive instances in the current view.
-     *
-     * These must be stored separately from LNodes because their presence is
-     * unknown at compile-time and thus space cannot be reserved in data[].
-     */
-    var directives;
     function getCleanup(view) {
         // top level variables should not be exported for performance reasons (PERF_NOTES.md)
         return view[CLEANUP] || (view[CLEANUP] = []);
@@ -4295,13 +4285,15 @@
     /**
      * The root index from which pure function instructions should calculate their binding
      * indices. In component views, this is TView.bindingStartIndex. In a host binding
-     * context, this is the TView.hostBindingStartIndex + any hostVars before the given dir.
+     * context, this is the TView.expandoStartIndex + any dirs/hostVars before the given dir.
      */
     var bindingRootIndex = -1;
     // top level variables should not be exported for performance reasons (PERF_NOTES.md)
     function getBindingRoot() {
         return bindingRootIndex;
     }
+    // Root component will always have an element index of 0 and an injector size of 1
+    var ROOT_EXPANDO_INSTRUCTIONS = [0, 1];
     /**
      * Swap the current state with a new state.
      *
@@ -4316,7 +4308,6 @@
      */
     function enterView(newView, hostTNode) {
         var oldView = viewData;
-        directives = newView && newView[DIRECTIVES];
         tView = newView && newView[TVIEW];
         creationMode = newView && (newView[FLAGS] & 1 /* CreationMode */) === 1 /* CreationMode */;
         firstTemplatePass = newView && tView.firstTemplatePass;
@@ -4340,7 +4331,7 @@
     function leaveView(newView, creationOnly) {
         if (!creationOnly) {
             if (!checkNoChangesMode) {
-                executeHooks(directives, tView.viewHooks, tView.viewCheckHooks, creationMode);
+                executeHooks(viewData, tView.viewHooks, tView.viewCheckHooks, creationMode);
             }
             // Views are clean and in update mode after being checked, so these bits are cleared
             viewData[FLAGS] &= ~(1 /* CreationMode */ | 4 /* Dirty */);
@@ -4356,7 +4347,7 @@
      * Note: view hooks are triggered later when leaving the view.
      */
     function refreshDescendantViews() {
-        setHostBindings(tView.hostBindings);
+        setHostBindings();
         var parentFirstTemplatePass = firstTemplatePass;
         // This needs to be set before children are processed to support recursive components
         tView.firstTemplatePass = firstTemplatePass = false;
@@ -4367,26 +4358,45 @@
         // Content query results must be refreshed before content hooks are called.
         refreshContentQueries(tView);
         if (!checkNoChangesMode) {
-            executeHooks(directives, tView.contentHooks, tView.contentCheckHooks, creationMode);
+            executeHooks(viewData, tView.contentHooks, tView.contentCheckHooks, creationMode);
         }
         refreshChildComponents(tView.components, parentFirstTemplatePass);
     }
     /** Sets the host bindings for the current view. */
-    function setHostBindings(bindings) {
-        if (bindings != null) {
-            bindingRootIndex = viewData[BINDING_INDEX] = tView.hostBindingStartIndex;
-            var defs = tView.directives;
-            for (var i = 0; i < bindings.length; i += 2) {
-                var dirIndex = bindings[i];
-                var def = defs[dirIndex];
-                if (firstTemplatePass) {
-                    for (var i_1 = 0; i_1 < def.hostVars; i_1++) {
-                        tView.blueprint.push(NO_CHANGE);
-                        viewData.push(NO_CHANGE);
+    function setHostBindings() {
+        if (tView.expandoInstructions) {
+            bindingRootIndex = viewData[BINDING_INDEX] = tView.expandoStartIndex;
+            var currentDirectiveIndex = -1;
+            var currentElementIndex = -1;
+            for (var i = 0; i < tView.expandoInstructions.length; i++) {
+                var instruction = tView.expandoInstructions[i];
+                if (typeof instruction === 'number') {
+                    if (instruction <= 0) {
+                        // Negative numbers mean that we are starting new EXPANDO block and need to update
+                        // the current element and directive index.
+                        currentElementIndex = -instruction;
+                        if (typeof viewData[bindingRootIndex] === 'number') {
+                            // We've hit an injector. It may or may not exist depending on whether
+                            // there is a public directive on this node.
+                            bindingRootIndex += INJECTOR_SIZE;
+                        }
+                        currentDirectiveIndex = bindingRootIndex;
+                    }
+                    else {
+                        // This is either the injector size (so the binding root can skip over directives
+                        // and get to the first set of host bindings on this node) or the host var count
+                        // (to get to the next set of host bindings on this node).
+                        bindingRootIndex += instruction;
                     }
                 }
-                def.hostBindings(dirIndex, bindings[i + 1]);
-                bindingRootIndex = viewData[BINDING_INDEX] = bindingRootIndex + def.hostVars;
+                else {
+                    // If it's not a number, it's a host binding function that needs to be executed.
+                    viewData[BINDING_INDEX] = bindingRootIndex;
+                    // We must subtract the header offset because the load() instruction
+                    // expects a raw, unadjusted index.
+                    instruction(currentDirectiveIndex - HEADER_OFFSET, currentElementIndex);
+                    currentDirectiveIndex++;
+                }
             }
         }
     }
@@ -4395,8 +4405,8 @@
         if (tView.contentQueries != null) {
             for (var i = 0; i < tView.contentQueries.length; i += 2) {
                 var directiveDefIdx = tView.contentQueries[i];
-                var directiveDef = tView.directives[directiveDefIdx];
-                directiveDef.contentQueriesRefresh(directiveDefIdx, tView.contentQueries[i + 1]);
+                var directiveDef = tView.data[directiveDefIdx];
+                directiveDef.contentQueriesRefresh(directiveDefIdx - HEADER_OFFSET, tView.contentQueries[i + 1]);
             }
         }
     }
@@ -4411,7 +4421,7 @@
     function executeInitAndContentHooks() {
         if (!checkNoChangesMode) {
             executeInitHooks(viewData, tView, creationMode);
-            executeHooks(directives, tView.contentHooks, tView.contentCheckHooks, creationMode);
+            executeHooks(viewData, tView.contentHooks, tView.contentCheckHooks, creationMode);
         }
     }
     function createLViewData(renderer, tView, context, flags, sanitizer) {
@@ -4497,7 +4507,7 @@
     function adjustBlueprintForNewNode(view) {
         var tView = view[TVIEW];
         if (tView.firstTemplatePass) {
-            tView.hostBindingStartIndex++;
+            tView.expandoStartIndex++;
             tView.blueprint.push(null);
             view.push(null);
         }
@@ -4566,11 +4576,15 @@
                     refreshDescendantViews();
                 }
                 else {
+                    // This must be set to false immediately after the first creation run because in an
+                    // ngFor loop, all the views will be created together before update mode runs and turns
+                    // off firstTemplatePass. If we don't set it here, instances will perform directive
+                    // matching, etc again and again.
                     viewToRender[TVIEW].firstTemplatePass = firstTemplatePass = false;
                 }
             }
             finally {
-                // renderEmbeddedTemplate() is called twice in fact, once for creation only and then once for
+                // renderEmbeddedTemplate() is called twice, once for creation only and then once for
                 // update. When for creation only, leaveView() must not trigger view hooks, nor clean flags.
                 var isCreationOnly = (rf & 1 /* Create */) === 1 /* Create */;
                 leaveView(oldView, isCreationOnly);
@@ -4609,7 +4623,7 @@
                 executeInitAndContentHooks();
                 // Element was stored at 0 in data and directive was stored at 0 in directives
                 // in renderComponent()
-                setHostBindings(tView.hostBindings);
+                setHostBindings();
                 componentRefresh(HEADER_OFFSET, false);
             }
         }
@@ -4781,16 +4795,43 @@
         // Please make sure to have explicit type for `exportsMap`. Inferred type triggers bug in tsickle.
         var exportsMap = localRefs ? { '': -1 } : null;
         var matches = tView.currentMatches = findDirectiveMatches(tNode);
+        generateExpandoBlock(tNode, matches);
+        var totalHostVars = 0;
         if (matches) {
             for (var i = 0; i < matches.length; i += 2) {
                 var def = matches[i];
                 var valueIndex = i + 1;
-                resolveDirective(def, valueIndex, matches, tView);
+                resolveDirective(def, valueIndex, matches);
+                totalHostVars += def.hostVars;
                 saveNameToExportMap(matches[valueIndex], def, exportsMap);
             }
         }
         if (exportsMap)
             cacheMatchingLocalNames(tNode, localRefs, exportsMap);
+        prefillHostVars(totalHostVars);
+    }
+    /**
+     * Generates a new block in TView.expandoInstructions for this node.
+     *
+     * Each expando block starts with the element index (turned negative so we can distinguish
+     * it from the hostVar count) and the directive count. See more in VIEW_DATA.md.
+     */
+    function generateExpandoBlock(tNode, matches) {
+        var directiveCount = matches ? matches.length / 2 : 0;
+        var elementIndex = -(tNode.index - HEADER_OFFSET);
+        (tView.expandoInstructions || (tView.expandoInstructions = [])).push(elementIndex, directiveCount);
+    }
+    /**
+     * On the first template pass, we need to reserve space for host binding values
+     * after directives are matched (so all directives are saved, then bindings).
+     * Because we are updating the blueprint, we only need to do this once.
+     */
+    function prefillHostVars(totalHostVars) {
+        for (var i = 0; i < totalHostVars; i++) {
+            viewData.push(NO_CHANGE);
+            tView.blueprint.push(NO_CHANGE);
+            tView.data.push(null);
+        }
     }
     /** Matches the current node against all available selectors. */
     function findDirectiveMatches(tNode) {
@@ -4801,30 +4842,28 @@
                 var def = registry[i];
                 if (isNodeMatchingSelectorList(tNode, def.selectors)) {
                     matches || (matches = []);
+                    if (def.diPublic)
+                        def.diPublic(def);
                     if (def.template) {
                         if (tNode.flags & 4096 /* isComponent */)
                             throwMultipleComponentError(tNode);
                         addComponentLogic(def);
-                        tNode.flags = 4096 /* isComponent */;
                         // The component is always stored first with directives after.
                         matches.unshift(def, null);
                     }
                     else {
                         matches.push(def, null);
                     }
-                    if (def.diPublic)
-                        def.diPublic(def);
                 }
             }
         }
         return matches;
     }
-    function resolveDirective(def, valueIndex, matches, tView) {
+    function resolveDirective(def, valueIndex, matches) {
         if (matches[valueIndex] === null) {
             matches[valueIndex] = CIRCULAR$1;
             var instance = def.factory();
-            (tView.directives || (tView.directives = [])).push(def);
-            return directiveCreate(matches[valueIndex] = tView.directives.length - 1, instance, def);
+            return directiveCreate(matches[valueIndex] = viewData.length, instance, def);
         }
         else if (matches[valueIndex] === CIRCULAR$1) {
             // If we revisit this directive before it's resolved, we know it's circular
@@ -4840,12 +4879,10 @@
     }
     /** Stores index of directive and host element so it will be queued for binding refresh during CD.
      */
-    function queueHostBindingForCheck(dirIndex, hostVars) {
-        // Must subtract the header offset because hostBindings functions are generated with
-        // instructions that expect element indices that are NOT adjusted (e.g. elementProperty).
+    function queueHostBindingForCheck(dirIndex, def) {
         ngDevMode &&
             assertEqual(firstTemplatePass, true, 'Should only be called in first template pass.');
-        (tView.hostBindings || (tView.hostBindings = [])).push(dirIndex, previousOrParentTNode.index - HEADER_OFFSET);
+        tView.expandoInstructions.push(def.hostBindings, def.hostVars);
     }
     /**
      * This function instantiates the given directives.
@@ -4859,9 +4896,8 @@
         if (count > 0) {
             var start = previousOrParentTNode.flags >> 15 /* DirectiveStartingIndexShift */;
             var end = start + count;
-            var tDirectives = tView.directives;
             for (var i = start; i < end; i++) {
-                var def = tDirectives[i];
+                var def = tView.data[i];
                 // Component view must be set on node before the factory is created so
                 // ChangeDetectorRefs have a way to store component view on creation.
                 if (def.template) {
@@ -4909,7 +4945,7 @@
             var localIndex = previousOrParentTNode.index + 1;
             for (var i = 0; i < localNames.length; i += 2) {
                 var index = localNames[i + 1];
-                var value = index === -1 ? localRefExtractor(tNode, viewData) : directives[index];
+                var value = index === -1 ? localRefExtractor(tNode, viewData) : viewData[index];
                 viewData[localIndex++] = value;
             }
         }
@@ -4962,8 +4998,9 @@
             data: blueprint.slice(),
             childIndex: -1,
             bindingStartIndex: bindingStartIndex,
-            hostBindingStartIndex: initialViewLength,
+            expandoStartIndex: initialViewLength,
             directives: null,
+            expandoInstructions: null,
             firstTemplatePass: true,
             initHooks: null,
             checkHooks: null,
@@ -4974,7 +5011,6 @@
             destroyHooks: null,
             pipeDestroyHooks: null,
             cleanup: null,
-            hostBindings: null,
             contentQueries: null,
             components: null,
             directiveRegistry: typeof directives === 'function' ? directives() : directives,
@@ -5065,10 +5101,11 @@
         resetComponentState();
         var tNode = createNodeAtIndex(0, 3 /* Element */, rNode, null, null, createLViewData(renderer, getOrCreateTView(def.template, def.consts, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery), null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, sanitizer));
         if (firstTemplatePass) {
-            tNode.flags = 4096 /* isComponent */;
+            tView.expandoInstructions = ROOT_EXPANDO_INSTRUCTIONS.slice();
             if (def.diPublic)
                 def.diPublic(def);
-            tView.directives = [def];
+            tNode.flags =
+                viewData.length << 15 /* DirectiveStartingIndexShift */ | 4096 /* isComponent */;
         }
         return viewData[HEADER_OFFSET];
     }
@@ -5124,8 +5161,8 @@
      */
     function createOutput(outputs, listener) {
         for (var i = 0; i < outputs.length; i += 2) {
-            ngDevMode && assertDataInRange(outputs[i], directives);
-            var subscription = directives[outputs[i]][outputs[i + 1]].subscribe(listener);
+            ngDevMode && assertDataInRange(outputs[i], viewData);
+            var subscription = viewData[outputs[i]][outputs[i + 1]].subscribe(listener);
             storeCleanupWithContext(viewData, subscription, subscription.unsubscribe);
         }
     }
@@ -5319,8 +5356,8 @@
      */
     function setInputsForProperty(inputs, value) {
         for (var i = 0; i < inputs.length; i += 2) {
-            ngDevMode && assertDataInRange(inputs[i], directives);
-            directives[inputs[i]][inputs[i + 1]] = value;
+            ngDevMode && assertDataInRange(inputs[i], viewData);
+            viewData[inputs[i]][inputs[i + 1]] = value;
         }
     }
     /**
@@ -5337,7 +5374,7 @@
             var start = tNodeFlags >> 15 /* DirectiveStartingIndexShift */;
             var end = start + count;
             var isInput = direction === 0 /* Input */;
-            var defs = tView.directives;
+            var defs = tView.data;
             for (var i = start; i < end; i++) {
                 var directiveDef = defs[i];
                 var propertyAliasMap = isInput ? directiveDef.inputs : directiveDef.outputs;
@@ -5568,8 +5605,6 @@
             // Init hooks are queued now so ngOnInit is called in host components before
             // any projected components.
             queueInitHooks(directiveDefIdx, directiveDef.onInit, directiveDef.doCheck, tView);
-            if (directiveDef.hostBindings)
-                queueHostBindingForCheck(directiveDefIdx, directiveDef.hostVars);
         }
         ngDevMode && assertDefined(previousOrParentTNode, 'previousOrParentTNode');
         if (previousOrParentTNode && previousOrParentTNode.attrs) {
@@ -5590,8 +5625,11 @@
         // we didn't yet know it was a component (just an element).
         hostNode.data = componentView;
         componentView[HOST_NODE] = previousOrParentTNode;
-        if (firstTemplatePass)
+        if (firstTemplatePass) {
             queueComponentIndexForCheck();
+            previousOrParentTNode.flags =
+                viewData.length << 15 /* DirectiveStartingIndexShift */ | 4096 /* isComponent */;
+        }
     }
     /**
      * A lighter version of directiveCreate() that is used for the root component
@@ -5606,13 +5644,10 @@
         if (hostNode) {
             attachPatchData(hostNode.native, viewData);
         }
-        if (directives == null)
-            viewData[DIRECTIVES] = directives = [];
-        ngDevMode && assertDataNext(index, directives);
-        directives[index] = directive;
+        viewData[index] = directive;
         if (firstTemplatePass) {
             var flags = previousOrParentTNode.flags;
-            if ((flags & 4095 /* DirectiveCountMask */) === 0) {
+            if (flags === 0) {
                 // When the first directive is created:
                 // - save the index,
                 // - set the number of directives to 1
@@ -5624,6 +5659,10 @@
                 ngDevMode && assertNotEqual(flags & 4095 /* DirectiveCountMask */, 4095 /* DirectiveCountMask */, 'Reached the max number of directives');
                 previousOrParentTNode.flags++;
             }
+            tView.data.push(directiveDef);
+            tView.blueprint.push(null);
+            if (directiveDef.hostBindings)
+                queueHostBindingForCheck(index, directiveDef);
         }
         else {
             var diPublic = directiveDef.diPublic;
@@ -6438,12 +6477,6 @@
         }
         return currentView;
     }
-    /** Retrieves a value from the `directives` array. */
-    function loadDirective(index) {
-        ngDevMode && assertDefined(directives, 'Directives array should be defined if reading a dir.');
-        ngDevMode && assertDataInRange(index, directives);
-        return directives[index];
-    }
     function loadQueryList(queryListIdx) {
         ngDevMode && assertDefined(viewData[CONTENT_QUERIES], 'Content QueryList array should be defined if reading a query.');
         ngDevMode && assertDataInRange(queryListIdx, viewData[CONTENT_QUERIES]);
@@ -6511,7 +6544,7 @@
     function registerContentQuery(queryList) {
         var savedContentQueriesLength = (viewData[CONTENT_QUERIES] || (viewData[CONTENT_QUERIES] = [])).push(queryList);
         if (firstTemplatePass) {
-            var currentDirectiveIndex = directives.length - 1;
+            var currentDirectiveIndex = viewData.length - 1;
             var tViewContentQueries = tView.contentQueries || (tView.contentQueries = []);
             var lastSavedDirectiveIndex = tView.contentQueries.length ? tView.contentQueries[tView.contentQueries.length - 2] : -1;
             if (currentDirectiveIndex !== lastSavedDirectiveIndex) {
@@ -6529,11 +6562,6 @@
         if (arr == null)
             arr = viewData;
         assertDataInRangeInternal(index, arr || viewData);
-    }
-    function assertDataNext(index, arr) {
-        if (arr == null)
-            arr = viewData;
-        assertEqual(arr.length, index, "index " + index + " expected to be at the end of arr (length " + arr.length + ")");
     }
     var CLEAN_PROMISE = _CLEAN_PROMISE;
 
@@ -6597,14 +6625,14 @@
      * renderComponent() and ViewContainerRef.createComponent().
      */
     function createRootComponent(elementNode, componentDef, rootView, rootContext, hostFeatures) {
-        // Create directive instance with factory() and store at index 0 in directives array
-        var component = baseDirectiveCreate(0, componentDef.factory(), componentDef, elementNode);
-        if (componentDef.hostBindings)
-            queueHostBindingForCheck(0, componentDef.hostVars);
+        // Create directive instance with factory() and store at next index in viewData
+        var component = baseDirectiveCreate(rootView.length, componentDef.factory(), componentDef, elementNode);
         rootContext.components.push(component);
         elementNode.data[CONTEXT] = component;
         hostFeatures && hostFeatures.forEach(function (feature) { return feature(component, componentDef); });
-        setHostBindings(rootView[TVIEW].hostBindings);
+        if (rootView[TVIEW].firstTemplatePass)
+            prefillHostVars(componentDef.hostVars);
+        setHostBindings();
         return component;
     }
     function createRootContext(scheduler, playerHandler) {
@@ -6631,10 +6659,9 @@
      */
     function LifecycleHooksFeature(component, def) {
         var rootTView = readPatchedLViewData(component)[TVIEW];
-        // Root component is always created at dir index 0
-        queueInitHooks(0, def.onInit, def.doCheck, rootTView);
-        // Directive starting index 0, directive count 1 -> directive flags: 1
-        queueLifecycleHooks(1, rootTView);
+        var dirIndex = rootTView.data.length - 1;
+        queueInitHooks(dirIndex, def.onInit, def.doCheck, rootTView);
+        queueLifecycleHooks(dirIndex << 15 /* DirectiveStartingIndexShift */ | 1, rootTView);
     }
     /**
      * Retrieve the root context for any component by walking the parent `LView` until
@@ -7067,17 +7094,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var TNODE = 8;
-    var PARENT_INJECTOR = 8;
-    var INJECTOR_SIZE = 9;
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     /**
      * The number of slots in each bloom filter (used by DI). The larger this number, the fewer
      * directives that will share slots, and thus, the fewer false positives when checking for
@@ -7127,7 +7143,6 @@
         }
     }
     function getOrCreateNodeInjector() {
-        ngDevMode && assertPreviousIsParent();
         return getOrCreateNodeInjectorForNode(getPreviousOrParentTNode(), _getViewData());
     }
     /**
@@ -7144,12 +7159,10 @@
         }
         var tView = hostView[TVIEW];
         if (tView.firstTemplatePass) {
-            // TODO(kara): Store node injector with host bindings for that node (see VIEW_DATA.md)
             tNode.injectorIndex = hostView.length;
             setUpBloom(tView.data, tNode); // foundation for node bloom
             setUpBloom(hostView, null); // foundation for cumulative bloom
             setUpBloom(tView.blueprint, null);
-            tView.hostBindingStartIndex += INJECTOR_SIZE;
         }
         var parentLoc = getParentInjectorLocation(tNode, hostView);
         var parentIndex = parentLoc & 32767 /* InjectorIndexMask */;
@@ -7249,7 +7262,8 @@
     }
     function directiveInject(token, flags) {
         if (flags === void 0) { flags = 0 /* Default */; }
-        return getOrCreateInjectable(getOrCreateNodeInjector(), _getViewData(), token, flags);
+        var hostTNode = getPreviousOrParentTNode();
+        return getOrCreateInjectable(hostTNode, _getViewData(), token, flags);
     }
     function injectRenderer2() {
         return getOrCreateRenderer2(_getViewData());
@@ -7322,7 +7336,7 @@
      * @param flags Injection flags
      * @returns the value from the injector or `null` when not found
      */
-    function getOrCreateInjectable(startInjectorIndex, hostView, token, flags) {
+    function getOrCreateInjectable(hostTNode, hostView, token, flags) {
         if (flags === void 0) { flags = 0 /* Default */; }
         var bloomHash = bloomHashBitOrFactory(token);
         // If the ID stored here is a function, this is a special object like ElementRef or TemplateRef
@@ -7332,12 +7346,22 @@
         // If the token has a bloom hash, then it is a directive that is public to the injection system
         // (diPublic) otherwise fall back to the module injector.
         if (bloomHash != null) {
+            var startInjectorIndex = getInjectorIndex(hostTNode, hostView);
             var injectorIndex = startInjectorIndex;
             var injectorView = hostView;
-            if (flags & 4 /* SkipSelf */) {
-                var parentLocation = injectorView[injectorIndex + PARENT_INJECTOR];
-                injectorIndex = parentLocation & 32767 /* InjectorIndexMask */;
-                injectorView = getParentInjectorView(parentLocation, injectorView);
+            var parentLocation = -1;
+            // If we should skip this injector or if an injector doesn't exist on this node (e.g. all
+            // directives on this node are private), start by searching the parent injector.
+            if (flags & 4 /* SkipSelf */ || injectorIndex === -1) {
+                parentLocation = injectorIndex === -1 ? getParentInjectorLocation(hostTNode, hostView) :
+                    injectorView[injectorIndex + PARENT_INJECTOR];
+                if (shouldNotSearchParent(flags, parentLocation)) {
+                    injectorIndex = -1;
+                }
+                else {
+                    injectorIndex = parentLocation & 32767 /* InjectorIndexMask */;
+                    injectorView = getParentInjectorView(parentLocation, injectorView);
+                }
             }
             while (injectorIndex !== -1) {
                 // Traverse up the injector tree until we find a potential match or until we know there
@@ -7347,9 +7371,8 @@
                     if (injectorHasToken(bloomHash, injectorIndex, injectorView[TVIEW].data)) {
                         break;
                     }
-                    if (flags & 2 /* Self */ ||
-                        flags & 1 /* Host */ &&
-                            !sameHostView(injectorView[injectorIndex + PARENT_INJECTOR])) {
+                    parentLocation = injectorView[injectorIndex + PARENT_INJECTOR];
+                    if (shouldNotSearchParent(flags, parentLocation)) {
                         injectorIndex = -1;
                         break;
                     }
@@ -7357,9 +7380,8 @@
                     // up to find the specific injector. If the ancestor bloom filter does not have the bit, we
                     // can abort.
                     if (injectorHasToken(bloomHash, injectorIndex, injectorView)) {
-                        var parentLocation_1 = injectorView[injectorIndex + PARENT_INJECTOR];
-                        injectorIndex = parentLocation_1 & 32767 /* InjectorIndexMask */;
-                        injectorView = getParentInjectorView(parentLocation_1, injectorView);
+                        injectorIndex = parentLocation & 32767 /* InjectorIndexMask */;
+                        injectorView = getParentInjectorView(parentLocation, injectorView);
                     }
                     else {
                         injectorIndex = -1;
@@ -7385,7 +7407,6 @@
                 }
                 // The def wasn't found anywhere on this node, so it was a false positive.
                 // Traverse up the tree and continue searching.
-                var parentLocation = injectorView[injectorIndex + PARENT_INJECTOR];
                 injectorIndex = parentLocation & 32767 /* InjectorIndexMask */;
                 injectorView = getParentInjectorView(parentLocation, injectorView);
             }
@@ -7405,7 +7426,7 @@
             for (var i = 0; i < matches.length; i += 2) {
                 var def = matches[i];
                 if (def.type === token) {
-                    return resolveDirective(def, i + 1, matches, hostTView);
+                    return resolveDirective(def, i + 1, matches);
                 }
             }
         }
@@ -7418,13 +7439,13 @@
         if (count !== 0) {
             var start = nodeFlags >> 15 /* DirectiveStartingIndexShift */;
             var end = start + count;
-            var defs = injectorView[TVIEW].directives;
+            var defs = injectorView[TVIEW].data;
             for (var i = start; i < end; i++) {
                 // Get the definition for the directive at this index and, if it is injectable (diPublic),
                 // and matches the given token, return the directive instance.
                 var directiveDef = defs[i];
                 if (directiveDef.type === token && directiveDef.diPublic) {
-                    return injectorView[DIRECTIVES][i];
+                    return injectorView[i];
                 }
             }
         }
@@ -7469,14 +7490,10 @@
         // this injector is a potential match.
         return !!(value & mask);
     }
-    /**
-     * Checks whether the current injector and its parent are in the same host view.
-     *
-     * This is necessary to support @Host() decorators. If @Host() is set, we should stop searching once
-     * the injector and its parent view don't match because it means we'd cross the view boundary.
-     */
-    function sameHostView(parentLocation) {
-        return !!parentLocation && (parentLocation >> 15 /* ViewOffsetShift */) === 0;
+    /** Returns true if flags prevent parent injector from being searched for tokens */
+    function shouldNotSearchParent(flags, parentLocation) {
+        return flags & 2 /* Self */ ||
+            (flags & 1 /* Host */ && (parentLocation >> 15 /* ViewOffsetShift */) > 0);
     }
     var NodeInjector = /** @class */ (function () {
         function NodeInjector(_tNode, _hostView) {
@@ -7489,7 +7506,7 @@
                 return getOrCreateRenderer2(this._hostView);
             }
             setEnvironment(this._tNode, this._hostView);
-            return getOrCreateInjectable(this._injectorIndex, this._hostView, token);
+            return getOrCreateInjectable(this._tNode, this._hostView, token);
         };
         return NodeInjector;
     }());
@@ -7882,7 +7899,7 @@
         ViewRef.prototype.detachFromAppRef = function () { this._appRef = null; };
         ViewRef.prototype.attachToAppRef = function (appRef) { this._appRef = appRef; };
         ViewRef.prototype._lookUpContext = function () {
-            return this._context = this._view[PARENT][DIRECTIVES][this._componentIndex];
+            return this._context = this._view[PARENT][this._componentIndex];
         };
         return ViewRef;
     }());
@@ -8339,10 +8356,6 @@
                     rendererFactory.begin();
                 // Create element node at index 0 in data array
                 elementNode = hostElement(componentTag, hostNode, this.componentDef);
-                // TODO: should LifecycleHooksFeature and other host features be generated by the compiler and
-                // executed here?
-                // Angular 5 reference: https://stackblitz.com/edit/lifecycle-hooks-vcref
-                component = createRootComponent(elementNode, this.componentDef, rootView, rootContext, [LifecycleHooksFeature]);
                 tElementNode = getTNode(0);
                 // Transform the arrays of native nodes into a LNode structure that can be consumed by the
                 // projection instruction. This is needed to support the reprojection of these nodes.
@@ -8362,6 +8375,10 @@
                         projection$$1.push(firstTNode);
                     }
                 }
+                // TODO: should LifecycleHooksFeature and other host features be generated by the compiler and
+                // executed here?
+                // Angular 5 reference: https://stackblitz.com/edit/lifecycle-hooks-vcref
+                component = createRootComponent(elementNode, this.componentDef, rootView, rootContext, [LifecycleHooksFeature]);
                 // Execute the template in creation mode only, and then turn off the CreationMode flag
                 var componentView = elementNode.data;
                 renderEmbeddedTemplate(componentView, componentView[TVIEW], component, 1 /* Create */);
@@ -9453,17 +9470,19 @@
     /**
      * Bindings for pure functions are stored after regular bindings.
      *
-     * |--------consts--------|----------------vars----------------|------ hostVars (dir1) ------|
-     * ---------------------------------------------------------------------------------------------
-     * | nodes / refs / pipes | bindings | pure function bindings  | host bindings  | host slots |
-     * ---------------------------------------------------------------------------------------------
-     *                        ^                                    ^
-     *             TView.bindingStartIndex            TView.hostBindingStartIndex
+     * |------consts------|---------vars---------|                 |----- hostVars (dir1) ------|
+     * ------------------------------------------------------------------------------------------
+     * | nodes/refs/pipes | bindings | fn slots  | injector | dir1 | host bindings | host slots |
+     * ------------------------------------------------------------------------------------------
+     *                    ^                      ^
+     *      TView.bindingStartIndex      TView.expandoStartIndex
      *
      * Pure function instructions are given an offset from the binding root. Adding the offset to the
      * binding root gives the first index where the bindings are stored. In component views, the binding
-     * root is the bindingStartIndex. In host bindings, the binding root is the hostBindingStartIndex +
-     * any hostVars in directives evaluated before it.
+     * root is the bindingStartIndex. In host bindings, the binding root is the expandoStartIndex +
+     * any directive instances + any hostVars in directives evaluated before it.
+     *
+     * See VIEW_DATA.md for more information about host binding resolution.
      */
     /**
      * If the value hasn't been saved, calls the pure function to store and return the
@@ -10132,7 +10151,7 @@
      * @returns Index of a found directive or null when none found.
      */
     function getIdxOfMatchingDirective(tNode, currentView, type) {
-        var defs = currentView[TVIEW].directives;
+        var defs = currentView[TVIEW].data;
         if (defs) {
             var flags = tNode.flags;
             var count = flags & 4095 /* DirectiveCountMask */;
@@ -10156,7 +10175,7 @@
         else {
             var matchingIdx = getIdxOfMatchingDirective(tNode, currentView, read);
             if (matchingIdx !== null) {
-                return currentView[DIRECTIVES][matchingIdx];
+                return currentView[matchingIdx];
             }
         }
         return null;
@@ -10193,7 +10212,7 @@
                         }
                         else {
                             if (directiveIdx > -1) {
-                                result = currentView[DIRECTIVES][directiveIdx];
+                                result = currentView[directiveIdx];
                             }
                             else {
                                 // if read token and / or strategy is not specified,
@@ -11236,7 +11255,6 @@
         'ɵnextContext': nextContext,
         'ɵcontainerRefreshStart': containerRefreshStart,
         'ɵcontainerRefreshEnd': containerRefreshEnd,
-        'ɵloadDirective': loadDirective,
         'ɵloadQueryList': loadQueryList,
         'ɵnamespaceHTML': namespaceHTML,
         'ɵnamespaceMathML': namespaceMathML,
@@ -11629,9 +11647,10 @@
                         var errors = template.errors.map(function (err) { return err.toString(); }).join(', ');
                         throw new Error("Errors during JIT compilation of template for " + stringify(type) + ": " + errors);
                     }
+                    var animations = metadata.animations !== null ? new compiler.WrappedNodeExpr(metadata.animations) : null;
                     // Compile the component metadata, including template, into an expression.
                     // TODO(alxhub): implement inputs, outputs, queries, etc.
-                    var res = compiler.compileComponentFromMetadata(__assign({}, directiveMetadata(type, metadata), { template: template, directives: new Map(), pipes: new Map(), viewQueries: [], wrapDirectivesInClosure: false, styles: metadata.styles || [], encapsulation: metadata.encapsulation || exports.ViewEncapsulation.Emulated, animations: metadata.animations || null }), constantPool, compiler.makeBindingParser());
+                    var res = compiler.compileComponentFromMetadata(__assign({}, directiveMetadata(type, metadata), { template: template, directives: new Map(), pipes: new Map(), viewQueries: [], wrapDirectivesInClosure: false, styles: metadata.styles || [], encapsulation: metadata.encapsulation || exports.ViewEncapsulation.Emulated, animations: animations }), constantPool, compiler.makeBindingParser());
                     var preStatements = __spread(constantPool.statements, res.statements);
                     ngComponentDef = compiler.jitExpression(res.expression, angularCoreEnv, "ng://" + type.name + "/ngComponentDef.js", preStatements);
                     // If component compilation is async, then the @NgModule annotation which declares the
@@ -12272,7 +12291,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-rc.0+79.sha-83302d1');
+    var VERSION = new Version('7.0.0-rc.0+101.sha-be4edf1');
 
     /**
      * @license
@@ -20734,7 +20753,7 @@
             // TODO(vicb): add view providers when supported
             get: function () {
                 // TODO(vicb): why/when
-                var directiveDefs = this.view[TVIEW].directives;
+                var directiveDefs = this.view[TVIEW].data;
                 if (this.nodeIndex === null || directiveDefs == null) {
                     return [];
                 }
@@ -20898,20 +20917,18 @@
     exports.ɵangular_packages_core_core_r = endTimeRange;
     exports.ɵangular_packages_core_core_p = leave;
     exports.ɵangular_packages_core_core_q = startTimeRange;
-    exports.ɵangular_packages_core_core_w = getOrCreateInjectable;
-    exports.ɵangular_packages_core_core_v = getOrCreateNodeInjector;
-    exports.ɵangular_packages_core_core_bd = NG_INJECTABLE_DEF;
-    exports.ɵangular_packages_core_core_y = _getViewData;
-    exports.ɵangular_packages_core_core_z = bindingUpdated;
-    exports.ɵangular_packages_core_core_x = getPreviousOrParentTNode;
-    exports.ɵangular_packages_core_core_bh = getOrCreatePlayerContext;
-    exports.ɵangular_packages_core_core_bg = loadInternal;
-    exports.ɵangular_packages_core_core_ba = createElementRef;
-    exports.ɵangular_packages_core_core_bb = createTemplateRef;
-    exports.ɵangular_packages_core_core_bc = createViewRef;
+    exports.ɵangular_packages_core_core_bb = NG_INJECTABLE_DEF;
+    exports.ɵangular_packages_core_core_w = _getViewData;
+    exports.ɵangular_packages_core_core_x = bindingUpdated;
+    exports.ɵangular_packages_core_core_v = getPreviousOrParentTNode;
+    exports.ɵangular_packages_core_core_bf = getOrCreatePlayerContext;
+    exports.ɵangular_packages_core_core_be = loadInternal;
+    exports.ɵangular_packages_core_core_y = createElementRef;
+    exports.ɵangular_packages_core_core_z = createTemplateRef;
+    exports.ɵangular_packages_core_core_ba = createViewRef;
     exports.ɵangular_packages_core_core_a = makeParamDecorator;
     exports.ɵangular_packages_core_core_b = makePropDecorator;
-    exports.ɵangular_packages_core_core_be = getClosureSafeProperty;
+    exports.ɵangular_packages_core_core_bc = getClosureSafeProperty;
     exports.ɵangular_packages_core_core_s = _def;
     exports.ɵangular_packages_core_core_t = DebugRendererFactory2;
     exports.ɵangular_packages_core_core_u = DebugContext;
@@ -21087,7 +21104,6 @@
     exports.ɵembeddedViewStart = embeddedViewStart;
     exports.ɵquery = query;
     exports.ɵregisterContentQuery = registerContentQuery;
-    exports.ɵloadDirective = loadDirective;
     exports.ɵprojection = projection;
     exports.ɵbind = bind;
     exports.ɵinterpolation1 = interpolation1;
