@@ -126,7 +126,7 @@ export declare function injectAttribute(attrNameToInject: string): string | unde
  * @param flags Injection flags
  * @returns the value from the injector or `null` when not found
  */
-export declare function getOrCreateInjectable<T>(startInjectorIndex: number, hostView: LViewData, token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
+export declare function getOrCreateInjectable<T>(hostTNode: TElementNode | TContainerNode | TElementContainerNode, hostView: LViewData, token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
 /**
  * Returns the bit in an injector's bloom filter that should be used to determine whether or not
  * the directive might be provided by the injector.

@@ -10,12 +10,12 @@ import { QueryList } from '../../linker';
 import { Sanitizer } from '../../sanitization/security';
 import { PlayerHandler } from '../interfaces/player';
 import { LContainer } from './container';
-import { ComponentQuery, ComponentTemplate, DirectiveDef, DirectiveDefList, PipeDef, PipeDefList } from './definition';
+import { ComponentDef, ComponentQuery, ComponentTemplate, DirectiveDef, DirectiveDefList, HostBindingsFunction, PipeDef, PipeDefList } from './definition';
 import { TElementNode, TNode, TViewNode } from './node';
 import { LQueries } from './query';
 import { Renderer3 } from './renderer';
 /** Size of LViewData's header. Necessary to adjust for it when setting slots.  */
-export declare const HEADER_OFFSET = 17;
+export declare const HEADER_OFFSET = 16;
 export declare const TVIEW = 0;
 export declare const PARENT = 1;
 export declare const NEXT = 2;
@@ -23,16 +23,15 @@ export declare const QUERIES = 3;
 export declare const FLAGS = 4;
 export declare const HOST_NODE = 5;
 export declare const BINDING_INDEX = 6;
-export declare const DIRECTIVES = 7;
-export declare const CLEANUP = 8;
-export declare const CONTEXT = 9;
-export declare const INJECTOR = 10;
-export declare const RENDERER = 11;
-export declare const SANITIZER = 12;
-export declare const TAIL = 13;
-export declare const CONTAINER_INDEX = 14;
-export declare const CONTENT_QUERIES = 15;
-export declare const DECLARATION_VIEW = 16;
+export declare const CLEANUP = 7;
+export declare const CONTEXT = 8;
+export declare const INJECTOR = 9;
+export declare const RENDERER = 10;
+export declare const SANITIZER = 11;
+export declare const TAIL = 12;
+export declare const CONTAINER_INDEX = 13;
+export declare const CONTENT_QUERIES = 14;
+export declare const DECLARATION_VIEW = 15;
 export interface OpaqueViewState {
     '__brand__': 'Brand for OpaqueViewState that nothing will match';
 }
@@ -95,13 +94,6 @@ export interface LViewData extends Array<any> {
      * a setter that creates an embedded view, like in ngIf).
      */
     [BINDING_INDEX]: number;
-    /**
-     * An array of directive instances in the current view.
-     *
-     * These must be stored separately from LNodes because their presence is
-     * unknown at compile-time and thus space cannot be reserved in data[].
-     */
-    [DIRECTIVES]: any[] | null;
     /**
      * When a view is destroyed, listeners need to be released and outputs need to be
      * unsubscribed. This context array stores both listener functions wrapped with
@@ -260,11 +252,16 @@ export interface TView {
      */
     bindingStartIndex: number;
     /**
-     * The index at which the data array begins to store host bindings for components
-     * or directives in its template. Saving this value ensures that we can set the
-     * binding root and binding index correctly before checking host bindings.
+     * The index where the "expando" section of `LViewData` begins. The expando
+     * section contains injectors, directive instances, and host binding values.
+     * Unlike the "consts" and "vars" sections of `LViewData`, the length of this
+     * section cannot be calculated at compile-time because directives are matched
+     * at runtime to preserve locality.
+     *
+     * We store this start index so we know where to start checking host bindings
+     * in `setHostBindings`.
      */
-    hostBindingStartIndex: number;
+    expandoStartIndex: number;
     /**
      * Index of the host node of the first LView or LContainer beneath this LView in
      * the hierarchy.
@@ -305,6 +302,12 @@ export interface TView {
      * are stored in LView.directives[]. This simplifies lookup in DI.
      */
     directives: DirectiveDefList | null;
+    /**
+     * Set of instructions used to process host bindings efficiently.
+     *
+     * See VIEW_DATA.md for more information.
+     */
+    expandoInstructions: (number | HostBindingsFunction)[] | null;
     /**
      * Full registry of directives and components that may be found in this view.
      *
@@ -416,16 +419,6 @@ export interface TView {
      */
     components: number[] | null;
     /**
-     * A list of indices for child directives that have host bindings.
-     *
-     * Even indices: Directive indices
-     * Odd indices: Element indices
-     *
-     * Element indices are NOT adjusted for LViewData header offset because
-     * they will be fed into instructions that expect the raw index (e.g. elementProperty)
-     */
-    hostBindings: number[] | null;
-    /**
      * A list of indices for child directives that have content queries.
      *
      * Even indices: Directive indices
@@ -487,7 +480,7 @@ export declare type HookData = (number | (() => void))[];
  *
  * Injector bloom filters are also stored here.
  */
-export declare type TData = (TNode | PipeDef<any> | number | null)[];
+export declare type TData = (TNode | PipeDef<any> | DirectiveDef<any> | ComponentDef<any> | number | null)[];
 /** Type for TView.currentMatches */
 export declare type CurrentMatchesList = [DirectiveDef<any>, (string | number | null)];
 export declare const unusedValueExportToPlacateAjd = 1;
