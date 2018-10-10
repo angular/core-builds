@@ -58,9 +58,6 @@ export interface LQueries {
      * @param descend If true the query will recursively apply to the children.
      * @param read Indicates which token should be read from DI for this query.
      */
-    track<T>(queryList: QueryList<T>, predicate: Type<any> | string[], descend?: boolean, read?: QueryReadType<T> | Type<T>): void;
-}
-export declare class QueryReadType<T> {
-    private defeatStructuralTyping;
+    track<T>(queryList: QueryList<T>, predicate: Type<any> | string[], descend?: boolean, read?: Type<T>): void;
 }
 export declare const unusedValueExportToPlacateAjd = 1;
