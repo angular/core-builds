@@ -92,7 +92,7 @@ export declare function enterView(newView: LViewData, hostTNode: TElementNode | 
  */
 export declare function leaveView(newView: LViewData, creationOnly?: boolean): void;
 /** Sets the host bindings for the current view. */
-export declare function setHostBindings(): void;
+export declare function setHostBindings(bindings: number[] | null): void;
 export declare function executeInitAndContentHooks(): void;
 export declare function createLViewData<T>(renderer: Renderer3, tView: TView, context: T | null, flags: LViewFlags, sanitizer?: Sanitizer | null): LViewData;
 /**
@@ -216,16 +216,10 @@ export declare function elementStart(index: number, name: string, attrs?: TAttri
  * @returns the element created
  */
 export declare function elementCreate(name: string, overriddenRenderer?: Renderer3): RElement;
-/**
- * On the first template pass, we need to reserve space for host binding values
- * after directives are matched (so all directives are saved, then bindings).
- * Because we are updating the blueprint, we only need to do this once.
- */
-export declare function prefillHostVars(totalHostVars: number): void;
-export declare function resolveDirective(def: DirectiveDef<any>, valueIndex: number, matches: CurrentMatchesList): any;
+export declare function resolveDirective(def: DirectiveDef<any>, valueIndex: number, matches: CurrentMatchesList, tView: TView): any;
 /** Stores index of directive and host element so it will be queued for binding refresh during CD.
  */
-export declare function queueHostBindingForCheck(dirIndex: number, def: DirectiveDef<any> | ComponentDef<any>): void;
+export declare function queueHostBindingForCheck(dirIndex: number, hostVars: number): void;
 /**
  * Creates a TView instance
  *
@@ -741,6 +735,8 @@ export declare function store<T>(index: number, value: T): void;
  * @param index The index of the local ref in contextViewData.
  */
 export declare function reference<T>(index: number): T;
+/** Retrieves a value from the `directives` array. */
+export declare function loadDirective<T>(index: number): T;
 export declare function loadQueryList<T>(queryListIdx: number): QueryList<T>;
 /** Retrieves a value from current `viewData`. */
 export declare function load<T>(index: number): T;
