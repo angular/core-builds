@@ -14,7 +14,7 @@ import { HookData, LViewData, TView } from './interfaces/view';
  * directive index), then saved in the even indices of the initHooks array. The odd indices
  * hold the hook functions themselves.
  *
- * @param index The index of the directive in LViewData[DIRECTIVES]
+ * @param index The index of the directive in LViewData
  * @param hooks The static hooks map on the directive def
  * @param tView The current TView
  */
@@ -35,7 +35,7 @@ export declare function executeInitHooks(currentView: LViewData, tView: TView, c
  *
  * @param currentView The current view
  */
-export declare function executeHooks(data: any[], allHooks: HookData | null, checkHooks: HookData | null, creationMode: boolean): void;
+export declare function executeHooks(data: LViewData, allHooks: HookData | null, checkHooks: HookData | null, creationMode: boolean): void;
 /**
  * Calls lifecycle hooks with their contexts, skipping init hooks if it's not
  * creation mode.
@@ -43,4 +43,4 @@ export declare function executeHooks(data: any[], allHooks: HookData | null, che
  * @param currentView The current view
  * @param arr The array in which the hooks are found
  */
-export declare function callHooks(data: any[], arr: HookData): void;
+export declare function callHooks(currentView: any[], arr: HookData): void;
