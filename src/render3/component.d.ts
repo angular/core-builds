@@ -8,9 +8,9 @@
 import { Type } from '../core';
 import { Injector } from '../di/injector';
 import { Sanitizer } from '../sanitization/security';
+import { PlayerHandler } from './interfaces/player';
 import { ComponentDef, ComponentType } from './interfaces/definition';
 import { LElementNode } from './interfaces/node';
-import { PlayerHandler } from './interfaces/player';
 import { RElement, RendererFactory3 } from './interfaces/renderer';
 import { LViewData, RootContext } from './interfaces/view';
 /** Options that control how the component should be bootstrapped. */

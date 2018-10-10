@@ -92,14 +92,12 @@ export declare function readPatchedLViewData(target: any): LViewData | null;
 export declare function isComponentInstance(instance: any): boolean;
 export declare function isDirectiveInstance(instance: any): boolean;
 /**
- * Returns a list of directives extracted from the given view based on the
- * provided list of directive index values.
+ * Returns a list of directives extracted from the given view. Does not contain
+ * the component.
  *
- * @param nodeIndex The node index
  * @param lViewData The target view data
- * @param includeComponents Whether or not to include components in returned directives
  */
-export declare function discoverDirectives(nodeIndex: number, lViewData: LViewData, includeComponents: boolean): any[] | null;
+export declare function discoverDirectives(nodeIndex: number, lViewData: LViewData): any[] | null;
 /**
  * Returns a map of local references (local reference name => element or directive instance) that
  * exist on a given element.
