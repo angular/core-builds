@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-rc.1+17.sha-1657c99
+ * @license Angular v7.0.0-rc.1+18.sha-bd186c7
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -12327,7 +12327,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-rc.1+17.sha-1657c99');
+    var VERSION = new Version('7.0.0-rc.1+18.sha-bd186c7');
 
     /**
      * @license
