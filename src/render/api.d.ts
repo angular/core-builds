@@ -21,7 +21,7 @@ export declare class RenderComponentType {
     constructor(id: string, templateUrl: string, slotCount: number, encapsulation: ViewEncapsulation, styles: Array<string | any[]>, animations: any);
 }
 /**
- * @deprecated Debug info is handeled internally in the view engine now.
+ * @deprecated Debug info is handled internally in the view engine now.
  */
 export declare abstract class RenderDebugInfo {
     abstract readonly injector: Injector;
