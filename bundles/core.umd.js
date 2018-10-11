@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-rc.1+4.sha-39f42ba
+ * @license Angular v7.0.0-rc.1+5.sha-053bf27
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1930,6 +1930,25 @@
             directiveStartIndex++;
         return lViewData.slice(directiveStartIndex, directiveEndIndex);
     }
+    /**
+     * Returns a map of local references (local reference name => element or directive instance) that
+     * exist on a given element.
+     */
+    function discoverLocalRefs(lViewData, lNodeIndex) {
+        var tNode = lViewData[TVIEW].data[lNodeIndex];
+        if (tNode && tNode.localNames) {
+            var result = {};
+            for (var i = 0; i < tNode.localNames.length; i += 2) {
+                var localRefName = tNode.localNames[i];
+                var directiveIndex = tNode.localNames[i + 1];
+                result[localRefName] = directiveIndex === -1 ?
+                    getLNodeFromViewData(lViewData, lNodeIndex).native :
+                    lViewData[directiveIndex];
+            }
+            return result;
+        }
+        return null;
+    }
     function getDirectiveStartIndex(tNode) {
         // the tNode instances store a flag value which then has a
         // pointer which tells the starting index of where all the
@@ -2714,8 +2733,8 @@
      */
     function removeView(lContainer, tContainer, removeIndex) {
         var view = lContainer[VIEWS][removeIndex];
-        destroyLView(view);
         detachView(lContainer, removeIndex, !!tContainer.detached);
+        destroyLView(view);
     }
     /** Gets the child of the given LViewData */
     function getLViewChild(viewData) {
@@ -12187,7 +12206,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-rc.1+4.sha-39f42ba');
+    var VERSION = new Version('7.0.0-rc.1+5.sha-053bf27');
 
     /**
      * @license
@@ -20325,11 +20344,7 @@
             this.debugContextFactory = getCurrentDebugContext;
             this.data = this.delegate.data;
         }
-        Object.defineProperty(DebugRenderer2.prototype, "debugContext", {
-            get: function () { return this.debugContextFactory(); },
-            enumerable: true,
-            configurable: true
-        });
+        DebugRenderer2.prototype.createDebugContext = function (nativeElement) { return this.debugContextFactory(nativeElement); };
         DebugRenderer2.prototype.destroyNode = function (node) {
             removeDebugNodeFromIndex(getDebugNode(node));
             if (this.delegate.destroyNode) {
@@ -20339,7 +20354,7 @@
         DebugRenderer2.prototype.destroy = function () { this.delegate.destroy(); };
         DebugRenderer2.prototype.createElement = function (name, namespace) {
             var el = this.delegate.createElement(name, namespace);
-            var debugCtx = this.debugContext;
+            var debugCtx = this.createDebugContext(el);
             if (debugCtx) {
                 var debugEl = new DebugElement(el, null, debugCtx);
                 debugEl.name = name;
@@ -20349,7 +20364,7 @@
         };
         DebugRenderer2.prototype.createComment = function (value) {
             var comment = this.delegate.createComment(value);
-            var debugCtx = this.debugContext;
+            var debugCtx = this.createDebugContext(comment);
             if (debugCtx) {
                 indexDebugNode(new DebugNode(comment, null, debugCtx));
             }
@@ -20357,7 +20372,7 @@
         };
         DebugRenderer2.prototype.createText = function (value) {
             var text = this.delegate.createText(value);
-            var debugCtx = this.debugContext;
+            var debugCtx = this.createDebugContext(text);
             if (debugCtx) {
                 indexDebugNode(new DebugNode(text, null, debugCtx));
             }
@@ -20390,7 +20405,7 @@
         };
         DebugRenderer2.prototype.selectRootElement = function (selectorOrNode, preserveContent) {
             var el = this.delegate.selectRootElement(selectorOrNode, preserveContent);
-            var debugCtx = getCurrentDebugContext();
+            var debugCtx = getCurrentDebugContext() || (this.createDebugContext(el));
             if (debugCtx) {
                 indexDebugNode(new DebugElement(el, null, debugCtx));
             }
@@ -20538,6 +20553,53 @@
      */
 
     /**
+     * Returns the host component instance associated with the target.
+     *
+     * This will only return a component instance of the DOM node
+     * contains an instance of a component on it.
+     */
+    function getHostComponent(target) {
+        var context = loadContext(target);
+        var tNode = context.lViewData[TVIEW].data[context.nodeIndex];
+        if (tNode.flags & 4096 /* isComponent */) {
+            var lNode = context.lViewData[context.nodeIndex];
+            return lNode.data[CONTEXT];
+        }
+        return null;
+    }
+    /**
+     * Returns the injector instance that is associated with
+     * the element, component or directive.
+     */
+    function getInjector(target) {
+        var context = loadContext(target);
+        var tNode = context.lViewData[TVIEW].data[context.nodeIndex];
+        return new NodeInjector(tNode, context.lViewData);
+    }
+    /**
+     * Returns LContext associated with a target passed as an argument.
+     * Throws if a given target doesn't have associated LContext.
+     */
+    function loadContext(target) {
+        var context = getContext(target);
+        if (!context) {
+            throw new Error(ngDevMode ? 'Unable to find the given context data for the given target' :
+                'Invalid ng target');
+        }
+        return context;
+    }
+    /**
+     *  Retrieve map of local references (local reference name => element or directive instance).
+     */
+    function getLocalRefs(target) {
+        var context = loadContext(target);
+        if (context.localRefs === undefined) {
+            context.localRefs = discoverLocalRefs(context.lViewData, context.nodeIndex);
+        }
+        return context.localRefs || {};
+    }
+
+    /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
      *
@@ -20554,9 +20616,9 @@
         function Render3DebugRendererFactory2() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        Render3DebugRendererFactory2.prototype.createRenderer = function (element$$1, renderData) {
-            var renderer = _super.prototype.createRenderer.call(this, element$$1, renderData);
-            renderer.debugContextFactory = function () { return new Render3DebugContext(_getViewData()); };
+        Render3DebugRendererFactory2.prototype.createRenderer = function (element, renderData) {
+            var renderer = _super.prototype.createRenderer.call(this, element, renderData);
+            renderer.debugContextFactory = function (nativeElement) { return new Render3DebugContext(nativeElement); };
             return renderer;
         };
         return Render3DebugRendererFactory2;
@@ -20567,88 +20629,71 @@
      * Used in tests to retrieve information those nodes.
      */
     var Render3DebugContext = /** @class */ (function () {
-        function Render3DebugContext(viewData) {
-            this.viewData = viewData;
-            // The LNode will be created next and appended to viewData
-            this.nodeIndex = viewData ? viewData.length : null;
+        function Render3DebugContext(_nativeNode) {
+            this._nativeNode = _nativeNode;
         }
+        Object.defineProperty(Render3DebugContext.prototype, "nodeIndex", {
+            get: function () { return loadContext(this._nativeNode).nodeIndex; },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(Render3DebugContext.prototype, "view", {
-            get: function () { return this.viewData; },
+            get: function () { return loadContext(this._nativeNode).lViewData; },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(Render3DebugContext.prototype, "injector", {
-            get: function () {
-                if (this.nodeIndex !== null) {
-                    var tNode = this.view[TVIEW].data[this.nodeIndex];
-                    return new NodeInjector(tNode, this.view);
-                }
-                return Injector.NULL;
-            },
+            get: function () { return getInjector(this._nativeNode); },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(Render3DebugContext.prototype, "component", {
-            get: function () {
-                // TODO(vicb): why/when
-                if (this.nodeIndex === null) {
-                    return null;
-                }
-                var tView = this.view[TVIEW];
-                var components = tView.components;
-                return (components && components.indexOf(this.nodeIndex) == -1) ?
-                    null :
-                    this.view[this.nodeIndex].data[CONTEXT];
-            },
+            get: function () { return getHostComponent(this._nativeNode); },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(Render3DebugContext.prototype, "providerTokens", {
-            // TODO(vicb): add view providers when supported
             get: function () {
-                // TODO(vicb): why/when
-                var directiveDefs = this.view[TVIEW].data;
-                if (this.nodeIndex === null || directiveDefs == null) {
-                    return [];
+                var lDebugCtx = loadContext(this._nativeNode);
+                var lViewData = lDebugCtx.lViewData;
+                var tNode = lViewData[TVIEW].data[lDebugCtx.nodeIndex];
+                var directivesCount = tNode.flags & 4095 /* DirectiveCountMask */;
+                if (directivesCount > 0) {
+                    var directiveIdxStart = tNode.flags >> 15 /* DirectiveStartingIndexShift */;
+                    var directiveIdxEnd = directiveIdxStart + directivesCount;
+                    var viewDirectiveDefs = this.view[TVIEW].data;
+                    var directiveDefs = viewDirectiveDefs.slice(directiveIdxStart, directiveIdxEnd);
+                    return directiveDefs.map(function (directiveDef) { return directiveDef.type; });
                 }
-                var currentTNode = this.view[TVIEW].data[this.nodeIndex];
-                var dirStart = currentTNode >> 15 /* DirectiveStartingIndexShift */;
-                var dirEnd = dirStart + (currentTNode & 4095 /* DirectiveCountMask */);
-                return directiveDefs.slice(dirStart, dirEnd);
+                return [];
             },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(Render3DebugContext.prototype, "references", {
-            get: function () {
-                // TODO(vicb): implement retrieving references
-                throw new Error('Not implemented yet in ivy');
-            },
+            get: function () { return getLocalRefs(this._nativeNode); },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(Render3DebugContext.prototype, "context", {
-            get: function () {
-                if (this.nodeIndex === null) {
-                    return null;
-                }
-                var lNode = this.view[this.nodeIndex];
-                return lNode.view[CONTEXT];
-            },
+            // TODO(pk): check previous implementation and re-implement
+            get: function () { throw new Error('Not implemented in ivy'); },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(Render3DebugContext.prototype, "componentRenderElement", {
+            // TODO(pk): check previous implementation and re-implement
             get: function () { throw new Error('Not implemented in ivy'); },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(Render3DebugContext.prototype, "renderNode", {
+            // TODO(pk): check previous implementation and re-implement
             get: function () { throw new Error('Not implemented in ivy'); },
             enumerable: true,
             configurable: true
         });
-        // TODO(vicb): check previous implementation
+        // TODO(pk): check previous implementation and re-implement
         Render3DebugContext.prototype.logError = function (console) {
             var values = [];
             for (var _i = 1; _i < arguments.length; _i++) {
