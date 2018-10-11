@@ -22,6 +22,7 @@ export declare class DebugRenderer2 implements Renderer2 {
     readonly data: {
         [key: string]: any;
     };
+    private createDebugContext;
     /**
      * Factory function used to create a `DebugContext` when a node is created.
      *
@@ -30,8 +31,7 @@ export declare class DebugRenderer2 implements Renderer2 {
      * The factory is configurable so that the `DebugRenderer2` could instantiate either a View Engine
      * or a Render context.
      */
-    debugContextFactory: () => DebugContext | null;
-    private readonly debugContext;
+    debugContextFactory: (nativeElement?: any) => DebugContext | null;
     constructor(delegate: Renderer2);
     destroyNode(node: any): void;
     destroy(): void;
