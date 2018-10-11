@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-rc.1+4.sha-39f42ba
+ * @license Angular v7.0.0-rc.1+5.sha-053bf27
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2647,6 +2647,31 @@ function discoverDirectives(nodeIndex, lViewData, includeComponents) {
     return lViewData.slice(directiveStartIndex, directiveEndIndex);
 }
 /**
+ * Returns a map of local references (local reference name => element or directive instance) that
+ * exist on a given element.
+ * @param {?} lViewData
+ * @param {?} lNodeIndex
+ * @return {?}
+ */
+function discoverLocalRefs(lViewData, lNodeIndex) {
+    /** @type {?} */
+    const tNode = /** @type {?} */ (lViewData[TVIEW].data[lNodeIndex]);
+    if (tNode && tNode.localNames) {
+        /** @type {?} */
+        const result = {};
+        for (let i = 0; i < tNode.localNames.length; i += 2) {
+            /** @type {?} */
+            const localRefName = tNode.localNames[i];
+            /** @type {?} */
+            const directiveIndex = /** @type {?} */ (tNode.localNames[i + 1]);
+            result[localRefName] = directiveIndex === -1 ? /** @type {?} */ ((getLNodeFromViewData(lViewData, lNodeIndex))).native :
+                lViewData[directiveIndex];
+        }
+        return result;
+    }
+    return null;
+}
+/**
  * @param {?} tNode
  * @return {?}
  */
@@ -3658,8 +3683,8 @@ function detachView(lContainer, removeIndex, detached) {
 function removeView(lContainer, tContainer, removeIndex) {
     /** @type {?} */
     const view = lContainer[VIEWS][removeIndex];
-    destroyLView(view);
     detachView(lContainer, removeIndex, !!tContainer.detached);
+    destroyLView(view);
 }
 /**
  * Gets the child of the given LViewData
@@ -14981,7 +15006,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-rc.1+4.sha-39f42ba');
+const VERSION = new Version('7.0.0-rc.1+5.sha-053bf27');
 
 /**
  * @fileoverview added by tsickle
@@ -25799,9 +25824,10 @@ class DebugRenderer2 {
         this.data = this.delegate.data;
     }
     /**
+     * @param {?} nativeElement
      * @return {?}
      */
-    get debugContext() { return this.debugContextFactory(); }
+    createDebugContext(nativeElement) { return this.debugContextFactory(nativeElement); }
     /**
      * @param {?} node
      * @return {?}
@@ -25825,7 +25851,7 @@ class DebugRenderer2 {
         /** @type {?} */
         const el = this.delegate.createElement(name, namespace);
         /** @type {?} */
-        const debugCtx = this.debugContext;
+        const debugCtx = this.createDebugContext(el);
         if (debugCtx) {
             /** @type {?} */
             const debugEl = new DebugElement(el, null, debugCtx);
@@ -25842,7 +25868,7 @@ class DebugRenderer2 {
         /** @type {?} */
         const comment = this.delegate.createComment(value);
         /** @type {?} */
-        const debugCtx = this.debugContext;
+        const debugCtx = this.createDebugContext(comment);
         if (debugCtx) {
             indexDebugNode(new DebugNode(comment, null, debugCtx));
         }
@@ -25856,7 +25882,7 @@ class DebugRenderer2 {
         /** @type {?} */
         const text = this.delegate.createText(value);
         /** @type {?} */
-        const debugCtx = this.debugContext;
+        const debugCtx = this.createDebugContext(text);
         if (debugCtx) {
             indexDebugNode(new DebugNode(text, null, debugCtx));
         }
@@ -25919,7 +25945,7 @@ class DebugRenderer2 {
         /** @type {?} */
         const el = this.delegate.selectRootElement(selectorOrNode, preserveContent);
         /** @type {?} */
-        const debugCtx = getCurrentDebugContext();
+        const debugCtx = getCurrentDebugContext() || (ivyEnabled$1 ? this.createDebugContext(el) : null);
         if (debugCtx) {
             indexDebugNode(new DebugElement(el, null, debugCtx));
         }
@@ -26158,6 +26184,73 @@ class NgModuleFactory_ extends NgModuleFactory {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
+ * Returns the host component instance associated with the target.
+ *
+ * This will only return a component instance of the DOM node
+ * contains an instance of a component on it.
+ * @template T
+ * @param {?} target
+ * @return {?}
+ */
+function getHostComponent(target) {
+    /** @type {?} */
+    const context = loadContext(target);
+    /** @type {?} */
+    const tNode = /** @type {?} */ (context.lViewData[TVIEW].data[context.nodeIndex]);
+    if (tNode.flags & 4096 /* isComponent */) {
+        /** @type {?} */
+        const lNode = /** @type {?} */ (context.lViewData[context.nodeIndex]);
+        return /** @type {?} */ ((((lNode.data))[CONTEXT]));
+    }
+    return null;
+}
+/**
+ * Returns the injector instance that is associated with
+ * the element, component or directive.
+ * @param {?} target
+ * @return {?}
+ */
+function getInjector(target) {
+    /** @type {?} */
+    const context = loadContext(target);
+    /** @type {?} */
+    const tNode = /** @type {?} */ (context.lViewData[TVIEW].data[context.nodeIndex]);
+    return new NodeInjector(tNode, context.lViewData);
+}
+/**
+ * Returns LContext associated with a target passed as an argument.
+ * Throws if a given target doesn't have associated LContext.
+ * @param {?} target
+ * @return {?}
+ */
+function loadContext(target) {
+    /** @type {?} */
+    const context = getContext(target);
+    if (!context) {
+        throw new Error(ngDevMode ? 'Unable to find the given context data for the given target' :
+            'Invalid ng target');
+    }
+    return context;
+}
+/**
+ *  Retrieve map of local references (local reference name => element or directive instance).
+ * @param {?} target
+ * @return {?}
+ */
+function getLocalRefs(target) {
+    /** @type {?} */
+    const context = /** @type {?} */ ((loadContext(target)));
+    if (context.localRefs === undefined) {
+        context.localRefs = discoverLocalRefs(context.lViewData, context.nodeIndex);
+    }
+    return context.localRefs || {};
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/**
  * Adapts the DebugRendererFactory2 to create a DebugRenderer2 specific for IVY.
  *
  * The created DebugRenderer know how to create a Debug Context specific to IVY.
@@ -26168,10 +26261,10 @@ class Render3DebugRendererFactory2 extends DebugRendererFactory2 {
      * @param {?} renderData
      * @return {?}
      */
-    createRenderer(element$$1, renderData) {
+    createRenderer(element, renderData) {
         /** @type {?} */
-        const renderer = /** @type {?} */ (super.createRenderer(element$$1, renderData));
-        renderer.debugContextFactory = () => new Render3DebugContext(_getViewData());
+        const renderer = /** @type {?} */ (super.createRenderer(element, renderData));
+        renderer.debugContextFactory = (nativeElement) => new Render3DebugContext(nativeElement);
         return renderer;
     }
 }
@@ -26182,79 +26275,60 @@ class Render3DebugRendererFactory2 extends DebugRendererFactory2 {
  */
 class Render3DebugContext {
     /**
-     * @param {?} viewData
+     * @param {?} _nativeNode
      */
-    constructor(viewData) {
-        this.viewData = viewData;
-        // The LNode will be created next and appended to viewData
-        this.nodeIndex = viewData ? viewData.length : null;
+    constructor(_nativeNode) {
+        this._nativeNode = _nativeNode;
     }
     /**
      * @return {?}
      */
-    get view() { return this.viewData; }
+    get nodeIndex() { return loadContext(this._nativeNode).nodeIndex; }
     /**
      * @return {?}
      */
-    get injector() {
-        if (this.nodeIndex !== null) {
-            /** @type {?} */
-            const tNode = this.view[TVIEW].data[this.nodeIndex];
-            return new NodeInjector(tNode, this.view);
-        }
-        return Injector.NULL;
-    }
+    get view() { return loadContext(this._nativeNode).lViewData; }
     /**
      * @return {?}
      */
-    get component() {
-        // TODO(vicb): why/when
-        if (this.nodeIndex === null) {
-            return null;
-        }
-        /** @type {?} */
-        const tView = this.view[TVIEW];
-        /** @type {?} */
-        const components = tView.components;
-        return (components && components.indexOf(this.nodeIndex) == -1) ?
-            null :
-            this.view[this.nodeIndex].data[CONTEXT];
-    }
+    get injector() { return getInjector(this._nativeNode); }
+    /**
+     * @return {?}
+     */
+    get component() { return getHostComponent(this._nativeNode); }
     /**
      * @return {?}
      */
     get providerTokens() {
         /** @type {?} */
-        const directiveDefs = this.view[TVIEW].data;
-        if (this.nodeIndex === null || directiveDefs == null) {
-            return [];
+        const lDebugCtx = loadContext(this._nativeNode);
+        /** @type {?} */
+        const lViewData = lDebugCtx.lViewData;
+        /** @type {?} */
+        const tNode = /** @type {?} */ (lViewData[TVIEW].data[lDebugCtx.nodeIndex]);
+        /** @type {?} */
+        const directivesCount = tNode.flags & 4095 /* DirectiveCountMask */;
+        if (directivesCount > 0) {
+            /** @type {?} */
+            const directiveIdxStart = tNode.flags >> 15 /* DirectiveStartingIndexShift */;
+            /** @type {?} */
+            const directiveIdxEnd = directiveIdxStart + directivesCount;
+            /** @type {?} */
+            const viewDirectiveDefs = this.view[TVIEW].data;
+            /** @type {?} */
+            const directiveDefs = /** @type {?} */ (viewDirectiveDefs.slice(directiveIdxStart, directiveIdxEnd));
+            return directiveDefs.map(directiveDef => directiveDef.type);
         }
-        /** @type {?} */
-        const currentTNode = this.view[TVIEW].data[this.nodeIndex];
-        /** @type {?} */
-        const dirStart = currentTNode >> 15 /* DirectiveStartingIndexShift */;
-        /** @type {?} */
-        const dirEnd = dirStart + (currentTNode & 4095 /* DirectiveCountMask */);
-        return directiveDefs.slice(dirStart, dirEnd);
+        return [];
     }
     /**
      * @return {?}
      */
-    get references() {
-        // TODO(vicb): implement retrieving references
-        throw new Error('Not implemented yet in ivy');
-    }
+    get references() { return getLocalRefs(this._nativeNode); }
     /**
      * @return {?}
      */
-    get context() {
-        if (this.nodeIndex === null) {
-            return null;
-        }
-        /** @type {?} */
-        const lNode = this.view[this.nodeIndex];
-        return lNode.view[CONTEXT];
-    }
+    get context() { throw new Error('Not implemented in ivy'); }
     /**
      * @return {?}
      */
