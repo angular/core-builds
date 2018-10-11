@@ -9,6 +9,7 @@ import { ChangeDetectorRef as ViewEngine_ChangeDetectorRef } from '../change_det
 import { ElementRef as ViewEngine_ElementRef } from '../linker/element_ref';
 import { TemplateRef as ViewEngine_TemplateRef } from '../linker/template_ref';
 import { ViewContainerRef as ViewEngine_ViewContainerRef } from '../linker/view_container_ref';
+import { Renderer2 } from '../render/api';
 import { TContainerNode, TElementContainerNode, TElementNode, TNode } from './interfaces/node';
 import { LViewData } from './interfaces/view';
 /**
@@ -70,3 +71,5 @@ export declare function injectChangeDetectorRef(): ViewEngine_ChangeDetectorRef;
  * @returns The ChangeDetectorRef to use
  */
 export declare function createViewRef(hostTNode: TNode, hostView: LViewData, context: any): ViewEngine_ChangeDetectorRef;
+/** Returns a Renderer2 (or throws when application was bootstrapped with Renderer3) */
+export declare function injectRenderer2(): Renderer2;

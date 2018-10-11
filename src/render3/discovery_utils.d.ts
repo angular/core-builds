@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Injector } from '../di/injector';
+import { LContext } from './context_discovery';
 import { LViewData, RootContext } from './interfaces/view';
 /**
  * NOTE: The following functions might not be ideal for core usage in Angular...
@@ -51,6 +52,11 @@ export declare function getInjector(target: {}): Injector;
  * with the underlying target element.
  */
 export declare function getDirectives(target: {}): Array<{}>;
+/**
+ * Returns LContext associated with a target passed as an argument.
+ * Throws if a given target doesn't have associated LContext.
+ */
+export declare function loadContext(target: {}): LContext;
 /**
  * Retrieve the root view from any component by walking the parent `LViewData` until
  * reaching the root `LViewData`.
