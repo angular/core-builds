@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-rc.1+19.sha-4b494f2
+ * @license Angular v7.0.0-rc.1+18.sha-bd186c7
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -5245,6 +5245,8 @@
      *        specifically for element styling--the index must be the next index after the element
      *        index.)
      * @param styleIndex Index of the style property on this element. (Monotonically increasing.)
+     * @param styleName Name of property. Because it is going to DOM this is not subject to
+     *        renaming as part of minification.
      * @param value New value to write (null to remove).
      * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
      *        Note that when a suffix is provided then the underlying sanitizer will
@@ -12204,7 +12206,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-rc.1+19.sha-4b494f2');
+    var VERSION = new Version('7.0.0-rc.1+18.sha-bd186c7');
 
     /**
      * @license
