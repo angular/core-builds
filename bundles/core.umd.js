@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-rc.1+18.sha-bd186c7
+ * @license Angular v7.0.0-rc.1+22.sha-0a3f817
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -5260,8 +5260,6 @@
      *        specifically for element styling--the index must be the next index after the element
      *        index.)
      * @param styleIndex Index of the style property on this element. (Monotonically increasing.)
-     * @param styleName Name of property. Because it is going to DOM this is not subject to
-     *        renaming as part of minification.
      * @param value New value to write (null to remove).
      * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
      *        Note that when a suffix is provided then the underlying sanitizer will
@@ -6751,112 +6749,6 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * @deprecated Use `RendererType2` (and `Renderer2`) instead.
-     */
-    var RenderComponentType = /** @class */ (function () {
-        function RenderComponentType(id, templateUrl, slotCount, encapsulation, styles, animations) {
-            this.id = id;
-            this.templateUrl = templateUrl;
-            this.slotCount = slotCount;
-            this.encapsulation = encapsulation;
-            this.styles = styles;
-            this.animations = animations;
-        }
-        return RenderComponentType;
-    }());
-    /**
-     * @deprecated Debug info is handeled internally in the view engine now.
-     */
-    var RenderDebugInfo = /** @class */ (function () {
-        function RenderDebugInfo() {
-        }
-        return RenderDebugInfo;
-    }());
-    /**
-     * @deprecated Use the `Renderer2` instead.
-     */
-    var Renderer = /** @class */ (function () {
-        function Renderer() {
-        }
-        return Renderer;
-    }());
-    var Renderer2Interceptor = new InjectionToken('Renderer2Interceptor');
-    /**
-     * Injectable service that provides a low-level interface for modifying the UI.
-     *
-     * Use this service to bypass Angular's templating and make custom UI changes that can't be
-     * expressed declaratively. For example if you need to set a property or an attribute whose name is
-     * not statically known, use {@link Renderer#setElementProperty setElementProperty} or
-     * {@link Renderer#setElementAttribute setElementAttribute} respectively.
-     *
-     * If you are implementing a custom renderer, you must implement this interface.
-     *
-     * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
-     *
-     * @deprecated Use `RendererFactory2` instead.
-     */
-    var RootRenderer = /** @class */ (function () {
-        function RootRenderer() {
-        }
-        return RootRenderer;
-    }());
-    /**
-     * Creates and initializes a custom renderer that implements the `Renderer2` base class.
-     *
-     * @experimental
-     */
-    var RendererFactory2 = /** @class */ (function () {
-        function RendererFactory2() {
-        }
-        return RendererFactory2;
-    }());
-    (function (RendererStyleFlags2) {
-        /**
-         * Marks a style as important.
-         */
-        RendererStyleFlags2[RendererStyleFlags2["Important"] = 1] = "Important";
-        /**
-         * Marks a style as using dash case naming (this-is-dash-case).
-         */
-        RendererStyleFlags2[RendererStyleFlags2["DashCase"] = 2] = "DashCase";
-    })(exports.RendererStyleFlags2 || (exports.RendererStyleFlags2 = {}));
-    /**
-     * Extend this base class to implement custom rendering. By default, Angular
-     * renders a template into DOM. You can use custom rendering to intercept
-     * rendering calls, or to render to something other than DOM.
-     *
-     * Create your custom renderer using `RendererFactory2`.
-     *
-     * Use a custom renderer to bypass Angular's templating and
-     * make custom UI changes that can't be expressed declaratively.
-     * For example if you need to set a property or an attribute whose name is
-     * not statically known, use the `setProperty()` or
-     * `setAttribute()` method.
-     *
-     * @experimental
-     */
-    var Renderer2 = /** @class */ (function () {
-        function Renderer2() {
-        }
-        return Renderer2;
-    }());
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
      * The number of slots in each bloom filter (used by DI). The larger this number, the fewer
      * directives that will share slots, and thus, the fewer false positives when checking for
      * the existence of a directive.
@@ -7027,9 +6919,6 @@
         var hostTNode = getPreviousOrParentTNode();
         return getOrCreateInjectable(hostTNode, _getViewData(), token, flags);
     }
-    function injectRenderer2() {
-        return getOrCreateRenderer2(_getViewData());
-    }
     /**
      * Inject static attribute value into directive constructor.
      *
@@ -7077,15 +6966,6 @@
             }
         }
         return undefined;
-    }
-    function getOrCreateRenderer2(view) {
-        var renderer = view[RENDERER];
-        if (isProceduralRenderer(renderer)) {
-            return renderer;
-        }
-        else {
-            throw new Error('Cannot inject Renderer2 when the application uses Renderer3!');
-        }
     }
     /**
      * Returns the value associated to the given token from the injectors.
@@ -7264,9 +7144,6 @@
             this._injectorIndex = getOrCreateNodeInjectorForNode(_tNode, _hostView);
         }
         NodeInjector.prototype.get = function (token) {
-            if (token === Renderer2) {
-                return getOrCreateRenderer2(this._hostView);
-            }
             setEnvironment(this._tNode, this._hostView);
             return getOrCreateInjectable(this._tNode, this._hostView, token);
         };
@@ -7939,6 +7816,19 @@
         }
         return null;
     }
+    function getOrCreateRenderer2(view) {
+        var renderer = view[RENDERER];
+        if (isProceduralRenderer(renderer)) {
+            return renderer;
+        }
+        else {
+            throw new Error('Cannot inject Renderer2 when the application uses Renderer3!');
+        }
+    }
+    /** Returns a Renderer2 (or throws when application was bootstrapped with Renderer3) */
+    function injectRenderer2() {
+        return getOrCreateRenderer2(_getViewData());
+    }
 
     /**
      * @license
@@ -7951,6 +7841,7 @@
     var R3_TEMPLATE_REF_FACTORY = injectTemplateRef;
     var R3_CHANGE_DETECTOR_REF_FACTORY = injectChangeDetectorRef;
     var R3_VIEW_CONTAINER_REF_FACTORY = injectViewContainerRef;
+    var R3_RENDERER2_FACTORY = injectRenderer2;
 
     /**
      * @license
@@ -7989,6 +7880,106 @@
         /** @internal */
         ElementRef.__NG_ELEMENT_ID__ = function () { return R3_ELEMENT_REF_FACTORY(ElementRef); };
         return ElementRef;
+    }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * @deprecated Use `RendererType2` (and `Renderer2`) instead.
+     */
+    var RenderComponentType = /** @class */ (function () {
+        function RenderComponentType(id, templateUrl, slotCount, encapsulation, styles, animations) {
+            this.id = id;
+            this.templateUrl = templateUrl;
+            this.slotCount = slotCount;
+            this.encapsulation = encapsulation;
+            this.styles = styles;
+            this.animations = animations;
+        }
+        return RenderComponentType;
+    }());
+    /**
+     * @deprecated Debug info is handled internally in the view engine now.
+     */
+    var RenderDebugInfo = /** @class */ (function () {
+        function RenderDebugInfo() {
+        }
+        return RenderDebugInfo;
+    }());
+    /**
+     * @deprecated Use the `Renderer2` instead.
+     */
+    var Renderer = /** @class */ (function () {
+        function Renderer() {
+        }
+        return Renderer;
+    }());
+    var Renderer2Interceptor = new InjectionToken('Renderer2Interceptor');
+    /**
+     * Injectable service that provides a low-level interface for modifying the UI.
+     *
+     * Use this service to bypass Angular's templating and make custom UI changes that can't be
+     * expressed declaratively. For example if you need to set a property or an attribute whose name is
+     * not statically known, use {@link Renderer#setElementProperty setElementProperty} or
+     * {@link Renderer#setElementAttribute setElementAttribute} respectively.
+     *
+     * If you are implementing a custom renderer, you must implement this interface.
+     *
+     * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
+     *
+     * @deprecated Use `RendererFactory2` instead.
+     */
+    var RootRenderer = /** @class */ (function () {
+        function RootRenderer() {
+        }
+        return RootRenderer;
+    }());
+    /**
+     * Creates and initializes a custom renderer that implements the `Renderer2` base class.
+     *
+     * @experimental
+     */
+    var RendererFactory2 = /** @class */ (function () {
+        function RendererFactory2() {
+        }
+        return RendererFactory2;
+    }());
+    (function (RendererStyleFlags2) {
+        /**
+         * Marks a style as important.
+         */
+        RendererStyleFlags2[RendererStyleFlags2["Important"] = 1] = "Important";
+        /**
+         * Marks a style as using dash case naming (this-is-dash-case).
+         */
+        RendererStyleFlags2[RendererStyleFlags2["DashCase"] = 2] = "DashCase";
+    })(exports.RendererStyleFlags2 || (exports.RendererStyleFlags2 = {}));
+    /**
+     * Extend this base class to implement custom rendering. By default, Angular
+     * renders a template into DOM. You can use custom rendering to intercept
+     * rendering calls, or to render to something other than DOM.
+     *
+     * Create your custom renderer using `RendererFactory2`.
+     *
+     * Use a custom renderer to bypass Angular's templating and
+     * make custom UI changes that can't be expressed declaratively.
+     * For example if you need to set a property or an attribute whose name is
+     * not statically known, use the `setProperty()` or
+     * `setAttribute()` method.
+     *
+     * @experimental
+     */
+    var Renderer2 = /** @class */ (function () {
+        function Renderer2() {
+        }
+        /** @internal */
+        Renderer2.__NG_ELEMENT_ID__ = function () { return R3_RENDERER2_FACTORY(); };
+        return Renderer2;
     }());
 
     /**
@@ -11002,7 +10993,6 @@
         'inject': inject,
         'ɵinjectAttribute': injectAttribute,
         'ɵtemplateRefExtractor': templateRefExtractor,
-        'ɵinjectRenderer2': injectRenderer2,
         'ɵNgOnChangesFeature': NgOnChangesFeature,
         'ɵPublicFeature': PublicFeature,
         'ɵInheritDefinitionFeature': InheritDefinitionFeature,
@@ -12221,7 +12211,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-rc.1+18.sha-bd186c7');
+    var VERSION = new Version('7.0.0-rc.1+22.sha-0a3f817');
 
     /**
      * @license
@@ -14612,6 +14602,14 @@
             list.splice(index, 1);
         }
     }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
 
     /**
      * @license
@@ -20832,6 +20830,7 @@
     var R3_TEMPLATE_REF_FACTORY__POST_NGCC__ = R3_TEMPLATE_REF_FACTORY;
     var R3_CHANGE_DETECTOR_REF_FACTORY__POST_NGCC__ = R3_CHANGE_DETECTOR_REF_FACTORY;
     var R3_VIEW_CONTAINER_REF_FACTORY__POST_NGCC__ = R3_VIEW_CONTAINER_REF_FACTORY;
+    var R3_RENDERER2_FACTORY__POST_NGCC__ = R3_RENDERER2_FACTORY;
 
     /**
      * @license
@@ -21023,7 +21022,6 @@
     exports.ɵRender3ComponentFactory = ComponentFactory$1;
     exports.ɵRender3ComponentRef = ComponentRef$1;
     exports.ɵdirectiveInject = directiveInject;
-    exports.ɵinjectRenderer2 = injectRenderer2;
     exports.ɵinjectAttribute = injectAttribute;
     exports.ɵgetFactoryOf = getFactoryOf;
     exports.ɵgetInheritedFactory = getInheritedFactory;
@@ -21144,6 +21142,7 @@
     exports.ɵR3_TEMPLATE_REF_FACTORY__POST_NGCC__ = R3_TEMPLATE_REF_FACTORY__POST_NGCC__;
     exports.ɵR3_CHANGE_DETECTOR_REF_FACTORY__POST_NGCC__ = R3_CHANGE_DETECTOR_REF_FACTORY__POST_NGCC__;
     exports.ɵR3_VIEW_CONTAINER_REF_FACTORY__POST_NGCC__ = R3_VIEW_CONTAINER_REF_FACTORY__POST_NGCC__;
+    exports.ɵR3_RENDERER2_FACTORY__POST_NGCC__ = R3_RENDERER2_FACTORY__POST_NGCC__;
     exports.ɵregisterModuleFactory = registerModuleFactory;
     exports.ɵEMPTY_ARRAY = EMPTY_ARRAY$3;
     exports.ɵEMPTY_MAP = EMPTY_MAP;
