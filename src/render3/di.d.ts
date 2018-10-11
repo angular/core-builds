@@ -7,6 +7,7 @@
  */
 import { InjectionToken } from '../di/injection_token';
 import { InjectFlags, Injector } from '../di/injector';
+import { Renderer2 } from '../render';
 import { Type } from '../type';
 import { DirectiveDef } from './interfaces/definition';
 import { TContainerNode, TElementContainerNode, TElementNode, TNode } from './interfaces/node';
@@ -81,6 +82,7 @@ export declare function diPublic(def: DirectiveDef<any>): void;
  */
 export declare function directiveInject<T>(token: Type<T> | InjectionToken<T>): T;
 export declare function directiveInject<T>(token: Type<T> | InjectionToken<T>, flags: InjectFlags): T;
+export declare function injectRenderer2(): Renderer2;
 /**
  * Inject static attribute value into directive constructor.
  *
