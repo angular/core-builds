@@ -12,7 +12,7 @@ import { NgOnChangesFeature } from './features/ng_onchanges_feature';
 import { PublicFeature } from './features/public_feature';
 import { BaseDef, ComponentDef, ComponentDefWithMeta, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFlags, DirectiveDefWithMeta, DirectiveType, PipeDef, PipeDefWithMeta } from './interfaces/definition';
 export { ComponentFactory, ComponentFactoryResolver, ComponentRef, WRAP_RENDERER_FACTORY2, injectComponentFactoryResolver } from './component_ref';
-export { directiveInject, getFactoryOf, getInheritedFactory, injectAttribute, injectRenderer2 } from './di';
+export { directiveInject, getFactoryOf, getInheritedFactory, injectAttribute } from './di';
 export { RenderFlags } from './interfaces/definition';
 export { CssSelectorList } from './interfaces/projection';
 export { NO_CHANGE, bind, interpolation1, interpolation2, interpolation3, interpolation4, interpolation5, interpolation6, interpolation7, interpolation8, interpolationV, container, containerRefreshStart, containerRefreshEnd, nextContext, element, elementAttribute, elementClassProp, elementEnd, elementProperty, elementStart, elementContainerStart, elementContainerEnd, elementStyling, elementStylingMap, elementStyleProp, elementStylingApply, getCurrentView, restoreView, listener, store, load, namespaceHTML, namespaceMathML, namespaceSVG, enableBindings, disableBindings, projection, projectionDef, text, textBinding, template, reference, embeddedViewStart, embeddedViewEnd, detectChanges, markDirty, tick, } from './instructions';
