@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { LContainer } from './container';
 import { RComment, RElement, RText } from './renderer';
 import { StylingContext } from './styling';
 import { LViewData, TView } from './view';
@@ -60,16 +59,12 @@ export interface LNode {
      */
     readonly native: RComment | RElement | RText | null;
     /**
-     * If regular LElementNode, LTextNode, and LProjectionNode then `data` will be null.
+     * If regular LElementNode, LTextNode, LContainerNode, and LProjectionNode then `data` will be
+     * null.
      * If LElementNode with component, then `data` contains LViewData.
      * If LViewNode, then `data` contains the LViewData.
-     * If LContainerNode, then `data` contains LContainer.
      */
-    readonly data: LViewData | LContainer | null;
-    /**
-     * A pointer to an LContainerNode created by directives requesting ViewContainerRef
-     */
-    dynamicLContainerNode: LContainerNode | null;
+    readonly data: LViewData | null;
 }
 /** LNode representing an element. */
 export interface LElementNode extends LNode {
@@ -89,23 +84,20 @@ export interface LTextNode extends LNode {
     /** The text node associated with this node. */
     native: RText;
     readonly data: null;
-    dynamicLContainerNode: null;
 }
 /** Abstract node which contains root nodes of a view. */
 export interface LViewNode extends LNode {
     readonly native: null;
     readonly data: LViewData;
-    dynamicLContainerNode: null;
 }
 /** Abstract node container which contains other views. */
 export interface LContainerNode extends LNode {
     native: RComment;
-    readonly data: LContainer;
+    readonly data: null;
 }
 export interface LProjectionNode extends LNode {
     readonly native: null;
     readonly data: null;
-    dynamicLContainerNode: null;
 }
 /**
  * A set of marker values to be used in the attributes arrays. Those markers indicate that some
@@ -278,10 +270,6 @@ export interface TNode {
      * If this is an inline view node (V), the parent will be its container.
      */
     parent: TElementNode | TContainerNode | null;
-    /**
-     * A pointer to a TContainerNode created by directives requesting ViewContainerRef
-     */
-    dynamicContainerNode: TNode | null;
     /**
      * If this node is part of an i18n block, it indicates whether this container is part of the DOM
      * If this node is not part of an i18n block, this field is null.
