@@ -5,8 +5,10 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { LElementNode } from './node';
+import { LContainerNode, LElementContainerNode, LElementNode } from './node';
 import { LQueries } from './query';
+import { RComment } from './renderer';
+import { StylingContext } from './styling';
 import { LViewData, NEXT, PARENT, QUERIES } from './view';
 /**
  * Below are constants for LContainer indices to help us look up LContainer members
@@ -14,8 +16,10 @@ import { LViewData, NEXT, PARENT, QUERIES } from './view';
  * Uglify will inline these when minifying so there shouldn't be a cost.
  */
 export declare const ACTIVE_INDEX = 0;
-export declare const VIEWS = 4;
-export declare const RENDER_PARENT = 5;
+export declare const HOST_NATIVE = 4;
+export declare const NATIVE = 5;
+export declare const VIEWS = 6;
+export declare const RENDER_PARENT = 7;
 /**
  * The state associated with an LContainerNode.
  *
@@ -32,7 +36,7 @@ export interface LContainer extends Array<any> {
      * it is set to null to identify this scenario, as indices are "absolute" in that case,
      * i.e. provided directly by the user of the ViewContainerRef API.
      */
-    [ACTIVE_INDEX]: number | null;
+    [ACTIVE_INDEX]: number;
     /**
      * Access to the parent view is necessary so we can propagate back
      * up from inside a container to parent[NEXT].
@@ -48,6 +52,10 @@ export interface LContainer extends Array<any> {
      * this container are reported to queries referenced here.
      */
     [QUERIES]: LQueries | null;
+    /** The host node of this LContainer. */
+    [HOST_NATIVE]: LElementNode | LContainerNode | LElementContainerNode | StylingContext;
+    /** The comment element that serves as an anchor for this LContainer. */
+    [NATIVE]: RComment;
     /**
      * A list of the container's currently active child views. Views will be inserted
      * here as they are added and spliced from here when they are removed. We need
