@@ -59,13 +59,13 @@ export declare abstract class Renderer {
     abstract listen(renderElement: any, name: string, callback: Function): Function;
     abstract listenGlobal(target: string, name: string, callback: Function): Function;
     abstract setElementProperty(renderElement: any, propertyName: string, propertyValue: any): void;
-    abstract setElementAttribute(renderElement: any, attributeName: string, attributeValue: string): void;
+    abstract setElementAttribute(renderElement: any, attributeName: string, attributeValue?: string): void;
     /**
      * Used only in debug mode to serialize property changes to dom nodes as attributes.
      */
     abstract setBindingDebugInfo(renderElement: any, propertyName: string, propertyValue: string): void;
     abstract setElementClass(renderElement: any, className: string, isAdd: boolean): void;
-    abstract setElementStyle(renderElement: any, styleName: string, styleValue: string): void;
+    abstract setElementStyle(renderElement: any, styleName: string, styleValue?: string): void;
     abstract invokeElementMethod(renderElement: any, methodName: string, args?: any[]): void;
     abstract setText(renderNode: any, text: string): void;
     abstract animate(element: any, startingStyles: any, keyframes: any[], duration: number, delay: number, easing: string, previousPlayers?: any[]): any;

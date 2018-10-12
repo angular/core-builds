@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-rc.1+33.sha-ea20ae6
+ * @license Angular v7.0.0-rc.1+34.sha-ff15043
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -15045,7 +15045,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-rc.1+33.sha-ea20ae6');
+const VERSION = new Version('7.0.0-rc.1+34.sha-ff15043');
 
 /**
  * @fileoverview added by tsickle
@@ -22585,7 +22585,7 @@ class RendererAdapter {
     /**
      * @param {?} renderElement
      * @param {?} namespaceAndName
-     * @param {?} attributeValue
+     * @param {?=} attributeValue
      * @return {?}
      */
     setElementAttribute(renderElement, namespaceAndName, attributeValue) {
@@ -22621,7 +22621,7 @@ class RendererAdapter {
     /**
      * @param {?} renderElement
      * @param {?} styleName
-     * @param {?} styleValue
+     * @param {?=} styleValue
      * @return {?}
      */
     setElementStyle(renderElement, styleName, styleValue) {
