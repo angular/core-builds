@@ -52,9 +52,6 @@ NgDevModePerfCounters.prototype.rendererMoveNode;
 NgDevModePerfCounters.prototype.rendererRemoveNode;
  /** @type {?} */
 NgDevModePerfCounters.prototype.rendererCreateComment;
-// externs from packages/core/src/linker/system_js_ng_module_factory_loader.closure.js:
- /** @type {?} */
-var System;
 // externs from packages/core/src/render3/interfaces/player.closure.js:
 
 /** @typedef {?} */
@@ -65,6 +62,9 @@ var ComponentInstance;
 
 /** @typedef {?} */
 var DirectiveInstance;
+// externs from packages/core/src/linker/system_js_ng_module_factory_loader.closure.js:
+ /** @type {?} */
+var System;
 // externs from packages/core/src/testability/testability.closure.js:
 /**
  * @record

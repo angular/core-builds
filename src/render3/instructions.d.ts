@@ -11,7 +11,7 @@ import { Sanitizer } from '../sanitization/security';
 import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
 import { LContainer } from './interfaces/container';
 import { ComponentDef, ComponentQuery, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, InitialStylingFlags, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
-import { LContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode, LocalRefExtractor, TAttributes, TContainerNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from './interfaces/node';
+import { LContainerNode, LElementContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode, LocalRefExtractor, TAttributes, TContainerNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from './interfaces/node';
 import { CssSelectorList } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
@@ -115,7 +115,7 @@ export declare function createLNodeObject(type: TNodeType, native: RText | RElem
  */
 export declare function createNodeAtIndex(index: number, type: TNodeType.Element, native: RElement | RText | null, name: string | null, attrs: TAttributes | null, lViewData?: LViewData | null): TElementNode;
 export declare function createNodeAtIndex(index: number, type: TNodeType.View, native: null, name: null, attrs: null, lViewData: LViewData): TViewNode;
-export declare function createNodeAtIndex(index: number, type: TNodeType.Container, native: RComment, name: string | null, attrs: TAttributes | null, lContainer: LContainer): TContainerNode;
+export declare function createNodeAtIndex(index: number, type: TNodeType.Container, native: RComment, name: string | null, attrs: TAttributes | null, data: null): TContainerNode;
 export declare function createNodeAtIndex(index: number, type: TNodeType.Projection, native: null, name: null, attrs: TAttributes | null, lProjection: null): TProjectionNode;
 export declare function createNodeAtIndex(index: number, type: TNodeType.ElementContainer, native: RComment, name: null, attrs: TAttributes | null, data: null): TElementContainerNode;
 /**
@@ -491,11 +491,14 @@ export declare function baseDirectiveCreate<T>(index: number, directive: T, dire
 /**
  * Creates a LContainer, either from a container instruction, or for a ViewContainerRef.
  *
+ * @param hostLNode The host node for the LContainer
+ * @param hostTNode The host TNode for the LContainer
  * @param currentView The parent view of the LContainer
+ * @param native The native comment element
  * @param isForViewContainerRef Optional a flag indicating the ViewContainerRef case
  * @returns LContainer
  */
-export declare function createLContainer(currentView: LViewData, isForViewContainerRef?: boolean): LContainer;
+export declare function createLContainer(hostLNode: LElementNode | LContainerNode | LElementContainerNode, hostTNode: TElementNode | TContainerNode | TElementContainerNode, currentView: LViewData, native: RComment, isForViewContainerRef?: boolean): LContainer;
 /**
  * Creates an LContainerNode for an ng-template (dynamically-inserted view), e.g.
  *
