@@ -6,8 +6,10 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import './ng_dev_mode';
+import { LContainer } from './interfaces/container';
 import { LElementNode } from './interfaces/node';
 import { RElement } from './interfaces/renderer';
+import { StylingContext } from './interfaces/styling';
 import { LViewData } from './interfaces/view';
 /**
  * This property will be monkey-patched on elements, components and directives
@@ -107,4 +109,13 @@ export declare function discoverDirectives(nodeIndex: number, lViewData: LViewDa
 export declare function discoverLocalRefs(lViewData: LViewData, lNodeIndex: number): {
     [key: string]: any;
 } | null;
-export declare function readElementValue(value: LElementNode | any[]): LElementNode;
+/**
+ * Takes the value of a slot in `LViewData` and returns the element node.
+ *
+ * Normally, element nodes are stored flat, but if the node has styles/classes on it,
+ * it might be wrapped in a styling context. Or if that node has a directive that injects
+ * ViewContainerRef, it may be wrapped in an LContainer.
+ *
+ * @param value The initial value in `LViewData`
+ */
+export declare function readElementValue(value: LElementNode | StylingContext | LContainer): LElementNode;
