@@ -5,7 +5,9 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { LContainerNode, LElementContainerNode, LElementNode, TNode } from './interfaces/node';
+import { LContainer } from './interfaces/container';
+import { LContainerNode, LElementContainerNode, LElementNode, LNode, TNode } from './interfaces/node';
+import { StylingContext } from './interfaces/styling';
 import { LViewData, RootContext, TData } from './interfaces/view';
 /**
  * Returns whether the values are different from a change detection stand point.
@@ -37,6 +39,7 @@ export declare function loadElementInternal(index: number, arr: LViewData): LEle
 export declare function getLNode(tNode: TNode, hostView: LViewData): LElementNode | LContainerNode | LElementContainerNode;
 export declare function isContentQueryHost(tNode: TNode): boolean;
 export declare function isComponent(tNode: TNode): boolean;
+export declare function isLContainer(value: LNode | LContainer | StylingContext): boolean;
 /**
  * Retrieve the root view from any component by walking the parent `LViewData` until
  * reaching the root `LViewData`.

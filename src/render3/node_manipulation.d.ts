@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { LContainer } from './interfaces/container';
-import { LContainerNode, LElementContainerNode, LElementNode, LTextNode, TContainerNode, TNode, TViewNode } from './interfaces/node';
+import { LContainerNode, LElementContainerNode, LElementNode, TContainerNode, TElementContainerNode, TElementNode, TNode, TViewNode } from './interfaces/node';
 import { RComment, RNode, RText, Renderer3 } from './interfaces/renderer';
 import { LViewData } from './interfaces/view';
 /** Retrieves the parent LNode of a given node. */
@@ -16,7 +16,7 @@ export declare function getParentLNode(tNode: TNode, currentView: LViewData): LE
  * LViewNode, since they are being phased out.
  */
 export declare function getHostElementNode(currentView: LViewData): LElementNode | null;
-export declare function getContainerNode(tNode: TNode, embeddedView: LViewData): LContainerNode | null;
+export declare function getLContainer(tNode: TViewNode, embeddedView: LViewData): LContainer | null;
 /**
  * Retrieves render parent LElementNode for a given view.
  * Might be null if a view is not yet attached to any container.
@@ -90,7 +90,7 @@ export declare function detachView(lContainer: LContainer, removeIndex: number, 
  * @param tContainer The TContainer node associated with the LContainer
  * @param removeIndex The index of the view to remove
  */
-export declare function removeView(lContainer: LContainer, tContainer: TContainerNode, removeIndex: number): void;
+export declare function removeView(lContainer: LContainer, containerHost: TElementNode | TContainerNode | TElementContainerNode, removeIndex: number): void;
 /** Gets the child of the given LViewData */
 export declare function getLViewChild(viewData: LViewData): LViewData | LContainer | null;
 /**
@@ -144,7 +144,7 @@ export declare function canInsertNativeNode(tNode: TNode, currentView: LViewData
  * @returns Whether or not the child was appended
  */
 export declare function appendChild(childEl: RNode | null, childTNode: TNode, currentView: LViewData): boolean;
-export declare function getBeforeNodeForView(index: number, views: LViewData[], container: LContainerNode): RComment;
+export declare function getBeforeNodeForView(index: number, views: LViewData[], containerNative: RComment): RComment;
 /**
  * Removes the `child` element of the `parent` from the DOM.
  *
@@ -158,10 +158,9 @@ export declare function removeChild(tNode: TNode, child: RNode | null, currentVi
  * Appends a projected node to the DOM, or in the case of a projected container,
  * appends the nodes from all of the container's active views to the DOM.
  *
- * @param projectedLNode The node to process
- * @param parentNode The last parent element to be processed
- * @param tProjectionNode
+ * @param projectedTNode The TNode to be projected
+ * @param tProjectionNode The projection (ng-content) TNode
  * @param currentView Current LView
- * @param projectionView Projection view
+ * @param projectionView Projection view (view above current)
  */
-export declare function appendProjectedNode(projectedLNode: LElementNode | LElementContainerNode | LTextNode | LContainerNode, projectedTNode: TNode, tProjectionNode: TNode, currentView: LViewData, projectionView: LViewData): void;
+export declare function appendProjectedNode(projectedTNode: TNode, tProjectionNode: TNode, currentView: LViewData, projectionView: LViewData): void;
