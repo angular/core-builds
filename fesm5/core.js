@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-rc.1+39.sha-b2db32b
+ * @license Angular v7.0.0-rc.1+40.sha-45732e5
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -11016,7 +11016,7 @@ var angularCoreEnv = {
     'ɵprojection': projection,
     'ɵelementProperty': elementProperty,
     'ɵpipeBind1': pipeBind1,
-    'ɵpipeBind2': pipeBind1,
+    'ɵpipeBind2': pipeBind2,
     'ɵpipeBind3': pipeBind3,
     'ɵpipeBind4': pipeBind4,
     'ɵpipeBindV': pipeBindV,
@@ -12187,7 +12187,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('7.0.0-rc.1+39.sha-b2db32b');
+var VERSION = new Version('7.0.0-rc.1+40.sha-45732e5');
 
 /**
  * @license
