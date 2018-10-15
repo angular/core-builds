@@ -6,54 +6,8 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import './ng_dev_mode';
-import { LContainer } from './interfaces/container';
-import { LElementNode } from './interfaces/node';
-import { RElement } from './interfaces/renderer';
-import { StylingContext } from './interfaces/styling';
+import { LContext } from './interfaces/context';
 import { LViewData } from './interfaces/view';
-/**
- * This property will be monkey-patched on elements, components and directives
- */
-export declare const MONKEY_PATCH_KEY_NAME = "__ngContext__";
-/**
- * The internal view context which is specific to a given DOM element, directive or
- * component instance. Each value in here (besides the LViewData and element node details)
- * can be present, null or undefined. If undefined then it implies the value has not been
- * looked up yet, otherwise, if null, then a lookup was executed and nothing was found.
- *
- * Each value will get filled when the respective value is examined within the getContext
- * function. The component, element and each directive instance will share the same instance
- * of the context.
- */
-export interface LContext {
-    /**
-     * The component's parent view data.
-     */
-    lViewData: LViewData;
-    /**
-     * The index instance of the node.
-     */
-    nodeIndex: number;
-    /**
-     * The instance of the DOM node that is attached to the lNode.
-     */
-    native: RElement;
-    /**
-     * The instance of the Component node.
-     */
-    component: {} | null | undefined;
-    /**
-     * The list of active directives that exist on this element.
-     */
-    directives: any[] | null | undefined;
-    /**
-     * The map of local references (local reference name => element or directive instance) that exist
-     * on this element.
-     */
-    localRefs: {
-        [key: string]: any;
-    } | null | undefined;
-}
 /** Returns the matching `LContext` data for a given DOM node, directive or component instance.
  *
  * This function will examine the provided DOM element, component, or directive instance\'s
@@ -73,24 +27,17 @@ export interface LContext {
  */
 export declare function getContext(target: any): LContext | null;
 /**
- * A simplified lookup function for finding the LElementNode from a component instance.
+ * Takes a component instance and returns the view for that component.
  *
- * This function exists for tree-shaking purposes to avoid having to pull in everything
- * that `getContext` has in the event that an Angular application doesn't need to have
- * any programmatic access to an element's context (only change detection uses this function).
+ * @param componentInstance
+ * @returns The component's view
  */
-export declare function getLElementFromComponent(componentInstance: {}): LElementNode;
+export declare function getComponentViewByInstance(componentInstance: {}): LViewData;
 /**
  * Assigns the given data to the given target (which could be a component,
  * directive or DOM node instance) using monkey-patching.
  */
 export declare function attachPatchData(target: any, data: LViewData | LContext): void;
-/**
- * Returns the monkey-patch value data present on the target (which could be
- * a component, directive or a DOM node).
- */
-export declare function readPatchedData(target: any): LViewData | LContext | null;
-export declare function readPatchedLViewData(target: any): LViewData | null;
 export declare function isComponentInstance(instance: any): boolean;
 export declare function isDirectiveInstance(instance: any): boolean;
 /**
@@ -106,16 +53,6 @@ export declare function discoverDirectives(nodeIndex: number, lViewData: LViewDa
  * Returns a map of local references (local reference name => element or directive instance) that
  * exist on a given element.
  */
-export declare function discoverLocalRefs(lViewData: LViewData, lNodeIndex: number): {
+export declare function discoverLocalRefs(lViewData: LViewData, nodeIndex: number): {
     [key: string]: any;
 } | null;
-/**
- * Takes the value of a slot in `LViewData` and returns the element node.
- *
- * Normally, element nodes are stored flat, but if the node has styles/classes on it,
- * it might be wrapped in a styling context. Or if that node has a directive that injects
- * ViewContainerRef, it may be wrapped in an LContainer.
- *
- * @param value The initial value in `LViewData`
- */
-export declare function readElementValue(value: LElementNode | StylingContext | LContainer): LElementNode;

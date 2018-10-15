@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Injector } from '../di/injector';
-import { LContext } from './context_discovery';
+import { LContext } from './interfaces/context';
 import { LViewData, RootContext } from './interfaces/view';
 /**
  * NOTE: The following functions might not be ideal for core usage in Angular...

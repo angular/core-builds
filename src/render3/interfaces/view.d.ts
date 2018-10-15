@@ -13,25 +13,27 @@ import { LContainer } from './container';
 import { ComponentDef, ComponentQuery, ComponentTemplate, DirectiveDef, DirectiveDefList, HostBindingsFunction, PipeDef, PipeDefList } from './definition';
 import { TElementNode, TNode, TViewNode } from './node';
 import { LQueries } from './query';
-import { Renderer3 } from './renderer';
+import { RElement, Renderer3 } from './renderer';
+import { StylingContext } from './styling';
 /** Size of LViewData's header. Necessary to adjust for it when setting slots.  */
-export declare const HEADER_OFFSET = 16;
+export declare const HEADER_OFFSET = 17;
 export declare const TVIEW = 0;
-export declare const PARENT = 1;
-export declare const NEXT = 2;
-export declare const QUERIES = 3;
-export declare const FLAGS = 4;
-export declare const HOST_NODE = 5;
-export declare const BINDING_INDEX = 6;
-export declare const CLEANUP = 7;
-export declare const CONTEXT = 8;
-export declare const INJECTOR = 9;
-export declare const RENDERER = 10;
-export declare const SANITIZER = 11;
-export declare const TAIL = 12;
-export declare const CONTAINER_INDEX = 13;
-export declare const CONTENT_QUERIES = 14;
-export declare const DECLARATION_VIEW = 15;
+export declare const FLAGS = 1;
+export declare const PARENT = 2;
+export declare const NEXT = 3;
+export declare const QUERIES = 4;
+export declare const HOST = 5;
+export declare const HOST_NODE = 6;
+export declare const BINDING_INDEX = 7;
+export declare const CLEANUP = 8;
+export declare const CONTEXT = 9;
+export declare const INJECTOR = 10;
+export declare const RENDERER = 11;
+export declare const SANITIZER = 12;
+export declare const TAIL = 13;
+export declare const CONTAINER_INDEX = 14;
+export declare const CONTENT_QUERIES = 15;
+export declare const DECLARATION_VIEW = 16;
 export interface OpaqueViewState {
     '__brand__': 'Brand for OpaqueViewState that nothing will match';
 }
@@ -52,6 +54,8 @@ export interface LViewData extends Array<any> {
      * directive defs are stored).
      */
     [TVIEW]: TView;
+    /** Flags for this view. See LViewFlags for more info. */
+    [FLAGS]: LViewFlags;
     /**
      * The parent view is needed when we exit the view and must restore the previous
      * `LViewData`. Without this, the render method would have to keep a stack of
@@ -73,8 +77,12 @@ export interface LViewData extends Array<any> {
     [NEXT]: LViewData | LContainer | null;
     /** Queries active for this view - nodes from a view are reported to those queries. */
     [QUERIES]: LQueries | null;
-    /** Flags for this view. See LViewFlags for more info. */
-    [FLAGS]: LViewFlags;
+    /**
+     * The host node for this LViewData instance, if this is a component view.
+     *
+     * If this is an embedded view, HOST will be null.
+     */
+    [HOST]: RElement | StylingContext | null;
     /**
      * Pointer to the `TViewNode` or `TElementNode` which represents the root of the view.
      *
