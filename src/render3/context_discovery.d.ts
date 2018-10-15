@@ -53,6 +53,6 @@ export declare function discoverDirectives(nodeIndex: number, lViewData: LViewDa
  * Returns a map of local references (local reference name => element or directive instance) that
  * exist on a given element.
  */
-export declare function discoverLocalRefs(lViewData: LViewData, lNodeIndex: number): {
+export declare function discoverLocalRefs(lViewData: LViewData, nodeIndex: number): {
     [key: string]: any;
 } | null;
