@@ -5,9 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { LContainerNode, LElementContainerNode, LElementNode } from './node';
 import { LQueries } from './query';
-import { RComment } from './renderer';
+import { RComment, RElement } from './renderer';
 import { StylingContext } from './styling';
 import { HOST, LViewData, NEXT, PARENT, QUERIES } from './view';
 /**
@@ -20,7 +19,7 @@ export declare const VIEWS = 1;
 export declare const NATIVE = 6;
 export declare const RENDER_PARENT = 7;
 /**
- * The state associated with an LContainerNode.
+ * The state associated with a container.
  *
  * This is an array so that its structure is closer to LViewData. This helps
  * when traversing the view tree (which is a mix of containers and component
@@ -59,30 +58,38 @@ export interface LContainer extends Array<any> {
      * this container are reported to queries referenced here.
      */
     [QUERIES]: LQueries | null;
-    /** The host node of this LContainer. */
-    [HOST]: LElementNode | LContainerNode | LElementContainerNode | StylingContext | LViewData;
+    /**
+     * The host element of this LContainer.
+     *
+     * The host could be an LViewData if this container is on a component node.
+     * In that case, the component LViewData is its HOST.
+     *
+     * It could also be a styling context if this is a node with a style/class
+     * binding.
+     */
+    [HOST]: RElement | RComment | StylingContext | LViewData;
     /** The comment element that serves as an anchor for this LContainer. */
     [NATIVE]: RComment;
     /**
-     * Parent Element which will contain the location where all of the Views will be
+     * Parent Element which will contain the location where all of the views will be
      * inserted into to.
      *
      * If `renderParent` is `null` it is headless. This means that it is contained
-     * in another `LViewNode` which in turn is contained in another `LContainerNode` and
+     * in another view which in turn is contained in another container and
      * therefore it does not yet have its own parent.
      *
      * If `renderParent` is not `null` then it may be:
-     * - same as `LContainerNode.parent` in which case it is just a normal container.
-     * - different from `LContainerNode.parent` in which case it has been re-projected.
-     *   In other words `LContainerNode.parent` is logical parent where as
-     *   `LContainer.projectedParent` is render parent.
+     * - same as `tContainerNode.parent` in which case it is just a normal container.
+     * - different from `tContainerNode.parent` in which case it has been re-projected.
+     *   In other words `tContainerNode.parent` is logical parent where as
+     *   `tContainerNode.projectedParent` is render parent.
      *
-     * When views are inserted into `LContainerNode` then `renderParent` is:
-     * - `null`, we are in `LViewNode` keep going up a hierarchy until actual
+     * When views are inserted into `LContainer` then `renderParent` is:
+     * - `null`, we are in a view, keep going up a hierarchy until actual
      *   `renderParent` is found.
      * - not `null`, then use the `projectedParent.native` as the `RElement` to insert
-     *   `LViewNode`s into.
+     * views into.
      */
-    [RENDER_PARENT]: LElementNode | null;
+    [RENDER_PARENT]: RElement | null;
 }
 export declare const unusedValueExportToPlacateAjd = 1;
