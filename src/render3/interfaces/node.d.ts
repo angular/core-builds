@@ -5,12 +5,11 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { RComment, RElement, RText } from './renderer';
 import { StylingContext } from './styling';
 import { LViewData, TView } from './view';
 /**
  * TNodeType corresponds to the TNode.type property. It contains information
- * on how to map a particular set of bits in LNode.flags to the node type.
+ * on how to map a particular set of bits in TNode.flags to the node type.
  */
 export declare const enum TNodeType {
     Container = 0,
@@ -34,70 +33,6 @@ export declare const enum TNodeFlags {
     hasContentQuery = 16384,
     /** The index of the first directive on this node is encoded on the most significant bits  */
     DirectiveStartingIndexShift = 15
-}
-/**
- * LNode is an internal data structure which is used for the incremental DOM algorithm.
- * The "L" stands for "Logical" to differentiate between `RNodes` (actual rendered DOM
- * node) and our logical representation of DOM nodes, `LNodes`.
- *
- * The data structure is optimized for speed and size.
- *
- * In order to be fast, all subtypes of `LNode` should have the same shape.
- * Because size of the `LNode` matters, many fields have multiple roles depending
- * on the `LNode` subtype.
- *
- * See: https://en.wikipedia.org/wiki/Inline_caching#Monomorphic_inline_caching
- *
- * NOTE: This is a private data structure and should not be exported by any of the
- * instructions.
- */
-export interface LNode {
-    /**
-     * The associated DOM node. Storing this allows us to:
-     *  - append children to their element parents in the DOM (e.g. `parent.native.appendChild(...)`)
-     *  - retrieve the sibling elements of text nodes whose creation / insertion has been delayed
-     */
-    readonly native: RComment | RElement | RText | null;
-    /**
-     * If regular LElementNode, LTextNode, LContainerNode, and LProjectionNode then `data` will be
-     * null.
-     * If LElementNode with component, then `data` contains LViewData.
-     * If LViewNode, then `data` contains the LViewData.
-     */
-    readonly data: LViewData | null;
-}
-/** LNode representing an element. */
-export interface LElementNode extends LNode {
-    /** The DOM element associated with this node. */
-    readonly native: RElement;
-    /** If Component then data has LView (light DOM) */
-    readonly data: LViewData | null;
-}
-/** LNode representing <ng-container>. */
-export interface LElementContainerNode extends LNode {
-    /** The DOM comment associated with this node. */
-    readonly native: RComment;
-    readonly data: null;
-}
-/** LNode representing a #text node. */
-export interface LTextNode extends LNode {
-    /** The text node associated with this node. */
-    native: RText;
-    readonly data: null;
-}
-/** Abstract node which contains root nodes of a view. */
-export interface LViewNode extends LNode {
-    readonly native: null;
-    readonly data: LViewData;
-}
-/** Abstract node container which contains other views. */
-export interface LContainerNode extends LNode {
-    native: RComment;
-    readonly data: null;
-}
-export interface LProjectionNode extends LNode {
-    readonly native: null;
-    readonly data: null;
 }
 /**
  * A set of marker values to be used in the attributes arrays. Those markers indicate that some
@@ -125,7 +60,7 @@ export declare const enum AttributeMarker {
  */
 export declare type TAttributes = (string | AttributeMarker)[];
 /**
- * LNode binding data (flyweight) for a particular node that is shared between all templates
+ * Binding data (flyweight) for a particular node that is shared between all templates
  * of a specific type.
  *
  * If a property is:
@@ -139,9 +74,9 @@ export interface TNode {
     /** The type of the TNode. See TNodeType. */
     type: TNodeType;
     /**
-     * Index of the TNode in TView.data and corresponding LNode in LView.data.
+     * Index of the TNode in TView.data and corresponding native element in LViewData.
      *
-     * This is necessary to get from any TNode to its corresponding LNode when
+     * This is necessary to get from any TNode to its corresponding native element when
      * traversing the node tree.
      *
      * If index is -1, this is a dynamically created container node or embedded view node.
@@ -225,7 +160,7 @@ export interface TNode {
     /**
      * The TView or TViews attached to this node.
      *
-     * If this TNode corresponds to an LContainerNode with inline views, the container will
+     * If this TNode corresponds to an LContainer with inline views, the container will
      * need to store separate static data for each of its view blocks (TView[]). Otherwise,
      * nodes in inline views with the same index as nodes in their parent views will overwrite
      * each other, as they are in the same template.
@@ -237,10 +172,10 @@ export interface TNode {
      *   [{tagName: 'div', attrs: ...}, null],     // V(0) TView
      *   [{tagName: 'button', attrs ...}, null]    // V(1) TView
      *
-     * If this TNode corresponds to an LContainerNode with a template (e.g. structural
+     * If this TNode corresponds to an LContainer with a template (e.g. structural
      * directive), the template's TView will be stored here.
      *
-     * If this TNode corresponds to an LElementNode, tViews will be null .
+     * If this TNode corresponds to an element, tViews will be null .
      */
     tViews: TView | TView[] | null;
     /**
@@ -314,7 +249,7 @@ export interface TNode {
      */
     projection: (TNode | null)[] | number | null;
 }
-/** Static data for an LElementNode  */
+/** Static data for an element  */
 export interface TElementNode extends TNode {
     /** Index in the data[] array */
     index: number;
@@ -333,7 +268,7 @@ export interface TElementNode extends TNode {
      */
     projection: (TNode | null)[] | null;
 }
-/** Static data for an LTextNode  */
+/** Static data for a text node */
 export interface TTextNode extends TNode {
     /** Index in the data[] array */
     index: number;
@@ -347,7 +282,7 @@ export interface TTextNode extends TNode {
     tViews: null;
     projection: null;
 }
-/** Static data for an LContainerNode */
+/** Static data for an LContainer */
 export interface TContainerNode extends TNode {
     /**
      * Index in the data[] array.
@@ -367,7 +302,7 @@ export interface TContainerNode extends TNode {
     tViews: TView | TView[] | null;
     projection: null;
 }
-/** Static data for an LElementContainerNode */
+/** Static data for an <ng-container> */
 export interface TElementContainerNode extends TNode {
     /** Index in the LViewData[] array. */
     index: number;
@@ -376,7 +311,7 @@ export interface TElementContainerNode extends TNode {
     tViews: null;
     projection: null;
 }
-/** Static data for an LViewNode  */
+/** Static data for a view  */
 export interface TViewNode extends TNode {
     /** If -1, it's a dynamically created view. Otherwise, it is the view block ID. */
     index: number;
