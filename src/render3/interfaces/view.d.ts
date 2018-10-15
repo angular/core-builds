@@ -11,9 +11,9 @@ import { Sanitizer } from '../../sanitization/security';
 import { PlayerHandler } from '../interfaces/player';
 import { LContainer } from './container';
 import { ComponentDef, ComponentQuery, ComponentTemplate, DirectiveDef, DirectiveDefList, HostBindingsFunction, PipeDef, PipeDefList } from './definition';
-import { LContainerNode, LElementContainerNode, LElementNode, TElementNode, TNode, TViewNode } from './node';
+import { TElementNode, TNode, TViewNode } from './node';
 import { LQueries } from './query';
-import { Renderer3 } from './renderer';
+import { RElement, Renderer3 } from './renderer';
 import { StylingContext } from './styling';
 /** Size of LViewData's header. Necessary to adjust for it when setting slots.  */
 export declare const HEADER_OFFSET = 17;
@@ -82,7 +82,7 @@ export interface LViewData extends Array<any> {
      *
      * If this is an embedded view, HOST will be null.
      */
-    [HOST]: LElementNode | LContainerNode | LElementContainerNode | StylingContext | null;
+    [HOST]: RElement | StylingContext | null;
     /**
      * Pointer to the `TViewNode` or `TElementNode` which represents the root of the view.
      *
