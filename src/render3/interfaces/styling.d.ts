@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
-import { RElement } from '../interfaces/renderer';
+import { LElementNode } from './node';
 import { PlayerContext } from './player';
 /**
  * The styling context acts as a styling manifest (shaped as an array) for determining which
@@ -115,7 +115,7 @@ import { PlayerContext } from './player';
  */
 export interface StylingContext extends Array<InitialStyles | {
     [key: string]: any;
-} | number | string | boolean | RElement | StyleSanitizeFn | PlayerContext | null> {
+} | number | string | boolean | LElementNode | StyleSanitizeFn | PlayerContext | null> {
     /**
      * Location of animation context (which contains the active players) for this element styling
      * context.
@@ -144,7 +144,7 @@ export interface StylingContext extends Array<InitialStyles | {
     /**
      * Location of element that is used as a target for this context.
      */
-    [StylingIndex.ElementPosition]: RElement | null;
+    [StylingIndex.ElementPosition]: LElementNode | null;
     /**
      * The last class value that was interpreted by elementStylingMap. This is cached
      * So that the algorithm can exit early incase the value has not changed.

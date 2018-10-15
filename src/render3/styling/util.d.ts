@@ -7,22 +7,22 @@
  */
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
 import { LContext } from '../interfaces/context';
+import { LElementNode } from '../interfaces/node';
 import { PlayerContext } from '../interfaces/player';
-import { RElement } from '../interfaces/renderer';
 import { InitialStyles, StylingContext } from '../interfaces/styling';
 import { LViewData } from '../interfaces/view';
 export declare const EMPTY_ARR: any[];
 export declare const EMPTY_OBJ: {
     [key: string]: any;
 };
-export declare function createEmptyStylingContext(element?: RElement | null, sanitizer?: StyleSanitizeFn | null, initialStylingValues?: InitialStyles): StylingContext;
+export declare function createEmptyStylingContext(element?: LElementNode | null, sanitizer?: StyleSanitizeFn | null, initialStylingValues?: InitialStyles): StylingContext;
 /**
  * Used clone a copy of a pre-computed template of a styling context.
  *
  * A pre-computed template is designed to be computed once for a given element
  * (instructions.ts has logic for caching this).
  */
-export declare function allocStylingContext(element: RElement | null, templateStyleContext: StylingContext): StylingContext;
+export declare function allocStylingContext(lElement: LElementNode | null, templateStyleContext: StylingContext): StylingContext;
 /**
  * Retrieve the `StylingContext` at a given index.
  *
