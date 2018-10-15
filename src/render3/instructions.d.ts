@@ -11,10 +11,10 @@ import { Sanitizer } from '../sanitization/security';
 import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
 import { LContainer } from './interfaces/container';
 import { ComponentDef, ComponentQuery, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, InitialStylingFlags, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
-import { LContainerNode, LElementContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode, LocalRefExtractor, TAttributes, TContainerNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from './interfaces/node';
+import { LContainerNode, LElementContainerNode, LElementNode, LocalRefExtractor, TAttributes, TContainerNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from './interfaces/node';
 import { CssSelectorList } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
-import { RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
+import { RComment, RElement, RNode, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 import { CurrentMatchesList, LViewData, LViewFlags, OpaqueViewState, RootContext, TView } from './interfaces/view';
 /**
  * Function used to sanitize the value before writing it into the renderer.
@@ -48,7 +48,6 @@ export declare function getCurrentView(): OpaqueViewState;
  * @param viewToRestore The OpaqueViewState instance to restore.
  */
 export declare function restoreView(viewToRestore: OpaqueViewState): void;
-export declare function getPreviousOrParentNode(): LNode | null;
 export declare function getPreviousOrParentTNode(): TNode;
 export declare function setEnvironment(tNode: TNode, view: LViewData): void;
 /**
@@ -96,12 +95,6 @@ export declare function setHostBindings(): void;
 export declare function executeInitAndContentHooks(): void;
 export declare function createLViewData<T>(renderer: Renderer3, tView: TView, context: T | null, flags: LViewFlags, sanitizer?: Sanitizer | null): LViewData;
 /**
- * Creation of LNode object is extracted to a separate function so we always create LNode object
- * with the same shape
- * (same properties assigned in the same order).
- */
-export declare function createLNodeObject(type: TNodeType, native: RText | RElement | RComment | null, state: any): LElementNode & LTextNode & LViewNode & LContainerNode & LProjectionNode;
-/**
  * A common way of creating the LNode to make sure that all of them have same shape to
  * keep the execution code monomorphic and fast.
  *
@@ -116,7 +109,7 @@ export declare function createLNodeObject(type: TNodeType, native: RText | RElem
 export declare function createNodeAtIndex(index: number, type: TNodeType.Element, native: RElement | RText | null, name: string | null, attrs: TAttributes | null, lViewData?: LViewData | null): TElementNode;
 export declare function createNodeAtIndex(index: number, type: TNodeType.View, native: null, name: null, attrs: null, lViewData: LViewData): TViewNode;
 export declare function createNodeAtIndex(index: number, type: TNodeType.Container, native: RComment, name: string | null, attrs: TAttributes | null, data: null): TContainerNode;
-export declare function createNodeAtIndex(index: number, type: TNodeType.Projection, native: null, name: null, attrs: TAttributes | null, lProjection: null): TProjectionNode;
+export declare function createNodeAtIndex(index: number, type: TNodeType.Projection, native: null, name: null, attrs: TAttributes | null, data: null): TProjectionNode;
 export declare function createNodeAtIndex(index: number, type: TNodeType.ElementContainer, native: RComment, name: null, attrs: TAttributes | null, data: null): TElementContainerNode;
 /**
  * When LNodes are created dynamically after a view blueprint is created (e.g. through
@@ -139,7 +132,7 @@ export declare function resetComponentState(): void;
  * @param directives Directive defs that should be used for matching
  * @param pipes Pipe defs that should be used for matching
  */
-export declare function renderTemplate<T>(hostNode: RElement, templateFn: ComponentTemplate<T>, consts: number, vars: number, context: T, providedRendererFactory: RendererFactory3, host: LElementNode | null, directives?: DirectiveDefListOrFactory | null, pipes?: PipeDefListOrFactory | null, sanitizer?: Sanitizer | null): LElementNode;
+export declare function renderTemplate<T>(hostNode: RElement, templateFn: ComponentTemplate<T>, consts: number, vars: number, context: T, providedRendererFactory: RendererFactory3, hostView: LViewData | null, directives?: DirectiveDefListOrFactory | null, pipes?: PipeDefListOrFactory | null, sanitizer?: Sanitizer | null): LViewData;
 /**
  * Used for creating the LViewNode of a dynamic embedded view,
  * either through ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
@@ -227,6 +220,18 @@ export declare function resolveDirective(def: DirectiveDef<any>, valueIndex: num
  */
 export declare function queueHostBindingForCheck(dirIndex: number, def: DirectiveDef<any> | ComponentDef<any>): void;
 /**
+ * Gets TView from a template function or creates a new TView
+ * if it doesn't already exist.
+ *
+ * @param templateFn The template from which to get static data
+ * @param consts The number of nodes, local refs, and pipes in this view
+ * @param vars The number of bindings and pure function bindings in this view
+ * @param directives Directive defs that should be saved on TView
+ * @param pipes Pipe defs that should be saved on TView
+ * @returns TView
+ */
+export declare function getOrCreateTView(templateFn: ComponentTemplate<any>, consts: number, vars: number, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null, viewQuery: ComponentQuery<any> | null): TView;
+/**
  * Creates a TView instance
  *
  * @param viewIndex The viewBlockId for inline views, or -1 if it's a component/dynamic
@@ -243,15 +248,6 @@ export declare function createError(text: string, token: any): Error;
  * @param elementOrSelector Render element or CSS selector to locate the element.
  */
 export declare function locateHostElement(factory: RendererFactory3, elementOrSelector: RElement | string): RElement | null;
-/**
- * Creates the host LNode.
- *
- * @param rNode Render host element.
- * @param def ComponentDef
- *
- * @returns LElementNode created
- */
-export declare function hostElement(tag: string, rNode: RElement | null, def: ComponentDef<any>, sanitizer?: Sanitizer | null): LElementNode;
 /**
  * Adds an event listener to the current node.
  *
@@ -487,7 +483,7 @@ export declare function directiveCreate<T>(directiveDefIdx: number, directive: T
  * This version does not contain features that we don't already support at root in
  * current Angular. Example: local refs and inputs on root component.
  */
-export declare function baseDirectiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T> | ComponentDef<T>, hostNode: LNode): T;
+export declare function baseDirectiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T> | ComponentDef<T>, native: RNode | null): T;
 /**
  * Creates a LContainer, either from a container instruction, or for a ViewContainerRef.
  *
@@ -601,7 +597,7 @@ export declare function projection(nodeIndex: number, selectorIndex?: number, at
  */
 export declare function addToViewTree<T extends LViewData | LContainer>(currentView: LViewData, adjustedHostIndex: number, state: T): T;
 /** If node is an OnPush component, marks its LViewData dirty. */
-export declare function markDirtyIfOnPush(node: LElementNode): void;
+export declare function markDirtyIfOnPush(viewIndex: number): void;
 /** Wraps an event listener with preventDefault behavior. */
 export declare function wrapListenerWithPreventDefault(listenerFn: (e?: any) => any): EventListener;
 /** Marks current view and all ancestors dirty */
@@ -746,7 +742,6 @@ export declare function loadQueryList<T>(queryListIdx: number): QueryList<T>;
 /** Retrieves a value from current `viewData`. */
 export declare function load<T>(index: number): T;
 export declare function loadElement(index: number): LElementNode;
-export declare function getTNode(index: number): TNode;
 /** Gets the current binding value. */
 export declare function getBinding(bindingIndex: number): any;
 /** Updates binding if changed, then returns whether it was updated. */
