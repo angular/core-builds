@@ -9,9 +9,8 @@ import { Type } from '../core';
 import { Injector } from '../di/injector';
 import { Sanitizer } from '../sanitization/security';
 import { ComponentDef, ComponentType } from './interfaces/definition';
-import { LElementNode } from './interfaces/node';
 import { PlayerHandler } from './interfaces/player';
-import { RElement, RendererFactory3 } from './interfaces/renderer';
+import { RElement, RNode, Renderer3, RendererFactory3 } from './interfaces/renderer';
 import { LViewData, RootContext } from './interfaces/view';
 /** Options that control how the component should be bootstrapped. */
 export interface CreateComponentOptions {
@@ -73,10 +72,22 @@ export declare const NULL_INJECTOR: Injector;
  */
 export declare function renderComponent<T>(componentType: ComponentType<T> | Type<T>, opts?: CreateComponentOptions): T;
 /**
+ * Creates the root component view and the root component node.
+ *
+ * @param rNode Render host element.
+ * @param def ComponentDef
+ * @param rootView The parent view where the host node is stored
+ * @param renderer The current renderer
+ * @param sanitizer The sanitizer, if provided
+ *
+ * @returns Component view created
+ */
+export declare function createRootComponentView(rNode: RElement | null, def: ComponentDef<any>, rootView: LViewData, renderer: Renderer3, sanitizer?: Sanitizer | null): LViewData;
+/**
  * Creates a root component and sets it up with features and host bindings. Shared by
  * renderComponent() and ViewContainerRef.createComponent().
  */
-export declare function createRootComponent<T>(elementNode: LElementNode, componentDef: ComponentDef<T>, rootView: LViewData, rootContext: RootContext, hostFeatures: HostFeature[] | null): any;
+export declare function createRootComponent<T>(hostRNode: RNode | null, componentView: LViewData, componentDef: ComponentDef<T>, rootView: LViewData, rootContext: RootContext, hostFeatures: HostFeature[] | null): any;
 export declare function createRootContext(scheduler: (workFn: () => void) => void, playerHandler?: PlayerHandler | null): RootContext;
 /**
  * Used to enable lifecycle hooks on the root component.
