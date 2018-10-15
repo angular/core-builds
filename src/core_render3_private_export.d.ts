@@ -11,8 +11,9 @@ export { R3_COMPILE_NGMODULE_DEFS as ɵcompileNgModuleDefs, R3_PATCH_COMPONENT_D
 export { NgModuleDef as ɵNgModuleDef, NgModuleDefWithMeta as ɵNgModuleDefWithMeta, NgModuleTransitiveScopes as ɵNgModuleTransitiveScopes, } from './metadata/ng_module';
 export { sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, } from './sanitization/sanitization';
 export { bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, } from './sanitization/bypass';
-export { LContext as ɵLContext, getContext as ɵgetContext } from './render3/context_discovery';
+export { getContext as ɵgetContext } from './render3/context_discovery';
 export { Player as ɵPlayer, PlayState as ɵPlayState, PlayerHandler as ɵPlayerHandler, } from './render3/interfaces/player';
+export { LContext as ɵLContext, } from './render3/interfaces/context';
 export { addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, } from './render3/player';
 export { compileNgModuleFactory__POST_NGCC__ as ɵcompileNgModuleFactory__POST_NGCC__ } from './application_ref';
 export { R3_COMPILE_COMPONENT__POST_NGCC__ as ɵR3_COMPILE_COMPONENT__POST_NGCC__, R3_COMPILE_DIRECTIVE__POST_NGCC__ as ɵR3_COMPILE_DIRECTIVE__POST_NGCC__, R3_COMPILE_INJECTABLE__POST_NGCC__ as ɵR3_COMPILE_INJECTABLE__POST_NGCC__, R3_COMPILE_NGMODULE__POST_NGCC__ as ɵR3_COMPILE_NGMODULE__POST_NGCC__, R3_COMPILE_PIPE__POST_NGCC__ as ɵR3_COMPILE_PIPE__POST_NGCC__, ivyEnable__POST_NGCC__ as ɵivyEnable__POST_NGCC__, } from './ivy_switch/compiler/legacy';
