@@ -7,8 +7,11 @@
  */
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
 import { InitialStylingFlags } from '../interfaces/definition';
+import { BindingStore, BindingType, Player, PlayerBuilder, PlayerFactory } from '../interfaces/player';
 import { Renderer3 } from '../interfaces/renderer';
 import { StylingContext } from '../interfaces/styling';
+import { LViewData, RootContext } from '../interfaces/view';
+import { BoundPlayerFactory } from './player_factory';
 /**
  * Creates a styling context template where styling information is stored.
  * Any styles that are later referenced using `updateStyleProp` must be
@@ -34,7 +37,7 @@ import { StylingContext } from '../interfaces/styling';
 export declare function createStylingContextTemplate(initialClassDeclarations?: (string | boolean | InitialStylingFlags)[] | null, initialStyleDeclarations?: (string | boolean | InitialStylingFlags)[] | null, styleSanitizer?: StyleSanitizeFn | null): StylingContext;
 /**
  * Sets and resolves all `multi` styling on an `StylingContext` so that they can be
- * applied to the element once `renderStyling` is called.
+ * applied to the element once `renderStyleAndClassBindings` is called.
  *
  * All missing styles/class (any values that are not provided in the new `styles`
  * or `classes` params) will resolve to `null` within their respective positions
@@ -42,17 +45,21 @@ export declare function createStylingContextTemplate(initialClassDeclarations?: 
  *
  * @param context The styling context that will be updated with the
  *    newly provided style values.
- * @param classes The key/value map of CSS class names that will be used for the update.
- * @param styles The key/value map of CSS styles that will be used for the update.
+ * @param classesInput The key/value map of CSS class names that will be used for the update.
+ * @param stylesInput The key/value map of CSS styles that will be used for the update.
  */
-export declare function updateStylingMap(context: StylingContext, classes: {
+export declare function updateStylingMap(context: StylingContext, classesInput: {
     [key: string]: any;
-} | string | null, styles?: {
+} | string | BoundPlayerFactory<null | string | {
     [key: string]: any;
-} | null): void;
+}> | null, stylesInput?: {
+    [key: string]: any;
+} | BoundPlayerFactory<null | {
+    [key: string]: any;
+}> | null): void;
 /**
  * Sets and resolves a single styling property/value on the provided `StylingContext` so
- * that they can be applied to the element once `renderStyling` is called.
+ * that they can be applied to the element once `renderStyleAndClassBindings` is called.
  *
  * Note that prop-level styling values are considered higher priority than any styling that
  * has been applied using `updateStylingMap`, therefore, when styling values are rendered
@@ -64,7 +71,7 @@ export declare function updateStylingMap(context: StylingContext, classes: {
  * @param index The index of the property which is being updated.
  * @param value The CSS style value that will be assigned
  */
-export declare function updateStyleProp(context: StylingContext, index: number, value: string | boolean | null): void;
+export declare function updateStyleProp(context: StylingContext, index: number, input: string | boolean | null | BoundPlayerFactory<string | boolean | null>): void;
 /**
  * This method will toggle the referenced CSS class (by the provided index)
  * within the given context.
@@ -74,7 +81,7 @@ export declare function updateStyleProp(context: StylingContext, index: number, 
  * @param index The index of the CSS class which is being updated.
  * @param addOrRemove Whether or not to add or remove the CSS class
  */
-export declare function updateClassProp(context: StylingContext, index: number, addOrRemove: boolean): void;
+export declare function updateClassProp(context: StylingContext, index: number, addOrRemove: boolean | BoundPlayerFactory<boolean>): void;
 /**
  * Renders all queued styling using a renderer onto the given element.
  *
@@ -88,15 +95,23 @@ export declare function updateClassProp(context: StylingContext, index: number, 
  * @param context The styling context that will be used to determine
  *      what styles will be rendered
  * @param renderer the renderer that will be used to apply the styling
- * @param styleStore if provided, the updated style values will be applied
+ * @param classesStore if provided, the updated class values will be applied
  *    to this key/value map instead of being renderered via the renderer.
- * @param classStore if provided, the updated class values will be applied
+ * @param stylesStore if provided, the updated style values will be applied
  *    to this key/value map instead of being renderered via the renderer.
+ * @returns number the total amount of players that got queued for animation (if any)
  */
-export declare function renderStyling(context: StylingContext, renderer: Renderer3, styleStore?: {
-    [key: string]: any;
-}, classStore?: {
-    [key: string]: boolean;
-}): void;
+export declare function renderStyleAndClassBindings(context: StylingContext, renderer: Renderer3, rootOrView: RootContext | LViewData, classesStore?: BindingStore | null, stylesStore?: BindingStore | null): number;
 export declare function isContextDirty(context: StylingContext): boolean;
 export declare function setContextDirty(context: StylingContext, isDirtyYes: boolean): void;
+export declare function setContextPlayersDirty(context: StylingContext, isDirtyYes: boolean): void;
+export declare class ClassAndStylePlayerBuilder<T> implements PlayerBuilder {
+    private _element;
+    private _type;
+    private _values;
+    private _dirty;
+    private _factory;
+    constructor(factory: PlayerFactory, _element: HTMLElement, _type: BindingType);
+    setValue(prop: string, value: any): void;
+    buildPlayer(currentPlayer?: Player | null): Player | undefined | null;
+}

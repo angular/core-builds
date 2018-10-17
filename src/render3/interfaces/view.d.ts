@@ -8,10 +8,10 @@
 import { Injector } from '../../di/injector';
 import { QueryList } from '../../linker';
 import { Sanitizer } from '../../sanitization/security';
-import { PlayerHandler } from '../interfaces/player';
 import { LContainer } from './container';
 import { ComponentDef, ComponentQuery, ComponentTemplate, DirectiveDef, DirectiveDefList, HostBindingsFunction, PipeDef, PipeDefList } from './definition';
 import { TElementNode, TNode, TViewNode } from './node';
+import { PlayerHandler } from './player';
 import { LQueries } from './query';
 import { RElement, Renderer3 } from './renderer';
 import { StylingContext } from './styling';
