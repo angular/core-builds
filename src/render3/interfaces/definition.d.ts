@@ -178,7 +178,7 @@ export interface ComponentDef<T> extends DirectiveDef<T> {
     /**
      * Runtime unique component ID.
      */
-    id: string;
+    readonly id: string;
     /**
      * The View template of the component.
      */
@@ -193,14 +193,14 @@ export interface ComponentDef<T> extends DirectiveDef<T> {
      * Used to calculate the length of the component's LViewData array, so we
      * can pre-fill the array and set the binding start index.
      */
-    consts: number;
+    readonly consts: number;
     /**
      * The number of bindings in this component template (including pure fn bindings).
      *
      * Used to calculate the length of the component's LViewData array, so we
      * can pre-fill the array and set the host binding start index.
      */
-    vars: number;
+    readonly vars: number;
     /**
      * Query-related instructions for a component.
      */
@@ -248,6 +248,11 @@ export interface ComponentDef<T> extends DirectiveDef<T> {
      * `PipeDefs`s. The function is necessary to be able to support forward declarations.
      */
     pipeDefs: PipeDefListOrFactory | null;
+    /**
+     * Used to store the result of `noSideEffects` function so that it is not removed by closure
+     * compiler. The property should never be read.
+     */
+    readonly _?: never;
 }
 /**
  * Runtime link information for Pipes.
