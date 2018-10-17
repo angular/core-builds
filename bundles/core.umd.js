@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-rc.1+58.sha-0f7d2ca
+ * @license Angular v7.0.0-rc.1+61.sha-371ffef
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1348,11 +1348,7 @@
         var declaredInputs = {};
         var encapsulation = componentDefinition.encapsulation || exports.ViewEncapsulation.Emulated;
         var styles = componentDefinition.styles || EMPTY_ARRAY;
-        var animations = componentDefinition.animations || null;
         var data = componentDefinition.data || {};
-        if (animations) {
-            data.animations = animations;
-        }
         var def = {
             type: type,
             diPublic: null,
@@ -12188,7 +12184,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-rc.1+58.sha-0f7d2ca');
+    var VERSION = new Version('7.0.0-rc.1+61.sha-371ffef');
 
     /**
      * @license
