@@ -1,11 +1,11 @@
 /**
- * @license Angular v7.0.0-rc.1+76.sha-a43b80a
+ * @license Angular v7.0.0-rc.1+85.sha-f8195e5
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
 import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, Injector, ɵRender3ComponentFactory, ɵRender3DebugRendererFactory2, ɵRender3NgModuleRef, ɵWRAP_RENDERER_FACTORY2, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, Compiler, Injectable, ApplicationInitStatus, NgZone, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵivyEnabled, ɵoverrideComponentView, ɵoverrideProvider } from '@angular/core';
-import { __spread, __decorate, __values, __read, __extends } from 'tslib';
+import { __spread, __values, __decorate, __extends, __read } from 'tslib';
 
 /**
  * @license
@@ -1073,9 +1073,10 @@ var TestBedRender3 = /** @class */ (function () {
             (_d = this._schemas).push.apply(_d, __spread(moduleDef.schemas));
         }
     };
-    // TODO(vicb): implement
     TestBedRender3.prototype.compileComponents = function () {
-        throw new Error('Render3TestBed.compileComponents is not implemented yet');
+        // assume for now that components don't use templateUrl / stylesUrl to unblock further testing
+        // TODO(pk): plug into the ivy's resource fetching pipeline
+        return Promise.resolve();
     };
     TestBedRender3.prototype.get = function (token, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
