@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-rc.1+58.sha-0f7d2ca
+ * @license Angular v7.0.0-rc.1+61.sha-371ffef
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1246,11 +1246,7 @@ function defineComponent(componentDefinition) {
     const declaredInputs = {};
     const encapsulation = componentDefinition.encapsulation || ViewEncapsulation.Emulated;
     const styles = componentDefinition.styles || EMPTY_ARRAY;
-    const animations = componentDefinition.animations || null;
-    let data = componentDefinition.data || {};
-    if (animations) {
-        data.animations = animations;
-    }
+    const data = componentDefinition.data || {};
     const def = {
         type: type,
         diPublic: null,
@@ -11863,7 +11859,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('7.0.0-rc.1+58.sha-0f7d2ca');
+const VERSION = new Version('7.0.0-rc.1+61.sha-371ffef');
 
 /**
  * @license
