@@ -234,10 +234,6 @@ export declare function defineComponent<T>(componentDefinition: {
      * `PipeDefs`s. The function is necessary to be able to support forward declarations.
      */
     pipes?: PipeTypesOrFactory | null;
-    /**
-     * Registry of the animation triggers present on the component that will be used by the view.
-     */
-    animations?: any[] | null;
 }): never;
 export declare function extractDirectiveDef(type: DirectiveType<any> & ComponentType<any>): DirectiveDef<any> | ComponentDef<any>;
 export declare function extractPipeDef(type: PipeType<any>): PipeDef<any>;

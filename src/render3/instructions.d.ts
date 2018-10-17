@@ -12,10 +12,11 @@ import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
 import { LContainer } from './interfaces/container';
 import { ComponentDef, ComponentQuery, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, InitialStylingFlags, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { LocalRefExtractor, TAttributes, TContainerNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from './interfaces/node';
+import { PlayerFactory } from './interfaces/player';
 import { CssSelectorList } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { RComment, RElement, RNode, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
-import { CurrentMatchesList, LViewData, LViewFlags, OpaqueViewState, RootContext, TView } from './interfaces/view';
+import { CurrentMatchesList, LViewData, LViewFlags, OpaqueViewState, RootContext, RootContextFlags, TView } from './interfaces/view';
 /**
  * Function used to sanitize the value before writing it into the renderer.
  */
@@ -357,7 +358,7 @@ export declare function createTNode(type: TNodeType, adjustedIndex: number, tagN
  *        renaming as part of minification.
  * @param value A value indicating if a given class should be added or removed.
  */
-export declare function elementClassProp<T>(index: number, stylingIndex: number, value: T | NO_CHANGE): void;
+export declare function elementClassProp(index: number, stylingIndex: number, value: boolean | PlayerFactory): void;
 /**
  * Assign any inline style values to the element during creation mode.
  *
@@ -386,7 +387,7 @@ export declare function elementClassProp<T>(index: number, stylingIndex: number,
  * @param styleSanitizer An optional sanitizer function that will be used (if provided)
  *   to sanitize the any CSS property values that are applied to the element (during rendering).
  */
-export declare function elementStyling<T>(classDeclarations?: (string | boolean | InitialStylingFlags)[] | null, styleDeclarations?: (string | boolean | InitialStylingFlags)[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
+export declare function elementStyling(classDeclarations?: (string | boolean | InitialStylingFlags)[] | null, styleDeclarations?: (string | boolean | InitialStylingFlags)[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
 /**
  * Apply all styling values to the element which have been queued by any styling instructions.
  *
@@ -401,7 +402,7 @@ export declare function elementStyling<T>(classDeclarations?: (string | boolean 
  *        specifically for element styling--the index must be the next index after the element
  *        index.)
  */
-export declare function elementStylingApply<T>(index: number): void;
+export declare function elementStylingApply(index: number): void;
 /**
  * Queue a given style to be rendered on an Element.
  *
@@ -422,7 +423,7 @@ export declare function elementStylingApply<T>(index: number): void;
  *        Note that when a suffix is provided then the underlying sanitizer will
  *        be ignored.
  */
-export declare function elementStyleProp<T>(index: number, styleIndex: number, value: T | null, suffix?: string): void;
+export declare function elementStyleProp(index: number, styleIndex: number, value: string | number | String | PlayerFactory | null, suffix?: string): void;
 /**
  * Queue a key/value map of styles to be rendered on an Element.
  *
@@ -610,7 +611,7 @@ export declare function markViewDirty(view: LViewData): void;
  * `scheduleTick` requests. The scheduling function can be overridden in
  * `renderComponent`'s `scheduler` option.
  */
-export declare function scheduleTick<T>(rootContext: RootContext): void;
+export declare function scheduleTick<T>(rootContext: RootContext, flags: RootContextFlags): void;
 /**
  * Used to perform change detection on the whole application.
  *
