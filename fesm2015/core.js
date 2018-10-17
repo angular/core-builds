@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-rc.1+60.sha-fdfedce
+ * @license Angular v7.0.0-rc.1+62.sha-4d164b6
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -811,6 +811,20 @@ function stringify(token) {
     const newLineIndex = res.indexOf('\n');
     return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
 }
+/**
+ * Convince closure compiler that the wrapped function has no side-effects.
+ *
+ * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
+ * allow us to execute a function but have closure compiler mark the call as no-side-effects.
+ * It is important that the return value for the `noSideEffects` function be assigned
+ * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
+ * compiler.
+ * @param {?} fn
+ * @return {?}
+ */
+function noSideEffects(fn) {
+    return '' + { toString: fn };
+}
 
 /**
  * @fileoverview added by tsickle
@@ -1511,17 +1525,9 @@ function defineComponent(componentDefinition) {
     /** @type {?} */
     const type = componentDefinition.type;
     /** @type {?} */
-    const pipeTypes = /** @type {?} */ ((componentDefinition.pipes));
-    /** @type {?} */
-    const directiveTypes = /** @type {?} */ ((componentDefinition.directives));
+    const typePrototype = type.prototype;
     /** @type {?} */
     const declaredInputs = /** @type {?} */ ({});
-    /** @type {?} */
-    const encapsulation = componentDefinition.encapsulation || ViewEncapsulation.Emulated;
-    /** @type {?} */
-    const styles = componentDefinition.styles || EMPTY_ARRAY;
-    /** @type {?} */
-    const data = componentDefinition.data || {};
     /** @type {?} */
     const def = {
         type: type,
@@ -1535,39 +1541,56 @@ function defineComponent(componentDefinition) {
         contentQueries: componentDefinition.contentQueries || null,
         contentQueriesRefresh: componentDefinition.contentQueriesRefresh || null,
         attributes: componentDefinition.attributes || null,
-        inputs: invertObject(componentDefinition.inputs, declaredInputs),
         declaredInputs: declaredInputs,
-        outputs: invertObject(componentDefinition.outputs),
+        inputs: /** @type {?} */ ((null)),
+        // assigned in noSideEffects
+        outputs: /** @type {?} */ ((null)),
+        // assigned in noSideEffects
         exportAs: componentDefinition.exportAs || null,
-        onInit: type.prototype.ngOnInit || null,
-        doCheck: type.prototype.ngDoCheck || null,
-        afterContentInit: type.prototype.ngAfterContentInit || null,
-        afterContentChecked: type.prototype.ngAfterContentChecked || null,
-        afterViewInit: type.prototype.ngAfterViewInit || null,
-        afterViewChecked: type.prototype.ngAfterViewChecked || null,
-        onDestroy: type.prototype.ngOnDestroy || null,
+        onInit: typePrototype.ngOnInit || null,
+        doCheck: typePrototype.ngDoCheck || null,
+        afterContentInit: typePrototype.ngAfterContentInit || null,
+        afterContentChecked: typePrototype.ngAfterContentChecked || null,
+        afterViewInit: typePrototype.ngAfterViewInit || null,
+        afterViewChecked: typePrototype.ngAfterViewChecked || null,
+        onDestroy: typePrototype.ngOnDestroy || null,
         onPush: componentDefinition.changeDetection === ChangeDetectionStrategy.OnPush,
-        directiveDefs: directiveTypes ?
-            () => (typeof directiveTypes === 'function' ? directiveTypes() : directiveTypes)
-                .map(extractDirectiveDef) :
-            null,
-        pipeDefs: pipeTypes ?
-            () => (typeof pipeTypes === 'function' ? pipeTypes() : pipeTypes).map(extractPipeDef) :
-            null,
+        directiveDefs: /** @type {?} */ ((null)),
+        // assigned in noSideEffects
+        pipeDefs: /** @type {?} */ ((null)),
+        // assigned in noSideEffects
         selectors: componentDefinition.selectors,
         viewQuery: componentDefinition.viewQuery || null,
         features: componentDefinition.features || null,
-        data,
+        data: componentDefinition.data || {},
         // TODO(misko): convert ViewEncapsulation into const enum so that it can be used directly in the
         // next line. Also `None` should be 0 not 2.
-        encapsulation,
+        encapsulation: componentDefinition.encapsulation || ViewEncapsulation.Emulated,
         providers: EMPTY_ARRAY,
         viewProviders: EMPTY_ARRAY,
-        id: `c${_renderCompCount++}`, styles,
+        id: 'c',
+        styles: componentDefinition.styles || EMPTY_ARRAY,
+        _: /** @type {?} */ (null),
     };
-    /** @type {?} */
-    const feature = componentDefinition.features;
-    feature && feature.forEach((fn) => fn(def));
+    def._ = /** @type {?} */ (noSideEffects(() => {
+        /** @type {?} */
+        const directiveTypes = /** @type {?} */ ((componentDefinition.directives));
+        /** @type {?} */
+        const feature = componentDefinition.features;
+        /** @type {?} */
+        const pipeTypes = /** @type {?} */ ((componentDefinition.pipes));
+        def.id += _renderCompCount++;
+        def.inputs = invertObject(componentDefinition.inputs, declaredInputs),
+            def.outputs = invertObject(componentDefinition.outputs),
+            feature && feature.forEach((fn) => fn(def));
+        def.directiveDefs = directiveTypes ?
+            () => (typeof directiveTypes === 'function' ? directiveTypes() : directiveTypes)
+                .map(extractDirectiveDef) :
+            null;
+        def.pipeDefs = pipeTypes ?
+            () => (typeof pipeTypes === 'function' ? pipeTypes() : pipeTypes).map(extractPipeDef) :
+            null;
+    }));
     return /** @type {?} */ (def);
 }
 /**
@@ -14821,7 +14844,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0-rc.1+60.sha-fdfedce');
+const VERSION = new Version('7.0.0-rc.1+62.sha-4d164b6');
 
 /**
  * @fileoverview added by tsickle
