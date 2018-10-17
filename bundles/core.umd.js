@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-rc.1+60.sha-fdfedce
+ * @license Angular v7.0.0-rc.1+62.sha-4d164b6
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -651,6 +651,18 @@
         }
         var newLineIndex = res.indexOf('\n');
         return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
+    }
+    /**
+     * Convince closure compiler that the wrapped function has no side-effects.
+     *
+     * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
+     * allow us to execute a function but have closure compiler mark the call as no-side-effects.
+     * It is important that the return value for the `noSideEffects` function be assigned
+     * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
+     * compiler.
+     */
+    function noSideEffects(fn) {
+        return '' + { toString: fn };
     }
 
     /**
@@ -1614,12 +1626,8 @@
      */
     function defineComponent(componentDefinition) {
         var type = componentDefinition.type;
-        var pipeTypes = componentDefinition.pipes;
-        var directiveTypes = componentDefinition.directives;
+        var typePrototype = type.prototype;
         var declaredInputs = {};
-        var encapsulation = componentDefinition.encapsulation || exports.ViewEncapsulation.Emulated;
-        var styles = componentDefinition.styles || EMPTY_ARRAY;
-        var data = componentDefinition.data || {};
         var def = {
             type: type,
             diPublic: null,
@@ -1632,38 +1640,49 @@
             contentQueries: componentDefinition.contentQueries || null,
             contentQueriesRefresh: componentDefinition.contentQueriesRefresh || null,
             attributes: componentDefinition.attributes || null,
-            inputs: invertObject(componentDefinition.inputs, declaredInputs),
             declaredInputs: declaredInputs,
-            outputs: invertObject(componentDefinition.outputs),
+            inputs: null,
+            outputs: null,
             exportAs: componentDefinition.exportAs || null,
-            onInit: type.prototype.ngOnInit || null,
-            doCheck: type.prototype.ngDoCheck || null,
-            afterContentInit: type.prototype.ngAfterContentInit || null,
-            afterContentChecked: type.prototype.ngAfterContentChecked || null,
-            afterViewInit: type.prototype.ngAfterViewInit || null,
-            afterViewChecked: type.prototype.ngAfterViewChecked || null,
-            onDestroy: type.prototype.ngOnDestroy || null,
+            onInit: typePrototype.ngOnInit || null,
+            doCheck: typePrototype.ngDoCheck || null,
+            afterContentInit: typePrototype.ngAfterContentInit || null,
+            afterContentChecked: typePrototype.ngAfterContentChecked || null,
+            afterViewInit: typePrototype.ngAfterViewInit || null,
+            afterViewChecked: typePrototype.ngAfterViewChecked || null,
+            onDestroy: typePrototype.ngOnDestroy || null,
             onPush: componentDefinition.changeDetection === exports.ChangeDetectionStrategy.OnPush,
-            directiveDefs: directiveTypes ?
-                function () { return (typeof directiveTypes === 'function' ? directiveTypes() : directiveTypes)
-                    .map(extractDirectiveDef); } :
-                null,
-            pipeDefs: pipeTypes ?
-                function () { return (typeof pipeTypes === 'function' ? pipeTypes() : pipeTypes).map(extractPipeDef); } :
-                null,
+            directiveDefs: null,
+            pipeDefs: null,
             selectors: componentDefinition.selectors,
             viewQuery: componentDefinition.viewQuery || null,
             features: componentDefinition.features || null,
-            data: data,
+            data: componentDefinition.data || {},
             // TODO(misko): convert ViewEncapsulation into const enum so that it can be used directly in the
             // next line. Also `None` should be 0 not 2.
-            encapsulation: encapsulation,
+            encapsulation: componentDefinition.encapsulation || exports.ViewEncapsulation.Emulated,
             providers: EMPTY_ARRAY,
             viewProviders: EMPTY_ARRAY,
-            id: "c" + _renderCompCount++, styles: styles,
+            id: 'c',
+            styles: componentDefinition.styles || EMPTY_ARRAY,
+            _: null,
         };
-        var feature = componentDefinition.features;
-        feature && feature.forEach(function (fn) { return fn(def); });
+        def._ = noSideEffects(function () {
+            var directiveTypes = componentDefinition.directives;
+            var feature = componentDefinition.features;
+            var pipeTypes = componentDefinition.pipes;
+            def.id += _renderCompCount++;
+            def.inputs = invertObject(componentDefinition.inputs, declaredInputs),
+                def.outputs = invertObject(componentDefinition.outputs),
+                feature && feature.forEach(function (fn) { return fn(def); });
+            def.directiveDefs = directiveTypes ?
+                function () { return (typeof directiveTypes === 'function' ? directiveTypes() : directiveTypes)
+                    .map(extractDirectiveDef); } :
+                null;
+            def.pipeDefs = pipeTypes ?
+                function () { return (typeof pipeTypes === 'function' ? pipeTypes() : pipeTypes).map(extractPipeDef); } :
+                null;
+        });
         return def;
     }
     function extractDirectiveDef(type) {
@@ -12308,7 +12327,7 @@
         }
         return Version;
     }());
-    var VERSION = new Version('7.0.0-rc.1+60.sha-fdfedce');
+    var VERSION = new Version('7.0.0-rc.1+62.sha-4d164b6');
 
     /**
      * @license
