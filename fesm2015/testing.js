@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0+7.sha-f85a969
+ * @license Angular v7.0.0+22.sha-6c48455
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1000,9 +1000,10 @@ class TestBedRender3 {
             this._schemas.push(...moduleDef.schemas);
         }
     }
-    // TODO(vicb): implement
     compileComponents() {
-        throw new Error('Render3TestBed.compileComponents is not implemented yet');
+        // assume for now that components don't use templateUrl / stylesUrl to unblock further testing
+        // TODO(pk): plug into the ivy's resource fetching pipeline
+        return Promise.resolve();
     }
     get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND) {
         this._initIfNeeded();
