@@ -58,9 +58,6 @@ var System;
 // externs from packages/core/src/render3/interfaces/player.closure.js:
 
 /** @typedef {?} */
-var PlayerContext;
-
-/** @typedef {?} */
 var ComponentInstance;
 
 /** @typedef {?} */

@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0+7.sha-f85a969
+ * @license Angular v7.0.0+22.sha-6c48455
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -644,6 +644,20 @@ function stringify(token) {
     /** @type {?} */
     const newLineIndex = res.indexOf('\n');
     return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
+}
+/**
+ * Convince closure compiler that the wrapped function has no side-effects.
+ *
+ * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
+ * allow us to execute a function but have closure compiler mark the call as no-side-effects.
+ * It is important that the return value for the `noSideEffects` function be assigned
+ * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
+ * compiler.
+ * @param {?} fn
+ * @return {?}
+ */
+function noSideEffects(fn) {
+    return '' + { toString: fn };
 }
 
 /**
@@ -1879,22 +1893,9 @@ function defineComponent(componentDefinition) {
     /** @type {?} */
     const type = componentDefinition.type;
     /** @type {?} */
-    const pipeTypes = /** @type {?} */ ((componentDefinition.pipes));
-    /** @type {?} */
-    const directiveTypes = /** @type {?} */ ((componentDefinition.directives));
+    const typePrototype = type.prototype;
     /** @type {?} */
     const declaredInputs = /** @type {?} */ ({});
-    /** @type {?} */
-    const encapsulation = componentDefinition.encapsulation || ViewEncapsulation.Emulated;
-    /** @type {?} */
-    const styles = componentDefinition.styles || EMPTY_ARRAY;
-    /** @type {?} */
-    const animations = componentDefinition.animations || null;
-    /** @type {?} */
-    let data = componentDefinition.data || {};
-    if (animations) {
-        data["animations"] = animations;
-    }
     /** @type {?} */
     const def = {
         type: type,
@@ -1908,39 +1909,56 @@ function defineComponent(componentDefinition) {
         contentQueries: componentDefinition.contentQueries || null,
         contentQueriesRefresh: componentDefinition.contentQueriesRefresh || null,
         attributes: componentDefinition.attributes || null,
-        inputs: invertObject(componentDefinition.inputs, declaredInputs),
         declaredInputs: declaredInputs,
-        outputs: invertObject(componentDefinition.outputs),
+        inputs: /** @type {?} */ ((null)),
+        // assigned in noSideEffects
+        outputs: /** @type {?} */ ((null)),
+        // assigned in noSideEffects
         exportAs: componentDefinition.exportAs || null,
-        onInit: type.prototype.ngOnInit || null,
-        doCheck: type.prototype.ngDoCheck || null,
-        afterContentInit: type.prototype.ngAfterContentInit || null,
-        afterContentChecked: type.prototype.ngAfterContentChecked || null,
-        afterViewInit: type.prototype.ngAfterViewInit || null,
-        afterViewChecked: type.prototype.ngAfterViewChecked || null,
-        onDestroy: type.prototype.ngOnDestroy || null,
+        onInit: typePrototype.ngOnInit || null,
+        doCheck: typePrototype.ngDoCheck || null,
+        afterContentInit: typePrototype.ngAfterContentInit || null,
+        afterContentChecked: typePrototype.ngAfterContentChecked || null,
+        afterViewInit: typePrototype.ngAfterViewInit || null,
+        afterViewChecked: typePrototype.ngAfterViewChecked || null,
+        onDestroy: typePrototype.ngOnDestroy || null,
         onPush: componentDefinition.changeDetection === ChangeDetectionStrategy.OnPush,
-        directiveDefs: directiveTypes ?
-            () => (typeof directiveTypes === 'function' ? directiveTypes() : directiveTypes)
-                .map(extractDirectiveDef) :
-            null,
-        pipeDefs: pipeTypes ?
-            () => (typeof pipeTypes === 'function' ? pipeTypes() : pipeTypes).map(extractPipeDef) :
-            null,
+        directiveDefs: /** @type {?} */ ((null)),
+        // assigned in noSideEffects
+        pipeDefs: /** @type {?} */ ((null)),
+        // assigned in noSideEffects
         selectors: componentDefinition.selectors,
         viewQuery: componentDefinition.viewQuery || null,
         features: componentDefinition.features || null,
-        data,
+        data: componentDefinition.data || {},
         // TODO(misko): convert ViewEncapsulation into const enum so that it can be used directly in the
         // next line. Also `None` should be 0 not 2.
-        encapsulation,
+        encapsulation: componentDefinition.encapsulation || ViewEncapsulation.Emulated,
         providers: EMPTY_ARRAY,
         viewProviders: EMPTY_ARRAY,
-        id: `c${_renderCompCount++}`, styles,
+        id: 'c',
+        styles: componentDefinition.styles || EMPTY_ARRAY,
+        _: /** @type {?} */ (null),
     };
-    /** @type {?} */
-    const feature = componentDefinition.features;
-    feature && feature.forEach((fn) => fn(def));
+    def._ = /** @type {?} */ (noSideEffects(() => {
+        /** @type {?} */
+        const directiveTypes = /** @type {?} */ ((componentDefinition.directives));
+        /** @type {?} */
+        const feature = componentDefinition.features;
+        /** @type {?} */
+        const pipeTypes = /** @type {?} */ ((componentDefinition.pipes));
+        def.id += _renderCompCount++;
+        def.inputs = invertObject(componentDefinition.inputs, declaredInputs),
+            def.outputs = invertObject(componentDefinition.outputs),
+            feature && feature.forEach((fn) => fn(def));
+        def.directiveDefs = directiveTypes ?
+            () => (typeof directiveTypes === 'function' ? directiveTypes() : directiveTypes)
+                .map(extractDirectiveDef) :
+            null;
+        def.pipeDefs = pipeTypes ?
+            () => (typeof pipeTypes === 'function' ? pipeTypes() : pipeTypes).map(extractPipeDef) :
+            null;
+    }));
     return /** @type {?} */ (def);
 }
 /**
@@ -4300,10 +4318,73 @@ function matchingSelectorIndex(tNode, selectors, textSelectors) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/** @type {?} */
-const EMPTY_ARR = [];
-/** @type {?} */
-const EMPTY_OBJ = {};
+/**
+ * Combines the binding value and a factory for an animation player.
+ *
+ * Used to bind a player to an element template binding (currently only
+ * `[style]`, `[style.prop]`, `[class]` and `[class.name]` bindings
+ * supported). The provided `factoryFn` function will be run once all
+ * the associated bindings have been evaluated on the element and is
+ * designed to return a player which will then be placed on the element.
+ *
+ * @template T
+ * @param {?} factoryFn The function that is used to create a player
+ *   once all the rendering-related (styling values) have been
+ *   processed for the element binding.
+ * @param {?} value The raw value that will be exposed to the binding
+ *   so that the binding can update its internal values when
+ *   any changes are evaluated.
+ * @return {?}
+ */
+function bindPlayerFactory(factoryFn, value) {
+    return /** @type {?} */ (new BoundPlayerFactory(factoryFn, value));
+}
+/**
+ * @template T
+ */
+class BoundPlayerFactory {
+    /**
+     * @param {?} fn
+     * @param {?} value
+     */
+    constructor(fn, value) {
+        this.fn = fn;
+        this.value = value;
+    }
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+class CorePlayerHandler {
+    constructor() {
+        this._players = [];
+    }
+    /**
+     * @return {?}
+     */
+    flushPlayers() {
+        for (let i = 0; i < this._players.length; i++) {
+            /** @type {?} */
+            const player = this._players[i];
+            if (!player.parent && player.state === 0 /* Pending */) {
+                player.play();
+            }
+        }
+        this._players.length = 0;
+    }
+    /**
+     * @param {?} player
+     * @return {?}
+     */
+    queuePlayer(player) { this._players.push(player); }
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
 /**
  * @param {?=} element
  * @param {?=} sanitizer
@@ -4369,8 +4450,9 @@ function getStylingContext(index, viewData) {
     else {
         /** @type {?} */
         const stylingTemplate = getTNode(index, viewData).stylingTemplate;
-        if (wrapper !== viewData)
+        if (wrapper !== viewData) {
             storageIndex = HOST;
+        }
         return wrapper[storageIndex] = stylingTemplate ?
             allocStylingContext(slotValue, stylingTemplate) :
             createEmptyStylingContext(slotValue);
@@ -4385,32 +4467,118 @@ function isStylingContext(value) {
     return typeof value[FLAGS] !== 'number' && typeof value[ACTIVE_INDEX] !== 'number';
 }
 /**
+ * @param {?} playerContext
+ * @param {?} rootContext
+ * @param {?} element
+ * @param {?} player
+ * @param {?} playerContextIndex
+ * @param {?=} ref
+ * @return {?}
+ */
+function addPlayerInternal(playerContext, rootContext, element, player, playerContextIndex, ref) {
+    ref = ref || element;
+    if (playerContextIndex) {
+        playerContext[playerContextIndex] = player;
+    }
+    else {
+        playerContext.push(player);
+    }
+    if (player) {
+        player.addEventListener(200 /* Destroyed */, () => {
+            /** @type {?} */
+            const index = playerContext.indexOf(player);
+            /** @type {?} */
+            const nonFactoryPlayerIndex = playerContext[0 /* NonBuilderPlayersStart */];
+            // if the player is being removed from the factory side of the context
+            // (which is where the [style] and [class] bindings do their thing) then
+            // that side of the array cannot be resized since the respective bindings
+            // have pointer index values that point to the associated factory instance
+            if (index) {
+                if (index < nonFactoryPlayerIndex) {
+                    playerContext[index] = null;
+                }
+                else {
+                    playerContext.splice(index, 1);
+                }
+            }
+            player.destroy();
+        });
+        /** @type {?} */
+        const playerHandler = rootContext.playerHandler || (rootContext.playerHandler = new CorePlayerHandler());
+        playerHandler.queuePlayer(player, ref);
+        return true;
+    }
+    return false;
+}
+/**
+ * @param {?} playerContext
+ * @return {?}
+ */
+function getPlayersInternal(playerContext) {
+    /** @type {?} */
+    const players = [];
+    /** @type {?} */
+    const nonFactoryPlayersStart = playerContext[0 /* NonBuilderPlayersStart */];
+    // add all factory-based players (which are apart of [style] and [class] bindings)
+    for (let i = 1 /* PlayerBuildersStartPosition */ + 1 /* PlayerOffsetPosition */; i < nonFactoryPlayersStart; i += 2 /* PlayerAndPlayerBuildersTupleSize */) {
+        /** @type {?} */
+        const player = /** @type {?} */ (playerContext[i]);
+        if (player) {
+            players.push(player);
+        }
+    }
+    // add all custom players (not apart of [style] and [class] bindings)
+    for (let i = nonFactoryPlayersStart; i < playerContext.length; i++) {
+        players.push(/** @type {?} */ (playerContext[i]));
+    }
+    return players;
+}
+/**
  * @param {?} target
  * @param {?=} context
  * @return {?}
  */
 function getOrCreatePlayerContext(target, context) {
     context = context || /** @type {?} */ ((getContext(target)));
-    if (ngDevMode && !context) {
-        throw new Error('Only elements that exist in an Angular application can be used for player access');
+    if (!context) {
+        ngDevMode && throwInvalidRefError();
+        return null;
     }
     const { lViewData, nodeIndex } = context;
     /** @type {?} */
     const stylingContext = getStylingContext(nodeIndex - HEADER_OFFSET, lViewData);
-    return stylingContext[0 /* PlayerContext */] || allocPlayerContext(stylingContext);
+    return getPlayerContext(stylingContext) || allocPlayerContext(stylingContext);
+}
+/**
+ * @param {?} stylingContext
+ * @return {?}
+ */
+function getPlayerContext(stylingContext) {
+    return stylingContext[0 /* PlayerContext */];
 }
 /**
  * @param {?} data
  * @return {?}
  */
 function allocPlayerContext(data) {
-    return data[0 /* PlayerContext */] = [];
+    return data[0 /* PlayerContext */] =
+        [5 /* SinglePlayerBuildersStartPosition */, null, null, null, null];
+}
+/**
+ * @return {?}
+ */
+function throwInvalidRefError() {
+    throw new Error('Only elements that exist in an Angular application can be used for animations');
 }
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
+/** @type {?} */
+const EMPTY_ARR = [];
+/** @type {?} */
+const EMPTY_OBJ = {};
 /**
  * Creates a styling context template where styling information is stored.
  * Any styles that are later referenced using `updateStyleProp` must be
@@ -4508,7 +4676,7 @@ function createStylingContextTemplate(initialClassDeclarations, initialStyleDecl
     /** @type {?} */
     const totalProps = styleProps.length + classNames.length;
     /** @type {?} */
-    const maxLength = totalProps * 3 /* Size */ * 2 + 8 /* SingleStylesStartPosition */;
+    const maxLength = totalProps * 4 /* Size */ * 2 + 8 /* SingleStylesStartPosition */;
     // we need to fill the array from the start so that we can access
     // both the multi and the single array positions in the same loop block
     for (let i = 8 /* SingleStylesStartPosition */; i < maxLength; i++) {
@@ -4517,7 +4685,7 @@ function createStylingContextTemplate(initialClassDeclarations, initialStyleDecl
     /** @type {?} */
     const singleStart = 8 /* SingleStylesStartPosition */;
     /** @type {?} */
-    const multiStart = totalProps * 3 /* Size */ + 8 /* SingleStylesStartPosition */;
+    const multiStart = totalProps * 4 /* Size */ + 8 /* SingleStylesStartPosition */;
     // fill single and multi-level styles
     for (let i = 0; i < totalProps; i++) {
         /** @type {?} */
@@ -4529,19 +4697,21 @@ function createStylingContextTemplate(initialClassDeclarations, initialStyleDecl
         /** @type {?} */
         const initialValue = initialStylingValues[indexForInitial];
         /** @type {?} */
-        const indexForMulti = i * 3 /* Size */ + multiStart;
+        const indexForMulti = i * 4 /* Size */ + multiStart;
         /** @type {?} */
-        const indexForSingle = i * 3 /* Size */ + singleStart;
+        const indexForSingle = i * 4 /* Size */ + singleStart;
         /** @type {?} */
         const initialFlag = prepareInitialFlag(prop, isClassBased, styleSanitizer || null);
         setFlag(context, indexForSingle, pointers(initialFlag, indexForInitial, indexForMulti));
         setProp(context, indexForSingle, prop);
         setValue(context, indexForSingle, null);
+        setPlayerBuilderIndex(context, indexForSingle, 0);
         /** @type {?} */
         const flagForMulti = initialFlag | (initialValue !== null ? 1 /* Dirty */ : 0 /* None */);
         setFlag(context, indexForMulti, pointers(flagForMulti, indexForInitial, indexForSingle));
         setProp(context, indexForMulti, prop);
         setValue(context, indexForMulti, null);
+        setPlayerBuilderIndex(context, indexForMulti, 0);
     }
     // there is no initial value flag for the master index since it doesn't
     // reference an initial style value
@@ -4551,7 +4721,7 @@ function createStylingContextTemplate(initialClassDeclarations, initialStyleDecl
 }
 /**
  * Sets and resolves all `multi` styling on an `StylingContext` so that they can be
- * applied to the element once `renderStyling` is called.
+ * applied to the element once `renderStyleAndClassBindings` is called.
  *
  * All missing styles/class (any values that are not provided in the new `styles`
  * or `classes` params) will resolve to `null` within their respective positions
@@ -4559,43 +4729,72 @@ function createStylingContextTemplate(initialClassDeclarations, initialStyleDecl
  *
  * @param {?} context The styling context that will be updated with the
  *    newly provided style values.
- * @param {?} classes The key/value map of CSS class names that will be used for the update.
- * @param {?=} styles The key/value map of CSS styles that will be used for the update.
+ * @param {?} classesInput The key/value map of CSS class names that will be used for the update.
+ * @param {?=} stylesInput The key/value map of CSS styles that will be used for the update.
  * @return {?}
  */
-function updateStylingMap(context, classes, styles) {
-    styles = styles || null;
+function updateStylingMap(context, classesInput, stylesInput) {
+    stylesInput = stylesInput || null;
     /** @type {?} */
-    const ignoreAllClassUpdates = classes === context[6 /* PreviousMultiClassValue */];
+    const element = /** @type {?} */ (((context[5 /* ElementPosition */])));
     /** @type {?} */
-    const ignoreAllStyleUpdates = styles === context[7 /* PreviousMultiStyleValue */];
+    const classesPlayerBuilder = classesInput instanceof BoundPlayerFactory ?
+        new ClassAndStylePlayerBuilder(/** @type {?} */ (classesInput), element, 2 /* Class */) :
+        null;
+    /** @type {?} */
+    const stylesPlayerBuilder = stylesInput instanceof BoundPlayerFactory ?
+        new ClassAndStylePlayerBuilder(/** @type {?} */ (stylesInput), element, 3 /* Style */) :
+        null;
+    /** @type {?} */
+    const classesValue = classesPlayerBuilder ? /** @type {?} */ (((/** @type {?} */ (classesInput)))).value :
+        classesInput;
+    /** @type {?} */
+    const stylesValue = stylesPlayerBuilder ? stylesInput["value"] : stylesInput;
+    /** @type {?} */
+    const ignoreAllClassUpdates = classesValue === context[6 /* PreviousMultiClassValue */];
+    /** @type {?} */
+    const ignoreAllStyleUpdates = stylesValue === context[7 /* PreviousMultiStyleValue */];
     if (ignoreAllClassUpdates && ignoreAllStyleUpdates)
         return;
+    context[6 /* PreviousMultiClassValue */] = classesValue;
+    context[7 /* PreviousMultiStyleValue */] = stylesValue;
     /** @type {?} */
     let classNames = EMPTY_ARR;
     /** @type {?} */
     let applyAllClasses = false;
+    /** @type {?} */
+    let playerBuildersAreDirty = false;
+    /** @type {?} */
+    const classesPlayerBuilderIndex = classesPlayerBuilder ? 1 /* ClassMapPlayerBuilderPosition */ : 0;
+    if (hasPlayerBuilderChanged(context, classesPlayerBuilder, 1 /* ClassMapPlayerBuilderPosition */)) {
+        setPlayerBuilder(context, classesPlayerBuilder, 1 /* ClassMapPlayerBuilderPosition */);
+        playerBuildersAreDirty = true;
+    }
+    /** @type {?} */
+    const stylesPlayerBuilderIndex = stylesPlayerBuilder ? 3 /* StyleMapPlayerBuilderPosition */ : 0;
+    if (hasPlayerBuilderChanged(context, stylesPlayerBuilder, 3 /* StyleMapPlayerBuilderPosition */)) {
+        setPlayerBuilder(context, stylesPlayerBuilder, 3 /* StyleMapPlayerBuilderPosition */);
+        playerBuildersAreDirty = true;
+    }
     // each time a string-based value pops up then it shouldn't require a deep
     // check of what's changed.
     if (!ignoreAllClassUpdates) {
-        context[6 /* PreviousMultiClassValue */] = classes;
-        if (typeof classes == 'string') {
-            classNames = classes.split(/\s+/);
+        if (typeof classesValue == 'string') {
+            classNames = classesValue.split(/\s+/);
             // this boolean is used to avoid having to create a key/value map of `true` values
             // since a classname string implies that all those classes are added
             applyAllClasses = true;
         }
         else {
-            classNames = classes ? Object.keys(classes) : EMPTY_ARR;
+            classNames = classesValue ? Object.keys(classesValue) : EMPTY_ARR;
         }
     }
-    classes = /** @type {?} */ ((classes || EMPTY_OBJ));
-    if (!ignoreAllStyleUpdates) {
-        context[7 /* PreviousMultiStyleValue */] = styles;
-    }
     /** @type {?} */
-    const styleProps = styles ? Object.keys(styles) : EMPTY_ARR;
-    styles = styles || EMPTY_OBJ;
+    const classes = /** @type {?} */ ((classesValue || EMPTY_OBJ));
+    /** @type {?} */
+    const styleProps = stylesValue ? Object.keys(stylesValue) : EMPTY_ARR;
+    /** @type {?} */
+    const styles = stylesValue || EMPTY_OBJ;
     /** @type {?} */
     const classesStartIndex = styleProps.length;
     /** @type {?} */
@@ -4626,14 +4825,18 @@ function updateStylingMap(context, classes, styles) {
             /** @type {?} */
             const newValue = isClassBased ? (applyAllClasses ? true : classes[newProp]) : styles[newProp];
             /** @type {?} */
+            const playerBuilderIndex = isClassBased ? classesPlayerBuilderIndex : stylesPlayerBuilderIndex;
+            /** @type {?} */
             const prop = getProp(context, ctxIndex);
             if (prop === newProp) {
                 /** @type {?} */
                 const value = getValue(context, ctxIndex);
                 /** @type {?} */
                 const flag = getPointers(context, ctxIndex);
+                setPlayerBuilderIndex(context, ctxIndex, playerBuilderIndex);
                 if (hasValueChanged(flag, value, newValue)) {
                     setValue(context, ctxIndex, newValue);
+                    playerBuildersAreDirty = playerBuildersAreDirty || !!playerBuilderIndex;
                     /** @type {?} */
                     const initialValue = getInitialValue(context, flag);
                     // there is no point in setting this to dirty if the previously
@@ -4659,6 +4862,7 @@ function updateStylingMap(context, classes, styles) {
                         setValue(context, ctxIndex, newValue);
                         if (hasValueChanged(flagToCompare, initialValue, newValue)) {
                             setDirty(context, ctxIndex, true);
+                            playerBuildersAreDirty = playerBuildersAreDirty || !!playerBuilderIndex;
                             dirty = true;
                         }
                     }
@@ -4666,12 +4870,13 @@ function updateStylingMap(context, classes, styles) {
                 else {
                     /** @type {?} */
                     const newFlag = prepareInitialFlag(newProp, isClassBased, getStyleSanitizer(context));
-                    insertNewMultiProperty(context, ctxIndex, isClassBased, newProp, newFlag, newValue);
+                    playerBuildersAreDirty = playerBuildersAreDirty || !!playerBuilderIndex;
+                    insertNewMultiProperty(context, ctxIndex, isClassBased, newProp, newFlag, newValue, playerBuilderIndex);
                     dirty = true;
                 }
             }
         }
-        ctxIndex += 3 /* Size */;
+        ctxIndex += 4 /* Size */;
         propIndex++;
     }
     // this means that there are left-over values in the context that
@@ -4692,10 +4897,13 @@ function updateStylingMap(context, classes, styles) {
             if (doRemoveValue) {
                 setDirty(context, ctxIndex, true);
                 setValue(context, ctxIndex, null);
+                /** @type {?} */
+                const playerBuilderIndex = isClassBased ? classesPlayerBuilderIndex : stylesPlayerBuilderIndex;
+                setPlayerBuilderIndex(context, ctxIndex, playerBuilderIndex);
                 dirty = true;
             }
         }
-        ctxIndex += 3 /* Size */;
+        ctxIndex += 4 /* Size */;
     }
     /** @type {?} */
     const sanitizer = getStyleSanitizer(context);
@@ -4713,7 +4921,9 @@ function updateStylingMap(context, classes, styles) {
             const value = isClassBased ? (applyAllClasses ? true : classes[prop]) : styles[prop];
             /** @type {?} */
             const flag = prepareInitialFlag(prop, isClassBased, sanitizer) | 1 /* Dirty */;
-            context.push(flag, prop, value);
+            /** @type {?} */
+            const playerBuilderIndex = isClassBased ? classesPlayerBuilderIndex : stylesPlayerBuilderIndex;
+            context.push(flag, prop, value, playerBuilderIndex);
             dirty = true;
         }
         propIndex++;
@@ -4721,10 +4931,13 @@ function updateStylingMap(context, classes, styles) {
     if (dirty) {
         setContextDirty(context, true);
     }
+    if (playerBuildersAreDirty) {
+        setContextPlayersDirty(context, true);
+    }
 }
 /**
  * Sets and resolves a single styling property/value on the provided `StylingContext` so
- * that they can be applied to the element once `renderStyling` is called.
+ * that they can be applied to the element once `renderStyleAndClassBindings` is called.
  *
  * Note that prop-level styling values are considered higher priority than any styling that
  * has been applied using `updateStylingMap`, therefore, when styling values are rendered
@@ -4734,18 +4947,43 @@ function updateStylingMap(context, classes, styles) {
  * @param {?} context The styling context that will be updated with the
  *    newly provided style value.
  * @param {?} index The index of the property which is being updated.
- * @param {?} value The CSS style value that will be assigned
+ * @param {?} input
  * @return {?}
  */
-function updateStyleProp(context, index, value) {
+function updateStyleProp(context, index, input) {
     /** @type {?} */
-    const singleIndex = 8 /* SingleStylesStartPosition */ + index * 3 /* Size */;
+    const singleIndex = 8 /* SingleStylesStartPosition */ + index * 4 /* Size */;
     /** @type {?} */
     const currValue = getValue(context, singleIndex);
     /** @type {?} */
     const currFlag = getPointers(context, singleIndex);
+    /** @type {?} */
+    const value = (input instanceof BoundPlayerFactory) ? input.value : input;
     // didn't change ... nothing to make a note of
     if (hasValueChanged(currFlag, currValue, value)) {
+        /** @type {?} */
+        const isClassBased = (currFlag & 2 /* Class */) === 2 /* Class */;
+        /** @type {?} */
+        const element = /** @type {?} */ (((context[5 /* ElementPosition */])));
+        /** @type {?} */
+        const playerBuilder = input instanceof BoundPlayerFactory ?
+            new ClassAndStylePlayerBuilder(/** @type {?} */ (input), element, isClassBased ? 2 /* Class */ : 3 /* Style */) :
+            null;
+        /** @type {?} */
+        const value = /** @type {?} */ ((playerBuilder ? (/** @type {?} */ (input)).value : input));
+        /** @type {?} */
+        const currPlayerIndex = getPlayerBuilderIndex(context, singleIndex);
+        /** @type {?} */
+        let playerBuildersAreDirty = false;
+        /** @type {?} */
+        let playerBuilderIndex = playerBuilder ? currPlayerIndex : 0;
+        if (hasPlayerBuilderChanged(context, playerBuilder, currPlayerIndex)) {
+            /** @type {?} */
+            const newIndex = setPlayerBuilder(context, playerBuilder, currPlayerIndex);
+            playerBuilderIndex = playerBuilder ? newIndex : 0;
+            setPlayerBuilderIndex(context, singleIndex, playerBuilderIndex);
+            playerBuildersAreDirty = true;
+        }
         // the value will always get updated (even if the dirty flag is skipped)
         setValue(context, singleIndex, value);
         /** @type {?} */
@@ -4757,8 +4995,6 @@ function updateStyleProp(context, index, value) {
             let multiDirty = false;
             /** @type {?} */
             let singleDirty = true;
-            /** @type {?} */
-            const isClassBased = (currFlag & 2 /* Class */) === 2 /* Class */;
             // only when the value is set to `null` should the multi-value get flagged
             if (!valueExists(value, isClassBased) && valueExists(valueForMulti, isClassBased)) {
                 multiDirty = true;
@@ -4767,6 +5003,9 @@ function updateStyleProp(context, index, value) {
             setDirty(context, indexForMulti, multiDirty);
             setDirty(context, singleIndex, singleDirty);
             setContextDirty(context, true);
+        }
+        if (playerBuildersAreDirty) {
+            setContextPlayersDirty(context, true);
         }
     }
 }
@@ -4797,21 +5036,26 @@ function updateClassProp(context, index, addOrRemove) {
  * @param {?} context The styling context that will be used to determine
  *      what styles will be rendered
  * @param {?} renderer the renderer that will be used to apply the styling
- * @param {?=} styleStore if provided, the updated style values will be applied
+ * @param {?} rootOrView
+ * @param {?=} classesStore if provided, the updated class values will be applied
  *    to this key/value map instead of being renderered via the renderer.
- * @param {?=} classStore if provided, the updated class values will be applied
+ * @param {?=} stylesStore if provided, the updated style values will be applied
  *    to this key/value map instead of being renderered via the renderer.
- * @return {?}
+ * @return {?} number the total amount of players that got queued for animation (if any)
  */
-function renderStyling(context, renderer, styleStore, classStore) {
+function renderStyleAndClassBindings(context, renderer, rootOrView, classesStore, stylesStore) {
+    /** @type {?} */
+    let totalPlayersQueued = 0;
     if (isContextDirty(context)) {
+        /** @type {?} */
+        const flushPlayerBuilders = context[3 /* MasterFlagPosition */] & 8 /* PlayerBuildersDirty */;
         /** @type {?} */
         const native = /** @type {?} */ ((context[5 /* ElementPosition */]));
         /** @type {?} */
         const multiStartIndex = getMultiStartIndex(context);
         /** @type {?} */
         const styleSanitizer = getStyleSanitizer(context);
-        for (let i = 8 /* SingleStylesStartPosition */; i < context.length; i += 3 /* Size */) {
+        for (let i = 8 /* SingleStylesStartPosition */; i < context.length; i += 4 /* Size */) {
             // there is no point in rendering styles that have not changed on screen
             if (isDirty(context, i)) {
                 /** @type {?} */
@@ -4820,6 +5064,8 @@ function renderStyling(context, renderer, styleStore, classStore) {
                 const value = getValue(context, i);
                 /** @type {?} */
                 const flag = getPointers(context, i);
+                /** @type {?} */
+                const playerBuilder = getPlayerBuilder(context, i);
                 /** @type {?} */
                 const isClassBased = flag & 2 /* Class */ ? true : false;
                 /** @type {?} */
@@ -4844,18 +5090,55 @@ function renderStyling(context, renderer, styleStore, classStore) {
                     valueToApply = getInitialValue(context, flag);
                 }
                 if (isClassBased) {
-                    setClass(native, prop, valueToApply ? true : false, renderer, classStore);
+                    setClass(native, prop, valueToApply ? true : false, renderer, classesStore, playerBuilder);
                 }
                 else {
                     /** @type {?} */
                     const sanitizer = (flag & 4 /* Sanitize */) ? styleSanitizer : null;
-                    setStyle(native, prop, /** @type {?} */ (valueToApply), renderer, sanitizer, styleStore);
+                    setStyle(native, prop, /** @type {?} */ (valueToApply), renderer, sanitizer, stylesStore, playerBuilder);
                 }
                 setDirty(context, i, false);
             }
         }
+        if (flushPlayerBuilders) {
+            /** @type {?} */
+            const rootContext = Array.isArray(rootOrView) ? getRootContext(rootOrView) : /** @type {?} */ (rootOrView);
+            /** @type {?} */
+            const playerContext = /** @type {?} */ ((getPlayerContext(context)));
+            /** @type {?} */
+            const playersStartIndex = playerContext[0 /* NonBuilderPlayersStart */];
+            for (let i = 1 /* PlayerBuildersStartPosition */; i < playersStartIndex; i += 2 /* PlayerAndPlayerBuildersTupleSize */) {
+                /** @type {?} */
+                const builder = /** @type {?} */ (playerContext[i]);
+                /** @type {?} */
+                const playerInsertionIndex = i + 1 /* PlayerOffsetPosition */;
+                /** @type {?} */
+                const oldPlayer = /** @type {?} */ (playerContext[playerInsertionIndex]);
+                if (builder) {
+                    /** @type {?} */
+                    const player = builder.buildPlayer(oldPlayer);
+                    if (player !== undefined) {
+                        if (player != null) {
+                            /** @type {?} */
+                            const wasQueued = addPlayerInternal(playerContext, rootContext, /** @type {?} */ (native), player, playerInsertionIndex);
+                            wasQueued && totalPlayersQueued++;
+                        }
+                        if (oldPlayer) {
+                            oldPlayer.destroy();
+                        }
+                    }
+                }
+                else if (oldPlayer) {
+                    // the player builder has been removed ... therefore we should delete the associated
+                    // player
+                    oldPlayer.destroy();
+                }
+            }
+            setContextPlayersDirty(context, false);
+        }
         setContextDirty(context, false);
     }
+    return totalPlayersQueued;
 }
 /**
  * This function renders a given CSS prop/value entry using the
@@ -4869,12 +5152,18 @@ function renderStyling(context, renderer, styleStore, classStore) {
  * @param {?} renderer
  * @param {?} sanitizer
  * @param {?=} store an optional key/value map that will be used as a context to render styles on
+ * @param {?=} playerBuilder
  * @return {?}
  */
-function setStyle(native, prop, value, renderer, sanitizer, store) {
+function setStyle(native, prop, value, renderer, sanitizer, store, playerBuilder) {
     value = sanitizer && value ? sanitizer(prop, value) : value;
-    if (store) {
-        store[prop] = value;
+    if (store || playerBuilder) {
+        if (store) {
+            store.setValue(prop, value);
+        }
+        if (playerBuilder) {
+            playerBuilder.setValue(prop, value);
+        }
     }
     else if (value) {
         ngDevMode && ngDevMode.rendererSetStyle++;
@@ -4900,11 +5189,17 @@ function setStyle(native, prop, value, renderer, sanitizer, store) {
  * @param {?} add
  * @param {?} renderer
  * @param {?=} store an optional key/value map that will be used as a context to render styles on
+ * @param {?=} playerBuilder
  * @return {?}
  */
-function setClass(native, className, add, renderer, store) {
-    if (store) {
-        store[className] = add;
+function setClass(native, className, add, renderer, store, playerBuilder) {
+    if (store || playerBuilder) {
+        if (store) {
+            store.setValue(className, add);
+        }
+        if (playerBuilder) {
+            playerBuilder.setValue(className, add);
+        }
     }
     else if (add) {
         ngDevMode && ngDevMode.rendererAddClass++;
@@ -4970,8 +5265,8 @@ function isSanitizable(context, index) {
  * @return {?}
  */
 function pointers(configFlag, staticIndex, dynamicIndex) {
-    return (configFlag & 7 /* BitMask */) | (staticIndex << 3 /* BitCountSize */) |
-        (dynamicIndex << (14 /* BitCountSize */ + 3 /* BitCountSize */));
+    return (configFlag & 15 /* BitMask */) | (staticIndex << 4 /* BitCountSize */) |
+        (dynamicIndex << (14 /* BitCountSize */ + 4 /* BitCountSize */));
 }
 /**
  * @param {?} context
@@ -4988,7 +5283,7 @@ function getInitialValue(context, flag) {
  * @return {?}
  */
 function getInitialIndex(flag) {
-    return (flag >> 3 /* BitCountSize */) & 16383 /* BitMask */;
+    return (flag >> 4 /* BitCountSize */) & 16383 /* BitMask */;
 }
 /**
  * @param {?} flag
@@ -4996,7 +5291,7 @@ function getInitialIndex(flag) {
  */
 function getMultiOrSingleIndex(flag) {
     /** @type {?} */
-    const index = (flag >> (14 /* BitCountSize */ + 3 /* BitCountSize */)) & 16383 /* BitMask */;
+    const index = (flag >> (14 /* BitCountSize */ + 4 /* BitCountSize */)) & 16383 /* BitMask */;
     return index >= 8 /* SingleStylesStartPosition */ ? index : -1;
 }
 /**
@@ -5030,6 +5325,79 @@ function setProp(context, index, prop) {
  */
 function setValue(context, index, value) {
     context[index + 2 /* ValueOffset */] = value;
+}
+/**
+ * @param {?} context
+ * @param {?} builder
+ * @param {?} index
+ * @return {?}
+ */
+function hasPlayerBuilderChanged(context, builder, index) {
+    /** @type {?} */
+    const playerContext = /** @type {?} */ ((context[0 /* PlayerContext */]));
+    if (builder) {
+        if (!playerContext || index === 0) {
+            return true;
+        }
+    }
+    else if (!playerContext) {
+        return false;
+    }
+    return playerContext[index] !== builder;
+}
+/**
+ * @param {?} context
+ * @param {?} builder
+ * @param {?} insertionIndex
+ * @return {?}
+ */
+function setPlayerBuilder(context, builder, insertionIndex) {
+    /** @type {?} */
+    let playerContext = context[0 /* PlayerContext */] || allocPlayerContext(context);
+    if (insertionIndex > 0) {
+        playerContext[insertionIndex] = builder;
+    }
+    else {
+        insertionIndex = playerContext[0 /* NonBuilderPlayersStart */];
+        playerContext.splice(insertionIndex, 0, builder, null);
+        playerContext[0 /* NonBuilderPlayersStart */] +=
+            2 /* PlayerAndPlayerBuildersTupleSize */;
+    }
+    return insertionIndex;
+}
+/**
+ * @param {?} context
+ * @param {?} index
+ * @param {?} playerBuilderIndex
+ * @return {?}
+ */
+function setPlayerBuilderIndex(context, index, playerBuilderIndex) {
+    context[index + 3 /* PlayerBuilderIndexOffset */] = playerBuilderIndex;
+}
+/**
+ * @param {?} context
+ * @param {?} index
+ * @return {?}
+ */
+function getPlayerBuilderIndex(context, index) {
+    return (/** @type {?} */ (context[index + 3 /* PlayerBuilderIndexOffset */])) || 0;
+}
+/**
+ * @param {?} context
+ * @param {?} index
+ * @return {?}
+ */
+function getPlayerBuilder(context, index) {
+    /** @type {?} */
+    const playerBuilderIndex = getPlayerBuilderIndex(context, index);
+    if (playerBuilderIndex) {
+        /** @type {?} */
+        const playerContext = context[0 /* PlayerContext */];
+        if (playerContext) {
+            return /** @type {?} */ (playerContext[playerBuilderIndex]);
+        }
+    }
+    return null;
 }
 /**
  * @param {?} context
@@ -5085,12 +5453,25 @@ function setContextDirty(context, isDirtyYes) {
 }
 /**
  * @param {?} context
+ * @param {?} isDirtyYes
+ * @return {?}
+ */
+function setContextPlayersDirty(context, isDirtyYes) {
+    if (isDirtyYes) {
+        (/** @type {?} */ (context[3 /* MasterFlagPosition */])) |= 8 /* PlayerBuildersDirty */;
+    }
+    else {
+        (/** @type {?} */ (context[3 /* MasterFlagPosition */])) &= ~8 /* PlayerBuildersDirty */;
+    }
+}
+/**
+ * @param {?} context
  * @param {?} prop
  * @param {?=} startIndex
  * @return {?}
  */
 function findEntryPositionByProp(context, prop, startIndex) {
-    for (let i = (startIndex || 0) + 1 /* PropertyOffset */; i < context.length; i += 3 /* Size */) {
+    for (let i = (startIndex || 0) + 1 /* PropertyOffset */; i < context.length; i += 4 /* Size */) {
         /** @type {?} */
         const thisProp = context[i];
         if (thisProp == prop) {
@@ -5112,6 +5493,8 @@ function swapMultiContextEntries(context, indexA, indexB) {
     const tmpProp = getProp(context, indexA);
     /** @type {?} */
     const tmpFlag = getPointers(context, indexA);
+    /** @type {?} */
+    const tmpPlayerBuilderIndex = getPlayerBuilderIndex(context, indexA);
     /** @type {?} */
     let flagA = tmpFlag;
     /** @type {?} */
@@ -5137,9 +5520,11 @@ function swapMultiContextEntries(context, indexA, indexB) {
     setValue(context, indexA, getValue(context, indexB));
     setProp(context, indexA, getProp(context, indexB));
     setFlag(context, indexA, getPointers(context, indexB));
+    setPlayerBuilderIndex(context, indexA, getPlayerBuilderIndex(context, indexB));
     setValue(context, indexB, tmpValue);
     setProp(context, indexB, tmpProp);
     setFlag(context, indexB, tmpFlag);
+    setPlayerBuilderIndex(context, indexB, tmpPlayerBuilderIndex);
 }
 /**
  * @param {?} context
@@ -5147,7 +5532,7 @@ function swapMultiContextEntries(context, indexA, indexB) {
  * @return {?}
  */
 function updateSinglePointerValues(context, indexStartPosition) {
-    for (let i = indexStartPosition; i < context.length; i += 3 /* Size */) {
+    for (let i = indexStartPosition; i < context.length; i += 4 /* Size */) {
         /** @type {?} */
         const multiFlag = getPointers(context, i);
         /** @type {?} */
@@ -5174,18 +5559,19 @@ function updateSinglePointerValues(context, indexStartPosition) {
  * @param {?} name
  * @param {?} flag
  * @param {?} value
+ * @param {?} playerIndex
  * @return {?}
  */
-function insertNewMultiProperty(context, index, classBased, name, flag, value) {
+function insertNewMultiProperty(context, index, classBased, name, flag, value, playerIndex) {
     /** @type {?} */
     const doShift = index < context.length;
     // prop does not exist in the list, add it in
-    context.splice(index, 0, flag | 1 /* Dirty */ | (classBased ? 2 /* Class */ : 0 /* None */), name, value);
+    context.splice(index, 0, flag | 1 /* Dirty */ | (classBased ? 2 /* Class */ : 0 /* None */), name, value, playerIndex);
     if (doShift) {
         // because the value was inserted midway into the array then we
         // need to update all the shifted multi values' single value
         // pointers to point to the newly shifted location
-        updateSinglePointerValues(context, index + 3 /* Size */);
+        updateSinglePointerValues(context, index + 4 /* Size */);
     }
 }
 /**
@@ -5236,6 +5622,51 @@ function hasValueChanged(flag, a, b) {
     }
     // everything else is safe to check with a normal equality check
     return a !== b;
+}
+/**
+ * @template T
+ */
+class ClassAndStylePlayerBuilder {
+    /**
+     * @param {?} factory
+     * @param {?} _element
+     * @param {?} _type
+     */
+    constructor(factory, _element, _type) {
+        this._element = _element;
+        this._type = _type;
+        this._values = {};
+        this._dirty = false;
+        this._factory = /** @type {?} */ (factory);
+    }
+    /**
+     * @param {?} prop
+     * @param {?} value
+     * @return {?}
+     */
+    setValue(prop, value) {
+        if (this._values[prop] !== value) {
+            this._values[prop] = value;
+            this._dirty = true;
+        }
+    }
+    /**
+     * @param {?=} currentPlayer
+     * @return {?}
+     */
+    buildPlayer(currentPlayer) {
+        // if no values have been set here then this means the binding didn't
+        // change and therefore the binding values were not updated through
+        // `setValue` which means no new player will be provided.
+        if (this._dirty) {
+            /** @type {?} */
+            const player = this._factory.fn(this._element, this._type, /** @type {?} */ ((this._values)), currentPlayer || null);
+            this._values = {};
+            this._dirty = false;
+            return player;
+        }
+        return undefined;
+    }
 }
 
 /**
@@ -6748,14 +7179,15 @@ function generatePropertyAliases(tNodeFlags, direction) {
  *
  * This instruction is meant to handle the [class.foo]="exp" case
  *
- * @template T
  * @param {?} index The index of the element to update in the data array
  * @param {?} stylingIndex
  * @param {?} value A value indicating if a given class should be added or removed.
  * @return {?}
  */
 function elementClassProp(index, stylingIndex, value) {
-    updateClassProp(getStylingContext(index, viewData), stylingIndex, value ? true : false);
+    /** @type {?} */
+    const val = (value instanceof BoundPlayerFactory) ? (/** @type {?} */ (value)) : (!!value);
+    updateClassProp(getStylingContext(index, viewData), stylingIndex, val);
 }
 /**
  * Assign any inline style values to the element during creation mode.
@@ -6768,7 +7200,6 @@ function elementClassProp(index, stylingIndex, value) {
  * (Note this function calls `elementStylingApply` immediately when called.)
  *
  *
- * @template T
  * @param {?=} classDeclarations A key/value array of CSS classes that will be registered on the element.
  *   Each individual style will be used on the element as long as it is not overridden
  *   by any classes placed on the element by multiple (`[class]`) or singular (`[class.named]`)
@@ -6805,7 +7236,6 @@ function elementStyling(classDeclarations, styleDeclarations, styleSanitizer) {
  *
  * Once called then all queued styles will be flushed.
  *
- * @template T
  * @param {?} index Index of the element's styling storage that will be rendered.
  *        (Note that this is not the element index, but rather an index value allocated
  *        specifically for element styling--the index must be the next index after the element
@@ -6813,7 +7243,13 @@ function elementStyling(classDeclarations, styleDeclarations, styleSanitizer) {
  * @return {?}
  */
 function elementStylingApply(index) {
-    renderStyling(getStylingContext(index, viewData), renderer);
+    /** @type {?} */
+    const totalPlayersQueued = renderStyleAndClassBindings(getStylingContext(index, viewData), renderer, viewData);
+    if (totalPlayersQueued > 0) {
+        /** @type {?} */
+        const rootContext = getRootContext(viewData);
+        scheduleTick(rootContext, 2 /* FlushPlayers */);
+    }
 }
 /**
  * Queue a given style to be rendered on an Element.
@@ -6825,7 +7261,6 @@ function elementStylingApply(index) {
  *
  * (Note that the styling instruction will not be applied until `elementStylingApply` is called.)
  *
- * @template T
  * @param {?} index Index of the element's styling storage to change in the data array.
  *        (Note that this is not the element index, but rather an index value allocated
  *        specifically for element styling--the index must be the next index after the element
@@ -7619,12 +8054,7 @@ function markViewDirty(view) {
     ngDevMode && assertDefined(currentView[CONTEXT], 'rootContext should be defined');
     /** @type {?} */
     const rootContext = /** @type {?} */ (currentView[CONTEXT]);
-    /** @type {?} */
-    const nothingScheduled = rootContext.flags === 0 /* Empty */;
-    rootContext.flags |= 1 /* DetectChanges */;
-    if (nothingScheduled) {
-        scheduleTick(rootContext);
-    }
+    scheduleTick(rootContext, 1 /* DetectChanges */);
 }
 /**
  * Used to schedule change detection on the whole application.
@@ -7638,10 +8068,14 @@ function markViewDirty(view) {
  * `renderComponent`'s `scheduler` option.
  * @template T
  * @param {?} rootContext
+ * @param {?} flags
  * @return {?}
  */
-function scheduleTick(rootContext) {
-    if (rootContext.clean == _CLEAN_PROMISE) {
+function scheduleTick(rootContext, flags) {
+    /** @type {?} */
+    const nothingScheduled = rootContext.flags === 0 /* Empty */;
+    rootContext.flags |= flags;
+    if (nothingScheduled && rootContext.clean == _CLEAN_PROMISE) {
         /** @type {?} */
         let res;
         rootContext.clean = new Promise((r) => res = r);
@@ -14990,7 +15424,7 @@ class Version {
     }
 }
 /** @type {?} */
-const VERSION = new Version('7.0.0+7.sha-f85a969');
+const VERSION = new Version('7.0.0+22.sha-6c48455');
 
 /**
  * @fileoverview added by tsickle
@@ -26194,6 +26628,19 @@ function getHostComponent(target) {
     return null;
 }
 /**
+ * Returns the `RootContext` instance that is associated with
+ * the application where the target is situated.
+ * @param {?} target
+ * @return {?}
+ */
+function getRootContext$2(target) {
+    /** @type {?} */
+    const lViewData = Array.isArray(target) ? target : /** @type {?} */ ((loadContext(target))).lViewData;
+    /** @type {?} */
+    const rootLViewData = getRootView$1(lViewData);
+    return /** @type {?} */ (rootLViewData[CONTEXT]);
+}
+/**
  * Returns the injector instance that is associated with
  * the element, component or directive.
  * @param {?} target
@@ -26220,6 +26667,29 @@ function loadContext(target) {
             'Invalid ng target');
     }
     return context;
+}
+/**
+ * Retrieve the root view from any component by walking the parent `LViewData` until
+ * reaching the root `LViewData`.
+ *
+ * @param {?} componentOrView any component or view
+ * @return {?}
+ */
+function getRootView$1(componentOrView) {
+    /** @type {?} */
+    let lViewData;
+    if (Array.isArray(componentOrView)) {
+        ngDevMode && assertDefined(componentOrView, 'lViewData');
+        lViewData = /** @type {?} */ (componentOrView);
+    }
+    else {
+        ngDevMode && assertDefined(componentOrView, 'component');
+        lViewData = /** @type {?} */ ((readPatchedLViewData(componentOrView)));
+    }
+    while (lViewData && !(lViewData[FLAGS] & 64 /* IsRoot */)) {
+        lViewData = /** @type {?} */ ((lViewData[PARENT]));
+    }
+    return lViewData;
 }
 /**
  *  Retrieve map of local references (local reference name => element or directive instance).
@@ -26338,73 +26808,60 @@ class Render3DebugContext {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-class CorePlayerHandler {
-    constructor() {
-        this._players = [];
-    }
-    /**
-     * @return {?}
-     */
-    flushPlayers() {
-        for (let i = 0; i < this._players.length; i++) {
-            /** @type {?} */
-            const player = this._players[i];
-            if (!player.parent) {
-                player.play();
-            }
-        }
-        this._players.length = 0;
-    }
-    /**
-     * @param {?} player
-     * @return {?}
-     */
-    queuePlayer(player) { this._players.push(player); }
-}
-
 /**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @param {?} ref
- * @param {?} player
+ * Adds a player to an element, directive or component instance that will later be
+ * animated once change detection has passed.
+ *
+ * When a player is added to a reference it will stay active until `player.destroy()`
+ * is called. Once called then the player will be removed from the active players
+ * present on the associated ref instance.
+ *
+ * To get a list of all the active players on an element see [getPlayers].
+ *
+ * @param {?} ref The element, directive or component that the player will be placed on.
+ * @param {?} player The player that will be triggered to play once change detection has run.
  * @return {?}
  */
 function addPlayer(ref, player) {
     /** @type {?} */
-    const elementContext = /** @type {?} */ ((getContext(ref)));
-    /** @type {?} */
-    const animationContext = /** @type {?} */ ((getOrCreatePlayerContext(elementContext.native, elementContext)));
-    animationContext.push(player);
-    player.addEventListener(200 /* Destroyed */, () => {
-        /** @type {?} */
-        const index = animationContext.indexOf(player);
-        if (index >= 0) {
-            animationContext.splice(index, 1);
-        }
-        player.destroy();
-    });
-    /** @type {?} */
-    const rootContext = getRootContext(elementContext.lViewData);
-    /** @type {?} */
-    const playerHandler = rootContext.playerHandler || (rootContext.playerHandler = new CorePlayerHandler());
-    playerHandler.queuePlayer(player, ref);
-    /** @type {?} */
-    const nothingScheduled = rootContext.flags === 0 /* Empty */;
-    // change detection may or may not happen therefore
-    // the core code needs to be kicked off to flush the animations
-    rootContext.flags |= 2 /* FlushPlayers */;
-    if (nothingScheduled) {
-        scheduleTick(rootContext);
+    const context = getContext(ref);
+    if (!context) {
+        ngDevMode && throwInvalidRefError();
+        return;
     }
+    /** @type {?} */
+    const element$$1 = /** @type {?} */ (context.native);
+    /** @type {?} */
+    const lViewData = context.lViewData;
+    /** @type {?} */
+    const playerContext = /** @type {?} */ ((getOrCreatePlayerContext(element$$1, context)));
+    /** @type {?} */
+    const rootContext = getRootContext$2(lViewData);
+    addPlayerInternal(playerContext, rootContext, element$$1, player, 0, ref);
+    scheduleTick(rootContext, 2 /* FlushPlayers */);
 }
 /**
+ * Returns a list of all the active players present on the provided ref instance (which can
+ * be an instance of a directive, component or element).
+ *
+ * This function will only return players that have been added to the ref instance using
+ * `addPlayer` or any players that are active through any template styling bindings
+ * (`[style]`, `[style.prop]`, `[class]` and `[class.name]`).
  * @param {?} ref
  * @return {?}
  */
 function getPlayers(ref) {
-    return getOrCreatePlayerContext(ref);
+    /** @type {?} */
+    const context = getContext(ref);
+    if (!context) {
+        ngDevMode && throwInvalidRefError();
+        return [];
+    }
+    /** @type {?} */
+    const stylingContext = getStylingContext(context.nodeIndex - HEADER_OFFSET, context.lViewData);
+    /** @type {?} */
+    const playerContext = stylingContext ? getPlayerContext(stylingContext) : null;
+    return playerContext ? getPlayersInternal(playerContext) : [];
 }
 
 /**
@@ -26438,5 +26895,5 @@ function getPlayers(ref) {
  * Generated bundle index. Do not edit.
  */
 
-export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_l, _iterableDiffersFactory as ɵangular_packages_core_core_i, _keyValueDiffersFactory as ɵangular_packages_core_core_j, _localeFactory as ɵangular_packages_core_core_k, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, DefaultIterableDifferFactory as ɵangular_packages_core_core_g, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_h, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, wtfEnabled as ɵangular_packages_core_core_m, createScope as ɵangular_packages_core_core_o, detectWTF as ɵangular_packages_core_core_n, endTimeRange as ɵangular_packages_core_core_r, leave as ɵangular_packages_core_core_p, startTimeRange as ɵangular_packages_core_core_q, NG_INJECTABLE_DEF as ɵangular_packages_core_core_bb, _getViewData as ɵangular_packages_core_core_w, bindingUpdated as ɵangular_packages_core_core_x, getPreviousOrParentTNode as ɵangular_packages_core_core_v, getOrCreatePlayerContext as ɵangular_packages_core_core_bf, loadInternal as ɵangular_packages_core_core_be, createElementRef as ɵangular_packages_core_core_y, createTemplateRef as ɵangular_packages_core_core_z, createViewRef as ɵangular_packages_core_core_ba, makeParamDecorator as ɵangular_packages_core_core_a, makePropDecorator as ɵangular_packages_core_core_b, getClosureSafeProperty as ɵangular_packages_core_core_bc, _def as ɵangular_packages_core_core_s, DebugRendererFactory2 as ɵangular_packages_core_core_t, DebugContext as ɵangular_packages_core_core_u, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, inject, INJECTOR, Injector, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList$1 as QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, getInjectableDef as ɵgetInjectableDef, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled$1 as ɵivyEnabled, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineBase as ɵdefineBase, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, directiveInject as ɵdirectiveInject, injectAttribute as ɵinjectAttribute, getFactoryOf as ɵgetFactoryOf, getInheritedFactory as ɵgetInheritedFactory, templateRefExtractor as ɵtemplateRefExtractor, PublicFeature as ɵPublicFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, NgOnChangesFeature as ɵNgOnChangesFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, container as ɵcontainer, nextContext as ɵnextContext, elementStart as ɵelementStart, namespaceHTML as ɵnamespaceHTML, namespaceMathML as ɵnamespaceMathML, namespaceSVG as ɵnamespaceSVG, element as ɵelement, listener as ɵlistener, text as ɵtext, embeddedViewStart as ɵembeddedViewStart, query as ɵquery, registerContentQuery as ɵregisterContentQuery, projection as ɵprojection, bind as ɵbind, interpolation1 as ɵinterpolation1, interpolation2 as ɵinterpolation2, interpolation3 as ɵinterpolation3, interpolation4 as ɵinterpolation4, interpolation5 as ɵinterpolation5, interpolation6 as ɵinterpolation6, interpolation7 as ɵinterpolation7, interpolation8 as ɵinterpolation8, interpolationV as ɵinterpolationV, pipeBind1 as ɵpipeBind1, pipeBind2 as ɵpipeBind2, pipeBind3 as ɵpipeBind3, pipeBind4 as ɵpipeBind4, pipeBindV as ɵpipeBindV, pureFunction0 as ɵpureFunction0, pureFunction1 as ɵpureFunction1, pureFunction2 as ɵpureFunction2, pureFunction3 as ɵpureFunction3, pureFunction4 as ɵpureFunction4, pureFunction5 as ɵpureFunction5, pureFunction6 as ɵpureFunction6, pureFunction7 as ɵpureFunction7, pureFunction8 as ɵpureFunction8, pureFunctionV as ɵpureFunctionV, getCurrentView as ɵgetCurrentView, restoreView as ɵrestoreView, containerRefreshStart as ɵcontainerRefreshStart, containerRefreshEnd as ɵcontainerRefreshEnd, queryRefresh as ɵqueryRefresh, loadQueryList as ɵloadQueryList, elementEnd as ɵelementEnd, elementProperty as ɵelementProperty, projectionDef as ɵprojectionDef, reference as ɵreference, enableBindings as ɵenableBindings, disableBindings as ɵdisableBindings, elementAttribute as ɵelementAttribute, elementStyling as ɵelementStyling, elementStylingMap as ɵelementStylingMap, elementStyleProp as ɵelementStyleProp, elementStylingApply as ɵelementStylingApply, elementClassProp as ɵelementClassProp, textBinding as ɵtextBinding, template as ɵtemplate, embeddedViewEnd as ɵembeddedViewEnd, store as ɵstore, load as ɵload, pipe as ɵpipe, whenRendered as ɵwhenRendered, i18nAttribute as ɵi18nAttribute, i18nExp as ɵi18nExp, i18nStart as ɵi18nStart, i18nEnd as ɵi18nEnd, i18nApply as ɵi18nApply, i18nExpMapping as ɵi18nExpMapping, i18nInterpolation1 as ɵi18nInterpolation1, i18nInterpolation2 as ɵi18nInterpolation2, i18nInterpolation3 as ɵi18nInterpolation3, i18nInterpolation4 as ɵi18nInterpolation4, i18nInterpolation5 as ɵi18nInterpolation5, i18nInterpolation6 as ɵi18nInterpolation6, i18nInterpolation7 as ɵi18nInterpolation7, i18nInterpolation8 as ɵi18nInterpolation8, i18nInterpolationV as ɵi18nInterpolationV, i18nMapping as ɵi18nMapping, WRAP_RENDERER_FACTORY2 as ɵWRAP_RENDERER_FACTORY2, Render3DebugRendererFactory2 as ɵRender3DebugRendererFactory2, R3_COMPILE_NGMODULE_DEFS as ɵcompileNgModuleDefs, R3_PATCH_COMPONENT_DEF_WTIH_SCOPE as ɵpatchComponentDefWithScope, R3_COMPILE_COMPONENT as ɵcompileComponent, R3_COMPILE_DIRECTIVE as ɵcompileDirective, R3_COMPILE_PIPE as ɵcompilePipe, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getContext as ɵgetContext, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_NGCC__ as ɵcompileNgModuleFactory__POST_NGCC__, R3_COMPILE_COMPONENT__POST_NGCC__ as ɵR3_COMPILE_COMPONENT__POST_NGCC__, R3_COMPILE_DIRECTIVE__POST_NGCC__ as ɵR3_COMPILE_DIRECTIVE__POST_NGCC__, R3_COMPILE_INJECTABLE__POST_NGCC__ as ɵR3_COMPILE_INJECTABLE__POST_NGCC__, R3_COMPILE_NGMODULE__POST_NGCC__ as ɵR3_COMPILE_NGMODULE__POST_NGCC__, R3_COMPILE_PIPE__POST_NGCC__ as ɵR3_COMPILE_PIPE__POST_NGCC__, ivyEnable__POST_NGCC__ as ɵivyEnable__POST_NGCC__, R3_ELEMENT_REF_FACTORY__POST_NGCC__ as ɵR3_ELEMENT_REF_FACTORY__POST_NGCC__, R3_TEMPLATE_REF_FACTORY__POST_NGCC__ as ɵR3_TEMPLATE_REF_FACTORY__POST_NGCC__, R3_CHANGE_DETECTOR_REF_FACTORY__POST_NGCC__ as ɵR3_CHANGE_DETECTOR_REF_FACTORY__POST_NGCC__, R3_VIEW_CONTAINER_REF_FACTORY__POST_NGCC__ as ɵR3_VIEW_CONTAINER_REF_FACTORY__POST_NGCC__, R3_RENDERER2_FACTORY__POST_NGCC__ as ɵR3_RENDERER2_FACTORY__POST_NGCC__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$4 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_l, _iterableDiffersFactory as ɵangular_packages_core_core_i, _keyValueDiffersFactory as ɵangular_packages_core_core_j, _localeFactory as ɵangular_packages_core_core_k, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, DefaultIterableDifferFactory as ɵangular_packages_core_core_g, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_h, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, wtfEnabled as ɵangular_packages_core_core_m, createScope as ɵangular_packages_core_core_o, detectWTF as ɵangular_packages_core_core_n, endTimeRange as ɵangular_packages_core_core_r, leave as ɵangular_packages_core_core_p, startTimeRange as ɵangular_packages_core_core_q, NG_INJECTABLE_DEF as ɵangular_packages_core_core_bd, _getViewData as ɵangular_packages_core_core_w, bindingUpdated as ɵangular_packages_core_core_x, getPreviousOrParentTNode as ɵangular_packages_core_core_v, BoundPlayerFactory as ɵangular_packages_core_core_z, loadInternal as ɵangular_packages_core_core_bg, createElementRef as ɵangular_packages_core_core_ba, createTemplateRef as ɵangular_packages_core_core_bb, createViewRef as ɵangular_packages_core_core_bc, makeParamDecorator as ɵangular_packages_core_core_a, makePropDecorator as ɵangular_packages_core_core_b, getClosureSafeProperty as ɵangular_packages_core_core_be, _def as ɵangular_packages_core_core_s, DebugRendererFactory2 as ɵangular_packages_core_core_t, DebugContext as ɵangular_packages_core_core_u, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, inject, INJECTOR, Injector, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList$1 as QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, getInjectableDef as ɵgetInjectableDef, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled$1 as ɵivyEnabled, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineBase as ɵdefineBase, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, directiveInject as ɵdirectiveInject, injectAttribute as ɵinjectAttribute, getFactoryOf as ɵgetFactoryOf, getInheritedFactory as ɵgetInheritedFactory, templateRefExtractor as ɵtemplateRefExtractor, PublicFeature as ɵPublicFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, NgOnChangesFeature as ɵNgOnChangesFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, container as ɵcontainer, nextContext as ɵnextContext, elementStart as ɵelementStart, namespaceHTML as ɵnamespaceHTML, namespaceMathML as ɵnamespaceMathML, namespaceSVG as ɵnamespaceSVG, element as ɵelement, listener as ɵlistener, text as ɵtext, embeddedViewStart as ɵembeddedViewStart, query as ɵquery, registerContentQuery as ɵregisterContentQuery, projection as ɵprojection, bind as ɵbind, interpolation1 as ɵinterpolation1, interpolation2 as ɵinterpolation2, interpolation3 as ɵinterpolation3, interpolation4 as ɵinterpolation4, interpolation5 as ɵinterpolation5, interpolation6 as ɵinterpolation6, interpolation7 as ɵinterpolation7, interpolation8 as ɵinterpolation8, interpolationV as ɵinterpolationV, pipeBind1 as ɵpipeBind1, pipeBind2 as ɵpipeBind2, pipeBind3 as ɵpipeBind3, pipeBind4 as ɵpipeBind4, pipeBindV as ɵpipeBindV, pureFunction0 as ɵpureFunction0, pureFunction1 as ɵpureFunction1, pureFunction2 as ɵpureFunction2, pureFunction3 as ɵpureFunction3, pureFunction4 as ɵpureFunction4, pureFunction5 as ɵpureFunction5, pureFunction6 as ɵpureFunction6, pureFunction7 as ɵpureFunction7, pureFunction8 as ɵpureFunction8, pureFunctionV as ɵpureFunctionV, getCurrentView as ɵgetCurrentView, restoreView as ɵrestoreView, containerRefreshStart as ɵcontainerRefreshStart, containerRefreshEnd as ɵcontainerRefreshEnd, queryRefresh as ɵqueryRefresh, loadQueryList as ɵloadQueryList, elementEnd as ɵelementEnd, elementProperty as ɵelementProperty, projectionDef as ɵprojectionDef, reference as ɵreference, enableBindings as ɵenableBindings, disableBindings as ɵdisableBindings, elementAttribute as ɵelementAttribute, elementStyling as ɵelementStyling, elementStylingMap as ɵelementStylingMap, elementStyleProp as ɵelementStyleProp, elementStylingApply as ɵelementStylingApply, elementClassProp as ɵelementClassProp, textBinding as ɵtextBinding, template as ɵtemplate, embeddedViewEnd as ɵembeddedViewEnd, store as ɵstore, load as ɵload, pipe as ɵpipe, whenRendered as ɵwhenRendered, i18nAttribute as ɵi18nAttribute, i18nExp as ɵi18nExp, i18nStart as ɵi18nStart, i18nEnd as ɵi18nEnd, i18nApply as ɵi18nApply, i18nExpMapping as ɵi18nExpMapping, i18nInterpolation1 as ɵi18nInterpolation1, i18nInterpolation2 as ɵi18nInterpolation2, i18nInterpolation3 as ɵi18nInterpolation3, i18nInterpolation4 as ɵi18nInterpolation4, i18nInterpolation5 as ɵi18nInterpolation5, i18nInterpolation6 as ɵi18nInterpolation6, i18nInterpolation7 as ɵi18nInterpolation7, i18nInterpolation8 as ɵi18nInterpolation8, i18nInterpolationV as ɵi18nInterpolationV, i18nMapping as ɵi18nMapping, WRAP_RENDERER_FACTORY2 as ɵWRAP_RENDERER_FACTORY2, Render3DebugRendererFactory2 as ɵRender3DebugRendererFactory2, R3_COMPILE_NGMODULE_DEFS as ɵcompileNgModuleDefs, R3_PATCH_COMPONENT_DEF_WTIH_SCOPE as ɵpatchComponentDefWithScope, R3_COMPILE_COMPONENT as ɵcompileComponent, R3_COMPILE_DIRECTIVE as ɵcompileDirective, R3_COMPILE_PIPE as ɵcompilePipe, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getContext as ɵgetContext, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_NGCC__ as ɵcompileNgModuleFactory__POST_NGCC__, R3_COMPILE_COMPONENT__POST_NGCC__ as ɵR3_COMPILE_COMPONENT__POST_NGCC__, R3_COMPILE_DIRECTIVE__POST_NGCC__ as ɵR3_COMPILE_DIRECTIVE__POST_NGCC__, R3_COMPILE_INJECTABLE__POST_NGCC__ as ɵR3_COMPILE_INJECTABLE__POST_NGCC__, R3_COMPILE_NGMODULE__POST_NGCC__ as ɵR3_COMPILE_NGMODULE__POST_NGCC__, R3_COMPILE_PIPE__POST_NGCC__ as ɵR3_COMPILE_PIPE__POST_NGCC__, ivyEnable__POST_NGCC__ as ɵivyEnable__POST_NGCC__, R3_ELEMENT_REF_FACTORY__POST_NGCC__ as ɵR3_ELEMENT_REF_FACTORY__POST_NGCC__, R3_TEMPLATE_REF_FACTORY__POST_NGCC__ as ɵR3_TEMPLATE_REF_FACTORY__POST_NGCC__, R3_CHANGE_DETECTOR_REF_FACTORY__POST_NGCC__ as ɵR3_CHANGE_DETECTOR_REF_FACTORY__POST_NGCC__, R3_VIEW_CONTAINER_REF_FACTORY__POST_NGCC__ as ɵR3_VIEW_CONTAINER_REF_FACTORY__POST_NGCC__, R3_RENDERER2_FACTORY__POST_NGCC__ as ɵR3_RENDERER2_FACTORY__POST_NGCC__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$4 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map
