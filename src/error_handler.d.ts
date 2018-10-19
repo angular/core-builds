@@ -27,6 +27,8 @@
  * })
  * class MyModule {}
  * ```
+ *
+ * @publicApi
  */
 export declare class ErrorHandler {
     handleError(error: any): void;

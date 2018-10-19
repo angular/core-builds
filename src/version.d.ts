@@ -8,7 +8,7 @@
 /**
  * @description Represents the version of Angular
  *
- *
+ * @publicApi
  */
 export declare class Version {
     full: string;
@@ -17,4 +17,7 @@ export declare class Version {
     readonly patch: string;
     constructor(full: string);
 }
+/**
+ * @publicApi
+ */
 export declare const VERSION: Version;

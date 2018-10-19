@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0+32.sha-3f94759
+ * @license Angular v7.0.0+52.sha-778e1c2
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -90,7 +90,7 @@ const NG_ELEMENT_ID = getClosureSafeProperty({ __NG_ELEMENT_ID__: getClosureSafe
  * * `factory` gives the zero argument function which will create an instance of the injectable.
  *   The factory can call `inject` to access the `Injector` and request injection of dependencies.
  *
- * \@experimental
+ * \@publicApi
  * @template T
  * @param {?} opts
  * @return {?}
@@ -118,7 +118,7 @@ function defineInjectable(opts) {
  *   whose providers will also be added to the injector. Locally provided types will override
  *   providers from imports.
  *
- * \@experimental
+ * \@publicApi
  * @param {?} options
  * @return {?}
  */
@@ -189,6 +189,8 @@ function getInjectorDef(type) {
  *
  * {\@example core/di/ts/injector_spec.ts region='ShakableInjectionToken'}
  *
+ *
+ * \@publicApi
  * @template T
  */
 class InjectionToken {
@@ -421,13 +423,14 @@ function makePropDecorator(name, props, parentClass, additionalProcessing) {
  * class ModuleWithRoutes {}
  * ```
  *
- * \@experimental
+ * \@publicApi
   @type {?} */
 const ANALYZE_FOR_ENTRY_COMPONENTS = new InjectionToken('AnalyzeForEntryComponents');
 /** *
  * Attribute decorator and metadata.
  *
  * \@Annotation
+ * \@publicApi
   @type {?} */
 const Attribute = makeParamDecorator('Attribute', (attributeName) => ({ attributeName }));
 /**
@@ -437,6 +440,8 @@ const Attribute = makeParamDecorator('Attribute', (attributeName) => ({ attribut
  * @see `ContentChild`.
  * @see `ViewChildren`.
  * @see `ViewChild`.
+ *
+ * \@publicApi
  * @abstract
  */
 class Query {
@@ -446,6 +451,7 @@ class Query {
  *
  *
  * \@Annotation
+ * \@publicApi
   @type {?} */
 const ContentChildren = makePropDecorator('ContentChildren', (selector, data = {}) => (Object.assign({ selector, first: false, isViewQuery: false, descendants: false }, data)), Query);
 /** *
@@ -453,18 +459,21 @@ const ContentChildren = makePropDecorator('ContentChildren', (selector, data = {
  *
  *
  * \@Annotation
+ * \@publicApi
   @type {?} */
 const ContentChild = makePropDecorator('ContentChild', (selector, data = {}) => (Object.assign({ selector, first: true, isViewQuery: false, descendants: true }, data)), Query);
 /** *
  * ViewChildren decorator and metadata.
  *
  * \@Annotation
+ * \@publicApi
   @type {?} */
 const ViewChildren = makePropDecorator('ViewChildren', (selector, data = {}) => (Object.assign({ selector, first: false, isViewQuery: true, descendants: true }, data)), Query);
 /** *
  * ViewChild decorator and metadata.
  *
  * \@Annotation
+ * \@publicApi
   @type {?} */
 const ViewChild = makePropDecorator('ViewChild', (selector, data) => (Object.assign({ selector, first: true, isViewQuery: true, descendants: true }, data)), Query);
 
@@ -674,7 +683,7 @@ function noSideEffects(fn) {
  * \@usageNotes
  * ### Example
  * {\@example core/di/ts/forward_ref/forward_ref_spec.ts region='forward_ref'}
- * \@experimental
+ * \@publicApi
  * @param {?} forwardRefFn
  * @return {?}
  */
@@ -694,7 +703,7 @@ function forwardRef(forwardRefFn) {
  * {\@example core/di/ts/forward_ref/forward_ref_spec.ts region='resolve_forward_ref'}
  *
  * @see `forwardRef`
- * \@experimental
+ * \@publicApi
  * @param {?} type
  * @return {?}
  */
@@ -716,30 +725,35 @@ function resolveForwardRef(type) {
  * Inject decorator and metadata.
  *
  * \@Annotation
+ * \@publicApi
   @type {?} */
 const Inject = makeParamDecorator('Inject', (token) => ({ token }));
 /** *
  * Optional decorator and metadata.
  *
  * \@Annotation
+ * \@publicApi
   @type {?} */
 const Optional = makeParamDecorator('Optional');
 /** *
  * Self decorator and metadata.
  *
  * \@Annotation
+ * \@publicApi
   @type {?} */
 const Self = makeParamDecorator('Self');
 /** *
  * SkipSelf decorator and metadata.
  *
  * \@Annotation
+ * \@publicApi
   @type {?} */
 const SkipSelf = makeParamDecorator('SkipSelf');
 /** *
  * Host decorator and metadata.
  *
  * \@Annotation
+ * \@publicApi
   @type {?} */
 const Host = makeParamDecorator('Host');
 
@@ -759,7 +773,7 @@ const THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
  * Requesting this token instead of `Injector` allows `StaticInjector` to be tree-shaken from a
  * project.
  *
- * \@experimental
+ * \@publicApi
   @type {?} */
 const INJECTOR = new InjectionToken('INJECTOR');
 class NullInjector {
@@ -793,7 +807,7 @@ class NullInjector {
  *
  * {\@example core/di/ts/injector_spec.ts region='injectInjector'}
  *
- *
+ * \@publicApi
  * @abstract
  */
 class Injector {
@@ -1276,7 +1290,7 @@ function injectArgs(types) {
  * An example of a `Type` is `MyCustomComponent` class, which in JavaScript is be represented by
  * the `MyCustomComponent` constructor function.
  *
- *
+ * \@publicApi
   @type {?} */
 const Type = Function;
 /**
@@ -2378,6 +2392,7 @@ function devModeEqual(a, b) {
  *  }
  * ```
  *
+ * \@publicApi
  */
 class WrappedValue {
     /**
@@ -2408,6 +2423,7 @@ class WrappedValue {
 /**
  * Represents a basic change from a previous to a new value.
  *
+ * \@publicApi
  */
 class SimpleChange {
     /**
@@ -9401,7 +9417,7 @@ function directiveInject(token, flags = 0 /* Default */) {
  * })
  * ```
  *
- * \@experimental
+ * \@publicApi
  * @param {?} attrNameToInject
  * @return {?}
  */
@@ -9722,12 +9738,14 @@ function PublicFeature(definition) {
  * Provides access to the component instance and related objects,
  * and provides the means of destroying the instance.
  *
+ * \@publicApi
  * @abstract
  * @template C
  */
 class ComponentRef {
 }
 /**
+ * \@publicApi
  * @abstract
  * @template C
  */
@@ -9761,6 +9779,7 @@ class _NullComponentFactoryResolver {
     }
 }
 /**
+ * \@publicApi
  * @abstract
  */
 class ComponentFactoryResolver {
@@ -9846,14 +9865,14 @@ class ComponentFactoryBoundToModule extends ComponentFactory {
  * `NgModuleRef` provides access to the NgModule Instance as well other objects related to this
  * NgModule Instance.
  *
- *
+ * \@publicApi
  * @abstract
  * @template T
  */
 class NgModuleRef {
 }
 /**
- * \@experimental
+ * \@publicApi
  * @abstract
  * @template T
  */
@@ -10588,7 +10607,7 @@ let R3_RENDERER2_FACTORY$1 = R3_RENDERER2_FACTORY__PRE_NGCC__;
  * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
  * [Security Guide](http://g.co/ng/security).
  *
- *
+ * \@publicApi
  * @template T
  */
 class ElementRef {
@@ -10608,6 +10627,7 @@ ElementRef.__NG_ELEMENT_ID__ = () => R3_ELEMENT_REF_FACTORY$1(ElementRef);
  */
 /**
  * @deprecated Use `RendererType2` (and `Renderer2`) instead.
+ * \@publicApi
  */
 class RenderComponentType {
     /**
@@ -10635,6 +10655,7 @@ class RenderDebugInfo {
 }
 /**
  * @deprecated Use the `Renderer2` instead.
+ * \@publicApi
  * @abstract
  */
 class Renderer {
@@ -10654,6 +10675,7 @@ const Renderer2Interceptor = new InjectionToken('Renderer2Interceptor');
  * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
  *
  * @deprecated Use `RendererFactory2` instead.
+ * \@publicApi
  * @abstract
  */
 class RootRenderer {
@@ -10661,7 +10683,7 @@ class RootRenderer {
 /**
  * Creates and initializes a custom renderer that implements the `Renderer2` base class.
  *
- * \@experimental
+ * \@publicApi
  * @abstract
  */
 class RendererFactory2 {
@@ -10692,7 +10714,7 @@ RendererStyleFlags2[RendererStyleFlags2.DashCase] = 'DashCase';
  * not statically known, use the `setProperty()` or
  * `setAttribute()` method.
  *
- * \@experimental
+ * \@publicApi
  * @abstract
  */
 class Renderer2 {
@@ -11710,7 +11732,7 @@ function getNullInjector() {
 /**
  * Create a new `Injector` which is configured using a `defType` of `InjectorType<any>`s.
  *
- * \@experimental
+ * \@publicApi
  * @param {?} defType
  * @param {?=} parent
  * @param {?=} additionalProviders
@@ -12594,6 +12616,7 @@ function isPure(index) {
  *
  * Once a reference implementation of the spec is available, switch to it.
  *
+ * \@publicApi
  * @template T
  */
 class EventEmitter extends Subject {
@@ -12684,6 +12707,7 @@ class EventEmitter extends Subject {
  * @see `ViewContainerRef`
  * @see [Navigate the Component Tree with DI](guide/dependency-injection-navtree)
  *
+ * \@publicApi
  * @abstract
  * @template C
  */
@@ -13365,7 +13389,7 @@ let _runModeLocked = false;
  *
  * By default, this is true, unless a user calls `enableProdMode` before calling this.
  *
- * \@experimental APIs related to application bootstrap are currently under review.
+ * \@publicApi
  * @return {?}
  */
 function isDevMode() {
@@ -13379,6 +13403,8 @@ function isDevMode() {
  * One important assertion this disables verifies that a change detection pass
  * does not result in additional changes to any bindings (also known as
  * unidirectional data flow).
+ *
+ * \@publicApi
  * @return {?}
  */
 function enableProdMode() {
@@ -13922,7 +13948,7 @@ SecurityContext[SecurityContext.RESOURCE_URL] = 'RESOURCE_URL';
 /**
  * Sanitizer is used by the views to sanitize potentially dangerous values.
  *
- *
+ * \@publicApi
  * @abstract
  */
 class Sanitizer {
@@ -15173,6 +15199,8 @@ function preR3InjectableCompile(injectableType, options) {
  */
 /** *
  * Type of the Directive metadata.
+ *
+ * \@publicApi
   @type {?} */
 const Directive = makeDecorator('Directive', (dir = {}) => dir, undefined, undefined, (type, meta) => R3_COMPILE_DIRECTIVE$1(type, meta));
 /** *
@@ -15262,12 +15290,12 @@ const Directive = makeDecorator('Directive', (dir = {}) => dir, undefined, undef
  * `ngPreserveWhitespaces` attribute.
  *
  * \@Annotation
+ * \@publicApi
   @type {?} */
 const Component = makeDecorator('Component', (c = {}) => (Object.assign({ changeDetection: ChangeDetectionStrategy.Default }, c)), Directive, undefined, (type, meta) => R3_COMPILE_COMPONENT$1(type, meta));
 /** *
- *
- *
  * \@Annotation
+ * \@publicApi
   @type {?} */
 const Pipe = makeDecorator('Pipe', (p) => (Object.assign({ pure: true }, p)), undefined, undefined, (type, meta) => R3_COMPILE_PIPE$1(type, meta));
 /** @type {?} */
@@ -15305,18 +15333,18 @@ const updateBaseDefFromIOProp = (getProp) => (target, name, ...args) => {
     defProp[name] = args[0];
 };
 /** *
- *
  * \@Annotation
+ * \@publicApi
   @type {?} */
 const Input = makePropDecorator('Input', (bindingPropertyName) => ({ bindingPropertyName }), undefined, updateBaseDefFromIOProp(baseDef => baseDef.inputs || {}));
 /** *
- *
  * \@Annotation
+ * \@publicApi
   @type {?} */
 const Output = makePropDecorator('Output', (bindingPropertyName) => ({ bindingPropertyName }), undefined, updateBaseDefFromIOProp(baseDef => baseDef.outputs || {}));
 /** *
- *
  * \@Annotation
+ * \@publicApi
   @type {?} */
 const HostBinding = makePropDecorator('HostBinding', (hostPropertyName) => ({ hostPropertyName }));
 /** *
@@ -15349,6 +15377,7 @@ const HostBinding = makePropDecorator('HostBinding', (hostPropertyName) => ({ ho
  * ```
  *
  * \@Annotation
+ * \@publicApi
   @type {?} */
 const HostListener = makePropDecorator('HostListener', (eventName, args) => ({ eventName, args }));
 
@@ -15362,7 +15391,7 @@ const HostListener = makePropDecorator('HostListener', (eventName, args) => ({ e
  * - Element properties named with dash case (`-`).
  * Dash case is the naming convention for custom elements.
  *
- *
+ * \@publicApi
   @type {?} */
 const CUSTOM_ELEMENTS_SCHEMA = {
     name: 'custom-elements'
@@ -15370,13 +15399,14 @@ const CUSTOM_ELEMENTS_SCHEMA = {
 /** *
  * Defines a schema that allows any property on any element.
  *
- * \@experimental
+ * \@publicApi
   @type {?} */
 const NO_ERRORS_SCHEMA = {
     name: 'no-errors-schema'
 };
 /** *
  * \@Annotation
+ * \@publicApi
   @type {?} */
 const NgModule = makeDecorator('NgModule', (ngModule) => ngModule, undefined, undefined, /**
      * Decorator that marks the following class as an NgModule, and supplies
@@ -15410,7 +15440,7 @@ const NgModule = makeDecorator('NgModule', (ngModule) => ngModule, undefined, un
 /**
  * \@description Represents the version of Angular
  *
- *
+ * \@publicApi
  */
 class Version {
     /**
@@ -15423,8 +15453,10 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-/** @type {?} */
-const VERSION = new Version('7.0.0+32.sha-3f94759');
+/** *
+ * \@publicApi
+  @type {?} */
+const VERSION = new Version('7.0.0+52.sha-778e1c2');
 
 /**
  * @fileoverview added by tsickle
@@ -15434,6 +15466,7 @@ const VERSION = new Version('7.0.0+32.sha-3f94759');
  * Injectable decorator and metadata.
  *
  * \@Annotation
+ * \@publicApi
   @type {?} */
 const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, (type, meta) => R3_COMPILE_INJECTABLE$1(type, meta));
 
@@ -15503,6 +15536,8 @@ function defaultErrorLogger(console, ...values) {
  * })
  * class MyModule {}
  * ```
+ *
+ * \@publicApi
  */
 class ErrorHandler {
     constructor() {
@@ -15850,7 +15885,9 @@ function mixingMultiProvidersWithRegularProvidersError(provider1, provider2) {
  * `Key` should not be created directly. {\@link ReflectiveInjector} creates keys automatically when
  * resolving
  * providers.
+ *
  * @deprecated No replacement
+ * \@publicApi
  */
 class ReflectiveKey {
     /**
@@ -16066,7 +16103,7 @@ class ResolvedReflectiveProvider_ {
 }
 /**
  * An internal resolved representation of a factory function created by resolving `Provider`.
- * \@experimental
+ * \@publicApi
  */
 class ResolvedReflectiveFactory {
     /**
@@ -16323,6 +16360,7 @@ const UNDEFINED = new Object();
  * resolve all of the object's dependencies automatically.
  *
  * @deprecated from v5 - slow and brings in a lot of code, Use `Injector.create` instead.
+ * \@publicApi
  * @abstract
  */
 class ReflectiveInjector {
@@ -16417,7 +16455,6 @@ class ReflectiveInjector {
      * var injector = ReflectiveInjector.fromResolvedProviders(providers);
      * expect(injector.get(Car) instanceof Car).toBe(true);
      * ```
-     * \@experimental
      * @param {?} providers
      * @param {?=} parent
      * @return {?}
@@ -16729,10 +16766,14 @@ function isObservable(obj) {
  */
 /** *
  * A function that will be executed when an application is initialized.
+ *
+ * \@publicApi
   @type {?} */
 const APP_INITIALIZER = new InjectionToken('Application Initializer');
 /**
  * A class that reflects the state of running {\@link APP_INITIALIZER}s.
+ *
+ * \@publicApi
  */
 class ApplicationInitStatus {
     /**
@@ -16798,7 +16839,7 @@ ApplicationInitStatus.ctorParameters = () => [
  * If you need to avoid randomly generated value to be used as an application id, you can provide
  * a custom value via a DI provider <!-- TODO: provider --> configuring the root {\@link Injector}
  * using this token.
- * \@experimental
+ * \@publicApi
   @type {?} */
 const APP_ID = new InjectionToken('AppId');
 /**
@@ -16809,7 +16850,7 @@ function _appIdRandomProviderFactory() {
 }
 /** *
  * Providers that will generate a random APP_ID_TOKEN.
- * \@experimental
+ * \@publicApi
   @type {?} */
 const APP_ID_RANDOM_PROVIDER = {
     provide: APP_ID,
@@ -16824,12 +16865,12 @@ function _randomChar() {
 }
 /** *
  * A function that will be executed when a platform is initialized.
- * \@experimental
+ * \@publicApi
   @type {?} */
 const PLATFORM_INITIALIZER = new InjectionToken('Platform Initializer');
 /** *
  * A token that indicates an opaque platform id.
- * \@experimental
+ * \@publicApi
   @type {?} */
 const PLATFORM_ID = new InjectionToken('Platform ID');
 /** *
@@ -16838,12 +16879,12 @@ const PLATFORM_ID = new InjectionToken('Platform ID');
  *
  * `(componentRef: ComponentRef) => void`.
  *
- * \@experimental
+ * \@publicApi
   @type {?} */
 const APP_BOOTSTRAP_LISTENER = new InjectionToken('appBootstrapListener');
 /** *
  * A token which indicates the root directory of the application
- * \@experimental
+ * \@publicApi
   @type {?} */
 const PACKAGE_ROOT_URL = new InjectionToken('Application Packages Root URL');
 
@@ -16880,7 +16921,7 @@ Console.decorators = [
 /**
  * Combination of NgModuleFactory and ComponentFactorys.
  *
- * \@experimental
+ * \@publicApi
  * @template T
  */
 class ModuleWithComponentFactories {
@@ -16908,6 +16949,7 @@ function _throwError() {
  * that will use the directives/pipes of the ng module for compilation
  * of components.
  *
+ * \@publicApi
  */
 class Compiler {
     /**
@@ -16967,13 +17009,13 @@ Compiler.decorators = [
 /** *
  * Token to provide CompilerOptions in the platform injector.
  *
- * \@experimental
+ * \@publicApi
   @type {?} */
 const COMPILER_OPTIONS = new InjectionToken('compilerOptions');
 /**
  * A factory for creating a Compiler
  *
- * \@experimental
+ * \@publicApi
  * @abstract
  */
 class CompilerFactory {
@@ -17080,7 +17122,7 @@ function noopScope(arg0, arg1) {
  * needs to be fixed before the app should be profiled. Add try-finally only when you expect that
  * an exception is expected during normal execution while profiling.
  *
- * \@experimental
+ * \@publicApi
   @type {?} */
 const wtfCreateScope = wtfEnabled ? createScope : (signature, flags) => noopScope;
 /** *
@@ -17090,7 +17132,7 @@ const wtfCreateScope = wtfEnabled ? createScope : (signature, flags) => noopScop
  * - `returnValue` (optional) to be passed to the WTF.
  *
  * Returns the `returnValue for easy chaining.
- * \@experimental
+ * \@publicApi
   @type {?} */
 const wtfLeave = wtfEnabled ? leave : (s, r) => r;
 /** *
@@ -17104,14 +17146,14 @@ const wtfLeave = wtfEnabled ? leave : (s, r) => r;
  *          wtfEndTimeRange(s);
  *        });
  *     }
- * \@experimental
+ * \@publicApi
   @type {?} */
 const wtfStartTimeRange = wtfEnabled ? startTimeRange : (rangeType, action) => null;
 /** *
  * Ends a async time range operation.
  * [range] is the return value from [wtfStartTimeRange] Async ranges only work if WTF has been
  * enabled.
- * \@experimental
+ * \@publicApi
   @type {?} */
 const wtfEndTimeRange = wtfEnabled ? endTimeRange : (r) => null;
 
@@ -17191,7 +17233,7 @@ const wtfEndTimeRange = wtfEnabled ? endTimeRange : (r) => null;
  * }
  * ```
  *
- * \@experimental
+ * \@publicApi
  */
 class NgZone {
     /**
@@ -17485,7 +17527,7 @@ class NoopNgZone {
  * The Testability service provides testing hooks that can be accessed from
  * the browser and by services such as Protractor. Each bootstrapped Angular
  * application on the page will have an instance of Testability.
- * \@experimental
+ * \@publicApi
  */
 class Testability {
     /**
@@ -17671,7 +17713,7 @@ Testability.ctorParameters = () => [
 ];
 /**
  * A global registry of {\@link Testability} instances for specific elements.
- * \@experimental
+ * \@publicApi
  */
 class TestabilityRegistry {
     constructor() {
@@ -17751,7 +17793,7 @@ class _NoopGetTestability {
 }
 /**
  * Set the {\@link GetTestability} implementation used by the Angular testing framework.
- * \@experimental
+ * \@publicApi
  * @param {?} getter
  * @return {?}
  */
@@ -17799,7 +17841,7 @@ const ALLOW_MULTIPLE_PLATFORMS = new InjectionToken('AllowMultipleToken');
 /**
  * A token for third-party components that can register themselves with NgProbe.
  *
- * \@experimental
+ * \@publicApi
  */
 class NgProbeToken {
     /**
@@ -17815,7 +17857,7 @@ class NgProbeToken {
  * Creates a platform.
  * Platforms have to be eagerly created via this function.
  *
- * \@experimental APIs related to application bootstrap are currently under review.
+ * \@publicApi
  * @param {?} injector
  * @return {?}
  */
@@ -17834,7 +17876,7 @@ function createPlatform(injector) {
 /**
  * Creates a factory for a platform
  *
- * \@experimental APIs related to application bootstrap are currently under review.
+ * \@publicApi
  * @param {?} parentPlatformFactory
  * @param {?} name
  * @param {?=} providers
@@ -17864,7 +17906,7 @@ function createPlatformFactory(parentPlatformFactory, name, providers = []) {
 /**
  * Checks that there currently is a platform which contains the given token as a provider.
  *
- * \@experimental APIs related to application bootstrap are currently under review.
+ * \@publicApi
  * @param {?} requiredToken
  * @return {?}
  */
@@ -17882,7 +17924,7 @@ function assertPlatform(requiredToken) {
 /**
  * Destroy the existing platform.
  *
- * \@experimental APIs related to application bootstrap are currently under review.
+ * \@publicApi
  * @return {?}
  */
 function destroyPlatform() {
@@ -17893,7 +17935,7 @@ function destroyPlatform() {
 /**
  * Returns the current platform.
  *
- * \@experimental APIs related to application bootstrap are currently under review.
+ * \@publicApi
  * @return {?}
  */
 function getPlatform() {
@@ -17906,6 +17948,8 @@ function getPlatform() {
  *
  * A page's platform is initialized implicitly when a platform is created via a platform factory
  * (e.g. {\@link platformBrowser}), or explicitly by calling the {\@link createPlatform} function.
+ *
+ * \@publicApi
  */
 class PlatformRef {
     /**
@@ -17939,8 +17983,6 @@ class PlatformRef {
      *
      * let moduleRef = platformBrowser().bootstrapModuleFactory(MyModuleNgFactory);
      * ```
-     *
-     * \@experimental APIs related to application bootstrap are currently under review.
      * @template M
      * @param {?} moduleFactory
      * @param {?=} options
@@ -18117,6 +18159,8 @@ function optionsReducer(dst, objs) {
 }
 /**
  * A reference to an Angular application running on a page.
+ *
+ * \@publicApi
  */
 class ApplicationRef {
     /**
@@ -18394,6 +18438,7 @@ function remove(list, el) {
 /**
  * Used to load ng module factories.
  *
+ * \@publicApi
  * @abstract
  */
 class NgModuleFactoryLoader {
@@ -18402,7 +18447,7 @@ class NgModuleFactoryLoader {
 let moduleFactories = new Map();
 /**
  * Registers a loaded module. Should only be called from generated NgModuleFactory code.
- * \@experimental
+ * \@publicApi
  * @param {?} id
  * @param {?} factory
  * @return {?}
@@ -18419,7 +18464,7 @@ function registerModuleFactory(id, factory) {
  * Returns the NgModuleFactory with the given id, if it exists and has been loaded.
  * Factories for modules that do not specify an `id` cannot be retrieved. Throws if the module
  * cannot be found.
- * \@experimental
+ * \@publicApi
  * @param {?} id
  * @return {?}
  */
@@ -18458,6 +18503,8 @@ function getModuleFactory(id) {
  * \@ViewChildren(Item) items:QueryList<Item>;
  * }
  * ```
+ *
+ * \@publicApi
  * @template T
  */
 class QueryList$1 {
@@ -18586,7 +18633,7 @@ const FACTORY_CLASS_SUFFIX = 'NgFactory';
  * Configuration for SystemJsNgModuleLoader.
  * token.
  *
- * \@experimental
+ * \@publicApi
  * @abstract
  */
 class SystemJsNgModuleLoaderConfig {
@@ -18598,7 +18645,7 @@ const DEFAULT_CONFIG = {
 };
 /**
  * NgModuleFactoryLoader that uses SystemJS to load NgModuleFactory
- * \@experimental
+ * \@publicApi
  */
 class SystemJsNgModuleLoader {
     /**
@@ -18687,6 +18734,7 @@ function checkNotEmpty(value, modulePath, exportName) {
  * @see `ComponentRef`
  * @see `EmbeddedViewRef`
  *
+ * \@publicApi
  * @abstract
  */
 class ViewContainerRef {
@@ -18740,6 +18788,7 @@ ViewContainerRef.__NG_ELEMENT_ID__ = () => R3_VIEW_CONTAINER_REF_FACTORY$1(ViewC
  *
  * <code-example path="core/ts/change_detect/change-detection.ts" region="reattach"></code-example>
  *
+ * \@publicApi
  * @abstract
  */
 class ChangeDetectorRef {
@@ -18760,6 +18809,8 @@ ChangeDetectorRef.__NG_ELEMENT_ID__ = () => R3_CHANGE_DETECTOR_REF_FACTORY$1();
  * that adds destroy methods for [embedded views](guide/glossary#view-tree).
  *
  * @see `EmbeddedViewRef`
+ *
+ * \@publicApi
  * @abstract
  */
 class ViewRef$1 extends ChangeDetectorRef {
@@ -18815,7 +18866,7 @@ class ViewRef$1 extends ChangeDetectorRef {
  * </ul>
  * <!-- /ViewRef: outer-0 -->
  * ```
- * \@experimental
+ * \@publicApi
  * @abstract
  * @template C
  */
@@ -18849,7 +18900,7 @@ class EventListener {
     }
 }
 /**
- * \@experimental All debugging apis are currently experimental.
+ * \@publicApi
  */
 class DebugNode {
     /**
@@ -18888,7 +18939,7 @@ class DebugNode {
     get providerTokens() { return this._debugContext.providerTokens; }
 }
 /**
- * \@experimental All debugging apis are currently experimental.
+ * \@publicApi
  */
 class DebugElement extends DebugNode {
     /**
@@ -19013,7 +19064,7 @@ class DebugElement extends DebugNode {
     }
 }
 /**
- * \@experimental
+ * \@publicApi
  * @param {?} debugEls
  * @return {?}
  */
@@ -19057,7 +19108,7 @@ function _queryNodeChildren(parentNode, predicate, matches) {
 /** @type {?} */
 const _nativeNodeToDebugNode = new Map();
 /**
- * \@experimental
+ * \@publicApi
  * @param {?} nativeNode
  * @return {?}
  */
@@ -19103,6 +19154,7 @@ class DefaultIterableDifferFactory {
 const trackByIdentity = (index, item) => item;
 /**
  * @deprecated v4.0.0 - Should not be part of public API.
+ * \@publicApi
  * @template V
  */
 class DefaultIterableDiffer {
@@ -20291,6 +20343,7 @@ class KeyValueChangeRecord_ {
 /**
  * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
  *
+ * \@publicApi
  */
 class IterableDiffers {
     /**
@@ -20382,6 +20435,7 @@ function getTypeNameForDebugging(type) {
 /**
  * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
  *
+ * \@publicApi
  */
 class KeyValueDiffers {
     /**
@@ -20491,7 +20545,7 @@ const _CORE_PLATFORM_PROVIDERS = [
 /** *
  * This platform has to be included in any other platform
  *
- * \@experimental
+ * \@publicApi
   @type {?} */
 const platformCore = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDERS);
 
@@ -20519,7 +20573,7 @@ const platformCore = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDER
  * });
  * ```
  *
- * \@experimental i18n support is experimental.
+ * \@publicApi
   @type {?} */
 const LOCALE_ID = new InjectionToken('LocaleId');
 /** *
@@ -20544,7 +20598,7 @@ const LOCALE_ID = new InjectionToken('LocaleId');
  * });
  * ```
  *
- * \@experimental i18n support is experimental.
+ * \@publicApi
   @type {?} */
 const TRANSLATIONS = new InjectionToken('Translations');
 /** *
@@ -20566,7 +20620,7 @@ const TRANSLATIONS = new InjectionToken('Translations');
  * });
  * ```
  *
- * \@experimental i18n support is experimental.
+ * \@publicApi
   @type {?} */
 const TRANSLATIONS_FORMAT = new InjectionToken('TranslationsFormat');
 /** @enum {number} */
@@ -20635,7 +20689,7 @@ const APPLICATION_MODULE_PROVIDERS = [
  * Re-exported by `BrowserModule`, which is included automatically in the root
  * `AppModule` when you create a new app with the CLI `new` command.
  *
- * \@experimental
+ * \@publicApi
  */
 class ApplicationModule {
     /**

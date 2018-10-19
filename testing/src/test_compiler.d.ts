@@ -10,7 +10,7 @@ import { MetadataOverride } from './metadata_override';
 /**
  * Special interface to the compiler only used by testing
  *
- * @experimental
+ * @publicApi
  */
 export declare class TestingCompiler extends Compiler {
     readonly injector: Injector;
@@ -38,7 +38,7 @@ export declare class TestingCompiler extends Compiler {
 /**
  * A factory for creating a Compiler
  *
- * @experimental
+ * @publicApi
  */
 export declare abstract class TestingCompilerFactory {
     abstract createTestingCompiler(options?: CompilerOptions[]): TestingCompiler;

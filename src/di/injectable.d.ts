@@ -11,11 +11,13 @@ import { ClassSansProvider, ConstructorSansProvider, ExistingSansProvider, Facto
 /**
  * Injectable providers used in `@Injectable` decorator.
  *
- * @experimental
+ * @publicApi
  */
 export declare type InjectableProvider = ValueSansProvider | ExistingSansProvider | StaticClassSansProvider | ConstructorSansProvider | FactorySansProvider | ClassSansProvider;
 /**
  * Type of the Injectable decorator / constructor function.
+ *
+ * @publicApi
  */
 export interface InjectableDecorator {
     /**
@@ -46,21 +48,22 @@ export interface InjectableDecorator {
 /**
  * Type of the Injectable metadata.
  *
- * @experimental
+ * @publicApi
  */
 export interface Injectable {
     providedIn?: Type<any> | 'root' | null;
 }
 /**
-* Injectable decorator and metadata.
-*
-* @Annotation
-*/
+ * Injectable decorator and metadata.
+ *
+ * @Annotation
+ * @publicApi
+ */
 export declare const Injectable: InjectableDecorator;
 /**
  * Type representing injectable service.
  *
- * @experimental
+ * @publicApi
  */
 export interface InjectableType<T> extends Type<T> {
     ngInjectableDef: InjectableDef<T>;

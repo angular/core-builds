@@ -78,7 +78,7 @@ import { EventEmitter } from '../event_emitter';
  * }
  * ```
  *
- * @experimental
+ * @publicApi
  */
 export declare class NgZone {
     readonly hasPendingMicrotasks: boolean;

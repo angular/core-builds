@@ -40,7 +40,7 @@ import { Type } from '../type';
  * class ModuleWithRoutes {}
  * ```
  *
- * @experimental
+ * @publicApi
  */
 export declare const ANALYZE_FOR_ENTRY_COMPONENTS: InjectionToken<any>;
 /**
@@ -101,6 +101,7 @@ export interface Attribute {
  * Attribute decorator and metadata.
  *
  * @Annotation
+ * @publicApi
  */
 export declare const Attribute: AttributeDecorator;
 /**
@@ -120,6 +121,8 @@ export interface Query {
  * @see `ContentChild`.
  * @see `ViewChildren`.
  * @see `ViewChild`.
+ *
+ * @publicApi
  */
 export declare abstract class Query {
 }
@@ -127,6 +130,7 @@ export declare abstract class Query {
  * Type of the ContentChildren decorator / constructor function.
  *
  * @see `ContentChildren`.
+ * @publicApi
  */
 export interface ContentChildrenDecorator {
     /**
@@ -180,14 +184,14 @@ export declare type ContentChildren = Query;
  * ContentChildren decorator and metadata.
  *
  *
- *  @Annotation
+ * @Annotation
+ * @publicApi
  */
 export declare const ContentChildren: ContentChildrenDecorator;
 /**
  * Type of the ContentChild decorator / constructor function.
  *
- *
- *
+ * @publicApi
  */
 export interface ContentChildDecorator {
     /**
@@ -235,6 +239,7 @@ export declare type ContentChild = Query;
  *
  *
  * @Annotation
+ * @publicApi
  */
 export declare const ContentChild: ContentChildDecorator;
 /**
@@ -242,7 +247,7 @@ export declare const ContentChild: ContentChildDecorator;
  *
  * @see `ViewChildren`.
  *
- *
+ * @publicApi
  */
 export interface ViewChildrenDecorator {
     /**
@@ -286,12 +291,14 @@ export declare type ViewChildren = Query;
  * ViewChildren decorator and metadata.
  *
  * @Annotation
+ * @publicApi
  */
 export declare const ViewChildren: ViewChildrenDecorator;
 /**
  * Type of the ViewChild decorator / constructor function.
  *
  * @see `ViewChild`.
+ * @publicApi
  */
 export interface ViewChildDecorator {
     /**
@@ -348,5 +355,6 @@ export declare type ViewChild = Query;
  * ViewChild decorator and metadata.
  *
  * @Annotation
+ * @publicApi
  */
 export declare const ViewChild: ViewChildDecorator;
