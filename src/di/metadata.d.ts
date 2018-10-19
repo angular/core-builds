@@ -7,6 +7,8 @@
  */
 /**
  * Type of the Inject decorator / constructor function.
+ *
+ * @publicApi
  */
 export interface InjectDecorator {
     /**
@@ -31,6 +33,8 @@ export interface InjectDecorator {
 }
 /**
  * Type of the Inject metadata.
+ *
+ * @publicApi
  */
 export interface Inject {
     /**
@@ -42,10 +46,13 @@ export interface Inject {
  * Inject decorator and metadata.
  *
  * @Annotation
+ * @publicApi
  */
 export declare const Inject: InjectDecorator;
 /**
  * Type of the Optional decorator / constructor function.
+ *
+ * @publicApi
  */
 export interface OptionalDecorator {
     /**
@@ -63,6 +70,8 @@ export interface OptionalDecorator {
 }
 /**
  * Type of the Optional metadata.
+ *
+ * @publicApi
  */
 export interface Optional {
 }
@@ -70,10 +79,13 @@ export interface Optional {
  * Optional decorator and metadata.
  *
  * @Annotation
+ * @publicApi
  */
 export declare const Optional: OptionalDecorator;
 /**
  * Type of the Self decorator / constructor function.
+ *
+ * @publicApi
  */
 export interface SelfDecorator {
     /**
@@ -95,6 +107,8 @@ export interface SelfDecorator {
 }
 /**
  * Type of the Self metadata.
+ *
+ * @publicApi
  */
 export interface Self {
 }
@@ -102,10 +116,13 @@ export interface Self {
  * Self decorator and metadata.
  *
  * @Annotation
+ * @publicApi
  */
 export declare const Self: SelfDecorator;
 /**
  * Type of the SkipSelf decorator / constructor function.
+ *
+ * @publicApi
  */
 export interface SkipSelfDecorator {
     /**
@@ -127,7 +144,7 @@ export interface SkipSelfDecorator {
 /**
  * Type of the SkipSelf metadata.
  *
- *
+ * @publicApi
  */
 export interface SkipSelf {
 }
@@ -135,10 +152,13 @@ export interface SkipSelf {
  * SkipSelf decorator and metadata.
  *
  * @Annotation
+ * @publicApi
  */
 export declare const SkipSelf: SkipSelfDecorator;
 /**
  * Type of the Host decorator / constructor function.
+ *
+ * @publicApi
  */
 export interface HostDecorator {
     /**
@@ -157,6 +177,8 @@ export interface HostDecorator {
 }
 /**
  * Type of the Host metadata.
+ *
+ * @publicApi
  */
 export interface Host {
 }
@@ -164,5 +186,6 @@ export interface Host {
  * Host decorator and metadata.
  *
  * @Annotation
+ * @publicApi
  */
 export declare const Host: HostDecorator;

@@ -24,6 +24,7 @@ export declare function devModeEqual(a: any, b: any): boolean;
  *  }
  * ```
  *
+ * @publicApi
  */
 export declare class WrappedValue {
     /** @deprecated from 5.3, use `unwrap()` instead - will switch to protected */
@@ -42,6 +43,7 @@ export declare class WrappedValue {
 /**
  * Represents a basic change from a previous to a new value.
  *
+ * @publicApi
  */
 export declare class SimpleChange {
     previousValue: any;

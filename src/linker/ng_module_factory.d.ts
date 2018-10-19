@@ -14,7 +14,7 @@ import { ComponentFactoryResolver } from './component_factory_resolver';
  * `NgModuleRef` provides access to the NgModule Instance as well other objects related to this
  * NgModule Instance.
  *
- *
+ * @publicApi
  */
 export declare abstract class NgModuleRef<T> {
     /**
@@ -43,7 +43,7 @@ export interface InternalNgModuleRef<T> extends NgModuleRef<T> {
     _bootstrapComponents: Type<any>[];
 }
 /**
- * @experimental
+ * @publicApi
  */
 export declare abstract class NgModuleFactory<T> {
     abstract readonly moduleType: Type<T>;

@@ -2,7 +2,7 @@
  * Clears out the shared fake async zone for a test.
  * To be called in a global `beforeEach`.
  *
- * @experimental
+ * @publicApi
  */
 export declare function resetFakeAsyncZone(): void;
 /**
@@ -22,7 +22,7 @@ export declare function resetFakeAsyncZone(): void;
  * @param fn
  * @returns The function wrapped to be executed in the fakeAsync zone
  *
- * @experimental
+ * @publicApi
  */
 export declare function fakeAsync(fn: Function): (...args: any[]) => any;
 /**
@@ -36,7 +36,7 @@ export declare function fakeAsync(fn: Function): (...args: any[]) => any;
  *
  * {@example core/testing/ts/fake_async.ts region='basic'}
  *
- * @experimental
+ * @publicApi
  */
 export declare function tick(millis?: number): void;
 /**
@@ -47,18 +47,18 @@ export declare function tick(millis?: number): void;
  * @param maxTurns
  * @returns The simulated time elapsed, in millis.
  *
- * @experimental
+ * @publicApi
  */
 export declare function flush(maxTurns?: number): number;
 /**
  * Discard all remaining periodic tasks.
  *
- * @experimental
+ * @publicApi
  */
 export declare function discardPeriodicTasks(): void;
 /**
  * Flush any pending microtasks.
  *
- * @experimental
+ * @publicApi
  */
 export declare function flushMicrotasks(): void;

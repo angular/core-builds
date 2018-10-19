@@ -12,7 +12,7 @@
  *
  * See DomSanitizer for more details on security in Angular applications.
  *
- *
+ * @publicApi
  */
 export declare enum SecurityContext {
     NONE = 0,
@@ -25,7 +25,7 @@ export declare enum SecurityContext {
 /**
  * Sanitizer is used by the views to sanitize potentially dangerous values.
  *
- *
+ * @publicApi
  */
 export declare abstract class Sanitizer {
     abstract sanitize(context: SecurityContext, value: {} | string | null): string | null;
