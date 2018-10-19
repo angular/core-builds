@@ -8,6 +8,7 @@
 import { InjectionToken } from '../di/injection_token';
 import { Injector } from '../di/injector';
 import { ViewEncapsulation } from '../metadata/view';
+import { injectRenderer2 as render3InjectRenderer2 } from '../render3/view_engine_compatibility';
 /**
  * @deprecated Use `RendererType2` (and `Renderer2`) instead.
  */
@@ -331,3 +332,4 @@ export declare abstract class Renderer2 {
      */
     abstract listen(target: 'window' | 'document' | 'body' | any, eventName: string, callback: (event: any) => boolean | void): () => void;
 }
+export declare const SWITCH_RENDERER2_FACTORY__POST_R3__: typeof render3InjectRenderer2;
