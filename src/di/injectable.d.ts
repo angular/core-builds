@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { compileInjectable as render3CompileInjectable } from '../render3/jit/injectable';
 import { Type } from '../type';
 import { InjectableDef } from './defs';
 import { ClassSansProvider, ConstructorSansProvider, ExistingSansProvider, FactorySansProvider, StaticClassSansProvider, ValueSansProvider } from './provider';
@@ -65,3 +66,4 @@ export declare const Injectable: InjectableDecorator;
 export interface InjectableType<T> extends Type<T> {
     ngInjectableDef: InjectableDef<T>;
 }
+export declare const SWITCH_COMPILE_INJECTABLE__POST_R3__: typeof render3CompileInjectable;

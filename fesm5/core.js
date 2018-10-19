@@ -1,12 +1,12 @@
 /**
- * @license Angular v7.0.0-rc.1+85.sha-f8195e5
+ * @license Angular v7.0.0-rc.1+102.sha-d4cee51
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
 import { __decorate, __metadata, __spread, __extends, __param, __read, __assign, __values } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
-import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compileInjectable, compilePipeFromMetadata } from '@angular/compiler';
+import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compilePipeFromMetadata, compileInjectable } from '@angular/compiler';
 import { share } from 'rxjs/operators';
 
 /**
@@ -500,6 +500,146 @@ function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
     return changeDetectionStrategy == null ||
         changeDetectionStrategy === ChangeDetectionStrategy.Default;
 }
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Used to resolve resource URLs on `@Component` when used with JIT compilation.
+ *
+ * Example:
+ * ```
+ * @Component({
+ *   selector: 'my-comp',
+ *   templateUrl: 'my-comp.html', // This requires asynchronous resolution
+ * })
+ * class MyComponnent{
+ * }
+ *
+ * // Calling `renderComponent` will fail because `MyComponent`'s `@Compenent.templateUrl`
+ * // needs to be resolved because `renderComponent` is synchronous process.
+ * // renderComponent(MyComponent);
+ *
+ * // Calling `resolveComponentResources` will resolve `@Compenent.templateUrl` into
+ * // `@Compenent.template`, which would allow `renderComponent` to proceed in synchronous manner.
+ * // Use browser's `fetch` function as the default resource resolution strategy.
+ * resolveComponentResources(fetch).then(() => {
+ *   // After resolution all URLs have been converted into strings.
+ *   renderComponent(MyComponent);
+ * });
+ *
+ * ```
+ *
+ * NOTE: In AOT the resolution happens during compilation, and so there should be no need
+ * to call this method outside JIT mode.
+ *
+ * @param resourceResolver a function which is responsible to returning a `Promise` of the resolved
+ * URL. Browser's `fetch` method is a good default implementation.
+ */
+function resolveComponentResources(resourceResolver) {
+    // Store all promises which are fetching the resources.
+    var urlFetches = [];
+    // Cache so that we don't fetch the same resource more than once.
+    var urlMap = new Map();
+    function cachedResourceResolve(url) {
+        var promise = urlMap.get(url);
+        if (!promise) {
+            var resp = resourceResolver(url);
+            urlMap.set(url, promise = resp.then(unwrapResponse));
+            urlFetches.push(promise);
+        }
+        return promise;
+    }
+    componentResourceResolutionQueue.forEach(function (component) {
+        if (component.templateUrl) {
+            cachedResourceResolve(component.templateUrl).then(function (template) {
+                component.template = template;
+                component.templateUrl = undefined;
+            });
+        }
+        var styleUrls = component.styleUrls;
+        var styles = component.styles || (component.styles = []);
+        var styleOffset = component.styles.length;
+        styleUrls && styleUrls.forEach(function (styleUrl, index) {
+            styles.push(''); // pre-allocate array.
+            cachedResourceResolve(styleUrl).then(function (style) {
+                styles[styleOffset + index] = style;
+                styleUrls.splice(styleUrls.indexOf(styleUrl), 1);
+                if (styleUrls.length == 0) {
+                    component.styleUrls = undefined;
+                }
+            });
+        });
+    });
+    componentResourceResolutionQueue.clear();
+    return Promise.all(urlFetches).then(function () { return null; });
+}
+var componentResourceResolutionQueue = new Set();
+function maybeQueueResolutionOfComponentResources(metadata) {
+    if (componentNeedsResolution(metadata)) {
+        componentResourceResolutionQueue.add(metadata);
+    }
+}
+function componentNeedsResolution(component) {
+    return component.templateUrl || component.styleUrls && component.styleUrls.length;
+}
+function unwrapResponse(response) {
+    return typeof response == 'string' ? response : response.text();
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Defines template and style encapsulation options available for Component's {@link Component}.
+ *
+ * See {@link Component#encapsulation encapsulation}.
+ *
+ * @usageNotes
+ * ### Example
+ * {@example core/ts/metadata/encapsulation.ts region='longform'}
+ */
+var ViewEncapsulation;
+(function (ViewEncapsulation) {
+    /**
+     * Emulate `Native` scoping of styles by adding an attribute containing surrogate id to the Host
+     * Element and pre-processing the style rules provided via {@link Component#styles styles} or
+     * {@link Component#styleUrls styleUrls}, and adding the new Host Element attribute to all
+     * selectors.
+     *
+     * This is the default option.
+     */
+    ViewEncapsulation[ViewEncapsulation["Emulated"] = 0] = "Emulated";
+    /**
+     * @deprecated v6.1.0 - use {ViewEncapsulation.ShadowDom} instead.
+     * Use the native encapsulation mechanism of the renderer.
+     *
+     * For the DOM this means using the deprecated [Shadow DOM
+     * v0](https://w3c.github.io/webcomponents/spec/shadow/) and
+     * creating a ShadowRoot for Component's Host Element.
+     */
+    ViewEncapsulation[ViewEncapsulation["Native"] = 1] = "Native";
+    /**
+     * Don't provide any template or style encapsulation.
+     */
+    ViewEncapsulation[ViewEncapsulation["None"] = 2] = "None";
+    /**
+     * Use Shadow DOM to encapsulate styles.
+     *
+     * For the DOM this means using modern [Shadow
+     * DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
+     * creating a ShadowRoot for Component's Host Element.
+     */
+    ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
+})(ViewEncapsulation || (ViewEncapsulation = {}));
 
 /**
  * @license
@@ -1071,402 +1211,6 @@ function injectArgs(types) {
     }
     return args;
 }
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * @description
- *
- * Represents a type that a Component or other object is instances of.
- *
- * An example of a `Type` is `MyCustomComponent` class, which in JavaScript is be represented by
- * the `MyCustomComponent` constructor function.
- *
- *
- */
-var Type = Function;
-function isType(v) {
-    return typeof v === 'function';
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Attention: These regex has to hold even if the code is minified!
- */
-var DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*arguments\)/;
-var INHERITED_CLASS = /^class\s+[A-Za-z\d$_]*\s*extends\s+[A-Za-z\d$_]+\s*{/;
-var INHERITED_CLASS_WITH_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[A-Za-z\d$_]+\s*{[\s\S]*constructor\s*\(/;
-var ReflectionCapabilities = /** @class */ (function () {
-    function ReflectionCapabilities(reflect) {
-        this._reflect = reflect || _global['Reflect'];
-    }
-    ReflectionCapabilities.prototype.isReflectionEnabled = function () { return true; };
-    ReflectionCapabilities.prototype.factory = function (t) { return function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        return new (t.bind.apply(t, __spread([void 0], args)))();
-    }; };
-    /** @internal */
-    ReflectionCapabilities.prototype._zipTypesAndAnnotations = function (paramTypes, paramAnnotations) {
-        var result;
-        if (typeof paramTypes === 'undefined') {
-            result = new Array(paramAnnotations.length);
-        }
-        else {
-            result = new Array(paramTypes.length);
-        }
-        for (var i = 0; i < result.length; i++) {
-            // TS outputs Object for parameters without types, while Traceur omits
-            // the annotations. For now we preserve the Traceur behavior to aid
-            // migration, but this can be revisited.
-            if (typeof paramTypes === 'undefined') {
-                result[i] = [];
-            }
-            else if (paramTypes[i] != Object) {
-                result[i] = [paramTypes[i]];
-            }
-            else {
-                result[i] = [];
-            }
-            if (paramAnnotations && paramAnnotations[i] != null) {
-                result[i] = result[i].concat(paramAnnotations[i]);
-            }
-        }
-        return result;
-    };
-    ReflectionCapabilities.prototype._ownParameters = function (type, parentCtor) {
-        var typeStr = type.toString();
-        // If we have no decorators, we only have function.length as metadata.
-        // In that case, to detect whether a child class declared an own constructor or not,
-        // we need to look inside of that constructor to check whether it is
-        // just calling the parent.
-        // This also helps to work around for https://github.com/Microsoft/TypeScript/issues/12439
-        // that sets 'design:paramtypes' to []
-        // if a class inherits from another class but has no ctor declared itself.
-        if (DELEGATE_CTOR.exec(typeStr) ||
-            (INHERITED_CLASS.exec(typeStr) && !INHERITED_CLASS_WITH_CTOR.exec(typeStr))) {
-            return null;
-        }
-        // Prefer the direct API.
-        if (type.parameters && type.parameters !== parentCtor.parameters) {
-            return type.parameters;
-        }
-        // API of tsickle for lowering decorators to properties on the class.
-        var tsickleCtorParams = type.ctorParameters;
-        if (tsickleCtorParams && tsickleCtorParams !== parentCtor.ctorParameters) {
-            // Newer tsickle uses a function closure
-            // Retain the non-function case for compatibility with older tsickle
-            var ctorParameters = typeof tsickleCtorParams === 'function' ? tsickleCtorParams() : tsickleCtorParams;
-            var paramTypes_1 = ctorParameters.map(function (ctorParam) { return ctorParam && ctorParam.type; });
-            var paramAnnotations_1 = ctorParameters.map(function (ctorParam) {
-                return ctorParam && convertTsickleDecoratorIntoMetadata(ctorParam.decorators);
-            });
-            return this._zipTypesAndAnnotations(paramTypes_1, paramAnnotations_1);
-        }
-        // API for metadata created by invoking the decorators.
-        var paramAnnotations = type.hasOwnProperty(PARAMETERS) && type[PARAMETERS];
-        var paramTypes = this._reflect && this._reflect.getOwnMetadata &&
-            this._reflect.getOwnMetadata('design:paramtypes', type);
-        if (paramTypes || paramAnnotations) {
-            return this._zipTypesAndAnnotations(paramTypes, paramAnnotations);
-        }
-        // If a class has no decorators, at least create metadata
-        // based on function.length.
-        // Note: We know that this is a real constructor as we checked
-        // the content of the constructor above.
-        return new Array(type.length).fill(undefined);
-    };
-    ReflectionCapabilities.prototype.parameters = function (type) {
-        // Note: only report metadata if we have at least one class decorator
-        // to stay in sync with the static reflector.
-        if (!isType(type)) {
-            return [];
-        }
-        var parentCtor = getParentCtor(type);
-        var parameters = this._ownParameters(type, parentCtor);
-        if (!parameters && parentCtor !== Object) {
-            parameters = this.parameters(parentCtor);
-        }
-        return parameters || [];
-    };
-    ReflectionCapabilities.prototype._ownAnnotations = function (typeOrFunc, parentCtor) {
-        // Prefer the direct API.
-        if (typeOrFunc.annotations && typeOrFunc.annotations !== parentCtor.annotations) {
-            var annotations = typeOrFunc.annotations;
-            if (typeof annotations === 'function' && annotations.annotations) {
-                annotations = annotations.annotations;
-            }
-            return annotations;
-        }
-        // API of tsickle for lowering decorators to properties on the class.
-        if (typeOrFunc.decorators && typeOrFunc.decorators !== parentCtor.decorators) {
-            return convertTsickleDecoratorIntoMetadata(typeOrFunc.decorators);
-        }
-        // API for metadata created by invoking the decorators.
-        if (typeOrFunc.hasOwnProperty(ANNOTATIONS)) {
-            return typeOrFunc[ANNOTATIONS];
-        }
-        return null;
-    };
-    ReflectionCapabilities.prototype.annotations = function (typeOrFunc) {
-        if (!isType(typeOrFunc)) {
-            return [];
-        }
-        var parentCtor = getParentCtor(typeOrFunc);
-        var ownAnnotations = this._ownAnnotations(typeOrFunc, parentCtor) || [];
-        var parentAnnotations = parentCtor !== Object ? this.annotations(parentCtor) : [];
-        return parentAnnotations.concat(ownAnnotations);
-    };
-    ReflectionCapabilities.prototype._ownPropMetadata = function (typeOrFunc, parentCtor) {
-        // Prefer the direct API.
-        if (typeOrFunc.propMetadata &&
-            typeOrFunc.propMetadata !== parentCtor.propMetadata) {
-            var propMetadata = typeOrFunc.propMetadata;
-            if (typeof propMetadata === 'function' && propMetadata.propMetadata) {
-                propMetadata = propMetadata.propMetadata;
-            }
-            return propMetadata;
-        }
-        // API of tsickle for lowering decorators to properties on the class.
-        if (typeOrFunc.propDecorators &&
-            typeOrFunc.propDecorators !== parentCtor.propDecorators) {
-            var propDecorators_1 = typeOrFunc.propDecorators;
-            var propMetadata_1 = {};
-            Object.keys(propDecorators_1).forEach(function (prop) {
-                propMetadata_1[prop] = convertTsickleDecoratorIntoMetadata(propDecorators_1[prop]);
-            });
-            return propMetadata_1;
-        }
-        // API for metadata created by invoking the decorators.
-        if (typeOrFunc.hasOwnProperty(PROP_METADATA)) {
-            return typeOrFunc[PROP_METADATA];
-        }
-        return null;
-    };
-    ReflectionCapabilities.prototype.propMetadata = function (typeOrFunc) {
-        if (!isType(typeOrFunc)) {
-            return {};
-        }
-        var parentCtor = getParentCtor(typeOrFunc);
-        var propMetadata = {};
-        if (parentCtor !== Object) {
-            var parentPropMetadata_1 = this.propMetadata(parentCtor);
-            Object.keys(parentPropMetadata_1).forEach(function (propName) {
-                propMetadata[propName] = parentPropMetadata_1[propName];
-            });
-        }
-        var ownPropMetadata = this._ownPropMetadata(typeOrFunc, parentCtor);
-        if (ownPropMetadata) {
-            Object.keys(ownPropMetadata).forEach(function (propName) {
-                var decorators = [];
-                if (propMetadata.hasOwnProperty(propName)) {
-                    decorators.push.apply(decorators, __spread(propMetadata[propName]));
-                }
-                decorators.push.apply(decorators, __spread(ownPropMetadata[propName]));
-                propMetadata[propName] = decorators;
-            });
-        }
-        return propMetadata;
-    };
-    ReflectionCapabilities.prototype.hasLifecycleHook = function (type, lcProperty) {
-        return type instanceof Type && lcProperty in type.prototype;
-    };
-    ReflectionCapabilities.prototype.guards = function (type) { return {}; };
-    ReflectionCapabilities.prototype.getter = function (name) { return new Function('o', 'return o.' + name + ';'); };
-    ReflectionCapabilities.prototype.setter = function (name) {
-        return new Function('o', 'v', 'return o.' + name + ' = v;');
-    };
-    ReflectionCapabilities.prototype.method = function (name) {
-        var functionBody = "if (!o." + name + ") throw new Error('\"" + name + "\" is undefined');\n        return o." + name + ".apply(o, args);";
-        return new Function('o', 'args', functionBody);
-    };
-    // There is not a concept of import uri in Js, but this is useful in developing Dart applications.
-    ReflectionCapabilities.prototype.importUri = function (type) {
-        // StaticSymbol
-        if (typeof type === 'object' && type['filePath']) {
-            return type['filePath'];
-        }
-        // Runtime type
-        return "./" + stringify(type);
-    };
-    ReflectionCapabilities.prototype.resourceUri = function (type) { return "./" + stringify(type); };
-    ReflectionCapabilities.prototype.resolveIdentifier = function (name, moduleUrl, members, runtime) {
-        return runtime;
-    };
-    ReflectionCapabilities.prototype.resolveEnum = function (enumIdentifier, name) { return enumIdentifier[name]; };
-    return ReflectionCapabilities;
-}());
-function convertTsickleDecoratorIntoMetadata(decoratorInvocations) {
-    if (!decoratorInvocations) {
-        return [];
-    }
-    return decoratorInvocations.map(function (decoratorInvocation) {
-        var decoratorType = decoratorInvocation.type;
-        var annotationCls = decoratorType.annotationCls;
-        var annotationArgs = decoratorInvocation.args ? decoratorInvocation.args : [];
-        return new (annotationCls.bind.apply(annotationCls, __spread([void 0], annotationArgs)))();
-    });
-}
-function getParentCtor(ctor) {
-    var parentProto = ctor.prototype ? Object.getPrototypeOf(ctor.prototype) : null;
-    var parentCtor = parentProto ? parentProto.constructor : null;
-    // Note: We always use `Object` as the null value
-    // to simplify checking later on.
-    return parentCtor || Object;
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Used to resolve resource URLs on `@Component` when used with JIT compilation.
- *
- * Example:
- * ```
- * @Component({
- *   selector: 'my-comp',
- *   templateUrl: 'my-comp.html', // This requires asynchronous resolution
- * })
- * class MyComponnent{
- * }
- *
- * // Calling `renderComponent` will fail because `MyComponent`'s `@Compenent.templateUrl`
- * // needs to be resolved because `renderComponent` is synchronous process.
- * // renderComponent(MyComponent);
- *
- * // Calling `resolveComponentResources` will resolve `@Compenent.templateUrl` into
- * // `@Compenent.template`, which would allow `renderComponent` to proceed in synchronous manner.
- * // Use browser's `fetch` function as the default resource resolution strategy.
- * resolveComponentResources(fetch).then(() => {
- *   // After resolution all URLs have been converted into strings.
- *   renderComponent(MyComponent);
- * });
- *
- * ```
- *
- * NOTE: In AOT the resolution happens during compilation, and so there should be no need
- * to call this method outside JIT mode.
- *
- * @param resourceResolver a function which is responsible to returning a `Promise` of the resolved
- * URL. Browser's `fetch` method is a good default implementation.
- */
-function resolveComponentResources(resourceResolver) {
-    // Store all promises which are fetching the resources.
-    var urlFetches = [];
-    // Cache so that we don't fetch the same resource more than once.
-    var urlMap = new Map();
-    function cachedResourceResolve(url) {
-        var promise = urlMap.get(url);
-        if (!promise) {
-            var resp = resourceResolver(url);
-            urlMap.set(url, promise = resp.then(unwrapResponse));
-            urlFetches.push(promise);
-        }
-        return promise;
-    }
-    componentResourceResolutionQueue.forEach(function (component) {
-        if (component.templateUrl) {
-            cachedResourceResolve(component.templateUrl).then(function (template) {
-                component.template = template;
-                component.templateUrl = undefined;
-            });
-        }
-        var styleUrls = component.styleUrls;
-        var styles = component.styles || (component.styles = []);
-        var styleOffset = component.styles.length;
-        styleUrls && styleUrls.forEach(function (styleUrl, index) {
-            styles.push(''); // pre-allocate array.
-            cachedResourceResolve(styleUrl).then(function (style) {
-                styles[styleOffset + index] = style;
-                styleUrls.splice(styleUrls.indexOf(styleUrl), 1);
-                if (styleUrls.length == 0) {
-                    component.styleUrls = undefined;
-                }
-            });
-        });
-    });
-    componentResourceResolutionQueue.clear();
-    return Promise.all(urlFetches).then(function () { return null; });
-}
-var componentResourceResolutionQueue = new Set();
-function maybeQueueResolutionOfComponentResources(metadata) {
-    if (componentNeedsResolution(metadata)) {
-        componentResourceResolutionQueue.add(metadata);
-    }
-}
-function componentNeedsResolution(component) {
-    return component.templateUrl || component.styleUrls && component.styleUrls.length;
-}
-function unwrapResponse(response) {
-    return typeof response == 'string' ? response : response.text();
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Defines template and style encapsulation options available for Component's {@link Component}.
- *
- * See {@link Component#encapsulation encapsulation}.
- *
- * @usageNotes
- * ### Example
- * {@example core/ts/metadata/encapsulation.ts region='longform'}
- */
-var ViewEncapsulation;
-(function (ViewEncapsulation) {
-    /**
-     * Emulate `Native` scoping of styles by adding an attribute containing surrogate id to the Host
-     * Element and pre-processing the style rules provided via {@link Component#styles styles} or
-     * {@link Component#styleUrls styleUrls}, and adding the new Host Element attribute to all
-     * selectors.
-     *
-     * This is the default option.
-     */
-    ViewEncapsulation[ViewEncapsulation["Emulated"] = 0] = "Emulated";
-    /**
-     * @deprecated v6.1.0 - use {ViewEncapsulation.ShadowDom} instead.
-     * Use the native encapsulation mechanism of the renderer.
-     *
-     * For the DOM this means using the deprecated [Shadow DOM
-     * v0](https://w3c.github.io/webcomponents/spec/shadow/) and
-     * creating a ShadowRoot for Component's Host Element.
-     */
-    ViewEncapsulation[ViewEncapsulation["Native"] = 1] = "Native";
-    /**
-     * Don't provide any template or style encapsulation.
-     */
-    ViewEncapsulation[ViewEncapsulation["None"] = 2] = "None";
-    /**
-     * Use Shadow DOM to encapsulate styles.
-     *
-     * For the DOM this means using modern [Shadow
-     * DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
-     * creating a ShadowRoot for Component's Host Element.
-     */
-    ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
-})(ViewEncapsulation || (ViewEncapsulation = {}));
 
 /**
  * @license
@@ -8310,40 +8054,13 @@ function injectRenderer2() {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var R3_ELEMENT_REF_FACTORY = injectElementRef;
-var R3_TEMPLATE_REF_FACTORY = injectTemplateRef;
-var R3_CHANGE_DETECTOR_REF_FACTORY = injectChangeDetectorRef;
-var R3_VIEW_CONTAINER_REF_FACTORY = injectViewContainerRef;
-var R3_RENDERER2_FACTORY = injectRenderer2;
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-function noopFactory() {
-    var tokens = [];
+function noop() {
+    var args = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        tokens[_i] = arguments[_i];
+        args[_i] = arguments[_i];
     }
+    // Do nothing.
 }
-var R3_ELEMENT_REF_FACTORY__POST_NGCC__ = R3_ELEMENT_REF_FACTORY;
-var R3_TEMPLATE_REF_FACTORY__POST_NGCC__ = R3_TEMPLATE_REF_FACTORY;
-var R3_CHANGE_DETECTOR_REF_FACTORY__POST_NGCC__ = R3_CHANGE_DETECTOR_REF_FACTORY;
-var R3_VIEW_CONTAINER_REF_FACTORY__POST_NGCC__ = R3_VIEW_CONTAINER_REF_FACTORY;
-var R3_RENDERER2_FACTORY__POST_NGCC__ = R3_RENDERER2_FACTORY;
-var R3_ELEMENT_REF_FACTORY__PRE_NGCC__ = noopFactory;
-var R3_TEMPLATE_REF_FACTORY__PRE_NGCC__ = noopFactory;
-var R3_CHANGE_DETECTOR_REF_FACTORY__PRE_NGCC__ = noopFactory;
-var R3_VIEW_CONTAINER_REF_FACTORY__PRE_NGCC__ = noopFactory;
-var R3_RENDERER2_FACTORY__PRE_NGCC__ = noopFactory;
-var R3_ELEMENT_REF_FACTORY$1 = R3_ELEMENT_REF_FACTORY__PRE_NGCC__;
-var R3_TEMPLATE_REF_FACTORY$1 = R3_TEMPLATE_REF_FACTORY__PRE_NGCC__;
-var R3_CHANGE_DETECTOR_REF_FACTORY$1 = R3_CHANGE_DETECTOR_REF_FACTORY__PRE_NGCC__;
-var R3_VIEW_CONTAINER_REF_FACTORY$1 = R3_VIEW_CONTAINER_REF_FACTORY__PRE_NGCC__;
-var R3_RENDERER2_FACTORY$1 = R3_RENDERER2_FACTORY__PRE_NGCC__;
 
 /**
  * @license
@@ -8372,9 +8089,12 @@ var ElementRef = /** @class */ (function () {
         this.nativeElement = nativeElement;
     }
     /** @internal */
-    ElementRef.__NG_ELEMENT_ID__ = function () { return R3_ELEMENT_REF_FACTORY$1(ElementRef); };
+    ElementRef.__NG_ELEMENT_ID__ = function () { return SWITCH_ELEMENT_REF_FACTORY(ElementRef); };
     return ElementRef;
 }());
+var SWITCH_ELEMENT_REF_FACTORY__POST_R3__ = injectElementRef;
+var SWITCH_ELEMENT_REF_FACTORY__PRE_R3__ = noop;
+var SWITCH_ELEMENT_REF_FACTORY = SWITCH_ELEMENT_REF_FACTORY__PRE_R3__;
 
 /**
  * @license
@@ -8477,9 +8197,12 @@ var Renderer2 = /** @class */ (function () {
     function Renderer2() {
     }
     /** @internal */
-    Renderer2.__NG_ELEMENT_ID__ = function () { return R3_RENDERER2_FACTORY$1(); };
+    Renderer2.__NG_ELEMENT_ID__ = function () { return SWITCH_RENDERER2_FACTORY(); };
     return Renderer2;
 }());
+var SWITCH_RENDERER2_FACTORY__POST_R3__ = injectRenderer2;
+var SWITCH_RENDERER2_FACTORY__PRE_R3__ = noop;
+var SWITCH_RENDERER2_FACTORY = SWITCH_RENDERER2_FACTORY__PRE_R3__;
 
 /**
  * @license
@@ -10231,9 +9954,12 @@ var TemplateRef = /** @class */ (function () {
     function TemplateRef() {
     }
     /** @internal */
-    TemplateRef.__NG_ELEMENT_ID__ = function () { return R3_TEMPLATE_REF_FACTORY$1(TemplateRef, ElementRef); };
+    TemplateRef.__NG_ELEMENT_ID__ = function () { return SWITCH_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef); };
     return TemplateRef;
 }());
+var SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ = injectTemplateRef;
+var SWITCH_TEMPLATE_REF_FACTORY__PRE_R3__ = noop;
+var SWITCH_TEMPLATE_REF_FACTORY = SWITCH_TEMPLATE_REF_FACTORY__PRE_R3__;
 
 /**
  * @license
@@ -11583,6 +11309,262 @@ var angularCoreEnv = {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * @description
+ *
+ * Represents a type that a Component or other object is instances of.
+ *
+ * An example of a `Type` is `MyCustomComponent` class, which in JavaScript is be represented by
+ * the `MyCustomComponent` constructor function.
+ *
+ *
+ */
+var Type = Function;
+function isType(v) {
+    return typeof v === 'function';
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Attention: These regex has to hold even if the code is minified!
+ */
+var DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*arguments\)/;
+var INHERITED_CLASS = /^class\s+[A-Za-z\d$_]*\s*extends\s+[A-Za-z\d$_]+\s*{/;
+var INHERITED_CLASS_WITH_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[A-Za-z\d$_]+\s*{[\s\S]*constructor\s*\(/;
+var ReflectionCapabilities = /** @class */ (function () {
+    function ReflectionCapabilities(reflect) {
+        this._reflect = reflect || _global['Reflect'];
+    }
+    ReflectionCapabilities.prototype.isReflectionEnabled = function () { return true; };
+    ReflectionCapabilities.prototype.factory = function (t) { return function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        return new (t.bind.apply(t, __spread([void 0], args)))();
+    }; };
+    /** @internal */
+    ReflectionCapabilities.prototype._zipTypesAndAnnotations = function (paramTypes, paramAnnotations) {
+        var result;
+        if (typeof paramTypes === 'undefined') {
+            result = new Array(paramAnnotations.length);
+        }
+        else {
+            result = new Array(paramTypes.length);
+        }
+        for (var i = 0; i < result.length; i++) {
+            // TS outputs Object for parameters without types, while Traceur omits
+            // the annotations. For now we preserve the Traceur behavior to aid
+            // migration, but this can be revisited.
+            if (typeof paramTypes === 'undefined') {
+                result[i] = [];
+            }
+            else if (paramTypes[i] != Object) {
+                result[i] = [paramTypes[i]];
+            }
+            else {
+                result[i] = [];
+            }
+            if (paramAnnotations && paramAnnotations[i] != null) {
+                result[i] = result[i].concat(paramAnnotations[i]);
+            }
+        }
+        return result;
+    };
+    ReflectionCapabilities.prototype._ownParameters = function (type, parentCtor) {
+        var typeStr = type.toString();
+        // If we have no decorators, we only have function.length as metadata.
+        // In that case, to detect whether a child class declared an own constructor or not,
+        // we need to look inside of that constructor to check whether it is
+        // just calling the parent.
+        // This also helps to work around for https://github.com/Microsoft/TypeScript/issues/12439
+        // that sets 'design:paramtypes' to []
+        // if a class inherits from another class but has no ctor declared itself.
+        if (DELEGATE_CTOR.exec(typeStr) ||
+            (INHERITED_CLASS.exec(typeStr) && !INHERITED_CLASS_WITH_CTOR.exec(typeStr))) {
+            return null;
+        }
+        // Prefer the direct API.
+        if (type.parameters && type.parameters !== parentCtor.parameters) {
+            return type.parameters;
+        }
+        // API of tsickle for lowering decorators to properties on the class.
+        var tsickleCtorParams = type.ctorParameters;
+        if (tsickleCtorParams && tsickleCtorParams !== parentCtor.ctorParameters) {
+            // Newer tsickle uses a function closure
+            // Retain the non-function case for compatibility with older tsickle
+            var ctorParameters = typeof tsickleCtorParams === 'function' ? tsickleCtorParams() : tsickleCtorParams;
+            var paramTypes_1 = ctorParameters.map(function (ctorParam) { return ctorParam && ctorParam.type; });
+            var paramAnnotations_1 = ctorParameters.map(function (ctorParam) {
+                return ctorParam && convertTsickleDecoratorIntoMetadata(ctorParam.decorators);
+            });
+            return this._zipTypesAndAnnotations(paramTypes_1, paramAnnotations_1);
+        }
+        // API for metadata created by invoking the decorators.
+        var paramAnnotations = type.hasOwnProperty(PARAMETERS) && type[PARAMETERS];
+        var paramTypes = this._reflect && this._reflect.getOwnMetadata &&
+            this._reflect.getOwnMetadata('design:paramtypes', type);
+        if (paramTypes || paramAnnotations) {
+            return this._zipTypesAndAnnotations(paramTypes, paramAnnotations);
+        }
+        // If a class has no decorators, at least create metadata
+        // based on function.length.
+        // Note: We know that this is a real constructor as we checked
+        // the content of the constructor above.
+        return new Array(type.length).fill(undefined);
+    };
+    ReflectionCapabilities.prototype.parameters = function (type) {
+        // Note: only report metadata if we have at least one class decorator
+        // to stay in sync with the static reflector.
+        if (!isType(type)) {
+            return [];
+        }
+        var parentCtor = getParentCtor(type);
+        var parameters = this._ownParameters(type, parentCtor);
+        if (!parameters && parentCtor !== Object) {
+            parameters = this.parameters(parentCtor);
+        }
+        return parameters || [];
+    };
+    ReflectionCapabilities.prototype._ownAnnotations = function (typeOrFunc, parentCtor) {
+        // Prefer the direct API.
+        if (typeOrFunc.annotations && typeOrFunc.annotations !== parentCtor.annotations) {
+            var annotations = typeOrFunc.annotations;
+            if (typeof annotations === 'function' && annotations.annotations) {
+                annotations = annotations.annotations;
+            }
+            return annotations;
+        }
+        // API of tsickle for lowering decorators to properties on the class.
+        if (typeOrFunc.decorators && typeOrFunc.decorators !== parentCtor.decorators) {
+            return convertTsickleDecoratorIntoMetadata(typeOrFunc.decorators);
+        }
+        // API for metadata created by invoking the decorators.
+        if (typeOrFunc.hasOwnProperty(ANNOTATIONS)) {
+            return typeOrFunc[ANNOTATIONS];
+        }
+        return null;
+    };
+    ReflectionCapabilities.prototype.annotations = function (typeOrFunc) {
+        if (!isType(typeOrFunc)) {
+            return [];
+        }
+        var parentCtor = getParentCtor(typeOrFunc);
+        var ownAnnotations = this._ownAnnotations(typeOrFunc, parentCtor) || [];
+        var parentAnnotations = parentCtor !== Object ? this.annotations(parentCtor) : [];
+        return parentAnnotations.concat(ownAnnotations);
+    };
+    ReflectionCapabilities.prototype._ownPropMetadata = function (typeOrFunc, parentCtor) {
+        // Prefer the direct API.
+        if (typeOrFunc.propMetadata &&
+            typeOrFunc.propMetadata !== parentCtor.propMetadata) {
+            var propMetadata = typeOrFunc.propMetadata;
+            if (typeof propMetadata === 'function' && propMetadata.propMetadata) {
+                propMetadata = propMetadata.propMetadata;
+            }
+            return propMetadata;
+        }
+        // API of tsickle for lowering decorators to properties on the class.
+        if (typeOrFunc.propDecorators &&
+            typeOrFunc.propDecorators !== parentCtor.propDecorators) {
+            var propDecorators_1 = typeOrFunc.propDecorators;
+            var propMetadata_1 = {};
+            Object.keys(propDecorators_1).forEach(function (prop) {
+                propMetadata_1[prop] = convertTsickleDecoratorIntoMetadata(propDecorators_1[prop]);
+            });
+            return propMetadata_1;
+        }
+        // API for metadata created by invoking the decorators.
+        if (typeOrFunc.hasOwnProperty(PROP_METADATA)) {
+            return typeOrFunc[PROP_METADATA];
+        }
+        return null;
+    };
+    ReflectionCapabilities.prototype.propMetadata = function (typeOrFunc) {
+        if (!isType(typeOrFunc)) {
+            return {};
+        }
+        var parentCtor = getParentCtor(typeOrFunc);
+        var propMetadata = {};
+        if (parentCtor !== Object) {
+            var parentPropMetadata_1 = this.propMetadata(parentCtor);
+            Object.keys(parentPropMetadata_1).forEach(function (propName) {
+                propMetadata[propName] = parentPropMetadata_1[propName];
+            });
+        }
+        var ownPropMetadata = this._ownPropMetadata(typeOrFunc, parentCtor);
+        if (ownPropMetadata) {
+            Object.keys(ownPropMetadata).forEach(function (propName) {
+                var decorators = [];
+                if (propMetadata.hasOwnProperty(propName)) {
+                    decorators.push.apply(decorators, __spread(propMetadata[propName]));
+                }
+                decorators.push.apply(decorators, __spread(ownPropMetadata[propName]));
+                propMetadata[propName] = decorators;
+            });
+        }
+        return propMetadata;
+    };
+    ReflectionCapabilities.prototype.hasLifecycleHook = function (type, lcProperty) {
+        return type instanceof Type && lcProperty in type.prototype;
+    };
+    ReflectionCapabilities.prototype.guards = function (type) { return {}; };
+    ReflectionCapabilities.prototype.getter = function (name) { return new Function('o', 'return o.' + name + ';'); };
+    ReflectionCapabilities.prototype.setter = function (name) {
+        return new Function('o', 'v', 'return o.' + name + ' = v;');
+    };
+    ReflectionCapabilities.prototype.method = function (name) {
+        var functionBody = "if (!o." + name + ") throw new Error('\"" + name + "\" is undefined');\n        return o." + name + ".apply(o, args);";
+        return new Function('o', 'args', functionBody);
+    };
+    // There is not a concept of import uri in Js, but this is useful in developing Dart applications.
+    ReflectionCapabilities.prototype.importUri = function (type) {
+        // StaticSymbol
+        if (typeof type === 'object' && type['filePath']) {
+            return type['filePath'];
+        }
+        // Runtime type
+        return "./" + stringify(type);
+    };
+    ReflectionCapabilities.prototype.resourceUri = function (type) { return "./" + stringify(type); };
+    ReflectionCapabilities.prototype.resolveIdentifier = function (name, moduleUrl, members, runtime) {
+        return runtime;
+    };
+    ReflectionCapabilities.prototype.resolveEnum = function (enumIdentifier, name) { return enumIdentifier[name]; };
+    return ReflectionCapabilities;
+}());
+function convertTsickleDecoratorIntoMetadata(decoratorInvocations) {
+    if (!decoratorInvocations) {
+        return [];
+    }
+    return decoratorInvocations.map(function (decoratorInvocation) {
+        var decoratorType = decoratorInvocation.type;
+        var annotationCls = decoratorType.annotationCls;
+        var annotationArgs = decoratorInvocation.args ? decoratorInvocation.args : [];
+        return new (annotationCls.bind.apply(annotationCls, __spread([void 0], annotationArgs)))();
+    });
+}
+function getParentCtor(ctor) {
+    var parentProto = ctor.prototype ? Object.getPrototypeOf(ctor.prototype) : null;
+    var parentCtor = parentProto ? parentProto.constructor : null;
+    // Note: We always use `Object` as the null value
+    // to simplify checking later on.
+    return parentCtor || Object;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 var _reflect = null;
 function getReflect() {
     return (_reflect = _reflect || new ReflectionCapabilities());
@@ -12049,105 +12031,6 @@ function parseInputOutputs(values) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * Compile an Angular injectable according to its `Injectable` metadata, and patch the resulting
- * `ngInjectableDef` onto the injectable type.
- */
-function compileInjectable$1(type, srcMeta) {
-    // Allow the compilation of a class with a `@Injectable()` decorator without parameters
-    var meta = srcMeta || { providedIn: null };
-    var def = null;
-    Object.defineProperty(type, NG_INJECTABLE_DEF, {
-        get: function () {
-            if (def === null) {
-                // Check whether the injectable metadata includes a provider specification.
-                var hasAProvider = isUseClassProvider(meta) || isUseFactoryProvider(meta) ||
-                    isUseValueProvider(meta) || isUseExistingProvider(meta);
-                var ctorDeps = reflectDependencies(type);
-                var userDeps = undefined;
-                if ((isUseClassProvider(meta) || isUseFactoryProvider(meta)) && meta.deps !== undefined) {
-                    userDeps = convertDependencies(meta.deps);
-                }
-                // Decide which flavor of factory to generate, based on the provider specified.
-                // Only one of the use* fields should be set.
-                var useClass = undefined;
-                var useFactory = undefined;
-                var useValue = undefined;
-                var useExisting = undefined;
-                if (!hasAProvider) {
-                    // In the case the user specifies a type provider, treat it as {provide: X, useClass: X}.
-                    // The deps will have been reflected above, causing the factory to create the class by
-                    // calling
-                    // its constructor with injected deps.
-                    useClass = new WrappedNodeExpr(type);
-                }
-                else if (isUseClassProvider(meta)) {
-                    // The user explicitly specified useClass, and may or may not have provided deps.
-                    useClass = new WrappedNodeExpr(meta.useClass);
-                }
-                else if (isUseValueProvider(meta)) {
-                    // The user explicitly specified useValue.
-                    useValue = new WrappedNodeExpr(meta.useValue);
-                }
-                else if (isUseFactoryProvider(meta)) {
-                    // The user explicitly specified useFactory.
-                    useFactory = new WrappedNodeExpr(meta.useFactory);
-                }
-                else if (isUseExistingProvider(meta)) {
-                    // The user explicitly specified useExisting.
-                    useExisting = new WrappedNodeExpr(meta.useExisting);
-                }
-                else {
-                    // Can't happen - either hasAProvider will be false, or one of the providers will be set.
-                    throw new Error("Unreachable state.");
-                }
-                var _a = compileInjectable({
-                    name: type.name,
-                    type: new WrappedNodeExpr(type),
-                    providedIn: computeProvidedIn(meta.providedIn),
-                    useClass: useClass,
-                    useFactory: useFactory,
-                    useValue: useValue,
-                    useExisting: useExisting,
-                    ctorDeps: ctorDeps,
-                    userDeps: userDeps,
-                }), expression = _a.expression, statements = _a.statements;
-                def = jitExpression(expression, angularCoreEnv, "ng://" + type.name + "/ngInjectableDef.js", statements);
-            }
-            return def;
-        },
-    });
-}
-function computeProvidedIn(providedIn) {
-    if (providedIn == null || typeof providedIn === 'string') {
-        return new LiteralExpr(providedIn);
-    }
-    else {
-        return new WrappedNodeExpr(providedIn);
-    }
-}
-function isUseClassProvider(meta) {
-    return meta.useClass !== undefined;
-}
-var ɵ0$1 = getClosureSafeProperty;
-var USE_VALUE$1 = getClosureSafeProperty({ provide: String, useValue: ɵ0$1 });
-function isUseValueProvider(meta) {
-    return USE_VALUE$1 in meta;
-}
-function isUseFactoryProvider(meta) {
-    return meta.useFactory !== undefined;
-}
-function isUseExistingProvider(meta) {
-    return meta.useExisting !== undefined;
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function compilePipe(type, meta) {
     var ngPipeDef = null;
     Object.defineProperty(type, NG_PIPE_DEF, {
@@ -12178,124 +12061,13 @@ function compilePipe(type, meta) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var ivyEnabled = true;
-var R3_COMPILE_COMPONENT = compileComponent;
-var R3_COMPILE_DIRECTIVE = compileDirective;
-var R3_COMPILE_INJECTABLE = compileInjectable$1;
-var R3_COMPILE_NGMODULE = compileNgModule$1;
-var R3_COMPILE_PIPE = compilePipe;
-var R3_COMPILE_NGMODULE_DEFS = compileNgModuleDefs;
-var R3_PATCH_COMPONENT_DEF_WTIH_SCOPE = patchComponentDefWithScope;
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-function noop() { }
-var R3_COMPILE_COMPONENT__POST_NGCC__ = R3_COMPILE_COMPONENT;
-var R3_COMPILE_DIRECTIVE__POST_NGCC__ = R3_COMPILE_DIRECTIVE;
-var R3_COMPILE_INJECTABLE__POST_NGCC__ = R3_COMPILE_INJECTABLE;
-var R3_COMPILE_NGMODULE__POST_NGCC__ = R3_COMPILE_NGMODULE;
-var R3_COMPILE_PIPE__POST_NGCC__ = R3_COMPILE_PIPE;
-var ivyEnable__POST_NGCC__ = ivyEnabled;
-var R3_COMPILE_COMPONENT__PRE_NGCC__ = noop;
-var R3_COMPILE_DIRECTIVE__PRE_NGCC__ = noop;
-var R3_COMPILE_INJECTABLE__PRE_NGCC__ = preR3InjectableCompile;
-var R3_COMPILE_NGMODULE__PRE_NGCC__ = preR3NgModuleCompile;
-var R3_COMPILE_PIPE__PRE_NGCC__ = noop;
-var ivyEnable__PRE_NGCC__ = false;
-var ivyEnabled$1 = ivyEnable__PRE_NGCC__;
-var R3_COMPILE_COMPONENT$1 = R3_COMPILE_COMPONENT__PRE_NGCC__;
-var R3_COMPILE_DIRECTIVE$1 = R3_COMPILE_DIRECTIVE__PRE_NGCC__;
-var R3_COMPILE_INJECTABLE$1 = R3_COMPILE_INJECTABLE__PRE_NGCC__;
-var R3_COMPILE_NGMODULE$1 = R3_COMPILE_NGMODULE__PRE_NGCC__;
-var R3_COMPILE_PIPE$1 = R3_COMPILE_PIPE__PRE_NGCC__;
-////////////////////////////////////////////////////////////
-// Glue code which should be removed after Ivy is default //
-////////////////////////////////////////////////////////////
-function preR3NgModuleCompile(moduleType, metadata) {
-    var imports = (metadata && metadata.imports) || [];
-    if (metadata && metadata.exports) {
-        imports = __spread(imports, [metadata.exports]);
-    }
-    moduleType.ngInjectorDef = defineInjector({
-        factory: convertInjectableProviderToFactory(moduleType, { useClass: moduleType }),
-        providers: metadata && metadata.providers,
-        imports: imports,
-    });
-}
-var ɵ0$2 = getClosureSafeProperty;
-var USE_VALUE$2 = getClosureSafeProperty({ provide: String, useValue: ɵ0$2 });
-var EMPTY_ARRAY$3 = [];
-function convertInjectableProviderToFactory(type, provider) {
-    if (!provider) {
-        var reflectionCapabilities = new ReflectionCapabilities();
-        var deps_1 = reflectionCapabilities.parameters(type);
-        // TODO - convert to flags.
-        return function () { return new (type.bind.apply(type, __spread([void 0], injectArgs(deps_1))))(); };
-    }
-    if (USE_VALUE$2 in provider) {
-        var valueProvider_1 = provider;
-        return function () { return valueProvider_1.useValue; };
-    }
-    else if (provider.useExisting) {
-        var existingProvider_1 = provider;
-        return function () { return inject(existingProvider_1.useExisting); };
-    }
-    else if (provider.useFactory) {
-        var factoryProvider_1 = provider;
-        return function () { return factoryProvider_1.useFactory.apply(factoryProvider_1, __spread(injectArgs(factoryProvider_1.deps || EMPTY_ARRAY$3))); };
-    }
-    else if (provider.useClass) {
-        var classProvider_1 = provider;
-        var deps_2 = provider.deps;
-        if (!deps_2) {
-            var reflectionCapabilities = new ReflectionCapabilities();
-            deps_2 = reflectionCapabilities.parameters(type);
-        }
-        return function () {
-            var _a;
-            return new ((_a = classProvider_1.useClass).bind.apply(_a, __spread([void 0], injectArgs(deps_2))))();
-        };
-    }
-    else {
-        var deps_3 = provider.deps;
-        if (!deps_3) {
-            var reflectionCapabilities = new ReflectionCapabilities();
-            deps_3 = reflectionCapabilities.parameters(type);
-        }
-        return function () { return new (type.bind.apply(type, __spread([void 0], injectArgs(deps_3))))(); };
-    }
-}
-/**
- * Supports @Injectable() in JIT mode for Render2.
- */
-function preR3InjectableCompile(injectableType, options) {
-    if (options && options.providedIn !== undefined && !getInjectableDef(injectableType)) {
-        injectableType.ngInjectableDef = defineInjectable({
-            providedIn: options.providedIn,
-            factory: convertInjectableProviderToFactory(injectableType, options),
-        });
-    }
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Type of the Directive metadata.
  */
 var Directive = makeDecorator('Directive', function (dir) {
     if (dir === void 0) { dir = {}; }
     return dir;
-}, undefined, undefined, function (type, meta) { return R3_COMPILE_DIRECTIVE$1(type, meta); });
+}, undefined, undefined, function (type, meta) { return SWITCH_COMPILE_DIRECTIVE(type, meta); });
 /**
  * Component decorator and metadata.
  *
@@ -12387,13 +12159,13 @@ var Directive = makeDecorator('Directive', function (dir) {
 var Component = makeDecorator('Component', function (c) {
     if (c === void 0) { c = {}; }
     return (__assign({ changeDetection: ChangeDetectionStrategy.Default }, c));
-}, Directive, undefined, function (type, meta) { return R3_COMPILE_COMPONENT$1(type, meta); });
+}, Directive, undefined, function (type, meta) { return SWITCH_COMPILE_COMPONENT(type, meta); });
 /**
  *
  *
  * @Annotation
  */
-var Pipe = makeDecorator('Pipe', function (p) { return (__assign({ pure: true }, p)); }, undefined, undefined, function (type, meta) { return R3_COMPILE_PIPE$1(type, meta); });
+var Pipe = makeDecorator('Pipe', function (p) { return (__assign({ pure: true }, p)); }, undefined, undefined, function (type, meta) { return SWITCH_COMPILE_PIPE(type, meta); });
 var initializeBaseDef = function (target) {
     var constructor = target.constructor;
     var inheritedBaseDef = constructor.ngBaseDef;
@@ -12474,6 +12246,66 @@ var HostBinding = makePropDecorator('HostBinding', function (hostPropertyName) {
  * @Annotation
  */
 var HostListener = makePropDecorator('HostListener', function (eventName, args) { return ({ eventName: eventName, args: args }); });
+var SWITCH_COMPILE_COMPONENT__POST_R3__ = compileComponent;
+var SWITCH_COMPILE_DIRECTIVE__POST_R3__ = compileDirective;
+var SWITCH_COMPILE_PIPE__POST_R3__ = compilePipe;
+var SWITCH_COMPILE_COMPONENT__PRE_R3__ = noop;
+var SWITCH_COMPILE_DIRECTIVE__PRE_R3__ = noop;
+var SWITCH_COMPILE_PIPE__PRE_R3__ = noop;
+var SWITCH_COMPILE_COMPONENT = SWITCH_COMPILE_COMPONENT__PRE_R3__;
+var SWITCH_COMPILE_DIRECTIVE = SWITCH_COMPILE_DIRECTIVE__PRE_R3__;
+var SWITCH_COMPILE_PIPE = SWITCH_COMPILE_PIPE__PRE_R3__;
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+var ɵ0$2 = getClosureSafeProperty;
+var USE_VALUE$1 = getClosureSafeProperty({ provide: String, useValue: ɵ0$2 });
+var EMPTY_ARRAY$3 = [];
+function convertInjectableProviderToFactory(type, provider) {
+    if (!provider) {
+        var reflectionCapabilities = new ReflectionCapabilities();
+        var deps_1 = reflectionCapabilities.parameters(type);
+        // TODO - convert to flags.
+        return function () { return new (type.bind.apply(type, __spread([void 0], injectArgs(deps_1))))(); };
+    }
+    if (USE_VALUE$1 in provider) {
+        var valueProvider_1 = provider;
+        return function () { return valueProvider_1.useValue; };
+    }
+    else if (provider.useExisting) {
+        var existingProvider_1 = provider;
+        return function () { return inject(existingProvider_1.useExisting); };
+    }
+    else if (provider.useFactory) {
+        var factoryProvider_1 = provider;
+        return function () { return factoryProvider_1.useFactory.apply(factoryProvider_1, __spread(injectArgs(factoryProvider_1.deps || EMPTY_ARRAY$3))); };
+    }
+    else if (provider.useClass) {
+        var classProvider_1 = provider;
+        var deps_2 = provider.deps;
+        if (!deps_2) {
+            var reflectionCapabilities = new ReflectionCapabilities();
+            deps_2 = reflectionCapabilities.parameters(type);
+        }
+        return function () {
+            var _a;
+            return new ((_a = classProvider_1.useClass).bind.apply(_a, __spread([void 0], injectArgs(deps_2))))();
+        };
+    }
+    else {
+        var deps_3 = provider.deps;
+        if (!deps_3) {
+            var reflectionCapabilities = new ReflectionCapabilities();
+            deps_3 = reflectionCapabilities.parameters(type);
+        }
+        return function () { return new (type.bind.apply(type, __spread([void 0], injectArgs(deps_3))))(); };
+    }
+}
 
 /**
  * @license
@@ -12516,7 +12348,21 @@ var NgModule = makeDecorator('NgModule', function (ngModule) { return ngModule; 
  * * The `imports` and `exports` options bring in members from other modules, and make
  * this module's members available to others.
  */
-function (type, meta) { return R3_COMPILE_NGMODULE$1(type, meta); });
+function (type, meta) { return SWITCH_COMPILE_NGMODULE(type, meta); });
+function preR3NgModuleCompile(moduleType, metadata) {
+    var imports = (metadata && metadata.imports) || [];
+    if (metadata && metadata.exports) {
+        imports = __spread(imports, [metadata.exports]);
+    }
+    moduleType.ngInjectorDef = defineInjector({
+        factory: convertInjectableProviderToFactory(moduleType, { useClass: moduleType }),
+        providers: metadata && metadata.providers,
+        imports: imports,
+    });
+}
+var SWITCH_COMPILE_NGMODULE__POST_R3__ = compileNgModule$1;
+var SWITCH_COMPILE_NGMODULE__PRE_R3__ = preR3NgModuleCompile;
+var SWITCH_COMPILE_NGMODULE = SWITCH_COMPILE_NGMODULE__PRE_R3__;
 
 /**
  * @license
@@ -12547,7 +12393,106 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('7.0.0-rc.1+85.sha-f8195e5');
+var VERSION = new Version('7.0.0-rc.1+102.sha-d4cee51');
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Compile an Angular injectable according to its `Injectable` metadata, and patch the resulting
+ * `ngInjectableDef` onto the injectable type.
+ */
+function compileInjectable$1(type, srcMeta) {
+    // Allow the compilation of a class with a `@Injectable()` decorator without parameters
+    var meta = srcMeta || { providedIn: null };
+    var def = null;
+    Object.defineProperty(type, NG_INJECTABLE_DEF, {
+        get: function () {
+            if (def === null) {
+                // Check whether the injectable metadata includes a provider specification.
+                var hasAProvider = isUseClassProvider(meta) || isUseFactoryProvider(meta) ||
+                    isUseValueProvider(meta) || isUseExistingProvider(meta);
+                var ctorDeps = reflectDependencies(type);
+                var userDeps = undefined;
+                if ((isUseClassProvider(meta) || isUseFactoryProvider(meta)) && meta.deps !== undefined) {
+                    userDeps = convertDependencies(meta.deps);
+                }
+                // Decide which flavor of factory to generate, based on the provider specified.
+                // Only one of the use* fields should be set.
+                var useClass = undefined;
+                var useFactory = undefined;
+                var useValue = undefined;
+                var useExisting = undefined;
+                if (!hasAProvider) {
+                    // In the case the user specifies a type provider, treat it as {provide: X, useClass: X}.
+                    // The deps will have been reflected above, causing the factory to create the class by
+                    // calling
+                    // its constructor with injected deps.
+                    useClass = new WrappedNodeExpr(type);
+                }
+                else if (isUseClassProvider(meta)) {
+                    // The user explicitly specified useClass, and may or may not have provided deps.
+                    useClass = new WrappedNodeExpr(meta.useClass);
+                }
+                else if (isUseValueProvider(meta)) {
+                    // The user explicitly specified useValue.
+                    useValue = new WrappedNodeExpr(meta.useValue);
+                }
+                else if (isUseFactoryProvider(meta)) {
+                    // The user explicitly specified useFactory.
+                    useFactory = new WrappedNodeExpr(meta.useFactory);
+                }
+                else if (isUseExistingProvider(meta)) {
+                    // The user explicitly specified useExisting.
+                    useExisting = new WrappedNodeExpr(meta.useExisting);
+                }
+                else {
+                    // Can't happen - either hasAProvider will be false, or one of the providers will be set.
+                    throw new Error("Unreachable state.");
+                }
+                var _a = compileInjectable({
+                    name: type.name,
+                    type: new WrappedNodeExpr(type),
+                    providedIn: computeProvidedIn(meta.providedIn),
+                    useClass: useClass,
+                    useFactory: useFactory,
+                    useValue: useValue,
+                    useExisting: useExisting,
+                    ctorDeps: ctorDeps,
+                    userDeps: userDeps,
+                }), expression = _a.expression, statements = _a.statements;
+                def = jitExpression(expression, angularCoreEnv, "ng://" + type.name + "/ngInjectableDef.js", statements);
+            }
+            return def;
+        },
+    });
+}
+function computeProvidedIn(providedIn) {
+    if (providedIn == null || typeof providedIn === 'string') {
+        return new LiteralExpr(providedIn);
+    }
+    else {
+        return new WrappedNodeExpr(providedIn);
+    }
+}
+function isUseClassProvider(meta) {
+    return meta.useClass !== undefined;
+}
+var ɵ0$3 = getClosureSafeProperty;
+var USE_VALUE$2 = getClosureSafeProperty({ provide: String, useValue: ɵ0$3 });
+function isUseValueProvider(meta) {
+    return USE_VALUE$2 in meta;
+}
+function isUseFactoryProvider(meta) {
+    return meta.useFactory !== undefined;
+}
+function isUseExistingProvider(meta) {
+    return meta.useExisting !== undefined;
+}
 
 /**
  * @license
@@ -12561,7 +12506,21 @@ var VERSION = new Version('7.0.0-rc.1+85.sha-f8195e5');
 *
 * @Annotation
 */
-var Injectable = makeDecorator('Injectable', undefined, undefined, undefined, function (type, meta) { return R3_COMPILE_INJECTABLE$1(type, meta); });
+var Injectable = makeDecorator('Injectable', undefined, undefined, undefined, function (type, meta) { return SWITCH_COMPILE_INJECTABLE(type, meta); });
+/**
+ * Supports @Injectable() in JIT mode for Render2.
+ */
+function render2CompileInjectable(injectableType, options) {
+    if (options && options.providedIn !== undefined && !getInjectableDef(injectableType)) {
+        injectableType.ngInjectableDef = defineInjectable({
+            providedIn: options.providedIn,
+            factory: convertInjectableProviderToFactory(injectableType, options),
+        });
+    }
+}
+var SWITCH_COMPILE_INJECTABLE__POST_R3__ = compileInjectable$1;
+var SWITCH_COMPILE_INJECTABLE__PRE_R3__ = render2CompileInjectable;
+var SWITCH_COMPILE_INJECTABLE = SWITCH_COMPILE_INJECTABLE__PRE_R3__;
 
 /**
  * @license
@@ -14449,13 +14408,13 @@ var _testabilityGetter = new _NoopGetTestability();
  * found in the LICENSE file at https://angular.io/license
  */
 var _platform;
-var compileNgModuleFactory = compileNgModuleFactory__PRE_NGCC__;
-function compileNgModuleFactory__PRE_NGCC__(injector, options, moduleType) {
+var compileNgModuleFactory = compileNgModuleFactory__PRE_R3__;
+function compileNgModuleFactory__PRE_R3__(injector, options, moduleType) {
     var compilerFactory = injector.get(CompilerFactory);
     var compiler = compilerFactory.createCompiler([options]);
     return compiler.compileModuleAsync(moduleType);
 }
-function compileNgModuleFactory__POST_NGCC__(injector, options, moduleType) {
+function compileNgModuleFactory__POST_R3__(injector, options, moduleType) {
     ngDevMode && assertNgModuleType(moduleType);
     return Promise.resolve(new NgModuleFactory$1(moduleType));
 }
@@ -15197,9 +15156,12 @@ var ViewContainerRef = /** @class */ (function () {
     function ViewContainerRef() {
     }
     /** @internal */
-    ViewContainerRef.__NG_ELEMENT_ID__ = function () { return R3_VIEW_CONTAINER_REF_FACTORY$1(ViewContainerRef, ElementRef); };
+    ViewContainerRef.__NG_ELEMENT_ID__ = function () { return SWITCH_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef); };
     return ViewContainerRef;
 }());
+var SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ = injectViewContainerRef;
+var SWITCH_VIEW_CONTAINER_REF_FACTORY__PRE_R3__ = noop;
+var SWITCH_VIEW_CONTAINER_REF_FACTORY = SWITCH_VIEW_CONTAINER_REF_FACTORY__PRE_R3__;
 
 /**
  * @license
@@ -15253,9 +15215,17 @@ var ChangeDetectorRef = /** @class */ (function () {
     function ChangeDetectorRef() {
     }
     /** @internal */
-    ChangeDetectorRef.__NG_ELEMENT_ID__ = function () { return R3_CHANGE_DETECTOR_REF_FACTORY$1(); };
+    ChangeDetectorRef.__NG_ELEMENT_ID__ = function () { return SWITCH_CHANGE_DETECTOR_REF_FACTORY(); };
     return ChangeDetectorRef;
 }());
+var SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ = injectChangeDetectorRef;
+var SWITCH_CHANGE_DETECTOR_REF_FACTORY__PRE_R3__ = function () {
+    var args = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        args[_i] = arguments[_i];
+    }
+};
+var SWITCH_CHANGE_DETECTOR_REF_FACTORY = SWITCH_CHANGE_DETECTOR_REF_FACTORY__PRE_R3__;
 
 /**
  * @license
@@ -16818,6 +16788,17 @@ var ApplicationModule = /** @class */ (function () {
     ], ApplicationModule);
     return ApplicationModule;
 }());
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+var SWITCH_IVY_ENABLED__POST_R3__ = true;
+var SWITCH_IVY_ENABLED__PRE_R3__ = false;
+var ivyEnabled = SWITCH_IVY_ENABLED__PRE_R3__;
 
 /**
  * @license
@@ -20820,7 +20801,7 @@ var DebugRenderer2 = /** @class */ (function () {
     };
     DebugRenderer2.prototype.selectRootElement = function (selectorOrNode, preserveContent) {
         var el = this.delegate.selectRootElement(selectorOrNode, preserveContent);
-        var debugCtx = getCurrentDebugContext() || (ivyEnabled$1 ? this.createDebugContext(el) : null);
+        var debugCtx = getCurrentDebugContext() || (ivyEnabled ? this.createDebugContext(el) : null);
         if (debugCtx) {
             indexDebugNode(new DebugElement(el, null, debugCtx));
         }
@@ -21247,5 +21228,5 @@ function getPlayers(ref) {
  * Generated bundle index. Do not edit.
  */
 
-export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_l, _iterableDiffersFactory as ɵangular_packages_core_core_i, _keyValueDiffersFactory as ɵangular_packages_core_core_j, _localeFactory as ɵangular_packages_core_core_k, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, DefaultIterableDifferFactory as ɵangular_packages_core_core_g, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_h, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, wtfEnabled as ɵangular_packages_core_core_m, createScope as ɵangular_packages_core_core_o, detectWTF as ɵangular_packages_core_core_n, endTimeRange as ɵangular_packages_core_core_r, leave as ɵangular_packages_core_core_p, startTimeRange as ɵangular_packages_core_core_q, NG_INJECTABLE_DEF as ɵangular_packages_core_core_bd, _getViewData as ɵangular_packages_core_core_w, bindingUpdated as ɵangular_packages_core_core_x, getPreviousOrParentTNode as ɵangular_packages_core_core_v, BoundPlayerFactory as ɵangular_packages_core_core_z, loadInternal as ɵangular_packages_core_core_bg, createElementRef as ɵangular_packages_core_core_ba, createTemplateRef as ɵangular_packages_core_core_bb, createViewRef as ɵangular_packages_core_core_bc, makeParamDecorator as ɵangular_packages_core_core_a, makePropDecorator as ɵangular_packages_core_core_b, getClosureSafeProperty as ɵangular_packages_core_core_be, _def as ɵangular_packages_core_core_s, DebugRendererFactory2 as ɵangular_packages_core_core_t, DebugContext as ɵangular_packages_core_core_u, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, inject, INJECTOR, Injector, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList$1 as QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, getInjectableDef as ɵgetInjectableDef, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled$1 as ɵivyEnabled, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineBase as ɵdefineBase, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, directiveInject as ɵdirectiveInject, injectAttribute as ɵinjectAttribute, getFactoryOf as ɵgetFactoryOf, getInheritedFactory as ɵgetInheritedFactory, templateRefExtractor as ɵtemplateRefExtractor, PublicFeature as ɵPublicFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, NgOnChangesFeature as ɵNgOnChangesFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, container as ɵcontainer, nextContext as ɵnextContext, elementStart as ɵelementStart, namespaceHTML as ɵnamespaceHTML, namespaceMathML as ɵnamespaceMathML, namespaceSVG as ɵnamespaceSVG, element as ɵelement, listener as ɵlistener, text as ɵtext, embeddedViewStart as ɵembeddedViewStart, query as ɵquery, registerContentQuery as ɵregisterContentQuery, projection as ɵprojection, bind as ɵbind, interpolation1 as ɵinterpolation1, interpolation2 as ɵinterpolation2, interpolation3 as ɵinterpolation3, interpolation4 as ɵinterpolation4, interpolation5 as ɵinterpolation5, interpolation6 as ɵinterpolation6, interpolation7 as ɵinterpolation7, interpolation8 as ɵinterpolation8, interpolationV as ɵinterpolationV, pipeBind1 as ɵpipeBind1, pipeBind2 as ɵpipeBind2, pipeBind3 as ɵpipeBind3, pipeBind4 as ɵpipeBind4, pipeBindV as ɵpipeBindV, pureFunction0 as ɵpureFunction0, pureFunction1 as ɵpureFunction1, pureFunction2 as ɵpureFunction2, pureFunction3 as ɵpureFunction3, pureFunction4 as ɵpureFunction4, pureFunction5 as ɵpureFunction5, pureFunction6 as ɵpureFunction6, pureFunction7 as ɵpureFunction7, pureFunction8 as ɵpureFunction8, pureFunctionV as ɵpureFunctionV, getCurrentView as ɵgetCurrentView, restoreView as ɵrestoreView, containerRefreshStart as ɵcontainerRefreshStart, containerRefreshEnd as ɵcontainerRefreshEnd, queryRefresh as ɵqueryRefresh, loadQueryList as ɵloadQueryList, elementEnd as ɵelementEnd, elementProperty as ɵelementProperty, projectionDef as ɵprojectionDef, reference as ɵreference, enableBindings as ɵenableBindings, disableBindings as ɵdisableBindings, elementAttribute as ɵelementAttribute, elementStyling as ɵelementStyling, elementStylingMap as ɵelementStylingMap, elementStyleProp as ɵelementStyleProp, elementStylingApply as ɵelementStylingApply, elementClassProp as ɵelementClassProp, textBinding as ɵtextBinding, template as ɵtemplate, embeddedViewEnd as ɵembeddedViewEnd, store as ɵstore, load as ɵload, pipe as ɵpipe, whenRendered as ɵwhenRendered, i18nAttribute as ɵi18nAttribute, i18nExp as ɵi18nExp, i18nStart as ɵi18nStart, i18nEnd as ɵi18nEnd, i18nApply as ɵi18nApply, i18nExpMapping as ɵi18nExpMapping, i18nInterpolation1 as ɵi18nInterpolation1, i18nInterpolation2 as ɵi18nInterpolation2, i18nInterpolation3 as ɵi18nInterpolation3, i18nInterpolation4 as ɵi18nInterpolation4, i18nInterpolation5 as ɵi18nInterpolation5, i18nInterpolation6 as ɵi18nInterpolation6, i18nInterpolation7 as ɵi18nInterpolation7, i18nInterpolation8 as ɵi18nInterpolation8, i18nInterpolationV as ɵi18nInterpolationV, i18nMapping as ɵi18nMapping, WRAP_RENDERER_FACTORY2 as ɵWRAP_RENDERER_FACTORY2, Render3DebugRendererFactory2 as ɵRender3DebugRendererFactory2, R3_COMPILE_NGMODULE_DEFS as ɵcompileNgModuleDefs, R3_PATCH_COMPONENT_DEF_WTIH_SCOPE as ɵpatchComponentDefWithScope, R3_COMPILE_COMPONENT as ɵcompileComponent, R3_COMPILE_DIRECTIVE as ɵcompileDirective, R3_COMPILE_PIPE as ɵcompilePipe, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getContext as ɵgetContext, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_NGCC__ as ɵcompileNgModuleFactory__POST_NGCC__, R3_COMPILE_COMPONENT__POST_NGCC__ as ɵR3_COMPILE_COMPONENT__POST_NGCC__, R3_COMPILE_DIRECTIVE__POST_NGCC__ as ɵR3_COMPILE_DIRECTIVE__POST_NGCC__, R3_COMPILE_INJECTABLE__POST_NGCC__ as ɵR3_COMPILE_INJECTABLE__POST_NGCC__, R3_COMPILE_NGMODULE__POST_NGCC__ as ɵR3_COMPILE_NGMODULE__POST_NGCC__, R3_COMPILE_PIPE__POST_NGCC__ as ɵR3_COMPILE_PIPE__POST_NGCC__, ivyEnable__POST_NGCC__ as ɵivyEnable__POST_NGCC__, R3_ELEMENT_REF_FACTORY__POST_NGCC__ as ɵR3_ELEMENT_REF_FACTORY__POST_NGCC__, R3_TEMPLATE_REF_FACTORY__POST_NGCC__ as ɵR3_TEMPLATE_REF_FACTORY__POST_NGCC__, R3_CHANGE_DETECTOR_REF_FACTORY__POST_NGCC__ as ɵR3_CHANGE_DETECTOR_REF_FACTORY__POST_NGCC__, R3_VIEW_CONTAINER_REF_FACTORY__POST_NGCC__ as ɵR3_VIEW_CONTAINER_REF_FACTORY__POST_NGCC__, R3_RENDERER2_FACTORY__POST_NGCC__ as ɵR3_RENDERER2_FACTORY__POST_NGCC__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$4 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_o, _iterableDiffersFactory as ɵangular_packages_core_core_l, _keyValueDiffersFactory as ɵangular_packages_core_core_m, _localeFactory as ɵangular_packages_core_core_n, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, DefaultIterableDifferFactory as ɵangular_packages_core_core_j, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_k, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, wtfEnabled as ɵangular_packages_core_core_p, createScope as ɵangular_packages_core_core_r, detectWTF as ɵangular_packages_core_core_q, endTimeRange as ɵangular_packages_core_core_u, leave as ɵangular_packages_core_core_s, startTimeRange as ɵangular_packages_core_core_t, NG_INJECTABLE_DEF as ɵangular_packages_core_core_bd, _getViewData as ɵangular_packages_core_core_z, bindingUpdated as ɵangular_packages_core_core_ba, getPreviousOrParentTNode as ɵangular_packages_core_core_y, BoundPlayerFactory as ɵangular_packages_core_core_bc, loadInternal as ɵangular_packages_core_core_bg, createElementRef as ɵangular_packages_core_core_g, createTemplateRef as ɵangular_packages_core_core_h, createViewRef as ɵangular_packages_core_core_i, makeParamDecorator as ɵangular_packages_core_core_a, makePropDecorator as ɵangular_packages_core_core_b, getClosureSafeProperty as ɵangular_packages_core_core_be, _def as ɵangular_packages_core_core_v, DebugRendererFactory2 as ɵangular_packages_core_core_w, DebugContext as ɵangular_packages_core_core_x, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, inject, INJECTOR, Injector, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList$1 as QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, getInjectableDef as ɵgetInjectableDef, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineBase as ɵdefineBase, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, directiveInject as ɵdirectiveInject, injectAttribute as ɵinjectAttribute, getFactoryOf as ɵgetFactoryOf, getInheritedFactory as ɵgetInheritedFactory, templateRefExtractor as ɵtemplateRefExtractor, PublicFeature as ɵPublicFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, NgOnChangesFeature as ɵNgOnChangesFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, container as ɵcontainer, nextContext as ɵnextContext, elementStart as ɵelementStart, namespaceHTML as ɵnamespaceHTML, namespaceMathML as ɵnamespaceMathML, namespaceSVG as ɵnamespaceSVG, element as ɵelement, listener as ɵlistener, text as ɵtext, embeddedViewStart as ɵembeddedViewStart, query as ɵquery, registerContentQuery as ɵregisterContentQuery, projection as ɵprojection, bind as ɵbind, interpolation1 as ɵinterpolation1, interpolation2 as ɵinterpolation2, interpolation3 as ɵinterpolation3, interpolation4 as ɵinterpolation4, interpolation5 as ɵinterpolation5, interpolation6 as ɵinterpolation6, interpolation7 as ɵinterpolation7, interpolation8 as ɵinterpolation8, interpolationV as ɵinterpolationV, pipeBind1 as ɵpipeBind1, pipeBind2 as ɵpipeBind2, pipeBind3 as ɵpipeBind3, pipeBind4 as ɵpipeBind4, pipeBindV as ɵpipeBindV, pureFunction0 as ɵpureFunction0, pureFunction1 as ɵpureFunction1, pureFunction2 as ɵpureFunction2, pureFunction3 as ɵpureFunction3, pureFunction4 as ɵpureFunction4, pureFunction5 as ɵpureFunction5, pureFunction6 as ɵpureFunction6, pureFunction7 as ɵpureFunction7, pureFunction8 as ɵpureFunction8, pureFunctionV as ɵpureFunctionV, getCurrentView as ɵgetCurrentView, restoreView as ɵrestoreView, containerRefreshStart as ɵcontainerRefreshStart, containerRefreshEnd as ɵcontainerRefreshEnd, queryRefresh as ɵqueryRefresh, loadQueryList as ɵloadQueryList, elementEnd as ɵelementEnd, elementProperty as ɵelementProperty, projectionDef as ɵprojectionDef, reference as ɵreference, enableBindings as ɵenableBindings, disableBindings as ɵdisableBindings, elementAttribute as ɵelementAttribute, elementStyling as ɵelementStyling, elementStylingMap as ɵelementStylingMap, elementStyleProp as ɵelementStyleProp, elementStylingApply as ɵelementStylingApply, elementClassProp as ɵelementClassProp, textBinding as ɵtextBinding, template as ɵtemplate, embeddedViewEnd as ɵembeddedViewEnd, store as ɵstore, load as ɵload, pipe as ɵpipe, whenRendered as ɵwhenRendered, i18nAttribute as ɵi18nAttribute, i18nExp as ɵi18nExp, i18nStart as ɵi18nStart, i18nEnd as ɵi18nEnd, i18nApply as ɵi18nApply, i18nExpMapping as ɵi18nExpMapping, i18nInterpolation1 as ɵi18nInterpolation1, i18nInterpolation2 as ɵi18nInterpolation2, i18nInterpolation3 as ɵi18nInterpolation3, i18nInterpolation4 as ɵi18nInterpolation4, i18nInterpolation5 as ɵi18nInterpolation5, i18nInterpolation6 as ɵi18nInterpolation6, i18nInterpolation7 as ɵi18nInterpolation7, i18nInterpolation8 as ɵi18nInterpolation8, i18nInterpolationV as ɵi18nInterpolationV, i18nMapping as ɵi18nMapping, WRAP_RENDERER_FACTORY2 as ɵWRAP_RENDERER_FACTORY2, Render3DebugRendererFactory2 as ɵRender3DebugRendererFactory2, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule$1 as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, compilePipe as ɵcompilePipe, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getContext as ɵgetContext, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$4 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map

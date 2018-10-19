@@ -1,11 +1,11 @@
 /**
- * @license Angular v7.0.0-rc.1+85.sha-f8195e5
+ * @license Angular v7.0.0-rc.1+102.sha-d4cee51
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
 import { Subject, Subscription, Observable, merge } from 'rxjs';
-import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compileInjectable, compilePipeFromMetadata } from '@angular/compiler';
+import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compilePipeFromMetadata, compileInjectable } from '@angular/compiler';
 import { share } from 'rxjs/operators';
 
 /**
@@ -545,6 +545,172 @@ function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
     return changeDetectionStrategy == null ||
         changeDetectionStrategy === ChangeDetectionStrategy.Default;
 }
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Used to resolve resource URLs on `\@Component` when used with JIT compilation.
+ *
+ * Example:
+ * ```
+ * \@Component({
+ *   selector: 'my-comp',
+ *   templateUrl: 'my-comp.html', // This requires asynchronous resolution
+ * })
+ * class MyComponnent{
+ * }
+ *
+ * // Calling `renderComponent` will fail because `MyComponent`'s `\@Compenent.templateUrl`
+ * // needs to be resolved because `renderComponent` is synchronous process.
+ * // renderComponent(MyComponent);
+ *
+ * // Calling `resolveComponentResources` will resolve `\@Compenent.templateUrl` into
+ * // `\@Compenent.template`, which would allow `renderComponent` to proceed in synchronous manner.
+ * // Use browser's `fetch` function as the default resource resolution strategy.
+ * resolveComponentResources(fetch).then(() => {
+ *   // After resolution all URLs have been converted into strings.
+ *   renderComponent(MyComponent);
+ * });
+ *
+ * ```
+ *
+ * NOTE: In AOT the resolution happens during compilation, and so there should be no need
+ * to call this method outside JIT mode.
+ *
+ * @param {?} resourceResolver a function which is responsible to returning a `Promise` of the resolved
+ * URL. Browser's `fetch` method is a good default implementation.
+ * @return {?}
+ */
+function resolveComponentResources(resourceResolver) {
+    /** @type {?} */
+    const urlFetches = [];
+    /** @type {?} */
+    const urlMap = new Map();
+    /**
+     * @param {?} url
+     * @return {?}
+     */
+    function cachedResourceResolve(url) {
+        /** @type {?} */
+        let promise = urlMap.get(url);
+        if (!promise) {
+            /** @type {?} */
+            const resp = resourceResolver(url);
+            urlMap.set(url, promise = resp.then(unwrapResponse));
+            urlFetches.push(promise);
+        }
+        return promise;
+    }
+    componentResourceResolutionQueue.forEach((component) => {
+        if (component.templateUrl) {
+            cachedResourceResolve(component.templateUrl).then((template) => {
+                component.template = template;
+                component.templateUrl = undefined;
+            });
+        }
+        /** @type {?} */
+        const styleUrls = component.styleUrls;
+        /** @type {?} */
+        const styles = component.styles || (component.styles = []);
+        /** @type {?} */
+        const styleOffset = component.styles.length;
+        styleUrls && styleUrls.forEach((styleUrl, index) => {
+            styles.push(''); // pre-allocate array.
+            cachedResourceResolve(styleUrl).then((style) => {
+                styles[styleOffset + index] = style;
+                styleUrls.splice(styleUrls.indexOf(styleUrl), 1);
+                if (styleUrls.length == 0) {
+                    component.styleUrls = undefined;
+                }
+            });
+        });
+    });
+    componentResourceResolutionQueue.clear();
+    return Promise.all(urlFetches).then(() => null);
+}
+/** @type {?} */
+const componentResourceResolutionQueue = new Set();
+/**
+ * @param {?} metadata
+ * @return {?}
+ */
+function maybeQueueResolutionOfComponentResources(metadata) {
+    if (componentNeedsResolution(metadata)) {
+        componentResourceResolutionQueue.add(metadata);
+    }
+}
+/**
+ * @param {?} component
+ * @return {?}
+ */
+function componentNeedsResolution(component) {
+    return component.templateUrl || component.styleUrls && component.styleUrls.length;
+}
+/**
+ * @param {?} response
+ * @return {?}
+ */
+function unwrapResponse(response) {
+    return typeof response == 'string' ? response : response.text();
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/** @enum {number} */
+var ViewEncapsulation = {
+    /**
+       * Emulate `Native` scoping of styles by adding an attribute containing surrogate id to the Host
+       * Element and pre-processing the style rules provided via {@link Component#styles styles} or
+       * {@link Component#styleUrls styleUrls}, and adding the new Host Element attribute to all
+       * selectors.
+       *
+       * This is the default option.
+       */
+    Emulated: 0,
+    /**
+       * @deprecated v6.1.0 - use {ViewEncapsulation.ShadowDom} instead.
+       * Use the native encapsulation mechanism of the renderer.
+       *
+       * For the DOM this means using the deprecated [Shadow DOM
+       * v0](https://w3c.github.io/webcomponents/spec/shadow/) and
+       * creating a ShadowRoot for Component's Host Element.
+       */
+    Native: 1,
+    /**
+       * Don't provide any template or style encapsulation.
+       */
+    None: 2,
+    /**
+       * Use Shadow DOM to encapsulate styles.
+       *
+       * For the DOM this means using modern [Shadow
+       * DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
+       * creating a ShadowRoot for Component's Host Element.
+       */
+    ShadowDom: 3,
+};
+ViewEncapsulation[ViewEncapsulation.Emulated] = 'Emulated';
+ViewEncapsulation[ViewEncapsulation.Native] = 'Native';
+ViewEncapsulation[ViewEncapsulation.None] = 'None';
+ViewEncapsulation[ViewEncapsulation.ShadowDom] = 'ShadowDom';
 
 /**
  * @fileoverview added by tsickle
@@ -1256,540 +1422,6 @@ function injectArgs(types) {
     }
     return args;
 }
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/** *
- * \@description
- *
- * Represents a type that a Component or other object is instances of.
- *
- * An example of a `Type` is `MyCustomComponent` class, which in JavaScript is be represented by
- * the `MyCustomComponent` constructor function.
- *
- *
-  @type {?} */
-const Type = Function;
-/**
- * @param {?} v
- * @return {?}
- */
-function isType(v) {
-    return typeof v === 'function';
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/** *
- * Attention: These regex has to hold even if the code is minified!
-  @type {?} */
-const DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*arguments\)/;
-/** @type {?} */
-const INHERITED_CLASS = /^class\s+[A-Za-z\d$_]*\s*extends\s+[A-Za-z\d$_]+\s*{/;
-/** @type {?} */
-const INHERITED_CLASS_WITH_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[A-Za-z\d$_]+\s*{[\s\S]*constructor\s*\(/;
-class ReflectionCapabilities {
-    /**
-     * @param {?=} reflect
-     */
-    constructor(reflect) { this._reflect = reflect || _global['Reflect']; }
-    /**
-     * @return {?}
-     */
-    isReflectionEnabled() { return true; }
-    /**
-     * @template T
-     * @param {?} t
-     * @return {?}
-     */
-    factory(t) { return (...args) => new t(...args); }
-    /**
-     * \@internal
-     * @param {?} paramTypes
-     * @param {?} paramAnnotations
-     * @return {?}
-     */
-    _zipTypesAndAnnotations(paramTypes, paramAnnotations) {
-        /** @type {?} */
-        let result;
-        if (typeof paramTypes === 'undefined') {
-            result = new Array(paramAnnotations.length);
-        }
-        else {
-            result = new Array(paramTypes.length);
-        }
-        for (let i = 0; i < result.length; i++) {
-            // TS outputs Object for parameters without types, while Traceur omits
-            // the annotations. For now we preserve the Traceur behavior to aid
-            // migration, but this can be revisited.
-            if (typeof paramTypes === 'undefined') {
-                result[i] = [];
-            }
-            else if (paramTypes[i] != Object) {
-                result[i] = [paramTypes[i]];
-            }
-            else {
-                result[i] = [];
-            }
-            if (paramAnnotations && paramAnnotations[i] != null) {
-                result[i] = result[i].concat(paramAnnotations[i]);
-            }
-        }
-        return result;
-    }
-    /**
-     * @param {?} type
-     * @param {?} parentCtor
-     * @return {?}
-     */
-    _ownParameters(type, parentCtor) {
-        /** @type {?} */
-        const typeStr = type.toString();
-        // If we have no decorators, we only have function.length as metadata.
-        // In that case, to detect whether a child class declared an own constructor or not,
-        // we need to look inside of that constructor to check whether it is
-        // just calling the parent.
-        // This also helps to work around for https://github.com/Microsoft/TypeScript/issues/12439
-        // that sets 'design:paramtypes' to []
-        // if a class inherits from another class but has no ctor declared itself.
-        if (DELEGATE_CTOR.exec(typeStr) ||
-            (INHERITED_CLASS.exec(typeStr) && !INHERITED_CLASS_WITH_CTOR.exec(typeStr))) {
-            return null;
-        }
-        // Prefer the direct API.
-        if ((/** @type {?} */ (type)).parameters && (/** @type {?} */ (type)).parameters !== parentCtor.parameters) {
-            return (/** @type {?} */ (type)).parameters;
-        }
-        /** @type {?} */
-        const tsickleCtorParams = (/** @type {?} */ (type)).ctorParameters;
-        if (tsickleCtorParams && tsickleCtorParams !== parentCtor.ctorParameters) {
-            /** @type {?} */
-            const ctorParameters = typeof tsickleCtorParams === 'function' ? tsickleCtorParams() : tsickleCtorParams;
-            /** @type {?} */
-            const paramTypes = ctorParameters.map((ctorParam) => ctorParam && ctorParam.type);
-            /** @type {?} */
-            const paramAnnotations = ctorParameters.map((ctorParam) => ctorParam && convertTsickleDecoratorIntoMetadata(ctorParam.decorators));
-            return this._zipTypesAndAnnotations(paramTypes, paramAnnotations);
-        }
-        /** @type {?} */
-        const paramAnnotations = type.hasOwnProperty(PARAMETERS) && (/** @type {?} */ (type))[PARAMETERS];
-        /** @type {?} */
-        const paramTypes = this._reflect && this._reflect.getOwnMetadata &&
-            this._reflect.getOwnMetadata('design:paramtypes', type);
-        if (paramTypes || paramAnnotations) {
-            return this._zipTypesAndAnnotations(paramTypes, paramAnnotations);
-        }
-        // If a class has no decorators, at least create metadata
-        // based on function.length.
-        // Note: We know that this is a real constructor as we checked
-        // the content of the constructor above.
-        return new Array((/** @type {?} */ (type.length))).fill(undefined);
-    }
-    /**
-     * @param {?} type
-     * @return {?}
-     */
-    parameters(type) {
-        // Note: only report metadata if we have at least one class decorator
-        // to stay in sync with the static reflector.
-        if (!isType(type)) {
-            return [];
-        }
-        /** @type {?} */
-        const parentCtor = getParentCtor(type);
-        /** @type {?} */
-        let parameters = this._ownParameters(type, parentCtor);
-        if (!parameters && parentCtor !== Object) {
-            parameters = this.parameters(parentCtor);
-        }
-        return parameters || [];
-    }
-    /**
-     * @param {?} typeOrFunc
-     * @param {?} parentCtor
-     * @return {?}
-     */
-    _ownAnnotations(typeOrFunc, parentCtor) {
-        // Prefer the direct API.
-        if ((/** @type {?} */ (typeOrFunc)).annotations && (/** @type {?} */ (typeOrFunc)).annotations !== parentCtor.annotations) {
-            /** @type {?} */
-            let annotations = (/** @type {?} */ (typeOrFunc)).annotations;
-            if (typeof annotations === 'function' && annotations.annotations) {
-                annotations = annotations.annotations;
-            }
-            return annotations;
-        }
-        // API of tsickle for lowering decorators to properties on the class.
-        if ((/** @type {?} */ (typeOrFunc)).decorators && (/** @type {?} */ (typeOrFunc)).decorators !== parentCtor.decorators) {
-            return convertTsickleDecoratorIntoMetadata((/** @type {?} */ (typeOrFunc)).decorators);
-        }
-        // API for metadata created by invoking the decorators.
-        if (typeOrFunc.hasOwnProperty(ANNOTATIONS)) {
-            return (/** @type {?} */ (typeOrFunc))[ANNOTATIONS];
-        }
-        return null;
-    }
-    /**
-     * @param {?} typeOrFunc
-     * @return {?}
-     */
-    annotations(typeOrFunc) {
-        if (!isType(typeOrFunc)) {
-            return [];
-        }
-        /** @type {?} */
-        const parentCtor = getParentCtor(typeOrFunc);
-        /** @type {?} */
-        const ownAnnotations = this._ownAnnotations(typeOrFunc, parentCtor) || [];
-        /** @type {?} */
-        const parentAnnotations = parentCtor !== Object ? this.annotations(parentCtor) : [];
-        return parentAnnotations.concat(ownAnnotations);
-    }
-    /**
-     * @param {?} typeOrFunc
-     * @param {?} parentCtor
-     * @return {?}
-     */
-    _ownPropMetadata(typeOrFunc, parentCtor) {
-        // Prefer the direct API.
-        if ((/** @type {?} */ (typeOrFunc)).propMetadata &&
-            (/** @type {?} */ (typeOrFunc)).propMetadata !== parentCtor.propMetadata) {
-            /** @type {?} */
-            let propMetadata = (/** @type {?} */ (typeOrFunc)).propMetadata;
-            if (typeof propMetadata === 'function' && propMetadata.propMetadata) {
-                propMetadata = propMetadata.propMetadata;
-            }
-            return propMetadata;
-        }
-        // API of tsickle for lowering decorators to properties on the class.
-        if ((/** @type {?} */ (typeOrFunc)).propDecorators &&
-            (/** @type {?} */ (typeOrFunc)).propDecorators !== parentCtor.propDecorators) {
-            /** @type {?} */
-            const propDecorators = (/** @type {?} */ (typeOrFunc)).propDecorators;
-            /** @type {?} */
-            const propMetadata = /** @type {?} */ ({});
-            Object.keys(propDecorators).forEach(prop => {
-                propMetadata[prop] = convertTsickleDecoratorIntoMetadata(propDecorators[prop]);
-            });
-            return propMetadata;
-        }
-        // API for metadata created by invoking the decorators.
-        if (typeOrFunc.hasOwnProperty(PROP_METADATA)) {
-            return (/** @type {?} */ (typeOrFunc))[PROP_METADATA];
-        }
-        return null;
-    }
-    /**
-     * @param {?} typeOrFunc
-     * @return {?}
-     */
-    propMetadata(typeOrFunc) {
-        if (!isType(typeOrFunc)) {
-            return {};
-        }
-        /** @type {?} */
-        const parentCtor = getParentCtor(typeOrFunc);
-        /** @type {?} */
-        const propMetadata = {};
-        if (parentCtor !== Object) {
-            /** @type {?} */
-            const parentPropMetadata = this.propMetadata(parentCtor);
-            Object.keys(parentPropMetadata).forEach((propName) => {
-                propMetadata[propName] = parentPropMetadata[propName];
-            });
-        }
-        /** @type {?} */
-        const ownPropMetadata = this._ownPropMetadata(typeOrFunc, parentCtor);
-        if (ownPropMetadata) {
-            Object.keys(ownPropMetadata).forEach((propName) => {
-                /** @type {?} */
-                const decorators = [];
-                if (propMetadata.hasOwnProperty(propName)) {
-                    decorators.push(...propMetadata[propName]);
-                }
-                decorators.push(...ownPropMetadata[propName]);
-                propMetadata[propName] = decorators;
-            });
-        }
-        return propMetadata;
-    }
-    /**
-     * @param {?} type
-     * @param {?} lcProperty
-     * @return {?}
-     */
-    hasLifecycleHook(type, lcProperty) {
-        return type instanceof Type && lcProperty in type.prototype;
-    }
-    /**
-     * @param {?} type
-     * @return {?}
-     */
-    guards(type) { return {}; }
-    /**
-     * @param {?} name
-     * @return {?}
-     */
-    getter(name) { return /** @type {?} */ (new Function('o', 'return o.' + name + ';')); }
-    /**
-     * @param {?} name
-     * @return {?}
-     */
-    setter(name) {
-        return /** @type {?} */ (new Function('o', 'v', 'return o.' + name + ' = v;'));
-    }
-    /**
-     * @param {?} name
-     * @return {?}
-     */
-    method(name) {
-        /** @type {?} */
-        const functionBody = `if (!o.${name}) throw new Error('"${name}" is undefined');
-        return o.${name}.apply(o, args);`;
-        return /** @type {?} */ (new Function('o', 'args', functionBody));
-    }
-    /**
-     * @param {?} type
-     * @return {?}
-     */
-    importUri(type) {
-        // StaticSymbol
-        if (typeof type === 'object' && type['filePath']) {
-            return type['filePath'];
-        }
-        // Runtime type
-        return `./${stringify(type)}`;
-    }
-    /**
-     * @param {?} type
-     * @return {?}
-     */
-    resourceUri(type) { return `./${stringify(type)}`; }
-    /**
-     * @param {?} name
-     * @param {?} moduleUrl
-     * @param {?} members
-     * @param {?} runtime
-     * @return {?}
-     */
-    resolveIdentifier(name, moduleUrl, members, runtime) {
-        return runtime;
-    }
-    /**
-     * @param {?} enumIdentifier
-     * @param {?} name
-     * @return {?}
-     */
-    resolveEnum(enumIdentifier, name) { return enumIdentifier[name]; }
-}
-/**
- * @param {?} decoratorInvocations
- * @return {?}
- */
-function convertTsickleDecoratorIntoMetadata(decoratorInvocations) {
-    if (!decoratorInvocations) {
-        return [];
-    }
-    return decoratorInvocations.map(decoratorInvocation => {
-        /** @type {?} */
-        const decoratorType = decoratorInvocation.type;
-        /** @type {?} */
-        const annotationCls = decoratorType.annotationCls;
-        /** @type {?} */
-        const annotationArgs = decoratorInvocation.args ? decoratorInvocation.args : [];
-        return new annotationCls(...annotationArgs);
-    });
-}
-/**
- * @param {?} ctor
- * @return {?}
- */
-function getParentCtor(ctor) {
-    /** @type {?} */
-    const parentProto = ctor.prototype ? Object.getPrototypeOf(ctor.prototype) : null;
-    /** @type {?} */
-    const parentCtor = parentProto ? parentProto.constructor : null;
-    // Note: We always use `Object` as the null value
-    // to simplify checking later on.
-    return parentCtor || Object;
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Used to resolve resource URLs on `\@Component` when used with JIT compilation.
- *
- * Example:
- * ```
- * \@Component({
- *   selector: 'my-comp',
- *   templateUrl: 'my-comp.html', // This requires asynchronous resolution
- * })
- * class MyComponnent{
- * }
- *
- * // Calling `renderComponent` will fail because `MyComponent`'s `\@Compenent.templateUrl`
- * // needs to be resolved because `renderComponent` is synchronous process.
- * // renderComponent(MyComponent);
- *
- * // Calling `resolveComponentResources` will resolve `\@Compenent.templateUrl` into
- * // `\@Compenent.template`, which would allow `renderComponent` to proceed in synchronous manner.
- * // Use browser's `fetch` function as the default resource resolution strategy.
- * resolveComponentResources(fetch).then(() => {
- *   // After resolution all URLs have been converted into strings.
- *   renderComponent(MyComponent);
- * });
- *
- * ```
- *
- * NOTE: In AOT the resolution happens during compilation, and so there should be no need
- * to call this method outside JIT mode.
- *
- * @param {?} resourceResolver a function which is responsible to returning a `Promise` of the resolved
- * URL. Browser's `fetch` method is a good default implementation.
- * @return {?}
- */
-function resolveComponentResources(resourceResolver) {
-    /** @type {?} */
-    const urlFetches = [];
-    /** @type {?} */
-    const urlMap = new Map();
-    /**
-     * @param {?} url
-     * @return {?}
-     */
-    function cachedResourceResolve(url) {
-        /** @type {?} */
-        let promise = urlMap.get(url);
-        if (!promise) {
-            /** @type {?} */
-            const resp = resourceResolver(url);
-            urlMap.set(url, promise = resp.then(unwrapResponse));
-            urlFetches.push(promise);
-        }
-        return promise;
-    }
-    componentResourceResolutionQueue.forEach((component) => {
-        if (component.templateUrl) {
-            cachedResourceResolve(component.templateUrl).then((template) => {
-                component.template = template;
-                component.templateUrl = undefined;
-            });
-        }
-        /** @type {?} */
-        const styleUrls = component.styleUrls;
-        /** @type {?} */
-        const styles = component.styles || (component.styles = []);
-        /** @type {?} */
-        const styleOffset = component.styles.length;
-        styleUrls && styleUrls.forEach((styleUrl, index) => {
-            styles.push(''); // pre-allocate array.
-            cachedResourceResolve(styleUrl).then((style) => {
-                styles[styleOffset + index] = style;
-                styleUrls.splice(styleUrls.indexOf(styleUrl), 1);
-                if (styleUrls.length == 0) {
-                    component.styleUrls = undefined;
-                }
-            });
-        });
-    });
-    componentResourceResolutionQueue.clear();
-    return Promise.all(urlFetches).then(() => null);
-}
-/** @type {?} */
-const componentResourceResolutionQueue = new Set();
-/**
- * @param {?} metadata
- * @return {?}
- */
-function maybeQueueResolutionOfComponentResources(metadata) {
-    if (componentNeedsResolution(metadata)) {
-        componentResourceResolutionQueue.add(metadata);
-    }
-}
-/**
- * @param {?} component
- * @return {?}
- */
-function componentNeedsResolution(component) {
-    return component.templateUrl || component.styleUrls && component.styleUrls.length;
-}
-/**
- * @param {?} response
- * @return {?}
- */
-function unwrapResponse(response) {
-    return typeof response == 'string' ? response : response.text();
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/** @enum {number} */
-var ViewEncapsulation = {
-    /**
-       * Emulate `Native` scoping of styles by adding an attribute containing surrogate id to the Host
-       * Element and pre-processing the style rules provided via {@link Component#styles styles} or
-       * {@link Component#styleUrls styleUrls}, and adding the new Host Element attribute to all
-       * selectors.
-       *
-       * This is the default option.
-       */
-    Emulated: 0,
-    /**
-       * @deprecated v6.1.0 - use {ViewEncapsulation.ShadowDom} instead.
-       * Use the native encapsulation mechanism of the renderer.
-       *
-       * For the DOM this means using the deprecated [Shadow DOM
-       * v0](https://w3c.github.io/webcomponents/spec/shadow/) and
-       * creating a ShadowRoot for Component's Host Element.
-       */
-    Native: 1,
-    /**
-       * Don't provide any template or style encapsulation.
-       */
-    None: 2,
-    /**
-       * Use Shadow DOM to encapsulate styles.
-       *
-       * For the DOM this means using modern [Shadow
-       * DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
-       * creating a ShadowRoot for Component's Host Element.
-       */
-    ShadowDom: 3,
-};
-ViewEncapsulation[ViewEncapsulation.Emulated] = 'Emulated';
-ViewEncapsulation[ViewEncapsulation.Native] = 'Native';
-ViewEncapsulation[ViewEncapsulation.None] = 'None';
-ViewEncapsulation[ViewEncapsulation.ShadowDom] = 'ShadowDom';
 
 /**
  * @fileoverview added by tsickle
@@ -10518,61 +10150,20 @@ function injectRenderer2() {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/** @type {?} */
-const R3_ELEMENT_REF_FACTORY = injectElementRef;
-/** @type {?} */
-const R3_TEMPLATE_REF_FACTORY = injectTemplateRef;
-/** @type {?} */
-const R3_CHANGE_DETECTOR_REF_FACTORY = injectChangeDetectorRef;
-/** @type {?} */
-const R3_VIEW_CONTAINER_REF_FACTORY = injectViewContainerRef;
-/** @type {?} */
-const R3_RENDERER2_FACTORY = injectRenderer2;
-
 /**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
  */
 /**
- * @param {...?} tokens
+ * @param {...?} args
  * @return {?}
  */
-function noopFactory(...tokens) { }
-/** @type {?} */
-const R3_ELEMENT_REF_FACTORY__POST_NGCC__ = R3_ELEMENT_REF_FACTORY;
-/** @type {?} */
-const R3_TEMPLATE_REF_FACTORY__POST_NGCC__ = R3_TEMPLATE_REF_FACTORY;
-/** @type {?} */
-const R3_CHANGE_DETECTOR_REF_FACTORY__POST_NGCC__ = R3_CHANGE_DETECTOR_REF_FACTORY;
-/** @type {?} */
-const R3_VIEW_CONTAINER_REF_FACTORY__POST_NGCC__ = R3_VIEW_CONTAINER_REF_FACTORY;
-/** @type {?} */
-const R3_RENDERER2_FACTORY__POST_NGCC__ = R3_RENDERER2_FACTORY;
-/** @type {?} */
-const R3_ELEMENT_REF_FACTORY__PRE_NGCC__ = noopFactory;
-/** @type {?} */
-const R3_TEMPLATE_REF_FACTORY__PRE_NGCC__ = noopFactory;
-/** @type {?} */
-const R3_CHANGE_DETECTOR_REF_FACTORY__PRE_NGCC__ = noopFactory;
-/** @type {?} */
-const R3_VIEW_CONTAINER_REF_FACTORY__PRE_NGCC__ = noopFactory;
-/** @type {?} */
-const R3_RENDERER2_FACTORY__PRE_NGCC__ = noopFactory;
-/** @type {?} */
-let R3_ELEMENT_REF_FACTORY$1 = R3_ELEMENT_REF_FACTORY__PRE_NGCC__;
-/** @type {?} */
-let R3_TEMPLATE_REF_FACTORY$1 = R3_TEMPLATE_REF_FACTORY__PRE_NGCC__;
-/** @type {?} */
-let R3_CHANGE_DETECTOR_REF_FACTORY$1 = R3_CHANGE_DETECTOR_REF_FACTORY__PRE_NGCC__;
-/** @type {?} */
-let R3_VIEW_CONTAINER_REF_FACTORY$1 = R3_VIEW_CONTAINER_REF_FACTORY__PRE_NGCC__;
-/** @type {?} */
-let R3_RENDERER2_FACTORY$1 = R3_RENDERER2_FACTORY__PRE_NGCC__;
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
+function noop(...args) {
+    // Do nothing.
+}
 
 /**
  * @fileoverview added by tsickle
@@ -10600,7 +10191,13 @@ class ElementRef {
 /**
  * \@internal
  */
-ElementRef.__NG_ELEMENT_ID__ = () => R3_ELEMENT_REF_FACTORY$1(ElementRef);
+ElementRef.__NG_ELEMENT_ID__ = () => SWITCH_ELEMENT_REF_FACTORY(ElementRef);
+/** @type {?} */
+const SWITCH_ELEMENT_REF_FACTORY__POST_R3__ = injectElementRef;
+/** @type {?} */
+const SWITCH_ELEMENT_REF_FACTORY__PRE_R3__ = noop;
+/** @type {?} */
+const SWITCH_ELEMENT_REF_FACTORY = SWITCH_ELEMENT_REF_FACTORY__PRE_R3__;
 
 /**
  * @fileoverview added by tsickle
@@ -10700,7 +10297,13 @@ class Renderer2 {
 /**
  * \@internal
  */
-Renderer2.__NG_ELEMENT_ID__ = () => R3_RENDERER2_FACTORY$1();
+Renderer2.__NG_ELEMENT_ID__ = () => SWITCH_RENDERER2_FACTORY();
+/** @type {?} */
+const SWITCH_RENDERER2_FACTORY__POST_R3__ = injectRenderer2;
+/** @type {?} */
+const SWITCH_RENDERER2_FACTORY__PRE_R3__ = noop;
+/** @type {?} */
+const SWITCH_RENDERER2_FACTORY = SWITCH_RENDERER2_FACTORY__PRE_R3__;
 
 /**
  * @fileoverview added by tsickle
@@ -12692,7 +12295,13 @@ class TemplateRef {
 /**
  * \@internal
  */
-TemplateRef.__NG_ELEMENT_ID__ = () => R3_TEMPLATE_REF_FACTORY$1(TemplateRef, ElementRef);
+TemplateRef.__NG_ELEMENT_ID__ = () => SWITCH_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef);
+/** @type {?} */
+const SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ = injectTemplateRef;
+/** @type {?} */
+const SWITCH_TEMPLATE_REF_FACTORY__PRE_R3__ = noop;
+/** @type {?} */
+const SWITCH_TEMPLATE_REF_FACTORY = SWITCH_TEMPLATE_REF_FACTORY__PRE_R3__;
 
 /**
  * @fileoverview added by tsickle
@@ -14265,6 +13874,374 @@ const angularCoreEnv = {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/** *
+ * \@description
+ *
+ * Represents a type that a Component or other object is instances of.
+ *
+ * An example of a `Type` is `MyCustomComponent` class, which in JavaScript is be represented by
+ * the `MyCustomComponent` constructor function.
+ *
+ *
+  @type {?} */
+const Type = Function;
+/**
+ * @param {?} v
+ * @return {?}
+ */
+function isType(v) {
+    return typeof v === 'function';
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/** *
+ * Attention: These regex has to hold even if the code is minified!
+  @type {?} */
+const DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*arguments\)/;
+/** @type {?} */
+const INHERITED_CLASS = /^class\s+[A-Za-z\d$_]*\s*extends\s+[A-Za-z\d$_]+\s*{/;
+/** @type {?} */
+const INHERITED_CLASS_WITH_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[A-Za-z\d$_]+\s*{[\s\S]*constructor\s*\(/;
+class ReflectionCapabilities {
+    /**
+     * @param {?=} reflect
+     */
+    constructor(reflect) { this._reflect = reflect || _global['Reflect']; }
+    /**
+     * @return {?}
+     */
+    isReflectionEnabled() { return true; }
+    /**
+     * @template T
+     * @param {?} t
+     * @return {?}
+     */
+    factory(t) { return (...args) => new t(...args); }
+    /**
+     * \@internal
+     * @param {?} paramTypes
+     * @param {?} paramAnnotations
+     * @return {?}
+     */
+    _zipTypesAndAnnotations(paramTypes, paramAnnotations) {
+        /** @type {?} */
+        let result;
+        if (typeof paramTypes === 'undefined') {
+            result = new Array(paramAnnotations.length);
+        }
+        else {
+            result = new Array(paramTypes.length);
+        }
+        for (let i = 0; i < result.length; i++) {
+            // TS outputs Object for parameters without types, while Traceur omits
+            // the annotations. For now we preserve the Traceur behavior to aid
+            // migration, but this can be revisited.
+            if (typeof paramTypes === 'undefined') {
+                result[i] = [];
+            }
+            else if (paramTypes[i] != Object) {
+                result[i] = [paramTypes[i]];
+            }
+            else {
+                result[i] = [];
+            }
+            if (paramAnnotations && paramAnnotations[i] != null) {
+                result[i] = result[i].concat(paramAnnotations[i]);
+            }
+        }
+        return result;
+    }
+    /**
+     * @param {?} type
+     * @param {?} parentCtor
+     * @return {?}
+     */
+    _ownParameters(type, parentCtor) {
+        /** @type {?} */
+        const typeStr = type.toString();
+        // If we have no decorators, we only have function.length as metadata.
+        // In that case, to detect whether a child class declared an own constructor or not,
+        // we need to look inside of that constructor to check whether it is
+        // just calling the parent.
+        // This also helps to work around for https://github.com/Microsoft/TypeScript/issues/12439
+        // that sets 'design:paramtypes' to []
+        // if a class inherits from another class but has no ctor declared itself.
+        if (DELEGATE_CTOR.exec(typeStr) ||
+            (INHERITED_CLASS.exec(typeStr) && !INHERITED_CLASS_WITH_CTOR.exec(typeStr))) {
+            return null;
+        }
+        // Prefer the direct API.
+        if ((/** @type {?} */ (type)).parameters && (/** @type {?} */ (type)).parameters !== parentCtor.parameters) {
+            return (/** @type {?} */ (type)).parameters;
+        }
+        /** @type {?} */
+        const tsickleCtorParams = (/** @type {?} */ (type)).ctorParameters;
+        if (tsickleCtorParams && tsickleCtorParams !== parentCtor.ctorParameters) {
+            /** @type {?} */
+            const ctorParameters = typeof tsickleCtorParams === 'function' ? tsickleCtorParams() : tsickleCtorParams;
+            /** @type {?} */
+            const paramTypes = ctorParameters.map((ctorParam) => ctorParam && ctorParam.type);
+            /** @type {?} */
+            const paramAnnotations = ctorParameters.map((ctorParam) => ctorParam && convertTsickleDecoratorIntoMetadata(ctorParam.decorators));
+            return this._zipTypesAndAnnotations(paramTypes, paramAnnotations);
+        }
+        /** @type {?} */
+        const paramAnnotations = type.hasOwnProperty(PARAMETERS) && (/** @type {?} */ (type))[PARAMETERS];
+        /** @type {?} */
+        const paramTypes = this._reflect && this._reflect.getOwnMetadata &&
+            this._reflect.getOwnMetadata('design:paramtypes', type);
+        if (paramTypes || paramAnnotations) {
+            return this._zipTypesAndAnnotations(paramTypes, paramAnnotations);
+        }
+        // If a class has no decorators, at least create metadata
+        // based on function.length.
+        // Note: We know that this is a real constructor as we checked
+        // the content of the constructor above.
+        return new Array((/** @type {?} */ (type.length))).fill(undefined);
+    }
+    /**
+     * @param {?} type
+     * @return {?}
+     */
+    parameters(type) {
+        // Note: only report metadata if we have at least one class decorator
+        // to stay in sync with the static reflector.
+        if (!isType(type)) {
+            return [];
+        }
+        /** @type {?} */
+        const parentCtor = getParentCtor(type);
+        /** @type {?} */
+        let parameters = this._ownParameters(type, parentCtor);
+        if (!parameters && parentCtor !== Object) {
+            parameters = this.parameters(parentCtor);
+        }
+        return parameters || [];
+    }
+    /**
+     * @param {?} typeOrFunc
+     * @param {?} parentCtor
+     * @return {?}
+     */
+    _ownAnnotations(typeOrFunc, parentCtor) {
+        // Prefer the direct API.
+        if ((/** @type {?} */ (typeOrFunc)).annotations && (/** @type {?} */ (typeOrFunc)).annotations !== parentCtor.annotations) {
+            /** @type {?} */
+            let annotations = (/** @type {?} */ (typeOrFunc)).annotations;
+            if (typeof annotations === 'function' && annotations.annotations) {
+                annotations = annotations.annotations;
+            }
+            return annotations;
+        }
+        // API of tsickle for lowering decorators to properties on the class.
+        if ((/** @type {?} */ (typeOrFunc)).decorators && (/** @type {?} */ (typeOrFunc)).decorators !== parentCtor.decorators) {
+            return convertTsickleDecoratorIntoMetadata((/** @type {?} */ (typeOrFunc)).decorators);
+        }
+        // API for metadata created by invoking the decorators.
+        if (typeOrFunc.hasOwnProperty(ANNOTATIONS)) {
+            return (/** @type {?} */ (typeOrFunc))[ANNOTATIONS];
+        }
+        return null;
+    }
+    /**
+     * @param {?} typeOrFunc
+     * @return {?}
+     */
+    annotations(typeOrFunc) {
+        if (!isType(typeOrFunc)) {
+            return [];
+        }
+        /** @type {?} */
+        const parentCtor = getParentCtor(typeOrFunc);
+        /** @type {?} */
+        const ownAnnotations = this._ownAnnotations(typeOrFunc, parentCtor) || [];
+        /** @type {?} */
+        const parentAnnotations = parentCtor !== Object ? this.annotations(parentCtor) : [];
+        return parentAnnotations.concat(ownAnnotations);
+    }
+    /**
+     * @param {?} typeOrFunc
+     * @param {?} parentCtor
+     * @return {?}
+     */
+    _ownPropMetadata(typeOrFunc, parentCtor) {
+        // Prefer the direct API.
+        if ((/** @type {?} */ (typeOrFunc)).propMetadata &&
+            (/** @type {?} */ (typeOrFunc)).propMetadata !== parentCtor.propMetadata) {
+            /** @type {?} */
+            let propMetadata = (/** @type {?} */ (typeOrFunc)).propMetadata;
+            if (typeof propMetadata === 'function' && propMetadata.propMetadata) {
+                propMetadata = propMetadata.propMetadata;
+            }
+            return propMetadata;
+        }
+        // API of tsickle for lowering decorators to properties on the class.
+        if ((/** @type {?} */ (typeOrFunc)).propDecorators &&
+            (/** @type {?} */ (typeOrFunc)).propDecorators !== parentCtor.propDecorators) {
+            /** @type {?} */
+            const propDecorators = (/** @type {?} */ (typeOrFunc)).propDecorators;
+            /** @type {?} */
+            const propMetadata = /** @type {?} */ ({});
+            Object.keys(propDecorators).forEach(prop => {
+                propMetadata[prop] = convertTsickleDecoratorIntoMetadata(propDecorators[prop]);
+            });
+            return propMetadata;
+        }
+        // API for metadata created by invoking the decorators.
+        if (typeOrFunc.hasOwnProperty(PROP_METADATA)) {
+            return (/** @type {?} */ (typeOrFunc))[PROP_METADATA];
+        }
+        return null;
+    }
+    /**
+     * @param {?} typeOrFunc
+     * @return {?}
+     */
+    propMetadata(typeOrFunc) {
+        if (!isType(typeOrFunc)) {
+            return {};
+        }
+        /** @type {?} */
+        const parentCtor = getParentCtor(typeOrFunc);
+        /** @type {?} */
+        const propMetadata = {};
+        if (parentCtor !== Object) {
+            /** @type {?} */
+            const parentPropMetadata = this.propMetadata(parentCtor);
+            Object.keys(parentPropMetadata).forEach((propName) => {
+                propMetadata[propName] = parentPropMetadata[propName];
+            });
+        }
+        /** @type {?} */
+        const ownPropMetadata = this._ownPropMetadata(typeOrFunc, parentCtor);
+        if (ownPropMetadata) {
+            Object.keys(ownPropMetadata).forEach((propName) => {
+                /** @type {?} */
+                const decorators = [];
+                if (propMetadata.hasOwnProperty(propName)) {
+                    decorators.push(...propMetadata[propName]);
+                }
+                decorators.push(...ownPropMetadata[propName]);
+                propMetadata[propName] = decorators;
+            });
+        }
+        return propMetadata;
+    }
+    /**
+     * @param {?} type
+     * @param {?} lcProperty
+     * @return {?}
+     */
+    hasLifecycleHook(type, lcProperty) {
+        return type instanceof Type && lcProperty in type.prototype;
+    }
+    /**
+     * @param {?} type
+     * @return {?}
+     */
+    guards(type) { return {}; }
+    /**
+     * @param {?} name
+     * @return {?}
+     */
+    getter(name) { return /** @type {?} */ (new Function('o', 'return o.' + name + ';')); }
+    /**
+     * @param {?} name
+     * @return {?}
+     */
+    setter(name) {
+        return /** @type {?} */ (new Function('o', 'v', 'return o.' + name + ' = v;'));
+    }
+    /**
+     * @param {?} name
+     * @return {?}
+     */
+    method(name) {
+        /** @type {?} */
+        const functionBody = `if (!o.${name}) throw new Error('"${name}" is undefined');
+        return o.${name}.apply(o, args);`;
+        return /** @type {?} */ (new Function('o', 'args', functionBody));
+    }
+    /**
+     * @param {?} type
+     * @return {?}
+     */
+    importUri(type) {
+        // StaticSymbol
+        if (typeof type === 'object' && type['filePath']) {
+            return type['filePath'];
+        }
+        // Runtime type
+        return `./${stringify(type)}`;
+    }
+    /**
+     * @param {?} type
+     * @return {?}
+     */
+    resourceUri(type) { return `./${stringify(type)}`; }
+    /**
+     * @param {?} name
+     * @param {?} moduleUrl
+     * @param {?} members
+     * @param {?} runtime
+     * @return {?}
+     */
+    resolveIdentifier(name, moduleUrl, members, runtime) {
+        return runtime;
+    }
+    /**
+     * @param {?} enumIdentifier
+     * @param {?} name
+     * @return {?}
+     */
+    resolveEnum(enumIdentifier, name) { return enumIdentifier[name]; }
+}
+/**
+ * @param {?} decoratorInvocations
+ * @return {?}
+ */
+function convertTsickleDecoratorIntoMetadata(decoratorInvocations) {
+    if (!decoratorInvocations) {
+        return [];
+    }
+    return decoratorInvocations.map(decoratorInvocation => {
+        /** @type {?} */
+        const decoratorType = decoratorInvocation.type;
+        /** @type {?} */
+        const annotationCls = decoratorType.annotationCls;
+        /** @type {?} */
+        const annotationArgs = decoratorInvocation.args ? decoratorInvocation.args : [];
+        return new annotationCls(...annotationArgs);
+    });
+}
+/**
+ * @param {?} ctor
+ * @return {?}
+ */
+function getParentCtor(ctor) {
+    /** @type {?} */
+    const parentProto = ctor.prototype ? Object.getPrototypeOf(ctor.prototype) : null;
+    /** @type {?} */
+    const parentCtor = parentProto ? parentProto.constructor : null;
+    // Note: We always use `Object` as the null value
+    // to simplify checking later on.
+    return parentCtor || Object;
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
 /** @type {?} */
 let _reflect = null;
 /**
@@ -14852,6 +14829,404 @@ function parseInputOutputs(values) {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
+ * @param {?} type
+ * @param {?} meta
+ * @return {?}
+ */
+function compilePipe(type, meta) {
+    /** @type {?} */
+    /** @nocollapse */ let ngPipeDef = null;
+    Object.defineProperty(type, NG_PIPE_DEF, {
+        get: () => {
+            if (ngPipeDef === null) {
+                /** @type {?} */
+                const sourceMapUrl = `ng://${stringify$1(type)}/ngPipeDef.js`;
+                /** @type {?} */
+                const name = type.name;
+                /** @type {?} */
+                const res = compilePipeFromMetadata({
+                    name,
+                    type: new WrappedNodeExpr(type),
+                    deps: reflectDependencies(type),
+                    pipeName: meta.name,
+                    pure: meta.pure !== undefined ? meta.pure : true,
+                });
+                ngPipeDef = jitExpression(res.expression, angularCoreEnv, sourceMapUrl, res.statements);
+            }
+            return ngPipeDef;
+        },
+        // Make the property configurable in dev mode to allow overriding in tests
+        configurable: !!ngDevMode,
+    });
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/** *
+ * Type of the Directive metadata.
+  @type {?} */
+const Directive = makeDecorator('Directive', (dir = {}) => dir, undefined, undefined, (type, meta) => SWITCH_COMPILE_DIRECTIVE(type, meta));
+/** *
+ * Component decorator and metadata.
+ *
+ * \@usageNotes
+ *
+ * ### Using animations
+ *
+ * The following snippet shows an animation trigger in a component's
+ * metadata. The trigger is attached to an element in the component's
+ * template, using "\@_trigger_name_", and a state expression that is evaluated
+ * at run time to determine whether the animation should start.
+ *
+ * ```typescript
+ * \@Component({
+ *   selector: 'animation-cmp',
+ *   templateUrl: 'animation-cmp.html',
+ *   animations: [
+ *     trigger('myTriggerName', [
+ *       state('on', style({ opacity: 1 }),
+ *       state('off', style({ opacity: 0 }),
+ *       transition('on => off', [
+ *         animate("1s")
+ *       ])
+ *     ])
+ *   ]
+ * })
+ * ```
+ *
+ * ```html
+ * <!-- animation-cmp.html -->
+ * <div \@myTriggerName="expression">...</div>
+ * ```
+ *
+ * ### Preserving whitespace
+ *
+ * Removing whitespace can greatly reduce AOT-generated code size, and speed up view creation.
+ * As of Angular 6, default for `preserveWhitespaces` is false (whitespace is removed).
+ * To change the default setting for all components in your application, set
+ * the `preserveWhitespaces` option of the AOT compiler.
+ *
+ * Current implementation removes whitespace characters as follows:
+ * - Trims all whitespaces at the beginning and the end of a template.
+ * - Removes whitespace-only text nodes. For example,
+ * `<button>Action 1</button>  <button>Action 2</button>` becomes
+ * `<button>Action 1</button><button>Action 2</button>`.
+ * - Replaces a series of whitespace characters in text nodes with a single space.
+ * For example, `<span>\n some text\n</span>` becomes `<span> some text </span>`.
+ * - Does NOT alter text nodes inside HTML tags such as `<pre>` or `<textarea>`,
+ * where whitespace characters are significant.
+ *
+ * Note that these transformations can influence DOM nodes layout, although impact
+ * should be minimal.
+ *
+ * You can override the default behavior to preserve whitespace characters
+ * in certain fragments of a template. For example, you can exclude an entire
+ * DOM sub-tree by using the `ngPreserveWhitespaces` attribute:
+ *
+ * ```html
+ * <div ngPreserveWhitespaces>
+ *     whitespaces are preserved here
+ *     <span>    and here </span>
+ * </div>
+ * ```
+ *
+ * You can force a single space to be preserved in a text node by using `&ngsp;`,
+ * which is replaced with a space character by Angular's template
+ * compiler:
+ *
+ * ```html
+ * <a>Spaces</a>&ngsp;<a>between</a>&ngsp;<a>links.</a>
+ * <!-->compiled to be equivalent to:</>
+ *  <a>Spaces</a> <a>between</a> <a>links.</a>
+ * ```
+ *
+ * Note that sequences of `&ngsp;` are still collapsed to just one space character when
+ * the `preserveWhitespaces` option is set to `false`.
+ *
+ * ```html
+ * <a>before</a>&ngsp;&ngsp;&ngsp;<a>after</a>
+ * <!-->compiled to be equivalent to:</>
+ *  <a>Spaces</a> <a>between</a> <a>links.</a>
+ * ```
+ *
+ * To preserve sequences of whitespace characters, use the
+ * `ngPreserveWhitespaces` attribute.
+ *
+ * \@Annotation
+  @type {?} */
+const Component = makeDecorator('Component', (c = {}) => (Object.assign({ changeDetection: ChangeDetectionStrategy.Default }, c)), Directive, undefined, (type, meta) => SWITCH_COMPILE_COMPONENT(type, meta));
+/** *
+ *
+ *
+ * \@Annotation
+  @type {?} */
+const Pipe = makeDecorator('Pipe', (p) => (Object.assign({ pure: true }, p)), undefined, undefined, (type, meta) => SWITCH_COMPILE_PIPE(type, meta));
+/** @type {?} */
+const initializeBaseDef = (target) => {
+    /** @type {?} */
+    const constructor = target.constructor;
+    /** @nocollapse @type {?} */
+    const inheritedBaseDef = constructor.ngBaseDef;
+    /** @type {?} */
+    const baseDef = constructor.ngBaseDef = {
+        inputs: {},
+        outputs: {},
+        declaredInputs: {},
+    };
+    if (inheritedBaseDef) {
+        fillProperties(baseDef.inputs, inheritedBaseDef.inputs);
+        fillProperties(baseDef.outputs, inheritedBaseDef.outputs);
+        fillProperties(baseDef.declaredInputs, inheritedBaseDef.declaredInputs);
+    }
+};
+/** *
+ * Does the work of creating the `ngBaseDef` property for the \@Input and \@Output decorators.
+ * \@param key "inputs" or "outputs"
+  @type {?} */
+const updateBaseDefFromIOProp = (getProp) => (target, name, ...args) => {
+    /** @type {?} */
+    const constructor = target.constructor;
+    if (!constructor.hasOwnProperty(NG_BASE_DEF)) {
+        initializeBaseDef(target);
+    }
+    /** @nocollapse @type {?} */
+    const baseDef = constructor.ngBaseDef;
+    /** @type {?} */
+    const defProp = getProp(baseDef);
+    defProp[name] = args[0];
+};
+/** *
+ *
+ * \@Annotation
+  @type {?} */
+const Input = makePropDecorator('Input', (bindingPropertyName) => ({ bindingPropertyName }), undefined, updateBaseDefFromIOProp(baseDef => baseDef.inputs || {}));
+/** *
+ *
+ * \@Annotation
+  @type {?} */
+const Output = makePropDecorator('Output', (bindingPropertyName) => ({ bindingPropertyName }), undefined, updateBaseDefFromIOProp(baseDef => baseDef.outputs || {}));
+/** *
+ *
+ * \@Annotation
+  @type {?} */
+const HostBinding = makePropDecorator('HostBinding', (hostPropertyName) => ({ hostPropertyName }));
+/** *
+ * Binds a CSS event to a host listener and supplies configuration metadata.
+ * Angular invokes the supplied handler method when the host element emits the specified event,
+ * and updates the bound element with the result.
+ * If the handler method returns false, applies `preventDefault` on the bound element.
+ *
+ * \@usageNotes
+ *
+ * The following example declares a directive
+ * that attaches a click listener to a button and counts clicks.
+ *
+ * ```
+ * \@Directive({selector: 'button[counting]'})
+ * class CountClicks {
+ *   numberOfClicks = 0;
+ *
+ * \@HostListener('click', ['$event.target'])
+ *   onClick(btn) {
+ *     console.log('button', btn, 'number of clicks:', this.numberOfClicks++);
+ *  }
+ * }
+ *
+ * \@Component({
+ *   selector: 'app',
+ *   template: '<button counting>Increment</button>',
+ * })
+ * class App {}
+ * ```
+ *
+ * \@Annotation
+  @type {?} */
+const HostListener = makePropDecorator('HostListener', (eventName, args) => ({ eventName, args }));
+/** @type {?} */
+const SWITCH_COMPILE_COMPONENT__POST_R3__ = compileComponent;
+/** @type {?} */
+const SWITCH_COMPILE_DIRECTIVE__POST_R3__ = compileDirective;
+/** @type {?} */
+const SWITCH_COMPILE_PIPE__POST_R3__ = compilePipe;
+/** @type {?} */
+const SWITCH_COMPILE_COMPONENT__PRE_R3__ = noop;
+/** @type {?} */
+const SWITCH_COMPILE_DIRECTIVE__PRE_R3__ = noop;
+/** @type {?} */
+const SWITCH_COMPILE_PIPE__PRE_R3__ = noop;
+/** @type {?} */
+const SWITCH_COMPILE_COMPONENT = SWITCH_COMPILE_COMPONENT__PRE_R3__;
+/** @type {?} */
+const SWITCH_COMPILE_DIRECTIVE = SWITCH_COMPILE_DIRECTIVE__PRE_R3__;
+/** @type {?} */
+const SWITCH_COMPILE_PIPE = SWITCH_COMPILE_PIPE__PRE_R3__;
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+const ɵ0$2 = getClosureSafeProperty;
+/** @type {?} */
+const USE_VALUE$1 = getClosureSafeProperty({ provide: String, useValue: ɵ0$2 });
+/** @type {?} */
+const EMPTY_ARRAY$3 = [];
+/**
+ * @param {?} type
+ * @param {?=} provider
+ * @return {?}
+ */
+function convertInjectableProviderToFactory(type, provider) {
+    if (!provider) {
+        /** @type {?} */
+        const reflectionCapabilities = new ReflectionCapabilities();
+        /** @type {?} */
+        const deps = reflectionCapabilities.parameters(type);
+        // TODO - convert to flags.
+        return () => new type(...injectArgs(/** @type {?} */ (deps)));
+    }
+    if (USE_VALUE$1 in provider) {
+        /** @type {?} */
+        const valueProvider = (/** @type {?} */ (provider));
+        return () => valueProvider.useValue;
+    }
+    else if ((/** @type {?} */ (provider)).useExisting) {
+        /** @type {?} */
+        const existingProvider = (/** @type {?} */ (provider));
+        return () => inject(existingProvider.useExisting);
+    }
+    else if ((/** @type {?} */ (provider)).useFactory) {
+        /** @type {?} */
+        const factoryProvider = (/** @type {?} */ (provider));
+        return () => factoryProvider.useFactory(...injectArgs(factoryProvider.deps || EMPTY_ARRAY$3));
+    }
+    else if ((/** @type {?} */ (provider)).useClass) {
+        /** @type {?} */
+        const classProvider = (/** @type {?} */ (provider));
+        /** @type {?} */
+        let deps = (/** @type {?} */ (provider)).deps;
+        if (!deps) {
+            /** @type {?} */
+            const reflectionCapabilities = new ReflectionCapabilities();
+            deps = reflectionCapabilities.parameters(type);
+        }
+        return () => new classProvider.useClass(...injectArgs(deps));
+    }
+    else {
+        /** @type {?} */
+        let deps = (/** @type {?} */ (provider)).deps;
+        if (!deps) {
+            /** @type {?} */
+            const reflectionCapabilities = new ReflectionCapabilities();
+            deps = reflectionCapabilities.parameters(type);
+        }
+        return () => new type(...injectArgs(/** @type {?} */ ((deps))));
+    }
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/** *
+ * Defines a schema that allows an NgModule to contain the following:
+ * - Non-Angular elements named with dash case (`-`).
+ * - Element properties named with dash case (`-`).
+ * Dash case is the naming convention for custom elements.
+ *
+ *
+  @type {?} */
+const CUSTOM_ELEMENTS_SCHEMA = {
+    name: 'custom-elements'
+};
+/** *
+ * Defines a schema that allows any property on any element.
+ *
+ * \@experimental
+  @type {?} */
+const NO_ERRORS_SCHEMA = {
+    name: 'no-errors-schema'
+};
+/** *
+ * \@Annotation
+  @type {?} */
+const NgModule = makeDecorator('NgModule', (ngModule) => ngModule, undefined, undefined, /**
+     * Decorator that marks the following class as an NgModule, and supplies
+     * configuration metadata for it.
+     *
+     * * The `declarations` and `entryComponents` options configure the compiler
+     * with information about what belongs to the NgModule.
+     * * The `providers` options configures the NgModule's injector to provide
+     * dependencies the NgModule members.
+     * * The `imports` and `exports` options bring in members from other modules, and make
+     * this module's members available to others.
+     */
+(type, meta) => SWITCH_COMPILE_NGMODULE(type, meta));
+/**
+ * @param {?} moduleType
+ * @param {?} metadata
+ * @return {?}
+ */
+function preR3NgModuleCompile(moduleType, metadata) {
+    /** @type {?} */
+    let imports = (metadata && metadata.imports) || [];
+    if (metadata && metadata.exports) {
+        imports = [...imports, metadata.exports];
+    }
+    /** @nocollapse */ moduleType.ngInjectorDef = defineInjector({
+        factory: convertInjectableProviderToFactory(moduleType, { useClass: moduleType }),
+        providers: metadata && metadata.providers,
+        imports: imports,
+    });
+}
+/** @type {?} */
+const SWITCH_COMPILE_NGMODULE__POST_R3__ = compileNgModule$1;
+/** @type {?} */
+const SWITCH_COMPILE_NGMODULE__PRE_R3__ = preR3NgModuleCompile;
+/** @type {?} */
+const SWITCH_COMPILE_NGMODULE = SWITCH_COMPILE_NGMODULE__PRE_R3__;
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * \@description Represents the version of Angular
+ *
+ *
+ */
+class Version {
+    /**
+     * @param {?} full
+     */
+    constructor(full) {
+        this.full = full;
+        this.major = full.split('.')[0];
+        this.minor = full.split('.')[1];
+        this.patch = full.split('.').slice(2).join('.');
+    }
+}
+/** @type {?} */
+const VERSION = new Version('7.0.0-rc.1+102.sha-d4cee51');
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/**
  * Compile an Angular injectable according to its `Injectable` metadata, and patch the resulting
  * `ngInjectableDef` onto the injectable type.
  * @param {?} type
@@ -14947,15 +15322,15 @@ function computeProvidedIn(providedIn) {
 function isUseClassProvider(meta) {
     return (/** @type {?} */ (meta)).useClass !== undefined;
 }
-const ɵ0$1 = getClosureSafeProperty;
+const ɵ0$3 = getClosureSafeProperty;
 /** @type {?} */
-const USE_VALUE$1 = getClosureSafeProperty({ provide: String, useValue: ɵ0$1 });
+const USE_VALUE$2 = getClosureSafeProperty({ provide: String, useValue: ɵ0$3 });
 /**
  * @param {?} meta
  * @return {?}
  */
 function isUseValueProvider(meta) {
-    return USE_VALUE$1 in meta;
+    return USE_VALUE$2 in meta;
 }
 /**
  * @param {?} meta
@@ -14976,184 +15351,19 @@ function isUseExistingProvider(meta) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @param {?} type
- * @param {?} meta
- * @return {?}
- */
-function compilePipe(type, meta) {
-    /** @type {?} */
-    /** @nocollapse */ let ngPipeDef = null;
-    Object.defineProperty(type, NG_PIPE_DEF, {
-        get: () => {
-            if (ngPipeDef === null) {
-                /** @type {?} */
-                const sourceMapUrl = `ng://${stringify$1(type)}/ngPipeDef.js`;
-                /** @type {?} */
-                const name = type.name;
-                /** @type {?} */
-                const res = compilePipeFromMetadata({
-                    name,
-                    type: new WrappedNodeExpr(type),
-                    deps: reflectDependencies(type),
-                    pipeName: meta.name,
-                    pure: meta.pure !== undefined ? meta.pure : true,
-                });
-                ngPipeDef = jitExpression(res.expression, angularCoreEnv, sourceMapUrl, res.statements);
-            }
-            return ngPipeDef;
-        },
-        // Make the property configurable in dev mode to allow overriding in tests
-        configurable: !!ngDevMode,
-    });
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/** @type {?} */
-const ivyEnabled = true;
-/** @type {?} */
-const R3_COMPILE_COMPONENT = compileComponent;
-/** @type {?} */
-const R3_COMPILE_DIRECTIVE = compileDirective;
-/** @type {?} */
-const R3_COMPILE_INJECTABLE = compileInjectable$1;
-/** @type {?} */
-const R3_COMPILE_NGMODULE = compileNgModule$1;
-/** @type {?} */
-const R3_COMPILE_PIPE = compilePipe;
-/** @type {?} */
-const R3_COMPILE_NGMODULE_DEFS = compileNgModuleDefs;
-/** @type {?} */
-const R3_PATCH_COMPONENT_DEF_WTIH_SCOPE = patchComponentDefWithScope;
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @return {?}
- */
-function noop() { }
-/** @type {?} */
-const R3_COMPILE_COMPONENT__POST_NGCC__ = R3_COMPILE_COMPONENT;
-/** @type {?} */
-const R3_COMPILE_DIRECTIVE__POST_NGCC__ = R3_COMPILE_DIRECTIVE;
-/** @type {?} */
-const R3_COMPILE_INJECTABLE__POST_NGCC__ = R3_COMPILE_INJECTABLE;
-/** @type {?} */
-const R3_COMPILE_NGMODULE__POST_NGCC__ = R3_COMPILE_NGMODULE;
-/** @type {?} */
-const R3_COMPILE_PIPE__POST_NGCC__ = R3_COMPILE_PIPE;
-/** @type {?} */
-const ivyEnable__POST_NGCC__ = ivyEnabled;
-/** @type {?} */
-const R3_COMPILE_COMPONENT__PRE_NGCC__ = noop;
-/** @type {?} */
-const R3_COMPILE_DIRECTIVE__PRE_NGCC__ = noop;
-/** @type {?} */
-const R3_COMPILE_INJECTABLE__PRE_NGCC__ = preR3InjectableCompile;
-/** @type {?} */
-const R3_COMPILE_NGMODULE__PRE_NGCC__ = preR3NgModuleCompile;
-/** @type {?} */
-const R3_COMPILE_PIPE__PRE_NGCC__ = noop;
-/** @type {?} */
-const ivyEnable__PRE_NGCC__ = false;
-/** @type {?} */
-const ivyEnabled$1 = ivyEnable__PRE_NGCC__;
-/** @type {?} */
-let R3_COMPILE_COMPONENT$1 = R3_COMPILE_COMPONENT__PRE_NGCC__;
-/** @type {?} */
-let R3_COMPILE_DIRECTIVE$1 = R3_COMPILE_DIRECTIVE__PRE_NGCC__;
-/** @type {?} */
-let R3_COMPILE_INJECTABLE$1 = R3_COMPILE_INJECTABLE__PRE_NGCC__;
-/** @type {?} */
-let R3_COMPILE_NGMODULE$1 = R3_COMPILE_NGMODULE__PRE_NGCC__;
-/** @type {?} */
-let R3_COMPILE_PIPE$1 = R3_COMPILE_PIPE__PRE_NGCC__;
-/**
- * @param {?} moduleType
- * @param {?} metadata
- * @return {?}
- */
-function preR3NgModuleCompile(moduleType, metadata) {
-    /** @type {?} */
-    let imports = (metadata && metadata.imports) || [];
-    if (metadata && metadata.exports) {
-        imports = [...imports, metadata.exports];
-    }
-    /** @nocollapse */ moduleType.ngInjectorDef = defineInjector({
-        factory: convertInjectableProviderToFactory(moduleType, { useClass: moduleType }),
-        providers: metadata && metadata.providers,
-        imports: imports,
-    });
-}
-const ɵ0$2 = getClosureSafeProperty;
-/** @type {?} */
-const USE_VALUE$2 = getClosureSafeProperty({ provide: String, useValue: ɵ0$2 });
-/** @type {?} */
-const EMPTY_ARRAY$3 = [];
-/**
- * @param {?} type
- * @param {?=} provider
- * @return {?}
- */
-function convertInjectableProviderToFactory(type, provider) {
-    if (!provider) {
-        /** @type {?} */
-        const reflectionCapabilities = new ReflectionCapabilities();
-        /** @type {?} */
-        const deps = reflectionCapabilities.parameters(type);
-        // TODO - convert to flags.
-        return () => new type(...injectArgs(/** @type {?} */ (deps)));
-    }
-    if (USE_VALUE$2 in provider) {
-        /** @type {?} */
-        const valueProvider = (/** @type {?} */ (provider));
-        return () => valueProvider.useValue;
-    }
-    else if ((/** @type {?} */ (provider)).useExisting) {
-        /** @type {?} */
-        const existingProvider = (/** @type {?} */ (provider));
-        return () => inject(existingProvider.useExisting);
-    }
-    else if ((/** @type {?} */ (provider)).useFactory) {
-        /** @type {?} */
-        const factoryProvider = (/** @type {?} */ (provider));
-        return () => factoryProvider.useFactory(...injectArgs(factoryProvider.deps || EMPTY_ARRAY$3));
-    }
-    else if ((/** @type {?} */ (provider)).useClass) {
-        /** @type {?} */
-        const classProvider = (/** @type {?} */ (provider));
-        /** @type {?} */
-        let deps = (/** @type {?} */ (provider)).deps;
-        if (!deps) {
-            /** @type {?} */
-            const reflectionCapabilities = new ReflectionCapabilities();
-            deps = reflectionCapabilities.parameters(type);
-        }
-        return () => new classProvider.useClass(...injectArgs(deps));
-    }
-    else {
-        /** @type {?} */
-        let deps = (/** @type {?} */ (provider)).deps;
-        if (!deps) {
-            /** @type {?} */
-            const reflectionCapabilities = new ReflectionCapabilities();
-            deps = reflectionCapabilities.parameters(type);
-        }
-        return () => new type(...injectArgs(/** @type {?} */ ((deps))));
-    }
-}
+/** *
+ * Injectable decorator and metadata.
+ *
+ * \@Annotation
+  @type {?} */
+const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, (type, meta) => SWITCH_COMPILE_INJECTABLE(/** @type {?} */ (type), meta));
 /**
  * Supports \@Injectable() in JIT mode for Render2.
  * @param {?} injectableType
  * @param {?} options
  * @return {?}
  */
-function preR3InjectableCompile(injectableType, options) {
+function render2CompileInjectable(injectableType, options) {
     if (options && options.providedIn !== undefined && !getInjectableDef(injectableType)) {
         /** @nocollapse */ injectableType.ngInjectableDef = defineInjectable({
             providedIn: options.providedIn,
@@ -15161,281 +15371,12 @@ function preR3InjectableCompile(injectableType, options) {
         });
     }
 }
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/** *
- * Type of the Directive metadata.
-  @type {?} */
-const Directive = makeDecorator('Directive', (dir = {}) => dir, undefined, undefined, (type, meta) => R3_COMPILE_DIRECTIVE$1(type, meta));
-/** *
- * Component decorator and metadata.
- *
- * \@usageNotes
- *
- * ### Using animations
- *
- * The following snippet shows an animation trigger in a component's
- * metadata. The trigger is attached to an element in the component's
- * template, using "\@_trigger_name_", and a state expression that is evaluated
- * at run time to determine whether the animation should start.
- *
- * ```typescript
- * \@Component({
- *   selector: 'animation-cmp',
- *   templateUrl: 'animation-cmp.html',
- *   animations: [
- *     trigger('myTriggerName', [
- *       state('on', style({ opacity: 1 }),
- *       state('off', style({ opacity: 0 }),
- *       transition('on => off', [
- *         animate("1s")
- *       ])
- *     ])
- *   ]
- * })
- * ```
- *
- * ```html
- * <!-- animation-cmp.html -->
- * <div \@myTriggerName="expression">...</div>
- * ```
- *
- * ### Preserving whitespace
- *
- * Removing whitespace can greatly reduce AOT-generated code size, and speed up view creation.
- * As of Angular 6, default for `preserveWhitespaces` is false (whitespace is removed).
- * To change the default setting for all components in your application, set
- * the `preserveWhitespaces` option of the AOT compiler.
- *
- * Current implementation removes whitespace characters as follows:
- * - Trims all whitespaces at the beginning and the end of a template.
- * - Removes whitespace-only text nodes. For example,
- * `<button>Action 1</button>  <button>Action 2</button>` becomes
- * `<button>Action 1</button><button>Action 2</button>`.
- * - Replaces a series of whitespace characters in text nodes with a single space.
- * For example, `<span>\n some text\n</span>` becomes `<span> some text </span>`.
- * - Does NOT alter text nodes inside HTML tags such as `<pre>` or `<textarea>`,
- * where whitespace characters are significant.
- *
- * Note that these transformations can influence DOM nodes layout, although impact
- * should be minimal.
- *
- * You can override the default behavior to preserve whitespace characters
- * in certain fragments of a template. For example, you can exclude an entire
- * DOM sub-tree by using the `ngPreserveWhitespaces` attribute:
- *
- * ```html
- * <div ngPreserveWhitespaces>
- *     whitespaces are preserved here
- *     <span>    and here </span>
- * </div>
- * ```
- *
- * You can force a single space to be preserved in a text node by using `&ngsp;`,
- * which is replaced with a space character by Angular's template
- * compiler:
- *
- * ```html
- * <a>Spaces</a>&ngsp;<a>between</a>&ngsp;<a>links.</a>
- * <!-->compiled to be equivalent to:</>
- *  <a>Spaces</a> <a>between</a> <a>links.</a>
- * ```
- *
- * Note that sequences of `&ngsp;` are still collapsed to just one space character when
- * the `preserveWhitespaces` option is set to `false`.
- *
- * ```html
- * <a>before</a>&ngsp;&ngsp;&ngsp;<a>after</a>
- * <!-->compiled to be equivalent to:</>
- *  <a>Spaces</a> <a>between</a> <a>links.</a>
- * ```
- *
- * To preserve sequences of whitespace characters, use the
- * `ngPreserveWhitespaces` attribute.
- *
- * \@Annotation
-  @type {?} */
-const Component = makeDecorator('Component', (c = {}) => (Object.assign({ changeDetection: ChangeDetectionStrategy.Default }, c)), Directive, undefined, (type, meta) => R3_COMPILE_COMPONENT$1(type, meta));
-/** *
- *
- *
- * \@Annotation
-  @type {?} */
-const Pipe = makeDecorator('Pipe', (p) => (Object.assign({ pure: true }, p)), undefined, undefined, (type, meta) => R3_COMPILE_PIPE$1(type, meta));
 /** @type {?} */
-const initializeBaseDef = (target) => {
-    /** @type {?} */
-    const constructor = target.constructor;
-    /** @nocollapse @type {?} */
-    const inheritedBaseDef = constructor.ngBaseDef;
-    /** @type {?} */
-    const baseDef = constructor.ngBaseDef = {
-        inputs: {},
-        outputs: {},
-        declaredInputs: {},
-    };
-    if (inheritedBaseDef) {
-        fillProperties(baseDef.inputs, inheritedBaseDef.inputs);
-        fillProperties(baseDef.outputs, inheritedBaseDef.outputs);
-        fillProperties(baseDef.declaredInputs, inheritedBaseDef.declaredInputs);
-    }
-};
-/** *
- * Does the work of creating the `ngBaseDef` property for the \@Input and \@Output decorators.
- * \@param key "inputs" or "outputs"
-  @type {?} */
-const updateBaseDefFromIOProp = (getProp) => (target, name, ...args) => {
-    /** @type {?} */
-    const constructor = target.constructor;
-    if (!constructor.hasOwnProperty(NG_BASE_DEF)) {
-        initializeBaseDef(target);
-    }
-    /** @nocollapse @type {?} */
-    const baseDef = constructor.ngBaseDef;
-    /** @type {?} */
-    const defProp = getProp(baseDef);
-    defProp[name] = args[0];
-};
-/** *
- *
- * \@Annotation
-  @type {?} */
-const Input = makePropDecorator('Input', (bindingPropertyName) => ({ bindingPropertyName }), undefined, updateBaseDefFromIOProp(baseDef => baseDef.inputs || {}));
-/** *
- *
- * \@Annotation
-  @type {?} */
-const Output = makePropDecorator('Output', (bindingPropertyName) => ({ bindingPropertyName }), undefined, updateBaseDefFromIOProp(baseDef => baseDef.outputs || {}));
-/** *
- *
- * \@Annotation
-  @type {?} */
-const HostBinding = makePropDecorator('HostBinding', (hostPropertyName) => ({ hostPropertyName }));
-/** *
- * Binds a CSS event to a host listener and supplies configuration metadata.
- * Angular invokes the supplied handler method when the host element emits the specified event,
- * and updates the bound element with the result.
- * If the handler method returns false, applies `preventDefault` on the bound element.
- *
- * \@usageNotes
- *
- * The following example declares a directive
- * that attaches a click listener to a button and counts clicks.
- *
- * ```
- * \@Directive({selector: 'button[counting]'})
- * class CountClicks {
- *   numberOfClicks = 0;
- *
- * \@HostListener('click', ['$event.target'])
- *   onClick(btn) {
- *     console.log('button', btn, 'number of clicks:', this.numberOfClicks++);
- *  }
- * }
- *
- * \@Component({
- *   selector: 'app',
- *   template: '<button counting>Increment</button>',
- * })
- * class App {}
- * ```
- *
- * \@Annotation
-  @type {?} */
-const HostListener = makePropDecorator('HostListener', (eventName, args) => ({ eventName, args }));
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/** *
- * Defines a schema that allows an NgModule to contain the following:
- * - Non-Angular elements named with dash case (`-`).
- * - Element properties named with dash case (`-`).
- * Dash case is the naming convention for custom elements.
- *
- *
-  @type {?} */
-const CUSTOM_ELEMENTS_SCHEMA = {
-    name: 'custom-elements'
-};
-/** *
- * Defines a schema that allows any property on any element.
- *
- * \@experimental
-  @type {?} */
-const NO_ERRORS_SCHEMA = {
-    name: 'no-errors-schema'
-};
-/** *
- * \@Annotation
-  @type {?} */
-const NgModule = makeDecorator('NgModule', (ngModule) => ngModule, undefined, undefined, /**
-     * Decorator that marks the following class as an NgModule, and supplies
-     * configuration metadata for it.
-     *
-     * * The `declarations` and `entryComponents` options configure the compiler
-     * with information about what belongs to the NgModule.
-     * * The `providers` options configures the NgModule's injector to provide
-     * dependencies the NgModule members.
-     * * The `imports` and `exports` options bring in members from other modules, and make
-     * this module's members available to others.
-     */
-(type, meta) => R3_COMPILE_NGMODULE$1(type, meta));
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * \@description Represents the version of Angular
- *
- *
- */
-class Version {
-    /**
-     * @param {?} full
-     */
-    constructor(full) {
-        this.full = full;
-        this.major = full.split('.')[0];
-        this.minor = full.split('.')[1];
-        this.patch = full.split('.').slice(2).join('.');
-    }
-}
+const SWITCH_COMPILE_INJECTABLE__POST_R3__ = compileInjectable$1;
 /** @type {?} */
-const VERSION = new Version('7.0.0-rc.1+85.sha-f8195e5');
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/** *
- * Injectable decorator and metadata.
- *
- * \@Annotation
-  @type {?} */
-const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, (type, meta) => R3_COMPILE_INJECTABLE$1(type, meta));
+const SWITCH_COMPILE_INJECTABLE__PRE_R3__ = render2CompileInjectable;
+/** @type {?} */
+const SWITCH_COMPILE_INJECTABLE = SWITCH_COMPILE_INJECTABLE__PRE_R3__;
 
 /**
  * @fileoverview added by tsickle
@@ -17768,7 +17709,7 @@ let _testabilityGetter = new _NoopGetTestability();
 /** @type {?} */
 let _platform;
 /** @type {?} */
-let compileNgModuleFactory = compileNgModuleFactory__PRE_NGCC__;
+let compileNgModuleFactory = compileNgModuleFactory__PRE_R3__;
 /**
  * @template M
  * @param {?} injector
@@ -17776,7 +17717,7 @@ let compileNgModuleFactory = compileNgModuleFactory__PRE_NGCC__;
  * @param {?} moduleType
  * @return {?}
  */
-function compileNgModuleFactory__PRE_NGCC__(injector, options, moduleType) {
+function compileNgModuleFactory__PRE_R3__(injector, options, moduleType) {
     /** @type {?} */
     const compilerFactory = injector.get(CompilerFactory);
     /** @type {?} */
@@ -17790,7 +17731,7 @@ function compileNgModuleFactory__PRE_NGCC__(injector, options, moduleType) {
  * @param {?} moduleType
  * @return {?}
  */
-function compileNgModuleFactory__POST_NGCC__(injector, options, moduleType) {
+function compileNgModuleFactory__POST_R3__(injector, options, moduleType) {
     ngDevMode && assertNgModuleType(moduleType);
     return Promise.resolve(new NgModuleFactory$1(moduleType));
 }
@@ -18694,7 +18635,13 @@ class ViewContainerRef {
 /**
  * \@internal
  */
-ViewContainerRef.__NG_ELEMENT_ID__ = () => R3_VIEW_CONTAINER_REF_FACTORY$1(ViewContainerRef, ElementRef);
+ViewContainerRef.__NG_ELEMENT_ID__ = () => SWITCH_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef);
+/** @type {?} */
+const SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ = injectViewContainerRef;
+/** @type {?} */
+const SWITCH_VIEW_CONTAINER_REF_FACTORY__PRE_R3__ = noop;
+/** @type {?} */
+const SWITCH_VIEW_CONTAINER_REF_FACTORY = SWITCH_VIEW_CONTAINER_REF_FACTORY__PRE_R3__;
 
 /**
  * @fileoverview added by tsickle
@@ -18747,7 +18694,13 @@ class ChangeDetectorRef {
 /**
  * \@internal
  */
-ChangeDetectorRef.__NG_ELEMENT_ID__ = () => R3_CHANGE_DETECTOR_REF_FACTORY$1();
+ChangeDetectorRef.__NG_ELEMENT_ID__ = () => SWITCH_CHANGE_DETECTOR_REF_FACTORY();
+/** @type {?} */
+const SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ = injectChangeDetectorRef;
+/** @type {?} */
+const SWITCH_CHANGE_DETECTOR_REF_FACTORY__PRE_R3__ = (...args) => { };
+/** @type {?} */
+const SWITCH_CHANGE_DETECTOR_REF_FACTORY = SWITCH_CHANGE_DETECTOR_REF_FACTORY__PRE_R3__;
 
 /**
  * @fileoverview added by tsickle
@@ -20650,6 +20603,24 @@ ApplicationModule.decorators = [
 ApplicationModule.ctorParameters = () => [
     { type: ApplicationRef }
 ];
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/** @type {?} */
+const SWITCH_IVY_ENABLED__POST_R3__ = true;
+/** @type {?} */
+const SWITCH_IVY_ENABLED__PRE_R3__ = false;
+/** @type {?} */
+const ivyEnabled = SWITCH_IVY_ENABLED__PRE_R3__;
 
 /**
  * @fileoverview added by tsickle
@@ -26368,7 +26339,7 @@ class DebugRenderer2 {
         /** @type {?} */
         const el = this.delegate.selectRootElement(selectorOrNode, preserveContent);
         /** @type {?} */
-        const debugCtx = getCurrentDebugContext() || (ivyEnabled$1 ? this.createDebugContext(el) : null);
+        const debugCtx = getCurrentDebugContext() || (ivyEnabled ? this.createDebugContext(el) : null);
         if (debugCtx) {
             indexDebugNode(new DebugElement(el, null, debugCtx));
         }
@@ -26895,5 +26866,5 @@ function getPlayers(ref) {
  * Generated bundle index. Do not edit.
  */
 
-export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_l, _iterableDiffersFactory as ɵangular_packages_core_core_i, _keyValueDiffersFactory as ɵangular_packages_core_core_j, _localeFactory as ɵangular_packages_core_core_k, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, DefaultIterableDifferFactory as ɵangular_packages_core_core_g, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_h, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, wtfEnabled as ɵangular_packages_core_core_m, createScope as ɵangular_packages_core_core_o, detectWTF as ɵangular_packages_core_core_n, endTimeRange as ɵangular_packages_core_core_r, leave as ɵangular_packages_core_core_p, startTimeRange as ɵangular_packages_core_core_q, NG_INJECTABLE_DEF as ɵangular_packages_core_core_bd, _getViewData as ɵangular_packages_core_core_w, bindingUpdated as ɵangular_packages_core_core_x, getPreviousOrParentTNode as ɵangular_packages_core_core_v, BoundPlayerFactory as ɵangular_packages_core_core_z, loadInternal as ɵangular_packages_core_core_bg, createElementRef as ɵangular_packages_core_core_ba, createTemplateRef as ɵangular_packages_core_core_bb, createViewRef as ɵangular_packages_core_core_bc, makeParamDecorator as ɵangular_packages_core_core_a, makePropDecorator as ɵangular_packages_core_core_b, getClosureSafeProperty as ɵangular_packages_core_core_be, _def as ɵangular_packages_core_core_s, DebugRendererFactory2 as ɵangular_packages_core_core_t, DebugContext as ɵangular_packages_core_core_u, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, inject, INJECTOR, Injector, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList$1 as QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, getInjectableDef as ɵgetInjectableDef, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled$1 as ɵivyEnabled, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineBase as ɵdefineBase, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, directiveInject as ɵdirectiveInject, injectAttribute as ɵinjectAttribute, getFactoryOf as ɵgetFactoryOf, getInheritedFactory as ɵgetInheritedFactory, templateRefExtractor as ɵtemplateRefExtractor, PublicFeature as ɵPublicFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, NgOnChangesFeature as ɵNgOnChangesFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, container as ɵcontainer, nextContext as ɵnextContext, elementStart as ɵelementStart, namespaceHTML as ɵnamespaceHTML, namespaceMathML as ɵnamespaceMathML, namespaceSVG as ɵnamespaceSVG, element as ɵelement, listener as ɵlistener, text as ɵtext, embeddedViewStart as ɵembeddedViewStart, query as ɵquery, registerContentQuery as ɵregisterContentQuery, projection as ɵprojection, bind as ɵbind, interpolation1 as ɵinterpolation1, interpolation2 as ɵinterpolation2, interpolation3 as ɵinterpolation3, interpolation4 as ɵinterpolation4, interpolation5 as ɵinterpolation5, interpolation6 as ɵinterpolation6, interpolation7 as ɵinterpolation7, interpolation8 as ɵinterpolation8, interpolationV as ɵinterpolationV, pipeBind1 as ɵpipeBind1, pipeBind2 as ɵpipeBind2, pipeBind3 as ɵpipeBind3, pipeBind4 as ɵpipeBind4, pipeBindV as ɵpipeBindV, pureFunction0 as ɵpureFunction0, pureFunction1 as ɵpureFunction1, pureFunction2 as ɵpureFunction2, pureFunction3 as ɵpureFunction3, pureFunction4 as ɵpureFunction4, pureFunction5 as ɵpureFunction5, pureFunction6 as ɵpureFunction6, pureFunction7 as ɵpureFunction7, pureFunction8 as ɵpureFunction8, pureFunctionV as ɵpureFunctionV, getCurrentView as ɵgetCurrentView, restoreView as ɵrestoreView, containerRefreshStart as ɵcontainerRefreshStart, containerRefreshEnd as ɵcontainerRefreshEnd, queryRefresh as ɵqueryRefresh, loadQueryList as ɵloadQueryList, elementEnd as ɵelementEnd, elementProperty as ɵelementProperty, projectionDef as ɵprojectionDef, reference as ɵreference, enableBindings as ɵenableBindings, disableBindings as ɵdisableBindings, elementAttribute as ɵelementAttribute, elementStyling as ɵelementStyling, elementStylingMap as ɵelementStylingMap, elementStyleProp as ɵelementStyleProp, elementStylingApply as ɵelementStylingApply, elementClassProp as ɵelementClassProp, textBinding as ɵtextBinding, template as ɵtemplate, embeddedViewEnd as ɵembeddedViewEnd, store as ɵstore, load as ɵload, pipe as ɵpipe, whenRendered as ɵwhenRendered, i18nAttribute as ɵi18nAttribute, i18nExp as ɵi18nExp, i18nStart as ɵi18nStart, i18nEnd as ɵi18nEnd, i18nApply as ɵi18nApply, i18nExpMapping as ɵi18nExpMapping, i18nInterpolation1 as ɵi18nInterpolation1, i18nInterpolation2 as ɵi18nInterpolation2, i18nInterpolation3 as ɵi18nInterpolation3, i18nInterpolation4 as ɵi18nInterpolation4, i18nInterpolation5 as ɵi18nInterpolation5, i18nInterpolation6 as ɵi18nInterpolation6, i18nInterpolation7 as ɵi18nInterpolation7, i18nInterpolation8 as ɵi18nInterpolation8, i18nInterpolationV as ɵi18nInterpolationV, i18nMapping as ɵi18nMapping, WRAP_RENDERER_FACTORY2 as ɵWRAP_RENDERER_FACTORY2, Render3DebugRendererFactory2 as ɵRender3DebugRendererFactory2, R3_COMPILE_NGMODULE_DEFS as ɵcompileNgModuleDefs, R3_PATCH_COMPONENT_DEF_WTIH_SCOPE as ɵpatchComponentDefWithScope, R3_COMPILE_COMPONENT as ɵcompileComponent, R3_COMPILE_DIRECTIVE as ɵcompileDirective, R3_COMPILE_PIPE as ɵcompilePipe, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getContext as ɵgetContext, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_NGCC__ as ɵcompileNgModuleFactory__POST_NGCC__, R3_COMPILE_COMPONENT__POST_NGCC__ as ɵR3_COMPILE_COMPONENT__POST_NGCC__, R3_COMPILE_DIRECTIVE__POST_NGCC__ as ɵR3_COMPILE_DIRECTIVE__POST_NGCC__, R3_COMPILE_INJECTABLE__POST_NGCC__ as ɵR3_COMPILE_INJECTABLE__POST_NGCC__, R3_COMPILE_NGMODULE__POST_NGCC__ as ɵR3_COMPILE_NGMODULE__POST_NGCC__, R3_COMPILE_PIPE__POST_NGCC__ as ɵR3_COMPILE_PIPE__POST_NGCC__, ivyEnable__POST_NGCC__ as ɵivyEnable__POST_NGCC__, R3_ELEMENT_REF_FACTORY__POST_NGCC__ as ɵR3_ELEMENT_REF_FACTORY__POST_NGCC__, R3_TEMPLATE_REF_FACTORY__POST_NGCC__ as ɵR3_TEMPLATE_REF_FACTORY__POST_NGCC__, R3_CHANGE_DETECTOR_REF_FACTORY__POST_NGCC__ as ɵR3_CHANGE_DETECTOR_REF_FACTORY__POST_NGCC__, R3_VIEW_CONTAINER_REF_FACTORY__POST_NGCC__ as ɵR3_VIEW_CONTAINER_REF_FACTORY__POST_NGCC__, R3_RENDERER2_FACTORY__POST_NGCC__ as ɵR3_RENDERER2_FACTORY__POST_NGCC__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$4 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_o, _iterableDiffersFactory as ɵangular_packages_core_core_l, _keyValueDiffersFactory as ɵangular_packages_core_core_m, _localeFactory as ɵangular_packages_core_core_n, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, DefaultIterableDifferFactory as ɵangular_packages_core_core_j, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_k, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, wtfEnabled as ɵangular_packages_core_core_p, createScope as ɵangular_packages_core_core_r, detectWTF as ɵangular_packages_core_core_q, endTimeRange as ɵangular_packages_core_core_u, leave as ɵangular_packages_core_core_s, startTimeRange as ɵangular_packages_core_core_t, NG_INJECTABLE_DEF as ɵangular_packages_core_core_bd, _getViewData as ɵangular_packages_core_core_z, bindingUpdated as ɵangular_packages_core_core_ba, getPreviousOrParentTNode as ɵangular_packages_core_core_y, BoundPlayerFactory as ɵangular_packages_core_core_bc, loadInternal as ɵangular_packages_core_core_bg, createElementRef as ɵangular_packages_core_core_g, createTemplateRef as ɵangular_packages_core_core_h, createViewRef as ɵangular_packages_core_core_i, makeParamDecorator as ɵangular_packages_core_core_a, makePropDecorator as ɵangular_packages_core_core_b, getClosureSafeProperty as ɵangular_packages_core_core_be, _def as ɵangular_packages_core_core_v, DebugRendererFactory2 as ɵangular_packages_core_core_w, DebugContext as ɵangular_packages_core_core_x, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, inject, INJECTOR, Injector, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList$1 as QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, getInjectableDef as ɵgetInjectableDef, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineBase as ɵdefineBase, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, directiveInject as ɵdirectiveInject, injectAttribute as ɵinjectAttribute, getFactoryOf as ɵgetFactoryOf, getInheritedFactory as ɵgetInheritedFactory, templateRefExtractor as ɵtemplateRefExtractor, PublicFeature as ɵPublicFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, NgOnChangesFeature as ɵNgOnChangesFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, container as ɵcontainer, nextContext as ɵnextContext, elementStart as ɵelementStart, namespaceHTML as ɵnamespaceHTML, namespaceMathML as ɵnamespaceMathML, namespaceSVG as ɵnamespaceSVG, element as ɵelement, listener as ɵlistener, text as ɵtext, embeddedViewStart as ɵembeddedViewStart, query as ɵquery, registerContentQuery as ɵregisterContentQuery, projection as ɵprojection, bind as ɵbind, interpolation1 as ɵinterpolation1, interpolation2 as ɵinterpolation2, interpolation3 as ɵinterpolation3, interpolation4 as ɵinterpolation4, interpolation5 as ɵinterpolation5, interpolation6 as ɵinterpolation6, interpolation7 as ɵinterpolation7, interpolation8 as ɵinterpolation8, interpolationV as ɵinterpolationV, pipeBind1 as ɵpipeBind1, pipeBind2 as ɵpipeBind2, pipeBind3 as ɵpipeBind3, pipeBind4 as ɵpipeBind4, pipeBindV as ɵpipeBindV, pureFunction0 as ɵpureFunction0, pureFunction1 as ɵpureFunction1, pureFunction2 as ɵpureFunction2, pureFunction3 as ɵpureFunction3, pureFunction4 as ɵpureFunction4, pureFunction5 as ɵpureFunction5, pureFunction6 as ɵpureFunction6, pureFunction7 as ɵpureFunction7, pureFunction8 as ɵpureFunction8, pureFunctionV as ɵpureFunctionV, getCurrentView as ɵgetCurrentView, restoreView as ɵrestoreView, containerRefreshStart as ɵcontainerRefreshStart, containerRefreshEnd as ɵcontainerRefreshEnd, queryRefresh as ɵqueryRefresh, loadQueryList as ɵloadQueryList, elementEnd as ɵelementEnd, elementProperty as ɵelementProperty, projectionDef as ɵprojectionDef, reference as ɵreference, enableBindings as ɵenableBindings, disableBindings as ɵdisableBindings, elementAttribute as ɵelementAttribute, elementStyling as ɵelementStyling, elementStylingMap as ɵelementStylingMap, elementStyleProp as ɵelementStyleProp, elementStylingApply as ɵelementStylingApply, elementClassProp as ɵelementClassProp, textBinding as ɵtextBinding, template as ɵtemplate, embeddedViewEnd as ɵembeddedViewEnd, store as ɵstore, load as ɵload, pipe as ɵpipe, whenRendered as ɵwhenRendered, i18nAttribute as ɵi18nAttribute, i18nExp as ɵi18nExp, i18nStart as ɵi18nStart, i18nEnd as ɵi18nEnd, i18nApply as ɵi18nApply, i18nExpMapping as ɵi18nExpMapping, i18nInterpolation1 as ɵi18nInterpolation1, i18nInterpolation2 as ɵi18nInterpolation2, i18nInterpolation3 as ɵi18nInterpolation3, i18nInterpolation4 as ɵi18nInterpolation4, i18nInterpolation5 as ɵi18nInterpolation5, i18nInterpolation6 as ɵi18nInterpolation6, i18nInterpolation7 as ɵi18nInterpolation7, i18nInterpolation8 as ɵi18nInterpolation8, i18nInterpolationV as ɵi18nInterpolationV, i18nMapping as ɵi18nMapping, WRAP_RENDERER_FACTORY2 as ɵWRAP_RENDERER_FACTORY2, Render3DebugRendererFactory2 as ɵRender3DebugRendererFactory2, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule$1 as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, compilePipe as ɵcompilePipe, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getContext as ɵgetContext, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$4 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map
