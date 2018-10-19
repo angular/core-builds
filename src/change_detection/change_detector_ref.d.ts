@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { injectChangeDetectorRef as render3InjectChangeDetectorRef } from '../render3/view_engine_compatibility';
 /**
  * Base class for Angular Views, provides change detection functionality.
  * A change-detection tree collects all views that are to be checked for changes.
@@ -99,3 +100,4 @@ export declare abstract class ChangeDetectorRef {
      */
     abstract reattach(): void;
 }
+export declare const SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__: typeof render3InjectChangeDetectorRef;

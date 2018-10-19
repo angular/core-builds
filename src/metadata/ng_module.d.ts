@@ -7,6 +7,7 @@
  */
 import { ApplicationRef } from '../application_ref';
 import { Provider } from '../di/provider';
+import { compileNgModule as render3CompileNgModule } from '../render3/jit/module';
 import { Type } from '../type';
 import { TypeDecorator } from '../util/decorators';
 /**
@@ -321,3 +322,4 @@ export declare const NgModule: NgModuleDecorator;
 export interface DoBootstrap {
     ngDoBootstrap(appRef: ApplicationRef): void;
 }
+export declare const SWITCH_COMPILE_NGMODULE__POST_R3__: typeof render3CompileNgModule;
