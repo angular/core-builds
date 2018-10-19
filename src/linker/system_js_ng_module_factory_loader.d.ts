@@ -13,7 +13,7 @@ import { NgModuleFactoryLoader } from './ng_module_factory_loader';
  * Configuration for SystemJsNgModuleLoader.
  * token.
  *
- * @experimental
+ * @publicApi
  */
 export declare abstract class SystemJsNgModuleLoaderConfig {
     /**
@@ -27,7 +27,7 @@ export declare abstract class SystemJsNgModuleLoaderConfig {
 }
 /**
  * NgModuleFactoryLoader that uses SystemJS to load NgModuleFactory
- * @experimental
+ * @publicApi
  */
 export declare class SystemJsNgModuleLoader implements NgModuleFactoryLoader {
     private _compiler;

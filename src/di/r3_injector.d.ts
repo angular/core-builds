@@ -13,7 +13,7 @@ import { StaticProvider } from './provider';
 /**
  * Create a new `Injector` which is configured using a `defType` of `InjectorType<any>`s.
  *
- * @experimental
+ * @publicApi
  */
 export declare function createInjector(defType: any, parent?: Injector | null, additionalProviders?: StaticProvider[] | null): Injector;
 export declare class R3Injector {

@@ -110,7 +110,7 @@ export declare function directiveInject<T>(token: Type<T> | InjectionToken<T>, f
  * })
  * ```
  *
- * @experimental
+ * @publicApi
  */
 export declare function injectAttribute(attrNameToInject: string): string | undefined;
 /**
