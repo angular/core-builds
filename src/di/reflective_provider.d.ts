@@ -36,7 +36,7 @@ export declare class ReflectiveDependency {
  * expect(injector.get('message')).toEqual('Hello');
  * ```
  *
- * @experimental
+ * @publicApi
  */
 export interface ResolvedReflectiveProvider {
     /**
@@ -61,7 +61,7 @@ export declare class ResolvedReflectiveProvider_ implements ResolvedReflectivePr
 }
 /**
  * An internal resolved representation of a factory function created by resolving `Provider`.
- * @experimental
+ * @publicApi
  */
 export declare class ResolvedReflectiveFactory {
     /**

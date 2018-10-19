@@ -24,7 +24,7 @@ export declare const APPLICATION_MODULE_PROVIDERS: StaticProvider[];
  * Re-exported by `BrowserModule`, which is included automatically in the root
  * `AppModule` when you create a new app with the CLI `new` command.
  *
- * @experimental
+ * @publicApi
  */
 export declare class ApplicationModule {
     constructor(appRef: ApplicationRef);

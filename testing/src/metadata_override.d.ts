@@ -8,7 +8,7 @@
 /**
  * Type used for modifications to metadata
  *
- * @experimental
+ * @publicApi
  */
 export declare type MetadataOverride<T> = {
     add?: Partial<T>;

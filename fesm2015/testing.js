@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-rc.1+118.sha-31022cb
+ * @license Angular v7.0.0-rc.1+137.sha-4c2ce4e
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -144,7 +144,7 @@ function runInTestZone(fn, context, finishCallback, failCallback) {
  * });
  * ```
  *
- *
+ * \@publicApi
  * @param {?} fn
  * @return {?}
  */
@@ -175,7 +175,7 @@ function async(fn) {
 /**
  * Fixture for debugging and testing a component.
  *
- *
+ * \@publicApi
  * @template T
  */
 class ComponentFixture {
@@ -395,7 +395,7 @@ let _fakeAsyncTestZoneSpec = null;
  * Clears out the shared fake async zone for a test.
  * To be called in a global `beforeEach`.
  *
- * \@experimental
+ * \@publicApi
  * @return {?}
  */
 function resetFakeAsyncZoneFallback() {
@@ -419,7 +419,7 @@ let _inFakeAsyncCall = false;
  *
  * {\@example core/testing/ts/fake_async.ts region='basic'}
  *
- * \@experimental
+ * \@publicApi
  * @param {?} fn
  * @return {?} The function wrapped to be executed in the fakeAsync zone
  *
@@ -487,7 +487,7 @@ function _getFakeAsyncZoneSpec() {
  *
  * {\@example core/testing/ts/fake_async.ts region='basic'}
  *
- * \@experimental
+ * \@publicApi
  * @param {?=} millis
  * @return {?}
  */
@@ -499,7 +499,7 @@ function tickFallback(millis = 0) {
  * draining the macrotask queue until it is empty. The returned value is the milliseconds
  * of time that would have been elapsed.
  *
- * \@experimental
+ * \@publicApi
  * @param {?=} maxTurns
  * @return {?} The simulated time elapsed, in millis.
  *
@@ -510,7 +510,7 @@ function flushFallback(maxTurns) {
 /**
  * Discard all remaining periodic tasks.
  *
- * \@experimental
+ * \@publicApi
  * @return {?}
  */
 function discardPeriodicTasksFallback() {
@@ -521,7 +521,7 @@ function discardPeriodicTasksFallback() {
 /**
  * Flush any pending microtasks.
  *
- * \@experimental
+ * \@publicApi
  * @return {?}
  */
 function flushMicrotasksFallback() {
@@ -540,7 +540,7 @@ const fakeAsyncTestModule = _Zone$1 && _Zone$1[_Zone$1.__symbol__('fakeAsyncTest
  * Clears out the shared fake async zone for a test.
  * To be called in a global `beforeEach`.
  *
- * \@experimental
+ * \@publicApi
  * @return {?}
  */
 function resetFakeAsyncZone() {
@@ -565,7 +565,7 @@ function resetFakeAsyncZone() {
  *
  * {\@example core/testing/ts/fake_async.ts region='basic'}
  *
- * \@experimental
+ * \@publicApi
  * @param {?} fn
  * @return {?} The function wrapped to be executed in the fakeAsync zone
  *
@@ -589,7 +589,7 @@ function fakeAsync(fn) {
  *
  * {\@example core/testing/ts/fake_async.ts region='basic'}
  *
- * \@experimental
+ * \@publicApi
  * @param {?=} millis
  * @return {?}
  */
@@ -606,7 +606,7 @@ function tick(millis = 0) {
  * draining the macrotask queue until it is empty. The returned value is the milliseconds
  * of time that would have been elapsed.
  *
- * \@experimental
+ * \@publicApi
  * @param {?=} maxTurns
  * @return {?} The simulated time elapsed, in millis.
  *
@@ -622,7 +622,7 @@ function flush(maxTurns) {
 /**
  * Discard all remaining periodic tasks.
  *
- * \@experimental
+ * \@publicApi
  * @return {?}
  */
 function discardPeriodicTasks() {
@@ -636,7 +636,7 @@ function discardPeriodicTasks() {
 /**
  * Flush any pending microtasks.
  *
- * \@experimental
+ * \@publicApi
  * @return {?}
  */
 function flushMicrotasks() {
@@ -930,7 +930,7 @@ class NgModuleResolver extends OverrideResolver {
 /**
  * An abstract class for inserting the root test component element in a platform independent way.
  *
- * \@experimental
+ * \@publicApi
  */
 class TestComponentRenderer {
     /**
@@ -940,11 +940,11 @@ class TestComponentRenderer {
     insertRootElement(rootElementId) { }
 }
 /** *
- * \@experimental
+ * \@publicApi
   @type {?} */
 const ComponentFixtureAutoDetect = new InjectionToken('ComponentFixtureAutoDetect');
 /** *
- * \@experimental
+ * \@publicApi
   @type {?} */
 const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
 
@@ -994,7 +994,7 @@ class TestBedRender3 {
      * Test modules and platforms for individual platforms are available from
      * '\@angular/<platform_name>/testing'.
      *
-     * \@experimental
+     * \@publicApi
      * @param {?} ngModule
      * @param {?} platform
      * @param {?=} aotSummaries
@@ -1009,7 +1009,7 @@ class TestBedRender3 {
     /**
      * Reset the providers for the test injector.
      *
-     * \@experimental
+     * \@publicApi
      * @return {?}
      */
     static resetTestEnvironment() { _getTestBedRender3().resetTestEnvironment(); }
@@ -1155,7 +1155,7 @@ class TestBedRender3 {
      * Test modules and platforms for individual platforms are available from
      * '\@angular/<platform_name>/testing'.
      *
-     * \@experimental
+     * \@publicApi
      * @param {?} ngModule
      * @param {?} platform
      * @param {?=} aotSummaries
@@ -1171,7 +1171,7 @@ class TestBedRender3 {
     /**
      * Reset the providers for the test injector.
      *
-     * \@experimental
+     * \@publicApi
      * @return {?}
      */
     resetTestEnvironment() {
@@ -1616,7 +1616,7 @@ function unimplemented() {
 /**
  * Special interface to the compiler only used by testing
  *
- * \@experimental
+ * \@publicApi
  */
 class TestingCompiler extends Compiler {
     /**
@@ -1685,7 +1685,7 @@ TestingCompiler.decorators = [
 /**
  * A factory for creating a Compiler
  *
- * \@experimental
+ * \@publicApi
  * @abstract
  */
 class TestingCompilerFactory {
@@ -1744,7 +1744,7 @@ class TestBedViewEngine {
      * Test modules and platforms for individual platforms are available from
      * '\@angular/<platform_name>/testing'.
      *
-     * \@experimental
+     * \@publicApi
      * @param {?} ngModule
      * @param {?} platform
      * @param {?=} aotSummaries
@@ -1759,7 +1759,7 @@ class TestBedViewEngine {
     /**
      * Reset the providers for the test injector.
      *
-     * \@experimental
+     * \@publicApi
      * @return {?}
      */
     static resetTestEnvironment() { _getTestBedViewEngine().resetTestEnvironment(); }
@@ -1900,7 +1900,7 @@ class TestBedViewEngine {
      * Test modules and platforms for individual platforms are available from
      * '\@angular/<platform_name>/testing'.
      *
-     * \@experimental
+     * \@publicApi
      * @param {?} ngModule
      * @param {?} platform
      * @param {?=} aotSummaries
@@ -1919,7 +1919,7 @@ class TestBedViewEngine {
     /**
      * Reset the providers for the test injector.
      *
-     * \@experimental
+     * \@publicApi
      * @return {?}
      */
     resetTestEnvironment() {
@@ -2303,6 +2303,8 @@ class TestBedViewEngine {
  *
  * Note: Use `TestBed` in tests. It will be set to either `TestBedViewEngine` or `TestBedRender3`
  * according to the compiler used.
+ *
+ * \@publicApi
   @type {?} */
 const TestBed = ɵivyEnabled ? /** @type {?} */ ((TestBedRender3)) : /** @type {?} */ ((TestBedViewEngine));
 /** *
@@ -2310,7 +2312,7 @@ const TestBed = ɵivyEnabled ? /** @type {?} */ ((TestBedRender3)) : /** @type {
  *
  * It will be either an instance of `TestBedViewEngine` or `TestBedRender3`.
  *
- * \@experimental
+ * \@publicApi
   @type {?} */
 const getTestBed = ɵivyEnabled ? _getTestBedRender3 : _getTestBedViewEngine;
 /** @type {?} */
@@ -2343,7 +2345,7 @@ function _getTestBedViewEngine() {
  * eventually
  *   becomes `it('...', \@Inject (object: AClass, async: AsyncTestCompleter) => { ... });`
  *
- *
+ * \@publicApi
  * @param {?} tokens
  * @param {?} fn
  * @return {?}
@@ -2370,7 +2372,7 @@ function inject(tokens, fn) {
     }
 }
 /**
- * \@experimental
+ * \@publicApi
  */
 class InjectSetupWrapper {
     /**

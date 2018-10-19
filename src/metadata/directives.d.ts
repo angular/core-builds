@@ -14,6 +14,7 @@ import { TypeDecorator } from '../util/decorators';
 import { ViewEncapsulation } from './view';
 /**
  * Type of the Directive decorator / constructor function.
+ * @publicApi
  */
 export interface DirectiveDecorator {
     /**
@@ -332,11 +333,14 @@ export interface Directive {
 }
 /**
  * Type of the Directive metadata.
+ *
+ * @publicApi
  */
 export declare const Directive: DirectiveDecorator;
 /**
  * Component decorator interface
  *
+ * @publicApi
  */
 export interface ComponentDecorator {
     /**
@@ -600,10 +604,13 @@ export interface Component extends Directive {
  * `ngPreserveWhitespaces` attribute.
  *
  * @Annotation
+ * @publicApi
  */
 export declare const Component: ComponentDecorator;
 /**
  * Type of the Pipe decorator / constructor function.
+ *
+ * @publicApi
  */
 export interface PipeDecorator {
     /**
@@ -638,13 +645,12 @@ export interface Pipe {
     pure?: boolean;
 }
 /**
- *
- *
  * @Annotation
+ * @publicApi
  */
 export declare const Pipe: PipeDecorator;
 /**
- *
+ * @publicApi
  */
 export interface InputDecorator {
     /**
@@ -721,12 +727,14 @@ export interface Input {
     bindingPropertyName?: string;
 }
 /**
- *
  * @Annotation
+ * @publicApi
  */
 export declare const Input: InputDecorator;
 /**
  * Type of the Output decorator / constructor function.
+ *
+ * @publicApi
  */
 export interface OutputDecorator {
     /**
@@ -754,12 +762,14 @@ export interface Output {
     bindingPropertyName?: string;
 }
 /**
- *
  * @Annotation
+ * @publicApi
  */
 export declare const Output: OutputDecorator;
 /**
  * Type of the HostBinding decorator / constructor function.
+ *
+ * @publicApi
  */
 export interface HostBindingDecorator {
     /**
@@ -801,12 +811,14 @@ export interface HostBinding {
     hostPropertyName?: string;
 }
 /**
- *
  * @Annotation
+ * @publicApi
  */
 export declare const HostBinding: HostBindingDecorator;
 /**
  * Type of the HostListener decorator / constructor function.
+ *
+ * @publicApi
  */
 export interface HostListenerDecorator {
     (eventName: string, args?: string[]): any;
@@ -855,6 +867,7 @@ export interface HostListener {
  * ```
  *
  * @Annotation
+ * @publicApi
  */
 export declare const HostListener: HostListenerDecorator;
 export declare const SWITCH_COMPILE_COMPONENT__POST_R3__: typeof render3CompileComponent;
