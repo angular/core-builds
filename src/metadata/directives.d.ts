@@ -7,6 +7,8 @@
  */
 import { ChangeDetectionStrategy } from '../change_detection/constants';
 import { Provider } from '../di';
+import { compileComponent as render3CompileComponent, compileDirective as render3CompileDirective } from '../render3/jit/directive';
+import { compilePipe as render3CompilePipe } from '../render3/jit/pipe';
 import { Type } from '../type';
 import { TypeDecorator } from '../util/decorators';
 import { ViewEncapsulation } from './view';
@@ -855,3 +857,6 @@ export interface HostListener {
  * @Annotation
  */
 export declare const HostListener: HostListenerDecorator;
+export declare const SWITCH_COMPILE_COMPONENT__POST_R3__: typeof render3CompileComponent;
+export declare const SWITCH_COMPILE_DIRECTIVE__POST_R3__: typeof render3CompileDirective;
+export declare const SWITCH_COMPILE_PIPE__POST_R3__: typeof render3CompilePipe;
