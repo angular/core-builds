@@ -9,7 +9,7 @@ import { ChangeDetectorRef, ComponentRef, DebugElement, ElementRef, NgZone } fro
 /**
  * Fixture for debugging and testing a component.
  *
- *
+ * @publicApi
  */
 export declare class ComponentFixture<T> {
     componentRef: ComponentRef<T>;

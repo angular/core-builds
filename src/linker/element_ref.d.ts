@@ -16,7 +16,7 @@ import { injectElementRef as render3InjectElementRef } from '../render3/view_eng
  * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
  * [Security Guide](http://g.co/ng/security).
  *
- *
+ * @publicApi
  */
 export declare class ElementRef<T = any> {
     /**

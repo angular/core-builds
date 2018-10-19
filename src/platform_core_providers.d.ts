@@ -10,6 +10,6 @@ import { StaticProvider } from './di';
 /**
  * This platform has to be included in any other platform
  *
- * @experimental
+ * @publicApi
  */
 export declare const platformCore: (extraProviders?: StaticProvider[] | undefined) => PlatformRef;

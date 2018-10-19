@@ -32,13 +32,13 @@ export declare class TestBedRender3 implements Injector, TestBed {
      * Test modules and platforms for individual platforms are available from
      * '@angular/<platform_name>/testing'.
      *
-     * @experimental
+     * @publicApi
      */
     static initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): TestBed;
     /**
      * Reset the providers for the test injector.
      *
-     * @experimental
+     * @publicApi
      */
     static resetTestEnvironment(): void;
     static configureCompiler(config: {
@@ -117,13 +117,13 @@ export declare class TestBedRender3 implements Injector, TestBed {
      * Test modules and platforms for individual platforms are available from
      * '@angular/<platform_name>/testing'.
      *
-     * @experimental
+     * @publicApi
      */
     initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): void;
     /**
      * Reset the providers for the test injector.
      *
-     * @experimental
+     * @publicApi
      */
     resetTestEnvironment(): void;
     resetTestingModule(): void;

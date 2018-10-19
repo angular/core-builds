@@ -25,6 +25,7 @@ import { EmbeddedViewRef, ViewRef } from './view_ref';
  * @see `ComponentRef`
  * @see `EmbeddedViewRef`
  *
+ * @publicApi
  */
 export declare abstract class ViewContainerRef {
     /**

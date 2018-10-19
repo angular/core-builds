@@ -13,6 +13,7 @@ export declare class DefaultIterableDifferFactory implements IterableDifferFacto
 }
 /**
  * @deprecated v4.0.0 - Should not be part of public API.
+ * @publicApi
  */
 export declare class DefaultIterableDiffer<V> implements IterableDiffer<V>, IterableChanges<V> {
     readonly length: number;

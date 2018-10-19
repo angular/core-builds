@@ -11,7 +11,7 @@
  *
  * By default, this is true, unless a user calls `enableProdMode` before calling this.
  *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @publicApi
  */
 export declare function isDevMode(): boolean;
 /**
@@ -21,5 +21,7 @@ export declare function isDevMode(): boolean;
  * One important assertion this disables verifies that a change detection pass
  * does not result in additional changes to any bindings (also known as
  * unidirectional data flow).
+ *
+ * @publicApi
  */
 export declare function enableProdMode(): void;
