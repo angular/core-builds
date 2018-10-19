@@ -12,21 +12,21 @@ import { TestBed } from './test_bed';
 /**
  * An abstract class for inserting the root test component element in a platform independent way.
  *
- * @experimental
+ * @publicApi
  */
 export declare class TestComponentRenderer {
     insertRootElement(rootElementId: string): void;
 }
 /**
- * @experimental
+ * @publicApi
  */
 export declare const ComponentFixtureAutoDetect: InjectionToken<boolean[]>;
 /**
- * @experimental
+ * @publicApi
  */
 export declare const ComponentFixtureNoNgZone: InjectionToken<boolean[]>;
 /**
- * @experimental
+ * @publicApi
  */
 export declare type TestModuleMetadata = {
     providers?: any[];
@@ -37,14 +37,14 @@ export declare type TestModuleMetadata = {
 };
 /**
  * Static methods implemented by the `TestBedViewEngine` and `TestBedRender3`
+ *
+ * @publicApi
  */
 export interface TestBedStatic {
     new (...args: any[]): TestBed;
     initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): TestBed;
     /**
      * Reset the providers for the test injector.
-     *
-     * @experimental
      */
     resetTestEnvironment(): void;
     resetTestingModule(): TestBedStatic;

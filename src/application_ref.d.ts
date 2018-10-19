@@ -18,7 +18,7 @@ export declare const ALLOW_MULTIPLE_PLATFORMS: InjectionToken<boolean>;
 /**
  * A token for third-party components that can register themselves with NgProbe.
  *
- * @experimental
+ * @publicApi
  */
 export declare class NgProbeToken {
     name: string;
@@ -29,31 +29,31 @@ export declare class NgProbeToken {
  * Creates a platform.
  * Platforms have to be eagerly created via this function.
  *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @publicApi
  */
 export declare function createPlatform(injector: Injector): PlatformRef;
 /**
  * Creates a factory for a platform
  *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @publicApi
  */
 export declare function createPlatformFactory(parentPlatformFactory: ((extraProviders?: StaticProvider[]) => PlatformRef) | null, name: string, providers?: StaticProvider[]): (extraProviders?: StaticProvider[]) => PlatformRef;
 /**
  * Checks that there currently is a platform which contains the given token as a provider.
  *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @publicApi
  */
 export declare function assertPlatform(requiredToken: any): PlatformRef;
 /**
  * Destroy the existing platform.
  *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @publicApi
  */
 export declare function destroyPlatform(): void;
 /**
  * Returns the current platform.
  *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @publicApi
  */
 export declare function getPlatform(): PlatformRef | null;
 /**
@@ -78,6 +78,8 @@ export interface BootstrapOptions {
  *
  * A page's platform is initialized implicitly when a platform is created via a platform factory
  * (e.g. {@link platformBrowser}), or explicitly by calling the {@link createPlatform} function.
+ *
+ * @publicApi
  */
 export declare class PlatformRef {
     private _injector;
@@ -105,8 +107,6 @@ export declare class PlatformRef {
      *
      * let moduleRef = platformBrowser().bootstrapModuleFactory(MyModuleNgFactory);
      * ```
-     *
-     * @experimental APIs related to application bootstrap are currently under review.
      */
     bootstrapModuleFactory<M>(moduleFactory: NgModuleFactory<M>, options?: BootstrapOptions): Promise<NgModuleRef<M>>;
     /**
@@ -144,6 +144,8 @@ export declare class PlatformRef {
 }
 /**
  * A reference to an Angular application running on a page.
+ *
+ * @publicApi
  */
 export declare class ApplicationRef {
     private _zone;

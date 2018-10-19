@@ -23,6 +23,7 @@ import { EmbeddedViewRef } from './view_ref';
  * @see `ViewContainerRef`
  * @see [Navigate the Component Tree with DI](guide/dependency-injection-navtree)
  *
+ * @publicApi
  */
 export declare abstract class TemplateRef<C> {
     /**

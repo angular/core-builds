@@ -8,10 +8,14 @@
 import { InjectionToken } from './di';
 /**
  * A function that will be executed when an application is initialized.
+ *
+ * @publicApi
  */
 export declare const APP_INITIALIZER: InjectionToken<(() => void)[]>;
 /**
  * A class that reflects the state of running {@link APP_INITIALIZER}s.
+ *
+ * @publicApi
  */
 export declare class ApplicationInitStatus {
     private appInits;

@@ -13,7 +13,7 @@
  * An example of a `Type` is `MyCustomComponent` class, which in JavaScript is be represented by
  * the `MyCustomComponent` constructor function.
  *
- *
+ * @publicApi
  */
 export declare const Type: FunctionConstructor;
 export declare function isType(v: any): v is Type<any>;
