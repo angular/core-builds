@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-rc.1+156.sha-100c7ef.with-local-changes
+ * @license Angular v7.0.0-rc.1+176.sha-2f9e957.with-local-changes
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2901,6 +2901,10 @@
     function getRenderParent(tNode, currentView) {
         if (canInsertNativeNode(tNode, currentView)) {
             var hostTNode = currentView[HOST_NODE];
+            var tNodeParent = tNode.parent;
+            if (tNodeParent != null && tNodeParent.type === 4 /* ElementContainer */) {
+                tNode = getHighestElementContainer(tNodeParent);
+            }
             return tNode.parent == null && hostTNode.type === 2 /* View */ ?
                 getContainerRenderParent(hostTNode, currentView) :
                 getParentNative(tNode, currentView);
@@ -3015,8 +3019,7 @@
                 nativeInsertBefore(renderer, lContainer[RENDER_PARENT], childEl, getBeforeNodeForView(index, views, lContainer[NATIVE]));
             }
             else if (parentTNode.type === 4 /* ElementContainer */) {
-                var elementContainer = getHighestElementContainer(childTNode);
-                var renderParent = getRenderParent(elementContainer, currentView);
+                var renderParent = getRenderParent(childTNode, currentView);
                 nativeInsertBefore(renderer, renderParent, childEl, parentEl);
             }
             else {
@@ -12484,7 +12487,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.0.0-rc.1+156.sha-100c7ef.with-local-changes');
+    var VERSION = new Version('7.0.0-rc.1+176.sha-2f9e957.with-local-changes');
 
     /**
      * @license
