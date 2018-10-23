@@ -61,7 +61,7 @@ export declare abstract class ComponentRef<C> {
  */
 export declare abstract class ComponentFactory<C> {
     /**
-     * The comonent's HTML selector.
+     * The component's HTML selector.
      */
     abstract readonly selector: string;
     /**
