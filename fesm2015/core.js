@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.0-rc.1+156.sha-100c7ef.with-local-changes
+ * @license Angular v7.0.0-rc.1+178.sha-ee0b857.with-local-changes
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -3512,6 +3512,11 @@ function getRenderParent(tNode, currentView) {
     if (canInsertNativeNode(tNode, currentView)) {
         /** @type {?} */
         const hostTNode = currentView[HOST_NODE];
+        /** @type {?} */
+        const tNodeParent = tNode.parent;
+        if (tNodeParent != null && tNodeParent.type === 4 /* ElementContainer */) {
+            tNode = getHighestElementContainer(tNodeParent);
+        }
         return tNode.parent == null && /** @type {?} */ ((hostTNode)).type === 2 /* View */ ?
             getContainerRenderParent(/** @type {?} */ (hostTNode), currentView) : /** @type {?} */ (getParentNative(tNode, currentView));
     }
@@ -3645,9 +3650,7 @@ function appendChild(childEl, childTNode, currentView) {
         }
         else if (parentTNode.type === 4 /* ElementContainer */) {
             /** @type {?} */
-            let elementContainer = getHighestElementContainer(childTNode);
-            /** @type {?} */
-            let renderParent = /** @type {?} */ ((getRenderParent(elementContainer, currentView)));
+            const renderParent = /** @type {?} */ ((getRenderParent(childTNode, currentView)));
             nativeInsertBefore(renderer, renderParent, childEl, parentEl);
         }
         else {
@@ -15152,7 +15155,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.0.0-rc.1+156.sha-100c7ef.with-local-changes');
+const VERSION = new Version('7.0.0-rc.1+178.sha-ee0b857.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
