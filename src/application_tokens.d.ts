@@ -15,13 +15,13 @@ import { ComponentRef } from './linker/component_factory';
  * If you need to avoid randomly generated value to be used as an application id, you can provide
  * a custom value via a DI provider <!-- TODO: provider --> configuring the root {@link Injector}
  * using this token.
- * @experimental
+ * @publicApi
  */
 export declare const APP_ID: InjectionToken<string>;
 export declare function _appIdRandomProviderFactory(): string;
 /**
  * Providers that will generate a random APP_ID_TOKEN.
- * @experimental
+ * @publicApi
  */
 export declare const APP_ID_RANDOM_PROVIDER: {
     provide: InjectionToken<string>;
@@ -30,12 +30,12 @@ export declare const APP_ID_RANDOM_PROVIDER: {
 };
 /**
  * A function that will be executed when a platform is initialized.
- * @experimental
+ * @publicApi
  */
 export declare const PLATFORM_INITIALIZER: InjectionToken<(() => void)[]>;
 /**
  * A token that indicates an opaque platform id.
- * @experimental
+ * @publicApi
  */
 export declare const PLATFORM_ID: InjectionToken<Object>;
 /**
@@ -44,11 +44,11 @@ export declare const PLATFORM_ID: InjectionToken<Object>;
  *
  * `(componentRef: ComponentRef) => void`.
  *
- * @experimental
+ * @publicApi
  */
 export declare const APP_BOOTSTRAP_LISTENER: InjectionToken<((compRef: ComponentRef<any>) => void)[]>;
 /**
  * A token which indicates the root directory of the application
- * @experimental
+ * @publicApi
  */
 export declare const PACKAGE_ROOT_URL: InjectionToken<string>;
