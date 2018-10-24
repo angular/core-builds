@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.0.0-rc.1+111.sha-5b4cf38
+ * @license Angular v7.0.0-rc.1+178.sha-ee0b857.with-local-changes
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __extends, __spread, __read, __assign, __values } from 'tslib';
+import { __extends, __spread, __assign, __read, __values } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compilePipeFromMetadata, compileInjectable } from '@angular/compiler';
 import { share } from 'rxjs/operators';
@@ -80,7 +80,7 @@ var NG_ELEMENT_ID = getClosureSafeProperty({ __NG_ELEMENT_ID__: getClosureSafePr
  * * `factory` gives the zero argument function which will create an instance of the injectable.
  *   The factory can call `inject` to access the `Injector` and request injection of dependencies.
  *
- * @experimental
+ * @publicApi
  */
 function defineInjectable(opts) {
     return {
@@ -105,7 +105,7 @@ function defineInjectable(opts) {
  *   whose providers will also be added to the injector. Locally provided types will override
  *   providers from imports.
  *
- * @experimental
+ * @publicApi
  */
 function defineInjector(options) {
     return {
@@ -173,6 +173,8 @@ function getInjectorDef(type) {
  *
  * {@example core/di/ts/injector_spec.ts region='ShakableInjectionToken'}
  *
+ *
+ * @publicApi
  */
 var InjectionToken = /** @class */ (function () {
     function InjectionToken(_desc, options) {
@@ -366,13 +368,14 @@ function makePropDecorator(name, props, parentClass, additionalProcessing) {
  * class ModuleWithRoutes {}
  * ```
  *
- * @experimental
+ * @publicApi
  */
 var ANALYZE_FOR_ENTRY_COMPONENTS = new InjectionToken('AnalyzeForEntryComponents');
 /**
  * Attribute decorator and metadata.
  *
  * @Annotation
+ * @publicApi
  */
 var Attribute = makeParamDecorator('Attribute', function (attributeName) { return ({ attributeName: attributeName }); });
 /**
@@ -382,6 +385,8 @@ var Attribute = makeParamDecorator('Attribute', function (attributeName) { retur
  * @see `ContentChild`.
  * @see `ViewChildren`.
  * @see `ViewChild`.
+ *
+ * @publicApi
  */
 var Query = /** @class */ (function () {
     function Query() {
@@ -392,7 +397,8 @@ var Query = /** @class */ (function () {
  * ContentChildren decorator and metadata.
  *
  *
- *  @Annotation
+ * @Annotation
+ * @publicApi
  */
 var ContentChildren = makePropDecorator('ContentChildren', function (selector, data) {
     if (data === void 0) { data = {}; }
@@ -403,6 +409,7 @@ var ContentChildren = makePropDecorator('ContentChildren', function (selector, d
  *
  *
  * @Annotation
+ * @publicApi
  */
 var ContentChild = makePropDecorator('ContentChild', function (selector, data) {
     if (data === void 0) { data = {}; }
@@ -412,6 +419,7 @@ var ContentChild = makePropDecorator('ContentChild', function (selector, data) {
  * ViewChildren decorator and metadata.
  *
  * @Annotation
+ * @publicApi
  */
 var ViewChildren = makePropDecorator('ViewChildren', function (selector, data) {
     if (data === void 0) { data = {}; }
@@ -421,6 +429,7 @@ var ViewChildren = makePropDecorator('ViewChildren', function (selector, data) {
  * ViewChild decorator and metadata.
  *
  * @Annotation
+ * @publicApi
  */
 var ViewChild = makePropDecorator('ViewChild', function (selector, data) {
     return (__assign({ selector: selector, first: true, isViewQuery: true, descendants: true }, data));
@@ -437,6 +446,7 @@ var ViewChild = makePropDecorator('ViewChild', function (selector, data) {
  * The strategy that the default change detector uses to detect changes.
  * When set, takes effect the next time change detection is triggered.
  *
+ * @publicApi
  */
 var ChangeDetectionStrategy;
 (function (ChangeDetectionStrategy) {
@@ -605,7 +615,10 @@ function unwrapResponse(response) {
  *
  * @usageNotes
  * ### Example
+ *
  * {@example core/ts/metadata/encapsulation.ts region='longform'}
+ *
+ * @publicApi
  */
 var ViewEncapsulation;
 (function (ViewEncapsulation) {
@@ -743,7 +756,7 @@ function noSideEffects(fn) {
  * @usageNotes
  * ### Example
  * {@example core/di/ts/forward_ref/forward_ref_spec.ts region='forward_ref'}
- * @experimental
+ * @publicApi
  */
 function forwardRef(forwardRefFn) {
     forwardRefFn.__forward_ref__ = forwardRef;
@@ -761,7 +774,7 @@ function forwardRef(forwardRefFn) {
  * {@example core/di/ts/forward_ref/forward_ref_spec.ts region='resolve_forward_ref'}
  *
  * @see `forwardRef`
- * @experimental
+ * @publicApi
  */
 function resolveForwardRef(type) {
     if (typeof type === 'function' && type.hasOwnProperty('__forward_ref__') &&
@@ -784,30 +797,35 @@ function resolveForwardRef(type) {
  * Inject decorator and metadata.
  *
  * @Annotation
+ * @publicApi
  */
 var Inject = makeParamDecorator('Inject', function (token) { return ({ token: token }); });
 /**
  * Optional decorator and metadata.
  *
  * @Annotation
+ * @publicApi
  */
 var Optional = makeParamDecorator('Optional');
 /**
  * Self decorator and metadata.
  *
  * @Annotation
+ * @publicApi
  */
 var Self = makeParamDecorator('Self');
 /**
  * SkipSelf decorator and metadata.
  *
  * @Annotation
+ * @publicApi
  */
 var SkipSelf = makeParamDecorator('SkipSelf');
 /**
  * Host decorator and metadata.
  *
  * @Annotation
+ * @publicApi
  */
 var Host = makeParamDecorator('Host');
 
@@ -827,7 +845,7 @@ var THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
  * Requesting this token instead of `Injector` allows `StaticInjector` to be tree-shaken from a
  * project.
  *
- * @experimental
+ * @publicApi
  */
 var INJECTOR = new InjectionToken('INJECTOR');
 var NullInjector = /** @class */ (function () {
@@ -860,7 +878,7 @@ var NullInjector = /** @class */ (function () {
  *
  * {@example core/di/ts/injector_spec.ts region='injectInjector'}
  *
- *
+ * @publicApi
  */
 var Injector = /** @class */ (function () {
     function Injector() {
@@ -1660,6 +1678,7 @@ function devModeEqual(a, b) {
  *  }
  * ```
  *
+ * @publicApi
  */
 var WrappedValue = /** @class */ (function () {
     function WrappedValue(value) {
@@ -1679,6 +1698,7 @@ var WrappedValue = /** @class */ (function () {
 /**
  * Represents a basic change from a previous to a new value.
  *
+ * @publicApi
  */
 var SimpleChange = /** @class */ (function () {
     function SimpleChange(previousValue, currentValue, firstChange) {
@@ -2816,6 +2836,10 @@ function executePipeOnDestroys(viewData) {
 function getRenderParent(tNode, currentView) {
     if (canInsertNativeNode(tNode, currentView)) {
         var hostTNode = currentView[HOST_NODE];
+        var tNodeParent = tNode.parent;
+        if (tNodeParent != null && tNodeParent.type === 4 /* ElementContainer */) {
+            tNode = getHighestElementContainer(tNodeParent);
+        }
         return tNode.parent == null && hostTNode.type === 2 /* View */ ?
             getContainerRenderParent(hostTNode, currentView) :
             getParentNative(tNode, currentView);
@@ -2930,8 +2954,7 @@ function appendChild(childEl, childTNode, currentView) {
             nativeInsertBefore(renderer, lContainer[RENDER_PARENT], childEl, getBeforeNodeForView(index, views, lContainer[NATIVE]));
         }
         else if (parentTNode.type === 4 /* ElementContainer */) {
-            var elementContainer = getHighestElementContainer(childTNode);
-            var renderParent = getRenderParent(elementContainer, currentView);
+            var renderParent = getRenderParent(childTNode, currentView);
             nativeInsertBefore(renderer, renderParent, childEl, parentEl);
         }
         else {
@@ -7165,7 +7188,7 @@ function directiveInject(token, flags) {
  * })
  * ```
  *
- * @experimental
+ * @publicApi
  */
 function injectAttribute(attrNameToInject) {
     var tNode = getPreviousOrParentTNode();
@@ -7419,12 +7442,16 @@ function PublicFeature(definition) {
  * Provides access to the component instance and related objects,
  * and provides the means of destroying the instance.
  *
+ * @publicApi
  */
 var ComponentRef = /** @class */ (function () {
     function ComponentRef() {
     }
     return ComponentRef;
 }());
+/**
+ * @publicApi
+ */
 var ComponentFactory = /** @class */ (function () {
     function ComponentFactory() {
     }
@@ -7452,6 +7479,9 @@ var _NullComponentFactoryResolver = /** @class */ (function () {
     };
     return _NullComponentFactoryResolver;
 }());
+/**
+ * @publicApi
+ */
 var ComponentFactoryResolver = /** @class */ (function () {
     function ComponentFactoryResolver() {
     }
@@ -7512,7 +7542,7 @@ var ComponentFactoryBoundToModule = /** @class */ (function (_super) {
  * `NgModuleRef` provides access to the NgModule Instance as well other objects related to this
  * NgModule Instance.
  *
- *
+ * @publicApi
  */
 var NgModuleRef = /** @class */ (function () {
     function NgModuleRef() {
@@ -7520,7 +7550,7 @@ var NgModuleRef = /** @class */ (function () {
     return NgModuleRef;
 }());
 /**
- * @experimental
+ * @publicApi
  */
 var NgModuleFactory = /** @class */ (function () {
     function NgModuleFactory() {
@@ -8072,7 +8102,7 @@ function injectRenderer2() {
  * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
  * [Security Guide](http://g.co/ng/security).
  *
- *
+ * @publicApi
  */
 // Note: We don't expose things like `Injector`, `ViewContainer`, ... here,
 // i.e. users have to ask for what they need. With that, we can build better analysis tools
@@ -8097,6 +8127,7 @@ var SWITCH_ELEMENT_REF_FACTORY = SWITCH_ELEMENT_REF_FACTORY__POST_R3__;
  */
 /**
  * @deprecated Use `RendererType2` (and `Renderer2`) instead.
+ * @publicApi
  */
 var RenderComponentType = /** @class */ (function () {
     function RenderComponentType(id, templateUrl, slotCount, encapsulation, styles, animations) {
@@ -8119,6 +8150,7 @@ var RenderDebugInfo = /** @class */ (function () {
 }());
 /**
  * @deprecated Use the `Renderer2` instead.
+ * @publicApi
  */
 var Renderer = /** @class */ (function () {
     function Renderer() {
@@ -8139,6 +8171,7 @@ var Renderer2Interceptor = new InjectionToken('Renderer2Interceptor');
  * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
  *
  * @deprecated Use `RendererFactory2` instead.
+ * @publicApi
  */
 var RootRenderer = /** @class */ (function () {
     function RootRenderer() {
@@ -8148,7 +8181,7 @@ var RootRenderer = /** @class */ (function () {
 /**
  * Creates and initializes a custom renderer that implements the `Renderer2` base class.
  *
- * @experimental
+ * @publicApi
  */
 var RendererFactory2 = /** @class */ (function () {
     function RendererFactory2() {
@@ -8157,7 +8190,7 @@ var RendererFactory2 = /** @class */ (function () {
 }());
 /**
  * Flags for renderer-specific style modifiers.
- * @experimental
+ * @publicApi
  */
 var RendererStyleFlags2;
 (function (RendererStyleFlags2) {
@@ -8183,7 +8216,7 @@ var RendererStyleFlags2;
  * not statically known, use the `setProperty()` or
  * `setAttribute()` method.
  *
- * @experimental
+ * @publicApi
  */
 var Renderer2 = /** @class */ (function () {
     function Renderer2() {
@@ -9056,7 +9089,7 @@ function getNullInjector() {
 /**
  * Create a new `Injector` which is configured using a `defType` of `InjectorType<any>`s.
  *
- * @experimental
+ * @publicApi
  */
 function createInjector(defType, parent, additionalProviders) {
     if (parent === void 0) { parent = null; }
@@ -9850,6 +9883,7 @@ function isPure(index) {
  *
  * Once a reference implementation of the spec is available, switch to it.
  *
+ * @publicApi
  */
 var EventEmitter = /** @class */ (function (_super) {
     __extends(EventEmitter, _super);
@@ -9940,6 +9974,7 @@ var EventEmitter = /** @class */ (function (_super) {
  * @see `ViewContainerRef`
  * @see [Navigate the Component Tree with DI](guide/dependency-injection-navtree)
  *
+ * @publicApi
  */
 var TemplateRef = /** @class */ (function () {
     function TemplateRef() {
@@ -10450,7 +10485,7 @@ var _runModeLocked = false;
  *
  * By default, this is true, unless a user calls `enableProdMode` before calling this.
  *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @publicApi
  */
 function isDevMode() {
     _runModeLocked = true;
@@ -10463,6 +10498,8 @@ function isDevMode() {
  * One important assertion this disables verifies that a change detection pass
  * does not result in additional changes to any bindings (also known as
  * unidirectional data flow).
+ *
+ * @publicApi
  */
 function enableProdMode() {
     if (_runModeLocked) {
@@ -10945,7 +10982,7 @@ function isTemplateElement(el) {
  *
  * See DomSanitizer for more details on security in Angular applications.
  *
- *
+ * @publicApi
  */
 var SecurityContext;
 (function (SecurityContext) {
@@ -10959,7 +10996,7 @@ var SecurityContext;
 /**
  * Sanitizer is used by the views to sanitize potentially dangerous values.
  *
- *
+ * @publicApi
  */
 var Sanitizer = /** @class */ (function () {
     function Sanitizer() {
@@ -11307,7 +11344,7 @@ var angularCoreEnv = {
  * An example of a `Type` is `MyCustomComponent` class, which in JavaScript is be represented by
  * the `MyCustomComponent` constructor function.
  *
- *
+ * @publicApi
  */
 var Type = Function;
 function isType(v) {
@@ -12046,6 +12083,8 @@ function compilePipe(type, meta) {
 
 /**
  * Type of the Directive metadata.
+ *
+ * @publicApi
  */
 var Directive = makeDecorator('Directive', function (dir) {
     if (dir === void 0) { dir = {}; }
@@ -12138,15 +12177,15 @@ var Directive = makeDecorator('Directive', function (dir) {
  * `ngPreserveWhitespaces` attribute.
  *
  * @Annotation
+ * @publicApi
  */
 var Component = makeDecorator('Component', function (c) {
     if (c === void 0) { c = {}; }
     return (__assign({ changeDetection: ChangeDetectionStrategy.Default }, c));
 }, Directive, undefined, function (type, meta) { return SWITCH_COMPILE_COMPONENT(type, meta); });
 /**
- *
- *
  * @Annotation
+ * @publicApi
  */
 var Pipe = makeDecorator('Pipe', function (p) { return (__assign({ pure: true }, p)); }, undefined, undefined, function (type, meta) { return SWITCH_COMPILE_PIPE(type, meta); });
 var initializeBaseDef = function (target) {
@@ -12183,18 +12222,18 @@ var updateBaseDefFromIOProp = function (getProp) {
     };
 };
 /**
- *
  * @Annotation
+ * @publicApi
  */
 var Input = makePropDecorator('Input', function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); }, undefined, updateBaseDefFromIOProp(function (baseDef) { return baseDef.inputs || {}; }));
 /**
- *
  * @Annotation
+ * @publicApi
  */
 var Output = makePropDecorator('Output', function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); }, undefined, updateBaseDefFromIOProp(function (baseDef) { return baseDef.outputs || {}; }));
 /**
- *
  * @Annotation
+ * @publicApi
  */
 var HostBinding = makePropDecorator('HostBinding', function (hostPropertyName) { return ({ hostPropertyName: hostPropertyName }); });
 /**
@@ -12227,6 +12266,7 @@ var HostBinding = makePropDecorator('HostBinding', function (hostPropertyName) {
  * ```
  *
  * @Annotation
+ * @publicApi
  */
 var HostListener = makePropDecorator('HostListener', function (eventName, args) { return ({ eventName: eventName, args: args }); });
 var SWITCH_COMPILE_COMPONENT__POST_R3__ = compileComponent;
@@ -12251,7 +12291,7 @@ var USE_VALUE$1 = getClosureSafeProperty({ provide: String, useValue: getClosure
  * - Element properties named with dash case (`-`).
  * Dash case is the naming convention for custom elements.
  *
- *
+ * @publicApi
  */
 var CUSTOM_ELEMENTS_SCHEMA = {
     name: 'custom-elements'
@@ -12259,13 +12299,14 @@ var CUSTOM_ELEMENTS_SCHEMA = {
 /**
  * Defines a schema that allows any property on any element.
  *
- * @experimental
+ * @publicApi
  */
 var NO_ERRORS_SCHEMA = {
     name: 'no-errors-schema'
 };
 /**
  * @Annotation
+ * @publicApi
  */
 var NgModule = makeDecorator('NgModule', function (ngModule) { return ngModule; }, undefined, undefined, 
 /**
@@ -12301,7 +12342,7 @@ var SWITCH_COMPILE_NGMODULE = SWITCH_COMPILE_NGMODULE__POST_R3__;
 /**
  * @description Represents the version of Angular
  *
- *
+ * @publicApi
  */
 var Version = /** @class */ (function () {
     function Version(full) {
@@ -12312,7 +12353,10 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('7.0.0-rc.1+111.sha-5b4cf38');
+/**
+ * @publicApi
+ */
+var VERSION = new Version('7.0.0-rc.1+178.sha-ee0b857.with-local-changes');
 
 /**
  * @license
@@ -12420,10 +12464,11 @@ function isUseExistingProvider(meta) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
-* Injectable decorator and metadata.
-*
-* @Annotation
-*/
+ * Injectable decorator and metadata.
+ *
+ * @Annotation
+ * @publicApi
+ */
 var Injectable = makeDecorator('Injectable', undefined, undefined, undefined, function (type, meta) { return SWITCH_COMPILE_INJECTABLE(type, meta); });
 var SWITCH_COMPILE_INJECTABLE__POST_R3__ = compileInjectable$1;
 var SWITCH_COMPILE_INJECTABLE = SWITCH_COMPILE_INJECTABLE__POST_R3__;
@@ -12484,6 +12529,8 @@ function defaultErrorLogger(console) {
  * })
  * class MyModule {}
  * ```
+ *
+ * @publicApi
  */
 var ErrorHandler = /** @class */ (function () {
     function ErrorHandler() {
@@ -12767,7 +12814,9 @@ function mixingMultiProvidersWithRegularProvidersError(provider1, provider2) {
  * `Key` should not be created directly. {@link ReflectiveInjector} creates keys automatically when
  * resolving
  * providers.
+ *
  * @deprecated No replacement
+ * @publicApi
  */
 var ReflectiveKey = /** @class */ (function () {
     /**
@@ -12910,7 +12959,7 @@ var ResolvedReflectiveProvider_ = /** @class */ (function () {
 }());
 /**
  * An internal resolved representation of a factory function created by resolving `Provider`.
- * @experimental
+ * @publicApi
  */
 var ResolvedReflectiveFactory = /** @class */ (function () {
     function ResolvedReflectiveFactory(
@@ -13125,6 +13174,7 @@ var UNDEFINED = new Object();
  * resolve all of the object's dependencies automatically.
  *
  * @deprecated from v5 - slow and brings in a lot of code, Use `Injector.create` instead.
+ * @publicApi
  */
 var ReflectiveInjector = /** @class */ (function () {
     function ReflectiveInjector() {
@@ -13214,7 +13264,6 @@ var ReflectiveInjector = /** @class */ (function () {
      * var injector = ReflectiveInjector.fromResolvedProviders(providers);
      * expect(injector.get(Car) instanceof Car).toBe(true);
      * ```
-     * @experimental
      */
     ReflectiveInjector.fromResolvedProviders = function (providers, parent) {
         return new ReflectiveInjector_(providers, parent);
@@ -13438,10 +13487,14 @@ function isObservable(obj) {
  */
 /**
  * A function that will be executed when an application is initialized.
+ *
+ * @publicApi
  */
 var APP_INITIALIZER = new InjectionToken('Application Initializer');
 /**
  * A class that reflects the state of running {@link APP_INITIALIZER}s.
+ *
+ * @publicApi
  */
 var ApplicationInitStatus = /** @class */ (function () {
     function ApplicationInitStatus(appInits) {
@@ -13498,7 +13551,7 @@ var ApplicationInitStatus = /** @class */ (function () {
  * If you need to avoid randomly generated value to be used as an application id, you can provide
  * a custom value via a DI provider <!-- TODO: provider --> configuring the root {@link Injector}
  * using this token.
- * @experimental
+ * @publicApi
  */
 var APP_ID = new InjectionToken('AppId');
 function _appIdRandomProviderFactory() {
@@ -13506,7 +13559,7 @@ function _appIdRandomProviderFactory() {
 }
 /**
  * Providers that will generate a random APP_ID_TOKEN.
- * @experimental
+ * @publicApi
  */
 var APP_ID_RANDOM_PROVIDER = {
     provide: APP_ID,
@@ -13518,12 +13571,12 @@ function _randomChar() {
 }
 /**
  * A function that will be executed when a platform is initialized.
- * @experimental
+ * @publicApi
  */
 var PLATFORM_INITIALIZER = new InjectionToken('Platform Initializer');
 /**
  * A token that indicates an opaque platform id.
- * @experimental
+ * @publicApi
  */
 var PLATFORM_ID = new InjectionToken('Platform ID');
 /**
@@ -13532,12 +13585,12 @@ var PLATFORM_ID = new InjectionToken('Platform ID');
  *
  * `(componentRef: ComponentRef) => void`.
  *
- * @experimental
+ * @publicApi
  */
 var APP_BOOTSTRAP_LISTENER = new InjectionToken('appBootstrapListener');
 /**
  * A token which indicates the root directory of the application
- * @experimental
+ * @publicApi
  */
 var PACKAGE_ROOT_URL = new InjectionToken('Application Packages Root URL');
 
@@ -13574,7 +13627,7 @@ var Console = /** @class */ (function () {
 /**
  * Combination of NgModuleFactory and ComponentFactorys.
  *
- * @experimental
+ * @publicApi
  */
 var ModuleWithComponentFactories = /** @class */ (function () {
     function ModuleWithComponentFactories(ngModuleFactory, componentFactories) {
@@ -13595,6 +13648,7 @@ function _throwError() {
  * that will use the directives/pipes of the ng module for compilation
  * of components.
  *
+ * @publicApi
  */
 var Compiler = /** @class */ (function () {
     function Compiler() {
@@ -13638,13 +13692,13 @@ var Compiler = /** @class */ (function () {
 /**
  * Token to provide CompilerOptions in the platform injector.
  *
- * @experimental
+ * @publicApi
  */
 var COMPILER_OPTIONS = new InjectionToken('compilerOptions');
 /**
  * A factory for creating a Compiler
  *
- * @experimental
+ * @publicApi
  */
 var CompilerFactory = /** @class */ (function () {
     function CompilerFactory() {
@@ -13729,7 +13783,7 @@ function noopScope(arg0, arg1) {
  * needs to be fixed before the app should be profiled. Add try-finally only when you expect that
  * an exception is expected during normal execution while profiling.
  *
- * @experimental
+ * @publicApi
  */
 var wtfCreateScope = wtfEnabled ? createScope : function (signature, flags) { return noopScope; };
 /**
@@ -13739,7 +13793,7 @@ var wtfCreateScope = wtfEnabled ? createScope : function (signature, flags) { re
  * - `returnValue` (optional) to be passed to the WTF.
  *
  * Returns the `returnValue for easy chaining.
- * @experimental
+ * @publicApi
  */
 var wtfLeave = wtfEnabled ? leave : function (s, r) { return r; };
 /**
@@ -13753,14 +13807,14 @@ var wtfLeave = wtfEnabled ? leave : function (s, r) { return r; };
  *          wtfEndTimeRange(s);
  *        });
  *     }
- * @experimental
+ * @publicApi
  */
 var wtfStartTimeRange = wtfEnabled ? startTimeRange : function (rangeType, action) { return null; };
 /**
  * Ends a async time range operation.
  * [range] is the return value from [wtfStartTimeRange] Async ranges only work if WTF has been
  * enabled.
- * @experimental
+ * @publicApi
  */
 var wtfEndTimeRange = wtfEnabled ? endTimeRange : function (r) { return null; };
 
@@ -13843,7 +13897,7 @@ var wtfEndTimeRange = wtfEnabled ? endTimeRange : function (r) { return null; };
  * }
  * ```
  *
- * @experimental
+ * @publicApi
  */
 var NgZone = /** @class */ (function () {
     function NgZone(_a) {
@@ -14072,7 +14126,7 @@ var NoopNgZone = /** @class */ (function () {
  * The Testability service provides testing hooks that can be accessed from
  * the browser and by services such as Protractor. Each bootstrapped Angular
  * application on the page will have an instance of Testability.
- * @experimental
+ * @publicApi
  */
 var Testability = /** @class */ (function () {
     function Testability(_ngZone) {
@@ -14231,7 +14285,7 @@ var Testability = /** @class */ (function () {
 }());
 /**
  * A global registry of {@link Testability} instances for specific elements.
- * @experimental
+ * @publicApi
  */
 var TestabilityRegistry = /** @class */ (function () {
     function TestabilityRegistry() {
@@ -14293,7 +14347,7 @@ var _NoopGetTestability = /** @class */ (function () {
 }());
 /**
  * Set the {@link GetTestability} implementation used by the Angular testing framework.
- * @experimental
+ * @publicApi
  */
 function setTestabilityGetter(getter) {
     _testabilityGetter = getter;
@@ -14310,7 +14364,7 @@ var ALLOW_MULTIPLE_PLATFORMS = new InjectionToken('AllowMultipleToken');
 /**
  * A token for third-party components that can register themselves with NgProbe.
  *
- * @experimental
+ * @publicApi
  */
 var NgProbeToken = /** @class */ (function () {
     function NgProbeToken(name, token) {
@@ -14323,7 +14377,7 @@ var NgProbeToken = /** @class */ (function () {
  * Creates a platform.
  * Platforms have to be eagerly created via this function.
  *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @publicApi
  */
 function createPlatform(injector) {
     if (_platform && !_platform.destroyed &&
@@ -14339,7 +14393,7 @@ function createPlatform(injector) {
 /**
  * Creates a factory for a platform
  *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @publicApi
  */
 function createPlatformFactory(parentPlatformFactory, name, providers) {
     if (providers === void 0) { providers = []; }
@@ -14363,7 +14417,7 @@ function createPlatformFactory(parentPlatformFactory, name, providers) {
 /**
  * Checks that there currently is a platform which contains the given token as a provider.
  *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @publicApi
  */
 function assertPlatform(requiredToken) {
     var platform = getPlatform();
@@ -14378,7 +14432,7 @@ function assertPlatform(requiredToken) {
 /**
  * Destroy the existing platform.
  *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @publicApi
  */
 function destroyPlatform() {
     if (_platform && !_platform.destroyed) {
@@ -14388,7 +14442,7 @@ function destroyPlatform() {
 /**
  * Returns the current platform.
  *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @publicApi
  */
 function getPlatform() {
     return _platform && !_platform.destroyed ? _platform : null;
@@ -14400,6 +14454,8 @@ function getPlatform() {
  *
  * A page's platform is initialized implicitly when a platform is created via a platform factory
  * (e.g. {@link platformBrowser}), or explicitly by calling the {@link createPlatform} function.
+ *
+ * @publicApi
  */
 var PlatformRef = /** @class */ (function () {
     /** @internal */
@@ -14430,8 +14486,6 @@ var PlatformRef = /** @class */ (function () {
      *
      * let moduleRef = platformBrowser().bootstrapModuleFactory(MyModuleNgFactory);
      * ```
-     *
-     * @experimental APIs related to application bootstrap are currently under review.
      */
     PlatformRef.prototype.bootstrapModuleFactory = function (moduleFactory, options) {
         var _this = this;
@@ -14572,6 +14626,8 @@ function optionsReducer(dst, objs) {
 }
 /**
  * A reference to an Angular application running on a page.
+ *
+ * @publicApi
  */
 var ApplicationRef = /** @class */ (function () {
     /** @internal */
@@ -14801,6 +14857,7 @@ function remove(list, el) {
 /**
  * Used to load ng module factories.
  *
+ * @publicApi
  */
 var NgModuleFactoryLoader = /** @class */ (function () {
     function NgModuleFactoryLoader() {
@@ -14810,7 +14867,7 @@ var NgModuleFactoryLoader = /** @class */ (function () {
 var moduleFactories = new Map();
 /**
  * Registers a loaded module. Should only be called from generated NgModuleFactory code.
- * @experimental
+ * @publicApi
  */
 function registerModuleFactory(id, factory) {
     var existing = moduleFactories.get(id);
@@ -14823,7 +14880,7 @@ function registerModuleFactory(id, factory) {
  * Returns the NgModuleFactory with the given id, if it exists and has been loaded.
  * Factories for modules that do not specify an `id` cannot be retrieved. Throws if the module
  * cannot be found.
- * @experimental
+ * @publicApi
  */
 function getModuleFactory(id) {
     var factory = moduleFactories.get(id);
@@ -14862,6 +14919,8 @@ function getModuleFactory(id) {
  *   @ViewChildren(Item) items:QueryList<Item>;
  * }
  * ```
+ *
+ * @publicApi
  */
 var QueryList$1 = /** @class */ (function () {
     function QueryList() {
@@ -14941,7 +15000,7 @@ var FACTORY_CLASS_SUFFIX = 'NgFactory';
  * Configuration for SystemJsNgModuleLoader.
  * token.
  *
- * @experimental
+ * @publicApi
  */
 var SystemJsNgModuleLoaderConfig = /** @class */ (function () {
     function SystemJsNgModuleLoaderConfig() {
@@ -14954,7 +15013,7 @@ var DEFAULT_CONFIG = {
 };
 /**
  * NgModuleFactoryLoader that uses SystemJS to load NgModuleFactory
- * @experimental
+ * @publicApi
  */
 var SystemJsNgModuleLoader = /** @class */ (function () {
     function SystemJsNgModuleLoader(_compiler, config) {
@@ -15010,6 +15069,7 @@ function checkNotEmpty(value, modulePath, exportName) {
  * @see `ComponentRef`
  * @see `EmbeddedViewRef`
  *
+ * @publicApi
  */
 var ViewContainerRef = /** @class */ (function () {
     function ViewContainerRef() {
@@ -15068,6 +15128,7 @@ var SWITCH_VIEW_CONTAINER_REF_FACTORY = SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_
  *
  * <code-example path="core/ts/change_detect/change-detection.ts" region="reattach"></code-example>
  *
+ * @publicApi
  */
 var ChangeDetectorRef = /** @class */ (function () {
     function ChangeDetectorRef() {
@@ -15093,6 +15154,8 @@ var SWITCH_CHANGE_DETECTOR_REF_FACTORY = SWITCH_CHANGE_DETECTOR_REF_FACTORY__POS
  * that adds destroy methods for [embedded views](guide/glossary#view-tree).
  *
  * @see `EmbeddedViewRef`
+ *
+ * @publicApi
  */
 var ViewRef$1 = /** @class */ (function (_super) {
     __extends(ViewRef, _super);
@@ -15152,7 +15215,7 @@ var ViewRef$1 = /** @class */ (function (_super) {
  * </ul>
  * <!-- /ViewRef: outer-0 -->
  * ```
- * @experimental
+ * @publicApi
  */
 var EmbeddedViewRef = /** @class */ (function (_super) {
     __extends(EmbeddedViewRef, _super);
@@ -15185,7 +15248,7 @@ var EventListener = /** @class */ (function () {
     return EventListener;
 }());
 /**
- * @experimental All debugging apis are currently experimental.
+ * @publicApi
  */
 var DebugNode = /** @class */ (function () {
     function DebugNode(nativeNode, parent, _debugContext) {
@@ -15225,7 +15288,7 @@ var DebugNode = /** @class */ (function () {
     return DebugNode;
 }());
 /**
- * @experimental All debugging apis are currently experimental.
+ * @publicApi
  */
 var DebugElement = /** @class */ (function (_super) {
     __extends(DebugElement, _super);
@@ -15310,7 +15373,7 @@ var DebugElement = /** @class */ (function (_super) {
     return DebugElement;
 }(DebugNode));
 /**
- * @experimental
+ * @publicApi
  */
 function asNativeElements(debugEls) {
     return debugEls.map(function (el) { return el.nativeElement; });
@@ -15340,7 +15403,7 @@ function _queryNodeChildren(parentNode, predicate, matches) {
 // Need to keep the nodes in a global Map so that multiple angular apps are supported.
 var _nativeNodeToDebugNode = new Map();
 /**
- * @experimental
+ * @publicApi
  */
 function getDebugNode(nativeNode) {
     return _nativeNodeToDebugNode.get(nativeNode) || null;
@@ -15371,6 +15434,7 @@ var DefaultIterableDifferFactory = /** @class */ (function () {
 var trackByIdentity = function (index, item) { return item; };
 /**
  * @deprecated v4.0.0 - Should not be part of public API.
+ * @publicApi
  */
 var DefaultIterableDiffer = /** @class */ (function () {
     function DefaultIterableDiffer(trackByFn) {
@@ -16291,6 +16355,7 @@ var KeyValueChangeRecord_ = /** @class */ (function () {
 /**
  * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
  *
+ * @publicApi
  */
 var IterableDiffers = /** @class */ (function () {
     function IterableDiffers(factories) {
@@ -16368,6 +16433,7 @@ function getTypeNameForDebugging(type) {
 /**
  * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
  *
+ * @publicApi
  */
 var KeyValueDiffers = /** @class */ (function () {
     function KeyValueDiffers(factories) {
@@ -16468,7 +16534,7 @@ var _CORE_PLATFORM_PROVIDERS = [
 /**
  * This platform has to be included in any other platform
  *
- * @experimental
+ * @publicApi
  */
 var platformCore = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDERS);
 
@@ -16499,7 +16565,7 @@ var platformCore = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDERS)
  * });
  * ```
  *
- * @experimental i18n support is experimental.
+ * @publicApi
  */
 var LOCALE_ID = new InjectionToken('LocaleId');
 /**
@@ -16524,7 +16590,7 @@ var LOCALE_ID = new InjectionToken('LocaleId');
  * });
  * ```
  *
- * @experimental i18n support is experimental.
+ * @publicApi
  */
 var TRANSLATIONS = new InjectionToken('Translations');
 /**
@@ -16546,7 +16612,7 @@ var TRANSLATIONS = new InjectionToken('Translations');
  * });
  * ```
  *
- * @experimental i18n support is experimental.
+ * @publicApi
  */
 var TRANSLATIONS_FORMAT = new InjectionToken('TranslationsFormat');
 /**
@@ -16570,7 +16636,7 @@ var TRANSLATIONS_FORMAT = new InjectionToken('TranslationsFormat');
  * });
  * ```
  *
- * @experimental i18n support is experimental.
+ * @publicApi
  */
 var MissingTranslationStrategy;
 (function (MissingTranslationStrategy) {
@@ -16628,7 +16694,7 @@ var APPLICATION_MODULE_PROVIDERS = [
  * Re-exported by `BrowserModule`, which is included automatically in the root
  * `AppModule` when you create a new app with the CLI `new` command.
  *
- * @experimental
+ * @publicApi
  */
 var ApplicationModule = /** @class */ (function () {
     // Inject ApplicationRef to make it eager...

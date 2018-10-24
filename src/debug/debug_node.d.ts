@@ -13,7 +13,7 @@ export declare class EventListener {
     constructor(name: string, callback: Function);
 }
 /**
- * @experimental All debugging apis are currently experimental.
+ * @publicApi
  */
 export declare class DebugNode {
     nativeNode: any;
@@ -30,7 +30,7 @@ export declare class DebugNode {
     readonly providerTokens: any[];
 }
 /**
- * @experimental All debugging apis are currently experimental.
+ * @publicApi
  */
 export declare class DebugElement extends DebugNode {
     name: string;
@@ -60,11 +60,11 @@ export declare class DebugElement extends DebugNode {
     triggerEventHandler(eventName: string, eventObj: any): void;
 }
 /**
- * @experimental
+ * @publicApi
  */
 export declare function asNativeElements(debugEls: DebugElement[]): any;
 /**
- * @experimental
+ * @publicApi
  */
 export declare function getDebugNode(nativeNode: any): DebugNode | null;
 export declare function getAllDebugNodes(): DebugNode[];
@@ -74,7 +74,7 @@ export declare function removeDebugNodeFromIndex(node: DebugNode): void;
  * A boolean-valued function over a value, possibly including context information
  * regarding that value's position in an array.
  *
- * @experimental All debugging apis are currently experimental.
+ * @publicApi
  */
 export interface Predicate<T> {
     (value: T): boolean;
