@@ -7,7 +7,6 @@
  */
 import './ng_dev_mode';
 import { ChangeDetectionStrategy } from '../change_detection/constants';
-import { Provider } from '../di/provider';
 import { NgModuleDef } from '../metadata/ng_module';
 import { ViewEncapsulation } from '../metadata/view';
 import { Type } from '../type';
@@ -40,7 +39,7 @@ export declare function defineComponent<T>(componentDefinition: {
     /**
      * Factory method used to create an instance of directive.
      */
-    factory: () => T;
+    factory: (t: Type<T> | null) => T;
     /**
      * The number of nodes, local refs, and pipes in this component template.
      *
@@ -135,7 +134,7 @@ export declare function defineComponent<T>(componentDefinition: {
     /**
      * Function to create instances of content queries associated with a given directive.
      */
-    contentQueries?: (() => void);
+    contentQueries?: ((dirIndex: number) => void);
     /** Refreshes content queries associated with directives in a given view */
     contentQueriesRefresh?: ((directiveIndex: number, queryIndex: number) => void);
     /**
@@ -186,7 +185,7 @@ export declare function defineComponent<T>(componentDefinition: {
     /**
      * A list of optional features to apply.
      *
-     * See: {@link NgOnChangesFeature}, {@link PublicFeature}
+     * See: {@link NgOnChangesFeature}, {@link ProvidersFeature}
      */
     features?: ComponentDefFeature[];
     /**
@@ -211,15 +210,6 @@ export declare function defineComponent<T>(componentDefinition: {
      * When set, takes effect the next time change detection is triggered.
      */
     changeDetection?: ChangeDetectionStrategy;
-    /**
-     * Defines the set of injectable objects that are visible to a Directive and its light DOM
-     * children.
-     */
-    providers?: Provider[];
-    /**
-     * Defines the set of injectable objects that are visible to its view DOM children.
-     */
-    viewProviders?: Provider[];
     /**
      * Registry of directives and components that may be found in this component's view.
      *
@@ -337,7 +327,7 @@ export declare const defineDirective: <T>(directiveDefinition: {
     /**
      * Factory method used to create an instance of directive.
      */
-    factory: () => T;
+    factory: (t: Type<T> | null) => T;
     /**
      * Static attributes to set on host element.
      *
@@ -403,7 +393,7 @@ export declare const defineDirective: <T>(directiveDefinition: {
     /**
      * A list of optional features to apply.
      *
-     * See: {@link NgOnChangesFeature}, {@link PublicFeature}, {@link InheritDefinitionFeature}
+     * See: {@link NgOnChangesFeature}, {@link ProvidersFeature}, {@link InheritDefinitionFeature}
      */
     features?: DirectiveDefFeature[] | undefined;
     /**
@@ -420,7 +410,7 @@ export declare const defineDirective: <T>(directiveDefinition: {
     /**
      * Function to create instances of content queries associated with a given directive.
      */
-    contentQueries?: (() => void) | undefined;
+    contentQueries?: ((directiveIndex: number) => void) | undefined;
     /** Refreshes content queries associated with directives in a given view */
     contentQueriesRefresh?: ((directiveIndex: number, queryIndex: number) => void) | undefined;
     /**
@@ -450,7 +440,7 @@ export declare function definePipe<T>(pipeDef: {
     /** Pipe class reference. Needed to extract pipe lifecycle hooks. */
     type: Type<T>;
     /** A factory for creating a pipe instance. */
-    factory: () => T;
+    factory: (t: Type<T> | null) => T;
     /** Whether the pipe is pure. */
     pure?: boolean;
 }): never;
