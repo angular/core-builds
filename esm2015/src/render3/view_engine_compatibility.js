@@ -355,7 +355,7 @@ export function injectChangeDetectorRef() {
 export function createViewRef(hostTNode, hostView, context) {
     if (isComponent(hostTNode)) {
         /** @type {?} */
-        const componentIndex = hostTNode.flags >> 15 /* DirectiveStartingIndexShift */;
+        const componentIndex = hostTNode.flags >> 16 /* DirectiveStartingIndexShift */;
         /** @type {?} */
         const componentView = getComponentViewByIndex(hostTNode.index, hostView);
         return new ViewRef(componentView, context, componentIndex);

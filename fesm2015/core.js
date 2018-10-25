@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.0+3.sha-1880c95
+ * @license Angular v7.1.0-beta.0+6.sha-297dc2b
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2701,7 +2701,7 @@ function getDirectiveStartIndex(tNode) {
     // the tNode instances store a flag value which then has a
     // pointer which tells the starting index of where all the
     // active directives are in the master directive array
-    return tNode.flags >> 15 /* DirectiveStartingIndexShift */;
+    return tNode.flags >> 16 /* DirectiveStartingIndexShift */;
 }
 /**
  * @param {?} tNode
@@ -2753,7 +2753,7 @@ function queueInitHooks(index, onInit, doCheck, tView) {
 function queueLifecycleHooks(flags, tView) {
     if (tView.firstTemplatePass) {
         /** @type {?} */
-        const start = flags >> 15 /* DirectiveStartingIndexShift */;
+        const start = flags >> 16 /* DirectiveStartingIndexShift */;
         /** @type {?} */
         const count = flags & 4095 /* DirectiveCountMask */;
         /** @type {?} */
@@ -3970,6 +3970,22 @@ function matchingSelectorIndex(tNode, selectors, textSelectors) {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/** *
+ * A special value which designates that a value has not changed.
+  @type {?} */
+const NO_CHANGE = /** @type {?} */ ({});
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/**
  * Combines the binding value and a factory for an animation player.
  *
  * Used to bind a player to an element template binding (currently only
@@ -4252,9 +4268,10 @@ const EMPTY_OBJ = {};
  *       property has an initial value of `100px`.
  *
  * @param {?=} styleSanitizer
+ * @param {?=} onlyProcessSingleClasses
  * @return {?}
  */
-function createStylingContextTemplate(initialClassDeclarations, initialStyleDeclarations, styleSanitizer) {
+function createStylingContextTemplate(initialClassDeclarations, initialStyleDeclarations, styleSanitizer, onlyProcessSingleClasses) {
     /** @type {?} */
     const initialStylingValues = [null];
     /** @type {?} */
@@ -4293,6 +4310,8 @@ function createStylingContextTemplate(initialClassDeclarations, initialStyleDecl
     }
     // make where the class offsets begin
     context[4 /* ClassOffsetPosition */] = totalStyleDeclarations;
+    /** @type {?} */
+    const initialStaticClasses = onlyProcessSingleClasses ? [] : null;
     if (initialClassDeclarations) {
         /** @type {?} */
         let hasPassedDeclarations = false;
@@ -4311,6 +4330,7 @@ function createStylingContextTemplate(initialClassDeclarations, initialStyleDecl
                     const value = /** @type {?} */ (initialClassDeclarations[++i]);
                     initialStylingValues.push(value);
                     classesLookup[className] = initialStylingValues.length - 1;
+                    initialStaticClasses && initialStaticClasses.push(className);
                 }
                 else {
                     classesLookup[className] = 0;
@@ -4364,10 +4384,14 @@ function createStylingContextTemplate(initialClassDeclarations, initialStyleDecl
         setValue(context, indexForMulti, null);
         setPlayerBuilderIndex(context, indexForMulti, 0);
     }
-    // there is no initial value flag for the master index since it doesn't
-    // reference an initial style value
-    setFlag(context, 3 /* MasterFlagPosition */, pointers(0, 0, multiStart));
+    /** @type {?} */
+    const masterFlag = pointers(0, 0, multiStart) |
+        (onlyProcessSingleClasses ? 16 /* OnlyProcessSingleClasses */ : 0);
+    setFlag(context, 3 /* MasterFlagPosition */, masterFlag);
     setContextDirty(context, initialStylingValues.length > 1);
+    if (initialStaticClasses) {
+        context[6 /* PreviousOrCachedMultiClassValue */] = initialStaticClasses.join(' ');
+    }
     return context;
 }
 /**
@@ -4402,12 +4426,13 @@ function updateStylingMap(context, classesInput, stylesInput) {
     /** @type {?} */
     const stylesValue = stylesPlayerBuilder ? stylesInput["value"] : stylesInput;
     /** @type {?} */
-    const ignoreAllClassUpdates = classesValue === context[6 /* PreviousMultiClassValue */];
+    const ignoreAllClassUpdates = limitToSingleClasses(context) || classesValue === NO_CHANGE ||
+        classesValue === context[6 /* PreviousOrCachedMultiClassValue */];
     /** @type {?} */
-    const ignoreAllStyleUpdates = stylesValue === context[7 /* PreviousMultiStyleValue */];
+    const ignoreAllStyleUpdates = stylesValue === NO_CHANGE || stylesValue === context[7 /* PreviousMultiStyleValue */];
     if (ignoreAllClassUpdates && ignoreAllStyleUpdates)
         return;
-    context[6 /* PreviousMultiClassValue */] = classesValue;
+    context[6 /* PreviousOrCachedMultiClassValue */] = classesValue;
     context[7 /* PreviousMultiStyleValue */] = stylesValue;
     /** @type {?} */
     let classNames = EMPTY_ARR;
@@ -4706,6 +4731,8 @@ function renderStyleAndClassBindings(context, renderer, rootOrView, classesStore
         const multiStartIndex = getMultiStartIndex(context);
         /** @type {?} */
         const styleSanitizer = getStyleSanitizer(context);
+        /** @type {?} */
+        const onlySingleClasses = limitToSingleClasses(context);
         for (let i = 8 /* SingleStylesStartPosition */; i < context.length; i += 4 /* Size */) {
             // there is no point in rendering styles that have not changed on screen
             if (isDirty(context, i)) {
@@ -4722,6 +4749,8 @@ function renderStyleAndClassBindings(context, renderer, rootOrView, classesStore
                 /** @type {?} */
                 const isInSingleRegion = i < multiStartIndex;
                 /** @type {?} */
+                const readInitialValue = !isClassBased || !onlySingleClasses;
+                /** @type {?} */
                 let valueToApply = value;
                 // VALUE DEFER CASE 1: Use a multi value instead of a null single value
                 // this check implies that a single value was removed and we
@@ -4737,7 +4766,7 @@ function renderStyleAndClassBindings(context, renderer, rootOrView, classesStore
                 // note that this should always be a falsy check since `false` is used
                 // for both class and style comparisons (styles can't be false and false
                 // classes are turned off and should therefore defer to their initial values)
-                if (!valueExists(valueToApply, isClassBased)) {
+                if (!valueExists(valueToApply, isClassBased) && readInitialValue) {
                     valueToApply = getInitialValue(context, flag);
                 }
                 if (isClassBased) {
@@ -4916,8 +4945,8 @@ function isSanitizable(context, index) {
  * @return {?}
  */
 function pointers(configFlag, staticIndex, dynamicIndex) {
-    return (configFlag & 15 /* BitMask */) | (staticIndex << 4 /* BitCountSize */) |
-        (dynamicIndex << (14 /* BitCountSize */ + 4 /* BitCountSize */));
+    return (configFlag & 15 /* BitMask */) | (staticIndex << 5 /* BitCountSize */) |
+        (dynamicIndex << (14 /* BitCountSize */ + 5 /* BitCountSize */));
 }
 /**
  * @param {?} context
@@ -4934,7 +4963,7 @@ function getInitialValue(context, flag) {
  * @return {?}
  */
 function getInitialIndex(flag) {
-    return (flag >> 4 /* BitCountSize */) & 16383 /* BitMask */;
+    return (flag >> 5 /* BitCountSize */) & 16383 /* BitMask */;
 }
 /**
  * @param {?} flag
@@ -4942,7 +4971,7 @@ function getInitialIndex(flag) {
  */
 function getMultiOrSingleIndex(flag) {
     /** @type {?} */
-    const index = (flag >> (14 /* BitCountSize */ + 4 /* BitCountSize */)) & 16383 /* BitMask */;
+    const index = (flag >> (14 /* BitCountSize */ + 5 /* BitCountSize */)) & 16383 /* BitMask */;
     return index >= 8 /* SingleStylesStartPosition */ ? index : -1;
 }
 /**
@@ -5093,6 +5122,13 @@ function getProp(context, index) {
  */
 function isContextDirty(context) {
     return isDirty(context, 3 /* MasterFlagPosition */);
+}
+/**
+ * @param {?} context
+ * @return {?}
+ */
+function limitToSingleClasses(context) {
+    return context[3 /* MasterFlagPosition */] & 16 /* OnlyProcessSingleClasses */;
 }
 /**
  * @param {?} context
@@ -6248,7 +6284,7 @@ function instantiateDirectivesDirectly() {
     }
     if (count > 0) {
         /** @type {?} */
-        const start = previousOrParentTNode.flags >> 15 /* DirectiveStartingIndexShift */;
+        const start = previousOrParentTNode.flags >> 16 /* DirectiveStartingIndexShift */;
         /** @type {?} */
         const end = start + count;
         for (let i = start; i < end; i++) {
@@ -6665,14 +6701,8 @@ function elementProperty(index, propName, value, sanitizer) {
     const element = /** @type {?} */ (getNativeByIndex(index, viewData));
     /** @type {?} */
     const tNode = getTNode(index, viewData);
-    // if tNode.inputs is undefined, a listener has created outputs, but inputs haven't
-    // yet been checked
-    if (tNode && tNode.inputs === undefined) {
-        // mark inputs as checked
-        tNode.inputs = generatePropertyAliases(tNode.flags, 0 /* Input */);
-    }
     /** @type {?} */
-    const inputData = tNode && tNode.inputs;
+    const inputData = initializeTNodeInputs(tNode);
     /** @type {?} */
     let dataValue;
     if (inputData && (dataValue = inputData[propName])) {
@@ -6798,7 +6828,7 @@ function generatePropertyAliases(tNodeFlags, direction) {
     let propStore = null;
     if (count > 0) {
         /** @type {?} */
-        const start = tNodeFlags >> 15 /* DirectiveStartingIndexShift */;
+        const start = tNodeFlags >> 16 /* DirectiveStartingIndexShift */;
         /** @type {?} */
         const end = start + count;
         /** @type {?} */
@@ -6868,14 +6898,29 @@ function elementClassProp(index, stylingIndex, value) {
 function elementStyling(classDeclarations, styleDeclarations, styleSanitizer) {
     /** @type {?} */
     const tNode = previousOrParentTNode;
+    /** @type {?} */
+    const inputData = initializeTNodeInputs(tNode);
     if (!tNode.stylingTemplate) {
+        /** @type {?} */
+        const hasClassInput = inputData && inputData.hasOwnProperty('class') ? true : false;
+        if (hasClassInput) {
+            tNode.flags |= 32768 /* hasClassInput */;
+        }
         // initialize the styling template.
-        tNode.stylingTemplate =
-            createStylingContextTemplate(classDeclarations, styleDeclarations, styleSanitizer);
+        tNode.stylingTemplate = createStylingContextTemplate(classDeclarations, styleDeclarations, styleSanitizer, hasClassInput);
     }
     if (styleDeclarations && styleDeclarations.length ||
         classDeclarations && classDeclarations.length) {
-        elementStylingApply(tNode.index - HEADER_OFFSET);
+        /** @type {?} */
+        const index = tNode.index - HEADER_OFFSET;
+        if (delegateToClassInput(tNode)) {
+            /** @type {?} */
+            const stylingContext = getStylingContext(index, viewData);
+            /** @type {?} */
+            const initialClasses = /** @type {?} */ (stylingContext[6 /* PreviousOrCachedMultiClassValue */]);
+            setInputsForProperty(/** @type {?} */ ((/** @type {?} */ ((tNode.inputs))['class'])), initialClasses);
+        }
+        elementStylingApply(index);
     }
 }
 /**
@@ -6966,7 +7011,18 @@ function elementStyleProp(index, styleIndex, value, suffix) {
  * @return {?}
  */
 function elementStylingMap(index, classes, styles) {
-    updateStylingMap(getStylingContext(index, viewData), classes, styles);
+    /** @type {?} */
+    const tNode = getTNode(index, viewData);
+    /** @type {?} */
+    const stylingContext = getStylingContext(index, viewData);
+    if (delegateToClassInput(tNode) && classes !== NO_CHANGE) {
+        /** @type {?} */
+        const initialClasses = /** @type {?} */ (stylingContext[6 /* PreviousOrCachedMultiClassValue */]);
+        /** @type {?} */
+        const classInputVal = (initialClasses.length ? (initialClasses + ' ') : '') + (/** @type {?} */ (classes));
+        setInputsForProperty(/** @type {?} */ ((/** @type {?} */ ((tNode.inputs))['class'])), classInputVal);
+    }
+    updateStylingMap(stylingContext, classes, styles);
 }
 /**
  * Create static text node
@@ -7062,7 +7118,7 @@ function addComponentLogic(def) {
     if (firstTemplatePass) {
         queueComponentIndexForCheck();
         previousOrParentTNode.flags =
-            viewData.length << 15 /* DirectiveStartingIndexShift */ | 4096 /* isComponent */;
+            viewData.length << 16 /* DirectiveStartingIndexShift */ | 4096 /* isComponent */;
     }
 }
 /**
@@ -7093,7 +7149,7 @@ function baseDirectiveCreate(index, directive, directiveDef, native) {
             // - save the index,
             // - set the number of directives to 1
             previousOrParentTNode.flags =
-                index << 15 /* DirectiveStartingIndexShift */ | flags & 4096 /* isComponent */ | 1;
+                index << 16 /* DirectiveStartingIndexShift */ | flags & 4096 /* isComponent */ | 1;
         }
         else {
             // Only need to bump the size when subsequent directives are created
@@ -7893,10 +7949,6 @@ function markDirty(component) {
     ngDevMode && assertDefined(component, 'component');
     markViewDirty(getComponentViewByInstance(component));
 }
-/** *
- * A special value which designates that a value has not changed.
-  @type {?} */
-const NO_CHANGE = /** @type {?} */ ({});
 /**
  * Creates a single value binding.
  *
@@ -8312,6 +8364,29 @@ function assertDataInRange(index, arr) {
 }
 /** @type {?} */
 const CLEAN_PROMISE = _CLEAN_PROMISE;
+/**
+ * @param {?} tNode
+ * @return {?}
+ */
+function initializeTNodeInputs(tNode) {
+    // If tNode.inputs is undefined, a listener has created outputs, but inputs haven't
+    // yet been checked.
+    if (tNode) {
+        if (tNode.inputs === undefined) {
+            // mark inputs as checked
+            tNode.inputs = generatePropertyAliases(tNode.flags, 0 /* Input */);
+        }
+        return tNode.inputs;
+    }
+    return null;
+}
+/**
+ * @param {?} tNode
+ * @return {?}
+ */
+function delegateToClassInput(tNode) {
+    return tNode.flags & 32768 /* hasClassInput */;
+}
 
 /**
  * @fileoverview added by tsickle
@@ -8402,7 +8477,7 @@ function createRootComponentView(rNode, def, rootView, renderer, sanitizer) {
         if (def.diPublic)
             def.diPublic(def);
         tNode.flags =
-            rootView.length << 15 /* DirectiveStartingIndexShift */ | 4096 /* isComponent */;
+            rootView.length << 16 /* DirectiveStartingIndexShift */ | 4096 /* isComponent */;
     }
     // Store component view at node index, with node as the HOST
     componentView[HOST] = rootView[HEADER_OFFSET];
@@ -8468,7 +8543,7 @@ function LifecycleHooksFeature(component, def) {
     /** @type {?} */
     const dirIndex = rootTView.data.length - 1;
     queueInitHooks(dirIndex, def.onInit, def.doCheck, rootTView);
-    queueLifecycleHooks(dirIndex << 15 /* DirectiveStartingIndexShift */ | 1, rootTView);
+    queueLifecycleHooks(dirIndex << 16 /* DirectiveStartingIndexShift */ | 1, rootTView);
 }
 /**
  * Retrieve the root context for any component by walking the parent `LView` until
@@ -9214,7 +9289,7 @@ function searchDirectivesOnInjector(injectorIndex, injectorView, token) {
     const count = nodeFlags & 4095 /* DirectiveCountMask */;
     if (count !== 0) {
         /** @type {?} */
-        const start = nodeFlags >> 15 /* DirectiveStartingIndexShift */;
+        const start = nodeFlags >> 16 /* DirectiveStartingIndexShift */;
         /** @type {?} */
         const end = start + count;
         /** @type {?} */
@@ -10134,7 +10209,7 @@ function injectChangeDetectorRef() {
 function createViewRef(hostTNode, hostView, context) {
     if (isComponent(hostTNode)) {
         /** @type {?} */
-        const componentIndex = hostTNode.flags >> 15 /* DirectiveStartingIndexShift */;
+        const componentIndex = hostTNode.flags >> 16 /* DirectiveStartingIndexShift */;
         /** @type {?} */
         const componentView = getComponentViewByIndex(hostTNode.index, hostView);
         return new ViewRef(componentView, context, componentIndex);
@@ -12553,7 +12628,7 @@ function getIdxOfMatchingDirective(tNode, currentView, type) {
         /** @type {?} */
         const count = flags & 4095 /* DirectiveCountMask */;
         /** @type {?} */
-        const start = flags >> 15 /* DirectiveStartingIndexShift */;
+        const start = flags >> 16 /* DirectiveStartingIndexShift */;
         /** @type {?} */
         const end = start + count;
         for (let i = start; i < end; i++) {
@@ -15255,7 +15330,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0-beta.0+3.sha-1880c95');
+const VERSION = new Version('7.1.0-beta.0+6.sha-297dc2b');
 
 /**
  * @fileoverview added by tsickle
@@ -26797,7 +26872,7 @@ class Render3DebugContext {
         const directivesCount = tNode.flags & 4095 /* DirectiveCountMask */;
         if (directivesCount > 0) {
             /** @type {?} */
-            const directiveIdxStart = tNode.flags >> 15 /* DirectiveStartingIndexShift */;
+            const directiveIdxStart = tNode.flags >> 16 /* DirectiveStartingIndexShift */;
             /** @type {?} */
             const directiveIdxEnd = directiveIdxStart + directivesCount;
             /** @type {?} */

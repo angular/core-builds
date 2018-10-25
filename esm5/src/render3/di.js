@@ -347,7 +347,7 @@ function searchDirectivesOnInjector(injectorIndex, injectorView, token) {
     var nodeFlags = tNode.flags;
     var count = nodeFlags & 4095 /* DirectiveCountMask */;
     if (count !== 0) {
-        var start = nodeFlags >> 15 /* DirectiveStartingIndexShift */;
+        var start = nodeFlags >> 16 /* DirectiveStartingIndexShift */;
         var end = start + count;
         var defs = injectorView[TVIEW].data;
         for (var i = start; i < end; i++) {

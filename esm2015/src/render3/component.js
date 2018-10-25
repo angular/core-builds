@@ -169,7 +169,7 @@ export function createRootComponentView(rNode, def, rootView, renderer, sanitize
         if (def.diPublic)
             def.diPublic(def);
         tNode.flags =
-            rootView.length << 15 /* DirectiveStartingIndexShift */ | 4096 /* isComponent */;
+            rootView.length << 16 /* DirectiveStartingIndexShift */ | 4096 /* isComponent */;
     }
     // Store component view at node index, with node as the HOST
     componentView[HOST] = rootView[HEADER_OFFSET];
@@ -235,7 +235,7 @@ export function LifecycleHooksFeature(component, def) {
     /** @type {?} */
     const dirIndex = rootTView.data.length - 1;
     queueInitHooks(dirIndex, def.onInit, def.doCheck, rootTView);
-    queueLifecycleHooks(dirIndex << 15 /* DirectiveStartingIndexShift */ | 1, rootTView);
+    queueLifecycleHooks(dirIndex << 16 /* DirectiveStartingIndexShift */ | 1, rootTView);
 }
 /**
  * Retrieve the root context for any component by walking the parent `LView` until
