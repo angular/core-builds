@@ -31,8 +31,10 @@ export declare const enum TNodeFlags {
     isProjected = 8192,
     /** This bit is set if the node has any content queries */
     hasContentQuery = 16384,
+    /** This bit is set if the node has any directives that contain [class properties */
+    hasClassInput = 32768,
     /** The index of the first directive on this node is encoded on the most significant bits  */
-    DirectiveStartingIndexShift = 15
+    DirectiveStartingIndexShift = 16
 }
 /**
  * A set of marker values to be used in the attributes arrays. Those markers indicate that some

@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { NO_CHANGE } from './instructions';
+import { NO_CHANGE } from '../../src/render3/tokens';
 /**
  * A list of flags to encode the i18n instructions used to translate the template.
  * We shift the flags by 29 so that 30 & 31 & 32 bits contains the instructions.

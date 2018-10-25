@@ -160,7 +160,7 @@ function getIdxOfMatchingDirective(tNode, currentView, type) {
     if (defs) {
         var flags = tNode.flags;
         var count = flags & 4095 /* DirectiveCountMask */;
-        var start = flags >> 15 /* DirectiveStartingIndexShift */;
+        var start = flags >> 16 /* DirectiveStartingIndexShift */;
         var end = start + count;
         for (var i = start; i < end; i++) {
             var def = defs[i];

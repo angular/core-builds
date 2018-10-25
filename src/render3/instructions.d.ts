@@ -17,6 +17,7 @@ import { CssSelectorList } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { RComment, RElement, RNode, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 import { CurrentMatchesList, LViewData, LViewFlags, OpaqueViewState, RootContext, RootContextFlags, TView } from './interfaces/view';
+import { NO_CHANGE } from './tokens';
 /**
  * Function used to sanitize the value before writing it into the renderer.
  */
@@ -447,9 +448,9 @@ export declare function elementStyleProp(index: number, styleIndex: number, valu
  */
 export declare function elementStylingMap<T>(index: number, classes: {
     [key: string]: any;
-} | string | null, styles?: {
+} | string | NO_CHANGE | null, styles?: {
     [styleName: string]: any;
-} | null): void;
+} | NO_CHANGE | null): void;
 /**
  * Create static text node
  *
@@ -679,11 +680,6 @@ export declare function detectChangesInternal<T>(hostView: LViewData, component:
  * @param component Component to mark as dirty.
  */
 export declare function markDirty<T>(component: T): void;
-export interface NO_CHANGE {
-    brand: 'NO_CHANGE';
-}
-/** A special value which designates that a value has not changed. */
-export declare const NO_CHANGE: NO_CHANGE;
 /**
  * Creates a single value binding.
  *
@@ -759,3 +755,4 @@ export declare function getTView(): TView;
 export declare function registerContentQuery<Q>(queryList: QueryList<Q>): void;
 export declare function assertPreviousIsParent(): void;
 export declare const CLEAN_PROMISE: Promise<null>;
+export declare function delegateToClassInput(tNode: TNode): number;

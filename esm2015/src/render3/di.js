@@ -418,7 +418,7 @@ function searchDirectivesOnInjector(injectorIndex, injectorView, token) {
     const count = nodeFlags & 4095 /* DirectiveCountMask */;
     if (count !== 0) {
         /** @type {?} */
-        const start = nodeFlags >> 15 /* DirectiveStartingIndexShift */;
+        const start = nodeFlags >> 16 /* DirectiveStartingIndexShift */;
         /** @type {?} */
         const end = start + count;
         /** @type {?} */

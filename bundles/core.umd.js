@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.0+3.sha-1880c95
+ * @license Angular v7.1.0-beta.0+6.sha-297dc2b
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2236,7 +2236,7 @@
         // the tNode instances store a flag value which then has a
         // pointer which tells the starting index of where all the
         // active directives are in the master directive array
-        return tNode.flags >> 15 /* DirectiveStartingIndexShift */;
+        return tNode.flags >> 16 /* DirectiveStartingIndexShift */;
     }
     function getDirectiveEndIndex(tNode, startIndex) {
         // The end value is also a part of the same flag
@@ -2282,7 +2282,7 @@
      */
     function queueLifecycleHooks(flags, tView) {
         if (tView.firstTemplatePass) {
-            var start = flags >> 15 /* DirectiveStartingIndexShift */;
+            var start = flags >> 16 /* DirectiveStartingIndexShift */;
             var count = flags & 4095 /* DirectiveCountMask */;
             var end = start + count;
             // It's necessary to loop through the directives at elementEnd() (rather than processing in
@@ -3269,6 +3269,16 @@
     }
 
     /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /** A special value which designates that a value has not changed. */
+    var NO_CHANGE = {};
+
+    /**
      * Combines the binding value and a factory for an animation player.
      *
      * Used to bind a player to an element template binding (currently only
@@ -3473,7 +3483,7 @@
      *       This implies that `foo` and `bar` will be later styled and that the `foo`
      *       class will be applied to the element as an initial class since it's true
      */
-    function createStylingContextTemplate(initialClassDeclarations, initialStyleDeclarations, styleSanitizer) {
+    function createStylingContextTemplate(initialClassDeclarations, initialStyleDeclarations, styleSanitizer, onlyProcessSingleClasses) {
         var initialStylingValues = [null];
         var context = createEmptyStylingContext(null, styleSanitizer, initialStylingValues);
         // we use two maps since a class name might collide with a CSS style prop
@@ -3504,6 +3514,7 @@
         }
         // make where the class offsets begin
         context[4 /* ClassOffsetPosition */] = totalStyleDeclarations;
+        var initialStaticClasses = onlyProcessSingleClasses ? [] : null;
         if (initialClassDeclarations) {
             var hasPassedDeclarations = false;
             for (var i = 0; i < initialClassDeclarations.length; i++) {
@@ -3518,6 +3529,7 @@
                         var value = initialClassDeclarations[++i];
                         initialStylingValues.push(value);
                         classesLookup[className] = initialStylingValues.length - 1;
+                        initialStaticClasses && initialStaticClasses.push(className);
                     }
                     else {
                         classesLookup[className] = 0;
@@ -3559,8 +3571,13 @@
         }
         // there is no initial value flag for the master index since it doesn't
         // reference an initial style value
-        setFlag(context, 3 /* MasterFlagPosition */, pointers(0, 0, multiStart));
+        var masterFlag = pointers(0, 0, multiStart) |
+            (onlyProcessSingleClasses ? 16 /* OnlyProcessSingleClasses */ : 0);
+        setFlag(context, 3 /* MasterFlagPosition */, masterFlag);
         setContextDirty(context, initialStylingValues.length > 1);
+        if (initialStaticClasses) {
+            context[6 /* PreviousOrCachedMultiClassValue */] = initialStaticClasses.join(' ');
+        }
         return context;
     }
     /**
@@ -3590,11 +3607,12 @@
             classesInput;
         var stylesValue = stylesPlayerBuilder ? stylesInput.value : stylesInput;
         // early exit (this is what's done to avoid using ctx.bind() to cache the value)
-        var ignoreAllClassUpdates = classesValue === context[6 /* PreviousMultiClassValue */];
-        var ignoreAllStyleUpdates = stylesValue === context[7 /* PreviousMultiStyleValue */];
+        var ignoreAllClassUpdates = limitToSingleClasses(context) || classesValue === NO_CHANGE ||
+            classesValue === context[6 /* PreviousOrCachedMultiClassValue */];
+        var ignoreAllStyleUpdates = stylesValue === NO_CHANGE || stylesValue === context[7 /* PreviousMultiStyleValue */];
         if (ignoreAllClassUpdates && ignoreAllStyleUpdates)
             return;
-        context[6 /* PreviousMultiClassValue */] = classesValue;
+        context[6 /* PreviousOrCachedMultiClassValue */] = classesValue;
         context[7 /* PreviousMultiStyleValue */] = stylesValue;
         var classNames = EMPTY_ARR;
         var applyAllClasses = false;
@@ -3835,6 +3853,7 @@
             var native = context[5 /* ElementPosition */];
             var multiStartIndex = getMultiStartIndex(context);
             var styleSanitizer = getStyleSanitizer(context);
+            var onlySingleClasses = limitToSingleClasses(context);
             for (var i = 8 /* SingleStylesStartPosition */; i < context.length; i += 4 /* Size */) {
                 // there is no point in rendering styles that have not changed on screen
                 if (isDirty(context, i)) {
@@ -3844,6 +3863,7 @@
                     var playerBuilder = getPlayerBuilder(context, i);
                     var isClassBased_6 = flag & 2 /* Class */ ? true : false;
                     var isInSingleRegion = i < multiStartIndex;
+                    var readInitialValue = !isClassBased_6 || !onlySingleClasses;
                     var valueToApply = value;
                     // VALUE DEFER CASE 1: Use a multi value instead of a null single value
                     // this check implies that a single value was removed and we
@@ -3859,7 +3879,7 @@
                     // note that this should always be a falsy check since `false` is used
                     // for both class and style comparisons (styles can't be false and false
                     // classes are turned off and should therefore defer to their initial values)
-                    if (!valueExists(valueToApply, isClassBased_6)) {
+                    if (!valueExists(valueToApply, isClassBased_6) && readInitialValue) {
                         valueToApply = getInitialValue(context, flag);
                     }
                     if (isClassBased_6) {
@@ -3993,18 +4013,18 @@
         return (context[adjustedIndex] & 4 /* Sanitize */) == 4 /* Sanitize */;
     }
     function pointers(configFlag, staticIndex, dynamicIndex) {
-        return (configFlag & 15 /* BitMask */) | (staticIndex << 4 /* BitCountSize */) |
-            (dynamicIndex << (14 /* BitCountSize */ + 4 /* BitCountSize */));
+        return (configFlag & 15 /* BitMask */) | (staticIndex << 5 /* BitCountSize */) |
+            (dynamicIndex << (14 /* BitCountSize */ + 5 /* BitCountSize */));
     }
     function getInitialValue(context, flag) {
         var index = getInitialIndex(flag);
         return context[2 /* InitialStylesPosition */][index];
     }
     function getInitialIndex(flag) {
-        return (flag >> 4 /* BitCountSize */) & 16383 /* BitMask */;
+        return (flag >> 5 /* BitCountSize */) & 16383 /* BitMask */;
     }
     function getMultiOrSingleIndex(flag) {
-        var index = (flag >> (14 /* BitCountSize */ + 4 /* BitCountSize */)) & 16383 /* BitMask */;
+        var index = (flag >> (14 /* BitCountSize */ + 5 /* BitCountSize */)) & 16383 /* BitMask */;
         return index >= 8 /* SingleStylesStartPosition */ ? index : -1;
     }
     function getMultiStartIndex(context) {
@@ -4076,6 +4096,9 @@
     }
     function isContextDirty(context) {
         return isDirty(context, 3 /* MasterFlagPosition */);
+    }
+    function limitToSingleClasses(context) {
+        return context[3 /* MasterFlagPosition */] & 16 /* OnlyProcessSingleClasses */;
     }
     function setContextDirty(context, isDirtyYes) {
         setDirty(context, 3 /* MasterFlagPosition */, isDirtyYes);
@@ -4964,7 +4987,7 @@
             currentQueries = currentQueries.clone();
         }
         if (count > 0) {
-            var start = previousOrParentTNode.flags >> 15 /* DirectiveStartingIndexShift */;
+            var start = previousOrParentTNode.flags >> 16 /* DirectiveStartingIndexShift */;
             var end = start + count;
             for (var i = start; i < end; i++) {
                 var def = tView.data[i];
@@ -5302,13 +5325,7 @@
             return;
         var element = getNativeByIndex(index, viewData);
         var tNode = getTNode(index, viewData);
-        // if tNode.inputs is undefined, a listener has created outputs, but inputs haven't
-        // yet been checked
-        if (tNode && tNode.inputs === undefined) {
-            // mark inputs as checked
-            tNode.inputs = generatePropertyAliases(tNode.flags, 0 /* Input */);
-        }
-        var inputData = tNode && tNode.inputs;
+        var inputData = initializeTNodeInputs(tNode);
         var dataValue;
         if (inputData && (dataValue = inputData[propName])) {
             setInputsForProperty(dataValue, value);
@@ -5424,7 +5441,7 @@
         var count = tNodeFlags & 4095 /* DirectiveCountMask */;
         var propStore = null;
         if (count > 0) {
-            var start = tNodeFlags >> 15 /* DirectiveStartingIndexShift */;
+            var start = tNodeFlags >> 16 /* DirectiveStartingIndexShift */;
             var end = start + count;
             var isInput = direction === 0 /* Input */;
             var defs = tView.data;
@@ -5488,14 +5505,24 @@
      */
     function elementStyling(classDeclarations, styleDeclarations, styleSanitizer) {
         var tNode = previousOrParentTNode;
+        var inputData = initializeTNodeInputs(tNode);
         if (!tNode.stylingTemplate) {
+            var hasClassInput = inputData && inputData.hasOwnProperty('class') ? true : false;
+            if (hasClassInput) {
+                tNode.flags |= 32768 /* hasClassInput */;
+            }
             // initialize the styling template.
-            tNode.stylingTemplate =
-                createStylingContextTemplate(classDeclarations, styleDeclarations, styleSanitizer);
+            tNode.stylingTemplate = createStylingContextTemplate(classDeclarations, styleDeclarations, styleSanitizer, hasClassInput);
         }
         if (styleDeclarations && styleDeclarations.length ||
             classDeclarations && classDeclarations.length) {
-            elementStylingApply(tNode.index - HEADER_OFFSET);
+            var index = tNode.index - HEADER_OFFSET;
+            if (delegateToClassInput(tNode)) {
+                var stylingContext = getStylingContext(index, viewData);
+                var initialClasses = stylingContext[6 /* PreviousOrCachedMultiClassValue */];
+                setInputsForProperty(tNode.inputs['class'], initialClasses);
+            }
+            elementStylingApply(index);
         }
     }
     /**
@@ -5579,7 +5606,14 @@
      *        removed (unset) from the element's styling.
      */
     function elementStylingMap(index, classes, styles) {
-        updateStylingMap(getStylingContext(index, viewData), classes, styles);
+        var tNode = getTNode(index, viewData);
+        var stylingContext = getStylingContext(index, viewData);
+        if (delegateToClassInput(tNode) && classes !== NO_CHANGE) {
+            var initialClasses = stylingContext[6 /* PreviousOrCachedMultiClassValue */];
+            var classInputVal = (initialClasses.length ? (initialClasses + ' ') : '') + classes;
+            setInputsForProperty(tNode.inputs['class'], classInputVal);
+        }
+        updateStylingMap(stylingContext, classes, styles);
     }
     //////////////////////////
     //// Text
@@ -5663,7 +5697,7 @@
         if (firstTemplatePass) {
             queueComponentIndexForCheck();
             previousOrParentTNode.flags =
-                viewData.length << 15 /* DirectiveStartingIndexShift */ | 4096 /* isComponent */;
+                viewData.length << 16 /* DirectiveStartingIndexShift */ | 4096 /* isComponent */;
         }
     }
     /**
@@ -5687,7 +5721,7 @@
                 // - save the index,
                 // - set the number of directives to 1
                 previousOrParentTNode.flags =
-                    index << 15 /* DirectiveStartingIndexShift */ | flags & 4096 /* isComponent */ | 1;
+                    index << 16 /* DirectiveStartingIndexShift */ | flags & 4096 /* isComponent */ | 1;
             }
             else {
                 // Only need to bump the size when subsequent directives are created
@@ -6362,8 +6396,9 @@
         ngDevMode && assertDefined(component, 'component');
         markViewDirty(getComponentViewByInstance(component));
     }
-    /** A special value which designates that a value has not changed. */
-    var NO_CHANGE = {};
+    ///////////////////////////////
+    //// Bindings & interpolations
+    ///////////////////////////////
     /**
      * Creates a single value binding.
      *
@@ -6585,6 +6620,21 @@
         assertDataInRangeInternal(index, arr || viewData);
     }
     var CLEAN_PROMISE = _CLEAN_PROMISE;
+    function initializeTNodeInputs(tNode) {
+        // If tNode.inputs is undefined, a listener has created outputs, but inputs haven't
+        // yet been checked.
+        if (tNode) {
+            if (tNode.inputs === undefined) {
+                // mark inputs as checked
+                tNode.inputs = generatePropertyAliases(tNode.flags, 0 /* Input */);
+            }
+            return tNode.inputs;
+        }
+        return null;
+    }
+    function delegateToClassInput(tNode) {
+        return tNode.flags & 32768 /* hasClassInput */;
+    }
 
     /**
      * @license
@@ -6663,7 +6713,7 @@
             if (def.diPublic)
                 def.diPublic(def);
             tNode.flags =
-                rootView.length << 15 /* DirectiveStartingIndexShift */ | 4096 /* isComponent */;
+                rootView.length << 16 /* DirectiveStartingIndexShift */ | 4096 /* isComponent */;
         }
         // Store component view at node index, with node as the HOST
         componentView[HOST] = rootView[HEADER_OFFSET];
@@ -6711,7 +6761,7 @@
         var rootTView = readPatchedLViewData(component)[TVIEW];
         var dirIndex = rootTView.data.length - 1;
         queueInitHooks(dirIndex, def.onInit, def.doCheck, rootTView);
-        queueLifecycleHooks(dirIndex << 15 /* DirectiveStartingIndexShift */ | 1, rootTView);
+        queueLifecycleHooks(dirIndex << 16 /* DirectiveStartingIndexShift */ | 1, rootTView);
     }
     /**
      * Retrieve the root context for any component by walking the parent `LView` until
@@ -7369,7 +7419,7 @@
         var nodeFlags = tNode.flags;
         var count = nodeFlags & 4095 /* DirectiveCountMask */;
         if (count !== 0) {
-            var start = nodeFlags >> 15 /* DirectiveStartingIndexShift */;
+            var start = nodeFlags >> 16 /* DirectiveStartingIndexShift */;
             var end = start + count;
             var defs = injectorView[TVIEW].data;
             for (var i = start; i < end; i++) {
@@ -8103,7 +8153,7 @@
      */
     function createViewRef(hostTNode, hostView, context) {
         if (isComponent(hostTNode)) {
-            var componentIndex = hostTNode.flags >> 15 /* DirectiveStartingIndexShift */;
+            var componentIndex = hostTNode.flags >> 16 /* DirectiveStartingIndexShift */;
             var componentView = getComponentViewByIndex(hostTNode.index, hostView);
             return new ViewRef(componentView, context, componentIndex);
         }
@@ -10193,7 +10243,7 @@
         if (defs) {
             var flags = tNode.flags;
             var count = flags & 4095 /* DirectiveCountMask */;
-            var start = flags >> 15 /* DirectiveStartingIndexShift */;
+            var start = flags >> 16 /* DirectiveStartingIndexShift */;
             var end = start + count;
             for (var i = start; i < end; i++) {
                 var def = defs[i];
@@ -12391,7 +12441,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0-beta.0+3.sha-1880c95');
+    var VERSION = new Version('7.1.0-beta.0+6.sha-297dc2b');
 
     /**
      * @license
@@ -21006,7 +21056,7 @@
                 var tNode = lViewData[TVIEW].data[lDebugCtx.nodeIndex];
                 var directivesCount = tNode.flags & 4095 /* DirectiveCountMask */;
                 if (directivesCount > 0) {
-                    var directiveIdxStart = tNode.flags >> 15 /* DirectiveStartingIndexShift */;
+                    var directiveIdxStart = tNode.flags >> 16 /* DirectiveStartingIndexShift */;
                     var directiveIdxEnd = directiveIdxStart + directivesCount;
                     var viewDirectiveDefs = this.view[TVIEW].data;
                     var directiveDefs = viewDirectiveDefs.slice(directiveIdxStart, directiveIdxEnd);

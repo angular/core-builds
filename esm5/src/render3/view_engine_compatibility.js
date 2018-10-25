@@ -262,7 +262,7 @@ export function injectChangeDetectorRef() {
  */
 export function createViewRef(hostTNode, hostView, context) {
     if (isComponent(hostTNode)) {
-        var componentIndex = hostTNode.flags >> 15 /* DirectiveStartingIndexShift */;
+        var componentIndex = hostTNode.flags >> 16 /* DirectiveStartingIndexShift */;
         var componentView = getComponentViewByIndex(hostTNode.index, hostView);
         return new ViewRef(componentView, context, componentIndex);
     }
