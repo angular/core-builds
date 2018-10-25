@@ -9,7 +9,11 @@ import { Type } from '../type';
 import { InjectorType } from './defs';
 import { InjectionToken } from './injection_token';
 import { InjectFlags, Injector } from './injector';
-import { StaticProvider } from './provider';
+import { ClassProvider, ConstructorProvider, ExistingProvider, FactoryProvider, StaticClassProvider, StaticProvider, TypeProvider, ValueProvider } from './provider';
+/**
+ * Internal type for a single provider in a deep provider array.
+ */
+declare type SingleProvider = TypeProvider | ValueProvider | ClassProvider | ConstructorProvider | ExistingProvider | FactoryProvider | StaticClassProvider;
 /**
  * Create a new `Injector` which is configured using a `defType` of `InjectorType<any>`s.
  *
@@ -61,3 +65,11 @@ export declare class R3Injector {
     private hydrate;
     private injectableDefInScope;
 }
+/**
+ * Converts a `SingleProvider` into a factory function.
+ *
+ * @param provider provider to convert to factory
+ */
+export declare function providerToFactory(provider: SingleProvider): () => any;
+export declare function isTypeProvider(value: SingleProvider): value is TypeProvider;
+export {};

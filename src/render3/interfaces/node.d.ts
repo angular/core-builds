@@ -37,6 +37,17 @@ export declare const enum TNodeFlags {
     DirectiveStartingIndexShift = 16
 }
 /**
+ * Corresponds to the TNode.providerIndexes property.
+ */
+export declare const enum TNodeProviderIndexes {
+    /** The index of the first provider on this node is encoded on the least significant bits */
+    ProvidersStartIndexMask = 65535,
+    /** The count of view providers from the component on this node is encoded on the 16 most
+       significant bits */
+    CptViewProvidersCountShift = 16,
+    CptViewProvidersCountShifter = 65536
+}
+/**
  * A set of marker values to be used in the attributes arrays. Those markers indicate that some
  * items are not regular attributes and the processing should be adapted accordingly.
  */
@@ -108,6 +119,13 @@ export interface TNode {
      * with a node without searching the whole directives array.
      */
     flags: TNodeFlags;
+    /**
+     * This number stores two values using its bits:
+     *
+     * - the index of the first provider on that node (first 16 bits)
+     * - the count of view providers from the component on this node (last 16 bits)
+     */
+    providerIndexes: TNodeProviderIndexes;
     /** The tag name associated with this node. */
     tagName: string | null;
     /**

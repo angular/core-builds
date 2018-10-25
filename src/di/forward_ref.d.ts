@@ -44,4 +44,4 @@ export declare function forwardRef(forwardRefFn: ForwardRefFn): Type<any>;
  * @see `forwardRef`
  * @publicApi
  */
-export declare function resolveForwardRef(type: any): any;
+export declare function resolveForwardRef<T>(type: T): T;

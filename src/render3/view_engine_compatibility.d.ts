@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { ChangeDetectorRef as ViewEngine_ChangeDetectorRef } from '../change_detection/change_detector_ref';
+import { Injector } from '../di/injector';
 import { ElementRef as ViewEngine_ElementRef } from '../linker/element_ref';
 import { TemplateRef as ViewEngine_TemplateRef } from '../linker/template_ref';
 import { ViewContainerRef as ViewEngine_ViewContainerRef } from '../linker/view_container_ref';
@@ -50,6 +51,12 @@ export declare function createTemplateRef<T>(TemplateRefToken: typeof ViewEngine
  * @returns The ViewContainerRef instance to use
  */
 export declare function injectViewContainerRef(ViewContainerRefToken: typeof ViewEngine_ViewContainerRef, ElementRefToken: typeof ViewEngine_ElementRef): ViewEngine_ViewContainerRef;
+export declare class NodeInjector implements Injector {
+    private _tNode;
+    private _hostView;
+    constructor(_tNode: TElementNode | TContainerNode | TElementContainerNode, _hostView: LViewData);
+    get(token: any, notFoundValue?: any): any;
+}
 /**
  * Creates a ViewContainerRef and stores it on the injector.
  *
