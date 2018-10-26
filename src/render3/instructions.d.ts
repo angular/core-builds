@@ -353,6 +353,13 @@ export declare function textBinding<T>(index: number, value: T | NO_CHANGE): voi
  */
 export declare function instantiateRootComponent<T>(tView: TView, viewData: LViewData, def: ComponentDef<T>): T;
 /**
+* Generates a new block in TView.expandoInstructions for this node.
+*
+* Each expando block starts with the element index (turned negative so we can distinguish
+* it from the hostVar count) and the directive count. See more in VIEW_DATA.md.
+*/
+export declare function generateExpandoInstructionBlock(tView: TView, tNode: TNode, directiveCount: number): void;
+/**
 * On the first template pass, we need to reserve space for host binding values
 * after directives are matched (so all directives are saved, then bindings).
 * Because we are updating the blueprint, we only need to do this once.

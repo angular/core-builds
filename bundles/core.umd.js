@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.0+30.sha-f385913
+ * @license Angular v7.1.0-beta.0+34.sha-c048358
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -4958,8 +4958,9 @@
                         // Negative numbers mean that we are starting new EXPANDO block and need to update
                         // the current element and directive index.
                         currentElementIndex = -instruction;
-                        // Injector block is taken into account.
-                        bindingRootIndex += INJECTOR_SIZE;
+                        // Injector block and providers are taken into account.
+                        var providerCount = tView.expandoInstructions[++i];
+                        bindingRootIndex += INJECTOR_SIZE + providerCount;
                         currentDirectiveIndex = bindingRootIndex;
                     }
                     else {
@@ -5952,14 +5953,15 @@
      * Instantiate a root component.
      */
     function instantiateRootComponent(tView, viewData, def) {
-        if (getFirstTemplatePass()) {
+        var rootTNode = getPreviousOrParentTNode();
+        if (tView.firstTemplatePass) {
             if (def.providersResolver)
                 def.providersResolver(def);
+            generateExpandoInstructionBlock(tView, rootTNode, 1);
             baseResolveDirective(tView, viewData, def, def.factory);
         }
-        var previousOrParentTNode = getPreviousOrParentTNode();
-        var directive = getNodeInjectable(tView.data, viewData, viewData.length - 1, previousOrParentTNode);
-        postProcessBaseDirective(viewData, previousOrParentTNode, directive, def);
+        var directive = getNodeInjectable(tView.data, viewData, viewData.length - 1, rootTNode);
+        postProcessBaseDirective(viewData, rootTNode, directive, def);
         return directive;
     }
     /**
@@ -5969,7 +5971,6 @@
         // Please make sure to have explicit type for `exportsMap`. Inferred type triggers bug in tsickle.
         ngDevMode && assertEqual(getFirstTemplatePass(), true, 'should run on first template pass only');
         var exportsMap = localRefs ? { '': -1 } : null;
-        generateExpandoInstructionBlock(tView, tNode, directives);
         var totalHostVars = 0;
         if (directives) {
             initNodeFlags(tNode, tView.data.length, directives.length);
@@ -5984,6 +5985,7 @@
                 if (def.providersResolver)
                     def.providersResolver(def);
             }
+            generateExpandoInstructionBlock(tView, tNode, directives.length);
             for (var i = 0; i < directives.length; i++) {
                 var def = directives[i];
                 var directiveDefIdx = tView.data.length;
@@ -6023,12 +6025,12 @@
     * Each expando block starts with the element index (turned negative so we can distinguish
     * it from the hostVar count) and the directive count. See more in VIEW_DATA.md.
     */
-    function generateExpandoInstructionBlock(tView, tNode, directives) {
-        var directiveCount = directives ? directives.length : 0;
+    function generateExpandoInstructionBlock(tView, tNode, directiveCount) {
+        ngDevMode && assertEqual(tView.firstTemplatePass, true, 'Expando block should only be generated on first template pass.');
         var elementIndex = -(tNode.index - HEADER_OFFSET);
-        if (directiveCount > 0) {
-            (tView.expandoInstructions || (tView.expandoInstructions = [])).push(elementIndex, directiveCount);
-        }
+        var providerStartIndex = tNode.providerIndexes & 65535 /* ProvidersStartIndexMask */;
+        var providerCount = tView.data.length - providerStartIndex;
+        (tView.expandoInstructions || (tView.expandoInstructions = [])).push(elementIndex, providerCount, directiveCount);
     }
     /**
     * On the first template pass, we need to reserve space for host binding values
@@ -8236,8 +8238,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    // Root component will always have an element index of 0 and an injector size of 1
-    var ROOT_EXPANDO_INSTRUCTIONS = [0, 1];
     /**
      * Bootstraps a Component into an existing host element and returns an instance
      * of the component.
@@ -8303,7 +8303,6 @@
         var componentView = createLViewData(renderer, getOrCreateTView(def.template, def.consts, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery), null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, sanitizer);
         var tNode = createNodeAtIndex(0, 3 /* Element */, rNode, null, null);
         if (tView.firstTemplatePass) {
-            tView.expandoInstructions = ROOT_EXPANDO_INSTRUCTIONS.slice();
             diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, rootView), rootView, def.type);
             tNode.flags = 4096 /* isComponent */;
             initNodeFlags(tNode, rootView.length, 1);
@@ -8974,24 +8973,22 @@
      * @param provider provider to convert to factory
      */
     function providerToFactory(provider) {
-        var token = resolveForwardRef(provider);
         var factory = undefined;
         if (isTypeProvider(provider)) {
-            return injectableDefFactory(provider);
+            return injectableDefFactory(resolveForwardRef(provider));
         }
         else {
-            token = resolveForwardRef(provider.provide);
             if (isValueProvider(provider)) {
-                factory = function () { return provider.useValue; };
+                factory = function () { return resolveForwardRef(provider.useValue); };
             }
             else if (isExistingProvider(provider)) {
-                factory = function () { return inject(provider.useExisting); };
+                factory = function () { return inject(resolveForwardRef(provider.useExisting)); };
             }
             else if (isFactoryProvider(provider)) {
                 factory = function () { return provider.useFactory.apply(provider, __spread(injectArgs(provider.deps || []))); };
             }
             else {
-                var classRef_1 = provider.useClass || token;
+                var classRef_1 = resolveForwardRef(provider.useClass || provider.provide);
                 if (hasDeps(provider)) {
                     factory = function () { return new ((classRef_1).bind.apply((classRef_1), __spread([void 0], injectArgs(provider.deps))))(); };
                 }
@@ -12857,7 +12854,7 @@
                     var animations = metadata.animations !== null ? new compiler.WrappedNodeExpr(metadata.animations) : null;
                     // Compile the component metadata, including template, into an expression.
                     // TODO(alxhub): implement inputs, outputs, queries, etc.
-                    var res = compiler.compileComponentFromMetadata(__assign({}, directiveMetadata(type, metadata), { template: template, directives: new Map(), pipes: new Map(), viewQueries: [], wrapDirectivesInClosure: false, styles: metadata.styles || [], encapsulation: metadata.encapsulation || exports.ViewEncapsulation.Emulated, animations: animations, viewProviders: metadata.viewProviders ? new compiler.WrappedNodeExpr(metadata.viewProviders) :
+                    var res = compiler.compileComponentFromMetadata(__assign({}, directiveMetadata(type, metadata), { template: template, directives: new Map(), pipes: new Map(), viewQueries: [], wrapDirectivesAndPipesInClosure: false, styles: metadata.styles || [], encapsulation: metadata.encapsulation || exports.ViewEncapsulation.Emulated, animations: animations, viewProviders: metadata.viewProviders ? new compiler.WrappedNodeExpr(metadata.viewProviders) :
                             null }), constantPool, compiler.makeBindingParser());
                     var preStatements = __spread(constantPool.statements, res.statements);
                     ngComponentDef = compiler.jitExpression(res.expression, angularCoreEnv, "ng://" + type.name + "/ngComponentDef.js", preStatements);
@@ -13300,7 +13297,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0-beta.0+30.sha-f385913');
+    var VERSION = new Version('7.1.0-beta.0+34.sha-c048358');
 
     /**
      * @license
