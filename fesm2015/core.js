@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.0+30.sha-f385913
+ * @license Angular v7.1.0-beta.0+34.sha-c048358
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -6178,8 +6178,9 @@ function setHostBindings(tView, viewData) {
                     // Negative numbers mean that we are starting new EXPANDO block and need to update
                     // the current element and directive index.
                     currentElementIndex = -instruction;
-                    // Injector block is taken into account.
-                    bindingRootIndex += INJECTOR_SIZE;
+                    /** @type {?} */
+                    const providerCount = (/** @type {?} */ (tView.expandoInstructions[++i]));
+                    bindingRootIndex += INJECTOR_SIZE + providerCount;
                     currentDirectiveIndex = bindingRootIndex;
                 }
                 else {
@@ -7400,16 +7401,17 @@ function textBinding(index, value) {
  * @return {?}
  */
 function instantiateRootComponent(tView, viewData, def) {
-    if (getFirstTemplatePass()) {
+    /** @type {?} */
+    const rootTNode = getPreviousOrParentTNode();
+    if (tView.firstTemplatePass) {
         if (def.providersResolver)
             def.providersResolver(def);
+        generateExpandoInstructionBlock(tView, rootTNode, 1);
         baseResolveDirective(tView, viewData, def, def.factory);
     }
     /** @type {?} */
-    const previousOrParentTNode = getPreviousOrParentTNode();
-    /** @type {?} */
-    const directive = getNodeInjectable(tView.data, viewData, viewData.length - 1, /** @type {?} */ (previousOrParentTNode));
-    postProcessBaseDirective(viewData, previousOrParentTNode, directive, /** @type {?} */ (def));
+    const directive = getNodeInjectable(tView.data, viewData, viewData.length - 1, /** @type {?} */ (rootTNode));
+    postProcessBaseDirective(viewData, rootTNode, directive, /** @type {?} */ (def));
     return directive;
 }
 /**
@@ -7426,7 +7428,6 @@ function resolveDirectives(tView, viewData, directives, tNode, localRefs) {
     ngDevMode && assertEqual(getFirstTemplatePass(), true, 'should run on first template pass only');
     /** @type {?} */
     const exportsMap = localRefs ? { '': -1 } : null;
-    generateExpandoInstructionBlock(tView, tNode, directives);
     /** @type {?} */
     let totalHostVars = 0;
     if (directives) {
@@ -7443,6 +7444,7 @@ function resolveDirectives(tView, viewData, directives, tNode, localRefs) {
             if (def.providersResolver)
                 def.providersResolver(def);
         }
+        generateExpandoInstructionBlock(tView, tNode, directives.length);
         for (let i = 0; i < directives.length; i++) {
             /** @type {?} */
             const def = /** @type {?} */ (directives[i]);
@@ -7493,17 +7495,18 @@ function instantiateAllDirectives(tView, viewData, previousOrParentTNode) {
  * it from the hostVar count) and the directive count. See more in VIEW_DATA.md.
  * @param {?} tView
  * @param {?} tNode
- * @param {?} directives
+ * @param {?} directiveCount
  * @return {?}
  */
-function generateExpandoInstructionBlock(tView, tNode, directives) {
-    /** @type {?} */
-    const directiveCount = directives ? directives.length : 0;
+function generateExpandoInstructionBlock(tView, tNode, directiveCount) {
+    ngDevMode && assertEqual(tView.firstTemplatePass, true, 'Expando block should only be generated on first template pass.');
     /** @type {?} */
     const elementIndex = -(tNode.index - HEADER_OFFSET);
-    if (directiveCount > 0) {
-        (tView.expandoInstructions || (tView.expandoInstructions = [])).push(elementIndex, directiveCount);
-    }
+    /** @type {?} */
+    const providerStartIndex = tNode.providerIndexes & 65535 /* ProvidersStartIndexMask */;
+    /** @type {?} */
+    const providerCount = tView.data.length - providerStartIndex;
+    (tView.expandoInstructions || (tView.expandoInstructions = [])).push(elementIndex, providerCount, directiveCount);
 }
 /**
  * On the first template pass, we need to reserve space for host binding values
@@ -10406,8 +10409,6 @@ function publishGlobalUtil(name, fn) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/** @type {?} */
-const ROOT_EXPANDO_INSTRUCTIONS = [0, 1];
 /**
  * Bootstraps a Component into an existing host element and returns an instance
  * of the component.
@@ -10488,7 +10489,6 @@ function createRootComponentView(rNode, def, rootView, renderer, sanitizer) {
     /** @type {?} */
     const tNode = createNodeAtIndex(0, 3 /* Element */, rNode, null, null);
     if (tView.firstTemplatePass) {
-        tView.expandoInstructions = ROOT_EXPANDO_INSTRUCTIONS.slice();
         diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, rootView), rootView, def.type);
         tNode.flags = 4096 /* isComponent */;
         initNodeFlags(tNode, rootView.length, 1);
@@ -11231,26 +11231,23 @@ function providerToRecord(provider) {
  */
 function providerToFactory(provider) {
     /** @type {?} */
-    let token = resolveForwardRef(provider);
-    /** @type {?} */
     let factory = undefined;
     if (isTypeProvider(provider)) {
-        return injectableDefFactory(provider);
+        return injectableDefFactory(resolveForwardRef(provider));
     }
     else {
-        token = resolveForwardRef(provider.provide);
         if (isValueProvider(provider)) {
-            factory = () => provider.useValue;
+            factory = () => resolveForwardRef(provider.useValue);
         }
         else if (isExistingProvider(provider)) {
-            factory = () => inject(provider.useExisting);
+            factory = () => inject(resolveForwardRef(provider.useExisting));
         }
         else if (isFactoryProvider(provider)) {
             factory = () => provider.useFactory(...injectArgs(provider.deps || []));
         }
         else {
             /** @type {?} */
-            const classRef = (/** @type {?} */ (provider)).useClass || token;
+            const classRef = resolveForwardRef((/** @type {?} */ (provider)).useClass || provider.provide);
             if (hasDeps(provider)) {
                 factory = () => new (classRef)(...injectArgs(provider.deps));
             }
@@ -15821,7 +15818,7 @@ function compileComponent(type, metadata) {
                 /** @type {?} */
                 const animations = metadata.animations !== null ? new WrappedNodeExpr(metadata.animations) : null;
                 /** @type {?} */
-                const res = compileComponentFromMetadata(Object.assign({}, directiveMetadata(type, metadata), { template, directives: new Map(), pipes: new Map(), viewQueries: [], wrapDirectivesInClosure: false, styles: metadata.styles || [], encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, animations, viewProviders: metadata.viewProviders ? new WrappedNodeExpr(metadata.viewProviders) :
+                const res = compileComponentFromMetadata(Object.assign({}, directiveMetadata(type, metadata), { template, directives: new Map(), pipes: new Map(), viewQueries: [], wrapDirectivesAndPipesInClosure: false, styles: metadata.styles || [], encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, animations, viewProviders: metadata.viewProviders ? new WrappedNodeExpr(metadata.viewProviders) :
                         null }), constantPool, makeBindingParser());
                 /** @type {?} */
                 const preStatements = [...constantPool.statements, ...res.statements];
@@ -16406,7 +16403,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0-beta.0+30.sha-f385913');
+const VERSION = new Version('7.1.0-beta.0+34.sha-c048358');
 
 /**
  * @fileoverview added by tsickle
