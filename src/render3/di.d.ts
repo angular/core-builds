@@ -6,7 +6,8 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { InjectionToken } from '../di/injection_token';
-import { InjectFlags } from '../di/injector';
+import { Injector } from '../di/injector';
+import { InjectFlags } from '../di/injector_compatibility';
 import { Type } from '../type';
 import { RelativeInjectorLocation } from './interfaces/injector';
 import { TContainerNode, TElementContainerNode, TElementNode, TNode } from './interfaces/node';
@@ -109,5 +110,13 @@ export declare function getNodeInjectable(tData: TData, lData: LViewData, index:
  */
 export declare function bloomHashBitOrFactory(token: Type<any> | InjectionToken<any>): number | Function | undefined;
 export declare function bloomHasToken(bloomHash: number, injectorIndex: number, injectorView: LViewData | TData): boolean;
+export declare function injectInjector(): NodeInjector;
+export declare class NodeInjector implements Injector {
+    private _tNode;
+    private _hostView;
+    private _injectorIndex;
+    constructor(_tNode: TElementNode | TContainerNode | TElementContainerNode, _hostView: LViewData);
+    get(token: any): any;
+}
 export declare function getFactoryOf<T>(type: Type<any>): ((type: Type<T> | null) => T) | null;
 export declare function getInheritedFactory<T>(type: Type<any>): (type: Type<T>) => T;
