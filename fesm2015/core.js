@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.0+34.sha-c048358
+ * @license Angular v7.1.0-beta.0+35.sha-19fcfc3
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -15888,7 +15888,8 @@ function directiveMetadata(type, metadata) {
         if (propMetadata.hasOwnProperty(field)) {
             propMetadata[field].forEach(ann => {
                 if (isInput(ann)) {
-                    inputsFromType[field] = ann.bindingPropertyName || field;
+                    inputsFromType[field] =
+                        ann.bindingPropertyName ? [ann.bindingPropertyName, field] : field;
                 }
                 else if (isOutput(ann)) {
                     outputsFromType[field] = ann.bindingPropertyName || field;
@@ -16301,7 +16302,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0-beta.0+34.sha-c048358');
+const VERSION = new Version('7.1.0-beta.0+35.sha-19fcfc3');
 
 /**
  * @fileoverview added by tsickle
