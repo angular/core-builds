@@ -33,7 +33,7 @@ export declare function createElementRef(ElementRefToken: typeof ViewEngine_Elem
  *
  * @returns The TemplateRef instance to use
  */
-export declare function injectTemplateRef<T>(TemplateRefToken: typeof ViewEngine_TemplateRef, ElementRefToken: typeof ViewEngine_ElementRef): ViewEngine_TemplateRef<T> | null;
+export declare function injectTemplateRef<T>(TemplateRefToken: typeof ViewEngine_TemplateRef, ElementRefToken: typeof ViewEngine_ElementRef): ViewEngine_TemplateRef<T>;
 /**
  * Creates a TemplateRef and stores it on the injector.
  *
@@ -43,7 +43,7 @@ export declare function injectTemplateRef<T>(TemplateRefToken: typeof ViewEngine
  * @param hostView The view to which the node belongs
  * @returns The TemplateRef instance to use
  */
-export declare function createTemplateRef<T>(TemplateRefToken: typeof ViewEngine_TemplateRef, ElementRefToken: typeof ViewEngine_ElementRef, hostTNode: TNode, hostView: LViewData): ViewEngine_TemplateRef<T> | null;
+export declare function createTemplateRef<T>(TemplateRefToken: typeof ViewEngine_TemplateRef, ElementRefToken: typeof ViewEngine_ElementRef, hostTNode: TNode, hostView: LViewData): ViewEngine_TemplateRef<T>;
 /**
  * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
  * already exists, retrieves the existing ViewContainerRef.

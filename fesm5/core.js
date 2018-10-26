@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.0+43.sha-d52d82d
+ * @license Angular v7.1.0-beta.0+42.sha-d2e6d69
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2799,13 +2799,7 @@ function getOrCreateInjectable(tNode, lViewData, token, flags, notFoundValue) {
         var saveViewData = getViewData();
         setTNodeAndViewData(tNode, lViewData);
         try {
-            var value = bloomHash();
-            if (value == null && !(flags & 8 /* Optional */)) {
-                throw new Error("No provider for " + stringify$1(token));
-            }
-            else {
-                return value;
-            }
+            return bloomHash();
         }
         finally {
             setTNodeAndViewData(savePreviousOrParentTNode, saveViewData);
@@ -7816,14 +7810,10 @@ function createTemplateRef(TemplateRefToken, ElementRefToken, hostTNode, hostVie
             return TemplateRef_;
         }(TemplateRefToken));
     }
-    if (hostTNode.type === 0 /* Container */) {
-        var hostContainer = hostView[hostTNode.index];
-        ngDevMode && assertDefined(hostTNode.tViews, 'TView must be allocated');
-        return new R3TemplateRef(hostView, createElementRef(ElementRefToken, hostTNode, hostView), hostTNode.tViews, getRenderer(), hostContainer[QUERIES], hostTNode.injectorIndex);
-    }
-    else {
-        return null;
-    }
+    var hostContainer = hostView[hostTNode.index];
+    ngDevMode && assertNodeType(hostTNode, 0 /* Container */);
+    ngDevMode && assertDefined(hostTNode.tViews, 'TView must be allocated');
+    return new R3TemplateRef(hostView, createElementRef(ElementRefToken, hostTNode, hostView), hostTNode.tViews, getRenderer(), hostContainer[QUERIES], hostTNode.injectorIndex);
 }
 var R3ViewContainerRef;
 /**
@@ -13362,7 +13352,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.1.0-beta.0+43.sha-d52d82d');
+var VERSION = new Version('7.1.0-beta.0+42.sha-d2e6d69');
 
 /**
  * @license
