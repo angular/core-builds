@@ -6,7 +6,7 @@ export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_p, _iterab
 export { _appIdRandomProviderFactory as ɵangular_packages_core_core_g } from './src/application_tokens';
 export { DefaultIterableDifferFactory as ɵangular_packages_core_core_k } from './src/change_detection/differs/default_iterable_differ';
 export { DefaultKeyValueDifferFactory as ɵangular_packages_core_core_l } from './src/change_detection/differs/default_keyvalue_differ';
-export { injectInjectorOnly as ɵangular_packages_core_core_c } from './src/di/injector';
+export { injectInjectorOnly as ɵangular_packages_core_core_c } from './src/di/injector_compatibility';
 export { ReflectiveInjector_ as ɵangular_packages_core_core_d } from './src/di/reflective_injector';
 export { ReflectiveDependency as ɵangular_packages_core_core_e, resolveReflectiveProviders as ɵangular_packages_core_core_f } from './src/di/reflective_provider';
 export { wtfEnabled as ɵangular_packages_core_core_q } from './src/profile/profile';

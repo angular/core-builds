@@ -8,7 +8,8 @@
 import { Type } from '../type';
 import { InjectorType } from './defs';
 import { InjectionToken } from './injection_token';
-import { InjectFlags, Injector } from './injector';
+import { Injector } from './injector';
+import { InjectFlags } from './injector_compatibility';
 import { ClassProvider, ConstructorProvider, ExistingProvider, FactoryProvider, StaticClassProvider, StaticProvider, TypeProvider, ValueProvider } from './provider';
 /**
  * Internal type for a single provider in a deep provider array.

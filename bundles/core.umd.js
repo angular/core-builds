@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.0+8.sha-b0476f3
+ * @license Angular v7.1.0-beta.0+18.sha-aefa06f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -811,55 +811,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __forward_ref__ = getClosureSafeProperty({ __forward_ref__: getClosureSafeProperty });
-    /**
-     * Allows to refer to references which are not yet defined.
-     *
-     * For instance, `forwardRef` is used when the `token` which we need to refer to for the purposes of
-     * DI is declared, but not yet defined. It is also used when the `token` which we use when creating
-     * a query is not yet defined.
-     *
-     * @usageNotes
-     * ### Example
-     * {@example core/di/ts/forward_ref/forward_ref_spec.ts region='forward_ref'}
-     * @publicApi
-     */
-    function forwardRef(forwardRefFn) {
-        forwardRefFn.__forward_ref__ = forwardRef;
-        forwardRefFn.toString = function () { return stringify(this()); };
-        return forwardRefFn;
-    }
-    /**
-     * Lazily retrieves the reference value from a forwardRef.
-     *
-     * Acts as the identity function when given a non-forward-ref value.
-     *
-     * @usageNotes
-     * ### Example
-     *
-     * {@example core/di/ts/forward_ref/forward_ref_spec.ts region='resolve_forward_ref'}
-     *
-     * @see `forwardRef`
-     * @publicApi
-     */
-    function resolveForwardRef(type) {
-        var fn = type;
-        if (typeof fn === 'function' && fn.hasOwnProperty(__forward_ref__) &&
-            fn.__forward_ref__ === forwardRef) {
-            return fn();
-        }
-        else {
-            return type;
-        }
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     /**
      * Inject decorator and metadata.
      *
@@ -903,332 +854,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var SOURCE = '__source';
-    var _THROW_IF_NOT_FOUND = new Object();
-    var THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
-    /**
-     * An InjectionToken that gets the current `Injector` for `createInjector()`-style injectors.
-     *
-     * Requesting this token instead of `Injector` allows `StaticInjector` to be tree-shaken from a
-     * project.
-     *
-     * @publicApi
-     */
-    var INJECTOR = new InjectionToken('INJECTOR');
-    var NullInjector = /** @class */ (function () {
-        function NullInjector() {
-        }
-        NullInjector.prototype.get = function (token, notFoundValue) {
-            if (notFoundValue === void 0) { notFoundValue = _THROW_IF_NOT_FOUND; }
-            if (notFoundValue === _THROW_IF_NOT_FOUND) {
-                // Intentionally left behind: With dev tools open the debugger will stop here. There is no
-                // reason why correctly written application should cause this exception.
-                // TODO(misko): uncomment the next line once `ngDevMode` works with closure.
-                // if(ngDevMode) debugger;
-                throw new Error("NullInjectorError: No provider for " + stringify(token) + "!");
-            }
-            return notFoundValue;
-        };
-        return NullInjector;
-    }());
-    /**
-     * Concrete injectors implement this interface.
-     *
-     * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
-     *
-     * @usageNotes
-     * ### Example
-     *
-     * {@example core/di/ts/injector_spec.ts region='Injector'}
-     *
-     * `Injector` returns itself when given `Injector` as a token:
-     *
-     * {@example core/di/ts/injector_spec.ts region='injectInjector'}
-     *
-     * @publicApi
-     */
-    var Injector = /** @class */ (function () {
-        function Injector() {
-        }
-        /**
-         * Create a new Injector which is configure using `StaticProvider`s.
-         *
-         * @usageNotes
-         * ### Example
-         *
-         * {@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
-         */
-        Injector.create = function (options, parent) {
-            if (Array.isArray(options)) {
-                return new StaticInjector(options, parent);
-            }
-            else {
-                return new StaticInjector(options.providers, options.parent, options.name || null);
-            }
-        };
-        Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
-        Injector.NULL = new NullInjector();
-        Injector.ngInjectableDef = defineInjectable({
-            providedIn: 'any',
-            factory: function () { return inject(INJECTOR); },
-        });
-        return Injector;
-    }());
-    var IDENT = function (value) {
-        return value;
-    };
-    var EMPTY = [];
-    var CIRCULAR = IDENT;
-    var MULTI_PROVIDER_FN = function () {
-        return Array.prototype.slice.call(arguments);
-    };
-    var USE_VALUE = getClosureSafeProperty({ provide: String, useValue: getClosureSafeProperty });
-    var NG_TOKEN_PATH = 'ngTokenPath';
-    var NG_TEMP_TOKEN_PATH = 'ngTempTokenPath';
-    var NULL_INJECTOR = Injector.NULL;
-    var NEW_LINE = /\n/gm;
-    var NO_NEW_LINE = 'ɵ';
-    var StaticInjector = /** @class */ (function () {
-        function StaticInjector(providers, parent, source) {
-            if (parent === void 0) { parent = NULL_INJECTOR; }
-            if (source === void 0) { source = null; }
-            this.parent = parent;
-            this.source = source;
-            var records = this._records = new Map();
-            records.set(Injector, { token: Injector, fn: IDENT, deps: EMPTY, value: this, useNew: false });
-            records.set(INJECTOR, { token: INJECTOR, fn: IDENT, deps: EMPTY, value: this, useNew: false });
-            recursivelyProcessProviders(records, providers);
-        }
-        StaticInjector.prototype.get = function (token, notFoundValue, flags) {
-            if (flags === void 0) { flags = 0 /* Default */; }
-            var record = this._records.get(token);
-            try {
-                return tryResolveToken(token, record, this._records, this.parent, notFoundValue, flags);
-            }
-            catch (e) {
-                var tokenPath = e[NG_TEMP_TOKEN_PATH];
-                if (token[SOURCE]) {
-                    tokenPath.unshift(token[SOURCE]);
-                }
-                e.message = formatError('\n' + e.message, tokenPath, this.source);
-                e[NG_TOKEN_PATH] = tokenPath;
-                e[NG_TEMP_TOKEN_PATH] = null;
-                throw e;
-            }
-        };
-        StaticInjector.prototype.toString = function () {
-            var tokens = [], records = this._records;
-            records.forEach(function (v, token) { return tokens.push(stringify(token)); });
-            return "StaticInjector[" + tokens.join(', ') + "]";
-        };
-        return StaticInjector;
-    }());
-    function resolveProvider(provider) {
-        var deps = computeDeps(provider);
-        var fn = IDENT;
-        var value = EMPTY;
-        var useNew = false;
-        var provide = resolveForwardRef(provider.provide);
-        if (USE_VALUE in provider) {
-            // We need to use USE_VALUE in provider since provider.useValue could be defined as undefined.
-            value = provider.useValue;
-        }
-        else if (provider.useFactory) {
-            fn = provider.useFactory;
-        }
-        else if (provider.useExisting) ;
-        else if (provider.useClass) {
-            useNew = true;
-            fn = resolveForwardRef(provider.useClass);
-        }
-        else if (typeof provide == 'function') {
-            useNew = true;
-            fn = provide;
-        }
-        else {
-            throw staticError('StaticProvider does not have [useValue|useFactory|useExisting|useClass] or [provide] is not newable', provider);
-        }
-        return { deps: deps, fn: fn, useNew: useNew, value: value };
-    }
-    function multiProviderMixError(token) {
-        return staticError('Cannot mix multi providers and regular providers', token);
-    }
-    function recursivelyProcessProviders(records, provider) {
-        if (provider) {
-            provider = resolveForwardRef(provider);
-            if (provider instanceof Array) {
-                // if we have an array recurse into the array
-                for (var i = 0; i < provider.length; i++) {
-                    recursivelyProcessProviders(records, provider[i]);
-                }
-            }
-            else if (typeof provider === 'function') {
-                // Functions were supported in ReflectiveInjector, but are not here. For safety give useful
-                // error messages
-                throw staticError('Function/Class not supported', provider);
-            }
-            else if (provider && typeof provider === 'object' && provider.provide) {
-                // At this point we have what looks like a provider: {provide: ?, ....}
-                var token = resolveForwardRef(provider.provide);
-                var resolvedProvider = resolveProvider(provider);
-                if (provider.multi === true) {
-                    // This is a multi provider.
-                    var multiProvider = records.get(token);
-                    if (multiProvider) {
-                        if (multiProvider.fn !== MULTI_PROVIDER_FN) {
-                            throw multiProviderMixError(token);
-                        }
-                    }
-                    else {
-                        // Create a placeholder factory which will look up the constituents of the multi provider.
-                        records.set(token, multiProvider = {
-                            token: provider.provide,
-                            deps: [],
-                            useNew: false,
-                            fn: MULTI_PROVIDER_FN,
-                            value: EMPTY
-                        });
-                    }
-                    // Treat the provider as the token.
-                    token = provider;
-                    multiProvider.deps.push({ token: token, options: 6 /* Default */ });
-                }
-                var record = records.get(token);
-                if (record && record.fn == MULTI_PROVIDER_FN) {
-                    throw multiProviderMixError(token);
-                }
-                records.set(token, resolvedProvider);
-            }
-            else {
-                throw staticError('Unexpected provider', provider);
-            }
-        }
-    }
-    function tryResolveToken(token, record, records, parent, notFoundValue, flags) {
-        try {
-            return resolveToken(token, record, records, parent, notFoundValue, flags);
-        }
-        catch (e) {
-            // ensure that 'e' is of type Error.
-            if (!(e instanceof Error)) {
-                e = new Error(e);
-            }
-            var path = e[NG_TEMP_TOKEN_PATH] = e[NG_TEMP_TOKEN_PATH] || [];
-            path.unshift(token);
-            if (record && record.value == CIRCULAR) {
-                // Reset the Circular flag.
-                record.value = EMPTY;
-            }
-            throw e;
-        }
-    }
-    function resolveToken(token, record, records, parent, notFoundValue, flags) {
-        var _a;
-        var value;
-        if (record && !(flags & 4 /* SkipSelf */)) {
-            // If we don't have a record, this implies that we don't own the provider hence don't know how
-            // to resolve it.
-            value = record.value;
-            if (value == CIRCULAR) {
-                throw Error(NO_NEW_LINE + 'Circular dependency');
-            }
-            else if (value === EMPTY) {
-                record.value = CIRCULAR;
-                var obj = undefined;
-                var useNew = record.useNew;
-                var fn = record.fn;
-                var depRecords = record.deps;
-                var deps = EMPTY;
-                if (depRecords.length) {
-                    deps = [];
-                    for (var i = 0; i < depRecords.length; i++) {
-                        var depRecord = depRecords[i];
-                        var options = depRecord.options;
-                        var childRecord = options & 2 /* CheckSelf */ ? records.get(depRecord.token) : undefined;
-                        deps.push(tryResolveToken(
-                        // Current Token to resolve
-                        depRecord.token, 
-                        // A record which describes how to resolve the token.
-                        // If undefined, this means we don't have such a record
-                        childRecord, 
-                        // Other records we know about.
-                        records, 
-                        // If we don't know how to resolve dependency and we should not check parent for it,
-                        // than pass in Null injector.
-                        !childRecord && !(options & 4 /* CheckParent */) ? NULL_INJECTOR : parent, options & 1 /* Optional */ ? null : Injector.THROW_IF_NOT_FOUND, 0 /* Default */));
-                    }
-                }
-                record.value = value = useNew ? new ((_a = fn).bind.apply(_a, __spread([void 0], deps)))() : fn.apply(obj, deps);
-            }
-        }
-        else if (!(flags & 2 /* Self */)) {
-            value = parent.get(token, notFoundValue, 0 /* Default */);
-        }
-        return value;
-    }
-    function computeDeps(provider) {
-        var deps = EMPTY;
-        var providerDeps = provider.deps;
-        if (providerDeps && providerDeps.length) {
-            deps = [];
-            for (var i = 0; i < providerDeps.length; i++) {
-                var options = 6 /* Default */;
-                var token = resolveForwardRef(providerDeps[i]);
-                if (token instanceof Array) {
-                    for (var j = 0, annotations = token; j < annotations.length; j++) {
-                        var annotation = annotations[j];
-                        if (annotation instanceof Optional || annotation == Optional) {
-                            options = options | 1 /* Optional */;
-                        }
-                        else if (annotation instanceof SkipSelf || annotation == SkipSelf) {
-                            options = options & ~2 /* CheckSelf */;
-                        }
-                        else if (annotation instanceof Self || annotation == Self) {
-                            options = options & ~4 /* CheckParent */;
-                        }
-                        else if (annotation instanceof Inject) {
-                            token = annotation.token;
-                        }
-                        else {
-                            token = resolveForwardRef(annotation);
-                        }
-                    }
-                }
-                deps.push({ token: token, options: options });
-            }
-        }
-        else if (provider.useExisting) {
-            var token = resolveForwardRef(provider.useExisting);
-            deps = [{ token: token, options: 6 /* Default */ }];
-        }
-        else if (!providerDeps && !(USE_VALUE in provider)) {
-            // useValue & useExisting are the only ones which are exempt from deps all others need it.
-            throw staticError('\'deps\' required', provider);
-        }
-        return deps;
-    }
-    function formatError(text, obj, source) {
-        if (source === void 0) { source = null; }
-        text = text && text.charAt(0) === '\n' && text.charAt(1) == NO_NEW_LINE ? text.substr(2) : text;
-        var context = stringify(obj);
-        if (obj instanceof Array) {
-            context = obj.map(stringify).join(' -> ');
-        }
-        else if (typeof obj === 'object') {
-            var parts = [];
-            for (var key in obj) {
-                if (obj.hasOwnProperty(key)) {
-                    var value = obj[key];
-                    parts.push(key + ':' + (typeof value === 'string' ? JSON.stringify(value) : stringify(value)));
-                }
-            }
-            context = "{" + parts.join(', ') + "}";
-        }
-        return "StaticInjectorError" + (source ? '(' + source + ')' : '') + "[" + context + "]: " + text.replace(NEW_LINE, '\n  ');
-    }
-    function staticError(text, obj) {
-        return new Error(formatError(text, obj));
-    }
     /**
      * Current injector value used by `inject`.
      * - `undefined`: it is an error to call `inject`
@@ -1242,19 +867,15 @@
         return former;
     }
     /**
-    * Current implementation of inject.
-    *
-    * By default, it is `injectInjectorOnly`, which makes it `Injector`-only aware. It can be changed
-    * to `directiveInject`, which brings in the `NodeInjector` system of ivy. It is designed this
-    * way for two reasons:
-    *  1. `Injector` should not depend on ivy logic.
-    *  2. To maintain tree shake-ability we don't want to bring in unnecessary code.
-    */
+     * Current implementation of inject.
+     *
+     * By default, it is `injectInjectorOnly`, which makes it `Injector`-only aware. It can be changed
+     * to `directiveInject`, which brings in the `NodeInjector` system of ivy. It is designed this
+     * way for two reasons:
+     *  1. `Injector` should not depend on ivy logic.
+     *  2. To maintain tree shake-ability we don't want to bring in unnecessary code.
+     */
     var _injectImplementation;
-    function inject(token, flags) {
-        if (flags === void 0) { flags = 0 /* Default */; }
-        return (_injectImplementation || injectInjectorOnly)(token, flags);
-    }
     /**
      * Sets the current inject implementation.
      */
@@ -1274,6 +895,10 @@
         else {
             return _currentInjector.get(token, flags & 8 /* Optional */ ? null : undefined, flags);
         }
+    }
+    function inject(token, flags) {
+        if (flags === void 0) { flags = 0 /* Default */; }
+        return (_injectImplementation || injectInjectorOnly)(token, flags);
     }
     /**
      * Injects `root` tokens in limp mode.
@@ -1396,10 +1021,10 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var EMPTY$1 = {};
+    var EMPTY = {};
     var EMPTY_ARRAY = [];
     if (typeof ngDevMode !== 'undefined' && ngDevMode) {
-        Object.freeze(EMPTY$1);
+        Object.freeze(EMPTY);
         Object.freeze(EMPTY_ARRAY);
     }
     var _renderCompCount = 0;
@@ -1550,7 +1175,7 @@
      */
     function invertObject(obj, secondary) {
         if (obj == null)
-            return EMPTY$1;
+            return EMPTY;
         var newLookup = {};
         for (var minifiedKey in obj) {
             if (obj.hasOwnProperty(minifiedKey)) {
@@ -1727,7 +1352,7 @@
     var BINDING_INDEX = 7;
     var CLEANUP = 8;
     var CONTEXT = 9;
-    var INJECTOR$1 = 10;
+    var INJECTOR = 10;
     var RENDERER = 11;
     var SANITIZER = 12;
     var TAIL = 13;
@@ -3297,7 +2922,7 @@
             }
         }
         if ((flags & (2 /* Self */ | 1 /* Host */)) === 0) {
-            var moduleInjector = lViewData[INJECTOR$1];
+            var moduleInjector = lViewData[INJECTOR];
             if (moduleInjector) {
                 return moduleInjector.get(token, notFoundValue, flags & 8 /* Optional */);
             }
@@ -3429,6 +3054,22 @@
         return !(flags & 2 /* Self */ ||
             (flags & 1 /* Host */ && getParentInjectorViewOffset(parentLocation) > 0));
     }
+    function injectInjector() {
+        var tNode = getPreviousOrParentTNode();
+        return new NodeInjector(tNode, getViewData());
+    }
+    var NodeInjector = /** @class */ (function () {
+        function NodeInjector(_tNode, _hostView) {
+            this._tNode = _tNode;
+            this._hostView = _hostView;
+            this._injectorIndex = getOrCreateNodeInjectorForNode(_tNode, _hostView);
+        }
+        NodeInjector.prototype.get = function (token) {
+            setTNodeAndViewData(this._tNode, this._hostView);
+            return getOrCreateInjectable(this._tNode, this._hostView, token);
+        };
+        return NodeInjector;
+    }());
     function getFactoryOf(type) {
         var typeAny = type;
         var def = getComponentDef(typeAny) || getDirectiveDef(typeAny) ||
@@ -5387,7 +5028,7 @@
         instance[FLAGS] = flags | 1 /* CreationMode */ | 8 /* Attached */ | 16 /* RunInit */;
         instance[PARENT] = instance[DECLARATION_VIEW] = viewData;
         instance[CONTEXT] = context;
-        instance[INJECTOR$1] = viewData ? viewData[INJECTOR$1] : null;
+        instance[INJECTOR] = viewData ? viewData[INJECTOR] : null;
         instance[RENDERER] = renderer;
         instance[SANITIZER] = sanitizer || null;
         return instance;
@@ -7478,6 +7119,411 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    function noop() {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        // Do nothing.
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var __forward_ref__ = getClosureSafeProperty({ __forward_ref__: getClosureSafeProperty });
+    /**
+     * Allows to refer to references which are not yet defined.
+     *
+     * For instance, `forwardRef` is used when the `token` which we need to refer to for the purposes of
+     * DI is declared, but not yet defined. It is also used when the `token` which we use when creating
+     * a query is not yet defined.
+     *
+     * @usageNotes
+     * ### Example
+     * {@example core/di/ts/forward_ref/forward_ref_spec.ts region='forward_ref'}
+     * @publicApi
+     */
+    function forwardRef(forwardRefFn) {
+        forwardRefFn.__forward_ref__ = forwardRef;
+        forwardRefFn.toString = function () { return stringify(this()); };
+        return forwardRefFn;
+    }
+    /**
+     * Lazily retrieves the reference value from a forwardRef.
+     *
+     * Acts as the identity function when given a non-forward-ref value.
+     *
+     * @usageNotes
+     * ### Example
+     *
+     * {@example core/di/ts/forward_ref/forward_ref_spec.ts region='resolve_forward_ref'}
+     *
+     * @see `forwardRef`
+     * @publicApi
+     */
+    function resolveForwardRef(type) {
+        var fn = type;
+        if (typeof fn === 'function' && fn.hasOwnProperty(__forward_ref__) &&
+            fn.__forward_ref__ === forwardRef) {
+            return fn();
+        }
+        else {
+            return type;
+        }
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var SOURCE = '__source';
+    var _THROW_IF_NOT_FOUND = new Object();
+    var THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
+    /**
+     * An InjectionToken that gets the current `Injector` for `createInjector()`-style injectors.
+     *
+     * Requesting this token instead of `Injector` allows `StaticInjector` to be tree-shaken from a
+     * project.
+     *
+     * @publicApi
+     */
+    var INJECTOR$1 = new InjectionToken('INJECTOR');
+    var NullInjector = /** @class */ (function () {
+        function NullInjector() {
+        }
+        NullInjector.prototype.get = function (token, notFoundValue) {
+            if (notFoundValue === void 0) { notFoundValue = _THROW_IF_NOT_FOUND; }
+            if (notFoundValue === _THROW_IF_NOT_FOUND) {
+                // Intentionally left behind: With dev tools open the debugger will stop here. There is no
+                // reason why correctly written application should cause this exception.
+                // TODO(misko): uncomment the next line once `ngDevMode` works with closure.
+                // if(ngDevMode) debugger;
+                throw new Error("NullInjectorError: No provider for " + stringify(token) + "!");
+            }
+            return notFoundValue;
+        };
+        return NullInjector;
+    }());
+    /**
+     * Concrete injectors implement this interface.
+     *
+     * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+     *
+     * @usageNotes
+     * ### Example
+     *
+     * {@example core/di/ts/injector_spec.ts region='Injector'}
+     *
+     * `Injector` returns itself when given `Injector` as a token:
+     *
+     * {@example core/di/ts/injector_spec.ts region='injectInjector'}
+     *
+     * @publicApi
+     */
+    var Injector = /** @class */ (function () {
+        function Injector() {
+        }
+        /**
+         * Create a new Injector which is configure using `StaticProvider`s.
+         *
+         * @usageNotes
+         * ### Example
+         *
+         * {@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
+         */
+        Injector.create = function (options, parent) {
+            if (Array.isArray(options)) {
+                return new StaticInjector(options, parent);
+            }
+            else {
+                return new StaticInjector(options.providers, options.parent, options.name || null);
+            }
+        };
+        Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
+        Injector.NULL = new NullInjector();
+        Injector.ngInjectableDef = defineInjectable({
+            providedIn: 'any',
+            factory: function () { return inject(INJECTOR$1); },
+        });
+        /** @internal */
+        Injector.__NG_ELEMENT_ID__ = function () { return SWITCH_INJECTOR_FACTORY(); };
+        return Injector;
+    }());
+    var SWITCH_INJECTOR_FACTORY__POST_R3__ = function () {
+        return injectInjector();
+    };
+    var SWITCH_INJECTOR_FACTORY__PRE_R3__ = noop;
+    var SWITCH_INJECTOR_FACTORY = SWITCH_INJECTOR_FACTORY__PRE_R3__;
+    var IDENT = function (value) {
+        return value;
+    };
+    var EMPTY$1 = [];
+    var CIRCULAR = IDENT;
+    var MULTI_PROVIDER_FN = function () {
+        return Array.prototype.slice.call(arguments);
+    };
+    var USE_VALUE = getClosureSafeProperty({ provide: String, useValue: getClosureSafeProperty });
+    var NG_TOKEN_PATH = 'ngTokenPath';
+    var NG_TEMP_TOKEN_PATH = 'ngTempTokenPath';
+    var NULL_INJECTOR = Injector.NULL;
+    var NEW_LINE = /\n/gm;
+    var NO_NEW_LINE = 'ɵ';
+    var StaticInjector = /** @class */ (function () {
+        function StaticInjector(providers, parent, source) {
+            if (parent === void 0) { parent = NULL_INJECTOR; }
+            if (source === void 0) { source = null; }
+            this.parent = parent;
+            this.source = source;
+            var records = this._records = new Map();
+            records.set(Injector, { token: Injector, fn: IDENT, deps: EMPTY$1, value: this, useNew: false });
+            records.set(INJECTOR$1, { token: INJECTOR$1, fn: IDENT, deps: EMPTY$1, value: this, useNew: false });
+            recursivelyProcessProviders(records, providers);
+        }
+        StaticInjector.prototype.get = function (token, notFoundValue, flags) {
+            if (flags === void 0) { flags = 0 /* Default */; }
+            var record = this._records.get(token);
+            try {
+                return tryResolveToken(token, record, this._records, this.parent, notFoundValue, flags);
+            }
+            catch (e) {
+                var tokenPath = e[NG_TEMP_TOKEN_PATH];
+                if (token[SOURCE]) {
+                    tokenPath.unshift(token[SOURCE]);
+                }
+                e.message = formatError('\n' + e.message, tokenPath, this.source);
+                e[NG_TOKEN_PATH] = tokenPath;
+                e[NG_TEMP_TOKEN_PATH] = null;
+                throw e;
+            }
+        };
+        StaticInjector.prototype.toString = function () {
+            var tokens = [], records = this._records;
+            records.forEach(function (v, token) { return tokens.push(stringify(token)); });
+            return "StaticInjector[" + tokens.join(', ') + "]";
+        };
+        return StaticInjector;
+    }());
+    function resolveProvider(provider) {
+        var deps = computeDeps(provider);
+        var fn = IDENT;
+        var value = EMPTY$1;
+        var useNew = false;
+        var provide = resolveForwardRef(provider.provide);
+        if (USE_VALUE in provider) {
+            // We need to use USE_VALUE in provider since provider.useValue could be defined as undefined.
+            value = provider.useValue;
+        }
+        else if (provider.useFactory) {
+            fn = provider.useFactory;
+        }
+        else if (provider.useExisting) ;
+        else if (provider.useClass) {
+            useNew = true;
+            fn = resolveForwardRef(provider.useClass);
+        }
+        else if (typeof provide == 'function') {
+            useNew = true;
+            fn = provide;
+        }
+        else {
+            throw staticError('StaticProvider does not have [useValue|useFactory|useExisting|useClass] or [provide] is not newable', provider);
+        }
+        return { deps: deps, fn: fn, useNew: useNew, value: value };
+    }
+    function multiProviderMixError(token) {
+        return staticError('Cannot mix multi providers and regular providers', token);
+    }
+    function recursivelyProcessProviders(records, provider) {
+        if (provider) {
+            provider = resolveForwardRef(provider);
+            if (provider instanceof Array) {
+                // if we have an array recurse into the array
+                for (var i = 0; i < provider.length; i++) {
+                    recursivelyProcessProviders(records, provider[i]);
+                }
+            }
+            else if (typeof provider === 'function') {
+                // Functions were supported in ReflectiveInjector, but are not here. For safety give useful
+                // error messages
+                throw staticError('Function/Class not supported', provider);
+            }
+            else if (provider && typeof provider === 'object' && provider.provide) {
+                // At this point we have what looks like a provider: {provide: ?, ....}
+                var token = resolveForwardRef(provider.provide);
+                var resolvedProvider = resolveProvider(provider);
+                if (provider.multi === true) {
+                    // This is a multi provider.
+                    var multiProvider = records.get(token);
+                    if (multiProvider) {
+                        if (multiProvider.fn !== MULTI_PROVIDER_FN) {
+                            throw multiProviderMixError(token);
+                        }
+                    }
+                    else {
+                        // Create a placeholder factory which will look up the constituents of the multi provider.
+                        records.set(token, multiProvider = {
+                            token: provider.provide,
+                            deps: [],
+                            useNew: false,
+                            fn: MULTI_PROVIDER_FN,
+                            value: EMPTY$1
+                        });
+                    }
+                    // Treat the provider as the token.
+                    token = provider;
+                    multiProvider.deps.push({ token: token, options: 6 /* Default */ });
+                }
+                var record = records.get(token);
+                if (record && record.fn == MULTI_PROVIDER_FN) {
+                    throw multiProviderMixError(token);
+                }
+                records.set(token, resolvedProvider);
+            }
+            else {
+                throw staticError('Unexpected provider', provider);
+            }
+        }
+    }
+    function tryResolveToken(token, record, records, parent, notFoundValue, flags) {
+        try {
+            return resolveToken(token, record, records, parent, notFoundValue, flags);
+        }
+        catch (e) {
+            // ensure that 'e' is of type Error.
+            if (!(e instanceof Error)) {
+                e = new Error(e);
+            }
+            var path = e[NG_TEMP_TOKEN_PATH] = e[NG_TEMP_TOKEN_PATH] || [];
+            path.unshift(token);
+            if (record && record.value == CIRCULAR) {
+                // Reset the Circular flag.
+                record.value = EMPTY$1;
+            }
+            throw e;
+        }
+    }
+    function resolveToken(token, record, records, parent, notFoundValue, flags) {
+        var _a;
+        var value;
+        if (record && !(flags & 4 /* SkipSelf */)) {
+            // If we don't have a record, this implies that we don't own the provider hence don't know how
+            // to resolve it.
+            value = record.value;
+            if (value == CIRCULAR) {
+                throw Error(NO_NEW_LINE + 'Circular dependency');
+            }
+            else if (value === EMPTY$1) {
+                record.value = CIRCULAR;
+                var obj = undefined;
+                var useNew = record.useNew;
+                var fn = record.fn;
+                var depRecords = record.deps;
+                var deps = EMPTY$1;
+                if (depRecords.length) {
+                    deps = [];
+                    for (var i = 0; i < depRecords.length; i++) {
+                        var depRecord = depRecords[i];
+                        var options = depRecord.options;
+                        var childRecord = options & 2 /* CheckSelf */ ? records.get(depRecord.token) : undefined;
+                        deps.push(tryResolveToken(
+                        // Current Token to resolve
+                        depRecord.token, 
+                        // A record which describes how to resolve the token.
+                        // If undefined, this means we don't have such a record
+                        childRecord, 
+                        // Other records we know about.
+                        records, 
+                        // If we don't know how to resolve dependency and we should not check parent for it,
+                        // than pass in Null injector.
+                        !childRecord && !(options & 4 /* CheckParent */) ? NULL_INJECTOR : parent, options & 1 /* Optional */ ? null : Injector.THROW_IF_NOT_FOUND, 0 /* Default */));
+                    }
+                }
+                record.value = value = useNew ? new ((_a = fn).bind.apply(_a, __spread([void 0], deps)))() : fn.apply(obj, deps);
+            }
+        }
+        else if (!(flags & 2 /* Self */)) {
+            value = parent.get(token, notFoundValue, 0 /* Default */);
+        }
+        return value;
+    }
+    function computeDeps(provider) {
+        var deps = EMPTY$1;
+        var providerDeps = provider.deps;
+        if (providerDeps && providerDeps.length) {
+            deps = [];
+            for (var i = 0; i < providerDeps.length; i++) {
+                var options = 6 /* Default */;
+                var token = resolveForwardRef(providerDeps[i]);
+                if (token instanceof Array) {
+                    for (var j = 0, annotations = token; j < annotations.length; j++) {
+                        var annotation = annotations[j];
+                        if (annotation instanceof Optional || annotation == Optional) {
+                            options = options | 1 /* Optional */;
+                        }
+                        else if (annotation instanceof SkipSelf || annotation == SkipSelf) {
+                            options = options & ~2 /* CheckSelf */;
+                        }
+                        else if (annotation instanceof Self || annotation == Self) {
+                            options = options & ~4 /* CheckParent */;
+                        }
+                        else if (annotation instanceof Inject) {
+                            token = annotation.token;
+                        }
+                        else {
+                            token = resolveForwardRef(annotation);
+                        }
+                    }
+                }
+                deps.push({ token: token, options: options });
+            }
+        }
+        else if (provider.useExisting) {
+            var token = resolveForwardRef(provider.useExisting);
+            deps = [{ token: token, options: 6 /* Default */ }];
+        }
+        else if (!providerDeps && !(USE_VALUE in provider)) {
+            // useValue & useExisting are the only ones which are exempt from deps all others need it.
+            throw staticError('\'deps\' required', provider);
+        }
+        return deps;
+    }
+    function formatError(text, obj, source) {
+        if (source === void 0) { source = null; }
+        text = text && text.charAt(0) === '\n' && text.charAt(1) == NO_NEW_LINE ? text.substr(2) : text;
+        var context = stringify(obj);
+        if (obj instanceof Array) {
+            context = obj.map(stringify).join(' -> ');
+        }
+        else if (typeof obj === 'object') {
+            var parts = [];
+            for (var key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    var value = obj[key];
+                    parts.push(key + ':' + (typeof value === 'string' ? JSON.stringify(value) : stringify(value)));
+                }
+            }
+            context = "{" + parts.join(', ') + "}";
+        }
+        return "StaticInjectorError" + (source ? '(' + source + ')' : '') + "[" + context + "]: " + text.replace(NEW_LINE, '\n  ');
+    }
+    function staticError(text, obj) {
+        return new Error(formatError(text, obj));
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     /**
      * Represents an instance of an NgModule created via a {@link NgModuleFactory}.
      *
@@ -7843,15 +7889,15 @@
         var previousTNode = getPreviousOrParentTNode();
         return createContainerRef(ViewContainerRefToken, ElementRefToken, previousTNode, getViewData());
     }
-    var NodeInjector = /** @class */ (function () {
-        function NodeInjector(_tNode, _hostView) {
+    var NodeInjector$1 = /** @class */ (function () {
+        function NodeInjector$$1(_tNode, _hostView) {
             this._tNode = _tNode;
             this._hostView = _hostView;
         }
-        NodeInjector.prototype.get = function (token, notFoundValue) {
+        NodeInjector$$1.prototype.get = function (token, notFoundValue) {
             return getOrCreateInjectable(this._tNode, this._hostView, token, notFoundValue);
         };
-        return NodeInjector;
+        return NodeInjector$$1;
     }());
     /**
      * Creates a ViewContainerRef and stores it on the injector.
@@ -7883,7 +7929,7 @@
                     configurable: true
                 });
                 Object.defineProperty(ViewContainerRef_.prototype, "injector", {
-                    get: function () { return new NodeInjector(this._hostTNode, this._hostView); },
+                    get: function () { return new NodeInjector$1(this._hostTNode, this._hostView); },
                     enumerable: true,
                     configurable: true
                 });
@@ -7895,7 +7941,7 @@
                         var parentTNode = getParentInjectorTNode(parentLocation, this._hostView, this._hostTNode);
                         return !hasParentInjector(parentLocation) || parentTNode == null ?
                             new NullInjector() :
-                            new NodeInjector(parentTNode, parentView);
+                            new NodeInjector$1(parentTNode, parentView);
                     },
                     enumerable: true,
                     configurable: true
@@ -8055,7 +8101,7 @@
                     context.component = ctx;
                     break;
                 }
-                lViewData = lViewData[PARENT];
+                lViewData = lViewData[FLAGS] & 64 /* IsRoot */ ? null : lViewData[PARENT];
             }
             if (context.component === undefined) {
                 context.component = null;
@@ -8101,7 +8147,7 @@
     function getInjector(target) {
         var context = loadContext(target);
         var tNode = context.lViewData[TVIEW].data[context.nodeIndex];
-        return new NodeInjector(tNode, context.lViewData);
+        return new NodeInjector$1(tNode, context.lViewData);
     }
     /**
      * Returns a list of all the directives that are associated
@@ -8252,7 +8298,7 @@
         var rootContext = createRootContext(opts.scheduler || requestAnimationFrame.bind(window), opts.playerHandler || null);
         var renderer = rendererFactory.createRenderer(hostRNode, componentDef);
         var rootView = createLViewData(renderer, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags);
-        rootView[INJECTOR$1] = opts.injector || null;
+        rootView[INJECTOR] = opts.injector || null;
         var oldView = enterView(rootView, null);
         var component;
         try {
@@ -8544,7 +8590,7 @@
         }
     }
     function maybeUnwrapEmpty(value) {
-        if (value === EMPTY$1) {
+        if (value === EMPTY) {
             return {};
         }
         else if (value === EMPTY_ARRAY) {
@@ -8740,7 +8786,7 @@
             additionalProviders &&
                 deepForEach(additionalProviders, function (provider) { return _this.processProvider(provider); });
             // Make sure the INJECTOR token provides this injector.
-            this.records.set(INJECTOR, makeRecord(undefined, this));
+            this.records.set(INJECTOR$1, makeRecord(undefined, this));
             // Detect whether this injector has the APP_ROOT_SCOPE token and thus should provide
             // any injectable scoped to APP_ROOT_SCOPE.
             this.isRootInjector = this.records.has(APP_ROOT);
@@ -9022,7 +9068,7 @@
             (typeof value === 'object' && value instanceof InjectionToken);
     }
 
-    /*
+    /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
      *
@@ -9059,8 +9105,8 @@
         }
     }
     /**
-    * Resolves a provider and publishes it to the DI system.
-    */
+     * Resolves a provider and publishes it to the DI system.
+     */
     function resolveProvider$1(provider, tInjectables, lInjectablesBlueprint, isComponent$$1, isViewProvider) {
         provider = resolveForwardRef(provider);
         if (Array.isArray(provider)) {
@@ -9154,8 +9200,8 @@
         }
     }
     /**
-    * Add a factory in a multi factory.
-    */
+     * Add a factory in a multi factory.
+     */
     function multiFactoryAdd(multiFactory, factory, isComponentProvider) {
         multiFactory.multi.push(factory);
         if (isComponentProvider) {
@@ -9163,8 +9209,8 @@
         }
     }
     /**
-    * Returns the index of item in the array, but only in the begin to end range.
-    */
+     * Returns the index of item in the array, but only in the begin to end range.
+     */
     function indexOf(item, arr, begin, end) {
         for (var i = begin; i < end; i++) {
             if (arr[i] === item)
@@ -9173,16 +9219,16 @@
         return -1;
     }
     /**
-    * Use this with `multi` `providers`.
-    */
+     * Use this with `multi` `providers`.
+     */
     function multiProvidersFactoryResolver(_, tData, lData, tNode) {
         return multiResolve(this.multi, []);
     }
     /**
-    * Use this with `multi` `viewProviders`.
-    *
-    * This factory knows how to concatenate itself with the existing `multi` `providers`.
-    */
+     * Use this with `multi` `viewProviders`.
+     *
+     * This factory knows how to concatenate itself with the existing `multi` `providers`.
+     */
     function multiViewProvidersFactoryResolver(_, tData, lData, tNode) {
         var factories = this.multi;
         var result;
@@ -9206,8 +9252,8 @@
         return result;
     }
     /**
-    * Maps an array of factories into an array of values.
-    */
+     * Maps an array of factories into an array of values.
+     */
     function multiResolve(factories, result) {
         for (var i = 0; i < factories.length; i++) {
             var factory = factories[i];
@@ -9216,8 +9262,8 @@
         return result;
     }
     /**
-    * Creates a multi factory.
-    */
+     * Creates a multi factory.
+     */
     function multiFactory(factoryFn, index, isViewProvider, isComponent$$1, f) {
         var factory = new NodeInjectorFactory(factoryFn, isViewProvider, directiveInject);
         factory.multi = [];
@@ -9362,21 +9408,6 @@
         };
         return ComponentFactoryBoundToModule;
     }(ComponentFactory));
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    function noop() {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        // Do nothing.
-    }
 
     /**
      * @license
@@ -9615,7 +9646,7 @@
             var renderer = rendererFactory.createRenderer(hostRNode, this.componentDef);
             // Create the root view. Uses empty TView and ContentTemplate.
             var rootView = createLViewData(renderer, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags);
-            rootView[INJECTOR$1] = ngModule && ngModule.injector || null;
+            rootView[INJECTOR] = ngModule && ngModule.injector || null;
             // rootView is the parent when bootstrapping
             var oldView = enterView(rootView, null);
             var component;
@@ -11769,9 +11800,10 @@
             // However this code never accesses properties off of `document` before deleting its contents
             // again, so it shouldn't be vulnerable to DOM clobbering.
             var current = el.firstChild;
+            var elementValid = true;
             while (current) {
                 if (current.nodeType === Node.ELEMENT_NODE) {
-                    this.startElement(current);
+                    elementValid = this.startElement(current);
                 }
                 else if (current.nodeType === Node.TEXT_NODE) {
                     this.chars(current.nodeValue);
@@ -11780,7 +11812,7 @@
                     // Strip non-element, non-text nodes.
                     this.sanitizedSomething = true;
                 }
-                if (current.firstChild) {
+                if (elementValid && current.firstChild) {
                     current = current.firstChild;
                     continue;
                 }
@@ -11799,11 +11831,19 @@
             }
             return this.buf.join('');
         };
+        /**
+         * Outputs only valid Elements.
+         *
+         * Invalid elements are skipped.
+         *
+         * @param element element to sanitize
+         * Returns true if the element is valid.
+         */
         SanitizingHtmlSerializer.prototype.startElement = function (element) {
             var tagName = element.nodeName.toLowerCase();
             if (!VALID_ELEMENTS.hasOwnProperty(tagName)) {
                 this.sanitizedSomething = true;
-                return;
+                return false;
             }
             this.buf.push('<');
             this.buf.push(tagName);
@@ -11825,6 +11865,7 @@
                 this.buf.push(' ', attrName, '="', encodeEntities(value), '"');
             }
             this.buf.push('>');
+            return true;
         };
         SanitizingHtmlSerializer.prototype.endElement = function (current) {
             var tagName = current.nodeName.toLowerCase();
@@ -12551,12 +12592,7 @@
             skipSelf: false,
         };
         function setTokenAndResolvedType(token) {
-            if (token === Injector) {
-                meta.resolved = compiler.R3ResolvedDependencyType.Injector;
-            }
-            else {
-                meta.resolved = compiler.R3ResolvedDependencyType.Token;
-            }
+            meta.resolved = compiler.R3ResolvedDependencyType.Token;
             meta.token = new compiler.WrappedNodeExpr(token);
         }
         if (Array.isArray(dep)) {
@@ -13368,7 +13404,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0-beta.0+8.sha-b0476f3');
+    var VERSION = new Version('7.1.0-beta.0+18.sha-aefa06f');
 
     /**
      * @license
@@ -18579,7 +18615,7 @@
      */
     var UNDEFINED_VALUE = new Object();
     var InjectorRefTokenKey = tokenKey(Injector);
-    var INJECTORRefTokenKey = tokenKey(INJECTOR);
+    var INJECTORRefTokenKey = tokenKey(INJECTOR$1);
     var NgModuleRefTokenKey = tokenKey(NgModuleRef);
     function moduleProvideDef(flags, token, value, deps) {
         // Need to resolve forwardRefs as e.g. for `useValue` we
@@ -19402,7 +19438,7 @@
     var TemplateRefTokenKey = tokenKey(TemplateRef);
     var ChangeDetectorRefTokenKey = tokenKey(ChangeDetectorRef);
     var InjectorRefTokenKey$1 = tokenKey(Injector);
-    var INJECTORRefTokenKey$1 = tokenKey(INJECTOR);
+    var INJECTORRefTokenKey$1 = tokenKey(INJECTOR$1);
     function directiveDef(checkIndex, flags, matchedQueries, childCount, ctor, deps, props, outputs) {
         var bindings = [];
         if (props) {
@@ -22219,9 +22255,9 @@
     exports.forwardRef = forwardRef;
     exports.resolveForwardRef = resolveForwardRef;
     exports.Injectable = Injectable;
-    exports.inject = inject;
-    exports.INJECTOR = INJECTOR;
+    exports.INJECTOR = INJECTOR$1;
     exports.Injector = Injector;
+    exports.inject = inject;
     exports.ReflectiveInjector = ReflectiveInjector;
     exports.createInjector = createInjector;
     exports.ResolvedReflectiveFactory = ResolvedReflectiveFactory;
@@ -22431,6 +22467,7 @@
     exports.ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ = SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__;
     exports.ɵSWITCH_RENDERER2_FACTORY__POST_R3__ = SWITCH_RENDERER2_FACTORY__POST_R3__;
     exports.ɵpublishGlobalUtil = publishGlobalUtil;
+    exports.ɵSWITCH_INJECTOR_FACTORY__POST_R3__ = SWITCH_INJECTOR_FACTORY__POST_R3__;
     exports.ɵregisterModuleFactory = registerModuleFactory;
     exports.ɵEMPTY_ARRAY = EMPTY_ARRAY$4;
     exports.ɵEMPTY_MAP = EMPTY_MAP;
