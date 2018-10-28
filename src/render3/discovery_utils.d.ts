@@ -36,7 +36,7 @@ export declare function getHostComponent<T = {}>(target: {}): T | null;
  * Returns the `RootContext` instance that is associated with
  * the application where the target is situated.
  */
-export declare function getRootContext(target: {}): RootContext;
+export declare function getRootContext(target: LViewData | {}): RootContext;
 /**
  * Returns a list of all the components in the application
  * that are have been bootstrapped.

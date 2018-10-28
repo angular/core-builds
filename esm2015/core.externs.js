@@ -58,13 +58,14 @@ var System;
 // externs from packages/core/src/render3/interfaces/player.closure.js:
 
 /** @typedef {?} */
-var PlayerContext;
-
-/** @typedef {?} */
 var ComponentInstance;
 
 /** @typedef {?} */
 var DirectiveInstance;
+// externs from packages/core/src/render3/publish_global_util.closure.js:
+
+/** @typedef {?} */
+var GlobalDevModeContainer;
 // externs from packages/core/src/testability/testability.closure.js:
 /**
  * @record

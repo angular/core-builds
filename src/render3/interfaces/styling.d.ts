@@ -149,7 +149,7 @@ export interface StylingContext extends Array<InitialStyles | {
      * The last class value that was interpreted by elementStylingMap. This is cached
      * So that the algorithm can exit early incase the value has not changed.
      */
-    [StylingIndex.PreviousMultiClassValue]: {
+    [StylingIndex.PreviousOrCachedMultiClassValue]: {
         [key: string]: any;
     } | string | null;
     /**
@@ -180,8 +180,10 @@ export declare const enum StylingFlags {
     Dirty = 1,
     Class = 2,
     Sanitize = 4,
-    BitCountSize = 3,
-    BitMask = 7
+    PlayerBuildersDirty = 8,
+    OnlyProcessSingleClasses = 16,
+    BitCountSize = 5,
+    BitMask = 15
 }
 /** Used as numeric pointer values to determine what cells to update in the `StylingContext` */
 export declare const enum StylingIndex {
@@ -191,13 +193,14 @@ export declare const enum StylingIndex {
     MasterFlagPosition = 3,
     ClassOffsetPosition = 4,
     ElementPosition = 5,
-    PreviousMultiClassValue = 6,
+    PreviousOrCachedMultiClassValue = 6,
     PreviousMultiStyleValue = 7,
     SingleStylesStartPosition = 8,
     FlagsOffset = 0,
     PropertyOffset = 1,
     ValueOffset = 2,
-    Size = 3,
+    PlayerBuilderIndexOffset = 3,
+    Size = 4,
     BitCountSize = 14,
     BitMask = 16383
 }

@@ -23,13 +23,13 @@ export interface TestBed {
      * Test modules and platforms for individual platforms are available from
      * '@angular/<platform_name>/testing'.
      *
-     * @experimental
+     * @publicApi
      */
     initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): void;
     /**
      * Reset the providers for the test injector.
      *
-     * @experimental
+     * @publicApi
      */
     resetTestEnvironment(): void;
     resetTestingModule(): void;
@@ -102,13 +102,13 @@ export declare class TestBedViewEngine implements Injector, TestBed {
      * Test modules and platforms for individual platforms are available from
      * '@angular/<platform_name>/testing'.
      *
-     * @experimental
+     * @publicApi
      */
     static initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): TestBedViewEngine;
     /**
      * Reset the providers for the test injector.
      *
-     * @experimental
+     * @publicApi
      */
     static resetTestEnvironment(): void;
     static resetTestingModule(): TestBedStatic;
@@ -201,13 +201,13 @@ export declare class TestBedViewEngine implements Injector, TestBed {
      * Test modules and platforms for individual platforms are available from
      * '@angular/<platform_name>/testing'.
      *
-     * @experimental
+     * @publicApi
      */
     initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): void;
     /**
      * Reset the providers for the test injector.
      *
-     * @experimental
+     * @publicApi
      */
     resetTestEnvironment(): void;
     resetTestingModule(): void;
@@ -261,6 +261,8 @@ export declare class TestBedViewEngine implements Injector, TestBed {
  *
  * Note: Use `TestBed` in tests. It will be set to either `TestBedViewEngine` or `TestBedRender3`
  * according to the compiler used.
+ *
+ * @publicApi
  */
 export declare const TestBed: TestBedStatic;
 /**
@@ -268,7 +270,7 @@ export declare const TestBed: TestBedStatic;
  *
  * It will be either an instance of `TestBedViewEngine` or `TestBedRender3`.
  *
- * @experimental
+ * @publicApi
  */
 export declare const getTestBed: () => TestBed;
 /**
@@ -293,11 +295,11 @@ export declare const getTestBed: () => TestBed;
  * eventually
  *   becomes `it('...', @Inject (object: AClass, async: AsyncTestCompleter) => { ... });`
  *
- *
+ * @publicApi
  */
 export declare function inject(tokens: any[], fn: Function): () => any;
 /**
- * @experimental
+ * @publicApi
  */
 export declare class InjectSetupWrapper {
     private _moduleDef;
@@ -306,7 +308,7 @@ export declare class InjectSetupWrapper {
     inject(tokens: any[], fn: Function): () => any;
 }
 /**
- * @experimental
+ * @publicApi
  */
 export declare function withModule(moduleDef: TestModuleMetadata): InjectSetupWrapper;
 export declare function withModule(moduleDef: TestModuleMetadata, fn: Function): () => any;

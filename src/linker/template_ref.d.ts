@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { injectTemplateRef as render3InjectTemplateRef } from '../render3/view_engine_compatibility';
 import { ElementRef } from './element_ref';
 import { EmbeddedViewRef } from './view_ref';
 /**
@@ -23,6 +24,7 @@ import { EmbeddedViewRef } from './view_ref';
  * @see `ViewContainerRef`
  * @see [Navigate the Component Tree with DI](guide/dependency-injection-navtree)
  *
+ * @publicApi
  */
 export declare abstract class TemplateRef<C> {
     /**
@@ -44,3 +46,4 @@ export declare abstract class TemplateRef<C> {
      */
     abstract createEmbeddedView(context: C): EmbeddedViewRef<C>;
 }
+export declare const SWITCH_TEMPLATE_REF_FACTORY__POST_R3__: typeof render3InjectTemplateRef;

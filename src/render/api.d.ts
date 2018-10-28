@@ -8,8 +8,10 @@
 import { InjectionToken } from '../di/injection_token';
 import { Injector } from '../di/injector';
 import { ViewEncapsulation } from '../metadata/view';
+import { injectRenderer2 as render3InjectRenderer2 } from '../render3/view_engine_compatibility';
 /**
  * @deprecated Use `RendererType2` (and `Renderer2`) instead.
+ * @publicApi
  */
 export declare class RenderComponentType {
     id: string;
@@ -45,6 +47,7 @@ export interface DirectRenderer {
 }
 /**
  * @deprecated Use the `Renderer2` instead.
+ * @publicApi
  */
 export declare abstract class Renderer {
     abstract selectRootElement(selectorOrNode: string | any, debugInfo?: RenderDebugInfo): any;
@@ -84,6 +87,7 @@ export declare const Renderer2Interceptor: InjectionToken<Renderer2[]>;
  * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
  *
  * @deprecated Use `RendererFactory2` instead.
+ * @publicApi
  */
 export declare abstract class RootRenderer {
     abstract renderComponent(componentType: RenderComponentType): Renderer;
@@ -91,7 +95,7 @@ export declare abstract class RootRenderer {
 /**
  * Used by `RendererFactory2` to associate custom rendering data and styles
  * with a rendering implementation.
- *  @experimental
+ *  @publicApi
  */
 export interface RendererType2 {
     /**
@@ -125,7 +129,7 @@ export interface RendererType2 {
 /**
  * Creates and initializes a custom renderer that implements the `Renderer2` base class.
  *
- * @experimental
+ * @publicApi
  */
 export declare abstract class RendererFactory2 {
     /**
@@ -151,7 +155,7 @@ export declare abstract class RendererFactory2 {
 }
 /**
  * Flags for renderer-specific style modifiers.
- * @experimental
+ * @publicApi
  */
 export declare enum RendererStyleFlags2 {
     /**
@@ -176,7 +180,7 @@ export declare enum RendererStyleFlags2 {
  * not statically known, use the `setProperty()` or
  * `setAttribute()` method.
  *
- * @experimental
+ * @publicApi
  */
 export declare abstract class Renderer2 {
     /**
@@ -331,3 +335,4 @@ export declare abstract class Renderer2 {
      */
     abstract listen(target: 'window' | 'document' | 'body' | any, eventName: string, callback: (event: any) => boolean | void): () => void;
 }
+export declare const SWITCH_RENDERER2_FACTORY__POST_R3__: typeof render3InjectRenderer2;

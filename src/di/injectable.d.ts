@@ -5,17 +5,20 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { compileInjectable as render3CompileInjectable } from '../render3/jit/injectable';
 import { Type } from '../type';
 import { InjectableDef } from './defs';
 import { ClassSansProvider, ConstructorSansProvider, ExistingSansProvider, FactorySansProvider, StaticClassSansProvider, ValueSansProvider } from './provider';
 /**
  * Injectable providers used in `@Injectable` decorator.
  *
- * @experimental
+ * @publicApi
  */
 export declare type InjectableProvider = ValueSansProvider | ExistingSansProvider | StaticClassSansProvider | ConstructorSansProvider | FactorySansProvider | ClassSansProvider;
 /**
  * Type of the Injectable decorator / constructor function.
+ *
+ * @publicApi
  */
 export interface InjectableDecorator {
     /**
@@ -46,22 +49,24 @@ export interface InjectableDecorator {
 /**
  * Type of the Injectable metadata.
  *
- * @experimental
+ * @publicApi
  */
 export interface Injectable {
     providedIn?: Type<any> | 'root' | null;
 }
 /**
-* Injectable decorator and metadata.
-*
-* @Annotation
-*/
+ * Injectable decorator and metadata.
+ *
+ * @Annotation
+ * @publicApi
+ */
 export declare const Injectable: InjectableDecorator;
 /**
  * Type representing injectable service.
  *
- * @experimental
+ * @publicApi
  */
 export interface InjectableType<T> extends Type<T> {
     ngInjectableDef: InjectableDef<T>;
 }
+export declare const SWITCH_COMPILE_INJECTABLE__POST_R3__: typeof render3CompileInjectable;

@@ -43,6 +43,7 @@ import { ResolvedReflectiveProvider } from './reflective_provider';
  * resolve all of the object's dependencies automatically.
  *
  * @deprecated from v5 - slow and brings in a lot of code, Use `Injector.create` instead.
+ * @publicApi
  */
 export declare abstract class ReflectiveInjector implements Injector {
     /**
@@ -125,7 +126,6 @@ export declare abstract class ReflectiveInjector implements Injector {
      * var injector = ReflectiveInjector.fromResolvedProviders(providers);
      * expect(injector.get(Car) instanceof Car).toBe(true);
      * ```
-     * @experimental
      */
     static fromResolvedProviders(providers: ResolvedReflectiveProvider[], parent?: Injector): ReflectiveInjector;
     /**

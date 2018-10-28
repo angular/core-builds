@@ -43,6 +43,8 @@ import { Type } from '../type';
  *
  * {@example core/di/ts/injector_spec.ts region='ShakableInjectionToken'}
  *
+ *
+ * @publicApi
  */
 export declare class InjectionToken<T> {
     protected _desc: string;

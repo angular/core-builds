@@ -57,6 +57,7 @@ import { Subject } from 'rxjs';
  *
  * Once a reference implementation of the spec is available, switch to it.
  *
+ * @publicApi
  */
 export declare class EventEmitter<T> extends Subject<T> {
     /**

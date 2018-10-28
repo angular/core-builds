@@ -12,7 +12,10 @@
  *
  * @usageNotes
  * ### Example
+ *
  * {@example core/ts/metadata/encapsulation.ts region='longform'}
+ *
+ * @publicApi
  */
 export declare enum ViewEncapsulation {
     /**

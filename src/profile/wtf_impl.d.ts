@@ -8,7 +8,7 @@
 /**
  * A scope function for the Web Tracing Framework (WTF).
  *
- * @experimental
+ * @publicApi
  */
 export interface WtfScopeFn {
     (arg0?: any, arg1?: any): any;

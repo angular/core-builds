@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { injectElementRef as render3InjectElementRef } from '../render3/view_engine_compatibility';
 /**
  * A wrapper around a native element inside of a View.
  *
@@ -15,7 +16,7 @@
  * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
  * [Security Guide](http://g.co/ng/security).
  *
- *
+ * @publicApi
  */
 export declare class ElementRef<T = any> {
     /**
@@ -42,3 +43,4 @@ export declare class ElementRef<T = any> {
     nativeElement: T;
     constructor(nativeElement: T);
 }
+export declare const SWITCH_ELEMENT_REF_FACTORY__POST_R3__: typeof render3InjectElementRef;

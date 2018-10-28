@@ -46,7 +46,7 @@ export function queueInitHooks(index, onInit, doCheck, tView) {
 export function queueLifecycleHooks(flags, tView) {
     if (tView.firstTemplatePass) {
         /** @type {?} */
-        const start = flags >> 15 /* DirectiveStartingIndexShift */;
+        const start = flags >> 16 /* DirectiveStartingIndexShift */;
         /** @type {?} */
         const count = flags & 4095 /* DirectiveCountMask */;
         /** @type {?} */

@@ -72,7 +72,7 @@ class Render3DebugContext {
         const directivesCount = tNode.flags & 4095 /* DirectiveCountMask */;
         if (directivesCount > 0) {
             /** @type {?} */
-            const directiveIdxStart = tNode.flags >> 15 /* DirectiveStartingIndexShift */;
+            const directiveIdxStart = tNode.flags >> 16 /* DirectiveStartingIndexShift */;
             /** @type {?} */
             const directiveIdxEnd = directiveIdxStart + directivesCount;
             /** @type {?} */

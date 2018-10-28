@@ -13,7 +13,7 @@ import { Type } from '../type';
  * ### Example
  *
  * {@example core/di/ts/forward_ref/forward_ref_spec.ts region='forward_ref_fn'}
- * @experimental
+ * @publicApi
  */
 export interface ForwardRefFn {
     (): any;
@@ -28,7 +28,7 @@ export interface ForwardRefFn {
  * @usageNotes
  * ### Example
  * {@example core/di/ts/forward_ref/forward_ref_spec.ts region='forward_ref'}
- * @experimental
+ * @publicApi
  */
 export declare function forwardRef(forwardRefFn: ForwardRefFn): Type<any>;
 /**
@@ -42,6 +42,6 @@ export declare function forwardRef(forwardRefFn: ForwardRefFn): Type<any>;
  * {@example core/di/ts/forward_ref/forward_ref_spec.ts region='resolve_forward_ref'}
  *
  * @see `forwardRef`
- * @experimental
+ * @publicApi
  */
-export declare function resolveForwardRef(type: any): any;
+export declare function resolveForwardRef<T>(type: T): T;

@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Injector } from '../di/injector';
+import { injectViewContainerRef as render3InjectViewContainerRef } from '../render3/view_engine_compatibility';
 import { ComponentFactory, ComponentRef } from './component_factory';
 import { ElementRef } from './element_ref';
 import { NgModuleRef } from './ng_module_factory';
@@ -24,6 +25,7 @@ import { EmbeddedViewRef, ViewRef } from './view_ref';
  * @see `ComponentRef`
  * @see `EmbeddedViewRef`
  *
+ * @publicApi
  */
 export declare abstract class ViewContainerRef {
     /**
@@ -122,3 +124,4 @@ export declare abstract class ViewContainerRef {
      */
     abstract detach(index?: number): ViewRef | null;
 }
+export declare const SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__: typeof render3InjectViewContainerRef;

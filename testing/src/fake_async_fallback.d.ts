@@ -9,7 +9,7 @@
  * Clears out the shared fake async zone for a test.
  * To be called in a global `beforeEach`.
  *
- * @experimental
+ * @publicApi
  */
 export declare function resetFakeAsyncZoneFallback(): void;
 /**
@@ -29,7 +29,7 @@ export declare function resetFakeAsyncZoneFallback(): void;
  * @param fn
  * @returns The function wrapped to be executed in the fakeAsync zone
  *
- * @experimental
+ * @publicApi
  */
 export declare function fakeAsyncFallback(fn: Function): (...args: any[]) => any;
 /**
@@ -43,7 +43,7 @@ export declare function fakeAsyncFallback(fn: Function): (...args: any[]) => any
  *
  * {@example core/testing/ts/fake_async.ts region='basic'}
  *
- * @experimental
+ * @publicApi
  */
 export declare function tickFallback(millis?: number): void;
 /**
@@ -54,18 +54,18 @@ export declare function tickFallback(millis?: number): void;
  * @param maxTurns
  * @returns The simulated time elapsed, in millis.
  *
- * @experimental
+ * @publicApi
  */
 export declare function flushFallback(maxTurns?: number): number;
 /**
  * Discard all remaining periodic tasks.
  *
- * @experimental
+ * @publicApi
  */
 export declare function discardPeriodicTasksFallback(): void;
 /**
  * Flush any pending microtasks.
  *
- * @experimental
+ * @publicApi
  */
 export declare function flushMicrotasksFallback(): void;
