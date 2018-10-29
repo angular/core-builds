@@ -281,7 +281,7 @@ function getDirectiveStartIndex(tNode) {
     // the tNode instances store a flag value which then has a
     // pointer which tells the starting index of where all the
     // active directives are in the master directive array
-    return tNode.flags >> 15 /* DirectiveStartingIndexShift */;
+    return tNode.flags >> 16 /* DirectiveStartingIndexShift */;
 }
 function getDirectiveEndIndex(tNode, startIndex) {
     // The end value is also a part of the same flag

@@ -6,94 +6,28 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import './ng_dev_mode';
+import { InjectionToken } from '../di/injection_token';
+import { InjectFlags } from '../di/injector_compatibility';
 import { QueryList } from '../linker';
 import { Sanitizer } from '../sanitization/security';
 import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
+import { Type } from '../type';
 import { LContainer } from './interfaces/container';
-import { ComponentDef, ComponentQuery, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, InitialStylingFlags, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
+import { ComponentDef, ComponentQuery, ComponentTemplate, DirectiveDefListOrFactory, InitialStylingFlags, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { LocalRefExtractor, TAttributes, TContainerNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from './interfaces/node';
 import { PlayerFactory } from './interfaces/player';
 import { CssSelectorList } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
-import { RComment, RElement, RNode, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
-import { CurrentMatchesList, LViewData, LViewFlags, OpaqueViewState, RootContext, RootContextFlags, TView } from './interfaces/view';
+import { RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
+import { LViewData, LViewFlags, RootContext, RootContextFlags, TView } from './interfaces/view';
+import { NO_CHANGE } from './tokens';
 /**
  * Function used to sanitize the value before writing it into the renderer.
  */
-export declare type SanitizerFn = (value: any) => string;
-/**
- * Token set in currentMatches while dependencies are being resolved.
- *
- * If we visit a directive that has a value set to CIRCULAR, we know we've
- * already seen it, and thus have a circular dependency.
- */
-export declare const CIRCULAR = "__CIRCULAR__";
-export declare function getRenderer(): Renderer3;
-export declare function getRendererFactory(): RendererFactory3;
-export declare function getCurrentSanitizer(): Sanitizer | null;
-/**
- * Returns the current OpaqueViewState instance.
- *
- * Used in conjunction with the restoreView() instruction to save a snapshot
- * of the current view and restore it when listeners are invoked. This allows
- * walking the declaration view tree in listeners to get vars from parent views.
- */
-export declare function getCurrentView(): OpaqueViewState;
-/**
- * Restores `contextViewData` to the given OpaqueViewState instance.
- *
- * Used in conjunction with the getCurrentView() instruction to save a snapshot
- * of the current view and restore it when listeners are invoked. This allows
- * walking the declaration view tree in listeners to get vars from parent views.
- *
- * @param viewToRestore The OpaqueViewState instance to restore.
- */
-export declare function restoreView(viewToRestore: OpaqueViewState): void;
-export declare function getPreviousOrParentTNode(): TNode;
-export declare function setEnvironment(tNode: TNode, view: LViewData): void;
-/**
- * Query instructions can ask for "current queries" in 2 different cases:
- * - when creating view queries (at the root of a component view, before any node is created - in
- * this case currentQueries points to view queries)
- * - when creating content queries (i.e. this previousOrParentTNode points to a node on which we
- * create content queries).
- */
-export declare function getOrCreateCurrentQueries(QueryType: {
-    new (parent: null, shallow: null, deep: null): LQueries;
-}): LQueries;
-export declare function getCreationMode(): boolean;
-/**
- * Internal function that returns the current LViewData instance.
- *
- * The getCurrentView() instruction should be used for anything public.
- */
-export declare function _getViewData(): LViewData;
-export declare function getBindingRoot(): number;
-/**
- * Swap the current state with a new state.
- *
- * For performance reasons we store the state in the top level of the module.
- * This way we minimize the number of properties to read. Whenever a new view
- * is entered we have to store the state for later, and when the view is
- * exited the state has to be restored
- *
- * @param newView New state to become active
- * @param host Element to which the View is a child of
- * @returns the previous state;
- */
-export declare function enterView(newView: LViewData, hostTNode: TElementNode | TViewNode | null): LViewData;
-/**
- * Used in lieu of enterView to make it clear when we are exiting a child view. This makes
- * the direction of traversal (up or down the view tree) a bit clearer.
- *
- * @param newView New state to become active
- * @param creationOnly An optional boolean to indicate that the view was processed in creation mode
- * only, i.e. the first update will be done later. Only possible for dynamically created views.
- */
-export declare function leaveView(newView: LViewData, creationOnly?: boolean): void;
+declare type SanitizerFn = (value: any) => string;
 /** Sets the host bindings for the current view. */
-export declare function setHostBindings(): void;
-export declare function executeInitAndContentHooks(): void;
+export declare function setHostBindings(tView: TView, viewData: LViewData): void;
+export declare function executeInitAndContentHooks(viewData: LViewData): void;
 export declare function createLViewData<T>(renderer: Renderer3, tView: TView, context: T | null, flags: LViewFlags, sanitizer?: Sanitizer | null): LViewData;
 /**
  * Create and stores the TNode, and hooks it up to the tree.
@@ -116,10 +50,6 @@ export declare function createViewNode(index: number, view: LViewData): TViewNod
  * template passes.
  */
 export declare function adjustBlueprintForNewNode(view: LViewData): void;
-/**
- * Resets the application state.
- */
-export declare function resetComponentState(): void;
 /**
  *
  * @param hostNode Existing node to render into.
@@ -160,7 +90,6 @@ export declare function renderEmbeddedTemplate<T>(viewToRender: LViewData, tView
  * @returns context
  */
 export declare function nextContext<T = any>(level?: number): T;
-export declare function renderComponentOrTemplate<T>(hostView: LViewData, componentOrContext: T, templateFn?: ComponentTemplate<T>): void;
 export declare function namespaceSVG(): void;
 export declare function namespaceMathML(): void;
 export declare function namespaceHTML(): void;
@@ -208,16 +137,6 @@ export declare function elementStart(index: number, name: string, attrs?: TAttri
  * @returns the element created
  */
 export declare function elementCreate(name: string, overriddenRenderer?: Renderer3): RElement;
-/**
- * On the first template pass, we need to reserve space for host binding values
- * after directives are matched (so all directives are saved, then bindings).
- * Because we are updating the blueprint, we only need to do this once.
- */
-export declare function prefillHostVars(totalHostVars: number): void;
-export declare function resolveDirective(def: DirectiveDef<any>, valueIndex: number, matches: CurrentMatchesList): any;
-/** Stores index of directive and host element so it will be queued for binding refresh during CD.
- */
-export declare function queueHostBindingForCheck(dirIndex: number, def: DirectiveDef<any> | ComponentDef<any>): void;
 /**
  * Gets TView from a template function or creates a new TView
  * if it doesn't already exist.
@@ -302,42 +221,6 @@ export declare function elementAttribute(index: number, name: string, value: any
  */
 export declare function elementProperty<T>(index: number, propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn): void;
 /**
- * Enables directive matching on elements.
- *
- *  * Example:
- * ```
- * <my-comp my-directive>
- *   Should match component / directive.
- * </my-comp>
- * <div ngNonBindable>
- *   <!-- disabledBindings() -->
- *   <my-comp my-directive>
- *     Should not match component / directive because we are in ngNonBindable.
- *   </my-comp>
- *   <!-- enableBindings() -->
- * </div>
- * ```
- */
-export declare function enableBindings(): void;
-/**
- * Disables directive matching on element.
- *
- *  * Example:
- * ```
- * <my-comp my-directive>
- *   Should match component / directive.
- * </my-comp>
- * <div ngNonBindable>
- *   <!-- disabledBindings() -->
- *   <my-comp my-directive>
- *     Should not match component / directive because we are in ngNonBindable.
- *   </my-comp>
- *   <!-- enableBindings() -->
- * </div>
- * ```
- */
-export declare function disableBindings(): void;
-/**
  * Constructs a TNode object from the arguments.
  *
  * @param type The type of the node
@@ -347,7 +230,7 @@ export declare function disableBindings(): void;
  * @param tViews Any TViews attached to this node
  * @returns the TNode object
  */
-export declare function createTNode(type: TNodeType, adjustedIndex: number, tagName: string | null, attrs: TAttributes | null, tViews: TView[] | null): TNode;
+export declare function createTNode(viewData: LViewData, type: TNodeType, adjustedIndex: number, tagName: string | null, attrs: TAttributes | null, tViews: TView[] | null): TNode;
 /**
  * Add or remove a class in a `classList` on a DOM element.
  *
@@ -447,9 +330,9 @@ export declare function elementStyleProp(index: number, styleIndex: number, valu
  */
 export declare function elementStylingMap<T>(index: number, classes: {
     [key: string]: any;
-} | string | null, styles?: {
+} | string | NO_CHANGE | null, styles?: {
     [styleName: string]: any;
-} | null): void;
+} | NO_CHANGE | null): void;
 /**
  * Create static text node
  *
@@ -466,22 +349,28 @@ export declare function text(index: number, value?: any): void;
  */
 export declare function textBinding<T>(index: number, value: T | NO_CHANGE): void;
 /**
- * Create a directive and their associated content queries.
- *
- * NOTE: directives can be created in order other than the index order. They can also
- *       be retrieved before they are created in which case the value will be null.
- *
- * @param directive The directive instance.
- * @param directiveDef DirectiveDef object which contains information about the template.
+ * Instantiate a root component.
  */
-export declare function directiveCreate<T>(directiveDefIdx: number, directive: T, directiveDef: DirectiveDef<T> | ComponentDef<T>): T;
+export declare function instantiateRootComponent<T>(tView: TView, viewData: LViewData, def: ComponentDef<T>): T;
 /**
- * A lighter version of directiveCreate() that is used for the root component
- *
- * This version does not contain features that we don't already support at root in
- * current Angular. Example: local refs and inputs on root component.
+* Generates a new block in TView.expandoInstructions for this node.
+*
+* Each expando block starts with the element index (turned negative so we can distinguish
+* it from the hostVar count) and the directive count. See more in VIEW_DATA.md.
+*/
+export declare function generateExpandoInstructionBlock(tView: TView, tNode: TNode, directiveCount: number): void;
+/**
+* On the first template pass, we need to reserve space for host binding values
+* after directives are matched (so all directives are saved, then bindings).
+* Because we are updating the blueprint, we only need to do this once.
+*/
+export declare function prefillHostVars(tView: TView, viewData: LViewData, totalHostVars: number): void;
+/**
+ * Initializes the flags on the current node, setting all indices to the initial index,
+ * the directive count to 0, and adding the isComponent flag.
+ * @param index the initial index
  */
-export declare function baseDirectiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T> | ComponentDef<T>, native: RNode | null): T;
+export declare function initNodeFlags(tNode: TNode, index: number, numberOfDirectives: number): void;
 /**
  * Creates a LContainer, either from a container instruction, or for a ViewContainerRef.
  *
@@ -594,10 +483,6 @@ export declare function projection(nodeIndex: number, selectorIndex?: number, at
  * @returns The state passed in
  */
 export declare function addToViewTree<T extends LViewData | LContainer>(currentView: LViewData, adjustedHostIndex: number, state: T): T;
-/** If node is an OnPush component, marks its LViewData dirty. */
-export declare function markDirtyIfOnPush(viewIndex: number): void;
-/** Wraps an event listener with preventDefault behavior. */
-export declare function wrapListenerWithPreventDefault(listenerFn: (e?: any) => any): EventListener;
 /** Marks current view and all ancestors dirty */
 export declare function markViewDirty(view: LViewData): void;
 /**
@@ -679,11 +564,6 @@ export declare function detectChangesInternal<T>(hostView: LViewData, component:
  * @param component Component to mark as dirty.
  */
 export declare function markDirty<T>(component: T): void;
-export interface NO_CHANGE {
-    brand: 'NO_CHANGE';
-}
-/** A special value which designates that a value has not changed. */
-export declare const NO_CHANGE: NO_CHANGE;
 /**
  * Creates a single value binding.
  *
@@ -751,11 +631,38 @@ export declare function bindingUpdated2(bindingIndex: number, exp1: any, exp2: a
 export declare function bindingUpdated3(bindingIndex: number, exp1: any, exp2: any, exp3: any): boolean;
 /** Updates 4 bindings if changed, then returns whether any was updated. */
 export declare function bindingUpdated4(bindingIndex: number, exp1: any, exp2: any, exp3: any, exp4: any): boolean;
-export declare function getTView(): TView;
+/**
+ * Returns the value associated to the given token from the injectors.
+ *
+ * `directiveInject` is intended to be used for directive, component and pipe factories.
+ *  All other injection use `inject` which does not walk the node injector tree.
+ *
+ * Usage example (in factory function):
+ *
+ * class SomeDirective {
+ *   constructor(directive: DirectiveA) {}
+ *
+ *   static ngDirectiveDef = defineDirective({
+ *     type: SomeDirective,
+ *     factory: () => new SomeDirective(directiveInject(DirectiveA))
+ *   });
+ * }
+ *
+ * @param token the type or token to inject
+ * @param flags Injection flags
+ * @returns the value from the injector or `null` when not found
+ */
+export declare function directiveInject<T>(token: Type<T> | InjectionToken<T>): T;
+export declare function directiveInject<T>(token: Type<T> | InjectionToken<T>, flags: InjectFlags): T;
+/**
+ * Facade for the attribute injection from DI.
+ */
+export declare function injectAttribute(attrNameToInject: string): string | undefined;
 /**
  * Registers a QueryList, associated with a content query, for later refresh (part of a view
  * refresh).
  */
-export declare function registerContentQuery<Q>(queryList: QueryList<Q>): void;
-export declare function assertPreviousIsParent(): void;
+export declare function registerContentQuery<Q>(queryList: QueryList<Q>, currentDirectiveIndex: number): void;
 export declare const CLEAN_PROMISE: Promise<null>;
+export declare function delegateToClassInput(tNode: TNode): number;
+export {};

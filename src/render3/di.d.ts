@@ -6,9 +6,10 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { InjectionToken } from '../di/injection_token';
-import { InjectFlags, Injector } from '../di/injector';
+import { Injector } from '../di/injector';
+import { InjectFlags } from '../di/injector_compatibility';
 import { Type } from '../type';
-import { DirectiveDef } from './interfaces/definition';
+import { RelativeInjectorLocation } from './interfaces/injector';
 import { TContainerNode, TElementContainerNode, TElementNode, TNode } from './interfaces/node';
 import { LViewData, TData, TView } from './interfaces/view';
 /**
@@ -19,8 +20,7 @@ import { LViewData, TData, TView } from './interfaces/view';
  * @param tView The TView for the injector's bloom filters
  * @param type The directive token to register
  */
-export declare function bloomAdd(injectorIndex: number, tView: TView, type: Type<any>): void;
-export declare function getOrCreateNodeInjector(): number;
+export declare function bloomAdd(injectorIndex: number, tView: TView, type: Type<any> | InjectionToken<any>): void;
 /**
  * Creates (or gets an existing) injector for a given element or container.
  *
@@ -33,54 +33,18 @@ export declare function getInjectorIndex(tNode: TNode, hostView: LViewData): num
 /**
  * Finds the index of the parent injector, with a view offset if applicable. Used to set the
  * parent injector initially.
- */
-export declare function getParentInjectorLocation(tNode: TNode, view: LViewData): number;
-/**
- * Unwraps a parent injector location number to find the view offset from the current injector,
- * then walks up the declaration view tree until the view is found that contains the parent
- * injector.
  *
- * @param location The location of the parent injector, which contains the view offset
- * @param startView The LViewData instance from which to start walking up the view tree
- * @returns The LViewData instance that contains the parent injector
+ * Returns a combination of number of `ViewData` we have to go up and index in that `Viewdata`
  */
-export declare function getParentInjectorView(location: number, startView: LViewData): LViewData;
+export declare function getParentInjectorLocation(tNode: TNode, view: LViewData): RelativeInjectorLocation;
 /**
- * Makes a directive public to the DI system by adding it to an injector's bloom filter.
+ * Makes a type or an injection token public to the DI system by adding it to an
+ * injector's bloom filter.
  *
  * @param di The node injector in which a directive will be added
- * @param def The definition of the directive to be made public
+ * @param token The type or the injection token to be made public
  */
-export declare function diPublicInInjector(injectorIndex: number, view: LViewData, def: DirectiveDef<any>): void;
-/**
- * Makes a directive public to the DI system by adding it to an injector's bloom filter.
- *
- * @param def The definition of the directive to be made public
- */
-export declare function diPublic(def: DirectiveDef<any>): void;
-/**
- * Returns the value associated to the given token from the injectors.
- *
- * `directiveInject` is intended to be used for directive, component and pipe factories.
- *  All other injection use `inject` which does not walk the node injector tree.
- *
- * Usage example (in factory function):
- *
- * class SomeDirective {
- *   constructor(directive: DirectiveA) {}
- *
- *   static ngDirectiveDef = defineDirective({
- *     type: SomeDirective,
- *     factory: () => new SomeDirective(directiveInject(DirectiveA))
- *   });
- * }
- *
- * @param token the type or token to inject
- * @param flags Injection flags
- * @returns the value from the injector or `null` when not found
- */
-export declare function directiveInject<T>(token: Type<T> | InjectionToken<T>): T;
-export declare function directiveInject<T>(token: Type<T> | InjectionToken<T>, flags: InjectFlags): T;
+export declare function diPublicInInjector(injectorIndex: number, view: LViewData, token: InjectionToken<any> | Type<any>): void;
 /**
  * Inject static attribute value into directive constructor.
  *
@@ -112,9 +76,9 @@ export declare function directiveInject<T>(token: Type<T> | InjectionToken<T>, f
  *
  * @publicApi
  */
-export declare function injectAttribute(attrNameToInject: string): string | undefined;
+export declare function injectAttributeImpl(tNode: TNode, attrNameToInject: string): string | undefined;
 /**
- * Returns the value associated to the given token from the injectors.
+ * Returns the value associated to the given token from the NodeInjectors => ModuleInjector.
  *
  * Look for the injector providing the token by walking up the node injector tree and then
  * the module injector tree.
@@ -124,7 +88,15 @@ export declare function injectAttribute(attrNameToInject: string): string | unde
  * @param flags Injection flags
  * @returns the value from the injector or `null` when not found
  */
-export declare function getOrCreateInjectable<T>(hostTNode: TElementNode | TContainerNode | TElementContainerNode, hostView: LViewData, token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
+export declare function getOrCreateInjectable<T>(tNode: TElementNode | TContainerNode | TElementContainerNode, lViewData: LViewData, token: Type<T> | InjectionToken<T>, flags?: InjectFlags, notFoundValue?: any): T | null;
+/**
+* Retrieve or instantiate the injectable from the `lData` at particular `index`.
+*
+* This function checks to see if the value has already been instantiated and if so returns the
+* cached `injectable`. Otherwise if it detects that the value is still a factory it
+* instantiates the `injectable` and caches the value.
+*/
+export declare function getNodeInjectable(tData: TData, lData: LViewData, index: number, tNode: TElementNode): any;
 /**
  * Returns the bit in an injector's bloom filter that should be used to determine whether or not
  * the directive might be provided by the injector.
@@ -137,7 +109,8 @@ export declare function getOrCreateInjectable<T>(hostTNode: TElementNode | TCont
  * @returns the matching bit to check in the bloom filter or `null` if the token is not known.
  */
 export declare function bloomHashBitOrFactory(token: Type<any> | InjectionToken<any>): number | Function | undefined;
-export declare function injectorHasToken(bloomHash: number, injectorIndex: number, injectorView: LViewData | TData): boolean;
+export declare function bloomHasToken(bloomHash: number, injectorIndex: number, injectorView: LViewData | TData): boolean;
+export declare function injectInjector(): NodeInjector;
 export declare class NodeInjector implements Injector {
     private _tNode;
     private _hostView;
@@ -145,5 +118,5 @@ export declare class NodeInjector implements Injector {
     constructor(_tNode: TElementNode | TContainerNode | TElementContainerNode, _hostView: LViewData);
     get(token: any): any;
 }
-export declare function getFactoryOf<T>(type: Type<any>): ((type?: Type<T>) => T) | null;
+export declare function getFactoryOf<T>(type: Type<any>): ((type: Type<T> | null) => T) | null;
 export declare function getInheritedFactory<T>(type: Type<any>): (type: Type<T>) => T;

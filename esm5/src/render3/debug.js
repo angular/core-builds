@@ -63,7 +63,7 @@ var Render3DebugContext = /** @class */ (function () {
             var tNode = lViewData[TVIEW].data[lDebugCtx.nodeIndex];
             var directivesCount = tNode.flags & 4095 /* DirectiveCountMask */;
             if (directivesCount > 0) {
-                var directiveIdxStart = tNode.flags >> 15 /* DirectiveStartingIndexShift */;
+                var directiveIdxStart = tNode.flags >> 16 /* DirectiveStartingIndexShift */;
                 var directiveIdxEnd = directiveIdxStart + directivesCount;
                 var viewDirectiveDefs = this.view[TVIEW].data;
                 var directiveDefs = viewDirectiveDefs.slice(directiveIdxStart, directiveIdxEnd);

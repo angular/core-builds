@@ -11,6 +11,7 @@ import { BindingStore, BindingType, Player, PlayerBuilder, PlayerFactory } from 
 import { Renderer3 } from '../interfaces/renderer';
 import { StylingContext } from '../interfaces/styling';
 import { LViewData, RootContext } from '../interfaces/view';
+import { NO_CHANGE } from '../tokens';
 import { BoundPlayerFactory } from './player_factory';
 /**
  * Creates a styling context template where styling information is stored.
@@ -34,7 +35,7 @@ import { BoundPlayerFactory } from './player_factory';
  *       This implies that `foo` and `bar` will be later styled and that the `foo`
  *       class will be applied to the element as an initial class since it's true
  */
-export declare function createStylingContextTemplate(initialClassDeclarations?: (string | boolean | InitialStylingFlags)[] | null, initialStyleDeclarations?: (string | boolean | InitialStylingFlags)[] | null, styleSanitizer?: StyleSanitizeFn | null): StylingContext;
+export declare function createStylingContextTemplate(initialClassDeclarations?: (string | boolean | InitialStylingFlags)[] | null, initialStyleDeclarations?: (string | boolean | InitialStylingFlags)[] | null, styleSanitizer?: StyleSanitizeFn | null, onlyProcessSingleClasses?: boolean): StylingContext;
 /**
  * Sets and resolves all `multi` styling on an `StylingContext` so that they can be
  * applied to the element once `renderStyleAndClassBindings` is called.
@@ -52,11 +53,11 @@ export declare function updateStylingMap(context: StylingContext, classesInput: 
     [key: string]: any;
 } | string | BoundPlayerFactory<null | string | {
     [key: string]: any;
-}> | null, stylesInput?: {
+}> | NO_CHANGE | null, stylesInput?: {
     [key: string]: any;
 } | BoundPlayerFactory<null | {
     [key: string]: any;
-}> | null): void;
+}> | NO_CHANGE | null): void;
 /**
  * Sets and resolves a single styling property/value on the provided `StylingContext` so
  * that they can be applied to the element once `renderStyleAndClassBindings` is called.
@@ -103,6 +104,7 @@ export declare function updateClassProp(context: StylingContext, index: number, 
  */
 export declare function renderStyleAndClassBindings(context: StylingContext, renderer: Renderer3, rootOrView: RootContext | LViewData, classesStore?: BindingStore | null, stylesStore?: BindingStore | null): number;
 export declare function isContextDirty(context: StylingContext): boolean;
+export declare function limitToSingleClasses(context: StylingContext): number;
 export declare function setContextDirty(context: StylingContext, isDirtyYes: boolean): void;
 export declare function setContextPlayersDirty(context: StylingContext, isDirtyYes: boolean): void;
 export declare class ClassAndStylePlayerBuilder<T> implements PlayerBuilder {
