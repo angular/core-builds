@@ -134,6 +134,20 @@ export declare function getRenderParent(tNode: TNode, currentView: LViewData): R
  */
 export declare function canInsertNativeNode(tNode: TNode, currentView: LViewData): boolean;
 /**
+ * Inserts a native node before another native node for a given parent using {@link Renderer3}.
+ * This is a utility function that can be used when native nodes were determined - it abstracts an
+ * actual renderer being used.
+ */
+export declare function nativeInsertBefore(renderer: Renderer3, parent: RElement, child: RNode, beforeNode: RNode | null): void;
+/**
+ * Returns a native parent of a given native node.
+ */
+export declare function nativeParentNode(renderer: Renderer3, node: RNode): RElement | null;
+/**
+ * Returns a native sibling of a given native node.
+ */
+export declare function nativeNextSibling(renderer: Renderer3, node: RNode): RNode | null;
+/**
  * Appends the `child` element to the `parent`.
  *
  * The element insertion might be delayed {@link canInsertNativeNode}.
