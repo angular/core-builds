@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.0+56.sha-2a86927
+ * @license Angular v7.1.0-beta.0+57.sha-1130e48
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1708,7 +1708,7 @@ function getParentInjectorIndex(parentLocation) {
     return parentLocation & 32767 /* InjectorIndexMask */;
 }
 function getParentInjectorViewOffset(parentLocation) {
-    return parentLocation >> 15 /* ViewOffsetShift */;
+    return parentLocation >> 16 /* ViewOffsetShift */;
 }
 /**
  * Unwraps a parent injector location number to find the view offset from the current injector,
@@ -2705,7 +2705,7 @@ function getInjectorIndex(tNode, hostView) {
  */
 function getParentInjectorLocation(tNode, view) {
     if (tNode.parent && tNode.parent.injectorIndex !== -1) {
-        return tNode.parent.injectorIndex; // view offset is 0
+        return tNode.parent.injectorIndex; // ViewOffset is 0, AcrossHostBoundary is 0
     }
     // For most cases, the parent injector index can be found on the host node (e.g. for component
     // or container), so this loop will be skipped, but we must keep the loop here to support
@@ -2717,8 +2717,12 @@ function getParentInjectorLocation(tNode, view) {
         hostTNode = view[HOST_NODE];
         viewOffset++;
     }
+    var acrossHostBoundary = hostTNode && hostTNode.type === 3 /* Element */ ?
+        32768 /* AcrossHostBoundary */ :
+        0;
     return hostTNode ?
-        hostTNode.injectorIndex | (viewOffset << 15 /* ViewOffsetShift */) :
+        hostTNode.injectorIndex | (viewOffset << 16 /* ViewOffsetShift */) |
+            acrossHostBoundary :
         -1;
 }
 /**
@@ -2993,7 +2997,8 @@ function bloomHasToken(bloomHash, injectorIndex, injectorView) {
 /** Returns true if flags prevent parent injector from being searched for tokens */
 function shouldSearchParent(flags, parentLocation) {
     return !(flags & 2 /* Self */ ||
-        (flags & 1 /* Host */ && getParentInjectorViewOffset(parentLocation) > 0));
+        (flags & 1 /* Host */ &&
+            (parentLocation & 32768 /* AcrossHostBoundary */)));
 }
 function injectInjector() {
     var tNode = getPreviousOrParentTNode();
@@ -13273,7 +13278,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.1.0-beta.0+56.sha-2a86927');
+var VERSION = new Version('7.1.0-beta.0+57.sha-1130e48');
 
 /**
  * @license

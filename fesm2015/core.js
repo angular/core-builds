@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.0+56.sha-2a86927
+ * @license Angular v7.1.0-beta.0+57.sha-1130e48
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2025,7 +2025,7 @@ function getParentInjectorIndex(parentLocation) {
  * @return {?}
  */
 function getParentInjectorViewOffset(parentLocation) {
-    return (/** @type {?} */ ((parentLocation))) >> 15 /* ViewOffsetShift */;
+    return (/** @type {?} */ ((parentLocation))) >> 16 /* ViewOffsetShift */;
 }
 /**
  * Unwraps a parent injector location number to find the view offset from the current injector,
@@ -3284,7 +3284,7 @@ function getInjectorIndex(tNode, hostView) {
  */
 function getParentInjectorLocation(tNode, view) {
     if (tNode.parent && tNode.parent.injectorIndex !== -1) {
-        return /** @type {?} */ (tNode.parent.injectorIndex); // view offset is 0
+        return /** @type {?} */ (tNode.parent.injectorIndex); // ViewOffset is 0, AcrossHostBoundary is 0
     }
     /** @type {?} */
     let hostTNode = view[HOST_NODE];
@@ -3295,8 +3295,13 @@ function getParentInjectorLocation(tNode, view) {
         hostTNode = /** @type {?} */ ((view[HOST_NODE]));
         viewOffset++;
     }
+    /** @type {?} */
+    const acrossHostBoundary = hostTNode && hostTNode.type === 3 /* Element */ ?
+        32768 /* AcrossHostBoundary */ :
+        0;
     return hostTNode ?
-        hostTNode.injectorIndex | (viewOffset << 15 /* ViewOffsetShift */) : /** @type {?} */ (-1);
+        hostTNode.injectorIndex | (viewOffset << 16 /* ViewOffsetShift */) |
+            acrossHostBoundary : /** @type {?} */ (-1);
 }
 /**
  * Makes a type or an injection token public to the DI system by adding it to an
@@ -3624,7 +3629,8 @@ function bloomHasToken(bloomHash, injectorIndex, injectorView) {
  */
 function shouldSearchParent(flags, parentLocation) {
     return !(flags & 2 /* Self */ ||
-        (flags & 1 /* Host */ && getParentInjectorViewOffset(parentLocation) > 0));
+        (flags & 1 /* Host */ &&
+            ((/** @type {?} */ ((parentLocation))) & 32768 /* AcrossHostBoundary */)));
 }
 /**
  * @return {?}
@@ -16313,7 +16319,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0-beta.0+56.sha-2a86927');
+const VERSION = new Version('7.1.0-beta.0+57.sha-1130e48');
 
 /**
  * @fileoverview added by tsickle

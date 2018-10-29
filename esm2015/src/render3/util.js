@@ -240,7 +240,7 @@ export function getParentInjectorIndex(parentLocation) {
  * @return {?}
  */
 export function getParentInjectorViewOffset(parentLocation) {
-    return (/** @type {?} */ ((parentLocation))) >> 15 /* ViewOffsetShift */;
+    return (/** @type {?} */ ((parentLocation))) >> 16 /* ViewOffsetShift */;
 }
 /**
  * Unwraps a parent injector location number to find the view offset from the current injector,
