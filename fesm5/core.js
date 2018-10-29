@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.1.0-beta.0+58.sha-96770e5
+ * @license Angular v7.1.0-beta.0+60.sha-ede65db
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __decorate, __metadata, __spread, __extends, __param, __read, __assign, __values } from 'tslib';
+import { __decorate, __metadata, __spread, __param, __extends, __read, __assign, __values } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compilePipeFromMetadata, compileInjectable } from '@angular/compiler';
 import { share } from 'rxjs/operators';
@@ -1669,6 +1669,9 @@ function isComponentDef(def) {
 function isLContainer(value) {
     // Styling contexts are also arrays, but their first index contains an element node
     return Array.isArray(value) && typeof value[ACTIVE_INDEX] === 'number';
+}
+function isRootView(target) {
+    return (target[FLAGS] & 64 /* IsRoot */) !== 0;
 }
 /**
  * Retrieve the root view from any component by walking the parent `LViewData` until
@@ -3524,6 +3527,12 @@ function executePipeOnDestroys(viewData) {
 }
 function getRenderParent(tNode, currentView) {
     if (canInsertNativeNode(tNode, currentView)) {
+        // If we are asked for a render parent of the root component we need to do low-level DOM
+        // operation as LTree doesn't exist above the topmost host node. We might need to find a render
+        // parent of the topmost host node if the root component injects ViewContainerRef.
+        if (isRootView(currentView)) {
+            return nativeParentNode(currentView[RENDERER], getNativeByTNode(tNode, currentView));
+        }
         var hostTNode = currentView[HOST_NODE];
         var tNodeParent = tNode.parent;
         if (tNodeParent != null && tNodeParent.type === 4 /* ElementContainer */) {
@@ -3620,6 +3629,18 @@ function nativeInsertBefore(renderer, parent, child, beforeNode) {
     else {
         parent.insertBefore(child, beforeNode, true);
     }
+}
+/**
+ * Returns a native parent of a given native node.
+ */
+function nativeParentNode(renderer, node) {
+    return (isProceduralRenderer(renderer) ? renderer.parentNode(node) : node.parentNode);
+}
+/**
+ * Returns a native sibling of a given native node.
+ */
+function nativeNextSibling(renderer, node) {
+    return isProceduralRenderer(renderer) ? renderer.nextSibling(node) : node.nextSibling;
 }
 /**
  * Appends the `child` element to the `parent`.
@@ -7984,11 +8005,23 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
         lContainer[ACTIVE_INDEX] = -1;
     }
     else {
-        var comment = hostView[RENDERER].createComment(ngDevMode ? 'container' : '');
+        var commentNode = hostView[RENDERER].createComment(ngDevMode ? 'container' : '');
         ngDevMode && ngDevMode.rendererCreateComment++;
+        // A container can be created on the root (topmost / bootstrapped) component and in this case we
+        // can't use LTree to insert container's marker node (both parent of a comment node and the
+        // commend node itself is located outside of elements hold by LTree). In this specific case we
+        // use low-level DOM manipulation to insert container's marker (comment) node.
+        if (isRootView(hostView)) {
+            var renderer = hostView[RENDERER];
+            var hostNative = getNativeByTNode(hostTNode, hostView);
+            var parentOfHostNative = nativeParentNode(renderer, hostNative);
+            nativeInsertBefore(renderer, parentOfHostNative, commentNode, nativeNextSibling(renderer, hostNative));
+        }
+        else {
+            appendChild(commentNode, hostTNode, hostView);
+        }
         hostView[hostTNode.index] = lContainer =
-            createLContainer(slotValue, hostTNode, hostView, comment, true);
-        appendChild(comment, hostTNode, hostView);
+            createLContainer(slotValue, hostTNode, hostView, commentNode, true);
         addToViewTree(hostView, hostTNode.index, lContainer);
     }
     return new R3ViewContainerRef(lContainer, hostTNode, hostView);
@@ -12855,8 +12888,7 @@ function compileComponent(type, metadata) {
                 }
                 var animations = metadata.animations !== null ? new WrappedNodeExpr(metadata.animations) : null;
                 // Compile the component metadata, including template, into an expression.
-                // TODO(alxhub): implement inputs, outputs, queries, etc.
-                var res = compileComponentFromMetadata(__assign({}, directiveMetadata(type, metadata), { template: template, directives: new Map(), pipes: new Map(), viewQueries: [], wrapDirectivesAndPipesInClosure: false, styles: metadata.styles || [], encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, animations: animations, viewProviders: metadata.viewProviders ? new WrappedNodeExpr(metadata.viewProviders) :
+                var res = compileComponentFromMetadata(__assign({}, directiveMetadata(type, metadata), { template: template, directives: new Map(), pipes: new Map(), viewQueries: extractQueriesMetadata(getReflect().propMetadata(type), isViewQuery), wrapDirectivesAndPipesInClosure: false, styles: metadata.styles || [], encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, animations: animations, viewProviders: metadata.viewProviders ? new WrappedNodeExpr(metadata.viewProviders) :
                         null }), constantPool, makeBindingParser());
                 var preStatements = __spread(constantPool.statements, res.statements);
                 ngComponentDef = jitExpression(res.expression, angularCoreEnv, "ng://" + type.name + "/ngComponentDef.js", preStatements);
@@ -12941,7 +12973,7 @@ function directiveMetadata(type, metadata) {
         deps: reflectDependencies(type), host: host,
         inputs: __assign({}, inputsFromMetadata, inputsFromType),
         outputs: __assign({}, outputsFromMetadata, outputsFromType),
-        queries: [],
+        queries: extractQueriesMetadata(propMetadata, isContentQuery),
         lifecycle: {
             usesOnChanges: type.prototype.ngOnChanges !== undefined,
         },
@@ -12975,6 +13007,34 @@ function extractHostBindings(metadata, propMetadata) {
     }
     return { attributes: attributes, listeners: listeners, properties: properties };
 }
+function convertToR3QueryPredicate(selector) {
+    return typeof selector === 'string' ? splitByComma(selector) : new WrappedNodeExpr(selector);
+}
+function convertToR3QueryMetadata(propertyName, ann) {
+    return {
+        propertyName: propertyName,
+        predicate: convertToR3QueryPredicate(ann.selector),
+        descendants: ann.descendants,
+        first: ann.first,
+        read: ann.read ? new WrappedNodeExpr(ann.read) : null
+    };
+}
+function extractQueriesMetadata(propMetadata, isQueryAnn) {
+    var queriesMeta = [];
+    var _loop_3 = function (field) {
+        if (propMetadata.hasOwnProperty(field)) {
+            propMetadata[field].forEach(function (ann) {
+                if (isQueryAnn(ann)) {
+                    queriesMeta.push(convertToR3QueryMetadata(field, ann));
+                }
+            });
+        }
+    };
+    for (var field in propMetadata) {
+        _loop_3(field);
+    }
+    return queriesMeta;
+}
 function isInput(value) {
     return value.ngMetadataName === 'Input';
 }
@@ -12987,9 +13047,20 @@ function isHostBinding(value) {
 function isHostListener(value) {
     return value.ngMetadataName === 'HostListener';
 }
+function isContentQuery(value) {
+    var name = value.ngMetadataName;
+    return name === 'ContentChild' || name === 'ContentChildren';
+}
+function isViewQuery(value) {
+    var name = value.ngMetadataName;
+    return name === 'ViewChild' || name === 'ViewChildren';
+}
+function splitByComma(value) {
+    return value.split(',').map(function (piece) { return piece.trim(); });
+}
 function parseInputOutputs(values) {
     return values.reduce(function (map, value) {
-        var _a = __read(value.split(',').map(function (piece) { return piece.trim(); }), 2), field = _a[0], property = _a[1];
+        var _a = __read(splitByComma(value), 2), field = _a[0], property = _a[1];
         map[field] = property || field;
         return map;
     }, {});
@@ -13371,7 +13442,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.1.0-beta.0+58.sha-96770e5');
+var VERSION = new Version('7.1.0-beta.0+60.sha-ede65db');
 
 /**
  * @license
