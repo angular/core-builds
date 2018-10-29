@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.0+57.sha-1130e48
+ * @license Angular v7.1.0-beta.0+58.sha-96770e5
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -3454,6 +3454,10 @@ function getOrCreateInjectable(tNode, lViewData, token, flags = 0 /* Default */,
                 injectorIndex = -1;
             }
         }
+    }
+    if (flags & 8 /* Optional */ && notFoundValue === undefined) {
+        // This must be set or the NullInjector will throw for optional deps
+        notFoundValue = null;
     }
     if ((flags & (2 /* Self */ | 1 /* Host */)) === 0) {
         /** @type {?} */
@@ -11064,8 +11068,8 @@ class R3Injector {
                 }
             }
             /** @type {?} */
-            let next = !(flags & 2 /* Self */) ? this.parent : getNullInjector();
-            return this.parent.get(token, notFoundValue);
+            const nextInjector = !(flags & 2 /* Self */) ? this.parent : getNullInjector();
+            return nextInjector.get(token, notFoundValue);
         }
         finally {
             // Lastly, clean up the state by restoring the previous injector.
@@ -16421,7 +16425,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0-beta.0+57.sha-1130e48');
+const VERSION = new Version('7.1.0-beta.0+58.sha-96770e5');
 
 /**
  * @fileoverview added by tsickle
