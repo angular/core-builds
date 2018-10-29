@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.0+60.sha-ede65db
+ * @license Angular v7.1.0-beta.0+59.sha-578e4c7
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1961,13 +1961,6 @@ function isComponentDef(def) {
 function isLContainer(value) {
     // Styling contexts are also arrays, but their first index contains an element node
     return Array.isArray(value) && typeof value[ACTIVE_INDEX] === 'number';
-}
-/**
- * @param {?} target
- * @return {?}
- */
-function isRootView(target) {
-    return (target[FLAGS] & 64 /* IsRoot */) !== 0;
 }
 /**
  * Retrieve the root view from any component by walking the parent `LViewData` until
@@ -4292,12 +4285,6 @@ function executePipeOnDestroys(viewData) {
  */
 function getRenderParent(tNode, currentView) {
     if (canInsertNativeNode(tNode, currentView)) {
-        // If we are asked for a render parent of the root component we need to do low-level DOM
-        // operation as LTree doesn't exist above the topmost host node. We might need to find a render
-        // parent of the topmost host node if the root component injects ViewContainerRef.
-        if (isRootView(currentView)) {
-            return nativeParentNode(currentView[RENDERER], getNativeByTNode(tNode, currentView));
-        }
         /** @type {?} */
         const hostTNode = currentView[HOST_NODE];
         /** @type {?} */
@@ -4408,24 +4395,6 @@ function nativeInsertBefore(renderer, parent, child, beforeNode) {
     else {
         parent.insertBefore(child, beforeNode, true);
     }
-}
-/**
- * Returns a native parent of a given native node.
- * @param {?} renderer
- * @param {?} node
- * @return {?}
- */
-function nativeParentNode(renderer, node) {
-    return /** @type {?} */ ((isProceduralRenderer(renderer) ? renderer.parentNode(node) : node.parentNode));
-}
-/**
- * Returns a native sibling of a given native node.
- * @param {?} renderer
- * @param {?} node
- * @return {?}
- */
-function nativeNextSibling(renderer, node) {
-    return isProceduralRenderer(renderer) ? renderer.nextSibling(node) : node.nextSibling;
 }
 /**
  * Appends the `child` element to the `parent`.
@@ -10190,26 +10159,11 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
     }
     else {
         /** @type {?} */
-        const commentNode = hostView[RENDERER].createComment(ngDevMode ? 'container' : '');
+        const comment = hostView[RENDERER].createComment(ngDevMode ? 'container' : '');
         ngDevMode && ngDevMode.rendererCreateComment++;
-        // A container can be created on the root (topmost / bootstrapped) component and in this case we
-        // can't use LTree to insert container's marker node (both parent of a comment node and the
-        // commend node itself is located outside of elements hold by LTree). In this specific case we
-        // use low-level DOM manipulation to insert container's marker (comment) node.
-        if (isRootView(hostView)) {
-            /** @type {?} */
-            const renderer = hostView[RENDERER];
-            /** @type {?} */
-            const hostNative = /** @type {?} */ ((getNativeByTNode(hostTNode, hostView)));
-            /** @type {?} */
-            const parentOfHostNative = nativeParentNode(renderer, hostNative);
-            nativeInsertBefore(renderer, /** @type {?} */ ((parentOfHostNative)), commentNode, nativeNextSibling(renderer, hostNative));
-        }
-        else {
-            appendChild(commentNode, hostTNode, hostView);
-        }
         hostView[hostTNode.index] = lContainer =
-            createLContainer(slotValue, hostTNode, hostView, commentNode, true);
+            createLContainer(slotValue, hostTNode, hostView, comment, true);
+        appendChild(comment, hostTNode, hostView);
         addToViewTree(hostView, /** @type {?} */ (hostTNode.index), lContainer);
     }
     return new R3ViewContainerRef(lContainer, hostTNode, hostView);
@@ -16536,7 +16490,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0-beta.0+60.sha-ede65db');
+const VERSION = new Version('7.1.0-beta.0+59.sha-578e4c7');
 
 /**
  * @fileoverview added by tsickle

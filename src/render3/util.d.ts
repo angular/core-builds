@@ -51,7 +51,6 @@ export declare function isContentQueryHost(tNode: TNode): boolean;
 export declare function isComponent(tNode: TNode): boolean;
 export declare function isComponentDef<T>(def: DirectiveDef<T>): def is ComponentDef<T>;
 export declare function isLContainer(value: RElement | RComment | LContainer | StylingContext): boolean;
-export declare function isRootView(target: LViewData): boolean;
 /**
  * Retrieve the root view from any component by walking the parent `LViewData` until
  * reaching the root `LViewData`.
