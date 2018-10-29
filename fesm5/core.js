@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.0+58.sha-96770e5
+ * @license Angular v7.1.0-beta.0+59.sha-578e4c7
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -12837,8 +12837,7 @@ function compileComponent(type, metadata) {
                 }
                 var animations = metadata.animations !== null ? new WrappedNodeExpr(metadata.animations) : null;
                 // Compile the component metadata, including template, into an expression.
-                // TODO(alxhub): implement inputs, outputs, queries, etc.
-                var res = compileComponentFromMetadata(__assign({}, directiveMetadata(type, metadata), { template: template, directives: new Map(), pipes: new Map(), viewQueries: [], wrapDirectivesAndPipesInClosure: false, styles: metadata.styles || [], encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, animations: animations, viewProviders: metadata.viewProviders ? new WrappedNodeExpr(metadata.viewProviders) :
+                var res = compileComponentFromMetadata(__assign({}, directiveMetadata(type, metadata), { template: template, directives: new Map(), pipes: new Map(), viewQueries: extractQueriesMetadata(getReflect().propMetadata(type), isViewQuery), wrapDirectivesAndPipesInClosure: false, styles: metadata.styles || [], encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, animations: animations, viewProviders: metadata.viewProviders ? new WrappedNodeExpr(metadata.viewProviders) :
                         null }), constantPool, makeBindingParser());
                 var preStatements = __spread(constantPool.statements, res.statements);
                 ngComponentDef = jitExpression(res.expression, angularCoreEnv, "ng://" + type.name + "/ngComponentDef.js", preStatements);
@@ -12923,7 +12922,7 @@ function directiveMetadata(type, metadata) {
         deps: reflectDependencies(type), host: host,
         inputs: __assign({}, inputsFromMetadata, inputsFromType),
         outputs: __assign({}, outputsFromMetadata, outputsFromType),
-        queries: [],
+        queries: extractQueriesMetadata(propMetadata, isContentQuery),
         lifecycle: {
             usesOnChanges: type.prototype.ngOnChanges !== undefined,
         },
@@ -12957,6 +12956,34 @@ function extractHostBindings(metadata, propMetadata) {
     }
     return { attributes: attributes, listeners: listeners, properties: properties };
 }
+function convertToR3QueryPredicate(selector) {
+    return typeof selector === 'string' ? splitByComma(selector) : new WrappedNodeExpr(selector);
+}
+function convertToR3QueryMetadata(propertyName, ann) {
+    return {
+        propertyName: propertyName,
+        predicate: convertToR3QueryPredicate(ann.selector),
+        descendants: ann.descendants,
+        first: ann.first,
+        read: ann.read ? new WrappedNodeExpr(ann.read) : null
+    };
+}
+function extractQueriesMetadata(propMetadata, isQueryAnn) {
+    var queriesMeta = [];
+    var _loop_3 = function (field) {
+        if (propMetadata.hasOwnProperty(field)) {
+            propMetadata[field].forEach(function (ann) {
+                if (isQueryAnn(ann)) {
+                    queriesMeta.push(convertToR3QueryMetadata(field, ann));
+                }
+            });
+        }
+    };
+    for (var field in propMetadata) {
+        _loop_3(field);
+    }
+    return queriesMeta;
+}
 function isInput(value) {
     return value.ngMetadataName === 'Input';
 }
@@ -12969,9 +12996,20 @@ function isHostBinding(value) {
 function isHostListener(value) {
     return value.ngMetadataName === 'HostListener';
 }
+function isContentQuery(value) {
+    var name = value.ngMetadataName;
+    return name === 'ContentChild' || name === 'ContentChildren';
+}
+function isViewQuery(value) {
+    var name = value.ngMetadataName;
+    return name === 'ViewChild' || name === 'ViewChildren';
+}
+function splitByComma(value) {
+    return value.split(',').map(function (piece) { return piece.trim(); });
+}
 function parseInputOutputs(values) {
     return values.reduce(function (map, value) {
-        var _a = __read(value.split(',').map(function (piece) { return piece.trim(); }), 2), field = _a[0], property = _a[1];
+        var _a = __read(splitByComma(value), 2), field = _a[0], property = _a[1];
         map[field] = property || field;
         return map;
     }, {});
@@ -13282,7 +13320,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.1.0-beta.0+58.sha-96770e5');
+var VERSION = new Version('7.1.0-beta.0+59.sha-578e4c7');
 
 /**
  * @license

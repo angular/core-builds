@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.0+58.sha-96770e5
+ * @license Angular v7.1.0-beta.0+59.sha-578e4c7
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -15817,7 +15817,7 @@ function compileComponent(type, metadata) {
                 /** @type {?} */
                 const animations = metadata.animations !== null ? new WrappedNodeExpr(metadata.animations) : null;
                 /** @type {?} */
-                const res = compileComponentFromMetadata(Object.assign({}, directiveMetadata(type, metadata), { template, directives: new Map(), pipes: new Map(), viewQueries: [], wrapDirectivesAndPipesInClosure: false, styles: metadata.styles || [], encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, animations, viewProviders: metadata.viewProviders ? new WrappedNodeExpr(metadata.viewProviders) :
+                const res = compileComponentFromMetadata(Object.assign({}, directiveMetadata(type, metadata), { template, directives: new Map(), pipes: new Map(), viewQueries: extractQueriesMetadata(getReflect().propMetadata(type), isViewQuery), wrapDirectivesAndPipesInClosure: false, styles: metadata.styles || [], encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, animations, viewProviders: metadata.viewProviders ? new WrappedNodeExpr(metadata.viewProviders) :
                         null }), constantPool, makeBindingParser());
                 /** @type {?} */
                 const preStatements = [...constantPool.statements, ...res.statements];
@@ -15926,7 +15926,7 @@ function directiveMetadata(type, metadata) {
         deps: reflectDependencies(type), host,
         inputs: Object.assign({}, inputsFromMetadata, inputsFromType),
         outputs: Object.assign({}, outputsFromMetadata, outputsFromType),
-        queries: [],
+        queries: extractQueriesMetadata(propMetadata, isContentQuery),
         lifecycle: {
             usesOnChanges: type.prototype.ngOnChanges !== undefined,
         },
@@ -15962,6 +15962,46 @@ function extractHostBindings(metadata, propMetadata) {
     return { attributes, listeners, properties };
 }
 /**
+ * @param {?} selector
+ * @return {?}
+ */
+function convertToR3QueryPredicate(selector) {
+    return typeof selector === 'string' ? splitByComma(selector) : new WrappedNodeExpr(selector);
+}
+/**
+ * @param {?} propertyName
+ * @param {?} ann
+ * @return {?}
+ */
+function convertToR3QueryMetadata(propertyName, ann) {
+    return {
+        propertyName: propertyName,
+        predicate: convertToR3QueryPredicate(ann.selector),
+        descendants: ann.descendants,
+        first: ann.first,
+        read: ann.read ? new WrappedNodeExpr(ann.read) : null
+    };
+}
+/**
+ * @param {?} propMetadata
+ * @param {?} isQueryAnn
+ * @return {?}
+ */
+function extractQueriesMetadata(propMetadata, isQueryAnn) {
+    /** @type {?} */
+    const queriesMeta = [];
+    for (const field in propMetadata) {
+        if (propMetadata.hasOwnProperty(field)) {
+            propMetadata[field].forEach(ann => {
+                if (isQueryAnn(ann)) {
+                    queriesMeta.push(convertToR3QueryMetadata(field, ann));
+                }
+            });
+        }
+    }
+    return queriesMeta;
+}
+/**
  * @param {?} value
  * @return {?}
  */
@@ -15990,12 +16030,37 @@ function isHostListener(value) {
     return value.ngMetadataName === 'HostListener';
 }
 /**
+ * @param {?} value
+ * @return {?}
+ */
+function isContentQuery(value) {
+    /** @type {?} */
+    const name = value.ngMetadataName;
+    return name === 'ContentChild' || name === 'ContentChildren';
+}
+/**
+ * @param {?} value
+ * @return {?}
+ */
+function isViewQuery(value) {
+    /** @type {?} */
+    const name = value.ngMetadataName;
+    return name === 'ViewChild' || name === 'ViewChildren';
+}
+/**
+ * @param {?} value
+ * @return {?}
+ */
+function splitByComma(value) {
+    return value.split(',').map(piece => piece.trim());
+}
+/**
  * @param {?} values
  * @return {?}
  */
 function parseInputOutputs(values) {
     return values.reduce((map, value) => {
-        const [field, property] = value.split(',').map(piece => piece.trim());
+        const [field, property] = splitByComma(value);
         map[field] = property || field;
         return map;
     }, /** @type {?} */ ({}));
@@ -16323,7 +16388,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0-beta.0+58.sha-96770e5');
+const VERSION = new Version('7.1.0-beta.0+59.sha-578e4c7');
 
 /**
  * @fileoverview added by tsickle
