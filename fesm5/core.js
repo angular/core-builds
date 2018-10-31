@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.1+14.sha-cc5e4fb.with-local-changes
+ * @license Angular v7.0.1+54.sha-bc93d47.with-local-changes
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1120,8 +1120,8 @@ function isType(v) {
  * Attention: These regex has to hold even if the code is minified!
  */
 var DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*arguments\)/;
-var INHERITED_CLASS = /^class\s+[A-Za-z\d$_]*\s*extends\s+[A-Za-z\d$_]+\s*{/;
-var INHERITED_CLASS_WITH_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[A-Za-z\d$_]+\s*{[\s\S]*constructor\s*\(/;
+var INHERITED_CLASS = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{/;
+var INHERITED_CLASS_WITH_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{[\s\S]*constructor\s*\(/;
 var ReflectionCapabilities = /** @class */ (function () {
     function ReflectionCapabilities(reflect) {
         this._reflect = reflect || _global['Reflect'];
@@ -12588,7 +12588,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.0.1+14.sha-cc5e4fb.with-local-changes');
+var VERSION = new Version('7.0.1+54.sha-bc93d47.with-local-changes');
 
 /**
  * @license

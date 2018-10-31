@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.0.1+14.sha-cc5e4fb.with-local-changes
+ * @license Angular v7.0.1+54.sha-bc93d47.with-local-changes
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1310,9 +1310,9 @@ function isType(v) {
   @type {?} */
 const DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*arguments\)/;
 /** @type {?} */
-const INHERITED_CLASS = /^class\s+[A-Za-z\d$_]*\s*extends\s+[A-Za-z\d$_]+\s*{/;
+const INHERITED_CLASS = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{/;
 /** @type {?} */
-const INHERITED_CLASS_WITH_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[A-Za-z\d$_]+\s*{[\s\S]*constructor\s*\(/;
+const INHERITED_CLASS_WITH_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{[\s\S]*constructor\s*\(/;
 class ReflectionCapabilities {
     /**
      * @param {?=} reflect
@@ -15456,7 +15456,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.0.1+14.sha-cc5e4fb.with-local-changes');
+const VERSION = new Version('7.0.1+54.sha-bc93d47.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
