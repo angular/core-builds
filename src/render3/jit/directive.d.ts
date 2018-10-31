@@ -5,8 +5,10 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { Query } from '../../metadata/di';
 import { Component, Directive } from '../../metadata/directives';
 import { Type } from '../../type';
+import { R3QueryMetadataFacade } from './compiler_facade_interface';
 /**
  * Compile an Angular component according to its decorator metadata, and patch the resulting
  * ngComponentDef onto the component type.
@@ -26,3 +28,4 @@ export declare function compileComponent(type: Type<any>, metadata: Component): 
  */
 export declare function compileDirective(type: Type<any>, directive: Directive): void;
 export declare function extendsDirectlyFromObject(type: Type<any>): boolean;
+export declare function convertToR3QueryMetadata(propertyName: string, ann: Query): R3QueryMetadataFacade;

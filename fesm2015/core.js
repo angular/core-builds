@@ -1,11 +1,10 @@
 /**
- * @license Angular v7.0.1+54.sha-bc93d47.with-local-changes
+ * @license Angular v7.0.1+55.sha-257ac83
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
 import { Subject, Subscription, Observable, merge } from 'rxjs';
-import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compileInjectable, compilePipeFromMetadata } from '@angular/compiler';
 import { share } from 'rxjs/operators';
 
 /**
@@ -2183,6 +2182,30 @@ function getPipeDef(type) {
  */
 function getNgModuleDef(type) {
     return (/** @type {?} */ (type))[NG_MODULE_DEF] || null;
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/**
+ * @return {?}
+ */
+function getCompilerFacade() {
+    /** @type {?} */
+    const globalNg = _global["ng"];
+    if (!globalNg || !globalNg.ɵcompilerFacade) {
+        throw new Error(`Angular JIT compilation failed: '@angular/compiler' not loaded!\n` +
+            `  - JIT compilation is discouraged for production use-cases! Consider AOT mode instead.\n` +
+            `  - Did you bootstrap using '@angular/platform-browser-dynamic' or '@angular/platform-server'?\n` +
+            `  - Alternatively provide the compiler with 'import "@angular/compiler";' before bootstrapping.`);
+    }
+    return globalNg.ɵcompilerFacade;
 }
 
 /**
@@ -9606,6 +9629,7 @@ function searchDirectivesOnInjector(injectorIndex, injectorView, token) {
  * @return {?} the matching bit to check in the bloom filter or `null` if the token is not known.
  */
 function bloomHashBitOrFactory(token) {
+    ngDevMode && assertDefined(token, 'token must be defined');
     /** @type {?} */
     const tokenId = (/** @type {?} */ (token))[NG_ELEMENT_ID];
     return typeof tokenId === 'number' ? tokenId & BLOOM_MASK : tokenId;
@@ -14311,19 +14335,22 @@ function reflectDependencies(type) {
  * @return {?}
  */
 function convertDependencies(deps) {
-    return deps.map(dep => reflectDependency(dep));
+    /** @type {?} */
+    const compiler = getCompilerFacade();
+    return deps.map(dep => reflectDependency(compiler, dep));
 }
 /**
+ * @param {?} compiler
  * @param {?} dep
  * @return {?}
  */
-function reflectDependency(dep) {
+function reflectDependency(compiler, dep) {
     /** @type {?} */
     const meta = {
-        token: new LiteralExpr(null),
+        token: null,
         host: false,
         optional: false,
-        resolved: R3ResolvedDependencyType.Token,
+        resolved: compiler.R3ResolvedDependencyType.Token,
         self: false,
         skipSelf: false,
     };
@@ -14332,13 +14359,8 @@ function reflectDependency(dep) {
      * @return {?}
      */
     function setTokenAndResolvedType(token) {
-        if (token === Injector) {
-            meta.resolved = R3ResolvedDependencyType.Injector;
-        }
-        else {
-            meta.resolved = R3ResolvedDependencyType.Token;
-        }
-        meta.token = new WrappedNodeExpr(token);
+        meta.resolved = compiler.R3ResolvedDependencyType.Token;
+        meta.token = token;
     }
     if (Array.isArray(dep)) {
         if (dep.length === 0) {
@@ -14360,14 +14382,14 @@ function reflectDependency(dep) {
                 meta.host = true;
             }
             else if (param instanceof Inject) {
-                meta.token = new WrappedNodeExpr(param.token);
+                meta.token = param.token;
             }
             else if (param instanceof Attribute) {
                 if (param.attributeName === undefined) {
                     throw new Error(`Attribute name must be defined.`);
                 }
-                meta.token = new LiteralExpr(param.attributeName);
-                meta.resolved = R3ResolvedDependencyType.Attribute;
+                meta.token = param.attributeName;
+                meta.resolved = compiler.R3ResolvedDependencyType.Attribute;
             }
             else {
                 setTokenAndResolvedType(param);
@@ -14394,7 +14416,7 @@ const EMPTY_ARRAY$2 = [];
  * @param {?} ngModule
  * @return {?}
  */
-function compileNgModule$1(moduleType, ngModule) {
+function compileNgModule(moduleType, ngModule) {
     compileNgModuleDefs(moduleType, ngModule);
     setScopeOnDeclaredComponents(moduleType, ngModule);
 }
@@ -14410,29 +14432,20 @@ function compileNgModuleDefs(moduleType, ngModule) {
     /** @type {?} */
     /** @nocollapse */ let ngModuleDef = null;
     Object.defineProperty(moduleType, NG_MODULE_DEF, {
+        configurable: true,
         get: () => {
             if (ngModuleDef === null) {
-                /** @type {?} */
-                const meta = {
-                    type: wrap(moduleType),
-                    bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$2).map(wrapReference),
-                    declarations: declarations.map(wrapReference),
-                    imports: flatten$1(ngModule.imports || EMPTY_ARRAY$2)
-                        .map(expandModuleWithProviders)
-                        .map(wrapReference),
-                    exports: flatten$1(ngModule.exports || EMPTY_ARRAY$2)
-                        .map(expandModuleWithProviders)
-                        .map(wrapReference),
+                ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, `ng://${moduleType.name}/ngModuleDef.js`, {
+                    type: moduleType,
+                    bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$2),
+                    declarations: declarations,
+                    imports: flatten$1(ngModule.imports || EMPTY_ARRAY$2).map(expandModuleWithProviders),
+                    exports: flatten$1(ngModule.exports || EMPTY_ARRAY$2).map(expandModuleWithProviders),
                     emitInline: true,
-                };
-                /** @type {?} */
-                const res = compileNgModule(meta);
-                ngModuleDef = jitExpression(res.expression, angularCoreEnv, `ng://${moduleType.name}/ngModuleDef.js`, []);
+                });
             }
             return ngModuleDef;
-        },
-        // Make the property configurable in dev mode to allow overriding in tests
-        configurable: !!ngDevMode,
+        }
     });
     /** @type {?} */
     /** @nocollapse */ let ngInjectorDef = null;
@@ -14442,17 +14455,15 @@ function compileNgModuleDefs(moduleType, ngModule) {
                 /** @type {?} */
                 const meta = {
                     name: moduleType.name,
-                    type: wrap(moduleType),
+                    type: moduleType,
                     deps: reflectDependencies(moduleType),
-                    providers: new WrappedNodeExpr(ngModule.providers || EMPTY_ARRAY$2),
-                    imports: new WrappedNodeExpr([
+                    providers: ngModule.providers || EMPTY_ARRAY$2,
+                    imports: [
                         ngModule.imports || EMPTY_ARRAY$2,
                         ngModule.exports || EMPTY_ARRAY$2,
-                    ]),
+                    ],
                 };
-                /** @type {?} */
-                const res = compileInjector(meta);
-                ngInjectorDef = jitExpression(res.expression, angularCoreEnv, `ng://${moduleType.name}/ngInjectorDef.js`, res.statements);
+                ngInjectorDef = getCompilerFacade().compileInjector(angularCoreEnv, `ng://${moduleType.name}/ngInjectorDef.js`, meta);
             }
             return ngInjectorDef;
         },
@@ -14614,22 +14625,6 @@ function expandModuleWithProviders(value) {
  * @param {?} value
  * @return {?}
  */
-function wrap(value) {
-    return new WrappedNodeExpr(value);
-}
-/**
- * @param {?} value
- * @return {?}
- */
-function wrapReference(value) {
-    /** @type {?} */
-    const wrapped = wrap(value);
-    return { value: wrapped, type: wrapped };
-}
-/**
- * @param {?} value
- * @return {?}
- */
 function isModuleWithProviders(value) {
     return (/** @type {?} */ (value)).ngModule !== undefined;
 }
@@ -14665,6 +14660,8 @@ function compileComponent(type, metadata) {
     maybeQueueResolutionOfComponentResources(metadata);
     Object.defineProperty(type, NG_COMPONENT_DEF, {
         get: () => {
+            /** @type {?} */
+            const compiler = getCompilerFacade();
             if (ngComponentDef === null) {
                 if (componentNeedsResolution(metadata)) {
                     /** @type {?} */
@@ -14679,23 +14676,8 @@ function compileComponent(type, metadata) {
                     throw new Error(error.join('\n'));
                 }
                 /** @type {?} */
-                const constantPool = new ConstantPool();
-                /** @type {?} */
-                const template = parseTemplate(/** @type {?} */ ((metadata.template)), `ng://${stringify(type)}/template.html`, {
-                    preserveWhitespaces: metadata.preserveWhitespaces || false,
-                }, '');
-                if (template.errors !== undefined) {
-                    /** @type {?} */
-                    const errors = template.errors.map(err => err.toString()).join(', ');
-                    throw new Error(`Errors during JIT compilation of template for ${stringify(type)}: ${errors}`);
-                }
-                /** @type {?} */
-                const animations = metadata.animations !== null ? new WrappedNodeExpr(metadata.animations) : null;
-                /** @type {?} */
-                const res = compileComponentFromMetadata(Object.assign({}, directiveMetadata(type, metadata), { template, directives: new Map(), pipes: new Map(), viewQueries: [], wrapDirectivesInClosure: false, styles: metadata.styles || [], encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, animations }), constantPool, makeBindingParser());
-                /** @type {?} */
-                const preStatements = [...constantPool.statements, ...res.statements];
-                ngComponentDef = jitExpression(res.expression, angularCoreEnv, `ng://${type.name}/ngComponentDef.js`, preStatements);
+                const meta = Object.assign({}, directiveMetadata(type, metadata), { template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, viewQueries: extractQueriesMetadata(getReflect().propMetadata(type), isViewQuery), directives: new Map(), pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, viewProviders: metadata.viewProviders || null });
+                ngComponentDef = compiler.compileComponent(angularCoreEnv, `ng://${stringify(type)}/template.html`, meta);
                 // If component compilation is async, then the @NgModule annotation which declares the
                 // component may execute and set an ngSelectorScope property on the component type. This
                 // allows the component to patch itself with directiveDefs from the module after it
@@ -14737,14 +14719,8 @@ function compileDirective(type, directive) {
         get: () => {
             if (ngDirectiveDef === null) {
                 /** @type {?} */
-                const constantPool = new ConstantPool();
-                /** @type {?} */
-                const sourceMapUrl = `ng://${type && type.name}/ngDirectiveDef.js`;
-                /** @type {?} */
-                const res = compileDirectiveFromMetadata(directiveMetadata(type, directive), constantPool, makeBindingParser());
-                /** @type {?} */
-                const preStatements = [...constantPool.statements, ...res.statements];
-                ngDirectiveDef = jitExpression(res.expression, angularCoreEnv, sourceMapUrl, preStatements);
+                const facade = directiveMetadata(type, directive);
+                ngDirectiveDef = getCompilerFacade().compileDirective(angularCoreEnv, `ng://${type && type.name}/ngDirectiveDef.js`, facade);
             }
             return ngDirectiveDef;
         },
@@ -14769,108 +14745,92 @@ function extendsDirectlyFromObject(type) {
 function directiveMetadata(type, metadata) {
     /** @type {?} */
     const propMetadata = getReflect().propMetadata(type);
-    /** @type {?} */
-    const host = extractHostBindings(metadata, propMetadata);
-    /** @type {?} */
-    const inputsFromMetadata = parseInputOutputs(metadata.inputs || []);
-    /** @type {?} */
-    const outputsFromMetadata = parseInputOutputs(metadata.outputs || []);
-    /** @type {?} */
-    const inputsFromType = {};
-    /** @type {?} */
-    const outputsFromType = {};
-    for (const field in propMetadata) {
-        if (propMetadata.hasOwnProperty(field)) {
-            propMetadata[field].forEach(ann => {
-                if (isInput(ann)) {
-                    inputsFromType[field] = ann.bindingPropertyName || field;
-                }
-                else if (isOutput(ann)) {
-                    outputsFromType[field] = ann.bindingPropertyName || field;
-                }
-            });
-        }
-    }
     return {
         name: type.name,
-        type: new WrappedNodeExpr(type),
+        type: type,
         typeArgumentCount: 0,
         selector: /** @type {?} */ ((metadata.selector)),
-        deps: reflectDependencies(type), host,
-        inputs: Object.assign({}, inputsFromMetadata, inputsFromType),
-        outputs: Object.assign({}, outputsFromMetadata, outputsFromType),
-        queries: [],
+        deps: reflectDependencies(type),
+        host: metadata.host || EMPTY_OBJ$1,
+        propMetadata: propMetadata,
+        inputs: metadata.inputs || EMPTY_ARRAY,
+        outputs: metadata.outputs || EMPTY_ARRAY,
+        queries: extractQueriesMetadata(propMetadata, isContentQuery),
         lifecycle: {
             usesOnChanges: type.prototype.ngOnChanges !== undefined,
         },
         typeSourceSpan: /** @type {?} */ ((null)),
         usesInheritance: !extendsDirectlyFromObject(type),
         exportAs: metadata.exportAs || null,
+        providers: metadata.providers || null,
+    };
+}
+/** @type {?} */
+const EMPTY_OBJ$1 = {};
+/**
+ * @param {?} selector
+ * @return {?}
+ */
+function convertToR3QueryPredicate(selector) {
+    return typeof selector === 'string' ? splitByComma(selector) : selector;
+}
+/**
+ * @param {?} propertyName
+ * @param {?} ann
+ * @return {?}
+ */
+function convertToR3QueryMetadata(propertyName, ann) {
+    return {
+        propertyName: propertyName,
+        predicate: convertToR3QueryPredicate(ann.selector),
+        descendants: ann.descendants,
+        first: ann.first,
+        read: ann.read ? ann.read : null
     };
 }
 /**
- * @param {?} metadata
  * @param {?} propMetadata
+ * @param {?} isQueryAnn
  * @return {?}
  */
-function extractHostBindings(metadata, propMetadata) {
-    const { attributes, listeners, properties, animations } = parseHostBindings(metadata.host || {});
-    if (Object.keys(animations).length > 0) {
-        throw new Error(`Animation bindings are as-of-yet unsupported in Ivy`);
-    }
-    // Next, loop over the properties of the object, looking for @HostBinding and @HostListener.
+function extractQueriesMetadata(propMetadata, isQueryAnn) {
+    /** @type {?} */
+    const queriesMeta = [];
     for (const field in propMetadata) {
         if (propMetadata.hasOwnProperty(field)) {
             propMetadata[field].forEach(ann => {
-                if (isHostBinding(ann)) {
-                    properties[ann.hostPropertyName || field] = field;
-                }
-                else if (isHostListener(ann)) {
-                    listeners[ann.eventName || field] = `${field}(${(ann.args || []).join(',')})`;
+                if (isQueryAnn(ann)) {
+                    queriesMeta.push(convertToR3QueryMetadata(field, ann));
                 }
             });
         }
     }
-    return { attributes, listeners, properties };
+    return queriesMeta;
 }
 /**
  * @param {?} value
  * @return {?}
  */
-function isInput(value) {
-    return value.ngMetadataName === 'Input';
+function isContentQuery(value) {
+    /** @type {?} */
+    const name = value.ngMetadataName;
+    return name === 'ContentChild' || name === 'ContentChildren';
 }
 /**
  * @param {?} value
  * @return {?}
  */
-function isOutput(value) {
-    return value.ngMetadataName === 'Output';
+function isViewQuery(value) {
+    /** @type {?} */
+    const name = value.ngMetadataName;
+    return name === 'ViewChild' || name === 'ViewChildren';
 }
 /**
  * @param {?} value
  * @return {?}
  */
-function isHostBinding(value) {
-    return value.ngMetadataName === 'HostBinding';
-}
-/**
- * @param {?} value
- * @return {?}
- */
-function isHostListener(value) {
-    return value.ngMetadataName === 'HostListener';
-}
-/**
- * @param {?} values
- * @return {?}
- */
-function parseInputOutputs(values) {
-    return values.reduce((map, value) => {
-        const [field, property] = value.split(',').map(piece => piece.trim());
-        map[field] = property || field;
-        return map;
-    }, /** @type {?} */ ({}));
+function splitByComma(value) {
+    return value.split(',').map(piece => piece.trim());
 }
 
 /**
@@ -14884,88 +14844,64 @@ function parseInputOutputs(values) {
  * @param {?=} srcMeta
  * @return {?}
  */
-function compileInjectable$1(type, srcMeta) {
-    /** @type {?} */
-    const meta = srcMeta || { providedIn: null };
+function compileInjectable(type, srcMeta) {
     /** @type {?} */
     let def = null;
     Object.defineProperty(type, NG_INJECTABLE_DEF, {
         get: () => {
             if (def === null) {
                 /** @type {?} */
+                const meta = srcMeta || { providedIn: null };
+                /** @type {?} */
                 const hasAProvider = isUseClassProvider(meta) || isUseFactoryProvider(meta) ||
                     isUseValueProvider(meta) || isUseExistingProvider(meta);
                 /** @type {?} */
-                const ctorDeps = reflectDependencies(type);
-                /** @type {?} */
-                let userDeps = undefined;
+                const compilerMeta = {
+                    name: type.name,
+                    type: type,
+                    providedIn: meta.providedIn,
+                    ctorDeps: reflectDependencies(type),
+                    userDeps: undefined
+                };
                 if ((isUseClassProvider(meta) || isUseFactoryProvider(meta)) && meta.deps !== undefined) {
-                    userDeps = convertDependencies(meta.deps);
+                    compilerMeta.userDeps = convertDependencies(meta.deps);
                 }
-                /** @type {?} */
-                let useClass = undefined;
-                /** @type {?} */
-                let useFactory = undefined;
-                /** @type {?} */
-                let useValue = undefined;
-                /** @type {?} */
-                let useExisting = undefined;
                 if (!hasAProvider) {
                     // In the case the user specifies a type provider, treat it as {provide: X, useClass: X}.
                     // The deps will have been reflected above, causing the factory to create the class by
                     // calling
                     // its constructor with injected deps.
-                    useClass = new WrappedNodeExpr(type);
+                    compilerMeta.useClass = type;
                 }
                 else if (isUseClassProvider(meta)) {
                     // The user explicitly specified useClass, and may or may not have provided deps.
-                    useClass = new WrappedNodeExpr(meta.useClass);
+                    compilerMeta.useClass = meta.useClass;
                 }
                 else if (isUseValueProvider(meta)) {
                     // The user explicitly specified useValue.
-                    useValue = new WrappedNodeExpr(meta.useValue);
+                    compilerMeta.useValue = meta.useValue;
                 }
                 else if (isUseFactoryProvider(meta)) {
                     // The user explicitly specified useFactory.
-                    useFactory = new WrappedNodeExpr(meta.useFactory);
+                    compilerMeta.useFactory = meta.useFactory;
                 }
                 else if (isUseExistingProvider(meta)) {
                     // The user explicitly specified useExisting.
-                    useExisting = new WrappedNodeExpr(meta.useExisting);
+                    compilerMeta.useExisting = meta.useExisting;
                 }
                 else {
                     // Can't happen - either hasAProvider will be false, or one of the providers will be set.
                     throw new Error(`Unreachable state.`);
                 }
-                const { expression, statements } = compileInjectable({
-                    name: type.name,
-                    type: new WrappedNodeExpr(type),
-                    providedIn: computeProvidedIn(meta.providedIn),
-                    useClass,
-                    useFactory,
-                    useValue,
-                    useExisting,
-                    ctorDeps,
-                    userDeps,
-                });
-                def = jitExpression(expression, angularCoreEnv, `ng://${type.name}/ngInjectableDef.js`, statements);
+                def = getCompilerFacade().compileInjectable(angularCoreEnv, `ng://${type.name}/ngInjectableDef.js`, compilerMeta);
             }
             return def;
         },
     });
 }
-/**
- * @param {?} providedIn
- * @return {?}
- */
-function computeProvidedIn(providedIn) {
-    if (providedIn == null || typeof providedIn === 'string') {
-        return new LiteralExpr(providedIn);
-    }
-    else {
-        return new WrappedNodeExpr(providedIn);
-    }
-}
+const ɵ0$1 = getClosureSafeProperty;
+/** @type {?} */
+const USE_VALUE$1 = getClosureSafeProperty({ provide: String, useValue: ɵ0$1 });
 /**
  * @param {?} meta
  * @return {?}
@@ -14973,9 +14909,6 @@ function computeProvidedIn(providedIn) {
 function isUseClassProvider(meta) {
     return (/** @type {?} */ (meta)).useClass !== undefined;
 }
-const ɵ0$1 = getClosureSafeProperty;
-/** @type {?} */
-const USE_VALUE$1 = getClosureSafeProperty({ provide: String, useValue: ɵ0$1 });
 /**
  * @param {?} meta
  * @return {?}
@@ -15013,19 +14946,13 @@ function compilePipe(type, meta) {
     Object.defineProperty(type, NG_PIPE_DEF, {
         get: () => {
             if (ngPipeDef === null) {
-                /** @type {?} */
-                const sourceMapUrl = `ng://${stringify$1(type)}/ngPipeDef.js`;
-                /** @type {?} */
-                const name = type.name;
-                /** @type {?} */
-                const res = compilePipeFromMetadata({
-                    name,
-                    type: new WrappedNodeExpr(type),
+                ngPipeDef = getCompilerFacade().compilePipe(angularCoreEnv, `ng://${stringify$1(type)}/ngPipeDef.js`, {
+                    type: type,
+                    name: type.name,
                     deps: reflectDependencies(type),
                     pipeName: meta.name,
-                    pure: meta.pure !== undefined ? meta.pure : true,
+                    pure: meta.pure !== undefined ? meta.pure : true
                 });
-                ngPipeDef = jitExpression(res.expression, angularCoreEnv, sourceMapUrl, res.statements);
             }
             return ngPipeDef;
         },
@@ -15045,9 +14972,9 @@ const R3_COMPILE_COMPONENT = compileComponent;
 /** @type {?} */
 const R3_COMPILE_DIRECTIVE = compileDirective;
 /** @type {?} */
-const R3_COMPILE_INJECTABLE = compileInjectable$1;
+const R3_COMPILE_INJECTABLE = compileInjectable;
 /** @type {?} */
-const R3_COMPILE_NGMODULE = compileNgModule$1;
+const R3_COMPILE_NGMODULE = compileNgModule;
 /** @type {?} */
 const R3_COMPILE_PIPE = compilePipe;
 /** @type {?} */
@@ -15456,7 +15383,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.0.1+54.sha-bc93d47.with-local-changes');
+const VERSION = new Version('7.0.1+55.sha-257ac83');
 
 /**
  * @fileoverview added by tsickle
