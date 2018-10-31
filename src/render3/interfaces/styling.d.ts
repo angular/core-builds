@@ -183,7 +183,7 @@ export declare const enum StylingFlags {
     PlayerBuildersDirty = 8,
     OnlyProcessSingleClasses = 16,
     BitCountSize = 5,
-    BitMask = 15
+    BitMask = 31
 }
 /** Used as numeric pointer values to determine what cells to update in the `StylingContext` */
 export declare const enum StylingIndex {

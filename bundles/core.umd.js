@@ -1,14 +1,14 @@
 /**
- * @license Angular v7.1.0-beta.0+74.sha-332394d
+ * @license Angular v7.1.0-beta.0+77.sha-d042c4a
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs'), require('@angular/compiler'), require('rxjs/operators')) :
-    typeof define === 'function' && define.amd ? define('@angular/core', ['exports', 'rxjs', '@angular/compiler', 'rxjs/operators'], factory) :
-    (factory((global.ng = global.ng || {}, global.ng.core = {}),global.rxjs,global.ng.compiler,global.rxjs.operators));
-}(this, (function (exports,rxjs,compiler,operators) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs'), require('rxjs/operators')) :
+    typeof define === 'function' && define.amd ? define('@angular/core', ['exports', 'rxjs', 'rxjs/operators'], factory) :
+    (factory((global.ng = global.ng || {}, global.ng.core = {}),global.rxjs,global.rxjs.operators));
+}(this, (function (exports,rxjs,operators) { 'use strict';
 
     /*! *****************************************************************************
     Copyright (c) Microsoft Corporation. All rights reserved.
@@ -796,158 +796,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    /**
-     * Inject decorator and metadata.
-     *
-     * @Annotation
-     * @publicApi
-     */
-    var Inject = makeParamDecorator('Inject', function (token) { return ({ token: token }); });
-    /**
-     * Optional decorator and metadata.
-     *
-     * @Annotation
-     * @publicApi
-     */
-    var Optional = makeParamDecorator('Optional');
-    /**
-     * Self decorator and metadata.
-     *
-     * @Annotation
-     * @publicApi
-     */
-    var Self = makeParamDecorator('Self');
-    /**
-     * SkipSelf decorator and metadata.
-     *
-     * @Annotation
-     * @publicApi
-     */
-    var SkipSelf = makeParamDecorator('SkipSelf');
-    /**
-     * Host decorator and metadata.
-     *
-     * @Annotation
-     * @publicApi
-     */
-    var Host = makeParamDecorator('Host');
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Current injector value used by `inject`.
-     * - `undefined`: it is an error to call `inject`
-     * - `null`: `inject` can be called but there is no injector (limp-mode).
-     * - Injector instance: Use the injector for resolution.
-     */
-    var _currentInjector = undefined;
-    function setCurrentInjector(injector) {
-        var former = _currentInjector;
-        _currentInjector = injector;
-        return former;
-    }
-    /**
-     * Current implementation of inject.
-     *
-     * By default, it is `injectInjectorOnly`, which makes it `Injector`-only aware. It can be changed
-     * to `directiveInject`, which brings in the `NodeInjector` system of ivy. It is designed this
-     * way for two reasons:
-     *  1. `Injector` should not depend on ivy logic.
-     *  2. To maintain tree shake-ability we don't want to bring in unnecessary code.
-     */
-    var _injectImplementation;
-    /**
-     * Sets the current inject implementation.
-     */
-    function setInjectImplementation(impl) {
-        var previous = _injectImplementation;
-        _injectImplementation = impl;
-        return previous;
-    }
-    function injectInjectorOnly(token, flags) {
-        if (flags === void 0) { flags = 0 /* Default */; }
-        if (_currentInjector === undefined) {
-            throw new Error("inject() must be called from an injection context");
-        }
-        else if (_currentInjector === null) {
-            return injectRootLimpMode(token, undefined, flags);
-        }
-        else {
-            return _currentInjector.get(token, flags & 8 /* Optional */ ? null : undefined, flags);
-        }
-    }
-    function inject(token, flags) {
-        if (flags === void 0) { flags = 0 /* Default */; }
-        return (_injectImplementation || injectInjectorOnly)(token, flags);
-    }
-    /**
-     * Injects `root` tokens in limp mode.
-     *
-     * If no injector exists, we can still inject tree-shakable providers which have `providedIn` set to
-     * `"root"`. This is known as the limp mode injection. In such case the value is stored in the
-     * `InjectableDef`.
-     */
-    function injectRootLimpMode(token, notFoundValue, flags) {
-        var injectableDef = getInjectableDef(token);
-        if (injectableDef && injectableDef.providedIn == 'root') {
-            return injectableDef.value === undefined ? injectableDef.value = injectableDef.factory() :
-                injectableDef.value;
-        }
-        if (flags & 8 /* Optional */)
-            return null;
-        if (notFoundValue !== undefined)
-            return notFoundValue;
-        throw new Error("Injector: NOT_FOUND [" + stringify(token) + "]");
-    }
-    function injectArgs(types) {
-        var args = [];
-        for (var i = 0; i < types.length; i++) {
-            var arg = types[i];
-            if (Array.isArray(arg)) {
-                if (arg.length === 0) {
-                    throw new Error('Arguments array must have arguments.');
-                }
-                var type = undefined;
-                var flags = 0 /* Default */;
-                for (var j = 0; j < arg.length; j++) {
-                    var meta = arg[j];
-                    if (meta instanceof Optional || meta.ngMetadataName === 'Optional') {
-                        flags |= 8 /* Optional */;
-                    }
-                    else if (meta instanceof SkipSelf || meta.ngMetadataName === 'SkipSelf') {
-                        flags |= 4 /* SkipSelf */;
-                    }
-                    else if (meta instanceof Self || meta.ngMetadataName === 'Self') {
-                        flags |= 2 /* Self */;
-                    }
-                    else if (meta instanceof Inject) {
-                        type = meta.token;
-                    }
-                    else {
-                        type = meta;
-                    }
-                }
-                args.push(inject(type, flags));
-            }
-            else {
-                args.push(inject(arg));
-            }
-        }
-        return args;
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     function ngDevModeResetPerfCounters() {
         var newCounters = {
             firstTemplatePass: 0,
@@ -1251,6 +1099,189 @@
     }
     function getNgModuleDef(type) {
         return type[NG_MODULE_DEF] || null;
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var R3ResolvedDependencyType;
+    (function (R3ResolvedDependencyType) {
+        R3ResolvedDependencyType[R3ResolvedDependencyType["Token"] = 0] = "Token";
+        R3ResolvedDependencyType[R3ResolvedDependencyType["Attribute"] = 1] = "Attribute";
+    })(R3ResolvedDependencyType || (R3ResolvedDependencyType = {}));
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    function getCompilerFacade() {
+        var globalNg = _global.ng;
+        if (!globalNg || !globalNg.ɵcompilerFacade) {
+            throw new Error("Angular JIT compilation failed: '@angular/compiler' not loaded!\n" +
+                "  - JIT compilation is discouraged for production use-cases! Consider AOT mode instead.\n" +
+                "  - Did you bootstrap using '@angular/platform-browser-dynamic' or '@angular/platform-server'?\n" +
+                "  - Alternatively provide the compiler with 'import \"@angular/compiler\";' before bootstrapping.");
+        }
+        return globalNg.ɵcompilerFacade;
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Inject decorator and metadata.
+     *
+     * @Annotation
+     * @publicApi
+     */
+    var Inject = makeParamDecorator('Inject', function (token) { return ({ token: token }); });
+    /**
+     * Optional decorator and metadata.
+     *
+     * @Annotation
+     * @publicApi
+     */
+    var Optional = makeParamDecorator('Optional');
+    /**
+     * Self decorator and metadata.
+     *
+     * @Annotation
+     * @publicApi
+     */
+    var Self = makeParamDecorator('Self');
+    /**
+     * SkipSelf decorator and metadata.
+     *
+     * @Annotation
+     * @publicApi
+     */
+    var SkipSelf = makeParamDecorator('SkipSelf');
+    /**
+     * Host decorator and metadata.
+     *
+     * @Annotation
+     * @publicApi
+     */
+    var Host = makeParamDecorator('Host');
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Current injector value used by `inject`.
+     * - `undefined`: it is an error to call `inject`
+     * - `null`: `inject` can be called but there is no injector (limp-mode).
+     * - Injector instance: Use the injector for resolution.
+     */
+    var _currentInjector = undefined;
+    function setCurrentInjector(injector) {
+        var former = _currentInjector;
+        _currentInjector = injector;
+        return former;
+    }
+    /**
+     * Current implementation of inject.
+     *
+     * By default, it is `injectInjectorOnly`, which makes it `Injector`-only aware. It can be changed
+     * to `directiveInject`, which brings in the `NodeInjector` system of ivy. It is designed this
+     * way for two reasons:
+     *  1. `Injector` should not depend on ivy logic.
+     *  2. To maintain tree shake-ability we don't want to bring in unnecessary code.
+     */
+    var _injectImplementation;
+    /**
+     * Sets the current inject implementation.
+     */
+    function setInjectImplementation(impl) {
+        var previous = _injectImplementation;
+        _injectImplementation = impl;
+        return previous;
+    }
+    function injectInjectorOnly(token, flags) {
+        if (flags === void 0) { flags = 0 /* Default */; }
+        if (_currentInjector === undefined) {
+            throw new Error("inject() must be called from an injection context");
+        }
+        else if (_currentInjector === null) {
+            return injectRootLimpMode(token, undefined, flags);
+        }
+        else {
+            return _currentInjector.get(token, flags & 8 /* Optional */ ? null : undefined, flags);
+        }
+    }
+    function inject(token, flags) {
+        if (flags === void 0) { flags = 0 /* Default */; }
+        return (_injectImplementation || injectInjectorOnly)(token, flags);
+    }
+    /**
+     * Injects `root` tokens in limp mode.
+     *
+     * If no injector exists, we can still inject tree-shakable providers which have `providedIn` set to
+     * `"root"`. This is known as the limp mode injection. In such case the value is stored in the
+     * `InjectableDef`.
+     */
+    function injectRootLimpMode(token, notFoundValue, flags) {
+        var injectableDef = getInjectableDef(token);
+        if (injectableDef && injectableDef.providedIn == 'root') {
+            return injectableDef.value === undefined ? injectableDef.value = injectableDef.factory() :
+                injectableDef.value;
+        }
+        if (flags & 8 /* Optional */)
+            return null;
+        if (notFoundValue !== undefined)
+            return notFoundValue;
+        throw new Error("Injector: NOT_FOUND [" + stringify(token) + "]");
+    }
+    function injectArgs(types) {
+        var args = [];
+        for (var i = 0; i < types.length; i++) {
+            var arg = types[i];
+            if (Array.isArray(arg)) {
+                if (arg.length === 0) {
+                    throw new Error('Arguments array must have arguments.');
+                }
+                var type = undefined;
+                var flags = 0 /* Default */;
+                for (var j = 0; j < arg.length; j++) {
+                    var meta = arg[j];
+                    if (meta instanceof Optional || meta.ngMetadataName === 'Optional') {
+                        flags |= 8 /* Optional */;
+                    }
+                    else if (meta instanceof SkipSelf || meta.ngMetadataName === 'SkipSelf') {
+                        flags |= 4 /* SkipSelf */;
+                    }
+                    else if (meta instanceof Self || meta.ngMetadataName === 'Self') {
+                        flags |= 2 /* Self */;
+                    }
+                    else if (meta instanceof Inject) {
+                        type = meta.token;
+                    }
+                    else {
+                        type = meta;
+                    }
+                }
+                args.push(inject(type, flags));
+            }
+            else {
+                args.push(inject(arg));
+            }
+        }
+        return args;
     }
 
     /**
@@ -3024,6 +3055,7 @@
      * @returns the matching bit to check in the bloom filter or `null` if the token is not known.
      */
     function bloomHashBitOrFactory(token) {
+        ngDevMode && assertDefined(token, 'token must be defined');
         var tokenId = token[NG_ELEMENT_ID];
         return typeof tokenId === 'number' ? tokenId & BLOOM_MASK : tokenId;
     }
@@ -4307,10 +4339,10 @@
         stylesInput = stylesInput || null;
         var element = context[5 /* ElementPosition */];
         var classesPlayerBuilder = classesInput instanceof BoundPlayerFactory ?
-            new ClassAndStylePlayerBuilder(classesInput, element, 2 /* Class */) :
+            new ClassAndStylePlayerBuilder(classesInput, element, 1 /* Class */) :
             null;
         var stylesPlayerBuilder = stylesInput instanceof BoundPlayerFactory ?
-            new ClassAndStylePlayerBuilder(stylesInput, element, 3 /* Style */) :
+            new ClassAndStylePlayerBuilder(stylesInput, element, 2 /* Style */) :
             null;
         var classesValue = classesPlayerBuilder ?
             classesInput.value :
@@ -4490,7 +4522,7 @@
             var isClassBased_5 = (currFlag & 2 /* Class */) === 2 /* Class */;
             var element = context[5 /* ElementPosition */];
             var playerBuilder = input instanceof BoundPlayerFactory ?
-                new ClassAndStylePlayerBuilder(input, element, isClassBased_5 ? 2 /* Class */ : 3 /* Style */) :
+                new ClassAndStylePlayerBuilder(input, element, isClassBased_5 ? 1 /* Class */ : 2 /* Style */) :
                 null;
             var value_1 = (playerBuilder ? input.value : input);
             var currPlayerIndex = getPlayerBuilderIndex(context, singleIndex);
@@ -4556,7 +4588,7 @@
      *    to this key/value map instead of being renderered via the renderer.
      * @returns number the total amount of players that got queued for animation (if any)
      */
-    function renderStyleAndClassBindings(context, renderer, rootOrView, classesStore, stylesStore) {
+    function renderStyleAndClassBindings(context, renderer, rootOrView, isFirstRender, classesStore, stylesStore) {
         var totalPlayersQueued = 0;
         if (isContextDirty(context)) {
             var flushPlayerBuilders = context[3 /* MasterFlagPosition */] & 8 /* PlayerBuildersDirty */;
@@ -4592,12 +4624,19 @@
                     if (!valueExists(valueToApply, isClassBased_6) && readInitialValue) {
                         valueToApply = getInitialValue(context, flag);
                     }
-                    if (isClassBased_6) {
-                        setClass(native, prop, valueToApply ? true : false, renderer, classesStore, playerBuilder);
-                    }
-                    else {
-                        var sanitizer = (flag & 4 /* Sanitize */) ? styleSanitizer : null;
-                        setStyle(native, prop, valueToApply, renderer, sanitizer, stylesStore, playerBuilder);
+                    // if the first render is true then we do not want to start applying falsy
+                    // values to the DOM element's styling. Otherwise then we know there has
+                    // been a change and even if it's falsy then it's removing something that
+                    // was truthy before.
+                    var doApplyValue = isFirstRender ? valueToApply : true;
+                    if (doApplyValue) {
+                        if (isClassBased_6) {
+                            setClass(native, prop, valueToApply ? true : false, renderer, classesStore, playerBuilder);
+                        }
+                        else {
+                            var sanitizer = (flag & 4 /* Sanitize */) ? styleSanitizer : null;
+                            setStyle(native, prop, valueToApply, renderer, sanitizer, stylesStore, playerBuilder);
+                        }
                     }
                     setDirty(context, i, false);
                 }
@@ -4611,7 +4650,7 @@
                     var playerInsertionIndex = i + 1 /* PlayerOffsetPosition */;
                     var oldPlayer = playerContext[playerInsertionIndex];
                     if (builder) {
-                        var player = builder.buildPlayer(oldPlayer);
+                        var player = builder.buildPlayer(oldPlayer, isFirstRender);
                         if (player !== undefined) {
                             if (player != null) {
                                 var wasQueued = addPlayerInternal(playerContext, rootContext, native, player, playerInsertionIndex);
@@ -4723,7 +4762,7 @@
         return (context[adjustedIndex] & 4 /* Sanitize */) == 4 /* Sanitize */;
     }
     function pointers(configFlag, staticIndex, dynamicIndex) {
-        return (configFlag & 15 /* BitMask */) | (staticIndex << 5 /* BitCountSize */) |
+        return (configFlag & 31 /* BitMask */) | (staticIndex << 5 /* BitCountSize */) |
             (dynamicIndex << (14 /* BitCountSize */ + 5 /* BitCountSize */));
     }
     function getInitialValue(context, flag) {
@@ -4927,12 +4966,12 @@
                 this._dirty = true;
             }
         };
-        ClassAndStylePlayerBuilder.prototype.buildPlayer = function (currentPlayer) {
+        ClassAndStylePlayerBuilder.prototype.buildPlayer = function (currentPlayer, isFirstRender) {
             // if no values have been set here then this means the binding didn't
             // change and therefore the binding values were not updated through
             // `setValue` which means no new player will be provided.
             if (this._dirty) {
-                var player = this._factory.fn(this._element, this._type, this._values, currentPlayer || null);
+                var player = this._factory.fn(this._element, this._type, this._values, isFirstRender, currentPlayer || null);
                 this._values = {};
                 this._dirty = false;
                 return player;
@@ -5869,7 +5908,8 @@
      */
     function elementStylingApply(index) {
         var viewData = getViewData();
-        var totalPlayersQueued = renderStyleAndClassBindings(getStylingContext(index, viewData), getRenderer(), viewData);
+        var isFirstRender = (viewData[FLAGS] & 1 /* CreationMode */) !== 0;
+        var totalPlayersQueued = renderStyleAndClassBindings(getStylingContext(index, viewData), getRenderer(), viewData, isFirstRender);
         if (totalPlayersQueued > 0) {
             var rootContext = getRootContext(viewData);
             scheduleTick(rootContext, 2 /* FlushPlayers */);
@@ -8241,7 +8281,7 @@
      *
      * To see this in action run the following command:
      *
-     *   bazel run --define=compile=local
+     *   bazel run --define=compile=aot
      *   //packages/core/test/bundling/todo:devserver
      *
      *  Then load `localhost:5432` and start using the console tools.
@@ -12596,11 +12636,12 @@
         return convertDependencies(getReflect().parameters(type));
     }
     function convertDependencies(deps) {
-        return deps.map(function (dep) { return reflectDependency(dep); });
+        var compiler = getCompilerFacade();
+        return deps.map(function (dep) { return reflectDependency(compiler, dep); });
     }
-    function reflectDependency(dep) {
+    function reflectDependency(compiler, dep) {
         var meta = {
-            token: new compiler.LiteralExpr(null),
+            token: null,
             host: false,
             optional: false,
             resolved: compiler.R3ResolvedDependencyType.Token,
@@ -12609,7 +12650,7 @@
         };
         function setTokenAndResolvedType(token) {
             meta.resolved = compiler.R3ResolvedDependencyType.Token;
-            meta.token = new compiler.WrappedNodeExpr(token);
+            meta.token = token;
         }
         if (Array.isArray(dep)) {
             if (dep.length === 0) {
@@ -12630,13 +12671,13 @@
                     meta.host = true;
                 }
                 else if (param instanceof Inject) {
-                    meta.token = new compiler.WrappedNodeExpr(param.token);
+                    meta.token = param.token;
                 }
                 else if (param instanceof Attribute) {
                     if (param.attributeName === undefined) {
                         throw new Error("Attribute name must be defined.");
                     }
-                    meta.token = new compiler.LiteralExpr(param.attributeName);
+                    meta.token = param.attributeName;
                     meta.resolved = compiler.R3ResolvedDependencyType.Attribute;
                 }
                 else {
@@ -12674,27 +12715,20 @@
         var declarations = flatten$1(ngModule.declarations || EMPTY_ARRAY$2);
         var ngModuleDef = null;
         Object.defineProperty(moduleType, NG_MODULE_DEF, {
+            configurable: true,
             get: function () {
                 if (ngModuleDef === null) {
-                    var meta = {
-                        type: wrap(moduleType),
-                        bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$2).map(wrapReference),
-                        declarations: declarations.map(wrapReference),
-                        imports: flatten$1(ngModule.imports || EMPTY_ARRAY$2)
-                            .map(expandModuleWithProviders)
-                            .map(wrapReference),
-                        exports: flatten$1(ngModule.exports || EMPTY_ARRAY$2)
-                            .map(expandModuleWithProviders)
-                            .map(wrapReference),
+                    ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, "ng://" + moduleType.name + "/ngModuleDef.js", {
+                        type: moduleType,
+                        bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$2),
+                        declarations: declarations,
+                        imports: flatten$1(ngModule.imports || EMPTY_ARRAY$2).map(expandModuleWithProviders),
+                        exports: flatten$1(ngModule.exports || EMPTY_ARRAY$2).map(expandModuleWithProviders),
                         emitInline: true,
-                    };
-                    var res = compiler.compileNgModule(meta);
-                    ngModuleDef = compiler.jitExpression(res.expression, angularCoreEnv, "ng://" + moduleType.name + "/ngModuleDef.js", []);
+                    });
                 }
                 return ngModuleDef;
-            },
-            // Make the property configurable in dev mode to allow overriding in tests
-            configurable: !!ngDevMode,
+            }
         });
         var ngInjectorDef = null;
         Object.defineProperty(moduleType, NG_INJECTOR_DEF, {
@@ -12702,16 +12736,15 @@
                 if (ngInjectorDef === null) {
                     var meta = {
                         name: moduleType.name,
-                        type: wrap(moduleType),
+                        type: moduleType,
                         deps: reflectDependencies(moduleType),
-                        providers: new compiler.WrappedNodeExpr(ngModule.providers || EMPTY_ARRAY$2),
-                        imports: new compiler.WrappedNodeExpr([
+                        providers: ngModule.providers || EMPTY_ARRAY$2,
+                        imports: [
                             ngModule.imports || EMPTY_ARRAY$2,
                             ngModule.exports || EMPTY_ARRAY$2,
-                        ]),
+                        ],
                     };
-                    var res = compiler.compileInjector(meta);
-                    ngInjectorDef = compiler.jitExpression(res.expression, angularCoreEnv, "ng://" + moduleType.name + "/ngInjectorDef.js", res.statements);
+                    ngInjectorDef = getCompilerFacade().compileInjector(angularCoreEnv, "ng://" + moduleType.name + "/ngInjectorDef.js", meta);
                 }
                 return ngInjectorDef;
             },
@@ -12845,13 +12878,6 @@
         }
         return value;
     }
-    function wrap(value) {
-        return new compiler.WrappedNodeExpr(value);
-    }
-    function wrapReference(value) {
-        var wrapped = wrap(value);
-        return { value: wrapped, type: wrapped };
-    }
     function isModuleWithProviders(value) {
         return value.ngModule !== undefined;
     }
@@ -12881,6 +12907,7 @@
         maybeQueueResolutionOfComponentResources(metadata);
         Object.defineProperty(type, NG_COMPONENT_DEF, {
             get: function () {
+                var compiler = getCompilerFacade();
                 if (ngComponentDef === null) {
                     if (componentNeedsResolution(metadata)) {
                         var error = ["Component '" + stringify(type) + "' is not resolved:"];
@@ -12893,22 +12920,8 @@
                         error.push("Did you run and wait for 'resolveComponentResources()'?");
                         throw new Error(error.join('\n'));
                     }
-                    // The ConstantPool is a requirement of the JIT'er.
-                    var constantPool = new compiler.ConstantPool();
-                    // Parse the template and check for errors.
-                    var template = compiler.parseTemplate(metadata.template, "ng://" + stringify(type) + "/template.html", {
-                        preserveWhitespaces: metadata.preserveWhitespaces || false,
-                    }, '');
-                    if (template.errors !== undefined) {
-                        var errors = template.errors.map(function (err) { return err.toString(); }).join(', ');
-                        throw new Error("Errors during JIT compilation of template for " + stringify(type) + ": " + errors);
-                    }
-                    var animations = metadata.animations !== null ? new compiler.WrappedNodeExpr(metadata.animations) : null;
-                    // Compile the component metadata, including template, into an expression.
-                    var res = compiler.compileComponentFromMetadata(__assign({}, directiveMetadata(type, metadata), { template: template, directives: new Map(), pipes: new Map(), viewQueries: extractQueriesMetadata(getReflect().propMetadata(type), isViewQuery), wrapDirectivesAndPipesInClosure: false, styles: metadata.styles || [], encapsulation: metadata.encapsulation || exports.ViewEncapsulation.Emulated, animations: animations, viewProviders: metadata.viewProviders ? new compiler.WrappedNodeExpr(metadata.viewProviders) :
-                            null }), constantPool, compiler.makeBindingParser());
-                    var preStatements = __spread(constantPool.statements, res.statements);
-                    ngComponentDef = compiler.jitExpression(res.expression, angularCoreEnv, "ng://" + type.name + "/ngComponentDef.js", preStatements);
+                    var meta = __assign({}, directiveMetadata(type, metadata), { template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, viewQueries: extractQueriesMetadata(getReflect().propMetadata(type), isViewQuery), directives: new Map(), pipes: new Map(), encapsulation: metadata.encapsulation || exports.ViewEncapsulation.Emulated, viewProviders: metadata.viewProviders || null });
+                    ngComponentDef = compiler.compileComponent(angularCoreEnv, "ng://" + stringify(type) + "/template.html", meta);
                     // If component compilation is async, then the @NgModule annotation which declares the
                     // component may execute and set an ngSelectorScope property on the component type. This
                     // allows the component to patch itself with directiveDefs from the module after it
@@ -12939,11 +12952,8 @@
         Object.defineProperty(type, NG_DIRECTIVE_DEF, {
             get: function () {
                 if (ngDirectiveDef === null) {
-                    var constantPool = new compiler.ConstantPool();
-                    var sourceMapUrl = "ng://" + (type && type.name) + "/ngDirectiveDef.js";
-                    var res = compiler.compileDirectiveFromMetadata(directiveMetadata(type, directive), constantPool, compiler.makeBindingParser());
-                    var preStatements = __spread(constantPool.statements, res.statements);
-                    ngDirectiveDef = compiler.jitExpression(res.expression, angularCoreEnv, sourceMapUrl, preStatements);
+                    var facade = directiveMetadata(type, directive);
+                    ngDirectiveDef = getCompilerFacade().compileDirective(angularCoreEnv, "ng://" + (type && type.name) + "/ngDirectiveDef.js", facade);
                 }
                 return ngDirectiveDef;
             },
@@ -12961,35 +12971,16 @@
     function directiveMetadata(type, metadata) {
         // Reflect inputs and outputs.
         var propMetadata = getReflect().propMetadata(type);
-        var host = extractHostBindings(metadata, propMetadata);
-        var inputsFromMetadata = parseInputOutputs(metadata.inputs || []);
-        var outputsFromMetadata = parseInputOutputs(metadata.outputs || []);
-        var inputsFromType = {};
-        var outputsFromType = {};
-        var _loop_1 = function (field) {
-            if (propMetadata.hasOwnProperty(field)) {
-                propMetadata[field].forEach(function (ann) {
-                    if (isInput(ann)) {
-                        inputsFromType[field] =
-                            ann.bindingPropertyName ? [ann.bindingPropertyName, field] : field;
-                    }
-                    else if (isOutput(ann)) {
-                        outputsFromType[field] = ann.bindingPropertyName || field;
-                    }
-                });
-            }
-        };
-        for (var field in propMetadata) {
-            _loop_1(field);
-        }
         return {
             name: type.name,
-            type: new compiler.WrappedNodeExpr(type),
+            type: type,
             typeArgumentCount: 0,
             selector: metadata.selector,
-            deps: reflectDependencies(type), host: host,
-            inputs: __assign({}, inputsFromMetadata, inputsFromType),
-            outputs: __assign({}, outputsFromMetadata, outputsFromType),
+            deps: reflectDependencies(type),
+            host: metadata.host || EMPTY_OBJ$1,
+            propMetadata: propMetadata,
+            inputs: metadata.inputs || EMPTY_ARRAY,
+            outputs: metadata.outputs || EMPTY_ARRAY,
             queries: extractQueriesMetadata(propMetadata, isContentQuery),
             lifecycle: {
                 usesOnChanges: type.prototype.ngOnChanges !== undefined,
@@ -12997,35 +12988,12 @@
             typeSourceSpan: null,
             usesInheritance: !extendsDirectlyFromObject(type),
             exportAs: metadata.exportAs || null,
-            providers: metadata.providers ? new compiler.WrappedNodeExpr(metadata.providers) : null
+            providers: metadata.providers || null,
         };
     }
-    function extractHostBindings(metadata, propMetadata) {
-        // First parse the declarations from the metadata.
-        var _a = compiler.parseHostBindings(metadata.host || {}), attributes = _a.attributes, listeners = _a.listeners, properties = _a.properties, animations = _a.animations;
-        if (Object.keys(animations).length > 0) {
-            throw new Error("Animation bindings are as-of-yet unsupported in Ivy");
-        }
-        var _loop_2 = function (field) {
-            if (propMetadata.hasOwnProperty(field)) {
-                propMetadata[field].forEach(function (ann) {
-                    if (isHostBinding(ann)) {
-                        properties[ann.hostPropertyName || field] = field;
-                    }
-                    else if (isHostListener(ann)) {
-                        listeners[ann.eventName || field] = field + "(" + (ann.args || []).join(',') + ")";
-                    }
-                });
-            }
-        };
-        // Next, loop over the properties of the object, looking for @HostBinding and @HostListener.
-        for (var field in propMetadata) {
-            _loop_2(field);
-        }
-        return { attributes: attributes, listeners: listeners, properties: properties };
-    }
+    var EMPTY_OBJ$1 = {};
     function convertToR3QueryPredicate(selector) {
-        return typeof selector === 'string' ? splitByComma(selector) : new compiler.WrappedNodeExpr(selector);
+        return typeof selector === 'string' ? splitByComma(selector) : selector;
     }
     function convertToR3QueryMetadata(propertyName, ann) {
         return {
@@ -13033,12 +13001,12 @@
             predicate: convertToR3QueryPredicate(ann.selector),
             descendants: ann.descendants,
             first: ann.first,
-            read: ann.read ? new compiler.WrappedNodeExpr(ann.read) : null
+            read: ann.read ? ann.read : null
         };
     }
     function extractQueriesMetadata(propMetadata, isQueryAnn) {
         var queriesMeta = [];
-        var _loop_3 = function (field) {
+        var _loop_1 = function (field) {
             if (propMetadata.hasOwnProperty(field)) {
                 propMetadata[field].forEach(function (ann) {
                     if (isQueryAnn(ann)) {
@@ -13048,21 +13016,9 @@
             }
         };
         for (var field in propMetadata) {
-            _loop_3(field);
+            _loop_1(field);
         }
         return queriesMeta;
-    }
-    function isInput(value) {
-        return value.ngMetadataName === 'Input';
-    }
-    function isOutput(value) {
-        return value.ngMetadataName === 'Output';
-    }
-    function isHostBinding(value) {
-        return value.ngMetadataName === 'HostBinding';
-    }
-    function isHostListener(value) {
-        return value.ngMetadataName === 'HostListener';
     }
     function isContentQuery(value) {
         var name = value.ngMetadataName;
@@ -13074,13 +13030,6 @@
     }
     function splitByComma(value) {
         return value.split(',').map(function (piece) { return piece.trim(); });
-    }
-    function parseInputOutputs(values) {
-        return values.reduce(function (map, value) {
-            var _a = __read(splitByComma(value), 2), field = _a[0], property = _a[1];
-            map[field] = property || field;
-            return map;
-        }, {});
     }
 
     /**
@@ -13095,16 +13044,13 @@
         Object.defineProperty(type, NG_PIPE_DEF, {
             get: function () {
                 if (ngPipeDef === null) {
-                    var sourceMapUrl = "ng://" + stringify$1(type) + "/ngPipeDef.js";
-                    var name_1 = type.name;
-                    var res = compiler.compilePipeFromMetadata({
-                        name: name_1,
-                        type: new compiler.WrappedNodeExpr(type),
+                    ngPipeDef = getCompilerFacade().compilePipe(angularCoreEnv, "ng://" + stringify$1(type) + "/ngPipeDef.js", {
+                        type: type,
+                        name: type.name,
                         deps: reflectDependencies(type),
                         pipeName: meta.name,
-                        pure: meta.pure !== undefined ? meta.pure : true,
+                        pure: meta.pure !== undefined ? meta.pure : true
                     });
-                    ngPipeDef = compiler.jitExpression(res.expression, angularCoreEnv, sourceMapUrl, res.statements);
                 }
                 return ngPipeDef;
             },
@@ -13388,7 +13334,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0-beta.0+74.sha-332394d');
+    var VERSION = new Version('7.1.0-beta.0+77.sha-d042c4a');
 
     /**
      * @license
@@ -13402,82 +13348,60 @@
      * `ngInjectableDef` onto the injectable type.
      */
     function compileInjectable(type, srcMeta) {
-        // Allow the compilation of a class with a `@Injectable()` decorator without parameters
-        var meta = srcMeta || { providedIn: null };
         var def = null;
         Object.defineProperty(type, NG_INJECTABLE_DEF, {
             get: function () {
                 if (def === null) {
-                    // Check whether the injectable metadata includes a provider specification.
-                    var hasAProvider = isUseClassProvider(meta) || isUseFactoryProvider(meta) ||
-                        isUseValueProvider(meta) || isUseExistingProvider(meta);
-                    var ctorDeps = reflectDependencies(type);
-                    var userDeps = undefined;
-                    if ((isUseClassProvider(meta) || isUseFactoryProvider(meta)) && meta.deps !== undefined) {
-                        userDeps = convertDependencies(meta.deps);
+                    var meta_1 = srcMeta || { providedIn: null };
+                    var hasAProvider = isUseClassProvider(meta_1) || isUseFactoryProvider(meta_1) ||
+                        isUseValueProvider(meta_1) || isUseExistingProvider(meta_1);
+                    var compilerMeta = {
+                        name: type.name,
+                        type: type,
+                        providedIn: meta_1.providedIn,
+                        ctorDeps: reflectDependencies(type),
+                        userDeps: undefined
+                    };
+                    if ((isUseClassProvider(meta_1) || isUseFactoryProvider(meta_1)) && meta_1.deps !== undefined) {
+                        compilerMeta.userDeps = convertDependencies(meta_1.deps);
                     }
-                    // Decide which flavor of factory to generate, based on the provider specified.
-                    // Only one of the use* fields should be set.
-                    var useClass = undefined;
-                    var useFactory = undefined;
-                    var useValue = undefined;
-                    var useExisting = undefined;
                     if (!hasAProvider) {
                         // In the case the user specifies a type provider, treat it as {provide: X, useClass: X}.
                         // The deps will have been reflected above, causing the factory to create the class by
                         // calling
                         // its constructor with injected deps.
-                        useClass = new compiler.WrappedNodeExpr(type);
+                        compilerMeta.useClass = type;
                     }
-                    else if (isUseClassProvider(meta)) {
+                    else if (isUseClassProvider(meta_1)) {
                         // The user explicitly specified useClass, and may or may not have provided deps.
-                        useClass = new compiler.WrappedNodeExpr(meta.useClass);
+                        compilerMeta.useClass = meta_1.useClass;
                     }
-                    else if (isUseValueProvider(meta)) {
+                    else if (isUseValueProvider(meta_1)) {
                         // The user explicitly specified useValue.
-                        useValue = new compiler.WrappedNodeExpr(meta.useValue);
+                        compilerMeta.useValue = meta_1.useValue;
                     }
-                    else if (isUseFactoryProvider(meta)) {
+                    else if (isUseFactoryProvider(meta_1)) {
                         // The user explicitly specified useFactory.
-                        useFactory = new compiler.WrappedNodeExpr(meta.useFactory);
+                        compilerMeta.useFactory = meta_1.useFactory;
                     }
-                    else if (isUseExistingProvider(meta)) {
+                    else if (isUseExistingProvider(meta_1)) {
                         // The user explicitly specified useExisting.
-                        useExisting = new compiler.WrappedNodeExpr(meta.useExisting);
+                        compilerMeta.useExisting = meta_1.useExisting;
                     }
                     else {
                         // Can't happen - either hasAProvider will be false, or one of the providers will be set.
                         throw new Error("Unreachable state.");
                     }
-                    var _a = compiler.compileInjectable({
-                        name: type.name,
-                        type: new compiler.WrappedNodeExpr(type),
-                        providedIn: computeProvidedIn(meta.providedIn),
-                        useClass: useClass,
-                        useFactory: useFactory,
-                        useValue: useValue,
-                        useExisting: useExisting,
-                        ctorDeps: ctorDeps,
-                        userDeps: userDeps,
-                    }), expression = _a.expression, statements = _a.statements;
-                    def = compiler.jitExpression(expression, angularCoreEnv, "ng://" + type.name + "/ngInjectableDef.js", statements);
+                    def = getCompilerFacade().compileInjectable(angularCoreEnv, "ng://" + type.name + "/ngInjectableDef.js", compilerMeta);
                 }
                 return def;
             },
         });
     }
-    function computeProvidedIn(providedIn) {
-        if (providedIn == null || typeof providedIn === 'string') {
-            return new compiler.LiteralExpr(providedIn);
-        }
-        else {
-            return new compiler.WrappedNodeExpr(providedIn);
-        }
-    }
+    var USE_VALUE$2 = getClosureSafeProperty({ provide: String, useValue: getClosureSafeProperty });
     function isUseClassProvider(meta) {
         return meta.useClass !== undefined;
     }
-    var USE_VALUE$2 = getClosureSafeProperty({ provide: String, useValue: getClosureSafeProperty });
     function isUseValueProvider(meta) {
         return USE_VALUE$2 in meta;
     }
