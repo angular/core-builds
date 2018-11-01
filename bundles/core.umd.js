@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.1+6.sha-4e9f2e5
+ * @license Angular v7.1.0-beta.1+14.sha-2e7b5c5
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -10525,6 +10525,53 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
+     * Adds decorator, constructor, and property metadata to a given type via static metadata fields
+     * on the type.
+     *
+     * These metadata fields can later be read with Angular's `ReflectionCapabilities` API.
+     *
+     * Calls to `setClassMetadata` can be marked as pure, resulting in the metadata assignments being
+     * tree-shaken away during production builds.
+     */
+    function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
+        var _a;
+        var clazz = type;
+        if (decorators !== null) {
+            if (clazz.decorators !== undefined) {
+                (_a = clazz.decorators).push.apply(_a, __spread(decorators));
+            }
+            else {
+                clazz.decorators = decorators;
+            }
+        }
+        if (ctorParameters !== null) {
+            // Rather than merging, clobber the existing parameters. If other projects exist which use
+            // tsickle-style annotations and reflect over them in the same way, this could cause issues,
+            // but that is vanishingly unlikely.
+            clazz.ctorParameters = ctorParameters;
+        }
+        if (propDecorators !== null) {
+            // The property decorator objects are merged as it is possible different fields have different
+            // decorator types. Decorators on individual fields are not merged, as it's also incredibly
+            // unlikely that a field will be decorated both with an Angular decorator and a non-Angular
+            // decorator that's also been downleveled.
+            if (clazz.propDecorators !== undefined) {
+                clazz.propDecorators = __assign({}, clazz.propDecorators, propDecorators);
+            }
+            else {
+                clazz.propDecorators = propDecorators;
+            }
+        }
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
      * Bindings for pure functions are stored after regular bindings.
      *
      * |------consts------|---------vars---------|                 |----- hostVars (dir1) ------|
@@ -13438,7 +13485,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0-beta.1+6.sha-4e9f2e5');
+    var VERSION = new Version('7.1.0-beta.1+14.sha-2e7b5c5');
 
     /**
      * @license
@@ -22446,6 +22493,7 @@
     exports.ɵi18nInterpolationV = i18nInterpolationV;
     exports.ɵi18nMapping = i18nMapping;
     exports.ɵWRAP_RENDERER_FACTORY2 = WRAP_RENDERER_FACTORY2;
+    exports.ɵsetClassMetadata = setClassMetadata;
     exports.ɵRender3DebugRendererFactory2 = Render3DebugRendererFactory2;
     exports.ɵcompileComponent = compileComponent;
     exports.ɵcompileDirective = compileDirective;
