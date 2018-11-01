@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.1+6.sha-4e9f2e5
+ * @license Angular v7.1.0-beta.1+14.sha-2e7b5c5
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -10493,6 +10493,53 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
+     * Adds decorator, constructor, and property metadata to a given type via static metadata fields
+     * on the type.
+     *
+     * These metadata fields can later be read with Angular's `ReflectionCapabilities` API.
+     *
+     * Calls to `setClassMetadata` can be marked as pure, resulting in the metadata assignments being
+     * tree-shaken away during production builds.
+     */
+    function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
+        var _a;
+        var clazz = type;
+        if (decorators !== null) {
+            if (clazz.decorators !== undefined) {
+                (_a = clazz.decorators).push.apply(_a, __spread(decorators));
+            }
+            else {
+                clazz.decorators = decorators;
+            }
+        }
+        if (ctorParameters !== null) {
+            // Rather than merging, clobber the existing parameters. If other projects exist which use
+            // tsickle-style annotations and reflect over them in the same way, this could cause issues,
+            // but that is vanishingly unlikely.
+            clazz.ctorParameters = ctorParameters;
+        }
+        if (propDecorators !== null) {
+            // The property decorator objects are merged as it is possible different fields have different
+            // decorator types. Decorators on individual fields are not merged, as it's also incredibly
+            // unlikely that a field will be decorated both with an Angular decorator and a non-Angular
+            // decorator that's also been downleveled.
+            if (clazz.propDecorators !== undefined) {
+                clazz.propDecorators = __assign({}, clazz.propDecorators, propDecorators);
+            }
+            else {
+                clazz.propDecorators = propDecorators;
+            }
+        }
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
      * Bindings for pure functions are stored after regular bindings.
      *
      * |------consts------|---------vars---------|                 |----- hostVars (dir1) ------|
@@ -13334,7 +13381,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0-beta.1+6.sha-4e9f2e5');
+    var VERSION = new Version('7.1.0-beta.1+14.sha-2e7b5c5');
 
     /**
      * @license
@@ -14491,6 +14538,17 @@
         ApplicationInitStatus.ngInjectableDef = defineInjectable({ token: ApplicationInitStatus, factory: function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(inject(APP_INITIALIZER, 8)); }, providedIn: null });
         return ApplicationInitStatus;
     }());
+    /*@__PURE__*/ setClassMetadata(ApplicationInitStatus, [{
+            type: Injectable
+        }], [{
+            type: undefined,
+            decorators: [{
+                    type: Inject,
+                    args: [APP_INITIALIZER]
+                }, {
+                    type: Optional
+                }]
+        }], null);
 
     /**
      * @license
@@ -14572,6 +14630,9 @@
         Console.ngInjectableDef = defineInjectable({ token: Console, factory: function Console_Factory(t) { return new (t || Console)(); }, providedIn: null });
         return Console;
     }());
+    /*@__PURE__*/ setClassMetadata(Console, [{
+            type: Injectable
+        }], null, null);
 
     /**
      * @license
@@ -14645,6 +14706,9 @@
         Compiler.ngInjectableDef = defineInjectable({ token: Compiler, factory: function Compiler_Factory(t) { return new (t || Compiler)(); }, providedIn: null });
         return Compiler;
     }());
+    /*@__PURE__*/ setClassMetadata(Compiler, [{
+            type: Injectable
+        }], null, null);
     /**
      * Token to provide CompilerOptions in the platform injector.
      *
@@ -15239,6 +15303,11 @@
         Testability.ngInjectableDef = defineInjectable({ token: Testability, factory: function Testability_Factory(t) { return new (t || Testability)(inject(NgZone)); }, providedIn: null });
         return Testability;
     }());
+    /*@__PURE__*/ setClassMetadata(Testability, [{
+            type: Injectable
+        }], [{
+            type: NgZone
+        }], null);
     /**
      * A global registry of {@link Testability} instances for specific elements.
      * @publicApi
@@ -15292,6 +15361,9 @@
         TestabilityRegistry.ngInjectableDef = defineInjectable({ token: TestabilityRegistry, factory: function TestabilityRegistry_Factory(t) { return new (t || TestabilityRegistry)(); }, providedIn: null });
         return TestabilityRegistry;
     }());
+    /*@__PURE__*/ setClassMetadata(TestabilityRegistry, [{
+            type: Injectable
+        }], [], null);
     var _NoopGetTestability = /** @class */ (function () {
         function _NoopGetTestability() {
         }
@@ -15542,6 +15614,11 @@
         PlatformRef.ngInjectableDef = defineInjectable({ token: PlatformRef, factory: function PlatformRef_Factory(t) { return new (t || PlatformRef)(inject(Injector)); }, providedIn: null });
         return PlatformRef;
     }());
+    /*@__PURE__*/ setClassMetadata(PlatformRef, [{
+            type: Injectable
+        }], [{
+            type: Injector
+        }], null);
     function getNgZone(ngZoneOption) {
         var ngZone;
         if (ngZoneOption === 'noop') {
@@ -15780,6 +15857,21 @@
         ApplicationRef.ngInjectableDef = defineInjectable({ token: ApplicationRef, factory: function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(inject(NgZone), inject(Console), inject(Injector), inject(ErrorHandler), inject(ComponentFactoryResolver), inject(ApplicationInitStatus)); }, providedIn: null });
         return ApplicationRef;
     }());
+    /*@__PURE__*/ setClassMetadata(ApplicationRef, [{
+            type: Injectable
+        }], [{
+            type: NgZone
+        }, {
+            type: Console
+        }, {
+            type: Injector
+        }, {
+            type: ErrorHandler
+        }, {
+            type: ComponentFactoryResolver
+        }, {
+            type: ApplicationInitStatus
+        }], null);
     function remove(list, el) {
         var index = list.indexOf(el);
         if (index > -1) {
@@ -16005,6 +16097,16 @@
         SystemJsNgModuleLoader.ngInjectableDef = defineInjectable({ token: SystemJsNgModuleLoader, factory: function SystemJsNgModuleLoader_Factory(t) { return new (t || SystemJsNgModuleLoader)(inject(Compiler), inject(SystemJsNgModuleLoaderConfig, 8)); }, providedIn: null });
         return SystemJsNgModuleLoader;
     }());
+    /*@__PURE__*/ setClassMetadata(SystemJsNgModuleLoader, [{
+            type: Injectable
+        }], [{
+            type: Compiler
+        }, {
+            type: SystemJsNgModuleLoaderConfig,
+            decorators: [{
+                    type: Optional
+                }]
+        }], null);
     function checkNotEmpty(value, modulePath, exportName) {
         if (!value) {
             throw new Error("Cannot find '" + exportName + "' in '" + modulePath + "'");
@@ -17636,6 +17738,12 @@
         ApplicationModule.ngInjectorDef = defineInjector({ factory: function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(inject(ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS, imports: [] });
         return ApplicationModule;
     }());
+    /*@__PURE__*/ setClassMetadata(ApplicationModule, [{
+            type: NgModule,
+            args: [{ providers: APPLICATION_MODULE_PROVIDERS }]
+        }], [{
+            type: ApplicationRef
+        }], null);
 
     /**
      * @license
@@ -22228,6 +22336,7 @@
     exports.ɵi18nInterpolationV = i18nInterpolationV;
     exports.ɵi18nMapping = i18nMapping;
     exports.ɵWRAP_RENDERER_FACTORY2 = WRAP_RENDERER_FACTORY2;
+    exports.ɵsetClassMetadata = setClassMetadata;
     exports.ɵRender3DebugRendererFactory2 = Render3DebugRendererFactory2;
     exports.ɵcompileComponent = compileComponent;
     exports.ɵcompileDirective = compileDirective;

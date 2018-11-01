@@ -20,6 +20,7 @@ export { getCurrentView, restoreView, enableBindings, disableBindings, } from '.
 export { i18nAttribute, i18nExp, i18nStart, i18nEnd, i18nApply, i18nMapping, i18nInterpolation1, i18nInterpolation2, i18nInterpolation3, i18nInterpolation4, i18nInterpolation5, i18nInterpolation6, i18nInterpolation7, i18nInterpolation8, i18nInterpolationV, i18nExpMapping, I18nInstruction, I18nExpInstruction } from './i18n';
 export { NgModuleFactory, NgModuleRef, NgModuleType } from './ng_module_ref';
 export { AttributeMarker } from './interfaces/node';
+export { setClassMetadata, } from './metadata';
 export { pipe, pipeBind1, pipeBind2, pipeBind3, pipeBind4, pipeBindV, } from './pipe';
 export { QueryList, query, queryRefresh, } from './query';
 export { registerContentQuery, loadQueryList, } from './instructions';

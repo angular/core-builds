@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.1.0-beta.1+6.sha-4e9f2e5
+ * @license Angular v7.1.0-beta.1+14.sha-2e7b5c5
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, Injector, ɵRender3ComponentFactory, ɵRender3DebugRendererFactory2, ɵRender3NgModuleRef, ɵWRAP_RENDERER_FACTORY2, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, Compiler, defineInjectable, ɵgetInheritedFactory, ɵclearOverrides, ɵoverrideComponentView, NgZone, ApplicationInitStatus, ɵAPP_ROOT, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled } from '@angular/core';
+import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, Injector, ɵRender3ComponentFactory, ɵRender3DebugRendererFactory2, ɵRender3NgModuleRef, ɵWRAP_RENDERER_FACTORY2, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, Compiler, Injectable, defineInjectable, ɵgetInheritedFactory, ɵsetClassMetadata, ɵclearOverrides, ɵoverrideComponentView, NgZone, ApplicationInitStatus, ɵAPP_ROOT, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled } from '@angular/core';
 import { __extends, __spread, __values, __decorate, __read } from 'tslib';
 
 /**
@@ -1383,6 +1383,9 @@ var TestingCompiler = /** @class */ (function (_super) {
     return TestingCompiler;
 }(Compiler));
 var ɵTestingCompiler_BaseFactory = ɵgetInheritedFactory(TestingCompiler);
+/*@__PURE__*/ ɵsetClassMetadata(TestingCompiler, [{
+        type: Injectable
+    }], null, null);
 /**
  * A factory for creating a Compiler
  *
