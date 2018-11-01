@@ -25,9 +25,15 @@ import { NO_CHANGE } from './tokens';
  * Function used to sanitize the value before writing it into the renderer.
  */
 declare type SanitizerFn = (value: any) => string;
+/**
+ * Refreshes the view, executing the following steps in that order:
+ * triggers init hooks, refreshes dynamic embedded views, triggers content hooks, sets host
+ * bindings, refreshes child components.
+ * Note: view hooks are triggered later when leaving the view.
+ */
+export declare function refreshDescendantViews(viewData: LViewData, rf: RenderFlags | null): void;
 /** Sets the host bindings for the current view. */
 export declare function setHostBindings(tView: TView, viewData: LViewData): void;
-export declare function executeInitAndContentHooks(viewData: LViewData): void;
 export declare function createLViewData<T>(renderer: Renderer3, tView: TView, context: T | null, flags: LViewFlags, sanitizer?: Sanitizer | null): LViewData;
 /**
  * Create and stores the TNode, and hooks it up to the tree.
@@ -365,6 +371,8 @@ export declare function generateExpandoInstructionBlock(tView: TView, tNode: TNo
 * Because we are updating the blueprint, we only need to do this once.
 */
 export declare function prefillHostVars(tView: TView, viewData: LViewData, totalHostVars: number): void;
+/** Stores index of component's host element so it will be queued for view refresh during CD. */
+export declare function queueComponentIndexForCheck(previousOrParentTNode: TNode): void;
 /**
  * Initializes the flags on the current node, setting all indices to the initial index,
  * the directive count to 0, and adding the isComponent flag.
@@ -436,7 +444,7 @@ export declare function embeddedViewEnd(): void;
  *
  * @param adjustedElementIndex  Element index in LViewData[] (adjusted for HEADER_OFFSET)
  */
-export declare function componentRefresh<T>(adjustedElementIndex: number, parentFirstTemplatePass: boolean): void;
+export declare function componentRefresh<T>(adjustedElementIndex: number, parentFirstTemplatePass: boolean, rf: RenderFlags | null): void;
 /** Returns a boolean for whether the view is attached */
 export declare function viewAttached(view: LViewData): boolean;
 /**
@@ -547,8 +555,6 @@ export declare function checkNoChanges<T>(component: T): void;
  * @param lViewData The view which the change detection should be checked on.
  */
 export declare function checkNoChangesInRootView(lViewData: LViewData): void;
-/** Checks the view of the component provided. Does not gate on dirty checks or execute doCheck. */
-export declare function detectChangesInternal<T>(hostView: LViewData, component: T): void;
 /**
  * Mark the component as dirty (needing change detection).
  *
