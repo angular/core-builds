@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.1+19.sha-eb5d308
+ * @license Angular v7.1.0-beta.1+31.sha-bc68b59
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -13369,7 +13369,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0-beta.1+19.sha-eb5d308');
+    var VERSION = new Version('7.1.0-beta.1+31.sha-bc68b59');
 
     /**
      * @license
@@ -22050,6 +22050,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    var ɵdefineNgModule = defineNgModule;
     // clang-format on
 
     /**
@@ -22223,11 +22224,11 @@
     exports.ɵoverrideComponentView = overrideComponentView;
     exports.ɵoverrideProvider = overrideProvider;
     exports.ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR;
+    exports.ɵdefineNgModule = ɵdefineNgModule;
     exports.ɵdefineBase = defineBase;
     exports.ɵdefineComponent = defineComponent;
     exports.ɵdefineDirective = defineDirective;
     exports.ɵdefinePipe = definePipe;
-    exports.ɵdefineNgModule = defineNgModule;
     exports.ɵdetectChanges = detectChanges;
     exports.ɵrenderComponent = renderComponent;
     exports.ɵRender3ComponentFactory = ComponentFactory$1;
