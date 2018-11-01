@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.1+36.sha-18b6d58
+ * @license Angular v7.1.0-beta.1+39.sha-ea0a996
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -3737,6 +3737,25 @@ function getInheritedFactory(type) {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * @param {...?} args
+ * @return {?}
+ */
+function noop(...args) {
+    // Do nothing.
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/**
  * Called when there are multiple component selectors that match a given node
  * @param {?} tNode
  * @return {?}
@@ -6226,10 +6245,10 @@ function refreshDescendantViews(viewData, rf) {
         const creationMode = getCreationMode();
         /** @type {?} */
         const checkNoChangesMode = getCheckNoChangesMode();
-        setHostBindings(tView, viewData);
         if (!checkNoChangesMode) {
             executeInitHooks(viewData, tView, creationMode);
         }
+        setHostBindings(tView, viewData);
         refreshDynamicEmbeddedViews(viewData);
         // Content query results must be refreshed before content hooks are called.
         refreshContentQueries(tView);
@@ -7697,7 +7716,9 @@ function queueComponentIndexForCheck(previousOrParentTNode) {
 function queueHostBindingForCheck(tView, def) {
     ngDevMode &&
         assertEqual(getFirstTemplatePass(), true, 'Should only be called in first template pass.'); /** @type {?} */
-    ((tView.expandoInstructions)).push(/** @type {?} */ ((def.hostBindings)), def.hostVars);
+    ((tView.expandoInstructions)).push(def.hostBindings || noop);
+    if (def.hostVars)
+        /** @type {?} */ ((tView.expandoInstructions)).push(def.hostVars);
 }
 /**
  * Caches local names and their matching directive indices for query and template lookups.
@@ -7771,8 +7792,7 @@ function baseResolveDirective(tView, viewData, def, directiveFactory) {
     const nodeInjectorFactory = new NodeInjectorFactory(directiveFactory, isComponentDef(def), null);
     tView.blueprint.push(nodeInjectorFactory);
     viewData.push(nodeInjectorFactory);
-    if (def.hostBindings)
-        queueHostBindingForCheck(tView, def);
+    queueHostBindingForCheck(tView, def);
 }
 /**
  * @template T
@@ -9057,11 +9077,6 @@ function initializeTNodeInputs(tNode) {
 function delegateToClassInput(tNode) {
     return tNode.flags & 32768 /* hasClassInput */;
 }
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
 
 /**
  * @fileoverview added by tsickle
@@ -16371,7 +16386,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0-beta.1+36.sha-18b6d58');
+const VERSION = new Version('7.1.0-beta.1+39.sha-ea0a996');
 
 /**
  * @fileoverview added by tsickle
