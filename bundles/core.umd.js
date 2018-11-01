@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.1+14.sha-2e7b5c5
+ * @license Angular v7.1.0-beta.1+15.sha-aadbc8a
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -13485,7 +13485,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0-beta.1+14.sha-2e7b5c5');
+    var VERSION = new Version('7.1.0-beta.1+15.sha-aadbc8a');
 
     /**
      * @license
@@ -22406,7 +22406,7 @@
     exports.ɵgetFactoryOf = getFactoryOf;
     exports.ɵgetInheritedFactory = getInheritedFactory;
     exports.ɵtemplateRefExtractor = templateRefExtractor;
-    exports.ɵProvidersResolver = ProvidersFeature;
+    exports.ɵProvidersFeature = ProvidersFeature;
     exports.ɵInheritDefinitionFeature = InheritDefinitionFeature;
     exports.ɵNgOnChangesFeature = NgOnChangesFeature;
     exports.ɵRender3NgModuleRef = NgModuleRef$1;
