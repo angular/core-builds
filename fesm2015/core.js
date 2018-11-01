@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.1+37.sha-3b9bc73
+ * @license Angular v7.1.0-beta.1+36.sha-18b6d58
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -3730,25 +3730,6 @@ function getInheritedFactory(type) {
         // latter has to be assumed.
         return (t) => new t();
     }
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * @param {...?} args
- * @return {?}
- */
-function noop(...args) {
-    // Do nothing.
 }
 
 /**
@@ -7716,9 +7697,7 @@ function queueComponentIndexForCheck(previousOrParentTNode) {
 function queueHostBindingForCheck(tView, def) {
     ngDevMode &&
         assertEqual(getFirstTemplatePass(), true, 'Should only be called in first template pass.'); /** @type {?} */
-    ((tView.expandoInstructions)).push(def.hostBindings || noop);
-    if (def.hostVars)
-        /** @type {?} */ ((tView.expandoInstructions)).push(def.hostVars);
+    ((tView.expandoInstructions)).push(/** @type {?} */ ((def.hostBindings)), def.hostVars);
 }
 /**
  * Caches local names and their matching directive indices for query and template lookups.
@@ -7792,7 +7771,8 @@ function baseResolveDirective(tView, viewData, def, directiveFactory) {
     const nodeInjectorFactory = new NodeInjectorFactory(directiveFactory, isComponentDef(def), null);
     tView.blueprint.push(nodeInjectorFactory);
     viewData.push(nodeInjectorFactory);
-    queueHostBindingForCheck(tView, def);
+    if (def.hostBindings)
+        queueHostBindingForCheck(tView, def);
 }
 /**
  * @template T
@@ -9077,6 +9057,11 @@ function initializeTNodeInputs(tNode) {
 function delegateToClassInput(tNode) {
     return tNode.flags & 32768 /* hasClassInput */;
 }
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
 
 /**
  * @fileoverview added by tsickle
@@ -16386,7 +16371,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0-beta.1+37.sha-3b9bc73');
+const VERSION = new Version('7.1.0-beta.1+36.sha-18b6d58');
 
 /**
  * @fileoverview added by tsickle
