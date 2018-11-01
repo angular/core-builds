@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.1+36.sha-18b6d58
+ * @license Angular v7.1.0-beta.1+39.sha-ea0a996
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -3144,6 +3144,21 @@
         }
     }
 
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    function noop() {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        // Do nothing.
+    }
+
     /** Called when directives inject each other (creating a circular dependency) */
     /** Called when there are multiple component selectors that match a given node */
     function throwMultipleComponentError(tNode) {
@@ -5026,10 +5041,10 @@
         if (rf !== 1 /* Create */) {
             var creationMode = getCreationMode();
             var checkNoChangesMode = getCheckNoChangesMode();
-            setHostBindings(tView, viewData);
             if (!checkNoChangesMode) {
                 executeInitHooks(viewData, tView, creationMode);
             }
+            setHostBindings(tView, viewData);
             refreshDynamicEmbeddedViews(viewData);
             // Content query results must be refreshed before content hooks are called.
             refreshContentQueries(tView);
@@ -6200,7 +6215,9 @@
     function queueHostBindingForCheck(tView, def) {
         ngDevMode &&
             assertEqual(getFirstTemplatePass(), true, 'Should only be called in first template pass.');
-        tView.expandoInstructions.push(def.hostBindings, def.hostVars);
+        tView.expandoInstructions.push(def.hostBindings || noop);
+        if (def.hostVars)
+            tView.expandoInstructions.push(def.hostVars);
     }
     /** Caches local names and their matching directive indices for query and template lookups. */
     function cacheMatchingLocalNames(tNode, localRefs, exportsMap) {
@@ -6249,8 +6266,7 @@
         var nodeInjectorFactory = new NodeInjectorFactory(directiveFactory, isComponentDef(def), null);
         tView.blueprint.push(nodeInjectorFactory);
         viewData.push(nodeInjectorFactory);
-        if (def.hostBindings)
-            queueHostBindingForCheck(tView, def);
+        queueHostBindingForCheck(tView, def);
     }
     function addComponentLogic(viewData, previousOrParentTNode, def) {
         var native = getNativeByTNode(previousOrParentTNode, viewData);
@@ -7179,21 +7195,6 @@
     }
     function delegateToClassInput(tNode) {
         return tNode.flags & 32768 /* hasClassInput */;
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    function noop() {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        // Do nothing.
     }
 
     /**
@@ -13473,7 +13474,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0-beta.1+36.sha-18b6d58');
+    var VERSION = new Version('7.1.0-beta.1+39.sha-ea0a996');
 
     /**
      * @license
