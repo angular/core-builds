@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.1+52.sha-496372d
+ * @license Angular v7.1.0-beta.1+60.sha-beabfb7
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -16474,7 +16474,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0-beta.1+52.sha-496372d');
+const VERSION = new Version('7.1.0-beta.1+60.sha-beabfb7');
 
 /**
  * @fileoverview added by tsickle
