@@ -4,7 +4,7 @@
  *
  * To see this in action run the following command:
  *
- *   bazel run --define=compile=local
+ *   bazel run --define=compile=aot
  *   //packages/core/test/bundling/todo:devserver
  *
  *  Then load `localhost:5432` and start using the console tools.

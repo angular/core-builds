@@ -102,7 +102,7 @@ export declare function updateClassProp(context: StylingContext, index: number, 
  *    to this key/value map instead of being renderered via the renderer.
  * @returns number the total amount of players that got queued for animation (if any)
  */
-export declare function renderStyleAndClassBindings(context: StylingContext, renderer: Renderer3, rootOrView: RootContext | LViewData, classesStore?: BindingStore | null, stylesStore?: BindingStore | null): number;
+export declare function renderStyleAndClassBindings(context: StylingContext, renderer: Renderer3, rootOrView: RootContext | LViewData, isFirstRender: boolean, classesStore?: BindingStore | null, stylesStore?: BindingStore | null): number;
 export declare function isContextDirty(context: StylingContext): boolean;
 export declare function limitToSingleClasses(context: StylingContext): number;
 export declare function setContextDirty(context: StylingContext, isDirtyYes: boolean): void;
@@ -115,5 +115,5 @@ export declare class ClassAndStylePlayerBuilder<T> implements PlayerBuilder {
     private _factory;
     constructor(factory: PlayerFactory, _element: HTMLElement, _type: BindingType);
     setValue(prop: string, value: any): void;
-    buildPlayer(currentPlayer?: Player | null): Player | undefined | null;
+    buildPlayer(currentPlayer: Player | null, isFirstRender: boolean): Player | undefined | null;
 }

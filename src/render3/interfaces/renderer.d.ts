@@ -57,6 +57,8 @@ export interface ProceduralRenderer3 {
     insertBefore(parent: RNode, newChild: RNode, refChild: RNode | null): void;
     removeChild(parent: RElement, oldChild: RNode): void;
     selectRootElement(selectorOrNode: string | any): RElement;
+    parentNode(node: RNode): RElement | null;
+    nextSibling(node: RNode): RNode | null;
     setAttribute(el: RElement, name: string, value: string, namespace?: string | null): void;
     removeAttribute(el: RElement, name: string, namespace?: string | null): void;
     addClass(el: RElement, name: string): void;
@@ -75,6 +77,8 @@ export interface RendererFactory3 {
 export declare const domRendererFactory3: RendererFactory3;
 /** Subset of API needed for appending elements and text nodes. */
 export interface RNode {
+    parentNode: RNode | null;
+    nextSibling: RNode | null;
     removeChild(oldChild: RNode): void;
     /**
      * Insert a child node.
