@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.1+77.sha-7dbc103
+ * @license Angular v7.1.0-beta.1+78.sha-dc2464e
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -15614,7 +15614,11 @@ function reflectDependency(compiler, dep) {
         for (let j = 0; j < dep.length; j++) {
             /** @type {?} */
             const param = dep[j];
-            if (param instanceof Optional || param.__proto__.ngMetadataName === 'Optional') {
+            if (param === undefined) {
+                // param may be undefined if type of dep is not set by ngtsc
+                continue;
+            }
+            else if (param instanceof Optional || param.__proto__.ngMetadataName === 'Optional') {
                 meta.optional = true;
             }
             else if (param instanceof SkipSelf || param.__proto__.ngMetadataName === 'SkipSelf') {
@@ -16474,7 +16478,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0-beta.1+77.sha-7dbc103');
+const VERSION = new Version('7.1.0-beta.1+78.sha-dc2464e');
 
 /**
  * @fileoverview added by tsickle
