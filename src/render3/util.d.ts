@@ -89,3 +89,4 @@ export declare function getParentInjectorView(location: RelativeInjectorLocation
  * @returns The TNode of the parent injector
  */
 export declare function getParentInjectorTNode(location: RelativeInjectorLocation, startView: LViewData, startTNode: TNode): TElementNode | TContainerNode | null;
+export declare const defaultScheduler: any;

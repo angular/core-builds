@@ -10,7 +10,7 @@ import { Injector } from '../di/injector';
 import { Sanitizer } from '../sanitization/security';
 import { ComponentDef, ComponentType } from './interfaces/definition';
 import { PlayerHandler } from './interfaces/player';
-import { RElement, RNode, Renderer3, RendererFactory3 } from './interfaces/renderer';
+import { RElement, Renderer3, RendererFactory3 } from './interfaces/renderer';
 import { LViewData, RootContext } from './interfaces/view';
 /** Options that control how the component should be bootstrapped. */
 export interface CreateComponentOptions {
@@ -87,8 +87,8 @@ export declare function createRootComponentView(rNode: RElement | null, def: Com
  * Creates a root component and sets it up with features and host bindings. Shared by
  * renderComponent() and ViewContainerRef.createComponent().
  */
-export declare function createRootComponent<T>(hostRNode: RNode | null, componentView: LViewData, componentDef: ComponentDef<T>, rootView: LViewData, rootContext: RootContext, hostFeatures: HostFeature[] | null): any;
-export declare function createRootContext(scheduler: (workFn: () => void) => void, playerHandler?: PlayerHandler | null): RootContext;
+export declare function createRootComponent<T>(componentView: LViewData, componentDef: ComponentDef<T>, rootView: LViewData, rootContext: RootContext, hostFeatures: HostFeature[] | null): any;
+export declare function createRootContext(scheduler?: (workFn: () => void) => void, playerHandler?: PlayerHandler | null): RootContext;
 /**
  * Used to enable lifecycle hooks on the root component.
  *
