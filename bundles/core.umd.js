@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.1+77.sha-7dbc103
+ * @license Angular v7.1.0-beta.1+78.sha-dc2464e
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -12701,7 +12701,11 @@
             }
             for (var j = 0; j < dep.length; j++) {
                 var param = dep[j];
-                if (param instanceof Optional || param.__proto__.ngMetadataName === 'Optional') {
+                if (param === undefined) {
+                    // param may be undefined if type of dep is not set by ngtsc
+                    continue;
+                }
+                else if (param instanceof Optional || param.__proto__.ngMetadataName === 'Optional') {
                     meta.optional = true;
                 }
                 else if (param instanceof SkipSelf || param.__proto__.ngMetadataName === 'SkipSelf') {
@@ -13377,7 +13381,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0-beta.1+77.sha-7dbc103');
+    var VERSION = new Version('7.1.0-beta.1+78.sha-dc2464e');
 
     /**
      * @license
