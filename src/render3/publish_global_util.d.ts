@@ -11,9 +11,9 @@
  */
 /**
  * This value reflects the property on the window where the dev
- * tools are patched (window.ngDev).
+ * tools are patched (window.ng).
  * */
-export declare const GLOBAL_PUBLISH_EXPANDO_KEY = "ngDev";
+export declare const GLOBAL_PUBLISH_EXPANDO_KEY = "ng";
 export declare function publishDefaultGlobalUtils(): void;
 export declare type GlobalDevModeContainer = {
     [GLOBAL_PUBLISH_EXPANDO_KEY]: {
