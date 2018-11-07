@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.1+80.sha-3ca1a57
+ * @license Angular v7.1.0-beta.1+81.sha-931a363
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -8316,9 +8316,9 @@
      */
     /**
      * This value reflects the property on the window where the dev
-     * tools are patched (window.ngDev).
+     * tools are patched (window.ng).
      * */
-    var GLOBAL_PUBLISH_EXPANDO_KEY = 'ngDev';
+    var GLOBAL_PUBLISH_EXPANDO_KEY = 'ng';
     /*
      * Publishes a collection of default debug tools onto `window._ng_`.
      *
@@ -13479,7 +13479,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0-beta.1+80.sha-3ca1a57');
+    var VERSION = new Version('7.1.0-beta.1+81.sha-931a363');
 
     /**
      * @license
@@ -22522,6 +22522,7 @@
     exports.ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ = SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__;
     exports.ɵSWITCH_RENDERER2_FACTORY__POST_R3__ = SWITCH_RENDERER2_FACTORY__POST_R3__;
     exports.ɵpublishGlobalUtil = publishGlobalUtil;
+    exports.ɵpublishDefaultGlobalUtils = publishDefaultGlobalUtils;
     exports.ɵSWITCH_INJECTOR_FACTORY__POST_R3__ = SWITCH_INJECTOR_FACTORY__POST_R3__;
     exports.ɵregisterModuleFactory = registerModuleFactory;
     exports.ɵEMPTY_ARRAY = EMPTY_ARRAY$4;
