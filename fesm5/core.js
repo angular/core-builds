@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.1+81.sha-931a363
+ * @license Angular v7.1.0-beta.1+83.sha-53e4e0c
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2039,7 +2039,7 @@ function findViaDirective(lViewData, directiveInstance) {
     return -1;
 }
 function assertDomElement(element) {
-    assertEqual(element.nodeType, 1, 'The provided value must be an instance of an HTMLElement');
+    assertEqual(element && (element.nodeType == Node.ELEMENT_NODE || element.nodeType == Node.TEXT_NODE), true, 'The provided value must be an instance of an HTMLElement');
 }
 /**
  * Returns a list of directives extracted from the given view based on the
@@ -7258,6 +7258,7 @@ var Injector = /** @class */ (function () {
     };
     Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
     Injector.NULL = new NullInjector();
+    /** @nocollapse */
     Injector.ngInjectableDef = defineInjectable({
         providedIn: 'any',
         factory: function () { return inject(INJECTOR$1); },
@@ -13428,7 +13429,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.1.0-beta.1+81.sha-931a363');
+var VERSION = new Version('7.1.0-beta.1+83.sha-53e4e0c');
 
 /**
  * @license
@@ -17530,6 +17531,7 @@ var IterableDiffers = /** @class */ (function () {
             throw new Error("Cannot find a differ supporting object '" + iterable + "' of type '" + getTypeNameForDebugging(iterable) + "'");
         }
     };
+    /** @nocollapse */
     IterableDiffers.ngInjectableDef = defineInjectable({
         providedIn: 'root',
         factory: function () { return new IterableDiffers([new DefaultIterableDifferFactory()]); }
