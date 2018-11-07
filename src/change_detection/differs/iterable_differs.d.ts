@@ -117,6 +117,7 @@ export interface IterableDifferFactory {
  * @publicApi
  */
 export declare class IterableDiffers {
+    /** @nocollapse */
     static ngInjectableDef: never;
     /**
      * @deprecated v4.0.0 - Should be private

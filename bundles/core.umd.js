@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.1+79.sha-297c54e
+ * @license Angular v7.1.0-beta.1+85.sha-9e26216
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2105,7 +2105,7 @@
         return -1;
     }
     function assertDomElement(element) {
-        assertEqual(element.nodeType, 1, 'The provided value must be an instance of an HTMLElement');
+        assertEqual(element && (element.nodeType == Node.ELEMENT_NODE || element.nodeType == Node.TEXT_NODE), true, 'The provided value must be an instance of an HTMLElement');
     }
     /**
      * Returns a list of directives extracted from the given view based on the
@@ -7324,6 +7324,7 @@
         };
         Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
         Injector.NULL = new NullInjector();
+        /** @nocollapse */
         Injector.ngInjectableDef = defineInjectable({
             providedIn: 'any',
             factory: function () { return inject(INJECTOR$1); },
@@ -8316,9 +8317,9 @@
      */
     /**
      * This value reflects the property on the window where the dev
-     * tools are patched (window.ngDev).
+     * tools are patched (window.ng).
      * */
-    var GLOBAL_PUBLISH_EXPANDO_KEY = 'ngDev';
+    var GLOBAL_PUBLISH_EXPANDO_KEY = 'ng';
     /*
      * Publishes a collection of default debug tools onto `window._ng_`.
      *
@@ -13479,7 +13480,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0-beta.1+79.sha-297c54e');
+    var VERSION = new Version('7.1.0-beta.1+85.sha-9e26216');
 
     /**
      * @license
@@ -17581,6 +17582,7 @@
                 throw new Error("Cannot find a differ supporting object '" + iterable + "' of type '" + getTypeNameForDebugging(iterable) + "'");
             }
         };
+        /** @nocollapse */
         IterableDiffers.ngInjectableDef = defineInjectable({
             providedIn: 'root',
             factory: function () { return new IterableDiffers([new DefaultIterableDifferFactory()]); }
@@ -22522,6 +22524,7 @@
     exports.ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ = SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__;
     exports.ɵSWITCH_RENDERER2_FACTORY__POST_R3__ = SWITCH_RENDERER2_FACTORY__POST_R3__;
     exports.ɵpublishGlobalUtil = publishGlobalUtil;
+    exports.ɵpublishDefaultGlobalUtils = publishDefaultGlobalUtils;
     exports.ɵSWITCH_INJECTOR_FACTORY__POST_R3__ = SWITCH_INJECTOR_FACTORY__POST_R3__;
     exports.ɵregisterModuleFactory = registerModuleFactory;
     exports.ɵEMPTY_ARRAY = EMPTY_ARRAY$4;
