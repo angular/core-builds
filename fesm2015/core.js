@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.1+81.sha-931a363
+ * @license Angular v7.1.0-beta.1+83.sha-53e4e0c
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2410,7 +2410,7 @@ function findViaDirective(lViewData, directiveInstance) {
  * @return {?}
  */
 function assertDomElement(element) {
-    assertEqual(element.nodeType, 1, 'The provided value must be an instance of an HTMLElement');
+    assertEqual(element && (element.nodeType == Node.ELEMENT_NODE || element.nodeType == Node.TEXT_NODE), true, 'The provided value must be an instance of an HTMLElement');
 }
 /**
  * Returns a list of directives extracted from the given view based on the
@@ -9215,6 +9215,7 @@ class Injector {
 }
 Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
 Injector.NULL = new NullInjector();
+/** @nocollapse */
 Injector.ngInjectableDef = defineInjectable({
     providedIn: /** @type {?} */ ('any'),
     factory: () => inject(INJECTOR$1),
@@ -16391,7 +16392,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0-beta.1+81.sha-931a363');
+const VERSION = new Version('7.1.0-beta.1+83.sha-53e4e0c');
 
 /**
  * @fileoverview added by tsickle
@@ -21545,6 +21546,7 @@ class IterableDiffers {
         }
     }
 }
+/** @nocollapse */
 IterableDiffers.ngInjectableDef = defineInjectable({
     providedIn: 'root',
     factory: () => new IterableDiffers([new DefaultIterableDifferFactory()])

@@ -55,6 +55,7 @@ export declare abstract class Injector {
         parent?: Injector;
         name?: string;
     }): Injector;
+    /** @nocollapse */
     static ngInjectableDef: never;
 }
 export declare const SWITCH_INJECTOR_FACTORY__POST_R3__: () => import("@angular/core/src/render3/di").NodeInjector;
