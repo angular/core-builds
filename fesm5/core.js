@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.1.0-beta.1+77.sha-7dbc103
+ * @license Angular v7.1.0-beta.1+79.sha-297c54e
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __decorate, __metadata, __spread, __extends, __param, __read, __assign, __values } from 'tslib';
+import { __decorate, __metadata, __spread, __param, __extends, __read, __assign, __values } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { share } from 'rxjs/operators';
 
@@ -1718,7 +1718,10 @@ function getRootView(target) {
     return lViewData;
 }
 function getRootContext(viewOrComponent) {
-    return getRootView(viewOrComponent)[CONTEXT];
+    var rootView = getRootView(viewOrComponent);
+    ngDevMode &&
+        assertDefined(rootView[CONTEXT], 'RootView has no context. Perhaps it is disconnected?');
+    return rootView[CONTEXT];
 }
 /**
  * Returns the monkey-patch value data present on the target (which could be
@@ -1794,6 +1797,9 @@ function getParentInjectorTNode(location, startView, startTNode) {
     }
     return parentTNode;
 }
+var defaultScheduler = (typeof requestAnimationFrame !== 'undefined' && requestAnimationFrame || // browser only
+    setTimeout // everything else
+).bind(_global);
 
 /**
  * @license
@@ -5152,7 +5158,7 @@ function renderEmbeddedTemplate(viewToRender, tView, context, rf) {
     var oldView;
     if (viewToRender[FLAGS] & 64 /* IsRoot */) {
         // This is a root view inside the view tree
-        tickRootContext(viewToRender[CONTEXT]);
+        tickRootContext(getRootContext(viewToRender));
     }
     else {
         try {
@@ -8313,7 +8319,7 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     var hostRNode = locateHostElement(rendererFactory, opts.host || componentTag);
     var rootFlags = componentDef.onPush ? 4 /* Dirty */ | 64 /* IsRoot */ :
         2 /* CheckAlways */ | 64 /* IsRoot */;
-    var rootContext = createRootContext(opts.scheduler || requestAnimationFrame.bind(window), opts.playerHandler || null);
+    var rootContext = createRootContext(opts.scheduler, opts.playerHandler);
     var renderer = rendererFactory.createRenderer(hostRNode, componentDef);
     var rootView = createLViewData(renderer, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags);
     rootView[INJECTOR] = opts.injector || null;
@@ -8323,7 +8329,7 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
         if (rendererFactory.begin)
             rendererFactory.begin();
         var componentView = createRootComponentView(hostRNode, componentDef, rootView, renderer, sanitizer);
-        component = createRootComponent(hostRNode, componentView, componentDef, rootView, rootContext, opts.hostFeatures || null);
+        component = createRootComponent(componentView, componentDef, rootView, rootContext, opts.hostFeatures || null);
         refreshDescendantViews(rootView, null);
     }
     finally {
@@ -8364,7 +8370,7 @@ function createRootComponentView(rNode, def, rootView, renderer, sanitizer) {
  * Creates a root component and sets it up with features and host bindings. Shared by
  * renderComponent() and ViewContainerRef.createComponent().
  */
-function createRootComponent(hostRNode, componentView, componentDef, rootView, rootContext, hostFeatures) {
+function createRootComponent(componentView, componentDef, rootView, rootContext, hostFeatures) {
     var tView = rootView[TVIEW];
     // Create directive instance with factory() and store at next index in viewData
     var component = instantiateRootComponent(tView, rootView, componentDef);
@@ -8378,7 +8384,7 @@ function createRootComponent(hostRNode, componentView, componentDef, rootView, r
 function createRootContext(scheduler, playerHandler) {
     return {
         components: [],
-        scheduler: scheduler,
+        scheduler: scheduler || defaultScheduler,
         clean: CLEAN_PROMISE,
         playerHandler: playerHandler || null,
         flags: 0 /* Empty */
@@ -9607,10 +9613,7 @@ var ROOT_CONTEXT = new InjectionToken('ROOT_CONTEXT_TOKEN', { providedIn: 'root'
  */
 var SCHEDULER = new InjectionToken('SCHEDULER_TOKEN', {
     providedIn: 'root',
-    factory: function () {
-        var useRaf = typeof requestAnimationFrame !== 'undefined' && typeof window !== 'undefined';
-        return useRaf ? requestAnimationFrame.bind(window) : setTimeout;
-    },
+    factory: function () { return defaultScheduler; },
 });
 /**
  * A function used to wrap the `RendererFactory2`.
@@ -9659,9 +9662,7 @@ var ComponentFactory$1 = /** @class */ (function (_super) {
             locateHostElement(rendererFactory, rootSelectorOrNode);
         var rootFlags = this.componentDef.onPush ? 4 /* Dirty */ | 64 /* IsRoot */ :
             2 /* CheckAlways */ | 64 /* IsRoot */;
-        var rootContext = ngModule && !isInternalRootView ?
-            ngModule.injector.get(ROOT_CONTEXT) :
-            createRootContext(requestAnimationFrame.bind(window));
+        var rootContext = ngModule && !isInternalRootView ? ngModule.injector.get(ROOT_CONTEXT) : createRootContext();
         var renderer = rendererFactory.createRenderer(hostRNode, this.componentDef);
         // Create the root view. Uses empty TView and ContentTemplate.
         var rootView = createLViewData(renderer, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags);
@@ -9706,7 +9707,7 @@ var ComponentFactory$1 = /** @class */ (function (_super) {
             // TODO: should LifecycleHooksFeature and other host features be generated by the compiler and
             // executed here?
             // Angular 5 reference: https://stackblitz.com/edit/lifecycle-hooks-vcref
-            component = createRootComponent(hostRNode, componentView, this.componentDef, rootView, rootContext, [LifecycleHooksFeature]);
+            component = createRootComponent(componentView, this.componentDef, rootView, rootContext, [LifecycleHooksFeature]);
             refreshDescendantViews(rootView, 1 /* Create */);
         }
         finally {
@@ -12676,7 +12677,11 @@ function reflectDependency(compiler, dep) {
         }
         for (var j = 0; j < dep.length; j++) {
             var param = dep[j];
-            if (param instanceof Optional || param.__proto__.ngMetadataName === 'Optional') {
+            if (param === undefined) {
+                // param may be undefined if type of dep is not set by ngtsc
+                continue;
+            }
+            else if (param instanceof Optional || param.__proto__.ngMetadataName === 'Optional') {
                 meta.optional = true;
             }
             else if (param instanceof SkipSelf || param.__proto__.ngMetadataName === 'SkipSelf') {
@@ -13423,7 +13428,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.1.0-beta.1+77.sha-7dbc103');
+var VERSION = new Version('7.1.0-beta.1+79.sha-297c54e');
 
 /**
  * @license
