@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.2
+ * @license Angular v7.1.0-beta.2+1.sha-3567e81
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -13850,12 +13850,12 @@ function getIdxOfMatchingDirective(tNode, currentView, type) {
     return null;
 }
 /**
+ * @param {?} read
  * @param {?} tNode
  * @param {?} currentView
- * @param {?} read
  * @return {?}
  */
-function queryRead(tNode, currentView, read) {
+function queryByReadToken(read, tNode, currentView) {
     /** @type {?} */
     const factoryFn = (/** @type {?} */ (read))[NG_ELEMENT_ID];
     if (typeof factoryFn === 'function') {
@@ -13875,7 +13875,7 @@ function queryRead(tNode, currentView, read) {
  * @param {?} currentView
  * @return {?}
  */
-function queryReadByTNodeType(tNode, currentView) {
+function queryByTNodeType(tNode, currentView) {
     if (tNode.type === 3 /* Element */ || tNode.type === 4 /* ElementContainer */) {
         return createElementRef(ElementRef, tNode, currentView);
     }
@@ -13883,6 +13883,39 @@ function queryReadByTNodeType(tNode, currentView) {
         return createTemplateRef(TemplateRef, ElementRef, tNode, currentView);
     }
     return null;
+}
+/**
+ * @param {?} templateRefToken
+ * @param {?} tNode
+ * @param {?} currentView
+ * @param {?} read
+ * @return {?}
+ */
+function queryByTemplateRef(templateRefToken, tNode, currentView, read) {
+    /** @type {?} */
+    const templateRefResult = (/** @type {?} */ (templateRefToken))[NG_ELEMENT_ID]();
+    if (read) {
+        return templateRefResult ? queryByReadToken(read, tNode, currentView) : null;
+    }
+    return templateRefResult;
+}
+/**
+ * @param {?} tNode
+ * @param {?} currentView
+ * @param {?} read
+ * @param {?} matchingIdx
+ * @return {?}
+ */
+function queryRead(tNode, currentView, read, matchingIdx) {
+    if (read) {
+        return queryByReadToken(read, tNode, currentView);
+    }
+    if (matchingIdx > -1) {
+        return currentView[matchingIdx];
+    }
+    // if read token and / or strategy is not specified,
+    // detect it using appropriate tNode type
+    return queryByTNodeType(tNode, currentView);
 }
 /**
  * @param {?} query
@@ -13896,10 +13929,20 @@ function add(query, tNode) {
         /** @type {?} */
         const predicate = query.predicate;
         /** @type {?} */
-        const type = predicate.type;
+        const type = /** @type {?} */ (predicate.type);
         if (type) {
             /** @type {?} */
-            const result = queryRead(tNode, currentView, predicate.read || type);
+            let result = null;
+            if (type === TemplateRef) {
+                result = queryByTemplateRef(type, tNode, currentView, predicate.read);
+            }
+            else {
+                /** @type {?} */
+                const matchingIdx = getIdxOfMatchingDirective(tNode, currentView, type);
+                if (matchingIdx !== null) {
+                    result = queryRead(tNode, currentView, predicate.read, matchingIdx);
+                }
+            }
             if (result !== null) {
                 addMatch(query, result);
             }
@@ -13909,23 +13952,10 @@ function add(query, tNode) {
             const selector = /** @type {?} */ ((predicate.selector));
             for (let i = 0; i < selector.length; i++) {
                 /** @type {?} */
-                const directiveIdx = getIdxOfMatchingSelector(tNode, selector[i]);
-                if (directiveIdx !== null) {
+                const matchingIdx = getIdxOfMatchingSelector(tNode, selector[i]);
+                if (matchingIdx !== null) {
                     /** @type {?} */
-                    let result = null;
-                    if (predicate.read) {
-                        result = queryRead(tNode, currentView, predicate.read);
-                    }
-                    else {
-                        if (directiveIdx > -1) {
-                            result = currentView[directiveIdx];
-                        }
-                        else {
-                            // if read token and / or strategy is not specified,
-                            // detect it using appropriate tNode type
-                            result = queryReadByTNodeType(tNode, currentView);
-                        }
-                    }
+                    const result = queryRead(tNode, currentView, predicate.read, matchingIdx);
                     if (result !== null) {
                         addMatch(query, result);
                     }
@@ -16480,7 +16510,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0-beta.2');
+const VERSION = new Version('7.1.0-beta.2+1.sha-3567e81');
 
 /**
  * @fileoverview added by tsickle
