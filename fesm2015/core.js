@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.2+16.sha-83c9bff
+ * @license Angular v7.1.0-beta.2+19.sha-78b6f88
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -10851,6 +10851,7 @@ function InheritDefinitionFeature(definition) {
                         superHostBindings(directiveIndex, elementIndex);
                         prevHostBindings(directiveIndex, elementIndex);
                     };
+                    (/** @type {?} */ (definition)).hostVars += superDef.hostVars;
                 }
                 else {
                     definition.hostBindings = superHostBindings;
@@ -10922,7 +10923,7 @@ function InheritDefinitionFeature(definition) {
             const features = superDef.features;
             if (features) {
                 for (const feature of features) {
-                    if (feature && feature !== InheritDefinitionFeature) {
+                    if (feature && feature.ngInherit) {
                         (/** @type {?} */ (feature))(definition);
                     }
                 }
@@ -11069,6 +11070,9 @@ function NgOnChangesFeature(definition) {
     }
     definition.doCheck = onChangesWrapper(definition.doCheck);
 }
+// This option ensures that the ngOnChanges lifecycle hook will be inherited
+// from superclasses (in InheritDefinitionFeature).
+(/** @type {?} */ (NgOnChangesFeature)).ngInherit = true;
 /**
  * @param {?} delegateHook
  * @return {?}
@@ -16596,7 +16600,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0-beta.2+16.sha-83c9bff');
+const VERSION = new Version('7.1.0-beta.2+19.sha-78b6f88');
 
 /**
  * @fileoverview added by tsickle

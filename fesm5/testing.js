@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.1.0-beta.2+16.sha-83c9bff
+ * @license Angular v7.1.0-beta.2+19.sha-78b6f88
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, Injector, ɵRender3ComponentFactory, ɵRender3DebugRendererFactory2, ɵRender3NgModuleRef, ɵWRAP_RENDERER_FACTORY2, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, Compiler, Injectable, ApplicationInitStatus, NgZone, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵivyEnabled, ɵoverrideComponentView, ɵoverrideProvider } from '@angular/core';
+import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, Injector, NgZone, ɵRender3ComponentFactory, ɵRender3DebugRendererFactory2, ɵRender3NgModuleRef, ɵWRAP_RENDERER_FACTORY2, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, Compiler, Injectable, ApplicationInitStatus, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵivyEnabled, ɵoverrideComponentView, ɵoverrideProvider } from '@angular/core';
 import { __spread, __decorate, __values, __read, __extends } from 'tslib';
 
 /**
@@ -1138,7 +1138,7 @@ var TestBedRender3 = /** @class */ (function () {
         var componentFactory = new ɵRender3ComponentFactory(componentDef);
         var componentRef = componentFactory.create(Injector.NULL, [], "#" + rootElId, this._moduleRef);
         var autoDetect = this.get(ComponentFixtureAutoDetect, false);
-        var fixture = new ComponentFixture(componentRef, null, autoDetect);
+        var fixture = new ComponentFixture(componentRef, this.get(NgZone), autoDetect);
         this._activeFixtures.push(fixture);
         return fixture;
     };
@@ -1189,7 +1189,8 @@ var TestBedRender3 = /** @class */ (function () {
             ], RootScopeModule);
             return RootScopeModule;
         }());
-        var providers = __spread(this._providers, this._providerOverrides);
+        var ngZone = new NgZone({ enableLongStackTrace: true });
+        var providers = __spread([{ provide: NgZone, useValue: ngZone }], this._providers, this._providerOverrides);
         var declarations = this._declarations;
         var imports = [RootScopeModule, this.ngModule, this._imports];
         var schemas = this._schemas;
