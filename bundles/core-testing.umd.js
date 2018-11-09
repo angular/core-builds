@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.1+85.sha-9e26216
+ * @license Angular v7.1.0-beta.2+19.sha-78b6f88
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1211,7 +1211,7 @@
             var componentFactory = new core.ɵRender3ComponentFactory(componentDef);
             var componentRef = componentFactory.create(core.Injector.NULL, [], "#" + rootElId, this._moduleRef);
             var autoDetect = this.get(ComponentFixtureAutoDetect, false);
-            var fixture = new ComponentFixture(componentRef, null, autoDetect);
+            var fixture = new ComponentFixture(componentRef, this.get(core.NgZone), autoDetect);
             this._activeFixtures.push(fixture);
             return fixture;
         };
@@ -1262,7 +1262,8 @@
                 ], RootScopeModule);
                 return RootScopeModule;
             }());
-            var providers = __spread(this._providers, this._providerOverrides);
+            var ngZone = new core.NgZone({ enableLongStackTrace: true });
+            var providers = __spread([{ provide: core.NgZone, useValue: ngZone }], this._providers, this._providerOverrides);
             var declarations = this._declarations;
             var imports = [RootScopeModule, this.ngModule, this._imports];
             var schemas = this._schemas;

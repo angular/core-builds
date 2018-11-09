@@ -28,5 +28,7 @@ export declare function addPlayer(ref: ComponentInstance | DirectiveInstance | H
  * This function will only return players that have been added to the ref instance using
  * `addPlayer` or any players that are active through any template styling bindings
  * (`[style]`, `[style.prop]`, `[class]` and `[class.name]`).
+ *
+ * @publicApi
  */
 export declare function getPlayers(ref: ComponentInstance | DirectiveInstance | HTMLElement): Player[];

@@ -23,6 +23,8 @@ import { LViewData, RootContext } from './interfaces/view';
  *    the component instance is exists in a template.
  * If a directive instance is used then it will return the
  *    component that contains that directive in it's template.
+ *
+ * @publicApi
  */
 export declare function getComponent<T = {}>(target: {}): T | null;
 /**
@@ -30,31 +32,43 @@ export declare function getComponent<T = {}>(target: {}): T | null;
  *
  * This will only return a component instance of the DOM node
  * contains an instance of a component on it.
+ *
+ * @publicApi
  */
 export declare function getHostComponent<T = {}>(target: {}): T | null;
 /**
  * Returns the `RootContext` instance that is associated with
  * the application where the target is situated.
+ *
+ * @publicApi
  */
 export declare function getRootContext(target: LViewData | {}): RootContext;
 /**
  * Returns a list of all the components in the application
  * that are have been bootstrapped.
+ *
+ * @publicApi
  */
 export declare function getRootComponents(target: {}): any[];
 /**
  * Returns the injector instance that is associated with
  * the element, component or directive.
+ *
+ * @publicApi
  */
 export declare function getInjector(target: {}): Injector;
 /**
  * Returns a list of all the directives that are associated
  * with the underlying target element.
+ *
+ * @publicApi
  */
 export declare function getDirectives(target: {}): Array<{}>;
 /**
  * Returns LContext associated with a target passed as an argument.
  * Throws if a given target doesn't have associated LContext.
+ *
+ * @publicApi
  */
 export declare function loadContext(target: {}): LContext;
 /**
@@ -62,10 +76,14 @@ export declare function loadContext(target: {}): LContext;
  * reaching the root `LViewData`.
  *
  * @param componentOrView any component or view
+ *
+ * @publicApi
  */
 export declare function getRootView(componentOrView: LViewData | {}): LViewData;
 /**
  *  Retrieve map of local references (local reference name => element or directive instance).
+ *
+ * @publicApi
  */
 export declare function getLocalRefs(target: {}): {
     [key: string]: any;

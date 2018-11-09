@@ -278,8 +278,14 @@ export interface PipeDef<T> {
     onDestroy: (() => void) | null;
 }
 export declare type PipeDefWithMeta<T, Name extends string> = PipeDef<T>;
-export declare type DirectiveDefFeature = <T>(directiveDef: DirectiveDef<T>) => void;
-export declare type ComponentDefFeature = <T>(componentDef: ComponentDef<T>) => void;
+export interface DirectiveDefFeature {
+    <T>(directiveDef: DirectiveDef<T>): void;
+    ngInherit?: true;
+}
+export interface ComponentDefFeature {
+    <T>(componentDef: ComponentDef<T>): void;
+    ngInherit?: true;
+}
 /**
  * Type used for directiveDefs on component definition.
  *

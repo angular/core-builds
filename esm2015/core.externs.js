@@ -62,7 +62,7 @@ var ComponentInstance;
 
 /** @typedef {?} */
 var DirectiveInstance;
-// externs from packages/core/src/render3/publish_global_util.closure.js:
+// externs from packages/core/src/render3/global_utils.closure.js:
 
 /** @typedef {?} */
 var GlobalDevModeContainer;
