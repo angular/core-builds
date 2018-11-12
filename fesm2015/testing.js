@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.2+20.sha-9729e8f
+ * @license Angular v7.1.0-beta.2+22.sha-99c5db1
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1351,13 +1351,21 @@ class TestBedRender3 {
             throw new Error(`It looks like '${ɵstringify(type)}' has not been IVY compiled - it has no 'ngComponentDef' field`);
         }
         /** @type {?} */
-        const componentFactory = new ɵRender3ComponentFactory(componentDef);
-        /** @type {?} */
-        const componentRef = componentFactory.create(Injector.NULL, [], `#${rootElId}`, this._moduleRef);
+        const noNgZone = this.get(ComponentFixtureNoNgZone, false);
         /** @type {?} */
         const autoDetect = this.get(ComponentFixtureAutoDetect, false);
         /** @type {?} */
-        const fixture = new ComponentFixture(componentRef, this.get(NgZone), autoDetect);
+        const ngZone = noNgZone ? null : this.get(NgZone, null);
+        /** @type {?} */
+        const componentFactory = new ɵRender3ComponentFactory(componentDef);
+        /** @type {?} */
+        const initComponent = () => {
+            /** @type {?} */
+            const componentRef = componentFactory.create(Injector.NULL, [], `#${rootElId}`, this._moduleRef);
+            return new ComponentFixture(componentRef, ngZone, autoDetect);
+        };
+        /** @type {?} */
+        const fixture = ngZone ? ngZone.run(initComponent) : initComponent();
         this._activeFixtures.push(fixture);
         return fixture;
     }
