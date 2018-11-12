@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.2+20.sha-9729e8f
+ * @license Angular v7.1.0-beta.2+22.sha-99c5db1
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1127,6 +1127,7 @@ var TestBedRender3 = /** @class */ (function () {
         throw new Error('No implemented in IVY');
     };
     TestBedRender3.prototype.createComponent = function (type) {
+        var _this = this;
         this._initIfNeeded();
         var testComponentRenderer = this.get(TestComponentRenderer);
         var rootElId = "root" + _nextRootElementId++;
@@ -1135,10 +1136,15 @@ var TestBedRender3 = /** @class */ (function () {
         if (!componentDef) {
             throw new Error("It looks like '" + ɵstringify(type) + "' has not been IVY compiled - it has no 'ngComponentDef' field");
         }
-        var componentFactory = new ɵRender3ComponentFactory(componentDef);
-        var componentRef = componentFactory.create(Injector.NULL, [], "#" + rootElId, this._moduleRef);
+        var noNgZone = this.get(ComponentFixtureNoNgZone, false);
         var autoDetect = this.get(ComponentFixtureAutoDetect, false);
-        var fixture = new ComponentFixture(componentRef, this.get(NgZone), autoDetect);
+        var ngZone = noNgZone ? null : this.get(NgZone, null);
+        var componentFactory = new ɵRender3ComponentFactory(componentDef);
+        var initComponent = function () {
+            var componentRef = componentFactory.create(Injector.NULL, [], "#" + rootElId, _this._moduleRef);
+            return new ComponentFixture(componentRef, ngZone, autoDetect);
+        };
+        var fixture = ngZone ? ngZone.run(initComponent) : initComponent();
         this._activeFixtures.push(fixture);
         return fixture;
     };
