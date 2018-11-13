@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.2+36.sha-9741f5b
+ * @license Angular v7.1.0-beta.2+39.sha-e6e5904
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -7559,6 +7559,7 @@
     }
     function directiveInject(token, flags) {
         if (flags === void 0) { flags = 0 /* Default */; }
+        token = resolveForwardRef(token);
         return getOrCreateInjectable(getPreviousOrParentTNode(), getViewData(), token, flags);
     }
     /**
@@ -13398,7 +13399,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0-beta.2+36.sha-9741f5b');
+    var VERSION = new Version('7.1.0-beta.2+39.sha-e6e5904');
 
     /**
      * @license
