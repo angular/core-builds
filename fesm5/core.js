@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.2+19.sha-78b6f88
+ * @license Angular v7.1.0-beta.2+29.sha-5247594
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -5404,13 +5404,13 @@ function refreshDescendantViews(viewData, rf) {
         if (!checkNoChangesMode) {
             executeInitHooks(viewData, tView, creationMode);
         }
-        setHostBindings(tView, viewData);
         refreshDynamicEmbeddedViews(viewData);
         // Content query results must be refreshed before content hooks are called.
         refreshContentQueries(tView);
         if (!checkNoChangesMode) {
             executeHooks(viewData, tView.contentHooks, tView.contentCheckHooks, creationMode);
         }
+        setHostBindings(tView, viewData);
     }
     refreshChildComponents(tView.components, parentFirstTemplatePass, rf);
 }
@@ -13527,7 +13527,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.1.0-beta.2+19.sha-78b6f88');
+var VERSION = new Version('7.1.0-beta.2+29.sha-5247594');
 
 /**
  * @license
