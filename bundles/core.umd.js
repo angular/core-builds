@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.2+37.sha-7695dbd
+ * @license Angular v7.1.0-beta.2+39.sha-e6e5904
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -7582,6 +7582,7 @@
     }
     function directiveInject(token, flags) {
         if (flags === void 0) { flags = 0 /* Default */; }
+        token = resolveForwardRef(token);
         return getOrCreateInjectable(getPreviousOrParentTNode(), getViewData(), token, flags);
     }
     /**
@@ -13495,7 +13496,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0-beta.2+37.sha-7695dbd');
+    var VERSION = new Version('7.1.0-beta.2+39.sha-e6e5904');
 
     /**
      * @license
@@ -22196,21 +22197,20 @@
     exports.ɵangular_packages_core_core_v = endTimeRange;
     exports.ɵangular_packages_core_core_t = leave;
     exports.ɵangular_packages_core_core_u = startTimeRange;
-    exports.ɵangular_packages_core_core_ba = getOrCreateInjectable;
     exports.ɵangular_packages_core_core_z = injectAttributeImpl;
-    exports.ɵangular_packages_core_core_bh = NG_INJECTABLE_DEF;
-    exports.ɵangular_packages_core_core_bb = bindingUpdated;
-    exports.ɵangular_packages_core_core_bc = getPreviousOrParentTNode;
-    exports.ɵangular_packages_core_core_bd = getViewData;
-    exports.ɵangular_packages_core_core_be = nextContextImpl;
-    exports.ɵangular_packages_core_core_bg = BoundPlayerFactory;
-    exports.ɵangular_packages_core_core_bk = loadInternal;
+    exports.ɵangular_packages_core_core_bg = NG_INJECTABLE_DEF;
+    exports.ɵangular_packages_core_core_ba = bindingUpdated;
+    exports.ɵangular_packages_core_core_bb = getPreviousOrParentTNode;
+    exports.ɵangular_packages_core_core_bc = getViewData;
+    exports.ɵangular_packages_core_core_bd = nextContextImpl;
+    exports.ɵangular_packages_core_core_bf = BoundPlayerFactory;
+    exports.ɵangular_packages_core_core_bj = loadInternal;
     exports.ɵangular_packages_core_core_h = createElementRef;
     exports.ɵangular_packages_core_core_i = createTemplateRef;
     exports.ɵangular_packages_core_core_j = createViewRef;
     exports.ɵangular_packages_core_core_a = makeParamDecorator;
     exports.ɵangular_packages_core_core_b = makePropDecorator;
-    exports.ɵangular_packages_core_core_bi = getClosureSafeProperty;
+    exports.ɵangular_packages_core_core_bh = getClosureSafeProperty;
     exports.ɵangular_packages_core_core_w = _def;
     exports.ɵangular_packages_core_core_x = DebugRendererFactory2;
     exports.ɵangular_packages_core_core_y = DebugContext;
