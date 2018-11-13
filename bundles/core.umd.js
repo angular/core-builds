@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.2+29.sha-5247594
+ * @license Angular v7.1.0-beta.2+40.sha-bc652a2
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -7582,6 +7582,7 @@
     }
     function directiveInject(token, flags) {
         if (flags === void 0) { flags = 0 /* Default */; }
+        token = resolveForwardRef(token);
         return getOrCreateInjectable(getPreviousOrParentTNode(), getViewData(), token, flags);
     }
     /**
@@ -13251,89 +13252,6 @@
     /**
      * Component decorator and metadata.
      *
-     * @usageNotes
-     *
-     * ### Using animations
-     *
-     * The following snippet shows an animation trigger in a component's
-     * metadata. The trigger is attached to an element in the component's
-     * template, using "@_trigger_name_", and a state expression that is evaluated
-     * at run time to determine whether the animation should start.
-     *
-     * ```typescript
-     * @Component({
-     *   selector: 'animation-cmp',
-     *   templateUrl: 'animation-cmp.html',
-     *   animations: [
-     *     trigger('myTriggerName', [
-     *       state('on', style({ opacity: 1 }),
-     *       state('off', style({ opacity: 0 }),
-     *       transition('on => off', [
-     *         animate("1s")
-     *       ])
-     *     ])
-     *   ]
-     * })
-     * ```
-     *
-     * ```html
-     * <!-- animation-cmp.html -->
-     * <div @myTriggerName="expression">...</div>
-     * ```
-     *
-     * ### Preserving whitespace
-     *
-     * Removing whitespace can greatly reduce AOT-generated code size, and speed up view creation.
-     * As of Angular 6, default for `preserveWhitespaces` is false (whitespace is removed).
-     * To change the default setting for all components in your application, set
-     * the `preserveWhitespaces` option of the AOT compiler.
-     *
-     * Current implementation removes whitespace characters as follows:
-     * - Trims all whitespaces at the beginning and the end of a template.
-     * - Removes whitespace-only text nodes. For example,
-     * `<button>Action 1</button>  <button>Action 2</button>` becomes
-     * `<button>Action 1</button><button>Action 2</button>`.
-     * - Replaces a series of whitespace characters in text nodes with a single space.
-     * For example, `<span>\n some text\n</span>` becomes `<span> some text </span>`.
-     * - Does NOT alter text nodes inside HTML tags such as `<pre>` or `<textarea>`,
-     * where whitespace characters are significant.
-     *
-     * Note that these transformations can influence DOM nodes layout, although impact
-     * should be minimal.
-     *
-     * You can override the default behavior to preserve whitespace characters
-     * in certain fragments of a template. For example, you can exclude an entire
-     * DOM sub-tree by using the `ngPreserveWhitespaces` attribute:
-     *
-     * ```html
-     * <div ngPreserveWhitespaces>
-     *     whitespaces are preserved here
-     *     <span>    and here </span>
-     * </div>
-     * ```
-     *
-     * You can force a single space to be preserved in a text node by using `&ngsp;`,
-     * which is replaced with a space character by Angular's template
-     * compiler:
-     *
-     * ```html
-     * <a>Spaces</a>&ngsp;<a>between</a>&ngsp;<a>links.</a>
-     * <!-->compiled to be equivalent to:</>
-     *  <a>Spaces</a> <a>between</a> <a>links.</a>
-     * ```
-     *
-     * Note that sequences of `&ngsp;` are still collapsed to just one space character when
-     * the `preserveWhitespaces` option is set to `false`.
-     *
-     * ```html
-     * <a>before</a>&ngsp;&ngsp;&ngsp;<a>after</a>
-     * <!-->compiled to be equivalent to:</>
-     *  <a>Spaces</a> <a>between</a> <a>links.</a>
-     * ```
-     *
-     * To preserve sequences of whitespace characters, use the
-     * `ngPreserveWhitespaces` attribute.
-     *
      * @Annotation
      * @publicApi
      */
@@ -13578,7 +13496,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0-beta.2+29.sha-5247594');
+    var VERSION = new Version('7.1.0-beta.2+40.sha-bc652a2');
 
     /**
      * @license
@@ -22279,21 +22197,20 @@
     exports.ɵangular_packages_core_core_v = endTimeRange;
     exports.ɵangular_packages_core_core_t = leave;
     exports.ɵangular_packages_core_core_u = startTimeRange;
-    exports.ɵangular_packages_core_core_ba = getOrCreateInjectable;
     exports.ɵangular_packages_core_core_z = injectAttributeImpl;
-    exports.ɵangular_packages_core_core_bh = NG_INJECTABLE_DEF;
-    exports.ɵangular_packages_core_core_bb = bindingUpdated;
-    exports.ɵangular_packages_core_core_bc = getPreviousOrParentTNode;
-    exports.ɵangular_packages_core_core_bd = getViewData;
-    exports.ɵangular_packages_core_core_be = nextContextImpl;
-    exports.ɵangular_packages_core_core_bg = BoundPlayerFactory;
-    exports.ɵangular_packages_core_core_bk = loadInternal;
+    exports.ɵangular_packages_core_core_bg = NG_INJECTABLE_DEF;
+    exports.ɵangular_packages_core_core_ba = bindingUpdated;
+    exports.ɵangular_packages_core_core_bb = getPreviousOrParentTNode;
+    exports.ɵangular_packages_core_core_bc = getViewData;
+    exports.ɵangular_packages_core_core_bd = nextContextImpl;
+    exports.ɵangular_packages_core_core_bf = BoundPlayerFactory;
+    exports.ɵangular_packages_core_core_bj = loadInternal;
     exports.ɵangular_packages_core_core_h = createElementRef;
     exports.ɵangular_packages_core_core_i = createTemplateRef;
     exports.ɵangular_packages_core_core_j = createViewRef;
     exports.ɵangular_packages_core_core_a = makeParamDecorator;
     exports.ɵangular_packages_core_core_b = makePropDecorator;
-    exports.ɵangular_packages_core_core_bi = getClosureSafeProperty;
+    exports.ɵangular_packages_core_core_bh = getClosureSafeProperty;
     exports.ɵangular_packages_core_core_w = _def;
     exports.ɵangular_packages_core_core_x = DebugRendererFactory2;
     exports.ɵangular_packages_core_core_y = DebugContext;
