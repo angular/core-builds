@@ -12,7 +12,6 @@ import { Sanitizer } from '../../sanitization/security';
 import { Type } from '../../type';
 import { LContainer } from './container';
 import { ComponentDef, ComponentQuery, ComponentTemplate, DirectiveDef, DirectiveDefList, HostBindingsFunction, PipeDef, PipeDefList } from './definition';
-import { I18nUpdateOpCodes, TI18n } from './i18n';
 import { TElementNode, TNode, TViewNode } from './node';
 import { PlayerHandler } from './player';
 import { LQueries } from './query';
@@ -253,7 +252,7 @@ export interface TView {
     node: TViewNode | TElementNode | null;
     /** Whether or not this template has been processed. */
     firstTemplatePass: boolean;
-    /** Static data equivalent of LView.data[]. Contains TNodes, PipeDefInternal or TI18n. */
+    /** Static data equivalent of LView.data[]. Contains TNodes. */
     data: TData;
     /**
      * The binding start index is the index at which the data array
@@ -466,5 +465,5 @@ export declare type HookData = (number | (() => void))[];
  *
  * Injector bloom filters are also stored here.
  */
-export declare type TData = (TNode | PipeDef<any> | DirectiveDef<any> | ComponentDef<any> | number | Type<any> | InjectionToken<any> | TI18n | I18nUpdateOpCodes | null)[];
+export declare type TData = (TNode | PipeDef<any> | DirectiveDef<any> | ComponentDef<any> | number | Type<any> | InjectionToken<any> | null)[];
 export declare const unusedValueExportToPlacateAjd = 1;

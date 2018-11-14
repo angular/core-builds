@@ -17,7 +17,7 @@ export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T>, viewEn
     private _componentIndex;
     private _appRef;
     private _viewContainerRef;
-    rootNodes: any[];
+    readonly rootNodes: any[];
     constructor(_view: LViewData, _context: T | null, _componentIndex: number);
     readonly context: T;
     readonly destroyed: boolean;

@@ -15,19 +15,15 @@
  *
  * See: `I18nCreateOpCodes` for example of usage.
  */
-import { SanitizerFn } from './sanitization';
 export declare const enum I18nMutateOpCode {
-    SHIFT_REF = 3,
+    SHIFT_REF = 2,
     SHIFT_PARENT = 17,
-    MASK_OPCODE = 7,
-    MASK_REF = 136,
+    MASK_OPCODE = 3,
+    MASK_REF = 68,
     Select = 0,
     AppendChild = 1,
     InsertBefore = 2,
-    Remove = 3,
-    Attr = 4,
-    ElementEnd = 5,
-    RemoveNestedIcu = 6
+    Remove = 3
 }
 /**
  * Marks that the next string is for element.
@@ -104,8 +100,8 @@ export interface COMMENT_MARKER {
  *   // For removing existing nodes
  *   // --------------------------------------------------
  *   //   const node = lViewData[1];
- *   //   removeChild(tView.data(1), node, lViewData);
- *   1 << SHIFT_REF | Remove,
+ *   //   lViewData[2].remove(node);
+ *   2 << SHIFT_PARENT | 1 << SHIFT_REF | Remove,
  *
  *   // For writing attributes
  *   // --------------------------------------------------
@@ -157,7 +153,7 @@ export declare const enum I18nUpdateOpCode {
  *  }
  * ```
  * We can assume that each call to `i18nExp` sets an internal `changeMask` bit depending on the
- * index of `i18nExp`.
+ * index of `i18nExp` index.
  *
  * OpCodes
  * ```
@@ -201,7 +197,7 @@ export declare const enum I18nUpdateOpCode {
  * ```
  *
  */
-export interface I18nUpdateOpCodes extends Array<string | number | SanitizerFn | null> {
+export interface I18nUpdateOpCodes extends Array<string | number | ((text: string) => string | null)> {
 }
 /**
  * Store information for the i18n translation block.
@@ -320,4 +316,11 @@ export interface TIcu {
      */
     update: I18nUpdateOpCodes[];
 }
-export declare const unusedValueExportToPlacateAjd = 1;
+/**
+ * Stores currently selected case in each ICU.
+ *
+ * For each ICU in translation, the `Li18n` stores the currently selected case for the current
+ * `LView`. For perf reasons this array is only created if a translation block has an ICU.
+ */
+export interface LI18n extends Array<number> {
+}
