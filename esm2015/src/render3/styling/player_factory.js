@@ -1,0 +1,51 @@
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/**
+ * Combines the binding value and a factory for an animation player.
+ *
+ * Used to bind a player to an element template binding (currently only
+ * `[style]`, `[style.prop]`, `[class]` and `[class.name]` bindings
+ * supported). The provided `factoryFn` function will be run once all
+ * the associated bindings have been evaluated on the element and is
+ * designed to return a player which will then be placed on the element.
+ *
+ * \@publicApi
+ * @template T
+ * @param {?} factoryFn The function that is used to create a player
+ *   once all the rendering-related (styling values) have been
+ *   processed for the element binding.
+ * @param {?} value The raw value that will be exposed to the binding
+ *   so that the binding can update its internal values when
+ *   any changes are evaluated.
+ *
+ * @return {?}
+ */
+export function bindPlayerFactory(factoryFn, value) {
+    return /** @type {?} */ (new BoundPlayerFactory(factoryFn, value));
+}
+/**
+ * \@publicApi
+ * @template T
+ */
+export class BoundPlayerFactory {
+    /**
+     * @param {?} fn
+     * @param {?} value
+     */
+    constructor(fn, value) {
+        this.fn = fn;
+        this.value = value;
+    }
+}
+if (false) {
+    /** @type {?} */
+    BoundPlayerFactory.prototype.__brand__;
+    /** @type {?} */
+    BoundPlayerFactory.prototype.fn;
+    /** @type {?} */
+    BoundPlayerFactory.prototype.value;
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicGxheWVyX2ZhY3RvcnkuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi8uLi8uLi8uLi9wYWNrYWdlcy9jb3JlL3NyYy9yZW5kZXIzL3N0eWxpbmcvcGxheWVyX2ZhY3RvcnkudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBMkJBLE1BQU0sVUFBVSxpQkFBaUIsQ0FBSSxTQUErQixFQUFFLEtBQVE7SUFDNUUseUJBQU8sSUFBSSxrQkFBa0IsQ0FBQyxTQUFTLEVBQUUsS0FBSyxDQUFRLEVBQUM7Q0FDeEQ7Ozs7O0FBS0QsTUFBTSxPQUFPLGtCQUFrQjs7Ozs7SUFFN0IsWUFBbUIsRUFBd0IsRUFBUyxLQUFRO1FBQXpDLE9BQUUsR0FBRixFQUFFLENBQXNCO1FBQVMsVUFBSyxHQUFMLEtBQUssQ0FBRztLQUFJO0NBQ2pFIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBAbGljZW5zZVxuICogQ29weXJpZ2h0IEdvb2dsZSBJbmMuIEFsbCBSaWdodHMgUmVzZXJ2ZWQuXG4gKlxuICogVXNlIG9mIHRoaXMgc291cmNlIGNvZGUgaXMgZ292ZXJuZWQgYnkgYW4gTUlULXN0eWxlIGxpY2Vuc2UgdGhhdCBjYW4gYmVcbiAqIGZvdW5kIGluIHRoZSBMSUNFTlNFIGZpbGUgYXQgaHR0cHM6Ly9hbmd1bGFyLmlvL2xpY2Vuc2VcbiAqL1xuaW1wb3J0IHtQbGF5ZXJGYWN0b3J5LCBQbGF5ZXJGYWN0b3J5QnVpbGRGbn0gZnJvbSAnLi4vaW50ZXJmYWNlcy9wbGF5ZXInO1xuXG4vKipcbiAqIENvbWJpbmVzIHRoZSBiaW5kaW5nIHZhbHVlIGFuZCBhIGZhY3RvcnkgZm9yIGFuIGFuaW1hdGlvbiBwbGF5ZXIuXG4gKlxuICogVXNlZCB0byBiaW5kIGEgcGxheWVyIHRvIGFuIGVsZW1lbnQgdGVtcGxhdGUgYmluZGluZyAoY3VycmVudGx5IG9ubHlcbiAqIGBbc3R5bGVdYCwgYFtzdHlsZS5wcm9wXWAsIGBbY2xhc3NdYCBhbmQgYFtjbGFzcy5uYW1lXWAgYmluZGluZ3NcbiAqIHN1cHBvcnRlZCkuIFRoZSBwcm92aWRlZCBgZmFjdG9yeUZuYCBmdW5jdGlvbiB3aWxsIGJlIHJ1biBvbmNlIGFsbFxuICogdGhlIGFzc29jaWF0ZWQgYmluZGluZ3MgaGF2ZSBiZWVuIGV2YWx1YXRlZCBvbiB0aGUgZWxlbWVudCBhbmQgaXNcbiAqIGRlc2lnbmVkIHRvIHJldHVybiBhIHBsYXllciB3aGljaCB3aWxsIHRoZW4gYmUgcGxhY2VkIG9uIHRoZSBlbGVtZW50LlxuICpcbiAqIEBwYXJhbSBmYWN0b3J5Rm4gVGhlIGZ1bmN0aW9uIHRoYXQgaXMgdXNlZCB0byBjcmVhdGUgYSBwbGF5ZXJcbiAqICAgb25jZSBhbGwgdGhlIHJlbmRlcmluZy1yZWxhdGVkIChzdHlsaW5nIHZhbHVlcykgaGF2ZSBiZWVuXG4gKiAgIHByb2Nlc3NlZCBmb3IgdGhlIGVsZW1lbnQgYmluZGluZy5cbiAqIEBwYXJhbSB2YWx1ZSBUaGUgcmF3IHZhbHVlIHRoYXQgd2lsbCBiZSBleHBvc2VkIHRvIHRoZSBiaW5kaW5nXG4gKiAgIHNvIHRoYXQgdGhlIGJpbmRpbmcgY2FuIHVwZGF0ZSBpdHMgaW50ZXJuYWwgdmFsdWVzIHdoZW5cbiAqICAgYW55IGNoYW5nZXMgYXJlIGV2YWx1YXRlZC5cbiAqXG4gKiBAcHVibGljQXBpXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBiaW5kUGxheWVyRmFjdG9yeTxUPihmYWN0b3J5Rm46IFBsYXllckZhY3RvcnlCdWlsZEZuLCB2YWx1ZTogVCk6IFBsYXllckZhY3Rvcnkge1xuICByZXR1cm4gbmV3IEJvdW5kUGxheWVyRmFjdG9yeShmYWN0b3J5Rm4sIHZhbHVlKSBhcyBhbnk7XG59XG5cbi8qKlxuICogQHB1YmxpY0FwaVxuICovXG5leHBvcnQgY2xhc3MgQm91bmRQbGF5ZXJGYWN0b3J5PFQ+IHtcbiAgJ19fYnJhbmRfXyc6ICdCcmFuZCBmb3IgUGxheWVyRmFjdG9yeSB0aGF0IG5vdGhpbmcgd2lsbCBtYXRjaCc7XG4gIGNvbnN0cnVjdG9yKHB1YmxpYyBmbjogUGxheWVyRmFjdG9yeUJ1aWxkRm4sIHB1YmxpYyB2YWx1ZTogVCkge31cbn1cbiJdfQ==

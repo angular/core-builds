@@ -1,0 +1,34 @@
+/**
+ * Combines the binding value and a factory for an animation player.
+ *
+ * Used to bind a player to an element template binding (currently only
+ * `[style]`, `[style.prop]`, `[class]` and `[class.name]` bindings
+ * supported). The provided `factoryFn` function will be run once all
+ * the associated bindings have been evaluated on the element and is
+ * designed to return a player which will then be placed on the element.
+ *
+ * @param factoryFn The function that is used to create a player
+ *   once all the rendering-related (styling values) have been
+ *   processed for the element binding.
+ * @param value The raw value that will be exposed to the binding
+ *   so that the binding can update its internal values when
+ *   any changes are evaluated.
+ *
+ * @publicApi
+ */
+export function bindPlayerFactory(factoryFn, value) {
+    return new BoundPlayerFactory(factoryFn, value);
+}
+/**
+ * @publicApi
+ */
+var BoundPlayerFactory = /** @class */ (function () {
+    function BoundPlayerFactory(fn, value) {
+        this.fn = fn;
+        this.value = value;
+    }
+    return BoundPlayerFactory;
+}());
+export { BoundPlayerFactory };
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicGxheWVyX2ZhY3RvcnkuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi8uLi8uLi8uLi8uLi8uLi8uLi9wYWNrYWdlcy9jb3JlL3NyYy9yZW5kZXIzL3N0eWxpbmcvcGxheWVyX2ZhY3RvcnkudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBU0E7Ozs7Ozs7Ozs7Ozs7Ozs7O0dBaUJHO0FBQ0gsTUFBTSxVQUFVLGlCQUFpQixDQUFJLFNBQStCLEVBQUUsS0FBUTtJQUM1RSxPQUFPLElBQUksa0JBQWtCLENBQUMsU0FBUyxFQUFFLEtBQUssQ0FBUSxDQUFDO0FBQ3pELENBQUM7QUFFRDs7R0FFRztBQUNIO0lBRUUsNEJBQW1CLEVBQXdCLEVBQVMsS0FBUTtRQUF6QyxPQUFFLEdBQUYsRUFBRSxDQUFzQjtRQUFTLFVBQUssR0FBTCxLQUFLLENBQUc7SUFBRyxDQUFDO0lBQ2xFLHlCQUFDO0FBQUQsQ0FBQyxBQUhELElBR0MiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIEBsaWNlbnNlXG4gKiBDb3B5cmlnaHQgR29vZ2xlIEluYy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBVc2Ugb2YgdGhpcyBzb3VyY2UgY29kZSBpcyBnb3Zlcm5lZCBieSBhbiBNSVQtc3R5bGUgbGljZW5zZSB0aGF0IGNhbiBiZVxuICogZm91bmQgaW4gdGhlIExJQ0VOU0UgZmlsZSBhdCBodHRwczovL2FuZ3VsYXIuaW8vbGljZW5zZVxuICovXG5pbXBvcnQge1BsYXllckZhY3RvcnksIFBsYXllckZhY3RvcnlCdWlsZEZufSBmcm9tICcuLi9pbnRlcmZhY2VzL3BsYXllcic7XG5cbi8qKlxuICogQ29tYmluZXMgdGhlIGJpbmRpbmcgdmFsdWUgYW5kIGEgZmFjdG9yeSBmb3IgYW4gYW5pbWF0aW9uIHBsYXllci5cbiAqXG4gKiBVc2VkIHRvIGJpbmQgYSBwbGF5ZXIgdG8gYW4gZWxlbWVudCB0ZW1wbGF0ZSBiaW5kaW5nIChjdXJyZW50bHkgb25seVxuICogYFtzdHlsZV1gLCBgW3N0eWxlLnByb3BdYCwgYFtjbGFzc11gIGFuZCBgW2NsYXNzLm5hbWVdYCBiaW5kaW5nc1xuICogc3VwcG9ydGVkKS4gVGhlIHByb3ZpZGVkIGBmYWN0b3J5Rm5gIGZ1bmN0aW9uIHdpbGwgYmUgcnVuIG9uY2UgYWxsXG4gKiB0aGUgYXNzb2NpYXRlZCBiaW5kaW5ncyBoYXZlIGJlZW4gZXZhbHVhdGVkIG9uIHRoZSBlbGVtZW50IGFuZCBpc1xuICogZGVzaWduZWQgdG8gcmV0dXJuIGEgcGxheWVyIHdoaWNoIHdpbGwgdGhlbiBiZSBwbGFjZWQgb24gdGhlIGVsZW1lbnQuXG4gKlxuICogQHBhcmFtIGZhY3RvcnlGbiBUaGUgZnVuY3Rpb24gdGhhdCBpcyB1c2VkIHRvIGNyZWF0ZSBhIHBsYXllclxuICogICBvbmNlIGFsbCB0aGUgcmVuZGVyaW5nLXJlbGF0ZWQgKHN0eWxpbmcgdmFsdWVzKSBoYXZlIGJlZW5cbiAqICAgcHJvY2Vzc2VkIGZvciB0aGUgZWxlbWVudCBiaW5kaW5nLlxuICogQHBhcmFtIHZhbHVlIFRoZSByYXcgdmFsdWUgdGhhdCB3aWxsIGJlIGV4cG9zZWQgdG8gdGhlIGJpbmRpbmdcbiAqICAgc28gdGhhdCB0aGUgYmluZGluZyBjYW4gdXBkYXRlIGl0cyBpbnRlcm5hbCB2YWx1ZXMgd2hlblxuICogICBhbnkgY2hhbmdlcyBhcmUgZXZhbHVhdGVkLlxuICpcbiAqIEBwdWJsaWNBcGlcbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGJpbmRQbGF5ZXJGYWN0b3J5PFQ+KGZhY3RvcnlGbjogUGxheWVyRmFjdG9yeUJ1aWxkRm4sIHZhbHVlOiBUKTogUGxheWVyRmFjdG9yeSB7XG4gIHJldHVybiBuZXcgQm91bmRQbGF5ZXJGYWN0b3J5KGZhY3RvcnlGbiwgdmFsdWUpIGFzIGFueTtcbn1cblxuLyoqXG4gKiBAcHVibGljQXBpXG4gKi9cbmV4cG9ydCBjbGFzcyBCb3VuZFBsYXllckZhY3Rvcnk8VD4ge1xuICAnX19icmFuZF9fJzogJ0JyYW5kIGZvciBQbGF5ZXJGYWN0b3J5IHRoYXQgbm90aGluZyB3aWxsIG1hdGNoJztcbiAgY29uc3RydWN0b3IocHVibGljIGZuOiBQbGF5ZXJGYWN0b3J5QnVpbGRGbiwgcHVibGljIHZhbHVlOiBUKSB7fVxufVxuIl19
