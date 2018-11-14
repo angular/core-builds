@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.2+48.sha-bf6ac6c
+ * @license Angular v7.1.0-beta.2+52.sha-4756324
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1854,9 +1854,11 @@
             return parentTNode_1;
         }
         var viewOffset = getParentInjectorViewOffset(location);
+        // view offset is 1
         var parentView = startView;
         var parentTNode = startView[HOST_NODE];
-        while (viewOffset > 0) {
+        // view offset is superior to 1
+        while (viewOffset > 1) {
             parentView = parentView[DECLARATION_VIEW];
             parentTNode = parentView[HOST_NODE];
             viewOffset--;
@@ -7643,6 +7645,17 @@
             this._tViewNode = null;
             this._view = _view;
         }
+        Object.defineProperty(ViewRef.prototype, "rootNodes", {
+            get: function () {
+                if (this._view[HOST] == null) {
+                    var tView = this._view[HOST_NODE];
+                    return collectNativeNodes(this._view, tView, []);
+                }
+                return [];
+            },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(ViewRef.prototype, "context", {
             get: function () { return this._context ? this._context : this._lookUpContext(); },
             enumerable: true,
@@ -7867,6 +7880,17 @@
         RootViewRef.prototype.checkNoChanges = function () { checkNoChangesInRootView(this._view); };
         return RootViewRef;
     }(ViewRef));
+    function collectNativeNodes(lView, parentTNode, result) {
+        var tNodeChild = parentTNode.child;
+        while (tNodeChild) {
+            result.push(getNativeByTNode(tNodeChild, lView));
+            if (tNodeChild.type === 4 /* ElementContainer */) {
+                collectNativeNodes(lView, tNodeChild, result);
+            }
+            tNodeChild = tNodeChild.next;
+        }
+        return result;
+    }
 
     /**
      * @license
@@ -7977,7 +8001,7 @@
             this._hostView = _hostView;
         }
         NodeInjector$$1.prototype.get = function (token, notFoundValue) {
-            return getOrCreateInjectable(this._tNode, this._hostView, token, notFoundValue);
+            return getOrCreateInjectable(this._tNode, this._hostView, token, 0 /* Default */, notFoundValue);
         };
         return NodeInjector$$1;
     }());
@@ -9768,6 +9792,21 @@
      * Used in tests to change the `RendererFactory2` into a `DebugRendererFactory2`.
      */
     var WRAP_RENDERER_FACTORY2 = new InjectionToken('WRAP_RENDERER_FACTORY2');
+    var NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
+    function createChainedInjector(rootViewInjector, moduleInjector) {
+        return {
+            get: function (token, notFoundValue) {
+                var value = rootViewInjector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR);
+                if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) {
+                    // Return the value from the root element injector when
+                    // - it provides it
+                    //   (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
+                    return value;
+                }
+                return moduleInjector.get(token, notFoundValue);
+            }
+        };
+    }
     /**
      * Render3 implementation of {@link viewEngine_ComponentFactory}.
      */
@@ -9814,7 +9853,7 @@
             var renderer = rendererFactory.createRenderer(hostRNode, this.componentDef);
             // Create the root view. Uses empty TView and ContentTemplate.
             var rootView = createLViewData(renderer, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags);
-            rootView[INJECTOR] = ngModule && ngModule.injector || null;
+            rootView[INJECTOR] = ngModule ? createChainedInjector(injector, ngModule.injector) : injector;
             // rootView is the parent when bootstrapping
             var oldView = enterView(rootView, null);
             var component;
@@ -13496,7 +13535,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0-beta.2+48.sha-bf6ac6c');
+    var VERSION = new Version('7.1.0-beta.2+52.sha-4756324');
 
     /**
      * @license
@@ -19763,7 +19802,7 @@
     // - el2.injector.get(token, default)
     // - el1.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) -> do not check the module
     // - mod2.injector.get(token, default)
-    var NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
+    var NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR$1 = {};
     function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
         if (depDef.flags & 8 /* Value */) {
@@ -19832,9 +19871,9 @@
                 searchView = null;
             }
         }
-        var value = startView.root.injector.get(depDef.token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR);
-        if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR ||
-            notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) {
+        var value = startView.root.injector.get(depDef.token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR$1);
+        if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR$1 ||
+            notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR$1) {
             // Return the value from the root element injector when
             // - it provides it
             //   (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
@@ -22351,7 +22390,7 @@
     exports.ɵinitServicesIfNeeded = initServicesIfNeeded;
     exports.ɵoverrideComponentView = overrideComponentView;
     exports.ɵoverrideProvider = overrideProvider;
-    exports.ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR;
+    exports.ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR$1;
     exports.ɵdefineNgModule = ɵdefineNgModule;
     exports.ɵdefineBase = defineBase;
     exports.ɵdefineComponent = defineComponent;
