@@ -128,9 +128,9 @@ export declare function getRenderParent(tNode: TNode, currentView: LViewData): R
  *
 
  *
- * @param parent The parent where the child will be inserted into.
+ * @param tNode The tNode of the node that we want to insert.
  * @param currentView Current LView being processed.
- * @return boolean Whether the child should be inserted now (or delayed until later).
+ * @return boolean Whether the node should be inserted now (or delayed until later).
  */
 export declare function canInsertNativeNode(tNode: TNode, currentView: LViewData): boolean;
 /**
@@ -157,7 +157,7 @@ export declare function nativeNextSibling(renderer: Renderer3, node: RNode): RNo
  * @param currentView The current LView
  * @returns Whether or not the child was appended
  */
-export declare function appendChild(childEl: RNode | null, childTNode: TNode, currentView: LViewData): boolean;
+export declare function appendChild(childEl: RNode | null | undefined, childTNode: TNode, currentView: LViewData): boolean;
 export declare function getBeforeNodeForView(index: number, views: LViewData[], containerNative: RComment): RComment;
 /**
  * Removes the `child` element from the DOM if not in view and not projected.
