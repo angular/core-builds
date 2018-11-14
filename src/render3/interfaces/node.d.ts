@@ -17,8 +17,7 @@ export declare const enum TNodeType {
     View = 2,
     Element = 3,
     ViewOrElement = 2,
-    ElementContainer = 4,
-    IcuContainer = 5
+    ElementContainer = 4
 }
 /**
  * Corresponds to the TNode.flags property.
@@ -227,7 +226,7 @@ export interface TNode {
      */
     parent: TElementNode | TContainerNode | null;
     /**
-     * If this node is part of an i18n block, it indicates whether this node is part of the DOM.
+     * If this node is part of an i18n block, it indicates whether this container is part of the DOM
      * If this node is not part of an i18n block, this field is null.
      */
     detached: boolean | null;
@@ -331,20 +330,6 @@ export interface TElementContainerNode extends TNode {
     parent: TElementNode | TElementContainerNode | null;
     tViews: null;
     projection: null;
-}
-/** Static data for an ICU expression */
-export interface TIcuContainerNode extends TNode {
-    /** Index in the LViewData[] array. */
-    index: number;
-    child: TElementNode | TTextNode | null;
-    parent: TElementNode | TElementContainerNode | null;
-    tViews: null;
-    projection: null;
-    /**
-     * Indicates the current active case for an ICU expression.
-     * It is null when there is no active case.
-     */
-    activeCaseIndex: number | null;
 }
 /** Static data for a view  */
 export interface TViewNode extends TNode {
