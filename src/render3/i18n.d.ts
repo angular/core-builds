@@ -5,108 +5,194 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { NO_CHANGE } from './tokens';
+import { NO_CHANGE } from '../../src/render3/tokens';
 /**
- * Extracts a part of a message and removes the rest.
- *
- * This method is used for extracting a part of the message associated with a template. A translated
- * message can span multiple templates.
- *
- * Example:
- * ```
- * <div i18n>Translate <span *ngIf>me</span>!</div>
- * ```
- *
- * @param message The message to crop
- * @param subTemplateIndex Index of the sub-template to extract. If undefined it returns the
- * external template and removes all sub-templates.
+ * A list of flags to encode the i18n instructions used to translate the template.
+ * We shift the flags by 29 so that 30 & 31 & 32 bits contains the instructions.
  */
-export declare function getTranslationForTemplate(message: string, subTemplateIndex?: number): string;
+export declare const enum I18nInstructions {
+    Text = 536870912,
+    Element = 1073741824,
+    Expression = 1610612736,
+    TemplateRoot = -2147483648,
+    Any = -1610612736,
+    CloseNode = -1073741824,
+    RemoveNode = -536870912,
+    /** Used to decode the number encoded with the instruction. */
+    IndexMask = 536870911,
+    /** Used to test the type of instruction. */
+    InstructionMask = -536870912
+}
 /**
- * Marks a block of text as translatable.
- *
- * The instructions `i18nStart` and `i18nEnd` mark the translation block in the template.
- * The translation `message` is the value which is locale specific. The translation string may
- * contain placeholders which associate inner elements and sub-templates within the translation.
- *
- * The translation `message` placeholders are:
- * - `�{index}(:{block})�`: *Binding Placeholder*: Marks a location where an expression will be
- *   interpolated into. The placeholder `index` points to the expression binding index. An optional
- *   `block` that matches the sub-template in which it was declared.
- * - `�#{index}(:{block})�`/`�/#{index}(:{block})�`: *Element Placeholder*:  Marks the beginning
- *   and end of DOM element that were embedded in the original translation block. The placeholder
- *   `index` points to the element index in the template instructions set. An optional `block` that
- *   matches the sub-template in which it was declared.
- * - `�*{index}:{block}�`/`�/*{index}:{block}�`: *Sub-template Placeholder*: Sub-templates must be
- *   split up and translated separately in each angular template function. The `index` points to the
- *   `template` instruction index. A `block` that matches the sub-template in which it was declared.
- *
- * @param index A unique index of the translation in the static block.
- * @param message The translation message.
- * @param subTemplateIndex Optional sub-template index in the `message`.
+ * Represents the instructions used to translate the template.
+ * Instructions can be a placeholder index, a static text or a simple bit field (`I18nFlag`).
+ * When the instruction is the flag `Text`, it is always followed by its text value.
  */
+export declare type I18nInstruction = number | string;
+/**
+ * Represents the instructions used to translate attributes containing expressions.
+ * Even indexes contain static strings, while odd indexes contain the index of the expression whose
+ * value will be concatenated into the final translation.
+ */
+export declare type I18nExpInstruction = number | string;
+/** Mapping of placeholder names to their absolute indexes in their templates. */
+export declare type PlaceholderMap = {
+    [name: string]: number;
+};
+/**
+ * Takes a translation string, the initial list of placeholders (elements and expressions) and the
+ * indexes of their corresponding expression nodes to return a list of instructions for each
+ * template function.
+ *
+ * Because embedded templates have different indexes for each placeholder, each parameter (except
+ * the translation) is an array, where each value corresponds to a different template, by order of
+ * appearance.
+ *
+ * @param translation A translation string where placeholders are represented by `{$name}`
+ * @param elements An array containing, for each template, the maps of element placeholders and
+ * their indexes.
+ * @param expressions An array containing, for each template, the maps of expression placeholders
+ * and their indexes.
+ * @param templateRoots An array of template roots whose content should be ignored when
+ * generating the instructions for their parent template.
+ * @param lastChildIndex The index of the last child of the i18n node. Used when the i18n block is
+ * an ng-container.
+ *
+ * @returns A list of instructions used to translate each template.
+ */
+export declare function i18nMapping(translation: string, elements: (PlaceholderMap | null)[] | null, expressions?: (PlaceholderMap | null)[] | null, templateRoots?: string[] | null, lastChildIndex?: number | null): I18nInstruction[][];
+export declare function i18nAttribute(index: number, attrs: any[]): void;
+export declare function i18nExp(expression: any): void;
 export declare function i18nStart(index: number, message: string, subTemplateIndex?: number): void;
-/**
- * Translates a translation block marked by `i18nStart` and `i18nEnd`. It inserts the text/ICU nodes
- * into the render tree, moves the placeholder nodes and removes the deleted nodes.
- */
 export declare function i18nEnd(): void;
 /**
+ * Takes a list of instructions generated by `i18nMapping()` to transform the template accordingly.
  *
- * Use this instruction to create a translation block that doesn't contain any placeholder.
- * It calls both {@link i18nStart} and {@link i18nEnd} in one instruction.
- *
- * The translation `message` is the value which is locale specific. The translation string may
- * contain placeholders which associate inner elements and sub-templates within the translation.
- *
- * The translation `message` placeholders are:
- * - `�{index}(:{block})�`: *Binding Placeholder*: Marks a location where an expression will be
- *   interpolated into. The placeholder `index` points to the expression binding index. An optional
- *   `block` that matches the sub-template in which it was declared.
- * - `�#{index}(:{block})�`/`�/#{index}(:{block})�`: *Element Placeholder*:  Marks the beginning
- *   and end of DOM element that were embedded in the original translation block. The placeholder
- *   `index` points to the element index in the template instructions set. An optional `block` that
- *   matches the sub-template in which it was declared.
- * - `�*{index}:{block}�`/`�/*{index}:{block}�`: *Sub-template Placeholder*: Sub-templates must be
- *   split up and translated separately in each angular template function. The `index` points to the
- *   `template` instruction index. A `block` that matches the sub-template in which it was declared.
- *
- * @param index A unique index of the translation in the static block.
- * @param message The translation message.
- * @param subTemplateIndex Optional sub-template index in the `message`.
+ * @param startIndex Index of the first element to translate (for instance the first child of the
+ * element with the i18n attribute).
+ * @param instructions The list of instructions to apply on the current view.
  */
-export declare function i18n(index: number, message: string, subTemplateIndex?: number): void;
+export declare function i18nApply(startIndex: number, instructions: I18nInstruction[]): void;
 /**
- * Marks a list of attributes as translatable.
- *
- * @param index A unique index in the static block
- * @param values
+ * Takes a translation string and the initial list of expressions and returns a list of instructions
+ * that will be used to translate an attribute.
+ * Even indexes contain static strings, while odd indexes contain the index of the expression whose
+ * value will be concatenated into the final translation.
  */
-export declare function i18nAttributes(index: number, values: string[]): void;
+export declare function i18nExpMapping(translation: string, placeholders: PlaceholderMap): I18nExpInstruction[];
 /**
- * Stores the values of the bindings during each update cycle in order to determine if we need to
- * update the translated nodes.
+ * Checks if the value of an expression has changed and replaces it by its value in a translation,
+ * or returns NO_CHANGE.
  *
- * @param expression The binding's new value or NO_CHANGE
+ * @param instructions A list of instructions that will be used to translate an attribute.
+ * @param v0 value checked for change.
+ *
+ * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
  */
-export declare function i18nExp<T>(expression: T | NO_CHANGE): void;
+export declare function i18nInterpolation1(instructions: I18nExpInstruction[], v0: any): string | NO_CHANGE;
 /**
- * Updates a translation block or an i18n attribute when the bindings have changed.
+ * Checks if the values of up to 2 expressions have changed and replaces them by their values in a
+ * translation, or returns NO_CHANGE.
  *
- * @param index Index of either {@link i18nStart} (translation block) or {@link i18nAttributes}
- * (i18n attribute) on which it should update the content.
+ * @param instructions A list of instructions that will be used to translate an attribute.
+ * @param v0 value checked for change.
+ * @param v1 value checked for change.
+ *
+ * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
  */
-export declare function i18nApply(index: number): void;
+export declare function i18nInterpolation2(instructions: I18nExpInstruction[], v0: any, v1: any): string | NO_CHANGE;
 /**
- * Replaces the variable parameter (main binding) of an ICU by a given value.
+ * Checks if the values of up to 3 expressions have changed and replaces them by their values in a
+ * translation, or returns NO_CHANGE.
  *
- * Example:
- * ```
- * const MSG_APP_1_RAW = "{VAR_SELECT, select, male {male} female {female} other {other}}";
- * const MSG_APP_1 = i18nIcuReplaceVars(MSG_APP_1_RAW, { VAR_SELECT: "�0�" });
- * // --> MSG_APP_1 = "{�0�, select, male {male} female {female} other {other}}"
- * ```
+ * @param instructions A list of instructions that will be used to translate an attribute.
+ * @param v0 value checked for change.
+ * @param v1 value checked for change.
+ * @param v2 value checked for change.
+ *
+ * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
  */
-export declare function i18nIcuReplaceVars(message: string, replacements: {
-    [key: string]: string;
-}): string;
+export declare function i18nInterpolation3(instructions: I18nExpInstruction[], v0: any, v1: any, v2: any): string | NO_CHANGE;
+/**
+ * Checks if the values of up to 4 expressions have changed and replaces them by their values in a
+ * translation, or returns NO_CHANGE.
+ *
+ * @param instructions A list of instructions that will be used to translate an attribute.
+ * @param v0 value checked for change.
+ * @param v1 value checked for change.
+ * @param v2 value checked for change.
+ * @param v3 value checked for change.
+ *
+ * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+export declare function i18nInterpolation4(instructions: I18nExpInstruction[], v0: any, v1: any, v2: any, v3: any): string | NO_CHANGE;
+/**
+ * Checks if the values of up to 5 expressions have changed and replaces them by their values in a
+ * translation, or returns NO_CHANGE.
+ *
+ * @param instructions A list of instructions that will be used to translate an attribute.
+ * @param v0 value checked for change.
+ * @param v1 value checked for change.
+ * @param v2 value checked for change.
+ * @param v3 value checked for change.
+ * @param v4 value checked for change.
+ *
+ * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+export declare function i18nInterpolation5(instructions: I18nExpInstruction[], v0: any, v1: any, v2: any, v3: any, v4: any): string | NO_CHANGE;
+/**
+ * Checks if the values of up to 6 expressions have changed and replaces them by their values in a
+ * translation, or returns NO_CHANGE.
+ *
+ * @param instructions A list of instructions that will be used to translate an attribute.
+ * @param v0 value checked for change.
+ * @param v1 value checked for change.
+ * @param v2 value checked for change.
+ * @param v3 value checked for change.
+ * @param v4 value checked for change.
+ * @param v5 value checked for change.
+ *
+ * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */ export declare function i18nInterpolation6(instructions: I18nExpInstruction[], v0: any, v1: any, v2: any, v3: any, v4: any, v5: any): string | NO_CHANGE;
+/**
+ * Checks if the values of up to 7 expressions have changed and replaces them by their values in a
+ * translation, or returns NO_CHANGE.
+ *
+ * @param instructions A list of instructions that will be used to translate an attribute.
+ * @param v0 value checked for change.
+ * @param v1 value checked for change.
+ * @param v2 value checked for change.
+ * @param v3 value checked for change.
+ * @param v4 value checked for change.
+ * @param v5 value checked for change.
+ * @param v6 value checked for change.
+ *
+ * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+export declare function i18nInterpolation7(instructions: I18nExpInstruction[], v0: any, v1: any, v2: any, v3: any, v4: any, v5: any, v6: any): string | NO_CHANGE;
+/**
+ * Checks if the values of up to 8 expressions have changed and replaces them by their values in a
+ * translation, or returns NO_CHANGE.
+ *
+ * @param instructions A list of instructions that will be used to translate an attribute.
+ * @param v0 value checked for change.
+ * @param v1 value checked for change.
+ * @param v2 value checked for change.
+ * @param v3 value checked for change.
+ * @param v4 value checked for change.
+ * @param v5 value checked for change.
+ * @param v6 value checked for change.
+ * @param v7 value checked for change.
+ *
+ * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+export declare function i18nInterpolation8(instructions: I18nExpInstruction[], v0: any, v1: any, v2: any, v3: any, v4: any, v5: any, v6: any, v7: any): string | NO_CHANGE;
+/**
+ * Create a translated interpolation binding with a variable number of expressions.
+ *
+ * If there are 1 to 8 expressions then `i18nInterpolation()` should be used instead. It is faster
+ * because there is no need to create an array of expressions and iterate over it.
+ *
+ * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+export declare function i18nInterpolationV(instructions: I18nExpInstruction[], values: any[]): string | NO_CHANGE;

@@ -63,7 +63,6 @@ export declare function disableBindings(): void;
  * walking the declaration view tree in listeners to get vars from parent views.
  */
 export declare function getCurrentView(): OpaqueViewState;
-export declare function _getViewData(): LViewData;
 /**
  * Restores `contextViewData` to the given OpaqueViewState instance.
  *
