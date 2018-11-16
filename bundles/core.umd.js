@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-rc.0+7.sha-4f965ad
+ * @license Angular v7.1.0-rc.0+9.sha-60800da
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -13250,8 +13250,8 @@
         'ɵelementStart': elementStart,
         'ɵelementEnd': elementEnd,
         'ɵelement': element,
-        'ɵEC': elementContainerStart,
-        'ɵeC': elementContainerEnd,
+        'ɵelementContainerStart': elementContainerStart,
+        'ɵelementContainerEnd': elementContainerEnd,
         'ɵpureFunction0': pureFunction0,
         'ɵpureFunction1': pureFunction1,
         'ɵpureFunction2': pureFunction2,
@@ -14201,7 +14201,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0-rc.0+7.sha-4f965ad');
+    var VERSION = new Version('7.1.0-rc.0+9.sha-60800da');
 
     /**
      * @license
@@ -23082,6 +23082,8 @@
     exports.ɵenableBindings = enableBindings;
     exports.ɵdisableBindings = disableBindings;
     exports.ɵelementAttribute = elementAttribute;
+    exports.ɵelementContainerStart = elementContainerStart;
+    exports.ɵelementContainerEnd = elementContainerEnd;
     exports.ɵelementStyling = elementStyling;
     exports.ɵelementStylingMap = elementStylingMap;
     exports.ɵelementStyleProp = elementStyleProp;
