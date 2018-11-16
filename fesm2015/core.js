@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-rc.0+5.sha-65943b4
+ * @license Angular v7.1.0-rc.0+6.sha-848f414
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -3470,8 +3470,9 @@ function getOrCreateInjectable(tNode, lViewData, token, flags = 0 /* Default */,
         let injectorIndex = getInjectorIndex(tNode, lViewData);
         /** @type {?} */
         let parentLocation = NO_PARENT_INJECTOR;
-        // If we should skip this injector, start by searching the parent injector.
-        if (flags & 4 /* SkipSelf */) {
+        // If we should skip this injector, or if there is no injector on this node, start by searching
+        // the parent injector.
+        if (injectorIndex === -1 || flags & 4 /* SkipSelf */) {
             parentLocation = injectorIndex === -1 ? getParentInjectorLocation(tNode, lViewData) :
                 lViewData[injectorIndex + PARENT_INJECTOR];
             if (!shouldSearchParent(flags, parentLocation)) {
@@ -17380,7 +17381,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0-rc.0+5.sha-65943b4');
+const VERSION = new Version('7.1.0-rc.0+6.sha-848f414');
 
 /**
  * @fileoverview added by tsickle
