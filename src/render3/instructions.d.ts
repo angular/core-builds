@@ -7,6 +7,7 @@
  */
 import './ng_dev_mode';
 import { InjectionToken } from '../di/injection_token';
+import { Injector } from '../di/injector';
 import { InjectFlags } from '../di/injector_compatibility';
 import { QueryList } from '../linker';
 import { Sanitizer } from '../sanitization/security';
@@ -31,7 +32,7 @@ import { NO_CHANGE } from './tokens';
 export declare function refreshDescendantViews(viewData: LViewData, rf: RenderFlags | null): void;
 /** Sets the host bindings for the current view. */
 export declare function setHostBindings(tView: TView, viewData: LViewData): void;
-export declare function createLViewData<T>(renderer: Renderer3, tView: TView, context: T | null, flags: LViewFlags, sanitizer?: Sanitizer | null): LViewData;
+export declare function createLViewData<T>(renderer: Renderer3, tView: TView, context: T | null, flags: LViewFlags, sanitizer?: Sanitizer | null, injector?: Injector | null): LViewData;
 /**
  * Create and stores the TNode, and hooks it up to the tree.
  *
