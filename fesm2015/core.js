@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-rc.0+2.sha-3ec7c50
+ * @license Angular v7.1.0-rc.0+5.sha-65943b4
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -6921,9 +6921,10 @@ function refreshChildComponents(components, parentFirstTemplatePass, rf) {
  * @param {?} context
  * @param {?} flags
  * @param {?=} sanitizer
+ * @param {?=} injector
  * @return {?}
  */
-function createLViewData(renderer, tView, context, flags, sanitizer) {
+function createLViewData(renderer, tView, context, flags, sanitizer, injector) {
     /** @type {?} */
     const viewData = getViewData();
     /** @type {?} */
@@ -6931,7 +6932,8 @@ function createLViewData(renderer, tView, context, flags, sanitizer) {
     instance[FLAGS] = flags | 1 /* CreationMode */ | 8 /* Attached */ | 16 /* RunInit */;
     instance[PARENT] = instance[DECLARATION_VIEW] = viewData;
     instance[CONTEXT] = context;
-    instance[INJECTOR] = viewData ? viewData[INJECTOR] : null;
+    instance[/** @type {?} */ (INJECTOR)] =
+        injector === undefined ? (viewData ? viewData[INJECTOR] : null) : injector;
     instance[RENDERER] = renderer;
     instance[SANITIZER] = sanitizer || null;
     return instance;
@@ -7404,7 +7406,7 @@ function createTView(viewIndex, templateFn, consts, vars, directives, pipes, vie
     const initialViewLength = bindingStartIndex + vars;
     /** @type {?} */
     const blueprint = createViewBlueprint(bindingStartIndex, initialViewLength);
-    return blueprint[TVIEW] = {
+    return blueprint[/** @type {?} */ (TVIEW)] = {
         id: viewIndex,
         blueprint: blueprint,
         template: templateFn,
@@ -9950,6 +9952,10 @@ class RootViewRef extends ViewRef {
      * @return {?}
      */
     checkNoChanges() { checkNoChangesInRootView(this._view); }
+    /**
+     * @return {?}
+     */
+    get context() { return /** @type {?} */ ((null)); }
 }
 /**
  * @param {?} lView
@@ -10712,8 +10718,7 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     /** @type {?} */
     const renderer = rendererFactory.createRenderer(hostRNode, componentDef);
     /** @type {?} */
-    const rootView = createLViewData(renderer, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags);
-    rootView[INJECTOR] = opts.injector || null;
+    const rootView = createLViewData(renderer, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags, undefined, opts.injector || null);
     /** @type {?} */
     const oldView = enterView(rootView, null);
     /** @type {?} */
@@ -12279,8 +12284,9 @@ class ComponentFactory$1 extends ComponentFactory {
         /** @type {?} */
         const renderer = rendererFactory.createRenderer(hostRNode, this.componentDef);
         /** @type {?} */
-        const rootView = createLViewData(renderer, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags);
-        rootView[INJECTOR] = ngModule ? createChainedInjector(injector, ngModule.injector) : injector;
+        const rootViewInjector = ngModule ? createChainedInjector(injector, ngModule.injector) : injector;
+        /** @type {?} */
+        const rootView = createLViewData(renderer, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags, undefined, rootViewInjector);
         /** @type {?} */
         const oldView = enterView(rootView, null);
         /** @type {?} */
@@ -12340,7 +12346,7 @@ class ComponentFactory$1 extends ComponentFactory {
                 rendererFactory.end();
         }
         /** @type {?} */
-        const componentRef = new ComponentRef$1(this.componentType, component, rootView, injector, createElementRef(ElementRef, tElementNode, rootView));
+        const componentRef = new ComponentRef$1(this.componentType, component, createElementRef(ElementRef, tElementNode, rootView), rootView, tElementNode);
         if (isInternalRootView) {
             /** @type {?} */ ((
             // The host element of the internal root view is attached to the component's host view node
@@ -12362,20 +12368,25 @@ class ComponentRef$1 extends ComponentRef {
     /**
      * @param {?} componentType
      * @param {?} instance
-     * @param {?} rootView
-     * @param {?} injector
      * @param {?} location
+     * @param {?} _rootView
+     * @param {?} _tNode
      */
-    constructor(componentType, instance, rootView, injector, location) {
+    constructor(componentType, instance, location, _rootView, _tNode) {
         super();
         this.location = location;
+        this._rootView = _rootView;
+        this._tNode = _tNode;
         this.destroyCbs = [];
         this.instance = instance;
-        this.hostView = this.changeDetectorRef = new RootViewRef(rootView);
-        this.hostView._tViewNode = createViewNode(-1, rootView);
-        this.injector = injector;
+        this.hostView = this.changeDetectorRef = new RootViewRef(_rootView);
+        this.hostView._tViewNode = createViewNode(-1, _rootView);
         this.componentType = componentType;
     }
+    /**
+     * @return {?}
+     */
+    get injector() { return new NodeInjector(this._tNode, this._rootView); }
     /**
      * @return {?}
      */
@@ -17369,7 +17380,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0-rc.0+2.sha-3ec7c50');
+const VERSION = new Version('7.1.0-rc.0+5.sha-65943b4');
 
 /**
  * @fileoverview added by tsickle
@@ -19601,8 +19612,12 @@ class Testability {
          */
         this._didWork = false;
         this._callbacks = [];
+        this.taskTrackingZone = null;
         this._watchAngularEvents();
-        _ngZone.run(() => { this.taskTrackingZone = Zone.current.get('TaskTrackingZone'); });
+        _ngZone.run(() => {
+            this.taskTrackingZone =
+                typeof Zone == 'undefined' ? null : Zone.current.get('TaskTrackingZone');
+        });
     }
     /**
      * @return {?}
