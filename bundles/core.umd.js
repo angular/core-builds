@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-rc.0+3.sha-ee12e72
+ * @license Angular v7.1.0-rc.0+10.sha-91bffa9
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2943,8 +2943,9 @@
             var previousTView = null;
             var injectorIndex = getInjectorIndex(tNode, lViewData);
             var parentLocation = NO_PARENT_INJECTOR;
-            // If we should skip this injector, start by searching the parent injector.
-            if (flags & 4 /* SkipSelf */) {
+            // If we should skip this injector, or if there is no injector on this node, start by searching
+            // the parent injector.
+            if (injectorIndex === -1 || flags & 4 /* SkipSelf */) {
                 parentLocation = injectorIndex === -1 ? getParentInjectorLocation(tNode, lViewData) :
                     lViewData[injectorIndex + PARENT_INJECTOR];
                 if (!shouldSearchParent(flags, parentLocation)) {
@@ -13275,8 +13276,8 @@
         'ɵelementStart': elementStart,
         'ɵelementEnd': elementEnd,
         'ɵelement': element,
-        'ɵEC': elementContainerStart,
-        'ɵeC': elementContainerEnd,
+        'ɵelementContainerStart': elementContainerStart,
+        'ɵelementContainerEnd': elementContainerEnd,
         'ɵpureFunction0': pureFunction0,
         'ɵpureFunction1': pureFunction1,
         'ɵpureFunction2': pureFunction2,
@@ -14297,7 +14298,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0-rc.0+3.sha-ee12e72');
+    var VERSION = new Version('7.1.0-rc.0+10.sha-91bffa9');
 
     /**
      * @license
@@ -23230,6 +23231,8 @@
     exports.ɵenableBindings = enableBindings;
     exports.ɵdisableBindings = disableBindings;
     exports.ɵelementAttribute = elementAttribute;
+    exports.ɵelementContainerStart = elementContainerStart;
+    exports.ɵelementContainerEnd = elementContainerEnd;
     exports.ɵelementStyling = elementStyling;
     exports.ɵelementStylingMap = elementStylingMap;
     exports.ɵelementStyleProp = elementStyleProp;
