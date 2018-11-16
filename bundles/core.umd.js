@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-rc.0
+ * @license Angular v7.1.0-rc.0+3.sha-ee12e72
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1868,6 +1868,17 @@
     var defaultScheduler = (typeof requestAnimationFrame !== 'undefined' && requestAnimationFrame || // browser only
         setTimeout // everything else
     ).bind(_global);
+    /**
+     * Equivalent to ES6 spread, add each item to an array.
+     *
+     * @param items The items to add
+     * @param arr The array to which you want to add the items
+     */
+    function addAllToArray(items, arr) {
+        for (var i = 0; i < items.length; i++) {
+            arr.push(items[i]);
+        }
+    }
 
     /**
      * @license
@@ -2428,6 +2439,9 @@
      * walking the declaration view tree in listeners to get vars from parent views.
      */
     function getCurrentView() {
+        return viewData;
+    }
+    function _getViewData() {
         return viewData;
     }
     /**
@@ -3653,8 +3667,23 @@
      */
     /** Retrieves the parent element of a given node. */
     function getParentNative(tNode, currentView) {
-        return tNode.parent == null ? getHostNative(currentView) :
-            getNativeByTNode(tNode.parent, currentView);
+        if (tNode.parent == null) {
+            return getHostNative(currentView);
+        }
+        else {
+            var parentTNode = getFirstParentNative(tNode);
+            return getNativeByTNode(parentTNode, currentView);
+        }
+    }
+    /**
+     * Get the first parent of a node that isn't an IcuContainer TNode
+     */
+    function getFirstParentNative(tNode) {
+        var parent = tNode.parent;
+        while (parent && parent.type === 5 /* IcuContainer */) {
+            parent = parent.parent;
+        }
+        return parent;
     }
     /**
      * Gets the host element given a view. Will return null if the current view is an embedded view,
@@ -4136,16 +4165,22 @@
      *
 
      *
-     * @param parent The parent where the child will be inserted into.
+     * @param tNode The tNode of the node that we want to insert.
      * @param currentView Current LView being processed.
-     * @return boolean Whether the child should be inserted now (or delayed until later).
+     * @return boolean Whether the node should be inserted now (or delayed until later).
      */
     function canInsertNativeNode(tNode, currentView) {
         var currentNode = tNode;
         var parent = tNode.parent;
-        if (tNode.parent && tNode.parent.type === 4 /* ElementContainer */) {
-            currentNode = getHighestElementContainer(tNode);
-            parent = currentNode.parent;
+        if (tNode.parent) {
+            if (tNode.parent.type === 4 /* ElementContainer */) {
+                currentNode = getHighestElementContainer(tNode);
+                parent = currentNode.parent;
+            }
+            else if (tNode.parent.type === 5 /* IcuContainer */) {
+                currentNode = getFirstParentNative(currentNode);
+                parent = currentNode.parent;
+            }
         }
         if (parent === null)
             parent = currentView[HOST_NODE];
@@ -4193,6 +4228,7 @@
      * @returns Whether or not the child was appended
      */
     function appendChild(childEl, childTNode, currentView) {
+        if (childEl === void 0) { childEl = null; }
         if (childEl !== null && canInsertNativeNode(childTNode, currentView)) {
             var renderer = currentView[RENDERER];
             var parentEl = getParentNative(childTNode, currentView);
@@ -4206,6 +4242,10 @@
             else if (parentTNode.type === 4 /* ElementContainer */) {
                 var renderParent = getRenderParent(childTNode, currentView);
                 nativeInsertBefore(renderer, renderParent, childEl, parentEl);
+            }
+            else if (parentTNode.type === 5 /* IcuContainer */) {
+                var icuAnchorNode = getNativeByTNode(childTNode.parent, currentView);
+                nativeInsertBefore(renderer, parentEl, childEl, icuAnchorNode);
             }
             else {
                 isProceduralRenderer(renderer) ? renderer.appendChild(parentEl, childEl) :
@@ -5538,13 +5578,14 @@
             }
         }
     }
-    function createLViewData(renderer, tView, context, flags, sanitizer) {
+    function createLViewData(renderer, tView, context, flags, sanitizer, injector) {
         var viewData = getViewData();
         var instance = tView.blueprint.slice();
         instance[FLAGS] = flags | 1 /* CreationMode */ | 8 /* Attached */ | 16 /* RunInit */;
         instance[PARENT] = instance[DECLARATION_VIEW] = viewData;
         instance[CONTEXT] = context;
-        instance[INJECTOR] = viewData ? viewData[INJECTOR] : null;
+        instance[INJECTOR] =
+            injector === undefined ? (viewData ? viewData[INJECTOR] : null) : injector;
         instance[RENDERER] = renderer;
         instance[SANITIZER] = sanitizer || null;
         return instance;
@@ -5597,11 +5638,12 @@
      * i18nApply() or ComponentFactory.create), we need to adjust the blueprint for future
      * template passes.
      */
-    function adjustBlueprintForNewNode(view) {
+    function allocExpando(view) {
         var tView = view[TVIEW];
         if (tView.firstTemplatePass) {
             tView.expandoStartIndex++;
             tView.blueprint.push(null);
+            tView.data.push(null);
             view.push(null);
         }
     }
@@ -7878,6 +7920,11 @@
         }
         RootViewRef.prototype.detectChanges = function () { detectChangesInRootView(this._view); };
         RootViewRef.prototype.checkNoChanges = function () { checkNoChangesInRootView(this._view); };
+        Object.defineProperty(RootViewRef.prototype, "context", {
+            get: function () { return null; },
+            enumerable: true,
+            configurable: true
+        });
         return RootViewRef;
     }(ViewRef));
     function collectNativeNodes(lView, parentTNode, result) {
@@ -8494,8 +8541,7 @@
             2 /* CheckAlways */ | 64 /* IsRoot */;
         var rootContext = createRootContext(opts.scheduler, opts.playerHandler);
         var renderer = rendererFactory.createRenderer(hostRNode, componentDef);
-        var rootView = createLViewData(renderer, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags);
-        rootView[INJECTOR] = opts.injector || null;
+        var rootView = createLViewData(renderer, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags, undefined, opts.injector || null);
         var oldView = enterView(rootView, null);
         var component;
         try {
@@ -9851,9 +9897,9 @@
                 2 /* CheckAlways */ | 64 /* IsRoot */;
             var rootContext = ngModule && !isInternalRootView ? ngModule.injector.get(ROOT_CONTEXT) : createRootContext();
             var renderer = rendererFactory.createRenderer(hostRNode, this.componentDef);
+            var rootViewInjector = ngModule ? createChainedInjector(injector, ngModule.injector) : injector;
             // Create the root view. Uses empty TView and ContentTemplate.
-            var rootView = createLViewData(renderer, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags);
-            rootView[INJECTOR] = ngModule ? createChainedInjector(injector, ngModule.injector) : injector;
+            var rootView = createLViewData(renderer, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags, undefined, rootViewInjector);
             // rootView is the parent when bootstrapping
             var oldView = enterView(rootView, null);
             var component;
@@ -9902,7 +9948,7 @@
                 if (rendererFactory.end)
                     rendererFactory.end();
             }
-            var componentRef = new ComponentRef$1(this.componentType, component, rootView, injector, createElementRef(ElementRef, tElementNode, rootView));
+            var componentRef = new ComponentRef$1(this.componentType, component, createElementRef(ElementRef, tElementNode, rootView), rootView, tElementNode);
             if (isInternalRootView) {
                 // The host element of the internal root view is attached to the component's host view node
                 componentRef.hostView._tViewNode.child = tElementNode;
@@ -9922,17 +9968,23 @@
      */
     var ComponentRef$1 = /** @class */ (function (_super) {
         __extends(ComponentRef$$1, _super);
-        function ComponentRef$$1(componentType, instance, rootView, injector, location) {
+        function ComponentRef$$1(componentType, instance, location, _rootView, _tNode) {
             var _this = _super.call(this) || this;
             _this.location = location;
+            _this._rootView = _rootView;
+            _this._tNode = _tNode;
             _this.destroyCbs = [];
             _this.instance = instance;
-            _this.hostView = _this.changeDetectorRef = new RootViewRef(rootView);
-            _this.hostView._tViewNode = createViewNode(-1, rootView);
-            _this.injector = injector;
+            _this.hostView = _this.changeDetectorRef = new RootViewRef(_rootView);
+            _this.hostView._tViewNode = createViewNode(-1, _rootView);
             _this.componentType = componentType;
             return _this;
         }
+        Object.defineProperty(ComponentRef$$1.prototype, "injector", {
+            get: function () { return new NodeInjector(this._tNode, this._rootView); },
+            enumerable: true,
+            configurable: true
+        });
         ComponentRef$$1.prototype.destroy = function () {
             ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
             this.destroyCbs.forEach(function (fn) { return fn(); });
@@ -9952,191 +10004,913 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var i18nTagRegex = /{\$([^}]+)}/g;
     /**
-     * Takes a translation string, the initial list of placeholders (elements and expressions) and the
-     * indexes of their corresponding expression nodes to return a list of instructions for each
-     * template function.
+     * This file is used to control if the default rendering pipeline should be `ViewEngine` or `Ivy`.
      *
-     * Because embedded templates have different indexes for each placeholder, each parameter (except
-     * the translation) is an array, where each value corresponds to a different template, by order of
-     * appearance.
-     *
-     * @param translation A translation string where placeholders are represented by `{$name}`
-     * @param elements An array containing, for each template, the maps of element placeholders and
-     * their indexes.
-     * @param expressions An array containing, for each template, the maps of expression placeholders
-     * and their indexes.
-     * @param templateRoots An array of template roots whose content should be ignored when
-     * generating the instructions for their parent template.
-     * @param lastChildIndex The index of the last child of the i18n node. Used when the i18n block is
-     * an ng-container.
-     *
-     * @returns A list of instructions used to translate each template.
+     * For more information on how to run and debug tests with either Ivy or View Engine (legacy),
+     * please see [BAZEL.md](./docs/BAZEL.md).
      */
-    function i18nMapping(translation, elements, expressions, templateRoots, lastChildIndex) {
-        var translationParts = translation.split(i18nTagRegex);
-        var nbTemplates = templateRoots ? templateRoots.length + 1 : 1;
-        var instructions = (new Array(nbTemplates)).fill(undefined);
-        generateMappingInstructions(0, 0, translationParts, instructions, elements, expressions, templateRoots, lastChildIndex);
-        return instructions;
+    var _devMode = true;
+    var _runModeLocked = false;
+    /**
+     * Returns whether Angular is in development mode. After called once,
+     * the value is locked and won't change any more.
+     *
+     * By default, this is true, unless a user calls `enableProdMode` before calling this.
+     *
+     * @publicApi
+     */
+    function isDevMode() {
+        _runModeLocked = true;
+        return _devMode;
     }
     /**
-     * Internal function that reads the translation parts and generates a set of instructions for each
-     * template.
+     * Disable Angular's development mode, which turns off assertions and other
+     * checks within the framework.
      *
-     * See `i18nMapping()` for more details.
+     * One important assertion this disables verifies that a change detection pass
+     * does not result in additional changes to any bindings (also known as
+     * unidirectional data flow).
      *
-     * @param tmplIndex The order of appearance of the template.
-     * 0 for the root template, following indexes match the order in `templateRoots`.
-     * @param partIndex The current index in `translationParts`.
-     * @param translationParts The translation string split into an array of placeholders and text
-     * elements.
-     * @param instructions The current list of instructions to update.
-     * @param elements An array containing, for each template, the maps of element placeholders and
-     * their indexes.
-     * @param expressions An array containing, for each template, the maps of expression placeholders
-     * and their indexes.
-     * @param templateRoots An array of template roots whose content should be ignored when
-     * generating the instructions for their parent template.
-     * @param lastChildIndex The index of the last child of the i18n node. Used when the i18n block is
-     * an ng-container.
-     *
-     * @returns the current index in `translationParts`
+     * @publicApi
      */
-    function generateMappingInstructions(tmplIndex, partIndex, translationParts, instructions, elements, expressions, templateRoots, lastChildIndex) {
-        var tmplInstructions = [];
-        var phVisited = [];
-        var openedTagCount = 0;
-        var maxIndex = 0;
-        var currentElements = elements && elements[tmplIndex] ? elements[tmplIndex] : null;
-        var currentExpressions = expressions && expressions[tmplIndex] ? expressions[tmplIndex] : null;
-        instructions[tmplIndex] = tmplInstructions;
-        for (; partIndex < translationParts.length; partIndex++) {
-            // The value can either be text or the name of a placeholder (element/template root/expression)
-            var value = translationParts[partIndex];
-            // Odd indexes are placeholders
-            if (partIndex & 1) {
-                var phIndex = void 0;
-                if (currentElements && currentElements[value] !== undefined) {
-                    phIndex = currentElements[value];
-                    // The placeholder represents a DOM element, add an instruction to move it
-                    var templateRootIndex = templateRoots ? templateRoots.indexOf(value) : -1;
-                    if (templateRootIndex !== -1 && (templateRootIndex + 1) !== tmplIndex) {
-                        // This is a template root, it has no closing tag, not treating it as an element
-                        tmplInstructions.push(phIndex | -2147483648 /* TemplateRoot */);
-                    }
-                    else {
-                        tmplInstructions.push(phIndex | 1073741824 /* Element */);
-                        openedTagCount++;
-                    }
-                    phVisited.push(value);
+    function enableProdMode() {
+        if (_runModeLocked) {
+            throw new Error('Cannot enable prod mode after platform setup.');
+        }
+        _devMode = false;
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * This helper class is used to get hold of an inert tree of DOM elements containing dirty HTML
+     * that needs sanitizing.
+     * Depending upon browser support we must use one of three strategies for doing this.
+     * Support: Safari 10.x -> XHR strategy
+     * Support: Firefox -> DomParser strategy
+     * Default: InertDocument strategy
+     */
+    var InertBodyHelper = /** @class */ (function () {
+        function InertBodyHelper(defaultDoc) {
+            this.defaultDoc = defaultDoc;
+            this.inertDocument = this.defaultDoc.implementation.createHTMLDocument('sanitization-inert');
+            this.inertBodyElement = this.inertDocument.body;
+            if (this.inertBodyElement == null) {
+                // usually there should be only one body element in the document, but IE doesn't have any, so
+                // we need to create one.
+                var inertHtml = this.inertDocument.createElement('html');
+                this.inertDocument.appendChild(inertHtml);
+                this.inertBodyElement = this.inertDocument.createElement('body');
+                inertHtml.appendChild(this.inertBodyElement);
+            }
+            this.inertBodyElement.innerHTML = '<svg><g onload="this.parentNode.remove()"></g></svg>';
+            if (this.inertBodyElement.querySelector && !this.inertBodyElement.querySelector('svg')) {
+                // We just hit the Safari 10.1 bug - which allows JS to run inside the SVG G element
+                // so use the XHR strategy.
+                this.getInertBodyElement = this.getInertBodyElement_XHR;
+                return;
+            }
+            this.inertBodyElement.innerHTML =
+                '<svg><p><style><img src="</style><img src=x onerror=alert(1)//">';
+            if (this.inertBodyElement.querySelector && this.inertBodyElement.querySelector('svg img')) {
+                // We just hit the Firefox bug - which prevents the inner img JS from being sanitized
+                // so use the DOMParser strategy, if it is available.
+                // If the DOMParser is not available then we are not in Firefox (Server/WebWorker?) so we
+                // fall through to the default strategy below.
+                if (isDOMParserAvailable()) {
+                    this.getInertBodyElement = this.getInertBodyElement_DOMParser;
+                    return;
                 }
-                else if (currentExpressions && currentExpressions[value] !== undefined) {
-                    phIndex = currentExpressions[value];
-                    // The placeholder represents an expression, add an instruction to move it
-                    tmplInstructions.push(phIndex | 1610612736 /* Expression */);
-                    phVisited.push(value);
+            }
+            // None of the bugs were hit so it is safe for us to use the default InertDocument strategy
+            this.getInertBodyElement = this.getInertBodyElement_InertDocument;
+        }
+        /**
+         * Use XHR to create and fill an inert body element (on Safari 10.1)
+         * See
+         * https://github.com/cure53/DOMPurify/blob/a992d3a75031cb8bb032e5ea8399ba972bdf9a65/src/purify.js#L439-L449
+         */
+        InertBodyHelper.prototype.getInertBodyElement_XHR = function (html) {
+            // We add these extra elements to ensure that the rest of the content is parsed as expected
+            // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
+            // `<head>` tag.
+            html = '<body><remove></remove>' + html + '</body>';
+            try {
+                html = encodeURI(html);
+            }
+            catch (e) {
+                return null;
+            }
+            var xhr = new XMLHttpRequest();
+            xhr.responseType = 'document';
+            xhr.open('GET', 'data:text/html;charset=utf-8,' + html, false);
+            xhr.send(undefined);
+            var body = xhr.response.body;
+            body.removeChild(body.firstChild);
+            return body;
+        };
+        /**
+         * Use DOMParser to create and fill an inert body element (on Firefox)
+         * See https://github.com/cure53/DOMPurify/releases/tag/0.6.7
+         *
+         */
+        InertBodyHelper.prototype.getInertBodyElement_DOMParser = function (html) {
+            // We add these extra elements to ensure that the rest of the content is parsed as expected
+            // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
+            // `<head>` tag.
+            html = '<body><remove></remove>' + html + '</body>';
+            try {
+                var body = new window
+                    .DOMParser()
+                    .parseFromString(html, 'text/html')
+                    .body;
+                body.removeChild(body.firstChild);
+                return body;
+            }
+            catch (e) {
+                return null;
+            }
+        };
+        /**
+         * Use an HTML5 `template` element, if supported, or an inert body element created via
+         * `createHtmlDocument` to create and fill an inert DOM element.
+         * This is the default sane strategy to use if the browser does not require one of the specialised
+         * strategies above.
+         */
+        InertBodyHelper.prototype.getInertBodyElement_InertDocument = function (html) {
+            // Prefer using <template> element if supported.
+            var templateEl = this.inertDocument.createElement('template');
+            if ('content' in templateEl) {
+                templateEl.innerHTML = html;
+                return templateEl;
+            }
+            this.inertBodyElement.innerHTML = html;
+            // Support: IE 9-11 only
+            // strip custom-namespaced attributes on IE<=11
+            if (this.defaultDoc.documentMode) {
+                this.stripCustomNsAttrs(this.inertBodyElement);
+            }
+            return this.inertBodyElement;
+        };
+        /**
+         * When IE9-11 comes across an unknown namespaced attribute e.g. 'xlink:foo' it adds 'xmlns:ns1'
+         * attribute to declare ns1 namespace and prefixes the attribute with 'ns1' (e.g.
+         * 'ns1:xlink:foo').
+         *
+         * This is undesirable since we don't want to allow any of these custom attributes. This method
+         * strips them all.
+         */
+        InertBodyHelper.prototype.stripCustomNsAttrs = function (el) {
+            var elAttrs = el.attributes;
+            // loop backwards so that we can support removals.
+            for (var i = elAttrs.length - 1; 0 < i; i--) {
+                var attrib = elAttrs.item(i);
+                var attrName = attrib.name;
+                if (attrName === 'xmlns:ns1' || attrName.indexOf('ns1:') === 0) {
+                    el.removeAttribute(attrName);
+                }
+            }
+            var childNode = el.firstChild;
+            while (childNode) {
+                if (childNode.nodeType === Node.ELEMENT_NODE)
+                    this.stripCustomNsAttrs(childNode);
+                childNode = childNode.nextSibling;
+            }
+        };
+        return InertBodyHelper;
+    }());
+    /**
+     * We need to determine whether the DOMParser exists in the global context.
+     * The try-catch is because, on some browsers, trying to access this property
+     * on window can actually throw an error.
+     *
+     * @suppress {uselessCode}
+     */
+    function isDOMParserAvailable() {
+        try {
+            return !!window.DOMParser;
+        }
+        catch (e) {
+            return false;
+        }
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * A pattern that recognizes a commonly useful subset of URLs that are safe.
+     *
+     * This regular expression matches a subset of URLs that will not cause script
+     * execution if used in URL context within a HTML document. Specifically, this
+     * regular expression matches if (comment from here on and regex copied from
+     * Soy's EscapingConventions):
+     * (1) Either a protocol in a whitelist (http, https, mailto or ftp).
+     * (2) or no protocol.  A protocol must be followed by a colon. The below
+     *     allows that by allowing colons only after one of the characters [/?#].
+     *     A colon after a hash (#) must be in the fragment.
+     *     Otherwise, a colon after a (?) must be in a query.
+     *     Otherwise, a colon after a single solidus (/) must be in a path.
+     *     Otherwise, a colon after a double solidus (//) must be in the authority
+     *     (before port).
+     *
+     * The pattern disallows &, used in HTML entity declarations before
+     * one of the characters in [/?#]. This disallows HTML entities used in the
+     * protocol name, which should never happen, e.g. "h&#116;tp" for "http".
+     * It also disallows HTML entities in the first path part of a relative path,
+     * e.g. "foo&lt;bar/baz".  Our existing escaping functions should not produce
+     * that. More importantly, it disallows masking of a colon,
+     * e.g. "javascript&#58;...".
+     *
+     * This regular expression was taken from the Closure sanitization library.
+     */
+    var SAFE_URL_PATTERN = /^(?:(?:https?|mailto|ftp|tel|file):|[^&:/?#]*(?:[/?#]|$))/gi;
+    /** A pattern that matches safe data URLs. Only matches image, video and audio types. */
+    var DATA_URL_PATTERN = /^data:(?:image\/(?:bmp|gif|jpeg|jpg|png|tiff|webp)|video\/(?:mpeg|mp4|ogg|webm)|audio\/(?:mp3|oga|ogg|opus));base64,[a-z0-9+\/]+=*$/i;
+    function _sanitizeUrl(url) {
+        url = String(url);
+        if (url.match(SAFE_URL_PATTERN) || url.match(DATA_URL_PATTERN))
+            return url;
+        if (isDevMode()) {
+            console.warn("WARNING: sanitizing unsafe URL value " + url + " (see http://g.co/ng/security#xss)");
+        }
+        return 'unsafe:' + url;
+    }
+    function sanitizeSrcset(srcset) {
+        srcset = String(srcset);
+        return srcset.split(',').map(function (srcset) { return _sanitizeUrl(srcset.trim()); }).join(', ');
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    function tagSet(tags) {
+        var e_1, _a;
+        var res = {};
+        try {
+            for (var _b = __values(tags.split(',')), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var t = _c.value;
+                res[t] = true;
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+        return res;
+    }
+    function merge() {
+        var sets = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            sets[_i] = arguments[_i];
+        }
+        var e_2, _a;
+        var res = {};
+        try {
+            for (var sets_1 = __values(sets), sets_1_1 = sets_1.next(); !sets_1_1.done; sets_1_1 = sets_1.next()) {
+                var s = sets_1_1.value;
+                for (var v in s) {
+                    if (s.hasOwnProperty(v))
+                        res[v] = true;
+                }
+            }
+        }
+        catch (e_2_1) { e_2 = { error: e_2_1 }; }
+        finally {
+            try {
+                if (sets_1_1 && !sets_1_1.done && (_a = sets_1.return)) _a.call(sets_1);
+            }
+            finally { if (e_2) throw e_2.error; }
+        }
+        return res;
+    }
+    // Good source of info about elements and attributes
+    // http://dev.w3.org/html5/spec/Overview.html#semantics
+    // http://simon.html5.org/html-elements
+    // Safe Void Elements - HTML5
+    // http://dev.w3.org/html5/spec/Overview.html#void-elements
+    var VOID_ELEMENTS = tagSet('area,br,col,hr,img,wbr');
+    // Elements that you can, intentionally, leave open (and which close themselves)
+    // http://dev.w3.org/html5/spec/Overview.html#optional-tags
+    var OPTIONAL_END_TAG_BLOCK_ELEMENTS = tagSet('colgroup,dd,dt,li,p,tbody,td,tfoot,th,thead,tr');
+    var OPTIONAL_END_TAG_INLINE_ELEMENTS = tagSet('rp,rt');
+    var OPTIONAL_END_TAG_ELEMENTS = merge(OPTIONAL_END_TAG_INLINE_ELEMENTS, OPTIONAL_END_TAG_BLOCK_ELEMENTS);
+    // Safe Block Elements - HTML5
+    var BLOCK_ELEMENTS = merge(OPTIONAL_END_TAG_BLOCK_ELEMENTS, tagSet('address,article,' +
+        'aside,blockquote,caption,center,del,details,dialog,dir,div,dl,figure,figcaption,footer,h1,h2,h3,h4,h5,' +
+        'h6,header,hgroup,hr,ins,main,map,menu,nav,ol,pre,section,summary,table,ul'));
+    // Inline Elements - HTML5
+    var INLINE_ELEMENTS = merge(OPTIONAL_END_TAG_INLINE_ELEMENTS, tagSet('a,abbr,acronym,audio,b,' +
+        'bdi,bdo,big,br,cite,code,del,dfn,em,font,i,img,ins,kbd,label,map,mark,picture,q,ruby,rp,rt,s,' +
+        'samp,small,source,span,strike,strong,sub,sup,time,track,tt,u,var,video'));
+    var VALID_ELEMENTS = merge(VOID_ELEMENTS, BLOCK_ELEMENTS, INLINE_ELEMENTS, OPTIONAL_END_TAG_ELEMENTS);
+    // Attributes that have href and hence need to be sanitized
+    var URI_ATTRS = tagSet('background,cite,href,itemtype,longdesc,poster,src,xlink:href');
+    // Attributes that have special href set hence need to be sanitized
+    var SRCSET_ATTRS = tagSet('srcset');
+    var HTML_ATTRS = tagSet('abbr,accesskey,align,alt,autoplay,axis,bgcolor,border,cellpadding,cellspacing,class,clear,color,cols,colspan,' +
+        'compact,controls,coords,datetime,default,dir,download,face,headers,height,hidden,hreflang,hspace,' +
+        'ismap,itemscope,itemprop,kind,label,lang,language,loop,media,muted,nohref,nowrap,open,preload,rel,rev,role,rows,rowspan,rules,' +
+        'scope,scrolling,shape,size,sizes,span,srclang,start,summary,tabindex,target,title,translate,type,usemap,' +
+        'valign,value,vspace,width');
+    // NB: This currently consciously doesn't support SVG. SVG sanitization has had several security
+    // issues in the past, so it seems safer to leave it out if possible. If support for binding SVG via
+    // innerHTML is required, SVG attributes should be added here.
+    // NB: Sanitization does not allow <form> elements or other active elements (<button> etc). Those
+    // can be sanitized, but they increase security surface area without a legitimate use case, so they
+    // are left out here.
+    var VALID_ATTRS = merge(URI_ATTRS, SRCSET_ATTRS, HTML_ATTRS);
+    /**
+     * SanitizingHtmlSerializer serializes a DOM fragment, stripping out any unsafe elements and unsafe
+     * attributes.
+     */
+    var SanitizingHtmlSerializer = /** @class */ (function () {
+        function SanitizingHtmlSerializer() {
+            // Explicitly track if something was stripped, to avoid accidentally warning of sanitization just
+            // because characters were re-encoded.
+            this.sanitizedSomething = false;
+            this.buf = [];
+        }
+        SanitizingHtmlSerializer.prototype.sanitizeChildren = function (el) {
+            // This cannot use a TreeWalker, as it has to run on Angular's various DOM adapters.
+            // However this code never accesses properties off of `document` before deleting its contents
+            // again, so it shouldn't be vulnerable to DOM clobbering.
+            var current = el.firstChild;
+            var elementValid = true;
+            while (current) {
+                if (current.nodeType === Node.ELEMENT_NODE) {
+                    elementValid = this.startElement(current);
+                }
+                else if (current.nodeType === Node.TEXT_NODE) {
+                    this.chars(current.nodeValue);
                 }
                 else {
-                    // It is a closing tag
-                    tmplInstructions.push(-1073741824 /* CloseNode */);
-                    if (tmplIndex > 0) {
-                        openedTagCount--;
-                        // If we have reached the closing tag for this template, exit the loop
-                        if (openedTagCount === 0) {
-                            break;
-                        }
+                    // Strip non-element, non-text nodes.
+                    this.sanitizedSomething = true;
+                }
+                if (elementValid && current.firstChild) {
+                    current = current.firstChild;
+                    continue;
+                }
+                while (current) {
+                    // Leaving the element. Walk up and to the right, closing tags as we go.
+                    if (current.nodeType === Node.ELEMENT_NODE) {
+                        this.endElement(current);
                     }
-                }
-                if (phIndex !== undefined && phIndex > maxIndex) {
-                    maxIndex = phIndex;
-                }
-                if (templateRoots) {
-                    var newTmplIndex = templateRoots.indexOf(value) + 1;
-                    if (newTmplIndex !== 0 && newTmplIndex !== tmplIndex) {
-                        partIndex = generateMappingInstructions(newTmplIndex, partIndex, translationParts, instructions, elements, expressions, templateRoots, lastChildIndex);
+                    var next = this.checkClobberedElement(current, current.nextSibling);
+                    if (next) {
+                        current = next;
+                        break;
                     }
+                    current = this.checkClobberedElement(current, current.parentNode);
                 }
             }
-            else if (value) {
-                // It's a non-empty string, create a text node
-                tmplInstructions.push(536870912 /* Text */, value);
+            return this.buf.join('');
+        };
+        /**
+         * Outputs only valid Elements.
+         *
+         * Invalid elements are skipped.
+         *
+         * @param element element to sanitize
+         * Returns true if the element is valid.
+         */
+        SanitizingHtmlSerializer.prototype.startElement = function (element) {
+            var tagName = element.nodeName.toLowerCase();
+            if (!VALID_ELEMENTS.hasOwnProperty(tagName)) {
+                this.sanitizedSomething = true;
+                return false;
             }
-        }
-        // Add instructions to remove elements that are not used in the translation
-        if (elements) {
-            var tmplElements = elements[tmplIndex];
-            if (tmplElements) {
-                var phKeys = Object.keys(tmplElements);
-                for (var i = 0; i < phKeys.length; i++) {
-                    var ph = phKeys[i];
-                    if (phVisited.indexOf(ph) === -1) {
-                        var index = tmplElements[ph];
-                        // Add an instruction to remove the element
-                        tmplInstructions.push(index | -536870912 /* RemoveNode */);
-                        if (index > maxIndex) {
-                            maxIndex = index;
-                        }
-                    }
+            this.buf.push('<');
+            this.buf.push(tagName);
+            var elAttrs = element.attributes;
+            for (var i = 0; i < elAttrs.length; i++) {
+                var elAttr = elAttrs.item(i);
+                var attrName = elAttr.name;
+                var lower = attrName.toLowerCase();
+                if (!VALID_ATTRS.hasOwnProperty(lower)) {
+                    this.sanitizedSomething = true;
+                    continue;
                 }
+                var value = elAttr.value;
+                // TODO(martinprobst): Special case image URIs for data:image/...
+                if (URI_ATTRS[lower])
+                    value = _sanitizeUrl(value);
+                if (SRCSET_ATTRS[lower])
+                    value = sanitizeSrcset(value);
+                this.buf.push(' ', attrName, '="', encodeEntities(value), '"');
             }
-        }
-        // Add instructions to remove expressions that are not used in the translation
-        if (expressions) {
-            var tmplExpressions = expressions[tmplIndex];
-            if (tmplExpressions) {
-                var phKeys = Object.keys(tmplExpressions);
-                for (var i = 0; i < phKeys.length; i++) {
-                    var ph = phKeys[i];
-                    if (phVisited.indexOf(ph) === -1) {
-                        var index = tmplExpressions[ph];
-                        if (ngDevMode) {
-                            assertLessThan(index.toString(2).length, 28, "Index " + index + " is too big and will overflow");
-                        }
-                        // Add an instruction to remove the expression
-                        tmplInstructions.push(index | -536870912 /* RemoveNode */);
-                        if (index > maxIndex) {
-                            maxIndex = index;
-                        }
-                    }
-                }
+            this.buf.push('>');
+            return true;
+        };
+        SanitizingHtmlSerializer.prototype.endElement = function (current) {
+            var tagName = current.nodeName.toLowerCase();
+            if (VALID_ELEMENTS.hasOwnProperty(tagName) && !VOID_ELEMENTS.hasOwnProperty(tagName)) {
+                this.buf.push('</');
+                this.buf.push(tagName);
+                this.buf.push('>');
             }
-        }
-        if (tmplIndex === 0 && typeof lastChildIndex === 'number') {
-            // The current parent is an ng-container and it has more children after the translation that we
-            // need to append to keep the order of the DOM nodes correct
-            for (var i = maxIndex + 1; i <= lastChildIndex; i++) {
-                if (ngDevMode) {
-                    assertLessThan(i.toString(2).length, 28, "Index " + i + " is too big and will overflow");
-                }
-                tmplInstructions.push(i | -1610612736 /* Any */);
+        };
+        SanitizingHtmlSerializer.prototype.chars = function (chars) { this.buf.push(encodeEntities(chars)); };
+        SanitizingHtmlSerializer.prototype.checkClobberedElement = function (node, nextNode) {
+            if (nextNode &&
+                (node.compareDocumentPosition(nextNode) &
+                    Node.DOCUMENT_POSITION_CONTAINED_BY) === Node.DOCUMENT_POSITION_CONTAINED_BY) {
+                throw new Error("Failed to sanitize html because the element is clobbered: " + node.outerHTML);
             }
-        }
-        return partIndex;
+            return nextNode;
+        };
+        return SanitizingHtmlSerializer;
+    }());
+    // Regular Expressions for parsing tags and attributes
+    var SURROGATE_PAIR_REGEXP = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
+    // ! to ~ is the ASCII range.
+    var NON_ALPHANUMERIC_REGEXP = /([^\#-~ |!])/g;
+    /**
+     * Escapes all potentially dangerous characters, so that the
+     * resulting string can be safely inserted into attribute or
+     * element text.
+     * @param value
+     */
+    function encodeEntities(value) {
+        return value.replace(/&/g, '&amp;')
+            .replace(SURROGATE_PAIR_REGEXP, function (match) {
+            var hi = match.charCodeAt(0);
+            var low = match.charCodeAt(1);
+            return '&#' + (((hi - 0xD800) * 0x400) + (low - 0xDC00) + 0x10000) + ';';
+        })
+            .replace(NON_ALPHANUMERIC_REGEXP, function (match) { return '&#' + match.charCodeAt(0) + ';'; })
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
     }
-    function appendI18nNode(tNode, parentTNode, previousTNode) {
-        if (ngDevMode) {
-            ngDevMode.rendererMoveNode++;
-        }
-        var viewData = getViewData();
-        // On first pass, re-organize node tree to put this node in the correct position.
-        var firstTemplatePass = viewData[TVIEW].firstTemplatePass;
-        if (firstTemplatePass) {
-            if (previousTNode === parentTNode && tNode !== parentTNode.child) {
-                tNode.next = parentTNode.child;
-                parentTNode.child = tNode;
+    var inertBodyHelper;
+    /**
+     * Sanitizes the given unsafe, untrusted HTML fragment, and returns HTML text that is safe to add to
+     * the DOM in a browser environment.
+     */
+    function _sanitizeHtml(defaultDoc, unsafeHtmlInput) {
+        var inertBodyElement = null;
+        try {
+            inertBodyHelper = inertBodyHelper || new InertBodyHelper(defaultDoc);
+            // Make sure unsafeHtml is actually a string (TypeScript types are not enforced at runtime).
+            var unsafeHtml = unsafeHtmlInput ? String(unsafeHtmlInput) : '';
+            inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
+            // mXSS protection. Repeatedly parse the document to make sure it stabilizes, so that a browser
+            // trying to auto-correct incorrect HTML cannot cause formerly inert HTML to become dangerous.
+            var mXSSAttempts = 5;
+            var parsedHtml = unsafeHtml;
+            do {
+                if (mXSSAttempts === 0) {
+                    throw new Error('Failed to sanitize html because the input is unstable');
+                }
+                mXSSAttempts--;
+                unsafeHtml = parsedHtml;
+                parsedHtml = inertBodyElement.innerHTML;
+                inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
+            } while (unsafeHtml !== parsedHtml);
+            var sanitizer = new SanitizingHtmlSerializer();
+            var safeHtml = sanitizer.sanitizeChildren(getTemplateContent(inertBodyElement) || inertBodyElement);
+            if (isDevMode() && sanitizer.sanitizedSomething) {
+                console.warn('WARNING: sanitizing HTML stripped some content (see http://g.co/ng/security#xss).');
             }
-            else if (previousTNode !== parentTNode && tNode !== previousTNode.next) {
-                tNode.next = previousTNode.next;
-                previousTNode.next = tNode;
+            return safeHtml;
+        }
+        finally {
+            // In case anything goes wrong, clear out inertElement to reset the entire DOM structure.
+            if (inertBodyElement) {
+                var parent_1 = getTemplateContent(inertBodyElement) || inertBodyElement;
+                while (parent_1.firstChild) {
+                    parent_1.removeChild(parent_1.firstChild);
+                }
+            }
+        }
+    }
+    function getTemplateContent(el) {
+        return 'content' in el /** Microsoft/TypeScript#21517 */ && isTemplateElement(el) ?
+            el.content :
+            null;
+    }
+    function isTemplateElement(el) {
+        return el.nodeType === Node.ELEMENT_NODE && el.nodeName === 'TEMPLATE';
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Marks that the next string is for element.
+     *
+     * See `I18nMutateOpCodes` documentation.
+     */
+    var ELEMENT_MARKER = {
+        marker: 'element'
+    };
+    /**
+     * Marks that the next string is for comment.
+     *
+     * See `I18nMutateOpCodes` documentation.
+     */
+    var COMMENT_MARKER = {
+        marker: 'comment'
+    };
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var MARKER = "\uFFFD";
+    var ICU_BLOCK_REGEX = /^\s*(�\d+�)\s*,\s*(select|plural)\s*,/;
+    var SUBTEMPLATE_REGEXP = /�\/?\*(\d+:\d+)�/gi;
+    var PH_REGEXP = /�(\/?[#*]\d+):?\d*�/gi;
+    var BINDING_REGEXP = /�(\d+):?\d*�/gi;
+    var ICU_REGEXP = /({\s*�\d+�\s*,\s*\S{6}\s*,[\s\S]*})/gi;
+    /**
+     * Breaks pattern into strings and top level {...} blocks.
+     * Can be used to break a message into text and ICU expressions, or to break an ICU expression into
+     * keys and cases.
+     * Original code from closure library, modified for Angular.
+     *
+     * @param pattern (sub)Pattern to be broken.
+     *
+     */
+    function extractParts(pattern) {
+        if (!pattern) {
+            return [];
+        }
+        var prevPos = 0;
+        var braceStack = [];
+        var results = [];
+        var braces = /[{}]/g;
+        // lastIndex doesn't get set to 0 so we have to.
+        braces.lastIndex = 0;
+        var match;
+        while (match = braces.exec(pattern)) {
+            var pos = match.index;
+            if (match[0] == '}') {
+                braceStack.pop();
+                if (braceStack.length == 0) {
+                    // End of the block.
+                    var block = pattern.substring(prevPos, pos);
+                    if (ICU_BLOCK_REGEX.test(block)) {
+                        results.push(parseICUBlock(block));
+                    }
+                    else if (block) { // Don't push empty strings
+                        results.push(block);
+                    }
+                    prevPos = pos + 1;
+                }
             }
             else {
-                tNode.next = null;
+                if (braceStack.length == 0) {
+                    var substring_1 = pattern.substring(prevPos, pos);
+                    results.push(substring_1);
+                    prevPos = pos + 1;
+                }
+                braceStack.push('{');
             }
-            if (parentTNode !== viewData[HOST_NODE]) {
-                tNode.parent = parentTNode;
+        }
+        var substring = pattern.substring(prevPos);
+        if (substring != '') {
+            results.push(substring);
+        }
+        return results;
+    }
+    /**
+     * Parses text containing an ICU expression and produces a JSON object for it.
+     * Original code from closure library, modified for Angular.
+     *
+     * @param pattern Text containing an ICU expression that needs to be parsed.
+     *
+     */
+    function parseICUBlock(pattern) {
+        var cases = [];
+        var values = [];
+        var icuType = 1 /* plural */;
+        var mainBinding = 0;
+        pattern = pattern.replace(ICU_BLOCK_REGEX, function (str, binding, type) {
+            if (type === 'select') {
+                icuType = 0 /* select */;
             }
+            else {
+                icuType = 1 /* plural */;
+            }
+            mainBinding = parseInt(binding.substr(1), 10);
+            return '';
+        });
+        var parts = extractParts(pattern);
+        // Looking for (key block)+ sequence. One of the keys has to be "other".
+        for (var pos = 0; pos < parts.length;) {
+            var key = parts[pos++].trim();
+            if (icuType === 1 /* plural */) {
+                // Key can be "=x", we just want "x"
+                key = key.replace(/\s*(?:=)?(\w+)\s*/, '$1');
+            }
+            if (key.length) {
+                cases.push(key);
+            }
+            var blocks = extractParts(parts[pos++]);
+            if (blocks.length) {
+                values.push(blocks);
+            }
+        }
+        assertGreaterThan(cases.indexOf('other'), -1, 'Missing key "other" in ICU statement.');
+        // TODO(ocombe): support ICU expressions in attributes, see #21615
+        return { type: icuType, mainBinding: mainBinding, cases: cases, values: values };
+    }
+    /**
+     * Removes everything inside the sub-templates of a message.
+     */
+    function removeInnerTemplateTranslation(message) {
+        var match;
+        var res = '';
+        var index = 0;
+        var inTemplate = false;
+        var tagMatched;
+        while ((match = SUBTEMPLATE_REGEXP.exec(message)) !== null) {
+            if (!inTemplate) {
+                res += message.substring(index, match.index + match[0].length);
+                tagMatched = match[1];
+                inTemplate = true;
+            }
+            else {
+                if (match[0] === MARKER + "/*" + tagMatched + MARKER) {
+                    index = match.index;
+                    inTemplate = false;
+                }
+            }
+        }
+        ngDevMode &&
+            assertEqual(inTemplate, false, "Tag mismatch: unable to find the end of the sub-template in the translation \"" + message + "\"");
+        res += message.substr(index);
+        return res;
+    }
+    /**
+     * Extracts a part of a message and removes the rest.
+     *
+     * This method is used for extracting a part of the message associated with a template. A translated
+     * message can span multiple templates.
+     *
+     * Example:
+     * ```
+     * <div i18n>Translate <span *ngIf>me</span>!</div>
+     * ```
+     *
+     * @param message The message to crop
+     * @param subTemplateIndex Index of the sub-template to extract. If undefined it returns the
+     * external template and removes all sub-templates.
+     */
+    function getTranslationForTemplate(message, subTemplateIndex) {
+        if (typeof subTemplateIndex !== 'number') {
+            // We want the root template message, ignore all sub-templates
+            return removeInnerTemplateTranslation(message);
+        }
+        else {
+            // We want a specific sub-template
+            var start = message.indexOf(":" + subTemplateIndex + MARKER) + 2 + subTemplateIndex.toString().length;
+            var end = message.search(new RegExp(MARKER + "\\/\\*\\d+:" + subTemplateIndex + MARKER));
+            return removeInnerTemplateTranslation(message.substring(start, end));
+        }
+    }
+    /**
+     * Generate the OpCodes to update the bindings of a string.
+     *
+     * @param str The string containing the bindings.
+     * @param destinationNode Index of the destination node which will receive the binding.
+     * @param attrName Name of the attribute, if the string belongs to an attribute.
+     * @param sanitizeFn Sanitization function used to sanitize the string after update, if necessary.
+     */
+    function generateBindingUpdateOpCodes(str, destinationNode, attrName, sanitizeFn) {
+        if (sanitizeFn === void 0) { sanitizeFn = null; }
+        var updateOpCodes = [null, null]; // Alloc space for mask and size
+        var textParts = str.split(BINDING_REGEXP);
+        var mask = 0;
+        for (var j = 0; j < textParts.length; j++) {
+            var textValue = textParts[j];
+            if (j & 1) {
+                // Odd indexes are bindings
+                var bindingIndex = parseInt(textValue, 10);
+                updateOpCodes.push(-1 - bindingIndex);
+                mask = mask | toMaskBit(bindingIndex);
+            }
+            else if (textValue !== '') {
+                // Even indexes are text
+                updateOpCodes.push(textValue);
+            }
+        }
+        updateOpCodes.push(destinationNode << 2 /* SHIFT_REF */ |
+            (attrName ? 1 /* Attr */ : 0 /* Text */));
+        if (attrName) {
+            updateOpCodes.push(attrName, sanitizeFn);
+        }
+        updateOpCodes[0] = mask;
+        updateOpCodes[1] = updateOpCodes.length - 2;
+        return updateOpCodes;
+    }
+    function getBindingMask(icuExpression, mask) {
+        if (mask === void 0) { mask = 0; }
+        mask = mask | toMaskBit(icuExpression.mainBinding);
+        var match;
+        for (var i = 0; i < icuExpression.values.length; i++) {
+            var valueArr = icuExpression.values[i];
+            for (var j = 0; j < valueArr.length; j++) {
+                var value = valueArr[j];
+                if (typeof value === 'string') {
+                    while (match = BINDING_REGEXP.exec(value)) {
+                        mask = mask | toMaskBit(parseInt(match[1], 10));
+                    }
+                }
+                else {
+                    mask = getBindingMask(value, mask);
+                }
+            }
+        }
+        return mask;
+    }
+    var i18nIndexStack = [];
+    var i18nIndexStackPointer = -1;
+    /**
+     * Convert binding index to mask bit.
+     *
+     * Each index represents a single bit on the bit-mask. Because bit-mask only has 32 bits, we make
+     * the 32nd bit share all masks for all bindings higher than 32. Since it is extremely rare to have
+     * more than 32 bindings this will be hit very rarely. The downside of hitting this corner case is
+     * that we will execute binding code more often than necessary. (penalty of performance)
+     */
+    function toMaskBit(bindingIndex) {
+        return 1 << Math.min(bindingIndex, 31);
+    }
+    var parentIndexStack = [];
+    /**
+     * Marks a block of text as translatable.
+     *
+     * The instructions `i18nStart` and `i18nEnd` mark the translation block in the template.
+     * The translation `message` is the value which is locale specific. The translation string may
+     * contain placeholders which associate inner elements and sub-templates within the translation.
+     *
+     * The translation `message` placeholders are:
+     * - `�{index}(:{block})�`: *Binding Placeholder*: Marks a location where an expression will be
+     *   interpolated into. The placeholder `index` points to the expression binding index. An optional
+     *   `block` that matches the sub-template in which it was declared.
+     * - `�#{index}(:{block})�`/`�/#{index}(:{block})�`: *Element Placeholder*:  Marks the beginning
+     *   and end of DOM element that were embedded in the original translation block. The placeholder
+     *   `index` points to the element index in the template instructions set. An optional `block` that
+     *   matches the sub-template in which it was declared.
+     * - `�*{index}:{block}�`/`�/*{index}:{block}�`: *Sub-template Placeholder*: Sub-templates must be
+     *   split up and translated separately in each angular template function. The `index` points to the
+     *   `template` instruction index. A `block` that matches the sub-template in which it was declared.
+     *
+     * @param index A unique index of the translation in the static block.
+     * @param message The translation message.
+     * @param subTemplateIndex Optional sub-template index in the `message`.
+     */
+    function i18nStart(index, message, subTemplateIndex) {
+        var tView = getTView();
+        ngDevMode && assertDefined(tView, "tView should be defined");
+        ngDevMode &&
+            assertEqual(tView.firstTemplatePass, true, "You should only call i18nEnd on first template pass");
+        if (tView.firstTemplatePass && tView.data[index + HEADER_OFFSET] === null) {
+            i18nStartFirstPass(tView, index, message, subTemplateIndex);
+        }
+    }
+    /**
+     * See `i18nStart` above.
+     */
+    function i18nStartFirstPass(tView, index, message, subTemplateIndex) {
+        i18nIndexStack[++i18nIndexStackPointer] = index;
+        var viewData = _getViewData();
+        var expandoStartIndex = tView.blueprint.length - HEADER_OFFSET;
+        var previousOrParentTNode = getPreviousOrParentTNode();
+        var parentTNode = getIsParent() ? getPreviousOrParentTNode() :
+            previousOrParentTNode && previousOrParentTNode.parent;
+        var parentIndex = parentTNode && parentTNode !== viewData[HOST_NODE] ?
+            parentTNode.index - HEADER_OFFSET :
+            index;
+        var parentIndexPointer = 0;
+        parentIndexStack[parentIndexPointer] = parentIndex;
+        var createOpCodes = [];
+        // If the previous node wasn't the direct parent then we have a translation without top level
+        // element and we need to keep a reference of the previous element if there is one
+        if (index > 0 && previousOrParentTNode !== parentTNode) {
+            // Create an OpCode to select the previous TNode
+            createOpCodes.push(previousOrParentTNode.index << 3 /* SHIFT_REF */ | 0 /* Select */);
+        }
+        var updateOpCodes = [];
+        var icuExpressions = [];
+        var templateTranslation = getTranslationForTemplate(message, subTemplateIndex);
+        var msgParts = templateTranslation.split(PH_REGEXP);
+        for (var i = 0; i < msgParts.length; i++) {
+            var value = msgParts[i];
+            if (i & 1) {
+                // Odd indexes are placeholders (elements and sub-templates)
+                if (value.charAt(0) === '/') {
+                    // It is a closing tag
+                    if (value.charAt(1) === '#') {
+                        var phIndex = parseInt(value.substr(2), 10);
+                        parentIndex = parentIndexStack[--parentIndexPointer];
+                        createOpCodes.push(phIndex << 3 /* SHIFT_REF */ | 5 /* ElementEnd */);
+                    }
+                }
+                else {
+                    var phIndex = parseInt(value.substr(1), 10);
+                    // The value represents a placeholder that we move to the designated index
+                    createOpCodes.push(phIndex << 3 /* SHIFT_REF */ | 0 /* Select */, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                    if (value.charAt(0) === '#') {
+                        parentIndexStack[++parentIndexPointer] = parentIndex = phIndex;
+                    }
+                }
+            }
+            else {
+                // Even indexes are text (including bindings & ICU expressions)
+                var parts = value.split(ICU_REGEXP);
+                for (var j = 0; j < parts.length; j++) {
+                    value = parts[j];
+                    if (j & 1) {
+                        // Odd indexes are ICU expressions
+                        // Create the comment node that will anchor the ICU expression
+                        allocExpando(viewData);
+                        var icuNodeIndex = tView.blueprint.length - 1 - HEADER_OFFSET;
+                        createOpCodes.push(COMMENT_MARKER, ngDevMode ? "ICU " + icuNodeIndex : '', parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                        // Update codes for the ICU expression
+                        var icuExpression = parseICUBlock(value.substr(1, value.length - 2));
+                        var mask = getBindingMask(icuExpression);
+                        icuStart(icuExpressions, icuExpression, icuNodeIndex, icuNodeIndex);
+                        // Since this is recursive, the last TIcu that was pushed is the one we want
+                        var tIcuIndex = icuExpressions.length - 1;
+                        updateOpCodes.push(toMaskBit(icuExpression.mainBinding), // mask of the main binding
+                        3, // skip 3 opCodes if not changed
+                        -1 - icuExpression.mainBinding, icuNodeIndex << 2 /* SHIFT_REF */ | 2 /* IcuSwitch */, tIcuIndex, mask, // mask of all the bindings of this ICU expression
+                        2, // skip 2 opCodes if not changed
+                        icuNodeIndex << 2 /* SHIFT_REF */ | 3 /* IcuUpdate */, tIcuIndex);
+                    }
+                    else if (value !== '') {
+                        // Even indexes are text (including bindings)
+                        var hasBinding = value.match(BINDING_REGEXP);
+                        // Create text nodes
+                        allocExpando(viewData);
+                        createOpCodes.push(
+                        // If there is a binding, the value will be set during update
+                        hasBinding ? '' : value, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                        if (hasBinding) {
+                            addAllToArray(generateBindingUpdateOpCodes(value, tView.blueprint.length - 1 - HEADER_OFFSET), updateOpCodes);
+                        }
+                    }
+                }
+            }
+        }
+        // NOTE: local var needed to properly assert the type of `TI18n`.
+        var tI18n = {
+            vars: tView.blueprint.length - HEADER_OFFSET - expandoStartIndex,
+            expandoStartIndex: expandoStartIndex,
+            create: createOpCodes,
+            update: updateOpCodes,
+            icus: icuExpressions.length ? icuExpressions : null,
+        };
+        tView.data[index + HEADER_OFFSET] = tI18n;
+    }
+    function appendI18nNode(tNode, parentTNode, previousTNode) {
+        ngDevMode && ngDevMode.rendererMoveNode++;
+        var viewData = _getViewData();
+        if (!previousTNode) {
+            previousTNode = parentTNode;
+        }
+        // re-organize node tree to put this node in the correct position.
+        if (previousTNode === parentTNode && tNode !== parentTNode.child) {
+            tNode.next = parentTNode.child;
+            parentTNode.child = tNode;
+        }
+        else if (previousTNode !== parentTNode && tNode !== previousTNode.next) {
+            tNode.next = previousTNode.next;
+            previousTNode.next = tNode;
+        }
+        else {
+            tNode.next = null;
+        }
+        if (parentTNode !== viewData[HOST_NODE]) {
+            tNode.parent = parentTNode;
         }
         appendChild(getNativeByTNode(tNode, viewData), tNode, viewData);
         var slotValue = viewData[tNode.index];
@@ -10146,434 +10920,936 @@
         }
         return tNode;
     }
-    function i18nAttribute(index, attrs) {
-        // placeholder for i18nAttribute function
-    }
-    function i18nExp(expression) {
-        // placeholder for i18nExp function
-    }
-    function i18nStart(index, message, subTemplateIndex) {
-        if (subTemplateIndex === void 0) { subTemplateIndex = 0; }
-        // placeholder for i18nExp function
-    }
+    /**
+     * Translates a translation block marked by `i18nStart` and `i18nEnd`. It inserts the text/ICU nodes
+     * into the render tree, moves the placeholder nodes and removes the deleted nodes.
+     */
     function i18nEnd() {
-        // placeholder for i18nEnd function
+        var tView = getTView();
+        ngDevMode && assertDefined(tView, "tView should be defined");
+        ngDevMode &&
+            assertEqual(tView.firstTemplatePass, true, "You should only call i18nEnd on first template pass");
+        if (tView.firstTemplatePass) {
+            i18nEndFirstPass(tView);
+        }
     }
     /**
-     * Takes a list of instructions generated by `i18nMapping()` to transform the template accordingly.
-     *
-     * @param startIndex Index of the first element to translate (for instance the first child of the
-     * element with the i18n attribute).
-     * @param instructions The list of instructions to apply on the current view.
+     * See `i18nEnd` above.
      */
-    function i18nApply(startIndex, instructions) {
-        var viewData = getViewData();
-        if (ngDevMode) {
-            assertEqual(viewData[BINDING_INDEX], viewData[TVIEW].bindingStartIndex, 'i18nApply should be called before any binding');
+    function i18nEndFirstPass(tView) {
+        var viewData = _getViewData();
+        ngDevMode && assertEqual(viewData[BINDING_INDEX], viewData[TVIEW].bindingStartIndex, 'i18nEnd should be called before any binding');
+        var rootIndex = i18nIndexStack[i18nIndexStackPointer--];
+        var tI18n = tView.data[rootIndex + HEADER_OFFSET];
+        ngDevMode && assertDefined(tI18n, "You should call i18nStart before i18nEnd");
+        // The last placeholder that was added before `i18nEnd`
+        var previousOrParentTNode = getPreviousOrParentTNode();
+        var visitedPlaceholders = readCreateOpCodes(rootIndex, tI18n.create, tI18n.expandoStartIndex, viewData);
+        // Remove deleted placeholders
+        // The last placeholder that was added before `i18nEnd` is `previousOrParentTNode`
+        for (var i = rootIndex + 1; i <= previousOrParentTNode.index - HEADER_OFFSET; i++) {
+            if (visitedPlaceholders.indexOf(i) === -1) {
+                removeNode(i, viewData);
+            }
         }
-        if (!instructions) {
-            return;
-        }
+    }
+    function readCreateOpCodes(index, createOpCodes, expandoStartIndex, viewData) {
         var renderer = getRenderer();
-        var startTNode = getTNode(startIndex, viewData);
-        var localParentTNode = startTNode.parent || viewData[HOST_NODE];
-        var localPreviousTNode = localParentTNode;
-        resetComponentState(); // We don't want to add to the tree with the wrong previous node
-        for (var i = 0; i < instructions.length; i++) {
-            var instruction = instructions[i];
-            switch (instruction & -536870912 /* InstructionMask */) {
-                case 1073741824 /* Element */:
-                    var elementTNode = getTNode(instruction & 536870911 /* IndexMask */, viewData);
-                    localPreviousTNode = appendI18nNode(elementTNode, localParentTNode, localPreviousTNode);
-                    localParentTNode = elementTNode;
-                    break;
-                case 1610612736 /* Expression */:
-                case -2147483648 /* TemplateRoot */:
-                case -1610612736 /* Any */:
-                    var nodeIndex = instruction & 536870911 /* IndexMask */;
-                    localPreviousTNode =
-                        appendI18nNode(getTNode(nodeIndex, viewData), localParentTNode, localPreviousTNode);
-                    break;
-                case 536870912 /* Text */:
-                    if (ngDevMode) {
-                        ngDevMode.rendererCreateTextNode++;
-                    }
-                    var value = instructions[++i];
-                    var textRNode = createTextNode(value, renderer);
-                    // If we were to only create a `RNode` then projections won't move the text.
-                    // Create text node at the current end of viewData. Must subtract header offset because
-                    // createNodeAtIndex takes a raw index (not adjusted by header offset).
-                    adjustBlueprintForNewNode(viewData);
-                    var textTNode = createNodeAtIndex(viewData.length - 1 - HEADER_OFFSET, 3 /* Element */, textRNode, null, null);
-                    localPreviousTNode = appendI18nNode(textTNode, localParentTNode, localPreviousTNode);
-                    resetComponentState();
-                    break;
-                case -1073741824 /* CloseNode */:
-                    localPreviousTNode = localParentTNode;
-                    localParentTNode = localParentTNode.parent || viewData[HOST_NODE];
-                    break;
-                case -536870912 /* RemoveNode */:
-                    if (ngDevMode) {
-                        ngDevMode.rendererRemoveNode++;
-                    }
-                    var removeIndex = instruction & 536870911 /* IndexMask */;
-                    var removedElement = getNativeByIndex(removeIndex, viewData);
-                    var removedTNode = getTNode(removeIndex, viewData);
-                    removeChild(removedTNode, removedElement || null, viewData);
-                    var slotValue = load(removeIndex);
-                    if (isLContainer(slotValue)) {
-                        var lContainer = slotValue;
-                        if (removedTNode.type !== 0 /* Container */) {
-                            removeChild(removedTNode, lContainer[NATIVE] || null, viewData);
+        var currentTNode = null;
+        var previousTNode = null;
+        var visitedPlaceholders = [];
+        for (var i = 0; i < createOpCodes.length; i++) {
+            var opCode = createOpCodes[i];
+            if (typeof opCode == 'string') {
+                var textRNode = createTextNode(opCode, renderer);
+                ngDevMode && ngDevMode.rendererCreateTextNode++;
+                previousTNode = currentTNode;
+                currentTNode =
+                    createNodeAtIndex(expandoStartIndex++, 3 /* Element */, textRNode, null, null);
+                setIsParent(false);
+            }
+            else if (typeof opCode == 'number') {
+                switch (opCode & 7 /* MASK_OPCODE */) {
+                    case 1 /* AppendChild */:
+                        var destinationNodeIndex = opCode >>> 17 /* SHIFT_PARENT */;
+                        var destinationTNode = void 0;
+                        if (destinationNodeIndex === index) {
+                            // If the destination node is `i18nStart`, we don't have a
+                            // top-level node and we should use the host node instead
+                            destinationTNode = viewData[HOST_NODE];
                         }
-                        removedTNode.detached = true;
-                        lContainer[RENDER_PARENT] = null;
+                        else {
+                            destinationTNode = getTNode(destinationNodeIndex, viewData);
+                        }
+                        ngDevMode &&
+                            assertDefined(currentTNode, "You need to create or select a node before you can insert it into the DOM");
+                        previousTNode = appendI18nNode(currentTNode, destinationTNode, previousTNode);
+                        destinationTNode.next = null;
+                        break;
+                    case 0 /* Select */:
+                        var nodeIndex = opCode >>> 3 /* SHIFT_REF */;
+                        visitedPlaceholders.push(nodeIndex);
+                        previousTNode = currentTNode;
+                        currentTNode = getTNode(nodeIndex, viewData);
+                        if (currentTNode) {
+                            setPreviousOrParentTNode(currentTNode);
+                            if (currentTNode.type === 3 /* Element */) {
+                                setIsParent(true);
+                            }
+                        }
+                        break;
+                    case 5 /* ElementEnd */:
+                        var elementIndex = opCode >>> 3 /* SHIFT_REF */;
+                        previousTNode = currentTNode = getTNode(elementIndex, viewData);
+                        setPreviousOrParentTNode(currentTNode);
+                        setIsParent(false);
+                        break;
+                    case 4 /* Attr */:
+                        var elementNodeIndex = opCode >>> 3 /* SHIFT_REF */;
+                        var attrName = createOpCodes[++i];
+                        var attrValue = createOpCodes[++i];
+                        elementAttribute(elementNodeIndex, attrName, attrValue);
+                        break;
+                    default:
+                        throw new Error("Unable to determine the type of mutate operation for \"" + opCode + "\"");
+                }
+            }
+            else {
+                switch (opCode) {
+                    case COMMENT_MARKER:
+                        var commentValue = createOpCodes[++i];
+                        ngDevMode && assertEqual(typeof commentValue, 'string', "Expected \"" + commentValue + "\" to be a comment node value");
+                        var commentRNode = renderer.createComment(commentValue);
+                        ngDevMode && ngDevMode.rendererCreateComment++;
+                        previousTNode = currentTNode;
+                        currentTNode = createNodeAtIndex(expandoStartIndex++, 5 /* IcuContainer */, commentRNode, null, null);
+                        currentTNode.activeCaseIndex = null;
+                        // We will add the case nodes later, during the update phase
+                        setIsParent(false);
+                        break;
+                    case ELEMENT_MARKER:
+                        var tagNameValue = createOpCodes[++i];
+                        ngDevMode && assertEqual(typeof tagNameValue, 'string', "Expected \"" + tagNameValue + "\" to be an element node tag name");
+                        var elementRNode = renderer.createElement(tagNameValue);
+                        ngDevMode && ngDevMode.rendererCreateElement++;
+                        previousTNode = currentTNode;
+                        currentTNode = createNodeAtIndex(expandoStartIndex++, 3 /* Element */, elementRNode, tagNameValue, null);
+                        break;
+                    default:
+                        throw new Error("Unable to determine the type of mutate operation for \"" + opCode + "\"");
+                }
+            }
+        }
+        setIsParent(false);
+        return visitedPlaceholders;
+    }
+    function readUpdateOpCodes(updateOpCodes, icus, bindingsStartIndex, changeMask, viewData, bypassCheckBit) {
+        if (bypassCheckBit === void 0) { bypassCheckBit = false; }
+        var caseCreated = false;
+        for (var i = 0; i < updateOpCodes.length; i++) {
+            // bit code to check if we should apply the next update
+            var checkBit = updateOpCodes[i];
+            // Number of opCodes to skip until next set of update codes
+            var skipCodes = updateOpCodes[++i];
+            if (bypassCheckBit || (checkBit & changeMask)) {
+                // The value has been updated since last checked
+                var value = '';
+                for (var j = i + 1; j <= (i + skipCodes); j++) {
+                    var opCode = updateOpCodes[j];
+                    if (typeof opCode == 'string') {
+                        value += opCode;
+                    }
+                    else if (typeof opCode == 'number') {
+                        if (opCode < 0) {
+                            // It's a binding index whose value is negative
+                            value += stringify$1(viewData[bindingsStartIndex - opCode]);
+                        }
+                        else {
+                            var nodeIndex = opCode >>> 2 /* SHIFT_REF */;
+                            switch (opCode & 3 /* MASK_OPCODE */) {
+                                case 1 /* Attr */:
+                                    var attrName = updateOpCodes[++j];
+                                    var sanitizeFn = updateOpCodes[++j];
+                                    elementAttribute(nodeIndex, attrName, value, sanitizeFn);
+                                    break;
+                                case 0 /* Text */:
+                                    textBinding(nodeIndex, value);
+                                    break;
+                                case 2 /* IcuSwitch */:
+                                    var tIcuIndex = updateOpCodes[++j];
+                                    var tIcu = icus[tIcuIndex];
+                                    var icuTNode = getTNode(nodeIndex, viewData);
+                                    // If there is an active case, delete the old nodes
+                                    if (icuTNode.activeCaseIndex !== null) {
+                                        var removeCodes = tIcu.remove[icuTNode.activeCaseIndex];
+                                        for (var k = 0; k < removeCodes.length; k++) {
+                                            var removeOpCode = removeCodes[k];
+                                            switch (removeOpCode & 7 /* MASK_OPCODE */) {
+                                                case 3 /* Remove */:
+                                                    var nodeIndex_1 = removeOpCode >>> 3 /* SHIFT_REF */;
+                                                    removeNode(nodeIndex_1, viewData);
+                                                    break;
+                                                case 6 /* RemoveNestedIcu */:
+                                                    var nestedIcuNodeIndex = removeCodes[k + 1] >>> 3 /* SHIFT_REF */;
+                                                    var nestedIcuTNode = getTNode(nestedIcuNodeIndex, viewData);
+                                                    var activeIndex = nestedIcuTNode.activeCaseIndex;
+                                                    if (activeIndex !== null) {
+                                                        var nestedIcuTIndex = removeOpCode >>> 3 /* SHIFT_REF */;
+                                                        var nestedTIcu = icus[nestedIcuTIndex];
+                                                        addAllToArray(nestedTIcu.remove[activeIndex], removeCodes);
+                                                    }
+                                                    break;
+                                            }
+                                        }
+                                    }
+                                    // Update the active caseIndex
+                                    var caseIndex = getCaseIndex(tIcu, value);
+                                    icuTNode.activeCaseIndex = caseIndex !== -1 ? caseIndex : null;
+                                    // Add the nodes for the new case
+                                    readCreateOpCodes(-1, tIcu.create[caseIndex], tIcu.expandoStartIndex, viewData);
+                                    caseCreated = true;
+                                    break;
+                                case 3 /* IcuUpdate */:
+                                    tIcuIndex = updateOpCodes[++j];
+                                    tIcu = icus[tIcuIndex];
+                                    icuTNode = getTNode(nodeIndex, viewData);
+                                    readUpdateOpCodes(tIcu.update[icuTNode.activeCaseIndex], icus, bindingsStartIndex, changeMask, viewData, caseCreated);
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+            i += skipCodes;
+        }
+    }
+    function removeNode(index, viewData) {
+        var removedPhTNode = getTNode(index, viewData);
+        var removedPhRNode = getNativeByIndex(index, viewData);
+        removeChild(removedPhTNode, removedPhRNode || null, viewData);
+        removedPhTNode.detached = true;
+        ngDevMode && ngDevMode.rendererRemoveNode++;
+        var slotValue = load(index);
+        if (isLContainer(slotValue)) {
+            var lContainer = slotValue;
+            if (removedPhTNode.type !== 0 /* Container */) {
+                removeChild(removedPhTNode, lContainer[NATIVE] || null, viewData);
+            }
+            lContainer[RENDER_PARENT] = null;
+        }
+    }
+    /**
+     * Marks a list of attributes as translatable.
+     *
+     * @param index A unique index in the static block
+     * @param values
+     */
+    function i18nAttributes(index, values) {
+        var tView = getTView();
+        ngDevMode && assertDefined(tView, "tView should be defined");
+        ngDevMode &&
+            assertEqual(tView.firstTemplatePass, true, "You should only call i18nEnd on first template pass");
+        if (tView.firstTemplatePass && tView.data[index + HEADER_OFFSET] === null) {
+            i18nAttributesFirstPass(tView, index, values);
+        }
+    }
+    /**
+     * See `i18nAttributes` above.
+     */
+    function i18nAttributesFirstPass(tView, index, values) {
+        var previousElement = getPreviousOrParentTNode();
+        var previousElementIndex = previousElement.index - HEADER_OFFSET;
+        var updateOpCodes = [];
+        for (var i = 0; i < values.length; i += 2) {
+            var attrName = values[i];
+            var message = values[i + 1];
+            var parts = message.split(ICU_REGEXP);
+            for (var j = 0; j < parts.length; j++) {
+                var value = parts[j];
+                if (j & 1) ;
+                else if (value !== '') {
+                    // Even indexes are text (including bindings)
+                    var hasBinding = !!value.match(BINDING_REGEXP);
+                    if (hasBinding) {
+                        addAllToArray(generateBindingUpdateOpCodes(value, previousElementIndex, attrName), updateOpCodes);
+                    }
+                    else {
+                        elementAttribute(previousElementIndex, attrName, value);
+                    }
+                }
+            }
+        }
+        tView.data[index + HEADER_OFFSET] = updateOpCodes;
+    }
+    var changeMask = 0;
+    var shiftsCounter = 0;
+    /**
+     * Stores the values of the bindings during each update cycle in order to determine if we need to
+     * update the translated nodes.
+     *
+     * @param expression The binding's new value or NO_CHANGE
+     */
+    function i18nExp(expression) {
+        if (expression !== NO_CHANGE) {
+            changeMask = changeMask | (1 << shiftsCounter);
+        }
+        shiftsCounter++;
+    }
+    /**
+     * Updates a translation block or an i18n attribute when the bindings have changed.
+     *
+     * @param index Index of either {@link i18nStart} (translation block) or {@link i18nAttributes}
+     * (i18n attribute) on which it should update the content.
+     */
+    function i18nApply(index) {
+        if (shiftsCounter) {
+            var tView = getTView();
+            ngDevMode && assertDefined(tView, "tView should be defined");
+            var viewData = _getViewData();
+            var tI18n = tView.data[index + HEADER_OFFSET];
+            var updateOpCodes = void 0;
+            var icus = null;
+            if (Array.isArray(tI18n)) {
+                updateOpCodes = tI18n;
+            }
+            else {
+                updateOpCodes = tI18n.update;
+                icus = tI18n.icus;
+            }
+            var bindingsStartIndex = viewData[BINDING_INDEX] - shiftsCounter - 1;
+            readUpdateOpCodes(updateOpCodes, icus, bindingsStartIndex, changeMask, viewData);
+            // Reset changeMask & maskBit to default for the next update cycle
+            changeMask = 0;
+            shiftsCounter = 0;
+        }
+    }
+    var Plural;
+    (function (Plural) {
+        Plural[Plural["Zero"] = 0] = "Zero";
+        Plural[Plural["One"] = 1] = "One";
+        Plural[Plural["Two"] = 2] = "Two";
+        Plural[Plural["Few"] = 3] = "Few";
+        Plural[Plural["Many"] = 4] = "Many";
+        Plural[Plural["Other"] = 5] = "Other";
+    })(Plural || (Plural = {}));
+    /**
+     * Returns the plural case based on the locale.
+     * This is a copy of the deprecated function that we used in Angular v4.
+     * // TODO(ocombe): remove this once we can the real getPluralCase function
+     *
+     * @deprecated from v5 the plural case function is in locale data files common/locales/*.ts
+     */
+    function getPluralCase(locale, nLike) {
+        if (typeof nLike === 'string') {
+            nLike = parseInt(nLike, 10);
+        }
+        var n = nLike;
+        var nDecimal = n.toString().replace(/^[^.]*\.?/, '');
+        var i = Math.floor(Math.abs(n));
+        var v = nDecimal.length;
+        var f = parseInt(nDecimal, 10);
+        var t = parseInt(n.toString().replace(/^[^.]*\.?|0+$/g, ''), 10) || 0;
+        var lang = locale.split('-')[0].toLowerCase();
+        switch (lang) {
+            case 'af':
+            case 'asa':
+            case 'az':
+            case 'bem':
+            case 'bez':
+            case 'bg':
+            case 'brx':
+            case 'ce':
+            case 'cgg':
+            case 'chr':
+            case 'ckb':
+            case 'ee':
+            case 'el':
+            case 'eo':
+            case 'es':
+            case 'eu':
+            case 'fo':
+            case 'fur':
+            case 'gsw':
+            case 'ha':
+            case 'haw':
+            case 'hu':
+            case 'jgo':
+            case 'jmc':
+            case 'ka':
+            case 'kk':
+            case 'kkj':
+            case 'kl':
+            case 'ks':
+            case 'ksb':
+            case 'ky':
+            case 'lb':
+            case 'lg':
+            case 'mas':
+            case 'mgo':
+            case 'ml':
+            case 'mn':
+            case 'nb':
+            case 'nd':
+            case 'ne':
+            case 'nn':
+            case 'nnh':
+            case 'nyn':
+            case 'om':
+            case 'or':
+            case 'os':
+            case 'ps':
+            case 'rm':
+            case 'rof':
+            case 'rwk':
+            case 'saq':
+            case 'seh':
+            case 'sn':
+            case 'so':
+            case 'sq':
+            case 'ta':
+            case 'te':
+            case 'teo':
+            case 'tk':
+            case 'tr':
+            case 'ug':
+            case 'uz':
+            case 'vo':
+            case 'vun':
+            case 'wae':
+            case 'xog':
+                if (n === 1)
+                    return Plural.One;
+                return Plural.Other;
+            case 'ak':
+            case 'ln':
+            case 'mg':
+            case 'pa':
+            case 'ti':
+                if (n === Math.floor(n) && n >= 0 && n <= 1)
+                    return Plural.One;
+                return Plural.Other;
+            case 'am':
+            case 'as':
+            case 'bn':
+            case 'fa':
+            case 'gu':
+            case 'hi':
+            case 'kn':
+            case 'mr':
+            case 'zu':
+                if (i === 0 || n === 1)
+                    return Plural.One;
+                return Plural.Other;
+            case 'ar':
+                if (n === 0)
+                    return Plural.Zero;
+                if (n === 1)
+                    return Plural.One;
+                if (n === 2)
+                    return Plural.Two;
+                if (n % 100 === Math.floor(n % 100) && n % 100 >= 3 && n % 100 <= 10)
+                    return Plural.Few;
+                if (n % 100 === Math.floor(n % 100) && n % 100 >= 11 && n % 100 <= 99)
+                    return Plural.Many;
+                return Plural.Other;
+            case 'ast':
+            case 'ca':
+            case 'de':
+            case 'en':
+            case 'et':
+            case 'fi':
+            case 'fy':
+            case 'gl':
+            case 'it':
+            case 'nl':
+            case 'sv':
+            case 'sw':
+            case 'ur':
+            case 'yi':
+                if (i === 1 && v === 0)
+                    return Plural.One;
+                return Plural.Other;
+            case 'be':
+                if (n % 10 === 1 && !(n % 100 === 11))
+                    return Plural.One;
+                if (n % 10 === Math.floor(n % 10) && n % 10 >= 2 && n % 10 <= 4 &&
+                    !(n % 100 >= 12 && n % 100 <= 14))
+                    return Plural.Few;
+                if (n % 10 === 0 || n % 10 === Math.floor(n % 10) && n % 10 >= 5 && n % 10 <= 9 ||
+                    n % 100 === Math.floor(n % 100) && n % 100 >= 11 && n % 100 <= 14)
+                    return Plural.Many;
+                return Plural.Other;
+            case 'br':
+                if (n % 10 === 1 && !(n % 100 === 11 || n % 100 === 71 || n % 100 === 91))
+                    return Plural.One;
+                if (n % 10 === 2 && !(n % 100 === 12 || n % 100 === 72 || n % 100 === 92))
+                    return Plural.Two;
+                if (n % 10 === Math.floor(n % 10) && (n % 10 >= 3 && n % 10 <= 4 || n % 10 === 9) &&
+                    !(n % 100 >= 10 && n % 100 <= 19 || n % 100 >= 70 && n % 100 <= 79 ||
+                        n % 100 >= 90 && n % 100 <= 99))
+                    return Plural.Few;
+                if (!(n === 0) && n % 1e6 === 0)
+                    return Plural.Many;
+                return Plural.Other;
+            case 'bs':
+            case 'hr':
+            case 'sr':
+                if (v === 0 && i % 10 === 1 && !(i % 100 === 11) || f % 10 === 1 && !(f % 100 === 11))
+                    return Plural.One;
+                if (v === 0 && i % 10 === Math.floor(i % 10) && i % 10 >= 2 && i % 10 <= 4 &&
+                    !(i % 100 >= 12 && i % 100 <= 14) ||
+                    f % 10 === Math.floor(f % 10) && f % 10 >= 2 && f % 10 <= 4 &&
+                        !(f % 100 >= 12 && f % 100 <= 14))
+                    return Plural.Few;
+                return Plural.Other;
+            case 'cs':
+            case 'sk':
+                if (i === 1 && v === 0)
+                    return Plural.One;
+                if (i === Math.floor(i) && i >= 2 && i <= 4 && v === 0)
+                    return Plural.Few;
+                if (!(v === 0))
+                    return Plural.Many;
+                return Plural.Other;
+            case 'cy':
+                if (n === 0)
+                    return Plural.Zero;
+                if (n === 1)
+                    return Plural.One;
+                if (n === 2)
+                    return Plural.Two;
+                if (n === 3)
+                    return Plural.Few;
+                if (n === 6)
+                    return Plural.Many;
+                return Plural.Other;
+            case 'da':
+                if (n === 1 || !(t === 0) && (i === 0 || i === 1))
+                    return Plural.One;
+                return Plural.Other;
+            case 'dsb':
+            case 'hsb':
+                if (v === 0 && i % 100 === 1 || f % 100 === 1)
+                    return Plural.One;
+                if (v === 0 && i % 100 === 2 || f % 100 === 2)
+                    return Plural.Two;
+                if (v === 0 && i % 100 === Math.floor(i % 100) && i % 100 >= 3 && i % 100 <= 4 ||
+                    f % 100 === Math.floor(f % 100) && f % 100 >= 3 && f % 100 <= 4)
+                    return Plural.Few;
+                return Plural.Other;
+            case 'ff':
+            case 'fr':
+            case 'hy':
+            case 'kab':
+                if (i === 0 || i === 1)
+                    return Plural.One;
+                return Plural.Other;
+            case 'fil':
+                if (v === 0 && (i === 1 || i === 2 || i === 3) ||
+                    v === 0 && !(i % 10 === 4 || i % 10 === 6 || i % 10 === 9) ||
+                    !(v === 0) && !(f % 10 === 4 || f % 10 === 6 || f % 10 === 9))
+                    return Plural.One;
+                return Plural.Other;
+            case 'ga':
+                if (n === 1)
+                    return Plural.One;
+                if (n === 2)
+                    return Plural.Two;
+                if (n === Math.floor(n) && n >= 3 && n <= 6)
+                    return Plural.Few;
+                if (n === Math.floor(n) && n >= 7 && n <= 10)
+                    return Plural.Many;
+                return Plural.Other;
+            case 'gd':
+                if (n === 1 || n === 11)
+                    return Plural.One;
+                if (n === 2 || n === 12)
+                    return Plural.Two;
+                if (n === Math.floor(n) && (n >= 3 && n <= 10 || n >= 13 && n <= 19))
+                    return Plural.Few;
+                return Plural.Other;
+            case 'gv':
+                if (v === 0 && i % 10 === 1)
+                    return Plural.One;
+                if (v === 0 && i % 10 === 2)
+                    return Plural.Two;
+                if (v === 0 &&
+                    (i % 100 === 0 || i % 100 === 20 || i % 100 === 40 || i % 100 === 60 || i % 100 === 80))
+                    return Plural.Few;
+                if (!(v === 0))
+                    return Plural.Many;
+                return Plural.Other;
+            case 'he':
+                if (i === 1 && v === 0)
+                    return Plural.One;
+                if (i === 2 && v === 0)
+                    return Plural.Two;
+                if (v === 0 && !(n >= 0 && n <= 10) && n % 10 === 0)
+                    return Plural.Many;
+                return Plural.Other;
+            case 'is':
+                if (t === 0 && i % 10 === 1 && !(i % 100 === 11) || !(t === 0))
+                    return Plural.One;
+                return Plural.Other;
+            case 'ksh':
+                if (n === 0)
+                    return Plural.Zero;
+                if (n === 1)
+                    return Plural.One;
+                return Plural.Other;
+            case 'kw':
+            case 'naq':
+            case 'se':
+            case 'smn':
+                if (n === 1)
+                    return Plural.One;
+                if (n === 2)
+                    return Plural.Two;
+                return Plural.Other;
+            case 'lag':
+                if (n === 0)
+                    return Plural.Zero;
+                if ((i === 0 || i === 1) && !(n === 0))
+                    return Plural.One;
+                return Plural.Other;
+            case 'lt':
+                if (n % 10 === 1 && !(n % 100 >= 11 && n % 100 <= 19))
+                    return Plural.One;
+                if (n % 10 === Math.floor(n % 10) && n % 10 >= 2 && n % 10 <= 9 &&
+                    !(n % 100 >= 11 && n % 100 <= 19))
+                    return Plural.Few;
+                if (!(f === 0))
+                    return Plural.Many;
+                return Plural.Other;
+            case 'lv':
+            case 'prg':
+                if (n % 10 === 0 || n % 100 === Math.floor(n % 100) && n % 100 >= 11 && n % 100 <= 19 ||
+                    v === 2 && f % 100 === Math.floor(f % 100) && f % 100 >= 11 && f % 100 <= 19)
+                    return Plural.Zero;
+                if (n % 10 === 1 && !(n % 100 === 11) || v === 2 && f % 10 === 1 && !(f % 100 === 11) ||
+                    !(v === 2) && f % 10 === 1)
+                    return Plural.One;
+                return Plural.Other;
+            case 'mk':
+                if (v === 0 && i % 10 === 1 || f % 10 === 1)
+                    return Plural.One;
+                return Plural.Other;
+            case 'mt':
+                if (n === 1)
+                    return Plural.One;
+                if (n === 0 || n % 100 === Math.floor(n % 100) && n % 100 >= 2 && n % 100 <= 10)
+                    return Plural.Few;
+                if (n % 100 === Math.floor(n % 100) && n % 100 >= 11 && n % 100 <= 19)
+                    return Plural.Many;
+                return Plural.Other;
+            case 'pl':
+                if (i === 1 && v === 0)
+                    return Plural.One;
+                if (v === 0 && i % 10 === Math.floor(i % 10) && i % 10 >= 2 && i % 10 <= 4 &&
+                    !(i % 100 >= 12 && i % 100 <= 14))
+                    return Plural.Few;
+                if (v === 0 && !(i === 1) && i % 10 === Math.floor(i % 10) && i % 10 >= 0 && i % 10 <= 1 ||
+                    v === 0 && i % 10 === Math.floor(i % 10) && i % 10 >= 5 && i % 10 <= 9 ||
+                    v === 0 && i % 100 === Math.floor(i % 100) && i % 100 >= 12 && i % 100 <= 14)
+                    return Plural.Many;
+                return Plural.Other;
+            case 'pt':
+                if (n === Math.floor(n) && n >= 0 && n <= 2 && !(n === 2))
+                    return Plural.One;
+                return Plural.Other;
+            case 'ro':
+                if (i === 1 && v === 0)
+                    return Plural.One;
+                if (!(v === 0) || n === 0 ||
+                    !(n === 1) && n % 100 === Math.floor(n % 100) && n % 100 >= 1 && n % 100 <= 19)
+                    return Plural.Few;
+                return Plural.Other;
+            case 'ru':
+            case 'uk':
+                if (v === 0 && i % 10 === 1 && !(i % 100 === 11))
+                    return Plural.One;
+                if (v === 0 && i % 10 === Math.floor(i % 10) && i % 10 >= 2 && i % 10 <= 4 &&
+                    !(i % 100 >= 12 && i % 100 <= 14))
+                    return Plural.Few;
+                if (v === 0 && i % 10 === 0 ||
+                    v === 0 && i % 10 === Math.floor(i % 10) && i % 10 >= 5 && i % 10 <= 9 ||
+                    v === 0 && i % 100 === Math.floor(i % 100) && i % 100 >= 11 && i % 100 <= 14)
+                    return Plural.Many;
+                return Plural.Other;
+            case 'shi':
+                if (i === 0 || n === 1)
+                    return Plural.One;
+                if (n === Math.floor(n) && n >= 2 && n <= 10)
+                    return Plural.Few;
+                return Plural.Other;
+            case 'si':
+                if (n === 0 || n === 1 || i === 0 && f === 1)
+                    return Plural.One;
+                return Plural.Other;
+            case 'sl':
+                if (v === 0 && i % 100 === 1)
+                    return Plural.One;
+                if (v === 0 && i % 100 === 2)
+                    return Plural.Two;
+                if (v === 0 && i % 100 === Math.floor(i % 100) && i % 100 >= 3 && i % 100 <= 4 || !(v === 0))
+                    return Plural.Few;
+                return Plural.Other;
+            case 'tzm':
+                if (n === Math.floor(n) && n >= 0 && n <= 1 || n === Math.floor(n) && n >= 11 && n <= 99)
+                    return Plural.One;
+                return Plural.Other;
+            // When there is no specification, the default is always "other"
+            // Spec: http://cldr.unicode.org/index/cldr-spec/plural-rules
+            // > other (required—general plural form — also used if the language only has a single form)
+            default:
+                return Plural.Other;
+        }
+    }
+    function getPluralCategory(value, locale) {
+        var plural = getPluralCase(locale, value);
+        switch (plural) {
+            case Plural.Zero:
+                return 'zero';
+            case Plural.One:
+                return 'one';
+            case Plural.Two:
+                return 'two';
+            case Plural.Few:
+                return 'few';
+            case Plural.Many:
+                return 'many';
+            default:
+                return 'other';
+        }
+    }
+    /**
+     * Returns the index of the current case of an ICU expression depending on the main binding value
+     *
+     * @param icuExpression
+     * @param bindingValue The value of the main binding used by this ICU expression
+     */
+    function getCaseIndex(icuExpression, bindingValue) {
+        var index = icuExpression.cases.indexOf(bindingValue);
+        if (index === -1) {
+            switch (icuExpression.type) {
+                case 1 /* plural */: {
+                    // TODO(ocombe): replace this hard-coded value by the real LOCALE_ID value
+                    var locale = 'en-US';
+                    var resolvedCase = getPluralCategory(bindingValue, locale);
+                    index = icuExpression.cases.indexOf(resolvedCase);
+                    if (index === -1 && resolvedCase !== 'other') {
+                        index = icuExpression.cases.indexOf('other');
                     }
                     break;
+                }
+                case 0 /* select */: {
+                    index = icuExpression.cases.indexOf('other');
+                    break;
+                }
             }
         }
+        return index;
     }
     /**
-     * Takes a translation string and the initial list of expressions and returns a list of instructions
-     * that will be used to translate an attribute.
-     * Even indexes contain static strings, while odd indexes contain the index of the expression whose
-     * value will be concatenated into the final translation.
+     * Generate the OpCodes for ICU expressions.
+     *
+     * @param tIcus
+     * @param icuExpression
+     * @param startIndex
+     * @param expandoStartIndex
      */
-    function i18nExpMapping(translation, placeholders) {
-        var staticText = translation.split(i18nTagRegex);
-        // odd indexes are placeholders
-        for (var i = 1; i < staticText.length; i += 2) {
-            staticText[i] = placeholders[staticText[i]];
+    function icuStart(tIcus, icuExpression, startIndex, expandoStartIndex) {
+        var createCodes = [];
+        var removeCodes = [];
+        var updateCodes = [];
+        var vars = [];
+        var childIcus = [];
+        for (var i = 0; i < icuExpression.values.length; i++) {
+            // Each value is an array of strings & other ICU expressions
+            var valueArr = icuExpression.values[i];
+            var nestedIcus = [];
+            for (var j = 0; j < valueArr.length; j++) {
+                var value = valueArr[j];
+                if (typeof value !== 'string') {
+                    // It is an nested ICU expression
+                    var icuIndex = nestedIcus.push(value) - 1;
+                    // Replace nested ICU expression by a comment node
+                    valueArr[j] = "<!--\uFFFD" + icuIndex + "\uFFFD-->";
+                }
+            }
+            var icuCase = parseIcuCase(valueArr.join(''), startIndex, nestedIcus, tIcus, expandoStartIndex);
+            createCodes.push(icuCase.create);
+            removeCodes.push(icuCase.remove);
+            updateCodes.push(icuCase.update);
+            vars.push(icuCase.vars);
+            childIcus.push(icuCase.childIcus);
         }
-        return staticText;
+        var tIcu = {
+            type: icuExpression.type,
+            vars: vars,
+            expandoStartIndex: expandoStartIndex + 1, childIcus: childIcus,
+            cases: icuExpression.cases,
+            create: createCodes,
+            remove: removeCodes,
+            update: updateCodes
+        };
+        tIcus.push(tIcu);
+        var lViewData = _getViewData();
+        var worstCaseSize = Math.max.apply(Math, __spread(vars));
+        for (var i = 0; i < worstCaseSize; i++) {
+            allocExpando(lViewData);
+        }
     }
     /**
-     * Checks if the value of an expression has changed and replaces it by its value in a translation,
-     * or returns NO_CHANGE.
+     * Transforms a string template into an HTML template and a list of instructions used to update
+     * attributes or nodes that contain bindings.
      *
-     * @param instructions A list of instructions that will be used to translate an attribute.
-     * @param v0 value checked for change.
-     *
-     * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+     * @param unsafeHtml The string to parse
+     * @param parentIndex
+     * @param nestedIcus
+     * @param tIcus
+     * @param expandoStartIndex
      */
-    function i18nInterpolation1(instructions, v0) {
-        var different = bindingUpdated(getViewData()[BINDING_INDEX]++, v0);
-        if (!different) {
-            return NO_CHANGE;
+    function parseIcuCase(unsafeHtml, parentIndex, nestedIcus, tIcus, expandoStartIndex) {
+        var inertBodyHelper = new InertBodyHelper(document);
+        var inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
+        if (!inertBodyElement) {
+            throw new Error('Unable to generate inert body element');
         }
-        var res = '';
-        for (var i = 0; i < instructions.length; i++) {
-            // Odd indexes are bindings
-            if (i & 1) {
-                res += stringify$1(v0);
-            }
-            else {
-                res += instructions[i];
-            }
-        }
-        return res;
+        var wrapper = getTemplateContent(inertBodyElement) || inertBodyElement;
+        var opCodes = { vars: 0, childIcus: [], create: [], remove: [], update: [] };
+        parseNodes(wrapper.firstChild, opCodes, parentIndex, nestedIcus, tIcus, expandoStartIndex);
+        return opCodes;
     }
+    var NESTED_ICU = /�(\d+)�/;
     /**
-     * Checks if the values of up to 2 expressions have changed and replaces them by their values in a
-     * translation, or returns NO_CHANGE.
+     * Parses a node, its children and its siblings, and generates the mutate & update OpCodes.
      *
-     * @param instructions A list of instructions that will be used to translate an attribute.
-     * @param v0 value checked for change.
-     * @param v1 value checked for change.
-     *
-     * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+     * @param currentNode The first node to parse
+     * @param icuCase The data for the ICU expression case that contains those nodes
+     * @param parentIndex Index of the current node's parent
+     * @param nestedIcus Data for the nested ICU expressions that this case contains
+     * @param tIcus Data for all ICU expressions of the current message
+     * @param expandoStartIndex Expando start index for the current ICU expression
      */
-    function i18nInterpolation2(instructions, v0, v1) {
-        var viewData = getViewData();
-        var different = bindingUpdated2(viewData[BINDING_INDEX], v0, v1);
-        viewData[BINDING_INDEX] += 2;
-        if (!different) {
-            return NO_CHANGE;
-        }
-        var res = '';
-        for (var i = 0; i < instructions.length; i++) {
-            // Odd indexes are bindings
-            if (i & 1) {
-                // Extract bits
-                var idx = instructions[i];
-                var b1 = idx & 1;
-                // Get the value from the argument vx where x = idx
-                var value = b1 ? v1 : v0;
-                res += stringify$1(value);
+    function parseNodes(currentNode, icuCase, parentIndex, nestedIcus, tIcus, expandoStartIndex) {
+        if (currentNode) {
+            var nestedIcusToCreate = [];
+            while (currentNode) {
+                var nextNode = currentNode.nextSibling;
+                var newIndex = expandoStartIndex + ++icuCase.vars;
+                switch (currentNode.nodeType) {
+                    case Node.ELEMENT_NODE:
+                        var element$$1 = currentNode;
+                        var tagName = element$$1.tagName.toLowerCase();
+                        if (!VALID_ELEMENTS.hasOwnProperty(tagName)) {
+                            // This isn't a valid element, we won't create an element for it
+                            icuCase.vars--;
+                        }
+                        else {
+                            icuCase.create.push(ELEMENT_MARKER, tagName, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                            var elAttrs = element$$1.attributes;
+                            for (var i = 0; i < elAttrs.length; i++) {
+                                var attr = elAttrs.item(i);
+                                var lowerAttrName = attr.name.toLowerCase();
+                                var hasBinding_1 = !!attr.value.match(BINDING_REGEXP);
+                                // we assume the input string is safe, unless it's using a binding
+                                if (hasBinding_1) {
+                                    if (VALID_ATTRS.hasOwnProperty(lowerAttrName)) {
+                                        if (URI_ATTRS[lowerAttrName]) {
+                                            addAllToArray(generateBindingUpdateOpCodes(attr.value, newIndex, attr.name, _sanitizeUrl), icuCase.update);
+                                        }
+                                        else if (SRCSET_ATTRS[lowerAttrName]) {
+                                            addAllToArray(generateBindingUpdateOpCodes(attr.value, newIndex, attr.name, sanitizeSrcset), icuCase.update);
+                                        }
+                                        else {
+                                            addAllToArray(generateBindingUpdateOpCodes(attr.value, newIndex, attr.name), icuCase.update);
+                                        }
+                                    }
+                                    else {
+                                        ngDevMode &&
+                                            console.warn("WARNING: ignoring unsafe attribute value " + lowerAttrName + " on element " + tagName + " (see http://g.co/ng/security#xss)");
+                                    }
+                                }
+                                else {
+                                    icuCase.create.push(newIndex << 3 /* SHIFT_REF */ | 4 /* Attr */, attr.name, attr.value);
+                                }
+                            }
+                            // Parse the children of this node (if any)
+                            parseNodes(currentNode.firstChild, icuCase, newIndex, nestedIcus, tIcus, expandoStartIndex);
+                            // Remove the parent node after the children
+                            icuCase.remove.push(newIndex << 3 /* SHIFT_REF */ | 3 /* Remove */);
+                        }
+                        break;
+                    case Node.TEXT_NODE:
+                        var value = currentNode.textContent || '';
+                        var hasBinding = value.match(BINDING_REGEXP);
+                        icuCase.create.push(hasBinding ? '' : value, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                        icuCase.remove.push(newIndex << 3 /* SHIFT_REF */ | 3 /* Remove */);
+                        if (hasBinding) {
+                            addAllToArray(generateBindingUpdateOpCodes(value, newIndex), icuCase.update);
+                        }
+                        break;
+                    case Node.COMMENT_NODE:
+                        // Check if the comment node is a placeholder for a nested ICU
+                        var match = NESTED_ICU.exec(currentNode.textContent || '');
+                        if (match) {
+                            var nestedIcuIndex = parseInt(match[1], 10);
+                            var newLocal = ngDevMode ? "nested ICU " + nestedIcuIndex : '';
+                            // Create the comment node that will anchor the ICU expression
+                            icuCase.create.push(COMMENT_MARKER, newLocal, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                            var nestedIcu = nestedIcus[nestedIcuIndex];
+                            nestedIcusToCreate.push([nestedIcu, newIndex]);
+                        }
+                        else {
+                            // We do not handle any other type of comment
+                            icuCase.vars--;
+                        }
+                        break;
+                    default:
+                        // We do not handle any other type of element
+                        icuCase.vars--;
+                }
+                currentNode = nextNode;
             }
-            else {
-                res += instructions[i];
+            for (var i = 0; i < nestedIcusToCreate.length; i++) {
+                var nestedIcu = nestedIcusToCreate[i][0];
+                var nestedIcuNodeIndex = nestedIcusToCreate[i][1];
+                icuStart(tIcus, nestedIcu, nestedIcuNodeIndex, expandoStartIndex + icuCase.vars);
+                // Since this is recursive, the last TIcu that was pushed is the one we want
+                var nestTIcuIndex = tIcus.length - 1;
+                icuCase.vars += Math.max.apply(Math, __spread(tIcus[nestTIcuIndex].vars));
+                icuCase.childIcus.push(nestTIcuIndex);
+                var mask = getBindingMask(nestedIcu);
+                icuCase.update.push(toMaskBit(nestedIcu.mainBinding), // mask of the main binding
+                3, // skip 3 opCodes if not changed
+                -1 - nestedIcu.mainBinding, nestedIcuNodeIndex << 2 /* SHIFT_REF */ | 2 /* IcuSwitch */, nestTIcuIndex, mask, // mask of all the bindings of this ICU expression
+                2, // skip 2 opCodes if not changed
+                nestedIcuNodeIndex << 2 /* SHIFT_REF */ | 3 /* IcuUpdate */, nestTIcuIndex);
+                icuCase.remove.push(nestTIcuIndex << 3 /* SHIFT_REF */ | 6 /* RemoveNestedIcu */, nestedIcuNodeIndex << 3 /* SHIFT_REF */ | 3 /* Remove */);
             }
         }
-        return res;
     }
+    var RAW_ICU_REGEXP = /{\s*(\S*)\s*,\s*\S{6}\s*,[\s\S]*}/gi;
     /**
-     * Checks if the values of up to 3 expressions have changed and replaces them by their values in a
-     * translation, or returns NO_CHANGE.
+     * Replaces the variable parameter (main binding) of an ICU by a given value.
      *
-     * @param instructions A list of instructions that will be used to translate an attribute.
-     * @param v0 value checked for change.
-     * @param v1 value checked for change.
-     * @param v2 value checked for change.
-     *
-     * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+     * Example:
+     * ```
+     * const MSG_APP_1_RAW = "{VAR_SELECT, select, male {male} female {female} other {other}}";
+     * const MSG_APP_1 = i18nIcuReplaceVars(MSG_APP_1_RAW, { VAR_SELECT: "�0�" });
+     * // --> MSG_APP_1 = "{�0�, select, male {male} female {female} other {other}}"
+     * ```
      */
-    function i18nInterpolation3(instructions, v0, v1, v2) {
-        var viewData = getViewData();
-        var different = bindingUpdated3(viewData[BINDING_INDEX], v0, v1, v2);
-        viewData[BINDING_INDEX] += 3;
-        if (!different) {
-            return NO_CHANGE;
+    function i18nIcuReplaceVars(message, replacements) {
+        var keys = Object.keys(replacements);
+        function replaceFn(replacement) {
+            return function (str, varMatch) { return str.replace(varMatch, replacement); };
         }
-        var res = '';
-        for (var i = 0; i < instructions.length; i++) {
-            // Odd indexes are bindings
-            if (i & 1) {
-                // Extract bits
-                var idx = instructions[i];
-                var b2 = idx & 2;
-                var b1 = idx & 1;
-                // Get the value from the argument vx where x = idx
-                var value = b2 ? v2 : (b1 ? v1 : v0);
-                res += stringify$1(value);
-            }
-            else {
-                res += instructions[i];
-            }
+        for (var i = 0; i < keys.length; i++) {
+            message = message.replace(RAW_ICU_REGEXP, replaceFn(replacements[keys[i]]));
         }
-        return res;
-    }
-    /**
-     * Checks if the values of up to 4 expressions have changed and replaces them by their values in a
-     * translation, or returns NO_CHANGE.
-     *
-     * @param instructions A list of instructions that will be used to translate an attribute.
-     * @param v0 value checked for change.
-     * @param v1 value checked for change.
-     * @param v2 value checked for change.
-     * @param v3 value checked for change.
-     *
-     * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
-     */
-    function i18nInterpolation4(instructions, v0, v1, v2, v3) {
-        var viewData = getViewData();
-        var different = bindingUpdated4(viewData[BINDING_INDEX], v0, v1, v2, v3);
-        viewData[BINDING_INDEX] += 4;
-        if (!different) {
-            return NO_CHANGE;
-        }
-        var res = '';
-        for (var i = 0; i < instructions.length; i++) {
-            // Odd indexes are bindings
-            if (i & 1) {
-                // Extract bits
-                var idx = instructions[i];
-                var b2 = idx & 2;
-                var b1 = idx & 1;
-                // Get the value from the argument vx where x = idx
-                var value = b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0);
-                res += stringify$1(value);
-            }
-            else {
-                res += instructions[i];
-            }
-        }
-        return res;
-    }
-    /**
-     * Checks if the values of up to 5 expressions have changed and replaces them by their values in a
-     * translation, or returns NO_CHANGE.
-     *
-     * @param instructions A list of instructions that will be used to translate an attribute.
-     * @param v0 value checked for change.
-     * @param v1 value checked for change.
-     * @param v2 value checked for change.
-     * @param v3 value checked for change.
-     * @param v4 value checked for change.
-     *
-     * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
-     */
-    function i18nInterpolation5(instructions, v0, v1, v2, v3, v4) {
-        var viewData = getViewData();
-        var different = bindingUpdated4(viewData[BINDING_INDEX], v0, v1, v2, v3);
-        different = bindingUpdated(viewData[BINDING_INDEX] + 4, v4) || different;
-        viewData[BINDING_INDEX] += 5;
-        if (!different) {
-            return NO_CHANGE;
-        }
-        var res = '';
-        for (var i = 0; i < instructions.length; i++) {
-            // Odd indexes are bindings
-            if (i & 1) {
-                // Extract bits
-                var idx = instructions[i];
-                var b4 = idx & 4;
-                var b2 = idx & 2;
-                var b1 = idx & 1;
-                // Get the value from the argument vx where x = idx
-                var value = b4 ? v4 : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
-                res += stringify$1(value);
-            }
-            else {
-                res += instructions[i];
-            }
-        }
-        return res;
-    }
-    /**
-     * Checks if the values of up to 6 expressions have changed and replaces them by their values in a
-     * translation, or returns NO_CHANGE.
-     *
-     * @param instructions A list of instructions that will be used to translate an attribute.
-     * @param v0 value checked for change.
-     * @param v1 value checked for change.
-     * @param v2 value checked for change.
-     * @param v3 value checked for change.
-     * @param v4 value checked for change.
-     * @param v5 value checked for change.
-     *
-     * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
-     */ function i18nInterpolation6(instructions, v0, v1, v2, v3, v4, v5) {
-        var viewData = getViewData();
-        var different = bindingUpdated4(viewData[BINDING_INDEX], v0, v1, v2, v3);
-        different = bindingUpdated2(viewData[BINDING_INDEX] + 4, v4, v5) || different;
-        viewData[BINDING_INDEX] += 6;
-        if (!different) {
-            return NO_CHANGE;
-        }
-        var res = '';
-        for (var i = 0; i < instructions.length; i++) {
-            // Odd indexes are bindings
-            if (i & 1) {
-                // Extract bits
-                var idx = instructions[i];
-                var b4 = idx & 4;
-                var b2 = idx & 2;
-                var b1 = idx & 1;
-                // Get the value from the argument vx where x = idx
-                var value = b4 ? (b1 ? v5 : v4) : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
-                res += stringify$1(value);
-            }
-            else {
-                res += instructions[i];
-            }
-        }
-        return res;
-    }
-    /**
-     * Checks if the values of up to 7 expressions have changed and replaces them by their values in a
-     * translation, or returns NO_CHANGE.
-     *
-     * @param instructions A list of instructions that will be used to translate an attribute.
-     * @param v0 value checked for change.
-     * @param v1 value checked for change.
-     * @param v2 value checked for change.
-     * @param v3 value checked for change.
-     * @param v4 value checked for change.
-     * @param v5 value checked for change.
-     * @param v6 value checked for change.
-     *
-     * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
-     */
-    function i18nInterpolation7(instructions, v0, v1, v2, v3, v4, v5, v6) {
-        var viewData = getViewData();
-        var different = bindingUpdated4(viewData[BINDING_INDEX], v0, v1, v2, v3);
-        different = bindingUpdated3(viewData[BINDING_INDEX] + 4, v4, v5, v6) || different;
-        viewData[BINDING_INDEX] += 7;
-        if (!different) {
-            return NO_CHANGE;
-        }
-        var res = '';
-        for (var i = 0; i < instructions.length; i++) {
-            // Odd indexes are bindings
-            if (i & 1) {
-                // Extract bits
-                var idx = instructions[i];
-                var b4 = idx & 4;
-                var b2 = idx & 2;
-                var b1 = idx & 1;
-                // Get the value from the argument vx where x = idx
-                var value = b4 ? (b2 ? v6 : (b1 ? v5 : v4)) : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
-                res += stringify$1(value);
-            }
-            else {
-                res += instructions[i];
-            }
-        }
-        return res;
-    }
-    /**
-     * Checks if the values of up to 8 expressions have changed and replaces them by their values in a
-     * translation, or returns NO_CHANGE.
-     *
-     * @param instructions A list of instructions that will be used to translate an attribute.
-     * @param v0 value checked for change.
-     * @param v1 value checked for change.
-     * @param v2 value checked for change.
-     * @param v3 value checked for change.
-     * @param v4 value checked for change.
-     * @param v5 value checked for change.
-     * @param v6 value checked for change.
-     * @param v7 value checked for change.
-     *
-     * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
-     */
-    function i18nInterpolation8(instructions, v0, v1, v2, v3, v4, v5, v6, v7) {
-        var viewData = getViewData();
-        var different = bindingUpdated4(viewData[BINDING_INDEX], v0, v1, v2, v3);
-        different = bindingUpdated4(viewData[BINDING_INDEX] + 4, v4, v5, v6, v7) || different;
-        viewData[BINDING_INDEX] += 8;
-        if (!different) {
-            return NO_CHANGE;
-        }
-        var res = '';
-        for (var i = 0; i < instructions.length; i++) {
-            // Odd indexes are bindings
-            if (i & 1) {
-                // Extract bits
-                var idx = instructions[i];
-                var b4 = idx & 4;
-                var b2 = idx & 2;
-                var b1 = idx & 1;
-                // Get the value from the argument vx where x = idx
-                var value = b4 ? (b2 ? (b1 ? v7 : v6) : (b1 ? v5 : v4)) : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
-                res += stringify$1(value);
-            }
-            else {
-                res += instructions[i];
-            }
-        }
-        return res;
-    }
-    /**
-     * Create a translated interpolation binding with a variable number of expressions.
-     *
-     * If there are 1 to 8 expressions then `i18nInterpolation()` should be used instead. It is faster
-     * because there is no need to create an array of expressions and iterate over it.
-     *
-     * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
-     */
-    function i18nInterpolationV(instructions, values) {
-        var viewData = getViewData();
-        var different = false;
-        for (var i = 0; i < values.length; i++) {
-            // Check if bindings have changed
-            bindingUpdated(viewData[BINDING_INDEX]++, values[i]) && (different = true);
-        }
-        if (!different) {
-            return NO_CHANGE;
-        }
-        var res = '';
-        for (var i = 0; i < instructions.length; i++) {
-            // Odd indexes are placeholders
-            if (i & 1) {
-                res += stringify$1(values[instructions[i]]);
-            }
-            else {
-                res += instructions[i];
-            }
-        }
-        return res;
+        return message;
     }
 
     /**
@@ -11716,520 +12992,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    /**
-     * This file is used to control if the default rendering pipeline should be `ViewEngine` or `Ivy`.
-     *
-     * For more information on how to run and debug tests with either Ivy or View Engine (legacy),
-     * please see [BAZEL.md](./docs/BAZEL.md).
-     */
-    var _devMode = true;
-    var _runModeLocked = false;
-    /**
-     * Returns whether Angular is in development mode. After called once,
-     * the value is locked and won't change any more.
-     *
-     * By default, this is true, unless a user calls `enableProdMode` before calling this.
-     *
-     * @publicApi
-     */
-    function isDevMode() {
-        _runModeLocked = true;
-        return _devMode;
-    }
-    /**
-     * Disable Angular's development mode, which turns off assertions and other
-     * checks within the framework.
-     *
-     * One important assertion this disables verifies that a change detection pass
-     * does not result in additional changes to any bindings (also known as
-     * unidirectional data flow).
-     *
-     * @publicApi
-     */
-    function enableProdMode() {
-        if (_runModeLocked) {
-            throw new Error('Cannot enable prod mode after platform setup.');
-        }
-        _devMode = false;
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * This helper class is used to get hold of an inert tree of DOM elements containing dirty HTML
-     * that needs sanitizing.
-     * Depending upon browser support we must use one of three strategies for doing this.
-     * Support: Safari 10.x -> XHR strategy
-     * Support: Firefox -> DomParser strategy
-     * Default: InertDocument strategy
-     */
-    var InertBodyHelper = /** @class */ (function () {
-        function InertBodyHelper(defaultDoc) {
-            this.defaultDoc = defaultDoc;
-            this.inertDocument = this.defaultDoc.implementation.createHTMLDocument('sanitization-inert');
-            this.inertBodyElement = this.inertDocument.body;
-            if (this.inertBodyElement == null) {
-                // usually there should be only one body element in the document, but IE doesn't have any, so
-                // we need to create one.
-                var inertHtml = this.inertDocument.createElement('html');
-                this.inertDocument.appendChild(inertHtml);
-                this.inertBodyElement = this.inertDocument.createElement('body');
-                inertHtml.appendChild(this.inertBodyElement);
-            }
-            this.inertBodyElement.innerHTML = '<svg><g onload="this.parentNode.remove()"></g></svg>';
-            if (this.inertBodyElement.querySelector && !this.inertBodyElement.querySelector('svg')) {
-                // We just hit the Safari 10.1 bug - which allows JS to run inside the SVG G element
-                // so use the XHR strategy.
-                this.getInertBodyElement = this.getInertBodyElement_XHR;
-                return;
-            }
-            this.inertBodyElement.innerHTML =
-                '<svg><p><style><img src="</style><img src=x onerror=alert(1)//">';
-            if (this.inertBodyElement.querySelector && this.inertBodyElement.querySelector('svg img')) {
-                // We just hit the Firefox bug - which prevents the inner img JS from being sanitized
-                // so use the DOMParser strategy, if it is available.
-                // If the DOMParser is not available then we are not in Firefox (Server/WebWorker?) so we
-                // fall through to the default strategy below.
-                if (isDOMParserAvailable()) {
-                    this.getInertBodyElement = this.getInertBodyElement_DOMParser;
-                    return;
-                }
-            }
-            // None of the bugs were hit so it is safe for us to use the default InertDocument strategy
-            this.getInertBodyElement = this.getInertBodyElement_InertDocument;
-        }
-        /**
-         * Use XHR to create and fill an inert body element (on Safari 10.1)
-         * See
-         * https://github.com/cure53/DOMPurify/blob/a992d3a75031cb8bb032e5ea8399ba972bdf9a65/src/purify.js#L439-L449
-         */
-        InertBodyHelper.prototype.getInertBodyElement_XHR = function (html) {
-            // We add these extra elements to ensure that the rest of the content is parsed as expected
-            // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
-            // `<head>` tag.
-            html = '<body><remove></remove>' + html + '</body>';
-            try {
-                html = encodeURI(html);
-            }
-            catch (e) {
-                return null;
-            }
-            var xhr = new XMLHttpRequest();
-            xhr.responseType = 'document';
-            xhr.open('GET', 'data:text/html;charset=utf-8,' + html, false);
-            xhr.send(undefined);
-            var body = xhr.response.body;
-            body.removeChild(body.firstChild);
-            return body;
-        };
-        /**
-         * Use DOMParser to create and fill an inert body element (on Firefox)
-         * See https://github.com/cure53/DOMPurify/releases/tag/0.6.7
-         *
-         */
-        InertBodyHelper.prototype.getInertBodyElement_DOMParser = function (html) {
-            // We add these extra elements to ensure that the rest of the content is parsed as expected
-            // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
-            // `<head>` tag.
-            html = '<body><remove></remove>' + html + '</body>';
-            try {
-                var body = new window
-                    .DOMParser()
-                    .parseFromString(html, 'text/html')
-                    .body;
-                body.removeChild(body.firstChild);
-                return body;
-            }
-            catch (e) {
-                return null;
-            }
-        };
-        /**
-         * Use an HTML5 `template` element, if supported, or an inert body element created via
-         * `createHtmlDocument` to create and fill an inert DOM element.
-         * This is the default sane strategy to use if the browser does not require one of the specialised
-         * strategies above.
-         */
-        InertBodyHelper.prototype.getInertBodyElement_InertDocument = function (html) {
-            // Prefer using <template> element if supported.
-            var templateEl = this.inertDocument.createElement('template');
-            if ('content' in templateEl) {
-                templateEl.innerHTML = html;
-                return templateEl;
-            }
-            this.inertBodyElement.innerHTML = html;
-            // Support: IE 9-11 only
-            // strip custom-namespaced attributes on IE<=11
-            if (this.defaultDoc.documentMode) {
-                this.stripCustomNsAttrs(this.inertBodyElement);
-            }
-            return this.inertBodyElement;
-        };
-        /**
-         * When IE9-11 comes across an unknown namespaced attribute e.g. 'xlink:foo' it adds 'xmlns:ns1'
-         * attribute to declare ns1 namespace and prefixes the attribute with 'ns1' (e.g.
-         * 'ns1:xlink:foo').
-         *
-         * This is undesirable since we don't want to allow any of these custom attributes. This method
-         * strips them all.
-         */
-        InertBodyHelper.prototype.stripCustomNsAttrs = function (el) {
-            var elAttrs = el.attributes;
-            // loop backwards so that we can support removals.
-            for (var i = elAttrs.length - 1; 0 < i; i--) {
-                var attrib = elAttrs.item(i);
-                var attrName = attrib.name;
-                if (attrName === 'xmlns:ns1' || attrName.indexOf('ns1:') === 0) {
-                    el.removeAttribute(attrName);
-                }
-            }
-            var childNode = el.firstChild;
-            while (childNode) {
-                if (childNode.nodeType === Node.ELEMENT_NODE)
-                    this.stripCustomNsAttrs(childNode);
-                childNode = childNode.nextSibling;
-            }
-        };
-        return InertBodyHelper;
-    }());
-    /**
-     * We need to determine whether the DOMParser exists in the global context.
-     * The try-catch is because, on some browsers, trying to access this property
-     * on window can actually throw an error.
-     *
-     * @suppress {uselessCode}
-     */
-    function isDOMParserAvailable() {
-        try {
-            return !!window.DOMParser;
-        }
-        catch (e) {
-            return false;
-        }
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * A pattern that recognizes a commonly useful subset of URLs that are safe.
-     *
-     * This regular expression matches a subset of URLs that will not cause script
-     * execution if used in URL context within a HTML document. Specifically, this
-     * regular expression matches if (comment from here on and regex copied from
-     * Soy's EscapingConventions):
-     * (1) Either a protocol in a whitelist (http, https, mailto or ftp).
-     * (2) or no protocol.  A protocol must be followed by a colon. The below
-     *     allows that by allowing colons only after one of the characters [/?#].
-     *     A colon after a hash (#) must be in the fragment.
-     *     Otherwise, a colon after a (?) must be in a query.
-     *     Otherwise, a colon after a single solidus (/) must be in a path.
-     *     Otherwise, a colon after a double solidus (//) must be in the authority
-     *     (before port).
-     *
-     * The pattern disallows &, used in HTML entity declarations before
-     * one of the characters in [/?#]. This disallows HTML entities used in the
-     * protocol name, which should never happen, e.g. "h&#116;tp" for "http".
-     * It also disallows HTML entities in the first path part of a relative path,
-     * e.g. "foo&lt;bar/baz".  Our existing escaping functions should not produce
-     * that. More importantly, it disallows masking of a colon,
-     * e.g. "javascript&#58;...".
-     *
-     * This regular expression was taken from the Closure sanitization library.
-     */
-    var SAFE_URL_PATTERN = /^(?:(?:https?|mailto|ftp|tel|file):|[^&:/?#]*(?:[/?#]|$))/gi;
-    /** A pattern that matches safe data URLs. Only matches image, video and audio types. */
-    var DATA_URL_PATTERN = /^data:(?:image\/(?:bmp|gif|jpeg|jpg|png|tiff|webp)|video\/(?:mpeg|mp4|ogg|webm)|audio\/(?:mp3|oga|ogg|opus));base64,[a-z0-9+\/]+=*$/i;
-    function _sanitizeUrl(url) {
-        url = String(url);
-        if (url.match(SAFE_URL_PATTERN) || url.match(DATA_URL_PATTERN))
-            return url;
-        if (isDevMode()) {
-            console.warn("WARNING: sanitizing unsafe URL value " + url + " (see http://g.co/ng/security#xss)");
-        }
-        return 'unsafe:' + url;
-    }
-    function sanitizeSrcset(srcset) {
-        srcset = String(srcset);
-        return srcset.split(',').map(function (srcset) { return _sanitizeUrl(srcset.trim()); }).join(', ');
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    function tagSet(tags) {
-        var e_1, _a;
-        var res = {};
-        try {
-            for (var _b = __values(tags.split(',')), _c = _b.next(); !_c.done; _c = _b.next()) {
-                var t = _c.value;
-                res[t] = true;
-            }
-        }
-        catch (e_1_1) { e_1 = { error: e_1_1 }; }
-        finally {
-            try {
-                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
-            }
-            finally { if (e_1) throw e_1.error; }
-        }
-        return res;
-    }
-    function merge() {
-        var sets = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            sets[_i] = arguments[_i];
-        }
-        var e_2, _a;
-        var res = {};
-        try {
-            for (var sets_1 = __values(sets), sets_1_1 = sets_1.next(); !sets_1_1.done; sets_1_1 = sets_1.next()) {
-                var s = sets_1_1.value;
-                for (var v in s) {
-                    if (s.hasOwnProperty(v))
-                        res[v] = true;
-                }
-            }
-        }
-        catch (e_2_1) { e_2 = { error: e_2_1 }; }
-        finally {
-            try {
-                if (sets_1_1 && !sets_1_1.done && (_a = sets_1.return)) _a.call(sets_1);
-            }
-            finally { if (e_2) throw e_2.error; }
-        }
-        return res;
-    }
-    // Good source of info about elements and attributes
-    // http://dev.w3.org/html5/spec/Overview.html#semantics
-    // http://simon.html5.org/html-elements
-    // Safe Void Elements - HTML5
-    // http://dev.w3.org/html5/spec/Overview.html#void-elements
-    var VOID_ELEMENTS = tagSet('area,br,col,hr,img,wbr');
-    // Elements that you can, intentionally, leave open (and which close themselves)
-    // http://dev.w3.org/html5/spec/Overview.html#optional-tags
-    var OPTIONAL_END_TAG_BLOCK_ELEMENTS = tagSet('colgroup,dd,dt,li,p,tbody,td,tfoot,th,thead,tr');
-    var OPTIONAL_END_TAG_INLINE_ELEMENTS = tagSet('rp,rt');
-    var OPTIONAL_END_TAG_ELEMENTS = merge(OPTIONAL_END_TAG_INLINE_ELEMENTS, OPTIONAL_END_TAG_BLOCK_ELEMENTS);
-    // Safe Block Elements - HTML5
-    var BLOCK_ELEMENTS = merge(OPTIONAL_END_TAG_BLOCK_ELEMENTS, tagSet('address,article,' +
-        'aside,blockquote,caption,center,del,details,dialog,dir,div,dl,figure,figcaption,footer,h1,h2,h3,h4,h5,' +
-        'h6,header,hgroup,hr,ins,main,map,menu,nav,ol,pre,section,summary,table,ul'));
-    // Inline Elements - HTML5
-    var INLINE_ELEMENTS = merge(OPTIONAL_END_TAG_INLINE_ELEMENTS, tagSet('a,abbr,acronym,audio,b,' +
-        'bdi,bdo,big,br,cite,code,del,dfn,em,font,i,img,ins,kbd,label,map,mark,picture,q,ruby,rp,rt,s,' +
-        'samp,small,source,span,strike,strong,sub,sup,time,track,tt,u,var,video'));
-    var VALID_ELEMENTS = merge(VOID_ELEMENTS, BLOCK_ELEMENTS, INLINE_ELEMENTS, OPTIONAL_END_TAG_ELEMENTS);
-    // Attributes that have href and hence need to be sanitized
-    var URI_ATTRS = tagSet('background,cite,href,itemtype,longdesc,poster,src,xlink:href');
-    // Attributes that have special href set hence need to be sanitized
-    var SRCSET_ATTRS = tagSet('srcset');
-    var HTML_ATTRS = tagSet('abbr,accesskey,align,alt,autoplay,axis,bgcolor,border,cellpadding,cellspacing,class,clear,color,cols,colspan,' +
-        'compact,controls,coords,datetime,default,dir,download,face,headers,height,hidden,hreflang,hspace,' +
-        'ismap,itemscope,itemprop,kind,label,lang,language,loop,media,muted,nohref,nowrap,open,preload,rel,rev,role,rows,rowspan,rules,' +
-        'scope,scrolling,shape,size,sizes,span,srclang,start,summary,tabindex,target,title,translate,type,usemap,' +
-        'valign,value,vspace,width');
-    // NB: This currently consciously doesn't support SVG. SVG sanitization has had several security
-    // issues in the past, so it seems safer to leave it out if possible. If support for binding SVG via
-    // innerHTML is required, SVG attributes should be added here.
-    // NB: Sanitization does not allow <form> elements or other active elements (<button> etc). Those
-    // can be sanitized, but they increase security surface area without a legitimate use case, so they
-    // are left out here.
-    var VALID_ATTRS = merge(URI_ATTRS, SRCSET_ATTRS, HTML_ATTRS);
-    /**
-     * SanitizingHtmlSerializer serializes a DOM fragment, stripping out any unsafe elements and unsafe
-     * attributes.
-     */
-    var SanitizingHtmlSerializer = /** @class */ (function () {
-        function SanitizingHtmlSerializer() {
-            // Explicitly track if something was stripped, to avoid accidentally warning of sanitization just
-            // because characters were re-encoded.
-            this.sanitizedSomething = false;
-            this.buf = [];
-        }
-        SanitizingHtmlSerializer.prototype.sanitizeChildren = function (el) {
-            // This cannot use a TreeWalker, as it has to run on Angular's various DOM adapters.
-            // However this code never accesses properties off of `document` before deleting its contents
-            // again, so it shouldn't be vulnerable to DOM clobbering.
-            var current = el.firstChild;
-            var elementValid = true;
-            while (current) {
-                if (current.nodeType === Node.ELEMENT_NODE) {
-                    elementValid = this.startElement(current);
-                }
-                else if (current.nodeType === Node.TEXT_NODE) {
-                    this.chars(current.nodeValue);
-                }
-                else {
-                    // Strip non-element, non-text nodes.
-                    this.sanitizedSomething = true;
-                }
-                if (elementValid && current.firstChild) {
-                    current = current.firstChild;
-                    continue;
-                }
-                while (current) {
-                    // Leaving the element. Walk up and to the right, closing tags as we go.
-                    if (current.nodeType === Node.ELEMENT_NODE) {
-                        this.endElement(current);
-                    }
-                    var next = this.checkClobberedElement(current, current.nextSibling);
-                    if (next) {
-                        current = next;
-                        break;
-                    }
-                    current = this.checkClobberedElement(current, current.parentNode);
-                }
-            }
-            return this.buf.join('');
-        };
-        /**
-         * Outputs only valid Elements.
-         *
-         * Invalid elements are skipped.
-         *
-         * @param element element to sanitize
-         * Returns true if the element is valid.
-         */
-        SanitizingHtmlSerializer.prototype.startElement = function (element) {
-            var tagName = element.nodeName.toLowerCase();
-            if (!VALID_ELEMENTS.hasOwnProperty(tagName)) {
-                this.sanitizedSomething = true;
-                return false;
-            }
-            this.buf.push('<');
-            this.buf.push(tagName);
-            var elAttrs = element.attributes;
-            for (var i = 0; i < elAttrs.length; i++) {
-                var elAttr = elAttrs.item(i);
-                var attrName = elAttr.name;
-                var lower = attrName.toLowerCase();
-                if (!VALID_ATTRS.hasOwnProperty(lower)) {
-                    this.sanitizedSomething = true;
-                    continue;
-                }
-                var value = elAttr.value;
-                // TODO(martinprobst): Special case image URIs for data:image/...
-                if (URI_ATTRS[lower])
-                    value = _sanitizeUrl(value);
-                if (SRCSET_ATTRS[lower])
-                    value = sanitizeSrcset(value);
-                this.buf.push(' ', attrName, '="', encodeEntities(value), '"');
-            }
-            this.buf.push('>');
-            return true;
-        };
-        SanitizingHtmlSerializer.prototype.endElement = function (current) {
-            var tagName = current.nodeName.toLowerCase();
-            if (VALID_ELEMENTS.hasOwnProperty(tagName) && !VOID_ELEMENTS.hasOwnProperty(tagName)) {
-                this.buf.push('</');
-                this.buf.push(tagName);
-                this.buf.push('>');
-            }
-        };
-        SanitizingHtmlSerializer.prototype.chars = function (chars) { this.buf.push(encodeEntities(chars)); };
-        SanitizingHtmlSerializer.prototype.checkClobberedElement = function (node, nextNode) {
-            if (nextNode &&
-                (node.compareDocumentPosition(nextNode) &
-                    Node.DOCUMENT_POSITION_CONTAINED_BY) === Node.DOCUMENT_POSITION_CONTAINED_BY) {
-                throw new Error("Failed to sanitize html because the element is clobbered: " + node.outerHTML);
-            }
-            return nextNode;
-        };
-        return SanitizingHtmlSerializer;
-    }());
-    // Regular Expressions for parsing tags and attributes
-    var SURROGATE_PAIR_REGEXP = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
-    // ! to ~ is the ASCII range.
-    var NON_ALPHANUMERIC_REGEXP = /([^\#-~ |!])/g;
-    /**
-     * Escapes all potentially dangerous characters, so that the
-     * resulting string can be safely inserted into attribute or
-     * element text.
-     * @param value
-     */
-    function encodeEntities(value) {
-        return value.replace(/&/g, '&amp;')
-            .replace(SURROGATE_PAIR_REGEXP, function (match) {
-            var hi = match.charCodeAt(0);
-            var low = match.charCodeAt(1);
-            return '&#' + (((hi - 0xD800) * 0x400) + (low - 0xDC00) + 0x10000) + ';';
-        })
-            .replace(NON_ALPHANUMERIC_REGEXP, function (match) { return '&#' + match.charCodeAt(0) + ';'; })
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
-    }
-    var inertBodyHelper;
-    /**
-     * Sanitizes the given unsafe, untrusted HTML fragment, and returns HTML text that is safe to add to
-     * the DOM in a browser environment.
-     */
-    function _sanitizeHtml(defaultDoc, unsafeHtmlInput) {
-        var inertBodyElement = null;
-        try {
-            inertBodyHelper = inertBodyHelper || new InertBodyHelper(defaultDoc);
-            // Make sure unsafeHtml is actually a string (TypeScript types are not enforced at runtime).
-            var unsafeHtml = unsafeHtmlInput ? String(unsafeHtmlInput) : '';
-            inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
-            // mXSS protection. Repeatedly parse the document to make sure it stabilizes, so that a browser
-            // trying to auto-correct incorrect HTML cannot cause formerly inert HTML to become dangerous.
-            var mXSSAttempts = 5;
-            var parsedHtml = unsafeHtml;
-            do {
-                if (mXSSAttempts === 0) {
-                    throw new Error('Failed to sanitize html because the input is unstable');
-                }
-                mXSSAttempts--;
-                unsafeHtml = parsedHtml;
-                parsedHtml = inertBodyElement.innerHTML;
-                inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
-            } while (unsafeHtml !== parsedHtml);
-            var sanitizer = new SanitizingHtmlSerializer();
-            var safeHtml = sanitizer.sanitizeChildren(getTemplateContent(inertBodyElement) || inertBodyElement);
-            if (isDevMode() && sanitizer.sanitizedSomething) {
-                console.warn('WARNING: sanitizing HTML stripped some content (see http://g.co/ng/security#xss).');
-            }
-            return safeHtml;
-        }
-        finally {
-            // In case anything goes wrong, clear out inertElement to reset the entire DOM structure.
-            if (inertBodyElement) {
-                var parent_1 = getTemplateContent(inertBodyElement) || inertBodyElement;
-                while (parent_1.firstChild) {
-                    parent_1.removeChild(parent_1.firstChild);
-                }
-            }
-        }
-    }
-    function getTemplateContent(el) {
-        return 'content' in el /** Microsoft/TypeScript#21517 */ && isTemplateElement(el) ?
-            el.content :
-            null;
-    }
-    function isTemplateElement(el) {
-        return el.nodeType === Node.ELEMENT_NODE && el.nodeName === 'TEMPLATE';
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     (function (SecurityContext) {
         SecurityContext[SecurityContext["NONE"] = 0] = "NONE";
         SecurityContext[SecurityContext["HTML"] = 1] = "HTML";
@@ -12561,7 +13323,7 @@
         'ɵtextBinding': textBinding,
         'ɵembeddedViewStart': embeddedViewStart,
         'ɵembeddedViewEnd': embeddedViewEnd,
-        'ɵi18nAttribute': i18nAttribute,
+        'ɵi18nAttributes': i18nAttributes,
         'ɵi18nExp': i18nExp,
         'ɵi18nStart': i18nStart,
         'ɵi18nEnd': i18nEnd,
@@ -13535,7 +14297,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0-rc.0');
+    var VERSION = new Version('7.1.0-rc.0+3.sha-ee12e72');
 
     /**
      * @license
@@ -15312,8 +16074,12 @@
              */
             this._didWork = false;
             this._callbacks = [];
+            this.taskTrackingZone = null;
             this._watchAngularEvents();
-            _ngZone.run(function () { _this.taskTrackingZone = Zone.current.get('TaskTrackingZone'); });
+            _ngZone.run(function () {
+                _this.taskTrackingZone =
+                    typeof Zone == 'undefined' ? null : Zone.current.get('TaskTrackingZone');
+            });
         }
         Testability.prototype._watchAngularEvents = function () {
             var _this = this;
@@ -22237,19 +23003,19 @@
     exports.ɵangular_packages_core_core_t = leave;
     exports.ɵangular_packages_core_core_u = startTimeRange;
     exports.ɵangular_packages_core_core_z = injectAttributeImpl;
-    exports.ɵangular_packages_core_core_bg = NG_INJECTABLE_DEF;
+    exports.ɵangular_packages_core_core_bh = NG_INJECTABLE_DEF;
     exports.ɵangular_packages_core_core_ba = bindingUpdated;
     exports.ɵangular_packages_core_core_bb = getPreviousOrParentTNode;
     exports.ɵangular_packages_core_core_bc = getViewData;
     exports.ɵangular_packages_core_core_bd = nextContextImpl;
-    exports.ɵangular_packages_core_core_bf = BoundPlayerFactory;
-    exports.ɵangular_packages_core_core_bj = loadInternal;
+    exports.ɵangular_packages_core_core_bg = BoundPlayerFactory;
+    exports.ɵangular_packages_core_core_bk = loadInternal;
     exports.ɵangular_packages_core_core_h = createElementRef;
     exports.ɵangular_packages_core_core_i = createTemplateRef;
     exports.ɵangular_packages_core_core_j = createViewRef;
     exports.ɵangular_packages_core_core_a = makeParamDecorator;
     exports.ɵangular_packages_core_core_b = makePropDecorator;
-    exports.ɵangular_packages_core_core_bh = getClosureSafeProperty;
+    exports.ɵangular_packages_core_core_bi = getClosureSafeProperty;
     exports.ɵangular_packages_core_core_w = _def;
     exports.ɵangular_packages_core_core_x = DebugRendererFactory2;
     exports.ɵangular_packages_core_core_y = DebugContext;
@@ -22476,22 +23242,12 @@
     exports.ɵload = load;
     exports.ɵpipe = pipe;
     exports.ɵwhenRendered = whenRendered;
-    exports.ɵi18nAttribute = i18nAttribute;
+    exports.ɵi18nAttributes = i18nAttributes;
     exports.ɵi18nExp = i18nExp;
     exports.ɵi18nStart = i18nStart;
     exports.ɵi18nEnd = i18nEnd;
     exports.ɵi18nApply = i18nApply;
-    exports.ɵi18nExpMapping = i18nExpMapping;
-    exports.ɵi18nInterpolation1 = i18nInterpolation1;
-    exports.ɵi18nInterpolation2 = i18nInterpolation2;
-    exports.ɵi18nInterpolation3 = i18nInterpolation3;
-    exports.ɵi18nInterpolation4 = i18nInterpolation4;
-    exports.ɵi18nInterpolation5 = i18nInterpolation5;
-    exports.ɵi18nInterpolation6 = i18nInterpolation6;
-    exports.ɵi18nInterpolation7 = i18nInterpolation7;
-    exports.ɵi18nInterpolation8 = i18nInterpolation8;
-    exports.ɵi18nInterpolationV = i18nInterpolationV;
-    exports.ɵi18nMapping = i18nMapping;
+    exports.ɵi18nIcuReplaceVars = i18nIcuReplaceVars;
     exports.ɵWRAP_RENDERER_FACTORY2 = WRAP_RENDERER_FACTORY2;
     exports.ɵsetClassMetadata = setClassMetadata;
     exports.ɵRender3DebugRendererFactory2 = Render3DebugRendererFactory2;

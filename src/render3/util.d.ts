@@ -90,3 +90,10 @@ export declare function getParentInjectorView(location: RelativeInjectorLocation
  */
 export declare function getParentInjectorTNode(location: RelativeInjectorLocation, startView: LViewData, startTNode: TNode): TElementNode | TContainerNode | null;
 export declare const defaultScheduler: any;
+/**
+ * Equivalent to ES6 spread, add each item to an array.
+ *
+ * @param items The items to add
+ * @param arr The array to which you want to add the items
+ */
+export declare function addAllToArray(items: any[], arr: any[]): void;
