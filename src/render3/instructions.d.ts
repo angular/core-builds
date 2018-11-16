@@ -7,6 +7,7 @@
  */
 import './ng_dev_mode';
 import { InjectionToken } from '../di/injection_token';
+import { Injector } from '../di/injector';
 import { InjectFlags } from '../di/injector_compatibility';
 import { QueryList } from '../linker';
 import { Sanitizer } from '../sanitization/security';
@@ -19,12 +20,9 @@ import { PlayerFactory } from './interfaces/player';
 import { CssSelectorList } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
+import { SanitizerFn } from './interfaces/sanitization';
 import { LViewData, LViewFlags, RootContext, RootContextFlags, TView } from './interfaces/view';
 import { NO_CHANGE } from './tokens';
-/**
- * Function used to sanitize the value before writing it into the renderer.
- */
-declare type SanitizerFn = (value: any) => string;
 /**
  * Refreshes the view, executing the following steps in that order:
  * triggers init hooks, refreshes dynamic embedded views, triggers content hooks, sets host
@@ -34,7 +32,7 @@ declare type SanitizerFn = (value: any) => string;
 export declare function refreshDescendantViews(viewData: LViewData, rf: RenderFlags | null): void;
 /** Sets the host bindings for the current view. */
 export declare function setHostBindings(tView: TView, viewData: LViewData): void;
-export declare function createLViewData<T>(renderer: Renderer3, tView: TView, context: T | null, flags: LViewFlags, sanitizer?: Sanitizer | null): LViewData;
+export declare function createLViewData<T>(renderer: Renderer3, tView: TView, context: T | null, flags: LViewFlags, sanitizer?: Sanitizer | null, injector?: Injector | null): LViewData;
 /**
  * Create and stores the TNode, and hooks it up to the tree.
  *
@@ -49,13 +47,14 @@ export declare function createNodeAtIndex(index: number, type: TNodeType.Element
 export declare function createNodeAtIndex(index: number, type: TNodeType.Container, native: RComment, name: string | null, attrs: TAttributes | null): TContainerNode;
 export declare function createNodeAtIndex(index: number, type: TNodeType.Projection, native: null, name: null, attrs: TAttributes | null): TProjectionNode;
 export declare function createNodeAtIndex(index: number, type: TNodeType.ElementContainer, native: RComment, name: null, attrs: TAttributes | null): TElementContainerNode;
+export declare function createNodeAtIndex(index: number, type: TNodeType.IcuContainer, native: RComment, name: null, attrs: TAttributes | null): TElementContainerNode;
 export declare function createViewNode(index: number, view: LViewData): TViewNode;
 /**
  * When elements are created dynamically after a view blueprint is created (e.g. through
  * i18nApply() or ComponentFactory.create), we need to adjust the blueprint for future
  * template passes.
  */
-export declare function adjustBlueprintForNewNode(view: LViewData): void;
+export declare function allocExpando(view: LViewData): void;
 /**
  *
  * @param hostNode Existing node to render into.
@@ -211,7 +210,7 @@ export declare function elementEnd(): void;
  *                  Otherwise the attribute value is set to the stringified value.
  * @param sanitizer An optional function used to sanitize the value.
  */
-export declare function elementAttribute(index: number, name: string, value: any, sanitizer?: SanitizerFn): void;
+export declare function elementAttribute(index: number, name: string, value: any, sanitizer?: SanitizerFn | null): void;
 /**
  * Update a property on an Element.
  *
@@ -225,7 +224,7 @@ export declare function elementAttribute(index: number, name: string, value: any
  * @param value New value to write.
  * @param sanitizer An optional function used to sanitize the value.
  */
-export declare function elementProperty<T>(index: number, propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn): void;
+export declare function elementProperty<T>(index: number, propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn | null): void;
 /**
  * Constructs a TNode object from the arguments.
  *
@@ -671,4 +670,3 @@ export declare function injectAttribute(attrNameToInject: string): string | unde
 export declare function registerContentQuery<Q>(queryList: QueryList<Q>, currentDirectiveIndex: number): void;
 export declare const CLEAN_PROMISE: Promise<null>;
 export declare function delegateToClassInput(tNode: TNode): number;
-export {};

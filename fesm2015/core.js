@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-beta.2+51.sha-ce52424
+ * @license Angular v7.1.0-rc.0+3.sha-ee12e72
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2123,6 +2123,18 @@ function getParentInjectorTNode(location, startView, startTNode) {
 const defaultScheduler = (typeof requestAnimationFrame !== 'undefined' && requestAnimationFrame || // browser only
     setTimeout // everything else
 ).bind(_global);
+/**
+ * Equivalent to ES6 spread, add each item to an array.
+ *
+ * @param {?} items The items to add
+ * @param {?} arr The array to which you want to add the items
+ * @return {?}
+ */
+function addAllToArray(items, arr) {
+    for (let i = 0; i < items.length; i++) {
+        arr.push(items[i]);
+    }
+}
 
 /**
  * @fileoverview added by tsickle
@@ -2818,6 +2830,12 @@ function disableBindings() {
  */
 function getCurrentView() {
     return /** @type {?} */ ((viewData));
+}
+/**
+ * @return {?}
+ */
+function _getViewData() {
+    return viewData;
 }
 /**
  * Restores `contextViewData` to the given OpaqueViewState instance.
@@ -4372,8 +4390,27 @@ const domRendererFactory3 = {
  * @return {?}
  */
 function getParentNative(tNode, currentView) {
-    return tNode.parent == null ? getHostNative(currentView) :
-        getNativeByTNode(tNode.parent, currentView);
+    if (tNode.parent == null) {
+        return getHostNative(currentView);
+    }
+    else {
+        /** @type {?} */
+        const parentTNode = getFirstParentNative(tNode);
+        return getNativeByTNode(parentTNode, currentView);
+    }
+}
+/**
+ * Get the first parent of a node that isn't an IcuContainer TNode
+ * @param {?} tNode
+ * @return {?}
+ */
+function getFirstParentNative(tNode) {
+    /** @type {?} */
+    let parent = tNode.parent;
+    while (parent && parent.type === 5 /* IcuContainer */) {
+        parent = parent.parent;
+    }
+    return /** @type {?} */ ((parent));
 }
 /**
  * Gets the host element given a view. Will return null if the current view is an embedded view,
@@ -4944,18 +4981,24 @@ function canInsertNativeChildOfView(viewTNode, view) {
  *   into destination.
  *
  *
- * @param {?} tNode
+ * @param {?} tNode The tNode of the node that we want to insert.
  * @param {?} currentView Current LView being processed.
- * @return {?} boolean Whether the child should be inserted now (or delayed until later).
+ * @return {?} boolean Whether the node should be inserted now (or delayed until later).
  */
 function canInsertNativeNode(tNode, currentView) {
     /** @type {?} */
     let currentNode = tNode;
     /** @type {?} */
     let parent = tNode.parent;
-    if (tNode.parent && tNode.parent.type === 4 /* ElementContainer */) {
-        currentNode = getHighestElementContainer(tNode);
-        parent = currentNode.parent;
+    if (tNode.parent) {
+        if (tNode.parent.type === 4 /* ElementContainer */) {
+            currentNode = getHighestElementContainer(tNode);
+            parent = currentNode.parent;
+        }
+        else if (tNode.parent.type === 5 /* IcuContainer */) {
+            currentNode = getFirstParentNative(currentNode);
+            parent = currentNode.parent;
+        }
     }
     if (parent === null)
         parent = currentView[HOST_NODE];
@@ -5008,12 +5051,12 @@ function nativeNextSibling(renderer, node) {
  *
  * The element insertion might be delayed {\@link canInsertNativeNode}.
  *
- * @param {?} childEl The child that should be appended
- * @param {?} childTNode The TNode of the child element
- * @param {?} currentView The current LView
+ * @param {?=} childEl The child that should be appended
+ * @param {?=} childTNode The TNode of the child element
+ * @param {?=} currentView The current LView
  * @return {?} Whether or not the child was appended
  */
-function appendChild(childEl, childTNode, currentView) {
+function appendChild(childEl = null, childTNode, currentView) {
     if (childEl !== null && canInsertNativeNode(childTNode, currentView)) {
         /** @type {?} */
         const renderer = currentView[RENDERER];
@@ -5034,6 +5077,11 @@ function appendChild(childEl, childTNode, currentView) {
             /** @type {?} */
             const renderParent = /** @type {?} */ ((getRenderParent(childTNode, currentView)));
             nativeInsertBefore(renderer, renderParent, childEl, parentEl);
+        }
+        else if (parentTNode.type === 5 /* IcuContainer */) {
+            /** @type {?} */
+            const icuAnchorNode = /** @type {?} */ (((getNativeByTNode(/** @type {?} */ ((childTNode.parent)), currentView))));
+            nativeInsertBefore(renderer, /** @type {?} */ (parentEl), childEl, icuAnchorNode);
         }
         else {
             isProceduralRenderer(renderer) ? renderer.appendChild(/** @type {?} */ (((parentEl))), childEl) : /** @type {?} */ ((parentEl)).appendChild(childEl);
@@ -6875,9 +6923,10 @@ function refreshChildComponents(components, parentFirstTemplatePass, rf) {
  * @param {?} context
  * @param {?} flags
  * @param {?=} sanitizer
+ * @param {?=} injector
  * @return {?}
  */
-function createLViewData(renderer, tView, context, flags, sanitizer) {
+function createLViewData(renderer, tView, context, flags, sanitizer, injector) {
     /** @type {?} */
     const viewData = getViewData();
     /** @type {?} */
@@ -6885,7 +6934,8 @@ function createLViewData(renderer, tView, context, flags, sanitizer) {
     instance[FLAGS] = flags | 1 /* CreationMode */ | 8 /* Attached */ | 16 /* RunInit */;
     instance[PARENT] = instance[DECLARATION_VIEW] = viewData;
     instance[CONTEXT] = context;
-    instance[INJECTOR] = viewData ? viewData[INJECTOR] : null;
+    instance[/** @type {?} */ (INJECTOR)] =
+        injector === undefined ? (viewData ? viewData[INJECTOR] : null) : injector;
     instance[RENDERER] = renderer;
     instance[SANITIZER] = sanitizer || null;
     return instance;
@@ -6960,12 +7010,13 @@ function createViewNode(index, view) {
  * @param {?} view
  * @return {?}
  */
-function adjustBlueprintForNewNode(view) {
+function allocExpando(view) {
     /** @type {?} */
     const tView = view[TVIEW];
     if (tView.firstTemplatePass) {
         tView.expandoStartIndex++;
         tView.blueprint.push(null);
+        tView.data.push(null);
         view.push(null);
     }
 }
@@ -7357,7 +7408,7 @@ function createTView(viewIndex, templateFn, consts, vars, directives, pipes, vie
     const initialViewLength = bindingStartIndex + vars;
     /** @type {?} */
     const blueprint = createViewBlueprint(bindingStartIndex, initialViewLength);
-    return blueprint[TVIEW] = {
+    return blueprint[/** @type {?} */ (TVIEW)] = {
         id: viewIndex,
         blueprint: blueprint,
         template: templateFn,
@@ -9903,6 +9954,10 @@ class RootViewRef extends ViewRef {
      * @return {?}
      */
     checkNoChanges() { checkNoChangesInRootView(this._view); }
+    /**
+     * @return {?}
+     */
+    get context() { return /** @type {?} */ ((null)); }
 }
 /**
  * @param {?} lView
@@ -10665,8 +10720,7 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     /** @type {?} */
     const renderer = rendererFactory.createRenderer(hostRNode, componentDef);
     /** @type {?} */
-    const rootView = createLViewData(renderer, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags);
-    rootView[INJECTOR] = opts.injector || null;
+    const rootView = createLViewData(renderer, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags, undefined, opts.injector || null);
     /** @type {?} */
     const oldView = enterView(rootView, null);
     /** @type {?} */
@@ -12236,8 +12290,9 @@ class ComponentFactory$1 extends ComponentFactory {
         /** @type {?} */
         const renderer = rendererFactory.createRenderer(hostRNode, this.componentDef);
         /** @type {?} */
-        const rootView = createLViewData(renderer, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags);
-        rootView[INJECTOR] = ngModule ? createChainedInjector(injector, ngModule.injector) : injector;
+        const rootViewInjector = ngModule ? createChainedInjector(injector, ngModule.injector) : injector;
+        /** @type {?} */
+        const rootView = createLViewData(renderer, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags, undefined, rootViewInjector);
         /** @type {?} */
         const oldView = enterView(rootView, null);
         /** @type {?} */
@@ -12297,7 +12352,7 @@ class ComponentFactory$1 extends ComponentFactory {
                 rendererFactory.end();
         }
         /** @type {?} */
-        const componentRef = new ComponentRef$1(this.componentType, component, rootView, injector, createElementRef(ElementRef, tElementNode, rootView));
+        const componentRef = new ComponentRef$1(this.componentType, component, createElementRef(ElementRef, tElementNode, rootView), rootView, tElementNode);
         if (isInternalRootView) {
             /** @type {?} */ ((
             // The host element of the internal root view is attached to the component's host view node
@@ -12319,20 +12374,25 @@ class ComponentRef$1 extends ComponentRef {
     /**
      * @param {?} componentType
      * @param {?} instance
-     * @param {?} rootView
-     * @param {?} injector
      * @param {?} location
+     * @param {?} _rootView
+     * @param {?} _tNode
      */
-    constructor(componentType, instance, rootView, injector, location) {
+    constructor(componentType, instance, location, _rootView, _tNode) {
         super();
         this.location = location;
+        this._rootView = _rootView;
+        this._tNode = _tNode;
         this.destroyCbs = [];
         this.instance = instance;
-        this.hostView = this.changeDetectorRef = new RootViewRef(rootView);
-        this.hostView._tViewNode = createViewNode(-1, rootView);
-        this.injector = injector;
+        this.hostView = this.changeDetectorRef = new RootViewRef(_rootView);
+        this.hostView._tViewNode = createViewNode(-1, _rootView);
         this.componentType = componentType;
     }
+    /**
+     * @return {?}
+     */
+    get injector() { return new NodeInjector(this._tNode, this._rootView); }
     /**
      * @return {?}
      */
@@ -12355,188 +12415,1014 @@ class ComponentRef$1 extends ComponentRef {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/** @type {?} */
-const i18nTagRegex = /{\$([^}]+)}/g;
 /**
- * Takes a translation string, the initial list of placeholders (elements and expressions) and the
- * indexes of their corresponding expression nodes to return a list of instructions for each
- * template function.
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
  *
- * Because embedded templates have different indexes for each placeholder, each parameter (except
- * the translation) is an array, where each value corresponds to a different template, by order of
- * appearance.
- *
- * @param {?} translation A translation string where placeholders are represented by `{$name}`
- * @param {?} elements An array containing, for each template, the maps of element placeholders and
- * their indexes.
- * @param {?=} expressions An array containing, for each template, the maps of expression placeholders
- * and their indexes.
- * @param {?=} templateRoots An array of template roots whose content should be ignored when
- * generating the instructions for their parent template.
- * @param {?=} lastChildIndex The index of the last child of the i18n node. Used when the i18n block is
- * an ng-container.
- *
- * @return {?} A list of instructions used to translate each template.
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
  */
-function i18nMapping(translation, elements, expressions, templateRoots, lastChildIndex) {
-    /** @type {?} */
-    const translationParts = translation.split(i18nTagRegex);
-    /** @type {?} */
-    const nbTemplates = templateRoots ? templateRoots.length + 1 : 1;
-    /** @type {?} */
-    const instructions = (new Array(nbTemplates)).fill(undefined);
-    generateMappingInstructions(0, 0, translationParts, instructions, elements, expressions, templateRoots, lastChildIndex);
-    return instructions;
+/**
+ * This file is used to control if the default rendering pipeline should be `ViewEngine` or `Ivy`.
+ *
+ * For more information on how to run and debug tests with either Ivy or View Engine (legacy),
+ * please see [BAZEL.md](./docs/BAZEL.md).
+ */
+/** @type {?} */
+let _devMode = true;
+/** @type {?} */
+let _runModeLocked = false;
+/**
+ * Returns whether Angular is in development mode. After called once,
+ * the value is locked and won't change any more.
+ *
+ * By default, this is true, unless a user calls `enableProdMode` before calling this.
+ *
+ * \@publicApi
+ * @return {?}
+ */
+function isDevMode() {
+    _runModeLocked = true;
+    return _devMode;
 }
 /**
- * Internal function that reads the translation parts and generates a set of instructions for each
- * template.
+ * Disable Angular's development mode, which turns off assertions and other
+ * checks within the framework.
  *
- * See `i18nMapping()` for more details.
+ * One important assertion this disables verifies that a change detection pass
+ * does not result in additional changes to any bindings (also known as
+ * unidirectional data flow).
  *
- * @param {?} tmplIndex The order of appearance of the template.
- * 0 for the root template, following indexes match the order in `templateRoots`.
- * @param {?} partIndex The current index in `translationParts`.
- * @param {?} translationParts The translation string split into an array of placeholders and text
- * elements.
- * @param {?} instructions The current list of instructions to update.
- * @param {?} elements An array containing, for each template, the maps of element placeholders and
- * their indexes.
- * @param {?=} expressions An array containing, for each template, the maps of expression placeholders
- * and their indexes.
- * @param {?=} templateRoots An array of template roots whose content should be ignored when
- * generating the instructions for their parent template.
- * @param {?=} lastChildIndex The index of the last child of the i18n node. Used when the i18n block is
- * an ng-container.
- *
- * @return {?} the current index in `translationParts`
+ * \@publicApi
+ * @return {?}
  */
-function generateMappingInstructions(tmplIndex, partIndex, translationParts, instructions, elements, expressions, templateRoots, lastChildIndex) {
-    /** @type {?} */
-    const tmplInstructions = [];
-    /** @type {?} */
-    const phVisited = [];
-    /** @type {?} */
-    let openedTagCount = 0;
-    /** @type {?} */
-    let maxIndex = 0;
-    /** @type {?} */
-    let currentElements = elements && elements[tmplIndex] ? elements[tmplIndex] : null;
-    /** @type {?} */
-    let currentExpressions = expressions && expressions[tmplIndex] ? expressions[tmplIndex] : null;
-    instructions[tmplIndex] = tmplInstructions;
-    for (; partIndex < translationParts.length; partIndex++) {
-        /** @type {?} */
-        const value = translationParts[partIndex];
-        // Odd indexes are placeholders
-        if (partIndex & 1) {
+function enableProdMode() {
+    if (_runModeLocked) {
+        throw new Error('Cannot enable prod mode after platform setup.');
+    }
+    _devMode = false;
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * This helper class is used to get hold of an inert tree of DOM elements containing dirty HTML
+ * that needs sanitizing.
+ * Depending upon browser support we must use one of three strategies for doing this.
+ * Support: Safari 10.x -> XHR strategy
+ * Support: Firefox -> DomParser strategy
+ * Default: InertDocument strategy
+ */
+class InertBodyHelper {
+    /**
+     * @param {?} defaultDoc
+     */
+    constructor(defaultDoc) {
+        this.defaultDoc = defaultDoc;
+        this.inertDocument = this.defaultDoc.implementation.createHTMLDocument('sanitization-inert');
+        this.inertBodyElement = this.inertDocument.body;
+        if (this.inertBodyElement == null) {
             /** @type {?} */
-            let phIndex;
-            if (currentElements && currentElements[value] !== undefined) {
-                phIndex = currentElements[value];
-                /** @type {?} */
-                let templateRootIndex = templateRoots ? templateRoots.indexOf(value) : -1;
-                if (templateRootIndex !== -1 && (templateRootIndex + 1) !== tmplIndex) {
-                    // This is a template root, it has no closing tag, not treating it as an element
-                    tmplInstructions.push(phIndex | -2147483648 /* TemplateRoot */);
-                }
-                else {
-                    tmplInstructions.push(phIndex | 1073741824 /* Element */);
-                    openedTagCount++;
-                }
-                phVisited.push(value);
+            const inertHtml = this.inertDocument.createElement('html');
+            this.inertDocument.appendChild(inertHtml);
+            this.inertBodyElement = this.inertDocument.createElement('body');
+            inertHtml.appendChild(this.inertBodyElement);
+        }
+        this.inertBodyElement.innerHTML = '<svg><g onload="this.parentNode.remove()"></g></svg>';
+        if (this.inertBodyElement.querySelector && !this.inertBodyElement.querySelector('svg')) {
+            // We just hit the Safari 10.1 bug - which allows JS to run inside the SVG G element
+            // so use the XHR strategy.
+            this.getInertBodyElement = this.getInertBodyElement_XHR;
+            return;
+        }
+        this.inertBodyElement.innerHTML =
+            '<svg><p><style><img src="</style><img src=x onerror=alert(1)//">';
+        if (this.inertBodyElement.querySelector && this.inertBodyElement.querySelector('svg img')) {
+            // We just hit the Firefox bug - which prevents the inner img JS from being sanitized
+            // so use the DOMParser strategy, if it is available.
+            // If the DOMParser is not available then we are not in Firefox (Server/WebWorker?) so we
+            // fall through to the default strategy below.
+            if (isDOMParserAvailable()) {
+                this.getInertBodyElement = this.getInertBodyElement_DOMParser;
+                return;
             }
-            else if (currentExpressions && currentExpressions[value] !== undefined) {
-                phIndex = currentExpressions[value];
-                // The placeholder represents an expression, add an instruction to move it
-                tmplInstructions.push(phIndex | 1610612736 /* Expression */);
-                phVisited.push(value);
+        }
+        // None of the bugs were hit so it is safe for us to use the default InertDocument strategy
+        this.getInertBodyElement = this.getInertBodyElement_InertDocument;
+    }
+    /**
+     * Use XHR to create and fill an inert body element (on Safari 10.1)
+     * See
+     * https://github.com/cure53/DOMPurify/blob/a992d3a75031cb8bb032e5ea8399ba972bdf9a65/src/purify.js#L439-L449
+     * @param {?} html
+     * @return {?}
+     */
+    getInertBodyElement_XHR(html) {
+        // We add these extra elements to ensure that the rest of the content is parsed as expected
+        // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
+        // `<head>` tag.
+        html = '<body><remove></remove>' + html + '</body>';
+        try {
+            html = encodeURI(html);
+        }
+        catch (e) {
+            return null;
+        }
+        /** @type {?} */
+        const xhr = new XMLHttpRequest();
+        xhr.responseType = 'document';
+        xhr.open('GET', 'data:text/html;charset=utf-8,' + html, false);
+        xhr.send(undefined);
+        /** @type {?} */
+        const body = xhr.response.body;
+        body.removeChild(/** @type {?} */ ((body.firstChild)));
+        return body;
+    }
+    /**
+     * Use DOMParser to create and fill an inert body element (on Firefox)
+     * See https://github.com/cure53/DOMPurify/releases/tag/0.6.7
+     *
+     * @param {?} html
+     * @return {?}
+     */
+    getInertBodyElement_DOMParser(html) {
+        // We add these extra elements to ensure that the rest of the content is parsed as expected
+        // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
+        // `<head>` tag.
+        html = '<body><remove></remove>' + html + '</body>';
+        try {
+            /** @type {?} */
+            const body = /** @type {?} */ (new (/** @type {?} */ (window))
+                .DOMParser()
+                .parseFromString(html, 'text/html')
+                .body);
+            body.removeChild(/** @type {?} */ ((body.firstChild)));
+            return body;
+        }
+        catch (e) {
+            return null;
+        }
+    }
+    /**
+     * Use an HTML5 `template` element, if supported, or an inert body element created via
+     * `createHtmlDocument` to create and fill an inert DOM element.
+     * This is the default sane strategy to use if the browser does not require one of the specialised
+     * strategies above.
+     * @param {?} html
+     * @return {?}
+     */
+    getInertBodyElement_InertDocument(html) {
+        /** @type {?} */
+        const templateEl = this.inertDocument.createElement('template');
+        if ('content' in templateEl) {
+            templateEl.innerHTML = html;
+            return templateEl;
+        }
+        this.inertBodyElement.innerHTML = html;
+        // Support: IE 9-11 only
+        // strip custom-namespaced attributes on IE<=11
+        if ((/** @type {?} */ (this.defaultDoc)).documentMode) {
+            this.stripCustomNsAttrs(this.inertBodyElement);
+        }
+        return this.inertBodyElement;
+    }
+    /**
+     * When IE9-11 comes across an unknown namespaced attribute e.g. 'xlink:foo' it adds 'xmlns:ns1'
+     * attribute to declare ns1 namespace and prefixes the attribute with 'ns1' (e.g.
+     * 'ns1:xlink:foo').
+     *
+     * This is undesirable since we don't want to allow any of these custom attributes. This method
+     * strips them all.
+     * @param {?} el
+     * @return {?}
+     */
+    stripCustomNsAttrs(el) {
+        /** @type {?} */
+        const elAttrs = el.attributes;
+        // loop backwards so that we can support removals.
+        for (let i = elAttrs.length - 1; 0 < i; i--) {
+            /** @type {?} */
+            const attrib = elAttrs.item(i);
+            /** @type {?} */
+            const attrName = /** @type {?} */ ((attrib)).name;
+            if (attrName === 'xmlns:ns1' || attrName.indexOf('ns1:') === 0) {
+                el.removeAttribute(attrName);
+            }
+        }
+        /** @type {?} */
+        let childNode = /** @type {?} */ (el.firstChild);
+        while (childNode) {
+            if (childNode.nodeType === Node.ELEMENT_NODE)
+                this.stripCustomNsAttrs(/** @type {?} */ (childNode));
+            childNode = childNode.nextSibling;
+        }
+    }
+}
+/**
+ * We need to determine whether the DOMParser exists in the global context.
+ * The try-catch is because, on some browsers, trying to access this property
+ * on window can actually throw an error.
+ *
+ * @suppress {uselessCode}
+ * @return {?}
+ */
+function isDOMParserAvailable() {
+    try {
+        return !!(/** @type {?} */ (window)).DOMParser;
+    }
+    catch (e) {
+        return false;
+    }
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/** *
+ * A pattern that recognizes a commonly useful subset of URLs that are safe.
+ *
+ * This regular expression matches a subset of URLs that will not cause script
+ * execution if used in URL context within a HTML document. Specifically, this
+ * regular expression matches if (comment from here on and regex copied from
+ * Soy's EscapingConventions):
+ * (1) Either a protocol in a whitelist (http, https, mailto or ftp).
+ * (2) or no protocol.  A protocol must be followed by a colon. The below
+ *     allows that by allowing colons only after one of the characters [/?#].
+ *     A colon after a hash (#) must be in the fragment.
+ *     Otherwise, a colon after a (?) must be in a query.
+ *     Otherwise, a colon after a single solidus (/) must be in a path.
+ *     Otherwise, a colon after a double solidus (//) must be in the authority
+ *     (before port).
+ *
+ * The pattern disallows &, used in HTML entity declarations before
+ * one of the characters in [/?#]. This disallows HTML entities used in the
+ * protocol name, which should never happen, e.g. "h&#116;tp" for "http".
+ * It also disallows HTML entities in the first path part of a relative path,
+ * e.g. "foo&lt;bar/baz".  Our existing escaping functions should not produce
+ * that. More importantly, it disallows masking of a colon,
+ * e.g. "javascript&#58;...".
+ *
+ * This regular expression was taken from the Closure sanitization library.
+  @type {?} */
+const SAFE_URL_PATTERN = /^(?:(?:https?|mailto|ftp|tel|file):|[^&:/?#]*(?:[/?#]|$))/gi;
+/** *
+ * A pattern that matches safe data URLs. Only matches image, video and audio types.
+  @type {?} */
+const DATA_URL_PATTERN = /^data:(?:image\/(?:bmp|gif|jpeg|jpg|png|tiff|webp)|video\/(?:mpeg|mp4|ogg|webm)|audio\/(?:mp3|oga|ogg|opus));base64,[a-z0-9+\/]+=*$/i;
+/**
+ * @param {?} url
+ * @return {?}
+ */
+function _sanitizeUrl(url) {
+    url = String(url);
+    if (url.match(SAFE_URL_PATTERN) || url.match(DATA_URL_PATTERN))
+        return url;
+    if (isDevMode()) {
+        console.warn(`WARNING: sanitizing unsafe URL value ${url} (see http://g.co/ng/security#xss)`);
+    }
+    return 'unsafe:' + url;
+}
+/**
+ * @param {?} srcset
+ * @return {?}
+ */
+function sanitizeSrcset(srcset) {
+    srcset = String(srcset);
+    return srcset.split(',').map((srcset) => _sanitizeUrl(srcset.trim())).join(', ');
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/**
+ * @param {?} tags
+ * @return {?}
+ */
+function tagSet(tags) {
+    /** @type {?} */
+    const res = {};
+    for (const t of tags.split(','))
+        res[t] = true;
+    return res;
+}
+/**
+ * @param {...?} sets
+ * @return {?}
+ */
+function merge$1(...sets) {
+    /** @type {?} */
+    const res = {};
+    for (const s of sets) {
+        for (const v in s) {
+            if (s.hasOwnProperty(v))
+                res[v] = true;
+        }
+    }
+    return res;
+}
+/** @type {?} */
+const VOID_ELEMENTS = tagSet('area,br,col,hr,img,wbr');
+/** @type {?} */
+const OPTIONAL_END_TAG_BLOCK_ELEMENTS = tagSet('colgroup,dd,dt,li,p,tbody,td,tfoot,th,thead,tr');
+/** @type {?} */
+const OPTIONAL_END_TAG_INLINE_ELEMENTS = tagSet('rp,rt');
+/** @type {?} */
+const OPTIONAL_END_TAG_ELEMENTS = merge$1(OPTIONAL_END_TAG_INLINE_ELEMENTS, OPTIONAL_END_TAG_BLOCK_ELEMENTS);
+/** @type {?} */
+const BLOCK_ELEMENTS = merge$1(OPTIONAL_END_TAG_BLOCK_ELEMENTS, tagSet('address,article,' +
+    'aside,blockquote,caption,center,del,details,dialog,dir,div,dl,figure,figcaption,footer,h1,h2,h3,h4,h5,' +
+    'h6,header,hgroup,hr,ins,main,map,menu,nav,ol,pre,section,summary,table,ul'));
+/** @type {?} */
+const INLINE_ELEMENTS = merge$1(OPTIONAL_END_TAG_INLINE_ELEMENTS, tagSet('a,abbr,acronym,audio,b,' +
+    'bdi,bdo,big,br,cite,code,del,dfn,em,font,i,img,ins,kbd,label,map,mark,picture,q,ruby,rp,rt,s,' +
+    'samp,small,source,span,strike,strong,sub,sup,time,track,tt,u,var,video'));
+/** @type {?} */
+const VALID_ELEMENTS = merge$1(VOID_ELEMENTS, BLOCK_ELEMENTS, INLINE_ELEMENTS, OPTIONAL_END_TAG_ELEMENTS);
+/** @type {?} */
+const URI_ATTRS = tagSet('background,cite,href,itemtype,longdesc,poster,src,xlink:href');
+/** @type {?} */
+const SRCSET_ATTRS = tagSet('srcset');
+/** @type {?} */
+const HTML_ATTRS = tagSet('abbr,accesskey,align,alt,autoplay,axis,bgcolor,border,cellpadding,cellspacing,class,clear,color,cols,colspan,' +
+    'compact,controls,coords,datetime,default,dir,download,face,headers,height,hidden,hreflang,hspace,' +
+    'ismap,itemscope,itemprop,kind,label,lang,language,loop,media,muted,nohref,nowrap,open,preload,rel,rev,role,rows,rowspan,rules,' +
+    'scope,scrolling,shape,size,sizes,span,srclang,start,summary,tabindex,target,title,translate,type,usemap,' +
+    'valign,value,vspace,width');
+/** @type {?} */
+const VALID_ATTRS = merge$1(URI_ATTRS, SRCSET_ATTRS, HTML_ATTRS);
+/**
+ * SanitizingHtmlSerializer serializes a DOM fragment, stripping out any unsafe elements and unsafe
+ * attributes.
+ */
+class SanitizingHtmlSerializer {
+    constructor() {
+        this.sanitizedSomething = false;
+        this.buf = [];
+    }
+    /**
+     * @param {?} el
+     * @return {?}
+     */
+    sanitizeChildren(el) {
+        /** @type {?} */
+        let current = /** @type {?} */ ((el.firstChild));
+        /** @type {?} */
+        let elementValid = true;
+        while (current) {
+            if (current.nodeType === Node.ELEMENT_NODE) {
+                elementValid = this.startElement(/** @type {?} */ (current));
+            }
+            else if (current.nodeType === Node.TEXT_NODE) {
+                this.chars(/** @type {?} */ ((current.nodeValue)));
             }
             else {
+                // Strip non-element, non-text nodes.
+                this.sanitizedSomething = true;
+            }
+            if (elementValid && current.firstChild) {
+                current = /** @type {?} */ ((current.firstChild));
+                continue;
+            }
+            while (current) {
+                // Leaving the element. Walk up and to the right, closing tags as we go.
+                if (current.nodeType === Node.ELEMENT_NODE) {
+                    this.endElement(/** @type {?} */ (current));
+                }
+                /** @type {?} */
+                let next = this.checkClobberedElement(current, /** @type {?} */ ((current.nextSibling)));
+                if (next) {
+                    current = next;
+                    break;
+                }
+                current = this.checkClobberedElement(current, /** @type {?} */ ((current.parentNode)));
+            }
+        }
+        return this.buf.join('');
+    }
+    /**
+     * Outputs only valid Elements.
+     *
+     * Invalid elements are skipped.
+     *
+     * @param {?} element element to sanitize
+     * Returns true if the element is valid.
+     * @return {?}
+     */
+    startElement(element) {
+        /** @type {?} */
+        const tagName = element.nodeName.toLowerCase();
+        if (!VALID_ELEMENTS.hasOwnProperty(tagName)) {
+            this.sanitizedSomething = true;
+            return false;
+        }
+        this.buf.push('<');
+        this.buf.push(tagName);
+        /** @type {?} */
+        const elAttrs = element.attributes;
+        for (let i = 0; i < elAttrs.length; i++) {
+            /** @type {?} */
+            const elAttr = elAttrs.item(i);
+            /** @type {?} */
+            const attrName = /** @type {?} */ ((elAttr)).name;
+            /** @type {?} */
+            const lower = attrName.toLowerCase();
+            if (!VALID_ATTRS.hasOwnProperty(lower)) {
+                this.sanitizedSomething = true;
+                continue;
+            }
+            /** @type {?} */
+            let value = /** @type {?} */ ((elAttr)).value;
+            // TODO(martinprobst): Special case image URIs for data:image/...
+            if (URI_ATTRS[lower])
+                value = _sanitizeUrl(value);
+            if (SRCSET_ATTRS[lower])
+                value = sanitizeSrcset(value);
+            this.buf.push(' ', attrName, '="', encodeEntities(value), '"');
+        }
+        this.buf.push('>');
+        return true;
+    }
+    /**
+     * @param {?} current
+     * @return {?}
+     */
+    endElement(current) {
+        /** @type {?} */
+        const tagName = current.nodeName.toLowerCase();
+        if (VALID_ELEMENTS.hasOwnProperty(tagName) && !VOID_ELEMENTS.hasOwnProperty(tagName)) {
+            this.buf.push('</');
+            this.buf.push(tagName);
+            this.buf.push('>');
+        }
+    }
+    /**
+     * @param {?} chars
+     * @return {?}
+     */
+    chars(chars) { this.buf.push(encodeEntities(chars)); }
+    /**
+     * @param {?} node
+     * @param {?} nextNode
+     * @return {?}
+     */
+    checkClobberedElement(node, nextNode) {
+        if (nextNode &&
+            (node.compareDocumentPosition(nextNode) &
+                Node.DOCUMENT_POSITION_CONTAINED_BY) === Node.DOCUMENT_POSITION_CONTAINED_BY) {
+            throw new Error(`Failed to sanitize html because the element is clobbered: ${((/** @type {?} */ (node))).outerHTML}`);
+        }
+        return nextNode;
+    }
+}
+/** @type {?} */
+const SURROGATE_PAIR_REGEXP = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
+/** @type {?} */
+const NON_ALPHANUMERIC_REGEXP = /([^\#-~ |!])/g;
+/**
+ * Escapes all potentially dangerous characters, so that the
+ * resulting string can be safely inserted into attribute or
+ * element text.
+ * @param {?} value
+ * @return {?}
+ */
+function encodeEntities(value) {
+    return value.replace(/&/g, '&amp;')
+        .replace(SURROGATE_PAIR_REGEXP, function (match) {
+        /** @type {?} */
+        const hi = match.charCodeAt(0);
+        /** @type {?} */
+        const low = match.charCodeAt(1);
+        return '&#' + (((hi - 0xD800) * 0x400) + (low - 0xDC00) + 0x10000) + ';';
+    })
+        .replace(NON_ALPHANUMERIC_REGEXP, function (match) { return '&#' + match.charCodeAt(0) + ';'; })
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+/** @type {?} */
+let inertBodyHelper;
+/**
+ * Sanitizes the given unsafe, untrusted HTML fragment, and returns HTML text that is safe to add to
+ * the DOM in a browser environment.
+ * @param {?} defaultDoc
+ * @param {?} unsafeHtmlInput
+ * @return {?}
+ */
+function _sanitizeHtml(defaultDoc, unsafeHtmlInput) {
+    /** @type {?} */
+    let inertBodyElement = null;
+    try {
+        inertBodyHelper = inertBodyHelper || new InertBodyHelper(defaultDoc);
+        /** @type {?} */
+        let unsafeHtml = unsafeHtmlInput ? String(unsafeHtmlInput) : '';
+        inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
+        /** @type {?} */
+        let mXSSAttempts = 5;
+        /** @type {?} */
+        let parsedHtml = unsafeHtml;
+        do {
+            if (mXSSAttempts === 0) {
+                throw new Error('Failed to sanitize html because the input is unstable');
+            }
+            mXSSAttempts--;
+            unsafeHtml = parsedHtml;
+            parsedHtml = /** @type {?} */ ((inertBodyElement)).innerHTML;
+            inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
+        } while (unsafeHtml !== parsedHtml);
+        /** @type {?} */
+        const sanitizer = new SanitizingHtmlSerializer();
+        /** @type {?} */
+        const safeHtml = sanitizer.sanitizeChildren(/** @type {?} */ (getTemplateContent(/** @type {?} */ ((inertBodyElement)))) || inertBodyElement);
+        if (isDevMode() && sanitizer.sanitizedSomething) {
+            console.warn('WARNING: sanitizing HTML stripped some content (see http://g.co/ng/security#xss).');
+        }
+        return safeHtml;
+    }
+    finally {
+        // In case anything goes wrong, clear out inertElement to reset the entire DOM structure.
+        if (inertBodyElement) {
+            /** @type {?} */
+            const parent = getTemplateContent(inertBodyElement) || inertBodyElement;
+            while (parent.firstChild) {
+                parent.removeChild(parent.firstChild);
+            }
+        }
+    }
+}
+/**
+ * @param {?} el
+ * @return {?}
+ */
+function getTemplateContent(el) {
+    return 'content' in (/** @type {?} */ (el /** Microsoft/TypeScript#21517 */) /** Microsoft/TypeScript#21517 */) && isTemplateElement(el) ?
+        el.content :
+        null;
+}
+/**
+ * @param {?} el
+ * @return {?}
+ */
+function isTemplateElement(el) {
+    return el.nodeType === Node.ELEMENT_NODE && el.nodeName === 'TEMPLATE';
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/** *
+ * Marks that the next string is for element.
+ *
+ * See `I18nMutateOpCodes` documentation.
+  @type {?} */
+const ELEMENT_MARKER = {
+    marker: 'element'
+};
+/** *
+ * Marks that the next string is for comment.
+ *
+ * See `I18nMutateOpCodes` documentation.
+  @type {?} */
+const COMMENT_MARKER = {
+    marker: 'comment'
+};
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/** @type {?} */
+const MARKER = `�`;
+/** @type {?} */
+const ICU_BLOCK_REGEX = /^\s*(�\d+�)\s*,\s*(select|plural)\s*,/;
+/** @type {?} */
+const SUBTEMPLATE_REGEXP = /�\/?\*(\d+:\d+)�/gi;
+/** @type {?} */
+const PH_REGEXP = /�(\/?[#*]\d+):?\d*�/gi;
+/** @type {?} */
+const BINDING_REGEXP = /�(\d+):?\d*�/gi;
+/** @type {?} */
+const ICU_REGEXP = /({\s*�\d+�\s*,\s*\S{6}\s*,[\s\S]*})/gi;
+/**
+ * Breaks pattern into strings and top level {...} blocks.
+ * Can be used to break a message into text and ICU expressions, or to break an ICU expression into
+ * keys and cases.
+ * Original code from closure library, modified for Angular.
+ *
+ * @param {?} pattern (sub)Pattern to be broken.
+ *
+ * @return {?}
+ */
+function extractParts(pattern) {
+    if (!pattern) {
+        return [];
+    }
+    /** @type {?} */
+    let prevPos = 0;
+    /** @type {?} */
+    const braceStack = [];
+    /** @type {?} */
+    const results = [];
+    /** @type {?} */
+    const braces = /[{}]/g;
+    // lastIndex doesn't get set to 0 so we have to.
+    braces.lastIndex = 0;
+    /** @type {?} */
+    let match;
+    while (match = braces.exec(pattern)) {
+        /** @type {?} */
+        const pos = match.index;
+        if (match[0] == '}') {
+            braceStack.pop();
+            if (braceStack.length == 0) {
+                /** @type {?} */
+                const block = pattern.substring(prevPos, pos);
+                if (ICU_BLOCK_REGEX.test(block)) {
+                    results.push(parseICUBlock(block));
+                }
+                else if (block) { // Don't push empty strings
+                    // Don't push empty strings
+                    results.push(block);
+                }
+                prevPos = pos + 1;
+            }
+        }
+        else {
+            if (braceStack.length == 0) {
+                /** @type {?} */
+                const substring = pattern.substring(prevPos, pos);
+                results.push(substring);
+                prevPos = pos + 1;
+            }
+            braceStack.push('{');
+        }
+    }
+    /** @type {?} */
+    const substring = pattern.substring(prevPos);
+    if (substring != '') {
+        results.push(substring);
+    }
+    return results;
+}
+/**
+ * Parses text containing an ICU expression and produces a JSON object for it.
+ * Original code from closure library, modified for Angular.
+ *
+ * @param {?} pattern Text containing an ICU expression that needs to be parsed.
+ *
+ * @return {?}
+ */
+function parseICUBlock(pattern) {
+    /** @type {?} */
+    const cases = [];
+    /** @type {?} */
+    const values = [];
+    /** @type {?} */
+    let icuType = 1 /* plural */;
+    /** @type {?} */
+    let mainBinding = 0;
+    pattern = pattern.replace(ICU_BLOCK_REGEX, function (str, binding, type) {
+        if (type === 'select') {
+            icuType = 0 /* select */;
+        }
+        else {
+            icuType = 1 /* plural */;
+        }
+        mainBinding = parseInt(binding.substr(1), 10);
+        return '';
+    });
+    /** @type {?} */
+    const parts = /** @type {?} */ (extractParts(pattern));
+    // Looking for (key block)+ sequence. One of the keys has to be "other".
+    for (let pos = 0; pos < parts.length;) {
+        /** @type {?} */
+        let key = parts[pos++].trim();
+        if (icuType === 1 /* plural */) {
+            // Key can be "=x", we just want "x"
+            key = key.replace(/\s*(?:=)?(\w+)\s*/, '$1');
+        }
+        if (key.length) {
+            cases.push(key);
+        }
+        /** @type {?} */
+        const blocks = /** @type {?} */ (extractParts(parts[pos++]));
+        if (blocks.length) {
+            values.push(blocks);
+        }
+    }
+    assertGreaterThan(cases.indexOf('other'), -1, 'Missing key "other" in ICU statement.');
+    // TODO(ocombe): support ICU expressions in attributes, see #21615
+    return { type: icuType, mainBinding: mainBinding, cases, values };
+}
+/**
+ * Removes everything inside the sub-templates of a message.
+ * @param {?} message
+ * @return {?}
+ */
+function removeInnerTemplateTranslation(message) {
+    /** @type {?} */
+    let match;
+    /** @type {?} */
+    let res = '';
+    /** @type {?} */
+    let index = 0;
+    /** @type {?} */
+    let inTemplate = false;
+    /** @type {?} */
+    let tagMatched;
+    while ((match = SUBTEMPLATE_REGEXP.exec(message)) !== null) {
+        if (!inTemplate) {
+            res += message.substring(index, match.index + match[0].length);
+            tagMatched = match[1];
+            inTemplate = true;
+        }
+        else {
+            if (match[0] === `${MARKER}/*${tagMatched}${MARKER}`) {
+                index = match.index;
+                inTemplate = false;
+            }
+        }
+    }
+    ngDevMode &&
+        assertEqual(inTemplate, false, `Tag mismatch: unable to find the end of the sub-template in the translation "${message}"`);
+    res += message.substr(index);
+    return res;
+}
+/**
+ * Extracts a part of a message and removes the rest.
+ *
+ * This method is used for extracting a part of the message associated with a template. A translated
+ * message can span multiple templates.
+ *
+ * Example:
+ * ```
+ * <div i18n>Translate <span *ngIf>me</span>!</div>
+ * ```
+ *
+ * @param {?} message The message to crop
+ * @param {?=} subTemplateIndex Index of the sub-template to extract. If undefined it returns the
+ * external template and removes all sub-templates.
+ * @return {?}
+ */
+function getTranslationForTemplate(message, subTemplateIndex) {
+    if (typeof subTemplateIndex !== 'number') {
+        // We want the root template message, ignore all sub-templates
+        return removeInnerTemplateTranslation(message);
+    }
+    else {
+        /** @type {?} */
+        const start = message.indexOf(`:${subTemplateIndex}${MARKER}`) + 2 + subTemplateIndex.toString().length;
+        /** @type {?} */
+        const end = message.search(new RegExp(`${MARKER}\\/\\*\\d+:${subTemplateIndex}${MARKER}`));
+        return removeInnerTemplateTranslation(message.substring(start, end));
+    }
+}
+/**
+ * Generate the OpCodes to update the bindings of a string.
+ *
+ * @param {?} str The string containing the bindings.
+ * @param {?} destinationNode Index of the destination node which will receive the binding.
+ * @param {?=} attrName Name of the attribute, if the string belongs to an attribute.
+ * @param {?=} sanitizeFn Sanitization function used to sanitize the string after update, if necessary.
+ * @return {?}
+ */
+function generateBindingUpdateOpCodes(str, destinationNode, attrName, sanitizeFn = null) {
+    /** @type {?} */
+    const updateOpCodes = [null, null];
+    /** @type {?} */
+    const textParts = str.split(BINDING_REGEXP);
+    /** @type {?} */
+    let mask = 0;
+    for (let j = 0; j < textParts.length; j++) {
+        /** @type {?} */
+        const textValue = textParts[j];
+        if (j & 1) {
+            /** @type {?} */
+            const bindingIndex = parseInt(textValue, 10);
+            updateOpCodes.push(-1 - bindingIndex);
+            mask = mask | toMaskBit(bindingIndex);
+        }
+        else if (textValue !== '') {
+            // Even indexes are text
+            updateOpCodes.push(textValue);
+        }
+    }
+    updateOpCodes.push(destinationNode << 2 /* SHIFT_REF */ |
+        (attrName ? 1 /* Attr */ : 0 /* Text */));
+    if (attrName) {
+        updateOpCodes.push(attrName, sanitizeFn);
+    }
+    updateOpCodes[0] = mask;
+    updateOpCodes[1] = updateOpCodes.length - 2;
+    return updateOpCodes;
+}
+/**
+ * @param {?} icuExpression
+ * @param {?=} mask
+ * @return {?}
+ */
+function getBindingMask(icuExpression, mask = 0) {
+    mask = mask | toMaskBit(icuExpression.mainBinding);
+    /** @type {?} */
+    let match;
+    for (let i = 0; i < icuExpression.values.length; i++) {
+        /** @type {?} */
+        const valueArr = icuExpression.values[i];
+        for (let j = 0; j < valueArr.length; j++) {
+            /** @type {?} */
+            const value = valueArr[j];
+            if (typeof value === 'string') {
+                while (match = BINDING_REGEXP.exec(value)) {
+                    mask = mask | toMaskBit(parseInt(match[1], 10));
+                }
+            }
+            else {
+                mask = getBindingMask(/** @type {?} */ (value), mask);
+            }
+        }
+    }
+    return mask;
+}
+/** @type {?} */
+const i18nIndexStack = [];
+/** @type {?} */
+let i18nIndexStackPointer = -1;
+/**
+ * Convert binding index to mask bit.
+ *
+ * Each index represents a single bit on the bit-mask. Because bit-mask only has 32 bits, we make
+ * the 32nd bit share all masks for all bindings higher than 32. Since it is extremely rare to have
+ * more than 32 bindings this will be hit very rarely. The downside of hitting this corner case is
+ * that we will execute binding code more often than necessary. (penalty of performance)
+ * @param {?} bindingIndex
+ * @return {?}
+ */
+function toMaskBit(bindingIndex) {
+    return 1 << Math.min(bindingIndex, 31);
+}
+/** @type {?} */
+const parentIndexStack = [];
+/**
+ * Marks a block of text as translatable.
+ *
+ * The instructions `i18nStart` and `i18nEnd` mark the translation block in the template.
+ * The translation `message` is the value which is locale specific. The translation string may
+ * contain placeholders which associate inner elements and sub-templates within the translation.
+ *
+ * The translation `message` placeholders are:
+ * - `�{index}(:{block})�`: *Binding Placeholder*: Marks a location where an expression will be
+ *   interpolated into. The placeholder `index` points to the expression binding index. An optional
+ *   `block` that matches the sub-template in which it was declared.
+ * - `�#{index}(:{block})�`/`�/#{index}(:{block})�`: *Element Placeholder*:  Marks the beginning
+ *   and end of DOM element that were embedded in the original translation block. The placeholder
+ *   `index` points to the element index in the template instructions set. An optional `block` that
+ *   matches the sub-template in which it was declared.
+ * - `�*{index}:{block}�`/`�/*{index}:{block}�`: *Sub-template Placeholder*: Sub-templates must be
+ *   split up and translated separately in each angular template function. The `index` points to the
+ *   `template` instruction index. A `block` that matches the sub-template in which it was declared.
+ *
+ * @param {?} index A unique index of the translation in the static block.
+ * @param {?} message The translation message.
+ * @param {?=} subTemplateIndex Optional sub-template index in the `message`.
+ * @return {?}
+ */
+function i18nStart(index, message, subTemplateIndex) {
+    /** @type {?} */
+    const tView = getTView();
+    ngDevMode && assertDefined(tView, `tView should be defined`);
+    ngDevMode &&
+        assertEqual(tView.firstTemplatePass, true, `You should only call i18nEnd on first template pass`);
+    if (tView.firstTemplatePass && tView.data[index + HEADER_OFFSET] === null) {
+        i18nStartFirstPass(tView, index, message, subTemplateIndex);
+    }
+}
+/**
+ * See `i18nStart` above.
+ * @param {?} tView
+ * @param {?} index
+ * @param {?} message
+ * @param {?=} subTemplateIndex
+ * @return {?}
+ */
+function i18nStartFirstPass(tView, index, message, subTemplateIndex) {
+    i18nIndexStack[++i18nIndexStackPointer] = index;
+    /** @type {?} */
+    const viewData = _getViewData();
+    /** @type {?} */
+    const expandoStartIndex = tView.blueprint.length - HEADER_OFFSET;
+    /** @type {?} */
+    const previousOrParentTNode = getPreviousOrParentTNode();
+    /** @type {?} */
+    const parentTNode = getIsParent() ? getPreviousOrParentTNode() :
+        previousOrParentTNode && previousOrParentTNode.parent;
+    /** @type {?} */
+    let parentIndex = parentTNode && parentTNode !== viewData[HOST_NODE] ?
+        parentTNode.index - HEADER_OFFSET :
+        index;
+    /** @type {?} */
+    let parentIndexPointer = 0;
+    parentIndexStack[parentIndexPointer] = parentIndex;
+    /** @type {?} */
+    const createOpCodes = [];
+    // If the previous node wasn't the direct parent then we have a translation without top level
+    // element and we need to keep a reference of the previous element if there is one
+    if (index > 0 && previousOrParentTNode !== parentTNode) {
+        // Create an OpCode to select the previous TNode
+        createOpCodes.push(previousOrParentTNode.index << 3 /* SHIFT_REF */ | 0 /* Select */);
+    }
+    /** @type {?} */
+    const updateOpCodes = [];
+    /** @type {?} */
+    const icuExpressions = [];
+    /** @type {?} */
+    const templateTranslation = getTranslationForTemplate(message, subTemplateIndex);
+    /** @type {?} */
+    const msgParts = templateTranslation.split(PH_REGEXP);
+    for (let i = 0; i < msgParts.length; i++) {
+        /** @type {?} */
+        let value = msgParts[i];
+        if (i & 1) {
+            // Odd indexes are placeholders (elements and sub-templates)
+            if (value.charAt(0) === '/') {
                 // It is a closing tag
-                tmplInstructions.push(-1073741824 /* CloseNode */);
-                if (tmplIndex > 0) {
-                    openedTagCount--;
-                    // If we have reached the closing tag for this template, exit the loop
-                    if (openedTagCount === 0) {
-                        break;
-                    }
-                }
-            }
-            if (phIndex !== undefined && phIndex > maxIndex) {
-                maxIndex = phIndex;
-            }
-            if (templateRoots) {
-                /** @type {?} */
-                const newTmplIndex = templateRoots.indexOf(value) + 1;
-                if (newTmplIndex !== 0 && newTmplIndex !== tmplIndex) {
-                    partIndex = generateMappingInstructions(newTmplIndex, partIndex, translationParts, instructions, elements, expressions, templateRoots, lastChildIndex);
-                }
-            }
-        }
-        else if (value) {
-            // It's a non-empty string, create a text node
-            tmplInstructions.push(536870912 /* Text */, value);
-        }
-    }
-    // Add instructions to remove elements that are not used in the translation
-    if (elements) {
-        /** @type {?} */
-        const tmplElements = elements[tmplIndex];
-        if (tmplElements) {
-            /** @type {?} */
-            const phKeys = Object.keys(tmplElements);
-            for (let i = 0; i < phKeys.length; i++) {
-                /** @type {?} */
-                const ph = phKeys[i];
-                if (phVisited.indexOf(ph) === -1) {
+                if (value.charAt(1) === '#') {
                     /** @type {?} */
-                    let index = tmplElements[ph];
-                    // Add an instruction to remove the element
-                    tmplInstructions.push(index | -536870912 /* RemoveNode */);
-                    if (index > maxIndex) {
-                        maxIndex = index;
-                    }
+                    const phIndex = parseInt(value.substr(2), 10);
+                    parentIndex = parentIndexStack[--parentIndexPointer];
+                    createOpCodes.push(phIndex << 3 /* SHIFT_REF */ | 5 /* ElementEnd */);
                 }
             }
-        }
-    }
-    // Add instructions to remove expressions that are not used in the translation
-    if (expressions) {
-        /** @type {?} */
-        const tmplExpressions = expressions[tmplIndex];
-        if (tmplExpressions) {
-            /** @type {?} */
-            const phKeys = Object.keys(tmplExpressions);
-            for (let i = 0; i < phKeys.length; i++) {
+            else {
                 /** @type {?} */
-                const ph = phKeys[i];
-                if (phVisited.indexOf(ph) === -1) {
+                const phIndex = parseInt(value.substr(1), 10);
+                // The value represents a placeholder that we move to the designated index
+                createOpCodes.push(phIndex << 3 /* SHIFT_REF */ | 0 /* Select */, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                if (value.charAt(0) === '#') {
+                    parentIndexStack[++parentIndexPointer] = parentIndex = phIndex;
+                }
+            }
+        }
+        else {
+            /** @type {?} */
+            const parts = value.split(ICU_REGEXP);
+            for (let j = 0; j < parts.length; j++) {
+                value = parts[j];
+                if (j & 1) {
+                    // Odd indexes are ICU expressions
+                    // Create the comment node that will anchor the ICU expression
+                    allocExpando(viewData);
                     /** @type {?} */
-                    let index = tmplExpressions[ph];
-                    if (ngDevMode) {
-                        assertLessThan(index.toString(2).length, 28, `Index ${index} is too big and will overflow`);
-                    }
-                    // Add an instruction to remove the expression
-                    tmplInstructions.push(index | -536870912 /* RemoveNode */);
-                    if (index > maxIndex) {
-                        maxIndex = index;
+                    const icuNodeIndex = tView.blueprint.length - 1 - HEADER_OFFSET;
+                    createOpCodes.push(COMMENT_MARKER, ngDevMode ? `ICU ${icuNodeIndex}` : '', parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                    /** @type {?} */
+                    const icuExpression = parseICUBlock(value.substr(1, value.length - 2));
+                    /** @type {?} */
+                    const mask = getBindingMask(icuExpression);
+                    icuStart(icuExpressions, icuExpression, icuNodeIndex, icuNodeIndex);
+                    /** @type {?} */
+                    const tIcuIndex = icuExpressions.length - 1;
+                    updateOpCodes.push(toMaskBit(icuExpression.mainBinding), // mask of the main binding
+                    3, // skip 3 opCodes if not changed
+                    // skip 3 opCodes if not changed
+                    -1 - icuExpression.mainBinding, icuNodeIndex << 2 /* SHIFT_REF */ | 2 /* IcuSwitch */, tIcuIndex, mask, // mask of all the bindings of this ICU expression
+                    2, // skip 2 opCodes if not changed
+                    // skip 2 opCodes if not changed
+                    icuNodeIndex << 2 /* SHIFT_REF */ | 3 /* IcuUpdate */, tIcuIndex);
+                }
+                else if (value !== '') {
+                    /** @type {?} */
+                    const hasBinding = value.match(BINDING_REGEXP);
+                    // Create text nodes
+                    allocExpando(viewData);
+                    createOpCodes.push(
+                    // If there is a binding, the value will be set during update
+                    hasBinding ? '' : value, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                    if (hasBinding) {
+                        addAllToArray(generateBindingUpdateOpCodes(value, tView.blueprint.length - 1 - HEADER_OFFSET), updateOpCodes);
                     }
                 }
             }
         }
     }
-    if (tmplIndex === 0 && typeof lastChildIndex === 'number') {
-        // The current parent is an ng-container and it has more children after the translation that we
-        // need to append to keep the order of the DOM nodes correct
-        for (let i = maxIndex + 1; i <= lastChildIndex; i++) {
-            if (ngDevMode) {
-                assertLessThan(i.toString(2).length, 28, `Index ${i} is too big and will overflow`);
-            }
-            tmplInstructions.push(i | -1610612736 /* Any */);
-        }
-    }
-    return partIndex;
+    /** @type {?} */
+    const tI18n = {
+        vars: tView.blueprint.length - HEADER_OFFSET - expandoStartIndex,
+        expandoStartIndex,
+        create: createOpCodes,
+        update: updateOpCodes,
+        icus: icuExpressions.length ? icuExpressions : null,
+    };
+    tView.data[index + HEADER_OFFSET] = tI18n;
 }
 /**
  * @param {?} tNode
@@ -12545,28 +13431,26 @@ function generateMappingInstructions(tmplIndex, partIndex, translationParts, ins
  * @return {?}
  */
 function appendI18nNode(tNode, parentTNode, previousTNode) {
-    if (ngDevMode) {
-        ngDevMode.rendererMoveNode++;
+    ngDevMode && ngDevMode.rendererMoveNode++;
+    /** @type {?} */
+    const viewData = _getViewData();
+    if (!previousTNode) {
+        previousTNode = parentTNode;
     }
-    /** @type {?} */
-    const viewData = getViewData();
-    /** @type {?} */
-    const firstTemplatePass = viewData[TVIEW].firstTemplatePass;
-    if (firstTemplatePass) {
-        if (previousTNode === parentTNode && tNode !== parentTNode.child) {
-            tNode.next = parentTNode.child;
-            parentTNode.child = tNode;
-        }
-        else if (previousTNode !== parentTNode && tNode !== previousTNode.next) {
-            tNode.next = previousTNode.next;
-            previousTNode.next = tNode;
-        }
-        else {
-            tNode.next = null;
-        }
-        if (parentTNode !== viewData[HOST_NODE]) {
-            tNode.parent = /** @type {?} */ (parentTNode);
-        }
+    // re-organize node tree to put this node in the correct position.
+    if (previousTNode === parentTNode && tNode !== parentTNode.child) {
+        tNode.next = parentTNode.child;
+        parentTNode.child = tNode;
+    }
+    else if (previousTNode !== parentTNode && tNode !== previousTNode.next) {
+        tNode.next = previousTNode.next;
+        previousTNode.next = tNode;
+    }
+    else {
+        tNode.next = null;
+    }
+    if (parentTNode !== viewData[HOST_NODE]) {
+        tNode.parent = /** @type {?} */ (parentTNode);
     }
     appendChild(getNativeByTNode(tNode, viewData), tNode, viewData);
     /** @type {?} */
@@ -12578,517 +13462,1096 @@ function appendI18nNode(tNode, parentTNode, previousTNode) {
     return tNode;
 }
 /**
- * @param {?} index
- * @param {?} attrs
- * @return {?}
- */
-function i18nAttribute(index, attrs) {
-    // placeholder for i18nAttribute function
-}
-/**
- * @param {?} expression
- * @return {?}
- */
-function i18nExp(expression) {
-    // placeholder for i18nExp function
-}
-/**
- * @param {?} index
- * @param {?} message
- * @param {?=} subTemplateIndex
- * @return {?}
- */
-function i18nStart(index, message, subTemplateIndex = 0) {
-    // placeholder for i18nExp function
-}
-/**
+ * Translates a translation block marked by `i18nStart` and `i18nEnd`. It inserts the text/ICU nodes
+ * into the render tree, moves the placeholder nodes and removes the deleted nodes.
  * @return {?}
  */
 function i18nEnd() {
-    // placeholder for i18nEnd function
+    /** @type {?} */
+    const tView = getTView();
+    ngDevMode && assertDefined(tView, `tView should be defined`);
+    ngDevMode &&
+        assertEqual(tView.firstTemplatePass, true, `You should only call i18nEnd on first template pass`);
+    if (tView.firstTemplatePass) {
+        i18nEndFirstPass(tView);
+    }
 }
 /**
- * Takes a list of instructions generated by `i18nMapping()` to transform the template accordingly.
- *
- * @param {?} startIndex Index of the first element to translate (for instance the first child of the
- * element with the i18n attribute).
- * @param {?} instructions The list of instructions to apply on the current view.
+ * See `i18nEnd` above.
+ * @param {?} tView
  * @return {?}
  */
-function i18nApply(startIndex, instructions) {
+function i18nEndFirstPass(tView) {
     /** @type {?} */
-    const viewData = getViewData();
-    if (ngDevMode) {
-        assertEqual(viewData[BINDING_INDEX], viewData[TVIEW].bindingStartIndex, 'i18nApply should be called before any binding');
+    const viewData = _getViewData();
+    ngDevMode && assertEqual(viewData[BINDING_INDEX], viewData[TVIEW].bindingStartIndex, 'i18nEnd should be called before any binding');
+    /** @type {?} */
+    const rootIndex = i18nIndexStack[i18nIndexStackPointer--];
+    /** @type {?} */
+    const tI18n = /** @type {?} */ (tView.data[rootIndex + HEADER_OFFSET]);
+    ngDevMode && assertDefined(tI18n, `You should call i18nStart before i18nEnd`);
+    /** @type {?} */
+    const previousOrParentTNode = getPreviousOrParentTNode();
+    /** @type {?} */
+    const visitedPlaceholders = readCreateOpCodes(rootIndex, tI18n.create, tI18n.expandoStartIndex, viewData);
+    // Remove deleted placeholders
+    // The last placeholder that was added before `i18nEnd` is `previousOrParentTNode`
+    for (let i = rootIndex + 1; i <= previousOrParentTNode.index - HEADER_OFFSET; i++) {
+        if (visitedPlaceholders.indexOf(i) === -1) {
+            removeNode(i, viewData);
+        }
     }
-    if (!instructions) {
-        return;
-    }
+}
+/**
+ * @param {?} index
+ * @param {?} createOpCodes
+ * @param {?} expandoStartIndex
+ * @param {?} viewData
+ * @return {?}
+ */
+function readCreateOpCodes(index, createOpCodes, expandoStartIndex, viewData) {
     /** @type {?} */
     const renderer = getRenderer();
     /** @type {?} */
-    const startTNode = getTNode(startIndex, viewData);
+    let currentTNode = null;
     /** @type {?} */
-    let localParentTNode = startTNode.parent || /** @type {?} */ ((viewData[HOST_NODE]));
+    let previousTNode = null;
     /** @type {?} */
-    let localPreviousTNode = localParentTNode;
-    resetComponentState(); // We don't want to add to the tree with the wrong previous node
-    for (let i = 0; i < instructions.length; i++) {
+    const visitedPlaceholders = [];
+    for (let i = 0; i < createOpCodes.length; i++) {
         /** @type {?} */
-        const instruction = /** @type {?} */ (instructions[i]);
-        switch (instruction & -536870912 /* InstructionMask */) {
-            case 1073741824 /* Element */:
-                /** @type {?} */
-                const elementTNode = getTNode(instruction & 536870911 /* IndexMask */, viewData);
-                localPreviousTNode = appendI18nNode(elementTNode, localParentTNode, localPreviousTNode);
-                localParentTNode = elementTNode;
-                break;
-            case 1610612736 /* Expression */:
-            case -2147483648 /* TemplateRoot */:
-            case -1610612736 /* Any */:
-                /** @type {?} */
-                const nodeIndex = instruction & 536870911 /* IndexMask */;
-                localPreviousTNode =
-                    appendI18nNode(getTNode(nodeIndex, viewData), localParentTNode, localPreviousTNode);
-                break;
-            case 536870912 /* Text */:
-                if (ngDevMode) {
-                    ngDevMode.rendererCreateTextNode++;
-                }
-                /** @type {?} */
-                const value = instructions[++i];
-                /** @type {?} */
-                const textRNode = createTextNode(value, renderer);
-                // If we were to only create a `RNode` then projections won't move the text.
-                // Create text node at the current end of viewData. Must subtract header offset because
-                // createNodeAtIndex takes a raw index (not adjusted by header offset).
-                adjustBlueprintForNewNode(viewData);
-                /** @type {?} */
-                const textTNode = createNodeAtIndex(viewData.length - 1 - HEADER_OFFSET, 3 /* Element */, textRNode, null, null);
-                localPreviousTNode = appendI18nNode(textTNode, localParentTNode, localPreviousTNode);
-                resetComponentState();
-                break;
-            case -1073741824 /* CloseNode */:
-                localPreviousTNode = localParentTNode;
-                localParentTNode = localParentTNode.parent || /** @type {?} */ ((viewData[HOST_NODE]));
-                break;
-            case -536870912 /* RemoveNode */:
-                if (ngDevMode) {
-                    ngDevMode.rendererRemoveNode++;
-                }
-                /** @type {?} */
-                const removeIndex = instruction & 536870911 /* IndexMask */;
-                /** @type {?} */
-                const removedElement = getNativeByIndex(removeIndex, viewData);
-                /** @type {?} */
-                const removedTNode = getTNode(removeIndex, viewData);
-                removeChild(removedTNode, removedElement || null, viewData);
-                /** @type {?} */
-                const slotValue = /** @type {?} */ (load(removeIndex));
-                if (isLContainer(slotValue)) {
+        const opCode = createOpCodes[i];
+        if (typeof opCode == 'string') {
+            /** @type {?} */
+            const textRNode = createTextNode(opCode, renderer);
+            ngDevMode && ngDevMode.rendererCreateTextNode++;
+            previousTNode = currentTNode;
+            currentTNode =
+                createNodeAtIndex(expandoStartIndex++, 3 /* Element */, textRNode, null, null);
+            setIsParent(false);
+        }
+        else if (typeof opCode == 'number') {
+            switch (opCode & 7 /* MASK_OPCODE */) {
+                case 1 /* AppendChild */:
                     /** @type {?} */
-                    const lContainer = /** @type {?} */ (slotValue);
-                    if (removedTNode.type !== 0 /* Container */) {
-                        removeChild(removedTNode, lContainer[NATIVE] || null, viewData);
+                    const destinationNodeIndex = opCode >>> 17 /* SHIFT_PARENT */;
+                    /** @type {?} */
+                    let destinationTNode;
+                    if (destinationNodeIndex === index) {
+                        // If the destination node is `i18nStart`, we don't have a
+                        // top-level node and we should use the host node instead
+                        destinationTNode = /** @type {?} */ ((viewData[HOST_NODE]));
                     }
-                    removedTNode.detached = true;
-                    lContainer[RENDER_PARENT] = null;
-                }
-                break;
+                    else {
+                        destinationTNode = getTNode(destinationNodeIndex, viewData);
+                    }
+                    ngDevMode &&
+                        assertDefined(/** @type {?} */ ((currentTNode)), `You need to create or select a node before you can insert it into the DOM`);
+                    previousTNode = appendI18nNode(/** @type {?} */ ((currentTNode)), destinationTNode, previousTNode);
+                    destinationTNode.next = null;
+                    break;
+                case 0 /* Select */:
+                    /** @type {?} */
+                    const nodeIndex = opCode >>> 3 /* SHIFT_REF */;
+                    visitedPlaceholders.push(nodeIndex);
+                    previousTNode = currentTNode;
+                    currentTNode = getTNode(nodeIndex, viewData);
+                    if (currentTNode) {
+                        setPreviousOrParentTNode(currentTNode);
+                        if (currentTNode.type === 3 /* Element */) {
+                            setIsParent(true);
+                        }
+                    }
+                    break;
+                case 5 /* ElementEnd */:
+                    /** @type {?} */
+                    const elementIndex = opCode >>> 3 /* SHIFT_REF */;
+                    previousTNode = currentTNode = getTNode(elementIndex, viewData);
+                    setPreviousOrParentTNode(currentTNode);
+                    setIsParent(false);
+                    break;
+                case 4 /* Attr */:
+                    /** @type {?} */
+                    const elementNodeIndex = opCode >>> 3 /* SHIFT_REF */;
+                    /** @type {?} */
+                    const attrName = /** @type {?} */ (createOpCodes[++i]);
+                    /** @type {?} */
+                    const attrValue = /** @type {?} */ (createOpCodes[++i]);
+                    elementAttribute(elementNodeIndex, attrName, attrValue);
+                    break;
+                default:
+                    throw new Error(`Unable to determine the type of mutate operation for "${opCode}"`);
+            }
+        }
+        else {
+            switch (opCode) {
+                case COMMENT_MARKER:
+                    /** @type {?} */
+                    const commentValue = /** @type {?} */ (createOpCodes[++i]);
+                    ngDevMode && assertEqual(typeof commentValue, 'string', `Expected "${commentValue}" to be a comment node value`);
+                    /** @type {?} */
+                    const commentRNode = renderer.createComment(commentValue);
+                    ngDevMode && ngDevMode.rendererCreateComment++;
+                    previousTNode = currentTNode;
+                    currentTNode = createNodeAtIndex(expandoStartIndex++, 5 /* IcuContainer */, commentRNode, null, null);
+                    (/** @type {?} */ (currentTNode)).activeCaseIndex = null;
+                    // We will add the case nodes later, during the update phase
+                    setIsParent(false);
+                    break;
+                case ELEMENT_MARKER:
+                    /** @type {?} */
+                    const tagNameValue = /** @type {?} */ (createOpCodes[++i]);
+                    ngDevMode && assertEqual(typeof tagNameValue, 'string', `Expected "${tagNameValue}" to be an element node tag name`);
+                    /** @type {?} */
+                    const elementRNode = renderer.createElement(tagNameValue);
+                    ngDevMode && ngDevMode.rendererCreateElement++;
+                    previousTNode = currentTNode;
+                    currentTNode = createNodeAtIndex(expandoStartIndex++, 3 /* Element */, elementRNode, tagNameValue, null);
+                    break;
+                default:
+                    throw new Error(`Unable to determine the type of mutate operation for "${opCode}"`);
+            }
         }
     }
+    setIsParent(false);
+    return visitedPlaceholders;
 }
 /**
- * Takes a translation string and the initial list of expressions and returns a list of instructions
- * that will be used to translate an attribute.
- * Even indexes contain static strings, while odd indexes contain the index of the expression whose
- * value will be concatenated into the final translation.
- * @param {?} translation
- * @param {?} placeholders
+ * @param {?} updateOpCodes
+ * @param {?} icus
+ * @param {?} bindingsStartIndex
+ * @param {?} changeMask
+ * @param {?} viewData
+ * @param {?=} bypassCheckBit
  * @return {?}
  */
-function i18nExpMapping(translation, placeholders) {
+function readUpdateOpCodes(updateOpCodes, icus, bindingsStartIndex, changeMask, viewData, bypassCheckBit = false) {
     /** @type {?} */
-    const staticText = translation.split(i18nTagRegex);
-    // odd indexes are placeholders
-    for (let i = 1; i < staticText.length; i += 2) {
-        staticText[i] = placeholders[staticText[i]];
+    let caseCreated = false;
+    for (let i = 0; i < updateOpCodes.length; i++) {
+        /** @type {?} */
+        const checkBit = /** @type {?} */ (updateOpCodes[i]);
+        /** @type {?} */
+        const skipCodes = /** @type {?} */ (updateOpCodes[++i]);
+        if (bypassCheckBit || (checkBit & changeMask)) {
+            /** @type {?} */
+            let value = '';
+            for (let j = i + 1; j <= (i + skipCodes); j++) {
+                /** @type {?} */
+                const opCode = updateOpCodes[j];
+                if (typeof opCode == 'string') {
+                    value += opCode;
+                }
+                else if (typeof opCode == 'number') {
+                    if (opCode < 0) {
+                        // It's a binding index whose value is negative
+                        value += stringify$1(viewData[bindingsStartIndex - opCode]);
+                    }
+                    else {
+                        /** @type {?} */
+                        const nodeIndex = opCode >>> 2 /* SHIFT_REF */;
+                        switch (opCode & 3 /* MASK_OPCODE */) {
+                            case 1 /* Attr */:
+                                /** @type {?} */
+                                const attrName = /** @type {?} */ (updateOpCodes[++j]);
+                                /** @type {?} */
+                                const sanitizeFn = /** @type {?} */ (updateOpCodes[++j]);
+                                elementAttribute(nodeIndex, attrName, value, sanitizeFn);
+                                break;
+                            case 0 /* Text */:
+                                textBinding(nodeIndex, value);
+                                break;
+                            case 2 /* IcuSwitch */:
+                                /** @type {?} */
+                                let tIcuIndex = /** @type {?} */ (updateOpCodes[++j]);
+                                /** @type {?} */
+                                let tIcu = /** @type {?} */ ((icus))[tIcuIndex];
+                                /** @type {?} */
+                                let icuTNode = /** @type {?} */ (getTNode(nodeIndex, viewData));
+                                // If there is an active case, delete the old nodes
+                                if (icuTNode.activeCaseIndex !== null) {
+                                    /** @type {?} */
+                                    const removeCodes = tIcu.remove[icuTNode.activeCaseIndex];
+                                    for (let k = 0; k < removeCodes.length; k++) {
+                                        /** @type {?} */
+                                        const removeOpCode = /** @type {?} */ (removeCodes[k]);
+                                        switch (removeOpCode & 7 /* MASK_OPCODE */) {
+                                            case 3 /* Remove */:
+                                                /** @type {?} */
+                                                const nodeIndex = removeOpCode >>> 3 /* SHIFT_REF */;
+                                                removeNode(nodeIndex, viewData);
+                                                break;
+                                            case 6 /* RemoveNestedIcu */:
+                                                /** @type {?} */
+                                                const nestedIcuNodeIndex = /** @type {?} */ (removeCodes[k + 1]) >>> 3 /* SHIFT_REF */;
+                                                /** @type {?} */
+                                                const nestedIcuTNode = /** @type {?} */ (getTNode(nestedIcuNodeIndex, viewData));
+                                                /** @type {?} */
+                                                const activeIndex = nestedIcuTNode.activeCaseIndex;
+                                                if (activeIndex !== null) {
+                                                    /** @type {?} */
+                                                    const nestedIcuTIndex = removeOpCode >>> 3 /* SHIFT_REF */;
+                                                    /** @type {?} */
+                                                    const nestedTIcu = /** @type {?} */ ((icus))[nestedIcuTIndex];
+                                                    addAllToArray(nestedTIcu.remove[activeIndex], removeCodes);
+                                                }
+                                                break;
+                                        }
+                                    }
+                                }
+                                /** @type {?} */
+                                const caseIndex = getCaseIndex(tIcu, value);
+                                icuTNode.activeCaseIndex = caseIndex !== -1 ? caseIndex : null;
+                                // Add the nodes for the new case
+                                readCreateOpCodes(-1, tIcu.create[caseIndex], tIcu.expandoStartIndex, viewData);
+                                caseCreated = true;
+                                break;
+                            case 3 /* IcuUpdate */:
+                                tIcuIndex = /** @type {?} */ (updateOpCodes[++j]);
+                                tIcu = /** @type {?} */ ((icus))[tIcuIndex];
+                                icuTNode = /** @type {?} */ (getTNode(nodeIndex, viewData));
+                                readUpdateOpCodes(tIcu.update[/** @type {?} */ ((icuTNode.activeCaseIndex))], icus, bindingsStartIndex, changeMask, viewData, caseCreated);
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+        i += skipCodes;
     }
-    return staticText;
 }
 /**
- * Checks if the value of an expression has changed and replaces it by its value in a translation,
- * or returns NO_CHANGE.
- *
- * @param {?} instructions A list of instructions that will be used to translate an attribute.
- * @param {?} v0 value checked for change.
- *
- * @return {?} The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ * @param {?} index
+ * @param {?} viewData
+ * @return {?}
  */
-function i18nInterpolation1(instructions, v0) {
+function removeNode(index, viewData) {
     /** @type {?} */
-    const different = bindingUpdated(getViewData()[BINDING_INDEX]++, v0);
-    if (!different) {
-        return NO_CHANGE;
-    }
+    const removedPhTNode = getTNode(index, viewData);
     /** @type {?} */
-    let res = '';
-    for (let i = 0; i < instructions.length; i++) {
-        // Odd indexes are bindings
-        if (i & 1) {
-            res += stringify$1(v0);
+    const removedPhRNode = getNativeByIndex(index, viewData);
+    removeChild(removedPhTNode, removedPhRNode || null, viewData);
+    removedPhTNode.detached = true;
+    ngDevMode && ngDevMode.rendererRemoveNode++;
+    /** @type {?} */
+    const slotValue = /** @type {?} */ (load(index));
+    if (isLContainer(slotValue)) {
+        /** @type {?} */
+        const lContainer = /** @type {?} */ (slotValue);
+        if (removedPhTNode.type !== 0 /* Container */) {
+            removeChild(removedPhTNode, lContainer[NATIVE] || null, viewData);
         }
-        else {
-            res += instructions[i];
-        }
+        lContainer[RENDER_PARENT] = null;
     }
-    return res;
 }
 /**
- * Checks if the values of up to 2 expressions have changed and replaces them by their values in a
- * translation, or returns NO_CHANGE.
+ * Marks a list of attributes as translatable.
  *
- * @param {?} instructions A list of instructions that will be used to translate an attribute.
- * @param {?} v0 value checked for change.
- * @param {?} v1 value checked for change.
- *
- * @return {?} The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
- */
-function i18nInterpolation2(instructions, v0, v1) {
-    /** @type {?} */
-    const viewData = getViewData();
-    /** @type {?} */
-    const different = bindingUpdated2(viewData[BINDING_INDEX], v0, v1);
-    viewData[BINDING_INDEX] += 2;
-    if (!different) {
-        return NO_CHANGE;
-    }
-    /** @type {?} */
-    let res = '';
-    for (let i = 0; i < instructions.length; i++) {
-        // Odd indexes are bindings
-        if (i & 1) {
-            /** @type {?} */
-            const idx = /** @type {?} */ (instructions[i]);
-            /** @type {?} */
-            const b1 = idx & 1;
-            /** @type {?} */
-            const value = b1 ? v1 : v0;
-            res += stringify$1(value);
-        }
-        else {
-            res += instructions[i];
-        }
-    }
-    return res;
-}
-/**
- * Checks if the values of up to 3 expressions have changed and replaces them by their values in a
- * translation, or returns NO_CHANGE.
- *
- * @param {?} instructions A list of instructions that will be used to translate an attribute.
- * @param {?} v0 value checked for change.
- * @param {?} v1 value checked for change.
- * @param {?} v2 value checked for change.
- *
- * @return {?} The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
- */
-function i18nInterpolation3(instructions, v0, v1, v2) {
-    /** @type {?} */
-    const viewData = getViewData();
-    /** @type {?} */
-    const different = bindingUpdated3(viewData[BINDING_INDEX], v0, v1, v2);
-    viewData[BINDING_INDEX] += 3;
-    if (!different) {
-        return NO_CHANGE;
-    }
-    /** @type {?} */
-    let res = '';
-    for (let i = 0; i < instructions.length; i++) {
-        // Odd indexes are bindings
-        if (i & 1) {
-            /** @type {?} */
-            const idx = /** @type {?} */ (instructions[i]);
-            /** @type {?} */
-            const b2 = idx & 2;
-            /** @type {?} */
-            const b1 = idx & 1;
-            /** @type {?} */
-            const value = b2 ? v2 : (b1 ? v1 : v0);
-            res += stringify$1(value);
-        }
-        else {
-            res += instructions[i];
-        }
-    }
-    return res;
-}
-/**
- * Checks if the values of up to 4 expressions have changed and replaces them by their values in a
- * translation, or returns NO_CHANGE.
- *
- * @param {?} instructions A list of instructions that will be used to translate an attribute.
- * @param {?} v0 value checked for change.
- * @param {?} v1 value checked for change.
- * @param {?} v2 value checked for change.
- * @param {?} v3 value checked for change.
- *
- * @return {?} The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
- */
-function i18nInterpolation4(instructions, v0, v1, v2, v3) {
-    /** @type {?} */
-    const viewData = getViewData();
-    /** @type {?} */
-    const different = bindingUpdated4(viewData[BINDING_INDEX], v0, v1, v2, v3);
-    viewData[BINDING_INDEX] += 4;
-    if (!different) {
-        return NO_CHANGE;
-    }
-    /** @type {?} */
-    let res = '';
-    for (let i = 0; i < instructions.length; i++) {
-        // Odd indexes are bindings
-        if (i & 1) {
-            /** @type {?} */
-            const idx = /** @type {?} */ (instructions[i]);
-            /** @type {?} */
-            const b2 = idx & 2;
-            /** @type {?} */
-            const b1 = idx & 1;
-            /** @type {?} */
-            const value = b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0);
-            res += stringify$1(value);
-        }
-        else {
-            res += instructions[i];
-        }
-    }
-    return res;
-}
-/**
- * Checks if the values of up to 5 expressions have changed and replaces them by their values in a
- * translation, or returns NO_CHANGE.
- *
- * @param {?} instructions A list of instructions that will be used to translate an attribute.
- * @param {?} v0 value checked for change.
- * @param {?} v1 value checked for change.
- * @param {?} v2 value checked for change.
- * @param {?} v3 value checked for change.
- * @param {?} v4 value checked for change.
- *
- * @return {?} The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
- */
-function i18nInterpolation5(instructions, v0, v1, v2, v3, v4) {
-    /** @type {?} */
-    const viewData = getViewData();
-    /** @type {?} */
-    let different = bindingUpdated4(viewData[BINDING_INDEX], v0, v1, v2, v3);
-    different = bindingUpdated(viewData[BINDING_INDEX] + 4, v4) || different;
-    viewData[BINDING_INDEX] += 5;
-    if (!different) {
-        return NO_CHANGE;
-    }
-    /** @type {?} */
-    let res = '';
-    for (let i = 0; i < instructions.length; i++) {
-        // Odd indexes are bindings
-        if (i & 1) {
-            /** @type {?} */
-            const idx = /** @type {?} */ (instructions[i]);
-            /** @type {?} */
-            const b4 = idx & 4;
-            /** @type {?} */
-            const b2 = idx & 2;
-            /** @type {?} */
-            const b1 = idx & 1;
-            /** @type {?} */
-            const value = b4 ? v4 : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
-            res += stringify$1(value);
-        }
-        else {
-            res += instructions[i];
-        }
-    }
-    return res;
-}
-/**
- * Checks if the values of up to 6 expressions have changed and replaces them by their values in a
- * translation, or returns NO_CHANGE.
- *
- * @param {?} instructions A list of instructions that will be used to translate an attribute.
- * @param {?} v0 value checked for change.
- * @param {?} v1 value checked for change.
- * @param {?} v2 value checked for change.
- * @param {?} v3 value checked for change.
- * @param {?} v4 value checked for change.
- * @param {?} v5 value checked for change.
- *
- * @return {?} The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
- */
-function i18nInterpolation6(instructions, v0, v1, v2, v3, v4, v5) {
-    /** @type {?} */
-    const viewData = getViewData();
-    /** @type {?} */
-    let different = bindingUpdated4(viewData[BINDING_INDEX], v0, v1, v2, v3);
-    different = bindingUpdated2(viewData[BINDING_INDEX] + 4, v4, v5) || different;
-    viewData[BINDING_INDEX] += 6;
-    if (!different) {
-        return NO_CHANGE;
-    }
-    /** @type {?} */
-    let res = '';
-    for (let i = 0; i < instructions.length; i++) {
-        // Odd indexes are bindings
-        if (i & 1) {
-            /** @type {?} */
-            const idx = /** @type {?} */ (instructions[i]);
-            /** @type {?} */
-            const b4 = idx & 4;
-            /** @type {?} */
-            const b2 = idx & 2;
-            /** @type {?} */
-            const b1 = idx & 1;
-            /** @type {?} */
-            const value = b4 ? (b1 ? v5 : v4) : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
-            res += stringify$1(value);
-        }
-        else {
-            res += instructions[i];
-        }
-    }
-    return res;
-}
-/**
- * Checks if the values of up to 7 expressions have changed and replaces them by their values in a
- * translation, or returns NO_CHANGE.
- *
- * @param {?} instructions A list of instructions that will be used to translate an attribute.
- * @param {?} v0 value checked for change.
- * @param {?} v1 value checked for change.
- * @param {?} v2 value checked for change.
- * @param {?} v3 value checked for change.
- * @param {?} v4 value checked for change.
- * @param {?} v5 value checked for change.
- * @param {?} v6 value checked for change.
- *
- * @return {?} The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
- */
-function i18nInterpolation7(instructions, v0, v1, v2, v3, v4, v5, v6) {
-    /** @type {?} */
-    const viewData = getViewData();
-    /** @type {?} */
-    let different = bindingUpdated4(viewData[BINDING_INDEX], v0, v1, v2, v3);
-    different = bindingUpdated3(viewData[BINDING_INDEX] + 4, v4, v5, v6) || different;
-    viewData[BINDING_INDEX] += 7;
-    if (!different) {
-        return NO_CHANGE;
-    }
-    /** @type {?} */
-    let res = '';
-    for (let i = 0; i < instructions.length; i++) {
-        // Odd indexes are bindings
-        if (i & 1) {
-            /** @type {?} */
-            const idx = /** @type {?} */ (instructions[i]);
-            /** @type {?} */
-            const b4 = idx & 4;
-            /** @type {?} */
-            const b2 = idx & 2;
-            /** @type {?} */
-            const b1 = idx & 1;
-            /** @type {?} */
-            const value = b4 ? (b2 ? v6 : (b1 ? v5 : v4)) : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
-            res += stringify$1(value);
-        }
-        else {
-            res += instructions[i];
-        }
-    }
-    return res;
-}
-/**
- * Checks if the values of up to 8 expressions have changed and replaces them by their values in a
- * translation, or returns NO_CHANGE.
- *
- * @param {?} instructions A list of instructions that will be used to translate an attribute.
- * @param {?} v0 value checked for change.
- * @param {?} v1 value checked for change.
- * @param {?} v2 value checked for change.
- * @param {?} v3 value checked for change.
- * @param {?} v4 value checked for change.
- * @param {?} v5 value checked for change.
- * @param {?} v6 value checked for change.
- * @param {?} v7 value checked for change.
- *
- * @return {?} The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
- */
-function i18nInterpolation8(instructions, v0, v1, v2, v3, v4, v5, v6, v7) {
-    /** @type {?} */
-    const viewData = getViewData();
-    /** @type {?} */
-    let different = bindingUpdated4(viewData[BINDING_INDEX], v0, v1, v2, v3);
-    different = bindingUpdated4(viewData[BINDING_INDEX] + 4, v4, v5, v6, v7) || different;
-    viewData[BINDING_INDEX] += 8;
-    if (!different) {
-        return NO_CHANGE;
-    }
-    /** @type {?} */
-    let res = '';
-    for (let i = 0; i < instructions.length; i++) {
-        // Odd indexes are bindings
-        if (i & 1) {
-            /** @type {?} */
-            const idx = /** @type {?} */ (instructions[i]);
-            /** @type {?} */
-            const b4 = idx & 4;
-            /** @type {?} */
-            const b2 = idx & 2;
-            /** @type {?} */
-            const b1 = idx & 1;
-            /** @type {?} */
-            const value = b4 ? (b2 ? (b1 ? v7 : v6) : (b1 ? v5 : v4)) : (b2 ? (b1 ? v3 : v2) : (b1 ? v1 : v0));
-            res += stringify$1(value);
-        }
-        else {
-            res += instructions[i];
-        }
-    }
-    return res;
-}
-/**
- * Create a translated interpolation binding with a variable number of expressions.
- *
- * If there are 1 to 8 expressions then `i18nInterpolation()` should be used instead. It is faster
- * because there is no need to create an array of expressions and iterate over it.
- *
- * @param {?} instructions
+ * @param {?} index A unique index in the static block
  * @param {?} values
- * @return {?} The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ * @return {?}
  */
-function i18nInterpolationV(instructions, values) {
+function i18nAttributes(index, values) {
     /** @type {?} */
-    const viewData = getViewData();
-    /** @type {?} */
-    let different = false;
-    for (let i = 0; i < values.length; i++) {
-        // Check if bindings have changed
-        bindingUpdated(viewData[BINDING_INDEX]++, values[i]) && (different = true);
+    const tView = getTView();
+    ngDevMode && assertDefined(tView, `tView should be defined`);
+    ngDevMode &&
+        assertEqual(tView.firstTemplatePass, true, `You should only call i18nEnd on first template pass`);
+    if (tView.firstTemplatePass && tView.data[index + HEADER_OFFSET] === null) {
+        i18nAttributesFirstPass(tView, index, values);
     }
-    if (!different) {
-        return NO_CHANGE;
-    }
+}
+/**
+ * See `i18nAttributes` above.
+ * @param {?} tView
+ * @param {?} index
+ * @param {?} values
+ * @return {?}
+ */
+function i18nAttributesFirstPass(tView, index, values) {
     /** @type {?} */
-    let res = '';
-    for (let i = 0; i < instructions.length; i++) {
-        // Odd indexes are placeholders
-        if (i & 1) {
-            res += stringify$1(values[/** @type {?} */ (instructions[i])]);
+    const previousElement = getPreviousOrParentTNode();
+    /** @type {?} */
+    const previousElementIndex = previousElement.index - HEADER_OFFSET;
+    /** @type {?} */
+    const updateOpCodes = [];
+    for (let i = 0; i < values.length; i += 2) {
+        /** @type {?} */
+        const attrName = values[i];
+        /** @type {?} */
+        const message = values[i + 1];
+        /** @type {?} */
+        const parts = message.split(ICU_REGEXP);
+        for (let j = 0; j < parts.length; j++) {
+            /** @type {?} */
+            const value = parts[j];
+            if (j & 1) ;
+            else if (value !== '') {
+                /** @type {?} */
+                const hasBinding = !!value.match(BINDING_REGEXP);
+                if (hasBinding) {
+                    addAllToArray(generateBindingUpdateOpCodes(value, previousElementIndex, attrName), updateOpCodes);
+                }
+                else {
+                    elementAttribute(previousElementIndex, attrName, value);
+                }
+            }
+        }
+    }
+    tView.data[index + HEADER_OFFSET] = updateOpCodes;
+}
+/** @type {?} */
+let changeMask = 0b0;
+/** @type {?} */
+let shiftsCounter = 0;
+/**
+ * Stores the values of the bindings during each update cycle in order to determine if we need to
+ * update the translated nodes.
+ *
+ * @template T
+ * @param {?} expression The binding's new value or NO_CHANGE
+ * @return {?}
+ */
+function i18nExp(expression) {
+    if (expression !== NO_CHANGE) {
+        changeMask = changeMask | (1 << shiftsCounter);
+    }
+    shiftsCounter++;
+}
+/**
+ * Updates a translation block or an i18n attribute when the bindings have changed.
+ *
+ * @param {?} index Index of either {\@link i18nStart} (translation block) or {\@link i18nAttributes}
+ * (i18n attribute) on which it should update the content.
+ * @return {?}
+ */
+function i18nApply(index) {
+    if (shiftsCounter) {
+        /** @type {?} */
+        const tView = getTView();
+        ngDevMode && assertDefined(tView, `tView should be defined`);
+        /** @type {?} */
+        const viewData = _getViewData();
+        /** @type {?} */
+        const tI18n = tView.data[index + HEADER_OFFSET];
+        /** @type {?} */
+        let updateOpCodes;
+        /** @type {?} */
+        let icus = null;
+        if (Array.isArray(tI18n)) {
+            updateOpCodes = /** @type {?} */ (tI18n);
         }
         else {
-            res += instructions[i];
+            updateOpCodes = (/** @type {?} */ (tI18n)).update;
+            icus = (/** @type {?} */ (tI18n)).icus;
+        }
+        /** @type {?} */
+        const bindingsStartIndex = viewData[BINDING_INDEX] - shiftsCounter - 1;
+        readUpdateOpCodes(updateOpCodes, icus, bindingsStartIndex, changeMask, viewData);
+        // Reset changeMask & maskBit to default for the next update cycle
+        changeMask = 0b0;
+        shiftsCounter = 0;
+    }
+}
+/** @enum {number} */
+var Plural = {
+    Zero: 0,
+    One: 1,
+    Two: 2,
+    Few: 3,
+    Many: 4,
+    Other: 5,
+};
+Plural[Plural.Zero] = 'Zero';
+Plural[Plural.One] = 'One';
+Plural[Plural.Two] = 'Two';
+Plural[Plural.Few] = 'Few';
+Plural[Plural.Many] = 'Many';
+Plural[Plural.Other] = 'Other';
+/**
+ * Returns the plural case based on the locale.
+ * This is a copy of the deprecated function that we used in Angular v4.
+ * // TODO(ocombe): remove this once we can the real getPluralCase function
+ *
+ * @deprecated from v5 the plural case function is in locale data files common/locales/*.ts
+ * @param {?} locale
+ * @param {?} nLike
+ * @return {?}
+ */
+function getPluralCase(locale, nLike) {
+    if (typeof nLike === 'string') {
+        nLike = parseInt(/** @type {?} */ (nLike), 10);
+    }
+    /** @type {?} */
+    const n = /** @type {?} */ (nLike);
+    /** @type {?} */
+    const nDecimal = n.toString().replace(/^[^.]*\.?/, '');
+    /** @type {?} */
+    const i = Math.floor(Math.abs(n));
+    /** @type {?} */
+    const v = nDecimal.length;
+    /** @type {?} */
+    const f = parseInt(nDecimal, 10);
+    /** @type {?} */
+    const t = parseInt(n.toString().replace(/^[^.]*\.?|0+$/g, ''), 10) || 0;
+    /** @type {?} */
+    const lang = locale.split('-')[0].toLowerCase();
+    switch (lang) {
+        case 'af':
+        case 'asa':
+        case 'az':
+        case 'bem':
+        case 'bez':
+        case 'bg':
+        case 'brx':
+        case 'ce':
+        case 'cgg':
+        case 'chr':
+        case 'ckb':
+        case 'ee':
+        case 'el':
+        case 'eo':
+        case 'es':
+        case 'eu':
+        case 'fo':
+        case 'fur':
+        case 'gsw':
+        case 'ha':
+        case 'haw':
+        case 'hu':
+        case 'jgo':
+        case 'jmc':
+        case 'ka':
+        case 'kk':
+        case 'kkj':
+        case 'kl':
+        case 'ks':
+        case 'ksb':
+        case 'ky':
+        case 'lb':
+        case 'lg':
+        case 'mas':
+        case 'mgo':
+        case 'ml':
+        case 'mn':
+        case 'nb':
+        case 'nd':
+        case 'ne':
+        case 'nn':
+        case 'nnh':
+        case 'nyn':
+        case 'om':
+        case 'or':
+        case 'os':
+        case 'ps':
+        case 'rm':
+        case 'rof':
+        case 'rwk':
+        case 'saq':
+        case 'seh':
+        case 'sn':
+        case 'so':
+        case 'sq':
+        case 'ta':
+        case 'te':
+        case 'teo':
+        case 'tk':
+        case 'tr':
+        case 'ug':
+        case 'uz':
+        case 'vo':
+        case 'vun':
+        case 'wae':
+        case 'xog':
+            if (n === 1)
+                return Plural.One;
+            return Plural.Other;
+        case 'ak':
+        case 'ln':
+        case 'mg':
+        case 'pa':
+        case 'ti':
+            if (n === Math.floor(n) && n >= 0 && n <= 1)
+                return Plural.One;
+            return Plural.Other;
+        case 'am':
+        case 'as':
+        case 'bn':
+        case 'fa':
+        case 'gu':
+        case 'hi':
+        case 'kn':
+        case 'mr':
+        case 'zu':
+            if (i === 0 || n === 1)
+                return Plural.One;
+            return Plural.Other;
+        case 'ar':
+            if (n === 0)
+                return Plural.Zero;
+            if (n === 1)
+                return Plural.One;
+            if (n === 2)
+                return Plural.Two;
+            if (n % 100 === Math.floor(n % 100) && n % 100 >= 3 && n % 100 <= 10)
+                return Plural.Few;
+            if (n % 100 === Math.floor(n % 100) && n % 100 >= 11 && n % 100 <= 99)
+                return Plural.Many;
+            return Plural.Other;
+        case 'ast':
+        case 'ca':
+        case 'de':
+        case 'en':
+        case 'et':
+        case 'fi':
+        case 'fy':
+        case 'gl':
+        case 'it':
+        case 'nl':
+        case 'sv':
+        case 'sw':
+        case 'ur':
+        case 'yi':
+            if (i === 1 && v === 0)
+                return Plural.One;
+            return Plural.Other;
+        case 'be':
+            if (n % 10 === 1 && !(n % 100 === 11))
+                return Plural.One;
+            if (n % 10 === Math.floor(n % 10) && n % 10 >= 2 && n % 10 <= 4 &&
+                !(n % 100 >= 12 && n % 100 <= 14))
+                return Plural.Few;
+            if (n % 10 === 0 || n % 10 === Math.floor(n % 10) && n % 10 >= 5 && n % 10 <= 9 ||
+                n % 100 === Math.floor(n % 100) && n % 100 >= 11 && n % 100 <= 14)
+                return Plural.Many;
+            return Plural.Other;
+        case 'br':
+            if (n % 10 === 1 && !(n % 100 === 11 || n % 100 === 71 || n % 100 === 91))
+                return Plural.One;
+            if (n % 10 === 2 && !(n % 100 === 12 || n % 100 === 72 || n % 100 === 92))
+                return Plural.Two;
+            if (n % 10 === Math.floor(n % 10) && (n % 10 >= 3 && n % 10 <= 4 || n % 10 === 9) &&
+                !(n % 100 >= 10 && n % 100 <= 19 || n % 100 >= 70 && n % 100 <= 79 ||
+                    n % 100 >= 90 && n % 100 <= 99))
+                return Plural.Few;
+            if (!(n === 0) && n % 1e6 === 0)
+                return Plural.Many;
+            return Plural.Other;
+        case 'bs':
+        case 'hr':
+        case 'sr':
+            if (v === 0 && i % 10 === 1 && !(i % 100 === 11) || f % 10 === 1 && !(f % 100 === 11))
+                return Plural.One;
+            if (v === 0 && i % 10 === Math.floor(i % 10) && i % 10 >= 2 && i % 10 <= 4 &&
+                !(i % 100 >= 12 && i % 100 <= 14) ||
+                f % 10 === Math.floor(f % 10) && f % 10 >= 2 && f % 10 <= 4 &&
+                    !(f % 100 >= 12 && f % 100 <= 14))
+                return Plural.Few;
+            return Plural.Other;
+        case 'cs':
+        case 'sk':
+            if (i === 1 && v === 0)
+                return Plural.One;
+            if (i === Math.floor(i) && i >= 2 && i <= 4 && v === 0)
+                return Plural.Few;
+            if (!(v === 0))
+                return Plural.Many;
+            return Plural.Other;
+        case 'cy':
+            if (n === 0)
+                return Plural.Zero;
+            if (n === 1)
+                return Plural.One;
+            if (n === 2)
+                return Plural.Two;
+            if (n === 3)
+                return Plural.Few;
+            if (n === 6)
+                return Plural.Many;
+            return Plural.Other;
+        case 'da':
+            if (n === 1 || !(t === 0) && (i === 0 || i === 1))
+                return Plural.One;
+            return Plural.Other;
+        case 'dsb':
+        case 'hsb':
+            if (v === 0 && i % 100 === 1 || f % 100 === 1)
+                return Plural.One;
+            if (v === 0 && i % 100 === 2 || f % 100 === 2)
+                return Plural.Two;
+            if (v === 0 && i % 100 === Math.floor(i % 100) && i % 100 >= 3 && i % 100 <= 4 ||
+                f % 100 === Math.floor(f % 100) && f % 100 >= 3 && f % 100 <= 4)
+                return Plural.Few;
+            return Plural.Other;
+        case 'ff':
+        case 'fr':
+        case 'hy':
+        case 'kab':
+            if (i === 0 || i === 1)
+                return Plural.One;
+            return Plural.Other;
+        case 'fil':
+            if (v === 0 && (i === 1 || i === 2 || i === 3) ||
+                v === 0 && !(i % 10 === 4 || i % 10 === 6 || i % 10 === 9) ||
+                !(v === 0) && !(f % 10 === 4 || f % 10 === 6 || f % 10 === 9))
+                return Plural.One;
+            return Plural.Other;
+        case 'ga':
+            if (n === 1)
+                return Plural.One;
+            if (n === 2)
+                return Plural.Two;
+            if (n === Math.floor(n) && n >= 3 && n <= 6)
+                return Plural.Few;
+            if (n === Math.floor(n) && n >= 7 && n <= 10)
+                return Plural.Many;
+            return Plural.Other;
+        case 'gd':
+            if (n === 1 || n === 11)
+                return Plural.One;
+            if (n === 2 || n === 12)
+                return Plural.Two;
+            if (n === Math.floor(n) && (n >= 3 && n <= 10 || n >= 13 && n <= 19))
+                return Plural.Few;
+            return Plural.Other;
+        case 'gv':
+            if (v === 0 && i % 10 === 1)
+                return Plural.One;
+            if (v === 0 && i % 10 === 2)
+                return Plural.Two;
+            if (v === 0 &&
+                (i % 100 === 0 || i % 100 === 20 || i % 100 === 40 || i % 100 === 60 || i % 100 === 80))
+                return Plural.Few;
+            if (!(v === 0))
+                return Plural.Many;
+            return Plural.Other;
+        case 'he':
+            if (i === 1 && v === 0)
+                return Plural.One;
+            if (i === 2 && v === 0)
+                return Plural.Two;
+            if (v === 0 && !(n >= 0 && n <= 10) && n % 10 === 0)
+                return Plural.Many;
+            return Plural.Other;
+        case 'is':
+            if (t === 0 && i % 10 === 1 && !(i % 100 === 11) || !(t === 0))
+                return Plural.One;
+            return Plural.Other;
+        case 'ksh':
+            if (n === 0)
+                return Plural.Zero;
+            if (n === 1)
+                return Plural.One;
+            return Plural.Other;
+        case 'kw':
+        case 'naq':
+        case 'se':
+        case 'smn':
+            if (n === 1)
+                return Plural.One;
+            if (n === 2)
+                return Plural.Two;
+            return Plural.Other;
+        case 'lag':
+            if (n === 0)
+                return Plural.Zero;
+            if ((i === 0 || i === 1) && !(n === 0))
+                return Plural.One;
+            return Plural.Other;
+        case 'lt':
+            if (n % 10 === 1 && !(n % 100 >= 11 && n % 100 <= 19))
+                return Plural.One;
+            if (n % 10 === Math.floor(n % 10) && n % 10 >= 2 && n % 10 <= 9 &&
+                !(n % 100 >= 11 && n % 100 <= 19))
+                return Plural.Few;
+            if (!(f === 0))
+                return Plural.Many;
+            return Plural.Other;
+        case 'lv':
+        case 'prg':
+            if (n % 10 === 0 || n % 100 === Math.floor(n % 100) && n % 100 >= 11 && n % 100 <= 19 ||
+                v === 2 && f % 100 === Math.floor(f % 100) && f % 100 >= 11 && f % 100 <= 19)
+                return Plural.Zero;
+            if (n % 10 === 1 && !(n % 100 === 11) || v === 2 && f % 10 === 1 && !(f % 100 === 11) ||
+                !(v === 2) && f % 10 === 1)
+                return Plural.One;
+            return Plural.Other;
+        case 'mk':
+            if (v === 0 && i % 10 === 1 || f % 10 === 1)
+                return Plural.One;
+            return Plural.Other;
+        case 'mt':
+            if (n === 1)
+                return Plural.One;
+            if (n === 0 || n % 100 === Math.floor(n % 100) && n % 100 >= 2 && n % 100 <= 10)
+                return Plural.Few;
+            if (n % 100 === Math.floor(n % 100) && n % 100 >= 11 && n % 100 <= 19)
+                return Plural.Many;
+            return Plural.Other;
+        case 'pl':
+            if (i === 1 && v === 0)
+                return Plural.One;
+            if (v === 0 && i % 10 === Math.floor(i % 10) && i % 10 >= 2 && i % 10 <= 4 &&
+                !(i % 100 >= 12 && i % 100 <= 14))
+                return Plural.Few;
+            if (v === 0 && !(i === 1) && i % 10 === Math.floor(i % 10) && i % 10 >= 0 && i % 10 <= 1 ||
+                v === 0 && i % 10 === Math.floor(i % 10) && i % 10 >= 5 && i % 10 <= 9 ||
+                v === 0 && i % 100 === Math.floor(i % 100) && i % 100 >= 12 && i % 100 <= 14)
+                return Plural.Many;
+            return Plural.Other;
+        case 'pt':
+            if (n === Math.floor(n) && n >= 0 && n <= 2 && !(n === 2))
+                return Plural.One;
+            return Plural.Other;
+        case 'ro':
+            if (i === 1 && v === 0)
+                return Plural.One;
+            if (!(v === 0) || n === 0 ||
+                !(n === 1) && n % 100 === Math.floor(n % 100) && n % 100 >= 1 && n % 100 <= 19)
+                return Plural.Few;
+            return Plural.Other;
+        case 'ru':
+        case 'uk':
+            if (v === 0 && i % 10 === 1 && !(i % 100 === 11))
+                return Plural.One;
+            if (v === 0 && i % 10 === Math.floor(i % 10) && i % 10 >= 2 && i % 10 <= 4 &&
+                !(i % 100 >= 12 && i % 100 <= 14))
+                return Plural.Few;
+            if (v === 0 && i % 10 === 0 ||
+                v === 0 && i % 10 === Math.floor(i % 10) && i % 10 >= 5 && i % 10 <= 9 ||
+                v === 0 && i % 100 === Math.floor(i % 100) && i % 100 >= 11 && i % 100 <= 14)
+                return Plural.Many;
+            return Plural.Other;
+        case 'shi':
+            if (i === 0 || n === 1)
+                return Plural.One;
+            if (n === Math.floor(n) && n >= 2 && n <= 10)
+                return Plural.Few;
+            return Plural.Other;
+        case 'si':
+            if (n === 0 || n === 1 || i === 0 && f === 1)
+                return Plural.One;
+            return Plural.Other;
+        case 'sl':
+            if (v === 0 && i % 100 === 1)
+                return Plural.One;
+            if (v === 0 && i % 100 === 2)
+                return Plural.Two;
+            if (v === 0 && i % 100 === Math.floor(i % 100) && i % 100 >= 3 && i % 100 <= 4 || !(v === 0))
+                return Plural.Few;
+            return Plural.Other;
+        case 'tzm':
+            if (n === Math.floor(n) && n >= 0 && n <= 1 || n === Math.floor(n) && n >= 11 && n <= 99)
+                return Plural.One;
+            return Plural.Other;
+        // When there is no specification, the default is always "other"
+        // Spec: http://cldr.unicode.org/index/cldr-spec/plural-rules
+        // > other (required—general plural form — also used if the language only has a single form)
+        default:
+            return Plural.Other;
+    }
+}
+/**
+ * @param {?} value
+ * @param {?} locale
+ * @return {?}
+ */
+function getPluralCategory(value, locale) {
+    /** @type {?} */
+    const plural = getPluralCase(locale, value);
+    switch (plural) {
+        case Plural.Zero:
+            return 'zero';
+        case Plural.One:
+            return 'one';
+        case Plural.Two:
+            return 'two';
+        case Plural.Few:
+            return 'few';
+        case Plural.Many:
+            return 'many';
+        default:
+            return 'other';
+    }
+}
+/**
+ * Returns the index of the current case of an ICU expression depending on the main binding value
+ *
+ * @param {?} icuExpression
+ * @param {?} bindingValue The value of the main binding used by this ICU expression
+ * @return {?}
+ */
+function getCaseIndex(icuExpression, bindingValue) {
+    /** @type {?} */
+    let index = icuExpression.cases.indexOf(bindingValue);
+    if (index === -1) {
+        switch (icuExpression.type) {
+            case 1 /* plural */: {
+                /** @type {?} */
+                const locale = 'en-US';
+                /** @type {?} */
+                const resolvedCase = getPluralCategory(bindingValue, locale);
+                index = icuExpression.cases.indexOf(resolvedCase);
+                if (index === -1 && resolvedCase !== 'other') {
+                    index = icuExpression.cases.indexOf('other');
+                }
+                break;
+            }
+            case 0 /* select */: {
+                index = icuExpression.cases.indexOf('other');
+                break;
+            }
         }
     }
-    return res;
+    return index;
+}
+/**
+ * Generate the OpCodes for ICU expressions.
+ *
+ * @param {?} tIcus
+ * @param {?} icuExpression
+ * @param {?} startIndex
+ * @param {?} expandoStartIndex
+ * @return {?}
+ */
+function icuStart(tIcus, icuExpression, startIndex, expandoStartIndex) {
+    /** @type {?} */
+    const createCodes = [];
+    /** @type {?} */
+    const removeCodes = [];
+    /** @type {?} */
+    const updateCodes = [];
+    /** @type {?} */
+    const vars = [];
+    /** @type {?} */
+    const childIcus = [];
+    for (let i = 0; i < icuExpression.values.length; i++) {
+        /** @type {?} */
+        const valueArr = icuExpression.values[i];
+        /** @type {?} */
+        const nestedIcus = [];
+        for (let j = 0; j < valueArr.length; j++) {
+            /** @type {?} */
+            const value = valueArr[j];
+            if (typeof value !== 'string') {
+                /** @type {?} */
+                const icuIndex = nestedIcus.push(/** @type {?} */ (value)) - 1;
+                // Replace nested ICU expression by a comment node
+                valueArr[j] = `<!--�${icuIndex}�-->`;
+            }
+        }
+        /** @type {?} */
+        const icuCase = parseIcuCase(valueArr.join(''), startIndex, nestedIcus, tIcus, expandoStartIndex);
+        createCodes.push(icuCase.create);
+        removeCodes.push(icuCase.remove);
+        updateCodes.push(icuCase.update);
+        vars.push(icuCase.vars);
+        childIcus.push(icuCase.childIcus);
+    }
+    /** @type {?} */
+    const tIcu = {
+        type: icuExpression.type,
+        vars,
+        expandoStartIndex: expandoStartIndex + 1, childIcus,
+        cases: icuExpression.cases,
+        create: createCodes,
+        remove: removeCodes,
+        update: updateCodes
+    };
+    tIcus.push(tIcu);
+    /** @type {?} */
+    const lViewData = _getViewData();
+    /** @type {?} */
+    const worstCaseSize = Math.max(...vars);
+    for (let i = 0; i < worstCaseSize; i++) {
+        allocExpando(lViewData);
+    }
+}
+/**
+ * Transforms a string template into an HTML template and a list of instructions used to update
+ * attributes or nodes that contain bindings.
+ *
+ * @param {?} unsafeHtml The string to parse
+ * @param {?} parentIndex
+ * @param {?} nestedIcus
+ * @param {?} tIcus
+ * @param {?} expandoStartIndex
+ * @return {?}
+ */
+function parseIcuCase(unsafeHtml, parentIndex, nestedIcus, tIcus, expandoStartIndex) {
+    /** @type {?} */
+    const inertBodyHelper = new InertBodyHelper(document);
+    /** @type {?} */
+    const inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
+    if (!inertBodyElement) {
+        throw new Error('Unable to generate inert body element');
+    }
+    /** @type {?} */
+    const wrapper = /** @type {?} */ (getTemplateContent(/** @type {?} */ ((inertBodyElement)))) || inertBodyElement;
+    /** @type {?} */
+    const opCodes = { vars: 0, childIcus: [], create: [], remove: [], update: [] };
+    parseNodes(wrapper.firstChild, opCodes, parentIndex, nestedIcus, tIcus, expandoStartIndex);
+    return opCodes;
+}
+/** @type {?} */
+const NESTED_ICU = /�(\d+)�/;
+/**
+ * Parses a node, its children and its siblings, and generates the mutate & update OpCodes.
+ *
+ * @param {?} currentNode The first node to parse
+ * @param {?} icuCase The data for the ICU expression case that contains those nodes
+ * @param {?} parentIndex Index of the current node's parent
+ * @param {?} nestedIcus Data for the nested ICU expressions that this case contains
+ * @param {?} tIcus Data for all ICU expressions of the current message
+ * @param {?} expandoStartIndex Expando start index for the current ICU expression
+ * @return {?}
+ */
+function parseNodes(currentNode, icuCase, parentIndex, nestedIcus, tIcus, expandoStartIndex) {
+    if (currentNode) {
+        /** @type {?} */
+        const nestedIcusToCreate = [];
+        while (currentNode) {
+            /** @type {?} */
+            const nextNode = currentNode.nextSibling;
+            /** @type {?} */
+            const newIndex = expandoStartIndex + ++icuCase.vars;
+            switch (currentNode.nodeType) {
+                case Node.ELEMENT_NODE:
+                    /** @type {?} */
+                    const element$$1 = /** @type {?} */ (currentNode);
+                    /** @type {?} */
+                    const tagName = element$$1.tagName.toLowerCase();
+                    if (!VALID_ELEMENTS.hasOwnProperty(tagName)) {
+                        // This isn't a valid element, we won't create an element for it
+                        icuCase.vars--;
+                    }
+                    else {
+                        icuCase.create.push(ELEMENT_MARKER, tagName, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                        /** @type {?} */
+                        const elAttrs = element$$1.attributes;
+                        for (let i = 0; i < elAttrs.length; i++) {
+                            /** @type {?} */
+                            const attr = /** @type {?} */ ((elAttrs.item(i)));
+                            /** @type {?} */
+                            const lowerAttrName = attr.name.toLowerCase();
+                            /** @type {?} */
+                            const hasBinding = !!attr.value.match(BINDING_REGEXP);
+                            // we assume the input string is safe, unless it's using a binding
+                            if (hasBinding) {
+                                if (VALID_ATTRS.hasOwnProperty(lowerAttrName)) {
+                                    if (URI_ATTRS[lowerAttrName]) {
+                                        addAllToArray(generateBindingUpdateOpCodes(attr.value, newIndex, attr.name, _sanitizeUrl), icuCase.update);
+                                    }
+                                    else if (SRCSET_ATTRS[lowerAttrName]) {
+                                        addAllToArray(generateBindingUpdateOpCodes(attr.value, newIndex, attr.name, sanitizeSrcset), icuCase.update);
+                                    }
+                                    else {
+                                        addAllToArray(generateBindingUpdateOpCodes(attr.value, newIndex, attr.name), icuCase.update);
+                                    }
+                                }
+                                else {
+                                    ngDevMode &&
+                                        console.warn(`WARNING: ignoring unsafe attribute value ${lowerAttrName} on element ${tagName} (see http://g.co/ng/security#xss)`);
+                                }
+                            }
+                            else {
+                                icuCase.create.push(newIndex << 3 /* SHIFT_REF */ | 4 /* Attr */, attr.name, attr.value);
+                            }
+                        }
+                        // Parse the children of this node (if any)
+                        parseNodes(currentNode.firstChild, icuCase, newIndex, nestedIcus, tIcus, expandoStartIndex);
+                        // Remove the parent node after the children
+                        icuCase.remove.push(newIndex << 3 /* SHIFT_REF */ | 3 /* Remove */);
+                    }
+                    break;
+                case Node.TEXT_NODE:
+                    /** @type {?} */
+                    const value = currentNode.textContent || '';
+                    /** @type {?} */
+                    const hasBinding = value.match(BINDING_REGEXP);
+                    icuCase.create.push(hasBinding ? '' : value, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                    icuCase.remove.push(newIndex << 3 /* SHIFT_REF */ | 3 /* Remove */);
+                    if (hasBinding) {
+                        addAllToArray(generateBindingUpdateOpCodes(value, newIndex), icuCase.update);
+                    }
+                    break;
+                case Node.COMMENT_NODE:
+                    /** @type {?} */
+                    const match = NESTED_ICU.exec(currentNode.textContent || '');
+                    if (match) {
+                        /** @type {?} */
+                        const nestedIcuIndex = parseInt(match[1], 10);
+                        /** @type {?} */
+                        const newLocal = ngDevMode ? `nested ICU ${nestedIcuIndex}` : '';
+                        // Create the comment node that will anchor the ICU expression
+                        icuCase.create.push(COMMENT_MARKER, newLocal, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                        /** @type {?} */
+                        const nestedIcu = nestedIcus[nestedIcuIndex];
+                        nestedIcusToCreate.push([nestedIcu, newIndex]);
+                    }
+                    else {
+                        // We do not handle any other type of comment
+                        icuCase.vars--;
+                    }
+                    break;
+                default:
+                    // We do not handle any other type of element
+                    icuCase.vars--;
+            }
+            currentNode = /** @type {?} */ ((nextNode));
+        }
+        for (let i = 0; i < nestedIcusToCreate.length; i++) {
+            /** @type {?} */
+            const nestedIcu = nestedIcusToCreate[i][0];
+            /** @type {?} */
+            const nestedIcuNodeIndex = nestedIcusToCreate[i][1];
+            icuStart(tIcus, nestedIcu, nestedIcuNodeIndex, expandoStartIndex + icuCase.vars);
+            /** @type {?} */
+            const nestTIcuIndex = tIcus.length - 1;
+            icuCase.vars += Math.max(...tIcus[nestTIcuIndex].vars);
+            icuCase.childIcus.push(nestTIcuIndex);
+            /** @type {?} */
+            const mask = getBindingMask(nestedIcu);
+            icuCase.update.push(toMaskBit(nestedIcu.mainBinding), // mask of the main binding
+            3, // skip 3 opCodes if not changed
+            // skip 3 opCodes if not changed
+            -1 - nestedIcu.mainBinding, nestedIcuNodeIndex << 2 /* SHIFT_REF */ | 2 /* IcuSwitch */, nestTIcuIndex, mask, // mask of all the bindings of this ICU expression
+            2, // skip 2 opCodes if not changed
+            // skip 2 opCodes if not changed
+            nestedIcuNodeIndex << 2 /* SHIFT_REF */ | 3 /* IcuUpdate */, nestTIcuIndex);
+            icuCase.remove.push(nestTIcuIndex << 3 /* SHIFT_REF */ | 6 /* RemoveNestedIcu */, nestedIcuNodeIndex << 3 /* SHIFT_REF */ | 3 /* Remove */);
+        }
+    }
+}
+/** @type {?} */
+const RAW_ICU_REGEXP = /{\s*(\S*)\s*,\s*\S{6}\s*,[\s\S]*}/gi;
+/**
+ * Replaces the variable parameter (main binding) of an ICU by a given value.
+ *
+ * Example:
+ * ```
+ * const MSG_APP_1_RAW = "{VAR_SELECT, select, male {male} female {female} other {other}}";
+ * const MSG_APP_1 = i18nIcuReplaceVars(MSG_APP_1_RAW, { VAR_SELECT: "�0�" });
+ * // --> MSG_APP_1 = "{�0�, select, male {male} female {female} other {other}}"
+ * ```
+ * @param {?} message
+ * @param {?} replacements
+ * @return {?}
+ */
+function i18nIcuReplaceVars(message, replacements) {
+    /** @type {?} */
+    const keys = Object.keys(replacements);
+    /**
+     * @param {?} replacement
+     * @return {?}
+     */
+    function replaceFn(replacement) {
+        return (str, varMatch) => { return str.replace(varMatch, replacement); };
+    }
+    for (let i = 0; i < keys.length; i++) {
+        message = message.replace(RAW_ICU_REGEXP, replaceFn(replacements[keys[i]]));
+    }
+    return message;
 }
 
 /**
@@ -14441,571 +15904,6 @@ function bypassSanitizationTrustString(trustedString, mode) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * This file is used to control if the default rendering pipeline should be `ViewEngine` or `Ivy`.
- *
- * For more information on how to run and debug tests with either Ivy or View Engine (legacy),
- * please see [BAZEL.md](./docs/BAZEL.md).
- */
-/** @type {?} */
-let _devMode = true;
-/** @type {?} */
-let _runModeLocked = false;
-/**
- * Returns whether Angular is in development mode. After called once,
- * the value is locked and won't change any more.
- *
- * By default, this is true, unless a user calls `enableProdMode` before calling this.
- *
- * \@publicApi
- * @return {?}
- */
-function isDevMode() {
-    _runModeLocked = true;
-    return _devMode;
-}
-/**
- * Disable Angular's development mode, which turns off assertions and other
- * checks within the framework.
- *
- * One important assertion this disables verifies that a change detection pass
- * does not result in additional changes to any bindings (also known as
- * unidirectional data flow).
- *
- * \@publicApi
- * @return {?}
- */
-function enableProdMode() {
-    if (_runModeLocked) {
-        throw new Error('Cannot enable prod mode after platform setup.');
-    }
-    _devMode = false;
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * This helper class is used to get hold of an inert tree of DOM elements containing dirty HTML
- * that needs sanitizing.
- * Depending upon browser support we must use one of three strategies for doing this.
- * Support: Safari 10.x -> XHR strategy
- * Support: Firefox -> DomParser strategy
- * Default: InertDocument strategy
- */
-class InertBodyHelper {
-    /**
-     * @param {?} defaultDoc
-     */
-    constructor(defaultDoc) {
-        this.defaultDoc = defaultDoc;
-        this.inertDocument = this.defaultDoc.implementation.createHTMLDocument('sanitization-inert');
-        this.inertBodyElement = this.inertDocument.body;
-        if (this.inertBodyElement == null) {
-            /** @type {?} */
-            const inertHtml = this.inertDocument.createElement('html');
-            this.inertDocument.appendChild(inertHtml);
-            this.inertBodyElement = this.inertDocument.createElement('body');
-            inertHtml.appendChild(this.inertBodyElement);
-        }
-        this.inertBodyElement.innerHTML = '<svg><g onload="this.parentNode.remove()"></g></svg>';
-        if (this.inertBodyElement.querySelector && !this.inertBodyElement.querySelector('svg')) {
-            // We just hit the Safari 10.1 bug - which allows JS to run inside the SVG G element
-            // so use the XHR strategy.
-            this.getInertBodyElement = this.getInertBodyElement_XHR;
-            return;
-        }
-        this.inertBodyElement.innerHTML =
-            '<svg><p><style><img src="</style><img src=x onerror=alert(1)//">';
-        if (this.inertBodyElement.querySelector && this.inertBodyElement.querySelector('svg img')) {
-            // We just hit the Firefox bug - which prevents the inner img JS from being sanitized
-            // so use the DOMParser strategy, if it is available.
-            // If the DOMParser is not available then we are not in Firefox (Server/WebWorker?) so we
-            // fall through to the default strategy below.
-            if (isDOMParserAvailable()) {
-                this.getInertBodyElement = this.getInertBodyElement_DOMParser;
-                return;
-            }
-        }
-        // None of the bugs were hit so it is safe for us to use the default InertDocument strategy
-        this.getInertBodyElement = this.getInertBodyElement_InertDocument;
-    }
-    /**
-     * Use XHR to create and fill an inert body element (on Safari 10.1)
-     * See
-     * https://github.com/cure53/DOMPurify/blob/a992d3a75031cb8bb032e5ea8399ba972bdf9a65/src/purify.js#L439-L449
-     * @param {?} html
-     * @return {?}
-     */
-    getInertBodyElement_XHR(html) {
-        // We add these extra elements to ensure that the rest of the content is parsed as expected
-        // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
-        // `<head>` tag.
-        html = '<body><remove></remove>' + html + '</body>';
-        try {
-            html = encodeURI(html);
-        }
-        catch (e) {
-            return null;
-        }
-        /** @type {?} */
-        const xhr = new XMLHttpRequest();
-        xhr.responseType = 'document';
-        xhr.open('GET', 'data:text/html;charset=utf-8,' + html, false);
-        xhr.send(undefined);
-        /** @type {?} */
-        const body = xhr.response.body;
-        body.removeChild(/** @type {?} */ ((body.firstChild)));
-        return body;
-    }
-    /**
-     * Use DOMParser to create and fill an inert body element (on Firefox)
-     * See https://github.com/cure53/DOMPurify/releases/tag/0.6.7
-     *
-     * @param {?} html
-     * @return {?}
-     */
-    getInertBodyElement_DOMParser(html) {
-        // We add these extra elements to ensure that the rest of the content is parsed as expected
-        // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
-        // `<head>` tag.
-        html = '<body><remove></remove>' + html + '</body>';
-        try {
-            /** @type {?} */
-            const body = /** @type {?} */ (new (/** @type {?} */ (window))
-                .DOMParser()
-                .parseFromString(html, 'text/html')
-                .body);
-            body.removeChild(/** @type {?} */ ((body.firstChild)));
-            return body;
-        }
-        catch (e) {
-            return null;
-        }
-    }
-    /**
-     * Use an HTML5 `template` element, if supported, or an inert body element created via
-     * `createHtmlDocument` to create and fill an inert DOM element.
-     * This is the default sane strategy to use if the browser does not require one of the specialised
-     * strategies above.
-     * @param {?} html
-     * @return {?}
-     */
-    getInertBodyElement_InertDocument(html) {
-        /** @type {?} */
-        const templateEl = this.inertDocument.createElement('template');
-        if ('content' in templateEl) {
-            templateEl.innerHTML = html;
-            return templateEl;
-        }
-        this.inertBodyElement.innerHTML = html;
-        // Support: IE 9-11 only
-        // strip custom-namespaced attributes on IE<=11
-        if ((/** @type {?} */ (this.defaultDoc)).documentMode) {
-            this.stripCustomNsAttrs(this.inertBodyElement);
-        }
-        return this.inertBodyElement;
-    }
-    /**
-     * When IE9-11 comes across an unknown namespaced attribute e.g. 'xlink:foo' it adds 'xmlns:ns1'
-     * attribute to declare ns1 namespace and prefixes the attribute with 'ns1' (e.g.
-     * 'ns1:xlink:foo').
-     *
-     * This is undesirable since we don't want to allow any of these custom attributes. This method
-     * strips them all.
-     * @param {?} el
-     * @return {?}
-     */
-    stripCustomNsAttrs(el) {
-        /** @type {?} */
-        const elAttrs = el.attributes;
-        // loop backwards so that we can support removals.
-        for (let i = elAttrs.length - 1; 0 < i; i--) {
-            /** @type {?} */
-            const attrib = elAttrs.item(i);
-            /** @type {?} */
-            const attrName = /** @type {?} */ ((attrib)).name;
-            if (attrName === 'xmlns:ns1' || attrName.indexOf('ns1:') === 0) {
-                el.removeAttribute(attrName);
-            }
-        }
-        /** @type {?} */
-        let childNode = /** @type {?} */ (el.firstChild);
-        while (childNode) {
-            if (childNode.nodeType === Node.ELEMENT_NODE)
-                this.stripCustomNsAttrs(/** @type {?} */ (childNode));
-            childNode = childNode.nextSibling;
-        }
-    }
-}
-/**
- * We need to determine whether the DOMParser exists in the global context.
- * The try-catch is because, on some browsers, trying to access this property
- * on window can actually throw an error.
- *
- * @suppress {uselessCode}
- * @return {?}
- */
-function isDOMParserAvailable() {
-    try {
-        return !!(/** @type {?} */ (window)).DOMParser;
-    }
-    catch (e) {
-        return false;
-    }
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/** *
- * A pattern that recognizes a commonly useful subset of URLs that are safe.
- *
- * This regular expression matches a subset of URLs that will not cause script
- * execution if used in URL context within a HTML document. Specifically, this
- * regular expression matches if (comment from here on and regex copied from
- * Soy's EscapingConventions):
- * (1) Either a protocol in a whitelist (http, https, mailto or ftp).
- * (2) or no protocol.  A protocol must be followed by a colon. The below
- *     allows that by allowing colons only after one of the characters [/?#].
- *     A colon after a hash (#) must be in the fragment.
- *     Otherwise, a colon after a (?) must be in a query.
- *     Otherwise, a colon after a single solidus (/) must be in a path.
- *     Otherwise, a colon after a double solidus (//) must be in the authority
- *     (before port).
- *
- * The pattern disallows &, used in HTML entity declarations before
- * one of the characters in [/?#]. This disallows HTML entities used in the
- * protocol name, which should never happen, e.g. "h&#116;tp" for "http".
- * It also disallows HTML entities in the first path part of a relative path,
- * e.g. "foo&lt;bar/baz".  Our existing escaping functions should not produce
- * that. More importantly, it disallows masking of a colon,
- * e.g. "javascript&#58;...".
- *
- * This regular expression was taken from the Closure sanitization library.
-  @type {?} */
-const SAFE_URL_PATTERN = /^(?:(?:https?|mailto|ftp|tel|file):|[^&:/?#]*(?:[/?#]|$))/gi;
-/** *
- * A pattern that matches safe data URLs. Only matches image, video and audio types.
-  @type {?} */
-const DATA_URL_PATTERN = /^data:(?:image\/(?:bmp|gif|jpeg|jpg|png|tiff|webp)|video\/(?:mpeg|mp4|ogg|webm)|audio\/(?:mp3|oga|ogg|opus));base64,[a-z0-9+\/]+=*$/i;
-/**
- * @param {?} url
- * @return {?}
- */
-function _sanitizeUrl(url) {
-    url = String(url);
-    if (url.match(SAFE_URL_PATTERN) || url.match(DATA_URL_PATTERN))
-        return url;
-    if (isDevMode()) {
-        console.warn(`WARNING: sanitizing unsafe URL value ${url} (see http://g.co/ng/security#xss)`);
-    }
-    return 'unsafe:' + url;
-}
-/**
- * @param {?} srcset
- * @return {?}
- */
-function sanitizeSrcset(srcset) {
-    srcset = String(srcset);
-    return srcset.split(',').map((srcset) => _sanitizeUrl(srcset.trim())).join(', ');
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @param {?} tags
- * @return {?}
- */
-function tagSet(tags) {
-    /** @type {?} */
-    const res = {};
-    for (const t of tags.split(','))
-        res[t] = true;
-    return res;
-}
-/**
- * @param {...?} sets
- * @return {?}
- */
-function merge$1(...sets) {
-    /** @type {?} */
-    const res = {};
-    for (const s of sets) {
-        for (const v in s) {
-            if (s.hasOwnProperty(v))
-                res[v] = true;
-        }
-    }
-    return res;
-}
-/** @type {?} */
-const VOID_ELEMENTS = tagSet('area,br,col,hr,img,wbr');
-/** @type {?} */
-const OPTIONAL_END_TAG_BLOCK_ELEMENTS = tagSet('colgroup,dd,dt,li,p,tbody,td,tfoot,th,thead,tr');
-/** @type {?} */
-const OPTIONAL_END_TAG_INLINE_ELEMENTS = tagSet('rp,rt');
-/** @type {?} */
-const OPTIONAL_END_TAG_ELEMENTS = merge$1(OPTIONAL_END_TAG_INLINE_ELEMENTS, OPTIONAL_END_TAG_BLOCK_ELEMENTS);
-/** @type {?} */
-const BLOCK_ELEMENTS = merge$1(OPTIONAL_END_TAG_BLOCK_ELEMENTS, tagSet('address,article,' +
-    'aside,blockquote,caption,center,del,details,dialog,dir,div,dl,figure,figcaption,footer,h1,h2,h3,h4,h5,' +
-    'h6,header,hgroup,hr,ins,main,map,menu,nav,ol,pre,section,summary,table,ul'));
-/** @type {?} */
-const INLINE_ELEMENTS = merge$1(OPTIONAL_END_TAG_INLINE_ELEMENTS, tagSet('a,abbr,acronym,audio,b,' +
-    'bdi,bdo,big,br,cite,code,del,dfn,em,font,i,img,ins,kbd,label,map,mark,picture,q,ruby,rp,rt,s,' +
-    'samp,small,source,span,strike,strong,sub,sup,time,track,tt,u,var,video'));
-/** @type {?} */
-const VALID_ELEMENTS = merge$1(VOID_ELEMENTS, BLOCK_ELEMENTS, INLINE_ELEMENTS, OPTIONAL_END_TAG_ELEMENTS);
-/** @type {?} */
-const URI_ATTRS = tagSet('background,cite,href,itemtype,longdesc,poster,src,xlink:href');
-/** @type {?} */
-const SRCSET_ATTRS = tagSet('srcset');
-/** @type {?} */
-const HTML_ATTRS = tagSet('abbr,accesskey,align,alt,autoplay,axis,bgcolor,border,cellpadding,cellspacing,class,clear,color,cols,colspan,' +
-    'compact,controls,coords,datetime,default,dir,download,face,headers,height,hidden,hreflang,hspace,' +
-    'ismap,itemscope,itemprop,kind,label,lang,language,loop,media,muted,nohref,nowrap,open,preload,rel,rev,role,rows,rowspan,rules,' +
-    'scope,scrolling,shape,size,sizes,span,srclang,start,summary,tabindex,target,title,translate,type,usemap,' +
-    'valign,value,vspace,width');
-/** @type {?} */
-const VALID_ATTRS = merge$1(URI_ATTRS, SRCSET_ATTRS, HTML_ATTRS);
-/**
- * SanitizingHtmlSerializer serializes a DOM fragment, stripping out any unsafe elements and unsafe
- * attributes.
- */
-class SanitizingHtmlSerializer {
-    constructor() {
-        this.sanitizedSomething = false;
-        this.buf = [];
-    }
-    /**
-     * @param {?} el
-     * @return {?}
-     */
-    sanitizeChildren(el) {
-        /** @type {?} */
-        let current = /** @type {?} */ ((el.firstChild));
-        /** @type {?} */
-        let elementValid = true;
-        while (current) {
-            if (current.nodeType === Node.ELEMENT_NODE) {
-                elementValid = this.startElement(/** @type {?} */ (current));
-            }
-            else if (current.nodeType === Node.TEXT_NODE) {
-                this.chars(/** @type {?} */ ((current.nodeValue)));
-            }
-            else {
-                // Strip non-element, non-text nodes.
-                this.sanitizedSomething = true;
-            }
-            if (elementValid && current.firstChild) {
-                current = /** @type {?} */ ((current.firstChild));
-                continue;
-            }
-            while (current) {
-                // Leaving the element. Walk up and to the right, closing tags as we go.
-                if (current.nodeType === Node.ELEMENT_NODE) {
-                    this.endElement(/** @type {?} */ (current));
-                }
-                /** @type {?} */
-                let next = this.checkClobberedElement(current, /** @type {?} */ ((current.nextSibling)));
-                if (next) {
-                    current = next;
-                    break;
-                }
-                current = this.checkClobberedElement(current, /** @type {?} */ ((current.parentNode)));
-            }
-        }
-        return this.buf.join('');
-    }
-    /**
-     * Outputs only valid Elements.
-     *
-     * Invalid elements are skipped.
-     *
-     * @param {?} element element to sanitize
-     * Returns true if the element is valid.
-     * @return {?}
-     */
-    startElement(element) {
-        /** @type {?} */
-        const tagName = element.nodeName.toLowerCase();
-        if (!VALID_ELEMENTS.hasOwnProperty(tagName)) {
-            this.sanitizedSomething = true;
-            return false;
-        }
-        this.buf.push('<');
-        this.buf.push(tagName);
-        /** @type {?} */
-        const elAttrs = element.attributes;
-        for (let i = 0; i < elAttrs.length; i++) {
-            /** @type {?} */
-            const elAttr = elAttrs.item(i);
-            /** @type {?} */
-            const attrName = /** @type {?} */ ((elAttr)).name;
-            /** @type {?} */
-            const lower = attrName.toLowerCase();
-            if (!VALID_ATTRS.hasOwnProperty(lower)) {
-                this.sanitizedSomething = true;
-                continue;
-            }
-            /** @type {?} */
-            let value = /** @type {?} */ ((elAttr)).value;
-            // TODO(martinprobst): Special case image URIs for data:image/...
-            if (URI_ATTRS[lower])
-                value = _sanitizeUrl(value);
-            if (SRCSET_ATTRS[lower])
-                value = sanitizeSrcset(value);
-            this.buf.push(' ', attrName, '="', encodeEntities(value), '"');
-        }
-        this.buf.push('>');
-        return true;
-    }
-    /**
-     * @param {?} current
-     * @return {?}
-     */
-    endElement(current) {
-        /** @type {?} */
-        const tagName = current.nodeName.toLowerCase();
-        if (VALID_ELEMENTS.hasOwnProperty(tagName) && !VOID_ELEMENTS.hasOwnProperty(tagName)) {
-            this.buf.push('</');
-            this.buf.push(tagName);
-            this.buf.push('>');
-        }
-    }
-    /**
-     * @param {?} chars
-     * @return {?}
-     */
-    chars(chars) { this.buf.push(encodeEntities(chars)); }
-    /**
-     * @param {?} node
-     * @param {?} nextNode
-     * @return {?}
-     */
-    checkClobberedElement(node, nextNode) {
-        if (nextNode &&
-            (node.compareDocumentPosition(nextNode) &
-                Node.DOCUMENT_POSITION_CONTAINED_BY) === Node.DOCUMENT_POSITION_CONTAINED_BY) {
-            throw new Error(`Failed to sanitize html because the element is clobbered: ${((/** @type {?} */ (node))).outerHTML}`);
-        }
-        return nextNode;
-    }
-}
-/** @type {?} */
-const SURROGATE_PAIR_REGEXP = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
-/** @type {?} */
-const NON_ALPHANUMERIC_REGEXP = /([^\#-~ |!])/g;
-/**
- * Escapes all potentially dangerous characters, so that the
- * resulting string can be safely inserted into attribute or
- * element text.
- * @param {?} value
- * @return {?}
- */
-function encodeEntities(value) {
-    return value.replace(/&/g, '&amp;')
-        .replace(SURROGATE_PAIR_REGEXP, function (match) {
-        /** @type {?} */
-        const hi = match.charCodeAt(0);
-        /** @type {?} */
-        const low = match.charCodeAt(1);
-        return '&#' + (((hi - 0xD800) * 0x400) + (low - 0xDC00) + 0x10000) + ';';
-    })
-        .replace(NON_ALPHANUMERIC_REGEXP, function (match) { return '&#' + match.charCodeAt(0) + ';'; })
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-}
-/** @type {?} */
-let inertBodyHelper;
-/**
- * Sanitizes the given unsafe, untrusted HTML fragment, and returns HTML text that is safe to add to
- * the DOM in a browser environment.
- * @param {?} defaultDoc
- * @param {?} unsafeHtmlInput
- * @return {?}
- */
-function _sanitizeHtml(defaultDoc, unsafeHtmlInput) {
-    /** @type {?} */
-    let inertBodyElement = null;
-    try {
-        inertBodyHelper = inertBodyHelper || new InertBodyHelper(defaultDoc);
-        /** @type {?} */
-        let unsafeHtml = unsafeHtmlInput ? String(unsafeHtmlInput) : '';
-        inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
-        /** @type {?} */
-        let mXSSAttempts = 5;
-        /** @type {?} */
-        let parsedHtml = unsafeHtml;
-        do {
-            if (mXSSAttempts === 0) {
-                throw new Error('Failed to sanitize html because the input is unstable');
-            }
-            mXSSAttempts--;
-            unsafeHtml = parsedHtml;
-            parsedHtml = /** @type {?} */ ((inertBodyElement)).innerHTML;
-            inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
-        } while (unsafeHtml !== parsedHtml);
-        /** @type {?} */
-        const sanitizer = new SanitizingHtmlSerializer();
-        /** @type {?} */
-        const safeHtml = sanitizer.sanitizeChildren(/** @type {?} */ (getTemplateContent(/** @type {?} */ ((inertBodyElement)))) || inertBodyElement);
-        if (isDevMode() && sanitizer.sanitizedSomething) {
-            console.warn('WARNING: sanitizing HTML stripped some content (see http://g.co/ng/security#xss).');
-        }
-        return safeHtml;
-    }
-    finally {
-        // In case anything goes wrong, clear out inertElement to reset the entire DOM structure.
-        if (inertBodyElement) {
-            /** @type {?} */
-            const parent = getTemplateContent(inertBodyElement) || inertBodyElement;
-            while (parent.firstChild) {
-                parent.removeChild(parent.firstChild);
-            }
-        }
-    }
-}
-/**
- * @param {?} el
- * @return {?}
- */
-function getTemplateContent(el) {
-    return 'content' in (/** @type {?} */ (el /** Microsoft/TypeScript#21517 */) /** Microsoft/TypeScript#21517 */) && isTemplateElement(el) ?
-        el.content :
-        null;
-}
-/**
- * @param {?} el
- * @return {?}
- */
-function isTemplateElement(el) {
-    return el.nodeType === Node.ELEMENT_NODE && el.nodeName === 'TEMPLATE';
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /** @enum {number} */
 var SecurityContext = {
     NONE: 0,
@@ -15350,7 +16248,7 @@ const angularCoreEnv = {
     'ɵtextBinding': textBinding,
     'ɵembeddedViewStart': embeddedViewStart,
     'ɵembeddedViewEnd': embeddedViewEnd,
-    'ɵi18nAttribute': i18nAttribute,
+    'ɵi18nAttributes': i18nAttributes,
     'ɵi18nExp': i18nExp,
     'ɵi18nStart': i18nStart,
     'ɵi18nEnd': i18nEnd,
@@ -16570,7 +17468,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0-beta.2+51.sha-ce52424');
+const VERSION = new Version('7.1.0-rc.0+3.sha-ee12e72');
 
 /**
  * @fileoverview added by tsickle
@@ -18777,8 +19675,12 @@ class Testability {
          */
         this._didWork = false;
         this._callbacks = [];
+        this.taskTrackingZone = null;
         this._watchAngularEvents();
-        _ngZone.run(() => { this.taskTrackingZone = Zone.current.get('TaskTrackingZone'); });
+        _ngZone.run(() => {
+            this.taskTrackingZone =
+                typeof Zone == 'undefined' ? null : Zone.current.get('TaskTrackingZone');
+        });
     }
     /**
      * @return {?}
@@ -28051,5 +28953,5 @@ const ɵdefineNgModule = defineNgModule;
  * Generated bundle index. Do not edit.
  */
 
-export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_p, _iterableDiffersFactory as ɵangular_packages_core_core_m, _keyValueDiffersFactory as ɵangular_packages_core_core_n, _localeFactory as ɵangular_packages_core_core_o, _appIdRandomProviderFactory as ɵangular_packages_core_core_g, DefaultIterableDifferFactory as ɵangular_packages_core_core_k, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_l, injectInjectorOnly as ɵangular_packages_core_core_c, ReflectiveInjector_ as ɵangular_packages_core_core_d, ReflectiveDependency as ɵangular_packages_core_core_e, resolveReflectiveProviders as ɵangular_packages_core_core_f, wtfEnabled as ɵangular_packages_core_core_q, createScope as ɵangular_packages_core_core_s, detectWTF as ɵangular_packages_core_core_r, endTimeRange as ɵangular_packages_core_core_v, leave as ɵangular_packages_core_core_t, startTimeRange as ɵangular_packages_core_core_u, injectAttributeImpl as ɵangular_packages_core_core_z, NG_INJECTABLE_DEF as ɵangular_packages_core_core_bg, bindingUpdated as ɵangular_packages_core_core_ba, getPreviousOrParentTNode as ɵangular_packages_core_core_bb, getViewData as ɵangular_packages_core_core_bc, nextContextImpl as ɵangular_packages_core_core_bd, BoundPlayerFactory as ɵangular_packages_core_core_bf, loadInternal as ɵangular_packages_core_core_bj, createElementRef as ɵangular_packages_core_core_h, createTemplateRef as ɵangular_packages_core_core_i, createViewRef as ɵangular_packages_core_core_j, makeParamDecorator as ɵangular_packages_core_core_a, makePropDecorator as ɵangular_packages_core_core_b, getClosureSafeProperty as ɵangular_packages_core_core_bh, _def as ɵangular_packages_core_core_w, DebugRendererFactory2 as ɵangular_packages_core_core_x, DebugContext as ɵangular_packages_core_core_y, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, INJECTOR$1 as INJECTOR, Injector, inject, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList$1 as QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, getInjectableDef as ɵgetInjectableDef, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR$1 as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, ɵdefineNgModule, defineBase as ɵdefineBase, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, directiveInject as ɵdirectiveInject, injectAttribute as ɵinjectAttribute, getFactoryOf as ɵgetFactoryOf, getInheritedFactory as ɵgetInheritedFactory, templateRefExtractor as ɵtemplateRefExtractor, ProvidersFeature as ɵProvidersFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, NgOnChangesFeature as ɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, container as ɵcontainer, nextContext as ɵnextContext, elementStart as ɵelementStart, namespaceHTML as ɵnamespaceHTML, namespaceMathML as ɵnamespaceMathML, namespaceSVG as ɵnamespaceSVG, element as ɵelement, listener as ɵlistener, text as ɵtext, embeddedViewStart as ɵembeddedViewStart, query as ɵquery, registerContentQuery as ɵregisterContentQuery, projection as ɵprojection, bind as ɵbind, interpolation1 as ɵinterpolation1, interpolation2 as ɵinterpolation2, interpolation3 as ɵinterpolation3, interpolation4 as ɵinterpolation4, interpolation5 as ɵinterpolation5, interpolation6 as ɵinterpolation6, interpolation7 as ɵinterpolation7, interpolation8 as ɵinterpolation8, interpolationV as ɵinterpolationV, pipeBind1 as ɵpipeBind1, pipeBind2 as ɵpipeBind2, pipeBind3 as ɵpipeBind3, pipeBind4 as ɵpipeBind4, pipeBindV as ɵpipeBindV, pureFunction0 as ɵpureFunction0, pureFunction1 as ɵpureFunction1, pureFunction2 as ɵpureFunction2, pureFunction3 as ɵpureFunction3, pureFunction4 as ɵpureFunction4, pureFunction5 as ɵpureFunction5, pureFunction6 as ɵpureFunction6, pureFunction7 as ɵpureFunction7, pureFunction8 as ɵpureFunction8, pureFunctionV as ɵpureFunctionV, getCurrentView as ɵgetCurrentView, restoreView as ɵrestoreView, containerRefreshStart as ɵcontainerRefreshStart, containerRefreshEnd as ɵcontainerRefreshEnd, queryRefresh as ɵqueryRefresh, loadQueryList as ɵloadQueryList, elementEnd as ɵelementEnd, elementProperty as ɵelementProperty, projectionDef as ɵprojectionDef, reference as ɵreference, enableBindings as ɵenableBindings, disableBindings as ɵdisableBindings, elementAttribute as ɵelementAttribute, elementStyling as ɵelementStyling, elementStylingMap as ɵelementStylingMap, elementStyleProp as ɵelementStyleProp, elementStylingApply as ɵelementStylingApply, elementClassProp as ɵelementClassProp, textBinding as ɵtextBinding, template as ɵtemplate, embeddedViewEnd as ɵembeddedViewEnd, store as ɵstore, load as ɵload, pipe as ɵpipe, whenRendered as ɵwhenRendered, i18nAttribute as ɵi18nAttribute, i18nExp as ɵi18nExp, i18nStart as ɵi18nStart, i18nEnd as ɵi18nEnd, i18nApply as ɵi18nApply, i18nExpMapping as ɵi18nExpMapping, i18nInterpolation1 as ɵi18nInterpolation1, i18nInterpolation2 as ɵi18nInterpolation2, i18nInterpolation3 as ɵi18nInterpolation3, i18nInterpolation4 as ɵi18nInterpolation4, i18nInterpolation5 as ɵi18nInterpolation5, i18nInterpolation6 as ɵi18nInterpolation6, i18nInterpolation7 as ɵi18nInterpolation7, i18nInterpolation8 as ɵi18nInterpolation8, i18nInterpolationV as ɵi18nInterpolationV, i18nMapping as ɵi18nMapping, WRAP_RENDERER_FACTORY2 as ɵWRAP_RENDERER_FACTORY2, setClassMetadata as ɵsetClassMetadata, Render3DebugRendererFactory2 as ɵRender3DebugRendererFactory2, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, compilePipe as ɵcompilePipe, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getContext as ɵgetContext, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, SWITCH_INJECTOR_FACTORY__POST_R3__ as ɵSWITCH_INJECTOR_FACTORY__POST_R3__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$4 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_p, _iterableDiffersFactory as ɵangular_packages_core_core_m, _keyValueDiffersFactory as ɵangular_packages_core_core_n, _localeFactory as ɵangular_packages_core_core_o, _appIdRandomProviderFactory as ɵangular_packages_core_core_g, DefaultIterableDifferFactory as ɵangular_packages_core_core_k, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_l, injectInjectorOnly as ɵangular_packages_core_core_c, ReflectiveInjector_ as ɵangular_packages_core_core_d, ReflectiveDependency as ɵangular_packages_core_core_e, resolveReflectiveProviders as ɵangular_packages_core_core_f, wtfEnabled as ɵangular_packages_core_core_q, createScope as ɵangular_packages_core_core_s, detectWTF as ɵangular_packages_core_core_r, endTimeRange as ɵangular_packages_core_core_v, leave as ɵangular_packages_core_core_t, startTimeRange as ɵangular_packages_core_core_u, injectAttributeImpl as ɵangular_packages_core_core_z, NG_INJECTABLE_DEF as ɵangular_packages_core_core_bh, bindingUpdated as ɵangular_packages_core_core_ba, getPreviousOrParentTNode as ɵangular_packages_core_core_bb, getViewData as ɵangular_packages_core_core_bc, nextContextImpl as ɵangular_packages_core_core_bd, BoundPlayerFactory as ɵangular_packages_core_core_bg, loadInternal as ɵangular_packages_core_core_bk, createElementRef as ɵangular_packages_core_core_h, createTemplateRef as ɵangular_packages_core_core_i, createViewRef as ɵangular_packages_core_core_j, makeParamDecorator as ɵangular_packages_core_core_a, makePropDecorator as ɵangular_packages_core_core_b, getClosureSafeProperty as ɵangular_packages_core_core_bi, _def as ɵangular_packages_core_core_w, DebugRendererFactory2 as ɵangular_packages_core_core_x, DebugContext as ɵangular_packages_core_core_y, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, INJECTOR$1 as INJECTOR, Injector, inject, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList$1 as QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, getInjectableDef as ɵgetInjectableDef, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR$1 as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, ɵdefineNgModule, defineBase as ɵdefineBase, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, directiveInject as ɵdirectiveInject, injectAttribute as ɵinjectAttribute, getFactoryOf as ɵgetFactoryOf, getInheritedFactory as ɵgetInheritedFactory, templateRefExtractor as ɵtemplateRefExtractor, ProvidersFeature as ɵProvidersFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, NgOnChangesFeature as ɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, container as ɵcontainer, nextContext as ɵnextContext, elementStart as ɵelementStart, namespaceHTML as ɵnamespaceHTML, namespaceMathML as ɵnamespaceMathML, namespaceSVG as ɵnamespaceSVG, element as ɵelement, listener as ɵlistener, text as ɵtext, embeddedViewStart as ɵembeddedViewStart, query as ɵquery, registerContentQuery as ɵregisterContentQuery, projection as ɵprojection, bind as ɵbind, interpolation1 as ɵinterpolation1, interpolation2 as ɵinterpolation2, interpolation3 as ɵinterpolation3, interpolation4 as ɵinterpolation4, interpolation5 as ɵinterpolation5, interpolation6 as ɵinterpolation6, interpolation7 as ɵinterpolation7, interpolation8 as ɵinterpolation8, interpolationV as ɵinterpolationV, pipeBind1 as ɵpipeBind1, pipeBind2 as ɵpipeBind2, pipeBind3 as ɵpipeBind3, pipeBind4 as ɵpipeBind4, pipeBindV as ɵpipeBindV, pureFunction0 as ɵpureFunction0, pureFunction1 as ɵpureFunction1, pureFunction2 as ɵpureFunction2, pureFunction3 as ɵpureFunction3, pureFunction4 as ɵpureFunction4, pureFunction5 as ɵpureFunction5, pureFunction6 as ɵpureFunction6, pureFunction7 as ɵpureFunction7, pureFunction8 as ɵpureFunction8, pureFunctionV as ɵpureFunctionV, getCurrentView as ɵgetCurrentView, restoreView as ɵrestoreView, containerRefreshStart as ɵcontainerRefreshStart, containerRefreshEnd as ɵcontainerRefreshEnd, queryRefresh as ɵqueryRefresh, loadQueryList as ɵloadQueryList, elementEnd as ɵelementEnd, elementProperty as ɵelementProperty, projectionDef as ɵprojectionDef, reference as ɵreference, enableBindings as ɵenableBindings, disableBindings as ɵdisableBindings, elementAttribute as ɵelementAttribute, elementStyling as ɵelementStyling, elementStylingMap as ɵelementStylingMap, elementStyleProp as ɵelementStyleProp, elementStylingApply as ɵelementStylingApply, elementClassProp as ɵelementClassProp, textBinding as ɵtextBinding, template as ɵtemplate, embeddedViewEnd as ɵembeddedViewEnd, store as ɵstore, load as ɵload, pipe as ɵpipe, whenRendered as ɵwhenRendered, i18nAttributes as ɵi18nAttributes, i18nExp as ɵi18nExp, i18nStart as ɵi18nStart, i18nEnd as ɵi18nEnd, i18nApply as ɵi18nApply, i18nIcuReplaceVars as ɵi18nIcuReplaceVars, WRAP_RENDERER_FACTORY2 as ɵWRAP_RENDERER_FACTORY2, setClassMetadata as ɵsetClassMetadata, Render3DebugRendererFactory2 as ɵRender3DebugRendererFactory2, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, compilePipe as ɵcompilePipe, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getContext as ɵgetContext, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, SWITCH_INJECTOR_FACTORY__POST_R3__ as ɵSWITCH_INJECTOR_FACTORY__POST_R3__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$4 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map
