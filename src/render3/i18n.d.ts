@@ -47,6 +47,28 @@ export declare function getTranslationForTemplate(message: string, subTemplateIn
  */
 export declare function i18nStart(index: number, message: string, subTemplateIndex?: number): void;
 /**
+ * Handles message string post-processing for internationalization.
+ *
+ * Handles message string post-processing by transforming it from intermediate
+ * format (that might contain some markers that we need to replace) to the final
+ * form, consumable by i18nStart instruction. Post processing steps include:
+ *
+ * 1. Resolve all multi-value cases (like [�*1:1��#2:1�|�#4:1�|�5�])
+ * 2. Replace all ICU vars (like "VAR_PLURAL")
+ * 3. Replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�)
+ *    in case multiple ICUs have the same placeholder name
+ *
+ * @param message Raw translation string for post processing
+ * @param replacements Set of replacements that should be applied
+ *
+ * @returns Transformed string that can be consumed by i18nStart instruction
+ *
+ * @publicAPI
+ */
+export declare function i18nPostprocess(message: string, replacements: {
+    [key: string]: (string | string[]);
+}): string;
+/**
  * Translates a translation block marked by `i18nStart` and `i18nEnd`. It inserts the text/ICU nodes
  * into the render tree, moves the placeholder nodes and removes the deleted nodes.
  */
@@ -97,16 +119,3 @@ export declare function i18nExp<T>(expression: T | NO_CHANGE): void;
  * (i18n attribute) on which it should update the content.
  */
 export declare function i18nApply(index: number): void;
-/**
- * Replaces the variable parameter (main binding) of an ICU by a given value.
- *
- * Example:
- * ```
- * const MSG_APP_1_RAW = "{VAR_SELECT, select, male {male} female {female} other {other}}";
- * const MSG_APP_1 = i18nIcuReplaceVars(MSG_APP_1_RAW, { VAR_SELECT: "�0�" });
- * // --> MSG_APP_1 = "{�0�, select, male {male} female {female} other {other}}"
- * ```
- */
-export declare function i18nIcuReplaceVars(message: string, replacements: {
-    [key: string]: string;
-}): string;
