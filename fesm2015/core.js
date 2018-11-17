@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-rc.0+14.sha-4222b63
+ * @license Angular v7.1.0-rc.0+15.sha-20ea5b5
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -7852,9 +7852,10 @@ function generatePropertyAliases(tNodeFlags, direction) {
  * @param {?} index The index of the element to update in the data array
  * @param {?} stylingIndex
  * @param {?} value A value indicating if a given class should be added or removed.
+ * @param {?=} directiveIndex the index for the directive that is attempting to change styling.
  * @return {?}
  */
-function elementClassProp(index, stylingIndex, value) {
+function elementClassProp(index, stylingIndex, value, directiveIndex) {
     /** @type {?} */
     const val = (value instanceof BoundPlayerFactory) ? (/** @type {?} */ (value)) : (!!value);
     updateClassProp(getStylingContext(index, getViewData()), stylingIndex, val);
@@ -7882,9 +7883,12 @@ function elementClassProp(index, stylingIndex, value) {
  *   values that are passed in here will be applied to the element (if matched).
  * @param {?=} styleSanitizer An optional sanitizer function that will be used (if provided)
  *   to sanitize the any CSS property values that are applied to the element (during rendering).
+ * @param {?=} directiveIndex the index for the directive that is attempting to change styling.
  * @return {?}
  */
-function elementStyling(classDeclarations, styleDeclarations, styleSanitizer) {
+function elementStyling(classDeclarations, styleDeclarations, styleSanitizer, directiveIndex) {
+    if (directiveIndex)
+        return;
     /** @type {?} */
     const tNode = getPreviousOrParentTNode();
     /** @type {?} */
@@ -7925,9 +7929,12 @@ function elementStyling(classDeclarations, styleDeclarations, styleSanitizer) {
  *        (Note that this is not the element index, but rather an index value allocated
  *        specifically for element styling--the index must be the next index after the element
  *        index.)
+ * @param {?=} directiveIndex the index for the directive that is attempting to change styling.
  * @return {?}
  */
-function elementStylingApply(index) {
+function elementStylingApply(index, directiveIndex) {
+    if (directiveIndex)
+        return;
     /** @type {?} */
     const viewData = getViewData();
     /** @type {?} */
@@ -7959,9 +7966,12 @@ function elementStylingApply(index) {
  * @param {?=} suffix Optional suffix. Used with scalar values to add unit such as `px`.
  *        Note that when a suffix is provided then the underlying sanitizer will
  *        be ignored.
+ * @param {?=} directiveIndex the index for the directive that is attempting to change styling.
  * @return {?}
  */
-function elementStyleProp(index, styleIndex, value, suffix) {
+function elementStyleProp(index, styleIndex, value, suffix, directiveIndex) {
+    if (directiveIndex)
+        return;
     /** @type {?} */
     let valueToAdd = null;
     if (value) {
@@ -8001,9 +8011,12 @@ function elementStyleProp(index, styleIndex, value, suffix) {
  * @param {?=} styles A key/value style map of the styles that will be applied to the given element.
  *        Any missing styles (that have already been applied to the element beforehand) will be
  *        removed (unset) from the element's styling.
+ * @param {?=} directiveIndex the index for the directive that is attempting to change styling.
  * @return {?}
  */
-function elementStylingMap(index, classes, styles) {
+function elementStylingMap(index, classes, styles, directiveIndex) {
+    if (directiveIndex)
+        return;
     /** @type {?} */
     const viewData = getViewData();
     /** @type {?} */
@@ -17452,7 +17465,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0-rc.0+14.sha-4222b63');
+const VERSION = new Version('7.1.0-rc.0+15.sha-20ea5b5');
 
 /**
  * @fileoverview added by tsickle
