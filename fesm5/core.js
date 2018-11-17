@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.1.0-rc.0+14.sha-4222b63
+ * @license Angular v7.1.0-rc.0+15.sha-20ea5b5
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __decorate, __metadata, __spread, __extends, __param, __read, __assign, __values } from 'tslib';
+import { __decorate, __metadata, __spread, __param, __extends, __read, __assign, __values } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { share } from 'rxjs/operators';
 
@@ -6262,8 +6262,9 @@ function generatePropertyAliases(tNodeFlags, direction) {
  * @param className Name of class to toggle. Because it is going to DOM, this is not subject to
  *        renaming as part of minification.
  * @param value A value indicating if a given class should be added or removed.
+ * @param directiveIndex the index for the directive that is attempting to change styling.
  */
-function elementClassProp(index, stylingIndex, value) {
+function elementClassProp(index, stylingIndex, value, directiveIndex) {
     var val = (value instanceof BoundPlayerFactory) ? value : (!!value);
     updateClassProp(getStylingContext(index, getViewData()), stylingIndex, val);
 }
@@ -6294,8 +6295,11 @@ function elementClassProp(index, stylingIndex, value) {
  *   values that are passed in here will be applied to the element (if matched).
  * @param styleSanitizer An optional sanitizer function that will be used (if provided)
  *   to sanitize the any CSS property values that are applied to the element (during rendering).
+ * @param directiveIndex the index for the directive that is attempting to change styling.
  */
-function elementStyling(classDeclarations, styleDeclarations, styleSanitizer) {
+function elementStyling(classDeclarations, styleDeclarations, styleSanitizer, directiveIndex) {
+    if (directiveIndex)
+        return; // supported in next PR
     var tNode = getPreviousOrParentTNode();
     var inputData = initializeTNodeInputs(tNode);
     if (!tNode.stylingTemplate) {
@@ -6330,8 +6334,11 @@ function elementStyling(classDeclarations, styleDeclarations, styleSanitizer) {
  *        (Note that this is not the element index, but rather an index value allocated
  *        specifically for element styling--the index must be the next index after the element
  *        index.)
+ * @param directiveIndex the index for the directive that is attempting to change styling.
  */
-function elementStylingApply(index) {
+function elementStylingApply(index, directiveIndex) {
+    if (directiveIndex)
+        return; // supported in next PR
     var viewData = getViewData();
     var isFirstRender = (viewData[FLAGS] & 1 /* CreationMode */) !== 0;
     var totalPlayersQueued = renderStyleAndClassBindings(getStylingContext(index, viewData), getRenderer(), viewData, isFirstRender);
@@ -6359,8 +6366,11 @@ function elementStylingApply(index) {
  * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
  *        Note that when a suffix is provided then the underlying sanitizer will
  *        be ignored.
+ * @param directiveIndex the index for the directive that is attempting to change styling.
  */
-function elementStyleProp(index, styleIndex, value, suffix) {
+function elementStyleProp(index, styleIndex, value, suffix, directiveIndex) {
+    if (directiveIndex)
+        return; // supported in next PR
     var valueToAdd = null;
     if (value) {
         if (suffix) {
@@ -6398,8 +6408,11 @@ function elementStyleProp(index, styleIndex, value, suffix) {
  * @param styles A key/value style map of the styles that will be applied to the given element.
  *        Any missing styles (that have already been applied to the element beforehand) will be
  *        removed (unset) from the element's styling.
+ * @param directiveIndex the index for the directive that is attempting to change styling.
  */
-function elementStylingMap(index, classes, styles) {
+function elementStylingMap(index, classes, styles, directiveIndex) {
+    if (directiveIndex)
+        return; // supported in next PR
     var viewData = getViewData();
     var tNode = getTNode(index, viewData);
     var stylingContext = getStylingContext(index, viewData);
@@ -14324,7 +14337,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.1.0-rc.0+14.sha-4222b63');
+var VERSION = new Version('7.1.0-rc.0+15.sha-20ea5b5');
 
 /**
  * @license
