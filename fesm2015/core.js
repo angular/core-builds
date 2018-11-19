@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-rc.0+17.sha-893c173.with-local-changes
+ * @license Angular v7.1.0-rc.0+19.sha-20729b3.with-local-changes
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -11268,9 +11268,9 @@ class R3Injector {
          * Flag indicating that this injector was previously destroyed.
          */
         this.destroyed = false;
-        // Start off by creating Records for every provider declared in every InjectorType
-        // included transitively in `def`.
-        deepForEach([def], injectorDef => this.processInjectorType(injectorDef, new Set()));
+        /** @type {?} */
+        const dedupStack = [];
+        deepForEach([def], injectorDef => this.processInjectorType(injectorDef, [], dedupStack));
         additionalProviders &&
             deepForEach(additionalProviders, provider => this.processProvider(provider));
         // Make sure the INJECTOR token provides this injector.
@@ -11356,9 +11356,10 @@ class R3Injector {
      * to this injector.
      * @param {?} defOrWrappedDef
      * @param {?} parents
+     * @param {?} dedupStack
      * @return {?}
      */
-    processInjectorType(defOrWrappedDef, parents) {
+    processInjectorType(defOrWrappedDef, parents, dedupStack) {
         defOrWrappedDef = resolveForwardRef(defOrWrappedDef);
         /** @type {?} */
         let def = getInjectorDef(defOrWrappedDef);
@@ -11366,6 +11367,16 @@ class R3Injector {
         const ngModule = (def == null) && (/** @type {?} */ (defOrWrappedDef)).ngModule || undefined;
         /** @type {?} */
         const defType = (ngModule === undefined) ? (/** @type {?} */ (defOrWrappedDef)) : ngModule;
+        // Check for circular dependencies.
+        if (ngDevMode && parents.indexOf(defType) !== -1) {
+            /** @type {?} */
+            const defName = stringify(defType);
+            throw new Error(`Circular dependency in DI detected for type ${defName}. Dependency path: ${parents.map(defType => stringify(defType)).join(' > ')} > ${defName}.`);
+        }
+        // Check for multiple imports of the same module
+        if (dedupStack.indexOf(defType) !== -1) {
+            return;
+        }
         /** @type {?} */
         const providers = (ngModule !== undefined) && (/** @type {?} */ (defOrWrappedDef)).providers ||
             EMPTY_ARRAY$1;
@@ -11378,10 +11389,6 @@ class R3Injector {
         if (def == null) {
             return;
         }
-        // Check for circular dependencies.
-        if (parents.has(defType)) {
-            throw new Error(`Circular dependency: type ${stringify(defType)} ends up importing itself.`);
-        }
         // Track the InjectorType and add a provider for it.
         this.injectorDefTypes.add(defType);
         this.records.set(defType, makeRecord(def.factory));
@@ -11390,13 +11397,15 @@ class R3Injector {
         if (def.imports != null) {
             // Before processing defType's imports, add it to the set of parents. This way, if it ends
             // up deeply importing itself, this can be detected.
-            parents.add(defType);
+            ngDevMode && parents.push(defType);
+            // Add it to the set of dedups. This way we can detect multiple imports of the same module
+            dedupStack.push(defType);
             try {
-                deepForEach(def.imports, imported => this.processInjectorType(imported, parents));
+                deepForEach(def.imports, imported => this.processInjectorType(imported, parents, dedupStack));
             }
             finally {
                 // Remove it from the parents set when finished.
-                parents.delete(defType);
+                ngDevMode && parents.pop();
             }
         }
         // Next, include providers listed on the definition itself.
@@ -17553,7 +17562,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0-rc.0+17.sha-893c173.with-local-changes');
+const VERSION = new Version('7.1.0-rc.0+19.sha-20729b3.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
