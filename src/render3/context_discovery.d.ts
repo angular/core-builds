@@ -24,6 +24,8 @@ import { LViewData } from './interfaces/view';
  * will be updated with a new context (which is then returned). If the monkey-patch value is not
  * detected for a component/directive instance then it will throw an error (all components and
  * directives should be automatically monkey-patched by ivy).
+ *
+ * @param target Component, Directive or DOM Node.
  */
 export declare function getContext(target: any): LContext | null;
 /**
@@ -48,7 +50,8 @@ export declare function isDirectiveInstance(instance: any): boolean;
  * @param lViewData The target view data
  * @param includeComponents Whether or not to include components in returned directives
  */
-export declare function discoverDirectives(nodeIndex: number, lViewData: LViewData, includeComponents: boolean): any[] | null;
+export declare function getDirectivesAtNodeIndex(nodeIndex: number, lViewData: LViewData, includeComponents: boolean): any[] | null;
+export declare function getComponentAtNodeIndex(nodeIndex: number, lViewData: LViewData): {} | null;
 /**
  * Returns a map of local references (local reference name => element or directive instance) that
  * exist on a given element.
