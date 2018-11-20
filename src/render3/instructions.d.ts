@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import './ng_dev_mode';
 import { InjectionToken } from '../di/injection_token';
 import { Injector } from '../di/injector';
 import { InjectFlags } from '../di/injector_compatibility';
@@ -32,7 +31,7 @@ import { NO_CHANGE } from './tokens';
 export declare function refreshDescendantViews(viewData: LViewData, rf: RenderFlags | null): void;
 /** Sets the host bindings for the current view. */
 export declare function setHostBindings(tView: TView, viewData: LViewData): void;
-export declare function createLViewData<T>(renderer: Renderer3, tView: TView, context: T | null, flags: LViewFlags, sanitizer?: Sanitizer | null, injector?: Injector | null): LViewData;
+export declare function createLViewData<T>(parentViewData: LViewData | null, renderer: Renderer3, tView: TView, context: T | null, flags: LViewFlags, sanitizer?: Sanitizer | null, injector?: Injector | null): LViewData;
 /**
  * Create and stores the TNode, and hooks it up to the tree.
  *
@@ -242,12 +241,12 @@ export declare function createTNode(viewData: LViewData, type: TNodeType, adjust
  * This instruction is meant to handle the [class.foo]="exp" case
  *
  * @param index The index of the element to update in the data array
- * @param className Name of class to toggle. Because it is going to DOM, this is not subject to
+ * @param classIndex Index of class to toggle. Because it is going to DOM, this is not subject to
  *        renaming as part of minification.
  * @param value A value indicating if a given class should be added or removed.
  * @param directiveIndex the index for the directive that is attempting to change styling.
  */
-export declare function elementClassProp(index: number, stylingIndex: number, value: boolean | PlayerFactory, directiveIndex?: number): void;
+export declare function elementClassProp(index: number, classIndex: number, value: boolean | PlayerFactory, directiveIndex?: number): void;
 /**
  * Assign any inline style values to the element during creation mode.
  *
@@ -572,6 +571,8 @@ export declare function checkNoChangesInRootView(lViewData: LViewData): void;
  * can be provided.
  *
  * @param component Component to mark as dirty.
+ *
+ * @publicApi
  */
 export declare function markDirty<T>(component: T): void;
 /**

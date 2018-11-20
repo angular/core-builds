@@ -5,8 +5,9 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { LifecycleHooksFeature, getHostElement, getRenderedText, renderComponent, whenRendered } from './component';
+import { LifecycleHooksFeature, renderComponent, whenRendered } from './component';
 import { defineBase, defineComponent, defineDirective, defineNgModule, definePipe } from './definition';
+import { getHostElement, getRenderedText } from './discovery_utils';
 import { InheritDefinitionFeature } from './features/inherit_definition_feature';
 import { NgOnChangesFeature } from './features/ng_onchanges_feature';
 import { ProvidersFeature } from './features/providers_feature';

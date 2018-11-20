@@ -101,6 +101,8 @@ export interface KeyValueDifferFactory {
  * @publicApi
  */
 export declare class KeyValueDiffers {
+    /** @nocollapse */
+    static ngInjectableDef: never;
     /**
      * @deprecated v4.0.0 - Should be private.
      */

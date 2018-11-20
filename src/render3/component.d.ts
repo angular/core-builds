@@ -104,26 +104,6 @@ export declare function createRootContext(scheduler?: (workFn: () => void) => vo
  */
 export declare function LifecycleHooksFeature(component: any, def: ComponentDef<any>): void;
 /**
- * Retrieve the host element of the component.
- *
- * Use this function to retrieve the host element of the component. The host
- * element is the element which the component is associated with.
- *
- * @param component Component for which the host element should be retrieved.
- */
-export declare function getHostElement<T>(component: T): HTMLElement;
-/**
- * Retrieves the rendered text for a given component.
- *
- * This function retrieves the host element of a component and
- * and then returns the `textContent` for that element. This implies
- * that the text returned will include re-projected content of
- * the component as well.
- *
- * @param component The component to return the content text for.
- */
-export declare function getRenderedText(component: any): string;
-/**
  * Wait on component until it is rendered.
  *
  * This function returns a `Promise` which is resolved when the component's
