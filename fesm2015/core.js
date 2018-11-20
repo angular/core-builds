@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-rc.0+27.sha-975c269.with-local-changes
+ * @license Angular v7.1.0-rc.0+21.sha-859da3a.with-local-changes
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -12180,38 +12180,6 @@ const SWITCH_RENDERER2_FACTORY = SWITCH_RENDERER2_FACTORY__POST_R3__;
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * \@description Represents the version of Angular
- *
- * \@publicApi
- */
-class Version {
-    /**
-     * @param {?} full
-     */
-    constructor(full) {
-        this.full = full;
-        this.major = full.split('.')[0];
-        this.minor = full.split('.')[1];
-        this.patch = full.split('.').slice(2).join('.');
-    }
-}
-/** *
- * \@publicApi
-  @type {?} */
-const VERSION = new Version('7.1.0-rc.0+27.sha-975c269.with-local-changes');
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
- */
 class ComponentFactoryResolver$1 extends ComponentFactoryResolver {
     /**
      * @template T
@@ -12340,12 +12308,6 @@ class ComponentFactory$1 extends ComponentFactory {
         const renderer = rendererFactory.createRenderer(hostRNode, this.componentDef);
         /** @type {?} */
         const rootViewInjector = ngModule ? createChainedInjector(injector, ngModule.injector) : injector;
-        if (rootSelectorOrNode && hostRNode) {
-            ngDevMode && ngDevMode.rendererSetAttribute++;
-            isProceduralRenderer(renderer) ?
-                renderer.setAttribute(hostRNode, 'ng-version', VERSION.full) :
-                hostRNode.setAttribute('ng-version', VERSION.full);
-        }
         /** @type {?} */
         const rootView = createLViewData(renderer, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags, undefined, rootViewInjector);
         /** @type {?} */
@@ -17481,6 +17443,38 @@ const SWITCH_COMPILE_NGMODULE = SWITCH_COMPILE_NGMODULE__POST_R3__;
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * \@description Represents the version of Angular
+ *
+ * \@publicApi
+ */
+class Version {
+    /**
+     * @param {?} full
+     */
+    constructor(full) {
+        this.full = full;
+        this.major = full.split('.')[0];
+        this.minor = full.split('.')[1];
+        this.patch = full.split('.').slice(2).join('.');
+    }
+}
+/** *
+ * \@publicApi
+  @type {?} */
+const VERSION = new Version('7.1.0-rc.0+21.sha-859da3a.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
