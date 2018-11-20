@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-rc.0+16.sha-81e975a.with-local-changes
+ * @license Angular v7.1.0-rc.0+19.sha-20729b3.with-local-changes
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -8975,7 +8975,8 @@ var R3Injector = /** @class */ (function () {
         this.destroyed = false;
         // Start off by creating Records for every provider declared in every InjectorType
         // included transitively in `def`.
-        deepForEach([def], function (injectorDef) { return _this.processInjectorType(injectorDef, new Set()); });
+        var dedupStack = [];
+        deepForEach([def], function (injectorDef) { return _this.processInjectorType(injectorDef, [], dedupStack); });
         additionalProviders &&
             deepForEach(additionalProviders, function (provider) { return _this.processProvider(provider); });
         // Make sure the INJECTOR token provides this injector.
@@ -9053,7 +9054,7 @@ var R3Injector = /** @class */ (function () {
      * Add an `InjectorType` or `InjectorDefTypeWithProviders` and all of its transitive providers
      * to this injector.
      */
-    R3Injector.prototype.processInjectorType = function (defOrWrappedDef, parents) {
+    R3Injector.prototype.processInjectorType = function (defOrWrappedDef, parents, dedupStack) {
         var _this = this;
         defOrWrappedDef = resolveForwardRef(defOrWrappedDef);
         // Either the defOrWrappedDef is an InjectorType (with ngInjectorDef) or an
@@ -9067,6 +9068,15 @@ var R3Injector = /** @class */ (function () {
         // then this is easy. In the case of an InjectorDefTypeWithProviders, then the definition type
         // is the `ngModule`.
         var defType = (ngModule === undefined) ? defOrWrappedDef : ngModule;
+        // Check for circular dependencies.
+        if (ngDevMode && parents.indexOf(defType) !== -1) {
+            var defName = stringify(defType);
+            throw new Error("Circular dependency in DI detected for type " + defName + ". Dependency path: " + parents.map(function (defType) { return stringify(defType); }).join(' > ') + " > " + defName + ".");
+        }
+        // Check for multiple imports of the same module
+        if (dedupStack.indexOf(defType) !== -1) {
+            return;
+        }
         // If defOrWrappedType was an InjectorDefTypeWithProviders, then .providers may hold some
         // extra providers.
         var providers = (ngModule !== undefined) && defOrWrappedDef.providers ||
@@ -9080,10 +9090,6 @@ var R3Injector = /** @class */ (function () {
         if (def == null) {
             return;
         }
-        // Check for circular dependencies.
-        if (parents.has(defType)) {
-            throw new Error("Circular dependency: type " + stringify(defType) + " ends up importing itself.");
-        }
         // Track the InjectorType and add a provider for it.
         this.injectorDefTypes.add(defType);
         this.records.set(defType, makeRecord(def.factory));
@@ -9092,13 +9098,15 @@ var R3Injector = /** @class */ (function () {
         if (def.imports != null) {
             // Before processing defType's imports, add it to the set of parents. This way, if it ends
             // up deeply importing itself, this can be detected.
-            parents.add(defType);
+            ngDevMode && parents.push(defType);
+            // Add it to the set of dedups. This way we can detect multiple imports of the same module
+            dedupStack.push(defType);
             try {
-                deepForEach(def.imports, function (imported) { return _this.processInjectorType(imported, parents); });
+                deepForEach(def.imports, function (imported) { return _this.processInjectorType(imported, parents, dedupStack); });
             }
             finally {
                 // Remove it from the parents set when finished.
-                parents.delete(defType);
+                ngDevMode && parents.pop();
             }
         }
         // Next, include providers listed on the definition itself.
@@ -14337,7 +14345,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.1.0-rc.0+16.sha-81e975a.with-local-changes');
+var VERSION = new Version('7.1.0-rc.0+19.sha-20729b3.with-local-changes');
 
 /**
  * @license
