@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-rc.0+26.sha-34306c3.with-local-changes
+ * @license Angular v7.1.0-rc.0+28.sha-ca40565.with-local-changes
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -6881,6 +6881,12 @@ function setHostBindings(tView, viewData) {
                 viewData[BINDING_INDEX] = bindingRootIndex;
                 // We must subtract the header offset because the load() instruction
                 // expects a raw, unadjusted index.
+                // <HACK(misko)>: set the `previousOrParentTNode` so that hostBindings functions can
+                // correctly retrieve it. This should be removed once we call the hostBindings function
+                // inline as part of the `RenderFlags.Create` because in that case the value will already be
+                // correctly set.
+                setPreviousOrParentTNode(/** @type {?} */ (getTView().data[currentElementIndex + HEADER_OFFSET]));
+                // </HACK>
                 instruction(currentDirectiveIndex - HEADER_OFFSET, currentElementIndex);
                 currentDirectiveIndex++;
             }
@@ -7852,15 +7858,19 @@ function generatePropertyAliases(tNodeFlags, direction) {
  * This instruction is meant to handle the [class.foo]="exp" case
  *
  * @param {?} index The index of the element to update in the data array
- * @param {?} stylingIndex
+ * @param {?} classIndex Index of class to toggle. Because it is going to DOM, this is not subject to
+ *        renaming as part of minification.
  * @param {?} value A value indicating if a given class should be added or removed.
  * @param {?=} directiveIndex the index for the directive that is attempting to change styling.
  * @return {?}
  */
-function elementClassProp(index, stylingIndex, value, directiveIndex) {
+function elementClassProp(index, classIndex, value, directiveIndex) {
+    if (directiveIndex != undefined) {
+        return hackImplementationOfElementClassProp(index, classIndex, value, directiveIndex); // proper supported in next PR
+    }
     /** @type {?} */
     const val = (value instanceof BoundPlayerFactory) ? (/** @type {?} */ (value)) : (!!value);
-    updateClassProp(getStylingContext(index, getViewData()), stylingIndex, val);
+    updateClassProp(getStylingContext(index, getViewData()), classIndex, val);
 }
 /**
  * Assign any inline style values to the element during creation mode.
@@ -7889,8 +7899,11 @@ function elementClassProp(index, stylingIndex, value, directiveIndex) {
  * @return {?}
  */
 function elementStyling(classDeclarations, styleDeclarations, styleSanitizer, directiveIndex) {
-    if (directiveIndex)
+    if (directiveIndex !== undefined) {
+        getCreationMode() &&
+            hackImplementationOfElementStyling(classDeclarations || null, styleDeclarations || null, styleSanitizer || null, directiveIndex); // supported in next PR
         return;
+    }
     /** @type {?} */
     const tNode = getPreviousOrParentTNode();
     /** @type {?} */
@@ -7935,8 +7948,9 @@ function elementStyling(classDeclarations, styleDeclarations, styleSanitizer, di
  * @return {?}
  */
 function elementStylingApply(index, directiveIndex) {
-    if (directiveIndex)
-        return;
+    if (directiveIndex != undefined) {
+        return hackImplementationOfElementStylingApply(index, directiveIndex); // supported in next PR
+    }
     /** @type {?} */
     const viewData = getViewData();
     /** @type {?} */
@@ -7972,8 +7986,8 @@ function elementStylingApply(index, directiveIndex) {
  * @return {?}
  */
 function elementStyleProp(index, styleIndex, value, suffix, directiveIndex) {
-    if (directiveIndex)
-        return;
+    if (directiveIndex != undefined)
+        return hackImplementationOfElementStyleProp(index, styleIndex, value, suffix, directiveIndex);
     /** @type {?} */
     let valueToAdd = null;
     if (value) {
@@ -8017,8 +8031,8 @@ function elementStyleProp(index, styleIndex, value, suffix, directiveIndex) {
  * @return {?}
  */
 function elementStylingMap(index, classes, styles, directiveIndex) {
-    if (directiveIndex)
-        return;
+    if (directiveIndex != undefined)
+        return hackImplementationOfElementStylingMap(index, classes, styles, directiveIndex);
     /** @type {?} */
     const viewData = getViewData();
     /** @type {?} */
@@ -8033,6 +8047,88 @@ function elementStylingMap(index, classes, styles, directiveIndex) {
         setInputsForProperty(getViewData(), /** @type {?} */ ((/** @type {?} */ ((tNode.inputs))['class'])), classInputVal);
     }
     updateStylingMap(stylingContext, classes, styles);
+}
+/**
+ * @param {?} classDeclarations
+ * @param {?} styleDeclarations
+ * @param {?} styleSanitizer
+ * @param {?} directiveIndex
+ * @return {?}
+ */
+function hackImplementationOfElementStyling(classDeclarations, styleDeclarations, styleSanitizer, directiveIndex) {
+    /** @type {?} */
+    const node = getNativeByTNode(getPreviousOrParentTNode(), getViewData());
+    ngDevMode && assertDefined(node, 'expecting parent DOM node');
+    /** @type {?} */
+    const hostStylingHackMap = ((/** @type {?} */ (node)).hostStylingHack || ((/** @type {?} */ (node)).hostStylingHack = {}));
+    hostStylingHackMap[directiveIndex] = {
+        classDeclarations: hackSquashDeclaration(classDeclarations),
+        styleDeclarations: hackSquashDeclaration(styleDeclarations), styleSanitizer
+    };
+}
+/**
+ * @param {?} declarations
+ * @return {?}
+ */
+function hackSquashDeclaration(declarations) {
+    // assume the array is correct. This should be fine for View Engine compatibility.
+    return declarations || /** @type {?} */ ([]);
+}
+/**
+ * @param {?} index
+ * @param {?} classIndex
+ * @param {?} value
+ * @param {?} directiveIndex
+ * @return {?}
+ */
+function hackImplementationOfElementClassProp(index, classIndex, value, directiveIndex) {
+    /** @type {?} */
+    const node = getNativeByIndex(index, getViewData());
+    ngDevMode && assertDefined(node, 'could not locate node');
+    /** @type {?} */
+    const hostStylingHack = (/** @type {?} */ (node)).hostStylingHack[directiveIndex];
+    /** @type {?} */
+    const className = hostStylingHack.classDeclarations[classIndex];
+    /** @type {?} */
+    const renderer = getRenderer();
+    if (isProceduralRenderer(renderer)) {
+        value ? renderer.addClass(node, className) : renderer.removeClass(node, className);
+    }
+    else {
+        /** @type {?} */
+        const classList = (/** @type {?} */ (node)).classList;
+        value ? classList.add(className) : classList.remove(className);
+    }
+}
+/**
+ * @param {?} index
+ * @param {?=} directiveIndex
+ * @return {?}
+ */
+function hackImplementationOfElementStylingApply(index, directiveIndex) {
+    // Do nothing because the hack implementation is eager.
+}
+/**
+ * @param {?} index
+ * @param {?} styleIndex
+ * @param {?} value
+ * @param {?=} suffix
+ * @param {?=} directiveIndex
+ * @return {?}
+ */
+function hackImplementationOfElementStyleProp(index, styleIndex, value, suffix, directiveIndex) {
+    throw new Error('unimplemented. Should not be needed by ViewEngine compatibility');
+}
+/**
+ * @template T
+ * @param {?} index
+ * @param {?} classes
+ * @param {?=} styles
+ * @param {?=} directiveIndex
+ * @return {?}
+ */
+function hackImplementationOfElementStylingMap(index, classes, styles, directiveIndex) {
+    throw new Error('unimplemented. Should not be needed by ViewEngine compatibility');
 }
 /**
  * Create static text node
@@ -12212,7 +12308,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0-rc.0+26.sha-34306c3.with-local-changes');
+const VERSION = new Version('7.1.0-rc.0+28.sha-ca40565.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
