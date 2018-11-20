@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0-rc.0+20.sha-a43998c.with-local-changes
+ * @license Angular v7.1.0-rc.0+25.sha-2a7210e.with-local-changes
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -9760,6 +9760,32 @@ var SWITCH_RENDERER2_FACTORY = SWITCH_RENDERER2_FACTORY__PRE_R3__;
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * @description Represents the version of Angular
+ *
+ * @publicApi
+ */
+var Version = /** @class */ (function () {
+    function Version(full) {
+        this.full = full;
+        this.major = full.split('.')[0];
+        this.minor = full.split('.')[1];
+        this.patch = full.split('.').slice(2).join('.');
+    }
+    return Version;
+}());
+/**
+ * @publicApi
+ */
+var VERSION = new Version('7.1.0-rc.0+25.sha-2a7210e.with-local-changes');
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 var ComponentFactoryResolver$1 = /** @class */ (function (_super) {
     __extends(ComponentFactoryResolver$$1, _super);
     function ComponentFactoryResolver$$1() {
@@ -9859,6 +9885,12 @@ var ComponentFactory$1 = /** @class */ (function (_super) {
         var rootContext = ngModule && !isInternalRootView ? ngModule.injector.get(ROOT_CONTEXT) : createRootContext();
         var renderer = rendererFactory.createRenderer(hostRNode, this.componentDef);
         var rootViewInjector = ngModule ? createChainedInjector(injector, ngModule.injector) : injector;
+        if (rootSelectorOrNode && hostRNode) {
+            ngDevMode && ngDevMode.rendererSetAttribute++;
+            isProceduralRenderer(renderer) ?
+                renderer.setAttribute(hostRNode, 'ng-version', VERSION.full) :
+                hostRNode.setAttribute('ng-version', VERSION.full);
+        }
         // Create the root view. Uses empty TView and ContentTemplate.
         var rootView = createLViewData(renderer, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags, undefined, rootViewInjector);
         // rootView is the parent when bootstrapping
@@ -14320,32 +14352,6 @@ var SWITCH_COMPILE_NGMODULE = SWITCH_COMPILE_NGMODULE__PRE_R3__;
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * @description Represents the version of Angular
- *
- * @publicApi
- */
-var Version = /** @class */ (function () {
-    function Version(full) {
-        this.full = full;
-        this.major = full.split('.')[0];
-        this.minor = full.split('.')[1];
-        this.patch = full.split('.').slice(2).join('.');
-    }
-    return Version;
-}());
-/**
- * @publicApi
- */
-var VERSION = new Version('7.1.0-rc.0+20.sha-a43998c.with-local-changes');
 
 /**
  * @license
