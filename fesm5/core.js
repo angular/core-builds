@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.1.0
+ * @license Angular v7.1.0+1.sha-dc300c5
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __decorate, __metadata, __spread, __extends, __param, __read, __assign, __values } from 'tslib';
+import { __decorate, __metadata, __spread, __param, __extends, __read, __assign, __values } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { share } from 'rxjs/operators';
 
@@ -5497,15 +5497,7 @@ function setHostBindings(tView, viewData) {
             else {
                 // If it's not a number, it's a host binding function that needs to be executed.
                 viewData[BINDING_INDEX] = bindingRootIndex;
-                // We must subtract the header offset because the load() instruction
-                // expects a raw, unadjusted index.
-                // <HACK(misko)>: set the `previousOrParentTNode` so that hostBindings functions can
-                // correctly retrieve it. This should be removed once we call the hostBindings function
-                // inline as part of the `RenderFlags.Create` because in that case the value will already be
-                // correctly set.
-                setPreviousOrParentTNode(getTView().data[currentElementIndex + HEADER_OFFSET]);
-                // </HACK>
-                instruction(currentDirectiveIndex - HEADER_OFFSET, currentElementIndex);
+                instruction(2 /* Update */, readElementValue(viewData[currentDirectiveIndex]), currentElementIndex);
                 currentDirectiveIndex++;
             }
         }
@@ -6277,11 +6269,11 @@ function generatePropertyAliases(tNodeFlags, direction) {
  * @param classIndex Index of class to toggle. Because it is going to DOM, this is not subject to
  *        renaming as part of minification.
  * @param value A value indicating if a given class should be added or removed.
- * @param directiveIndex the index for the directive that is attempting to change styling.
+ * @param directive the ref to the directive that is attempting to change styling.
  */
-function elementClassProp(index, classIndex, value, directiveIndex) {
-    if (directiveIndex != undefined) {
-        return hackImplementationOfElementClassProp(index, classIndex, value, directiveIndex); // proper supported in next PR
+function elementClassProp(index, classIndex, value, directive) {
+    if (directive != undefined) {
+        return hackImplementationOfElementClassProp(index, classIndex, value, directive); // proper supported in next PR
     }
     var val = (value instanceof BoundPlayerFactory) ? value : (!!value);
     updateClassProp(getStylingContext(index, getViewData()), classIndex, val);
@@ -6313,12 +6305,12 @@ function elementClassProp(index, classIndex, value, directiveIndex) {
  *   values that are passed in here will be applied to the element (if matched).
  * @param styleSanitizer An optional sanitizer function that will be used (if provided)
  *   to sanitize the any CSS property values that are applied to the element (during rendering).
- * @param directiveIndex the index for the directive that is attempting to change styling.
+ * @param directive the ref to the directive that is attempting to change styling.
  */
-function elementStyling(classDeclarations, styleDeclarations, styleSanitizer, directiveIndex) {
-    if (directiveIndex !== undefined) {
+function elementStyling(classDeclarations, styleDeclarations, styleSanitizer, directive) {
+    if (directive != undefined) {
         getCreationMode() &&
-            hackImplementationOfElementStyling(classDeclarations || null, styleDeclarations || null, styleSanitizer || null, directiveIndex); // supported in next PR
+            hackImplementationOfElementStyling(classDeclarations || null, styleDeclarations || null, styleSanitizer || null, directive); // supported in next PR
         return;
     }
     var tNode = getPreviousOrParentTNode();
@@ -6355,11 +6347,11 @@ function elementStyling(classDeclarations, styleDeclarations, styleSanitizer, di
  *        (Note that this is not the element index, but rather an index value allocated
  *        specifically for element styling--the index must be the next index after the element
  *        index.)
- * @param directiveIndex the index for the directive that is attempting to change styling.
+ * @param directive the ref to the directive that is attempting to change styling.
  */
-function elementStylingApply(index, directiveIndex) {
-    if (directiveIndex != undefined) {
-        return hackImplementationOfElementStylingApply(index, directiveIndex); // supported in next PR
+function elementStylingApply(index, directive) {
+    if (directive != undefined) {
+        return hackImplementationOfElementStylingApply(index, directive); // supported in next PR
     }
     var viewData = getViewData();
     var isFirstRender = (viewData[FLAGS] & 1 /* CreationMode */) !== 0;
@@ -6388,11 +6380,11 @@ function elementStylingApply(index, directiveIndex) {
  * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
  *        Note that when a suffix is provided then the underlying sanitizer will
  *        be ignored.
- * @param directiveIndex the index for the directive that is attempting to change styling.
+ * @param directive the ref to the directive that is attempting to change styling.
  */
-function elementStyleProp(index, styleIndex, value, suffix, directiveIndex) {
-    if (directiveIndex != undefined)
-        return hackImplementationOfElementStyleProp(index, styleIndex, value, suffix, directiveIndex); // supported in next PR
+function elementStyleProp(index, styleIndex, value, suffix, directive) {
+    if (directive != undefined)
+        return hackImplementationOfElementStyleProp(index, styleIndex, value, suffix, directive); // supported in next PR
     var valueToAdd = null;
     if (value) {
         if (suffix) {
@@ -6430,11 +6422,11 @@ function elementStyleProp(index, styleIndex, value, suffix, directiveIndex) {
  * @param styles A key/value style map of the styles that will be applied to the given element.
  *        Any missing styles (that have already been applied to the element beforehand) will be
  *        removed (unset) from the element's styling.
- * @param directiveIndex the index for the directive that is attempting to change styling.
+ * @param directive the ref to the directive that is attempting to change styling.
  */
-function elementStylingMap(index, classes, styles, directiveIndex) {
-    if (directiveIndex != undefined)
-        return hackImplementationOfElementStylingMap(index, classes, styles, directiveIndex); // supported in next PR
+function elementStylingMap(index, classes, styles, directive) {
+    if (directive != undefined)
+        return hackImplementationOfElementStylingMap(index, classes, styles, directive); // supported in next PR
     var viewData = getViewData();
     var tNode = getTNode(index, viewData);
     var stylingContext = getStylingContext(index, viewData);
@@ -6445,23 +6437,23 @@ function elementStylingMap(index, classes, styles, directiveIndex) {
     }
     updateStylingMap(stylingContext, classes, styles);
 }
-function hackImplementationOfElementStyling(classDeclarations, styleDeclarations, styleSanitizer, directiveIndex) {
+function hackImplementationOfElementStyling(classDeclarations, styleDeclarations, styleSanitizer, directive) {
     var node = getNativeByTNode(getPreviousOrParentTNode(), getViewData());
     ngDevMode && assertDefined(node, 'expecting parent DOM node');
-    var hostStylingHackMap = (node.hostStylingHack || (node.hostStylingHack = {}));
-    hostStylingHackMap[directiveIndex] = {
+    var hostStylingHackMap = (node.hostStylingHack || (node.hostStylingHack = new Map()));
+    hostStylingHackMap.set(directive, {
         classDeclarations: hackSquashDeclaration(classDeclarations),
         styleDeclarations: hackSquashDeclaration(styleDeclarations), styleSanitizer: styleSanitizer
-    };
+    });
 }
 function hackSquashDeclaration(declarations) {
     // assume the array is correct. This should be fine for View Engine compatibility.
     return declarations || [];
 }
-function hackImplementationOfElementClassProp(index, classIndex, value, directiveIndex) {
+function hackImplementationOfElementClassProp(index, classIndex, value, directive) {
     var node = getNativeByIndex(index, getViewData());
     ngDevMode && assertDefined(node, 'could not locate node');
-    var hostStylingHack = node.hostStylingHack[directiveIndex];
+    var hostStylingHack = node.hostStylingHack.get(directive);
     var className = hostStylingHack.classDeclarations[classIndex];
     var renderer = getRenderer();
     if (isProceduralRenderer(renderer)) {
@@ -6472,13 +6464,13 @@ function hackImplementationOfElementClassProp(index, classIndex, value, directiv
         value ? classList.add(className) : classList.remove(className);
     }
 }
-function hackImplementationOfElementStylingApply(index, directiveIndex) {
+function hackImplementationOfElementStylingApply(index, directive) {
     // Do nothing because the hack implementation is eager.
 }
-function hackImplementationOfElementStyleProp(index, styleIndex, value, suffix, directiveIndex) {
+function hackImplementationOfElementStyleProp(index, styleIndex, value, suffix, directive) {
     throw new Error('unimplemented. Should not be needed by ViewEngine compatibility');
 }
-function hackImplementationOfElementStylingMap(index, classes, styles, directiveIndex) {
+function hackImplementationOfElementStylingMap(index, classes, styles, directive) {
     throw new Error('unimplemented. Should not be needed by ViewEngine compatibility');
 }
 /* END OF HACK BLOCK */
@@ -6642,6 +6634,9 @@ function postProcessBaseDirective(viewData, previousOrParentTNode, directive, de
     var native = getNativeByTNode(previousOrParentTNode, viewData);
     ngDevMode && assertEqual(viewData[BINDING_INDEX], getTView().bindingStartIndex, 'directives should be created before any bindings');
     ngDevMode && assertPreviousIsParent();
+    if (def.hostBindings) {
+        def.hostBindings(1 /* Create */, directive, previousOrParentTNode.index);
+    }
     attachPatchData(directive, viewData);
     if (native) {
         attachPatchData(native, viewData);
@@ -8754,9 +8749,9 @@ function InheritDefinitionFeature(definition) {
             var superHostBindings_1 = superDef.hostBindings;
             if (superHostBindings_1) {
                 if (prevHostBindings_1) {
-                    definition.hostBindings = function (directiveIndex, elementIndex) {
-                        superHostBindings_1(directiveIndex, elementIndex);
-                        prevHostBindings_1(directiveIndex, elementIndex);
+                    definition.hostBindings = function (rf, ctx, elementIndex) {
+                        superHostBindings_1(rf, ctx, elementIndex);
+                        prevHostBindings_1(rf, ctx, elementIndex);
                     };
                     definition.hostVars += superDef.hostVars;
                 }
@@ -9867,7 +9862,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.1.0');
+var VERSION = new Version('7.1.0+1.sha-dc300c5');
 
 /**
  * @license
