@@ -87,7 +87,7 @@ export declare class Testability implements PublicTestability {
      * @param exactMatch Whether using exactMatch
      */
     findProviders(using: any, provider: string, exactMatch: boolean): any[];
-    static ngInjectableDef: i0.InjectableDef<Testability>;
+    static ngInjectableDef: i0.ɵInjectableDef<Testability>;
 }
 /**
  * A global registry of {@link Testability} instances for specific elements.
@@ -130,7 +130,7 @@ export declare class TestabilityRegistry {
      * current node
      */
     findTestabilityInTree(elem: Node, findInAncestors?: boolean): Testability | null;
-    static ngInjectableDef: i0.InjectableDef<TestabilityRegistry>;
+    static ngInjectableDef: i0.ɵInjectableDef<TestabilityRegistry>;
 }
 /**
  * Adapter interface for retrieving the `Testability` service associated for a
