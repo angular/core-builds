@@ -668,7 +668,7 @@ export declare function directiveInject<T>(token: Type<T> | InjectionToken<T>, f
 /**
  * Facade for the attribute injection from DI.
  */
-export declare function injectAttribute(attrNameToInject: string): string | undefined;
+export declare function injectAttribute(attrNameToInject: string): string | null;
 /**
  * Registers a QueryList, associated with a content query, for later refresh (part of a view
  * refresh).

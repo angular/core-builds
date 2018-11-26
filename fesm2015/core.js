@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+1.sha-dc300c5
+ * @license Angular v7.1.0+11.sha-f45aedc
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -3067,7 +3067,7 @@ function injectAttributeImpl(tNode, attrNameToInject) {
             }
         }
     }
-    return undefined;
+    return null;
 }
 /**
  * Returns the value associated to the given token from the NodeInjectors => ModuleInjector.
@@ -12347,7 +12347,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0+1.sha-dc300c5');
+const VERSION = new Version('7.1.0+11.sha-f45aedc');
 
 /**
  * @fileoverview added by tsickle
