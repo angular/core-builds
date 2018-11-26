@@ -76,7 +76,7 @@ export declare function diPublicInInjector(injectorIndex: number, view: LViewDat
  *
  * @publicApi
  */
-export declare function injectAttributeImpl(tNode: TNode, attrNameToInject: string): string | undefined;
+export declare function injectAttributeImpl(tNode: TNode, attrNameToInject: string): string | null;
 /**
  * Returns the value associated to the given token from the NodeInjectors => ModuleInjector.
  *
