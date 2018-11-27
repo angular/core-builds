@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+19.sha-a7ba05a
+ * @license Angular v7.1.0+20.sha-d0e8020
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -6895,8 +6895,6 @@ const _CLEAN_PROMISE = Promise.resolve(null);
 function refreshDescendantViews(viewData, rf) {
     /** @type {?} */
     const tView = getTView();
-    /** @type {?} */
-    const parentFirstTemplatePass = getFirstTemplatePass();
     // This needs to be set before children are processed to support recursive components
     tView.firstTemplatePass = false;
     setFirstTemplatePass(false);
@@ -6919,7 +6917,7 @@ function refreshDescendantViews(viewData, rf) {
         }
         setHostBindings(tView, viewData);
     }
-    refreshChildComponents(tView.components, parentFirstTemplatePass, rf);
+    refreshChildComponents(tView.components, rf);
 }
 /**
  * Sets the host bindings for the current view.
@@ -6985,14 +6983,13 @@ function refreshContentQueries(tView) {
 /**
  * Refreshes child components in the current view.
  * @param {?} components
- * @param {?} parentFirstTemplatePass
  * @param {?} rf
  * @return {?}
  */
-function refreshChildComponents(components, parentFirstTemplatePass, rf) {
+function refreshChildComponents(components, rf) {
     if (components != null) {
         for (let i = 0; i < components.length; i++) {
-            componentRefresh(components[i], parentFirstTemplatePass, rf);
+            componentRefresh(components[i], rf);
         }
     }
 }
@@ -8986,18 +8983,17 @@ function embeddedViewEnd() {
  *
  * @template T
  * @param {?} adjustedElementIndex  Element index in LViewData[] (adjusted for HEADER_OFFSET)
- * @param {?} parentFirstTemplatePass
- * @param {?} rf
+ * @param {?} rf  The render flags that should be used to process this template
  * @return {?}
  */
-function componentRefresh(adjustedElementIndex, parentFirstTemplatePass, rf) {
+function componentRefresh(adjustedElementIndex, rf) {
     ngDevMode && assertDataInRange(adjustedElementIndex);
     /** @type {?} */
     const hostView = getComponentViewByIndex(adjustedElementIndex, getViewData());
     ngDevMode && assertNodeType(/** @type {?} */ (getTView().data[adjustedElementIndex]), 3 /* Element */);
     // Only attached CheckAlways components or attached, dirty OnPush components should be checked
     if (viewAttached(hostView) && hostView[FLAGS] & (2 /* CheckAlways */ | 4 /* Dirty */)) {
-        parentFirstTemplatePass && syncViewWithBlueprint(hostView);
+        syncViewWithBlueprint(hostView);
         detectChangesInternal(hostView, hostView[CONTEXT], rf);
     }
 }
@@ -12431,7 +12427,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0+19.sha-a7ba05a');
+const VERSION = new Version('7.1.0+20.sha-d0e8020');
 
 /**
  * @fileoverview added by tsickle
