@@ -446,8 +446,9 @@ export declare function embeddedViewEnd(): void;
  * Refreshes components by entering the component view and processing its bindings, queries, etc.
  *
  * @param adjustedElementIndex  Element index in LViewData[] (adjusted for HEADER_OFFSET)
+ * @param rf  The render flags that should be used to process this template
  */
-export declare function componentRefresh<T>(adjustedElementIndex: number, parentFirstTemplatePass: boolean, rf: RenderFlags | null): void;
+export declare function componentRefresh<T>(adjustedElementIndex: number, rf: RenderFlags | null): void;
 /** Returns a boolean for whether the view is attached */
 export declare function viewAttached(view: LViewData): boolean;
 /**
