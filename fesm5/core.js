@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+18.sha-d62da4d
+ * @license Angular v7.1.0+19.sha-a7ba05a
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -6625,7 +6625,7 @@ function resolveDirectives(tView, viewData, directives, tNode, localRefs) {
  */
 function instantiateAllDirectives(tView, viewData, previousOrParentTNode) {
     var start = previousOrParentTNode.flags >> 16 /* DirectiveStartingIndexShift */;
-    var end = start + previousOrParentTNode.flags & 4095 /* DirectiveCountMask */;
+    var end = start + (previousOrParentTNode.flags & 4095 /* DirectiveCountMask */);
     if (!getFirstTemplatePass() && start < end) {
         getOrCreateNodeInjectorForNode(previousOrParentTNode, viewData);
     }
@@ -9912,7 +9912,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.1.0+18.sha-d62da4d');
+var VERSION = new Version('7.1.0+19.sha-a7ba05a');
 
 /**
  * @license
