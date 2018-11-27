@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+14.sha-c2f3054
+ * @license Angular v7.1.0+18.sha-d62da4d
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -3557,6 +3557,38 @@ var NgModuleFactory = /** @class */ (function () {
     return NgModuleFactory;
 }());
 
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function normalizeDebugBindingName(name) {
+    // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
+    name = camelCaseToDashCase(name.replace(/[$@]/g, '_'));
+    return "ng-reflect-" + name;
+}
+var CAMEL_CASE_REGEXP = /([A-Z])/g;
+function camelCaseToDashCase(input) {
+    return input.replace(CAMEL_CASE_REGEXP, function () {
+        var m = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            m[_i] = arguments[_i];
+        }
+        return '-' + m[1].toLowerCase();
+    });
+}
+function normalizeDebugBindingValue(value) {
+    try {
+        // Limit the size of the value as otherwise the DOM just gets polluted.
+        return value != null ? value.toString().slice(0, 30) : value;
+    }
+    catch (e) {
+        return '[ERROR] Exception while trying to serialize the value';
+    }
+}
+
 /** Called when directives inject each other (creating a circular dependency) */
 /** Called when there are multiple component selectors that match a given node */
 function throwMultipleComponentError(tNode) {
@@ -6177,6 +6209,9 @@ function elementProperty(index, propName, value, sanitizer) {
         setInputsForProperty(viewData, dataValue, value);
         if (isComponent(tNode))
             markDirtyIfOnPush(viewData, index + HEADER_OFFSET);
+        if (ngDevMode && tNode.type === 3 /* Element */) {
+            setNgReflectProperties(element, propName, value);
+        }
     }
     else if (tNode.type === 3 /* Element */) {
         var renderer = getRenderer();
@@ -6238,6 +6273,14 @@ function setInputsForProperty(viewData, inputs, value) {
         ngDevMode && assertDataInRange(inputs[i], viewData);
         viewData[inputs[i]][inputs[i + 1]] = value;
     }
+}
+function setNgReflectProperties(element, propName, value) {
+    var renderer = getRenderer();
+    var isProcedural = isProceduralRenderer(renderer);
+    var attrName = normalizeDebugBindingName(propName);
+    var debugValue = normalizeDebugBindingValue(value);
+    isProcedural ? renderer.setAttribute(element, attrName, debugValue) :
+        element.setAttribute(attrName, debugValue);
 }
 /**
  * Consolidates all inputs or outputs of all directives on this logical node.
@@ -9170,9 +9213,7 @@ var R3Injector = /** @class */ (function () {
             throw new Error("Circular dependency in DI detected for type " + defName + ". Dependency path: " + parents.map(function (defType) { return stringify(defType); }).join(' > ') + " > " + defName + ".");
         }
         // Check for multiple imports of the same module
-        if (dedupStack.indexOf(defType) !== -1) {
-            return;
-        }
+        var isDuplicate = dedupStack.indexOf(defType) !== -1;
         // If defOrWrappedType was an InjectorDefTypeWithProviders, then .providers may hold some
         // extra providers.
         var providers = (ngModule !== undefined) && defOrWrappedDef.providers ||
@@ -9191,7 +9232,7 @@ var R3Injector = /** @class */ (function () {
         this.records.set(defType, makeRecord(def.factory));
         // Add providers in the same way that @NgModule resolution did:
         // First, include providers from any imports.
-        if (def.imports != null) {
+        if (def.imports != null && !isDuplicate) {
             // Before processing defType's imports, add it to the set of parents. This way, if it ends
             // up deeply importing itself, this can be detected.
             ngDevMode && parents.push(defType);
@@ -9206,7 +9247,7 @@ var R3Injector = /** @class */ (function () {
             }
         }
         // Next, include providers listed on the definition itself.
-        if (def.providers != null) {
+        if (def.providers != null && !isDuplicate) {
             deepForEach(def.providers, function (provider) { return _this.processProvider(provider); });
         }
         // Finally, include providers from an InjectorDefTypeWithProviders if there was one.
@@ -9871,7 +9912,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.1.0+14.sha-c2f3054');
+var VERSION = new Version('7.1.0+18.sha-d62da4d');
 
 /**
  * @license
@@ -22431,30 +22472,6 @@ function debugCheckAndUpdateNode(view, nodeDef, argStyle, givenValues) {
 }
 function debugCheckNoChangesNode(view, nodeDef, argStyle, values) {
     checkNoChangesNode.apply(void 0, __spread([view, nodeDef, argStyle], values));
-}
-function normalizeDebugBindingName(name) {
-    // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
-    name = camelCaseToDashCase(name.replace(/[$@]/g, '_'));
-    return "ng-reflect-" + name;
-}
-var CAMEL_CASE_REGEXP = /([A-Z])/g;
-function camelCaseToDashCase(input) {
-    return input.replace(CAMEL_CASE_REGEXP, function () {
-        var m = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            m[_i] = arguments[_i];
-        }
-        return '-' + m[1].toLowerCase();
-    });
-}
-function normalizeDebugBindingValue(value) {
-    try {
-        // Limit the size of the value as otherwise the DOM just gets polluted.
-        return value != null ? value.toString().slice(0, 30) : value;
-    }
-    catch (e) {
-        return '[ERROR] Exception while trying to serialize the value';
-    }
 }
 function nextDirectiveWithBinding(view, nodeIndex) {
     for (var i = nodeIndex; i < view.def.nodes.length; i++) {
