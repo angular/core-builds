@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+11.sha-f45aedc
+ * @license Angular v7.1.0+13.sha-d767e0b
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -3195,12 +3195,6 @@ function searchTokensOnInjector(injectorIndex, injectorView, token, previousTVie
     /** @type {?} */
     const tNode = /** @type {?} */ (currentTView.data[injectorIndex + TNODE]);
     /** @type {?} */
-    const nodeFlags = tNode.flags;
-    /** @type {?} */
-    const nodeProviderIndexes = tNode.providerIndexes;
-    /** @type {?} */
-    const tInjectables = currentTView.data;
-    /** @type {?} */
     let canAccessViewProviders = false;
     // We need to determine if view providers can be accessed by the starting element.
     // It happens in 2 cases:
@@ -3213,9 +3207,37 @@ function searchTokensOnInjector(injectorIndex, injectorView, token, previousTVie
     // and check the host node of the current view to identify component views.
     if (previousTView == null && isComponent(tNode) && includeViewProviders ||
         previousTView != null && previousTView != currentTView &&
-            (currentTView.node == null || /** @type {?} */ ((currentTView.node)).type === 3 /* Element */)) {
+            (currentTView.node == null || currentTView.node.type === 3 /* Element */)) {
         canAccessViewProviders = true;
     }
+    /** @type {?} */
+    const injectableIdx = locateDirectiveOrProvider(tNode, injectorView, token, canAccessViewProviders);
+    if (injectableIdx !== null) {
+        return getNodeInjectable(currentTView.data, injectorView, injectableIdx, /** @type {?} */ (tNode));
+    }
+    else {
+        return NOT_FOUND;
+    }
+}
+/**
+ * Searches for the given token among the node's directives and providers.
+ *
+ * @template T
+ * @param {?} tNode TNode on which directives are present.
+ * @param {?} view The view we are currently processing
+ * @param {?} token Provider token or type of a directive to look for.
+ * @param {?} canAccessViewProviders Whether view providers should be considered.
+ * @return {?} Index of a found directive or provider, or null when none found.
+ */
+function locateDirectiveOrProvider(tNode, view, token, canAccessViewProviders) {
+    /** @type {?} */
+    const tView = view[TVIEW];
+    /** @type {?} */
+    const nodeFlags = tNode.flags;
+    /** @type {?} */
+    const nodeProviderIndexes = tNode.providerIndexes;
+    /** @type {?} */
+    const tInjectables = tView.data;
     /** @type {?} */
     const startInjectables = nodeProviderIndexes & 65535 /* ProvidersStartIndexMask */;
     /** @type {?} */
@@ -3231,10 +3253,10 @@ function searchTokensOnInjector(injectorIndex, injectorView, token, previousTVie
         const providerTokenOrDef = /** @type {?} */ (tInjectables[i]);
         if (i < startDirectives && token === providerTokenOrDef ||
             i >= startDirectives && (/** @type {?} */ (providerTokenOrDef)).type === token) {
-            return getNodeInjectable(tInjectables, injectorView, i, /** @type {?} */ (tNode));
+            return i;
         }
     }
-    return NOT_FOUND;
+    return null;
 }
 /**
  * Retrieve or instantiate the injectable from the `lData` at particular `index`.
@@ -12347,7 +12369,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0+11.sha-f45aedc');
+const VERSION = new Version('7.1.0+13.sha-d767e0b');
 
 /**
  * @fileoverview added by tsickle
@@ -15691,36 +15713,6 @@ function getIdxOfMatchingSelector(tNode, selector) {
     return null;
 }
 /**
- * Iterates over all the directives for a node and returns index of a directive for a given type.
- *
- * @param {?} tNode TNode on which directives are present.
- * @param {?} currentView The view we are currently processing
- * @param {?} type Type of a directive to look for.
- * @return {?} Index of a found directive or null when none found.
- */
-function getIdxOfMatchingDirective(tNode, currentView, type) {
-    /** @type {?} */
-    const defs = currentView[TVIEW].data;
-    if (defs) {
-        /** @type {?} */
-        const flags = tNode.flags;
-        /** @type {?} */
-        const count = flags & 4095 /* DirectiveCountMask */;
-        /** @type {?} */
-        const start = flags >> 16 /* DirectiveStartingIndexShift */;
-        /** @type {?} */
-        const end = start + count;
-        for (let i = start; i < end; i++) {
-            /** @type {?} */
-            const def = /** @type {?} */ (defs[i]);
-            if (def.type === type) {
-                return i;
-            }
-        }
-    }
-    return null;
-}
-/**
  * @param {?} read
  * @param {?} tNode
  * @param {?} currentView
@@ -15734,9 +15726,9 @@ function queryByReadToken(read, tNode, currentView) {
     }
     else {
         /** @type {?} */
-        const matchingIdx = getIdxOfMatchingDirective(tNode, currentView, /** @type {?} */ (read));
+        const matchingIdx = locateDirectiveOrProvider(tNode, currentView, /** @type {?} */ (read), false);
         if (matchingIdx !== null) {
-            return currentView[matchingIdx];
+            return getNodeInjectable(currentView[TVIEW].data, currentView, matchingIdx, /** @type {?} */ (tNode));
         }
     }
     return null;
@@ -15782,7 +15774,7 @@ function queryRead(tNode, currentView, read, matchingIdx) {
         return queryByReadToken(read, tNode, currentView);
     }
     if (matchingIdx > -1) {
-        return currentView[matchingIdx];
+        return getNodeInjectable(currentView[TVIEW].data, currentView, matchingIdx, /** @type {?} */ (tNode));
     }
     // if read token and / or strategy is not specified,
     // detect it using appropriate tNode type
@@ -15809,7 +15801,7 @@ function add(query, tNode) {
             }
             else {
                 /** @type {?} */
-                const matchingIdx = getIdxOfMatchingDirective(tNode, currentView, type);
+                const matchingIdx = locateDirectiveOrProvider(tNode, currentView, type, false);
                 if (matchingIdx !== null) {
                     result = queryRead(tNode, currentView, predicate.read, matchingIdx);
                 }
