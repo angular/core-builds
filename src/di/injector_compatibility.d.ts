@@ -13,7 +13,7 @@ import { Injector } from './injector';
  *
  * @publicApi
  */
-export declare const enum InjectFlags {
+export declare enum InjectFlags {
     Default = 0,
     /**
      * Specifies that an injector should retrieve a dependency from any injector until reaching the

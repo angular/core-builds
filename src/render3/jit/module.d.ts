@@ -13,7 +13,7 @@ import { ComponentDef } from '../interfaces/definition';
  *
  * This function automatically gets called when a class has a `@NgModule` decorator.
  */
-export declare function compileNgModule(moduleType: Type<any>, ngModule: NgModule): void;
+export declare function compileNgModule(moduleType: Type<any>, ngModule?: NgModule): void;
 /**
  * Compiles and adds the `ngModuleDef` and `ngInjectorDef` properties to the module class.
  */

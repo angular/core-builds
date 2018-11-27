@@ -123,9 +123,9 @@ export declare function bloomHasToken(bloomHash: number, injectorIndex: number, 
 export declare function injectInjector(): NodeInjector;
 export declare class NodeInjector implements Injector {
     private _tNode;
-    private _hostView;
+    private _lView;
     private _injectorIndex;
-    constructor(_tNode: TElementNode | TContainerNode | TElementContainerNode, _hostView: LViewData);
+    constructor(_tNode: TElementNode | TContainerNode | TElementContainerNode, _lView: LViewData);
     get(token: any): any;
 }
 export declare function getFactoryOf<T>(type: Type<any>): ((type: Type<T> | null) => T) | null;

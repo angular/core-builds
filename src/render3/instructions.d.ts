@@ -31,7 +31,7 @@ import { NO_CHANGE } from './tokens';
 export declare function refreshDescendantViews(viewData: LViewData, rf: RenderFlags | null): void;
 /** Sets the host bindings for the current view. */
 export declare function setHostBindings(tView: TView, viewData: LViewData): void;
-export declare function createLViewData<T>(parentViewData: LViewData | null, renderer: Renderer3, tView: TView, context: T | null, flags: LViewFlags, sanitizer?: Sanitizer | null, injector?: Injector | null): LViewData;
+export declare function createLViewData<T>(parentLView: LViewData | null, tView: TView, context: T | null, flags: LViewFlags, rendererFactory?: RendererFactory3 | null, renderer?: Renderer3 | null, sanitizer?: Sanitizer | null, injector?: Injector | null): LViewData;
 /**
  * Create and stores the TNode, and hooks it up to the tree.
  *

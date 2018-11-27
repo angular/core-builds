@@ -16,10 +16,8 @@ import { I18nUpdateOpCodes, TI18n } from './i18n';
 import { TElementNode, TNode, TViewNode } from './node';
 import { PlayerHandler } from './player';
 import { LQueries } from './query';
-import { RElement, Renderer3 } from './renderer';
+import { RElement, Renderer3, RendererFactory3 } from './renderer';
 import { StylingContext } from './styling';
-/** Size of LViewData's header. Necessary to adjust for it when setting slots.  */
-export declare const HEADER_OFFSET = 17;
 export declare const TVIEW = 0;
 export declare const FLAGS = 1;
 export declare const PARENT = 2;
@@ -31,12 +29,15 @@ export declare const BINDING_INDEX = 7;
 export declare const CLEANUP = 8;
 export declare const CONTEXT = 9;
 export declare const INJECTOR = 10;
-export declare const RENDERER = 11;
-export declare const SANITIZER = 12;
-export declare const TAIL = 13;
-export declare const CONTAINER_INDEX = 14;
-export declare const CONTENT_QUERIES = 15;
-export declare const DECLARATION_VIEW = 16;
+export declare const RENDERER_FACTORY = 11;
+export declare const RENDERER = 12;
+export declare const SANITIZER = 13;
+export declare const TAIL = 14;
+export declare const CONTAINER_INDEX = 15;
+export declare const CONTENT_QUERIES = 16;
+export declare const DECLARATION_VIEW = 17;
+/** Size of LViewData's header. Necessary to adjust for it when setting slots.  */
+export declare const HEADER_OFFSET = 18;
 export interface OpaqueViewState {
     '__brand__': 'Brand for OpaqueViewState that nothing will match';
 }
@@ -124,6 +125,8 @@ export interface LViewData extends Array<any> {
     [CONTEXT]: {} | RootContext | null;
     /** An optional Module Injector to be used as fall back after Element Injectors are consulted. */
     readonly [INJECTOR]: Injector | null;
+    /** Renderer to be used for this view. */
+    [RENDERER_FACTORY]: RendererFactory3;
     /** Renderer to be used for this view. */
     [RENDERER]: Renderer3;
     /** An optional custom sanitizer. */

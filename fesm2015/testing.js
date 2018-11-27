@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.1.0+20.sha-d0e8020
+ * @license Angular v7.1.0+34.sha-39e426c
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, Injector, NgZone, ɵRender3ComponentFactory, ɵRender3DebugRendererFactory2, ɵRender3NgModuleRef, ɵWRAP_RENDERER_FACTORY2, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, Compiler, Injectable, ApplicationInitStatus, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵivyEnabled, ɵoverrideComponentView, ɵoverrideProvider } from '@angular/core';
+import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, Injector, NgZone, ɵRender3ComponentFactory, ɵRender3NgModuleRef, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, Compiler, Injectable, ApplicationInitStatus, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵivyEnabled, ɵoverrideComponentView, ɵoverrideProvider } from '@angular/core';
 
 /**
  * @fileoverview added by tsickle
@@ -1426,16 +1426,11 @@ class TestBedRender3 {
     _createTestModule() {
         /** @type {?} */
         const rootProviderOverrides = this._rootProviderOverrides;
-        /** @type {?} */
-        const rendererFactoryWrapper = {
-            provide: ɵWRAP_RENDERER_FACTORY2,
-            useFactory: () => (rf) => new ɵRender3DebugRendererFactory2(rf),
-        };
         class RootScopeModule {
         }
         RootScopeModule.decorators = [
             { type: NgModule, args: [{
-                        providers: [...rootProviderOverrides, rendererFactoryWrapper],
+                        providers: [...rootProviderOverrides],
                         jit: true,
                     },] },
         ];
@@ -1758,8 +1753,6 @@ class TestBedViewEngine {
      *
      * Test modules and platforms for individual platforms are available from
      * '\@angular/<platform_name>/testing'.
-     *
-     * \@publicApi
      * @param {?} ngModule
      * @param {?} platform
      * @param {?=} aotSummaries
@@ -1773,8 +1766,6 @@ class TestBedViewEngine {
     }
     /**
      * Reset the providers for the test injector.
-     *
-     * \@publicApi
      * @return {?}
      */
     static resetTestEnvironment() { _getTestBedViewEngine().resetTestEnvironment(); }
@@ -1914,8 +1905,6 @@ class TestBedViewEngine {
      *
      * Test modules and platforms for individual platforms are available from
      * '\@angular/<platform_name>/testing'.
-     *
-     * \@publicApi
      * @param {?} ngModule
      * @param {?} platform
      * @param {?=} aotSummaries
@@ -1933,8 +1922,6 @@ class TestBedViewEngine {
     }
     /**
      * Reset the providers for the test injector.
-     *
-     * \@publicApi
      * @return {?}
      */
     resetTestEnvironment() {

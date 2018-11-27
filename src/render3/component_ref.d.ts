@@ -12,7 +12,6 @@ import { ComponentFactory as viewEngine_ComponentFactory, ComponentRef as viewEn
 import { ComponentFactoryResolver as viewEngine_ComponentFactoryResolver } from '../linker/component_factory_resolver';
 import { ElementRef as viewEngine_ElementRef } from '../linker/element_ref';
 import { NgModuleRef as viewEngine_NgModuleRef } from '../linker/ng_module_factory';
-import { RendererFactory2 } from '../render/api';
 import { Type } from '../type';
 import { ComponentDef } from './interfaces/definition';
 import { TContainerNode, TElementContainerNode, TElementNode } from './interfaces/node';
@@ -30,11 +29,6 @@ export declare const ROOT_CONTEXT: InjectionToken<RootContext>;
  * for the default `RootContext` found in the {@link ROOT_CONTEXT} token.
  */
 export declare const SCHEDULER: InjectionToken<(fn: () => void) => void>;
-/**
- * A function used to wrap the `RendererFactory2`.
- * Used in tests to change the `RendererFactory2` into a `DebugRendererFactory2`.
- */
-export declare const WRAP_RENDERER_FACTORY2: InjectionToken<(rf: RendererFactory2) => RendererFactory2>;
 /**
  * Render3 implementation of {@link viewEngine_ComponentFactory}.
  */
