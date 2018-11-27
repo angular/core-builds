@@ -13,7 +13,6 @@ import { LViewData, OpaqueViewState, TView } from './interfaces/view';
 export declare function getRenderer(): Renderer3;
 export declare function setRenderer(r: Renderer3): void;
 export declare function getRendererFactory(): RendererFactory3;
-export declare function setRendererFactory(factory: RendererFactory3): void;
 export declare function getCurrentSanitizer(): Sanitizer | null;
 export declare function getElementDepthCount(): number;
 export declare function increaseElementDepthCount(): void;

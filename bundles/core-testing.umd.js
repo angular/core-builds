@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+20.sha-d0e8020
+ * @license Angular v7.1.0+34.sha-39e426c
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1259,16 +1259,12 @@
         };
         TestBedRender3.prototype._createTestModule = function () {
             var rootProviderOverrides = this._rootProviderOverrides;
-            var rendererFactoryWrapper = {
-                provide: i0.ɵWRAP_RENDERER_FACTORY2,
-                useFactory: function () { return function (rf) { return new i0.ɵRender3DebugRendererFactory2(rf); }; },
-            };
             var RootScopeModule = /** @class */ (function () {
                 function RootScopeModule() {
                 }
                 RootScopeModule = __decorate([
                     i0.NgModule({
-                        providers: __spread(rootProviderOverrides, [rendererFactoryWrapper]),
+                        providers: __spread(rootProviderOverrides),
                         jit: true,
                     })
                 ], RootScopeModule);
@@ -1536,8 +1532,6 @@
          *
          * Test modules and platforms for individual platforms are available from
          * '@angular/<platform_name>/testing'.
-         *
-         * @publicApi
          */
         TestBedViewEngine.initTestEnvironment = function (ngModule, platform, aotSummaries) {
             var testBed = _getTestBedViewEngine();
@@ -1546,8 +1540,6 @@
         };
         /**
          * Reset the providers for the test injector.
-         *
-         * @publicApi
          */
         TestBedViewEngine.resetTestEnvironment = function () { _getTestBedViewEngine().resetTestEnvironment(); };
         TestBedViewEngine.resetTestingModule = function () {
@@ -1631,8 +1623,6 @@
          *
          * Test modules and platforms for individual platforms are available from
          * '@angular/<platform_name>/testing'.
-         *
-         * @publicApi
          */
         TestBedViewEngine.prototype.initTestEnvironment = function (ngModule, platform, aotSummaries) {
             if (this.platform || this.ngModule) {
@@ -1646,8 +1636,6 @@
         };
         /**
          * Reset the providers for the test injector.
-         *
-         * @publicApi
          */
         TestBedViewEngine.prototype.resetTestEnvironment = function () {
             this.resetTestingModule();

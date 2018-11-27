@@ -15,3 +15,4 @@ export declare function assertNotDefined<T>(actual: T, msg: string): void;
 export declare function assertDefined<T>(actual: T, msg: string): void;
 export declare function assertComponentType(actual: any, msg?: string): void;
 export declare function assertNgModuleType(actual: any, msg?: string): void;
+export declare function assertDomNode(node: any): void;

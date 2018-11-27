@@ -9,6 +9,9 @@ import { Component, Directive, Injector, NgModule, Pipe, PlatformRef, Type } fro
 import { ComponentFixture } from './component_fixture';
 import { MetadataOverride } from './metadata_override';
 import { TestBedStatic, TestModuleMetadata } from './test_bed_common';
+/**
+ * @publicApi
+ */
 export interface TestBed {
     platform: PlatformRef;
     ngModule: Type<any> | Type<any>[];
@@ -22,14 +25,10 @@ export interface TestBed {
      *
      * Test modules and platforms for individual platforms are available from
      * '@angular/<platform_name>/testing'.
-     *
-     * @publicApi
      */
     initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): void;
     /**
      * Reset the providers for the test injector.
-     *
-     * @publicApi
      */
     resetTestEnvironment(): void;
     resetTestingModule(): void;
@@ -101,14 +100,10 @@ export declare class TestBedViewEngine implements Injector, TestBed {
      *
      * Test modules and platforms for individual platforms are available from
      * '@angular/<platform_name>/testing'.
-     *
-     * @publicApi
      */
     static initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): TestBedViewEngine;
     /**
      * Reset the providers for the test injector.
-     *
-     * @publicApi
      */
     static resetTestEnvironment(): void;
     static resetTestingModule(): TestBedStatic;
@@ -200,14 +195,10 @@ export declare class TestBedViewEngine implements Injector, TestBed {
      *
      * Test modules and platforms for individual platforms are available from
      * '@angular/<platform_name>/testing'.
-     *
-     * @publicApi
      */
     initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): void;
     /**
      * Reset the providers for the test injector.
-     *
-     * @publicApi
      */
     resetTestEnvironment(): void;
     resetTestingModule(): void;

@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.1.0+20.sha-d0e8020
+ * @license Angular v7.1.0+34.sha-39e426c
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, Injector, NgZone, ɵRender3ComponentFactory, ɵRender3DebugRendererFactory2, ɵRender3NgModuleRef, ɵWRAP_RENDERER_FACTORY2, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, Compiler, Injectable, defineInjectable, ɵgetInheritedFactory, ɵsetClassMetadata, ɵclearOverrides, ɵoverrideComponentView, ApplicationInitStatus, ɵAPP_ROOT, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled } from '@angular/core';
+import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, Injector, NgZone, ɵRender3ComponentFactory, ɵRender3NgModuleRef, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, Compiler, Injectable, defineInjectable, ɵgetInheritedFactory, ɵsetClassMetadata, ɵclearOverrides, ɵoverrideComponentView, ApplicationInitStatus, ɵAPP_ROOT, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled } from '@angular/core';
 import { __extends, __spread, __values, __decorate, __read } from 'tslib';
 
 /**
@@ -1186,16 +1186,12 @@ var TestBedRender3 = /** @class */ (function () {
     };
     TestBedRender3.prototype._createTestModule = function () {
         var rootProviderOverrides = this._rootProviderOverrides;
-        var rendererFactoryWrapper = {
-            provide: ɵWRAP_RENDERER_FACTORY2,
-            useFactory: function () { return function (rf) { return new ɵRender3DebugRendererFactory2(rf); }; },
-        };
         var RootScopeModule = /** @class */ (function () {
             function RootScopeModule() {
             }
             RootScopeModule = __decorate([
                 NgModule({
-                    providers: __spread(rootProviderOverrides, [rendererFactoryWrapper]),
+                    providers: __spread(rootProviderOverrides),
                     jit: true,
                 })
             ], RootScopeModule);
@@ -1463,8 +1459,6 @@ var TestBedViewEngine = /** @class */ (function () {
      *
      * Test modules and platforms for individual platforms are available from
      * '@angular/<platform_name>/testing'.
-     *
-     * @publicApi
      */
     TestBedViewEngine.initTestEnvironment = function (ngModule, platform, aotSummaries) {
         var testBed = _getTestBedViewEngine();
@@ -1473,8 +1467,6 @@ var TestBedViewEngine = /** @class */ (function () {
     };
     /**
      * Reset the providers for the test injector.
-     *
-     * @publicApi
      */
     TestBedViewEngine.resetTestEnvironment = function () { _getTestBedViewEngine().resetTestEnvironment(); };
     TestBedViewEngine.resetTestingModule = function () {
@@ -1558,8 +1550,6 @@ var TestBedViewEngine = /** @class */ (function () {
      *
      * Test modules and platforms for individual platforms are available from
      * '@angular/<platform_name>/testing'.
-     *
-     * @publicApi
      */
     TestBedViewEngine.prototype.initTestEnvironment = function (ngModule, platform, aotSummaries) {
         if (this.platform || this.ngModule) {
@@ -1573,8 +1563,6 @@ var TestBedViewEngine = /** @class */ (function () {
     };
     /**
      * Reset the providers for the test injector.
-     *
-     * @publicApi
      */
     TestBedViewEngine.prototype.resetTestEnvironment = function () {
         this.resetTestingModule();
