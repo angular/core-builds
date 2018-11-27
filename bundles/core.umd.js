@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+11.sha-f45aedc
+ * @license Angular v7.1.0+13.sha-d767e0b
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2709,9 +2709,6 @@
     function searchTokensOnInjector(injectorIndex, injectorView, token, previousTView) {
         var currentTView = injectorView[TVIEW];
         var tNode = currentTView.data[injectorIndex + TNODE];
-        var nodeFlags = tNode.flags;
-        var nodeProviderIndexes = tNode.providerIndexes;
-        var tInjectables = currentTView.data;
         // First, we step through providers
         var canAccessViewProviders = false;
         // We need to determine if view providers can be accessed by the starting element.
@@ -2728,6 +2725,28 @@
                 (currentTView.node == null || currentTView.node.type === 3 /* Element */)) {
             canAccessViewProviders = true;
         }
+        var injectableIdx = locateDirectiveOrProvider(tNode, injectorView, token, canAccessViewProviders);
+        if (injectableIdx !== null) {
+            return getNodeInjectable(currentTView.data, injectorView, injectableIdx, tNode);
+        }
+        else {
+            return NOT_FOUND;
+        }
+    }
+    /**
+     * Searches for the given token among the node's directives and providers.
+     *
+     * @param tNode TNode on which directives are present.
+     * @param view The view we are currently processing
+     * @param token Provider token or type of a directive to look for.
+     * @param canAccessViewProviders Whether view providers should be considered.
+     * @returns Index of a found directive or provider, or null when none found.
+     */
+    function locateDirectiveOrProvider(tNode, view, token, canAccessViewProviders) {
+        var tView = view[TVIEW];
+        var nodeFlags = tNode.flags;
+        var nodeProviderIndexes = tNode.providerIndexes;
+        var tInjectables = tView.data;
         var startInjectables = nodeProviderIndexes & 65535 /* ProvidersStartIndexMask */;
         var startDirectives = nodeFlags >> 16 /* DirectiveStartingIndexShift */;
         var cptViewProvidersCount = nodeProviderIndexes >> 16 /* CptViewProvidersCountShift */;
@@ -2737,10 +2756,10 @@
             var providerTokenOrDef = tInjectables[i];
             if (i < startDirectives && token === providerTokenOrDef ||
                 i >= startDirectives && providerTokenOrDef.type === token) {
-                return getNodeInjectable(tInjectables, injectorView, i, tNode);
+                return i;
             }
         }
-        return NOT_FOUND;
+        return null;
     }
     /**
     * Retrieve or instantiate the injectable from the `lData` at particular `index`.
@@ -9898,7 +9917,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0+11.sha-f45aedc');
+    var VERSION = new Version('7.1.0+13.sha-d767e0b');
 
     /**
      * @license
@@ -12831,30 +12850,6 @@
         }
         return null;
     }
-    /**
-     * Iterates over all the directives for a node and returns index of a directive for a given type.
-     *
-     * @param tNode TNode on which directives are present.
-     * @param currentView The view we are currently processing
-     * @param type Type of a directive to look for.
-     * @returns Index of a found directive or null when none found.
-     */
-    function getIdxOfMatchingDirective(tNode, currentView, type) {
-        var defs = currentView[TVIEW].data;
-        if (defs) {
-            var flags = tNode.flags;
-            var count = flags & 4095 /* DirectiveCountMask */;
-            var start = flags >> 16 /* DirectiveStartingIndexShift */;
-            var end = start + count;
-            for (var i = start; i < end; i++) {
-                var def = defs[i];
-                if (def.type === type) {
-                    return i;
-                }
-            }
-        }
-        return null;
-    }
     // TODO: "read" should be an AbstractType (FW-486)
     function queryByReadToken(read, tNode, currentView) {
         var factoryFn = read[NG_ELEMENT_ID];
@@ -12862,9 +12857,9 @@
             return factoryFn();
         }
         else {
-            var matchingIdx = getIdxOfMatchingDirective(tNode, currentView, read);
+            var matchingIdx = locateDirectiveOrProvider(tNode, currentView, read, false);
             if (matchingIdx !== null) {
-                return currentView[matchingIdx];
+                return getNodeInjectable(currentView[TVIEW].data, currentView, matchingIdx, tNode);
             }
         }
         return null;
@@ -12890,7 +12885,7 @@
             return queryByReadToken(read, tNode, currentView);
         }
         if (matchingIdx > -1) {
-            return currentView[matchingIdx];
+            return getNodeInjectable(currentView[TVIEW].data, currentView, matchingIdx, tNode);
         }
         // if read token and / or strategy is not specified,
         // detect it using appropriate tNode type
@@ -12907,7 +12902,7 @@
                     result = queryByTemplateRef(type, tNode, currentView, predicate.read);
                 }
                 else {
-                    var matchingIdx = getIdxOfMatchingDirective(tNode, currentView, type);
+                    var matchingIdx = locateDirectiveOrProvider(tNode, currentView, type, false);
                     if (matchingIdx !== null) {
                         result = queryRead(tNode, currentView, predicate.read, matchingIdx);
                     }

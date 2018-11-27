@@ -90,6 +90,16 @@ export declare function injectAttributeImpl(tNode: TNode, attrNameToInject: stri
  */
 export declare function getOrCreateInjectable<T>(tNode: TElementNode | TContainerNode | TElementContainerNode, lViewData: LViewData, token: Type<T> | InjectionToken<T>, flags?: InjectFlags, notFoundValue?: any): T | null;
 /**
+ * Searches for the given token among the node's directives and providers.
+ *
+ * @param tNode TNode on which directives are present.
+ * @param view The view we are currently processing
+ * @param token Provider token or type of a directive to look for.
+ * @param canAccessViewProviders Whether view providers should be considered.
+ * @returns Index of a found directive or provider, or null when none found.
+ */
+export declare function locateDirectiveOrProvider<T>(tNode: TNode, view: LViewData, token: Type<T> | InjectionToken<T>, canAccessViewProviders: boolean): number | null;
+/**
 * Retrieve or instantiate the injectable from the `lData` at particular `index`.
 *
 * This function checks to see if the value has already been instantiated and if so returns the
