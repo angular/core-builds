@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+13.sha-d767e0b
+ * @license Angular v7.1.0+14.sha-c2f3054
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -4402,7 +4402,7 @@
                 continue;
             if (mode & 4 /* ELEMENT */) {
                 mode = 2 /* ATTRIBUTE */ | mode & 1 /* NOT */;
-                if (current !== '' && current !== tNode.tagName) {
+                if (current !== '' && current !== tNode.tagName || current === '' && selector.length === 1) {
                     if (isPositive(mode))
                         return false;
                     skipToNextSelector = true;
@@ -9917,7 +9917,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0+13.sha-d767e0b');
+    var VERSION = new Version('7.1.0+14.sha-c2f3054');
 
     /**
      * @license
