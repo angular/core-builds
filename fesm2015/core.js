@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+14.sha-c2f3054
+ * @license Angular v7.1.0+18.sha-d62da4d
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -4346,6 +4346,49 @@ class NgModuleFactory {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * @param {?} name
+ * @return {?}
+ */
+function normalizeDebugBindingName(name) {
+    // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
+    name = camelCaseToDashCase(name.replace(/[$@]/g, '_'));
+    return `ng-reflect-${name}`;
+}
+/** @type {?} */
+const CAMEL_CASE_REGEXP = /([A-Z])/g;
+/**
+ * @param {?} input
+ * @return {?}
+ */
+function camelCaseToDashCase(input) {
+    return input.replace(CAMEL_CASE_REGEXP, (...m) => '-' + m[1].toLowerCase());
+}
+/**
+ * @param {?} value
+ * @return {?}
+ */
+function normalizeDebugBindingValue(value) {
+    try {
+        // Limit the size of the value as otherwise the DOM just gets polluted.
+        return value != null ? value.toString().slice(0, 30) : value;
+    }
+    catch (e) {
+        return '[ERROR] Exception while trying to serialize the value';
+    }
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/**
  * Called when there are multiple component selectors that match a given node
  * @param {?} tNode
  * @return {?}
@@ -7768,6 +7811,9 @@ function elementProperty(index, propName, value, sanitizer) {
         setInputsForProperty(viewData, dataValue, value);
         if (isComponent(tNode))
             markDirtyIfOnPush(viewData, index + HEADER_OFFSET);
+        if (ngDevMode && tNode.type === 3 /* Element */) {
+            setNgReflectProperties(/** @type {?} */ (element), propName, value);
+        }
     }
     else if (tNode.type === 3 /* Element */) {
         /** @type {?} */
@@ -7837,6 +7883,24 @@ function setInputsForProperty(viewData, inputs, value) {
         ngDevMode && assertDataInRange(/** @type {?} */ (inputs[i]), viewData);
         viewData[/** @type {?} */ (inputs[i])][inputs[i + 1]] = value;
     }
+}
+/**
+ * @param {?} element
+ * @param {?} propName
+ * @param {?} value
+ * @return {?}
+ */
+function setNgReflectProperties(element, propName, value) {
+    /** @type {?} */
+    const renderer = /** @type {?} */ (getRenderer());
+    /** @type {?} */
+    const isProcedural = isProceduralRenderer(renderer);
+    /** @type {?} */
+    const attrName = normalizeDebugBindingName(propName);
+    /** @type {?} */
+    const debugValue = normalizeDebugBindingValue(value);
+    isProcedural ? renderer.setAttribute(element, attrName, debugValue) :
+        element.setAttribute(attrName, debugValue);
 }
 /**
  * Consolidates all inputs or outputs of all directives on this logical node.
@@ -11530,10 +11594,8 @@ class R3Injector {
             const defName = stringify(defType);
             throw new Error(`Circular dependency in DI detected for type ${defName}. Dependency path: ${parents.map(defType => stringify(defType)).join(' > ')} > ${defName}.`);
         }
-        // Check for multiple imports of the same module
-        if (dedupStack.indexOf(defType) !== -1) {
-            return;
-        }
+        /** @type {?} */
+        const isDuplicate = dedupStack.indexOf(defType) !== -1;
         /** @type {?} */
         const providers = (ngModule !== undefined) && (/** @type {?} */ (defOrWrappedDef)).providers ||
             EMPTY_ARRAY$1;
@@ -11551,7 +11613,7 @@ class R3Injector {
         this.records.set(defType, makeRecord(def.factory));
         // Add providers in the same way that @NgModule resolution did:
         // First, include providers from any imports.
-        if (def.imports != null) {
+        if (def.imports != null && !isDuplicate) {
             // Before processing defType's imports, add it to the set of parents. This way, if it ends
             // up deeply importing itself, this can be detected.
             ngDevMode && parents.push(defType);
@@ -11566,7 +11628,7 @@ class R3Injector {
             }
         }
         // Next, include providers listed on the definition itself.
-        if (def.providers != null) {
+        if (def.providers != null && !isDuplicate) {
             deepForEach(def.providers, provider => this.processProvider(provider));
         }
         // Finally, include providers from an InjectorDefTypeWithProviders if there was one.
@@ -12369,7 +12431,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0+14.sha-c2f3054');
+const VERSION = new Version('7.1.0+18.sha-d62da4d');
 
 /**
  * @fileoverview added by tsickle
@@ -28362,37 +28424,6 @@ function debugCheckAndUpdateNode(view, nodeDef, argStyle, givenValues) {
  */
 function debugCheckNoChangesNode(view, nodeDef, argStyle, values) {
     (/** @type {?} */ (checkNoChangesNode))(view, nodeDef, argStyle, ...values);
-}
-/**
- * @param {?} name
- * @return {?}
- */
-function normalizeDebugBindingName(name) {
-    // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
-    name = camelCaseToDashCase(name.replace(/[$@]/g, '_'));
-    return `ng-reflect-${name}`;
-}
-/** @type {?} */
-const CAMEL_CASE_REGEXP = /([A-Z])/g;
-/**
- * @param {?} input
- * @return {?}
- */
-function camelCaseToDashCase(input) {
-    return input.replace(CAMEL_CASE_REGEXP, (...m) => '-' + m[1].toLowerCase());
-}
-/**
- * @param {?} value
- * @return {?}
- */
-function normalizeDebugBindingValue(value) {
-    try {
-        // Limit the size of the value as otherwise the DOM just gets polluted.
-        return value != null ? value.toString().slice(0, 30) : value;
-    }
-    catch (e) {
-        return '[ERROR] Exception while trying to serialize the value';
-    }
 }
 /**
  * @param {?} view
