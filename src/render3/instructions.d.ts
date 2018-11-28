@@ -31,7 +31,7 @@ import { NO_CHANGE } from './tokens';
 export declare function refreshDescendantViews(viewData: LViewData, rf: RenderFlags | null): void;
 /** Sets the host bindings for the current view. */
 export declare function setHostBindings(tView: TView, viewData: LViewData): void;
-export declare function createLViewData<T>(parentViewData: LViewData | null, renderer: Renderer3, tView: TView, context: T | null, flags: LViewFlags, sanitizer?: Sanitizer | null, injector?: Injector | null): LViewData;
+export declare function createLViewData<T>(parentLView: LViewData | null, tView: TView, context: T | null, flags: LViewFlags, rendererFactory?: RendererFactory3 | null, renderer?: Renderer3 | null, sanitizer?: Sanitizer | null, injector?: Injector | null): LViewData;
 /**
  * Create and stores the TNode, and hooks it up to the tree.
  *
@@ -244,9 +244,9 @@ export declare function createTNode(viewData: LViewData, type: TNodeType, adjust
  * @param classIndex Index of class to toggle. Because it is going to DOM, this is not subject to
  *        renaming as part of minification.
  * @param value A value indicating if a given class should be added or removed.
- * @param directiveIndex the index for the directive that is attempting to change styling.
+ * @param directive the ref to the directive that is attempting to change styling.
  */
-export declare function elementClassProp(index: number, classIndex: number, value: boolean | PlayerFactory, directiveIndex?: number): void;
+export declare function elementClassProp(index: number, classIndex: number, value: boolean | PlayerFactory, directive?: {}): void;
 /**
  * Assign any inline style values to the element during creation mode.
  *
@@ -274,9 +274,9 @@ export declare function elementClassProp(index: number, classIndex: number, valu
  *   values that are passed in here will be applied to the element (if matched).
  * @param styleSanitizer An optional sanitizer function that will be used (if provided)
  *   to sanitize the any CSS property values that are applied to the element (during rendering).
- * @param directiveIndex the index for the directive that is attempting to change styling.
+ * @param directive the ref to the directive that is attempting to change styling.
  */
-export declare function elementStyling(classDeclarations?: (string | boolean | InitialStylingFlags)[] | null, styleDeclarations?: (string | boolean | InitialStylingFlags)[] | null, styleSanitizer?: StyleSanitizeFn | null, directiveIndex?: number): void;
+export declare function elementStyling(classDeclarations?: (string | boolean | InitialStylingFlags)[] | null, styleDeclarations?: (string | boolean | InitialStylingFlags)[] | null, styleSanitizer?: StyleSanitizeFn | null, directive?: {}): void;
 /**
  * Apply all styling values to the element which have been queued by any styling instructions.
  *
@@ -290,9 +290,9 @@ export declare function elementStyling(classDeclarations?: (string | boolean | I
  *        (Note that this is not the element index, but rather an index value allocated
  *        specifically for element styling--the index must be the next index after the element
  *        index.)
- * @param directiveIndex the index for the directive that is attempting to change styling.
+ * @param directive the ref to the directive that is attempting to change styling.
  */
-export declare function elementStylingApply(index: number, directiveIndex?: number): void;
+export declare function elementStylingApply(index: number, directive?: {}): void;
 /**
  * Queue a given style to be rendered on an Element.
  *
@@ -312,9 +312,9 @@ export declare function elementStylingApply(index: number, directiveIndex?: numb
  * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
  *        Note that when a suffix is provided then the underlying sanitizer will
  *        be ignored.
- * @param directiveIndex the index for the directive that is attempting to change styling.
+ * @param directive the ref to the directive that is attempting to change styling.
  */
-export declare function elementStyleProp(index: number, styleIndex: number, value: string | number | String | PlayerFactory | null, suffix?: string, directiveIndex?: number): void;
+export declare function elementStyleProp(index: number, styleIndex: number, value: string | number | String | PlayerFactory | null, suffix?: string, directive?: {}): void;
 /**
  * Queue a key/value map of styles to be rendered on an Element.
  *
@@ -335,13 +335,13 @@ export declare function elementStyleProp(index: number, styleIndex: number, valu
  * @param styles A key/value style map of the styles that will be applied to the given element.
  *        Any missing styles (that have already been applied to the element beforehand) will be
  *        removed (unset) from the element's styling.
- * @param directiveIndex the index for the directive that is attempting to change styling.
+ * @param directive the ref to the directive that is attempting to change styling.
  */
 export declare function elementStylingMap<T>(index: number, classes: {
     [key: string]: any;
 } | string | NO_CHANGE | null, styles?: {
     [styleName: string]: any;
-} | NO_CHANGE | null, directiveIndex?: number): void;
+} | NO_CHANGE | null, directive?: {}): void;
 /**
  * Create static text node
  *
@@ -446,8 +446,9 @@ export declare function embeddedViewEnd(): void;
  * Refreshes components by entering the component view and processing its bindings, queries, etc.
  *
  * @param adjustedElementIndex  Element index in LViewData[] (adjusted for HEADER_OFFSET)
+ * @param rf  The render flags that should be used to process this template
  */
-export declare function componentRefresh<T>(adjustedElementIndex: number, parentFirstTemplatePass: boolean, rf: RenderFlags | null): void;
+export declare function componentRefresh<T>(adjustedElementIndex: number, rf: RenderFlags | null): void;
 /** Returns a boolean for whether the view is attached */
 export declare function viewAttached(view: LViewData): boolean;
 /**
@@ -668,7 +669,7 @@ export declare function directiveInject<T>(token: Type<T> | InjectionToken<T>, f
 /**
  * Facade for the attribute injection from DI.
  */
-export declare function injectAttribute(attrNameToInject: string): string | undefined;
+export declare function injectAttribute(attrNameToInject: string): string | null;
 /**
  * Registers a QueryList, associated with a content query, for later refresh (part of a view
  * refresh).

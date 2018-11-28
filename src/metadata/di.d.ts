@@ -46,7 +46,7 @@ export declare const ANALYZE_FOR_ENTRY_COMPONENTS: InjectionToken<any>;
 /**
  * Type of the Attribute decorator / constructor function.
  *
- *
+ * @publicApi
  */
 export interface AttributeDecorator {
     /**
@@ -86,13 +86,15 @@ export interface AttributeDecorator {
      * ]
      * ```
      *
-     *
+     * @publicApi
      */
     (name: string): any;
     new (name: string): Attribute;
 }
 /**
  * Type of the Attribute metadata.
+ *
+ * @publicApi
  */
 export interface Attribute {
     attributeName?: string;
@@ -106,6 +108,8 @@ export interface Attribute {
 export declare const Attribute: AttributeDecorator;
 /**
  * Type of the Query metadata.
+ *
+ * @publicApi
  */
 export interface Query {
     descendants: boolean;
@@ -178,6 +182,7 @@ export interface ContentChildrenDecorator {
  *
  *
  * @Annotation
+ * @publicApi
  */
 export declare type ContentChildren = Query;
 /**
@@ -231,7 +236,7 @@ export interface ContentChildDecorator {
  *
  * @see `ContentChild`.
  *
- *
+ * @publicApi
  */
 export declare type ContentChild = Query;
 /**
@@ -239,6 +244,7 @@ export declare type ContentChild = Query;
  *
  *
  * @Annotation
+ *
  * @publicApi
  */
 export declare const ContentChild: ContentChildDecorator;
@@ -285,6 +291,8 @@ export interface ViewChildrenDecorator {
 }
 /**
  * Type of the ViewChildren metadata.
+ *
+ * @publicApi
  */
 export declare type ViewChildren = Query;
 /**
@@ -349,6 +357,8 @@ export interface ViewChildDecorator {
 }
 /**
  * Type of the ViewChild metadata.
+ *
+ * @publicApi
  */
 export declare type ViewChild = Query;
 /**

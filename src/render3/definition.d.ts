@@ -10,7 +10,7 @@ import { ChangeDetectionStrategy } from '../change_detection/constants';
 import { NgModuleDef } from '../metadata/ng_module';
 import { ViewEncapsulation } from '../metadata/view';
 import { Type } from '../type';
-import { BaseDef, ComponentDef, ComponentDefFeature, ComponentQuery, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveTypesOrFactory, PipeDef, PipeType, PipeTypesOrFactory } from './interfaces/definition';
+import { BaseDef, ComponentDef, ComponentDefFeature, ComponentQuery, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveTypesOrFactory, HostBindingsFunction, PipeDef, PipeType, PipeTypesOrFactory } from './interfaces/definition';
 import { CssSelectorList, SelectorFlags } from './interfaces/projection';
 export declare const EMPTY: {};
 export declare const EMPTY_ARRAY: any[];
@@ -130,7 +130,7 @@ export declare function defineComponent<T>(componentDefinition: {
     /**
      * Function executed by the parent template to allow child directive to apply host bindings.
      */
-    hostBindings?: (directiveIndex: number, elementIndex: number) => void;
+    hostBindings?: HostBindingsFunction<T>;
     /**
      * Function to create instances of content queries associated with a given directive.
      */
@@ -406,7 +406,7 @@ export declare const defineDirective: <T>(directiveDefinition: {
     /**
      * Function executed by the parent template to allow child directive to apply host bindings.
      */
-    hostBindings?: ((directiveIndex: number, elementIndex: number) => void) | undefined;
+    hostBindings?: HostBindingsFunction<T> | undefined;
     /**
      * Function to create instances of content queries associated with a given directive.
      */

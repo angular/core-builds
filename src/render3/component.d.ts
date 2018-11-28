@@ -82,7 +82,7 @@ export declare function renderComponent<T>(componentType: ComponentType<T> | Typ
  *
  * @returns Component view created
  */
-export declare function createRootComponentView(rNode: RElement | null, def: ComponentDef<any>, rootView: LViewData, renderer: Renderer3, sanitizer?: Sanitizer | null): LViewData;
+export declare function createRootComponentView(rNode: RElement | null, def: ComponentDef<any>, rootView: LViewData, rendererFactory: RendererFactory3, renderer: Renderer3, sanitizer?: Sanitizer | null): LViewData;
 /**
  * Creates a root component and sets it up with features and host bindings. Shared by
  * renderComponent() and ViewContainerRef.createComponent().

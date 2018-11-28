@@ -88,6 +88,7 @@ export declare function getDirectives(target: {}): Array<{}>;
  *
  */
 export declare function loadContext(target: {}): LContext;
+export declare function loadContext(target: {}, throwOnNotFound: false): LContext | null;
 /**
  * Retrieve the root view from any component by walking the parent `LViewData` until
  * reaching the root `LViewData`.

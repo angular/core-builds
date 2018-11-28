@@ -22,6 +22,10 @@ export declare class ModuleWithComponentFactories<T> {
     componentFactories: ComponentFactory<any>[];
     constructor(ngModuleFactory: NgModuleFactory<T>, componentFactories: ComponentFactory<any>[]);
 }
+export declare const Compiler_compileModuleSync__POST_R3__: <T>(moduleType: Type<T>) => NgModuleFactory<T>;
+export declare const Compiler_compileModuleAsync__POST_R3__: <T>(moduleType: Type<T>) => Promise<NgModuleFactory<T>>;
+export declare const Compiler_compileModuleAndAllComponentsSync__POST_R3__: <T>(moduleType: Type<T>) => ModuleWithComponentFactories<T>;
+export declare const Compiler_compileModuleAndAllComponentsAsync__POST_R3__: <T>(moduleType: Type<T>) => Promise<ModuleWithComponentFactories<T>>;
 /**
  * Low-level service for running the angular compiler during runtime
  * to create {@link ComponentFactory}s, which
@@ -38,19 +42,19 @@ export declare class Compiler {
      * Compiles the given NgModule and all of its components. All templates of the components listed
      * in `entryComponents` have to be inlined.
      */
-    compileModuleSync<T>(moduleType: Type<T>): NgModuleFactory<T>;
+    compileModuleSync: <T>(moduleType: Type<T>) => NgModuleFactory<T>;
     /**
      * Compiles the given NgModule and all of its components
      */
-    compileModuleAsync<T>(moduleType: Type<T>): Promise<NgModuleFactory<T>>;
+    compileModuleAsync: <T>(moduleType: Type<T>) => Promise<NgModuleFactory<T>>;
     /**
      * Same as {@link #compileModuleSync} but also creates ComponentFactories for all components.
      */
-    compileModuleAndAllComponentsSync<T>(moduleType: Type<T>): ModuleWithComponentFactories<T>;
+    compileModuleAndAllComponentsSync: <T>(moduleType: Type<T>) => ModuleWithComponentFactories<T>;
     /**
      * Same as {@link #compileModuleAsync} but also creates ComponentFactories for all components.
      */
-    compileModuleAndAllComponentsAsync<T>(moduleType: Type<T>): Promise<ModuleWithComponentFactories<T>>;
+    compileModuleAndAllComponentsAsync: <T>(moduleType: Type<T>) => Promise<ModuleWithComponentFactories<T>>;
     /**
      * Clears all caches.
      */
