@@ -36,22 +36,22 @@ export declare const TAIL = 14;
 export declare const CONTAINER_INDEX = 15;
 export declare const CONTENT_QUERIES = 16;
 export declare const DECLARATION_VIEW = 17;
-/** Size of LView's header. Necessary to adjust for it when setting slots.  */
+/** Size of LViewData's header. Necessary to adjust for it when setting slots.  */
 export declare const HEADER_OFFSET = 18;
 export interface OpaqueViewState {
     '__brand__': 'Brand for OpaqueViewState that nothing will match';
 }
 /**
- * `LView` stores all of the information needed to process the instructions as
+ * `LViewData` stores all of the information needed to process the instructions as
  * they are invoked from the template. Each embedded view and component view has its
- * own `LView`. When processing a particular view, we set the `viewData` to that
- * `LView`. When that view is done processing, the `viewData` is set back to
- * whatever the original `viewData` was before (the parent `LView`).
+ * own `LViewData`. When processing a particular view, we set the `viewData` to that
+ * `LViewData`. When that view is done processing, the `viewData` is set back to
+ * whatever the original `viewData` was before (the parent `LViewData`).
  *
  * Keeping separate state for each view facilities view insertion / deletion, so we
  * don't have to edit the data array based on which views are present.
  */
-export interface LView extends Array<any> {
+export interface LViewData extends Array<any> {
     /**
      * The static data for this view. We need a reference to this so we can easily walk up the
      * node tree in DI and get the TView.data array associated with a node (where the
@@ -62,27 +62,27 @@ export interface LView extends Array<any> {
     [FLAGS]: LViewFlags;
     /**
      * The parent view is needed when we exit the view and must restore the previous
-     * `LView`. Without this, the render method would have to keep a stack of
+     * `LViewData`. Without this, the render method would have to keep a stack of
      * views as it is recursively rendering templates.
      *
      * This is the "insertion" view for embedded views. This allows us to properly
      * destroy embedded views.
      */
-    [PARENT]: LView | null;
+    [PARENT]: LViewData | null;
     /**
      *
-     * The next sibling LView or LContainer.
+     * The next sibling LViewData or LContainer.
      *
      * Allows us to propagate between sibling view states that aren't in the same
      * container. Embedded views already have a node.next, but it is only set for
      * views in the same container. We need a way to link component views and views
      * across containers as well.
      */
-    [NEXT]: LView | LContainer | null;
+    [NEXT]: LViewData | LContainer | null;
     /** Queries active for this view - nodes from a view are reported to those queries. */
     [QUERIES]: LQueries | null;
     /**
-     * The host node for this LView instance, if this is a component view.
+     * The host node for this LViewData instance, if this is a component view.
      *
      * If this is an embedded view, HOST will be null.
      */
@@ -132,12 +132,12 @@ export interface LView extends Array<any> {
     /** An optional custom sanitizer. */
     [SANITIZER]: Sanitizer | null;
     /**
-     * The last LView or LContainer beneath this LView in the hierarchy.
+     * The last LViewData or LContainer beneath this LViewData in the hierarchy.
      *
      * The tail allows us to quickly add a new state to the end of the view list
      * without having to propagate starting from the first child.
      */
-    [TAIL]: LView | LContainer | null;
+    [TAIL]: LViewData | LContainer | null;
     /**
      * The index of the parent container's host node. Applicable only to embedded views that
      * have been inserted dynamically. Will be -1 for component views and inline views.
@@ -160,7 +160,7 @@ export interface LView extends Array<any> {
      *
      * The template for a dynamically created view may be declared in a different view than
      * it is inserted. We already track the "insertion view" (view where the template was
-     * inserted) in LView[PARENT], but we also need access to the "declaration view"
+     * inserted) in LViewData[PARENT], but we also need access to the "declaration view"
      * (view where the template was declared). Otherwise, we wouldn't be able to call the
      * view's template function with the proper contexts. Context should be inherited from
      * the declaration view tree, not the insertion view tree.
@@ -177,9 +177,9 @@ export interface LView extends Array<any> {
      * template function during change detection, we need the declaration view to get inherited
      * context.
      */
-    [DECLARATION_VIEW]: LView | null;
+    [DECLARATION_VIEW]: LViewData | null;
 }
-/** Flags associated with an LView (saved in LView[FLAGS]) */
+/** Flags associated with an LView (saved in LViewData[FLAGS]) */
 export declare const enum LViewFlags {
     /**
      * Whether or not the view is in creationMode.
@@ -225,10 +225,10 @@ export interface TView {
      */
     readonly id: number;
     /**
-     * This is a blueprint used to generate LView instances for this TView. Copying this
-     * blueprint is faster than creating a new LView from scratch.
+     * This is a blueprint used to generate LViewData instances for this TView. Copying this
+     * blueprint is faster than creating a new LViewData from scratch.
      */
-    blueprint: LView;
+    blueprint: LViewData;
     /**
      * The template function used to refresh the view of dynamically created views
      * and components. Will be null for inline views.
@@ -266,9 +266,9 @@ export interface TView {
      */
     bindingStartIndex: number;
     /**
-     * The index where the "expando" section of `LView` begins. The expando
+     * The index where the "expando" section of `LViewData` begins. The expando
      * section contains injectors, directive instances, and host binding values.
-     * Unlike the "consts" and "vars" sections of `LView`, the length of this
+     * Unlike the "consts" and "vars" sections of `LViewData`, the length of this
      * section cannot be calculated at compile-time because directives are matched
      * at runtime to preserve locality.
      *

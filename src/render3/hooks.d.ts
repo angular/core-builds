@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { HookData, LView, TView } from './interfaces/view';
+import { HookData, LViewData, TView } from './interfaces/view';
 /**
  * If this is the first template pass, any ngOnInit or ngDoCheck hooks will be queued into
  * TView.initHooks during directiveCreate.
@@ -14,7 +14,7 @@ import { HookData, LView, TView } from './interfaces/view';
  * directive index), then saved in the even indices of the initHooks array. The odd indices
  * hold the hook functions themselves.
  *
- * @param index The index of the directive in LView
+ * @param index The index of the directive in LViewData
  * @param hooks The static hooks map on the directive def
  * @param tView The current TView
  */
@@ -29,13 +29,13 @@ export declare function queueLifecycleHooks(flags: number, tView: TView): void;
  *
  * @param currentView The current view
  */
-export declare function executeInitHooks(currentView: LView, tView: TView, creationMode: boolean): void;
+export declare function executeInitHooks(currentView: LViewData, tView: TView, creationMode: boolean): void;
 /**
  * Iterates over afterViewInit and afterViewChecked functions and calls them.
  *
  * @param currentView The current view
  */
-export declare function executeHooks(data: LView, allHooks: HookData | null, checkHooks: HookData | null, creationMode: boolean): void;
+export declare function executeHooks(data: LViewData, allHooks: HookData | null, checkHooks: HookData | null, creationMode: boolean): void;
 /**
  * Calls lifecycle hooks with their contexts, skipping init hooks if it's not
  * creation mode.

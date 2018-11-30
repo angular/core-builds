@@ -10,7 +10,7 @@ import { InitialStylingFlags } from '../interfaces/definition';
 import { BindingStore, BindingType, Player, PlayerBuilder, PlayerFactory } from '../interfaces/player';
 import { Renderer3 } from '../interfaces/renderer';
 import { StylingContext } from '../interfaces/styling';
-import { LView, RootContext } from '../interfaces/view';
+import { LViewData, RootContext } from '../interfaces/view';
 import { NO_CHANGE } from '../tokens';
 import { BoundPlayerFactory } from './player_factory';
 /**
@@ -102,7 +102,7 @@ export declare function updateClassProp(context: StylingContext, index: number, 
  *    to this key/value map instead of being renderered via the renderer.
  * @returns number the total amount of players that got queued for animation (if any)
  */
-export declare function renderStyleAndClassBindings(context: StylingContext, renderer: Renderer3, rootOrView: RootContext | LView, isFirstRender: boolean, classesStore?: BindingStore | null, stylesStore?: BindingStore | null): number;
+export declare function renderStyleAndClassBindings(context: StylingContext, renderer: Renderer3, rootOrView: RootContext | LViewData, isFirstRender: boolean, classesStore?: BindingStore | null, stylesStore?: BindingStore | null): number;
 export declare function isContextDirty(context: StylingContext): boolean;
 export declare function limitToSingleClasses(context: StylingContext): number;
 export declare function setContextDirty(context: StylingContext, isDirtyYes: boolean): void;

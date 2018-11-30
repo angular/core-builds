@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { StylingContext } from './styling';
-import { LView, TView } from './view';
+import { LViewData, TView } from './view';
 /**
  * TNodeType corresponds to the TNode.type property. It contains information
  * on how to map a particular set of bits in TNode.flags to the node type.
@@ -88,7 +88,7 @@ export interface TNode {
     /** The type of the TNode. See TNodeType. */
     type: TNodeType;
     /**
-     * Index of the TNode in TView.data and corresponding native element in LView.
+     * Index of the TNode in TView.data and corresponding native element in LViewData.
      *
      * This is necessary to get from any TNode to its corresponding native element when
      * traversing the node tree.
@@ -97,7 +97,7 @@ export interface TNode {
      */
     index: number;
     /**
-     * The index of the closest injector in this node's LView.
+     * The index of the closest injector in this node's LViewData.
      *
      * If the index === -1, there is no injector on this node or any ancestor node in this view.
      *
@@ -325,7 +325,7 @@ export interface TContainerNode extends TNode {
 }
 /** Static data for an <ng-container> */
 export interface TElementContainerNode extends TNode {
-    /** Index in the LView[] array. */
+    /** Index in the LViewData[] array. */
     index: number;
     child: TElementNode | TTextNode | TContainerNode | TElementContainerNode | TProjectionNode | null;
     parent: TElementNode | TElementContainerNode | null;
@@ -334,7 +334,7 @@ export interface TElementContainerNode extends TNode {
 }
 /** Static data for an ICU expression */
 export interface TIcuContainerNode extends TNode {
-    /** Index in the LView[] array. */
+    /** Index in the LViewData[] array. */
     index: number;
     child: TElementNode | TTextNode | null;
     parent: TElementNode | TElementContainerNode | null;
@@ -430,4 +430,4 @@ export declare type TNodeWithLocalRefs = TContainerNode | TElementNode | TElemen
  * - `<div #nativeDivEl>` - `nativeDivEl` should point to the native `<div>` element;
  * - `<ng-template #tplRef>` - `tplRef` should point to the `TemplateRef` instance;
  */
-export declare type LocalRefExtractor = (tNode: TNodeWithLocalRefs, currentView: LView) => any;
+export declare type LocalRefExtractor = (tNode: TNodeWithLocalRefs, currentView: LViewData) => any;

@@ -15,7 +15,7 @@ import { NgModuleRef as viewEngine_NgModuleRef } from '../linker/ng_module_facto
 import { Type } from '../type';
 import { ComponentDef } from './interfaces/definition';
 import { TContainerNode, TElementContainerNode, TElementNode } from './interfaces/node';
-import { LView, RootContext } from './interfaces/view';
+import { LViewData, RootContext } from './interfaces/view';
 import { ViewRef } from './view_ref';
 export declare class ComponentFactoryResolver extends viewEngine_ComponentFactoryResolver {
     resolveComponentFactory<T>(component: Type<T>): viewEngine_ComponentFactory<T>;
@@ -66,14 +66,14 @@ export declare function injectComponentFactoryResolver(): viewEngine_ComponentFa
  */
 export declare class ComponentRef<T> extends viewEngine_ComponentRef<T> {
     location: viewEngine_ElementRef;
-    private _rootLView;
+    private _rootView;
     private _tNode;
     destroyCbs: (() => void)[] | null;
     instance: T;
     hostView: ViewRef<T>;
     changeDetectorRef: ViewEngine_ChangeDetectorRef;
     componentType: Type<T>;
-    constructor(componentType: Type<T>, instance: T, location: viewEngine_ElementRef, _rootLView: LView, _tNode: TElementNode | TContainerNode | TElementContainerNode);
+    constructor(componentType: Type<T>, instance: T, location: viewEngine_ElementRef, _rootView: LViewData, _tNode: TElementNode | TContainerNode | TElementContainerNode);
     readonly injector: Injector;
     destroy(): void;
     onDestroy(callback: () => void): void;
