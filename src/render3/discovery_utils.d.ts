@@ -7,7 +7,7 @@
  */
 import { Injector } from '../di/injector';
 import { LContext } from './interfaces/context';
-import { LViewData, RootContext } from './interfaces/view';
+import { LView, RootContext } from './interfaces/view';
 /**
  * Returns the component instance associated with a given DOM host element.
  * Elements which don't represent components return `null`.
@@ -55,7 +55,7 @@ export declare function getViewComponent<T = {}>(element: Element | {}): T | nul
  * the application where the target is situated.
  *
  */
-export declare function getRootContext(target: LViewData | {}): RootContext;
+export declare function getRootContext(target: LView | {}): RootContext;
 /**
  * Retrieve all root components.
  *
@@ -90,13 +90,13 @@ export declare function getDirectives(target: {}): Array<{}>;
 export declare function loadContext(target: {}): LContext;
 export declare function loadContext(target: {}, throwOnNotFound: false): LContext | null;
 /**
- * Retrieve the root view from any component by walking the parent `LViewData` until
- * reaching the root `LViewData`.
+ * Retrieve the root view from any component by walking the parent `LView` until
+ * reaching the root `LView`.
  *
  * @param componentOrView any component or view
  *
  */
-export declare function getRootView(componentOrView: LViewData | {}): LViewData;
+export declare function getRootView(componentOrView: LView | {}): LView;
 /**
  * Retrieve map of local references.
  *

@@ -6,14 +6,14 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { RElement } from './renderer';
-import { LViewData } from './view';
+import { LView } from './view';
 /**
  * This property will be monkey-patched on elements, components and directives
  */
 export declare const MONKEY_PATCH_KEY_NAME = "__ngContext__";
 /**
  * The internal view context which is specific to a given DOM element, directive or
- * component instance. Each value in here (besides the LViewData and element node details)
+ * component instance. Each value in here (besides the LView and element node details)
  * can be present, null or undefined. If undefined then it implies the value has not been
  * looked up yet, otherwise, if null, then a lookup was executed and nothing was found.
  *
@@ -25,7 +25,7 @@ export interface LContext {
     /**
      * The component's parent view data.
      */
-    lViewData: LViewData;
+    lView: LView;
     /**
      * The index instance of the node.
      */

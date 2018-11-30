@@ -62,11 +62,12 @@ export declare function sanitizeResourceUrl(unsafeResourceUrl: any): string;
 /**
  * A `script` sanitizer which only lets trusted javascript through.
  *
- * This passes only `script`s marked trusted by calling {@link bypassSanitizationTrustScript}.
+ * This passes only `script`s marked trusted by calling {@link
+ * bypassSanitizationTrustScript}.
  *
  * @param unsafeScript untrusted `script`, typically from the user.
  * @returns `url` string which is safe to bind to the `<script>` element such as `<img src>`,
- * because only trusted `scripts`s have been allowed to pass.
+ * because only trusted `scripts` have been allowed to pass.
  */
 export declare function sanitizeScript(unsafeScript: any): string;
 /**
