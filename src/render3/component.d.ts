@@ -11,7 +11,7 @@ import { Sanitizer } from '../sanitization/security';
 import { ComponentDef, ComponentType } from './interfaces/definition';
 import { PlayerHandler } from './interfaces/player';
 import { RElement, Renderer3, RendererFactory3 } from './interfaces/renderer';
-import { LViewData, RootContext } from './interfaces/view';
+import { LView, RootContext } from './interfaces/view';
 /** Options that control how the component should be bootstrapped. */
 export interface CreateComponentOptions {
     /** Which renderer factory to use. */
@@ -82,12 +82,12 @@ export declare function renderComponent<T>(componentType: ComponentType<T> | Typ
  *
  * @returns Component view created
  */
-export declare function createRootComponentView(rNode: RElement | null, def: ComponentDef<any>, rootView: LViewData, rendererFactory: RendererFactory3, renderer: Renderer3, sanitizer?: Sanitizer | null): LViewData;
+export declare function createRootComponentView(rNode: RElement | null, def: ComponentDef<any>, rootView: LView, rendererFactory: RendererFactory3, renderer: Renderer3, sanitizer?: Sanitizer | null): LView;
 /**
  * Creates a root component and sets it up with features and host bindings. Shared by
  * renderComponent() and ViewContainerRef.createComponent().
  */
-export declare function createRootComponent<T>(componentView: LViewData, componentDef: ComponentDef<T>, rootView: LViewData, rootContext: RootContext, hostFeatures: HostFeature[] | null): any;
+export declare function createRootComponent<T>(componentView: LView, componentDef: ComponentDef<T>, rootView: LView, rootContext: RootContext, hostFeatures: HostFeature[] | null): any;
 export declare function createRootContext(scheduler?: (workFn: () => void) => void, playerHandler?: PlayerHandler | null): RootContext;
 /**
  * Used to enable lifecycle hooks on the root component.
