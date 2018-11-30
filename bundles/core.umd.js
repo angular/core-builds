@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+96.sha-0df914e
+ * @license Angular v7.1.0+97.sha-a088b8c
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -886,7 +886,6 @@
             providersResolver: null,
             consts: componentDefinition.consts,
             vars: componentDefinition.vars,
-            hostVars: componentDefinition.hostVars || 0,
             factory: componentDefinition.factory,
             template: componentDefinition.template || null,
             hostBindings: componentDefinition.hostBindings || null,
@@ -1939,6 +1938,14 @@
     }
     function decreaseElementDepthCount() {
         elementDepthCount--;
+    }
+    var currentDirectiveDef = null;
+    function getCurrentDirectiveDef() {
+        // top level variables should not be exported for performance reasons (PERF_NOTES.md)
+        return currentDirectiveDef;
+    }
+    function setCurrentDirectiveDef(def) {
+        currentDirectiveDef = def;
     }
     /**
      * Stores whether directives should be matched to elements.
@@ -3022,13 +3029,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    function noop() {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        // Do nothing.
-    }
 
     /**
      * @license
@@ -5593,8 +5593,10 @@
                 }
                 else {
                     // If it's not a number, it's a host binding function that needs to be executed.
-                    viewData[BINDING_INDEX] = bindingRootIndex;
-                    instruction(2 /* Update */, readElementValue(viewData[currentDirectiveIndex]), currentElementIndex);
+                    if (instruction !== null) {
+                        viewData[BINDING_INDEX] = bindingRootIndex;
+                        instruction(2 /* Update */, readElementValue(viewData[currentDirectiveIndex]), currentElementIndex);
+                    }
                     currentDirectiveIndex++;
                 }
             }
@@ -5949,6 +5951,7 @@
             resolveDirectives(tView, viewData, findDirectiveMatches(tView, viewData, previousOrParentTNode), previousOrParentTNode, localRefs || null);
         }
         instantiateAllDirectives(tView, viewData, previousOrParentTNode);
+        invokeDirectivesHostBindings(tView, viewData, previousOrParentTNode);
         saveResolvedLocalsInData(viewData, previousOrParentTNode, localRefExtractor);
     }
     /**
@@ -6645,7 +6648,6 @@
         // Please make sure to have explicit type for `exportsMap`. Inferred type triggers bug in tsickle.
         ngDevMode && assertEqual(getFirstTemplatePass(), true, 'should run on first template pass only');
         var exportsMap = localRefs ? { '': -1 } : null;
-        var totalHostVars = 0;
         if (directives) {
             initNodeFlags(tNode, tView.data.length, directives.length);
             // When the same token is provided by several directives on the same node, some rules apply in
@@ -6664,7 +6666,6 @@
                 var def = directives[i];
                 var directiveDefIdx = tView.data.length;
                 baseResolveDirective(tView, viewData, def, def.factory);
-                totalHostVars += def.hostVars;
                 saveNameToExportMap(tView.data.length - 1, def, exportsMap);
                 // Init hooks are queued now so ngOnInit is called in host components before
                 // any projected components.
@@ -6673,7 +6674,6 @@
         }
         if (exportsMap)
             cacheMatchingLocalNames(tNode, localRefs, exportsMap);
-        prefillHostVars(tView, viewData, totalHostVars);
     }
     /**
      * Instantiate all the directives that were previously resolved on the current node.
@@ -6691,6 +6691,31 @@
             }
             var directive = getNodeInjectable(tView.data, viewData, i, previousOrParentTNode);
             postProcessDirective(viewData, directive, def, i);
+        }
+    }
+    function invokeDirectivesHostBindings(tView, viewData, previousOrParentTNode) {
+        var start = previousOrParentTNode.flags >> 16 /* DirectiveStartingIndexShift */;
+        var end = start + (previousOrParentTNode.flags & 4095 /* DirectiveCountMask */);
+        var expando = tView.expandoInstructions;
+        var firstTemplatePass = getFirstTemplatePass();
+        for (var i = start; i < end; i++) {
+            var def = tView.data[i];
+            var directive = viewData[i];
+            if (def.hostBindings) {
+                var previousExpandoLength = expando.length;
+                setCurrentDirectiveDef(def);
+                def.hostBindings(1 /* Create */, directive, previousOrParentTNode.index);
+                setCurrentDirectiveDef(null);
+                // `hostBindings` function may or may not contain `allocHostVars` call
+                // (e.g. it may not if it only contains host listeners), so we need to check whether
+                // `expandoInstructions` has changed and if not - we push `null` to keep indices in sync
+                if (previousExpandoLength === expando.length && firstTemplatePass) {
+                    expando.push(null);
+                }
+            }
+            else if (firstTemplatePass) {
+                expando.push(null);
+            }
         }
     }
     /**
@@ -6712,6 +6737,8 @@
     * Because we are updating the blueprint, we only need to do this once.
     */
     function prefillHostVars(tView, lView, totalHostVars) {
+        ngDevMode &&
+            assertEqual(getFirstTemplatePass(), true, 'Should only be called in first template pass.');
         for (var i = 0; i < totalHostVars; i++) {
             lView.push(NO_CHANGE);
             tView.blueprint.push(NO_CHANGE);
@@ -6743,9 +6770,6 @@
         var native = getNativeByTNode(previousOrParentTNode, lView);
         ngDevMode && assertEqual(lView[BINDING_INDEX], lView[TVIEW].bindingStartIndex, 'directives should be created before any bindings');
         ngDevMode && assertPreviousIsParent(getIsParent());
-        if (def.hostBindings) {
-            def.hostBindings(1 /* Create */, directive, previousOrParentTNode.index);
-        }
         attachPatchData(directive, lView);
         if (native) {
             attachPatchData(native, lView);
@@ -6791,14 +6815,20 @@
         var tView = getLView()[TVIEW];
         (tView.components || (tView.components = [])).push(previousOrParentTNode.index);
     }
-    /** Stores index of directive and host element so it will be queued for binding refresh during CD.
+    /**
+     * Stores host binding fn and number of host vars so it will be queued for binding refresh during
+     * CD.
     */
-    function queueHostBindingForCheck(tView, def) {
+    function queueHostBindingForCheck(tView, def, hostVars) {
         ngDevMode &&
             assertEqual(getFirstTemplatePass(), true, 'Should only be called in first template pass.');
-        tView.expandoInstructions.push(def.hostBindings || noop);
-        if (def.hostVars)
-            tView.expandoInstructions.push(def.hostVars);
+        var expando = tView.expandoInstructions;
+        // check whether a given `hostBindings` function already exists in expandoInstructions,
+        // which can happen in case directive definition was extended from base definition (as a part of
+        // the `InheritDefinitionFeature` logic)
+        if (expando.length < 2 || expando[expando.length - 2] !== def.hostBindings) {
+            expando.push(def.hostBindings, hostVars);
+        }
     }
     /** Caches local names and their matching directive indices for query and template lookups. */
     function cacheMatchingLocalNames(tNode, localRefs, exportsMap) {
@@ -6847,7 +6877,6 @@
         var nodeInjectorFactory = new NodeInjectorFactory(directiveFactory, isComponentDef(def), null);
         tView.blueprint.push(nodeInjectorFactory);
         viewData.push(nodeInjectorFactory);
-        queueHostBindingForCheck(tView, def);
     }
     function addComponentLogic(lView, previousOrParentTNode, def) {
         var native = getNativeByTNode(previousOrParentTNode, lView);
@@ -7551,6 +7580,19 @@
     function bind(value) {
         var lView = getLView();
         return bindingUpdated(lView, lView[BINDING_INDEX]++, value) ? value : NO_CHANGE;
+    }
+    /**
+     * Allocates the necessary amount of slots for host vars.
+     *
+     * @param count Amount of vars to be allocated
+     */
+    function allocHostVars(count) {
+        if (!getFirstTemplatePass())
+            return;
+        var lView = getLView();
+        var tView = lView[TVIEW];
+        queueHostBindingForCheck(tView, getCurrentDirectiveDef(), count);
+        prefillHostVars(tView, lView, count);
     }
     /**
      * Create interpolation bindings with a variable number of expressions.
@@ -8724,8 +8766,12 @@
         rootContext.components.push(component);
         componentView[CONTEXT] = component;
         hostFeatures && hostFeatures.forEach(function (feature) { return feature(component, componentDef); });
-        if (tView.firstTemplatePass)
-            prefillHostVars(tView, rootView, componentDef.hostVars);
+        if (tView.firstTemplatePass && componentDef.hostBindings) {
+            var rootTNode = getPreviousOrParentTNode();
+            setCurrentDirectiveDef(componentDef);
+            componentDef.hostBindings(1 /* Create */, component, rootTNode.index);
+            setCurrentDirectiveDef(null);
+        }
         return component;
     }
     function createRootContext(scheduler, playerHandler) {
@@ -8850,7 +8896,6 @@
                             superHostBindings_1(rf, ctx, elementIndex);
                             prevHostBindings_1(rf, ctx, elementIndex);
                         };
-                        definition.hostVars += superDef.hostVars;
                     }
                     else {
                         definition.hostBindings = superHostBindings_1;
@@ -9976,7 +10021,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0+96.sha-0df914e');
+    var VERSION = new Version('7.1.0+97.sha-a088b8c');
 
     /**
      * @license
@@ -13497,6 +13542,7 @@
         'ɵnamespaceSVG': namespaceSVG,
         'ɵenableBindings': enableBindings,
         'ɵdisableBindings': disableBindings,
+        'ɵallocHostVars': allocHostVars,
         'ɵelementStart': elementStart,
         'ɵelementEnd': elementEnd,
         'ɵelement': element,
@@ -23415,6 +23461,7 @@
     exports.ɵreference = reference;
     exports.ɵenableBindings = enableBindings;
     exports.ɵdisableBindings = disableBindings;
+    exports.ɵallocHostVars = allocHostVars;
     exports.ɵelementAttribute = elementAttribute;
     exports.ɵelementContainerStart = elementContainerStart;
     exports.ɵelementContainerEnd = elementContainerEnd;

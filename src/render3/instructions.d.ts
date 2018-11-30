@@ -368,12 +368,6 @@ export declare function instantiateRootComponent<T>(tView: TView, viewData: LVie
 * it from the hostVar count) and the directive count. See more in VIEW_DATA.md.
 */
 export declare function generateExpandoInstructionBlock(tView: TView, tNode: TNode, directiveCount: number): void;
-/**
-* On the first template pass, we need to reserve space for host binding values
-* after directives are matched (so all directives are saved, then bindings).
-* Because we are updating the blueprint, we only need to do this once.
-*/
-export declare function prefillHostVars(tView: TView, lView: LView, totalHostVars: number): void;
 /** Stores index of component's host element so it will be queued for view refresh during CD. */
 export declare function queueComponentIndexForCheck(previousOrParentTNode: TNode): void;
 /**
@@ -582,6 +576,12 @@ export declare function markDirty<T>(component: T): void;
  * @param value Value to diff
  */
 export declare function bind<T>(value: T): T | NO_CHANGE;
+/**
+ * Allocates the necessary amount of slots for host vars.
+ *
+ * @param count Amount of vars to be allocated
+ */
+export declare function allocHostVars(count: number): void;
 /**
  * Create interpolation bindings with a variable number of expressions.
  *
