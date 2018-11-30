@@ -55,13 +55,6 @@ export declare function defineComponent<T>(componentDefinition: {
      */
     vars: number;
     /**
-     * The number of host bindings (including pure fn bindings) in this component.
-     *
-     * Used to calculate the length of the LView array for the *parent* component
-     * of this component.
-     */
-    hostVars?: number;
-    /**
      * Static attributes to set on host element.
      *
      * Even indices: attribute name
@@ -396,13 +389,6 @@ export declare const defineDirective: <T>(directiveDefinition: {
      * See: {@link NgOnChangesFeature}, {@link ProvidersFeature}, {@link InheritDefinitionFeature}
      */
     features?: DirectiveDefFeature[] | undefined;
-    /**
-     * The number of host bindings (including pure fn bindings) in this directive.
-     *
-     * Used to calculate the length of the LView array for the *parent* component
-     * of this directive.
-     */
-    hostVars?: number | undefined;
     /**
      * Function executed by the parent template to allow child directive to apply host bindings.
      */
