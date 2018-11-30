@@ -5,12 +5,15 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { ComponentDef, DirectiveDef } from './interfaces/definition';
 import { TElementNode, TNode, TViewNode } from './interfaces/node';
 import { LQueries } from './interfaces/query';
 import { LView, OpaqueViewState } from './interfaces/view';
 export declare function getElementDepthCount(): number;
 export declare function increaseElementDepthCount(): void;
 export declare function decreaseElementDepthCount(): void;
+export declare function getCurrentDirectiveDef(): DirectiveDef<any> | ComponentDef<any> | null;
+export declare function setCurrentDirectiveDef(def: DirectiveDef<any> | ComponentDef<any> | null): void;
 export declare function getBindingsEnabled(): boolean;
 /**
  * Enables directive matching on elements.
