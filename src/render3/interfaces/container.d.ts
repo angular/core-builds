@@ -8,7 +8,7 @@
 import { LQueries } from './query';
 import { RComment, RElement } from './renderer';
 import { StylingContext } from './styling';
-import { HOST, LView, NEXT, PARENT, QUERIES } from './view';
+import { HOST, LViewData, NEXT, PARENT, QUERIES } from './view';
 /**
  * Below are constants for LContainer indices to help us look up LContainer members
  * without having to remember the specific indices.
@@ -21,7 +21,7 @@ export declare const RENDER_PARENT = 7;
 /**
  * The state associated with a container.
  *
- * This is an array so that its structure is closer to LView. This helps
+ * This is an array so that its structure is closer to LViewData. This helps
  * when traversing the view tree (which is a mix of containers and component
  * views), so we can jump to viewOrContainer[NEXT] in the same way regardless
  * of type.
@@ -42,17 +42,17 @@ export interface LContainer extends Array<any> {
      * (and don't need to be re-added) and so we can remove views from the DOM when they
      * are no longer required.
      */
-    [VIEWS]: LView[];
+    [VIEWS]: LViewData[];
     /**
      * Access to the parent view is necessary so we can propagate back
      * up from inside a container to parent[NEXT].
      */
-    [PARENT]: LView | null;
+    [PARENT]: LViewData | null;
     /**
      * This allows us to jump from a container to a sibling container or component
      * view with the same parent, so we can remove listeners efficiently.
      */
-    [NEXT]: LView | LContainer | null;
+    [NEXT]: LViewData | LContainer | null;
     /**
      * Queries active for this container - all the views inserted to / removed from
      * this container are reported to queries referenced here.
@@ -61,13 +61,13 @@ export interface LContainer extends Array<any> {
     /**
      * The host element of this LContainer.
      *
-     * The host could be an LView if this container is on a component node.
-     * In that case, the component LView is its HOST.
+     * The host could be an LViewData if this container is on a component node.
+     * In that case, the component LViewData is its HOST.
      *
      * It could also be a styling context if this is a node with a style/class
      * binding.
      */
-    [HOST]: RElement | RComment | StylingContext | LView;
+    [HOST]: RElement | RComment | StylingContext | LViewData;
     /** The comment element that serves as an anchor for this LContainer. */
     [NATIVE]: RComment;
     /**

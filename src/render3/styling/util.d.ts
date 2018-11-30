@@ -11,7 +11,7 @@ import { LContext } from '../interfaces/context';
 import { Player, PlayerContext } from '../interfaces/player';
 import { RElement } from '../interfaces/renderer';
 import { InitialStyles, StylingContext } from '../interfaces/styling';
-import { LView, RootContext } from '../interfaces/view';
+import { LViewData, RootContext } from '../interfaces/view';
 export declare function createEmptyStylingContext(element?: RElement | null, sanitizer?: StyleSanitizeFn | null, initialStylingValues?: InitialStyles): StylingContext;
 /**
  * Used clone a copy of a pre-computed template of a styling context.
@@ -31,7 +31,7 @@ export declare function allocStylingContext(element: RElement | null, templateSt
  * @param index Index of the style allocation. See: `elementStyling`.
  * @param viewData The view to search for the styling context
  */
-export declare function getStylingContext(index: number, viewData: LView): StylingContext;
+export declare function getStylingContext(index: number, viewData: LViewData): StylingContext;
 export declare function addPlayerInternal(playerContext: PlayerContext, rootContext: RootContext, element: HTMLElement, player: Player | null, playerContextIndex: number, ref?: any): boolean;
 export declare function getPlayersInternal(playerContext: PlayerContext): Player[];
 export declare function getOrCreatePlayerContext(target: {}, context?: LContext | null): PlayerContext | null;
