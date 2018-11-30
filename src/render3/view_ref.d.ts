@@ -9,7 +9,7 @@ import { ApplicationRef } from '../application_ref';
 import { ChangeDetectorRef as viewEngine_ChangeDetectorRef } from '../change_detection/change_detector_ref';
 import { ViewContainerRef as viewEngine_ViewContainerRef } from '../linker/view_container_ref';
 import { EmbeddedViewRef as viewEngine_EmbeddedViewRef, InternalViewRef as viewEngine_InternalViewRef } from '../linker/view_ref';
-import { LViewData } from './interfaces/view';
+import { LView } from './interfaces/view';
 export interface viewEngine_ChangeDetectorRef_interface extends viewEngine_ChangeDetectorRef {
 }
 export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T>, viewEngine_InternalViewRef, viewEngine_ChangeDetectorRef_interface {
@@ -18,7 +18,7 @@ export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T>, viewEn
     private _appRef;
     private _viewContainerRef;
     readonly rootNodes: any[];
-    constructor(_view: LViewData, _context: T | null, _componentIndex: number);
+    constructor(_lView: LView, _context: T | null, _componentIndex: number);
     readonly context: T;
     readonly destroyed: boolean;
     destroy(): void;
