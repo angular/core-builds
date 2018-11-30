@@ -12,7 +12,7 @@ import { TemplateRef as ViewEngine_TemplateRef } from '../linker/template_ref';
 import { ViewContainerRef as ViewEngine_ViewContainerRef } from '../linker/view_container_ref';
 import { Renderer2 } from '../render/api';
 import { TContainerNode, TElementContainerNode, TElementNode, TNode } from './interfaces/node';
-import { LViewData } from './interfaces/view';
+import { LView } from './interfaces/view';
 /**
  * Creates an ElementRef from the most recent node.
  *
@@ -27,7 +27,7 @@ export declare function injectElementRef(ElementRefToken: typeof ViewEngine_Elem
  * @param view The view to which the node belongs
  * @returns The ElementRef instance to use
  */
-export declare function createElementRef(ElementRefToken: typeof ViewEngine_ElementRef, tNode: TNode, view: LViewData): ViewEngine_ElementRef;
+export declare function createElementRef(ElementRefToken: typeof ViewEngine_ElementRef, tNode: TNode, view: LView): ViewEngine_ElementRef;
 /**
  * Creates a TemplateRef given a node.
  *
@@ -43,7 +43,7 @@ export declare function injectTemplateRef<T>(TemplateRefToken: typeof ViewEngine
  * @param hostView The view to which the node belongs
  * @returns The TemplateRef instance to use
  */
-export declare function createTemplateRef<T>(TemplateRefToken: typeof ViewEngine_TemplateRef, ElementRefToken: typeof ViewEngine_ElementRef, hostTNode: TNode, hostView: LViewData): ViewEngine_TemplateRef<T> | null;
+export declare function createTemplateRef<T>(TemplateRefToken: typeof ViewEngine_TemplateRef, ElementRefToken: typeof ViewEngine_ElementRef, hostTNode: TNode, hostView: LView): ViewEngine_TemplateRef<T> | null;
 /**
  * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
  * already exists, retrieves the existing ViewContainerRef.
@@ -54,7 +54,7 @@ export declare function injectViewContainerRef(ViewContainerRefToken: typeof Vie
 export declare class NodeInjector implements Injector {
     private _tNode;
     private _hostView;
-    constructor(_tNode: TElementNode | TContainerNode | TElementContainerNode, _hostView: LViewData);
+    constructor(_tNode: TElementNode | TContainerNode | TElementContainerNode, _hostView: LView);
     get(token: any, notFoundValue?: any): any;
 }
 /**
@@ -66,7 +66,7 @@ export declare class NodeInjector implements Injector {
  * @param hostView The view to which the node belongs
  * @returns The ViewContainerRef instance to use
  */
-export declare function createContainerRef(ViewContainerRefToken: typeof ViewEngine_ViewContainerRef, ElementRefToken: typeof ViewEngine_ElementRef, hostTNode: TElementNode | TContainerNode | TElementContainerNode, hostView: LViewData): ViewEngine_ViewContainerRef;
+export declare function createContainerRef(ViewContainerRefToken: typeof ViewEngine_ViewContainerRef, ElementRefToken: typeof ViewEngine_ElementRef, hostTNode: TElementNode | TContainerNode | TElementContainerNode, hostView: LView): ViewEngine_ViewContainerRef;
 /** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
 export declare function injectChangeDetectorRef(): ViewEngine_ChangeDetectorRef;
 /**
@@ -77,6 +77,6 @@ export declare function injectChangeDetectorRef(): ViewEngine_ChangeDetectorRef;
  * @param context The context for this change detector ref
  * @returns The ChangeDetectorRef to use
  */
-export declare function createViewRef(hostTNode: TNode, hostView: LViewData, context: any): ViewEngine_ChangeDetectorRef;
+export declare function createViewRef(hostTNode: TNode, hostView: LView, context: any): ViewEngine_ChangeDetectorRef;
 /** Returns a Renderer2 (or throws when application was bootstrapped with Renderer3) */
 export declare function injectRenderer2(): Renderer2;

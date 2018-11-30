@@ -9,14 +9,14 @@ import { InjectionToken } from '../../di/injection_token';
 import { InjectFlags } from '../../di/injector_compatibility';
 import { Type } from '../../type';
 import { TElementNode } from './node';
-import { LViewData, TData } from './view';
+import { LView, TData } from './view';
 export declare const TNODE = 8;
 export declare const PARENT_INJECTOR = 8;
 export declare const INJECTOR_SIZE = 9;
 /**
  * Represents a relative location of parent injector.
  *
- * The interfaces encodes number of parents `LViewData`s to traverse and index in the `LViewData`
+ * The interfaces encodes number of parents `LView`s to traverse and index in the `LView`
  * pointing to the parent injector.
  */
 export interface RelativeInjectorLocation {
@@ -30,10 +30,10 @@ export declare const enum RelativeInjectorLocationFlags {
 }
 export declare const NO_PARENT_INJECTOR: RelativeInjectorLocation;
 /**
- * Each injector is saved in 9 contiguous slots in `LViewData` and 9 contiguous slots in
+ * Each injector is saved in 9 contiguous slots in `LView` and 9 contiguous slots in
  * `TView.data`. This allows us to store information about the current node's tokens (which
  * can be shared in `TView`) as well as the tokens of its ancestor nodes (which cannot be
- * shared, so they live in `LViewData`).
+ * shared, so they live in `LView`).
  *
  * Each of these slots (aside from the last slot) contains a bloom filter. This bloom filter
  * determines whether a directive is available on the associated node or not. This prevents us
@@ -41,7 +41,7 @@ export declare const NO_PARENT_INJECTOR: RelativeInjectorLocation;
  *
  * See: https://en.wikipedia.org/wiki/Bloom_filter for more about bloom filters.
  *
- * Because all injectors have been flattened into `LViewData` and `TViewData`, they cannot typed
+ * Because all injectors have been flattened into `LView` and `TViewData`, they cannot typed
  * using interfaces as they were previously. The start index of each `LInjector` and `TInjector`
  * will differ based on where it is flattened into the main array, so it's not possible to know
  * the indices ahead of time and save their types here. The interfaces are still included here
@@ -137,7 +137,7 @@ export declare class NodeInjectorFactory {
      * array where existing instances of injectables are stored. This is used in case
      * of multi shadow is needed. See `multi` field documentation.
      */
-    lData: LViewData, 
+    lView: LView, 
     /**
      * The TNode of the same element injector.
      */
@@ -230,7 +230,7 @@ export declare class NodeInjectorFactory {
      * array where existing instances of injectables are stored. This is used in case
      * of multi shadow is needed. See `multi` field documentation.
      */
-    lData: LViewData, 
+    lView: LView, 
     /**
      * The TNode of the same element injector.
      */

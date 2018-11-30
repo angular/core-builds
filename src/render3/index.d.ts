@@ -16,8 +16,8 @@ export { ComponentFactory, ComponentFactoryResolver, ComponentRef, injectCompone
 export { getFactoryOf, getInheritedFactory } from './di';
 export { RenderFlags } from './interfaces/definition';
 export { CssSelectorList } from './interfaces/projection';
-export { bind, interpolation1, interpolation2, interpolation3, interpolation4, interpolation5, interpolation6, interpolation7, interpolation8, interpolationV, container, containerRefreshStart, containerRefreshEnd, nextContext, element, elementAttribute, elementClassProp, elementEnd, elementProperty, elementStart, elementContainerStart, elementContainerEnd, elementStyling, elementStylingMap, elementStyleProp, elementStylingApply, listener, store, load, namespaceHTML, namespaceMathML, namespaceSVG, projection, projectionDef, text, textBinding, template, reference, embeddedViewStart, embeddedViewEnd, detectChanges, markDirty, tick, directiveInject, injectAttribute, } from './instructions';
-export { getCurrentView, restoreView, enableBindings, disableBindings, } from './state';
+export { bind, interpolation1, interpolation2, interpolation3, interpolation4, interpolation5, interpolation6, interpolation7, interpolation8, interpolationV, container, containerRefreshStart, containerRefreshEnd, nextContext, element, elementAttribute, elementClassProp, elementEnd, elementProperty, elementStart, elementContainerStart, elementContainerEnd, elementStyling, elementStylingMap, elementStyleProp, elementStylingApply, listener, store, load, namespaceHTML, namespaceMathML, namespaceSVG, projection, projectionDef, text, textBinding, template, reference, embeddedViewStart, embeddedViewEnd, detectChanges, markDirty, tick, directiveInject, injectAttribute, getCurrentView } from './instructions';
+export { restoreView, enableBindings, disableBindings, } from './state';
 export { i18n, i18nAttributes, i18nExp, i18nStart, i18nEnd, i18nApply, i18nPostprocess } from './i18n';
 export { NgModuleFactory, NgModuleRef, NgModuleType } from './ng_module_ref';
 export { AttributeMarker } from './interfaces/node';
