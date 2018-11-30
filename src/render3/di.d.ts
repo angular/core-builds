@@ -20,7 +20,7 @@ import { LView, TData, TView } from './interfaces/view';
  * @param tView The TView for the injector's bloom filters
  * @param type The directive token to register
  */
-export declare function bloomAdd(injectorIndex: number, tView: TView, type: Type<any> | InjectionToken<any>): void;
+export declare function bloomAdd(injectorIndex: number, tView: TView, type: Type<any> | InjectionToken<any> | string): void;
 /**
  * Creates (or gets an existing) injector for a given element or container.
  *
@@ -118,7 +118,7 @@ export declare function getNodeInjectable(tData: TData, lData: LView, index: num
  * @param token the injection token
  * @returns the matching bit to check in the bloom filter or `null` if the token is not known.
  */
-export declare function bloomHashBitOrFactory(token: Type<any> | InjectionToken<any>): number | Function | undefined;
+export declare function bloomHashBitOrFactory(token: Type<any> | InjectionToken<any> | string): number | Function | undefined;
 export declare function bloomHasToken(bloomHash: number, injectorIndex: number, injectorView: LView | TData): boolean;
 export declare function injectInjector(): NodeInjector;
 export declare class NodeInjector implements Injector {

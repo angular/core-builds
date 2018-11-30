@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+84.sha-c96dea2
+ * @license Angular v7.1.0+85.sha-64a3461
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2631,7 +2631,7 @@ let nextNgElementId = 0;
 function bloomAdd(injectorIndex, tView, type) {
     ngDevMode && assertEqual(tView.firstTemplatePass, true, 'expected firstTemplatePass to be true');
     /** @type {?} */
-    let id = (/** @type {?} */ (type))[NG_ELEMENT_ID];
+    let id = typeof type !== 'string' ? (/** @type {?} */ (type))[NG_ELEMENT_ID] : type.charCodeAt(0) || 0;
     // Set a unique ID on the directive type, so if something tries to inject the directive,
     // we can easily retrieve the ID and hash it into the bloom bit that should be checked.
     if (id == null) {
@@ -3072,6 +3072,9 @@ function getNodeInjectable(tData, lData, index, tNode) {
  */
 function bloomHashBitOrFactory(token) {
     ngDevMode && assertDefined(token, 'token must be defined');
+    if (typeof token === 'string') {
+        return token.charCodeAt(0) || 0;
+    }
     /** @type {?} */
     const tokenId = (/** @type {?} */ (token))[NG_ELEMENT_ID];
     return typeof tokenId === 'number' ? tokenId & BLOOM_MASK : tokenId;
@@ -12407,7 +12410,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0+84.sha-c96dea2');
+const VERSION = new Version('7.1.0+85.sha-64a3461');
 
 /**
  * @fileoverview added by tsickle
