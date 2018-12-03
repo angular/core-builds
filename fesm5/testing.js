@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.1.0+111.sha-8eb102a
+ * @license Angular v7.1.0+116.sha-0cf49c8
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, Injector, NgZone, ɵRender3ComponentFactory, ɵRender3NgModuleRef, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, Compiler, Injectable, defineInjectable, ɵgetInheritedFactory, ɵsetClassMetadata, ɵclearOverrides, ɵoverrideComponentView, ApplicationInitStatus, ɵAPP_ROOT, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled } from '@angular/core';
+import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, ApplicationInitStatus, Injector, NgZone, ɵRender3ComponentFactory, ɵRender3NgModuleRef, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, Compiler, Injectable, defineInjectable, ɵgetInheritedFactory, ɵsetClassMetadata, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled } from '@angular/core';
 import { __extends, __spread, __values, __decorate, __read } from 'tslib';
 
 /**
@@ -1164,6 +1164,9 @@ var TestBedRender3 = /** @class */ (function () {
         compileNgModule(testModuleType, resolvers);
         var parentInjector = this.platform.injector;
         this._moduleRef = new ɵRender3NgModuleRef(testModuleType, parentInjector);
+        // ApplicationInitStatus.runInitializers() is marked @internal
+        // to core. Cast it to any before accessing it.
+        this._moduleRef.injector.get(ApplicationInitStatus).runInitializers();
         this._instantiated = true;
     };
     // creates resolvers taking overrides into account

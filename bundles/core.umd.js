@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+111.sha-8eb102a
+ * @license Angular v7.1.0+116.sha-0cf49c8
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -9357,7 +9357,7 @@
             }
             // Track the InjectorType and add a provider for it.
             this.injectorDefTypes.add(defType);
-            this.records.set(defType, makeRecord(def.factory));
+            this.records.set(defType, makeRecord(def.factory, NOT_YET));
             // Add providers in the same way that @NgModule resolution did:
             // First, include providers from any imports.
             if (def.imports != null && !isDuplicate) {
@@ -9497,7 +9497,6 @@
         return factory;
     }
     function makeRecord(factory, value, multi) {
-        if (value === void 0) { value = NOT_YET; }
         if (multi === void 0) { multi = false; }
         return {
             factory: factory,
@@ -10061,7 +10060,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0+111.sha-8eb102a');
+    var VERSION = new Version('7.1.0+116.sha-0cf49c8');
 
     /**
      * @license
