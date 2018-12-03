@@ -103,6 +103,19 @@ export declare function updateClassProp(context: StylingContext, index: number, 
  * @returns number the total amount of players that got queued for animation (if any)
  */
 export declare function renderStyleAndClassBindings(context: StylingContext, renderer: Renderer3, rootOrView: RootContext | LView, isFirstRender: boolean, classesStore?: BindingStore | null, stylesStore?: BindingStore | null): number;
+/**
+ * This function renders a given CSS prop/value entry using the
+ * provided renderer. If a `store` value is provided then
+ * that will be used a render context instead of the provided
+ * renderer.
+ *
+ * @param native the DOM Element
+ * @param prop the CSS style property that will be rendered
+ * @param value the CSS style value that will be rendered
+ * @param renderer
+ * @param store an optional key/value map that will be used as a context to render styles on
+ */
+export declare function setStyle(native: any, prop: string, value: string | null, renderer: Renderer3, sanitizer: StyleSanitizeFn | null, store?: BindingStore | null, playerBuilder?: ClassAndStylePlayerBuilder<any> | null): void;
 export declare function isContextDirty(context: StylingContext): boolean;
 export declare function limitToSingleClasses(context: StylingContext): number;
 export declare function setContextDirty(context: StylingContext, isDirtyYes: boolean): void;

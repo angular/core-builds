@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+109.sha-7d89cff
+ * @license Angular v7.1.0+110.sha-2a39425
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -8088,8 +8088,6 @@ function elementStylingApply(index, directive) {
  * @return {?}
  */
 function elementStyleProp(index, styleIndex, value, suffix, directive) {
-    if (directive != undefined)
-        return hackImplementationOfElementStyleProp(index, styleIndex, value, suffix, directive);
     /** @type {?} */
     let valueToAdd = null;
     if (value !== null) {
@@ -8106,7 +8104,12 @@ function elementStyleProp(index, styleIndex, value, suffix, directive) {
             valueToAdd = /** @type {?} */ ((value));
         }
     }
-    updateStyleProp(getStylingContext(index, getLView()), styleIndex, valueToAdd);
+    if (directive != undefined) {
+        hackImplementationOfElementStyleProp(index, styleIndex, valueToAdd, suffix, directive);
+    }
+    else {
+        updateStyleProp(getStylingContext(index, getLView()), styleIndex, valueToAdd);
+    }
 }
 /**
  * Queue a key/value map of styles to be rendered on an Element.
@@ -8159,14 +8162,48 @@ function elementStylingMap(index, classes, styles, directive) {
  */
 function hackImplementationOfElementStyling(classDeclarations, styleDeclarations, styleSanitizer, directive) {
     /** @type {?} */
-    const node = getNativeByTNode(getPreviousOrParentTNode(), getLView());
+    const node = /** @type {?} */ (getNativeByTNode(getPreviousOrParentTNode(), getLView()));
     ngDevMode && assertDefined(node, 'expecting parent DOM node');
     /** @type {?} */
     const hostStylingHackMap = ((/** @type {?} */ (node)).hostStylingHack || ((/** @type {?} */ (node)).hostStylingHack = new Map()));
+    /** @type {?} */
+    const squashedClassDeclarations = hackSquashDeclaration(classDeclarations);
     hostStylingHackMap.set(directive, {
-        classDeclarations: hackSquashDeclaration(classDeclarations),
+        classDeclarations: squashedClassDeclarations,
         styleDeclarations: hackSquashDeclaration(styleDeclarations), styleSanitizer
     });
+    hackSetStaticClasses(node, squashedClassDeclarations);
+}
+/**
+ * @param {?} node
+ * @param {?} classDeclarations
+ * @return {?}
+ */
+function hackSetStaticClasses(node, classDeclarations) {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const staticClassStartIndex = classDeclarations.indexOf(/** @type {?} */ (1 /* VALUES_MODE */)) + 1;
+    /** @type {?} */
+    const renderer = lView[RENDERER];
+    for (let i = staticClassStartIndex; i < classDeclarations.length; i += 2) {
+        /** @type {?} */
+        const className = /** @type {?} */ (classDeclarations[i]);
+        /** @type {?} */
+        const value = classDeclarations[i + 1];
+        // if value is true, then this is a static class and we should set it now.
+        // class bindings are set separately in elementClassProp.
+        if (value === true) {
+            if (isProceduralRenderer(renderer)) {
+                renderer.addClass(node, className);
+            }
+            else {
+                /** @type {?} */
+                const classList = (/** @type {?} */ (node)).classList;
+                classList.add(className);
+            }
+        }
+    }
 }
 /**
  * @param {?} declarations
@@ -8221,7 +8258,18 @@ function hackImplementationOfElementStylingApply(index, directive) {
  * @return {?}
  */
 function hackImplementationOfElementStyleProp(index, styleIndex, value, suffix, directive) {
-    throw new Error('unimplemented. Should not be needed by ViewEngine compatibility');
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const node = getNativeByIndex(index, lView);
+    ngDevMode && assertDefined(node, 'could not locate node');
+    /** @type {?} */
+    const hostStylingHack = (/** @type {?} */ (node)).hostStylingHack.get(directive);
+    /** @type {?} */
+    const styleName = hostStylingHack.styleDeclarations[styleIndex];
+    /** @type {?} */
+    const renderer = lView[RENDERER];
+    setStyle(node, styleName, /** @type {?} */ (value), renderer, null);
 }
 /**
  * @template T
@@ -12494,7 +12542,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0+109.sha-7d89cff');
+const VERSION = new Version('7.1.0+110.sha-2a39425');
 
 /**
  * @fileoverview added by tsickle
