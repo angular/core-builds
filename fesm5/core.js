@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+107.sha-931a636
+ * @license Angular v7.1.0+108.sha-6f5c124
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -6793,10 +6793,16 @@ function queueHostBindingForCheck(tView, def, hostVars) {
     ngDevMode &&
         assertEqual(getFirstTemplatePass(), true, 'Should only be called in first template pass.');
     var expando = tView.expandoInstructions;
-    // check whether a given `hostBindings` function already exists in expandoInstructions,
+    var length = expando.length;
+    // Check whether a given `hostBindings` function already exists in expandoInstructions,
     // which can happen in case directive definition was extended from base definition (as a part of
-    // the `InheritDefinitionFeature` logic)
-    if (expando.length < 2 || expando[expando.length - 2] !== def.hostBindings) {
+    // the `InheritDefinitionFeature` logic). If we found the same `hostBindings` function in the
+    // list, we just increase the number of host vars associated with that function, but do not add it
+    // into the list again.
+    if (length >= 2 && expando[length - 2] === def.hostBindings) {
+        expando[length - 1] = expando[length - 1] + hostVars;
+    }
+    else {
         expando.push(def.hostBindings, hostVars);
     }
 }
@@ -10008,7 +10014,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.1.0+107.sha-931a636');
+var VERSION = new Version('7.1.0+108.sha-6f5c124');
 
 /**
  * @license
