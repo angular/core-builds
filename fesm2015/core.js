@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+99.sha-01fd0cd
+ * @license Angular v7.1.0+109.sha-7d89cff
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -8092,7 +8092,7 @@ function elementStyleProp(index, styleIndex, value, suffix, directive) {
         return hackImplementationOfElementStyleProp(index, styleIndex, value, suffix, directive);
     /** @type {?} */
     let valueToAdd = null;
-    if (value) {
+    if (value !== null) {
         if (suffix) {
             // when a suffix is applied then it will bypass
             // sanitization entirely (b/c a new string is created)
@@ -8556,10 +8556,17 @@ function queueHostBindingForCheck(tView, def, hostVars) {
         assertEqual(getFirstTemplatePass(), true, 'Should only be called in first template pass.');
     /** @type {?} */
     const expando = /** @type {?} */ ((tView.expandoInstructions));
-    // check whether a given `hostBindings` function already exists in expandoInstructions,
+    /** @type {?} */
+    const length = expando.length;
+    // Check whether a given `hostBindings` function already exists in expandoInstructions,
     // which can happen in case directive definition was extended from base definition (as a part of
-    // the `InheritDefinitionFeature` logic)
-    if (expando.length < 2 || expando[expando.length - 2] !== def.hostBindings) {
+    // the `InheritDefinitionFeature` logic). If we found the same `hostBindings` function in the
+    // list, we just increase the number of host vars associated with that function, but do not add it
+    // into the list again.
+    if (length >= 2 && expando[length - 2] === def.hostBindings) {
+        expando[length - 1] = (/** @type {?} */ (expando[length - 1])) + hostVars;
+    }
+    else {
         expando.push(/** @type {?} */ ((def.hostBindings)), hostVars);
     }
 }
@@ -12487,7 +12494,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0+99.sha-01fd0cd');
+const VERSION = new Version('7.1.0+109.sha-7d89cff');
 
 /**
  * @fileoverview added by tsickle
@@ -12594,16 +12601,11 @@ class ComponentFactory$1 extends ComponentFactory {
         /** @type {?} */
         const isInternalRootView = rootSelectorOrNode === undefined;
         /** @type {?} */
-        let rendererFactory;
+        const rootViewInjector = ngModule ? createChainedInjector(injector, ngModule.injector) : injector;
         /** @type {?} */
-        let sanitizer = null;
-        if (ngModule) {
-            rendererFactory = /** @type {?} */ (ngModule.injector.get(RendererFactory2));
-            sanitizer = ngModule.injector.get(Sanitizer, null);
-        }
-        else {
-            rendererFactory = domRendererFactory3;
-        }
+        const rendererFactory = /** @type {?} */ (rootViewInjector.get(RendererFactory2, domRendererFactory3));
+        /** @type {?} */
+        const sanitizer = rootViewInjector.get(Sanitizer, null);
         /** @type {?} */
         const hostRNode = isInternalRootView ?
             elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef)) :
@@ -12612,11 +12614,9 @@ class ComponentFactory$1 extends ComponentFactory {
         const rootFlags = this.componentDef.onPush ? 4 /* Dirty */ | 64 /* IsRoot */ :
             2 /* CheckAlways */ | 64 /* IsRoot */;
         /** @type {?} */
-        const rootContext = ngModule && !isInternalRootView ? ngModule.injector.get(ROOT_CONTEXT) : createRootContext();
+        const rootContext = !isInternalRootView ? rootViewInjector.get(ROOT_CONTEXT) : createRootContext();
         /** @type {?} */
         const renderer = rendererFactory.createRenderer(hostRNode, this.componentDef);
-        /** @type {?} */
-        const rootViewInjector = ngModule ? createChainedInjector(injector, ngModule.injector) : injector;
         if (rootSelectorOrNode && hostRNode) {
             ngDevMode && ngDevMode.rendererSetAttribute++;
             isProceduralRenderer(renderer) ?
