@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+108.sha-6f5c124
+ * @license Angular v7.1.0+109.sha-7d89cff
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -12494,7 +12494,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0+108.sha-6f5c124');
+const VERSION = new Version('7.1.0+109.sha-7d89cff');
 
 /**
  * @fileoverview added by tsickle
@@ -12601,16 +12601,11 @@ class ComponentFactory$1 extends ComponentFactory {
         /** @type {?} */
         const isInternalRootView = rootSelectorOrNode === undefined;
         /** @type {?} */
-        let rendererFactory;
+        const rootViewInjector = ngModule ? createChainedInjector(injector, ngModule.injector) : injector;
         /** @type {?} */
-        let sanitizer = null;
-        if (ngModule) {
-            rendererFactory = /** @type {?} */ (ngModule.injector.get(RendererFactory2));
-            sanitizer = ngModule.injector.get(Sanitizer, null);
-        }
-        else {
-            rendererFactory = domRendererFactory3;
-        }
+        const rendererFactory = /** @type {?} */ (rootViewInjector.get(RendererFactory2, domRendererFactory3));
+        /** @type {?} */
+        const sanitizer = rootViewInjector.get(Sanitizer, null);
         /** @type {?} */
         const hostRNode = isInternalRootView ?
             elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef)) :
@@ -12619,11 +12614,9 @@ class ComponentFactory$1 extends ComponentFactory {
         const rootFlags = this.componentDef.onPush ? 4 /* Dirty */ | 64 /* IsRoot */ :
             2 /* CheckAlways */ | 64 /* IsRoot */;
         /** @type {?} */
-        const rootContext = ngModule && !isInternalRootView ? ngModule.injector.get(ROOT_CONTEXT) : createRootContext();
+        const rootContext = !isInternalRootView ? rootViewInjector.get(ROOT_CONTEXT) : createRootContext();
         /** @type {?} */
         const renderer = rendererFactory.createRenderer(hostRNode, this.componentDef);
-        /** @type {?} */
-        const rootViewInjector = ngModule ? createChainedInjector(injector, ngModule.injector) : injector;
         if (rootSelectorOrNode && hostRNode) {
             ngDevMode && ngDevMode.rendererSetAttribute++;
             isProceduralRenderer(renderer) ?
