@@ -11,7 +11,7 @@ import { Sanitizer } from '../sanitization/security';
 import { ComponentDef, ComponentType } from './interfaces/definition';
 import { PlayerHandler } from './interfaces/player';
 import { RElement, Renderer3, RendererFactory3 } from './interfaces/renderer';
-import { LViewData, RootContext } from './interfaces/view';
+import { LView, RootContext } from './interfaces/view';
 /** Options that control how the component should be bootstrapped. */
 export interface CreateComponentOptions {
     /** Which renderer factory to use. */
@@ -82,12 +82,12 @@ export declare function renderComponent<T>(componentType: ComponentType<T> | Typ
  *
  * @returns Component view created
  */
-export declare function createRootComponentView(rNode: RElement | null, def: ComponentDef<any>, rootView: LViewData, renderer: Renderer3, sanitizer?: Sanitizer | null): LViewData;
+export declare function createRootComponentView(rNode: RElement | null, def: ComponentDef<any>, rootView: LView, rendererFactory: RendererFactory3, renderer: Renderer3, sanitizer?: Sanitizer | null): LView;
 /**
  * Creates a root component and sets it up with features and host bindings. Shared by
  * renderComponent() and ViewContainerRef.createComponent().
  */
-export declare function createRootComponent<T>(componentView: LViewData, componentDef: ComponentDef<T>, rootView: LViewData, rootContext: RootContext, hostFeatures: HostFeature[] | null): any;
+export declare function createRootComponent<T>(componentView: LView, componentDef: ComponentDef<T>, rootView: LView, rootContext: RootContext, hostFeatures: HostFeature[] | null): any;
 export declare function createRootContext(scheduler?: (workFn: () => void) => void, playerHandler?: PlayerHandler | null): RootContext;
 /**
  * Used to enable lifecycle hooks on the root component.
@@ -103,26 +103,6 @@ export declare function createRootContext(scheduler?: (workFn: () => void) => vo
  * ```
  */
 export declare function LifecycleHooksFeature(component: any, def: ComponentDef<any>): void;
-/**
- * Retrieve the host element of the component.
- *
- * Use this function to retrieve the host element of the component. The host
- * element is the element which the component is associated with.
- *
- * @param component Component for which the host element should be retrieved.
- */
-export declare function getHostElement<T>(component: T): HTMLElement;
-/**
- * Retrieves the rendered text for a given component.
- *
- * This function retrieves the host element of a component and
- * and then returns the `textContent` for that element. This implies
- * that the text returned will include re-projected content of
- * the component as well.
- *
- * @param component The component to return the content text for.
- */
-export declare function getRenderedText(component: any): string;
 /**
  * Wait on component until it is rendered.
  *

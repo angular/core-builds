@@ -7,9 +7,9 @@
  */
 import { TemplateRef as ViewEngine_TemplateRef } from '../linker/template_ref';
 import { TNode } from './interfaces/node';
-import { LViewData } from './interfaces/view';
+import { LView } from './interfaces/view';
 /**
  * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
  * `<ng-template>` element.
  */
-export declare function templateRefExtractor(tNode: TNode, currentView: LViewData): ViewEngine_TemplateRef<{}> | null;
+export declare function templateRefExtractor(tNode: TNode, currentView: LView): ViewEngine_TemplateRef<{}> | null;

@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import './ng_dev_mode';
 import { InjectionToken } from '../di/injection_token';
 import { Injector } from '../di/injector';
 import { InjectFlags } from '../di/injector_compatibility';
@@ -21,7 +20,7 @@ import { CssSelectorList } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 import { SanitizerFn } from './interfaces/sanitization';
-import { LViewData, LViewFlags, RootContext, RootContextFlags, TView } from './interfaces/view';
+import { LView, LViewFlags, OpaqueViewState, RootContext, RootContextFlags, TView } from './interfaces/view';
 import { NO_CHANGE } from './tokens';
 /**
  * Refreshes the view, executing the following steps in that order:
@@ -29,10 +28,10 @@ import { NO_CHANGE } from './tokens';
  * bindings, refreshes child components.
  * Note: view hooks are triggered later when leaving the view.
  */
-export declare function refreshDescendantViews(viewData: LViewData, rf: RenderFlags | null): void;
+export declare function refreshDescendantViews(lView: LView, rf: RenderFlags | null): void;
 /** Sets the host bindings for the current view. */
-export declare function setHostBindings(tView: TView, viewData: LViewData): void;
-export declare function createLViewData<T>(renderer: Renderer3, tView: TView, context: T | null, flags: LViewFlags, sanitizer?: Sanitizer | null, injector?: Injector | null): LViewData;
+export declare function setHostBindings(tView: TView, viewData: LView): void;
+export declare function createLView<T>(parentLView: LView | null, tView: TView, context: T | null, flags: LViewFlags, rendererFactory?: RendererFactory3 | null, renderer?: Renderer3 | null, sanitizer?: Sanitizer | null, injector?: Injector | null): LView;
 /**
  * Create and stores the TNode, and hooks it up to the tree.
  *
@@ -48,13 +47,13 @@ export declare function createNodeAtIndex(index: number, type: TNodeType.Contain
 export declare function createNodeAtIndex(index: number, type: TNodeType.Projection, native: null, name: null, attrs: TAttributes | null): TProjectionNode;
 export declare function createNodeAtIndex(index: number, type: TNodeType.ElementContainer, native: RComment, name: null, attrs: TAttributes | null): TElementContainerNode;
 export declare function createNodeAtIndex(index: number, type: TNodeType.IcuContainer, native: RComment, name: null, attrs: TAttributes | null): TElementContainerNode;
-export declare function createViewNode(index: number, view: LViewData): TViewNode;
+export declare function createViewNode(index: number, view: LView): TViewNode;
 /**
  * When elements are created dynamically after a view blueprint is created (e.g. through
  * i18nApply() or ComponentFactory.create), we need to adjust the blueprint for future
  * template passes.
  */
-export declare function allocExpando(view: LViewData): void;
+export declare function allocExpando(view: LView): void;
 /**
  *
  * @param hostNode Existing node to render into.
@@ -66,13 +65,13 @@ export declare function allocExpando(view: LViewData): void;
  * @param directives Directive defs that should be used for matching
  * @param pipes Pipe defs that should be used for matching
  */
-export declare function renderTemplate<T>(hostNode: RElement, templateFn: ComponentTemplate<T>, consts: number, vars: number, context: T, providedRendererFactory: RendererFactory3, hostView: LViewData | null, directives?: DirectiveDefListOrFactory | null, pipes?: PipeDefListOrFactory | null, sanitizer?: Sanitizer | null): LViewData;
+export declare function renderTemplate<T>(hostNode: RElement, templateFn: ComponentTemplate<T>, consts: number, vars: number, context: T, providedRendererFactory: RendererFactory3, hostView: LView | null, directives?: DirectiveDefListOrFactory | null, pipes?: PipeDefListOrFactory | null, sanitizer?: Sanitizer | null): LView;
 /**
  * Used for creating the LViewNode of a dynamic embedded view,
  * either through ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
  * Such lViewNode will then be renderer with renderEmbeddedTemplate() (see below).
  */
-export declare function createEmbeddedViewAndNode<T>(tView: TView, context: T, declarationView: LViewData, renderer: Renderer3, queries: LQueries | null, injectorIndex: number): LViewData;
+export declare function createEmbeddedViewAndNode<T>(tView: TView, context: T, declarationView: LView, renderer: Renderer3, queries: LQueries | null, injectorIndex: number): LView;
 /**
  * Used for rendering embedded views (e.g. dynamically created views)
  *
@@ -83,7 +82,7 @@ export declare function createEmbeddedViewAndNode<T>(tView: TView, context: T, d
  * can't store TViews in the template function itself (as we do for comps). Instead, we store the
  * TView for dynamically created views on their host TNode, which only has one instance.
  */
-export declare function renderEmbeddedTemplate<T>(viewToRender: LViewData, tView: TView, context: T, rf: RenderFlags): void;
+export declare function renderEmbeddedTemplate<T>(viewToRender: LView, tView: TView, context: T, rf: RenderFlags): void;
 /**
  * Retrieves a context at the level specified and saves it as the global, contextViewData.
  * Will get the next level up if level is not specified.
@@ -111,7 +110,7 @@ export declare function element(index: number, name: string, attrs?: TAttributes
  * Creates a logical container for other nodes (<ng-container>) backed by a comment node in the DOM.
  * The instruction must later be followed by `elementContainerEnd()` call.
  *
- * @param index Index of the element in the LViewData array
+ * @param index Index of the element in the LView array
  * @param attrs Set of attributes to be used when matching directives.
  * @param localRefs A set of local reference bindings on the element.
  *
@@ -125,7 +124,7 @@ export declare function elementContainerEnd(): void;
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
  *
- * @param index Index of the element in the LViewData array
+ * @param index Index of the element in the LView array
  * @param name Name of the DOM Node
  * @param attrs Statically bound set of attributes to be written into the DOM element on creation.
  * @param localRefs A set of local reference bindings on the element.
@@ -189,7 +188,7 @@ export declare function listener(eventName: string, listenerFn: (e?: any) => any
  * - Cleanup function
  * - Index of context we just saved in LView.cleanupInstances
  */
-export declare function storeCleanupWithContext(view: LViewData | null, context: any, cleanupFn: Function): void;
+export declare function storeCleanupWithContext(lView: LView, context: any, cleanupFn: Function): void;
 /**
  * Saves the cleanup function itself in LView.cleanupInstances.
  *
@@ -198,7 +197,7 @@ export declare function storeCleanupWithContext(view: LViewData | null, context:
  *
  * On the first template pass, the index of the cleanup function is saved in TView.
  */
-export declare function storeCleanupFn(view: LViewData, cleanupFn: Function): void;
+export declare function storeCleanupFn(view: LView, cleanupFn: Function): void;
 /** Mark the end of the element. */
 export declare function elementEnd(): void;
 /**
@@ -235,19 +234,19 @@ export declare function elementProperty<T>(index: number, propName: string, valu
  * @param tViews Any TViews attached to this node
  * @returns the TNode object
  */
-export declare function createTNode(viewData: LViewData, type: TNodeType, adjustedIndex: number, tagName: string | null, attrs: TAttributes | null, tViews: TView[] | null): TNode;
+export declare function createTNode(viewData: LView, type: TNodeType, adjustedIndex: number, tagName: string | null, attrs: TAttributes | null, tViews: TView[] | null): TNode;
 /**
  * Add or remove a class in a `classList` on a DOM element.
  *
  * This instruction is meant to handle the [class.foo]="exp" case
  *
  * @param index The index of the element to update in the data array
- * @param className Name of class to toggle. Because it is going to DOM, this is not subject to
+ * @param classIndex Index of class to toggle. Because it is going to DOM, this is not subject to
  *        renaming as part of minification.
  * @param value A value indicating if a given class should be added or removed.
- * @param directiveIndex the index for the directive that is attempting to change styling.
+ * @param directive the ref to the directive that is attempting to change styling.
  */
-export declare function elementClassProp(index: number, stylingIndex: number, value: boolean | PlayerFactory, directiveIndex?: number): void;
+export declare function elementClassProp(index: number, classIndex: number, value: boolean | PlayerFactory, directive?: {}): void;
 /**
  * Assign any inline style values to the element during creation mode.
  *
@@ -275,9 +274,9 @@ export declare function elementClassProp(index: number, stylingIndex: number, va
  *   values that are passed in here will be applied to the element (if matched).
  * @param styleSanitizer An optional sanitizer function that will be used (if provided)
  *   to sanitize the any CSS property values that are applied to the element (during rendering).
- * @param directiveIndex the index for the directive that is attempting to change styling.
+ * @param directive the ref to the directive that is attempting to change styling.
  */
-export declare function elementStyling(classDeclarations?: (string | boolean | InitialStylingFlags)[] | null, styleDeclarations?: (string | boolean | InitialStylingFlags)[] | null, styleSanitizer?: StyleSanitizeFn | null, directiveIndex?: number): void;
+export declare function elementStyling(classDeclarations?: (string | boolean | InitialStylingFlags)[] | null, styleDeclarations?: (string | boolean | InitialStylingFlags)[] | null, styleSanitizer?: StyleSanitizeFn | null, directive?: {}): void;
 /**
  * Apply all styling values to the element which have been queued by any styling instructions.
  *
@@ -291,9 +290,9 @@ export declare function elementStyling(classDeclarations?: (string | boolean | I
  *        (Note that this is not the element index, but rather an index value allocated
  *        specifically for element styling--the index must be the next index after the element
  *        index.)
- * @param directiveIndex the index for the directive that is attempting to change styling.
+ * @param directive the ref to the directive that is attempting to change styling.
  */
-export declare function elementStylingApply(index: number, directiveIndex?: number): void;
+export declare function elementStylingApply(index: number, directive?: {}): void;
 /**
  * Queue a given style to be rendered on an Element.
  *
@@ -313,9 +312,9 @@ export declare function elementStylingApply(index: number, directiveIndex?: numb
  * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
  *        Note that when a suffix is provided then the underlying sanitizer will
  *        be ignored.
- * @param directiveIndex the index for the directive that is attempting to change styling.
+ * @param directive the ref to the directive that is attempting to change styling.
  */
-export declare function elementStyleProp(index: number, styleIndex: number, value: string | number | String | PlayerFactory | null, suffix?: string, directiveIndex?: number): void;
+export declare function elementStyleProp(index: number, styleIndex: number, value: string | number | String | PlayerFactory | null, suffix?: string, directive?: {}): void;
 /**
  * Queue a key/value map of styles to be rendered on an Element.
  *
@@ -336,13 +335,13 @@ export declare function elementStyleProp(index: number, styleIndex: number, valu
  * @param styles A key/value style map of the styles that will be applied to the given element.
  *        Any missing styles (that have already been applied to the element beforehand) will be
  *        removed (unset) from the element's styling.
- * @param directiveIndex the index for the directive that is attempting to change styling.
+ * @param directive the ref to the directive that is attempting to change styling.
  */
 export declare function elementStylingMap<T>(index: number, classes: {
     [key: string]: any;
 } | string | NO_CHANGE | null, styles?: {
     [styleName: string]: any;
-} | NO_CHANGE | null, directiveIndex?: number): void;
+} | NO_CHANGE | null, directive?: {}): void;
 /**
  * Create static text node
  *
@@ -361,7 +360,7 @@ export declare function textBinding<T>(index: number, value: T | NO_CHANGE): voi
 /**
  * Instantiate a root component.
  */
-export declare function instantiateRootComponent<T>(tView: TView, viewData: LViewData, def: ComponentDef<T>): T;
+export declare function instantiateRootComponent<T>(tView: TView, viewData: LView, def: ComponentDef<T>): T;
 /**
 * Generates a new block in TView.expandoInstructions for this node.
 *
@@ -369,12 +368,6 @@ export declare function instantiateRootComponent<T>(tView: TView, viewData: LVie
 * it from the hostVar count) and the directive count. See more in VIEW_DATA.md.
 */
 export declare function generateExpandoInstructionBlock(tView: TView, tNode: TNode, directiveCount: number): void;
-/**
-* On the first template pass, we need to reserve space for host binding values
-* after directives are matched (so all directives are saved, then bindings).
-* Because we are updating the blueprint, we only need to do this once.
-*/
-export declare function prefillHostVars(tView: TView, viewData: LViewData, totalHostVars: number): void;
 /** Stores index of component's host element so it will be queued for view refresh during CD. */
 export declare function queueComponentIndexForCheck(previousOrParentTNode: TNode): void;
 /**
@@ -393,7 +386,7 @@ export declare function initNodeFlags(tNode: TNode, index: number, numberOfDirec
  * @param isForViewContainerRef Optional a flag indicating the ViewContainerRef case
  * @returns LContainer
  */
-export declare function createLContainer(hostNative: RElement | RComment, hostTNode: TElementNode | TContainerNode | TElementContainerNode, currentView: LViewData, native: RComment, isForViewContainerRef?: boolean): LContainer;
+export declare function createLContainer(hostNative: RElement | RComment, hostTNode: TElementNode | TContainerNode | TElementContainerNode, currentView: LView, native: RComment, isForViewContainerRef?: boolean): LContainer;
 /**
  * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
  *
@@ -446,11 +439,12 @@ export declare function embeddedViewEnd(): void;
 /**
  * Refreshes components by entering the component view and processing its bindings, queries, etc.
  *
- * @param adjustedElementIndex  Element index in LViewData[] (adjusted for HEADER_OFFSET)
+ * @param adjustedElementIndex  Element index in LView[] (adjusted for HEADER_OFFSET)
+ * @param rf  The render flags that should be used to process this template
  */
-export declare function componentRefresh<T>(adjustedElementIndex: number, parentFirstTemplatePass: boolean, rf: RenderFlags | null): void;
+export declare function componentRefresh<T>(adjustedElementIndex: number, rf: RenderFlags | null): void;
 /** Returns a boolean for whether the view is attached */
-export declare function viewAttached(view: LViewData): boolean;
+export declare function viewAttached(view: LView): boolean;
 /**
  * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
  * It takes all the selectors from the entire component's template and decides where
@@ -484,19 +478,19 @@ export declare function projectionDef(selectors?: CssSelectorList[], textSelecto
  */
 export declare function projection(nodeIndex: number, selectorIndex?: number, attrs?: string[]): void;
 /**
- * Adds LViewData or LContainer to the end of the current view tree.
+ * Adds LView or LContainer to the end of the current view tree.
  *
  * This structure will be used to traverse through nested views to remove listeners
  * and call onDestroy callbacks.
  *
- * @param currentView The view where LViewData or LContainer should be added
- * @param adjustedHostIndex Index of the view's host node in LViewData[], adjusted for header
- * @param state The LViewData or LContainer to add to the view tree
+ * @param lView The view where LView or LContainer should be added
+ * @param adjustedHostIndex Index of the view's host node in LView[], adjusted for header
+ * @param state The LView or LContainer to add to the view tree
  * @returns The state passed in
  */
-export declare function addToViewTree<T extends LViewData | LContainer>(currentView: LViewData, adjustedHostIndex: number, state: T): T;
+export declare function addToViewTree<T extends LView | LContainer>(lView: LView, adjustedHostIndex: number, state: T): T;
 /** Marks current view and all ancestors dirty */
-export declare function markViewDirty(view: LViewData): void;
+export declare function markViewDirty(lView: LView): void;
 /**
  * Used to schedule change detection on the whole application.
  *
@@ -539,9 +533,9 @@ export declare function detectChanges<T>(component: T): void;
 /**
  * Synchronously perform change detection on a root view and its components.
  *
- * @param lViewData The view which the change detection should be performed on.
+ * @param lView The view which the change detection should be performed on.
  */
-export declare function detectChangesInRootView(lViewData: LViewData): void;
+export declare function detectChangesInRootView(lView: LView): void;
 /**
  * Checks the change detector and its children, and throws if any changes are detected.
  *
@@ -556,9 +550,9 @@ export declare function checkNoChanges<T>(component: T): void;
  * This is used in development mode to verify that running change detection doesn't
  * introduce other changes.
  *
- * @param lViewData The view which the change detection should be checked on.
+ * @param lView The view which the change detection should be checked on.
  */
-export declare function checkNoChangesInRootView(lViewData: LViewData): void;
+export declare function checkNoChangesInRootView(lView: LView): void;
 /**
  * Mark the component as dirty (needing change detection).
  *
@@ -572,6 +566,8 @@ export declare function checkNoChangesInRootView(lViewData: LViewData): void;
  * can be provided.
  *
  * @param component Component to mark as dirty.
+ *
+ * @publicApi
  */
 export declare function markDirty<T>(component: T): void;
 /**
@@ -580,6 +576,12 @@ export declare function markDirty<T>(component: T): void;
  * @param value Value to diff
  */
 export declare function bind<T>(value: T): T | NO_CHANGE;
+/**
+ * Allocates the necessary amount of slots for host vars.
+ *
+ * @param count Amount of vars to be allocated
+ */
+export declare function allocHostVars(count: number): void;
 /**
  * Create interpolation bindings with a variable number of expressions.
  *
@@ -629,18 +631,6 @@ export declare function reference<T>(index: number): T;
 export declare function loadQueryList<T>(queryListIdx: number): QueryList<T>;
 /** Retrieves a value from current `viewData`. */
 export declare function load<T>(index: number): T;
-/** Gets the current binding value. */
-export declare function getBinding(bindingIndex: number): any;
-/** Updates binding if changed, then returns whether it was updated. */
-export declare function bindingUpdated(bindingIndex: number, value: any): boolean;
-/** Updates binding and returns the value. */
-export declare function updateBinding(bindingIndex: number, value: any): any;
-/** Updates 2 bindings if changed, then returns whether either was updated. */
-export declare function bindingUpdated2(bindingIndex: number, exp1: any, exp2: any): boolean;
-/** Updates 3 bindings if changed, then returns whether any was updated. */
-export declare function bindingUpdated3(bindingIndex: number, exp1: any, exp2: any, exp3: any): boolean;
-/** Updates 4 bindings if changed, then returns whether any was updated. */
-export declare function bindingUpdated4(bindingIndex: number, exp1: any, exp2: any, exp3: any, exp4: any): boolean;
 /**
  * Returns the value associated to the given token from the injectors.
  *
@@ -667,7 +657,7 @@ export declare function directiveInject<T>(token: Type<T> | InjectionToken<T>, f
 /**
  * Facade for the attribute injection from DI.
  */
-export declare function injectAttribute(attrNameToInject: string): string | undefined;
+export declare function injectAttribute(attrNameToInject: string): string | null;
 /**
  * Registers a QueryList, associated with a content query, for later refresh (part of a view
  * refresh).
@@ -675,3 +665,11 @@ export declare function injectAttribute(attrNameToInject: string): string | unde
 export declare function registerContentQuery<Q>(queryList: QueryList<Q>, currentDirectiveIndex: number): void;
 export declare const CLEAN_PROMISE: Promise<null>;
 export declare function delegateToClassInput(tNode: TNode): number;
+/**
+ * Returns the current OpaqueViewState instance.
+ *
+ * Used in conjunction with the restoreView() instruction to save a snapshot
+ * of the current view and restore it when listeners are invoked. This allows
+ * walking the declaration view tree in listeners to get vars from parent views.
+ */
+export declare function getCurrentView(): OpaqueViewState;

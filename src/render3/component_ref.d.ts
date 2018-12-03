@@ -12,11 +12,10 @@ import { ComponentFactory as viewEngine_ComponentFactory, ComponentRef as viewEn
 import { ComponentFactoryResolver as viewEngine_ComponentFactoryResolver } from '../linker/component_factory_resolver';
 import { ElementRef as viewEngine_ElementRef } from '../linker/element_ref';
 import { NgModuleRef as viewEngine_NgModuleRef } from '../linker/ng_module_factory';
-import { RendererFactory2 } from '../render/api';
 import { Type } from '../type';
 import { ComponentDef } from './interfaces/definition';
 import { TContainerNode, TElementContainerNode, TElementNode } from './interfaces/node';
-import { LViewData, RootContext } from './interfaces/view';
+import { LView, RootContext } from './interfaces/view';
 import { ViewRef } from './view_ref';
 export declare class ComponentFactoryResolver extends viewEngine_ComponentFactoryResolver {
     resolveComponentFactory<T>(component: Type<T>): viewEngine_ComponentFactory<T>;
@@ -30,11 +29,6 @@ export declare const ROOT_CONTEXT: InjectionToken<RootContext>;
  * for the default `RootContext` found in the {@link ROOT_CONTEXT} token.
  */
 export declare const SCHEDULER: InjectionToken<(fn: () => void) => void>;
-/**
- * A function used to wrap the `RendererFactory2`.
- * Used in tests to change the `RendererFactory2` into a `DebugRendererFactory2`.
- */
-export declare const WRAP_RENDERER_FACTORY2: InjectionToken<(rf: RendererFactory2) => RendererFactory2>;
 /**
  * Render3 implementation of {@link viewEngine_ComponentFactory}.
  */
@@ -72,14 +66,14 @@ export declare function injectComponentFactoryResolver(): viewEngine_ComponentFa
  */
 export declare class ComponentRef<T> extends viewEngine_ComponentRef<T> {
     location: viewEngine_ElementRef;
-    private _rootView;
+    private _rootLView;
     private _tNode;
     destroyCbs: (() => void)[] | null;
     instance: T;
     hostView: ViewRef<T>;
     changeDetectorRef: ViewEngine_ChangeDetectorRef;
     componentType: Type<T>;
-    constructor(componentType: Type<T>, instance: T, location: viewEngine_ElementRef, _rootView: LViewData, _tNode: TElementNode | TContainerNode | TElementContainerNode);
+    constructor(componentType: Type<T>, instance: T, location: viewEngine_ElementRef, _rootLView: LView, _tNode: TElementNode | TContainerNode | TElementContainerNode);
     readonly injector: Injector;
     destroy(): void;
     onDestroy(callback: () => void): void;

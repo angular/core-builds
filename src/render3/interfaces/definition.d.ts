@@ -129,15 +129,8 @@ export interface DirectiveDef<T> extends BaseDef<T> {
     contentQueries: ((directiveIndex: number) => void) | null;
     /** Refreshes content queries associated with directives in a given view */
     contentQueriesRefresh: ((directiveIndex: number, queryIndex: number) => void) | null;
-    /**
-     * The number of host bindings (including pure fn bindings) in this directive/component.
-     *
-     * Used to calculate the length of the LViewData array for the *parent* component
-     * of this directive/component.
-     */
-    readonly hostVars: number;
     /** Refreshes host bindings on the associated directive. */
-    hostBindings: HostBindingsFunction | null;
+    hostBindings: HostBindingsFunction<T> | null;
     /**
      * Static attributes to set on host element.
      *
@@ -190,14 +183,14 @@ export interface ComponentDef<T> extends DirectiveDef<T> {
     /**
      * The number of nodes, local refs, and pipes in this component template.
      *
-     * Used to calculate the length of the component's LViewData array, so we
+     * Used to calculate the length of the component's LView array, so we
      * can pre-fill the array and set the binding start index.
      */
     readonly consts: number;
     /**
      * The number of bindings in this component template (including pure fn bindings).
      *
-     * Used to calculate the length of the component's LViewData array, so we
+     * Used to calculate the length of the component's LView array, so we
      * can pre-fill the array and set the host binding start index.
      */
     readonly vars: number;
@@ -295,7 +288,7 @@ export declare type DirectiveDefListOrFactory = (() => DirectiveDefList) | Direc
 export declare type DirectiveDefList = (DirectiveDef<any> | ComponentDef<any>)[];
 export declare type DirectiveTypesOrFactory = (() => DirectiveTypeList) | DirectiveTypeList;
 export declare type DirectiveTypeList = (DirectiveDef<any> | ComponentDef<any> | Type<any>)[];
-export declare type HostBindingsFunction = (directiveIndex: number, elementIndex: number) => void;
+export declare type HostBindingsFunction<T> = (rf: RenderFlags, ctx: T, elementIndex: number) => void;
 /**
  * Type used for PipeDefs on component definition.
  *

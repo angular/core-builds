@@ -16,10 +16,8 @@ import { I18nUpdateOpCodes, TI18n } from './i18n';
 import { TElementNode, TNode, TViewNode } from './node';
 import { PlayerHandler } from './player';
 import { LQueries } from './query';
-import { RElement, Renderer3 } from './renderer';
+import { RElement, Renderer3, RendererFactory3 } from './renderer';
 import { StylingContext } from './styling';
-/** Size of LViewData's header. Necessary to adjust for it when setting slots.  */
-export declare const HEADER_OFFSET = 17;
 export declare const TVIEW = 0;
 export declare const FLAGS = 1;
 export declare const PARENT = 2;
@@ -31,26 +29,29 @@ export declare const BINDING_INDEX = 7;
 export declare const CLEANUP = 8;
 export declare const CONTEXT = 9;
 export declare const INJECTOR = 10;
-export declare const RENDERER = 11;
-export declare const SANITIZER = 12;
-export declare const TAIL = 13;
-export declare const CONTAINER_INDEX = 14;
-export declare const CONTENT_QUERIES = 15;
-export declare const DECLARATION_VIEW = 16;
+export declare const RENDERER_FACTORY = 11;
+export declare const RENDERER = 12;
+export declare const SANITIZER = 13;
+export declare const TAIL = 14;
+export declare const CONTAINER_INDEX = 15;
+export declare const CONTENT_QUERIES = 16;
+export declare const DECLARATION_VIEW = 17;
+/** Size of LView's header. Necessary to adjust for it when setting slots.  */
+export declare const HEADER_OFFSET = 18;
 export interface OpaqueViewState {
     '__brand__': 'Brand for OpaqueViewState that nothing will match';
 }
 /**
- * `LViewData` stores all of the information needed to process the instructions as
+ * `LView` stores all of the information needed to process the instructions as
  * they are invoked from the template. Each embedded view and component view has its
- * own `LViewData`. When processing a particular view, we set the `viewData` to that
- * `LViewData`. When that view is done processing, the `viewData` is set back to
- * whatever the original `viewData` was before (the parent `LViewData`).
+ * own `LView`. When processing a particular view, we set the `viewData` to that
+ * `LView`. When that view is done processing, the `viewData` is set back to
+ * whatever the original `viewData` was before (the parent `LView`).
  *
  * Keeping separate state for each view facilities view insertion / deletion, so we
  * don't have to edit the data array based on which views are present.
  */
-export interface LViewData extends Array<any> {
+export interface LView extends Array<any> {
     /**
      * The static data for this view. We need a reference to this so we can easily walk up the
      * node tree in DI and get the TView.data array associated with a node (where the
@@ -61,27 +62,27 @@ export interface LViewData extends Array<any> {
     [FLAGS]: LViewFlags;
     /**
      * The parent view is needed when we exit the view and must restore the previous
-     * `LViewData`. Without this, the render method would have to keep a stack of
+     * `LView`. Without this, the render method would have to keep a stack of
      * views as it is recursively rendering templates.
      *
      * This is the "insertion" view for embedded views. This allows us to properly
      * destroy embedded views.
      */
-    [PARENT]: LViewData | null;
+    [PARENT]: LView | null;
     /**
      *
-     * The next sibling LViewData or LContainer.
+     * The next sibling LView or LContainer.
      *
      * Allows us to propagate between sibling view states that aren't in the same
      * container. Embedded views already have a node.next, but it is only set for
      * views in the same container. We need a way to link component views and views
      * across containers as well.
      */
-    [NEXT]: LViewData | LContainer | null;
+    [NEXT]: LView | LContainer | null;
     /** Queries active for this view - nodes from a view are reported to those queries. */
     [QUERIES]: LQueries | null;
     /**
-     * The host node for this LViewData instance, if this is a component view.
+     * The host node for this LView instance, if this is a component view.
      *
      * If this is an embedded view, HOST will be null.
      */
@@ -125,16 +126,18 @@ export interface LViewData extends Array<any> {
     /** An optional Module Injector to be used as fall back after Element Injectors are consulted. */
     readonly [INJECTOR]: Injector | null;
     /** Renderer to be used for this view. */
+    [RENDERER_FACTORY]: RendererFactory3;
+    /** Renderer to be used for this view. */
     [RENDERER]: Renderer3;
     /** An optional custom sanitizer. */
     [SANITIZER]: Sanitizer | null;
     /**
-     * The last LViewData or LContainer beneath this LViewData in the hierarchy.
+     * The last LView or LContainer beneath this LView in the hierarchy.
      *
      * The tail allows us to quickly add a new state to the end of the view list
      * without having to propagate starting from the first child.
      */
-    [TAIL]: LViewData | LContainer | null;
+    [TAIL]: LView | LContainer | null;
     /**
      * The index of the parent container's host node. Applicable only to embedded views that
      * have been inserted dynamically. Will be -1 for component views and inline views.
@@ -157,7 +160,7 @@ export interface LViewData extends Array<any> {
      *
      * The template for a dynamically created view may be declared in a different view than
      * it is inserted. We already track the "insertion view" (view where the template was
-     * inserted) in LViewData[PARENT], but we also need access to the "declaration view"
+     * inserted) in LView[PARENT], but we also need access to the "declaration view"
      * (view where the template was declared). Otherwise, we wouldn't be able to call the
      * view's template function with the proper contexts. Context should be inherited from
      * the declaration view tree, not the insertion view tree.
@@ -174,9 +177,9 @@ export interface LViewData extends Array<any> {
      * template function during change detection, we need the declaration view to get inherited
      * context.
      */
-    [DECLARATION_VIEW]: LViewData | null;
+    [DECLARATION_VIEW]: LView | null;
 }
-/** Flags associated with an LView (saved in LViewData[FLAGS]) */
+/** Flags associated with an LView (saved in LView[FLAGS]) */
 export declare const enum LViewFlags {
     /**
      * Whether or not the view is in creationMode.
@@ -222,10 +225,10 @@ export interface TView {
      */
     readonly id: number;
     /**
-     * This is a blueprint used to generate LViewData instances for this TView. Copying this
-     * blueprint is faster than creating a new LViewData from scratch.
+     * This is a blueprint used to generate LView instances for this TView. Copying this
+     * blueprint is faster than creating a new LView from scratch.
      */
-    blueprint: LViewData;
+    blueprint: LView;
     /**
      * The template function used to refresh the view of dynamically created views
      * and components. Will be null for inline views.
@@ -263,9 +266,9 @@ export interface TView {
      */
     bindingStartIndex: number;
     /**
-     * The index where the "expando" section of `LViewData` begins. The expando
+     * The index where the "expando" section of `LView` begins. The expando
      * section contains injectors, directive instances, and host binding values.
-     * Unlike the "consts" and "vars" sections of `LViewData`, the length of this
+     * Unlike the "consts" and "vars" sections of `LView`, the length of this
      * section cannot be calculated at compile-time because directives are matched
      * at runtime to preserve locality.
      *
@@ -293,7 +296,7 @@ export interface TView {
      *
      * See VIEW_DATA.md for more information.
      */
-    expandoInstructions: (number | HostBindingsFunction)[] | null;
+    expandoInstructions: (number | HostBindingsFunction<any> | null)[] | null;
     /**
      * Full registry of directives and components that may be found in this view.
      *
