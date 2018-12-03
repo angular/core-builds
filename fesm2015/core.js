@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+110.sha-2a39425
+ * @license Angular v7.1.0+112.sha-7ec05b4
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -8455,9 +8455,10 @@ function invokeDirectivesHostBindings(tView, viewData, previousOrParentTNode) {
             setCurrentDirectiveDef(null);
             // `hostBindings` function may or may not contain `allocHostVars` call
             // (e.g. it may not if it only contains host listeners), so we need to check whether
-            // `expandoInstructions` has changed and if not - we push `null` to keep indices in sync
+            // `expandoInstructions` has changed and if not - we still push `hostBindings` to
+            // expando block, to make sure we execute it for DI cycle
             if (previousExpandoLength === expando.length && firstTemplatePass) {
-                expando.push(null);
+                expando.push(def.hostBindings);
             }
         }
         else if (firstTemplatePass) {
@@ -12565,7 +12566,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0+110.sha-2a39425');
+const VERSION = new Version('7.1.0+112.sha-7ec05b4');
 
 /**
  * @fileoverview added by tsickle
