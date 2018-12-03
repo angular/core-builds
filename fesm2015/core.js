@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+105.sha-d847051
+ * @license Angular v7.1.0+106.sha-a082f64
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -8101,7 +8101,7 @@ function elementStyleProp(index, styleIndex, value, suffix, directive) {
         return hackImplementationOfElementStyleProp(index, styleIndex, value, suffix, directive);
     /** @type {?} */
     let valueToAdd = null;
-    if (value) {
+    if (value !== null) {
         if (suffix) {
             // when a suffix is applied then it will bypass
             // sanitization entirely (b/c a new string is created)
@@ -12510,7 +12510,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0+105.sha-d847051');
+const VERSION = new Version('7.1.0+106.sha-a082f64');
 
 /**
  * @fileoverview added by tsickle
