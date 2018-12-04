@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.1.0+109.sha-7d89cff
+ * @license Angular v7.1.0+115.sha-6552471
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, Injector, NgZone, ɵRender3ComponentFactory, ɵRender3NgModuleRef, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, Compiler, Injectable, ApplicationInitStatus, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵivyEnabled, ɵoverrideComponentView, ɵoverrideProvider } from '@angular/core';
+import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, ApplicationInitStatus, Injector, NgZone, ɵRender3ComponentFactory, ɵRender3NgModuleRef, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, Compiler, Injectable, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵivyEnabled, ɵoverrideComponentView, ɵoverrideProvider } from '@angular/core';
 
 /**
  * @fileoverview added by tsickle
@@ -1389,6 +1389,9 @@ class TestBedRender3 {
         /** @type {?} */
         const parentInjector = this.platform.injector;
         this._moduleRef = new ɵRender3NgModuleRef(testModuleType, parentInjector);
+        // ApplicationInitStatus.runInitializers() is marked @internal
+        // to core. Cast it to any before accessing it.
+        (/** @type {?} */ (this._moduleRef.injector.get(ApplicationInitStatus))).runInitializers();
         this._instantiated = true;
     }
     /**

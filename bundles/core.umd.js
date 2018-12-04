@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+109.sha-7d89cff
+ * @license Angular v7.1.0+115.sha-6552471
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -6523,8 +6523,6 @@
      * @param directive the ref to the directive that is attempting to change styling.
      */
     function elementStyleProp(index, styleIndex, value, suffix, directive) {
-        if (directive != undefined)
-            return hackImplementationOfElementStyleProp(index, styleIndex, value, suffix, directive); // supported in next PR
         var valueToAdd = null;
         if (value !== null) {
             if (suffix) {
@@ -6540,7 +6538,12 @@
                 valueToAdd = value;
             }
         }
-        updateStyleProp(getStylingContext(index, getLView()), styleIndex, valueToAdd);
+        if (directive != undefined) {
+            hackImplementationOfElementStyleProp(index, styleIndex, valueToAdd, suffix, directive);
+        }
+        else {
+            updateStyleProp(getStylingContext(index, getLView()), styleIndex, valueToAdd);
+        }
     }
     /**
      * Queue a key/value map of styles to be rendered on an Element.
@@ -6581,10 +6584,34 @@
         var node = getNativeByTNode(getPreviousOrParentTNode(), getLView());
         ngDevMode && assertDefined(node, 'expecting parent DOM node');
         var hostStylingHackMap = (node.hostStylingHack || (node.hostStylingHack = new Map()));
+        var squashedClassDeclarations = hackSquashDeclaration(classDeclarations);
         hostStylingHackMap.set(directive, {
-            classDeclarations: hackSquashDeclaration(classDeclarations),
+            classDeclarations: squashedClassDeclarations,
             styleDeclarations: hackSquashDeclaration(styleDeclarations), styleSanitizer: styleSanitizer
         });
+        hackSetStaticClasses(node, squashedClassDeclarations);
+    }
+    function hackSetStaticClasses(node, classDeclarations) {
+        // Static classes need to be set here because static classes don't generate
+        // elementClassProp instructions.
+        var lView = getLView();
+        var staticClassStartIndex = classDeclarations.indexOf(1 /* VALUES_MODE */) + 1;
+        var renderer = lView[RENDERER];
+        for (var i = staticClassStartIndex; i < classDeclarations.length; i += 2) {
+            var className = classDeclarations[i];
+            var value = classDeclarations[i + 1];
+            // if value is true, then this is a static class and we should set it now.
+            // class bindings are set separately in elementClassProp.
+            if (value === true) {
+                if (isProceduralRenderer(renderer)) {
+                    renderer.addClass(node, className);
+                }
+                else {
+                    var classList = node.classList;
+                    classList.add(className);
+                }
+            }
+        }
     }
     function hackSquashDeclaration(declarations) {
         // assume the array is correct. This should be fine for View Engine compatibility.
@@ -6609,7 +6636,13 @@
         // Do nothing because the hack implementation is eager.
     }
     function hackImplementationOfElementStyleProp(index, styleIndex, value, suffix, directive) {
-        throw new Error('unimplemented. Should not be needed by ViewEngine compatibility');
+        var lView = getLView();
+        var node = getNativeByIndex(index, lView);
+        ngDevMode && assertDefined(node, 'could not locate node');
+        var hostStylingHack = node.hostStylingHack.get(directive);
+        var styleName = hostStylingHack.styleDeclarations[styleIndex];
+        var renderer = lView[RENDERER];
+        setStyle(node, styleName, value, renderer, null);
     }
     function hackImplementationOfElementStylingMap(index, classes, styles, directive) {
         throw new Error('unimplemented. Should not be needed by ViewEngine compatibility');
@@ -6738,9 +6771,10 @@
                 setCurrentDirectiveDef(null);
                 // `hostBindings` function may or may not contain `allocHostVars` call
                 // (e.g. it may not if it only contains host listeners), so we need to check whether
-                // `expandoInstructions` has changed and if not - we push `null` to keep indices in sync
+                // `expandoInstructions` has changed and if not - we still push `hostBindings` to
+                // expando block, to make sure we execute it for DI cycle
                 if (previousExpandoLength === expando.length && firstTemplatePass) {
-                    expando.push(null);
+                    expando.push(def.hostBindings);
                 }
             }
             else if (firstTemplatePass) {
@@ -9353,7 +9387,7 @@
             }
             // Track the InjectorType and add a provider for it.
             this.injectorDefTypes.add(defType);
-            this.records.set(defType, makeRecord(def.factory));
+            this.records.set(defType, makeRecord(def.factory, NOT_YET));
             // Add providers in the same way that @NgModule resolution did:
             // First, include providers from any imports.
             if (def.imports != null && !isDuplicate) {
@@ -9493,7 +9527,6 @@
         return factory;
     }
     function makeRecord(factory, value, multi) {
-        if (value === void 0) { value = NOT_YET; }
         if (multi === void 0) { multi = false; }
         return {
             factory: factory,
@@ -10059,7 +10092,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0+109.sha-7d89cff');
+    var VERSION = new Version('7.1.0+115.sha-6552471');
 
     /**
      * @license

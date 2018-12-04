@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+109.sha-7d89cff
+ * @license Angular v7.1.0+115.sha-6552471
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1237,6 +1237,9 @@
             compileNgModule(testModuleType, resolvers);
             var parentInjector = this.platform.injector;
             this._moduleRef = new core.ɵRender3NgModuleRef(testModuleType, parentInjector);
+            // ApplicationInitStatus.runInitializers() is marked @internal
+            // to core. Cast it to any before accessing it.
+            this._moduleRef.injector.get(core.ApplicationInitStatus).runInitializers();
             this._instantiated = true;
         };
         // creates resolvers taking overrides into account
