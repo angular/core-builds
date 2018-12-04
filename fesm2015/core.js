@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+121.sha-d3c08e7
+ * @license Angular v7.1.0+128.sha-8e644d9
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -12566,7 +12566,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0+121.sha-d3c08e7');
+const VERSION = new Version('7.1.0+128.sha-8e644d9');
 
 /**
  * @fileoverview added by tsickle
@@ -17432,7 +17432,7 @@ function compileComponent(type, metadata) {
                     throw new Error(error.join('\n'));
                 }
                 /** @type {?} */
-                const meta = Object.assign({}, directiveMetadata(type, metadata), { template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, viewQueries: extractQueriesMetadata(getReflect().propMetadata(type), isViewQuery), directives: [], pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, viewProviders: metadata.viewProviders || null });
+                const meta = Object.assign({}, directiveMetadata(type, metadata), { template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, viewQueries: extractQueriesMetadata(getReflect().propMetadata(type), isViewQuery), directives: [], pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
                 ngComponentDef = compiler.compileComponent(angularCoreEnv, `ng://${stringify(type)}/template.html`, meta);
                 // If component compilation is async, then the @NgModule annotation which declares the
                 // component may execute and set an ngSelectorScope property on the component type. This
