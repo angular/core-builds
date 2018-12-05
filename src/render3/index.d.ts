@@ -7,7 +7,7 @@
  */
 import { LifecycleHooksFeature, renderComponent, whenRendered } from './component';
 import { defineBase, defineComponent, defineDirective, defineNgModule, definePipe } from './definition';
-import { getHostElement, getRenderedText } from './discovery_utils';
+import { getComponent, getHostElement, getRenderedText } from './discovery_utils';
 import { InheritDefinitionFeature } from './features/inherit_definition_feature';
 import { NgOnChangesFeature } from './features/ng_onchanges_feature';
 import { ProvidersFeature } from './features/providers_feature';
@@ -27,5 +27,5 @@ export { QueryList, query, queryRefresh, } from './query';
 export { registerContentQuery, loadQueryList, } from './instructions';
 export { pureFunction0, pureFunction1, pureFunction2, pureFunction3, pureFunction4, pureFunction5, pureFunction6, pureFunction7, pureFunction8, pureFunctionV, } from './pure_function';
 export { templateRefExtractor } from './view_engine_compatibility_prebound';
-export { BaseDef, ComponentDef, ComponentDefWithMeta, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFlags, DirectiveDefWithMeta, DirectiveType, NgOnChangesFeature, InheritDefinitionFeature, ProvidersFeature, PipeDef, PipeDefWithMeta, LifecycleHooksFeature, defineComponent, defineDirective, defineNgModule, defineBase, definePipe, getHostElement, getRenderedText, renderComponent, whenRendered, };
+export { BaseDef, ComponentDef, ComponentDefWithMeta, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFlags, DirectiveDefWithMeta, DirectiveType, NgOnChangesFeature, InheritDefinitionFeature, ProvidersFeature, PipeDef, PipeDefWithMeta, LifecycleHooksFeature, defineComponent, defineDirective, defineNgModule, defineBase, definePipe, getHostElement, getComponent, getRenderedText, renderComponent, whenRendered, };
 export { NO_CHANGE } from './tokens';

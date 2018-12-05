@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+131.sha-c61a8b7
+ * @license Angular v7.1.0+148.sha-a3ee089
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -4031,6 +4031,7 @@
      * @param lContainer The container from which to detach a view
      * @param removeIndex The index of the view to detach
      * @param detached Whether or not this view is already detached.
+     * @returns Detached LView instance.
      */
     function detachView(lContainer, removeIndex, detached) {
         var views = lContainer[VIEWS];
@@ -4049,6 +4050,7 @@
         viewToDetach[PARENT] = null;
         // Unsets the attached flag
         viewToDetach[FLAGS] &= ~8 /* Attached */;
+        return viewToDetach;
     }
     /**
      * Removes a view from a container, i.e. detaches it and then destroys the underlying LView.
@@ -8126,9 +8128,19 @@
          * introduce other changes.
          */
         ViewRef.prototype.checkNoChanges = function () { checkNoChanges(this.context); };
-        ViewRef.prototype.attachToViewContainerRef = function (vcRef) { this._viewContainerRef = vcRef; };
+        ViewRef.prototype.attachToViewContainerRef = function (vcRef) {
+            if (this._appRef) {
+                throw new Error('This view is already attached directly to the ApplicationRef!');
+            }
+            this._viewContainerRef = vcRef;
+        };
         ViewRef.prototype.detachFromAppRef = function () { this._appRef = null; };
-        ViewRef.prototype.attachToAppRef = function (appRef) { this._appRef = appRef; };
+        ViewRef.prototype.attachToAppRef = function (appRef) {
+            if (this._viewContainerRef) {
+                throw new Error('This view is already attached to a ViewContainer!');
+            }
+            this._appRef = appRef;
+        };
         ViewRef.prototype._lookUpContext = function () {
             return this._context = this._lView[PARENT][this._componentIndex];
         };
@@ -8381,8 +8393,9 @@
                 };
                 ViewContainerRef_.prototype.detach = function (index) {
                     var adjustedIdx = this._adjustIndex(index, -1);
-                    detachView(this._lContainer, adjustedIdx, !!this._hostTNode.detached);
-                    return this._viewRefs.splice(adjustedIdx, 1)[0] || null;
+                    var view = detachView(this._lContainer, adjustedIdx, !!this._hostTNode.detached);
+                    var wasDetached = this._viewRefs.splice(adjustedIdx, 1)[0] != null;
+                    return wasDetached ? new ViewRef(view, view[CONTEXT], view[CONTAINER_INDEX]) : null;
                 };
                 ViewContainerRef_.prototype._adjustIndex = function (index, shift) {
                     if (shift === void 0) { shift = 0; }
@@ -9460,7 +9473,7 @@
                         if (def && this.injectableDefInScope(def)) {
                             // Found an ngInjectableDef and it's scoped to this injector. Pretend as if it was here
                             // all along.
-                            record = makeRecord(injectableDefFactory(token), NOT_YET);
+                            record = makeRecord(injectableDefOrInjectorDefFactory(token), NOT_YET);
                             this.records.set(token, record);
                         }
                     }
@@ -9612,9 +9625,13 @@
         };
         return R3Injector;
     }());
-    function injectableDefFactory(token) {
+    function injectableDefOrInjectorDefFactory(token) {
         var injectableDef = getInjectableDef(token);
         if (injectableDef === null) {
+            var injectorDef = getInjectorDef(token);
+            if (injectorDef !== null) {
+                return injectorDef.factory;
+            }
             if (token instanceof InjectionToken) {
                 throw new Error("Token " + stringify(token) + " is missing an ngInjectableDef definition.");
             }
@@ -9641,7 +9658,7 @@
     function providerToFactory(provider) {
         var factory = undefined;
         if (isTypeProvider(provider)) {
-            return injectableDefFactory(resolveForwardRef(provider));
+            return injectableDefOrInjectorDefFactory(resolveForwardRef(provider));
         }
         else {
             if (isValueProvider(provider)) {
@@ -9659,7 +9676,7 @@
                     factory = function () { return new ((classRef_1).bind.apply((classRef_1), __spread([void 0], injectArgs(provider.deps))))(); };
                 }
                 else {
-                    return injectableDefFactory(classRef_1);
+                    return injectableDefOrInjectorDefFactory(classRef_1);
                 }
             }
         }
@@ -10231,7 +10248,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0+131.sha-c61a8b7');
+    var VERSION = new Version('7.1.0+148.sha-a3ee089');
 
     /**
      * @license
@@ -12780,8 +12797,8 @@
      */
     function pipeBind1(index, slotOffset, v1) {
         var pipeInstance = load(index);
-        return isPure(index) ? pureFunction1(slotOffset, pipeInstance.transform, v1, pipeInstance) :
-            pipeInstance.transform(v1);
+        return unwrapValue(isPure(index) ? pureFunction1(slotOffset, pipeInstance.transform, v1, pipeInstance) :
+            pipeInstance.transform(v1));
     }
     /**
      * Invokes a pipe with 2 arguments.
@@ -12796,8 +12813,8 @@
      */
     function pipeBind2(index, slotOffset, v1, v2) {
         var pipeInstance = load(index);
-        return isPure(index) ? pureFunction2(slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
-            pipeInstance.transform(v1, v2);
+        return unwrapValue(isPure(index) ? pureFunction2(slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
+            pipeInstance.transform(v1, v2));
     }
     /**
      * Invokes a pipe with 3 arguments.
@@ -12813,9 +12830,8 @@
      */
     function pipeBind3(index, slotOffset, v1, v2, v3) {
         var pipeInstance = load(index);
-        return isPure(index) ?
-            pureFunction3(slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
-            pipeInstance.transform(v1, v2, v3);
+        return unwrapValue(isPure(index) ? pureFunction3(slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
+            pipeInstance.transform(v1, v2, v3));
     }
     /**
      * Invokes a pipe with 4 arguments.
@@ -12832,9 +12848,9 @@
      */
     function pipeBind4(index, slotOffset, v1, v2, v3, v4) {
         var pipeInstance = load(index);
-        return isPure(index) ?
+        return unwrapValue(isPure(index) ?
             pureFunction4(slotOffset, pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
-            pipeInstance.transform(v1, v2, v3, v4);
+            pipeInstance.transform(v1, v2, v3, v4));
     }
     /**
      * Invokes a pipe with variable number of arguments.
@@ -12848,11 +12864,25 @@
      */
     function pipeBindV(index, slotOffset, values) {
         var pipeInstance = load(index);
-        return isPure(index) ? pureFunctionV(slotOffset, pipeInstance.transform, values, pipeInstance) :
-            pipeInstance.transform.apply(pipeInstance, values);
+        return unwrapValue(isPure(index) ? pureFunctionV(slotOffset, pipeInstance.transform, values, pipeInstance) :
+            pipeInstance.transform.apply(pipeInstance, values));
     }
     function isPure(index) {
         return getLView()[TVIEW].data[index + HEADER_OFFSET].pure;
+    }
+    /**
+     * Unwrap the output of a pipe transformation.
+     * In order to trick change detection into considering that the new value is always different from
+     * the old one, the old value is overwritten by NO_CHANGE.
+     *
+     * @param newValue the pipe transformation output.
+     */
+    function unwrapValue(newValue) {
+        if (WrappedValue.isWrapped(newValue)) {
+            newValue = WrappedValue.unwrap(newValue);
+            getLView()[getBindingRoot()] = NO_CHANGE;
+        }
+        return newValue;
     }
 
     /**
@@ -19556,7 +19586,7 @@
         }
         return key;
     }
-    function unwrapValue(view, nodeIdx, bindingIdx, value) {
+    function unwrapValue$1(view, nodeIdx, bindingIdx, value) {
         if (WrappedValue.isWrapped(value)) {
             value = WrappedValue.unwrap(value);
             var globalBindingIdx = view.def.nodes[nodeIdx].bindingIndex + bindingIdx;
@@ -23896,7 +23926,7 @@
     exports.ɵppd = purePipeDef;
     exports.ɵqud = queryDef;
     exports.ɵted = textDef;
-    exports.ɵunv = unwrapValue;
+    exports.ɵunv = unwrapValue$1;
     exports.ɵvid = viewDef;
 
     Object.defineProperty(exports, '__esModule', { value: true });
