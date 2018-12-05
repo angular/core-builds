@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+153.sha-20cef50
+ * @license Angular v7.1.0+155.sha-2bc3986
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -7824,8 +7824,10 @@ function elementProperty(index, propName, value, sanitizer) {
         setInputsForProperty(lView, dataValue, value);
         if (isComponent(tNode))
             markDirtyIfOnPush(lView, index + HEADER_OFFSET);
-        if (ngDevMode && tNode.type === 3 /* Element */) {
-            setNgReflectProperties(lView, /** @type {?} */ (element), propName, value);
+        if (ngDevMode) {
+            if (tNode.type === 3 /* Element */ || tNode.type === 0 /* Container */) {
+                setNgReflectProperties(lView, element, tNode.type, dataValue, value);
+            }
         }
     }
     else if (tNode.type === 3 /* Element */) {
@@ -7902,25 +7904,41 @@ function setInputsForProperty(lView, inputs, value) {
 /**
  * @param {?} lView
  * @param {?} element
- * @param {?} propName
+ * @param {?} type
+ * @param {?} inputs
  * @param {?} value
  * @return {?}
  */
-function setNgReflectProperties(lView, element, propName, value) {
-    /** @type {?} */
-    const renderer = lView[RENDERER];
-    /** @type {?} */
-    const attrName = normalizeDebugBindingName(propName);
-    /** @type {?} */
-    const debugValue = normalizeDebugBindingValue(value);
-    isProceduralRenderer(renderer) ? renderer.setAttribute(element, attrName, debugValue) :
-        element.setAttribute(attrName, debugValue);
+function setNgReflectProperties(lView, element, type, inputs, value) {
+    for (let i = 0; i < inputs.length; i += 2) {
+        /** @type {?} */
+        const renderer = lView[RENDERER];
+        /** @type {?} */
+        const attrName = normalizeDebugBindingName(/** @type {?} */ (inputs[i + 1]));
+        /** @type {?} */
+        const debugValue = normalizeDebugBindingValue(value);
+        if (type === 3 /* Element */) {
+            isProceduralRenderer(renderer) ?
+                renderer.setAttribute((/** @type {?} */ (element)), attrName, debugValue) :
+                (/** @type {?} */ (element)).setAttribute(attrName, debugValue);
+        }
+        else if (value !== undefined) {
+            /** @type {?} */
+            const value = `bindings=${JSON.stringify({ [attrName]: debugValue }, null, 2)}`;
+            if (isProceduralRenderer(renderer)) {
+                renderer.setValue((/** @type {?} */ (element)), value);
+            }
+            else {
+                (/** @type {?} */ (element)).textContent = value;
+            }
+        }
+    }
 }
 /**
  * Consolidates all inputs or outputs of all directives on this logical node.
  *
  * @param {?} tNode
- * @param {?} direction
+ * @param {?} direction whether to consider inputs or outputs
  * @return {?} PropertyAliases|null aggregate of all properties if any, `null` otherwise
  */
 function generatePropertyAliases(tNode, direction) {
@@ -12678,7 +12696,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0+153.sha-20cef50');
+const VERSION = new Version('7.1.0+155.sha-2bc3986');
 
 /**
  * @fileoverview added by tsickle
