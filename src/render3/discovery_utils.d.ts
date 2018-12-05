@@ -12,7 +12,7 @@ import { LView, RootContext } from './interfaces/view';
  * Returns the component instance associated with a given DOM host element.
  * Elements which don't represent components return `null`.
  *
- * @param element Host DOM element from which the component should be retrieved.
+ * @param element Host DOM element from which the component should be retrieved for.
  *
  * ```
  * <my-app>
@@ -29,27 +29,6 @@ import { LView, RootContext } from './interfaces/view';
  * @publicApi
  */
 export declare function getComponent<T = {}>(element: Element): T | null;
-/**
- * Returns the component instance associated with a given DOM host element.
- * Elements which don't represent components return `null`.
- *
- * @param element Host DOM element from which the component should be retrieved.
- *
- * ```
- * <my-app>
- *   #VIEW
- *     <div>
- *       <child-comp></child-comp>
- *     </div>
- * </mp-app>
- *
- * expect(getComponent(<child-comp>) instanceof ChildComponent).toBeTruthy();
- * expect(getComponent(<my-app>) instanceof MyApp).toBeTruthy();
- * ```
- *
- * @publicApi
- */
-export declare function getContext<T = {}>(element: Element): T | null;
 /**
  * Returns the component instance associated with view which owns the DOM element (`null`
  * otherwise).
@@ -96,13 +75,6 @@ export declare function getRootComponents(target: {}): any[];
  */
 export declare function getInjector(target: {}): Injector;
 /**
- * Retrieve a set of injection tokens at a given DOM node.
- *
- * @param element Element for which the injection tokens should be retrieved.
- * @publicApi
- */
-export declare function getInjectionTokens(element: Element): any[];
-/**
  * Retrieves directives associated with a given DOM host element.
  *
  * @param target A DOM element, component or directive instance.
@@ -115,8 +87,8 @@ export declare function getDirectives(target: {}): Array<{}>;
  * Throws if a given target doesn't have associated LContext.
  *
  */
-export declare function loadLContext(target: {}): LContext;
-export declare function loadLContext(target: {}, throwOnNotFound: false): LContext | null;
+export declare function loadContext(target: {}): LContext;
+export declare function loadContext(target: {}, throwOnNotFound: false): LContext | null;
 /**
  * Retrieve the root view from any component by walking the parent `LView` until
  * reaching the root `LView`.
@@ -159,33 +131,3 @@ export declare function getHostElement<T>(directive: T): Element;
  * @param component The component to return the content text for.
  */
 export declare function getRenderedText(component: any): string;
-export declare function loadLContextFromNode(node: Node): LContext;
-export interface Listener {
-    name: string;
-    element: Element;
-    callback: (value: any) => any;
-    useCapture: boolean | null;
-}
-export declare function isBrowserEvents(listener: Listener): boolean;
-/**
- * Retrieves a list of DOM listeners.
- *
- * ```
- * <my-app>
- *   #VIEW
- *     <div (click)="doSomething()">
- *     </div>
- * </mp-app>
- *
- * expect(getListeners(<div>)).toEqual({
- *   name: 'click',
- *   element: <div>,
- *   callback: () => doSomething(),
- *   useCapture: false
- * });
- * ```
- *
- * @param element Element for which the DOM listeners should be retrieved.
- * @publicApi
- */
-export declare function getListeners(element: Element): Listener[];

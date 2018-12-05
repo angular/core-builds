@@ -12,7 +12,7 @@ import { TElementNode } from './node';
 import { LView, TData } from './view';
 export declare const TNODE = 8;
 export declare const PARENT_INJECTOR = 8;
-export declare const INJECTOR_BLOOM_PARENT_SIZE = 9;
+export declare const INJECTOR_SIZE = 9;
 /**
  * Represents a relative location of parent injector.
  *

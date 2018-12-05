@@ -27,7 +27,7 @@ import { LView } from './interfaces/view';
  *
  * @param target Component, Directive or DOM Node.
  */
-export declare function getLContext(target: any): LContext | null;
+export declare function getContext(target: any): LContext | null;
 /**
  * Takes a component instance and returns the view for that component.
  *

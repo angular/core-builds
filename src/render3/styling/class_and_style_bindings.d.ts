@@ -116,9 +116,6 @@ export declare function renderStyleAndClassBindings(context: StylingContext, ren
  * @param store an optional key/value map that will be used as a context to render styles on
  */
 export declare function setStyle(native: any, prop: string, value: string | null, renderer: Renderer3, sanitizer: StyleSanitizeFn | null, store?: BindingStore | null, playerBuilder?: ClassAndStylePlayerBuilder<any> | null): void;
-export declare function isClassBased(context: StylingContext, index: number): boolean;
-export declare function getValue(context: StylingContext, index: number): string | boolean | null;
-export declare function getProp(context: StylingContext, index: number): string;
 export declare function isContextDirty(context: StylingContext): boolean;
 export declare function limitToSingleClasses(context: StylingContext): number;
 export declare function setContextDirty(context: StylingContext, isDirtyYes: boolean): void;
