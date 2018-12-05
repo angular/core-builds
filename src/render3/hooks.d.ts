@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { TNode } from './interfaces/node';
 import { HookData, LView, TView } from './interfaces/view';
 /**
  * If this is the first template pass, any ngOnInit or ngDoCheck hooks will be queued into
@@ -23,7 +24,7 @@ export declare function queueInitHooks(index: number, onInit: (() => void) | nul
  * Loops through the directives on a node and queues all their hooks except ngOnInit
  * and ngDoCheck, which are queued separately in directiveCreate.
  */
-export declare function queueLifecycleHooks(flags: number, tView: TView): void;
+export declare function queueLifecycleHooks(tView: TView, tNode: TNode): void;
 /**
  * Calls onInit and doCheck calls if they haven't already been called.
  *

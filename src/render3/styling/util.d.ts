@@ -32,6 +32,7 @@ export declare function allocStylingContext(element: RElement | null, templateSt
  * @param viewData The view to search for the styling context
  */
 export declare function getStylingContext(index: number, viewData: LView): StylingContext;
+export declare function isStylingContext(value: any): value is StylingContext;
 export declare function addPlayerInternal(playerContext: PlayerContext, rootContext: RootContext, element: HTMLElement, player: Player | null, playerContextIndex: number, ref?: any): boolean;
 export declare function getPlayersInternal(playerContext: PlayerContext): Player[];
 export declare function getOrCreatePlayerContext(target: {}, context?: LContext | null): PlayerContext | null;
