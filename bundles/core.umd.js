@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+155.sha-2bc3986
+ * @license Angular v7.1.0+156.sha-cd85832
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -10233,7 +10233,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0+155.sha-2bc3986');
+    var VERSION = new Version('7.1.0+156.sha-cd85832');
 
     /**
      * @license
@@ -14169,6 +14169,45 @@
      * found in the LICENSE file at https://angular.io/license
      */
     var EMPTY_ARRAY$2 = [];
+    var moduleQueue = [];
+    /**
+     * Enqueues moduleDef to be checked later to see if scope can be set on its
+     * component declarations.
+     */
+    function enqueueModuleForDelayedScoping(moduleType, ngModule) {
+        moduleQueue.push({ moduleType: moduleType, ngModule: ngModule });
+    }
+    var flushingModuleQueue = false;
+    /**
+     * Loops over queued module definitions, if a given module definition has all of its
+     * declarations resolved, it dequeues that module definition and sets the scope on
+     * its declarations.
+     */
+    function flushModuleScopingQueueAsMuchAsPossible() {
+        if (!flushingModuleQueue) {
+            flushingModuleQueue = true;
+            for (var i = moduleQueue.length - 1; i >= 0; i--) {
+                var _a = moduleQueue[i], moduleType = _a.moduleType, ngModule = _a.ngModule;
+                if (ngModule.declarations && ngModule.declarations.every(isResolvedDeclaration)) {
+                    // dequeue
+                    moduleQueue.splice(i, 1);
+                    setScopeOnDeclaredComponents(moduleType, ngModule);
+                }
+            }
+            flushingModuleQueue = false;
+        }
+    }
+    /**
+     * Returns truthy if a declaration has resolved. If the declaration happens to be
+     * an array of declarations, it will recurse to check each declaration in that array
+     * (which may also be arrays).
+     */
+    function isResolvedDeclaration(declaration) {
+        if (Array.isArray(declaration)) {
+            return declaration.every(isResolvedDeclaration);
+        }
+        return !!resolveForwardRef(declaration);
+    }
     /**
      * Compiles a module in JIT mode.
      *
@@ -14177,7 +14216,11 @@
     function compileNgModule(moduleType, ngModule) {
         if (ngModule === void 0) { ngModule = {}; }
         compileNgModuleDefs(moduleType, ngModule);
-        setScopeOnDeclaredComponents(moduleType, ngModule);
+        // Because we don't know if all declarations have resolved yet at the moment the
+        // NgModule decorator is executing, we're enqueueing the setting of module scope
+        // on its declarations to be run at a later time when all declarations for the module,
+        // including forward refs, have resolved.
+        enqueueModuleForDelayedScoping(moduleType, ngModule);
     }
     /**
      * Compiles and adds the `ngModuleDef` and `ngInjectorDef` properties to the module class.
@@ -14395,6 +14438,12 @@
                     }
                     var meta = __assign({}, directiveMetadata(type, metadata), { template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, viewQueries: extractQueriesMetadata(getReflect().propMetadata(type), isViewQuery), directives: [], pipes: new Map(), encapsulation: metadata.encapsulation || exports.ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
                     ngComponentDef = compiler.compileComponent(angularCoreEnv, "ng://" + stringify(type) + "/template.html", meta);
+                    // When NgModule decorator executed, we enqueued the module definition such that
+                    // it would only dequeue and add itself as module scope to all of its declarations,
+                    // but only if  if all of its declarations had resolved. This call runs the check
+                    // to see if any modules that are in the queue can be dequeued and add scope to
+                    // their declarations.
+                    flushModuleScopingQueueAsMuchAsPossible();
                     // If component compilation is async, then the @NgModule annotation which declares the
                     // component may execute and set an ngSelectorScope property on the component type. This
                     // allows the component to patch itself with directiveDefs from the module after it
