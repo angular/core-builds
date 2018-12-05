@@ -7,6 +7,7 @@
  */
 import { compileInjectable as render3CompileInjectable } from '../render3/jit/injectable';
 import { Type } from '../type';
+import { TypeDecorator } from '../util/decorators';
 import { InjectableDef } from './defs';
 import { ClassSansProvider, ConstructorSansProvider, ExistingSansProvider, FactorySansProvider, StaticClassSansProvider, ValueSansProvider } from './provider';
 /**
@@ -37,10 +38,10 @@ export interface InjectableDecorator {
      * {@example core/di/ts/metadata_spec.ts region='InjectableThrows'}
      *
      */
-    (): any;
+    (): TypeDecorator;
     (options?: {
         providedIn: Type<any> | 'root' | null;
-    } & InjectableProvider): any;
+    } & InjectableProvider): TypeDecorator;
     new (): Injectable;
     new (options?: {
         providedIn: Type<any> | 'root' | null;
