@@ -12,7 +12,7 @@ export { compilePipe as ɵcompilePipe, } from './render3/jit/pipe';
 export { NgModuleDef as ɵNgModuleDef, NgModuleDefWithMeta as ɵNgModuleDefWithMeta, NgModuleTransitiveScopes as ɵNgModuleTransitiveScopes, } from './metadata/ng_module';
 export { sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, } from './sanitization/sanitization';
 export { bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, } from './sanitization/bypass';
-export { getContext as ɵgetContext } from './render3/context_discovery';
+export { getLContext as ɵgetLContext } from './render3/context_discovery';
 export { Player as ɵPlayer, PlayerFactory as ɵPlayerFactory, PlayState as ɵPlayState, PlayerHandler as ɵPlayerHandler, } from './render3/interfaces/player';
 export { LContext as ɵLContext, } from './render3/interfaces/context';
 export { bindPlayerFactory as ɵbindPlayerFactory, } from './render3/styling/player_factory';
