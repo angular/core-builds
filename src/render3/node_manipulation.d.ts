@@ -81,8 +81,9 @@ export declare function insertView(lView: LView, lContainer: LContainer, parentV
  * @param lContainer The container from which to detach a view
  * @param removeIndex The index of the view to detach
  * @param detached Whether or not this view is already detached.
+ * @returns Detached LView instance.
  */
-export declare function detachView(lContainer: LContainer, removeIndex: number, detached: boolean): void;
+export declare function detachView(lContainer: LContainer, removeIndex: number, detached: boolean): LView;
 /**
  * Removes a view from a container, i.e. detaches it and then destroys the underlying LView.
  *
