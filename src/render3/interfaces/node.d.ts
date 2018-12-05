@@ -24,14 +24,18 @@ export declare const enum TNodeType {
  * Corresponds to the TNode.flags property.
  */
 export declare const enum TNodeFlags {
+    /** The number of directives on this node is encoded on the least significant bits */
+    DirectiveCountMask = 4095,
     /** This bit is set if the node is a component */
-    isComponent = 1,
+    isComponent = 4096,
     /** This bit is set if the node has been projected */
-    isProjected = 2,
+    isProjected = 8192,
     /** This bit is set if the node has any content queries */
-    hasContentQuery = 4,
+    hasContentQuery = 16384,
     /** This bit is set if the node has any directives that contain [class properties */
-    hasClassInput = 8
+    hasClassInput = 32768,
+    /** The index of the first directive on this node is encoded on the most significant bits  */
+    DirectiveStartingIndexShift = 16
 }
 /**
  * Corresponds to the TNode.providerIndexes property.
@@ -107,15 +111,13 @@ export interface TNode {
      */
     injectorIndex: number;
     /**
-     * Stores starting index of the directives.
-     */
-    directiveStart: number;
-    /**
-     * Stores final exclusive index of the directives.
-     */
-    directiveEnd: number;
-    /**
-     * Stores if Node isComponent, isProjected, hasContentQuery and hasClassInput
+     * This number stores two values using its bits:
+     *
+     * - the number of directives on that node (first 12 bits)
+     * - the starting index of the node's directives in the directives array (last 20 bits).
+     *
+     * These two values are necessary so DI can effectively search the directives associated
+     * with a node without searching the whole directives array.
      */
     flags: TNodeFlags;
     /**
