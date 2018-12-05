@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+153.sha-20cef50
+ * @license Angular v7.1.0+155.sha-2bc3986
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -6230,8 +6230,10 @@ function elementProperty(index, propName, value, sanitizer) {
         setInputsForProperty(lView, dataValue, value);
         if (isComponent(tNode))
             markDirtyIfOnPush(lView, index + HEADER_OFFSET);
-        if (ngDevMode && tNode.type === 3 /* Element */) {
-            setNgReflectProperties(lView, element, propName, value);
+        if (ngDevMode) {
+            if (tNode.type === 3 /* Element */ || tNode.type === 0 /* Container */) {
+                setNgReflectProperties(lView, element, tNode.type, dataValue, value);
+            }
         }
     }
     else if (tNode.type === 3 /* Element */) {
@@ -6297,18 +6299,33 @@ function setInputsForProperty(lView, inputs, value) {
         lView[inputs[i]][inputs[i + 1]] = value;
     }
 }
-function setNgReflectProperties(lView, element, propName, value) {
-    var renderer = lView[RENDERER];
-    var attrName = normalizeDebugBindingName(propName);
-    var debugValue = normalizeDebugBindingValue(value);
-    isProceduralRenderer(renderer) ? renderer.setAttribute(element, attrName, debugValue) :
-        element.setAttribute(attrName, debugValue);
+function setNgReflectProperties(lView, element, type, inputs, value) {
+    var _a;
+    for (var i = 0; i < inputs.length; i += 2) {
+        var renderer = lView[RENDERER];
+        var attrName = normalizeDebugBindingName(inputs[i + 1]);
+        var debugValue = normalizeDebugBindingValue(value);
+        if (type === 3 /* Element */) {
+            isProceduralRenderer(renderer) ?
+                renderer.setAttribute(element, attrName, debugValue) :
+                element.setAttribute(attrName, debugValue);
+        }
+        else if (value !== undefined) {
+            var value_1 = "bindings=" + JSON.stringify((_a = {}, _a[attrName] = debugValue, _a), null, 2);
+            if (isProceduralRenderer(renderer)) {
+                renderer.setValue(element, value_1);
+            }
+            else {
+                element.textContent = value_1;
+            }
+        }
+    }
 }
 /**
  * Consolidates all inputs or outputs of all directives on this logical node.
  *
- * @param number tNodeFlags node flags
- * @param Direction direction whether to consider inputs or outputs
+ * @param tNodeFlags node flags
+ * @param direction whether to consider inputs or outputs
  * @returns PropertyAliases|null aggregate of all properties if any, `null` otherwise
  */
 function generatePropertyAliases(tNode, direction) {
@@ -10186,7 +10203,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.1.0+153.sha-20cef50');
+var VERSION = new Version('7.1.0+155.sha-2bc3986');
 
 /**
  * @license
