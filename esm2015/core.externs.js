@@ -59,13 +59,13 @@ var ComponentInstance;
 
 /** @typedef {?} */
 var DirectiveInstance;
-// externs from packages/core/src/linker/system_js_ng_module_factory_loader.closure.js:
- /** @type {?} */
-var System;
 // externs from packages/core/src/render3/global_utils.closure.js:
 
 /** @typedef {?} */
 var GlobalDevModeContainer;
+// externs from packages/core/src/linker/system_js_ng_module_factory_loader.closure.js:
+ /** @type {?} */
+var System;
 // externs from packages/core/src/testability/testability.closure.js:
 /**
  * @record

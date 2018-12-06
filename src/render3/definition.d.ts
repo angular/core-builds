@@ -81,7 +81,7 @@ export declare function defineComponent<T>(componentDefinition: {
      * ```
      * {
      *   publicInput1: 'publicInput1',
-     *   declaredInput2: ['declaredInput2', 'publicInput2'],
+     *   declaredInput2: ['publicInput2', 'declaredInput2'],
      * }
      * ```
      *
@@ -89,7 +89,7 @@ export declare function defineComponent<T>(componentDefinition: {
      * ```
      * {
      *   minifiedPublicInput1: 'publicInput1',
-     *   minifiedDeclaredInput2: [ 'publicInput2', 'declaredInput2'],
+     *   minifiedDeclaredInput2: ['publicInput2', 'declaredInput2'],
      * }
      * ```
      *
@@ -98,7 +98,7 @@ export declare function defineComponent<T>(componentDefinition: {
      *
      * NOTE:
      *  - Because declared and public name are usually same we only generate the array
-     *    `['declared', 'public']` format when they differ.
+     *    `['public', 'declared']` format when they differ.
      *  - The reason why this API and `outputs` API is not the same is that `NgOnChanges` has
      *    inconsistent behavior in that it uses declared names rather than minified or public. For
      *    this reason `NgOnChanges` will be deprecated and removed in future version and this

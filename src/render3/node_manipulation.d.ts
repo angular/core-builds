@@ -81,8 +81,9 @@ export declare function insertView(lView: LView, lContainer: LContainer, parentV
  * @param lContainer The container from which to detach a view
  * @param removeIndex The index of the view to detach
  * @param detached Whether or not this view is already detached.
+ * @returns Detached LView instance.
  */
-export declare function detachView(lContainer: LContainer, removeIndex: number, detached: boolean): void;
+export declare function detachView(lContainer: LContainer, removeIndex: number, detached: boolean): LView;
 /**
  * Removes a view from a container, i.e. detaches it and then destroys the underlying LView.
  *
@@ -158,7 +159,7 @@ export declare function nativeNextSibling(renderer: Renderer3, node: RNode): RNo
  * @returns Whether or not the child was appended
  */
 export declare function appendChild(childEl: RNode | null | undefined, childTNode: TNode, currentView: LView): boolean;
-export declare function getBeforeNodeForView(index: number, views: LView[], containerNative: RComment): RComment;
+export declare function getBeforeNodeForView(index: number, views: LView[], containerNative: RComment): RComment | RElement;
 /**
  * Removes the `child` element from the DOM if not in view and not projected.
  *

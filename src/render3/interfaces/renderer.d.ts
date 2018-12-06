@@ -66,7 +66,7 @@ export interface ProceduralRenderer3 {
     setStyle(el: RElement, style: string, value: any, flags?: RendererStyleFlags2 | RendererStyleFlags3): void;
     removeStyle(el: RElement, style: string, flags?: RendererStyleFlags2 | RendererStyleFlags3): void;
     setProperty(el: RElement, name: string, value: any): void;
-    setValue(node: RText, value: string): void;
+    setValue(node: RText | RComment, value: string): void;
     listen(target: RNode, eventName: string, callback: (event: any) => boolean | void): () => void;
 }
 export interface RendererFactory3 {
@@ -120,5 +120,6 @@ export interface RText extends RNode {
     textContent: string | null;
 }
 export interface RComment extends RNode {
+    textContent: string | null;
 }
 export declare const unusedValueExportToPlacateAjd = 1;

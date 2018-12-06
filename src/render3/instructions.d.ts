@@ -234,7 +234,7 @@ export declare function elementProperty<T>(index: number, propName: string, valu
  * @param tViews Any TViews attached to this node
  * @returns the TNode object
  */
-export declare function createTNode(viewData: LView, type: TNodeType, adjustedIndex: number, tagName: string | null, attrs: TAttributes | null, tViews: TView[] | null): TNode;
+export declare function createTNode(lView: LView, type: TNodeType, adjustedIndex: number, tagName: string | null, attrs: TAttributes | null, tViews: TView[] | null): TNode;
 /**
  * Add or remove a class in a `classList` on a DOM element.
  *

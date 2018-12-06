@@ -9,6 +9,12 @@ import { NgModule, NgModuleTransitiveScopes } from '../../metadata/ng_module';
 import { Type } from '../../type';
 import { ComponentDef } from '../interfaces/definition';
 /**
+ * Loops over queued module definitions, if a given module definition has all of its
+ * declarations resolved, it dequeues that module definition and sets the scope on
+ * its declarations.
+ */
+export declare function flushModuleScopingQueueAsMuchAsPossible(): void;
+/**
  * Compiles a module in JIT mode.
  *
  * This function automatically gets called when a class has a `@NgModule` decorator.
