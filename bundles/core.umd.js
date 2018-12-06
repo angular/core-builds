@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+205.sha-4da739a
+ * @license Angular v7.1.0+206.sha-c71d7b5
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -4649,6 +4649,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    var ANIMATION_PROP_PREFIX = '@';
     function createEmptyStylingContext(element, sanitizer, initialStylingValues) {
         return [
             null,
@@ -4710,6 +4711,9 @@
         // Not an LView or an LContainer
         return Array.isArray(value) && typeof value[FLAGS] !== 'number' &&
             typeof value[ACTIVE_INDEX] !== 'number';
+    }
+    function isAnimationProp(name) {
+        return name[0] === ANIMATION_PROP_PREFIX;
     }
     function addPlayerInternal(playerContext, rootContext, element, player, playerContextIndex, ref) {
         ref = ref || element;
@@ -6109,10 +6113,17 @@
                 else {
                     // Standard attributes
                     var attrVal = attrs[i + 1];
-                    isProc ?
-                        renderer
-                            .setAttribute(native, attrName, attrVal) :
-                        native.setAttribute(attrName, attrVal);
+                    if (isAnimationProp(attrName)) {
+                        if (isProc) {
+                            renderer.setProperty(native, attrName, attrVal);
+                        }
+                    }
+                    else {
+                        isProc ?
+                            renderer
+                                .setAttribute(native, attrName, attrVal) :
+                            native.setAttribute(attrName, attrVal);
+                    }
                     i += 2;
                 }
             }
@@ -6317,10 +6328,13 @@
             // is risky, so sanitization can be done without further checks.
             value = sanitizer != null ? sanitizer(value) : value;
             ngDevMode && ngDevMode.rendererSetProperty++;
-            isProceduralRenderer(renderer) ?
-                renderer.setProperty(element, propName, value) :
-                (element.setProperty ? element.setProperty(propName, value) :
-                    element[propName] = value);
+            if (isProceduralRenderer(renderer)) {
+                renderer.setProperty(element, propName, value);
+            }
+            else if (!isAnimationProp(propName)) {
+                element.setProperty ? element.setProperty(propName, value) :
+                    element[propName] = value;
+            }
         }
     }
     /**
@@ -10265,7 +10279,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0+205.sha-4da739a');
+    var VERSION = new Version('7.1.0+206.sha-c71d7b5');
 
     /**
      * @license
