@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+196.sha-091a504
+ * @license Angular v7.1.0+209.sha-913563a
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -4649,6 +4649,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    var ANIMATION_PROP_PREFIX = '@';
     function createEmptyStylingContext(element, sanitizer, initialStylingValues) {
         return [
             null,
@@ -4710,6 +4711,9 @@
         // Not an LView or an LContainer
         return Array.isArray(value) && typeof value[FLAGS] !== 'number' &&
             typeof value[ACTIVE_INDEX] !== 'number';
+    }
+    function isAnimationProp(name) {
+        return name[0] === ANIMATION_PROP_PREFIX;
     }
     function addPlayerInternal(playerContext, rootContext, element, player, playerContextIndex, ref) {
         ref = ref || element;
@@ -6109,10 +6113,17 @@
                 else {
                     // Standard attributes
                     var attrVal = attrs[i + 1];
-                    isProc ?
-                        renderer
-                            .setAttribute(native, attrName, attrVal) :
-                        native.setAttribute(attrName, attrVal);
+                    if (isAnimationProp(attrName)) {
+                        if (isProc) {
+                            renderer.setProperty(native, attrName, attrVal);
+                        }
+                    }
+                    else {
+                        isProc ?
+                            renderer
+                                .setAttribute(native, attrName, attrVal) :
+                            native.setAttribute(attrName, attrVal);
+                    }
                     i += 2;
                 }
             }
@@ -6317,10 +6328,13 @@
             // is risky, so sanitization can be done without further checks.
             value = sanitizer != null ? sanitizer(value) : value;
             ngDevMode && ngDevMode.rendererSetProperty++;
-            isProceduralRenderer(renderer) ?
-                renderer.setProperty(element, propName, value) :
-                (element.setProperty ? element.setProperty(propName, value) :
-                    element[propName] = value);
+            if (isProceduralRenderer(renderer)) {
+                renderer.setProperty(element, propName, value);
+            }
+            else if (!isAnimationProp(propName)) {
+                element.setProperty ? element.setProperty(propName, value) :
+                    element[propName] = value;
+            }
         }
     }
     /**
@@ -8373,7 +8387,7 @@
                 };
                 ViewContainerRef_.prototype.createComponent = function (componentFactory, index, injector, projectableNodes, ngModuleRef) {
                     var contextInjector = injector || this.parentInjector;
-                    if (!ngModuleRef && contextInjector) {
+                    if (!ngModuleRef && componentFactory.ngModule == null && contextInjector) {
                         ngModuleRef = contextInjector.get(NgModuleRef, null);
                     }
                     var componentRef = componentFactory.create(contextInjector, projectableNodes, undefined, ngModuleRef);
@@ -10265,7 +10279,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.1.0+196.sha-091a504');
+    var VERSION = new Version('7.1.0+209.sha-913563a');
 
     /**
      * @license
@@ -10276,13 +10290,18 @@
      */
     var ComponentFactoryResolver$1 = /** @class */ (function (_super) {
         __extends(ComponentFactoryResolver$$1, _super);
-        function ComponentFactoryResolver$$1() {
-            return _super !== null && _super.apply(this, arguments) || this;
+        /**
+         * @param ngModule The NgModuleRef to which all resolved factories are bound.
+         */
+        function ComponentFactoryResolver$$1(ngModule) {
+            var _this = _super.call(this) || this;
+            _this.ngModule = ngModule;
+            return _this;
         }
         ComponentFactoryResolver$$1.prototype.resolveComponentFactory = function (component) {
             ngDevMode && assertComponentType(component);
             var componentDef = getComponentDef(component);
-            return new ComponentFactory$1(componentDef);
+            return new ComponentFactory$1(componentDef, this.ngModule);
         };
         return ComponentFactoryResolver$$1;
     }(ComponentFactoryResolver));
@@ -10313,10 +10332,13 @@
         return {
             get: function (token, notFoundValue) {
                 var value = rootViewInjector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR);
-                if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) {
+                if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR ||
+                    notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) {
                     // Return the value from the root element injector when
                     // - it provides it
                     //   (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
+                    // - the module injector should not be checked
+                    //   (notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
                     return value;
                 }
                 return moduleInjector.get(token, notFoundValue);
@@ -10328,9 +10350,14 @@
      */
     var ComponentFactory$1 = /** @class */ (function (_super) {
         __extends(ComponentFactory$$1, _super);
-        function ComponentFactory$$1(componentDef) {
+        /**
+         * @param componentDef The component definition.
+         * @param ngModule The NgModuleRef to which the factory is bound.
+         */
+        function ComponentFactory$$1(componentDef, ngModule) {
             var _this = _super.call(this) || this;
             _this.componentDef = componentDef;
+            _this.ngModule = ngModule;
             _this.componentType = componentDef.type;
             _this.selector = componentDef.selectors[0][0];
             _this.ngContentSelectors = [];
@@ -10352,6 +10379,7 @@
         });
         ComponentFactory$$1.prototype.create = function (injector, projectableNodes, rootSelectorOrNode, ngModule) {
             var isInternalRootView = rootSelectorOrNode === undefined;
+            ngModule = ngModule || this.ngModule;
             var rootViewInjector = ngModule ? createChainedInjector(injector, ngModule.injector) : injector;
             var rendererFactory = rootViewInjector.get(RendererFactory2, domRendererFactory3);
             var sanitizer = rootViewInjector.get(Sanitizer, null);
@@ -12407,30 +12435,47 @@
      */
     var COMPONENT_FACTORY_RESOLVER = {
         provide: ComponentFactoryResolver,
-        useFactory: function () { return new ComponentFactoryResolver$1(); },
-        deps: [],
+        useClass: ComponentFactoryResolver$1,
+        deps: [NgModuleRef],
     };
     var NgModuleRef$1 = /** @class */ (function (_super) {
         __extends(NgModuleRef$$1, _super);
-        function NgModuleRef$$1(ngModuleType, parentInjector) {
+        function NgModuleRef$$1(ngModuleType, _parent) {
             var _this = _super.call(this) || this;
+            _this._parent = _parent;
             // tslint:disable-next-line:require-internal-with-underscore
             _this._bootstrapComponents = [];
+            _this.injector = _this;
             _this.destroyCbs = [];
             var ngModuleDef = getNgModuleDef(ngModuleType);
             ngDevMode && assertDefined(ngModuleDef, "NgModule '" + stringify(ngModuleType) + "' is not a subtype of 'NgModuleType'.");
             _this._bootstrapComponents = ngModuleDef.bootstrap;
             var additionalProviders = [
-                COMPONENT_FACTORY_RESOLVER, {
+                {
                     provide: NgModuleRef,
                     useValue: _this,
-                }
+                },
+                COMPONENT_FACTORY_RESOLVER
             ];
-            _this.injector = createInjector(ngModuleType, parentInjector, additionalProviders);
-            _this.instance = _this.injector.get(ngModuleType);
-            _this.componentFactoryResolver = new ComponentFactoryResolver$1();
+            _this._r3Injector = createInjector(ngModuleType, _parent, additionalProviders);
+            _this.instance = _this.get(ngModuleType);
             return _this;
         }
+        NgModuleRef$$1.prototype.get = function (token, notFoundValue, injectFlags) {
+            if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
+            if (injectFlags === void 0) { injectFlags = exports.InjectFlags.Default; }
+            if (token === Injector || token === NgModuleRef || token === INJECTOR$1) {
+                return this;
+            }
+            return this._r3Injector.get(token, notFoundValue, injectFlags);
+        };
+        Object.defineProperty(NgModuleRef$$1.prototype, "componentFactoryResolver", {
+            get: function () {
+                return this.get(ComponentFactoryResolver);
+            },
+            enumerable: true,
+            configurable: true
+        });
         NgModuleRef$$1.prototype.destroy = function () {
             ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
             this.destroyCbs.forEach(function (fn) { return fn(); });
@@ -14872,18 +14917,20 @@
         Object.defineProperty(type, NG_INJECTABLE_DEF, {
             get: function () {
                 if (def === null) {
-                    var meta_1 = srcMeta || { providedIn: null };
-                    var hasAProvider = isUseClassProvider(meta_1) || isUseFactoryProvider(meta_1) ||
-                        isUseValueProvider(meta_1) || isUseExistingProvider(meta_1);
+                    // Allow the compilation of a class with a `@Injectable()` decorator without parameters
+                    var meta = srcMeta || { providedIn: null };
+                    var hasAProvider = isUseClassProvider(meta) || isUseFactoryProvider(meta) ||
+                        isUseValueProvider(meta) || isUseExistingProvider(meta);
                     var compilerMeta = {
                         name: type.name,
                         type: type,
-                        providedIn: meta_1.providedIn,
+                        typeArgumentCount: 0,
+                        providedIn: meta.providedIn,
                         ctorDeps: reflectDependencies(type),
                         userDeps: undefined
                     };
-                    if ((isUseClassProvider(meta_1) || isUseFactoryProvider(meta_1)) && meta_1.deps !== undefined) {
-                        compilerMeta.userDeps = convertDependencies(meta_1.deps);
+                    if ((isUseClassProvider(meta) || isUseFactoryProvider(meta)) && meta.deps !== undefined) {
+                        compilerMeta.userDeps = convertDependencies(meta.deps);
                     }
                     if (!hasAProvider) {
                         // In the case the user specifies a type provider, treat it as {provide: X, useClass: X}.
@@ -14892,21 +14939,21 @@
                         // its constructor with injected deps.
                         compilerMeta.useClass = type;
                     }
-                    else if (isUseClassProvider(meta_1)) {
+                    else if (isUseClassProvider(meta)) {
                         // The user explicitly specified useClass, and may or may not have provided deps.
-                        compilerMeta.useClass = meta_1.useClass;
+                        compilerMeta.useClass = meta.useClass;
                     }
-                    else if (isUseValueProvider(meta_1)) {
+                    else if (isUseValueProvider(meta)) {
                         // The user explicitly specified useValue.
-                        compilerMeta.useValue = meta_1.useValue;
+                        compilerMeta.useValue = meta.useValue;
                     }
-                    else if (isUseFactoryProvider(meta_1)) {
+                    else if (isUseFactoryProvider(meta)) {
                         // The user explicitly specified useFactory.
-                        compilerMeta.useFactory = meta_1.useFactory;
+                        compilerMeta.useFactory = meta.useFactory;
                     }
-                    else if (isUseExistingProvider(meta_1)) {
+                    else if (isUseExistingProvider(meta)) {
                         // The user explicitly specified useExisting.
-                        compilerMeta.useExisting = meta_1.useExisting;
+                        compilerMeta.useExisting = meta.useExisting;
                     }
                     else {
                         // Can't happen - either hasAProvider will be false, or one of the providers will be set.
@@ -23899,6 +23946,7 @@
     exports.ɵpureFunction8 = pureFunction8;
     exports.ɵpureFunctionV = pureFunctionV;
     exports.ɵgetCurrentView = getCurrentView;
+    exports.ɵgetHostElement = getHostElement;
     exports.ɵrestoreView = restoreView;
     exports.ɵcontainerRefreshStart = containerRefreshStart;
     exports.ɵcontainerRefreshEnd = containerRefreshEnd;
