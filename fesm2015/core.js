@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+205.sha-4da739a
+ * @license Angular v7.1.0+206.sha-c71d7b5
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -5577,6 +5577,8 @@ class CorePlayerHandler {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
+/** @type {?} */
+const ANIMATION_PROP_PREFIX = '@';
 /**
  * @param {?=} element
  * @param {?=} sanitizer
@@ -5658,6 +5660,13 @@ function isStylingContext(value) {
     // Not an LView or an LContainer
     return Array.isArray(value) && typeof value[FLAGS] !== 'number' &&
         typeof value[ACTIVE_INDEX] !== 'number';
+}
+/**
+ * @param {?} name
+ * @return {?}
+ */
+function isAnimationProp(name) {
+    return name[0] === ANIMATION_PROP_PREFIX;
 }
 /**
  * @param {?} playerContext
@@ -7584,10 +7593,17 @@ function setUpAttributes(native, attrs) {
             else {
                 /** @type {?} */
                 const attrVal = attrs[i + 1];
-                isProc ?
-                    (/** @type {?} */ (renderer))
-                        .setAttribute(native, /** @type {?} */ (attrName), /** @type {?} */ (attrVal)) :
-                    native.setAttribute(/** @type {?} */ (attrName), /** @type {?} */ (attrVal));
+                if (isAnimationProp(attrName)) {
+                    if (isProc) {
+                        (/** @type {?} */ (renderer)).setProperty(native, attrName, attrVal);
+                    }
+                }
+                else {
+                    isProc ?
+                        (/** @type {?} */ (renderer))
+                            .setAttribute(native, /** @type {?} */ (attrName), /** @type {?} */ (attrVal)) :
+                        native.setAttribute(/** @type {?} */ (attrName), /** @type {?} */ (attrVal));
+                }
                 i += 2;
             }
         }
@@ -7846,10 +7862,13 @@ function elementProperty(index, propName, value, sanitizer) {
         // is risky, so sanitization can be done without further checks.
         value = sanitizer != null ? (/** @type {?} */ (sanitizer(value))) : value;
         ngDevMode && ngDevMode.rendererSetProperty++;
-        isProceduralRenderer(renderer) ?
-            renderer.setProperty(/** @type {?} */ (element), propName, value) :
-            ((/** @type {?} */ (element)).setProperty ? (/** @type {?} */ (element)).setProperty(propName, value) :
-                (/** @type {?} */ (element))[propName] = value);
+        if (isProceduralRenderer(renderer)) {
+            renderer.setProperty(/** @type {?} */ (element), propName, value);
+        }
+        else if (!isAnimationProp(propName)) {
+            (/** @type {?} */ (element)).setProperty ? (/** @type {?} */ (element)).setProperty(propName, value) :
+                (/** @type {?} */ (element))[propName] = value;
+        }
     }
 }
 /**
@@ -12775,7 +12794,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0+205.sha-4da739a');
+const VERSION = new Version('7.1.0+206.sha-c71d7b5');
 
 /**
  * @fileoverview added by tsickle
