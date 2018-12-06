@@ -18,6 +18,11 @@ import { TContainerNode, TElementContainerNode, TElementNode } from './interface
 import { LView, RootContext } from './interfaces/view';
 import { ViewRef } from './view_ref';
 export declare class ComponentFactoryResolver extends viewEngine_ComponentFactoryResolver {
+    private ngModule?;
+    /**
+     * @param ngModule The NgModuleRef to which all resolved factories are bound.
+     */
+    constructor(ngModule?: viewEngine_NgModuleRef<any> | undefined);
     resolveComponentFactory<T>(component: Type<T>): viewEngine_ComponentFactory<T>;
 }
 /**
@@ -34,6 +39,7 @@ export declare const SCHEDULER: InjectionToken<(fn: () => void) => void>;
  */
 export declare class ComponentFactory<T> extends viewEngine_ComponentFactory<T> {
     private componentDef;
+    private ngModule?;
     selector: string;
     componentType: Type<any>;
     ngContentSelectors: string[];
@@ -45,7 +51,11 @@ export declare class ComponentFactory<T> extends viewEngine_ComponentFactory<T> 
         propName: string;
         templateName: string;
     }[];
-    constructor(componentDef: ComponentDef<any>);
+    /**
+     * @param componentDef The component definition.
+     * @param ngModule The NgModuleRef to which the factory is bound.
+     */
+    constructor(componentDef: ComponentDef<any>, ngModule?: viewEngine_NgModuleRef<any> | undefined);
     create(injector: Injector, projectableNodes?: any[][] | undefined, rootSelectorOrNode?: any, ngModule?: viewEngine_NgModuleRef<any> | undefined): viewEngine_ComponentRef<T>;
 }
 /**
