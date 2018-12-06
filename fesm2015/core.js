@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.1.0+201.sha-7f221d8
+ * @license Angular v7.1.0+202.sha-159ab1c
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -12775,7 +12775,7 @@ class Version {
 /** *
  * \@publicApi
   @type {?} */
-const VERSION = new Version('7.1.0+201.sha-7f221d8');
+const VERSION = new Version('7.1.0+202.sha-159ab1c');
 
 /**
  * @fileoverview added by tsickle
@@ -18109,6 +18109,7 @@ function compileInjectable(type, srcMeta) {
                 const compilerMeta = {
                     name: type.name,
                     type: type,
+                    typeArgumentCount: 0,
                     providedIn: meta.providedIn,
                     ctorDeps: reflectDependencies(type),
                     userDeps: undefined
