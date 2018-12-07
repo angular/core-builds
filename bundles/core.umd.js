@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-beta.1+13.sha-f034114
+ * @license Angular v7.2.0-beta.1+15.sha-255e672
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -5853,7 +5853,7 @@
     //////////////////////////
     var _currentNamespace = null;
     function namespaceSVG() {
-        _currentNamespace = 'http://www.w3.org/2000/svg/';
+        _currentNamespace = 'http://www.w3.org/2000/svg';
     }
     function namespaceMathML() {
         _currentNamespace = 'http://www.w3.org/1998/MathML/';
@@ -10279,7 +10279,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0-beta.1+13.sha-f034114');
+    var VERSION = new Version('7.2.0-beta.1+15.sha-255e672');
 
     /**
      * @license
