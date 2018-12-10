@@ -83,10 +83,12 @@ export declare function injectAttributeImpl(tNode: TNode, attrNameToInject: stri
  * Look for the injector providing the token by walking up the node injector tree and then
  * the module injector tree.
  *
- * @param nodeInjector Node injector where the search should start
+ * @param tNode The Node where the search for the injector should start
+ * @param lView The `LView` that contains the `tNode`
  * @param token The token to look for
  * @param flags Injection flags
- * @returns the value from the injector or `null` when not found
+ * @param notFoundValue The value to return when the injection flags is `InjectFlags.Optional`
+ * @returns the value from the injector, `null` when not found, or `notFoundValue` if provided
  */
 export declare function getOrCreateInjectable<T>(tNode: TElementNode | TContainerNode | TElementContainerNode, lView: LView, token: Type<T> | InjectionToken<T>, flags?: InjectFlags, notFoundValue?: any): T | null;
 /**
@@ -124,9 +126,8 @@ export declare function injectInjector(): NodeInjector;
 export declare class NodeInjector implements Injector {
     private _tNode;
     private _lView;
-    private _injectorIndex;
     constructor(_tNode: TElementNode | TContainerNode | TElementContainerNode, _lView: LView);
-    get(token: any): any;
+    get(token: any, notFoundValue?: any): any;
 }
 export declare function getFactoryOf<T>(type: Type<any>): ((type: Type<T> | null) => T) | null;
 export declare function getInheritedFactory<T>(type: Type<any>): (type: Type<T>) => T;
