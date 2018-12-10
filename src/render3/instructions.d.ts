@@ -553,6 +553,8 @@ export declare function checkNoChanges<T>(component: T): void;
  * @param lView The view which the change detection should be checked on.
  */
 export declare function checkNoChangesInRootView(lView: LView): void;
+/** Checks the view of the component provided. Does not gate on dirty checks or execute doCheck. */
+export declare function detectChangesInternal<T>(hostView: LView, component: T, rf: RenderFlags | null): void;
 /**
  * Mark the component as dirty (needing change detection).
  *
