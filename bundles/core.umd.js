@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-beta.1+28.sha-3cb6dad
+ * @license Angular v7.2.0-beta.1+32.sha-053b43d
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -6183,7 +6183,7 @@
         }
     }
     /**
-     * Update a property on an Element.
+     * Update a property on an element.
      *
      * If the property name also exists as an input property on one of the element's directives,
      * the component property will be set instead of the element property. This check must
@@ -6194,16 +6194,19 @@
      *        renaming as part of minification.
      * @param value New value to write.
      * @param sanitizer An optional function used to sanitize the value.
+     * @param nativeOnly Whether or not we should only set native properties and skip input check
+     * (this is necessary for host property bindings)
      */
-    function elementProperty(index, propName, value, sanitizer) {
+    function elementProperty(index, propName, value, sanitizer, nativeOnly) {
         if (value === NO_CHANGE)
             return;
         var lView = getLView();
         var element = getNativeByIndex(index, lView);
         var tNode = getTNode(index, lView);
-        var inputData = initializeTNodeInputs(tNode);
+        var inputData;
         var dataValue;
-        if (inputData && (dataValue = inputData[propName])) {
+        if (!nativeOnly && (inputData = initializeTNodeInputs(tNode)) &&
+            (dataValue = inputData[propName])) {
             setInputsForProperty(lView, dataValue, value);
             if (isComponent(tNode))
                 markDirtyIfOnPush(lView, index + HEADER_OFFSET);
@@ -10237,7 +10240,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0-beta.1+28.sha-3cb6dad');
+    var VERSION = new Version('7.2.0-beta.1+32.sha-053b43d');
 
     /**
      * @license
