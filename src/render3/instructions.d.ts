@@ -211,7 +211,7 @@ export declare function elementEnd(): void;
  */
 export declare function elementAttribute(index: number, name: string, value: any, sanitizer?: SanitizerFn | null): void;
 /**
- * Update a property on an Element.
+ * Update a property on an element.
  *
  * If the property name also exists as an input property on one of the element's directives,
  * the component property will be set instead of the element property. This check must
@@ -222,8 +222,10 @@ export declare function elementAttribute(index: number, name: string, value: any
  *        renaming as part of minification.
  * @param value New value to write.
  * @param sanitizer An optional function used to sanitize the value.
+ * @param nativeOnly Whether or not we should only set native properties and skip input check
+ * (this is necessary for host property bindings)
  */
-export declare function elementProperty<T>(index: number, propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn | null): void;
+export declare function elementProperty<T>(index: number, propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): void;
 /**
  * Constructs a TNode object from the arguments.
  *

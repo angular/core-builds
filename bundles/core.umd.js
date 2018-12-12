@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-beta.1+26.sha-3290fc3
+ * @license Angular v7.2.0-beta.2+10.sha-7fabe44
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -4026,8 +4026,9 @@
             removeListeners(view);
             executeOnDestroys(view);
             executePipeOnDestroys(view);
+            var hostTNode = view[HOST_NODE];
             // For component views only, the local renderer is destroyed as clean up time.
-            if (view[TVIEW].id === -1 && isProceduralRenderer(view[RENDERER])) {
+            if (hostTNode && hostTNode.type === 3 /* Element */ && isProceduralRenderer(view[RENDERER])) {
                 ngDevMode && ngDevMode.rendererDestroy++;
                 view[RENDERER].destroy();
             }
@@ -6198,7 +6199,7 @@
         }
     }
     /**
-     * Update a property on an Element.
+     * Update a property on an element.
      *
      * If the property name also exists as an input property on one of the element's directives,
      * the component property will be set instead of the element property. This check must
@@ -6209,16 +6210,19 @@
      *        renaming as part of minification.
      * @param value New value to write.
      * @param sanitizer An optional function used to sanitize the value.
+     * @param nativeOnly Whether or not we should only set native properties and skip input check
+     * (this is necessary for host property bindings)
      */
-    function elementProperty(index, propName, value, sanitizer) {
+    function elementProperty(index, propName, value, sanitizer, nativeOnly) {
         if (value === NO_CHANGE)
             return;
         var lView = getLView();
         var element = getNativeByIndex(index, lView);
         var tNode = getTNode(index, lView);
-        var inputData = initializeTNodeInputs(tNode);
+        var inputData;
         var dataValue;
-        if (inputData && (dataValue = inputData[propName])) {
+        if (!nativeOnly && (inputData = initializeTNodeInputs(tNode)) &&
+            (dataValue = inputData[propName])) {
             setInputsForProperty(lView, dataValue, value);
             if (isComponent(tNode))
                 markDirtyIfOnPush(lView, index + HEADER_OFFSET);
@@ -10269,7 +10273,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0-beta.1+26.sha-3290fc3');
+    var VERSION = new Version('7.2.0-beta.2+10.sha-7fabe44');
 
     /**
      * @license
