@@ -1,6 +1,6 @@
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -9,22 +9,17 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * The goal here is to make sure that the browser DOM API is the Renderer.
- * We do this by defining a subset of DOM API to be the renderer and than
- * use that time for rendering.
- *
- * At runtime we can than use the DOM api directly, in server or web-worker
- * it will be easy to implement such API.
- */
 /** @enum {number} */
-const RendererStyleFlags3 = {
+var RendererStyleFlags3 = {
     Important: 1,
     DashCase: 2,
 };
 export { RendererStyleFlags3 };
 RendererStyleFlags3[RendererStyleFlags3.Important] = 'Important';
 RendererStyleFlags3[RendererStyleFlags3.DashCase] = 'DashCase';
+/** @typedef {?} */
+var Renderer3;
+export { Renderer3 };
 /**
  * Object Oriented style of API needed to create elements and text nodes.
  *
@@ -35,41 +30,23 @@ RendererStyleFlags3[RendererStyleFlags3.DashCase] = 'DashCase';
  * @record
  */
 export function ObjectOrientedRenderer3() { }
-if (false) {
-    /**
-     * @param {?} data
-     * @return {?}
-     */
-    ObjectOrientedRenderer3.prototype.createComment = function (data) { };
-    /**
-     * @param {?} tagName
-     * @return {?}
-     */
-    ObjectOrientedRenderer3.prototype.createElement = function (tagName) { };
-    /**
-     * @param {?} namespace
-     * @param {?} tagName
-     * @return {?}
-     */
-    ObjectOrientedRenderer3.prototype.createElementNS = function (namespace, tagName) { };
-    /**
-     * @param {?} data
-     * @return {?}
-     */
-    ObjectOrientedRenderer3.prototype.createTextNode = function (data) { };
-    /**
-     * @param {?} selectors
-     * @return {?}
-     */
-    ObjectOrientedRenderer3.prototype.querySelector = function (selectors) { };
-}
+/** @type {?} */
+ObjectOrientedRenderer3.prototype.createComment;
+/** @type {?} */
+ObjectOrientedRenderer3.prototype.createElement;
+/** @type {?} */
+ObjectOrientedRenderer3.prototype.createElementNS;
+/** @type {?} */
+ObjectOrientedRenderer3.prototype.createTextNode;
+/** @type {?} */
+ObjectOrientedRenderer3.prototype.querySelector;
 /**
  * Returns whether the `renderer` is a `ProceduralRenderer3`
  * @param {?} renderer
  * @return {?}
  */
 export function isProceduralRenderer(renderer) {
-    return !!(((/** @type {?} */ (renderer))).listen);
+    return !!((/** @type {?} */ (renderer)).listen);
 }
 /**
  * Procedural style of API needed to create elements and text nodes.
@@ -80,151 +57,61 @@ export function isProceduralRenderer(renderer) {
  * @record
  */
 export function ProceduralRenderer3() { }
-if (false) {
-    /**
-     * This property is allowed to be null / undefined,
-     * in which case the view engine won't call it.
-     * This is used as a performance optimization for production mode.
-     * @type {?|undefined}
-     */
-    ProceduralRenderer3.prototype.destroyNode;
-    /**
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.destroy = function () { };
-    /**
-     * @param {?} value
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.createComment = function (value) { };
-    /**
-     * @param {?} name
-     * @param {?=} namespace
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.createElement = function (name, namespace) { };
-    /**
-     * @param {?} value
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.createText = function (value) { };
-    /**
-     * @param {?} parent
-     * @param {?} newChild
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.appendChild = function (parent, newChild) { };
-    /**
-     * @param {?} parent
-     * @param {?} newChild
-     * @param {?} refChild
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.insertBefore = function (parent, newChild, refChild) { };
-    /**
-     * @param {?} parent
-     * @param {?} oldChild
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.removeChild = function (parent, oldChild) { };
-    /**
-     * @param {?} selectorOrNode
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.selectRootElement = function (selectorOrNode) { };
-    /**
-     * @param {?} node
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.parentNode = function (node) { };
-    /**
-     * @param {?} node
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.nextSibling = function (node) { };
-    /**
-     * @param {?} el
-     * @param {?} name
-     * @param {?} value
-     * @param {?=} namespace
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.setAttribute = function (el, name, value, namespace) { };
-    /**
-     * @param {?} el
-     * @param {?} name
-     * @param {?=} namespace
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.removeAttribute = function (el, name, namespace) { };
-    /**
-     * @param {?} el
-     * @param {?} name
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.addClass = function (el, name) { };
-    /**
-     * @param {?} el
-     * @param {?} name
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.removeClass = function (el, name) { };
-    /**
-     * @param {?} el
-     * @param {?} style
-     * @param {?} value
-     * @param {?=} flags
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.setStyle = function (el, style, value, flags) { };
-    /**
-     * @param {?} el
-     * @param {?} style
-     * @param {?=} flags
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.removeStyle = function (el, style, flags) { };
-    /**
-     * @param {?} el
-     * @param {?} name
-     * @param {?} value
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.setProperty = function (el, name, value) { };
-    /**
-     * @param {?} node
-     * @param {?} value
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.setValue = function (node, value) { };
-    /**
-     * @param {?} target
-     * @param {?} eventName
-     * @param {?} callback
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.listen = function (target, eventName, callback) { };
-}
+/** @type {?} */
+ProceduralRenderer3.prototype.destroy;
+/** @type {?} */
+ProceduralRenderer3.prototype.createComment;
+/** @type {?} */
+ProceduralRenderer3.prototype.createElement;
+/** @type {?} */
+ProceduralRenderer3.prototype.createText;
+/**
+ * This property is allowed to be null / undefined,
+ * in which case the view engine won't call it.
+ * This is used as a performance optimization for production mode.
+ * @type {?|undefined}
+ */
+ProceduralRenderer3.prototype.destroyNode;
+/** @type {?} */
+ProceduralRenderer3.prototype.appendChild;
+/** @type {?} */
+ProceduralRenderer3.prototype.insertBefore;
+/** @type {?} */
+ProceduralRenderer3.prototype.removeChild;
+/** @type {?} */
+ProceduralRenderer3.prototype.selectRootElement;
+/** @type {?} */
+ProceduralRenderer3.prototype.parentNode;
+/** @type {?} */
+ProceduralRenderer3.prototype.nextSibling;
+/** @type {?} */
+ProceduralRenderer3.prototype.setAttribute;
+/** @type {?} */
+ProceduralRenderer3.prototype.removeAttribute;
+/** @type {?} */
+ProceduralRenderer3.prototype.addClass;
+/** @type {?} */
+ProceduralRenderer3.prototype.removeClass;
+/** @type {?} */
+ProceduralRenderer3.prototype.setStyle;
+/** @type {?} */
+ProceduralRenderer3.prototype.removeStyle;
+/** @type {?} */
+ProceduralRenderer3.prototype.setProperty;
+/** @type {?} */
+ProceduralRenderer3.prototype.setValue;
+/** @type {?} */
+ProceduralRenderer3.prototype.listen;
 /**
  * @record
  */
 export function RendererFactory3() { }
-if (false) {
-    /**
-     * @param {?} hostElement
-     * @param {?} rendererType
-     * @return {?}
-     */
-    RendererFactory3.prototype.createRenderer = function (hostElement, rendererType) { };
-    /**
-     * @return {?}
-     */
-    RendererFactory3.prototype.begin = function () { };
-    /**
-     * @return {?}
-     */
-    RendererFactory3.prototype.end = function () { };
-}
+/** @type {?} */
+RendererFactory3.prototype.createRenderer;
+/** @type {?|undefined} */
+RendererFactory3.prototype.begin;
+/** @type {?|undefined} */
+RendererFactory3.prototype.end;
 /** @type {?} */
 export const domRendererFactory3 = {
     createRenderer: (hostElement, rendererType) => { return document; }
@@ -234,139 +121,79 @@ export const domRendererFactory3 = {
  * @record
  */
 export function RNode() { }
-if (false) {
-    /** @type {?} */
-    RNode.prototype.parentNode;
-    /** @type {?} */
-    RNode.prototype.nextSibling;
-    /**
-     * @param {?} oldChild
-     * @return {?}
-     */
-    RNode.prototype.removeChild = function (oldChild) { };
-    /**
-     * Insert a child node.
-     *
-     * Used exclusively for adding View root nodes into ViewAnchor location.
-     * @param {?} newChild
-     * @param {?} refChild
-     * @param {?} isViewRoot
-     * @return {?}
-     */
-    RNode.prototype.insertBefore = function (newChild, refChild, isViewRoot) { };
-    /**
-     * Append a child node.
-     *
-     * Used exclusively for building up DOM which are static (ie not View roots)
-     * @param {?} newChild
-     * @return {?}
-     */
-    RNode.prototype.appendChild = function (newChild) { };
-}
+/** @type {?} */
+RNode.prototype.parentNode;
+/** @type {?} */
+RNode.prototype.nextSibling;
+/** @type {?} */
+RNode.prototype.removeChild;
+/**
+ * Insert a child node.
+ *
+ * Used exclusively for adding View root nodes into ViewAnchor location.
+ * @type {?}
+ */
+RNode.prototype.insertBefore;
+/**
+ * Append a child node.
+ *
+ * Used exclusively for building up DOM which are static (ie not View roots)
+ * @type {?}
+ */
+RNode.prototype.appendChild;
 /**
  * Subset of API needed for writing attributes, properties, and setting up
  * listeners on Element.
  * @record
  */
 export function RElement() { }
-if (false) {
-    /** @type {?} */
-    RElement.prototype.style;
-    /** @type {?} */
-    RElement.prototype.classList;
-    /** @type {?} */
-    RElement.prototype.className;
-    /**
-     * @param {?} name
-     * @param {?} value
-     * @return {?}
-     */
-    RElement.prototype.setAttribute = function (name, value) { };
-    /**
-     * @param {?} name
-     * @return {?}
-     */
-    RElement.prototype.removeAttribute = function (name) { };
-    /**
-     * @param {?} namespaceURI
-     * @param {?} qualifiedName
-     * @param {?} value
-     * @return {?}
-     */
-    RElement.prototype.setAttributeNS = function (namespaceURI, qualifiedName, value) { };
-    /**
-     * @param {?} type
-     * @param {?} listener
-     * @param {?=} useCapture
-     * @return {?}
-     */
-    RElement.prototype.addEventListener = function (type, listener, useCapture) { };
-    /**
-     * @param {?} type
-     * @param {?=} listener
-     * @param {?=} options
-     * @return {?}
-     */
-    RElement.prototype.removeEventListener = function (type, listener, options) { };
-    /**
-     * @param {?} name
-     * @param {?} value
-     * @return {?}
-     */
-    RElement.prototype.setProperty = function (name, value) { };
-}
+/** @type {?} */
+RElement.prototype.style;
+/** @type {?} */
+RElement.prototype.classList;
+/** @type {?} */
+RElement.prototype.className;
+/** @type {?} */
+RElement.prototype.setAttribute;
+/** @type {?} */
+RElement.prototype.removeAttribute;
+/** @type {?} */
+RElement.prototype.setAttributeNS;
+/** @type {?} */
+RElement.prototype.addEventListener;
+/** @type {?} */
+RElement.prototype.removeEventListener;
+/** @type {?|undefined} */
+RElement.prototype.setProperty;
 /**
  * @record
  */
 export function RCssStyleDeclaration() { }
-if (false) {
-    /**
-     * @param {?} propertyName
-     * @return {?}
-     */
-    RCssStyleDeclaration.prototype.removeProperty = function (propertyName) { };
-    /**
-     * @param {?} propertyName
-     * @param {?} value
-     * @param {?=} priority
-     * @return {?}
-     */
-    RCssStyleDeclaration.prototype.setProperty = function (propertyName, value, priority) { };
-}
+/** @type {?} */
+RCssStyleDeclaration.prototype.removeProperty;
+/** @type {?} */
+RCssStyleDeclaration.prototype.setProperty;
 /**
  * @record
  */
 export function RDomTokenList() { }
-if (false) {
-    /**
-     * @param {?} token
-     * @return {?}
-     */
-    RDomTokenList.prototype.add = function (token) { };
-    /**
-     * @param {?} token
-     * @return {?}
-     */
-    RDomTokenList.prototype.remove = function (token) { };
-}
+/** @type {?} */
+RDomTokenList.prototype.add;
+/** @type {?} */
+RDomTokenList.prototype.remove;
 /**
  * @record
  */
 export function RText() { }
-if (false) {
-    /** @type {?} */
-    RText.prototype.textContent;
-}
+/** @type {?} */
+RText.prototype.textContent;
 /**
  * @record
  */
 export function RComment() { }
-if (false) {
-    /** @type {?} */
-    RComment.prototype.textContent;
-}
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
+/** @type {?} */
+RComment.prototype.textContent;
 /** @type {?} */
 export const unusedValueExportToPlacateAjd = 1;
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmVuZGVyZXIuanMiLCJzb3VyY2VSb290IjoiLi4vLi4vIiwic291cmNlcyI6WyJwYWNrYWdlcy9jb3JlL3NyYy9yZW5kZXIzL2ludGVyZmFjZXMvcmVuZGVyZXIudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0lBc0JFLFlBQWtCO0lBQ2xCLFdBQWlCOzs7Ozs7Ozs7Ozs7OztBQVluQiw2Q0FPQzs7Ozs7O0lBTkMsc0VBQXNDOzs7OztJQUN0Qyx5RUFBeUM7Ozs7OztJQUN6QyxzRkFBOEQ7Ozs7O0lBQzlELHVFQUFvQzs7Ozs7SUFFcEMsMkVBQWdEOzs7Ozs7O0FBSWxELE1BQU0sVUFBVSxvQkFBb0IsQ0FBQyxRQUF1RDtJQUUxRixPQUFPLENBQUMsQ0FBQyxDQUFDLENBQUMsbUJBQUEsUUFBUSxFQUFPLENBQUMsQ0FBQyxNQUFNLENBQUMsQ0FBQztBQUN0QyxDQUFDOzs7Ozs7Ozs7QUFTRCx5Q0FnQ0M7Ozs7Ozs7O0lBdEJDLDBDQUEyQzs7OztJQVQzQyx3REFBZ0I7Ozs7O0lBQ2hCLG1FQUF1Qzs7Ozs7O0lBQ3ZDLDZFQUErRDs7Ozs7SUFDL0QsZ0VBQWlDOzs7Ozs7SUFPakMsNEVBQXFEOzs7Ozs7O0lBQ3JELHVGQUF5RTs7Ozs7O0lBQ3pFLDRFQUFxRDs7Ozs7SUFDckQsZ0ZBQXdEOzs7OztJQUV4RCwrREFBdUM7Ozs7O0lBQ3ZDLGdFQUFxQzs7Ozs7Ozs7SUFFckMsdUZBQXVGOzs7Ozs7O0lBQ3ZGLG1GQUEyRTs7Ozs7O0lBQzNFLGlFQUEyQzs7Ozs7O0lBQzNDLG9FQUE4Qzs7Ozs7Ozs7SUFDOUMsZ0ZBRTJEOzs7Ozs7O0lBQzNELDRFQUFnRzs7Ozs7OztJQUNoRywyRUFBMEQ7Ozs7OztJQUMxRCxvRUFBb0Q7Ozs7Ozs7SUFHcEQsa0ZBQStGOzs7OztBQUdqRyxzQ0FJQzs7Ozs7OztJQUhDLHFGQUF3Rjs7OztJQUN4RixtREFBZTs7OztJQUNmLGlEQUFhOzs7QUFHZixNQUFNLE9BQU8sbUJBQW1CLEdBQXFCO0lBQ25ELGNBQWMsRUFBRSxDQUFDLFdBQTRCLEVBQUUsWUFBa0MsRUFDbkQsRUFBRSxHQUFHLE9BQU8sUUFBUSxDQUFDLENBQUEsQ0FBQztDQUNyRDs7Ozs7QUFHRCwyQkFvQkM7OztJQW5CQywyQkFBdUI7O0lBRXZCLDRCQUF3Qjs7Ozs7SUFFeEIsc0RBQW1DOzs7Ozs7Ozs7O0lBT25DLDZFQUErRTs7Ozs7Ozs7SUFPL0Usc0RBQW9DOzs7Ozs7O0FBT3RDLDhCQVdDOzs7SUFWQyx5QkFBNEI7O0lBQzVCLDZCQUF5Qjs7SUFDekIsNkJBQWtCOzs7Ozs7SUFDbEIsNkRBQWdEOzs7OztJQUNoRCx5REFBb0M7Ozs7Ozs7SUFDcEMsc0ZBQWlGOzs7Ozs7O0lBQ2pGLGdGQUFvRjs7Ozs7OztJQUNwRixnRkFBcUY7Ozs7OztJQUVyRiw0REFBNkM7Ozs7O0FBRy9DLDBDQUdDOzs7Ozs7SUFGQyw0RUFBNkM7Ozs7Ozs7SUFDN0MsMEZBQStFOzs7OztBQUdqRixtQ0FHQzs7Ozs7O0lBRkMsbURBQXlCOzs7OztJQUN6QixzREFBNEI7Ozs7O0FBRzlCLDJCQUFrRTs7O0lBQTNCLDRCQUF5Qjs7Ozs7QUFFaEUsOEJBQXFFOzs7SUFBM0IsK0JBQXlCOzs7OztBQUluRSxNQUFNLE9BQU8sNkJBQTZCLEdBQUcsQ0FBQyIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQGxpY2Vuc2VcbiAqIENvcHlyaWdodCBHb29nbGUgSW5jLiBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIFVzZSBvZiB0aGlzIHNvdXJjZSBjb2RlIGlzIGdvdmVybmVkIGJ5IGFuIE1JVC1zdHlsZSBsaWNlbnNlIHRoYXQgY2FuIGJlXG4gKiBmb3VuZCBpbiB0aGUgTElDRU5TRSBmaWxlIGF0IGh0dHBzOi8vYW5ndWxhci5pby9saWNlbnNlXG4gKi9cblxuLyoqXG4gKiBUaGUgZ29hbCBoZXJlIGlzIHRvIG1ha2Ugc3VyZSB0aGF0IHRoZSBicm93c2VyIERPTSBBUEkgaXMgdGhlIFJlbmRlcmVyLlxuICogV2UgZG8gdGhpcyBieSBkZWZpbmluZyBhIHN1YnNldCBvZiBET00gQVBJIHRvIGJlIHRoZSByZW5kZXJlciBhbmQgdGhhblxuICogdXNlIHRoYXQgdGltZSBmb3IgcmVuZGVyaW5nLlxuICpcbiAqIEF0IHJ1bnRpbWUgd2UgY2FuIHRoYW4gdXNlIHRoZSBET00gYXBpIGRpcmVjdGx5LCBpbiBzZXJ2ZXIgb3Igd2ViLXdvcmtlclxuICogaXQgd2lsbCBiZSBlYXN5IHRvIGltcGxlbWVudCBzdWNoIEFQSS5cbiAqL1xuXG5pbXBvcnQge1JlbmRlcmVyU3R5bGVGbGFnczIsIFJlbmRlcmVyVHlwZTJ9IGZyb20gJy4uLy4uL3JlbmRlci9hcGknO1xuXG5cbi8vIFRPRE86IGNsZWFudXAgb25jZSB0aGUgY29kZSBpcyBtZXJnZWQgaW4gYW5ndWxhci9hbmd1bGFyXG5leHBvcnQgZW51bSBSZW5kZXJlclN0eWxlRmxhZ3MzIHtcbiAgSW1wb3J0YW50ID0gMSA8PCAwLFxuICBEYXNoQ2FzZSA9IDEgPDwgMVxufVxuXG5leHBvcnQgdHlwZSBSZW5kZXJlcjMgPSBPYmplY3RPcmllbnRlZFJlbmRlcmVyMyB8IFByb2NlZHVyYWxSZW5kZXJlcjM7XG5cbi8qKlxuICogT2JqZWN0IE9yaWVudGVkIHN0eWxlIG9mIEFQSSBuZWVkZWQgdG8gY3JlYXRlIGVsZW1lbnRzIGFuZCB0ZXh0IG5vZGVzLlxuICpcbiAqIFRoaXMgaXMgdGhlIG5hdGl2ZSBicm93c2VyIEFQSSBzdHlsZSwgZS5nLiBvcGVyYXRpb25zIGFyZSBtZXRob2RzIG9uIGluZGl2aWR1YWwgb2JqZWN0c1xuICogbGlrZSBIVE1MRWxlbWVudC4gV2l0aCB0aGlzIHN0eWxlLCBubyBhZGRpdGlvbmFsIGNvZGUgaXMgbmVlZGVkIGFzIGEgZmFjYWRlXG4gKiAocmVkdWNpbmcgcGF5bG9hZCBzaXplKS5cbiAqICovXG5leHBvcnQgaW50ZXJmYWNlIE9iamVjdE9yaWVudGVkUmVuZGVyZXIzIHtcbiAgY3JlYXRlQ29tbWVudChkYXRhOiBzdHJpbmcpOiBSQ29tbWVudDtcbiAgY3JlYXRlRWxlbWVudCh0YWdOYW1lOiBzdHJpbmcpOiBSRWxlbWVudDtcbiAgY3JlYXRlRWxlbWVudE5TKG5hbWVzcGFjZTogc3RyaW5nLCB0YWdOYW1lOiBzdHJpbmcpOiBSRWxlbWVudDtcbiAgY3JlYXRlVGV4dE5vZGUoZGF0YTogc3RyaW5nKTogUlRleHQ7XG5cbiAgcXVlcnlTZWxlY3RvcihzZWxlY3RvcnM6IHN0cmluZyk6IFJFbGVtZW50fG51bGw7XG59XG5cbi8qKiBSZXR1cm5zIHdoZXRoZXIgdGhlIGByZW5kZXJlcmAgaXMgYSBgUHJvY2VkdXJhbFJlbmRlcmVyM2AgKi9cbmV4cG9ydCBmdW5jdGlvbiBpc1Byb2NlZHVyYWxSZW5kZXJlcihyZW5kZXJlcjogUHJvY2VkdXJhbFJlbmRlcmVyMyB8IE9iamVjdE9yaWVudGVkUmVuZGVyZXIzKTpcbiAgICByZW5kZXJlciBpcyBQcm9jZWR1cmFsUmVuZGVyZXIzIHtcbiAgcmV0dXJuICEhKChyZW5kZXJlciBhcyBhbnkpLmxpc3Rlbik7XG59XG5cbi8qKlxuICogUHJvY2VkdXJhbCBzdHlsZSBvZiBBUEkgbmVlZGVkIHRvIGNyZWF0ZSBlbGVtZW50cyBhbmQgdGV4dCBub2Rlcy5cbiAqXG4gKiBJbiBub24tbmF0aXZlIGJyb3dzZXIgZW52aXJvbm1lbnRzIChlLmcuIHBsYXRmb3JtcyBzdWNoIGFzIHdlYi13b3JrZXJzKSwgdGhpcyBpcyB0aGVcbiAqIGZhY2FkZSB0aGF0IGVuYWJsZXMgZWxlbWVudCBtYW5pcHVsYXRpb24uIFRoaXMgYWxzbyBmYWNpbGl0YXRlcyBiYWNrd2FyZHMgY29tcGF0aWJpbGl0eVxuICogd2l0aCBSZW5kZXJlcjIuXG4gKi9cbmV4cG9ydCBpbnRlcmZhY2UgUHJvY2VkdXJhbFJlbmRlcmVyMyB7XG4gIGRlc3Ryb3koKTogdm9pZDtcbiAgY3JlYXRlQ29tbWVudCh2YWx1ZTogc3RyaW5nKTogUkNvbW1lbnQ7XG4gIGNyZWF0ZUVsZW1lbnQobmFtZTogc3RyaW5nLCBuYW1lc3BhY2U/OiBzdHJpbmd8bnVsbCk6IFJFbGVtZW50O1xuICBjcmVhdGVUZXh0KHZhbHVlOiBzdHJpbmcpOiBSVGV4dDtcbiAgLyoqXG4gICAqIFRoaXMgcHJvcGVydHkgaXMgYWxsb3dlZCB0byBiZSBudWxsIC8gdW5kZWZpbmVkLFxuICAgKiBpbiB3aGljaCBjYXNlIHRoZSB2aWV3IGVuZ2luZSB3b24ndCBjYWxsIGl0LlxuICAgKiBUaGlzIGlzIHVzZWQgYXMgYSBwZXJmb3JtYW5jZSBvcHRpbWl6YXRpb24gZm9yIHByb2R1Y3Rpb24gbW9kZS5cbiAgICovXG4gIGRlc3Ryb3lOb2RlPzogKChub2RlOiBSTm9kZSkgPT4gdm9pZCl8bnVsbDtcbiAgYXBwZW5kQ2hpbGQocGFyZW50OiBSRWxlbWVudCwgbmV3Q2hpbGQ6IFJOb2RlKTogdm9pZDtcbiAgaW5zZXJ0QmVmb3JlKHBhcmVudDogUk5vZGUsIG5ld0NoaWxkOiBSTm9kZSwgcmVmQ2hpbGQ6IFJOb2RlfG51bGwpOiB2b2lkO1xuICByZW1vdmVDaGlsZChwYXJlbnQ6IFJFbGVtZW50LCBvbGRDaGlsZDogUk5vZGUpOiB2b2lkO1xuICBzZWxlY3RSb290RWxlbWVudChzZWxlY3Rvck9yTm9kZTogc3RyaW5nfGFueSk6IFJFbGVtZW50O1xuXG4gIHBhcmVudE5vZGUobm9kZTogUk5vZGUpOiBSRWxlbWVudHxudWxsO1xuICBuZXh0U2libGluZyhub2RlOiBSTm9kZSk6IFJOb2RlfG51bGw7XG5cbiAgc2V0QXR0cmlidXRlKGVsOiBSRWxlbWVudCwgbmFtZTogc3RyaW5nLCB2YWx1ZTogc3RyaW5nLCBuYW1lc3BhY2U/OiBzdHJpbmd8bnVsbCk6IHZvaWQ7XG4gIHJlbW92ZUF0dHJpYnV0ZShlbDogUkVsZW1lbnQsIG5hbWU6IHN0cmluZywgbmFtZXNwYWNlPzogc3RyaW5nfG51bGwpOiB2b2lkO1xuICBhZGRDbGFzcyhlbDogUkVsZW1lbnQsIG5hbWU6IHN0cmluZyk6IHZvaWQ7XG4gIHJlbW92ZUNsYXNzKGVsOiBSRWxlbWVudCwgbmFtZTogc3RyaW5nKTogdm9pZDtcbiAgc2V0U3R5bGUoXG4gICAgICBlbDogUkVsZW1lbnQsIHN0eWxlOiBzdHJpbmcsIHZhbHVlOiBhbnksXG4gICAgICBmbGFncz86IFJlbmRlcmVyU3R5bGVGbGFnczJ8UmVuZGVyZXJTdHlsZUZsYWdzMyk6IHZvaWQ7XG4gIHJlbW92ZVN0eWxlKGVsOiBSRWxlbWVudCwgc3R5bGU6IHN0cmluZywgZmxhZ3M/OiBSZW5kZXJlclN0eWxlRmxhZ3MyfFJlbmRlcmVyU3R5bGVGbGFnczMpOiB2b2lkO1xuICBzZXRQcm9wZXJ0eShlbDogUkVsZW1lbnQsIG5hbWU6IHN0cmluZywgdmFsdWU6IGFueSk6IHZvaWQ7XG4gIHNldFZhbHVlKG5vZGU6IFJUZXh0fFJDb21tZW50LCB2YWx1ZTogc3RyaW5nKTogdm9pZDtcblxuICAvLyBUT0RPKG1pc2tvKTogRGVwcmVjYXRlIGluIGZhdm9yIG9mIGFkZEV2ZW50TGlzdGVuZXIvcmVtb3ZlRXZlbnRMaXN0ZW5lclxuICBsaXN0ZW4odGFyZ2V0OiBSTm9kZSwgZXZlbnROYW1lOiBzdHJpbmcsIGNhbGxiYWNrOiAoZXZlbnQ6IGFueSkgPT4gYm9vbGVhbiB8IHZvaWQpOiAoKSA9PiB2b2lkO1xufVxuXG5leHBvcnQgaW50ZXJmYWNlIFJlbmRlcmVyRmFjdG9yeTMge1xuICBjcmVhdGVSZW5kZXJlcihob3N0RWxlbWVudDogUkVsZW1lbnR8bnVsbCwgcmVuZGVyZXJUeXBlOiBSZW5kZXJlclR5cGUyfG51bGwpOiBSZW5kZXJlcjM7XG4gIGJlZ2luPygpOiB2b2lkO1xuICBlbmQ/KCk6IHZvaWQ7XG59XG5cbmV4cG9ydCBjb25zdCBkb21SZW5kZXJlckZhY3RvcnkzOiBSZW5kZXJlckZhY3RvcnkzID0ge1xuICBjcmVhdGVSZW5kZXJlcjogKGhvc3RFbGVtZW50OiBSRWxlbWVudCB8IG51bGwsIHJlbmRlcmVyVHlwZTogUmVuZGVyZXJUeXBlMiB8IG51bGwpOlxuICAgICAgICAgICAgICAgICAgICAgIFJlbmRlcmVyMyA9PiB7IHJldHVybiBkb2N1bWVudDt9XG59O1xuXG4vKiogU3Vic2V0IG9mIEFQSSBuZWVkZWQgZm9yIGFwcGVuZGluZyBlbGVtZW50cyBhbmQgdGV4dCBub2Rlcy4gKi9cbmV4cG9ydCBpbnRlcmZhY2UgUk5vZGUge1xuICBwYXJlbnROb2RlOiBSTm9kZXxudWxsO1xuXG4gIG5leHRTaWJsaW5nOiBSTm9kZXxudWxsO1xuXG4gIHJlbW92ZUNoaWxkKG9sZENoaWxkOiBSTm9kZSk6IHZvaWQ7XG5cbiAgLyoqXG4gICAqIEluc2VydCBhIGNoaWxkIG5vZGUuXG4gICAqXG4gICAqIFVzZWQgZXhjbHVzaXZlbHkgZm9yIGFkZGluZyBWaWV3IHJvb3Qgbm9kZXMgaW50byBWaWV3QW5jaG9yIGxvY2F0aW9uLlxuICAgKi9cbiAgaW5zZXJ0QmVmb3JlKG5ld0NoaWxkOiBSTm9kZSwgcmVmQ2hpbGQ6IFJOb2RlfG51bGwsIGlzVmlld1Jvb3Q6IGJvb2xlYW4pOiB2b2lkO1xuXG4gIC8qKlxuICAgKiBBcHBlbmQgYSBjaGlsZCBub2RlLlxuICAgKlxuICAgKiBVc2VkIGV4Y2x1c2l2ZWx5IGZvciBidWlsZGluZyB1cCBET00gd2hpY2ggYXJlIHN0YXRpYyAoaWUgbm90IFZpZXcgcm9vdHMpXG4gICAqL1xuICBhcHBlbmRDaGlsZChuZXdDaGlsZDogUk5vZGUpOiBSTm9kZTtcbn1cblxuLyoqXG4gKiBTdWJzZXQgb2YgQVBJIG5lZWRlZCBmb3Igd3JpdGluZyBhdHRyaWJ1dGVzLCBwcm9wZXJ0aWVzLCBhbmQgc2V0dGluZyB1cFxuICogbGlzdGVuZXJzIG9uIEVsZW1lbnQuXG4gKi9cbmV4cG9ydCBpbnRlcmZhY2UgUkVsZW1lbnQgZXh0ZW5kcyBSTm9kZSB7XG4gIHN0eWxlOiBSQ3NzU3R5bGVEZWNsYXJhdGlvbjtcbiAgY2xhc3NMaXN0OiBSRG9tVG9rZW5MaXN0O1xuICBjbGFzc05hbWU6IHN0cmluZztcbiAgc2V0QXR0cmlidXRlKG5hbWU6IHN0cmluZywgdmFsdWU6IHN0cmluZyk6IHZvaWQ7XG4gIHJlbW92ZUF0dHJpYnV0ZShuYW1lOiBzdHJpbmcpOiB2b2lkO1xuICBzZXRBdHRyaWJ1dGVOUyhuYW1lc3BhY2VVUkk6IHN0cmluZywgcXVhbGlmaWVkTmFtZTogc3RyaW5nLCB2YWx1ZTogc3RyaW5nKTogdm9pZDtcbiAgYWRkRXZlbnRMaXN0ZW5lcih0eXBlOiBzdHJpbmcsIGxpc3RlbmVyOiBFdmVudExpc3RlbmVyLCB1c2VDYXB0dXJlPzogYm9vbGVhbik6IHZvaWQ7XG4gIHJlbW92ZUV2ZW50TGlzdGVuZXIodHlwZTogc3RyaW5nLCBsaXN0ZW5lcj86IEV2ZW50TGlzdGVuZXIsIG9wdGlvbnM/OiBib29sZWFuKTogdm9pZDtcblxuICBzZXRQcm9wZXJ0eT8obmFtZTogc3RyaW5nLCB2YWx1ZTogYW55KTogdm9pZDtcbn1cblxuZXhwb3J0IGludGVyZmFjZSBSQ3NzU3R5bGVEZWNsYXJhdGlvbiB7XG4gIHJlbW92ZVByb3BlcnR5KHByb3BlcnR5TmFtZTogc3RyaW5nKTogc3RyaW5nO1xuICBzZXRQcm9wZXJ0eShwcm9wZXJ0eU5hbWU6IHN0cmluZywgdmFsdWU6IHN0cmluZ3xudWxsLCBwcmlvcml0eT86IHN0cmluZyk6IHZvaWQ7XG59XG5cbmV4cG9ydCBpbnRlcmZhY2UgUkRvbVRva2VuTGlzdCB7XG4gIGFkZCh0b2tlbjogc3RyaW5nKTogdm9pZDtcbiAgcmVtb3ZlKHRva2VuOiBzdHJpbmcpOiB2b2lkO1xufVxuXG5leHBvcnQgaW50ZXJmYWNlIFJUZXh0IGV4dGVuZHMgUk5vZGUgeyB0ZXh0Q29udGVudDogc3RyaW5nfG51bGw7IH1cblxuZXhwb3J0IGludGVyZmFjZSBSQ29tbWVudCBleHRlbmRzIFJOb2RlIHsgdGV4dENvbnRlbnQ6IHN0cmluZ3xudWxsOyB9XG5cbi8vIE5vdGU6IFRoaXMgaGFjayBpcyBuZWNlc3Nhcnkgc28gd2UgZG9uJ3QgZXJyb25lb3VzbHkgZ2V0IGEgY2lyY3VsYXIgZGVwZW5kZW5jeVxuLy8gZmFpbHVyZSBiYXNlZCBvbiB0eXBlcy5cbmV4cG9ydCBjb25zdCB1bnVzZWRWYWx1ZUV4cG9ydFRvUGxhY2F0ZUFqZCA9IDE7XG4iXX0=
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmVuZGVyZXIuanMiLCJzb3VyY2VSb290IjoiLi4vLi4vIiwic291cmNlcyI6WyJwYWNrYWdlcy9jb3JlL3NyYy9yZW5kZXIzL2ludGVyZmFjZXMvcmVuZGVyZXIudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7OztJQXNCRSxZQUFrQjtJQUNsQixXQUFpQjs7O3dDQURqQixTQUFTO3dDQUNULFFBQVE7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBc0JWLE1BQU0sVUFBVSxvQkFBb0IsQ0FBQyxRQUF1RDtJQUUxRixPQUFPLENBQUMsQ0FBQyxDQUFDLG1CQUFDLFFBQWUsRUFBQyxDQUFDLE1BQU0sQ0FBQyxDQUFDO0NBQ3JDOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFpREQsYUFBYSxtQkFBbUIsR0FBcUI7SUFDbkQsY0FBYyxFQUFFLENBQUMsV0FBNEIsRUFBRSxZQUFrQyxFQUNuRCxFQUFFLEdBQUcsT0FBTyxRQUFRLENBQUMsRUFBQztDQUNyRCxDQUFDOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBMERGLGFBQWEsNkJBQTZCLEdBQUcsQ0FBQyxDQUFDIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBAbGljZW5zZVxuICogQ29weXJpZ2h0IEdvb2dsZSBJbmMuIEFsbCBSaWdodHMgUmVzZXJ2ZWQuXG4gKlxuICogVXNlIG9mIHRoaXMgc291cmNlIGNvZGUgaXMgZ292ZXJuZWQgYnkgYW4gTUlULXN0eWxlIGxpY2Vuc2UgdGhhdCBjYW4gYmVcbiAqIGZvdW5kIGluIHRoZSBMSUNFTlNFIGZpbGUgYXQgaHR0cHM6Ly9hbmd1bGFyLmlvL2xpY2Vuc2VcbiAqL1xuXG4vKipcbiAqIFRoZSBnb2FsIGhlcmUgaXMgdG8gbWFrZSBzdXJlIHRoYXQgdGhlIGJyb3dzZXIgRE9NIEFQSSBpcyB0aGUgUmVuZGVyZXIuXG4gKiBXZSBkbyB0aGlzIGJ5IGRlZmluaW5nIGEgc3Vic2V0IG9mIERPTSBBUEkgdG8gYmUgdGhlIHJlbmRlcmVyIGFuZCB0aGFuXG4gKiB1c2UgdGhhdCB0aW1lIGZvciByZW5kZXJpbmcuXG4gKlxuICogQXQgcnVudGltZSB3ZSBjYW4gdGhhbiB1c2UgdGhlIERPTSBhcGkgZGlyZWN0bHksIGluIHNlcnZlciBvciB3ZWItd29ya2VyXG4gKiBpdCB3aWxsIGJlIGVhc3kgdG8gaW1wbGVtZW50IHN1Y2ggQVBJLlxuICovXG5cbmltcG9ydCB7UmVuZGVyZXJTdHlsZUZsYWdzMiwgUmVuZGVyZXJUeXBlMn0gZnJvbSAnLi4vLi4vcmVuZGVyL2FwaSc7XG5cblxuLy8gVE9ETzogY2xlYW51cCBvbmNlIHRoZSBjb2RlIGlzIG1lcmdlZCBpbiBhbmd1bGFyL2FuZ3VsYXJcbmV4cG9ydCBlbnVtIFJlbmRlcmVyU3R5bGVGbGFnczMge1xuICBJbXBvcnRhbnQgPSAxIDw8IDAsXG4gIERhc2hDYXNlID0gMSA8PCAxXG59XG5cbmV4cG9ydCB0eXBlIFJlbmRlcmVyMyA9IE9iamVjdE9yaWVudGVkUmVuZGVyZXIzIHwgUHJvY2VkdXJhbFJlbmRlcmVyMztcblxuLyoqXG4gKiBPYmplY3QgT3JpZW50ZWQgc3R5bGUgb2YgQVBJIG5lZWRlZCB0byBjcmVhdGUgZWxlbWVudHMgYW5kIHRleHQgbm9kZXMuXG4gKlxuICogVGhpcyBpcyB0aGUgbmF0aXZlIGJyb3dzZXIgQVBJIHN0eWxlLCBlLmcuIG9wZXJhdGlvbnMgYXJlIG1ldGhvZHMgb24gaW5kaXZpZHVhbCBvYmplY3RzXG4gKiBsaWtlIEhUTUxFbGVtZW50LiBXaXRoIHRoaXMgc3R5bGUsIG5vIGFkZGl0aW9uYWwgY29kZSBpcyBuZWVkZWQgYXMgYSBmYWNhZGVcbiAqIChyZWR1Y2luZyBwYXlsb2FkIHNpemUpLlxuICogKi9cbmV4cG9ydCBpbnRlcmZhY2UgT2JqZWN0T3JpZW50ZWRSZW5kZXJlcjMge1xuICBjcmVhdGVDb21tZW50KGRhdGE6IHN0cmluZyk6IFJDb21tZW50O1xuICBjcmVhdGVFbGVtZW50KHRhZ05hbWU6IHN0cmluZyk6IFJFbGVtZW50O1xuICBjcmVhdGVFbGVtZW50TlMobmFtZXNwYWNlOiBzdHJpbmcsIHRhZ05hbWU6IHN0cmluZyk6IFJFbGVtZW50O1xuICBjcmVhdGVUZXh0Tm9kZShkYXRhOiBzdHJpbmcpOiBSVGV4dDtcblxuICBxdWVyeVNlbGVjdG9yKHNlbGVjdG9yczogc3RyaW5nKTogUkVsZW1lbnR8bnVsbDtcbn1cblxuLyoqIFJldHVybnMgd2hldGhlciB0aGUgYHJlbmRlcmVyYCBpcyBhIGBQcm9jZWR1cmFsUmVuZGVyZXIzYCAqL1xuZXhwb3J0IGZ1bmN0aW9uIGlzUHJvY2VkdXJhbFJlbmRlcmVyKHJlbmRlcmVyOiBQcm9jZWR1cmFsUmVuZGVyZXIzIHwgT2JqZWN0T3JpZW50ZWRSZW5kZXJlcjMpOlxuICAgIHJlbmRlcmVyIGlzIFByb2NlZHVyYWxSZW5kZXJlcjMge1xuICByZXR1cm4gISEoKHJlbmRlcmVyIGFzIGFueSkubGlzdGVuKTtcbn1cblxuLyoqXG4gKiBQcm9jZWR1cmFsIHN0eWxlIG9mIEFQSSBuZWVkZWQgdG8gY3JlYXRlIGVsZW1lbnRzIGFuZCB0ZXh0IG5vZGVzLlxuICpcbiAqIEluIG5vbi1uYXRpdmUgYnJvd3NlciBlbnZpcm9ubWVudHMgKGUuZy4gcGxhdGZvcm1zIHN1Y2ggYXMgd2ViLXdvcmtlcnMpLCB0aGlzIGlzIHRoZVxuICogZmFjYWRlIHRoYXQgZW5hYmxlcyBlbGVtZW50IG1hbmlwdWxhdGlvbi4gVGhpcyBhbHNvIGZhY2lsaXRhdGVzIGJhY2t3YXJkcyBjb21wYXRpYmlsaXR5XG4gKiB3aXRoIFJlbmRlcmVyMi5cbiAqL1xuZXhwb3J0IGludGVyZmFjZSBQcm9jZWR1cmFsUmVuZGVyZXIzIHtcbiAgZGVzdHJveSgpOiB2b2lkO1xuICBjcmVhdGVDb21tZW50KHZhbHVlOiBzdHJpbmcpOiBSQ29tbWVudDtcbiAgY3JlYXRlRWxlbWVudChuYW1lOiBzdHJpbmcsIG5hbWVzcGFjZT86IHN0cmluZ3xudWxsKTogUkVsZW1lbnQ7XG4gIGNyZWF0ZVRleHQodmFsdWU6IHN0cmluZyk6IFJUZXh0O1xuICAvKipcbiAgICogVGhpcyBwcm9wZXJ0eSBpcyBhbGxvd2VkIHRvIGJlIG51bGwgLyB1bmRlZmluZWQsXG4gICAqIGluIHdoaWNoIGNhc2UgdGhlIHZpZXcgZW5naW5lIHdvbid0IGNhbGwgaXQuXG4gICAqIFRoaXMgaXMgdXNlZCBhcyBhIHBlcmZvcm1hbmNlIG9wdGltaXphdGlvbiBmb3IgcHJvZHVjdGlvbiBtb2RlLlxuICAgKi9cbiAgZGVzdHJveU5vZGU/OiAoKG5vZGU6IFJOb2RlKSA9PiB2b2lkKXxudWxsO1xuICBhcHBlbmRDaGlsZChwYXJlbnQ6IFJFbGVtZW50LCBuZXdDaGlsZDogUk5vZGUpOiB2b2lkO1xuICBpbnNlcnRCZWZvcmUocGFyZW50OiBSTm9kZSwgbmV3Q2hpbGQ6IFJOb2RlLCByZWZDaGlsZDogUk5vZGV8bnVsbCk6IHZvaWQ7XG4gIHJlbW92ZUNoaWxkKHBhcmVudDogUkVsZW1lbnQsIG9sZENoaWxkOiBSTm9kZSk6IHZvaWQ7XG4gIHNlbGVjdFJvb3RFbGVtZW50KHNlbGVjdG9yT3JOb2RlOiBzdHJpbmd8YW55KTogUkVsZW1lbnQ7XG5cbiAgcGFyZW50Tm9kZShub2RlOiBSTm9kZSk6IFJFbGVtZW50fG51bGw7XG4gIG5leHRTaWJsaW5nKG5vZGU6IFJOb2RlKTogUk5vZGV8bnVsbDtcblxuICBzZXRBdHRyaWJ1dGUoZWw6IFJFbGVtZW50LCBuYW1lOiBzdHJpbmcsIHZhbHVlOiBzdHJpbmcsIG5hbWVzcGFjZT86IHN0cmluZ3xudWxsKTogdm9pZDtcbiAgcmVtb3ZlQXR0cmlidXRlKGVsOiBSRWxlbWVudCwgbmFtZTogc3RyaW5nLCBuYW1lc3BhY2U/OiBzdHJpbmd8bnVsbCk6IHZvaWQ7XG4gIGFkZENsYXNzKGVsOiBSRWxlbWVudCwgbmFtZTogc3RyaW5nKTogdm9pZDtcbiAgcmVtb3ZlQ2xhc3MoZWw6IFJFbGVtZW50LCBuYW1lOiBzdHJpbmcpOiB2b2lkO1xuICBzZXRTdHlsZShcbiAgICAgIGVsOiBSRWxlbWVudCwgc3R5bGU6IHN0cmluZywgdmFsdWU6IGFueSxcbiAgICAgIGZsYWdzPzogUmVuZGVyZXJTdHlsZUZsYWdzMnxSZW5kZXJlclN0eWxlRmxhZ3MzKTogdm9pZDtcbiAgcmVtb3ZlU3R5bGUoZWw6IFJFbGVtZW50LCBzdHlsZTogc3RyaW5nLCBmbGFncz86IFJlbmRlcmVyU3R5bGVGbGFnczJ8UmVuZGVyZXJTdHlsZUZsYWdzMyk6IHZvaWQ7XG4gIHNldFByb3BlcnR5KGVsOiBSRWxlbWVudCwgbmFtZTogc3RyaW5nLCB2YWx1ZTogYW55KTogdm9pZDtcbiAgc2V0VmFsdWUobm9kZTogUlRleHR8UkNvbW1lbnQsIHZhbHVlOiBzdHJpbmcpOiB2b2lkO1xuXG4gIC8vIFRPRE8obWlza28pOiBEZXByZWNhdGUgaW4gZmF2b3Igb2YgYWRkRXZlbnRMaXN0ZW5lci9yZW1vdmVFdmVudExpc3RlbmVyXG4gIGxpc3Rlbih0YXJnZXQ6IFJOb2RlLCBldmVudE5hbWU6IHN0cmluZywgY2FsbGJhY2s6IChldmVudDogYW55KSA9PiBib29sZWFuIHwgdm9pZCk6ICgpID0+IHZvaWQ7XG59XG5cbmV4cG9ydCBpbnRlcmZhY2UgUmVuZGVyZXJGYWN0b3J5MyB7XG4gIGNyZWF0ZVJlbmRlcmVyKGhvc3RFbGVtZW50OiBSRWxlbWVudHxudWxsLCByZW5kZXJlclR5cGU6IFJlbmRlcmVyVHlwZTJ8bnVsbCk6IFJlbmRlcmVyMztcbiAgYmVnaW4/KCk6IHZvaWQ7XG4gIGVuZD8oKTogdm9pZDtcbn1cblxuZXhwb3J0IGNvbnN0IGRvbVJlbmRlcmVyRmFjdG9yeTM6IFJlbmRlcmVyRmFjdG9yeTMgPSB7XG4gIGNyZWF0ZVJlbmRlcmVyOiAoaG9zdEVsZW1lbnQ6IFJFbGVtZW50IHwgbnVsbCwgcmVuZGVyZXJUeXBlOiBSZW5kZXJlclR5cGUyIHwgbnVsbCk6XG4gICAgICAgICAgICAgICAgICAgICAgUmVuZGVyZXIzID0+IHsgcmV0dXJuIGRvY3VtZW50O31cbn07XG5cbi8qKiBTdWJzZXQgb2YgQVBJIG5lZWRlZCBmb3IgYXBwZW5kaW5nIGVsZW1lbnRzIGFuZCB0ZXh0IG5vZGVzLiAqL1xuZXhwb3J0IGludGVyZmFjZSBSTm9kZSB7XG4gIHBhcmVudE5vZGU6IFJOb2RlfG51bGw7XG5cbiAgbmV4dFNpYmxpbmc6IFJOb2RlfG51bGw7XG5cbiAgcmVtb3ZlQ2hpbGQob2xkQ2hpbGQ6IFJOb2RlKTogdm9pZDtcblxuICAvKipcbiAgICogSW5zZXJ0IGEgY2hpbGQgbm9kZS5cbiAgICpcbiAgICogVXNlZCBleGNsdXNpdmVseSBmb3IgYWRkaW5nIFZpZXcgcm9vdCBub2RlcyBpbnRvIFZpZXdBbmNob3IgbG9jYXRpb24uXG4gICAqL1xuICBpbnNlcnRCZWZvcmUobmV3Q2hpbGQ6IFJOb2RlLCByZWZDaGlsZDogUk5vZGV8bnVsbCwgaXNWaWV3Um9vdDogYm9vbGVhbik6IHZvaWQ7XG5cbiAgLyoqXG4gICAqIEFwcGVuZCBhIGNoaWxkIG5vZGUuXG4gICAqXG4gICAqIFVzZWQgZXhjbHVzaXZlbHkgZm9yIGJ1aWxkaW5nIHVwIERPTSB3aGljaCBhcmUgc3RhdGljIChpZSBub3QgVmlldyByb290cylcbiAgICovXG4gIGFwcGVuZENoaWxkKG5ld0NoaWxkOiBSTm9kZSk6IFJOb2RlO1xufVxuXG4vKipcbiAqIFN1YnNldCBvZiBBUEkgbmVlZGVkIGZvciB3cml0aW5nIGF0dHJpYnV0ZXMsIHByb3BlcnRpZXMsIGFuZCBzZXR0aW5nIHVwXG4gKiBsaXN0ZW5lcnMgb24gRWxlbWVudC5cbiAqL1xuZXhwb3J0IGludGVyZmFjZSBSRWxlbWVudCBleHRlbmRzIFJOb2RlIHtcbiAgc3R5bGU6IFJDc3NTdHlsZURlY2xhcmF0aW9uO1xuICBjbGFzc0xpc3Q6IFJEb21Ub2tlbkxpc3Q7XG4gIGNsYXNzTmFtZTogc3RyaW5nO1xuICBzZXRBdHRyaWJ1dGUobmFtZTogc3RyaW5nLCB2YWx1ZTogc3RyaW5nKTogdm9pZDtcbiAgcmVtb3ZlQXR0cmlidXRlKG5hbWU6IHN0cmluZyk6IHZvaWQ7XG4gIHNldEF0dHJpYnV0ZU5TKG5hbWVzcGFjZVVSSTogc3RyaW5nLCBxdWFsaWZpZWROYW1lOiBzdHJpbmcsIHZhbHVlOiBzdHJpbmcpOiB2b2lkO1xuICBhZGRFdmVudExpc3RlbmVyKHR5cGU6IHN0cmluZywgbGlzdGVuZXI6IEV2ZW50TGlzdGVuZXIsIHVzZUNhcHR1cmU/OiBib29sZWFuKTogdm9pZDtcbiAgcmVtb3ZlRXZlbnRMaXN0ZW5lcih0eXBlOiBzdHJpbmcsIGxpc3RlbmVyPzogRXZlbnRMaXN0ZW5lciwgb3B0aW9ucz86IGJvb2xlYW4pOiB2b2lkO1xuXG4gIHNldFByb3BlcnR5PyhuYW1lOiBzdHJpbmcsIHZhbHVlOiBhbnkpOiB2b2lkO1xufVxuXG5leHBvcnQgaW50ZXJmYWNlIFJDc3NTdHlsZURlY2xhcmF0aW9uIHtcbiAgcmVtb3ZlUHJvcGVydHkocHJvcGVydHlOYW1lOiBzdHJpbmcpOiBzdHJpbmc7XG4gIHNldFByb3BlcnR5KHByb3BlcnR5TmFtZTogc3RyaW5nLCB2YWx1ZTogc3RyaW5nfG51bGwsIHByaW9yaXR5Pzogc3RyaW5nKTogdm9pZDtcbn1cblxuZXhwb3J0IGludGVyZmFjZSBSRG9tVG9rZW5MaXN0IHtcbiAgYWRkKHRva2VuOiBzdHJpbmcpOiB2b2lkO1xuICByZW1vdmUodG9rZW46IHN0cmluZyk6IHZvaWQ7XG59XG5cbmV4cG9ydCBpbnRlcmZhY2UgUlRleHQgZXh0ZW5kcyBSTm9kZSB7IHRleHRDb250ZW50OiBzdHJpbmd8bnVsbDsgfVxuXG5leHBvcnQgaW50ZXJmYWNlIFJDb21tZW50IGV4dGVuZHMgUk5vZGUgeyB0ZXh0Q29udGVudDogc3RyaW5nfG51bGw7IH1cblxuLy8gTm90ZTogVGhpcyBoYWNrIGlzIG5lY2Vzc2FyeSBzbyB3ZSBkb24ndCBlcnJvbmVvdXNseSBnZXQgYSBjaXJjdWxhciBkZXBlbmRlbmN5XG4vLyBmYWlsdXJlIGJhc2VkIG9uIHR5cGVzLlxuZXhwb3J0IGNvbnN0IHVudXNlZFZhbHVlRXhwb3J0VG9QbGFjYXRlQWpkID0gMTtcbiJdfQ==
