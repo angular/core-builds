@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-beta.2+6.sha-28ceca0
+ * @license Angular v7.2.0-beta.2+9.sha-37c05bd
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -4026,8 +4026,9 @@
             removeListeners(view);
             executeOnDestroys(view);
             executePipeOnDestroys(view);
+            var hostTNode = view[HOST_NODE];
             // For component views only, the local renderer is destroyed as clean up time.
-            if (view[TVIEW].id === -1 && isProceduralRenderer(view[RENDERER])) {
+            if (hostTNode && hostTNode.type === 3 /* Element */ && isProceduralRenderer(view[RENDERER])) {
                 ngDevMode && ngDevMode.rendererDestroy++;
                 view[RENDERER].destroy();
             }
@@ -10272,7 +10273,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0-beta.2+6.sha-28ceca0');
+    var VERSION = new Version('7.2.0-beta.2+9.sha-37c05bd');
 
     /**
      * @license

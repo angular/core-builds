@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-beta.2+6.sha-28ceca0
+ * @license Angular v7.2.0-beta.2+9.sha-37c05bd
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -8,7 +8,7 @@ import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgMo
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -18,7 +18,7 @@ import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgMo
  * found in the LICENSE file at https://angular.io/license
  */
 /** @type {?} */
-const _global = /** @type {?} */ ((typeof window === 'undefined' ? global : window));
+const _global = (/** @type {?} */ ((typeof window === 'undefined' ? global : window)));
 /**
  * Wraps a test function in an asynchronous test zone. The test will automatically
  * complete when all asynchronous calls within this zone are done. Can be used
@@ -52,7 +52,7 @@ function asyncFallback(fn) {
             }
             runInTestZone(fn, this, done, (err) => {
                 if (typeof err === 'string') {
-                    return done.fail(new Error(/** @type {?} */ (err)));
+                    return done.fail(new Error((/** @type {?} */ (err))));
                 }
                 else {
                     done.fail(err);
@@ -81,13 +81,13 @@ function runInTestZone(fn, context, finishCallback, failCallback) {
     /** @type {?} */
     const currentZone = Zone.current;
     /** @type {?} */
-    const AsyncTestZoneSpec = (/** @type {?} */ (Zone))['AsyncTestZoneSpec'];
+    const AsyncTestZoneSpec = ((/** @type {?} */ (Zone)))['AsyncTestZoneSpec'];
     if (AsyncTestZoneSpec === undefined) {
         throw new Error('AsyncTestZoneSpec is needed for the async() test helper but could not be found. ' +
             'Please make sure that your environment includes zone.js/dist/async-test.js');
     }
     /** @type {?} */
-    const ProxyZoneSpec = /** @type {?} */ ((/** @type {?} */ (Zone))['ProxyZoneSpec']);
+    const ProxyZoneSpec = (/** @type {?} */ (((/** @type {?} */ (Zone)))['ProxyZoneSpec']));
     if (ProxyZoneSpec === undefined) {
         throw new Error('ProxyZoneSpec is needed for the async() test helper but could not be found. ' +
             'Please make sure that your environment includes zone.js/dist/proxy.js');
@@ -95,6 +95,8 @@ function runInTestZone(fn, context, finishCallback, failCallback) {
     /** @type {?} */
     const proxyZoneSpec = ProxyZoneSpec.get();
     ProxyZoneSpec.assertPresent();
+    // We need to create the AsyncTestZoneSpec outside the ProxyZone.
+    // If we do it in ProxyZone then we will get to infinite recursion.
     /** @type {?} */
     const proxyZone = Zone.current.getZoneWith('ProxyZoneSpec');
     /** @type {?} */
@@ -127,7 +129,7 @@ function runInTestZone(fn, context, finishCallback, failCallback) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
  */
 /**
  * Wraps a test function in an asynchronous test zone. The test will automatically
@@ -170,7 +172,7 @@ function async(fn) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
  */
 /**
  * Fixture for debugging and testing a component.
@@ -198,7 +200,7 @@ class ComponentFixture {
         this._onErrorSubscription = null;
         this.changeDetectorRef = componentRef.changeDetectorRef;
         this.elementRef = componentRef.location;
-        this.debugElement = /** @type {?} */ (getDebugNode(this.elementRef.nativeElement));
+        this.debugElement = (/** @type {?} */ (getDebugNode(this.elementRef.nativeElement)));
         this.componentInstance = componentRef.instance;
         this.nativeElement = this.elementRef.nativeElement;
         this.componentRef = componentRef;
@@ -229,7 +231,7 @@ class ComponentFixture {
                             scheduleMicroTask(() => {
                                 if (!ngZone.hasPendingMacrotasks) {
                                     if (this._promise !== null) {
-                                        /** @type {?} */ ((this._resolve))(true);
+                                        (/** @type {?} */ (this._resolve))(true);
                                         this._resolve = null;
                                         this._promise = null;
                                     }
@@ -293,7 +295,7 @@ class ComponentFixture {
      * yet.
      * @return {?}
      */
-    isStable() { return this._isStable && !/** @type {?} */ ((this.ngZone)).hasPendingMacrotasks; }
+    isStable() { return this._isStable && !(/** @type {?} */ (this.ngZone)).hasPendingMacrotasks; }
     /**
      * Get a promise that resolves when the fixture is stable.
      *
@@ -320,7 +322,7 @@ class ComponentFixture {
         if (this._renderer === undefined) {
             this._renderer = this.componentRef.injector.get(RendererFactory2, null);
         }
-        return /** @type {?} */ (this._renderer);
+        return (/** @type {?} */ (this._renderer));
     }
     /**
      * Get a promise that resolves when the ui state is stable following animations.
@@ -371,7 +373,7 @@ function scheduleMicroTask(fn) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -380,10 +382,11 @@ function scheduleMicroTask(fn) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/** *
+/**
  * fakeAsync has been moved to zone.js
  * this file is for fallback in case old version of zone.js is used
-  @type {?} */
+ * @type {?}
+ */
 const _Zone = typeof Zone !== 'undefined' ? Zone : null;
 /** @type {?} */
 const FakeAsyncTestZoneSpec = _Zone && _Zone['FakeAsyncTestZoneSpec'];
@@ -530,7 +533,7 @@ function flushMicrotasksFallback() {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
  */
 /** @type {?} */
 const _Zone$1 = typeof Zone !== 'undefined' ? Zone : null;
@@ -650,7 +653,7 @@ function flushMicrotasks() {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -688,7 +691,7 @@ class AsyncTestCompleter {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
  */
 /** @type {?} */
 let _nextReferenceId = 0;
@@ -709,7 +712,7 @@ class MetadataOverrider {
         /** @type {?} */
         const props = {};
         if (oldMetadata) {
-            _valueProps(oldMetadata).forEach((prop) => props[prop] = (/** @type {?} */ (oldMetadata))[prop]);
+            _valueProps(oldMetadata).forEach((prop) => props[prop] = ((/** @type {?} */ (oldMetadata)))[prop]);
         }
         if (override.set) {
             if (override.remove || override.add) {
@@ -723,7 +726,7 @@ class MetadataOverrider {
         if (override.add) {
             addMetadata(props, override.add);
         }
-        return new metadataClass(/** @type {?} */ (props));
+        return new metadataClass((/** @type {?} */ (props)));
     }
 }
 /**
@@ -830,6 +833,7 @@ function _valueProps(obj) {
             props.push(prop);
         }
     });
+    // getters
     /** @type {?} */
     let proto = obj;
     while (proto = Object.getPrototypeOf(proto)) {
@@ -846,7 +850,7 @@ function _valueProps(obj) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
  */
 /** @type {?} */
 const reflection = new ɵReflectionCapabilities();
@@ -925,7 +929,7 @@ class NgModuleResolver extends OverrideResolver {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
  */
 /**
  * An abstract class for inserting the root test component element in a platform independent way.
@@ -939,18 +943,20 @@ class TestComponentRenderer {
      */
     insertRootElement(rootElementId) { }
 }
-/** *
+/**
  * \@publicApi
-  @type {?} */
+ * @type {?}
+ */
 const ComponentFixtureAutoDetect = new InjectionToken('ComponentFixtureAutoDetect');
-/** *
+/**
  * \@publicApi
-  @type {?} */
+ * @type {?}
+ */
 const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
  */
 /** @type {?} */
 let _nextRootElementId = 0;
@@ -967,20 +973,22 @@ let _nextRootElementId = 0;
 class TestBedRender3 {
     constructor() {
         // Properties
-        this.platform = /** @type {?} */ ((null));
-        this.ngModule = /** @type {?} */ ((null));
+        this.platform = (/** @type {?} */ (null));
+        this.ngModule = (/** @type {?} */ (null));
+        // metadata overrides
         this._moduleOverrides = [];
         this._componentOverrides = [];
         this._directiveOverrides = [];
         this._pipeOverrides = [];
         this._providerOverrides = [];
         this._rootProviderOverrides = [];
+        // test module configuration
         this._providers = [];
         this._declarations = [];
         this._imports = [];
         this._schemas = [];
         this._activeFixtures = [];
-        this._moduleRef = /** @type {?} */ ((null));
+        this._moduleRef = (/** @type {?} */ (null));
         this._instantiated = false;
     }
     /**
@@ -1019,7 +1027,7 @@ class TestBedRender3 {
      */
     static configureCompiler(config) {
         _getTestBedRender3().configureCompiler(config);
-        return /** @type {?} */ ((TestBedRender3));
+        return (/** @type {?} */ ((/** @type {?} */ (TestBedRender3))));
     }
     /**
      * Allows overriding default providers, directives, pipes, modules of the test injector,
@@ -1029,7 +1037,7 @@ class TestBedRender3 {
      */
     static configureTestingModule(moduleDef) {
         _getTestBedRender3().configureTestingModule(moduleDef);
-        return /** @type {?} */ ((TestBedRender3));
+        return (/** @type {?} */ ((/** @type {?} */ (TestBedRender3))));
     }
     /**
      * Compile components with a `templateUrl` for the test's NgModule.
@@ -1045,7 +1053,7 @@ class TestBedRender3 {
      */
     static overrideModule(ngModule, override) {
         _getTestBedRender3().overrideModule(ngModule, override);
-        return /** @type {?} */ ((TestBedRender3));
+        return (/** @type {?} */ ((/** @type {?} */ (TestBedRender3))));
     }
     /**
      * @param {?} component
@@ -1054,7 +1062,7 @@ class TestBedRender3 {
      */
     static overrideComponent(component, override) {
         _getTestBedRender3().overrideComponent(component, override);
-        return /** @type {?} */ ((TestBedRender3));
+        return (/** @type {?} */ ((/** @type {?} */ (TestBedRender3))));
     }
     /**
      * @param {?} directive
@@ -1063,7 +1071,7 @@ class TestBedRender3 {
      */
     static overrideDirective(directive, override) {
         _getTestBedRender3().overrideDirective(directive, override);
-        return /** @type {?} */ ((TestBedRender3));
+        return (/** @type {?} */ ((/** @type {?} */ (TestBedRender3))));
     }
     /**
      * @param {?} pipe
@@ -1072,7 +1080,7 @@ class TestBedRender3 {
      */
     static overridePipe(pipe, override) {
         _getTestBedRender3().overridePipe(pipe, override);
-        return /** @type {?} */ ((TestBedRender3));
+        return (/** @type {?} */ ((/** @type {?} */ (TestBedRender3))));
     }
     /**
      * @param {?} component
@@ -1080,8 +1088,8 @@ class TestBedRender3 {
      * @return {?}
      */
     static overrideTemplate(component, template) {
-        _getTestBedRender3().overrideComponent(component, { set: { template, templateUrl: /** @type {?} */ ((null)) } });
-        return /** @type {?} */ ((TestBedRender3));
+        _getTestBedRender3().overrideComponent(component, { set: { template, templateUrl: (/** @type {?} */ (null)) } });
+        return (/** @type {?} */ ((/** @type {?} */ (TestBedRender3))));
     }
     /**
      * Overrides the template of the given component, compiling the template
@@ -1094,7 +1102,7 @@ class TestBedRender3 {
      */
     static overrideTemplateUsingTestingModule(component, template) {
         _getTestBedRender3().overrideTemplateUsingTestingModule(component, template);
-        return /** @type {?} */ ((TestBedRender3));
+        return (/** @type {?} */ ((/** @type {?} */ (TestBedRender3))));
     }
     /**
      * @param {?} component
@@ -1111,7 +1119,7 @@ class TestBedRender3 {
      */
     static overrideProvider(token, provider) {
         _getTestBedRender3().overrideProvider(token, provider);
-        return /** @type {?} */ ((TestBedRender3));
+        return (/** @type {?} */ ((/** @type {?} */ (TestBedRender3))));
     }
     /**
      * @param {?} token
@@ -1142,7 +1150,7 @@ class TestBedRender3 {
      */
     static resetTestingModule() {
         _getTestBedRender3().resetTestingModule();
-        return /** @type {?} */ ((TestBedRender3));
+        return (/** @type {?} */ ((/** @type {?} */ (TestBedRender3))));
     }
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
@@ -1176,8 +1184,8 @@ class TestBedRender3 {
      */
     resetTestEnvironment() {
         this.resetTestingModule();
-        this.platform = /** @type {?} */ ((null));
-        this.ngModule = /** @type {?} */ ((null));
+        this.platform = (/** @type {?} */ (null));
+        this.ngModule = (/** @type {?} */ (null));
     }
     /**
      * @return {?}
@@ -1195,7 +1203,7 @@ class TestBedRender3 {
         this._declarations = [];
         this._imports = [];
         this._schemas = [];
-        this._moduleRef = /** @type {?} */ ((null));
+        this._moduleRef = (/** @type {?} */ (null));
         this._instantiated = false;
         this._activeFixtures.forEach((fixture) => {
             try {
@@ -1351,7 +1359,7 @@ class TestBedRender3 {
         const rootElId = `root${_nextRootElementId++}`;
         testComponentRenderer.insertRootElement(rootElId);
         /** @nocollapse @type {?} */
-        const componentDef = (/** @type {?} */ (type)).ngComponentDef;
+        const componentDef = ((/** @type {?} */ (type))).ngComponentDef;
         if (!componentDef) {
             throw new Error(`It looks like '${ɵstringify(type)}' has not been IVY compiled - it has no 'ngComponentDef' field`);
         }
@@ -1374,6 +1382,7 @@ class TestBedRender3 {
         this._activeFixtures.push(fixture);
         return fixture;
     }
+    // internal methods
     /**
      * @return {?}
      */
@@ -1391,9 +1400,10 @@ class TestBedRender3 {
         this._moduleRef = new ɵRender3NgModuleRef(testModuleType, parentInjector);
         // ApplicationInitStatus.runInitializers() is marked @internal
         // to core. Cast it to any before accessing it.
-        (/** @type {?} */ (this._moduleRef.injector.get(ApplicationInitStatus))).runInitializers();
+        ((/** @type {?} */ (this._moduleRef.injector.get(ApplicationInitStatus)))).runInitializers();
         this._instantiated = true;
     }
+    // creates resolvers taking overrides into account
     /**
      * @return {?}
      */
@@ -1463,6 +1473,7 @@ let testBed;
 function _getTestBedRender3() {
     return testBed = testBed || new TestBedRender3();
 }
+// Module compiler
 /** @type {?} */
 const EMPTY_ARRAY = [];
 /**
@@ -1503,9 +1514,10 @@ function compileNgModule(moduleType, resolvers) {
             return;
         }
     });
+    // Compile transitive modules, components, directives and pipes
     /** @type {?} */
     const transitiveScope = transitiveScopesFor(moduleType, resolvers);
-    compiledComponents.forEach(cmp => ɵpatchComponentDefWithScope((/** @type {?} */ (cmp)).ngComponentDef, transitiveScope));
+    compiledComponents.forEach(cmp => ɵpatchComponentDefWithScope(((/** @type {?} */ (cmp))).ngComponentDef, transitiveScope));
 }
 /**
  * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
@@ -1540,7 +1552,7 @@ function transitiveScopesFor(moduleType, resolvers) {
     };
     def.declarations.forEach(declared => {
         /** @type {?} */
-        const declaredWithDefs = /** @type {?} */ (declared);
+        const declaredWithDefs = (/** @type {?} */ (declared));
         if (declaredWithDefs.ngPipeDef !== undefined) {
             scopes.compilation.pipes.add(declared);
         }
@@ -1557,6 +1569,8 @@ function transitiveScopesFor(moduleType, resolvers) {
         else {
             compileNgModule(imported, resolvers);
         }
+        // When this module imports another, the imported module's exported directives and pipes are
+        // added to the compilation scope of this module.
         /** @type {?} */
         const importedScope = transitiveScopesFor(imported, resolvers);
         importedScope.exported.directives.forEach(entry => scopes.compilation.directives.add(entry));
@@ -1564,10 +1578,12 @@ function transitiveScopesFor(moduleType, resolvers) {
     });
     def.exports.forEach((exported) => {
         /** @type {?} */
-        const exportedTyped = /** @type {?} */ (exported);
+        const exportedTyped = (/** @type {?} */ (exported));
         // Either the type is a module, a pipe, or a component/directive (which may not have an
         // ngComponentDef as it might be compiled asynchronously).
         if (isNgModule(exportedTyped)) {
+            // When this module exports another, the exported module's exported directives and pipes are
+            // added to both the compilation and exported scopes of this module.
             /** @type {?} */
             const exportedScope = transitiveScopesFor(exportedTyped, resolvers);
             exportedScope.exported.directives.forEach(entry => {
@@ -1613,12 +1629,12 @@ function flatten(values) {
  * @return {?}
  */
 function isNgModule(value) {
-    return (/** @type {?} */ (value)).ngModuleDef !== undefined;
+    return ((/** @type {?} */ (value))).ngModuleDef !== undefined;
 }
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
  */
 /**
  * @return {?}
@@ -1706,12 +1722,13 @@ class TestingCompilerFactory {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
  */
 /** @type {?} */
 const UNDEFINED = new Object();
 /** @type {?} */
 let _nextRootElementId$1 = 0;
+// WARNING: interface has both a type and a value, skipping emit
 /**
  * \@description
  * Configures and initializes environment for unit testing and provides methods for
@@ -1725,9 +1742,9 @@ let _nextRootElementId$1 = 0;
 class TestBedViewEngine {
     constructor() {
         this._instantiated = false;
-        this._compiler = /** @type {?} */ ((null));
-        this._moduleRef = /** @type {?} */ ((null));
-        this._moduleFactory = /** @type {?} */ ((null));
+        this._compiler = (/** @type {?} */ (null));
+        this._moduleRef = (/** @type {?} */ (null));
+        this._moduleFactory = (/** @type {?} */ (null));
         this._compilerOptions = [];
         this._moduleOverrides = [];
         this._componentOverrides = [];
@@ -1743,8 +1760,8 @@ class TestBedViewEngine {
         this._templateOverrides = [];
         this._isRoot = true;
         this._rootProviderOverrides = [];
-        this.platform = /** @type {?} */ ((null));
-        this.ngModule = /** @type {?} */ ((null));
+        this.platform = (/** @type {?} */ (null));
+        this.ngModule = (/** @type {?} */ (null));
     }
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
@@ -1777,7 +1794,7 @@ class TestBedViewEngine {
      */
     static resetTestingModule() {
         _getTestBedViewEngine().resetTestingModule();
-        return /** @type {?} */ ((TestBedViewEngine));
+        return (/** @type {?} */ ((/** @type {?} */ (TestBedViewEngine))));
     }
     /**
      * Allows overriding default compiler providers and settings
@@ -1787,7 +1804,7 @@ class TestBedViewEngine {
      */
     static configureCompiler(config) {
         _getTestBedViewEngine().configureCompiler(config);
-        return /** @type {?} */ ((TestBedViewEngine));
+        return (/** @type {?} */ ((/** @type {?} */ (TestBedViewEngine))));
     }
     /**
      * Allows overriding default providers, directives, pipes, modules of the test injector,
@@ -1797,7 +1814,7 @@ class TestBedViewEngine {
      */
     static configureTestingModule(moduleDef) {
         _getTestBedViewEngine().configureTestingModule(moduleDef);
-        return /** @type {?} */ ((TestBedViewEngine));
+        return (/** @type {?} */ ((/** @type {?} */ (TestBedViewEngine))));
     }
     /**
      * Compile components with a `templateUrl` for the test's NgModule.
@@ -1813,7 +1830,7 @@ class TestBedViewEngine {
      */
     static overrideModule(ngModule, override) {
         _getTestBedViewEngine().overrideModule(ngModule, override);
-        return /** @type {?} */ ((TestBedViewEngine));
+        return (/** @type {?} */ ((/** @type {?} */ (TestBedViewEngine))));
     }
     /**
      * @param {?} component
@@ -1822,7 +1839,7 @@ class TestBedViewEngine {
      */
     static overrideComponent(component, override) {
         _getTestBedViewEngine().overrideComponent(component, override);
-        return /** @type {?} */ ((TestBedViewEngine));
+        return (/** @type {?} */ ((/** @type {?} */ (TestBedViewEngine))));
     }
     /**
      * @param {?} directive
@@ -1831,7 +1848,7 @@ class TestBedViewEngine {
      */
     static overrideDirective(directive, override) {
         _getTestBedViewEngine().overrideDirective(directive, override);
-        return /** @type {?} */ ((TestBedViewEngine));
+        return (/** @type {?} */ ((/** @type {?} */ (TestBedViewEngine))));
     }
     /**
      * @param {?} pipe
@@ -1840,7 +1857,7 @@ class TestBedViewEngine {
      */
     static overridePipe(pipe, override) {
         _getTestBedViewEngine().overridePipe(pipe, override);
-        return /** @type {?} */ ((TestBedViewEngine));
+        return (/** @type {?} */ ((/** @type {?} */ (TestBedViewEngine))));
     }
     /**
      * @param {?} component
@@ -1848,8 +1865,8 @@ class TestBedViewEngine {
      * @return {?}
      */
     static overrideTemplate(component, template) {
-        _getTestBedViewEngine().overrideComponent(component, { set: { template, templateUrl: /** @type {?} */ ((null)) } });
-        return /** @type {?} */ ((TestBedViewEngine));
+        _getTestBedViewEngine().overrideComponent(component, { set: { template, templateUrl: (/** @type {?} */ (null)) } });
+        return (/** @type {?} */ ((/** @type {?} */ (TestBedViewEngine))));
     }
     /**
      * Overrides the template of the given component, compiling the template
@@ -1862,7 +1879,7 @@ class TestBedViewEngine {
      */
     static overrideTemplateUsingTestingModule(component, template) {
         _getTestBedViewEngine().overrideTemplateUsingTestingModule(component, template);
-        return /** @type {?} */ ((TestBedViewEngine));
+        return (/** @type {?} */ ((/** @type {?} */ (TestBedViewEngine))));
     }
     /**
      * @param {?} token
@@ -1870,8 +1887,8 @@ class TestBedViewEngine {
      * @return {?}
      */
     static overrideProvider(token, provider) {
-        _getTestBedViewEngine().overrideProvider(token, /** @type {?} */ (provider));
-        return /** @type {?} */ ((TestBedViewEngine));
+        _getTestBedViewEngine().overrideProvider(token, (/** @type {?} */ (provider)));
+        return (/** @type {?} */ ((/** @type {?} */ (TestBedViewEngine))));
     }
     /**
      * @param {?} token
@@ -1879,8 +1896,8 @@ class TestBedViewEngine {
      * @return {?}
      */
     static deprecatedOverrideProvider(token, provider) {
-        _getTestBedViewEngine().deprecatedOverrideProvider(token, /** @type {?} */ (provider));
-        return /** @type {?} */ ((TestBedViewEngine));
+        _getTestBedViewEngine().deprecatedOverrideProvider(token, (/** @type {?} */ (provider)));
+        return (/** @type {?} */ ((/** @type {?} */ (TestBedViewEngine))));
     }
     /**
      * @param {?} token
@@ -1929,8 +1946,8 @@ class TestBedViewEngine {
      */
     resetTestEnvironment() {
         this.resetTestingModule();
-        this.platform = /** @type {?} */ ((null));
-        this.ngModule = /** @type {?} */ ((null));
+        this.platform = (/** @type {?} */ (null));
+        this.ngModule = (/** @type {?} */ (null));
         this._testEnvAotSummaries = () => [];
     }
     /**
@@ -1940,15 +1957,15 @@ class TestBedViewEngine {
         ɵclearOverrides();
         this._aotSummaries = [];
         this._templateOverrides = [];
-        this._compiler = /** @type {?} */ ((null));
+        this._compiler = (/** @type {?} */ (null));
         this._moduleOverrides = [];
         this._componentOverrides = [];
         this._directiveOverrides = [];
         this._pipeOverrides = [];
         this._isRoot = true;
         this._rootProviderOverrides = [];
-        this._moduleRef = /** @type {?} */ ((null));
-        this._moduleFactory = /** @type {?} */ ((null));
+        this._moduleRef = (/** @type {?} */ (null));
+        this._moduleFactory = (/** @type {?} */ (null));
         this._compilerOptions = [];
         this._providers = [];
         this._declarations = [];
@@ -2056,7 +2073,7 @@ class TestBedViewEngine {
         this._moduleRef = this._moduleFactory.create(ngZoneInjector);
         // ApplicationInitStatus.runInitializers() is marked @internal to core. So casting to any
         // before accessing it.
-        (/** @type {?} */ (this._moduleRef.injector.get(ApplicationInitStatus))).runInitializers();
+        ((/** @type {?} */ (this._moduleRef.injector.get(ApplicationInitStatus)))).runInitializers();
         this._instantiated = true;
     }
     /**
@@ -2127,6 +2144,8 @@ class TestBedViewEngine {
         if (token === TestBed) {
             return this;
         }
+        // Tests can inject things from the ng module and from the compiler,
+        // but the ng module can't inject things from the compiler and vice versa.
         /** @type {?} */
         const result = this._moduleRef.injector.get(token, UNDEFINED);
         return result === UNDEFINED ? this._compiler.injector.get(token, notFoundValue) : result;
@@ -2193,7 +2212,7 @@ class TestBedViewEngine {
      * @return {?}
      */
     deprecatedOverrideProvider(token, provider) {
-        this.overrideProviderImpl(token, provider, /* deprecated */ /* deprecated */ true);
+        this.overrideProviderImpl(token, provider, /* deprecated */ true);
     }
     /**
      * @param {?} token
@@ -2299,7 +2318,7 @@ class TestBedViewEngine {
         return fixture;
     }
 }
-/** *
+/**
  * \@description
  * Configures and initializes environment for unit testing and provides methods for
  * creating components and services in unit tests.
@@ -2310,15 +2329,17 @@ class TestBedViewEngine {
  * according to the compiler used.
  *
  * \@publicApi
-  @type {?} */
-const TestBed = ɵivyEnabled ? /** @type {?} */ ((TestBedRender3)) : /** @type {?} */ ((TestBedViewEngine));
-/** *
+ * @type {?}
+ */
+const TestBed = ɵivyEnabled ? (/** @type {?} */ ((/** @type {?} */ (TestBedRender3)))) : (/** @type {?} */ ((/** @type {?} */ (TestBedViewEngine))));
+/**
  * Returns a singleton of the applicable `TestBed`.
  *
  * It will be either an instance of `TestBedViewEngine` or `TestBedRender3`.
  *
  * \@publicApi
-  @type {?} */
+ * @type {?}
+ */
 const getTestBed = ɵivyEnabled ? _getTestBedRender3 : _getTestBedViewEngine;
 /** @type {?} */
 let testBed$1;
@@ -2433,10 +2454,10 @@ function withModule(moduleDef, fn) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
  */
 /** @type {?} */
-const _global$1 = /** @type {?} */ ((typeof window === 'undefined' ? global : window));
+const _global$1 = (/** @type {?} */ ((typeof window === 'undefined' ? global : window)));
 // Reset the test providers and the fake async zone before each test.
 if (_global$1.beforeEach) {
     _global$1.beforeEach(() => {
@@ -2444,28 +2465,41 @@ if (_global$1.beforeEach) {
         resetFakeAsyncZone();
     });
 }
+// TODO(juliemr): remove this, only used because we need to export something to have compilation
+// work.
 /** @type {?} */
 const __core_private_testing_placeholder__ = '';
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
  */
-// This file only reexports content of the `src` folder. Keep it that way.
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ */
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
  */
 
 /**
