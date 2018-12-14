@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-beta.2+33.sha-d528e30
+ * @license Angular v7.2.0-beta.2+38.sha-a954345
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -9550,8 +9550,11 @@
             if (this._appRef) {
                 this._appRef.detachView(this);
             }
-            else if (this._viewContainerRef && viewAttached(this._lView)) {
-                this._viewContainerRef.detach(this._viewContainerRef.indexOf(this));
+            else if (this._viewContainerRef) {
+                var index = this._viewContainerRef.indexOf(this);
+                if (index > -1) {
+                    this._viewContainerRef.detach(index);
+                }
                 this._viewContainerRef = null;
             }
             destroyLView(this._lView);
@@ -10273,7 +10276,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0-beta.2+33.sha-d528e30');
+    var VERSION = new Version('7.2.0-beta.2+38.sha-a954345');
 
     /**
      * @license
