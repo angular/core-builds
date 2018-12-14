@@ -78,7 +78,7 @@ ApplicationInitStatus.ctorParameters = () => [
 ApplicationInitStatus.ngInjectableDef = i0.defineInjectable({ token: ApplicationInitStatus, factory: function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(i0.inject(APP_INITIALIZER, 8)); }, providedIn: null });
 /*@__PURE__*/ i0.setClassMetadata(ApplicationInitStatus, [{
         type: Injectable
-    }], function () { return [{
+    }], [{
         type: undefined,
         decorators: [{
                 type: Inject,
@@ -86,7 +86,7 @@ ApplicationInitStatus.ngInjectableDef = i0.defineInjectable({ token: Application
             }, {
                 type: Optional
             }]
-    }]; }, null);
+    }], null);
 if (false) {
     /** @type {?} */
     ApplicationInitStatus.prototype.resolve;

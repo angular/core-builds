@@ -267,9 +267,9 @@ var PlatformRef = /** @class */ (function () {
 export { PlatformRef };
 /*@__PURE__*/ i0.setClassMetadata(PlatformRef, [{
         type: Injectable
-    }], function () { return [{
+    }], [{
         type: Injector
-    }]; }, null);
+    }], null);
 function getNgZone(ngZoneOption) {
     var ngZone;
     if (ngZoneOption === 'noop') {
@@ -511,7 +511,7 @@ var ApplicationRef = /** @class */ (function () {
 export { ApplicationRef };
 /*@__PURE__*/ i0.setClassMetadata(ApplicationRef, [{
         type: Injectable
-    }], function () { return [{
+    }], [{
         type: NgZone
     }, {
         type: Console
@@ -523,7 +523,7 @@ export { ApplicationRef };
         type: ComponentFactoryResolver
     }, {
         type: ApplicationInitStatus
-    }]; }, null);
+    }], null);
 function remove(list, el) {
     var index = list.indexOf(el);
     if (index > -1) {

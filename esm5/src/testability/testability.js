@@ -177,9 +177,9 @@ var Testability = /** @class */ (function () {
 export { Testability };
 /*@__PURE__*/ i0.setClassMetadata(Testability, [{
         type: Injectable
-    }], function () { return [{
+    }], [{
         type: NgZone
-    }]; }, null);
+    }], null);
 /**
  * A global registry of {@link Testability} instances for specific elements.
  * @publicApi
@@ -236,7 +236,7 @@ var TestabilityRegistry = /** @class */ (function () {
 export { TestabilityRegistry };
 /*@__PURE__*/ i0.setClassMetadata(TestabilityRegistry, [{
         type: Injectable
-    }], function () { return []; }, null);
+    }], [], null);
 var _NoopGetTestability = /** @class */ (function () {
     function _NoopGetTestability() {
     }

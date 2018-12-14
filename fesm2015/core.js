@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-beta.2+39.sha-d0d351c
+ * @license Angular v7.2.0-beta.2+37.sha-a8ebc83
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -13121,7 +13121,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.0-beta.2+39.sha-d0d351c');
+const VERSION = new Version('7.2.0-beta.2+37.sha-a8ebc83');
 
 /**
  * @fileoverview added by tsickle
@@ -20082,7 +20082,7 @@ ApplicationInitStatus.ctorParameters = () => [
 ApplicationInitStatus.ngInjectableDef = defineInjectable({ token: ApplicationInitStatus, factory: function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(inject(APP_INITIALIZER, 8)); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(ApplicationInitStatus, [{
         type: Injectable
-    }], function () { return [{
+    }], [{
         type: undefined,
         decorators: [{
                 type: Inject,
@@ -20090,7 +20090,7 @@ ApplicationInitStatus.ngInjectableDef = defineInjectable({ token: ApplicationIni
             }, {
                 type: Optional
             }]
-    }]; }, null);
+    }], null);
 
 /**
  * @fileoverview added by tsickle
@@ -21019,9 +21019,9 @@ Testability.ctorParameters = () => [
 Testability.ngInjectableDef = defineInjectable({ token: Testability, factory: function Testability_Factory(t) { return new (t || Testability)(inject(NgZone)); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(Testability, [{
         type: Injectable
-    }], function () { return [{
+    }], [{
         type: NgZone
-    }]; }, null);
+    }], null);
 /**
  * A global registry of {\@link Testability} instances for specific elements.
  * \@publicApi
@@ -21089,7 +21089,7 @@ TestabilityRegistry.ctorParameters = () => [];
 TestabilityRegistry.ngInjectableDef = defineInjectable({ token: TestabilityRegistry, factory: function TestabilityRegistry_Factory(t) { return new (t || TestabilityRegistry)(); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(TestabilityRegistry, [{
         type: Injectable
-    }], function () { return []; }, null);
+    }], [], null);
 class _NoopGetTestability {
     /**
      * @param {?} registry
@@ -21416,9 +21416,9 @@ PlatformRef.ctorParameters = () => [
 PlatformRef.ngInjectableDef = defineInjectable({ token: PlatformRef, factory: function PlatformRef_Factory(t) { return new (t || PlatformRef)(inject(Injector)); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(PlatformRef, [{
         type: Injectable
-    }], function () { return [{
+    }], [{
         type: Injector
-    }]; }, null);
+    }], null);
 /**
  * @param {?=} ngZoneOption
  * @return {?}
@@ -21725,7 +21725,7 @@ ApplicationRef.ctorParameters = () => [
 ApplicationRef.ngInjectableDef = defineInjectable({ token: ApplicationRef, factory: function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(inject(NgZone), inject(Console), inject(Injector), inject(ErrorHandler), inject(ComponentFactoryResolver), inject(ApplicationInitStatus)); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(ApplicationRef, [{
         type: Injectable
-    }], function () { return [{
+    }], [{
         type: NgZone
     }, {
         type: Console
@@ -21737,7 +21737,7 @@ ApplicationRef.ngInjectableDef = defineInjectable({ token: ApplicationRef, facto
         type: ComponentFactoryResolver
     }, {
         type: ApplicationInitStatus
-    }]; }, null);
+    }], null);
 /**
  * @template T
  * @param {?} list
@@ -22052,14 +22052,14 @@ SystemJsNgModuleLoader.ctorParameters = () => [
 SystemJsNgModuleLoader.ngInjectableDef = defineInjectable({ token: SystemJsNgModuleLoader, factory: function SystemJsNgModuleLoader_Factory(t) { return new (t || SystemJsNgModuleLoader)(inject(Compiler), inject(SystemJsNgModuleLoaderConfig, 8)); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(SystemJsNgModuleLoader, [{
         type: Injectable
-    }], function () { return [{
+    }], [{
         type: Compiler
     }, {
         type: SystemJsNgModuleLoaderConfig,
         decorators: [{
                 type: Optional
             }]
-    }]; }, null);
+    }], null);
 /**
  * @param {?} value
  * @param {?} modulePath
@@ -24422,9 +24422,9 @@ ApplicationModule.ngInjectorDef = defineInjector({ factory: function Application
 /*@__PURE__*/ setClassMetadata(ApplicationModule, [{
         type: NgModule,
         args: [{ providers: APPLICATION_MODULE_PROVIDERS }]
-    }], function () { return [{
+    }], [{
         type: ApplicationRef
-    }]; }, null);
+    }], null);
 
 /**
  * @fileoverview added by tsickle

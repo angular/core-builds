@@ -106,14 +106,14 @@ SystemJsNgModuleLoader.ctorParameters = () => [
 SystemJsNgModuleLoader.ngInjectableDef = i0.defineInjectable({ token: SystemJsNgModuleLoader, factory: function SystemJsNgModuleLoader_Factory(t) { return new (t || SystemJsNgModuleLoader)(i0.inject(Compiler), i0.inject(SystemJsNgModuleLoaderConfig, 8)); }, providedIn: null });
 /*@__PURE__*/ i0.setClassMetadata(SystemJsNgModuleLoader, [{
         type: Injectable
-    }], function () { return [{
+    }], [{
         type: Compiler
     }, {
         type: SystemJsNgModuleLoaderConfig,
         decorators: [{
                 type: Optional
             }]
-    }]; }, null);
+    }], null);
 if (false) {
     /** @type {?} */
     SystemJsNgModuleLoader.prototype._config;
