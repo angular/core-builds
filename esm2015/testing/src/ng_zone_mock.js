@@ -42,7 +42,7 @@ MockNgZone.ctorParameters = () => [];
 MockNgZone.ngInjectableDef = i0.defineInjectable({ token: MockNgZone, factory: function MockNgZone_Factory(t) { return new (t || MockNgZone)(); }, providedIn: null });
 /*@__PURE__*/ i0.ɵsetClassMetadata(MockNgZone, [{
         type: Injectable
-    }], [], null);
+    }], function () { return []; }, null);
 if (false) {
     /** @type {?} */
     MockNgZone.prototype.onStable;
