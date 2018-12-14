@@ -15,6 +15,6 @@ import { Type } from '../type';
  * Calls to `setClassMetadata` can be marked as pure, resulting in the metadata assignments being
  * tree-shaken away during production builds.
  */
-export declare function setClassMetadata(type: Type<any>, decorators: any[] | null, ctorParameters: any[] | null, propDecorators: {
+export declare function setClassMetadata(type: Type<any>, decorators: any[] | null, ctorParameters: (() => any[]) | null, propDecorators: {
     [field: string]: any;
 } | null): void;
