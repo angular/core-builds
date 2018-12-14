@@ -247,9 +247,9 @@ Testability.ctorParameters = () => [
 Testability.ngInjectableDef = i0.defineInjectable({ token: Testability, factory: function Testability_Factory(t) { return new (t || Testability)(i0.inject(NgZone)); }, providedIn: null });
 /*@__PURE__*/ i0.setClassMetadata(Testability, [{
         type: Injectable
-    }], function () { return [{
+    }], [{
         type: NgZone
-    }]; }, null);
+    }], null);
 if (false) {
     /** @type {?} */
     Testability.prototype._pendingCount;
@@ -337,7 +337,7 @@ TestabilityRegistry.ctorParameters = () => [];
 TestabilityRegistry.ngInjectableDef = i0.defineInjectable({ token: TestabilityRegistry, factory: function TestabilityRegistry_Factory(t) { return new (t || TestabilityRegistry)(); }, providedIn: null });
 /*@__PURE__*/ i0.setClassMetadata(TestabilityRegistry, [{
         type: Injectable
-    }], function () { return []; }, null);
+    }], [], null);
 if (false) {
     /**
      * \@internal
