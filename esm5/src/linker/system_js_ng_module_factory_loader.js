@@ -68,14 +68,14 @@ var SystemJsNgModuleLoader = /** @class */ (function () {
 export { SystemJsNgModuleLoader };
 /*@__PURE__*/ i0.setClassMetadata(SystemJsNgModuleLoader, [{
         type: Injectable
-    }], [{
+    }], function () { return [{
         type: Compiler
     }, {
         type: SystemJsNgModuleLoaderConfig,
         decorators: [{
                 type: Optional
             }]
-    }], null);
+    }]; }, null);
 function checkNotEmpty(value, modulePath, exportName) {
     if (!value) {
         throw new Error("Cannot find '" + exportName + "' in '" + modulePath + "'");
