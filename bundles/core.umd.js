@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-beta.2+45.sha-023bd31
+ * @license Angular v7.2.0-beta.2+49.sha-4df82bd
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -4016,16 +4016,18 @@
         }
     }
     /**
-     * Removes all listeners and call all onDestroys in a given view.
+     * Calls onDestroys hooks for all directives and pipes in a given view and then removes all
+     * listeners. Listeners are removed as the last step so events delivered in the onDestroys hooks
+     * can be propagated to @Output listeners.
      *
      * @param view The LView to clean up
      */
     function cleanUpView(viewOrContainer) {
         if (viewOrContainer.length >= HEADER_OFFSET) {
             var view = viewOrContainer;
-            removeListeners(view);
             executeOnDestroys(view);
             executePipeOnDestroys(view);
+            removeListeners(view);
             var hostTNode = view[HOST_NODE];
             // For component views only, the local renderer is destroyed as clean up time.
             if (hostTNode && hostTNode.type === 3 /* Element */ && isProceduralRenderer(view[RENDERER])) {
@@ -10276,7 +10278,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0-beta.2+45.sha-023bd31');
+    var VERSION = new Version('7.2.0-beta.2+49.sha-4df82bd');
 
     /**
      * @license
@@ -10436,6 +10438,7 @@
                 // executed here?
                 // Angular 5 reference: https://stackblitz.com/edit/lifecycle-hooks-vcref
                 component = createRootComponent(componentView, this.componentDef, rootLView, rootContext, [LifecycleHooksFeature]);
+                addToViewTree(rootLView, HEADER_OFFSET, componentView);
                 refreshDescendantViews(rootLView, 1 /* Create */);
             }
             finally {
