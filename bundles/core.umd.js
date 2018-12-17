@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-beta.2+62.sha-94f17e9
+ * @license Angular v7.2.0-beta.2+55.sha-a726338
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -10299,7 +10299,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0-beta.2+62.sha-94f17e9');
+    var VERSION = new Version('7.2.0-beta.2+55.sha-a726338');
 
     /**
      * @license
@@ -14465,7 +14465,7 @@
                     scopes.exported.pipes.add(entry);
                 });
             }
-            else if (getPipeDef(exportedTyped)) {
+            else if (getNgModuleDef(exportedTyped)) {
                 scopes.exported.pipes.add(exportedTyped);
             }
             else {
@@ -16195,24 +16195,12 @@
         throw new Error("Runtime compiler is not loaded");
     }
     var Compiler_compileModuleSync__PRE_R3__ = _throwError;
-    var Compiler_compileModuleSync__POST_R3__ = function (moduleType) {
-        return new NgModuleFactory$1(moduleType);
-    };
     var Compiler_compileModuleSync = Compiler_compileModuleSync__PRE_R3__;
     var Compiler_compileModuleAsync__PRE_R3__ = _throwError;
-    var Compiler_compileModuleAsync__POST_R3__ = function (moduleType) {
-        return Promise.resolve(Compiler_compileModuleSync__POST_R3__(moduleType));
-    };
     var Compiler_compileModuleAsync = Compiler_compileModuleAsync__PRE_R3__;
     var Compiler_compileModuleAndAllComponentsSync__PRE_R3__ = _throwError;
-    var Compiler_compileModuleAndAllComponentsSync__POST_R3__ = function (moduleType) {
-        return new ModuleWithComponentFactories(Compiler_compileModuleSync__POST_R3__(moduleType), []);
-    };
     var Compiler_compileModuleAndAllComponentsSync = Compiler_compileModuleAndAllComponentsSync__PRE_R3__;
     var Compiler_compileModuleAndAllComponentsAsync__PRE_R3__ = _throwError;
-    var Compiler_compileModuleAndAllComponentsAsync__POST_R3__ = function (moduleType) {
-        return Promise.resolve(Compiler_compileModuleAndAllComponentsSync__POST_R3__(moduleType));
-    };
     var Compiler_compileModuleAndAllComponentsAsync = Compiler_compileModuleAndAllComponentsAsync__PRE_R3__;
     /**
      * Low-level service for running the angular compiler during runtime
@@ -24039,14 +24027,9 @@
     exports.ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__ = SWITCH_COMPILE_DIRECTIVE__POST_R3__;
     exports.ɵSWITCH_COMPILE_PIPE__POST_R3__ = SWITCH_COMPILE_PIPE__POST_R3__;
     exports.ɵSWITCH_COMPILE_NGMODULE__POST_R3__ = SWITCH_COMPILE_NGMODULE__POST_R3__;
-    exports.ɵgetDebugNode__POST_R3__ = getDebugNode__POST_R3__;
     exports.ɵSWITCH_COMPILE_INJECTABLE__POST_R3__ = SWITCH_COMPILE_INJECTABLE__POST_R3__;
     exports.ɵSWITCH_IVY_ENABLED__POST_R3__ = SWITCH_IVY_ENABLED__POST_R3__;
     exports.ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ = SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__;
-    exports.ɵCompiler_compileModuleSync__POST_R3__ = Compiler_compileModuleSync__POST_R3__;
-    exports.ɵCompiler_compileModuleAsync__POST_R3__ = Compiler_compileModuleAsync__POST_R3__;
-    exports.ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__ = Compiler_compileModuleAndAllComponentsSync__POST_R3__;
-    exports.ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__ = Compiler_compileModuleAndAllComponentsAsync__POST_R3__;
     exports.ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__ = SWITCH_ELEMENT_REF_FACTORY__POST_R3__;
     exports.ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__ = SWITCH_TEMPLATE_REF_FACTORY__POST_R3__;
     exports.ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ = SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__;
