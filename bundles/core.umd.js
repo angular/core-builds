@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-beta.2+63.sha-d132bae
+ * @license Angular v7.2.0-beta.2+64.sha-e94975d
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -208,7 +208,7 @@
      * @param type type which may have `ngInjectableDef`
      */
     function getInjectableDef(type) {
-        return type.hasOwnProperty(NG_INJECTABLE_DEF) ? type[NG_INJECTABLE_DEF] : null;
+        return type && type.hasOwnProperty(NG_INJECTABLE_DEF) ? type[NG_INJECTABLE_DEF] : null;
     }
     /**
      * Read the `ngInjectorDef` type in a way which is immune to accidentally reading inherited value.
@@ -216,7 +216,7 @@
      * @param type type which may have `ngInjectorDef`
      */
     function getInjectorDef(type) {
-        return type.hasOwnProperty(NG_INJECTOR_DEF) ? type[NG_INJECTOR_DEF] : null;
+        return type && type.hasOwnProperty(NG_INJECTOR_DEF) ? type[NG_INJECTOR_DEF] : null;
     }
 
     /**
@@ -1112,8 +1112,12 @@
     function getPipeDef(type) {
         return type[NG_PIPE_DEF] || null;
     }
-    function getNgModuleDef(type) {
-        return type[NG_MODULE_DEF] || null;
+    function getNgModuleDef(type, throwNotFound) {
+        var ngModuleDef = type[NG_MODULE_DEF] || null;
+        if (!ngModuleDef && throwNotFound === true) {
+            throw new Error("Type " + stringify(type) + " does not have 'ngModuleDef' property.");
+        }
+        return ngModuleDef;
     }
 
     /**
@@ -8864,8 +8868,7 @@
             // included transitively in `def`.
             var dedupStack = [];
             deepForEach([def], function (injectorDef) { return _this.processInjectorType(injectorDef, [], dedupStack); });
-            additionalProviders &&
-                deepForEach(additionalProviders, function (provider) { return _this.processProvider(provider); });
+            additionalProviders && deepForEach(additionalProviders, function (provider) { return _this.processProvider(provider, def, additionalProviders); });
             // Make sure the INJECTOR token provides this injector.
             this.records.set(INJECTOR$1, makeRecord(undefined, this));
             // Detect whether this injector has the APP_ROOT_SCOPE token and thus should provide
@@ -8997,22 +9000,25 @@
                 }
             }
             // Next, include providers listed on the definition itself.
-            if (def.providers != null && !isDuplicate) {
-                deepForEach(def.providers, function (provider) { return _this.processProvider(provider); });
+            var defProviders = def.providers;
+            if (defProviders != null && !isDuplicate) {
+                var injectorType_1 = defOrWrappedDef;
+                deepForEach(defProviders, function (provider) { return _this.processProvider(provider, injectorType_1, defProviders); });
             }
             // Finally, include providers from an InjectorDefTypeWithProviders if there was one.
-            deepForEach(providers, function (provider) { return _this.processProvider(provider); });
+            var ngModuleType = defOrWrappedDef.ngModule;
+            deepForEach(providers, function (provider) { return _this.processProvider(provider, ngModuleType, providers); });
         };
         /**
          * Process a `SingleProvider` and add it.
          */
-        R3Injector.prototype.processProvider = function (provider) {
+        R3Injector.prototype.processProvider = function (provider, ngModuleType, providers) {
             // Determine the token from the provider. Either it's its own token, or has a {provide: ...}
             // property.
             provider = resolveForwardRef(provider);
-            var token = isTypeProvider(provider) ? provider : resolveForwardRef(provider.provide);
+            var token = isTypeProvider(provider) ? provider : resolveForwardRef(provider && provider.provide);
             // Construct a `Record` for the provider.
-            var record = providerToRecord(provider);
+            var record = providerToRecord(provider, ngModuleType, providers);
             if (!isTypeProvider(provider) && provider.multi === true) {
                 // If the provider indicates that it's a multi-provider, process it specially.
                 // First check whether it's been defined already.
@@ -9041,7 +9047,7 @@
         };
         R3Injector.prototype.hydrate = function (token, record) {
             if (record.value === CIRCULAR$1) {
-                throw new Error("Circular dep for " + stringify(token));
+                throw new Error("Cannot instantiate cyclic dependency! " + stringify(token));
             }
             else if (record.value === NOT_YET) {
                 record.value = CIRCULAR$1;
@@ -9072,17 +9078,23 @@
             if (injectorDef !== null) {
                 return injectorDef.factory;
             }
-            if (token instanceof InjectionToken) {
+            else if (token instanceof InjectionToken) {
                 throw new Error("Token " + stringify(token) + " is missing an ngInjectableDef definition.");
             }
-            // TODO(alxhub): there should probably be a strict mode which throws here instead of assuming a
-            // no-args constructor.
-            return function () { return new token(); };
+            else if (token instanceof Function) {
+                var paramLength = token.length;
+                if (paramLength > 0) {
+                    var args = new Array(paramLength).fill('?');
+                    throw new Error("Can't resolve all parameters for " + stringify(token) + ": (" + args.join(', ') + ").");
+                }
+                return function () { return new token(); };
+            }
+            throw new Error('unreachable');
         }
         return injectableDef.factory;
     }
-    function providerToRecord(provider) {
-        var factory = providerToFactory(provider);
+    function providerToRecord(provider, ngModuleType, providers) {
+        var factory = providerToFactory(provider, ngModuleType, providers);
         if (isValueProvider(provider)) {
             return makeRecord(undefined, provider.useValue);
         }
@@ -9095,7 +9107,7 @@
      *
      * @param provider provider to convert to factory
      */
-    function providerToFactory(provider) {
+    function providerToFactory(provider, ngModuleType, providers) {
         var factory = undefined;
         if (isTypeProvider(provider)) {
             return injectableDefOrInjectorDefFactory(resolveForwardRef(provider));
@@ -9111,7 +9123,17 @@
                 factory = function () { return provider.useFactory.apply(provider, __spread(injectArgs(provider.deps || []))); };
             }
             else {
-                var classRef_1 = resolveForwardRef(provider.useClass || provider.provide);
+                var classRef_1 = resolveForwardRef(provider &&
+                    (provider.useClass || provider.provide));
+                if (!classRef_1) {
+                    var ngModuleDetail = '';
+                    if (ngModuleType && providers) {
+                        var providerDetail = providers.map(function (v) { return v == provider ? '?' + provider + '?' : '...'; });
+                        ngModuleDetail =
+                            " - only instances of Provider and Type are allowed, got: [" + providerDetail.join(', ') + "]";
+                    }
+                    throw new Error("Invalid provider for the NgModule '" + stringify(ngModuleType) + "'" + ngModuleDetail);
+                }
                 if (hasDeps(provider)) {
                     factory = function () { return new ((classRef_1).bind.apply((classRef_1), __spread([void 0], injectArgs(provider.deps))))(); };
                 }
@@ -9134,13 +9156,13 @@
         input.forEach(function (value) { return Array.isArray(value) ? deepForEach(value, fn) : fn(value); });
     }
     function isValueProvider(value) {
-        return USE_VALUE in value;
+        return value && typeof value == 'object' && USE_VALUE in value;
     }
     function isExistingProvider(value) {
-        return !!value.useExisting;
+        return !!(value && value.useExisting);
     }
     function isFactoryProvider(value) {
-        return !!value.useFactory;
+        return !!(value && value.useFactory);
     }
     function isTypeProvider(value) {
         return typeof value === 'function';
@@ -10299,7 +10321,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0-beta.2+63.sha-d132bae');
+    var VERSION = new Version('7.2.0-beta.2+64.sha-e94975d');
 
     /**
      * @license
@@ -12866,7 +12888,7 @@
                 }
             }
         }
-        throw new Error("Pipe with name '" + name + "' not found!");
+        throw new Error("The pipe '" + name + "' could not be found!");
     }
     /**
      * Invokes a pipe with 1 arguments.
@@ -13938,6 +13960,71 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
+     * Used to load ng module factories.
+     *
+     * @publicApi
+     */
+    var NgModuleFactoryLoader = /** @class */ (function () {
+        function NgModuleFactoryLoader() {
+        }
+        return NgModuleFactoryLoader;
+    }());
+    /**
+     * Map of module-id to the corresponding NgModule.
+     * - In pre Ivy we track NgModuleFactory,
+     * - In post Ivy we track the NgModuleType
+     */
+    var modules = new Map();
+    /**
+     * Registers a loaded module. Should only be called from generated NgModuleFactory code.
+     * @publicApi
+     */
+    function registerModuleFactory(id, factory) {
+        var existing = modules.get(id);
+        assertNotExisting(id, existing && existing.moduleType);
+        modules.set(id, factory);
+    }
+    function assertNotExisting(id, type) {
+        if (type) {
+            throw new Error("Duplicate module registered for " + id + " - " + stringify(type) + " vs " + stringify(type.name));
+        }
+    }
+    function registerNgModuleType(id, ngModuleType) {
+        var existing = modules.get(id);
+        assertNotExisting(id, existing);
+        modules.set(id, ngModuleType);
+    }
+    function getModuleFactory__PRE_R3__(id) {
+        var factory = modules.get(id);
+        if (!factory)
+            throw noModuleError(id);
+        return factory;
+    }
+    function getModuleFactory__POST_R3__(id) {
+        var type = modules.get(id);
+        if (!type)
+            throw noModuleError(id);
+        return new NgModuleFactory$1(type);
+    }
+    /**
+     * Returns the NgModuleFactory with the given id, if it exists and has been loaded.
+     * Factories for modules that do not specify an `id` cannot be retrieved. Throws if the module
+     * cannot be found.
+     * @publicApi
+     */
+    var getModuleFactory = getModuleFactory__PRE_R3__;
+    function noModuleError(id) {
+        return new Error("No module with ID " + id + " loaded");
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
      * @description
      *
      * Represents a type that a Component or other object is instances of.
@@ -14285,15 +14372,19 @@
     function flushModuleScopingQueueAsMuchAsPossible() {
         if (!flushingModuleQueue) {
             flushingModuleQueue = true;
-            for (var i = moduleQueue.length - 1; i >= 0; i--) {
-                var _a = moduleQueue[i], moduleType = _a.moduleType, ngModule = _a.ngModule;
-                if (ngModule.declarations && ngModule.declarations.every(isResolvedDeclaration)) {
-                    // dequeue
-                    moduleQueue.splice(i, 1);
-                    setScopeOnDeclaredComponents(moduleType, ngModule);
+            try {
+                for (var i = moduleQueue.length - 1; i >= 0; i--) {
+                    var _a = moduleQueue[i], moduleType = _a.moduleType, ngModule = _a.ngModule;
+                    if (ngModule.declarations && ngModule.declarations.every(isResolvedDeclaration)) {
+                        // dequeue
+                        moduleQueue.splice(i, 1);
+                        setScopeOnDeclaredComponents(moduleType, ngModule);
+                    }
                 }
             }
-            flushingModuleQueue = false;
+            finally {
+                flushingModuleQueue = false;
+            }
         }
     }
     /**
@@ -14345,10 +14436,14 @@
                 return ngModuleDef;
             }
         });
+        if (ngModule.id) {
+            registerNgModuleType(ngModule.id, moduleType);
+        }
         var ngInjectorDef = null;
         Object.defineProperty(moduleType, NG_INJECTOR_DEF, {
             get: function () {
                 if (ngInjectorDef === null) {
+                    ngDevMode && verifySemanticsOfNgModuleDef(moduleType);
                     var meta = {
                         name: moduleType.name,
                         type: moduleType,
@@ -14366,6 +14461,145 @@
             // Make the property configurable in dev mode to allow overriding in tests
             configurable: !!ngDevMode,
         });
+    }
+    function verifySemanticsOfNgModuleDef(moduleType) {
+        if (verifiedNgModule.get(moduleType))
+            return;
+        verifiedNgModule.set(moduleType, true);
+        moduleType = resolveForwardRef(moduleType);
+        var ngModuleDef = getNgModuleDef(moduleType, true);
+        var errors = [];
+        ngModuleDef.declarations.forEach(verifyDeclarationsHaveDefinitions);
+        var combinedDeclarations = __spread(ngModuleDef.declarations, flatten$1(ngModuleDef.imports.map(computeCombinedExports)));
+        ngModuleDef.exports.forEach(verifyExportsAreDeclaredOrReExported);
+        ngModuleDef.declarations.forEach(verifyDeclarationIsUnique);
+        ngModuleDef.declarations.forEach(verifyComponentEntryComponentsIsPartOfNgModule);
+        var ngModule = getAnnotation(moduleType, 'NgModule');
+        if (ngModule) {
+            ngModule.imports &&
+                flatten$1(ngModule.imports, unwrapModuleWithProvidersImports)
+                    .forEach(verifySemanticsOfNgModuleDef);
+            ngModule.bootstrap && ngModule.bootstrap.forEach(verifyComponentIsPartOfNgModule);
+            ngModule.entryComponents && ngModule.entryComponents.forEach(verifyComponentIsPartOfNgModule);
+        }
+        // Throw Error if any errors were detected.
+        if (errors.length) {
+            throw new Error(errors.join('\n'));
+        }
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+        function verifyDeclarationsHaveDefinitions(type) {
+            type = resolveForwardRef(type);
+            var def = getComponentDef(type) || getDirectiveDef(type) || getPipeDef(type);
+            if (!def) {
+                errors.push("Unexpected value '" + stringify$1(type) + "' declared by the module '" + stringify$1(moduleType) + "'. Please add a @Pipe/@Directive/@Component annotation.");
+            }
+        }
+        function verifyExportsAreDeclaredOrReExported(type) {
+            type = resolveForwardRef(type);
+            var kind = getComponentDef(type) && 'component' || getDirectiveDef(type) && 'directive' ||
+                getPipeDef(type) && 'pipe';
+            if (kind) {
+                // only checked if we are declared as Component, Directive, or Pipe
+                // Modules don't need to be declared or imported.
+                if (combinedDeclarations.lastIndexOf(type) === -1) {
+                    // We are exporting something which we don't explicitly declare or import.
+                    errors.push("Can't export " + kind + " " + stringify$1(type) + " from " + stringify$1(moduleType) + " as it was neither declared nor imported!");
+                }
+            }
+        }
+        function verifyDeclarationIsUnique(type) {
+            type = resolveForwardRef(type);
+            var existingModule = ownerNgModule.get(type);
+            if (existingModule && existingModule !== moduleType) {
+                var modules = [existingModule, moduleType].map(stringify$1).sort();
+                errors.push("Type " + stringify$1(type) + " is part of the declarations of 2 modules: " + modules[0] + " and " + modules[1] + "! " +
+                    ("Please consider moving " + stringify$1(type) + " to a higher module that imports " + modules[0] + " and " + modules[1] + ". ") +
+                    ("You can also create a new NgModule that exports and includes " + stringify$1(type) + " then import that NgModule in " + modules[0] + " and " + modules[1] + "."));
+            }
+            else {
+                // Mark type as having owner.
+                ownerNgModule.set(type, moduleType);
+            }
+        }
+        function verifyComponentIsPartOfNgModule(type) {
+            type = resolveForwardRef(type);
+            var existingModule = ownerNgModule.get(type);
+            if (!existingModule) {
+                errors.push("Component " + stringify$1(type) + " is not part of any NgModule or the module has not been imported into your module.");
+            }
+        }
+        function verifyComponentEntryComponentsIsPartOfNgModule(type) {
+            type = resolveForwardRef(type);
+            if (getComponentDef(type)) {
+                // We know we are component
+                var component = getAnnotation(type, 'Component');
+                if (component && component.entryComponents) {
+                    component.entryComponents.forEach(verifyComponentIsPartOfNgModule);
+                }
+            }
+        }
+    }
+    function unwrapModuleWithProvidersImports(typeOrWithProviders) {
+        typeOrWithProviders = resolveForwardRef(typeOrWithProviders);
+        return typeOrWithProviders.ngModule || typeOrWithProviders;
+    }
+    function getAnnotation(type, name) {
+        var annotation = null;
+        collect(type.__annotations__);
+        collect(type.decorators);
+        return annotation;
+        function collect(annotations) {
+            if (annotations) {
+                annotations.forEach(readAnnotation);
+            }
+        }
+        function readAnnotation(decorator) {
+            if (!annotation) {
+                var proto = Object.getPrototypeOf(decorator);
+                if (proto.ngMetadataName == name) {
+                    annotation = decorator;
+                }
+                else if (decorator.type) {
+                    var proto_1 = Object.getPrototypeOf(decorator.type);
+                    if (proto_1.ngMetadataName == name) {
+                        annotation = decorator.args[0];
+                    }
+                }
+            }
+        }
+    }
+    /**
+     * Keep track of compiled components. This is needed because in tests we often want to compile the
+     * same component with more than one NgModule. This would cause an error unless we reset which
+     * NgModule the component belongs to. We keep the list of compiled components here so that the
+     * TestBed can reset it later.
+     */
+    var ownerNgModule = new Map();
+    var verifiedNgModule = new Map();
+    function resetCompiledComponents() {
+        ownerNgModule = new Map();
+        verifiedNgModule = new Map();
+        moduleQueue.length = 0;
+    }
+    /**
+     * Computes the combined declarations of explicit declarations, as well as declarations inherited
+     * by
+     * traversing the exports of imported modules.
+     * @param type
+     */
+    function computeCombinedExports(type) {
+        type = resolveForwardRef(type);
+        var ngModuleDef = getNgModuleDef(type, true);
+        return __spread(flatten$1(ngModuleDef.exports.map(function (type) {
+            var ngModuleDef = getNgModuleDef(type);
+            if (ngModuleDef) {
+                verifySemanticsOfNgModuleDef(type);
+                return computeCombinedExports(type);
+            }
+            else {
+                return type;
+            }
+        })));
     }
     /**
      * Some declared components may be compiled asynchronously, and thus may not have their
@@ -14475,14 +14709,14 @@
         def.transitiveCompileScopes = scopes;
         return scopes;
     }
-    function flatten$1(values) {
+    function flatten$1(values, mapFn) {
         var out = [];
         values.forEach(function (value) {
             if (Array.isArray(value)) {
-                out.push.apply(out, __spread(flatten$1(value)));
+                out.push.apply(out, __spread(flatten$1(value, mapFn)));
             }
             else {
-                out.push(value);
+                out.push(mapFn ? mapFn(value) : value);
             }
         });
         return out;
@@ -14535,7 +14769,7 @@
                         error.push("Did you run and wait for 'resolveComponentResources()'?");
                         throw new Error(error.join('\n'));
                     }
-                    var meta = __assign({}, directiveMetadata(type, metadata), { template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, viewQueries: extractQueriesMetadata(getReflect().propMetadata(type), isViewQuery), directives: [], pipes: new Map(), encapsulation: metadata.encapsulation || exports.ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
+                    var meta = __assign({}, directiveMetadata(type, metadata), { template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, viewQueries: extractQueriesMetadata(type, getReflect().propMetadata(type), isViewQuery), directives: [], pipes: new Map(), encapsulation: metadata.encapsulation || exports.ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
                     ngComponentDef = compiler.compileComponent(angularCoreEnv, "ng://" + stringify(type) + "/template.html", meta);
                     // When NgModule decorator executed, we enqueued the module definition such that
                     // it would only dequeue and add itself as module scope to all of its declarations,
@@ -14602,7 +14836,7 @@
             propMetadata: propMetadata,
             inputs: metadata.inputs || EMPTY_ARRAY,
             outputs: metadata.outputs || EMPTY_ARRAY,
-            queries: extractQueriesMetadata(propMetadata, isContentQuery),
+            queries: extractQueriesMetadata(type, propMetadata, isContentQuery),
             lifecycle: {
                 usesOnChanges: type.prototype.ngOnChanges !== undefined,
             },
@@ -14625,12 +14859,16 @@
             read: ann.read ? ann.read : null
         };
     }
-    function extractQueriesMetadata(propMetadata, isQueryAnn) {
+    function extractQueriesMetadata(type, propMetadata, isQueryAnn) {
         var queriesMeta = [];
         var _loop_1 = function (field) {
             if (propMetadata.hasOwnProperty(field)) {
                 propMetadata[field].forEach(function (ann) {
                     if (isQueryAnn(ann)) {
+                        if (!ann.selector) {
+                            throw new Error("Can't construct a query for the property \"" + field + "\" of " +
+                                ("\"" + stringify(type) + "\" since the query selector wasn't defined."));
+                        }
                         queriesMeta.push(convertToR3QueryMetadata(field, ann));
                     }
                 });
@@ -17452,48 +17690,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Used to load ng module factories.
-     *
-     * @publicApi
-     */
-    var NgModuleFactoryLoader = /** @class */ (function () {
-        function NgModuleFactoryLoader() {
-        }
-        return NgModuleFactoryLoader;
-    }());
-    var moduleFactories = new Map();
-    /**
-     * Registers a loaded module. Should only be called from generated NgModuleFactory code.
-     * @publicApi
-     */
-    function registerModuleFactory(id, factory) {
-        var existing = moduleFactories.get(id);
-        if (existing) {
-            throw new Error("Duplicate module registered for " + id + " - " + existing.moduleType.name + " vs " + factory.moduleType.name);
-        }
-        moduleFactories.set(id, factory);
-    }
-    /**
-     * Returns the NgModuleFactory with the given id, if it exists and has been loaded.
-     * Factories for modules that do not specify an `id` cannot be retrieved. Throws if the module
-     * cannot be found.
-     * @publicApi
-     */
-    function getModuleFactory(id) {
-        var factory = moduleFactories.get(id);
-        if (!factory)
-            throw new Error("No module with ID " + id + " loaded");
-        return factory;
-    }
 
     /**
      * @license
@@ -23746,40 +23942,41 @@
      * Generated bundle index. Do not edit.
      */
 
-    exports.ɵangular_packages_core_core_r = APPLICATION_MODULE_PROVIDERS;
-    exports.ɵangular_packages_core_core_o = _iterableDiffersFactory;
-    exports.ɵangular_packages_core_core_p = _keyValueDiffersFactory;
-    exports.ɵangular_packages_core_core_q = _localeFactory;
+    exports.ɵangular_packages_core_core_s = APPLICATION_MODULE_PROVIDERS;
+    exports.ɵangular_packages_core_core_p = _iterableDiffersFactory;
+    exports.ɵangular_packages_core_core_q = _keyValueDiffersFactory;
+    exports.ɵangular_packages_core_core_r = _localeFactory;
     exports.ɵangular_packages_core_core_g = _appIdRandomProviderFactory;
-    exports.ɵangular_packages_core_core_m = DefaultIterableDifferFactory;
-    exports.ɵangular_packages_core_core_n = DefaultKeyValueDifferFactory;
-    exports.ɵangular_packages_core_core_l = DebugElement__PRE_R3__;
-    exports.ɵangular_packages_core_core_k = DebugNode__PRE_R3__;
+    exports.ɵangular_packages_core_core_n = DefaultIterableDifferFactory;
+    exports.ɵangular_packages_core_core_o = DefaultKeyValueDifferFactory;
+    exports.ɵangular_packages_core_core_m = DebugElement__PRE_R3__;
+    exports.ɵangular_packages_core_core_l = DebugNode__PRE_R3__;
     exports.ɵangular_packages_core_core_c = injectInjectorOnly;
     exports.ɵangular_packages_core_core_d = ReflectiveInjector_;
     exports.ɵangular_packages_core_core_e = ReflectiveDependency;
     exports.ɵangular_packages_core_core_f = resolveReflectiveProviders;
-    exports.ɵangular_packages_core_core_s = wtfEnabled;
-    exports.ɵangular_packages_core_core_u = createScope;
-    exports.ɵangular_packages_core_core_t = detectWTF;
-    exports.ɵangular_packages_core_core_x = endTimeRange;
-    exports.ɵangular_packages_core_core_v = leave;
-    exports.ɵangular_packages_core_core_w = startTimeRange;
-    exports.ɵangular_packages_core_core_ba = injectAttributeImpl;
-    exports.ɵangular_packages_core_core_bh = NG_INJECTABLE_DEF;
-    exports.ɵangular_packages_core_core_bb = getLView;
-    exports.ɵangular_packages_core_core_bc = getPreviousOrParentTNode;
-    exports.ɵangular_packages_core_core_bd = nextContextImpl;
-    exports.ɵangular_packages_core_core_bg = BoundPlayerFactory;
-    exports.ɵangular_packages_core_core_bk = loadInternal;
+    exports.ɵangular_packages_core_core_k = getModuleFactory__PRE_R3__;
+    exports.ɵangular_packages_core_core_t = wtfEnabled;
+    exports.ɵangular_packages_core_core_v = createScope;
+    exports.ɵangular_packages_core_core_u = detectWTF;
+    exports.ɵangular_packages_core_core_y = endTimeRange;
+    exports.ɵangular_packages_core_core_w = leave;
+    exports.ɵangular_packages_core_core_x = startTimeRange;
+    exports.ɵangular_packages_core_core_bb = injectAttributeImpl;
+    exports.ɵangular_packages_core_core_bi = NG_INJECTABLE_DEF;
+    exports.ɵangular_packages_core_core_bc = getLView;
+    exports.ɵangular_packages_core_core_bd = getPreviousOrParentTNode;
+    exports.ɵangular_packages_core_core_be = nextContextImpl;
+    exports.ɵangular_packages_core_core_bh = BoundPlayerFactory;
+    exports.ɵangular_packages_core_core_bl = loadInternal;
     exports.ɵangular_packages_core_core_h = createElementRef;
     exports.ɵangular_packages_core_core_i = createTemplateRef;
     exports.ɵangular_packages_core_core_j = createViewRef;
     exports.ɵangular_packages_core_core_a = makeParamDecorator;
     exports.ɵangular_packages_core_core_b = makePropDecorator;
-    exports.ɵangular_packages_core_core_bi = getClosureSafeProperty;
-    exports.ɵangular_packages_core_core_y = _def;
-    exports.ɵangular_packages_core_core_z = DebugContext;
+    exports.ɵangular_packages_core_core_bj = getClosureSafeProperty;
+    exports.ɵangular_packages_core_core_z = _def;
+    exports.ɵangular_packages_core_core_ba = DebugContext;
     exports.createPlatform = createPlatform;
     exports.assertPlatform = assertPlatform;
     exports.destroyPlatform = destroyPlatform;
@@ -24020,6 +24217,7 @@
     exports.ɵcompileNgModule = compileNgModule;
     exports.ɵcompileNgModuleDefs = compileNgModuleDefs;
     exports.ɵpatchComponentDefWithScope = patchComponentDefWithScope;
+    exports.ɵresetCompiledComponents = resetCompiledComponents;
     exports.ɵcompilePipe = compilePipe;
     exports.ɵsanitizeHtml = sanitizeHtml;
     exports.ɵsanitizeStyle = sanitizeStyle;
@@ -24051,6 +24249,7 @@
     exports.ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__ = SWITCH_TEMPLATE_REF_FACTORY__POST_R3__;
     exports.ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ = SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__;
     exports.ɵSWITCH_RENDERER2_FACTORY__POST_R3__ = SWITCH_RENDERER2_FACTORY__POST_R3__;
+    exports.ɵgetModuleFactory__POST_R3__ = getModuleFactory__POST_R3__;
     exports.ɵpublishGlobalUtil = publishGlobalUtil;
     exports.ɵpublishDefaultGlobalUtils = publishDefaultGlobalUtils;
     exports.ɵSWITCH_INJECTOR_FACTORY__POST_R3__ = SWITCH_INJECTOR_FACTORY__POST_R3__;
