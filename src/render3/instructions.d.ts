@@ -45,7 +45,7 @@ export declare function createLView<T>(parentLView: LView | null, tView: TView, 
 export declare function createNodeAtIndex(index: number, type: TNodeType.Element, native: RElement | RText | null, name: string | null, attrs: TAttributes | null): TElementNode;
 export declare function createNodeAtIndex(index: number, type: TNodeType.Container, native: RComment, name: string | null, attrs: TAttributes | null): TContainerNode;
 export declare function createNodeAtIndex(index: number, type: TNodeType.Projection, native: null, name: null, attrs: TAttributes | null): TProjectionNode;
-export declare function createNodeAtIndex(index: number, type: TNodeType.ElementContainer, native: RComment, name: null, attrs: TAttributes | null): TElementContainerNode;
+export declare function createNodeAtIndex(index: number, type: TNodeType.ElementContainer, native: RComment, name: string | null, attrs: TAttributes | null): TElementContainerNode;
 export declare function createNodeAtIndex(index: number, type: TNodeType.IcuContainer, native: RComment, name: null, attrs: TAttributes | null): TElementContainerNode;
 export declare function createViewNode(index: number, view: LView): TViewNode;
 /**
@@ -211,7 +211,7 @@ export declare function elementEnd(): void;
  */
 export declare function elementAttribute(index: number, name: string, value: any, sanitizer?: SanitizerFn | null): void;
 /**
- * Update a property on an Element.
+ * Update a property on an element.
  *
  * If the property name also exists as an input property on one of the element's directives,
  * the component property will be set instead of the element property. This check must
@@ -222,8 +222,10 @@ export declare function elementAttribute(index: number, name: string, value: any
  *        renaming as part of minification.
  * @param value New value to write.
  * @param sanitizer An optional function used to sanitize the value.
+ * @param nativeOnly Whether or not we should only set native properties and skip input check
+ * (this is necessary for host property bindings)
  */
-export declare function elementProperty<T>(index: number, propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn | null): void;
+export declare function elementProperty<T>(index: number, propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): void;
 /**
  * Constructs a TNode object from the arguments.
  *
@@ -553,6 +555,8 @@ export declare function checkNoChanges<T>(component: T): void;
  * @param lView The view which the change detection should be checked on.
  */
 export declare function checkNoChangesInRootView(lView: LView): void;
+/** Checks the view of the component provided. Does not gate on dirty checks or execute doCheck. */
+export declare function detectChangesInternal<T>(hostView: LView, component: T, rf: RenderFlags | null): void;
 /**
  * Mark the component as dirty (needing change detection).
  *

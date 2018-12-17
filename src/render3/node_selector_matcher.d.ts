@@ -15,8 +15,8 @@ import { CssSelector, CssSelectorList } from './interfaces/projection';
  * @param selector
  * @returns true if node matches the selector.
  */
-export declare function isNodeMatchingSelector(tNode: TNode, selector: CssSelector): boolean;
-export declare function isNodeMatchingSelectorList(tNode: TNode, selector: CssSelectorList): boolean;
+export declare function isNodeMatchingSelector(tNode: TNode, selector: CssSelector, isProjectionMode: boolean): boolean;
+export declare function isNodeMatchingSelectorList(tNode: TNode, selector: CssSelectorList, isProjectionMode?: boolean): boolean;
 export declare function getProjectAsAttrValue(tNode: TNode): string | null;
 /**
  * Checks a given node against matching selectors and returns
