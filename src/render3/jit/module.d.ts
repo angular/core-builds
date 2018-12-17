@@ -8,6 +8,7 @@
 import { NgModule, NgModuleTransitiveScopes } from '../../metadata/ng_module';
 import { Type } from '../../type';
 import { ComponentDef } from '../interfaces/definition';
+import { NgModuleType } from '../ng_module_ref';
 /**
  * Loops over queued module definitions, if a given module definition has all of its
  * declarations resolved, it dequeues that module definition and sets the scope on
@@ -23,7 +24,8 @@ export declare function compileNgModule(moduleType: Type<any>, ngModule?: NgModu
 /**
  * Compiles and adds the `ngModuleDef` and `ngInjectorDef` properties to the module class.
  */
-export declare function compileNgModuleDefs(moduleType: Type<any>, ngModule: NgModule): void;
+export declare function compileNgModuleDefs(moduleType: NgModuleType, ngModule: NgModule): void;
+export declare function resetCompiledComponents(): void;
 /**
  * Patch the definition of a component with directives and pipes from the compilation scope of
  * a given module.

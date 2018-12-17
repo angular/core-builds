@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-beta.2+63.sha-d132bae
+ * @license Angular v7.2.0-beta.2+64.sha-e94975d
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -135,7 +135,7 @@ function defineInjector(options) {
  * @return {?}
  */
 function getInjectableDef(type) {
-    return type.hasOwnProperty(NG_INJECTABLE_DEF) ? ((/** @type {?} */ (type)))[NG_INJECTABLE_DEF] : null;
+    return type && type.hasOwnProperty(NG_INJECTABLE_DEF) ? ((/** @type {?} */ (type)))[NG_INJECTABLE_DEF] : null;
 }
 /**
  * Read the `ngInjectorDef` type in a way which is immune to accidentally reading inherited value.
@@ -145,7 +145,7 @@ function getInjectableDef(type) {
  * @return {?}
  */
 function getInjectorDef(type) {
-    return type.hasOwnProperty(NG_INJECTOR_DEF) ? ((/** @type {?} */ (type)))[NG_INJECTOR_DEF] : null;
+    return type && type.hasOwnProperty(NG_INJECTOR_DEF) ? ((/** @type {?} */ (type)))[NG_INJECTOR_DEF] : null;
 }
 
 /**
@@ -1227,10 +1227,16 @@ function getPipeDef(type) {
 /**
  * @template T
  * @param {?} type
+ * @param {?=} throwNotFound
  * @return {?}
  */
-function getNgModuleDef(type) {
-    return ((/** @type {?} */ (type)))[NG_MODULE_DEF] || null;
+function getNgModuleDef(type, throwNotFound) {
+    /** @type {?} */
+    const ngModuleDef = ((/** @type {?} */ (type)))[NG_MODULE_DEF] || null;
+    if (!ngModuleDef && throwNotFound === true) {
+        throw new Error(`Type ${stringify(type)} does not have 'ngModuleDef' property.`);
+    }
+    return ngModuleDef;
 }
 
 /**
@@ -11372,8 +11378,7 @@ class R3Injector {
         /** @type {?} */
         const dedupStack = [];
         deepForEach([def], injectorDef => this.processInjectorType(injectorDef, [], dedupStack));
-        additionalProviders &&
-            deepForEach(additionalProviders, provider => this.processProvider(provider));
+        additionalProviders && deepForEach(additionalProviders, provider => this.processProvider(provider, def, additionalProviders));
         // Make sure the INJECTOR token provides this injector.
         this.records.set(INJECTOR$1, makeRecord(undefined, this));
         // Detect whether this injector has the APP_ROOT_SCOPE token and thus should provide
@@ -11527,26 +11532,34 @@ class R3Injector {
             }
         }
         // Next, include providers listed on the definition itself.
-        if (def.providers != null && !isDuplicate) {
-            deepForEach(def.providers, provider => this.processProvider(provider));
+        /** @type {?} */
+        const defProviders = def.providers;
+        if (defProviders != null && !isDuplicate) {
+            /** @type {?} */
+            const injectorType = (/** @type {?} */ (defOrWrappedDef));
+            deepForEach(defProviders, provider => this.processProvider(provider, injectorType, defProviders));
         }
         // Finally, include providers from an InjectorDefTypeWithProviders if there was one.
-        deepForEach(providers, provider => this.processProvider(provider));
+        /** @type {?} */
+        const ngModuleType = ((/** @type {?} */ (defOrWrappedDef))).ngModule;
+        deepForEach(providers, provider => this.processProvider(provider, ngModuleType, providers));
     }
     /**
      * Process a `SingleProvider` and add it.
      * @param {?} provider
+     * @param {?} ngModuleType
+     * @param {?} providers
      * @return {?}
      */
-    processProvider(provider) {
+    processProvider(provider, ngModuleType, providers) {
         // Determine the token from the provider. Either it's its own token, or has a {provide: ...}
         // property.
         provider = resolveForwardRef(provider);
         /** @type {?} */
-        let token = isTypeProvider(provider) ? provider : resolveForwardRef(provider.provide);
+        let token = isTypeProvider(provider) ? provider : resolveForwardRef(provider && provider.provide);
         // Construct a `Record` for the provider.
         /** @type {?} */
-        const record = providerToRecord(provider);
+        const record = providerToRecord(provider, ngModuleType, providers);
         if (!isTypeProvider(provider) && provider.multi === true) {
             // If the provider indicates that it's a multi-provider, process it specially.
             // First check whether it's been defined already.
@@ -11583,7 +11596,7 @@ class R3Injector {
      */
     hydrate(token, record) {
         if (record.value === CIRCULAR$1) {
-            throw new Error(`Circular dep for ${stringify(token)}`);
+            throw new Error(`Cannot instantiate cyclic dependency! ${stringify(token)}`);
         }
         else if (record.value === NOT_YET) {
             record.value = CIRCULAR$1;
@@ -11623,22 +11636,32 @@ function injectableDefOrInjectorDefFactory(token) {
         if (injectorDef !== null) {
             return injectorDef.factory;
         }
-        if (token instanceof InjectionToken) {
+        else if (token instanceof InjectionToken) {
             throw new Error(`Token ${stringify(token)} is missing an ngInjectableDef definition.`);
         }
-        // TODO(alxhub): there should probably be a strict mode which throws here instead of assuming a
-        // no-args constructor.
-        return () => new ((/** @type {?} */ (token)))();
+        else if (token instanceof Function) {
+            /** @type {?} */
+            const paramLength = token.length;
+            if (paramLength > 0) {
+                /** @type {?} */
+                const args = new Array(paramLength).fill('?');
+                throw new Error(`Can't resolve all parameters for ${stringify(token)}: (${args.join(', ')}).`);
+            }
+            return () => new ((/** @type {?} */ (token)))();
+        }
+        throw new Error('unreachable');
     }
     return injectableDef.factory;
 }
 /**
  * @param {?} provider
+ * @param {?} ngModuleType
+ * @param {?} providers
  * @return {?}
  */
-function providerToRecord(provider) {
+function providerToRecord(provider, ngModuleType, providers) {
     /** @type {?} */
-    let factory = providerToFactory(provider);
+    let factory = providerToFactory(provider, ngModuleType, providers);
     if (isValueProvider(provider)) {
         return makeRecord(undefined, provider.useValue);
     }
@@ -11650,9 +11673,11 @@ function providerToRecord(provider) {
  * Converts a `SingleProvider` into a factory function.
  *
  * @param {?} provider provider to convert to factory
+ * @param {?=} ngModuleType
+ * @param {?=} providers
  * @return {?}
  */
-function providerToFactory(provider) {
+function providerToFactory(provider, ngModuleType, providers) {
     /** @type {?} */
     let factory = undefined;
     if (isTypeProvider(provider)) {
@@ -11670,7 +11695,19 @@ function providerToFactory(provider) {
         }
         else {
             /** @type {?} */
-            const classRef = resolveForwardRef(((/** @type {?} */ (provider))).useClass || provider.provide);
+            const classRef = resolveForwardRef(provider &&
+                (((/** @type {?} */ (provider))).useClass || provider.provide));
+            if (!classRef) {
+                /** @type {?} */
+                let ngModuleDetail = '';
+                if (ngModuleType && providers) {
+                    /** @type {?} */
+                    const providerDetail = providers.map(v => v == provider ? '?' + provider + '?' : '...');
+                    ngModuleDetail =
+                        ` - only instances of Provider and Type are allowed, got: [${providerDetail.join(', ')}]`;
+                }
+                throw new Error(`Invalid provider for the NgModule '${stringify(ngModuleType)}'` + ngModuleDetail);
+            }
             if (hasDeps(provider)) {
                 factory = () => new (classRef)(...injectArgs(provider.deps));
             }
@@ -11709,21 +11746,21 @@ function deepForEach(input, fn) {
  * @return {?}
  */
 function isValueProvider(value) {
-    return USE_VALUE in value;
+    return value && typeof value == 'object' && USE_VALUE in value;
 }
 /**
  * @param {?} value
  * @return {?}
  */
 function isExistingProvider(value) {
-    return !!((/** @type {?} */ (value))).useExisting;
+    return !!(value && ((/** @type {?} */ (value))).useExisting);
 }
 /**
  * @param {?} value
  * @return {?}
  */
 function isFactoryProvider(value) {
-    return !!((/** @type {?} */ (value))).useFactory;
+    return !!(value && ((/** @type {?} */ (value))).useFactory);
 }
 /**
  * @param {?} value
@@ -13151,7 +13188,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.0-beta.2+63.sha-d132bae');
+const VERSION = new Version('7.2.0-beta.2+64.sha-e94975d');
 
 /**
  * @fileoverview added by tsickle
@@ -16154,7 +16191,7 @@ function getPipeDef$1(name, registry) {
             }
         }
     }
-    throw new Error(`Pipe with name '${name}' not found!`);
+    throw new Error(`The pipe '${name}' could not be found!`);
 }
 /**
  * Invokes a pipe with 1 arguments.
@@ -17434,6 +17471,86 @@ const angularCoreEnv = {
  * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
  */
 /**
+ * Used to load ng module factories.
+ *
+ * \@publicApi
+ * @abstract
+ */
+class NgModuleFactoryLoader {
+}
+/**
+ * Map of module-id to the corresponding NgModule.
+ * - In pre Ivy we track NgModuleFactory,
+ * - In post Ivy we track the NgModuleType
+ * @type {?}
+ */
+const modules = new Map();
+/**
+ * Registers a loaded module. Should only be called from generated NgModuleFactory code.
+ * \@publicApi
+ * @param {?} id
+ * @param {?} factory
+ * @return {?}
+ */
+function registerModuleFactory(id, factory) {
+    /** @type {?} */
+    const existing = (/** @type {?} */ (modules.get(id)));
+    assertNotExisting(id, existing && existing.moduleType);
+    modules.set(id, factory);
+}
+/**
+ * @param {?} id
+ * @param {?} type
+ * @return {?}
+ */
+function assertNotExisting(id, type) {
+    if (type) {
+        throw new Error(`Duplicate module registered for ${id} - ${stringify(type)} vs ${stringify(type.name)}`);
+    }
+}
+/**
+ * @param {?} id
+ * @param {?} ngModuleType
+ * @return {?}
+ */
+function registerNgModuleType(id, ngModuleType) {
+    /** @type {?} */
+    const existing = (/** @type {?} */ (modules.get(id)));
+    assertNotExisting(id, existing);
+    modules.set(id, ngModuleType);
+}
+/**
+ * @param {?} id
+ * @return {?}
+ */
+function getModuleFactory__POST_R3__(id) {
+    /** @type {?} */
+    const type = (/** @type {?} */ (modules.get(id)));
+    if (!type)
+        throw noModuleError(id);
+    return new NgModuleFactory$1(type);
+}
+/**
+ * Returns the NgModuleFactory with the given id, if it exists and has been loaded.
+ * Factories for modules that do not specify an `id` cannot be retrieved. Throws if the module
+ * cannot be found.
+ * \@publicApi
+ * @type {?}
+ */
+const getModuleFactory = getModuleFactory__POST_R3__;
+/**
+ * @param {?} id
+ * @return {?}
+ */
+function noModuleError(id) {
+    return new Error(`No module with ID ${id} loaded`);
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ */
+/**
  * @license
  * Copyright Google Inc. All Rights Reserved.
  *
@@ -17929,15 +18046,19 @@ let flushingModuleQueue = false;
 function flushModuleScopingQueueAsMuchAsPossible() {
     if (!flushingModuleQueue) {
         flushingModuleQueue = true;
-        for (let i = moduleQueue.length - 1; i >= 0; i--) {
-            const { moduleType, ngModule } = moduleQueue[i];
-            if (ngModule.declarations && ngModule.declarations.every(isResolvedDeclaration)) {
-                // dequeue
-                moduleQueue.splice(i, 1);
-                setScopeOnDeclaredComponents(moduleType, ngModule);
+        try {
+            for (let i = moduleQueue.length - 1; i >= 0; i--) {
+                const { moduleType, ngModule } = moduleQueue[i];
+                if (ngModule.declarations && ngModule.declarations.every(isResolvedDeclaration)) {
+                    // dequeue
+                    moduleQueue.splice(i, 1);
+                    setScopeOnDeclaredComponents(moduleType, ngModule);
+                }
             }
         }
-        flushingModuleQueue = false;
+        finally {
+            flushingModuleQueue = false;
+        }
     }
 }
 /**
@@ -17962,7 +18083,7 @@ function isResolvedDeclaration(declaration) {
  * @return {?}
  */
 function compileNgModule(moduleType, ngModule = {}) {
-    compileNgModuleDefs(moduleType, ngModule);
+    compileNgModuleDefs((/** @type {?} */ (moduleType)), ngModule);
     // Because we don't know if all declarations have resolved yet at the moment the
     // NgModule decorator is executing, we're enqueueing the setting of module scope
     // on its declarations to be run at a later time when all declarations for the module,
@@ -17998,11 +18119,15 @@ function compileNgModuleDefs(moduleType, ngModule) {
             return ngModuleDef;
         }
     });
+    if (ngModule.id) {
+        registerNgModuleType(ngModule.id, moduleType);
+    }
     /** @type {?} */
     let ngInjectorDef = null;
     Object.defineProperty(moduleType, NG_INJECTOR_DEF, {
         get: () => {
             if (ngInjectorDef === null) {
+                ngDevMode && verifySemanticsOfNgModuleDef((/** @type {?} */ ((/** @type {?} */ (moduleType)))));
                 /** @type {?} */
                 const meta = {
                     name: moduleType.name,
@@ -18021,6 +18146,211 @@ function compileNgModuleDefs(moduleType, ngModule) {
         // Make the property configurable in dev mode to allow overriding in tests
         configurable: !!ngDevMode,
     });
+}
+/**
+ * @param {?} moduleType
+ * @return {?}
+ */
+function verifySemanticsOfNgModuleDef(moduleType) {
+    if (verifiedNgModule.get(moduleType))
+        return;
+    verifiedNgModule.set(moduleType, true);
+    moduleType = resolveForwardRef(moduleType);
+    /** @type {?} */
+    const ngModuleDef = getNgModuleDef(moduleType, true);
+    /** @type {?} */
+    const errors = [];
+    ngModuleDef.declarations.forEach(verifyDeclarationsHaveDefinitions);
+    /** @type {?} */
+    const combinedDeclarations = [
+        ...ngModuleDef.declarations,
+        ...flatten$1(ngModuleDef.imports.map(computeCombinedExports)),
+    ];
+    ngModuleDef.exports.forEach(verifyExportsAreDeclaredOrReExported);
+    ngModuleDef.declarations.forEach(verifyDeclarationIsUnique);
+    ngModuleDef.declarations.forEach(verifyComponentEntryComponentsIsPartOfNgModule);
+    /** @type {?} */
+    const ngModule = getAnnotation(moduleType, 'NgModule');
+    if (ngModule) {
+        ngModule.imports &&
+            flatten$1(ngModule.imports, unwrapModuleWithProvidersImports)
+                .forEach(verifySemanticsOfNgModuleDef);
+        ngModule.bootstrap && ngModule.bootstrap.forEach(verifyComponentIsPartOfNgModule);
+        ngModule.entryComponents && ngModule.entryComponents.forEach(verifyComponentIsPartOfNgModule);
+    }
+    // Throw Error if any errors were detected.
+    if (errors.length) {
+        throw new Error(errors.join('\n'));
+    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * @param {?} type
+     * @return {?}
+     */
+    function verifyDeclarationsHaveDefinitions(type) {
+        type = resolveForwardRef(type);
+        /** @type {?} */
+        const def = getComponentDef(type) || getDirectiveDef(type) || getPipeDef(type);
+        if (!def) {
+            errors.push(`Unexpected value '${stringify$1(type)}' declared by the module '${stringify$1(moduleType)}'. Please add a @Pipe/@Directive/@Component annotation.`);
+        }
+    }
+    /**
+     * @param {?} type
+     * @return {?}
+     */
+    function verifyExportsAreDeclaredOrReExported(type) {
+        type = resolveForwardRef(type);
+        /** @type {?} */
+        const kind = getComponentDef(type) && 'component' || getDirectiveDef(type) && 'directive' ||
+            getPipeDef(type) && 'pipe';
+        if (kind) {
+            // only checked if we are declared as Component, Directive, or Pipe
+            // Modules don't need to be declared or imported.
+            if (combinedDeclarations.lastIndexOf(type) === -1) {
+                // We are exporting something which we don't explicitly declare or import.
+                errors.push(`Can't export ${kind} ${stringify$1(type)} from ${stringify$1(moduleType)} as it was neither declared nor imported!`);
+            }
+        }
+    }
+    /**
+     * @param {?} type
+     * @return {?}
+     */
+    function verifyDeclarationIsUnique(type) {
+        type = resolveForwardRef(type);
+        /** @type {?} */
+        const existingModule = ownerNgModule.get(type);
+        if (existingModule && existingModule !== moduleType) {
+            /** @type {?} */
+            const modules = [existingModule, moduleType].map(stringify$1).sort();
+            errors.push(`Type ${stringify$1(type)} is part of the declarations of 2 modules: ${modules[0]} and ${modules[1]}! ` +
+                `Please consider moving ${stringify$1(type)} to a higher module that imports ${modules[0]} and ${modules[1]}. ` +
+                `You can also create a new NgModule that exports and includes ${stringify$1(type)} then import that NgModule in ${modules[0]} and ${modules[1]}.`);
+        }
+        else {
+            // Mark type as having owner.
+            ownerNgModule.set(type, moduleType);
+        }
+    }
+    /**
+     * @param {?} type
+     * @return {?}
+     */
+    function verifyComponentIsPartOfNgModule(type) {
+        type = resolveForwardRef(type);
+        /** @type {?} */
+        const existingModule = ownerNgModule.get(type);
+        if (!existingModule) {
+            errors.push(`Component ${stringify$1(type)} is not part of any NgModule or the module has not been imported into your module.`);
+        }
+    }
+    /**
+     * @param {?} type
+     * @return {?}
+     */
+    function verifyComponentEntryComponentsIsPartOfNgModule(type) {
+        type = resolveForwardRef(type);
+        if (getComponentDef(type)) {
+            // We know we are component
+            /** @type {?} */
+            const component = getAnnotation(type, 'Component');
+            if (component && component.entryComponents) {
+                component.entryComponents.forEach(verifyComponentIsPartOfNgModule);
+            }
+        }
+    }
+}
+/**
+ * @param {?} typeOrWithProviders
+ * @return {?}
+ */
+function unwrapModuleWithProvidersImports(typeOrWithProviders) {
+    typeOrWithProviders = resolveForwardRef(typeOrWithProviders);
+    return ((/** @type {?} */ (typeOrWithProviders))).ngModule || typeOrWithProviders;
+}
+/**
+ * @template T
+ * @param {?} type
+ * @param {?} name
+ * @return {?}
+ */
+function getAnnotation(type, name) {
+    /** @type {?} */
+    let annotation = null;
+    collect(type.__annotations__);
+    collect(type.decorators);
+    return annotation;
+    /**
+     * @param {?} annotations
+     * @return {?}
+     */
+    function collect(annotations) {
+        if (annotations) {
+            annotations.forEach(readAnnotation);
+        }
+    }
+    /**
+     * @param {?} decorator
+     * @return {?}
+     */
+    function readAnnotation(decorator) {
+        if (!annotation) {
+            /** @type {?} */
+            const proto = Object.getPrototypeOf(decorator);
+            if (proto.ngMetadataName == name) {
+                annotation = (/** @type {?} */ (decorator));
+            }
+            else if (decorator.type) {
+                /** @type {?} */
+                const proto = Object.getPrototypeOf(decorator.type);
+                if (proto.ngMetadataName == name) {
+                    annotation = decorator.args[0];
+                }
+            }
+        }
+    }
+}
+/**
+ * Keep track of compiled components. This is needed because in tests we often want to compile the
+ * same component with more than one NgModule. This would cause an error unless we reset which
+ * NgModule the component belongs to. We keep the list of compiled components here so that the
+ * TestBed can reset it later.
+ * @type {?}
+ */
+let ownerNgModule = new Map();
+/** @type {?} */
+let verifiedNgModule = new Map();
+/**
+ * @return {?}
+ */
+function resetCompiledComponents() {
+    ownerNgModule = new Map();
+    verifiedNgModule = new Map();
+    moduleQueue.length = 0;
+}
+/**
+ * Computes the combined declarations of explicit declarations, as well as declarations inherited
+ * by
+ * traversing the exports of imported modules.
+ * @param {?} type
+ * @return {?}
+ */
+function computeCombinedExports(type) {
+    type = resolveForwardRef(type);
+    /** @type {?} */
+    const ngModuleDef = getNgModuleDef(type, true);
+    return [...flatten$1(ngModuleDef.exports.map((type) => {
+            /** @type {?} */
+            const ngModuleDef = getNgModuleDef(type);
+            if (ngModuleDef) {
+                verifySemanticsOfNgModuleDef((/** @type {?} */ ((/** @type {?} */ (type)))));
+                return computeCombinedExports(type);
+            }
+            else {
+                return type;
+            }
+        }))];
 }
 /**
  * Some declared components may be compiled asynchronously, and thus may not have their
@@ -18152,17 +18482,18 @@ function transitiveScopesFor(moduleType) {
 /**
  * @template T
  * @param {?} values
+ * @param {?=} mapFn
  * @return {?}
  */
-function flatten$1(values) {
+function flatten$1(values, mapFn) {
     /** @type {?} */
     const out = [];
     values.forEach(value => {
         if (Array.isArray(value)) {
-            out.push(...flatten$1(value));
+            out.push(...flatten$1(value, mapFn));
         }
         else {
-            out.push(value);
+            out.push(mapFn ? mapFn(value) : value);
         }
     });
     return out;
@@ -18232,7 +18563,7 @@ function compileComponent(type, metadata) {
                     throw new Error(error.join('\n'));
                 }
                 /** @type {?} */
-                const meta = Object.assign({}, directiveMetadata(type, metadata), { template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, viewQueries: extractQueriesMetadata(getReflect().propMetadata(type), isViewQuery), directives: [], pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
+                const meta = Object.assign({}, directiveMetadata(type, metadata), { template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, viewQueries: extractQueriesMetadata(type, getReflect().propMetadata(type), isViewQuery), directives: [], pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
                 ngComponentDef = compiler.compileComponent(angularCoreEnv, `ng://${stringify(type)}/template.html`, meta);
                 // When NgModule decorator executed, we enqueued the module definition such that
                 // it would only dequeue and add itself as module scope to all of its declarations,
@@ -18281,7 +18612,7 @@ function compileDirective(type, directive) {
         get: () => {
             if (ngDirectiveDef === null) {
                 /** @type {?} */
-                const facade = directiveMetadata(type, directive);
+                const facade = directiveMetadata((/** @type {?} */ (type)), directive);
                 ngDirectiveDef = getCompilerFacade().compileDirective(angularCoreEnv, `ng://${type && type.name}/ngDirectiveDef.js`, facade);
             }
             return ngDirectiveDef;
@@ -18318,7 +18649,7 @@ function directiveMetadata(type, metadata) {
         propMetadata: propMetadata,
         inputs: metadata.inputs || EMPTY_ARRAY,
         outputs: metadata.outputs || EMPTY_ARRAY,
-        queries: extractQueriesMetadata(propMetadata, isContentQuery),
+        queries: extractQueriesMetadata(type, propMetadata, isContentQuery),
         lifecycle: {
             usesOnChanges: type.prototype.ngOnChanges !== undefined,
         },
@@ -18352,17 +18683,22 @@ function convertToR3QueryMetadata(propertyName, ann) {
     };
 }
 /**
+ * @param {?} type
  * @param {?} propMetadata
  * @param {?} isQueryAnn
  * @return {?}
  */
-function extractQueriesMetadata(propMetadata, isQueryAnn) {
+function extractQueriesMetadata(type, propMetadata, isQueryAnn) {
     /** @type {?} */
     const queriesMeta = [];
     for (const field in propMetadata) {
         if (propMetadata.hasOwnProperty(field)) {
             propMetadata[field].forEach(ann => {
                 if (isQueryAnn(ann)) {
+                    if (!ann.selector) {
+                        throw new Error(`Can't construct a query for the property "${field}" of ` +
+                            `"${stringify(type)}" since the query selector wasn't defined.`);
+                    }
                     queriesMeta.push(convertToR3QueryMetadata(field, ann));
                 }
             });
@@ -21792,58 +22128,6 @@ function remove(list, el) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
  */
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Used to load ng module factories.
- *
- * \@publicApi
- * @abstract
- */
-class NgModuleFactoryLoader {
-}
-/** @type {?} */
-let moduleFactories = new Map();
-/**
- * Registers a loaded module. Should only be called from generated NgModuleFactory code.
- * \@publicApi
- * @param {?} id
- * @param {?} factory
- * @return {?}
- */
-function registerModuleFactory(id, factory) {
-    /** @type {?} */
-    const existing = moduleFactories.get(id);
-    if (existing) {
-        throw new Error(`Duplicate module registered for ${id} - ${existing.moduleType.name} vs ${factory.moduleType.name}`);
-    }
-    moduleFactories.set(id, factory);
-}
-/**
- * Returns the NgModuleFactory with the given id, if it exists and has been loaded.
- * Factories for modules that do not specify an `id` cannot be retrieved. Throws if the module
- * cannot be found.
- * \@publicApi
- * @param {?} id
- * @return {?}
- */
-function getModuleFactory(id) {
-    /** @type {?} */
-    const factory = moduleFactories.get(id);
-    if (!factory)
-        throw new Error(`No module with ID ${id} loaded`);
-    return factory;
-}
 
 /**
  * @fileoverview added by tsickle
@@ -30530,5 +30814,5 @@ class NgModuleFactory_ extends NgModuleFactory {
  * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
  */
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, INJECTOR$1 as INJECTOR, Injector, inject, InjectFlags, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList$1 as QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, getInjectableDef as ɵgetInjectableDef, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR$1 as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineBase as ɵdefineBase, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, directiveInject as ɵdirectiveInject, injectAttribute as ɵinjectAttribute, getFactoryOf as ɵgetFactoryOf, getInheritedFactory as ɵgetInheritedFactory, templateRefExtractor as ɵtemplateRefExtractor, ProvidersFeature as ɵProvidersFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, NgOnChangesFeature as ɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, container as ɵcontainer, nextContext as ɵnextContext, elementStart as ɵelementStart, namespaceHTML as ɵnamespaceHTML, namespaceMathML as ɵnamespaceMathML, namespaceSVG as ɵnamespaceSVG, element as ɵelement, listener as ɵlistener, text as ɵtext, embeddedViewStart as ɵembeddedViewStart, query as ɵquery, registerContentQuery as ɵregisterContentQuery, projection as ɵprojection, bind as ɵbind, interpolation1 as ɵinterpolation1, interpolation2 as ɵinterpolation2, interpolation3 as ɵinterpolation3, interpolation4 as ɵinterpolation4, interpolation5 as ɵinterpolation5, interpolation6 as ɵinterpolation6, interpolation7 as ɵinterpolation7, interpolation8 as ɵinterpolation8, interpolationV as ɵinterpolationV, pipeBind1 as ɵpipeBind1, pipeBind2 as ɵpipeBind2, pipeBind3 as ɵpipeBind3, pipeBind4 as ɵpipeBind4, pipeBindV as ɵpipeBindV, pureFunction0 as ɵpureFunction0, pureFunction1 as ɵpureFunction1, pureFunction2 as ɵpureFunction2, pureFunction3 as ɵpureFunction3, pureFunction4 as ɵpureFunction4, pureFunction5 as ɵpureFunction5, pureFunction6 as ɵpureFunction6, pureFunction7 as ɵpureFunction7, pureFunction8 as ɵpureFunction8, pureFunctionV as ɵpureFunctionV, getCurrentView as ɵgetCurrentView, getHostElement as ɵgetHostElement, restoreView as ɵrestoreView, containerRefreshStart as ɵcontainerRefreshStart, containerRefreshEnd as ɵcontainerRefreshEnd, queryRefresh as ɵqueryRefresh, loadQueryList as ɵloadQueryList, elementEnd as ɵelementEnd, elementProperty as ɵelementProperty, projectionDef as ɵprojectionDef, reference as ɵreference, enableBindings as ɵenableBindings, disableBindings as ɵdisableBindings, allocHostVars as ɵallocHostVars, elementAttribute as ɵelementAttribute, elementContainerStart as ɵelementContainerStart, elementContainerEnd as ɵelementContainerEnd, elementStyling as ɵelementStyling, elementStylingMap as ɵelementStylingMap, elementStyleProp as ɵelementStyleProp, elementStylingApply as ɵelementStylingApply, elementClassProp as ɵelementClassProp, textBinding as ɵtextBinding, template as ɵtemplate, embeddedViewEnd as ɵembeddedViewEnd, store as ɵstore, load as ɵload, pipe as ɵpipe, whenRendered as ɵwhenRendered, i18n as ɵi18n, i18nAttributes as ɵi18nAttributes, i18nExp as ɵi18nExp, i18nStart as ɵi18nStart, i18nEnd as ɵi18nEnd, i18nApply as ɵi18nApply, i18nPostprocess as ɵi18nPostprocess, setClassMetadata as ɵsetClassMetadata, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, compilePipe as ɵcompilePipe, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, SWITCH_INJECTOR_FACTORY__POST_R3__ as ɵSWITCH_INJECTOR_FACTORY__POST_R3__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$4 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue$1 as ɵunv, viewDef as ɵvid };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, INJECTOR$1 as INJECTOR, Injector, inject, InjectFlags, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList$1 as QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, getInjectableDef as ɵgetInjectableDef, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR$1 as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineBase as ɵdefineBase, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, directiveInject as ɵdirectiveInject, injectAttribute as ɵinjectAttribute, getFactoryOf as ɵgetFactoryOf, getInheritedFactory as ɵgetInheritedFactory, templateRefExtractor as ɵtemplateRefExtractor, ProvidersFeature as ɵProvidersFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, NgOnChangesFeature as ɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, container as ɵcontainer, nextContext as ɵnextContext, elementStart as ɵelementStart, namespaceHTML as ɵnamespaceHTML, namespaceMathML as ɵnamespaceMathML, namespaceSVG as ɵnamespaceSVG, element as ɵelement, listener as ɵlistener, text as ɵtext, embeddedViewStart as ɵembeddedViewStart, query as ɵquery, registerContentQuery as ɵregisterContentQuery, projection as ɵprojection, bind as ɵbind, interpolation1 as ɵinterpolation1, interpolation2 as ɵinterpolation2, interpolation3 as ɵinterpolation3, interpolation4 as ɵinterpolation4, interpolation5 as ɵinterpolation5, interpolation6 as ɵinterpolation6, interpolation7 as ɵinterpolation7, interpolation8 as ɵinterpolation8, interpolationV as ɵinterpolationV, pipeBind1 as ɵpipeBind1, pipeBind2 as ɵpipeBind2, pipeBind3 as ɵpipeBind3, pipeBind4 as ɵpipeBind4, pipeBindV as ɵpipeBindV, pureFunction0 as ɵpureFunction0, pureFunction1 as ɵpureFunction1, pureFunction2 as ɵpureFunction2, pureFunction3 as ɵpureFunction3, pureFunction4 as ɵpureFunction4, pureFunction5 as ɵpureFunction5, pureFunction6 as ɵpureFunction6, pureFunction7 as ɵpureFunction7, pureFunction8 as ɵpureFunction8, pureFunctionV as ɵpureFunctionV, getCurrentView as ɵgetCurrentView, getHostElement as ɵgetHostElement, restoreView as ɵrestoreView, containerRefreshStart as ɵcontainerRefreshStart, containerRefreshEnd as ɵcontainerRefreshEnd, queryRefresh as ɵqueryRefresh, loadQueryList as ɵloadQueryList, elementEnd as ɵelementEnd, elementProperty as ɵelementProperty, projectionDef as ɵprojectionDef, reference as ɵreference, enableBindings as ɵenableBindings, disableBindings as ɵdisableBindings, allocHostVars as ɵallocHostVars, elementAttribute as ɵelementAttribute, elementContainerStart as ɵelementContainerStart, elementContainerEnd as ɵelementContainerEnd, elementStyling as ɵelementStyling, elementStylingMap as ɵelementStylingMap, elementStyleProp as ɵelementStyleProp, elementStylingApply as ɵelementStylingApply, elementClassProp as ɵelementClassProp, textBinding as ɵtextBinding, template as ɵtemplate, embeddedViewEnd as ɵembeddedViewEnd, store as ɵstore, load as ɵload, pipe as ɵpipe, whenRendered as ɵwhenRendered, i18n as ɵi18n, i18nAttributes as ɵi18nAttributes, i18nExp as ɵi18nExp, i18nStart as ɵi18nStart, i18nEnd as ɵi18nEnd, i18nApply as ɵi18nApply, i18nPostprocess as ɵi18nPostprocess, setClassMetadata as ɵsetClassMetadata, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, compilePipe as ɵcompilePipe, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, SWITCH_INJECTOR_FACTORY__POST_R3__ as ɵSWITCH_INJECTOR_FACTORY__POST_R3__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$4 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue$1 as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map

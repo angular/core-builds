@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.2.0-beta.2+63.sha-d132bae
+ * @license Angular v7.2.0-beta.2+64.sha-e94975d
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, ApplicationInitStatus, Injector, NgZone, ɵRender3ComponentFactory, ɵRender3NgModuleRef, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, Compiler, Injectable, defineInjectable, ɵgetInheritedFactory, ɵsetClassMetadata, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled } from '@angular/core';
+import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, ApplicationInitStatus, Injector, NgZone, ɵRender3ComponentFactory, ɵRender3NgModuleRef, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, ɵresetCompiledComponents, Compiler, Injectable, defineInjectable, ɵgetInheritedFactory, ɵsetClassMetadata, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled } from '@angular/core';
 import { __extends, __spread, __values, __decorate, __read } from 'tslib';
 
 /**
@@ -1027,6 +1027,7 @@ var TestBedRender3 = /** @class */ (function () {
         this.ngModule = null;
     };
     TestBedRender3.prototype.resetTestingModule = function () {
+        ɵresetCompiledComponents();
         // reset metadata overrides
         this._moduleOverrides = [];
         this._componentOverrides = [];
