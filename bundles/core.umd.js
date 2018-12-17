@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-beta.2+53.sha-ea10a3a
+ * @license Angular v7.2.0-beta.2+62.sha-94f17e9
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -4332,6 +4332,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    var NG_TEMPLATE_SELECTOR = 'ng-template';
     function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
         var nodeClassesLen = nodeClassAttrVal.length;
         var matchIndex = nodeClassAttrVal.indexOf(cssClassToMatch);
@@ -4346,13 +4347,29 @@
         return true;
     }
     /**
+     * Function that checks whether a given tNode matches tag-based selector and has a valid type.
+     *
+     * Matching can be perfomed in 2 modes: projection mode (when we project nodes) and regular
+     * directive matching mode. In "projection" mode, we do not need to check types, so if tag name
+     * matches selector, we declare a match. In "directive matching" mode, we also check whether tNode
+     * is of expected type:
+     * - whether tNode has either Element or ElementContainer type
+     * - or if we want to match "ng-template" tag, we check for Container type
+     */
+    function hasTagAndTypeMatch(tNode, currentSelector, isProjectionMode) {
+        return currentSelector === tNode.tagName &&
+            (isProjectionMode ||
+                (tNode.type === 3 /* Element */ || tNode.type === 4 /* ElementContainer */) ||
+                (tNode.type === 0 /* Container */ && currentSelector === NG_TEMPLATE_SELECTOR));
+    }
+    /**
      * A utility function to match an Ivy node static data against a simple CSS selector
      *
      * @param node static data to match
      * @param selector
      * @returns true if node matches the selector.
      */
-    function isNodeMatchingSelector(tNode, selector) {
+    function isNodeMatchingSelector(tNode, selector, isProjectionMode) {
         ngDevMode && assertDefined(selector[0], 'Selector should have a tag name');
         var mode = 4 /* ELEMENT */;
         var nodeAttrs = tNode.attrs;
@@ -4379,7 +4396,8 @@
                 continue;
             if (mode & 4 /* ELEMENT */) {
                 mode = 2 /* ATTRIBUTE */ | mode & 1 /* NOT */;
-                if (current !== '' && current !== tNode.tagName || current === '' && selector.length === 1) {
+                if (current !== '' && !hasTagAndTypeMatch(tNode, current, isProjectionMode) ||
+                    current === '' && selector.length === 1) {
                     if (isPositive(mode))
                         return false;
                     skipToNextSelector = true;
@@ -4452,9 +4470,10 @@
         }
         return -1;
     }
-    function isNodeMatchingSelectorList(tNode, selector) {
+    function isNodeMatchingSelectorList(tNode, selector, isProjectionMode) {
+        if (isProjectionMode === void 0) { isProjectionMode = false; }
         for (var i = 0; i < selector.length; i++) {
-            if (isNodeMatchingSelector(tNode, selector[i])) {
+            if (isNodeMatchingSelector(tNode, selector[i], isProjectionMode)) {
                 return true;
             }
         }
@@ -4485,7 +4504,8 @@
             // if a node has the ngProjectAs attribute match it against unparsed selector
             // match a node against a parsed selector only if ngProjectAs attribute is not present
             if (ngProjectAsAttrVal === textSelectors[i] ||
-                ngProjectAsAttrVal === null && isNodeMatchingSelectorList(tNode, selectors[i])) {
+                ngProjectAsAttrVal === null &&
+                    isNodeMatchingSelectorList(tNode, selectors[i], /* isProjectionMode */ true)) {
                 return i + 1; // first matching selector "captures" a given node
             }
         }
@@ -5786,11 +5806,12 @@
         var lView = getLView();
         var tView = lView[TVIEW];
         var renderer = lView[RENDERER];
+        var tagName = 'ng-container';
         ngDevMode && assertEqual(lView[BINDING_INDEX], tView.bindingStartIndex, 'element containers should be created before any bindings');
         ngDevMode && ngDevMode.rendererCreateComment++;
-        var native = renderer.createComment(ngDevMode ? 'ng-container' : '');
+        var native = renderer.createComment(ngDevMode ? tagName : '');
         ngDevMode && assertDataInRange(lView, index - 1);
-        var tNode = createNodeAtIndex(index, 4 /* ElementContainer */, native, null, attrs || null);
+        var tNode = createNodeAtIndex(index, 4 /* ElementContainer */, native, tagName, attrs || null);
         appendChild(native, tNode, lView);
         createDirectivesAndLocals(tView, lView, localRefs);
     }
@@ -6793,7 +6814,7 @@
         if (registry) {
             for (var i = 0; i < registry.length; i++) {
                 var def = registry[i];
-                if (isNodeMatchingSelectorList(tNode, def.selectors)) {
+                if (isNodeMatchingSelectorList(tNode, def.selectors, /* isProjectionMode */ false)) {
                     matches || (matches = []);
                     diPublicInInjector(getOrCreateNodeInjectorForNode(getPreviousOrParentTNode(), viewData), viewData, def.type);
                     if (isComponentDef(def)) {
@@ -10246,7 +10267,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0-beta.2+53.sha-ea10a3a');
+    var VERSION = new Version('7.2.0-beta.2+62.sha-94f17e9');
 
     /**
      * @license
@@ -14411,7 +14432,7 @@
                     scopes.exported.pipes.add(entry);
                 });
             }
-            else if (getNgModuleDef(exportedTyped)) {
+            else if (getPipeDef(exportedTyped)) {
                 scopes.exported.pipes.add(exportedTyped);
             }
             else {
@@ -23845,9 +23866,14 @@
     exports.ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__ = SWITCH_COMPILE_DIRECTIVE__POST_R3__;
     exports.ɵSWITCH_COMPILE_PIPE__POST_R3__ = SWITCH_COMPILE_PIPE__POST_R3__;
     exports.ɵSWITCH_COMPILE_NGMODULE__POST_R3__ = SWITCH_COMPILE_NGMODULE__POST_R3__;
+    exports.ɵgetDebugNode__POST_R3__ = getDebugNode__POST_R3__;
     exports.ɵSWITCH_COMPILE_INJECTABLE__POST_R3__ = SWITCH_COMPILE_INJECTABLE__POST_R3__;
     exports.ɵSWITCH_IVY_ENABLED__POST_R3__ = SWITCH_IVY_ENABLED__POST_R3__;
     exports.ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ = SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__;
+    exports.ɵCompiler_compileModuleSync__POST_R3__ = Compiler_compileModuleSync__POST_R3__;
+    exports.ɵCompiler_compileModuleAsync__POST_R3__ = Compiler_compileModuleAsync__POST_R3__;
+    exports.ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__ = Compiler_compileModuleAndAllComponentsSync__POST_R3__;
+    exports.ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__ = Compiler_compileModuleAndAllComponentsAsync__POST_R3__;
     exports.ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__ = SWITCH_ELEMENT_REF_FACTORY__POST_R3__;
     exports.ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__ = SWITCH_TEMPLATE_REF_FACTORY__POST_R3__;
     exports.ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ = SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__;

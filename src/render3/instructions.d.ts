@@ -45,7 +45,7 @@ export declare function createLView<T>(parentLView: LView | null, tView: TView, 
 export declare function createNodeAtIndex(index: number, type: TNodeType.Element, native: RElement | RText | null, name: string | null, attrs: TAttributes | null): TElementNode;
 export declare function createNodeAtIndex(index: number, type: TNodeType.Container, native: RComment, name: string | null, attrs: TAttributes | null): TContainerNode;
 export declare function createNodeAtIndex(index: number, type: TNodeType.Projection, native: null, name: null, attrs: TAttributes | null): TProjectionNode;
-export declare function createNodeAtIndex(index: number, type: TNodeType.ElementContainer, native: RComment, name: null, attrs: TAttributes | null): TElementContainerNode;
+export declare function createNodeAtIndex(index: number, type: TNodeType.ElementContainer, native: RComment, name: string | null, attrs: TAttributes | null): TElementContainerNode;
 export declare function createNodeAtIndex(index: number, type: TNodeType.IcuContainer, native: RComment, name: null, attrs: TAttributes | null): TElementContainerNode;
 export declare function createViewNode(index: number, view: LView): TViewNode;
 /**
