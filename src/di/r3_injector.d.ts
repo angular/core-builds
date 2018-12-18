@@ -71,6 +71,6 @@ export declare class R3Injector {
  *
  * @param provider provider to convert to factory
  */
-export declare function providerToFactory(provider: SingleProvider): () => any;
+export declare function providerToFactory(provider: SingleProvider, ngModuleType?: InjectorType<any>, providers?: any[]): () => any;
 export declare function isTypeProvider(value: SingleProvider): value is TypeProvider;
 export {};
