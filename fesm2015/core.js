@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-beta.2+66.sha-c986d3d
+ * @license Angular v7.2.0-beta.2+82.sha-1c93afe
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1075,8 +1075,8 @@ function defineNgModule(def) {
  * \@Input()
  *   propName1: string;
  *
- * \@Input('publicName')
- *   propName2: number;
+ * \@Input('publicName2')
+ *   declaredPropName2: number;
  * }
  * ```
  *
@@ -1084,26 +1084,35 @@ function defineNgModule(def) {
  *
  * ```
  * {
- *   a0: 'propName1',
- *   b1: ['publicName', 'propName2'],
+ *   propName1: 'propName1',
+ *   declaredPropName2: ['publicName2', 'declaredPropName2'],
  * }
  * ```
  *
- * becomes
+ * which is than translated by the minifier as:
  *
  * ```
  * {
- *  'propName1': 'a0',
- *  'publicName': 'b1'
+ *   minifiedPropName1: 'propName1',
+ *   minifiedPropName2: ['publicName2', 'declaredPropName2'],
  * }
  * ```
  *
- * Optionally the function can take `secondary` which will result in:
+ * becomes: (public name => minifiedName)
  *
  * ```
  * {
- *  'propName1': 'a0',
- *  'propName2': 'b1'
+ *  'propName1': 'minifiedPropName1',
+ *  'publicName2': 'minifiedPropName2',
+ * }
+ * ```
+ *
+ * Optionally the function can take `secondary` which will result in: (public name => declared name)
+ *
+ * ```
+ * {
+ *  'propName1': 'propName1',
+ *  'publicName2': 'declaredPropName2',
  * }
  * ```
  *
@@ -1128,7 +1137,7 @@ function invertObject(obj, secondary) {
             }
             newLookup[publicName] = minifiedKey;
             if (secondary) {
-                (secondary[declaredName] = minifiedKey);
+                (secondary[publicName] = declaredName);
             }
         }
     }
@@ -2044,6 +2053,8 @@ function stringify$1(value) {
         return value;
     if (value == null)
         return '';
+    if (typeof value == 'object' && typeof value.type == 'function')
+        return value.type.name || value.type;
     return '' + value;
 }
 /**
@@ -3020,7 +3031,7 @@ function getOrCreateInjectable(tNode, lView, token, flags = InjectFlags.Default,
             /** @type {?} */
             const value = bloomHash();
             if (value == null && !(flags & InjectFlags.Optional)) {
-                throw new Error(`No provider for ${stringify$1(token)}`);
+                throw new Error(`No provider for ${stringify$1(token)}!`);
             }
             else {
                 return value;
@@ -3428,8 +3439,8 @@ function getLContext(target) {
                 }
             }
             // the goal is not to fill the entire context full of data because the lookups
-            // are expensive. Instead, only the target data (the element, compontent or
-            // directive details) are filled into the context. If called multiple times
+            // are expensive. Instead, only the target data (the element, component, container, ICU
+            // expression or directive details) are filled into the context. If called multiple times
             // with different target values then the missing target data will be filled in.
             /** @type {?} */
             const native = readElementValue(lView[nodeIndex]);
@@ -3596,10 +3607,15 @@ function traverseNextElement(tNode) {
     else if (tNode.next) {
         return tNode.next;
     }
-    else if (tNode.parent) {
-        return tNode.parent.next || null;
+    else {
+        // Let's take the following template: <div><span>text</span></div><component/>
+        // After checking the text node, we need to find the next parent that has a "next" TNode,
+        // in this case the parent `div`, so that we can find the component.
+        while (tNode.parent && !tNode.parent.next) {
+            tNode = tNode.parent;
+        }
+        return tNode.parent && tNode.parent.next;
     }
-    return null;
 }
 /**
  * Locates the component within the given LView and returns the matching index
@@ -7205,25 +7221,27 @@ function createNodeAtIndex(index, type, native, name, attrs) {
     /** @type {?} */
     let tNode = (/** @type {?} */ (tView.data[adjustedIndex]));
     if (tNode == null) {
-        /** @type {?} */
-        const previousOrParentTNode = getPreviousOrParentTNode();
-        /** @type {?} */
-        const isParent = getIsParent();
         // TODO(misko): Refactor createTNode so that it does not depend on LView.
         tNode = tView.data[adjustedIndex] = createTNode(lView, type, adjustedIndex, name, attrs, null);
-        // Now link ourselves into the tree.
-        if (previousOrParentTNode) {
-            if (isParent && previousOrParentTNode.child == null &&
-                (tNode.parent !== null || previousOrParentTNode.type === 2 /* View */)) {
-                // We are in the same view, which means we are adding content node to the parent view.
-                previousOrParentTNode.child = tNode;
-            }
-            else if (!isParent) {
-                previousOrParentTNode.next = tNode;
-            }
+    }
+    // Now link ourselves into the tree.
+    // We need this even if tNode exists, otherwise we might end up pointing to unexisting tNodes when
+    // we use i18n (especially with ICU expressions that update the DOM during the update phase).
+    /** @type {?} */
+    const previousOrParentTNode = getPreviousOrParentTNode();
+    /** @type {?} */
+    const isParent = getIsParent();
+    if (previousOrParentTNode) {
+        if (isParent && previousOrParentTNode.child == null &&
+            (tNode.parent !== null || previousOrParentTNode.type === 2 /* View */)) {
+            // We are in the same view, which means we are adding content node to the parent view.
+            previousOrParentTNode.child = tNode;
+        }
+        else if (!isParent) {
+            previousOrParentTNode.next = tNode;
         }
     }
-    if (tView.firstChild == null && type === 3 /* Element */) {
+    if (tView.firstChild == null) {
         tView.firstChild = tNode;
     }
     setPreviousOrParentTNode(tNode);
@@ -7482,6 +7500,7 @@ function elementContainerStart(index, attrs, localRefs) {
     const tNode = createNodeAtIndex(index, 4 /* ElementContainer */, native, tagName, attrs || null);
     appendChild(native, tNode, lView);
     createDirectivesAndLocals(tView, lView, localRefs);
+    attachPatchData(native, lView);
 }
 /**
  * Mark the end of the <ng-container>.
@@ -8664,7 +8683,7 @@ function invokeDirectivesHostBindings(tView, viewData, tNode) {
             /** @type {?} */
             const previousExpandoLength = expando.length;
             setCurrentDirectiveDef(def);
-            (/** @type {?} */ (def.hostBindings))(1 /* Create */, directive, tNode.index);
+            (/** @type {?} */ (def.hostBindings))(1 /* Create */, directive, tNode.index - HEADER_OFFSET);
             setCurrentDirectiveDef(null);
             // `hostBindings` function may or may not contain `allocHostVars` call
             // (e.g. it may not if it only contains host listeners), so we need to check whether
@@ -9072,6 +9091,9 @@ function template(index, templateFn, consts, vars, tagName, attrs, localRefs, lo
     const currentQueries = lView[QUERIES];
     /** @type {?} */
     const previousOrParentTNode = getPreviousOrParentTNode();
+    /** @type {?} */
+    const native = getNativeByTNode(previousOrParentTNode, lView);
+    attachPatchData(native, lView);
     if (currentQueries) {
         lView[QUERIES] = currentQueries.addNode((/** @type {?} */ (previousOrParentTNode)));
     }
@@ -10444,7 +10466,7 @@ function createRootComponent(componentView, componentDef, rootView, rootContext,
         /** @type {?} */
         const rootTNode = getPreviousOrParentTNode();
         setCurrentDirectiveDef(componentDef);
-        componentDef.hostBindings(1 /* Create */, component, rootTNode.index);
+        componentDef.hostBindings(1 /* Create */, component, rootTNode.index - HEADER_OFFSET);
         setCurrentDirectiveDef(null);
     }
     return component;
@@ -10743,13 +10765,17 @@ const PRIVATE_PREFIX = '__ngOnChanges_';
  */
 function NgOnChangesFeature(definition) {
     /** @type {?} */
-    const declaredToMinifiedInputs = definition.declaredInputs;
+    const publicToDeclaredInputs = definition.declaredInputs;
+    /** @type {?} */
+    const publicToMinifiedInputs = definition.inputs;
     /** @type {?} */
     const proto = definition.type.prototype;
-    for (const declaredName in declaredToMinifiedInputs) {
-        if (declaredToMinifiedInputs.hasOwnProperty(declaredName)) {
+    for (const publicName in publicToDeclaredInputs) {
+        if (publicToDeclaredInputs.hasOwnProperty(publicName)) {
             /** @type {?} */
-            const minifiedKey = declaredToMinifiedInputs[declaredName];
+            const minifiedKey = publicToMinifiedInputs[publicName];
+            /** @type {?} */
+            const declaredKey = publicToDeclaredInputs[publicName];
             /** @type {?} */
             const privateMinKey = PRIVATE_PREFIX + minifiedKey;
             // Walk the prototype chain to see if we find a property descriptor
@@ -10788,12 +10814,12 @@ function NgOnChangesFeature(definition) {
                     /** @type {?} */
                     const isFirstChange = !this.hasOwnProperty(privateMinKey);
                     /** @type {?} */
-                    const currentChange = simpleChanges[declaredName];
+                    const currentChange = simpleChanges[declaredKey];
                     if (currentChange) {
                         currentChange.currentValue = value;
                     }
                     else {
-                        simpleChanges[declaredName] =
+                        simpleChanges[declaredKey] =
                             new SimpleChange(this[privateMinKey], value, isFirstChange);
                     }
                     if (isFirstChange) {
@@ -13208,7 +13234,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.0-beta.2+66.sha-c986d3d');
+const VERSION = new Version('7.2.0-beta.2+82.sha-1c93afe');
 
 /**
  * @fileoverview added by tsickle
@@ -14411,8 +14437,7 @@ function i18nStart(index, message, subTemplateIndex) {
     /** @type {?} */
     const tView = getLView()[TVIEW];
     ngDevMode && assertDefined(tView, `tView should be defined`);
-    ngDevMode &&
-        assertEqual(tView.firstTemplatePass, true, `You should only call i18nEnd on first template pass`);
+    i18nIndexStack[++i18nIndexStackPointer] = index;
     if (tView.firstTemplatePass && tView.data[index + HEADER_OFFSET] === null) {
         i18nStartFirstPass(tView, index, message, subTemplateIndex);
     }
@@ -14426,7 +14451,6 @@ function i18nStart(index, message, subTemplateIndex) {
  * @return {?}
  */
 function i18nStartFirstPass(tView, index, message, subTemplateIndex) {
-    i18nIndexStack[++i18nIndexStackPointer] = index;
     /** @type {?} */
     const viewData = getLView();
     /** @type {?} */
@@ -14652,11 +14676,7 @@ function i18nEnd() {
     /** @type {?} */
     const tView = getLView()[TVIEW];
     ngDevMode && assertDefined(tView, `tView should be defined`);
-    ngDevMode &&
-        assertEqual(tView.firstTemplatePass, true, `You should only call i18nEnd on first template pass`);
-    if (tView.firstTemplatePass) {
-        i18nEndFirstPass(tView);
-    }
+    i18nEndFirstPass(tView);
 }
 /**
  * See `i18nEnd` above.
@@ -14777,6 +14797,7 @@ function readCreateOpCodes(index, createOpCodes, expandoStartIndex, viewData) {
                     ngDevMode && ngDevMode.rendererCreateComment++;
                     previousTNode = currentTNode;
                     currentTNode = createNodeAtIndex(expandoStartIndex++, 5 /* IcuContainer */, commentRNode, null, null);
+                    attachPatchData(commentRNode, viewData);
                     ((/** @type {?} */ (currentTNode))).activeCaseIndex = null;
                     // We will add the case nodes later, during the update phase
                     setIsParent(false);
