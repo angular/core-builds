@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-beta.2+81.sha-4774a1a
+ * @license Angular v7.2.0-beta.2+82.sha-1c93afe
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1075,8 +1075,8 @@ function defineNgModule(def) {
  * \@Input()
  *   propName1: string;
  *
- * \@Input('publicName')
- *   propName2: number;
+ * \@Input('publicName2')
+ *   declaredPropName2: number;
  * }
  * ```
  *
@@ -1084,26 +1084,35 @@ function defineNgModule(def) {
  *
  * ```
  * {
- *   a0: 'propName1',
- *   b1: ['publicName', 'propName2'],
+ *   propName1: 'propName1',
+ *   declaredPropName2: ['publicName2', 'declaredPropName2'],
  * }
  * ```
  *
- * becomes
+ * which is than translated by the minifier as:
  *
  * ```
  * {
- *  'propName1': 'a0',
- *  'publicName': 'b1'
+ *   minifiedPropName1: 'propName1',
+ *   minifiedPropName2: ['publicName2', 'declaredPropName2'],
  * }
  * ```
  *
- * Optionally the function can take `secondary` which will result in:
+ * becomes: (public name => minifiedName)
  *
  * ```
  * {
- *  'propName1': 'a0',
- *  'propName2': 'b1'
+ *  'propName1': 'minifiedPropName1',
+ *  'publicName2': 'minifiedPropName2',
+ * }
+ * ```
+ *
+ * Optionally the function can take `secondary` which will result in: (public name => declared name)
+ *
+ * ```
+ * {
+ *  'propName1': 'propName1',
+ *  'publicName2': 'declaredPropName2',
  * }
  * ```
  *
@@ -1128,7 +1137,7 @@ function invertObject(obj, secondary) {
             }
             newLookup[publicName] = minifiedKey;
             if (secondary) {
-                (secondary[declaredName] = minifiedKey);
+                (secondary[publicName] = declaredName);
             }
         }
     }
@@ -10756,13 +10765,17 @@ const PRIVATE_PREFIX = '__ngOnChanges_';
  */
 function NgOnChangesFeature(definition) {
     /** @type {?} */
-    const declaredToMinifiedInputs = definition.declaredInputs;
+    const publicToDeclaredInputs = definition.declaredInputs;
+    /** @type {?} */
+    const publicToMinifiedInputs = definition.inputs;
     /** @type {?} */
     const proto = definition.type.prototype;
-    for (const declaredName in declaredToMinifiedInputs) {
-        if (declaredToMinifiedInputs.hasOwnProperty(declaredName)) {
+    for (const publicName in publicToDeclaredInputs) {
+        if (publicToDeclaredInputs.hasOwnProperty(publicName)) {
             /** @type {?} */
-            const minifiedKey = declaredToMinifiedInputs[declaredName];
+            const minifiedKey = publicToMinifiedInputs[publicName];
+            /** @type {?} */
+            const declaredKey = publicToDeclaredInputs[publicName];
             /** @type {?} */
             const privateMinKey = PRIVATE_PREFIX + minifiedKey;
             // Walk the prototype chain to see if we find a property descriptor
@@ -10801,12 +10814,12 @@ function NgOnChangesFeature(definition) {
                     /** @type {?} */
                     const isFirstChange = !this.hasOwnProperty(privateMinKey);
                     /** @type {?} */
-                    const currentChange = simpleChanges[declaredName];
+                    const currentChange = simpleChanges[declaredKey];
                     if (currentChange) {
                         currentChange.currentValue = value;
                     }
                     else {
-                        simpleChanges[declaredName] =
+                        simpleChanges[declaredKey] =
                             new SimpleChange(this[privateMinKey], value, isFirstChange);
                     }
                     if (isFirstChange) {
@@ -13221,7 +13234,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.0-beta.2+81.sha-4774a1a');
+const VERSION = new Version('7.2.0-beta.2+82.sha-1c93afe');
 
 /**
  * @fileoverview added by tsickle

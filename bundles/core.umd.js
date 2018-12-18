@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-beta.2+81.sha-4774a1a
+ * @license Angular v7.2.0-beta.2+82.sha-1c93afe
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -987,8 +987,8 @@
      *   @Input()
      *   propName1: string;
      *
-     *   @Input('publicName')
-     *   propName2: number;
+     *   @Input('publicName2')
+     *   declaredPropName2: number;
      * }
      * ```
      *
@@ -996,26 +996,35 @@
      *
      * ```
      * {
-     *   a0: 'propName1',
-     *   b1: ['publicName', 'propName2'],
+     *   propName1: 'propName1',
+     *   declaredPropName2: ['publicName2', 'declaredPropName2'],
      * }
      * ```
      *
-     * becomes
+     * which is than translated by the minifier as:
      *
      * ```
      * {
-     *  'propName1': 'a0',
-     *  'publicName': 'b1'
+     *   minifiedPropName1: 'propName1',
+     *   minifiedPropName2: ['publicName2', 'declaredPropName2'],
      * }
      * ```
      *
-     * Optionally the function can take `secondary` which will result in:
+     * becomes: (public name => minifiedName)
      *
      * ```
      * {
-     *  'propName1': 'a0',
-     *  'propName2': 'b1'
+     *  'propName1': 'minifiedPropName1',
+     *  'publicName2': 'minifiedPropName2',
+     * }
+     * ```
+     *
+     * Optionally the function can take `secondary` which will result in: (public name => declared name)
+     *
+     * ```
+     * {
+     *  'propName1': 'propName1',
+     *  'publicName2': 'declaredPropName2',
      * }
      * ```
      *
@@ -1035,7 +1044,7 @@
                 }
                 newLookup[publicName] = minifiedKey;
                 if (secondary) {
-                    (secondary[declaredName] = minifiedKey);
+                    (secondary[publicName] = declaredName);
                 }
             }
         }
@@ -8366,11 +8375,13 @@
      * ```
      */
     function NgOnChangesFeature(definition) {
-        var declaredToMinifiedInputs = definition.declaredInputs;
+        var publicToDeclaredInputs = definition.declaredInputs;
+        var publicToMinifiedInputs = definition.inputs;
         var proto = definition.type.prototype;
-        var _loop_1 = function (declaredName) {
-            if (declaredToMinifiedInputs.hasOwnProperty(declaredName)) {
-                var minifiedKey = declaredToMinifiedInputs[declaredName];
+        var _loop_1 = function (publicName) {
+            if (publicToDeclaredInputs.hasOwnProperty(publicName)) {
+                var minifiedKey = publicToMinifiedInputs[publicName];
+                var declaredKey_1 = publicToDeclaredInputs[publicName];
                 var privateMinKey_1 = PRIVATE_PREFIX + minifiedKey;
                 // Walk the prototype chain to see if we find a property descriptor
                 // That way we can honor setters and getters that were inherited.
@@ -8395,12 +8406,12 @@
                             Object.defineProperty(this, PRIVATE_PREFIX, { value: simpleChanges, writable: true });
                         }
                         var isFirstChange = !this.hasOwnProperty(privateMinKey_1);
-                        var currentChange = simpleChanges[declaredName];
+                        var currentChange = simpleChanges[declaredKey_1];
                         if (currentChange) {
                             currentChange.currentValue = value;
                         }
                         else {
-                            simpleChanges[declaredName] =
+                            simpleChanges[declaredKey_1] =
                                 new SimpleChange(this[privateMinKey_1], value, isFirstChange);
                         }
                         if (isFirstChange) {
@@ -8418,8 +8429,8 @@
                 });
             }
         };
-        for (var declaredName in declaredToMinifiedInputs) {
-            _loop_1(declaredName);
+        for (var publicName in publicToDeclaredInputs) {
+            _loop_1(publicName);
         }
         // If an onInit hook is defined, it will need to wrap the ngOnChanges call
         // so the call order is changes-init-check in creation mode. In subsequent
@@ -10333,7 +10344,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0-beta.2+81.sha-4774a1a');
+    var VERSION = new Version('7.2.0-beta.2+82.sha-1c93afe');
 
     /**
      * @license
