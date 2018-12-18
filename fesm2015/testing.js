@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-beta.2+82.sha-1c93afe
+ * @license Angular v7.2.0-beta.2+90.sha-7901cd8
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -8,7 +8,7 @@ import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgMo
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -129,7 +129,7 @@ function runInTestZone(fn, context, finishCallback, failCallback) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Wraps a test function in an asynchronous test zone. The test will automatically
@@ -172,7 +172,7 @@ function async(fn) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Fixture for debugging and testing a component.
@@ -246,6 +246,7 @@ class ComponentFixture {
         }
     }
     /**
+     * @private
      * @param {?} checkNoChanges
      * @return {?}
      */
@@ -316,6 +317,7 @@ class ComponentFixture {
         }
     }
     /**
+     * @private
      * @return {?}
      */
     _getRenderer() {
@@ -373,7 +375,7 @@ function scheduleMicroTask(fn) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -533,7 +535,7 @@ function flushMicrotasksFallback() {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const _Zone$1 = typeof Zone !== 'undefined' ? Zone : null;
@@ -653,7 +655,7 @@ function flushMicrotasks() {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -691,7 +693,7 @@ class AsyncTestCompleter {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 let _nextReferenceId = 0;
@@ -850,7 +852,7 @@ function _valueProps(obj) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const reflection = new ɵReflectionCapabilities();
@@ -929,7 +931,7 @@ class NgModuleResolver extends OverrideResolver {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * An abstract class for inserting the root test component element in a platform independent way.
@@ -956,7 +958,7 @@ const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 let _nextRootElementId = 0;
@@ -1385,6 +1387,7 @@ class TestBedRender3 {
     }
     // internal methods
     /**
+     * @private
      * @return {?}
      */
     _initIfNeeded() {
@@ -1406,6 +1409,7 @@ class TestBedRender3 {
     }
     // creates resolvers taking overrides into account
     /**
+     * @private
      * @return {?}
      */
     _getResolvers() {
@@ -1424,6 +1428,7 @@ class TestBedRender3 {
         return { module, component, directive, pipe };
     }
     /**
+     * @private
      * @param {?} methodName
      * @param {?} methodDescription
      * @return {?}
@@ -1435,6 +1440,7 @@ class TestBedRender3 {
         }
     }
     /**
+     * @private
      * @return {?}
      */
     _createTestModule() {
@@ -1635,7 +1641,7 @@ function isNgModule(value) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @return {?}
@@ -1723,7 +1729,7 @@ class TestingCompilerFactory {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const UNDEFINED = new Object();
@@ -2031,6 +2037,7 @@ class TestBedViewEngine {
         });
     }
     /**
+     * @private
      * @return {?}
      */
     _initIfNeeded() {
@@ -2078,6 +2085,7 @@ class TestBedViewEngine {
         this._instantiated = true;
     }
     /**
+     * @private
      * @return {?}
      */
     _createCompilerAndModule() {
@@ -2125,6 +2133,7 @@ class TestBedViewEngine {
         return DynamicTestModule;
     }
     /**
+     * @private
      * @param {?} methodName
      * @param {?} methodDescription
      * @return {?}
@@ -2216,6 +2225,7 @@ class TestBedViewEngine {
         this.overrideProviderImpl(token, provider, /* deprecated */ true);
     }
     /**
+     * @private
      * @param {?} token
      * @param {?} provider
      * @param {?=} deprecated
@@ -2409,6 +2419,7 @@ class InjectSetupWrapper {
         this._moduleDef = _moduleDef;
     }
     /**
+     * @private
      * @return {?}
      */
     _addModule() {
@@ -2455,7 +2466,7 @@ function withModule(moduleDef, fn) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const _global$1 = (/** @type {?} */ ((typeof window === 'undefined' ? global : window)));
@@ -2473,7 +2484,7 @@ const __core_private_testing_placeholder__ = '';
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -2485,22 +2496,22 @@ const __core_private_testing_placeholder__ = '';
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
