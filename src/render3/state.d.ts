@@ -77,7 +77,8 @@ export declare function setIsParent(value: boolean): void;
 export declare function getOrCreateCurrentQueries(QueryType: {
     new (parent: null, shallow: null, deep: null): LQueries;
 }): LQueries;
-export declare function getCreationMode(): boolean;
+/** Checks whether a given view is in creation mode */
+export declare function isCreationMode(view?: LView): boolean;
 export declare function getContextLView(): LView;
 export declare function getCheckNoChangesMode(): boolean;
 export declare function setCheckNoChangesMode(mode: boolean): void;
@@ -108,7 +109,5 @@ export declare function resetComponentState(): void;
  * the direction of traversal (up or down the view tree) a bit clearer.
  *
  * @param newView New state to become active
- * @param creationOnly An optional boolean to indicate that the view was processed in creation mode
- * only, i.e. the first update will be done later. Only possible for dynamically created views.
  */
-export declare function leaveView(newView: LView, creationOnly?: boolean): void;
+export declare function leaveView(newView: LView): void;

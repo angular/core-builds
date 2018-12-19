@@ -28,7 +28,7 @@ import { NO_CHANGE } from './tokens';
  * bindings, refreshes child components.
  * Note: view hooks are triggered later when leaving the view.
  */
-export declare function refreshDescendantViews(lView: LView, rf: RenderFlags | null): void;
+export declare function refreshDescendantViews(lView: LView): void;
 /** Sets the host bindings for the current view. */
 export declare function setHostBindings(tView: TView, viewData: LView): void;
 export declare function createLView<T>(parentLView: LView | null, tView: TView, context: T | null, flags: LViewFlags, rendererFactory?: RendererFactory3 | null, renderer?: Renderer3 | null, sanitizer?: Sanitizer | null, injector?: Injector | null): LView;
@@ -82,7 +82,7 @@ export declare function createEmbeddedViewAndNode<T>(tView: TView, context: T, d
  * can't store TViews in the template function itself (as we do for comps). Instead, we store the
  * TView for dynamically created views on their host TNode, which only has one instance.
  */
-export declare function renderEmbeddedTemplate<T>(viewToRender: LView, tView: TView, context: T, rf: RenderFlags): void;
+export declare function renderEmbeddedTemplate<T>(viewToRender: LView, tView: TView, context: T): void;
 /**
  * Retrieves a context at the level specified and saves it as the global, contextViewData.
  * Will get the next level up if level is not specified.
@@ -442,9 +442,8 @@ export declare function embeddedViewEnd(): void;
  * Refreshes components by entering the component view and processing its bindings, queries, etc.
  *
  * @param adjustedElementIndex  Element index in LView[] (adjusted for HEADER_OFFSET)
- * @param rf  The render flags that should be used to process this template
  */
-export declare function componentRefresh<T>(adjustedElementIndex: number, rf: RenderFlags | null): void;
+export declare function componentRefresh<T>(adjustedElementIndex: number): void;
 /** Returns a boolean for whether the view is attached */
 export declare function viewAttached(view: LView): boolean;
 /**
@@ -532,6 +531,7 @@ export declare function tick<T>(component: T): void;
  * @param component The component which the change detection should be performed on.
  */
 export declare function detectChanges<T>(component: T): void;
+export declare function detectChangesInternal<T>(view: LView, context: T): void;
 /**
  * Synchronously perform change detection on a root view and its components.
  *
@@ -556,7 +556,7 @@ export declare function checkNoChanges<T>(component: T): void;
  */
 export declare function checkNoChangesInRootView(lView: LView): void;
 /** Checks the view of the component provided. Does not gate on dirty checks or execute doCheck. */
-export declare function detectChangesInternal<T>(hostView: LView, component: T, rf: RenderFlags | null): void;
+export declare function checkView<T>(hostView: LView, component: T): void;
 /**
  * Mark the component as dirty (needing change detection).
  *
