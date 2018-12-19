@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-rc.0+2.sha-e8f7241
+ * @license Angular v7.2.0-rc.0+3.sha-8f8572f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2339,6 +2339,32 @@ function addAllToArray(items, arr) {
         arr.push(items[i]);
     }
 }
+/**
+ * Given a current view, finds the nearest component's host (LElement).
+ *
+ * @param {?} lView LView for which we want a host element node
+ * @param {?=} declarationMode indicates whether DECLARATION_VIEW or PARENT should be used to climb the
+ * tree.
+ * @return {?} The host node
+ */
+function findComponentView(lView, declarationMode) {
+    /** @type {?} */
+    let rootTNode = lView[HOST_NODE];
+    while (rootTNode && rootTNode.type === 2 /* View */) {
+        ngDevMode && assertDefined(lView[declarationMode ? DECLARATION_VIEW : PARENT], declarationMode ? 'lView.declarationView' : 'lView.parent');
+        lView = (/** @type {?} */ (lView[declarationMode ? DECLARATION_VIEW : PARENT]));
+        rootTNode = lView[HOST_NODE];
+    }
+    return lView;
+}
+/**
+ * Return the host TElementNode of the starting LView
+ * @param {?} lView the starting LView.
+ * @return {?}
+ */
+function getHostTElementNode(lView) {
+    return (/** @type {?} */ (findComponentView(lView, true)[HOST_NODE]));
+}
 
 /**
  * @fileoverview added by tsickle
@@ -2911,7 +2937,7 @@ function getInjectorIndex(tNode, hostView) {
  */
 function getParentInjectorLocation(tNode, view) {
     if (tNode.parent && tNode.parent.injectorIndex !== -1) {
-        return (/** @type {?} */ (tNode.parent.injectorIndex)); // ViewOffset is 0, AcrossHostBoundary is 0
+        return (/** @type {?} */ (tNode.parent.injectorIndex)); // ViewOffset is 0
     }
     // For most cases, the parent injector index can be found on the host node (e.g. for component
     // or container), so this loop will be skipped, but we must keep the loop here to support
@@ -2925,13 +2951,8 @@ function getParentInjectorLocation(tNode, view) {
         hostTNode = (/** @type {?} */ (view[HOST_NODE]));
         viewOffset++;
     }
-    /** @type {?} */
-    const acrossHostBoundary = hostTNode && hostTNode.type === 3 /* Element */ ?
-        32768 /* AcrossHostBoundary */ :
-        0;
     return hostTNode ?
-        hostTNode.injectorIndex | (viewOffset << 16 /* ViewOffsetShift */) |
-            acrossHostBoundary :
+        hostTNode.injectorIndex | (viewOffset << 16 /* ViewOffsetShift */) :
         (/** @type {?} */ (-1));
 }
 /**
@@ -3047,12 +3068,14 @@ function getOrCreateInjectable(tNode, lView, token, flags = InjectFlags.Default,
         let injectorIndex = getInjectorIndex(tNode, lView);
         /** @type {?} */
         let parentLocation = NO_PARENT_INJECTOR;
+        /** @type {?} */
+        let hostTElementNode = flags & InjectFlags.Host ? getHostTElementNode(lView) : null;
         // If we should skip this injector, or if there is no injector on this node, start by searching
         // the parent injector.
         if (injectorIndex === -1 || flags & InjectFlags.SkipSelf) {
             parentLocation = injectorIndex === -1 ? getParentInjectorLocation(tNode, lView) :
                 lView[injectorIndex + PARENT_INJECTOR];
-            if (!shouldSearchParent(flags, parentLocation)) {
+            if (!shouldSearchParent(flags, false)) {
                 injectorIndex = -1;
             }
             else {
@@ -3073,12 +3096,12 @@ function getOrCreateInjectable(tNode, lView, token, flags = InjectFlags.Default,
                 // the providers and directives associated with the injector's corresponding node to get
                 // the instance.
                 /** @type {?} */
-                const instance = searchTokensOnInjector(injectorIndex, lView, token, previousTView);
+                const instance = searchTokensOnInjector(injectorIndex, lView, token, previousTView, flags, hostTElementNode);
                 if (instance !== NOT_FOUND) {
                     return instance;
                 }
             }
-            if (shouldSearchParent(flags, parentLocation) &&
+            if (shouldSearchParent(flags, lView[TVIEW].data[injectorIndex + TNODE] === hostTElementNode) &&
                 bloomHasToken(bloomHash, injectorIndex, lView)) {
                 // The def wasn't found anywhere on this node, so it was a false positive.
                 // Traverse up the tree and continue searching.
@@ -3123,9 +3146,11 @@ const NOT_FOUND = {};
  * @param {?} lView
  * @param {?} token
  * @param {?} previousTView
+ * @param {?} flags
+ * @param {?} hostTElementNode
  * @return {?}
  */
-function searchTokensOnInjector(injectorIndex, lView, token, previousTView) {
+function searchTokensOnInjector(injectorIndex, lView, token, previousTView, flags, hostTElementNode) {
     /** @type {?} */
     const currentTView = lView[TVIEW];
     /** @type {?} */
@@ -3149,8 +3174,12 @@ function searchTokensOnInjector(injectorIndex, lView, token, previousTView) {
         // This means that we just came from the Component's View and therefore are allowed to see
         // into the ViewProviders.
         (previousTView != currentTView && (tNode.type === 3 /* Element */));
+    // This special case happens when there is a @host on the inject and when we are searching
+    // on the host element node.
     /** @type {?} */
-    const injectableIdx = locateDirectiveOrProvider(tNode, lView, token, canAccessViewProviders);
+    const isHostSpecialCase = (flags & InjectFlags.Host) && hostTElementNode === tNode;
+    /** @type {?} */
+    const injectableIdx = locateDirectiveOrProvider(tNode, lView, token, canAccessViewProviders, isHostSpecialCase);
     if (injectableIdx !== null) {
         return getNodeInjectable(currentTView.data, lView, injectableIdx, (/** @type {?} */ (tNode)));
     }
@@ -3166,13 +3195,12 @@ function searchTokensOnInjector(injectorIndex, lView, token, previousTView) {
  * @param {?} lView The view we are currently processing
  * @param {?} token Provider token or type of a directive to look for.
  * @param {?} canAccessViewProviders Whether view providers should be considered.
+ * @param {?} isHostSpecialCase Whether the host special case applies.
  * @return {?} Index of a found directive or provider, or null when none found.
  */
-function locateDirectiveOrProvider(tNode, lView, token, canAccessViewProviders) {
+function locateDirectiveOrProvider(tNode, lView, token, canAccessViewProviders, isHostSpecialCase) {
     /** @type {?} */
     const tView = lView[TVIEW];
-    /** @type {?} */
-    const nodeFlags = tNode.flags;
     /** @type {?} */
     const nodeProviderIndexes = tNode.providerIndexes;
     /** @type {?} */
@@ -3187,12 +3215,22 @@ function locateDirectiveOrProvider(tNode, lView, token, canAccessViewProviders) 
     const cptViewProvidersCount = nodeProviderIndexes >> 16 /* CptViewProvidersCountShift */;
     /** @type {?} */
     const startingIndex = canAccessViewProviders ? injectablesStart : injectablesStart + cptViewProvidersCount;
-    for (let i = startingIndex; i < directiveEnd; i++) {
+    // When the host special case applies, only the viewProviders and the component are visible
+    /** @type {?} */
+    const endIndex = isHostSpecialCase ? injectablesStart + cptViewProvidersCount : directiveEnd;
+    for (let i = startingIndex; i < endIndex; i++) {
         /** @type {?} */
         const providerTokenOrDef = (/** @type {?} */ (tInjectables[i]));
         if (i < directivesStart && token === providerTokenOrDef ||
             i >= directivesStart && ((/** @type {?} */ (providerTokenOrDef))).type === token) {
             return i;
+        }
+    }
+    if (isHostSpecialCase) {
+        /** @type {?} */
+        const dirDef = (/** @type {?} */ (tInjectables[directivesStart]));
+        if (dirDef && isComponentDef(dirDef) && dirDef.type === token) {
+            return directivesStart;
         }
     }
     return null;
@@ -3302,13 +3340,11 @@ function bloomHasToken(bloomHash, injectorIndex, injectorView) {
 /**
  * Returns true if flags prevent parent injector from being searched for tokens
  * @param {?} flags
- * @param {?} parentLocation
+ * @param {?} isFirstHostTNode
  * @return {?}
  */
-function shouldSearchParent(flags, parentLocation) {
-    return !(flags & InjectFlags.Self ||
-        (flags & InjectFlags.Host &&
-            (((/** @type {?} */ ((/** @type {?} */ (parentLocation))))) & 32768 /* AcrossHostBoundary */)));
+function shouldSearchParent(flags, isFirstHostTNode) {
+    return !(flags & InjectFlags.Self) && !(flags & InjectFlags.Host && isFirstHostTNode);
 }
 /**
  * @return {?}
@@ -4743,22 +4779,6 @@ function walkTNodeTree(viewToWalk, action, renderer, renderParent, beforeNode) {
         }
         tNode = nextTNode;
     }
-}
-/**
- * Given a current view, finds the nearest component's host (LElement).
- *
- * @param {?} lView LView for which we want a host element node
- * @return {?} The host node
- */
-function findComponentView(lView) {
-    /** @type {?} */
-    let rootTNode = lView[HOST_NODE];
-    while (rootTNode && rootTNode.type === 2 /* View */) {
-        ngDevMode && assertDefined(lView[PARENT], 'lView.parent');
-        lView = (/** @type {?} */ (lView[PARENT]));
-        rootTNode = lView[HOST_NODE];
-    }
-    return lView;
 }
 /**
  * NOTE: for performance reasons, the possible actions are inlined within the function instead of
@@ -13212,7 +13232,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.0-rc.0+2.sha-e8f7241');
+const VERSION = new Version('7.2.0-rc.0+3.sha-8f8572f');
 
 /**
  * @fileoverview added by tsickle
@@ -16717,7 +16737,7 @@ function queryByReadToken(read, tNode, currentView) {
     }
     else {
         /** @type {?} */
-        const matchingIdx = locateDirectiveOrProvider(tNode, currentView, (/** @type {?} */ (read)), false);
+        const matchingIdx = locateDirectiveOrProvider(tNode, currentView, (/** @type {?} */ (read)), false, false);
         if (matchingIdx !== null) {
             return getNodeInjectable(currentView[TVIEW].data, currentView, matchingIdx, (/** @type {?} */ (tNode)));
         }
@@ -16792,7 +16812,7 @@ function add(query, tNode) {
             }
             else {
                 /** @type {?} */
-                const matchingIdx = locateDirectiveOrProvider(tNode, currentView, type, false);
+                const matchingIdx = locateDirectiveOrProvider(tNode, currentView, type, false, false);
                 if (matchingIdx !== null) {
                     result = queryRead(tNode, currentView, predicate.read, matchingIdx);
                 }

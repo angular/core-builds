@@ -98,9 +98,10 @@ export declare function getOrCreateInjectable<T>(tNode: TElementNode | TContaine
  * @param lView The view we are currently processing
  * @param token Provider token or type of a directive to look for.
  * @param canAccessViewProviders Whether view providers should be considered.
+ * @param isHostSpecialCase Whether the host special case applies.
  * @returns Index of a found directive or provider, or null when none found.
  */
-export declare function locateDirectiveOrProvider<T>(tNode: TNode, lView: LView, token: Type<T> | InjectionToken<T>, canAccessViewProviders: boolean): number | null;
+export declare function locateDirectiveOrProvider<T>(tNode: TNode, lView: LView, token: Type<T> | InjectionToken<T>, canAccessViewProviders: boolean, isHostSpecialCase: boolean | number): number | null;
 /**
 * Retrieve or instantiate the injectable from the `lData` at particular `index`.
 *
