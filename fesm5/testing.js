@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-rc.0+21.sha-cdd737e
+ * @license Angular v7.2.0-rc.0+24.sha-bba5e26
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -764,7 +764,9 @@ var OverrideResolver = /** @class */ (function () {
         this.overrides.clear();
         overrides.forEach(function (_a) {
             var _b = __read(_a, 2), type = _b[0], override = _b[1];
-            return _this.overrides.set(type, override);
+            var overrides = _this.overrides.get(type) || [];
+            overrides.push(override);
+            _this.overrides.set(type, overrides);
         });
     };
     OverrideResolver.prototype.getAnnotation = function (type) {
@@ -772,14 +774,17 @@ var OverrideResolver = /** @class */ (function () {
         return reflection.annotations(type).find(function (a) { return a instanceof _this.type; }) || null;
     };
     OverrideResolver.prototype.resolve = function (type) {
+        var _this = this;
         var resolved = this.resolved.get(type) || null;
         if (!resolved) {
             resolved = this.getAnnotation(type);
             if (resolved) {
-                var override = this.overrides.get(type);
-                if (override) {
-                    var overrider = new MetadataOverrider();
-                    resolved = overrider.overrideMetadata(this.type, resolved, override);
+                var overrides = this.overrides.get(type);
+                if (overrides) {
+                    var overrider_1 = new MetadataOverrider();
+                    overrides.forEach(function (override) {
+                        resolved = overrider_1.overrideMetadata(_this.type, resolved, override);
+                    });
                 }
             }
             this.resolved.set(type, resolved);
