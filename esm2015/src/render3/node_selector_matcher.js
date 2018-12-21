@@ -73,7 +73,7 @@ export function isNodeMatchingSelector(tNode, selector, isProjectionMode) {
     /** @type {?} */
     const nodeAttrs = (/** @type {?} */ (tNode.attrs));
     /** @type {?} */
-    const selectOnlyMarkerIdx = nodeAttrs ? nodeAttrs.indexOf(1 /* SelectOnly */) : -1;
+    const selectOnlyMarkerIdx = nodeAttrs ? nodeAttrs.indexOf(3 /* SelectOnly */) : -1;
     // When processing ":not" selectors, we skip to the next ":not" if the
     // current one doesn't match
     /** @type {?} */
@@ -177,7 +177,7 @@ function findAttrIndexInNode(name, attrs) {
             i += 4;
         }
         else {
-            if (maybeAttrName === 1 /* SelectOnly */) {
+            if (maybeAttrName === 3 /* SelectOnly */) {
                 selectOnlyMode = true;
             }
             i += selectOnlyMode ? 1 : 2;

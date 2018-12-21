@@ -230,7 +230,7 @@ export function injectAttributeImpl(tNode, attrNameToInject) {
     if (attrs) {
         for (var i = 0; i < attrs.length; i = i + 2) {
             var attrName = attrs[i];
-            if (attrName === 1 /* SelectOnly */)
+            if (attrName === 3 /* SelectOnly */)
                 break;
             if (attrName == attrNameToInject) {
                 return attrs[i + 1];
