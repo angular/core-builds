@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-rc.0+21.sha-cdd737e
+ * @license Angular v7.2.0-rc.0+24.sha-bba5e26
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -872,7 +872,12 @@ class OverrideResolver {
      */
     setOverrides(overrides) {
         this.overrides.clear();
-        overrides.forEach(([type, override]) => this.overrides.set(type, override));
+        overrides.forEach(([type, override]) => {
+            /** @type {?} */
+            const overrides = this.overrides.get(type) || [];
+            overrides.push(override);
+            this.overrides.set(type, overrides);
+        });
     }
     /**
      * @param {?} type
@@ -892,11 +897,13 @@ class OverrideResolver {
             resolved = this.getAnnotation(type);
             if (resolved) {
                 /** @type {?} */
-                const override = this.overrides.get(type);
-                if (override) {
+                const overrides = this.overrides.get(type);
+                if (overrides) {
                     /** @type {?} */
                     const overrider = new MetadataOverrider();
-                    resolved = overrider.overrideMetadata(this.type, resolved, override);
+                    overrides.forEach(override => {
+                        resolved = overrider.overrideMetadata(this.type, (/** @type {?} */ (resolved)), override);
+                    });
                 }
             }
             this.resolved.set(type, resolved);
