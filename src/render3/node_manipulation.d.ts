@@ -22,13 +22,6 @@ export declare function getLContainer(tNode: TViewNode, embeddedView: LView): LC
  * Might be null if a view is not yet attached to any container.
  */
 export declare function getContainerRenderParent(tViewNode: TViewNode, view: LView): RElement | null;
-/**
- * Given a current view, finds the nearest component's host (LElement).
- *
- * @param lView LView for which we want a host element node
- * @returns The host node
- */
-export declare function findComponentView(lView: LView): LView;
 export declare function createTextNode(value: any, renderer: Renderer3): RText;
 /**
  * Adds or removes all DOM elements associated with a view.

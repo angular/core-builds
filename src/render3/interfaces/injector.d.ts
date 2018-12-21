@@ -24,7 +24,6 @@ export interface RelativeInjectorLocation {
 }
 export declare const enum RelativeInjectorLocationFlags {
     InjectorIndexMask = 32767,
-    AcrossHostBoundary = 32768,
     ViewOffsetShift = 16,
     NO_PARENT = -1
 }

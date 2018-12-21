@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-beta.2+91.sha-12c3176
+ * @license Angular v7.2.0-rc.0+25.sha-4b67b0a
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1664,10 +1664,10 @@
      *
      * @param currentView The current view
      */
-    function executeInitHooks(currentView, tView, creationMode) {
-        if (currentView[FLAGS] & 16 /* RunInit */) {
-            executeHooks(currentView, tView.initHooks, tView.checkHooks, creationMode);
-            currentView[FLAGS] &= ~16 /* RunInit */;
+    function executeInitHooks(currentView, tView, checkNoChangesMode) {
+        if (!checkNoChangesMode && currentView[FLAGS] & 32 /* RunInit */) {
+            executeHooks(currentView, tView.initHooks, tView.checkHooks, checkNoChangesMode);
+            currentView[FLAGS] &= ~32 /* RunInit */;
         }
     }
     /**
@@ -1675,15 +1675,17 @@
      *
      * @param currentView The current view
      */
-    function executeHooks(data, allHooks, checkHooks, creationMode) {
-        var hooksToCall = creationMode ? allHooks : checkHooks;
+    function executeHooks(currentView, allHooks, checkHooks, checkNoChangesMode) {
+        if (checkNoChangesMode)
+            return;
+        var hooksToCall = currentView[FLAGS] & 2 /* FirstLViewPass */ ? allHooks : checkHooks;
         if (hooksToCall) {
-            callHooks(data, hooksToCall);
+            callHooks(currentView, hooksToCall);
         }
     }
     /**
      * Calls lifecycle hooks with their contexts, skipping init hooks if it's not
-     * creation mode.
+     * the first LView pass.
      *
      * @param currentView The current view
      * @param arr The array in which the hooks are found
@@ -1833,7 +1835,7 @@
         return Array.isArray(value) && typeof value[ACTIVE_INDEX] === 'number';
     }
     function isRootView(target) {
-        return (target[FLAGS] & 64 /* IsRoot */) !== 0;
+        return (target[FLAGS] & 128 /* IsRoot */) !== 0;
     }
     /**
      * Retrieve the root view from any component by walking the parent `LView` until
@@ -1844,7 +1846,7 @@
     function getRootView(target) {
         ngDevMode && assertDefined(target, 'component');
         var lView = Array.isArray(target) ? target : readPatchedLView(target);
-        while (lView && !(lView[FLAGS] & 64 /* IsRoot */)) {
+        while (lView && !(lView[FLAGS] & 128 /* IsRoot */)) {
             lView = lView[PARENT];
         }
         return lView;
@@ -1945,6 +1947,30 @@
         for (var i = 0; i < items.length; i++) {
             arr.push(items[i]);
         }
+    }
+    /**
+     * Given a current view, finds the nearest component's host (LElement).
+     *
+     * @param lView LView for which we want a host element node
+     * @param declarationMode indicates whether DECLARATION_VIEW or PARENT should be used to climb the
+     * tree.
+     * @returns The host node
+     */
+    function findComponentView(lView, declarationMode) {
+        var rootTNode = lView[HOST_NODE];
+        while (rootTNode && rootTNode.type === 2 /* View */) {
+            ngDevMode && assertDefined(lView[declarationMode ? DECLARATION_VIEW : PARENT], declarationMode ? 'lView.declarationView' : 'lView.parent');
+            lView = lView[declarationMode ? DECLARATION_VIEW : PARENT];
+            rootTNode = lView[HOST_NODE];
+        }
+        return lView;
+    }
+    /**
+     * Return the host TElementNode of the starting LView
+     * @param lView the starting LView.
+     */
+    function getHostTElementNode(lView) {
+        return findComponentView(lView, true)[HOST_NODE];
     }
 
     /**
@@ -2100,13 +2126,10 @@
         }
         return currentQueries || (lView[QUERIES] = new QueryType(null, null, null));
     }
-    /**
-     * This property gets set before entering a template.
-     */
-    var creationMode;
-    function getCreationMode() {
-        // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-        return creationMode;
+    /** Checks whether a given view is in creation mode */
+    function isCreationMode(view) {
+        if (view === void 0) { view = lView; }
+        return (view[FLAGS] & 1 /* CreationMode */) === 1 /* CreationMode */;
     }
     /**
      * State of the current view being processed.
@@ -2176,7 +2199,6 @@
         var oldView = lView;
         if (newView) {
             var tView = newView[TVIEW];
-            creationMode = (newView[FLAGS] & 1 /* CreationMode */) === 1 /* CreationMode */;
             firstTemplatePass = tView.firstTemplatePass;
             bindingRootIndex = tView.bindingStartIndex;
         }
@@ -2212,20 +2234,19 @@
      * the direction of traversal (up or down the view tree) a bit clearer.
      *
      * @param newView New state to become active
-     * @param creationOnly An optional boolean to indicate that the view was processed in creation mode
-     * only, i.e. the first update will be done later. Only possible for dynamically created views.
      */
-    function leaveView(newView, creationOnly) {
+    function leaveView(newView) {
         var tView = lView[TVIEW];
-        if (!creationOnly) {
-            if (!checkNoChangesMode) {
-                executeHooks(lView, tView.viewHooks, tView.viewCheckHooks, creationMode);
-            }
-            // Views are clean and in update mode after being checked, so these bits are cleared
-            lView[FLAGS] &= ~(1 /* CreationMode */ | 4 /* Dirty */);
+        if (isCreationMode(lView)) {
+            lView[FLAGS] &= ~1 /* CreationMode */;
         }
-        lView[FLAGS] |= 16 /* RunInit */;
-        lView[BINDING_INDEX] = tView.bindingStartIndex;
+        else {
+            executeHooks(lView, tView.viewHooks, tView.viewCheckHooks, checkNoChangesMode);
+            // Views are clean and in update mode after being checked, so these bits are cleared
+            lView[FLAGS] &= ~(8 /* Dirty */ | 2 /* FirstLViewPass */);
+            lView[FLAGS] |= 32 /* RunInit */;
+            lView[BINDING_INDEX] = tView.bindingStartIndex;
+        }
         enterView(newView, null);
     }
 
@@ -2387,7 +2408,7 @@
      */
     function getParentInjectorLocation(tNode, view) {
         if (tNode.parent && tNode.parent.injectorIndex !== -1) {
-            return tNode.parent.injectorIndex; // ViewOffset is 0, AcrossHostBoundary is 0
+            return tNode.parent.injectorIndex; // ViewOffset is 0
         }
         // For most cases, the parent injector index can be found on the host node (e.g. for component
         // or container), so this loop will be skipped, but we must keep the loop here to support
@@ -2399,12 +2420,8 @@
             hostTNode = view[HOST_NODE];
             viewOffset++;
         }
-        var acrossHostBoundary = hostTNode && hostTNode.type === 3 /* Element */ ?
-            32768 /* AcrossHostBoundary */ :
-            0;
         return hostTNode ?
-            hostTNode.injectorIndex | (viewOffset << 16 /* ViewOffsetShift */) |
-                acrossHostBoundary :
+            hostTNode.injectorIndex | (viewOffset << 16 /* ViewOffsetShift */) :
             -1;
     }
     /**
@@ -2506,12 +2523,13 @@
             var previousTView = null;
             var injectorIndex = getInjectorIndex(tNode, lView);
             var parentLocation = NO_PARENT_INJECTOR;
+            var hostTElementNode = flags & exports.InjectFlags.Host ? getHostTElementNode(lView) : null;
             // If we should skip this injector, or if there is no injector on this node, start by searching
             // the parent injector.
             if (injectorIndex === -1 || flags & exports.InjectFlags.SkipSelf) {
                 parentLocation = injectorIndex === -1 ? getParentInjectorLocation(tNode, lView) :
                     lView[injectorIndex + PARENT_INJECTOR];
-                if (!shouldSearchParent(flags, parentLocation)) {
+                if (!shouldSearchParent(flags, false)) {
                     injectorIndex = -1;
                 }
                 else {
@@ -2530,12 +2548,12 @@
                     // At this point, we have an injector which *may* contain the token, so we step through
                     // the providers and directives associated with the injector's corresponding node to get
                     // the instance.
-                    var instance = searchTokensOnInjector(injectorIndex, lView, token, previousTView);
+                    var instance = searchTokensOnInjector(injectorIndex, lView, token, previousTView, flags, hostTElementNode);
                     if (instance !== NOT_FOUND) {
                         return instance;
                     }
                 }
-                if (shouldSearchParent(flags, parentLocation) &&
+                if (shouldSearchParent(flags, lView[TVIEW].data[injectorIndex + TNODE] === hostTElementNode) &&
                     bloomHasToken(bloomHash, injectorIndex, lView)) {
                     // The def wasn't found anywhere on this node, so it was a false positive.
                     // Traverse up the tree and continue searching.
@@ -2572,7 +2590,7 @@
         }
     }
     var NOT_FOUND = {};
-    function searchTokensOnInjector(injectorIndex, lView, token, previousTView) {
+    function searchTokensOnInjector(injectorIndex, lView, token, previousTView, flags, hostTElementNode) {
         var currentTView = lView[TVIEW];
         var tNode = currentTView.data[injectorIndex + TNODE];
         // First, we need to determine if view providers can be accessed by the starting element.
@@ -2593,7 +2611,10 @@
             // This means that we just came from the Component's View and therefore are allowed to see
             // into the ViewProviders.
             (previousTView != currentTView && (tNode.type === 3 /* Element */));
-        var injectableIdx = locateDirectiveOrProvider(tNode, lView, token, canAccessViewProviders);
+        // This special case happens when there is a @host on the inject and when we are searching
+        // on the host element node.
+        var isHostSpecialCase = (flags & exports.InjectFlags.Host) && hostTElementNode === tNode;
+        var injectableIdx = locateDirectiveOrProvider(tNode, lView, token, canAccessViewProviders, isHostSpecialCase);
         if (injectableIdx !== null) {
             return getNodeInjectable(currentTView.data, lView, injectableIdx, tNode);
         }
@@ -2608,11 +2629,11 @@
      * @param lView The view we are currently processing
      * @param token Provider token or type of a directive to look for.
      * @param canAccessViewProviders Whether view providers should be considered.
+     * @param isHostSpecialCase Whether the host special case applies.
      * @returns Index of a found directive or provider, or null when none found.
      */
-    function locateDirectiveOrProvider(tNode, lView, token, canAccessViewProviders) {
+    function locateDirectiveOrProvider(tNode, lView, token, canAccessViewProviders, isHostSpecialCase) {
         var tView = lView[TVIEW];
-        var nodeFlags = tNode.flags;
         var nodeProviderIndexes = tNode.providerIndexes;
         var tInjectables = tView.data;
         var injectablesStart = nodeProviderIndexes & 65535 /* ProvidersStartIndexMask */;
@@ -2620,11 +2641,19 @@
         var directiveEnd = tNode.directiveEnd;
         var cptViewProvidersCount = nodeProviderIndexes >> 16 /* CptViewProvidersCountShift */;
         var startingIndex = canAccessViewProviders ? injectablesStart : injectablesStart + cptViewProvidersCount;
-        for (var i = startingIndex; i < directiveEnd; i++) {
+        // When the host special case applies, only the viewProviders and the component are visible
+        var endIndex = isHostSpecialCase ? injectablesStart + cptViewProvidersCount : directiveEnd;
+        for (var i = startingIndex; i < endIndex; i++) {
             var providerTokenOrDef = tInjectables[i];
             if (i < directivesStart && token === providerTokenOrDef ||
                 i >= directivesStart && providerTokenOrDef.type === token) {
                 return i;
+            }
+        }
+        if (isHostSpecialCase) {
+            var dirDef = tInjectables[directivesStart];
+            if (dirDef && isComponentDef(dirDef) && dirDef.type === token) {
+                return directivesStart;
             }
         }
         return null;
@@ -2709,10 +2738,8 @@
         return !!(value & mask);
     }
     /** Returns true if flags prevent parent injector from being searched for tokens */
-    function shouldSearchParent(flags, parentLocation) {
-        return !(flags & exports.InjectFlags.Self ||
-            (flags & exports.InjectFlags.Host &&
-                (parentLocation & 32768 /* AcrossHostBoundary */)));
+    function shouldSearchParent(flags, isFirstHostTNode) {
+        return !(flags & exports.InjectFlags.Self) && !(flags & exports.InjectFlags.Host && isFirstHostTNode);
     }
     function injectInjector() {
         var tNode = getPreviousOrParentTNode();
@@ -3124,7 +3151,7 @@
             // As long as lView[HOST] is null we know we are part of sub-template such as `*ngIf`
             lView = lView[PARENT];
         }
-        return lView[FLAGS] & 64 /* IsRoot */ ? null : lView[CONTEXT];
+        return lView[FLAGS] & 128 /* IsRoot */ ? null : lView[CONTEXT];
     }
     /**
      * Returns the `RootContext` instance that is associated with
@@ -3229,7 +3256,7 @@
             ngDevMode && assertDefined(componentOrView, 'component');
             lView = readPatchedLView(componentOrView);
         }
-        while (lView && !(lView[FLAGS] & 64 /* IsRoot */)) {
+        while (lView && !(lView[FLAGS] & 128 /* IsRoot */)) {
             lView = lView[PARENT];
         }
         return lView;
@@ -3592,7 +3619,7 @@
         else if (isDifferent(lView[bindingIndex], value)) {
             if (ngDevMode && getCheckNoChangesMode()) {
                 if (!devModeEqual(lView[bindingIndex], value)) {
-                    throwErrorIfNoChangesMode(getCreationMode(), lView[bindingIndex], value);
+                    throwErrorIfNoChangesMode(isCreationMode(lView), lView[bindingIndex], value);
                 }
             }
             lView[bindingIndex] = value;
@@ -3815,21 +3842,6 @@
         }
     }
     /**
-     * Given a current view, finds the nearest component's host (LElement).
-     *
-     * @param lView LView for which we want a host element node
-     * @returns The host node
-     */
-    function findComponentView(lView) {
-        var rootTNode = lView[HOST_NODE];
-        while (rootTNode && rootTNode.type === 2 /* View */) {
-            ngDevMode && assertDefined(lView[PARENT], 'lView.parent');
-            lView = lView[PARENT];
-            rootTNode = lView[HOST_NODE];
-        }
-        return lView;
-    }
-    /**
      * NOTE: for performance reasons, the possible actions are inlined within the function instead of
      * being passed as an argument.
      */
@@ -3946,7 +3958,7 @@
             lView[QUERIES].insertView(index);
         }
         // Sets the attached flag
-        lView[FLAGS] |= 8 /* Attached */;
+        lView[FLAGS] |= 16 /* Attached */;
     }
     /**
      * Detaches a view from a container.
@@ -3975,7 +3987,7 @@
         viewToDetach[CONTAINER_INDEX] = -1;
         viewToDetach[PARENT] = null;
         // Unsets the attached flag
-        viewToDetach[FLAGS] &= ~8 /* Attached */;
+        viewToDetach[FLAGS] &= ~16 /* Attached */;
         return viewToDetach;
     }
     /**
@@ -4008,7 +4020,7 @@
         }
         destroyViewTree(view);
         // Sets the destroyed flag
-        view[FLAGS] |= 32 /* Destroyed */;
+        view[FLAGS] |= 64 /* Destroyed */;
     }
     /**
      * Determines which LViewOrLContainer to jump to when traversing back up the
@@ -5531,29 +5543,23 @@
      * bindings, refreshes child components.
      * Note: view hooks are triggered later when leaving the view.
      */
-    function refreshDescendantViews(lView, rf) {
+    function refreshDescendantViews(lView) {
         var tView = lView[TVIEW];
         // This needs to be set before children are processed to support recursive components
         tView.firstTemplatePass = false;
         setFirstTemplatePass(false);
-        // Dynamically created views must run first only in creation mode. If this is a
-        // creation-only pass, we should not call lifecycle hooks or evaluate bindings.
-        // This will be done in the update-only pass.
-        if (rf !== 1 /* Create */) {
-            var creationMode = getCreationMode();
+        // If this is a creation pass, we should not call lifecycle hooks or evaluate bindings.
+        // This will be done in the update pass.
+        if (!isCreationMode(lView)) {
             var checkNoChangesMode = getCheckNoChangesMode();
-            if (!checkNoChangesMode) {
-                executeInitHooks(lView, tView, creationMode);
-            }
+            executeInitHooks(lView, tView, checkNoChangesMode);
             refreshDynamicEmbeddedViews(lView);
             // Content query results must be refreshed before content hooks are called.
             refreshContentQueries(tView);
-            if (!checkNoChangesMode) {
-                executeHooks(lView, tView.contentHooks, tView.contentCheckHooks, creationMode);
-            }
+            executeHooks(lView, tView.contentHooks, tView.contentCheckHooks, checkNoChangesMode);
             setHostBindings(tView, lView);
         }
-        refreshChildComponents(tView.components, rf);
+        refreshChildComponents(tView.components);
     }
     /** Sets the host bindings for the current view. */
     function setHostBindings(tView, viewData) {
@@ -5604,16 +5610,17 @@
         }
     }
     /** Refreshes child components in the current view. */
-    function refreshChildComponents(components, rf) {
+    function refreshChildComponents(components) {
         if (components != null) {
             for (var i = 0; i < components.length; i++) {
-                componentRefresh(components[i], rf);
+                componentRefresh(components[i]);
             }
         }
     }
     function createLView(parentLView, tView, context, flags, rendererFactory, renderer, sanitizer, injector) {
         var lView = tView.blueprint.slice();
-        lView[FLAGS] = flags | 1 /* CreationMode */ | 8 /* Attached */ | 16 /* RunInit */;
+        lView[FLAGS] = flags | 1 /* CreationMode */ | 16 /* Attached */ | 32 /* RunInit */ |
+            2 /* FirstLViewPass */;
         lView[PARENT] = lView[DECLARATION_VIEW] = parentLView;
         lView[CONTEXT] = context;
         lView[RENDERER_FACTORY] = (rendererFactory || parentLView && parentLView[RENDERER_FACTORY]);
@@ -5690,7 +5697,7 @@
         var _previousOrParentTNode = getPreviousOrParentTNode();
         setIsParent(true);
         setPreviousOrParentTNode(null);
-        var lView = createLView(declarationView, tView, context, 2 /* CheckAlways */);
+        var lView = createLView(declarationView, tView, context, 4 /* CheckAlways */);
         lView[DECLARATION_VIEW] = declarationView;
         if (queries) {
             lView[QUERIES] = queries.createView();
@@ -5713,13 +5720,13 @@
      * can't store TViews in the template function itself (as we do for comps). Instead, we store the
      * TView for dynamically created views on their host TNode, which only has one instance.
      */
-    function renderEmbeddedTemplate(viewToRender, tView, context, rf) {
+    function renderEmbeddedTemplate(viewToRender, tView, context) {
         var _isParent = getIsParent();
         var _previousOrParentTNode = getPreviousOrParentTNode();
         setIsParent(true);
         setPreviousOrParentTNode(null);
         var oldView;
-        if (viewToRender[FLAGS] & 64 /* IsRoot */) {
+        if (viewToRender[FLAGS] & 128 /* IsRoot */) {
             // This is a root view inside the view tree
             tickRootContext(getRootContext(viewToRender));
         }
@@ -5729,24 +5736,17 @@
                 setPreviousOrParentTNode(null);
                 oldView = enterView(viewToRender, viewToRender[HOST_NODE]);
                 namespaceHTML();
-                tView.template(rf, context);
-                if (rf & 2 /* Update */) {
-                    refreshDescendantViews(viewToRender, null);
-                }
-                else {
-                    // This must be set to false immediately after the first creation run because in an
-                    // ngFor loop, all the views will be created together before update mode runs and turns
-                    // off firstTemplatePass. If we don't set it here, instances will perform directive
-                    // matching, etc again and again.
-                    viewToRender[TVIEW].firstTemplatePass = false;
-                    setFirstTemplatePass(false);
-                }
+                tView.template(getRenderFlags(viewToRender), context);
+                // This must be set to false immediately after the first creation run because in an
+                // ngFor loop, all the views will be created together before update mode runs and turns
+                // off firstTemplatePass. If we don't set it here, instances will perform directive
+                // matching, etc again and again.
+                viewToRender[TVIEW].firstTemplatePass = false;
+                setFirstTemplatePass(false);
+                refreshDescendantViews(viewToRender);
             }
             finally {
-                // renderEmbeddedTemplate() is called twice, once for creation only and then once for
-                // update. When for creation only, leaveView() must not trigger view hooks, nor clean flags.
-                var isCreationOnly = (rf & 1 /* Create */) === 1 /* Create */;
-                leaveView(oldView, isCreationOnly);
+                leaveView(oldView);
                 setIsParent(_isParent);
                 setPreviousOrParentTNode(_previousOrParentTNode);
             }
@@ -5766,18 +5766,25 @@
         if (level === void 0) { level = 1; }
         return nextContextImpl(level);
     }
-    function renderComponentOrTemplate(hostView, componentOrContext, rf, templateFn) {
+    function renderComponentOrTemplate(hostView, context, templateFn) {
         var rendererFactory = hostView[RENDERER_FACTORY];
         var oldView = enterView(hostView, hostView[HOST_NODE]);
         try {
             if (rendererFactory.begin) {
                 rendererFactory.begin();
             }
-            if (templateFn) {
-                namespaceHTML();
-                templateFn(rf || getRenderFlags(hostView), componentOrContext);
+            if (isCreationMode(hostView)) {
+                // creation mode pass
+                if (templateFn) {
+                    namespaceHTML();
+                    templateFn(1 /* Create */, context);
+                }
+                refreshDescendantViews(hostView);
+                hostView[FLAGS] &= ~1 /* CreationMode */;
             }
-            refreshDescendantViews(hostView, rf);
+            // update mode pass
+            templateFn && templateFn(2 /* Update */, context);
+            refreshDescendantViews(hostView);
         }
         finally {
             if (rendererFactory.end) {
@@ -5788,16 +5795,11 @@
     }
     /**
      * This function returns the default configuration of rendering flags depending on when the
-     * template is in creation mode or update mode. By default, the update block is run with the
-     * creation block when the view is in creation mode. Otherwise, the update block is run
-     * alone.
-     *
-     * Dynamically created views do NOT use this configuration (update block and create block are
-     * always run separately).
+     * template is in creation mode or update mode. Update block and create block are
+     * always run separately.
      */
     function getRenderFlags(view) {
-        return view[FLAGS] & 1 /* CreationMode */ ? 1 /* Create */ | 2 /* Update */ :
-            2 /* Update */;
+        return isCreationMode(view) ? 1 /* Create */ : 2 /* Update */;
     }
     //////////////////////////
     //// Namespace
@@ -6446,7 +6448,7 @@
      */
     function elementStyling(classDeclarations, styleDeclarations, styleSanitizer, directive) {
         if (directive != undefined) {
-            getCreationMode() &&
+            isCreationMode() &&
                 hackImplementationOfElementStyling(classDeclarations || null, styleDeclarations || null, styleSanitizer || null, directive); // supported in next PR
             return;
         }
@@ -6492,7 +6494,7 @@
             return hackImplementationOfElementStylingApply(index, directive); // supported in next PR
         }
         var lView = getLView();
-        var isFirstRender = (lView[FLAGS] & 1 /* CreationMode */) !== 0;
+        var isFirstRender = (lView[FLAGS] & 2 /* FirstLViewPass */) !== 0;
         var totalPlayersQueued = renderStyleAndClassBindings(getStylingContext(index + HEADER_OFFSET, lView), lView[RENDERER], lView, isFirstRender);
         if (totalPlayersQueued > 0) {
             var rootContext = getRootContext(lView);
@@ -6953,7 +6955,7 @@
         // Only component views should be added to the view tree directly. Embedded views are
         // accessed through their containers because they may be removed / re-added later.
         var rendererFactory = lView[RENDERER_FACTORY];
-        var componentView = addToViewTree(lView, previousOrParentTNode.index, createLView(lView, tView, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, rendererFactory, lView[RENDERER_FACTORY].createRenderer(native, def)));
+        var componentView = addToViewTree(lView, previousOrParentTNode.index, createLView(lView, tView, null, def.onPush ? 8 /* Dirty */ : 4 /* CheckAlways */, rendererFactory, lView[RENDERER_FACTORY].createRenderer(native, def)));
         componentView[HOST_NODE] = previousOrParentTNode;
         // Component view will always be created before any injected LContainers,
         // so this is a regular element, wrap it with the component view
@@ -7131,11 +7133,9 @@
         ngDevMode && assertNodeType(previousOrParentTNode, 0 /* Container */);
         setIsParent(true);
         lView[index + HEADER_OFFSET][ACTIVE_INDEX] = 0;
-        if (!getCheckNoChangesMode()) {
-            // We need to execute init hooks here so ngOnInit hooks are called in top level views
-            // before they are called in embedded views (for backwards compatibility).
-            executeInitHooks(lView, tView, getCreationMode());
-        }
+        // We need to execute init hooks here so ngOnInit hooks are called in top level views
+        // before they are called in embedded views (for backwards compatibility).
+        executeInitHooks(lView, tView, getCheckNoChangesMode());
     }
     /**
      * Marks the end of the LContainer.
@@ -7176,7 +7176,7 @@
                     var dynamicViewData = container_1[VIEWS][i];
                     // The directives and pipes are not needed here as an existing view is only being refreshed.
                     ngDevMode && assertDefined(dynamicViewData[TVIEW], 'TView must be allocated');
-                    renderEmbeddedTemplate(dynamicViewData, dynamicViewData[TVIEW], dynamicViewData[CONTEXT], 2 /* Update */);
+                    renderEmbeddedTemplate(dynamicViewData, dynamicViewData[TVIEW], dynamicViewData[CONTEXT]);
                 }
             }
         }
@@ -7233,7 +7233,7 @@
         }
         else {
             // When we create a new LView, we always reset the state of the instructions.
-            viewToRender = createLView(lView, getOrCreateEmbeddedTView(viewBlockId, consts, vars, containerTNode), null, 2 /* CheckAlways */);
+            viewToRender = createLView(lView, getOrCreateEmbeddedTView(viewBlockId, consts, vars, containerTNode), null, 4 /* CheckAlways */);
             if (lContainer[QUERIES]) {
                 viewToRender[QUERIES] = lContainer[QUERIES].createView();
             }
@@ -7241,13 +7241,14 @@
             enterView(viewToRender, viewToRender[TVIEW].node);
         }
         if (lContainer) {
-            if (getCreationMode()) {
+            if (isCreationMode(viewToRender)) {
                 // it is a new view, insert it into collection of views for a given container
                 insertView(viewToRender, lContainer, lView, lContainer[ACTIVE_INDEX], -1);
             }
             lContainer[ACTIVE_INDEX]++;
         }
-        return getRenderFlags(viewToRender);
+        return isCreationMode(viewToRender) ? 1 /* Create */ | 2 /* Update */ :
+            2 /* Update */;
     }
     /**
      * Initialize the TView (e.g. static data) for the active embedded view.
@@ -7277,7 +7278,11 @@
     function embeddedViewEnd() {
         var lView = getLView();
         var viewHost = lView[HOST_NODE];
-        refreshDescendantViews(lView, null);
+        if (isCreationMode(lView)) {
+            refreshDescendantViews(lView); // creation mode pass
+            lView[FLAGS] &= ~1 /* CreationMode */;
+        }
+        refreshDescendantViews(lView); // update mode pass
         leaveView(lView[PARENT]);
         setPreviousOrParentTNode(viewHost);
         setIsParent(false);
@@ -7287,17 +7292,16 @@
      * Refreshes components by entering the component view and processing its bindings, queries, etc.
      *
      * @param adjustedElementIndex  Element index in LView[] (adjusted for HEADER_OFFSET)
-     * @param rf  The render flags that should be used to process this template
      */
-    function componentRefresh(adjustedElementIndex, rf) {
+    function componentRefresh(adjustedElementIndex) {
         var lView = getLView();
         ngDevMode && assertDataInRange(lView, adjustedElementIndex);
         var hostView = getComponentViewByIndex(adjustedElementIndex, lView);
         ngDevMode && assertNodeType(lView[TVIEW].data[adjustedElementIndex], 3 /* Element */);
         // Only attached CheckAlways components or attached, dirty OnPush components should be checked
-        if (viewAttached(hostView) && hostView[FLAGS] & (2 /* CheckAlways */ | 4 /* Dirty */)) {
+        if (viewAttached(hostView) && hostView[FLAGS] & (4 /* CheckAlways */ | 8 /* Dirty */)) {
             syncViewWithBlueprint(hostView);
-            detectChangesInternal(hostView, hostView[CONTEXT], rf);
+            checkView(hostView, hostView[CONTEXT]);
         }
     }
     /**
@@ -7334,7 +7338,7 @@
     }
     /** Returns a boolean for whether the view is attached */
     function viewAttached(view) {
-        return (view[FLAGS] & 8 /* Attached */) === 8 /* Attached */;
+        return (view[FLAGS] & 16 /* Attached */) === 16 /* Attached */;
     }
     /**
      * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
@@ -7470,8 +7474,8 @@
     /** If node is an OnPush component, marks its LView dirty. */
     function markDirtyIfOnPush(lView, viewIndex) {
         var childComponentLView = getComponentViewByIndex(viewIndex, lView);
-        if (!(childComponentLView[FLAGS] & 2 /* CheckAlways */)) {
-            childComponentLView[FLAGS] |= 4 /* Dirty */;
+        if (!(childComponentLView[FLAGS] & 4 /* CheckAlways */)) {
+            childComponentLView[FLAGS] |= 8 /* Dirty */;
         }
     }
     /** Wraps an event listener with preventDefault behavior. */
@@ -7486,11 +7490,11 @@
     }
     /** Marks current view and all ancestors dirty */
     function markViewDirty(lView) {
-        while (lView && !(lView[FLAGS] & 64 /* IsRoot */)) {
-            lView[FLAGS] |= 4 /* Dirty */;
+        while (lView && !(lView[FLAGS] & 128 /* IsRoot */)) {
+            lView[FLAGS] |= 8 /* Dirty */;
             lView = lView[PARENT];
         }
-        lView[FLAGS] |= 4 /* Dirty */;
+        lView[FLAGS] |= 8 /* Dirty */;
         ngDevMode && assertDefined(lView[CONTEXT], 'rootContext should be defined');
         var rootContext = lView[CONTEXT];
         scheduleTick(rootContext, 1 /* DetectChanges */);
@@ -7532,7 +7536,7 @@
     function tickRootContext(rootContext) {
         for (var i = 0; i < rootContext.components.length; i++) {
             var rootComponent = rootContext.components[i];
-            renderComponentOrTemplate(readPatchedLView(rootComponent), rootComponent, 2 /* Update */);
+            renderComponentOrTemplate(readPatchedLView(rootComponent), rootComponent);
         }
     }
     /**
@@ -7549,7 +7553,19 @@
      * @param component The component which the change detection should be performed on.
      */
     function detectChanges(component) {
-        detectChangesInternal(getComponentViewByInstance(component), component, null);
+        var view = getComponentViewByInstance(component);
+        detectChangesInternal(view, component);
+    }
+    function detectChangesInternal(view, context) {
+        var rendererFactory = view[RENDERER_FACTORY];
+        if (rendererFactory.begin)
+            rendererFactory.begin();
+        if (isCreationMode(view)) {
+            checkView(view, context); // creation mode pass
+        }
+        checkView(view, context); // update mode pass
+        if (rendererFactory.end)
+            rendererFactory.end();
     }
     /**
      * Synchronously perform change detection on a root view and its components.
@@ -7593,30 +7609,29 @@
         }
     }
     /** Checks the view of the component provided. Does not gate on dirty checks or execute doCheck. */
-    function detectChangesInternal(hostView, component, rf) {
+    function checkView(hostView, component) {
         var hostTView = hostView[TVIEW];
         var oldView = enterView(hostView, hostView[HOST_NODE]);
         var templateFn = hostTView.template;
         var viewQuery = hostTView.viewQuery;
         try {
             namespaceHTML();
-            createViewQuery(viewQuery, rf, hostView[FLAGS], component);
-            templateFn(rf || getRenderFlags(hostView), component);
-            refreshDescendantViews(hostView, rf);
-            updateViewQuery(viewQuery, hostView[FLAGS], component);
+            createViewQuery(viewQuery, hostView, component);
+            templateFn(getRenderFlags(hostView), component);
+            refreshDescendantViews(hostView);
+            updateViewQuery(viewQuery, hostView, component);
         }
         finally {
-            leaveView(oldView, rf === 1 /* Create */);
+            leaveView(oldView);
         }
     }
-    function createViewQuery(viewQuery, renderFlags, viewFlags, component) {
-        if (viewQuery && (renderFlags === 1 /* Create */ ||
-            (renderFlags === null && (viewFlags & 1 /* CreationMode */)))) {
+    function createViewQuery(viewQuery, view, component) {
+        if (viewQuery && isCreationMode(view)) {
             viewQuery(1 /* Create */, component);
         }
     }
-    function updateViewQuery(viewQuery, flags, component) {
-        if (viewQuery && flags & 2 /* Update */) {
+    function updateViewQuery(viewQuery, view, component) {
+        if (viewQuery && !isCreationMode(view)) {
             viewQuery(2 /* Update */, component);
         }
     }
@@ -8035,8 +8050,8 @@
         // The first index of the first selector is the tag name.
         var componentTag = componentDef.selectors[0][0];
         var hostRNode = locateHostElement(rendererFactory, opts.host || componentTag);
-        var rootFlags = componentDef.onPush ? 4 /* Dirty */ | 64 /* IsRoot */ :
-            2 /* CheckAlways */ | 64 /* IsRoot */;
+        var rootFlags = componentDef.onPush ? 8 /* Dirty */ | 128 /* IsRoot */ :
+            4 /* CheckAlways */ | 128 /* IsRoot */;
         var rootContext = createRootContext(opts.scheduler, opts.playerHandler);
         var renderer = rendererFactory.createRenderer(hostRNode, componentDef);
         var rootView = createLView(null, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags, rendererFactory, renderer, undefined, opts.injector || null);
@@ -8047,7 +8062,9 @@
                 rendererFactory.begin();
             var componentView = createRootComponentView(hostRNode, componentDef, rootView, rendererFactory, renderer, sanitizer);
             component = createRootComponent(componentView, componentDef, rootView, rootContext, opts.hostFeatures || null);
-            refreshDescendantViews(rootView, null);
+            refreshDescendantViews(rootView); // creation mode pass
+            rootView[FLAGS] &= ~1 /* CreationMode */;
+            refreshDescendantViews(rootView); // update mode pass
         }
         finally {
             leaveView(oldView);
@@ -8070,7 +8087,7 @@
     function createRootComponentView(rNode, def, rootView, rendererFactory, renderer, sanitizer) {
         resetComponentState();
         var tView = rootView[TVIEW];
-        var componentView = createLView(rootView, getOrCreateTView(def.template, def.consts, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery), null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, rendererFactory, renderer, sanitizer);
+        var componentView = createLView(rootView, getOrCreateTView(def.template, def.consts, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery), null, def.onPush ? 8 /* Dirty */ : 4 /* CheckAlways */, rendererFactory, renderer, sanitizer);
         var tNode = createNodeAtIndex(0, 3 /* Element */, rNode, null, null);
         if (tView.firstTemplatePass) {
             diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, rootView), rootView, def.type);
@@ -9609,7 +9626,7 @@
         });
         Object.defineProperty(ViewRef.prototype, "destroyed", {
             get: function () {
-                return (this._lView[FLAGS] & 32 /* Destroyed */) === 32 /* Destroyed */;
+                return (this._lView[FLAGS] & 64 /* Destroyed */) === 64 /* Destroyed */;
             },
             enumerable: true,
             configurable: true
@@ -9716,7 +9733,7 @@
          * }
          * ```
          */
-        ViewRef.prototype.detach = function () { this._lView[FLAGS] &= ~8 /* Attached */; };
+        ViewRef.prototype.detach = function () { this._lView[FLAGS] &= ~16 /* Attached */; };
         /**
          * Re-attaches a view to the change detection tree.
          *
@@ -9773,7 +9790,7 @@
          * }
          * ```
          */
-        ViewRef.prototype.reattach = function () { this._lView[FLAGS] |= 8 /* Attached */; };
+        ViewRef.prototype.reattach = function () { this._lView[FLAGS] |= 16 /* Attached */; };
         /**
          * Checks the view and its children.
          *
@@ -9795,16 +9812,7 @@
          *
          * See {@link ChangeDetectorRef#detach detach} for more information.
          */
-        ViewRef.prototype.detectChanges = function () {
-            var rendererFactory = this._lView[RENDERER_FACTORY];
-            if (rendererFactory.begin) {
-                rendererFactory.begin();
-            }
-            detectChangesInternal(this._lView, this.context, null);
-            if (rendererFactory.end) {
-                rendererFactory.end();
-            }
-        };
+        ViewRef.prototype.detectChanges = function () { detectChangesInternal(this._lView, this.context); };
         /**
          * Checks the change detector and its children, and throws if any changes are detected.
          *
@@ -9934,7 +9942,7 @@
                     if (container$$1) {
                         insertView(lView, container$$1, hostView, index, hostTNode.index);
                     }
-                    renderEmbeddedTemplate(lView, this._tView, context, 1 /* Create */);
+                    renderEmbeddedTemplate(lView, this._tView, context);
                     var viewRef = new ViewRef(lView, context, -1);
                     viewRef._tViewNode = lView[HOST_NODE];
                     return viewRef;
@@ -10344,7 +10352,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0-beta.2+91.sha-12c3176');
+    var VERSION = new Version('7.2.0-rc.0+25.sha-4b67b0a');
 
     /**
      * @license
@@ -10451,8 +10459,8 @@
             var hostRNode = isInternalRootView ?
                 elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef)) :
                 locateHostElement(rendererFactory, rootSelectorOrNode);
-            var rootFlags = this.componentDef.onPush ? 4 /* Dirty */ | 64 /* IsRoot */ :
-                2 /* CheckAlways */ | 64 /* IsRoot */;
+            var rootFlags = this.componentDef.onPush ? 8 /* Dirty */ | 128 /* IsRoot */ :
+                4 /* CheckAlways */ | 128 /* IsRoot */;
             var rootContext = !isInternalRootView ? rootViewInjector.get(ROOT_CONTEXT) : createRootContext();
             var renderer = rendererFactory.createRenderer(hostRNode, this.componentDef);
             if (rootSelectorOrNode && hostRNode) {
@@ -10505,10 +10513,10 @@
                 // Angular 5 reference: https://stackblitz.com/edit/lifecycle-hooks-vcref
                 component = createRootComponent(componentView, this.componentDef, rootLView, rootContext, [LifecycleHooksFeature]);
                 addToViewTree(rootLView, HEADER_OFFSET, componentView);
-                refreshDescendantViews(rootLView, 1 /* Create */);
+                refreshDescendantViews(rootLView);
             }
             finally {
-                leaveView(oldLView, true);
+                leaveView(oldLView);
                 if (rendererFactory.end)
                     rendererFactory.end();
             }
@@ -12645,7 +12653,7 @@
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
         var bindingIndex = getBindingRoot() + slotOffset;
         var lView = getLView();
-        return getCreationMode() ?
+        return isCreationMode() ?
             updateBinding(lView, bindingIndex, thisArg ? pureFn.call(thisArg) : pureFn()) :
             getBinding(lView, bindingIndex);
     }
@@ -13326,7 +13334,7 @@
             return factoryFn();
         }
         else {
-            var matchingIdx = locateDirectiveOrProvider(tNode, currentView, read, false);
+            var matchingIdx = locateDirectiveOrProvider(tNode, currentView, read, false, false);
             if (matchingIdx !== null) {
                 return getNodeInjectable(currentView[TVIEW].data, currentView, matchingIdx, tNode);
             }
@@ -13371,7 +13379,7 @@
                     result = queryByTemplateRef(type, tNode, currentView, predicate.read);
                 }
                 else {
-                    var matchingIdx = locateDirectiveOrProvider(tNode, currentView, type, false);
+                    var matchingIdx = locateDirectiveOrProvider(tNode, currentView, type, false, false);
                     if (matchingIdx !== null) {
                         result = queryRead(tNode, currentView, predicate.read, matchingIdx);
                     }
@@ -14787,7 +14795,7 @@
                         error.push("Did you run and wait for 'resolveComponentResources()'?");
                         throw new Error(error.join('\n'));
                     }
-                    var meta = __assign({}, directiveMetadata(type, metadata), { template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, viewQueries: extractQueriesMetadata(type, getReflect().propMetadata(type), isViewQuery), directives: [], pipes: new Map(), encapsulation: metadata.encapsulation || exports.ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
+                    var meta = __assign({}, directiveMetadata(type, metadata), { template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, viewQueries: extractQueriesMetadata(type, getReflect().propMetadata(type), isViewQuery), directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || exports.ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
                     ngComponentDef = compiler.compileComponent(angularCoreEnv, "ng://" + stringify(type) + "/template.html", meta);
                     // When NgModule decorator executed, we enqueued the module definition such that
                     // it would only dequeue and add itself as module scope to all of its declarations,
