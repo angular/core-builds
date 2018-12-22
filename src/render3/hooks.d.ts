@@ -30,16 +30,16 @@ export declare function queueLifecycleHooks(tView: TView, tNode: TNode): void;
  *
  * @param currentView The current view
  */
-export declare function executeInitHooks(currentView: LView, tView: TView, creationMode: boolean): void;
+export declare function executeInitHooks(currentView: LView, tView: TView, checkNoChangesMode: boolean): void;
 /**
  * Iterates over afterViewInit and afterViewChecked functions and calls them.
  *
  * @param currentView The current view
  */
-export declare function executeHooks(data: LView, allHooks: HookData | null, checkHooks: HookData | null, creationMode: boolean): void;
+export declare function executeHooks(currentView: LView, allHooks: HookData | null, checkHooks: HookData | null, checkNoChangesMode: boolean): void;
 /**
  * Calls lifecycle hooks with their contexts, skipping init hooks if it's not
- * creation mode.
+ * the first LView pass.
  *
  * @param currentView The current view
  * @param arr The array in which the hooks are found

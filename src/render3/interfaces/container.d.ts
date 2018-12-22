@@ -18,6 +18,7 @@ export declare const ACTIVE_INDEX = 0;
 export declare const VIEWS = 1;
 export declare const NATIVE = 6;
 export declare const RENDER_PARENT = 7;
+export declare const LCONTAINER_LENGTH = 8;
 /**
  * The state associated with a container.
  *

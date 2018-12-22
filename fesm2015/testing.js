@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-beta.2+78.sha-01a5c74
+ * @license Angular v7.2.0-rc.0+28.sha-3be276c
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -8,7 +8,7 @@ import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgMo
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -129,7 +129,7 @@ function runInTestZone(fn, context, finishCallback, failCallback) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Wraps a test function in an asynchronous test zone. The test will automatically
@@ -172,7 +172,7 @@ function async(fn) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Fixture for debugging and testing a component.
@@ -246,6 +246,7 @@ class ComponentFixture {
         }
     }
     /**
+     * @private
      * @param {?} checkNoChanges
      * @return {?}
      */
@@ -316,6 +317,7 @@ class ComponentFixture {
         }
     }
     /**
+     * @private
      * @return {?}
      */
     _getRenderer() {
@@ -373,7 +375,7 @@ function scheduleMicroTask(fn) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -533,7 +535,7 @@ function flushMicrotasksFallback() {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const _Zone$1 = typeof Zone !== 'undefined' ? Zone : null;
@@ -653,7 +655,7 @@ function flushMicrotasks() {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -691,7 +693,7 @@ class AsyncTestCompleter {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 let _nextReferenceId = 0;
@@ -850,7 +852,7 @@ function _valueProps(obj) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const reflection = new ɵReflectionCapabilities();
@@ -870,7 +872,12 @@ class OverrideResolver {
      */
     setOverrides(overrides) {
         this.overrides.clear();
-        overrides.forEach(([type, override]) => this.overrides.set(type, override));
+        overrides.forEach(([type, override]) => {
+            /** @type {?} */
+            const overrides = this.overrides.get(type) || [];
+            overrides.push(override);
+            this.overrides.set(type, overrides);
+        });
     }
     /**
      * @param {?} type
@@ -890,11 +897,13 @@ class OverrideResolver {
             resolved = this.getAnnotation(type);
             if (resolved) {
                 /** @type {?} */
-                const override = this.overrides.get(type);
-                if (override) {
+                const overrides = this.overrides.get(type);
+                if (overrides) {
                     /** @type {?} */
                     const overrider = new MetadataOverrider();
-                    resolved = overrider.overrideMetadata(this.type, resolved, override);
+                    overrides.forEach(override => {
+                        resolved = overrider.overrideMetadata(this.type, (/** @type {?} */ (resolved)), override);
+                    });
                 }
             }
             this.resolved.set(type, resolved);
@@ -929,7 +938,7 @@ class NgModuleResolver extends OverrideResolver {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * An abstract class for inserting the root test component element in a platform independent way.
@@ -956,10 +965,12 @@ const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 let _nextRootElementId = 0;
+/** @type {?} */
+const EMPTY_ARRAY = [];
 /**
  * \@description
  * Configures and initializes environment for unit testing and provides methods for
@@ -982,6 +993,7 @@ class TestBedRender3 {
         this._pipeOverrides = [];
         this._providerOverrides = [];
         this._rootProviderOverrides = [];
+        this._providerOverridesByToken = new Map();
         // test module configuration
         this._providers = [];
         this._declarations = [];
@@ -1199,6 +1211,7 @@ class TestBedRender3 {
         this._pipeOverrides = [];
         this._providerOverrides = [];
         this._rootProviderOverrides = [];
+        this._providerOverridesByToken.clear();
         // reset test module config
         this._providers = [];
         this._declarations = [];
@@ -1326,18 +1339,22 @@ class TestBedRender3 {
      */
     overrideProvider(token, provider) {
         /** @type {?} */
+        const providerDef = provider.useFactory ?
+            { provide: token, useFactory: provider.useFactory, deps: provider.deps || [] } :
+            { provide: token, useValue: provider.useValue };
+        /** @type {?} */
         let injectableDef;
         /** @type {?} */
         const isRoot = (typeof token !== 'string' && (injectableDef = ɵgetInjectableDef(token)) &&
             injectableDef.providedIn === 'root');
         /** @type {?} */
-        const overrides = isRoot ? this._rootProviderOverrides : this._providerOverrides;
-        if (provider.useFactory) {
-            overrides.push({ provide: token, useFactory: provider.useFactory, deps: provider.deps || [] });
-        }
-        else {
-            overrides.push({ provide: token, useValue: provider.useValue });
-        }
+        const overridesBucket = isRoot ? this._rootProviderOverrides : this._providerOverrides;
+        overridesBucket.push(providerDef);
+        // keep all overrides grouped by token as well for fast lookups using token
+        /** @type {?} */
+        const overridesForToken = this._providerOverridesByToken.get(token) || [];
+        overridesForToken.push(providerDef);
+        this._providerOverridesByToken.set(token, overridesForToken);
     }
     /**
      * @param {?} token
@@ -1385,6 +1402,7 @@ class TestBedRender3 {
     }
     // internal methods
     /**
+     * @private
      * @return {?}
      */
     _initIfNeeded() {
@@ -1395,7 +1413,7 @@ class TestBedRender3 {
         const resolvers = this._getResolvers();
         /** @type {?} */
         const testModuleType = this._createTestModule();
-        compileNgModule(testModuleType, resolvers);
+        this._compileNgModule(testModuleType, resolvers);
         /** @type {?} */
         const parentInjector = this.platform.injector;
         this._moduleRef = new ɵRender3NgModuleRef(testModuleType, parentInjector);
@@ -1404,8 +1422,22 @@ class TestBedRender3 {
         ((/** @type {?} */ (this._moduleRef.injector.get(ApplicationInitStatus)))).runInitializers();
         this._instantiated = true;
     }
+    // get overrides for a specific provider (if any)
+    /**
+     * @private
+     * @param {?} provider
+     * @return {?}
+     */
+    _getProviderOverrides(provider) {
+        /** @type {?} */
+        const token = typeof provider === 'object' && provider.hasOwnProperty('provide') ?
+            provider.provide :
+            provider;
+        return this._providerOverridesByToken.get(token) || [];
+    }
     // creates resolvers taking overrides into account
     /**
+     * @private
      * @return {?}
      */
     _getResolvers() {
@@ -1424,6 +1456,7 @@ class TestBedRender3 {
         return { module, component, directive, pipe };
     }
     /**
+     * @private
      * @param {?} methodName
      * @param {?} methodDescription
      * @return {?}
@@ -1435,6 +1468,7 @@ class TestBedRender3 {
         }
     }
     /**
+     * @private
      * @return {?}
      */
     _createTestModule() {
@@ -1465,6 +1499,159 @@ class TestBedRender3 {
         ];
         return (/** @type {?} */ (DynamicTestModule));
     }
+    /**
+     * @private
+     * @param {?} meta
+     * @return {?}
+     */
+    _getMetaWithOverrides(meta) {
+        if (meta.providers && meta.providers.length) {
+            /** @type {?} */
+            const overrides = flatten(meta.providers, (provider) => this._getProviderOverrides(provider));
+            if (overrides.length) {
+                return Object.assign({}, meta, { providers: [...meta.providers, ...overrides] });
+            }
+        }
+        return meta;
+    }
+    /**
+     * @private
+     * @param {?} moduleType
+     * @param {?} resolvers
+     * @return {?}
+     */
+    _compileNgModule(moduleType, resolvers) {
+        /** @type {?} */
+        const ngModule = resolvers.module.resolve(moduleType);
+        if (ngModule === null) {
+            throw new Error(`${ɵstringify(moduleType)} has not @NgModule annotation`);
+        }
+        /** @type {?} */
+        const metadata = this._getMetaWithOverrides(ngModule);
+        ɵcompileNgModuleDefs(moduleType, metadata);
+        /** @type {?} */
+        const declarations = flatten(ngModule.declarations || EMPTY_ARRAY);
+        /** @type {?} */
+        const compiledComponents = [];
+        // Compile the components, directives and pipes declared by this module
+        declarations.forEach(declaration => {
+            /** @type {?} */
+            const component = resolvers.component.resolve(declaration);
+            if (component) {
+                /** @type {?} */
+                const metadata = this._getMetaWithOverrides(component);
+                ɵcompileComponent(declaration, metadata);
+                compiledComponents.push(declaration);
+                return;
+            }
+            /** @type {?} */
+            const directive = resolvers.directive.resolve(declaration);
+            if (directive) {
+                /** @type {?} */
+                const metadata = this._getMetaWithOverrides(directive);
+                ɵcompileDirective(declaration, metadata);
+                return;
+            }
+            /** @type {?} */
+            const pipe = resolvers.pipe.resolve(declaration);
+            if (pipe) {
+                ɵcompilePipe(declaration, pipe);
+                return;
+            }
+        });
+        // Compile transitive modules, components, directives and pipes
+        /** @type {?} */
+        const transitiveScope = this._transitiveScopesFor(moduleType, resolvers);
+        compiledComponents.forEach(cmp => ɵpatchComponentDefWithScope(((/** @type {?} */ (cmp))).ngComponentDef, transitiveScope));
+    }
+    /**
+     * Compute the pair of transitive scopes (compilation scope and exported scope) for a given
+     * module.
+     *
+     * This operation is memoized and the result is cached on the module's definition. It can be
+     * called on modules with components that have not fully compiled yet, but the result should not
+     * be used until they have.
+     * @private
+     * @template T
+     * @param {?} moduleType
+     * @param {?} resolvers
+     * @return {?}
+     */
+    _transitiveScopesFor(moduleType, resolvers) {
+        if (!isNgModule(moduleType)) {
+            throw new Error(`${moduleType.name} does not have an ngModuleDef`);
+        }
+        /** @nocollapse @type {?} */
+        const def = moduleType.ngModuleDef;
+        if (def.transitiveCompileScopes !== null) {
+            return def.transitiveCompileScopes;
+        }
+        /** @type {?} */
+        const scopes = {
+            compilation: {
+                directives: new Set(),
+                pipes: new Set(),
+            },
+            exported: {
+                directives: new Set(),
+                pipes: new Set(),
+            },
+        };
+        def.declarations.forEach(declared => {
+            /** @type {?} */
+            const declaredWithDefs = (/** @type {?} */ (declared));
+            if (declaredWithDefs.ngPipeDef !== undefined) {
+                scopes.compilation.pipes.add(declared);
+            }
+            else {
+                scopes.compilation.directives.add(declared);
+            }
+        });
+        def.imports.forEach((imported) => {
+            /** @type {?} */
+            const ngModule = resolvers.module.resolve(imported);
+            if (ngModule === null) {
+                throw new Error(`Importing ${imported.name} which does not have an @ngModule`);
+            }
+            else {
+                this._compileNgModule(imported, resolvers);
+            }
+            // When this module imports another, the imported module's exported directives and pipes are
+            // added to the compilation scope of this module.
+            /** @type {?} */
+            const importedScope = this._transitiveScopesFor(imported, resolvers);
+            importedScope.exported.directives.forEach(entry => scopes.compilation.directives.add(entry));
+            importedScope.exported.pipes.forEach(entry => scopes.compilation.pipes.add(entry));
+        });
+        def.exports.forEach((exported) => {
+            /** @type {?} */
+            const exportedTyped = (/** @type {?} */ (exported));
+            // Either the type is a module, a pipe, or a component/directive (which may not have an
+            // ngComponentDef as it might be compiled asynchronously).
+            if (isNgModule(exportedTyped)) {
+                // When this module exports another, the exported module's exported directives and pipes are
+                // added to both the compilation and exported scopes of this module.
+                /** @type {?} */
+                const exportedScope = this._transitiveScopesFor(exportedTyped, resolvers);
+                exportedScope.exported.directives.forEach(entry => {
+                    scopes.compilation.directives.add(entry);
+                    scopes.exported.directives.add(entry);
+                });
+                exportedScope.exported.pipes.forEach(entry => {
+                    scopes.compilation.pipes.add(entry);
+                    scopes.exported.pipes.add(entry);
+                });
+            }
+            else if (exportedTyped.ngPipeDef !== undefined) {
+                scopes.exported.pipes.add(exportedTyped);
+            }
+            else {
+                scopes.exported.directives.add(exportedTyped);
+            }
+        });
+        def.transitiveCompileScopes = scopes;
+        return scopes;
+    }
 }
 /** @type {?} */
 let testBed;
@@ -1474,152 +1661,21 @@ let testBed;
 function _getTestBedRender3() {
     return testBed = testBed || new TestBedRender3();
 }
-// Module compiler
-/** @type {?} */
-const EMPTY_ARRAY = [];
-/**
- * @param {?} moduleType
- * @param {?} resolvers
- * @return {?}
- */
-function compileNgModule(moduleType, resolvers) {
-    /** @type {?} */
-    const ngModule = resolvers.module.resolve(moduleType);
-    if (ngModule === null) {
-        throw new Error(`${ɵstringify(moduleType)} has not @NgModule annotation`);
-    }
-    ɵcompileNgModuleDefs(moduleType, ngModule);
-    /** @type {?} */
-    const declarations = flatten(ngModule.declarations || EMPTY_ARRAY);
-    /** @type {?} */
-    const compiledComponents = [];
-    // Compile the components, directives and pipes declared by this module
-    declarations.forEach(declaration => {
-        /** @type {?} */
-        const component = resolvers.component.resolve(declaration);
-        if (component) {
-            ɵcompileComponent(declaration, component);
-            compiledComponents.push(declaration);
-            return;
-        }
-        /** @type {?} */
-        const directive = resolvers.directive.resolve(declaration);
-        if (directive) {
-            ɵcompileDirective(declaration, directive);
-            return;
-        }
-        /** @type {?} */
-        const pipe = resolvers.pipe.resolve(declaration);
-        if (pipe) {
-            ɵcompilePipe(declaration, pipe);
-            return;
-        }
-    });
-    // Compile transitive modules, components, directives and pipes
-    /** @type {?} */
-    const transitiveScope = transitiveScopesFor(moduleType, resolvers);
-    compiledComponents.forEach(cmp => ɵpatchComponentDefWithScope(((/** @type {?} */ (cmp))).ngComponentDef, transitiveScope));
-}
-/**
- * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
- *
- * This operation is memoized and the result is cached on the module's definition. It can be called
- * on modules with components that have not fully compiled yet, but the result should not be used
- * until they have.
- * @template T
- * @param {?} moduleType
- * @param {?} resolvers
- * @return {?}
- */
-function transitiveScopesFor(moduleType, resolvers) {
-    if (!isNgModule(moduleType)) {
-        throw new Error(`${moduleType.name} does not have an ngModuleDef`);
-    }
-    /** @nocollapse @type {?} */
-    const def = moduleType.ngModuleDef;
-    if (def.transitiveCompileScopes !== null) {
-        return def.transitiveCompileScopes;
-    }
-    /** @type {?} */
-    const scopes = {
-        compilation: {
-            directives: new Set(),
-            pipes: new Set(),
-        },
-        exported: {
-            directives: new Set(),
-            pipes: new Set(),
-        },
-    };
-    def.declarations.forEach(declared => {
-        /** @type {?} */
-        const declaredWithDefs = (/** @type {?} */ (declared));
-        if (declaredWithDefs.ngPipeDef !== undefined) {
-            scopes.compilation.pipes.add(declared);
-        }
-        else {
-            scopes.compilation.directives.add(declared);
-        }
-    });
-    def.imports.forEach((imported) => {
-        /** @type {?} */
-        const ngModule = resolvers.module.resolve(imported);
-        if (ngModule === null) {
-            throw new Error(`Importing ${imported.name} which does not have an @ngModule`);
-        }
-        else {
-            compileNgModule(imported, resolvers);
-        }
-        // When this module imports another, the imported module's exported directives and pipes are
-        // added to the compilation scope of this module.
-        /** @type {?} */
-        const importedScope = transitiveScopesFor(imported, resolvers);
-        importedScope.exported.directives.forEach(entry => scopes.compilation.directives.add(entry));
-        importedScope.exported.pipes.forEach(entry => scopes.compilation.pipes.add(entry));
-    });
-    def.exports.forEach((exported) => {
-        /** @type {?} */
-        const exportedTyped = (/** @type {?} */ (exported));
-        // Either the type is a module, a pipe, or a component/directive (which may not have an
-        // ngComponentDef as it might be compiled asynchronously).
-        if (isNgModule(exportedTyped)) {
-            // When this module exports another, the exported module's exported directives and pipes are
-            // added to both the compilation and exported scopes of this module.
-            /** @type {?} */
-            const exportedScope = transitiveScopesFor(exportedTyped, resolvers);
-            exportedScope.exported.directives.forEach(entry => {
-                scopes.compilation.directives.add(entry);
-                scopes.exported.directives.add(entry);
-            });
-            exportedScope.exported.pipes.forEach(entry => {
-                scopes.compilation.pipes.add(entry);
-                scopes.exported.pipes.add(entry);
-            });
-        }
-        else if (exportedTyped.ngPipeDef !== undefined) {
-            scopes.exported.pipes.add(exportedTyped);
-        }
-        else {
-            scopes.exported.directives.add(exportedTyped);
-        }
-    });
-    def.transitiveCompileScopes = scopes;
-    return scopes;
-}
 /**
  * @template T
  * @param {?} values
+ * @param {?=} mapFn
  * @return {?}
  */
-function flatten(values) {
+function flatten(values, mapFn) {
     /** @type {?} */
     const out = [];
     values.forEach(value => {
         if (Array.isArray(value)) {
-            out.push(...flatten(value));
+            out.push(...flatten(value, mapFn));
         }
         else {
-            out.push(value);
+            out.push(mapFn ? mapFn(value) : value);
         }
     });
     return out;
@@ -1635,7 +1691,7 @@ function isNgModule(value) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @return {?}
@@ -1723,7 +1779,7 @@ class TestingCompilerFactory {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const UNDEFINED = new Object();
@@ -2031,6 +2087,7 @@ class TestBedViewEngine {
         });
     }
     /**
+     * @private
      * @return {?}
      */
     _initIfNeeded() {
@@ -2078,6 +2135,7 @@ class TestBedViewEngine {
         this._instantiated = true;
     }
     /**
+     * @private
      * @return {?}
      */
     _createCompilerAndModule() {
@@ -2125,6 +2183,7 @@ class TestBedViewEngine {
         return DynamicTestModule;
     }
     /**
+     * @private
      * @param {?} methodName
      * @param {?} methodDescription
      * @return {?}
@@ -2216,6 +2275,7 @@ class TestBedViewEngine {
         this.overrideProviderImpl(token, provider, /* deprecated */ true);
     }
     /**
+     * @private
      * @param {?} token
      * @param {?} provider
      * @param {?=} deprecated
@@ -2409,6 +2469,7 @@ class InjectSetupWrapper {
         this._moduleDef = _moduleDef;
     }
     /**
+     * @private
      * @return {?}
      */
     _addModule() {
@@ -2455,7 +2516,7 @@ function withModule(moduleDef, fn) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const _global$1 = (/** @type {?} */ ((typeof window === 'undefined' ? global : window)));
@@ -2473,7 +2534,7 @@ const __core_private_testing_placeholder__ = '';
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -2485,22 +2546,22 @@ const __core_private_testing_placeholder__ = '';
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
