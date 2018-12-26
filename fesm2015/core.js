@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-rc.0+12.sha-70c184b
+ * @license Angular v7.2.0-rc.0+14.sha-4ad7e21
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -508,7 +508,7 @@ const ChangeDetectionStrategy = {
     /**
      * Use the `CheckOnce` strategy, meaning that automatic change detection is deactivated
      * until reactivated by setting the strategy to `Default` (`CheckAlways`).
-     * Change detection can still be explictly invoked.
+     * Change detection can still be explicitly invoked.
      */
     OnPush: 0,
     /**
@@ -532,7 +532,7 @@ const ChangeDetectorStatus = {
      */
     Checked: 1,
     /**
-     * A state in which change detection continues automatically until explictly
+     * A state in which change detection continues automatically until explicitly
      * deactivated.
      */
     CheckAlways: 2,
@@ -13241,7 +13241,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.0-rc.0+12.sha-70c184b');
+const VERSION = new Version('7.2.0-rc.0+14.sha-4ad7e21');
 
 /**
  * @fileoverview added by tsickle
