@@ -8,11 +8,12 @@
 import '../ng_dev_mode';
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
 import { LContext } from '../interfaces/context';
+import { TAttributes, TNode } from '../interfaces/node';
 import { Player, PlayerContext } from '../interfaces/player';
 import { RElement } from '../interfaces/renderer';
-import { InitialStyles, StylingContext } from '../interfaces/styling';
+import { InitialStylingValues, StylingContext } from '../interfaces/styling';
 import { LView, RootContext } from '../interfaces/view';
-export declare function createEmptyStylingContext(element?: RElement | null, sanitizer?: StyleSanitizeFn | null, initialStylingValues?: InitialStyles): StylingContext;
+export declare function createEmptyStylingContext(element?: RElement | null, sanitizer?: StyleSanitizeFn | null, initialStyles?: InitialStylingValues | null, initialClasses?: InitialStylingValues | null): StylingContext;
 /**
  * Used clone a copy of a pre-computed template of a styling context.
  *
@@ -40,3 +41,5 @@ export declare function getOrCreatePlayerContext(target: {}, context?: LContext 
 export declare function getPlayerContext(stylingContext: StylingContext): PlayerContext | null;
 export declare function allocPlayerContext(data: StylingContext): PlayerContext;
 export declare function throwInvalidRefError(): void;
+export declare function hasStyling(attrs: TAttributes): boolean;
+export declare function hasClassInput(tNode: TNode): boolean;

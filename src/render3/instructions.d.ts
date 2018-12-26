@@ -13,7 +13,7 @@ import { Sanitizer } from '../sanitization/security';
 import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
 import { Type } from '../type';
 import { LContainer } from './interfaces/container';
-import { ComponentDef, ComponentQuery, ComponentTemplate, DirectiveDefListOrFactory, InitialStylingFlags, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
+import { ComponentDef, ComponentQuery, ComponentTemplate, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { LocalRefExtractor, TAttributes, TContainerNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from './interfaces/node';
 import { PlayerFactory } from './interfaces/player';
 import { CssSelectorList } from './interfaces/projection';
@@ -102,7 +102,8 @@ export declare function namespaceHTML(): void;
  *
  * @param index Index of the element in the data array
  * @param name Name of the DOM Node
- * @param attrs Statically bound set of attributes to be written into the DOM element on creation.
+ * @param attrs Statically bound set of attributes, classes, and styles to be written into the DOM
+ *              element on creation. Use [AttributeMarker] to denote the meaning of this array.
  * @param localRefs A set of local reference bindings on the element.
  */
 export declare function element(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
@@ -126,7 +127,8 @@ export declare function elementContainerEnd(): void;
  *
  * @param index Index of the element in the LView array
  * @param name Name of the DOM Node
- * @param attrs Statically bound set of attributes to be written into the DOM element on creation.
+ * @param attrs Statically bound set of attributes, classes, and styles to be written into the DOM
+ *              element on creation. Use [AttributeMarker] to denote the meaning of this array.
  * @param localRefs A set of local reference bindings on the element.
  *
  * Attributes and localRefs are passed as an array of strings where elements with an even index
@@ -238,106 +240,128 @@ export declare function elementProperty<T>(index: number, propName: string, valu
  */
 export declare function createTNode(lView: LView, type: TNodeType, adjustedIndex: number, tagName: string | null, attrs: TAttributes | null, tViews: TView[] | null): TNode;
 /**
- * Add or remove a class in a `classList` on a DOM element.
- *
- * This instruction is meant to handle the [class.foo]="exp" case
- *
- * @param index The index of the element to update in the data array
- * @param classIndex Index of class to toggle. Because it is going to DOM, this is not subject to
- *        renaming as part of minification.
- * @param value A value indicating if a given class should be added or removed.
- * @param directive the ref to the directive that is attempting to change styling.
- */
-export declare function elementClassProp(index: number, classIndex: number, value: boolean | PlayerFactory, directive?: {}): void;
-/**
  * Assign any inline style values to the element during creation mode.
  *
- * This instruction is meant to be called during creation mode to apply all styling
- * (e.g. `style="..."`) values to the element. This is also where the provided index
- * value is allocated for the styling details for its corresponding element (the element
- * index is the previous index value from this one).
+ * This instruction is meant to be called during creation mode to register all
+ * dynamic style and class bindings on the element. Note for static values (no binding)
+ * see `elementStart` and `elementHostAttrs`.
  *
- * (Note this function calls `elementStylingApply` immediately when called.)
+ * @param classBindingNames An array containing bindable class names.
+ *        The `elementClassProp` refers to the class name by index in this array.
+ *        (i.e. `['foo', 'bar']` means `foo=0` and `bar=1`).
+ * @param styleBindingNames An array containing bindable style properties.
+ *        The `elementStyleProp` refers to the class name by index in this array.
+ *        (i.e. `['width', 'height']` means `width=0` and `height=1`).
+ * @param styleSanitizer An optional sanitizer function that will be used to sanitize any CSS
+ *        property values that are applied to the element (during rendering).
+ *        Note that the sanitizer instance itself is tied to the `directive` (if  provided).
+ * @param directive A directive instance the styling is associated with. If not provided
+ *        current view's controller instance is assumed.
  *
- *
- * @param index Index value which will be allocated to store styling data for the element.
- *        (Note that this is not the element index, but rather an index value allocated
- *        specifically for element styling--the index must be the next index after the element
- *        index.)
- * @param classDeclarations A key/value array of CSS classes that will be registered on the element.
- *   Each individual style will be used on the element as long as it is not overridden
- *   by any classes placed on the element by multiple (`[class]`) or singular (`[class.named]`)
- *   bindings. If a class binding changes its value to a falsy value then the matching initial
- *   class value that are passed in here will be applied to the element (if matched).
- * @param styleDeclarations A key/value array of CSS styles that will be registered on the element.
- *   Each individual style will be used on the element as long as it is not overridden
- *   by any styles placed on the element by multiple (`[style]`) or singular (`[style.prop]`)
- *   bindings. If a style binding changes its value to null then the initial styling
- *   values that are passed in here will be applied to the element (if matched).
- * @param styleSanitizer An optional sanitizer function that will be used (if provided)
- *   to sanitize the any CSS property values that are applied to the element (during rendering).
- * @param directive the ref to the directive that is attempting to change styling.
+ * @publicApi
  */
-export declare function elementStyling(classDeclarations?: (string | boolean | InitialStylingFlags)[] | null, styleDeclarations?: (string | boolean | InitialStylingFlags)[] | null, styleSanitizer?: StyleSanitizeFn | null, directive?: {}): void;
+export declare function elementStyling(classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null, directive?: {}): void;
 /**
- * Apply all styling values to the element which have been queued by any styling instructions.
+ * Assign static styling values to a host element.
  *
- * This instruction is meant to be run once one or more `elementStyle` and/or `elementStyleProp`
- * have been issued against the element. This function will also determine if any styles have
- * changed and will then skip the operation if there is nothing new to render.
+ * NOTE: This instruction is meant to used from `hostBindings` function only.
  *
- * Once called then all queued styles will be flushed.
+ * @param directive A directive instance the styling is associated with.
+ * @param attrs An array containing class and styling information. The values must be marked with
+ *              `AttributeMarker`.
  *
- * @param index Index of the element's styling storage that will be rendered.
- *        (Note that this is not the element index, but rather an index value allocated
- *        specifically for element styling--the index must be the next index after the element
- *        index.)
- * @param directive the ref to the directive that is attempting to change styling.
+ *        ```
+ *        var attrs = [AttributeMarker.Classes, 'foo', 'bar',
+ *                     AttributeMarker.Styles, 'width', '100px', 'height, '200px']
+ *        elementHostAttrs(directive, attrs);
+ *        ```
+ *
+ * @publicApi
  */
-export declare function elementStylingApply(index: number, directive?: {}): void;
+export declare function elementHostAttrs(directive: any, attrs: TAttributes): void;
 /**
- * Queue a given style to be rendered on an Element.
+ * Apply styling binding to the element.
+ *
+ * This instruction is meant to be run after `elementStyle` and/or `elementStyleProp`.
+ * if any styling bindings have changed then the changes are flushed to the element.
+ *
+ *
+ * @param index Index of the element's with which styling is associated.
+ * @param directive Directive instance that is attempting to change styling. (Defaults to the
+ *        component of the current view).
+components
+ *
+ * @publicApi
+ */
+export declare function elementStylingApply(index: number, directive?: any): void;
+/**
+ * Update a style bindings value on an element.
  *
  * If the style value is `null` then it will be removed from the element
  * (or assigned a different value depending if there are any styles placed
  * on the element with `elementStyle` or any styles that are present
  * from when the element was created (with `elementStyling`).
  *
- * (Note that the styling instruction will not be applied until `elementStylingApply` is called.)
+ * (Note that the styling element is updated as part of `elementStylingApply`.)
  *
- * @param index Index of the element's styling storage to change in the data array.
- *        (Note that this is not the element index, but rather an index value allocated
- *        specifically for element styling--the index must be the next index after the element
- *        index.)
- * @param styleIndex Index of the style property on this element. (Monotonically increasing.)
- * @param value New value to write (null to remove).
+ * @param index Index of the element's with which styling is associated.
+ * @param styleIndex Index of style to update. This index value refers to the
+ *        index of the style in the style bindings array that was passed into
+ *        `elementStlyingBindings`.
+ * @param value New value to write (null to remove). Note that if a directive also
+ *        attempts to write to the same binding value then it will only be able to
+ *        do so if the template binding value is `null` (or doesn't exist at all).
  * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
  *        Note that when a suffix is provided then the underlying sanitizer will
  *        be ignored.
- * @param directive the ref to the directive that is attempting to change styling.
- */
-export declare function elementStyleProp(index: number, styleIndex: number, value: string | number | String | PlayerFactory | null, suffix?: string, directive?: {}): void;
-/**
- * Queue a key/value map of styles to be rendered on an Element.
+ * @param directive Directive instance that is attempting to change styling. (Defaults to the
+ *        component of the current view).
+components
  *
- * This instruction is meant to handle the `[style]="exp"` usage. When styles are applied to
- * the Element they will then be placed with respect to any styles set with `elementStyleProp`.
- * If any styles are set to `null` then they will be removed from the element (unless the same
- * style properties have been assigned to the element during creation using `elementStyling`).
+ * @publicApi
+ */
+export declare function elementStyleProp(index: number, styleIndex: number, value: string | number | String | PlayerFactory | null, suffix?: string | null, directive?: {}): void;
+/**
+ * Add or remove a class via a class binding on a DOM element.
+ *
+ * This instruction is meant to handle the [class.foo]="exp" case and, therefore,
+ * the class itself must already be applied using `elementStyling` within
+ * the creation block.
+ *
+ * @param index Index of the element's with which styling is associated.
+ * @param classIndex Index of class to toggle. This index value refers to the
+ *        index of the class in the class bindings array that was passed into
+ *        `elementStlyingBindings` (which is meant to be called before this
+ *        function is).
+ * @param value A true/false value which will turn the class on or off.
+ * @param directive Directive instance that is attempting to change styling. (Defaults to the
+ *        component of the current view).
+components
+ *
+ * @publicApi
+ */
+export declare function elementClassProp(index: number, classIndex: number, value: boolean | PlayerFactory, directive?: {}): void;
+/**
+ * Update style and/or class bindings using object literal.
+ *
+ * This instruction is meant apply styling via the `[style]="exp"` and `[class]="exp"` template
+ * bindings. When styles are applied to the Element they will then be placed with respect to
+ * any styles set with `elementStyleProp`. If any styles are set to `null` then they will be
+ * removed from the element.
  *
  * (Note that the styling instruction will not be applied until `elementStylingApply` is called.)
  *
- * @param index Index of the element's styling storage to change in the data array.
- *        (Note that this is not the element index, but rather an index value allocated
- *        specifically for element styling--the index must be the next index after the element
- *        index.)
+ * @param index Index of the element's with which styling is associated.
  * @param classes A key/value style map of CSS classes that will be added to the given element.
  *        Any missing classes (that have already been applied to the element beforehand) will be
  *        removed (unset) from the element's list of CSS classes.
  * @param styles A key/value style map of the styles that will be applied to the given element.
  *        Any missing styles (that have already been applied to the element beforehand) will be
  *        removed (unset) from the element's styling.
- * @param directive the ref to the directive that is attempting to change styling.
+ * @param directive Directive instance that is attempting to change styling. (Defaults to the
+ *        component of the current view).
+ *
+ * @publicApi
  */
 export declare function elementStylingMap<T>(index: number, classes: {
     [key: string]: any;
@@ -668,7 +692,6 @@ export declare function injectAttribute(attrNameToInject: string): string | null
  */
 export declare function registerContentQuery<Q>(queryList: QueryList<Q>, currentDirectiveIndex: number): void;
 export declare const CLEAN_PROMISE: Promise<null>;
-export declare function delegateToClassInput(tNode: TNode): number;
 /**
  * Returns the current OpaqueViewState instance.
  *
