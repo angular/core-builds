@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-rc.0+27.sha-13eb57a
+ * @license Angular v7.2.0-rc.0+29.sha-9b91bee
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -522,7 +522,7 @@
         /**
          * Use the `CheckOnce` strategy, meaning that automatic change detection is deactivated
          * until reactivated by setting the strategy to `Default` (`CheckAlways`).
-         * Change detection can still be explictly invoked.
+         * Change detection can still be explicitly invoked.
          */
         ChangeDetectionStrategy[ChangeDetectionStrategy["OnPush"] = 0] = "OnPush";
         /**
@@ -543,7 +543,7 @@
          */
         ChangeDetectorStatus[ChangeDetectorStatus["Checked"] = 1] = "Checked";
         /**
-         * A state in which change detection continues automatically until explictly
+         * A state in which change detection continues automatically until explicitly
          * deactivated.
          */
         ChangeDetectorStatus[ChangeDetectorStatus["CheckAlways"] = 2] = "CheckAlways";
@@ -10728,7 +10728,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0-rc.0+27.sha-13eb57a');
+    var VERSION = new Version('7.2.0-rc.0+29.sha-9b91bee');
 
     /**
      * @license

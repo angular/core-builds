@@ -15,7 +15,7 @@ export declare enum ChangeDetectionStrategy {
     /**
      * Use the `CheckOnce` strategy, meaning that automatic change detection is deactivated
      * until reactivated by setting the strategy to `Default` (`CheckAlways`).
-     * Change detection can still be explictly invoked.
+     * Change detection can still be explicitly invoked.
      */
     OnPush = 0,
     /**
@@ -40,7 +40,7 @@ export declare enum ChangeDetectorStatus {
      */
     Checked = 1,
     /**
-     * A state in which change detection continues automatically until explictly
+     * A state in which change detection continues automatically until explicitly
      * deactivated.
      */
     CheckAlways = 2,
