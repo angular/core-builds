@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.2.0-rc.0+42.sha-7df9040
+ * @license Angular v7.2.0-rc.0+45.sha-a979001
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, ApplicationInitStatus, Injector, NgZone, ɵRender3ComponentFactory, ɵRender3NgModuleRef, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, ɵresetCompiledComponents, Compiler, Injectable, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵivyEnabled, ɵoverrideComponentView, ɵoverrideProvider } from '@angular/core';
+import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, ApplicationInitStatus, Injector, NgZone, resolveForwardRef, ɵRender3ComponentFactory, ɵRender3NgModuleRef, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, ɵresetCompiledComponents, Compiler, Injectable, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵivyEnabled, ɵoverrideComponentView, ɵoverrideProvider } from '@angular/core';
 
 /**
  * @fileoverview added by tsickle
@@ -1530,7 +1530,7 @@ class TestBedRender3 {
         const metadata = this._getMetaWithOverrides(ngModule);
         ɵcompileNgModuleDefs(moduleType, metadata);
         /** @type {?} */
-        const declarations = flatten(ngModule.declarations || EMPTY_ARRAY);
+        const declarations = flatten(ngModule.declarations || EMPTY_ARRAY, resolveForwardRef);
         /** @type {?} */
         const compiledComponents = [];
         // Compile the components, directives and pipes declared by this module

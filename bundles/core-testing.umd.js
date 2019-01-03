@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-rc.0+42.sha-7df9040
+ * @license Angular v7.2.0-rc.0+45.sha-a979001
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1335,7 +1335,7 @@
             }
             var metadata = this._getMetaWithOverrides(ngModule);
             core.ɵcompileNgModuleDefs(moduleType, metadata);
-            var declarations = flatten(ngModule.declarations || EMPTY_ARRAY);
+            var declarations = flatten(ngModule.declarations || EMPTY_ARRAY, core.resolveForwardRef);
             var compiledComponents = [];
             // Compile the components, directives and pipes declared by this module
             declarations.forEach(function (declaration) {

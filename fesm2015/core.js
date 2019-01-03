@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-rc.0+42.sha-7df9040
+ * @license Angular v7.2.0-rc.0+45.sha-a979001
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -580,6 +580,177 @@ function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/** @type {?} */
+const __window = typeof window !== 'undefined' && window;
+/** @type {?} */
+const __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
+    self instanceof WorkerGlobalScope && self;
+/** @type {?} */
+const __global = typeof global !== 'undefined' && global;
+// Check __global first, because in Node tests both __global and __window may be defined and _global
+// should be __global in that case.
+/** @type {?} */
+const _global = __global || __window || __self;
+/** @type {?} */
+const promise = Promise.resolve(0);
+/** @type {?} */
+let _symbolIterator = null;
+/**
+ * @return {?}
+ */
+function getSymbolIterator() {
+    if (!_symbolIterator) {
+        /** @type {?} */
+        const Symbol = _global['Symbol'];
+        if (Symbol && Symbol.iterator) {
+            _symbolIterator = Symbol.iterator;
+        }
+        else {
+            // es6-shim specific logic
+            /** @type {?} */
+            const keys = Object.getOwnPropertyNames(Map.prototype);
+            for (let i = 0; i < keys.length; ++i) {
+                /** @type {?} */
+                const key = keys[i];
+                if (key !== 'entries' && key !== 'size' &&
+                    ((/** @type {?} */ (Map))).prototype[key] === Map.prototype['entries']) {
+                    _symbolIterator = key;
+                }
+            }
+        }
+    }
+    return _symbolIterator;
+}
+/**
+ * @param {?} fn
+ * @return {?}
+ */
+function scheduleMicroTask(fn) {
+    if (typeof Zone === 'undefined') {
+        // use promise to schedule microTask instead of use Zone
+        promise.then(() => { fn && fn.apply(null, null); });
+    }
+    else {
+        Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
+    }
+}
+// JS has NaN !== NaN
+/**
+ * @param {?} a
+ * @param {?} b
+ * @return {?}
+ */
+function looseIdentical(a, b) {
+    return a === b || typeof a === 'number' && typeof b === 'number' && isNaN(a) && isNaN(b);
+}
+/**
+ * @param {?} token
+ * @return {?}
+ */
+function stringify(token) {
+    if (typeof token === 'string') {
+        return token;
+    }
+    if (token instanceof Array) {
+        return '[' + token.map(stringify).join(', ') + ']';
+    }
+    if (token == null) {
+        return '' + token;
+    }
+    if (token.overriddenName) {
+        return `${token.overriddenName}`;
+    }
+    if (token.name) {
+        return `${token.name}`;
+    }
+    /** @type {?} */
+    const res = token.toString();
+    if (res == null) {
+        return '' + res;
+    }
+    /** @type {?} */
+    const newLineIndex = res.indexOf('\n');
+    return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
+}
+/**
+ * Convince closure compiler that the wrapped function has no side-effects.
+ *
+ * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
+ * allow us to execute a function but have closure compiler mark the call as no-side-effects.
+ * It is important that the return value for the `noSideEffects` function be assigned
+ * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
+ * compiler.
+ * @param {?} fn
+ * @return {?}
+ */
+function noSideEffects(fn) {
+    return '' + { toString: fn };
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/** @type {?} */
+const __forward_ref__ = getClosureSafeProperty({ __forward_ref__: getClosureSafeProperty });
+/**
+ * Allows to refer to references which are not yet defined.
+ *
+ * For instance, `forwardRef` is used when the `token` which we need to refer to for the purposes of
+ * DI is declared, but not yet defined. It is also used when the `token` which we use when creating
+ * a query is not yet defined.
+ *
+ * \@usageNotes
+ * ### Example
+ * {\@example core/di/ts/forward_ref/forward_ref_spec.ts region='forward_ref'}
+ * \@publicApi
+ * @param {?} forwardRefFn
+ * @return {?}
+ */
+function forwardRef(forwardRefFn) {
+    ((/** @type {?} */ (forwardRefFn))).__forward_ref__ = forwardRef;
+    ((/** @type {?} */ (forwardRefFn))).toString = function () { return stringify(this()); };
+    return ((/** @type {?} */ ((/** @type {?} */ (forwardRefFn)))));
+}
+/**
+ * Lazily retrieves the reference value from a forwardRef.
+ *
+ * Acts as the identity function when given a non-forward-ref value.
+ *
+ * \@usageNotes
+ * ### Example
+ *
+ * {\@example core/di/ts/forward_ref/forward_ref_spec.ts region='resolve_forward_ref'}
+ *
+ * @see `forwardRef`
+ * \@publicApi
+ * @template T
+ * @param {?} type
+ * @return {?}
+ */
+function resolveForwardRef(type) {
+    /** @type {?} */
+    const fn = type;
+    if (typeof fn === 'function' && fn.hasOwnProperty(__forward_ref__) &&
+        fn.__forward_ref__ === forwardRef) {
+        return fn();
+    }
+    else {
+        return type;
+    }
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 /**
  * Used to resolve resource URLs on `\@Component` when used with JIT compilation.
  *
@@ -821,124 +992,6 @@ const EMPTY_ARRAY = [];
 if (typeof ngDevMode !== 'undefined' && ngDevMode) {
     Object.freeze(EMPTY_OBJ);
     Object.freeze(EMPTY_ARRAY);
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/** @type {?} */
-const __window = typeof window !== 'undefined' && window;
-/** @type {?} */
-const __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
-    self instanceof WorkerGlobalScope && self;
-/** @type {?} */
-const __global = typeof global !== 'undefined' && global;
-// Check __global first, because in Node tests both __global and __window may be defined and _global
-// should be __global in that case.
-/** @type {?} */
-const _global = __global || __window || __self;
-/** @type {?} */
-const promise = Promise.resolve(0);
-/** @type {?} */
-let _symbolIterator = null;
-/**
- * @return {?}
- */
-function getSymbolIterator() {
-    if (!_symbolIterator) {
-        /** @type {?} */
-        const Symbol = _global['Symbol'];
-        if (Symbol && Symbol.iterator) {
-            _symbolIterator = Symbol.iterator;
-        }
-        else {
-            // es6-shim specific logic
-            /** @type {?} */
-            const keys = Object.getOwnPropertyNames(Map.prototype);
-            for (let i = 0; i < keys.length; ++i) {
-                /** @type {?} */
-                const key = keys[i];
-                if (key !== 'entries' && key !== 'size' &&
-                    ((/** @type {?} */ (Map))).prototype[key] === Map.prototype['entries']) {
-                    _symbolIterator = key;
-                }
-            }
-        }
-    }
-    return _symbolIterator;
-}
-/**
- * @param {?} fn
- * @return {?}
- */
-function scheduleMicroTask(fn) {
-    if (typeof Zone === 'undefined') {
-        // use promise to schedule microTask instead of use Zone
-        promise.then(() => { fn && fn.apply(null, null); });
-    }
-    else {
-        Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
-    }
-}
-// JS has NaN !== NaN
-/**
- * @param {?} a
- * @param {?} b
- * @return {?}
- */
-function looseIdentical(a, b) {
-    return a === b || typeof a === 'number' && typeof b === 'number' && isNaN(a) && isNaN(b);
-}
-/**
- * @param {?} token
- * @return {?}
- */
-function stringify(token) {
-    if (typeof token === 'string') {
-        return token;
-    }
-    if (token instanceof Array) {
-        return '[' + token.map(stringify).join(', ') + ']';
-    }
-    if (token == null) {
-        return '' + token;
-    }
-    if (token.overriddenName) {
-        return `${token.overriddenName}`;
-    }
-    if (token.name) {
-        return `${token.name}`;
-    }
-    /** @type {?} */
-    const res = token.toString();
-    if (res == null) {
-        return '' + res;
-    }
-    /** @type {?} */
-    const newLineIndex = res.indexOf('\n');
-    return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
-}
-/**
- * Convince closure compiler that the wrapped function has no side-effects.
- *
- * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
- * allow us to execute a function but have closure compiler mark the call as no-side-effects.
- * It is important that the return value for the `noSideEffects` function be assigned
- * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
- * compiler.
- * @param {?} fn
- * @return {?}
- */
-function noSideEffects(fn) {
-    return '' + { toString: fn };
 }
 
 /**
@@ -4154,59 +4207,6 @@ function sortListeners(a, b) {
  */
 function isDirectiveDefHack(obj) {
     return obj.type !== undefined && obj.template !== undefined && obj.declaredInputs !== undefined;
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/** @type {?} */
-const __forward_ref__ = getClosureSafeProperty({ __forward_ref__: getClosureSafeProperty });
-/**
- * Allows to refer to references which are not yet defined.
- *
- * For instance, `forwardRef` is used when the `token` which we need to refer to for the purposes of
- * DI is declared, but not yet defined. It is also used when the `token` which we use when creating
- * a query is not yet defined.
- *
- * \@usageNotes
- * ### Example
- * {\@example core/di/ts/forward_ref/forward_ref_spec.ts region='forward_ref'}
- * \@publicApi
- * @param {?} forwardRefFn
- * @return {?}
- */
-function forwardRef(forwardRefFn) {
-    ((/** @type {?} */ (forwardRefFn))).__forward_ref__ = forwardRef;
-    ((/** @type {?} */ (forwardRefFn))).toString = function () { return stringify(this()); };
-    return ((/** @type {?} */ ((/** @type {?} */ (forwardRefFn)))));
-}
-/**
- * Lazily retrieves the reference value from a forwardRef.
- *
- * Acts as the identity function when given a non-forward-ref value.
- *
- * \@usageNotes
- * ### Example
- *
- * {\@example core/di/ts/forward_ref/forward_ref_spec.ts region='resolve_forward_ref'}
- *
- * @see `forwardRef`
- * \@publicApi
- * @template T
- * @param {?} type
- * @return {?}
- */
-function resolveForwardRef(type) {
-    /** @type {?} */
-    const fn = type;
-    if (typeof fn === 'function' && fn.hasOwnProperty(__forward_ref__) &&
-        fn.__forward_ref__ === forwardRef) {
-        return fn();
-    }
-    else {
-        return type;
-    }
 }
 
 /**
@@ -13767,7 +13767,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.0-rc.0+42.sha-7df9040');
+const VERSION = new Version('7.2.0-rc.0+45.sha-a979001');
 
 /**
  * @fileoverview added by tsickle
@@ -18707,10 +18707,12 @@ function compileNgModuleDefs(moduleType, ngModule) {
             if (ngModuleDef === null) {
                 ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, `ng://${moduleType.name}/ngModuleDef.js`, {
                     type: moduleType,
-                    bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$2),
-                    declarations: declarations,
-                    imports: flatten$1(ngModule.imports || EMPTY_ARRAY$2).map(expandModuleWithProviders),
-                    exports: flatten$1(ngModule.exports || EMPTY_ARRAY$2).map(expandModuleWithProviders),
+                    bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$2, resolveForwardRef),
+                    declarations: declarations.map(resolveForwardRef),
+                    imports: flatten$1(ngModule.imports || EMPTY_ARRAY$2, resolveForwardRef)
+                        .map(expandModuleWithProviders),
+                    exports: flatten$1(ngModule.exports || EMPTY_ARRAY$2, resolveForwardRef)
+                        .map(expandModuleWithProviders),
                     emitInline: true,
                 });
             }
@@ -18733,8 +18735,8 @@ function compileNgModuleDefs(moduleType, ngModule) {
                     deps: reflectDependencies(moduleType),
                     providers: ngModule.providers || EMPTY_ARRAY$2,
                     imports: [
-                        ngModule.imports || EMPTY_ARRAY$2,
-                        ngModule.exports || EMPTY_ARRAY$2,
+                        (ngModule.imports || EMPTY_ARRAY$2).map(resolveForwardRef),
+                        (ngModule.exports || EMPTY_ARRAY$2).map(resolveForwardRef),
                     ],
                 };
                 ngInjectorDef = getCompilerFacade().compileInjector(angularCoreEnv, `ng://${moduleType.name}/ngInjectorDef.js`, meta);
@@ -18761,8 +18763,8 @@ function verifySemanticsOfNgModuleDef(moduleType) {
     ngModuleDef.declarations.forEach(verifyDeclarationsHaveDefinitions);
     /** @type {?} */
     const combinedDeclarations = [
-        ...ngModuleDef.declarations,
-        ...flatten$1(ngModuleDef.imports.map(computeCombinedExports)),
+        ...ngModuleDef.declarations.map(resolveForwardRef),
+        ...flatten$1(ngModuleDef.imports.map(computeCombinedExports), resolveForwardRef),
     ];
     ngModuleDef.exports.forEach(verifyExportsAreDeclaredOrReExported);
     ngModuleDef.declarations.forEach(verifyDeclarationIsUnique);
@@ -19262,7 +19264,7 @@ function directiveMetadata(type, metadata) {
  * @return {?}
  */
 function convertToR3QueryPredicate(selector) {
-    return typeof selector === 'string' ? splitByComma(selector) : selector;
+    return typeof selector === 'string' ? splitByComma(selector) : resolveForwardRef(selector);
 }
 /**
  * @param {?} propertyName
