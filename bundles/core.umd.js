@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-rc.0+60.sha-13d23f3
+ * @license Angular v7.2.0-rc.0+61.sha-0bd9deb
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -10720,7 +10720,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0-rc.0+60.sha-13d23f3');
+    var VERSION = new Version('7.2.0-rc.0+61.sha-0bd9deb');
 
     /**
      * @license
@@ -13275,7 +13275,7 @@
      */
     function getPipeDef$1(name, registry) {
         if (registry) {
-            for (var i = 0; i < registry.length; i++) {
+            for (var i = registry.length - 1; i >= 0; i--) {
                 var pipeDef = registry[i];
                 if (name === pipeDef.name) {
                     return pipeDef;
