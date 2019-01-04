@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.2.0-rc.0+62.sha-5d3dcfc
+ * @license Angular v7.2.0-rc.0+63.sha-fb7816f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __extends, __spread, __assign, __read, __values } from 'tslib';
+import { __extends, __spread, __read, __assign, __values } from 'tslib';
 import { Subject, Subscription, Observable, merge } from 'rxjs';
 import { share } from 'rxjs/operators';
 
@@ -2296,7 +2296,7 @@ function leaveView(newView) {
  *
  * ```
  */
-var includeViewProviders = false;
+var includeViewProviders = true;
 function setIncludeViewProviders(v) {
     var oldValue = includeViewProviders;
     includeViewProviders = v;
@@ -10721,7 +10721,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.2.0-rc.0+62.sha-5d3dcfc');
+var VERSION = new Version('7.2.0-rc.0+63.sha-fb7816f');
 
 /**
  * @license

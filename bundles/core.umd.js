@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-rc.0+62.sha-5d3dcfc
+ * @license Angular v7.2.0-rc.0+63.sha-fb7816f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2341,7 +2341,7 @@
      *
      * ```
      */
-    var includeViewProviders = false;
+    var includeViewProviders = true;
     function setIncludeViewProviders(v) {
         var oldValue = includeViewProviders;
         includeViewProviders = v;
@@ -10751,7 +10751,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0-rc.0+62.sha-5d3dcfc');
+    var VERSION = new Version('7.2.0-rc.0+63.sha-fb7816f');
 
     /**
      * @license
