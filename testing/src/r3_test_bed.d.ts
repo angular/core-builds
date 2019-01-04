@@ -100,14 +100,12 @@ export declare class TestBedRender3 implements Injector, TestBed {
     private _providerOverrides;
     private _rootProviderOverrides;
     private _providerOverridesByToken;
-    private _templateOverrides;
     private _providers;
     private _declarations;
     private _imports;
     private _schemas;
     private _activeFixtures;
     private _moduleRef;
-    private _testModuleType;
     private _instantiated;
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
