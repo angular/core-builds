@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-rc.0+57.sha-7eb2c41
+ * @license Angular v7.2.0-rc.0+56.sha-3f2ebbd
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1999,17 +1999,27 @@ function addAllToArray(items, arr) {
  * Given a current view, finds the nearest component's host (LElement).
  *
  * @param {?} lView LView for which we want a host element node
+ * @param {?=} declarationMode indicates whether DECLARATION_VIEW or PARENT should be used to climb the
+ * tree.
  * @return {?} The host node
  */
-function findComponentView(lView) {
+function findComponentView(lView, declarationMode) {
     /** @type {?} */
     let rootTNode = lView[HOST_NODE];
     while (rootTNode && rootTNode.type === 2 /* View */) {
-        ngDevMode && assertDefined(lView[DECLARATION_VIEW], 'lView[DECLARATION_VIEW]');
-        lView = (/** @type {?} */ (lView[DECLARATION_VIEW]));
+        ngDevMode && assertDefined(lView[declarationMode ? DECLARATION_VIEW : PARENT], declarationMode ? 'lView.declarationView' : 'lView.parent');
+        lView = (/** @type {?} */ (lView[declarationMode ? DECLARATION_VIEW : PARENT]));
         rootTNode = lView[HOST_NODE];
     }
     return lView;
+}
+/**
+ * Return the host TElementNode of the starting LView
+ * @param {?} lView the starting LView.
+ * @return {?}
+ */
+function getHostTElementNode(lView) {
+    return (/** @type {?} */ (findComponentView(lView, true)[HOST_NODE]));
 }
 
 /**
@@ -3133,7 +3143,7 @@ function getOrCreateInjectable(tNode, lView, token, flags = InjectFlags.Default,
         /** @type {?} */
         let parentLocation = NO_PARENT_INJECTOR;
         /** @type {?} */
-        let hostTElementNode = flags & InjectFlags.Host ? findComponentView(lView)[HOST_NODE] : null;
+        let hostTElementNode = flags & InjectFlags.Host ? getHostTElementNode(lView) : null;
         // If we should skip this injector, or if there is no injector on this node, start by searching
         // the parent injector.
         if (injectorIndex === -1 || flags & InjectFlags.SkipSelf) {
@@ -13759,7 +13769,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.0-rc.0+57.sha-7eb2c41');
+const VERSION = new Version('7.2.0-rc.0+56.sha-3f2ebbd');
 
 /**
  * @fileoverview added by tsickle
