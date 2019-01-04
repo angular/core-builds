@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-rc.0+56.sha-3f2ebbd
+ * @license Angular v7.2.0-rc.0+54.sha-176b3f1
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -10729,7 +10729,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0-rc.0+56.sha-3f2ebbd');
+    var VERSION = new Version('7.2.0-rc.0+54.sha-176b3f1');
 
     /**
      * @license
@@ -11493,11 +11493,11 @@
      * found in the LICENSE file at https://angular.io/license
      */
     var MARKER = "\uFFFD";
-    var ICU_BLOCK_REGEX = /^\s*(�\d+:?\d*�)\s*,\s*(select|plural)\s*,/;
+    var ICU_BLOCK_REGEX = /^\s*(�\d+�)\s*,\s*(select|plural)\s*,/;
     var SUBTEMPLATE_REGEXP = /�\/?\*(\d+:\d+)�/gi;
     var PH_REGEXP = /�(\/?[#*]\d+):?\d*�/gi;
     var BINDING_REGEXP = /�(\d+):?\d*�/gi;
-    var ICU_REGEXP = /({\s*�\d+:?\d*�\s*,\s*\S{6}\s*,[\s\S]*})/gi;
+    var ICU_REGEXP = /({\s*�\d+�\s*,\s*\S{6}\s*,[\s\S]*})/gi;
     // i18nPostproocess regexps
     var PP_PLACEHOLDERS = /\[(�.+?�?)\]/g;
     var PP_ICU_VARS = /({\s*)(VAR_(PLURAL|SELECT)(_\d+)?)(\s*,)/g;

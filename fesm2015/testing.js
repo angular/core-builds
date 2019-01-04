@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-rc.0+56.sha-3f2ebbd
+ * @license Angular v7.2.0-rc.0+54.sha-176b3f1
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -994,7 +994,6 @@ class TestBedRender3 {
         this._providerOverrides = [];
         this._rootProviderOverrides = [];
         this._providerOverridesByToken = new Map();
-        this._templateOverrides = new Map();
         // test module configuration
         this._providers = [];
         this._declarations = [];
@@ -1002,7 +1001,6 @@ class TestBedRender3 {
         this._schemas = [];
         this._activeFixtures = [];
         this._moduleRef = (/** @type {?} */ (null));
-        this._testModuleType = (/** @type {?} */ (null));
         this._instantiated = false;
     }
     /**
@@ -1124,10 +1122,7 @@ class TestBedRender3 {
      * @return {?}
      */
     overrideTemplateUsingTestingModule(component, template) {
-        if (this._instantiated) {
-            throw new Error('Cannot override template when the test module has already been instantiated');
-        }
-        this._templateOverrides.set(component, template);
+        throw new Error('Render3TestBed.overrideTemplateUsingTestingModule is not implemented yet');
     }
     /**
      * @param {?} token
@@ -1217,14 +1212,12 @@ class TestBedRender3 {
         this._providerOverrides = [];
         this._rootProviderOverrides = [];
         this._providerOverridesByToken.clear();
-        this._templateOverrides.clear();
         // reset test module config
         this._providers = [];
         this._declarations = [];
         this._imports = [];
         this._schemas = [];
         this._moduleRef = (/** @type {?} */ (null));
-        this._testModuleType = (/** @type {?} */ (null));
         this._instantiated = false;
         this._activeFixtures.forEach((fixture) => {
             try {
@@ -1418,11 +1411,12 @@ class TestBedRender3 {
         }
         /** @type {?} */
         const resolvers = this._getResolvers();
-        this._testModuleType = this._createTestModule();
-        this._compileNgModule(this._testModuleType, resolvers);
+        /** @type {?} */
+        const testModuleType = this._createTestModule();
+        this._compileNgModule(testModuleType, resolvers);
         /** @type {?} */
         const parentInjector = this.platform.injector;
-        this._moduleRef = new ɵRender3NgModuleRef(this._testModuleType, parentInjector);
+        this._moduleRef = new ɵRender3NgModuleRef(testModuleType, parentInjector);
         // ApplicationInitStatus.runInitializers() is marked @internal
         // to core. Cast it to any before accessing it.
         ((/** @type {?} */ (this._moduleRef.injector.get(ApplicationInitStatus)))).runInitializers();
@@ -1508,25 +1502,17 @@ class TestBedRender3 {
     /**
      * @private
      * @param {?} meta
-     * @param {?=} type
      * @return {?}
      */
-    _getMetaWithOverrides(meta, type) {
-        /** @type {?} */
-        const overrides = {};
+    _getMetaWithOverrides(meta) {
         if (meta.providers && meta.providers.length) {
             /** @type {?} */
-            const providerOverrides = flatten(meta.providers, (provider) => this._getProviderOverrides(provider));
-            if (providerOverrides.length) {
-                overrides.providers = [...meta.providers, ...providerOverrides];
+            const overrides = flatten(meta.providers, (provider) => this._getProviderOverrides(provider));
+            if (overrides.length) {
+                return Object.assign({}, meta, { providers: [...meta.providers, ...overrides] });
             }
         }
-        /** @type {?} */
-        const hasTemplateOverride = !!type && this._templateOverrides.has(type);
-        if (hasTemplateOverride) {
-            overrides.template = this._templateOverrides.get((/** @type {?} */ (type)));
-        }
-        return Object.keys(overrides).length ? Object.assign({}, meta, overrides) : meta;
+        return meta;
     }
     /**
      * @private
@@ -1553,7 +1539,7 @@ class TestBedRender3 {
             const component = resolvers.component.resolve(declaration);
             if (component) {
                 /** @type {?} */
-                const metadata = this._getMetaWithOverrides(component, declaration);
+                const metadata = this._getMetaWithOverrides(component);
                 ɵcompileComponent(declaration, metadata);
                 compiledComponents.push(declaration);
                 return;
@@ -1576,16 +1562,7 @@ class TestBedRender3 {
         // Compile transitive modules, components, directives and pipes
         /** @type {?} */
         const transitiveScope = this._transitiveScopesFor(moduleType, resolvers);
-        compiledComponents.forEach(cmp => {
-            /** @type {?} */
-            const scope = this._templateOverrides.has(cmp) ?
-                // if we have template override via `TestBed.overrideTemplateUsingTestingModule` -
-                // define Component scope as TestingModule scope, instead of the scope of NgModule
-                // where this Component was declared
-                this._transitiveScopesFor(this._testModuleType, resolvers) :
-                transitiveScope;
-            ɵpatchComponentDefWithScope(((/** @type {?} */ (cmp))).ngComponentDef, scope);
-        });
+        compiledComponents.forEach(cmp => ɵpatchComponentDefWithScope(((/** @type {?} */ (cmp))).ngComponentDef, transitiveScope));
     }
     /**
      * Compute the pair of transitive scopes (compilation scope and exported scope) for a given
