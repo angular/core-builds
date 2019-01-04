@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-rc.0+28.sha-eea2b0f
+ * @license Angular v7.2.0-rc.0+61.sha-0bd9deb
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -537,7 +537,7 @@
         /**
          * Use the `CheckOnce` strategy, meaning that automatic change detection is deactivated
          * until reactivated by setting the strategy to `Default` (`CheckAlways`).
-         * Change detection can still be explictly invoked.
+         * Change detection can still be explicitly invoked.
          */
         ChangeDetectionStrategy[ChangeDetectionStrategy["OnPush"] = 0] = "OnPush";
         /**
@@ -558,7 +558,7 @@
          */
         ChangeDetectorStatus[ChangeDetectorStatus["Checked"] = 1] = "Checked";
         /**
-         * A state in which change detection continues automatically until explictly
+         * A state in which change detection continues automatically until explicitly
          * deactivated.
          */
         ChangeDetectorStatus[ChangeDetectorStatus["CheckAlways"] = 2] = "CheckAlways";
@@ -588,6 +588,140 @@
     function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
         return changeDetectionStrategy == null ||
             changeDetectionStrategy === exports.ChangeDetectionStrategy.Default;
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var __window = typeof window !== 'undefined' && window;
+    var __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
+        self instanceof WorkerGlobalScope && self;
+    var __global = typeof global !== 'undefined' && global;
+    // Check __global first, because in Node tests both __global and __window may be defined and _global
+    // should be __global in that case.
+    var _global = __global || __window || __self;
+    var promise = Promise.resolve(0);
+    var _symbolIterator = null;
+    function getSymbolIterator() {
+        if (!_symbolIterator) {
+            var Symbol_1 = _global['Symbol'];
+            if (Symbol_1 && Symbol_1.iterator) {
+                _symbolIterator = Symbol_1.iterator;
+            }
+            else {
+                // es6-shim specific logic
+                var keys = Object.getOwnPropertyNames(Map.prototype);
+                for (var i = 0; i < keys.length; ++i) {
+                    var key = keys[i];
+                    if (key !== 'entries' && key !== 'size' &&
+                        Map.prototype[key] === Map.prototype['entries']) {
+                        _symbolIterator = key;
+                    }
+                }
+            }
+        }
+        return _symbolIterator;
+    }
+    function scheduleMicroTask(fn) {
+        if (typeof Zone === 'undefined') {
+            // use promise to schedule microTask instead of use Zone
+            promise.then(function () { fn && fn.apply(null, null); });
+        }
+        else {
+            Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
+        }
+    }
+    // JS has NaN !== NaN
+    function looseIdentical(a, b) {
+        return a === b || typeof a === 'number' && typeof b === 'number' && isNaN(a) && isNaN(b);
+    }
+    function stringify(token) {
+        if (typeof token === 'string') {
+            return token;
+        }
+        if (token instanceof Array) {
+            return '[' + token.map(stringify).join(', ') + ']';
+        }
+        if (token == null) {
+            return '' + token;
+        }
+        if (token.overriddenName) {
+            return "" + token.overriddenName;
+        }
+        if (token.name) {
+            return "" + token.name;
+        }
+        var res = token.toString();
+        if (res == null) {
+            return '' + res;
+        }
+        var newLineIndex = res.indexOf('\n');
+        return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
+    }
+    /**
+     * Convince closure compiler that the wrapped function has no side-effects.
+     *
+     * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
+     * allow us to execute a function but have closure compiler mark the call as no-side-effects.
+     * It is important that the return value for the `noSideEffects` function be assigned
+     * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
+     * compiler.
+     */
+    function noSideEffects(fn) {
+        return '' + { toString: fn };
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var __forward_ref__ = getClosureSafeProperty({ __forward_ref__: getClosureSafeProperty });
+    /**
+     * Allows to refer to references which are not yet defined.
+     *
+     * For instance, `forwardRef` is used when the `token` which we need to refer to for the purposes of
+     * DI is declared, but not yet defined. It is also used when the `token` which we use when creating
+     * a query is not yet defined.
+     *
+     * @usageNotes
+     * ### Example
+     * {@example core/di/ts/forward_ref/forward_ref_spec.ts region='forward_ref'}
+     * @publicApi
+     */
+    function forwardRef(forwardRefFn) {
+        forwardRefFn.__forward_ref__ = forwardRef;
+        forwardRefFn.toString = function () { return stringify(this()); };
+        return forwardRefFn;
+    }
+    /**
+     * Lazily retrieves the reference value from a forwardRef.
+     *
+     * Acts as the identity function when given a non-forward-ref value.
+     *
+     * @usageNotes
+     * ### Example
+     *
+     * {@example core/di/ts/forward_ref/forward_ref_spec.ts region='resolve_forward_ref'}
+     *
+     * @see `forwardRef`
+     * @publicApi
+     */
+    function resolveForwardRef(type) {
+        var fn = type;
+        if (typeof fn === 'function' && fn.hasOwnProperty(__forward_ref__) &&
+            fn.__forward_ref__ === forwardRef) {
+            return fn();
+        }
+        else {
+            return type;
+        }
     }
 
     /**
@@ -797,91 +931,6 @@
     if (typeof ngDevMode !== 'undefined' && ngDevMode) {
         Object.freeze(EMPTY_OBJ);
         Object.freeze(EMPTY_ARRAY);
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var __window = typeof window !== 'undefined' && window;
-    var __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
-        self instanceof WorkerGlobalScope && self;
-    var __global = typeof global !== 'undefined' && global;
-    // Check __global first, because in Node tests both __global and __window may be defined and _global
-    // should be __global in that case.
-    var _global = __global || __window || __self;
-    var promise = Promise.resolve(0);
-    var _symbolIterator = null;
-    function getSymbolIterator() {
-        if (!_symbolIterator) {
-            var Symbol_1 = _global['Symbol'];
-            if (Symbol_1 && Symbol_1.iterator) {
-                _symbolIterator = Symbol_1.iterator;
-            }
-            else {
-                // es6-shim specific logic
-                var keys = Object.getOwnPropertyNames(Map.prototype);
-                for (var i = 0; i < keys.length; ++i) {
-                    var key = keys[i];
-                    if (key !== 'entries' && key !== 'size' &&
-                        Map.prototype[key] === Map.prototype['entries']) {
-                        _symbolIterator = key;
-                    }
-                }
-            }
-        }
-        return _symbolIterator;
-    }
-    function scheduleMicroTask(fn) {
-        if (typeof Zone === 'undefined') {
-            // use promise to schedule microTask instead of use Zone
-            promise.then(function () { fn && fn.apply(null, null); });
-        }
-        else {
-            Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
-        }
-    }
-    // JS has NaN !== NaN
-    function looseIdentical(a, b) {
-        return a === b || typeof a === 'number' && typeof b === 'number' && isNaN(a) && isNaN(b);
-    }
-    function stringify(token) {
-        if (typeof token === 'string') {
-            return token;
-        }
-        if (token instanceof Array) {
-            return '[' + token.map(stringify).join(', ') + ']';
-        }
-        if (token == null) {
-            return '' + token;
-        }
-        if (token.overriddenName) {
-            return "" + token.overriddenName;
-        }
-        if (token.name) {
-            return "" + token.name;
-        }
-        var res = token.toString();
-        if (res == null) {
-            return '' + res;
-        }
-        var newLineIndex = res.indexOf('\n');
-        return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
-    }
-    /**
-     * Convince closure compiler that the wrapped function has no side-effects.
-     *
-     * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
-     * allow us to execute a function but have closure compiler mark the call as no-side-effects.
-     * It is important that the return value for the `noSideEffects` function be assigned
-     * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
-     * compiler.
-     */
-    function noSideEffects(fn) {
-        return '' + { toString: fn };
     }
 
     /**
@@ -1633,25 +1682,16 @@
      * Given a current view, finds the nearest component's host (LElement).
      *
      * @param lView LView for which we want a host element node
-     * @param declarationMode indicates whether DECLARATION_VIEW or PARENT should be used to climb the
-     * tree.
      * @returns The host node
      */
-    function findComponentView(lView, declarationMode) {
+    function findComponentView(lView) {
         var rootTNode = lView[HOST_NODE];
         while (rootTNode && rootTNode.type === 2 /* View */) {
-            ngDevMode && assertDefined(lView[declarationMode ? DECLARATION_VIEW : PARENT], declarationMode ? 'lView.declarationView' : 'lView.parent');
-            lView = lView[declarationMode ? DECLARATION_VIEW : PARENT];
+            ngDevMode && assertDefined(lView[DECLARATION_VIEW], 'lView[DECLARATION_VIEW]');
+            lView = lView[DECLARATION_VIEW];
             rootTNode = lView[HOST_NODE];
         }
         return lView;
-    }
-    /**
-     * Return the host TElementNode of the starting LView
-     * @param lView the starting LView.
-     */
-    function getHostTElementNode(lView) {
-        return findComponentView(lView, true)[HOST_NODE];
     }
 
     /**
@@ -2546,7 +2586,7 @@
             var previousTView = null;
             var injectorIndex = getInjectorIndex(tNode, lView);
             var parentLocation = NO_PARENT_INJECTOR;
-            var hostTElementNode = flags & exports.InjectFlags.Host ? getHostTElementNode(lView) : null;
+            var hostTElementNode = flags & exports.InjectFlags.Host ? findComponentView(lView)[HOST_NODE] : null;
             // If we should skip this injector, or if there is no injector on this node, start by searching
             // the parent injector.
             if (injectorIndex === -1 || flags & exports.InjectFlags.SkipSelf) {
@@ -3386,55 +3426,6 @@
      */
     function isDirectiveDefHack(obj) {
         return obj.type !== undefined && obj.template !== undefined && obj.declaredInputs !== undefined;
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var __forward_ref__ = getClosureSafeProperty({ __forward_ref__: getClosureSafeProperty });
-    /**
-     * Allows to refer to references which are not yet defined.
-     *
-     * For instance, `forwardRef` is used when the `token` which we need to refer to for the purposes of
-     * DI is declared, but not yet defined. It is also used when the `token` which we use when creating
-     * a query is not yet defined.
-     *
-     * @usageNotes
-     * ### Example
-     * {@example core/di/ts/forward_ref/forward_ref_spec.ts region='forward_ref'}
-     * @publicApi
-     */
-    function forwardRef(forwardRefFn) {
-        forwardRefFn.__forward_ref__ = forwardRef;
-        forwardRefFn.toString = function () { return stringify(this()); };
-        return forwardRefFn;
-    }
-    /**
-     * Lazily retrieves the reference value from a forwardRef.
-     *
-     * Acts as the identity function when given a non-forward-ref value.
-     *
-     * @usageNotes
-     * ### Example
-     *
-     * {@example core/di/ts/forward_ref/forward_ref_spec.ts region='resolve_forward_ref'}
-     *
-     * @see `forwardRef`
-     * @publicApi
-     */
-    function resolveForwardRef(type) {
-        var fn = type;
-        if (typeof fn === 'function' && fn.hasOwnProperty(__forward_ref__) &&
-            fn.__forward_ref__ === forwardRef) {
-            return fn();
-        }
-        else {
-            return type;
-        }
     }
 
     /**
@@ -6212,8 +6203,9 @@
     function renderComponentOrTemplate(hostView, context, templateFn) {
         var rendererFactory = hostView[RENDERER_FACTORY];
         var oldView = enterView(hostView, hostView[HOST_NODE]);
+        var normalExecutionPath = !getCheckNoChangesMode();
         try {
-            if (rendererFactory.begin) {
+            if (normalExecutionPath && rendererFactory.begin) {
                 rendererFactory.begin();
             }
             if (isCreationMode(hostView)) {
@@ -6230,7 +6222,7 @@
             refreshDescendantViews(hostView);
         }
         finally {
-            if (rendererFactory.end) {
+            if (normalExecutionPath && rendererFactory.end) {
                 rendererFactory.end();
             }
             leaveView(oldView);
@@ -10760,7 +10752,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0-rc.0+28.sha-eea2b0f');
+    var VERSION = new Version('7.2.0-rc.0+61.sha-0bd9deb');
 
     /**
      * @license
@@ -11524,11 +11516,11 @@
      * found in the LICENSE file at https://angular.io/license
      */
     var MARKER = "\uFFFD";
-    var ICU_BLOCK_REGEX = /^\s*(�\d+�)\s*,\s*(select|plural)\s*,/;
+    var ICU_BLOCK_REGEX = /^\s*(�\d+:?\d*�)\s*,\s*(select|plural)\s*,/;
     var SUBTEMPLATE_REGEXP = /�\/?\*(\d+:\d+)�/gi;
     var PH_REGEXP = /�(\/?[#*]\d+):?\d*�/gi;
     var BINDING_REGEXP = /�(\d+):?\d*�/gi;
-    var ICU_REGEXP = /({\s*�\d+�\s*,\s*\S{6}\s*,[\s\S]*})/gi;
+    var ICU_REGEXP = /({\s*�\d+:?\d*�\s*,\s*\S{6}\s*,[\s\S]*})/gi;
     // i18nPostproocess regexps
     var PP_PLACEHOLDERS = /\[(�.+?�?)\]/g;
     var PP_ICU_VARS = /({\s*)(VAR_(PLURAL|SELECT)(_\d+)?)(\s*,)/g;
@@ -13315,7 +13307,7 @@
      */
     function getPipeDef$1(name, registry) {
         if (registry) {
-            for (var i = 0; i < registry.length; i++) {
+            for (var i = registry.length - 1; i >= 0; i--) {
                 var pipeDef = registry[i];
                 if (name === pipeDef.name) {
                     return pipeDef;
@@ -14861,10 +14853,12 @@
                 if (ngModuleDef === null) {
                     ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, "ng://" + moduleType.name + "/ngModuleDef.js", {
                         type: moduleType,
-                        bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$2),
-                        declarations: declarations,
-                        imports: flatten$1(ngModule.imports || EMPTY_ARRAY$2).map(expandModuleWithProviders),
-                        exports: flatten$1(ngModule.exports || EMPTY_ARRAY$2).map(expandModuleWithProviders),
+                        bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$2, resolveForwardRef),
+                        declarations: declarations.map(resolveForwardRef),
+                        imports: flatten$1(ngModule.imports || EMPTY_ARRAY$2, resolveForwardRef)
+                            .map(expandModuleWithProviders),
+                        exports: flatten$1(ngModule.exports || EMPTY_ARRAY$2, resolveForwardRef)
+                            .map(expandModuleWithProviders),
                         emitInline: true,
                     });
                 }
@@ -14885,8 +14879,8 @@
                         deps: reflectDependencies(moduleType),
                         providers: ngModule.providers || EMPTY_ARRAY$2,
                         imports: [
-                            ngModule.imports || EMPTY_ARRAY$2,
-                            ngModule.exports || EMPTY_ARRAY$2,
+                            (ngModule.imports || EMPTY_ARRAY$2).map(resolveForwardRef),
+                            (ngModule.exports || EMPTY_ARRAY$2).map(resolveForwardRef),
                         ],
                     };
                     ngInjectorDef = getCompilerFacade().compileInjector(angularCoreEnv, "ng://" + moduleType.name + "/ngInjectorDef.js", meta);
@@ -14905,7 +14899,7 @@
         var ngModuleDef = getNgModuleDef(moduleType, true);
         var errors = [];
         ngModuleDef.declarations.forEach(verifyDeclarationsHaveDefinitions);
-        var combinedDeclarations = __spread(ngModuleDef.declarations, flatten$1(ngModuleDef.imports.map(computeCombinedExports)));
+        var combinedDeclarations = __spread(ngModuleDef.declarations.map(resolveForwardRef), flatten$1(ngModuleDef.imports.map(computeCombinedExports), resolveForwardRef));
         ngModuleDef.exports.forEach(verifyExportsAreDeclaredOrReExported);
         ngModuleDef.declarations.forEach(verifyDeclarationIsUnique);
         ngModuleDef.declarations.forEach(verifyComponentEntryComponentsIsPartOfNgModule);
@@ -15282,7 +15276,7 @@
         };
     }
     function convertToR3QueryPredicate(selector) {
-        return typeof selector === 'string' ? splitByComma(selector) : selector;
+        return typeof selector === 'string' ? splitByComma(selector) : resolveForwardRef(selector);
     }
     function convertToR3QueryMetadata(propertyName, ann) {
         return {
