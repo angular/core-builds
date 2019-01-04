@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-rc.0+59.sha-48555f9
+ * @license Angular v7.2.0-rc.0+60.sha-13d23f3
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -10690,7 +10690,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.2.0-rc.0+59.sha-48555f9');
+var VERSION = new Version('7.2.0-rc.0+60.sha-13d23f3');
 
 /**
  * @license
