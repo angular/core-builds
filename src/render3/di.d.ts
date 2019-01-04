@@ -90,7 +90,7 @@ export declare function injectAttributeImpl(tNode: TNode, attrNameToInject: stri
  * @param notFoundValue The value to return when the injection flags is `InjectFlags.Optional`
  * @returns the value from the injector, `null` when not found, or `notFoundValue` if provided
  */
-export declare function getOrCreateInjectable<T>(tNode: TElementNode | TContainerNode | TElementContainerNode, lView: LView, token: Type<T> | InjectionToken<T>, flags?: InjectFlags, notFoundValue?: any): T | null;
+export declare function getOrCreateInjectable<T>(tNode: TElementNode | TContainerNode | TElementContainerNode | null, lView: LView, token: Type<T> | InjectionToken<T>, flags?: InjectFlags, notFoundValue?: any): T | null;
 /**
  * Searches for the given token among the node's directives and providers.
  *
@@ -127,7 +127,7 @@ export declare function injectInjector(): NodeInjector;
 export declare class NodeInjector implements Injector {
     private _tNode;
     private _lView;
-    constructor(_tNode: TElementNode | TContainerNode | TElementContainerNode, _lView: LView);
+    constructor(_tNode: TElementNode | TContainerNode | TElementContainerNode | null, _lView: LView);
     get(token: any, notFoundValue?: any): any;
 }
 export declare function getFactoryOf<T>(type: Type<any>): ((type: Type<T> | null) => T) | null;
