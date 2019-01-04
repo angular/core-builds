@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-rc.0+46.sha-1e6c9be
+ * @license Angular v7.2.0-rc.0+52.sha-51a0bd2
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -6197,8 +6197,9 @@
     function renderComponentOrTemplate(hostView, context, templateFn) {
         var rendererFactory = hostView[RENDERER_FACTORY];
         var oldView = enterView(hostView, hostView[HOST_NODE]);
+        var normalExecutionPath = !getCheckNoChangesMode();
         try {
-            if (rendererFactory.begin) {
+            if (normalExecutionPath && rendererFactory.begin) {
                 rendererFactory.begin();
             }
             if (isCreationMode(hostView)) {
@@ -6215,7 +6216,7 @@
             refreshDescendantViews(hostView);
         }
         finally {
-            if (rendererFactory.end) {
+            if (normalExecutionPath && rendererFactory.end) {
                 rendererFactory.end();
             }
             leaveView(oldView);
@@ -10728,7 +10729,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0-rc.0+46.sha-1e6c9be');
+    var VERSION = new Version('7.2.0-rc.0+52.sha-51a0bd2');
 
     /**
      * @license
