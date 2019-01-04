@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-rc.0+55.sha-38b4d15
+ * @license Angular v7.2.0-rc.0+57.sha-7eb2c41
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1616,25 +1616,16 @@ function addAllToArray(items, arr) {
  * Given a current view, finds the nearest component's host (LElement).
  *
  * @param lView LView for which we want a host element node
- * @param declarationMode indicates whether DECLARATION_VIEW or PARENT should be used to climb the
- * tree.
  * @returns The host node
  */
-function findComponentView(lView, declarationMode) {
+function findComponentView(lView) {
     var rootTNode = lView[HOST_NODE];
     while (rootTNode && rootTNode.type === 2 /* View */) {
-        ngDevMode && assertDefined(lView[declarationMode ? DECLARATION_VIEW : PARENT], declarationMode ? 'lView.declarationView' : 'lView.parent');
-        lView = lView[declarationMode ? DECLARATION_VIEW : PARENT];
+        ngDevMode && assertDefined(lView[DECLARATION_VIEW], 'lView[DECLARATION_VIEW]');
+        lView = lView[DECLARATION_VIEW];
         rootTNode = lView[HOST_NODE];
     }
     return lView;
-}
-/**
- * Return the host TElementNode of the starting LView
- * @param lView the starting LView.
- */
-function getHostTElementNode(lView) {
-    return findComponentView(lView, true)[HOST_NODE];
 }
 
 /**
@@ -2535,7 +2526,7 @@ function getOrCreateInjectable(tNode, lView, token, flags, notFoundValue) {
         var previousTView = null;
         var injectorIndex = getInjectorIndex(tNode, lView);
         var parentLocation = NO_PARENT_INJECTOR;
-        var hostTElementNode = flags & InjectFlags.Host ? getHostTElementNode(lView) : null;
+        var hostTElementNode = flags & InjectFlags.Host ? findComponentView(lView)[HOST_NODE] : null;
         // If we should skip this injector, or if there is no injector on this node, start by searching
         // the parent injector.
         if (injectorIndex === -1 || flags & InjectFlags.SkipSelf) {
@@ -10699,7 +10690,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.2.0-rc.0+55.sha-38b4d15');
+var VERSION = new Version('7.2.0-rc.0+57.sha-7eb2c41');
 
 /**
  * @license
@@ -11463,11 +11454,11 @@ var COMMENT_MARKER = {
  * found in the LICENSE file at https://angular.io/license
  */
 var MARKER = "\uFFFD";
-var ICU_BLOCK_REGEX = /^\s*(�\d+�)\s*,\s*(select|plural)\s*,/;
+var ICU_BLOCK_REGEX = /^\s*(�\d+:?\d*�)\s*,\s*(select|plural)\s*,/;
 var SUBTEMPLATE_REGEXP = /�\/?\*(\d+:\d+)�/gi;
 var PH_REGEXP = /�(\/?[#*]\d+):?\d*�/gi;
 var BINDING_REGEXP = /�(\d+):?\d*�/gi;
-var ICU_REGEXP = /({\s*�\d+�\s*,\s*\S{6}\s*,[\s\S]*})/gi;
+var ICU_REGEXP = /({\s*�\d+:?\d*�\s*,\s*\S{6}\s*,[\s\S]*})/gi;
 // i18nPostproocess regexps
 var PP_PLACEHOLDERS = /\[(�.+?�?)\]/g;
 var PP_ICU_VARS = /({\s*)(VAR_(PLURAL|SELECT)(_\d+)?)(\s*,)/g;
