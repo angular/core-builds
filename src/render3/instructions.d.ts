@@ -229,6 +229,28 @@ export declare function elementAttribute(index: number, name: string, value: any
  */
 export declare function elementProperty<T>(index: number, propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): void;
 /**
+ * Updates a synthetic host binding (e.g. `[@foo]`) on a component.
+ *
+ * This instruction is for compatibility purposes and is designed to ensure that a
+ * synthetic host binding (e.g. `@HostBinding('@foo')`) properly gets rendered in
+ * the component's renderer. Normally all host bindings are evaluated with the parent
+ * component's renderer, but, in the case of animation @triggers, they need to be
+ * evaluated with the sub components renderer (because that's where the animation
+ * triggers are defined).
+ *
+ * Do not use this instruction as a replacement for `elementProperty`. This instruction
+ * only exists to ensure compatibility with the ViewEngine's host binding behavior.
+ *
+ * @param index The index of the element to update in the data array
+ * @param propName Name of property. Because it is going to DOM, this is not subject to
+ *        renaming as part of minification.
+ * @param value New value to write.
+ * @param sanitizer An optional function used to sanitize the value.
+ * @param nativeOnly Whether or not we should only set native properties and skip input check
+ * (this is necessary for host property bindings)
+ */
+export declare function componentHostSyntheticProperty<T>(index: number, propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): void;
+/**
  * Constructs a TNode object from the arguments.
  *
  * @param type The type of the node

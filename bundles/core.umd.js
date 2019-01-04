@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-rc.0+61.sha-0bd9deb
+ * @license Angular v7.2.0-rc.0+62.sha-5d3dcfc
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -6715,6 +6715,37 @@
      * (this is necessary for host property bindings)
      */
     function elementProperty(index, propName, value, sanitizer, nativeOnly) {
+        elementPropertyInternal(index, propName, value, sanitizer, nativeOnly);
+    }
+    /**
+     * Updates a synthetic host binding (e.g. `[@foo]`) on a component.
+     *
+     * This instruction is for compatibility purposes and is designed to ensure that a
+     * synthetic host binding (e.g. `@HostBinding('@foo')`) properly gets rendered in
+     * the component's renderer. Normally all host bindings are evaluated with the parent
+     * component's renderer, but, in the case of animation @triggers, they need to be
+     * evaluated with the sub components renderer (because that's where the animation
+     * triggers are defined).
+     *
+     * Do not use this instruction as a replacement for `elementProperty`. This instruction
+     * only exists to ensure compatibility with the ViewEngine's host binding behavior.
+     *
+     * @param index The index of the element to update in the data array
+     * @param propName Name of property. Because it is going to DOM, this is not subject to
+     *        renaming as part of minification.
+     * @param value New value to write.
+     * @param sanitizer An optional function used to sanitize the value.
+     * @param nativeOnly Whether or not we should only set native properties and skip input check
+     * (this is necessary for host property bindings)
+     */
+    function componentHostSyntheticProperty(index, propName, value, sanitizer, nativeOnly) {
+        elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadComponentRenderer);
+    }
+    function loadComponentRenderer(tNode, lView) {
+        var componentLView = lView[tNode.index];
+        return componentLView[RENDERER];
+    }
+    function elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadRendererFn) {
         if (value === NO_CHANGE)
             return;
         var lView = getLView();
@@ -6734,7 +6765,7 @@
             }
         }
         else if (tNode.type === 3 /* Element */) {
-            var renderer = lView[RENDERER];
+            var renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
             // It is assumed that the sanitizer is only added when the compiler determines that the property
             // is risky, so sanitization can be done without further checks.
             value = sanitizer != null ? sanitizer(value) : value;
@@ -10720,7 +10751,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0-rc.0+61.sha-0bd9deb');
+    var VERSION = new Version('7.2.0-rc.0+62.sha-5d3dcfc');
 
     /**
      * @license
@@ -14310,6 +14341,7 @@
         'ɵload': load,
         'ɵprojection': projection,
         'ɵelementProperty': elementProperty,
+        'ɵcomponentHostSyntheticProperty': componentHostSyntheticProperty,
         'ɵpipeBind1': pipeBind1,
         'ɵpipeBind2': pipeBind2,
         'ɵpipeBind3': pipeBind3,
@@ -24432,6 +24464,7 @@
     exports.ɵloadQueryList = loadQueryList;
     exports.ɵelementEnd = elementEnd;
     exports.ɵelementProperty = elementProperty;
+    exports.ɵcomponentHostSyntheticProperty = componentHostSyntheticProperty;
     exports.ɵprojectionDef = projectionDef;
     exports.ɵreference = reference;
     exports.ɵenableBindings = enableBindings;
