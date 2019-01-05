@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-rc.0+64.sha-929334b
+ * @license Angular v7.2.0-rc.0+65.sha-b61dafa
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -10742,7 +10742,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.2.0-rc.0+64.sha-929334b');
+var VERSION = new Version('7.2.0-rc.0+65.sha-b61dafa');
 
 /**
  * @license
@@ -11067,7 +11067,7 @@ var InertBodyHelper = /** @class */ (function () {
         try {
             html = encodeURI(html);
         }
-        catch (e) {
+        catch (_a) {
             return null;
         }
         var xhr = new XMLHttpRequest();
@@ -11096,7 +11096,7 @@ var InertBodyHelper = /** @class */ (function () {
             body.removeChild(body.firstChild);
             return body;
         }
-        catch (e) {
+        catch (_a) {
             return null;
         }
     };
@@ -11159,7 +11159,7 @@ function isDOMParserAvailable() {
     try {
         return !!window.DOMParser;
     }
-    catch (e) {
+    catch (_a) {
         return false;
     }
 }
