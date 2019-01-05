@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-rc.0+61.sha-0bd9deb
+ * @license Angular v7.2.0-rc.0+65.sha-b61dafa
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2356,7 +2356,7 @@
      *
      * ```
      */
-    var includeViewProviders = false;
+    var includeViewProviders = true;
     function setIncludeViewProviders(v) {
         var oldValue = includeViewProviders;
         includeViewProviders = v;
@@ -2480,7 +2480,7 @@
         var viewOffset = 1;
         while (hostTNode && hostTNode.injectorIndex === -1) {
             view = view[DECLARATION_VIEW];
-            hostTNode = view[HOST_NODE];
+            hostTNode = view ? view[HOST_NODE] : null;
             viewOffset++;
         }
         return hostTNode ?
@@ -2559,76 +2559,80 @@
      */
     function getOrCreateInjectable(tNode, lView, token, flags, notFoundValue) {
         if (flags === void 0) { flags = exports.InjectFlags.Default; }
-        var bloomHash = bloomHashBitOrFactory(token);
-        // If the ID stored here is a function, this is a special object like ElementRef or TemplateRef
-        // so just call the factory function to create it.
-        if (typeof bloomHash === 'function') {
-            var savePreviousOrParentTNode = getPreviousOrParentTNode();
-            var saveLView = getLView();
-            setTNodeAndViewData(tNode, lView);
-            try {
-                var value = bloomHash();
-                if (value == null && !(flags & exports.InjectFlags.Optional)) {
-                    throw new Error("No provider for " + stringify$1(token) + "!");
-                }
-                else {
-                    return value;
-                }
-            }
-            finally {
-                setTNodeAndViewData(savePreviousOrParentTNode, saveLView);
-            }
-        }
-        else if (typeof bloomHash == 'number') {
-            // If the token has a bloom hash, then it is a token which could be in NodeInjector.
-            // A reference to the previous injector TView that was found while climbing the element injector
-            // tree. This is used to know if viewProviders can be accessed on the current injector.
-            var previousTView = null;
-            var injectorIndex = getInjectorIndex(tNode, lView);
-            var parentLocation = NO_PARENT_INJECTOR;
-            var hostTElementNode = flags & exports.InjectFlags.Host ? findComponentView(lView)[HOST_NODE] : null;
-            // If we should skip this injector, or if there is no injector on this node, start by searching
-            // the parent injector.
-            if (injectorIndex === -1 || flags & exports.InjectFlags.SkipSelf) {
-                parentLocation = injectorIndex === -1 ? getParentInjectorLocation(tNode, lView) :
-                    lView[injectorIndex + PARENT_INJECTOR];
-                if (!shouldSearchParent(flags, false)) {
-                    injectorIndex = -1;
-                }
-                else {
-                    previousTView = lView[TVIEW];
-                    injectorIndex = getParentInjectorIndex(parentLocation);
-                    lView = getParentInjectorView(parentLocation, lView);
-                }
-            }
-            // Traverse up the injector tree until we find a potential match or until we know there
-            // *isn't* a match.
-            while (injectorIndex !== -1) {
-                parentLocation = lView[injectorIndex + PARENT_INJECTOR];
-                // Check the current injector. If it matches, see if it contains token.
-                var tView = lView[TVIEW];
-                if (bloomHasToken(bloomHash, injectorIndex, tView.data)) {
-                    // At this point, we have an injector which *may* contain the token, so we step through
-                    // the providers and directives associated with the injector's corresponding node to get
-                    // the instance.
-                    var instance = searchTokensOnInjector(injectorIndex, lView, token, previousTView, flags, hostTElementNode);
-                    if (instance !== NOT_FOUND) {
-                        return instance;
+        if (tNode) {
+            var bloomHash = bloomHashBitOrFactory(token);
+            // If the ID stored here is a function, this is a special object like ElementRef or TemplateRef
+            // so just call the factory function to create it.
+            if (typeof bloomHash === 'function') {
+                var savePreviousOrParentTNode = getPreviousOrParentTNode();
+                var saveLView = getLView();
+                setTNodeAndViewData(tNode, lView);
+                try {
+                    var value = bloomHash();
+                    if (value == null && !(flags & exports.InjectFlags.Optional)) {
+                        throw new Error("No provider for " + stringify$1(token) + "!");
+                    }
+                    else {
+                        return value;
                     }
                 }
-                if (shouldSearchParent(flags, lView[TVIEW].data[injectorIndex + TNODE] === hostTElementNode) &&
-                    bloomHasToken(bloomHash, injectorIndex, lView)) {
-                    // The def wasn't found anywhere on this node, so it was a false positive.
-                    // Traverse up the tree and continue searching.
-                    previousTView = tView;
-                    injectorIndex = getParentInjectorIndex(parentLocation);
-                    lView = getParentInjectorView(parentLocation, lView);
+                finally {
+                    setTNodeAndViewData(savePreviousOrParentTNode, saveLView);
                 }
-                else {
-                    // If we should not search parent OR If the ancestor bloom filter value does not have the
-                    // bit corresponding to the directive we can give up on traversing up to find the specific
-                    // injector.
-                    injectorIndex = -1;
+            }
+            else if (typeof bloomHash == 'number') {
+                // If the token has a bloom hash, then it is a token which could be in NodeInjector.
+                // A reference to the previous injector TView that was found while climbing the element
+                // injector tree. This is used to know if viewProviders can be accessed on the current
+                // injector.
+                var previousTView = null;
+                var injectorIndex = getInjectorIndex(tNode, lView);
+                var parentLocation = NO_PARENT_INJECTOR;
+                var hostTElementNode = flags & exports.InjectFlags.Host ? findComponentView(lView)[HOST_NODE] : null;
+                // If we should skip this injector, or if there is no injector on this node, start by
+                // searching
+                // the parent injector.
+                if (injectorIndex === -1 || flags & exports.InjectFlags.SkipSelf) {
+                    parentLocation = injectorIndex === -1 ? getParentInjectorLocation(tNode, lView) :
+                        lView[injectorIndex + PARENT_INJECTOR];
+                    if (!shouldSearchParent(flags, false)) {
+                        injectorIndex = -1;
+                    }
+                    else {
+                        previousTView = lView[TVIEW];
+                        injectorIndex = getParentInjectorIndex(parentLocation);
+                        lView = getParentInjectorView(parentLocation, lView);
+                    }
+                }
+                // Traverse up the injector tree until we find a potential match or until we know there
+                // *isn't* a match.
+                while (injectorIndex !== -1) {
+                    parentLocation = lView[injectorIndex + PARENT_INJECTOR];
+                    // Check the current injector. If it matches, see if it contains token.
+                    var tView = lView[TVIEW];
+                    if (bloomHasToken(bloomHash, injectorIndex, tView.data)) {
+                        // At this point, we have an injector which *may* contain the token, so we step through
+                        // the providers and directives associated with the injector's corresponding node to get
+                        // the instance.
+                        var instance = searchTokensOnInjector(injectorIndex, lView, token, previousTView, flags, hostTElementNode);
+                        if (instance !== NOT_FOUND) {
+                            return instance;
+                        }
+                    }
+                    if (shouldSearchParent(flags, lView[TVIEW].data[injectorIndex + TNODE] === hostTElementNode) &&
+                        bloomHasToken(bloomHash, injectorIndex, lView)) {
+                        // The def wasn't found anywhere on this node, so it was a false positive.
+                        // Traverse up the tree and continue searching.
+                        previousTView = tView;
+                        injectorIndex = getParentInjectorIndex(parentLocation);
+                        lView = getParentInjectorView(parentLocation, lView);
+                    }
+                    else {
+                        // If we should not search parent OR If the ancestor bloom filter value does not have the
+                        // bit corresponding to the directive we can give up on traversing up to find the specific
+                        // injector.
+                        injectorIndex = -1;
+                    }
                 }
             }
         }
@@ -6730,6 +6734,37 @@
      * (this is necessary for host property bindings)
      */
     function elementProperty(index, propName, value, sanitizer, nativeOnly) {
+        elementPropertyInternal(index, propName, value, sanitizer, nativeOnly);
+    }
+    /**
+     * Updates a synthetic host binding (e.g. `[@foo]`) on a component.
+     *
+     * This instruction is for compatibility purposes and is designed to ensure that a
+     * synthetic host binding (e.g. `@HostBinding('@foo')`) properly gets rendered in
+     * the component's renderer. Normally all host bindings are evaluated with the parent
+     * component's renderer, but, in the case of animation @triggers, they need to be
+     * evaluated with the sub components renderer (because that's where the animation
+     * triggers are defined).
+     *
+     * Do not use this instruction as a replacement for `elementProperty`. This instruction
+     * only exists to ensure compatibility with the ViewEngine's host binding behavior.
+     *
+     * @param index The index of the element to update in the data array
+     * @param propName Name of property. Because it is going to DOM, this is not subject to
+     *        renaming as part of minification.
+     * @param value New value to write.
+     * @param sanitizer An optional function used to sanitize the value.
+     * @param nativeOnly Whether or not we should only set native properties and skip input check
+     * (this is necessary for host property bindings)
+     */
+    function componentHostSyntheticProperty(index, propName, value, sanitizer, nativeOnly) {
+        elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadComponentRenderer);
+    }
+    function loadComponentRenderer(tNode, lView) {
+        var componentLView = lView[tNode.index];
+        return componentLView[RENDERER];
+    }
+    function elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadRendererFn) {
         if (value === NO_CHANGE)
             return;
         var lView = getLView();
@@ -6749,7 +6784,7 @@
             }
         }
         else if (tNode.type === 3 /* Element */) {
-            var renderer = lView[RENDERER];
+            var renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
             // It is assumed that the sanitizer is only added when the compiler determines that the property
             // is risky, so sanitization can be done without further checks.
             value = sanitizer != null ? sanitizer(value) : value;
@@ -10411,7 +10446,7 @@
                         var parentView = getParentInjectorView(parentLocation, this._hostView);
                         var parentTNode = getParentInjectorTNode(parentLocation, this._hostView, this._hostTNode);
                         return !hasParentInjector(parentLocation) || parentTNode == null ?
-                            new NullInjector() :
+                            new NodeInjector(null, this._hostView) :
                             new NodeInjector(parentTNode, parentView);
                     },
                     enumerable: true,
@@ -10752,7 +10787,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0-rc.0+61.sha-0bd9deb');
+    var VERSION = new Version('7.2.0-rc.0+65.sha-b61dafa');
 
     /**
      * @license
@@ -11077,7 +11112,7 @@
             try {
                 html = encodeURI(html);
             }
-            catch (e) {
+            catch (_a) {
                 return null;
             }
             var xhr = new XMLHttpRequest();
@@ -11106,7 +11141,7 @@
                 body.removeChild(body.firstChild);
                 return body;
             }
-            catch (e) {
+            catch (_a) {
                 return null;
             }
         };
@@ -11169,7 +11204,7 @@
         try {
             return !!window.DOMParser;
         }
-        catch (e) {
+        catch (_a) {
             return false;
         }
     }
@@ -14343,6 +14378,7 @@
         'ɵload': load,
         'ɵprojection': projection,
         'ɵelementProperty': elementProperty,
+        'ɵcomponentHostSyntheticProperty': componentHostSyntheticProperty,
         'ɵpipeBind1': pipeBind1,
         'ɵpipeBind2': pipeBind2,
         'ɵpipeBind3': pipeBind3,
@@ -24612,6 +24648,7 @@
     exports.ɵloadQueryList = loadQueryList;
     exports.ɵelementEnd = elementEnd;
     exports.ɵelementProperty = elementProperty;
+    exports.ɵcomponentHostSyntheticProperty = componentHostSyntheticProperty;
     exports.ɵprojectionDef = projectionDef;
     exports.ɵreference = reference;
     exports.ɵenableBindings = enableBindings;
