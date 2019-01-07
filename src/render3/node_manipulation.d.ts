@@ -9,13 +9,6 @@ import { LContainer } from './interfaces/container';
 import { TContainerNode, TElementContainerNode, TElementNode, TNode, TViewNode } from './interfaces/node';
 import { RComment, RElement, RNode, RText, Renderer3 } from './interfaces/renderer';
 import { LView } from './interfaces/view';
-/** Retrieves the parent element of a given node. */
-export declare function getParentNative(tNode: TNode, currentView: LView): RElement | RComment | null;
-/**
- * Gets the host element given a view. Will return null if the current view is an embedded view,
- * which does not have a host element.
- */
-export declare function getHostNative(currentView: LView): RElement | null;
 export declare function getLContainer(tNode: TViewNode, embeddedView: LView): LContainer | null;
 /**
  * Retrieves render parent for a given view.
@@ -133,6 +126,10 @@ export declare function canInsertNativeNode(tNode: TNode, currentView: LView): b
  * actual renderer being used.
  */
 export declare function nativeInsertBefore(renderer: Renderer3, parent: RElement, child: RNode, beforeNode: RNode | null): void;
+/**
+ * Removes a native child node from a given native parent node.
+ */
+export declare function nativeRemoveChild(renderer: Renderer3, parent: RElement, child: RNode): void;
 /**
  * Returns a native parent of a given native node.
  */
