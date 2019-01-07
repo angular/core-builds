@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+9.sha-e775313
+ * @license Angular v7.2.0+10.sha-a75c734
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -10762,7 +10762,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0+9.sha-e775313');
+    var VERSION = new Version('7.2.0+10.sha-a75c734');
 
     /**
      * @license
@@ -24402,18 +24402,17 @@
     exports.ɵangular_packages_core_core_w = leave;
     exports.ɵangular_packages_core_core_x = startTimeRange;
     exports.ɵangular_packages_core_core_bb = injectAttributeImpl;
-    exports.ɵangular_packages_core_core_bi = NG_INJECTABLE_DEF;
     exports.ɵangular_packages_core_core_bc = getLView;
     exports.ɵangular_packages_core_core_bd = getPreviousOrParentTNode;
     exports.ɵangular_packages_core_core_be = nextContextImpl;
     exports.ɵangular_packages_core_core_bh = BoundPlayerFactory;
-    exports.ɵangular_packages_core_core_bl = loadInternal;
+    exports.ɵangular_packages_core_core_bk = loadInternal;
     exports.ɵangular_packages_core_core_h = createElementRef;
     exports.ɵangular_packages_core_core_i = createTemplateRef;
     exports.ɵangular_packages_core_core_j = createViewRef;
     exports.ɵangular_packages_core_core_a = makeParamDecorator;
     exports.ɵangular_packages_core_core_b = makePropDecorator;
-    exports.ɵangular_packages_core_core_bj = getClosureSafeProperty;
+    exports.ɵangular_packages_core_core_bi = getClosureSafeProperty;
     exports.ɵangular_packages_core_core_z = _def;
     exports.ɵangular_packages_core_core_ba = DebugContext;
     exports.createPlatform = createPlatform;
@@ -24670,6 +24669,14 @@
     exports.ɵbypassSanitizationTrustUrl = bypassSanitizationTrustUrl;
     exports.ɵbypassSanitizationTrustResourceUrl = bypassSanitizationTrustResourceUrl;
     exports.ɵgetLContext = getLContext;
+    exports.ɵNG_ELEMENT_ID = NG_ELEMENT_ID;
+    exports.ɵNG_COMPONENT_DEF = NG_COMPONENT_DEF;
+    exports.ɵNG_DIRECTIVE_DEF = NG_DIRECTIVE_DEF;
+    exports.ɵNG_INJECTABLE_DEF = NG_INJECTABLE_DEF;
+    exports.ɵNG_INJECTOR_DEF = NG_INJECTOR_DEF;
+    exports.ɵNG_PIPE_DEF = NG_PIPE_DEF;
+    exports.ɵNG_MODULE_DEF = NG_MODULE_DEF;
+    exports.ɵNG_BASE_DEF = NG_BASE_DEF;
     exports.ɵbindPlayerFactory = bindPlayerFactory;
     exports.ɵaddPlayer = addPlayer;
     exports.ɵgetPlayers = getPlayers;

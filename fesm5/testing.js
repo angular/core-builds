@@ -1,11 +1,11 @@
 /**
- * @license Angular v7.2.0+9.sha-e775313
+ * @license Angular v7.2.0+10.sha-a75c734
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, ApplicationInitStatus, Injector, NgZone, resolveForwardRef, ɵRender3ComponentFactory, ɵRender3NgModuleRef, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, ɵresetCompiledComponents, Compiler, Injectable, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵivyEnabled, ɵoverrideComponentView, ɵoverrideProvider } from '@angular/core';
-import { __spread, __decorate, __assign, __values, __read, __extends } from 'tslib';
+import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, ApplicationInitStatus, Injector, NgZone, resolveForwardRef, ɵNG_COMPONENT_DEF, ɵNG_DIRECTIVE_DEF, ɵNG_INJECTOR_DEF, ɵNG_MODULE_DEF, ɵNG_PIPE_DEF, ɵRender3ComponentFactory, ɵRender3NgModuleRef, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, ɵresetCompiledComponents, Compiler, Injectable, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵivyEnabled, ɵoverrideComponentView, ɵoverrideProvider } from '@angular/core';
+import { __spread, __decorate, __assign, __values, __extends, __read } from 'tslib';
 
 /**
  * @license
@@ -911,6 +911,10 @@ var TestBedRender3 = /** @class */ (function () {
         this._moduleRef = null;
         this._testModuleType = null;
         this._instantiated = false;
+        // Map that keeps initial version of component/directive/pipe defs in case
+        // we compile a Type again, thus overriding respective static fields. This is
+        // required to make sure we restore defs to their initial states between test runs
+        this._initiaNgDefs = new Map();
     }
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
@@ -1069,6 +1073,11 @@ var TestBedRender3 = /** @class */ (function () {
             }
         });
         this._activeFixtures = [];
+        // restore initial component/directive/pipe defs
+        this._initiaNgDefs.forEach(function (value, type) {
+            Object.defineProperty(type, value[0], value[1]);
+        });
+        this._initiaNgDefs.clear();
     };
     TestBedRender3.prototype.configureCompiler = function (config) {
         var _a;
@@ -1187,6 +1196,12 @@ var TestBedRender3 = /** @class */ (function () {
         this._moduleRef.injector.get(ApplicationInitStatus).runInitializers();
         this._instantiated = true;
     };
+    TestBedRender3.prototype._storeNgDef = function (prop, type) {
+        if (!this._initiaNgDefs.has(type)) {
+            var currentDef = Object.getOwnPropertyDescriptor(type, prop);
+            this._initiaNgDefs.set(type, [prop, currentDef]);
+        }
+    };
     // get overrides for a specific provider (if any)
     TestBedRender3.prototype._getProviderOverrides = function (provider) {
         var token = typeof provider === 'object' && provider.hasOwnProperty('provide') ?
@@ -1261,6 +1276,8 @@ var TestBedRender3 = /** @class */ (function () {
         if (ngModule === null) {
             throw new Error(ɵstringify(moduleType) + " has not @NgModule annotation");
         }
+        this._storeNgDef(ɵNG_MODULE_DEF, moduleType);
+        this._storeNgDef(ɵNG_INJECTOR_DEF, moduleType);
         var metadata = this._getMetaWithOverrides(ngModule);
         ɵcompileNgModuleDefs(moduleType, metadata);
         var declarations = flatten(ngModule.declarations || EMPTY_ARRAY, resolveForwardRef);
@@ -1269,6 +1286,7 @@ var TestBedRender3 = /** @class */ (function () {
         declarations.forEach(function (declaration) {
             var component = resolvers.component.resolve(declaration);
             if (component) {
+                _this._storeNgDef(ɵNG_COMPONENT_DEF, declaration);
                 var metadata_1 = _this._getMetaWithOverrides(component, declaration);
                 ɵcompileComponent(declaration, metadata_1);
                 compiledComponents.push(declaration);
@@ -1276,12 +1294,14 @@ var TestBedRender3 = /** @class */ (function () {
             }
             var directive = resolvers.directive.resolve(declaration);
             if (directive) {
+                _this._storeNgDef(ɵNG_DIRECTIVE_DEF, declaration);
                 var metadata_2 = _this._getMetaWithOverrides(directive);
                 ɵcompileDirective(declaration, metadata_2);
                 return;
             }
             var pipe = resolvers.pipe.resolve(declaration);
             if (pipe) {
+                _this._storeNgDef(ɵNG_PIPE_DEF, declaration);
                 ɵcompilePipe(declaration, pipe);
                 return;
             }
