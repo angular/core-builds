@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { QueryList as viewEngine_QueryList } from '../linker/query_list';
+import { QueryList } from '../linker/query_list';
 import { Type } from '../type';
 import { TContainerNode, TElementContainerNode, TElementNode } from './interfaces/node';
 import { LQueries } from './interfaces/query';
@@ -64,7 +64,7 @@ export declare class LQueries_ implements LQueries {
     private shallow;
     private deep;
     constructor(parent: LQueries_ | null, shallow: LQuery<any> | null, deep: LQuery<any> | null);
-    track<T>(queryList: viewEngine_QueryList<T>, predicate: Type<T> | string[], descend?: boolean, read?: Type<T>): void;
+    track<T>(queryList: QueryList<T>, predicate: Type<T> | string[], descend?: boolean, read?: Type<T>): void;
     clone(): LQueries;
     container(): LQueries | null;
     createView(): LQueries | null;
@@ -72,8 +72,6 @@ export declare class LQueries_ implements LQueries {
     addNode(tNode: TElementNode | TContainerNode | TElementContainerNode): LQueries | null;
     removeView(): void;
 }
-export declare type QueryList<T> = viewEngine_QueryList<T>;
-export declare const QueryList: typeof viewEngine_QueryList;
 /**
  * Creates and returns a QueryList.
  *
