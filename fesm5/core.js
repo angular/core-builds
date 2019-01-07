@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+10.sha-a75c734
+ * @license Angular v7.2.0+15.sha-4613864
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -10700,7 +10700,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.2.0+10.sha-a75c734');
+var VERSION = new Version('7.2.0+15.sha-4613864');
 
 /**
  * @license
@@ -11863,6 +11863,7 @@ function appendI18nNode(tNode, parentTNode, previousTNode) {
  * @publicAPI
  */
 function i18nPostprocess(message, replacements) {
+    if (replacements === void 0) { replacements = {}; }
     //
     // Step 1: resolve all multi-value cases (like [�*1:1��#2:1�|�#4:1�|�5�])
     //
