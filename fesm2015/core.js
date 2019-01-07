@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+16.sha-9de9c8a
+ * @license Angular v7.2.0+14.sha-ac5f5ed
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -13757,7 +13757,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.0+16.sha-9de9c8a');
+const VERSION = new Version('7.2.0+14.sha-ac5f5ed');
 
 /**
  * @fileoverview added by tsickle
@@ -15143,12 +15143,12 @@ function appendI18nNode(tNode, parentTNode, previousTNode) {
  *
  * \@publicAPI
  * @param {?} message Raw translation string for post processing
- * @param {?=} replacements Set of replacements that should be applied
+ * @param {?} replacements Set of replacements that should be applied
  *
  * @return {?} Transformed string that can be consumed by i18nStart instruction
  *
  */
-function i18nPostprocess(message, replacements = {}) {
+function i18nPostprocess(message, replacements) {
     //
     // Step 1: resolve all multi-value cases (like [�*1:1��#2:1�|�#4:1�|�5�])
     //
