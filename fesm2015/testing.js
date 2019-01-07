@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.2.0+9.sha-e775313
+ * @license Angular v7.2.0+10.sha-a75c734
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, ApplicationInitStatus, Injector, NgZone, resolveForwardRef, ɵRender3ComponentFactory, ɵRender3NgModuleRef, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, ɵresetCompiledComponents, Compiler, Injectable, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵivyEnabled, ɵoverrideComponentView, ɵoverrideProvider, defineInjectable, ɵgetInheritedFactory, ɵsetClassMetadata } from '@angular/core';
+import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, ApplicationInitStatus, Injector, NgZone, resolveForwardRef, ɵNG_COMPONENT_DEF, ɵNG_DIRECTIVE_DEF, ɵNG_INJECTOR_DEF, ɵNG_MODULE_DEF, ɵNG_PIPE_DEF, ɵRender3ComponentFactory, ɵRender3NgModuleRef, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, ɵresetCompiledComponents, Compiler, Injectable, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵivyEnabled, ɵoverrideComponentView, ɵoverrideProvider, defineInjectable, ɵgetInheritedFactory, ɵsetClassMetadata } from '@angular/core';
 
 /**
  * @fileoverview added by tsickle
@@ -1004,6 +1004,10 @@ class TestBedRender3 {
         this._moduleRef = (/** @type {?} */ (null));
         this._testModuleType = (/** @type {?} */ (null));
         this._instantiated = false;
+        // Map that keeps initial version of component/directive/pipe defs in case
+        // we compile a Type again, thus overriding respective static fields. This is
+        // required to make sure we restore defs to their initial states between test runs
+        this._initiaNgDefs = new Map();
     }
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
@@ -1238,6 +1242,11 @@ class TestBedRender3 {
             }
         });
         this._activeFixtures = [];
+        // restore initial component/directive/pipe defs
+        this._initiaNgDefs.forEach((value, type) => {
+            Object.defineProperty(type, value[0], value[1]);
+        });
+        this._initiaNgDefs.clear();
     }
     /**
      * @param {?} config
@@ -1428,6 +1437,19 @@ class TestBedRender3 {
         ((/** @type {?} */ (this._moduleRef.injector.get(ApplicationInitStatus)))).runInitializers();
         this._instantiated = true;
     }
+    /**
+     * @private
+     * @param {?} prop
+     * @param {?} type
+     * @return {?}
+     */
+    _storeNgDef(prop, type) {
+        if (!this._initiaNgDefs.has(type)) {
+            /** @type {?} */
+            const currentDef = Object.getOwnPropertyDescriptor(type, prop);
+            this._initiaNgDefs.set(type, [prop, currentDef]);
+        }
+    }
     // get overrides for a specific provider (if any)
     /**
      * @private
@@ -1540,6 +1562,8 @@ class TestBedRender3 {
         if (ngModule === null) {
             throw new Error(`${ɵstringify(moduleType)} has not @NgModule annotation`);
         }
+        this._storeNgDef(ɵNG_MODULE_DEF, moduleType);
+        this._storeNgDef(ɵNG_INJECTOR_DEF, moduleType);
         /** @type {?} */
         const metadata = this._getMetaWithOverrides(ngModule);
         ɵcompileNgModuleDefs(moduleType, metadata);
@@ -1552,6 +1576,7 @@ class TestBedRender3 {
             /** @type {?} */
             const component = resolvers.component.resolve(declaration);
             if (component) {
+                this._storeNgDef(ɵNG_COMPONENT_DEF, declaration);
                 /** @type {?} */
                 const metadata = this._getMetaWithOverrides(component, declaration);
                 ɵcompileComponent(declaration, metadata);
@@ -1561,6 +1586,7 @@ class TestBedRender3 {
             /** @type {?} */
             const directive = resolvers.directive.resolve(declaration);
             if (directive) {
+                this._storeNgDef(ɵNG_DIRECTIVE_DEF, declaration);
                 /** @type {?} */
                 const metadata = this._getMetaWithOverrides(directive);
                 ɵcompileDirective(declaration, metadata);
@@ -1569,6 +1595,7 @@ class TestBedRender3 {
             /** @type {?} */
             const pipe = resolvers.pipe.resolve(declaration);
             if (pipe) {
+                this._storeNgDef(ɵNG_PIPE_DEF, declaration);
                 ɵcompilePipe(declaration, pipe);
                 return;
             }

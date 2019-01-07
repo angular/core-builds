@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+9.sha-e775313
+ * @license Angular v7.2.0+10.sha-a75c734
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -10730,7 +10730,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0+9.sha-e775313');
+    var VERSION = new Version('7.2.0+10.sha-a75c734');
 
     /**
      * @license
@@ -24490,6 +24490,14 @@
     exports.ɵbypassSanitizationTrustUrl = bypassSanitizationTrustUrl;
     exports.ɵbypassSanitizationTrustResourceUrl = bypassSanitizationTrustResourceUrl;
     exports.ɵgetLContext = getLContext;
+    exports.ɵNG_ELEMENT_ID = NG_ELEMENT_ID;
+    exports.ɵNG_COMPONENT_DEF = NG_COMPONENT_DEF;
+    exports.ɵNG_DIRECTIVE_DEF = NG_DIRECTIVE_DEF;
+    exports.ɵNG_INJECTABLE_DEF = NG_INJECTABLE_DEF;
+    exports.ɵNG_INJECTOR_DEF = NG_INJECTOR_DEF;
+    exports.ɵNG_PIPE_DEF = NG_PIPE_DEF;
+    exports.ɵNG_MODULE_DEF = NG_MODULE_DEF;
+    exports.ɵNG_BASE_DEF = NG_BASE_DEF;
     exports.ɵbindPlayerFactory = bindPlayerFactory;
     exports.ɵaddPlayer = addPlayer;
     exports.ɵgetPlayers = getPlayers;
