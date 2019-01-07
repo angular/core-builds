@@ -65,7 +65,7 @@ export declare function i18nStart(index: number, message: string, subTemplateInd
  *
  * @publicAPI
  */
-export declare function i18nPostprocess(message: string, replacements: {
+export declare function i18nPostprocess(message: string, replacements?: {
     [key: string]: (string | string[]);
 }): string;
 /**
