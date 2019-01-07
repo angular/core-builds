@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+1.sha-654055b
+ * @license Angular v7.2.0+6.sha-e08feb7
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -4611,33 +4611,14 @@ const domRendererFactory3 = {
  * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
- * Retrieves the parent element of a given node.
+ * Retrieves the native node (element or a comment) for the parent of a given node.
  * @param {?} tNode
  * @param {?} currentView
  * @return {?}
  */
 function getParentNative(tNode, currentView) {
-    if (tNode.parent == null) {
-        return getHostNative(currentView);
-    }
-    else {
-        /** @type {?} */
-        const parentTNode = getFirstParentNative(tNode);
-        return getNativeByTNode(parentTNode, currentView);
-    }
-}
-/**
- * Get the first parent of a node that isn't an IcuContainer TNode
- * @param {?} tNode
- * @return {?}
- */
-function getFirstParentNative(tNode) {
-    /** @type {?} */
-    let parent = tNode.parent;
-    while (parent && parent.type === 5 /* IcuContainer */) {
-        parent = parent.parent;
-    }
-    return (/** @type {?} */ (parent));
+    return tNode.parent == null ? getHostNative(currentView) :
+        getNativeByTNode(tNode.parent, currentView);
 }
 /**
  * Gets the host element given a view. Will return null if the current view is an embedded view,
@@ -4807,14 +4788,10 @@ function walkTNodeTree(viewToWalk, action, renderer, renderParent, beforeNode) {
  */
 function executeNodeAction(action, renderer, parent, node, beforeNode) {
     if (action === 0 /* Insert */) {
-        isProceduralRenderer((/** @type {?} */ (renderer))) ?
-            ((/** @type {?} */ (renderer))).insertBefore((/** @type {?} */ (parent)), node, (/** @type {?} */ (beforeNode))) :
-            (/** @type {?} */ (parent)).insertBefore(node, (/** @type {?} */ (beforeNode)), true);
+        nativeInsertBefore(renderer, (/** @type {?} */ (parent)), node, beforeNode || null);
     }
     else if (action === 1 /* Detach */) {
-        isProceduralRenderer((/** @type {?} */ (renderer))) ?
-            ((/** @type {?} */ (renderer))).removeChild((/** @type {?} */ (parent)), node) :
-            (/** @type {?} */ (parent)).removeChild(node);
+        nativeRemoveChild(renderer, (/** @type {?} */ (parent)), node);
     }
     else if (action === 2 /* Destroy */) {
         ngDevMode && ngDevMode.rendererDestroyNode++;
@@ -5156,13 +5133,11 @@ function getRenderParent(tNode, currentView) {
         if (isRootView(currentView)) {
             return nativeParentNode(currentView[RENDERER], getNativeByTNode(tNode, currentView));
         }
+        // skip over element and ICU containers as those are represented by a comment node and
+        // can't be used as a render parent
+        tNode = getHighestElementOrICUContainer(tNode);
         /** @type {?} */
         const hostTNode = currentView[HOST_NODE];
-        /** @type {?} */
-        const tNodeParent = tNode.parent;
-        if (tNodeParent != null && tNodeParent.type === 4 /* ElementContainer */) {
-            tNode = getHighestElementContainer(tNodeParent);
-        }
         return tNode.parent == null && (/** @type {?} */ (hostTNode)).type === 2 /* View */ ?
             getContainerRenderParent((/** @type {?} */ (hostTNode)), currentView) :
             (/** @type {?} */ (getParentNative(tNode, currentView)));
@@ -5236,17 +5211,9 @@ function canInsertNativeNode(tNode, currentView) {
     /** @type {?} */
     let currentNode = tNode;
     /** @type {?} */
-    let parent = tNode.parent;
-    if (tNode.parent) {
-        if (tNode.parent.type === 4 /* ElementContainer */) {
-            currentNode = getHighestElementContainer(tNode);
-            parent = currentNode.parent;
-        }
-        else if (tNode.parent.type === 5 /* IcuContainer */) {
-            currentNode = getFirstParentNative(currentNode);
-            parent = currentNode.parent;
-        }
-    }
+    let parent;
+    currentNode = getHighestElementOrICUContainer(currentNode);
+    parent = currentNode.parent;
     if (parent === null)
         parent = currentView[HOST_NODE];
     if (parent && parent.type === 2 /* View */) {
@@ -5274,6 +5241,17 @@ function nativeInsertBefore(renderer, parent, child, beforeNode) {
     else {
         parent.insertBefore(child, beforeNode, true);
     }
+}
+/**
+ * Removes a native child node from a given native parent node.
+ * @param {?} renderer
+ * @param {?} parent
+ * @param {?} child
+ * @return {?}
+ */
+function nativeRemoveChild(renderer, parent, child) {
+    isProceduralRenderer(renderer) ? renderer.removeChild((/** @type {?} */ (parent)), child) :
+        parent.removeChild(child);
 }
 /**
  * Returns a native parent of a given native node.
@@ -5308,7 +5286,7 @@ function appendChild(childEl = null, childTNode, currentView) {
         /** @type {?} */
         const renderer = currentView[RENDERER];
         /** @type {?} */
-        const parentEl = getParentNative(childTNode, currentView);
+        const renderParent = (/** @type {?} */ (getRenderParent(childTNode, currentView)));
         /** @type {?} */
         const parentTNode = childTNode.parent || (/** @type {?} */ (currentView[HOST_NODE]));
         if (parentTNode.type === 2 /* View */) {
@@ -5318,37 +5296,34 @@ function appendChild(childEl = null, childTNode, currentView) {
             const views = lContainer[VIEWS];
             /** @type {?} */
             const index = views.indexOf(currentView);
-            nativeInsertBefore(renderer, (/** @type {?} */ (lContainer[RENDER_PARENT])), childEl, getBeforeNodeForView(index, views, lContainer[NATIVE]));
+            nativeInsertBefore(renderer, renderParent, childEl, getBeforeNodeForView(index, views, lContainer[NATIVE]));
         }
-        else if (parentTNode.type === 4 /* ElementContainer */) {
+        else if (parentTNode.type === 4 /* ElementContainer */ ||
+            parentTNode.type === 5 /* IcuContainer */) {
             /** @type {?} */
-            const renderParent = (/** @type {?} */ (getRenderParent(childTNode, currentView)));
-            nativeInsertBefore(renderer, renderParent, childEl, parentEl);
-        }
-        else if (parentTNode.type === 5 /* IcuContainer */) {
-            /** @type {?} */
-            const icuAnchorNode = (/** @type {?} */ ((/** @type {?} */ (getNativeByTNode((/** @type {?} */ (childTNode.parent)), currentView)))));
-            nativeInsertBefore(renderer, (/** @type {?} */ (parentEl)), childEl, icuAnchorNode);
+            const anchorNode = getNativeByTNode(parentTNode, currentView);
+            nativeInsertBefore(renderer, renderParent, childEl, anchorNode);
         }
         else {
-            isProceduralRenderer(renderer) ? renderer.appendChild((/** @type {?} */ ((/** @type {?} */ (parentEl)))), childEl) :
-                (/** @type {?} */ (parentEl)).appendChild(childEl);
+            isProceduralRenderer(renderer) ? renderer.appendChild(renderParent, childEl) :
+                renderParent.appendChild(childEl);
         }
         return true;
     }
     return false;
 }
 /**
- * Gets the top-level ng-container if ng-containers are nested.
+ * Gets the top-level element or an ICU container if those containers are nested.
  *
- * @param {?} ngContainer The TNode of the starting ng-container
- * @return {?} tNode The TNode of the highest level ng-container
+ * @param {?} tNode The starting TNode for which we should skip element and ICU containers
+ * @return {?} The TNode of the highest level ICU container or element container
  */
-function getHighestElementContainer(ngContainer) {
-    while (ngContainer.parent != null && ngContainer.parent.type === 4 /* ElementContainer */) {
-        ngContainer = ngContainer.parent;
+function getHighestElementOrICUContainer(tNode) {
+    while (tNode.parent != null && (tNode.parent.type === 4 /* ElementContainer */ ||
+        tNode.parent.type === 5 /* IcuContainer */)) {
+        tNode = tNode.parent;
     }
-    return ngContainer;
+    return tNode;
 }
 /**
  * @param {?} index
@@ -5380,11 +5355,8 @@ function removeChild(childTNode, childEl, currentView) {
     // We only remove the element if not in View or not projected.
     if (childEl !== null && canInsertNativeNode(childTNode, currentView)) {
         /** @type {?} */
-        const parentNative = (/** @type {?} */ ((/** @type {?} */ (getParentNative(childTNode, currentView)))));
-        /** @type {?} */
-        const renderer = currentView[RENDERER];
-        isProceduralRenderer(renderer) ? renderer.removeChild((/** @type {?} */ (parentNative)), childEl) :
-            (/** @type {?} */ (parentNative)).removeChild(childEl);
+        const parentNative = (/** @type {?} */ (getRenderParent(childTNode, currentView)));
+        nativeRemoveChild(currentView[RENDERER], parentNative, childEl);
         return true;
     }
     return false;
@@ -13792,7 +13764,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.0+1.sha-654055b');
+const VERSION = new Version('7.2.0+6.sha-e08feb7');
 
 /**
  * @fileoverview added by tsickle

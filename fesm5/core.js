@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+1.sha-654055b
+ * @license Angular v7.2.0+6.sha-e08feb7
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -3648,25 +3648,10 @@ var domRendererFactory3 = {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/** Retrieves the parent element of a given node. */
+/** Retrieves the native node (element or a comment) for the parent of a given node. */
 function getParentNative(tNode, currentView) {
-    if (tNode.parent == null) {
-        return getHostNative(currentView);
-    }
-    else {
-        var parentTNode = getFirstParentNative(tNode);
-        return getNativeByTNode(parentTNode, currentView);
-    }
-}
-/**
- * Get the first parent of a node that isn't an IcuContainer TNode
- */
-function getFirstParentNative(tNode) {
-    var parent = tNode.parent;
-    while (parent && parent.type === 5 /* IcuContainer */) {
-        parent = parent.parent;
-    }
-    return parent;
+    return tNode.parent == null ? getHostNative(currentView) :
+        getNativeByTNode(tNode.parent, currentView);
 }
 /**
  * Gets the host element given a view. Will return null if the current view is an embedded view,
@@ -3805,14 +3790,10 @@ function walkTNodeTree(viewToWalk, action, renderer, renderParent, beforeNode) {
  */
 function executeNodeAction(action, renderer, parent, node, beforeNode) {
     if (action === 0 /* Insert */) {
-        isProceduralRenderer(renderer) ?
-            renderer.insertBefore(parent, node, beforeNode) :
-            parent.insertBefore(node, beforeNode, true);
+        nativeInsertBefore(renderer, parent, node, beforeNode || null);
     }
     else if (action === 1 /* Detach */) {
-        isProceduralRenderer(renderer) ?
-            renderer.removeChild(parent, node) :
-            parent.removeChild(node);
+        nativeRemoveChild(renderer, parent, node);
     }
     else if (action === 2 /* Destroy */) {
         ngDevMode && ngDevMode.rendererDestroyNode++;
@@ -4091,11 +4072,10 @@ function getRenderParent(tNode, currentView) {
         if (isRootView(currentView)) {
             return nativeParentNode(currentView[RENDERER], getNativeByTNode(tNode, currentView));
         }
+        // skip over element and ICU containers as those are represented by a comment node and
+        // can't be used as a render parent
+        tNode = getHighestElementOrICUContainer(tNode);
         var hostTNode = currentView[HOST_NODE];
-        var tNodeParent = tNode.parent;
-        if (tNodeParent != null && tNodeParent.type === 4 /* ElementContainer */) {
-            tNode = getHighestElementContainer(tNodeParent);
-        }
         return tNode.parent == null && hostTNode.type === 2 /* View */ ?
             getContainerRenderParent(hostTNode, currentView) :
             getParentNative(tNode, currentView);
@@ -4160,17 +4140,9 @@ function canInsertNativeChildOfView(viewTNode, view) {
  */
 function canInsertNativeNode(tNode, currentView) {
     var currentNode = tNode;
-    var parent = tNode.parent;
-    if (tNode.parent) {
-        if (tNode.parent.type === 4 /* ElementContainer */) {
-            currentNode = getHighestElementContainer(tNode);
-            parent = currentNode.parent;
-        }
-        else if (tNode.parent.type === 5 /* IcuContainer */) {
-            currentNode = getFirstParentNative(currentNode);
-            parent = currentNode.parent;
-        }
-    }
+    var parent;
+    currentNode = getHighestElementOrICUContainer(currentNode);
+    parent = currentNode.parent;
     if (parent === null)
         parent = currentView[HOST_NODE];
     if (parent && parent.type === 2 /* View */) {
@@ -4193,6 +4165,13 @@ function nativeInsertBefore(renderer, parent, child, beforeNode) {
     else {
         parent.insertBefore(child, beforeNode, true);
     }
+}
+/**
+ * Removes a native child node from a given native parent node.
+ */
+function nativeRemoveChild(renderer, parent, child) {
+    isProceduralRenderer(renderer) ? renderer.removeChild(parent, child) :
+        parent.removeChild(child);
 }
 /**
  * Returns a native parent of a given native node.
@@ -4220,41 +4199,39 @@ function appendChild(childEl, childTNode, currentView) {
     if (childEl === void 0) { childEl = null; }
     if (childEl !== null && canInsertNativeNode(childTNode, currentView)) {
         var renderer = currentView[RENDERER];
-        var parentEl = getParentNative(childTNode, currentView);
+        var renderParent = getRenderParent(childTNode, currentView);
         var parentTNode = childTNode.parent || currentView[HOST_NODE];
         if (parentTNode.type === 2 /* View */) {
             var lContainer = getLContainer(parentTNode, currentView);
             var views = lContainer[VIEWS];
             var index = views.indexOf(currentView);
-            nativeInsertBefore(renderer, lContainer[RENDER_PARENT], childEl, getBeforeNodeForView(index, views, lContainer[NATIVE]));
+            nativeInsertBefore(renderer, renderParent, childEl, getBeforeNodeForView(index, views, lContainer[NATIVE]));
         }
-        else if (parentTNode.type === 4 /* ElementContainer */) {
-            var renderParent = getRenderParent(childTNode, currentView);
-            nativeInsertBefore(renderer, renderParent, childEl, parentEl);
-        }
-        else if (parentTNode.type === 5 /* IcuContainer */) {
-            var icuAnchorNode = getNativeByTNode(childTNode.parent, currentView);
-            nativeInsertBefore(renderer, parentEl, childEl, icuAnchorNode);
+        else if (parentTNode.type === 4 /* ElementContainer */ ||
+            parentTNode.type === 5 /* IcuContainer */) {
+            var anchorNode = getNativeByTNode(parentTNode, currentView);
+            nativeInsertBefore(renderer, renderParent, childEl, anchorNode);
         }
         else {
-            isProceduralRenderer(renderer) ? renderer.appendChild(parentEl, childEl) :
-                parentEl.appendChild(childEl);
+            isProceduralRenderer(renderer) ? renderer.appendChild(renderParent, childEl) :
+                renderParent.appendChild(childEl);
         }
         return true;
     }
     return false;
 }
 /**
- * Gets the top-level ng-container if ng-containers are nested.
+ * Gets the top-level element or an ICU container if those containers are nested.
  *
- * @param ngContainer The TNode of the starting ng-container
- * @returns tNode The TNode of the highest level ng-container
+ * @param tNode The starting TNode for which we should skip element and ICU containers
+ * @returns The TNode of the highest level ICU container or element container
  */
-function getHighestElementContainer(ngContainer) {
-    while (ngContainer.parent != null && ngContainer.parent.type === 4 /* ElementContainer */) {
-        ngContainer = ngContainer.parent;
+function getHighestElementOrICUContainer(tNode) {
+    while (tNode.parent != null && (tNode.parent.type === 4 /* ElementContainer */ ||
+        tNode.parent.type === 5 /* IcuContainer */)) {
+        tNode = tNode.parent;
     }
-    return ngContainer;
+    return tNode;
 }
 function getBeforeNodeForView(index, views, containerNative) {
     if (index + 1 < views.length) {
@@ -4277,10 +4254,8 @@ function getBeforeNodeForView(index, views, containerNative) {
 function removeChild(childTNode, childEl, currentView) {
     // We only remove the element if not in View or not projected.
     if (childEl !== null && canInsertNativeNode(childTNode, currentView)) {
-        var parentNative = getParentNative(childTNode, currentView);
-        var renderer = currentView[RENDERER];
-        isProceduralRenderer(renderer) ? renderer.removeChild(parentNative, childEl) :
-            parentNative.removeChild(childEl);
+        var parentNative = getRenderParent(childTNode, currentView);
+        nativeRemoveChild(currentView[RENDERER], parentNative, childEl);
         return true;
     }
     return false;
@@ -10725,7 +10700,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.2.0+1.sha-654055b');
+var VERSION = new Version('7.2.0+6.sha-e08feb7');
 
 /**
  * @license
