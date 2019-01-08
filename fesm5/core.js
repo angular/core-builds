@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+17.sha-c1dacdd
+ * @license Angular v7.2.0+32.sha-f547110
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -10676,7 +10676,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.2.0+17.sha-c1dacdd');
+var VERSION = new Version('7.2.0+32.sha-f547110');
 
 /**
  * @license
@@ -12136,8 +12136,6 @@ function i18n(index, message, subTemplateIndex) {
 function i18nAttributes(index, values) {
     var tView = getLView()[TVIEW];
     ngDevMode && assertDefined(tView, "tView should be defined");
-    ngDevMode &&
-        assertEqual(tView.firstTemplatePass, true, "You should only call i18nEnd on first template pass");
     if (tView.firstTemplatePass && tView.data[index + HEADER_OFFSET] === null) {
         i18nAttributesFirstPass(tView, index, values);
     }
