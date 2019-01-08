@@ -13,6 +13,7 @@ export { NgModuleDef as ɵNgModuleDef, NgModuleDefWithMeta as ɵNgModuleDefWithM
 export { sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, } from './sanitization/sanitization';
 export { bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, } from './sanitization/bypass';
 export { getLContext as ɵgetLContext } from './render3/context_discovery';
+export { NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF } from './render3/fields';
 export { Player as ɵPlayer, PlayerFactory as ɵPlayerFactory, PlayState as ɵPlayState, PlayerHandler as ɵPlayerHandler, } from './render3/interfaces/player';
 export { LContext as ɵLContext, } from './render3/interfaces/context';
 export { bindPlayerFactory as ɵbindPlayerFactory, } from './render3/styling/player_factory';

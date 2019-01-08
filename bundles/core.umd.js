@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-rc.0+65.sha-b61dafa
+ * @license Angular v7.2.0+15.sha-4613864
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1439,8 +1439,13 @@
         /**
          * Set to `true` if the token is declared in `viewProviders` (or if it is component).
          */
-        isViewProvider, injectImplementation) {
+        isViewProvider, 
+        /**
+         * Set to `true` if the token is a provider, and not a directive.
+         */
+        isProvider, injectImplementation) {
             this.factory = factory;
+            this.isProvider = isProvider;
             /**
              * Marker set to true during factory invocation to see if we get into recursive loop.
              * Recursive loop causes an error to be displayed.
@@ -2750,6 +2755,10 @@
             setTNodeAndViewData(tNode, lData);
             try {
                 value = lData[index] = factory.factory(null, tData, lData, tNode);
+                var tView = lData[TVIEW];
+                if (value && factory.isProvider && value.ngOnDestroy) {
+                    (tView.destroyHooks || (tView.destroyHooks = [])).push(index, value.ngOnDestroy);
+                }
             }
             finally {
                 if (factory.injectImpl)
@@ -3708,25 +3717,10 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    /** Retrieves the parent element of a given node. */
+    /** Retrieves the native node (element or a comment) for the parent of a given node. */
     function getParentNative(tNode, currentView) {
-        if (tNode.parent == null) {
-            return getHostNative(currentView);
-        }
-        else {
-            var parentTNode = getFirstParentNative(tNode);
-            return getNativeByTNode(parentTNode, currentView);
-        }
-    }
-    /**
-     * Get the first parent of a node that isn't an IcuContainer TNode
-     */
-    function getFirstParentNative(tNode) {
-        var parent = tNode.parent;
-        while (parent && parent.type === 5 /* IcuContainer */) {
-            parent = parent.parent;
-        }
-        return parent;
+        return tNode.parent == null ? getHostNative(currentView) :
+            getNativeByTNode(tNode.parent, currentView);
     }
     /**
      * Gets the host element given a view. Will return null if the current view is an embedded view,
@@ -3865,14 +3859,10 @@
      */
     function executeNodeAction(action, renderer, parent, node, beforeNode) {
         if (action === 0 /* Insert */) {
-            isProceduralRenderer(renderer) ?
-                renderer.insertBefore(parent, node, beforeNode) :
-                parent.insertBefore(node, beforeNode, true);
+            nativeInsertBefore(renderer, parent, node, beforeNode || null);
         }
         else if (action === 1 /* Detach */) {
-            isProceduralRenderer(renderer) ?
-                renderer.removeChild(parent, node) :
-                parent.removeChild(node);
+            nativeRemoveChild(renderer, parent, node);
         }
         else if (action === 2 /* Destroy */) {
             ngDevMode && ngDevMode.rendererDestroyNode++;
@@ -4076,7 +4066,6 @@
         if (viewOrContainer.length >= HEADER_OFFSET) {
             var view = viewOrContainer;
             executeOnDestroys(view);
-            executePipeOnDestroys(view);
             removeListeners(view);
             var hostTNode = view[HOST_NODE];
             // For component views only, the local renderer is destroyed as clean up time.
@@ -4136,13 +4125,6 @@
             callHooks(view, destroyHooks);
         }
     }
-    /** Calls pipe destroy hooks for this view */
-    function executePipeOnDestroys(lView) {
-        var pipeDestroyHooks = lView[TVIEW] && lView[TVIEW].pipeDestroyHooks;
-        if (pipeDestroyHooks) {
-            callHooks(lView, pipeDestroyHooks);
-        }
-    }
     function getRenderParent(tNode, currentView) {
         if (canInsertNativeNode(tNode, currentView)) {
             // If we are asked for a render parent of the root component we need to do low-level DOM
@@ -4151,11 +4133,10 @@
             if (isRootView(currentView)) {
                 return nativeParentNode(currentView[RENDERER], getNativeByTNode(tNode, currentView));
             }
+            // skip over element and ICU containers as those are represented by a comment node and
+            // can't be used as a render parent
+            tNode = getHighestElementOrICUContainer(tNode);
             var hostTNode = currentView[HOST_NODE];
-            var tNodeParent = tNode.parent;
-            if (tNodeParent != null && tNodeParent.type === 4 /* ElementContainer */) {
-                tNode = getHighestElementContainer(tNodeParent);
-            }
             return tNode.parent == null && hostTNode.type === 2 /* View */ ?
                 getContainerRenderParent(hostTNode, currentView) :
                 getParentNative(tNode, currentView);
@@ -4220,17 +4201,9 @@
      */
     function canInsertNativeNode(tNode, currentView) {
         var currentNode = tNode;
-        var parent = tNode.parent;
-        if (tNode.parent) {
-            if (tNode.parent.type === 4 /* ElementContainer */) {
-                currentNode = getHighestElementContainer(tNode);
-                parent = currentNode.parent;
-            }
-            else if (tNode.parent.type === 5 /* IcuContainer */) {
-                currentNode = getFirstParentNative(currentNode);
-                parent = currentNode.parent;
-            }
-        }
+        var parent;
+        currentNode = getHighestElementOrICUContainer(currentNode);
+        parent = currentNode.parent;
         if (parent === null)
             parent = currentView[HOST_NODE];
         if (parent && parent.type === 2 /* View */) {
@@ -4253,6 +4226,13 @@
         else {
             parent.insertBefore(child, beforeNode, true);
         }
+    }
+    /**
+     * Removes a native child node from a given native parent node.
+     */
+    function nativeRemoveChild(renderer, parent, child) {
+        isProceduralRenderer(renderer) ? renderer.removeChild(parent, child) :
+            parent.removeChild(child);
     }
     /**
      * Returns a native parent of a given native node.
@@ -4280,41 +4260,39 @@
         if (childEl === void 0) { childEl = null; }
         if (childEl !== null && canInsertNativeNode(childTNode, currentView)) {
             var renderer = currentView[RENDERER];
-            var parentEl = getParentNative(childTNode, currentView);
+            var renderParent = getRenderParent(childTNode, currentView);
             var parentTNode = childTNode.parent || currentView[HOST_NODE];
             if (parentTNode.type === 2 /* View */) {
                 var lContainer = getLContainer(parentTNode, currentView);
                 var views = lContainer[VIEWS];
                 var index = views.indexOf(currentView);
-                nativeInsertBefore(renderer, lContainer[RENDER_PARENT], childEl, getBeforeNodeForView(index, views, lContainer[NATIVE]));
+                nativeInsertBefore(renderer, renderParent, childEl, getBeforeNodeForView(index, views, lContainer[NATIVE]));
             }
-            else if (parentTNode.type === 4 /* ElementContainer */) {
-                var renderParent = getRenderParent(childTNode, currentView);
-                nativeInsertBefore(renderer, renderParent, childEl, parentEl);
-            }
-            else if (parentTNode.type === 5 /* IcuContainer */) {
-                var icuAnchorNode = getNativeByTNode(childTNode.parent, currentView);
-                nativeInsertBefore(renderer, parentEl, childEl, icuAnchorNode);
+            else if (parentTNode.type === 4 /* ElementContainer */ ||
+                parentTNode.type === 5 /* IcuContainer */) {
+                var anchorNode = getNativeByTNode(parentTNode, currentView);
+                nativeInsertBefore(renderer, renderParent, childEl, anchorNode);
             }
             else {
-                isProceduralRenderer(renderer) ? renderer.appendChild(parentEl, childEl) :
-                    parentEl.appendChild(childEl);
+                isProceduralRenderer(renderer) ? renderer.appendChild(renderParent, childEl) :
+                    renderParent.appendChild(childEl);
             }
             return true;
         }
         return false;
     }
     /**
-     * Gets the top-level ng-container if ng-containers are nested.
+     * Gets the top-level element or an ICU container if those containers are nested.
      *
-     * @param ngContainer The TNode of the starting ng-container
-     * @returns tNode The TNode of the highest level ng-container
+     * @param tNode The starting TNode for which we should skip element and ICU containers
+     * @returns The TNode of the highest level ICU container or element container
      */
-    function getHighestElementContainer(ngContainer) {
-        while (ngContainer.parent != null && ngContainer.parent.type === 4 /* ElementContainer */) {
-            ngContainer = ngContainer.parent;
+    function getHighestElementOrICUContainer(tNode) {
+        while (tNode.parent != null && (tNode.parent.type === 4 /* ElementContainer */ ||
+            tNode.parent.type === 5 /* IcuContainer */)) {
+            tNode = tNode.parent;
         }
-        return ngContainer;
+        return tNode;
     }
     function getBeforeNodeForView(index, views, containerNative) {
         if (index + 1 < views.length) {
@@ -4337,10 +4315,8 @@
     function removeChild(childTNode, childEl, currentView) {
         // We only remove the element if not in View or not projected.
         if (childEl !== null && canInsertNativeNode(childTNode, currentView)) {
-            var parentNative = getParentNative(childTNode, currentView);
-            var renderer = currentView[RENDERER];
-            isProceduralRenderer(renderer) ? renderer.removeChild(parentNative, childEl) :
-                parentNative.removeChild(childEl);
+            var parentNative = getRenderParent(childTNode, currentView);
+            nativeRemoveChild(currentView[RENDERER], parentNative, childEl);
             return true;
         }
         return false;
@@ -6488,7 +6464,6 @@
             viewHooks: null,
             viewCheckHooks: null,
             destroyHooks: null,
-            pipeDestroyHooks: null,
             cleanup: null,
             contentQueries: null,
             components: null,
@@ -7383,7 +7358,7 @@
     }
     function baseResolveDirective(tView, viewData, def, directiveFactory) {
         tView.data.push(def);
-        var nodeInjectorFactory = new NodeInjectorFactory(directiveFactory, isComponentDef(def), null);
+        var nodeInjectorFactory = new NodeInjectorFactory(directiveFactory, isComponentDef(def), false, null);
         tView.blueprint.push(nodeInjectorFactory);
         viewData.push(nodeInjectorFactory);
     }
@@ -9713,7 +9688,7 @@
             var cptViewProvidersCount = tNode.providerIndexes >> 16 /* CptViewProvidersCountShift */;
             if (isTypeProvider(provider) || !provider.multi) {
                 // Single provider case: the factory is created and pushed immediately
-                var factory = new NodeInjectorFactory(providerFactory, isViewProvider, directiveInject);
+                var factory = new NodeInjectorFactory(providerFactory, isViewProvider, true, directiveInject);
                 var existingFactoryIndex = indexOf(token, tInjectables, isViewProvider ? beginIndex : beginIndex + cptViewProvidersCount, endIndex);
                 if (existingFactoryIndex == -1) {
                     diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, lView), lView, token);
@@ -9851,7 +9826,7 @@
      * Creates a multi factory.
      */
     function multiFactory(factoryFn, index, isViewProvider, isComponent$$1, f) {
-        var factory = new NodeInjectorFactory(factoryFn, isViewProvider, directiveInject);
+        var factory = new NodeInjectorFactory(factoryFn, isViewProvider, true, directiveInject);
         factory.multi = [];
         factory.index = index;
         factory.componentProviders = 0;
@@ -10787,7 +10762,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0-rc.0+65.sha-b61dafa');
+    var VERSION = new Version('7.2.0+15.sha-4613864');
 
     /**
      * @license
@@ -11950,6 +11925,7 @@
      * @publicAPI
      */
     function i18nPostprocess(message, replacements) {
+        if (replacements === void 0) { replacements = {}; }
         //
         // Step 1: resolve all multi-value cases (like [�*1:1��#2:1�|�#4:1�|�5�])
         //
@@ -13322,7 +13298,7 @@
             pipeDef = getPipeDef$1(pipeName, tView.pipeRegistry);
             tView.data[adjustedIndex] = pipeDef;
             if (pipeDef.onDestroy) {
-                (tView.pipeDestroyHooks || (tView.pipeDestroyHooks = [])).push(adjustedIndex, pipeDef.onDestroy);
+                (tView.destroyHooks || (tView.destroyHooks = [])).push(adjustedIndex, pipeDef.onDestroy);
             }
         }
         else {
@@ -24427,18 +24403,17 @@
     exports.ɵangular_packages_core_core_w = leave;
     exports.ɵangular_packages_core_core_x = startTimeRange;
     exports.ɵangular_packages_core_core_bb = injectAttributeImpl;
-    exports.ɵangular_packages_core_core_bi = NG_INJECTABLE_DEF;
     exports.ɵangular_packages_core_core_bc = getLView;
     exports.ɵangular_packages_core_core_bd = getPreviousOrParentTNode;
     exports.ɵangular_packages_core_core_be = nextContextImpl;
     exports.ɵangular_packages_core_core_bh = BoundPlayerFactory;
-    exports.ɵangular_packages_core_core_bl = loadInternal;
+    exports.ɵangular_packages_core_core_bk = loadInternal;
     exports.ɵangular_packages_core_core_h = createElementRef;
     exports.ɵangular_packages_core_core_i = createTemplateRef;
     exports.ɵangular_packages_core_core_j = createViewRef;
     exports.ɵangular_packages_core_core_a = makeParamDecorator;
     exports.ɵangular_packages_core_core_b = makePropDecorator;
-    exports.ɵangular_packages_core_core_bj = getClosureSafeProperty;
+    exports.ɵangular_packages_core_core_bi = getClosureSafeProperty;
     exports.ɵangular_packages_core_core_z = _def;
     exports.ɵangular_packages_core_core_ba = DebugContext;
     exports.createPlatform = createPlatform;
@@ -24695,6 +24670,14 @@
     exports.ɵbypassSanitizationTrustUrl = bypassSanitizationTrustUrl;
     exports.ɵbypassSanitizationTrustResourceUrl = bypassSanitizationTrustResourceUrl;
     exports.ɵgetLContext = getLContext;
+    exports.ɵNG_ELEMENT_ID = NG_ELEMENT_ID;
+    exports.ɵNG_COMPONENT_DEF = NG_COMPONENT_DEF;
+    exports.ɵNG_DIRECTIVE_DEF = NG_DIRECTIVE_DEF;
+    exports.ɵNG_INJECTABLE_DEF = NG_INJECTABLE_DEF;
+    exports.ɵNG_INJECTOR_DEF = NG_INJECTOR_DEF;
+    exports.ɵNG_PIPE_DEF = NG_PIPE_DEF;
+    exports.ɵNG_MODULE_DEF = NG_MODULE_DEF;
+    exports.ɵNG_BASE_DEF = NG_BASE_DEF;
     exports.ɵbindPlayerFactory = bindPlayerFactory;
     exports.ɵaddPlayer = addPlayer;
     exports.ɵgetPlayers = getPlayers;
