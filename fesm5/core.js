@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+44.sha-1a7f92c
+ * @license Angular v7.2.0+45.sha-b9c6df6
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -10696,7 +10696,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.2.0+44.sha-1a7f92c');
+var VERSION = new Version('7.2.0+45.sha-b9c6df6');
 
 /**
  * @license
@@ -19937,6 +19937,7 @@ var APPLICATION_MODULE_PROVIDERS = [
         useClass: ApplicationRef,
         deps: [NgZone, Console, Injector, ErrorHandler, ComponentFactoryResolver, ApplicationInitStatus]
     },
+    { provide: SCHEDULER, deps: [NgZone], useFactory: zoneSchedulerFactory },
     {
         provide: ApplicationInitStatus,
         useClass: ApplicationInitStatus,
@@ -19952,6 +19953,24 @@ var APPLICATION_MODULE_PROVIDERS = [
         deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
     },
 ];
+/**
+ * Schedule work at next available slot.
+ *
+ * In Ivy this is just `requestAnimationFrame`. For compatibility reasons when bootstrapped
+ * using `platformRef.bootstrap` we need to use `NgZone.onStable` as the scheduling mechanism.
+ * This overrides the scheduling mechanism in Ivy to `NgZone.onStable`.
+ *
+ * @param ngZone NgZone to use for scheduling.
+ */
+function zoneSchedulerFactory(ngZone) {
+    var queue = [];
+    ngZone.onStable.subscribe(function () {
+        while (queue.length) {
+            queue.pop()();
+        }
+    });
+    return function (fn) { queue.push(fn); };
+}
 /**
  * Configures the root injector for an app with
  * providers of `@angular/core` dependencies that `ApplicationRef` needs
