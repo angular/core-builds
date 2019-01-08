@@ -19,6 +19,11 @@ export declare enum RendererStyleFlags3 {
     DashCase = 2
 }
 export declare type Renderer3 = ObjectOrientedRenderer3 | ProceduralRenderer3;
+export declare type GlobalTargetName = 'document' | 'window' | 'body';
+export declare type GlobalTargetResolver = (element: any) => {
+    name: GlobalTargetName;
+    target: EventTarget;
+};
 /**
  * Object Oriented style of API needed to create elements and text nodes.
  *
@@ -67,7 +72,7 @@ export interface ProceduralRenderer3 {
     removeStyle(el: RElement, style: string, flags?: RendererStyleFlags2 | RendererStyleFlags3): void;
     setProperty(el: RElement, name: string, value: any): void;
     setValue(node: RText | RComment, value: string): void;
-    listen(target: RNode, eventName: string, callback: (event: any) => boolean | void): () => void;
+    listen(target: GlobalTargetName | RNode, eventName: string, callback: (event: any) => boolean | void): () => void;
 }
 export interface RendererFactory3 {
     createRenderer(hostElement: RElement | null, rendererType: RendererType2 | null): Renderer3;

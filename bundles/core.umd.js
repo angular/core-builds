@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+33.sha-917c09c
+ * @license Angular v7.2.0+43.sha-a084024
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1673,6 +1673,15 @@
             rootTNode = lView[HOST_NODE];
         }
         return lView;
+    }
+    function resolveWindow(element) {
+        return { name: 'window', target: element.ownerDocument.defaultView };
+    }
+    function resolveDocument(element) {
+        return { name: 'document', target: element.ownerDocument };
+    }
+    function resolveBody(element) {
+        return { name: 'body', target: element.ownerDocument.body };
     }
 
     /**
@@ -4059,13 +4068,15 @@
             for (var i = 0; i < tCleanup.length - 1; i += 2) {
                 if (typeof tCleanup[i] === 'string') {
                     // This is a listener with the native renderer
-                    var idx = tCleanup[i + 1];
+                    var idxOrTargetGetter = tCleanup[i + 1];
+                    var target = typeof idxOrTargetGetter === 'function' ?
+                        idxOrTargetGetter(lView) :
+                        readElementValue(lView[idxOrTargetGetter]);
                     var listener = lCleanup[tCleanup[i + 2]];
-                    var native = readElementValue(lView[idx]);
                     var useCaptureOrSubIdx = tCleanup[i + 3];
                     if (typeof useCaptureOrSubIdx === 'boolean') {
                         // DOM listener
-                        native.removeEventListener(tCleanup[i], listener, useCaptureOrSubIdx);
+                        target.removeEventListener(tCleanup[i], listener, useCaptureOrSubIdx);
                     }
                     else {
                         if (useCaptureOrSubIdx >= 0) {
@@ -4233,8 +4244,7 @@
      * @returns Whether or not the child was appended
      */
     function appendChild(childEl, childTNode, currentView) {
-        if (childEl === void 0) { childEl = null; }
-        if (childEl !== null && canInsertNativeNode(childTNode, currentView)) {
+        if (canInsertNativeNode(childTNode, currentView)) {
             var renderer = currentView[RENDERER];
             var renderParent = getRenderParent(childTNode, currentView);
             var parentTNode = childTNode.parent || currentView[HOST_NODE];
@@ -4290,7 +4300,7 @@
      */
     function removeChild(childTNode, childEl, currentView) {
         // We only remove the element if not in View or not projected.
-        if (childEl !== null && canInsertNativeNode(childTNode, currentView)) {
+        if (canInsertNativeNode(childTNode, currentView)) {
             var parentNative = getRenderParent(childTNode, currentView);
             nativeRemoveChild(currentView[RENDERER], parentNative, childEl);
             return true;
@@ -6533,9 +6543,11 @@
      *
      * @param eventName Name of the event
      * @param listenerFn The function to be called when event emits
-     * @param useCapture Whether or not to use capture in event listener.
+     * @param useCapture Whether or not to use capture in event listener
+     * @param eventTargetResolver Function that returns global target information in case this listener
+     * should be attached to a global object like window, document or body
      */
-    function listener(eventName, listenerFn, useCapture) {
+    function listener(eventName, listenerFn, useCapture, eventTargetResolver) {
         if (useCapture === void 0) { useCapture = false; }
         var lView = getLView();
         var tNode = getPreviousOrParentTNode();
@@ -6546,6 +6558,8 @@
         // add native event listener - applicable to elements only
         if (tNode.type === 3 /* Element */) {
             var native = getNativeByTNode(tNode, lView);
+            var resolved = eventTargetResolver ? eventTargetResolver(native) : {};
+            var target = resolved.target || native;
             ngDevMode && ngDevMode.rendererAddEventListener++;
             var renderer = lView[RENDERER];
             var lCleanup = getCleanup(lView);
@@ -6554,16 +6568,22 @@
             // In order to match current behavior, native DOM event listeners must be added for all
             // events (including outputs).
             if (isProceduralRenderer(renderer)) {
-                var cleanupFn = renderer.listen(native, eventName, listenerFn);
+                // The first argument of `listen` function in Procedural Renderer is:
+                // - either a target name (as a string) in case of global target (window, document, body)
+                // - or element reference (in all other cases)
+                var cleanupFn = renderer.listen(resolved.name || target, eventName, listenerFn);
                 lCleanup.push(listenerFn, cleanupFn);
                 useCaptureOrSubIdx = lCleanupIndex + 1;
             }
             else {
                 var wrappedListener = wrapListenerWithPreventDefault(listenerFn);
-                native.addEventListener(eventName, wrappedListener, useCapture);
+                target.addEventListener(eventName, wrappedListener, useCapture);
                 lCleanup.push(wrappedListener);
             }
-            tCleanup && tCleanup.push(eventName, tNode.index, lCleanupIndex, useCaptureOrSubIdx);
+            var idxOrTargetGetter = eventTargetResolver ?
+                function (_lView) { return eventTargetResolver(readElementValue(_lView[tNode.index])).target; } :
+                tNode.index;
+            tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, useCaptureOrSubIdx);
         }
         // subscribe to directive outputs
         if (tNode.outputs === undefined) {
@@ -10738,7 +10758,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0+33.sha-917c09c');
+    var VERSION = new Version('7.2.0+43.sha-a084024');
 
     /**
      * @license
@@ -12149,14 +12169,16 @@
     function removeNode(index, viewData) {
         var removedPhTNode = getTNode(index, viewData);
         var removedPhRNode = getNativeByIndex(index, viewData);
-        removeChild(removedPhTNode, removedPhRNode || null, viewData);
+        if (removedPhRNode) {
+            removeChild(removedPhTNode, removedPhRNode, viewData);
+        }
         removedPhTNode.detached = true;
         ngDevMode && ngDevMode.rendererRemoveNode++;
         var slotValue = load(index);
         if (isLContainer(slotValue)) {
             var lContainer = slotValue;
             if (removedPhTNode.type !== 0 /* Container */) {
-                removeChild(removedPhTNode, lContainer[NATIVE] || null, viewData);
+                removeChild(removedPhTNode, lContainer[NATIVE], viewData);
             }
             lContainer[RENDER_PARENT] = null;
         }
@@ -14380,6 +14402,9 @@
         'ɵi18nEnd': i18nEnd,
         'ɵi18nApply': i18nApply,
         'ɵi18nPostprocess': i18nPostprocess,
+        'ɵresolveWindow': resolveWindow,
+        'ɵresolveDocument': resolveDocument,
+        'ɵresolveBody': resolveBody,
         'ɵsanitizeHtml': sanitizeHtml,
         'ɵsanitizeStyle': sanitizeStyle,
         'ɵdefaultStyleSanitizer': defaultStyleSanitizer,
@@ -24298,14 +24323,14 @@
     exports.ɵangular_packages_core_core_bc = getLView;
     exports.ɵangular_packages_core_core_bd = getPreviousOrParentTNode;
     exports.ɵangular_packages_core_core_be = nextContextImpl;
-    exports.ɵangular_packages_core_core_bh = BoundPlayerFactory;
-    exports.ɵangular_packages_core_core_bk = loadInternal;
+    exports.ɵangular_packages_core_core_bi = BoundPlayerFactory;
+    exports.ɵangular_packages_core_core_bg = loadInternal;
     exports.ɵangular_packages_core_core_h = createElementRef;
     exports.ɵangular_packages_core_core_i = createTemplateRef;
     exports.ɵangular_packages_core_core_j = createViewRef;
     exports.ɵangular_packages_core_core_a = makeParamDecorator;
     exports.ɵangular_packages_core_core_b = makePropDecorator;
-    exports.ɵangular_packages_core_core_bi = getClosureSafeProperty;
+    exports.ɵangular_packages_core_core_bj = getClosureSafeProperty;
     exports.ɵangular_packages_core_core_z = _def;
     exports.ɵangular_packages_core_core_ba = DebugContext;
     exports.createPlatform = createPlatform;
@@ -24545,6 +24570,9 @@
     exports.ɵi18nApply = i18nApply;
     exports.ɵi18nPostprocess = i18nPostprocess;
     exports.ɵsetClassMetadata = setClassMetadata;
+    exports.ɵresolveWindow = resolveWindow;
+    exports.ɵresolveDocument = resolveDocument;
+    exports.ɵresolveBody = resolveBody;
     exports.ɵcompileComponent = compileComponent;
     exports.ɵcompileDirective = compileDirective;
     exports.ɵcompileNgModule = compileNgModule;

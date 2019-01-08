@@ -103,3 +103,21 @@ export declare function addAllToArray(items: any[], arr: any[]): void;
  * @returns The host node
  */
 export declare function findComponentView(lView: LView): LView;
+export declare function resolveWindow(element: RElement & {
+    ownerDocument: Document;
+}): {
+    name: string;
+    target: Window | null;
+};
+export declare function resolveDocument(element: RElement & {
+    ownerDocument: Document;
+}): {
+    name: string;
+    target: Document;
+};
+export declare function resolveBody(element: RElement & {
+    ownerDocument: Document;
+}): {
+    name: string;
+    target: HTMLElement;
+};
