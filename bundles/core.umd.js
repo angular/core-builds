@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+44.sha-1a7f92c
+ * @license Angular v7.2.0+45.sha-b9c6df6
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -10758,7 +10758,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0+44.sha-1a7f92c');
+    var VERSION = new Version('7.2.0+45.sha-b9c6df6');
 
     /**
      * @license
@@ -20082,6 +20082,7 @@
             useClass: ApplicationRef,
             deps: [NgZone, Console, Injector, ErrorHandler, ComponentFactoryResolver, ApplicationInitStatus]
         },
+        { provide: SCHEDULER, deps: [NgZone], useFactory: zoneSchedulerFactory },
         {
             provide: ApplicationInitStatus,
             useClass: ApplicationInitStatus,
@@ -20097,6 +20098,24 @@
             deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
         },
     ];
+    /**
+     * Schedule work at next available slot.
+     *
+     * In Ivy this is just `requestAnimationFrame`. For compatibility reasons when bootstrapped
+     * using `platformRef.bootstrap` we need to use `NgZone.onStable` as the scheduling mechanism.
+     * This overrides the scheduling mechanism in Ivy to `NgZone.onStable`.
+     *
+     * @param ngZone NgZone to use for scheduling.
+     */
+    function zoneSchedulerFactory(ngZone) {
+        var queue = [];
+        ngZone.onStable.subscribe(function () {
+            while (queue.length) {
+                queue.pop()();
+            }
+        });
+        return function (fn) { queue.push(fn); };
+    }
     /**
      * Configures the root injector for an app with
      * providers of `@angular/core` dependencies that `ApplicationRef` needs
@@ -24303,6 +24322,7 @@
     exports.ɵangular_packages_core_core_p = _iterableDiffersFactory;
     exports.ɵangular_packages_core_core_q = _keyValueDiffersFactory;
     exports.ɵangular_packages_core_core_r = _localeFactory;
+    exports.ɵangular_packages_core_core_t = zoneSchedulerFactory;
     exports.ɵangular_packages_core_core_g = _appIdRandomProviderFactory;
     exports.ɵangular_packages_core_core_n = DefaultIterableDifferFactory;
     exports.ɵangular_packages_core_core_o = DefaultKeyValueDifferFactory;
@@ -24313,26 +24333,27 @@
     exports.ɵangular_packages_core_core_e = ReflectiveDependency;
     exports.ɵangular_packages_core_core_f = resolveReflectiveProviders;
     exports.ɵangular_packages_core_core_k = getModuleFactory__PRE_R3__;
-    exports.ɵangular_packages_core_core_t = wtfEnabled;
-    exports.ɵangular_packages_core_core_v = createScope;
-    exports.ɵangular_packages_core_core_u = detectWTF;
-    exports.ɵangular_packages_core_core_y = endTimeRange;
-    exports.ɵangular_packages_core_core_w = leave;
-    exports.ɵangular_packages_core_core_x = startTimeRange;
-    exports.ɵangular_packages_core_core_bb = injectAttributeImpl;
-    exports.ɵangular_packages_core_core_bc = getLView;
-    exports.ɵangular_packages_core_core_bd = getPreviousOrParentTNode;
-    exports.ɵangular_packages_core_core_be = nextContextImpl;
-    exports.ɵangular_packages_core_core_bi = BoundPlayerFactory;
-    exports.ɵangular_packages_core_core_bg = loadInternal;
+    exports.ɵangular_packages_core_core_u = wtfEnabled;
+    exports.ɵangular_packages_core_core_w = createScope;
+    exports.ɵangular_packages_core_core_v = detectWTF;
+    exports.ɵangular_packages_core_core_z = endTimeRange;
+    exports.ɵangular_packages_core_core_x = leave;
+    exports.ɵangular_packages_core_core_y = startTimeRange;
+    exports.ɵangular_packages_core_core_bc = SCHEDULER;
+    exports.ɵangular_packages_core_core_bd = injectAttributeImpl;
+    exports.ɵangular_packages_core_core_be = getLView;
+    exports.ɵangular_packages_core_core_bf = getPreviousOrParentTNode;
+    exports.ɵangular_packages_core_core_bg = nextContextImpl;
+    exports.ɵangular_packages_core_core_bk = BoundPlayerFactory;
+    exports.ɵangular_packages_core_core_bi = loadInternal;
     exports.ɵangular_packages_core_core_h = createElementRef;
     exports.ɵangular_packages_core_core_i = createTemplateRef;
     exports.ɵangular_packages_core_core_j = createViewRef;
     exports.ɵangular_packages_core_core_a = makeParamDecorator;
     exports.ɵangular_packages_core_core_b = makePropDecorator;
-    exports.ɵangular_packages_core_core_bj = getClosureSafeProperty;
-    exports.ɵangular_packages_core_core_z = _def;
-    exports.ɵangular_packages_core_core_ba = DebugContext;
+    exports.ɵangular_packages_core_core_bl = getClosureSafeProperty;
+    exports.ɵangular_packages_core_core_ba = _def;
+    exports.ɵangular_packages_core_core_bb = DebugContext;
     exports.createPlatform = createPlatform;
     exports.assertPlatform = assertPlatform;
     exports.destroyPlatform = destroyPlatform;
