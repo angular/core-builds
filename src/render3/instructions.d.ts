@@ -18,7 +18,7 @@ import { LocalRefExtractor, TAttributes, TContainerNode, TElementContainerNode, 
 import { PlayerFactory } from './interfaces/player';
 import { CssSelectorList } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
-import { RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
+import { GlobalTargetResolver, RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 import { SanitizerFn } from './interfaces/sanitization';
 import { LView, LViewFlags, OpaqueViewState, RootContext, RootContextFlags, TView } from './interfaces/view';
 import { NO_CHANGE } from './tokens';
@@ -180,9 +180,11 @@ export declare function locateHostElement(factory: RendererFactory3, elementOrSe
  *
  * @param eventName Name of the event
  * @param listenerFn The function to be called when event emits
- * @param useCapture Whether or not to use capture in event listener.
+ * @param useCapture Whether or not to use capture in event listener
+ * @param eventTargetResolver Function that returns global target information in case this listener
+ * should be attached to a global object like window, document or body
  */
-export declare function listener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean): void;
+export declare function listener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
 /**
  * Saves context for this cleanup function in LView.cleanupInstances.
  *

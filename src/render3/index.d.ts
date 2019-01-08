@@ -27,5 +27,6 @@ export { query, queryRefresh, } from './query';
 export { registerContentQuery, loadQueryList, } from './instructions';
 export { pureFunction0, pureFunction1, pureFunction2, pureFunction3, pureFunction4, pureFunction5, pureFunction6, pureFunction7, pureFunction8, pureFunctionV, } from './pure_function';
 export { templateRefExtractor } from './view_engine_compatibility_prebound';
+export { resolveWindow, resolveDocument, resolveBody } from './util';
 export { BaseDef, ComponentDef, ComponentDefWithMeta, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFlags, DirectiveDefWithMeta, DirectiveType, NgOnChangesFeature, InheritDefinitionFeature, ProvidersFeature, PipeDef, PipeDefWithMeta, LifecycleHooksFeature, defineComponent, defineDirective, defineNgModule, defineBase, definePipe, getHostElement, getComponent, getRenderedText, renderComponent, whenRendered, };
 export { NO_CHANGE } from './tokens';
