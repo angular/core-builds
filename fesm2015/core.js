@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+56.sha-c3aa24c
+ * @license Angular v7.2.0+67.sha-d6cfe2e
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -13766,7 +13766,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.0+56.sha-c3aa24c');
+const VERSION = new Version('7.2.0+67.sha-d6cfe2e');
 
 /**
  * @fileoverview added by tsickle
@@ -14607,7 +14607,7 @@ function _sanitizeHtml(defaultDoc, unsafeHtmlInput) {
         /** @type {?} */
         const safeHtml = sanitizer.sanitizeChildren((/** @type {?} */ (getTemplateContent((/** @type {?} */ (inertBodyElement))))) || inertBodyElement);
         if (isDevMode() && sanitizer.sanitizedSomething) {
-            console.warn('WARNING: sanitizing HTML stripped some content (see http://g.co/ng/security#xss).');
+            console.warn('WARNING: sanitizing HTML stripped some content, see http://g.co/ng/security#xss');
         }
         return safeHtml;
     }

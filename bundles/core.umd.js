@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+56.sha-c3aa24c
+ * @license Angular v7.2.0+67.sha-d6cfe2e
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -10727,7 +10727,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0+56.sha-c3aa24c');
+    var VERSION = new Version('7.2.0+67.sha-d6cfe2e');
 
     /**
      * @license
@@ -11436,7 +11436,7 @@
             var sanitizer = new SanitizingHtmlSerializer();
             var safeHtml = sanitizer.sanitizeChildren(getTemplateContent(inertBodyElement) || inertBodyElement);
             if (isDevMode() && sanitizer.sanitizedSomething) {
-                console.warn('WARNING: sanitizing HTML stripped some content (see http://g.co/ng/security#xss).');
+                console.warn('WARNING: sanitizing HTML stripped some content, see http://g.co/ng/security#xss');
             }
             return safeHtml;
         }
