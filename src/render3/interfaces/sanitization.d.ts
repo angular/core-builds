@@ -8,4 +8,4 @@
 /**
  * Function used to sanitize the value before writing it into the renderer.
  */
-export declare type SanitizerFn = (value: any) => string;
+export declare type SanitizerFn = (value: any, tagName?: string, propName?: string) => string;

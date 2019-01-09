@@ -148,7 +148,7 @@ export declare function nativeNextSibling(renderer: Renderer3, node: RNode): RNo
  * @param currentView The current LView
  * @returns Whether or not the child was appended
  */
-export declare function appendChild(childEl: RNode | null | undefined, childTNode: TNode, currentView: LView): boolean;
+export declare function appendChild(childEl: RNode, childTNode: TNode, currentView: LView): boolean;
 export declare function getBeforeNodeForView(index: number, views: LView[], containerNative: RComment): RComment | RElement;
 /**
  * Removes the `child` element from the DOM if not in view and not projected.
@@ -158,7 +158,7 @@ export declare function getBeforeNodeForView(index: number, views: LView[], cont
  * @param currentView The current LView
  * @returns Whether or not the child was removed
  */
-export declare function removeChild(childTNode: TNode, childEl: RNode | null, currentView: LView): boolean;
+export declare function removeChild(childTNode: TNode, childEl: RNode, currentView: LView): boolean;
 /**
  * Appends a projected node to the DOM, or in the case of a projected container,
  * appends the nodes from all of the container's active views to the DOM.

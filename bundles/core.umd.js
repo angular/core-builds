@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+15.sha-4613864
+ * @license Angular v7.2.0+56.sha-c3aa24c
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1490,30 +1490,6 @@
             return value.type.name || value.type;
         return '' + value;
     }
-    /**
-     * Flattens an array in non-recursive way. Input arrays are not modified.
-     */
-    function flatten(list) {
-        var result = [];
-        var i = 0;
-        while (i < list.length) {
-            var item = list[i];
-            if (Array.isArray(item)) {
-                if (item.length > 0) {
-                    list = item.concat(list.slice(i + 1));
-                    i = 0;
-                }
-                else {
-                    i++;
-                }
-            }
-            else {
-                result.push(item);
-                i++;
-            }
-        }
-        return result;
-    }
     /** Retrieves a value from any `LView` or `TData`. */
     function loadInternal(view, index) {
         ngDevMode && assertDataInRange(view, index + HEADER_OFFSET);
@@ -1697,6 +1673,15 @@
             rootTNode = lView[HOST_NODE];
         }
         return lView;
+    }
+    function resolveWindow(element) {
+        return { name: 'window', target: element.ownerDocument.defaultView };
+    }
+    function resolveDocument(element) {
+        return { name: 'document', target: element.ownerDocument };
+    }
+    function resolveBody(element) {
+        return { name: 'body', target: element.ownerDocument.body };
     }
 
     /**
@@ -4083,13 +4068,15 @@
             for (var i = 0; i < tCleanup.length - 1; i += 2) {
                 if (typeof tCleanup[i] === 'string') {
                     // This is a listener with the native renderer
-                    var idx = tCleanup[i + 1];
+                    var idxOrTargetGetter = tCleanup[i + 1];
+                    var target = typeof idxOrTargetGetter === 'function' ?
+                        idxOrTargetGetter(lView) :
+                        readElementValue(lView[idxOrTargetGetter]);
                     var listener = lCleanup[tCleanup[i + 2]];
-                    var native = readElementValue(lView[idx]);
                     var useCaptureOrSubIdx = tCleanup[i + 3];
                     if (typeof useCaptureOrSubIdx === 'boolean') {
                         // DOM listener
-                        native.removeEventListener(tCleanup[i], listener, useCaptureOrSubIdx);
+                        target.removeEventListener(tCleanup[i], listener, useCaptureOrSubIdx);
                     }
                     else {
                         if (useCaptureOrSubIdx >= 0) {
@@ -4257,8 +4244,7 @@
      * @returns Whether or not the child was appended
      */
     function appendChild(childEl, childTNode, currentView) {
-        if (childEl === void 0) { childEl = null; }
-        if (childEl !== null && canInsertNativeNode(childTNode, currentView)) {
+        if (canInsertNativeNode(childTNode, currentView)) {
             var renderer = currentView[RENDERER];
             var renderParent = getRenderParent(childTNode, currentView);
             var parentTNode = childTNode.parent || currentView[HOST_NODE];
@@ -4314,7 +4300,7 @@
      */
     function removeChild(childTNode, childEl, currentView) {
         // We only remove the element if not in View or not projected.
-        if (childEl !== null && canInsertNativeNode(childTNode, currentView)) {
+        if (canInsertNativeNode(childTNode, currentView)) {
             var parentNative = getRenderParent(childTNode, currentView);
             nativeRemoveChild(currentView[RENDERER], parentNative, childEl);
             return true;
@@ -6557,9 +6543,11 @@
      *
      * @param eventName Name of the event
      * @param listenerFn The function to be called when event emits
-     * @param useCapture Whether or not to use capture in event listener.
+     * @param useCapture Whether or not to use capture in event listener
+     * @param eventTargetResolver Function that returns global target information in case this listener
+     * should be attached to a global object like window, document or body
      */
-    function listener(eventName, listenerFn, useCapture) {
+    function listener(eventName, listenerFn, useCapture, eventTargetResolver) {
         if (useCapture === void 0) { useCapture = false; }
         var lView = getLView();
         var tNode = getPreviousOrParentTNode();
@@ -6570,6 +6558,8 @@
         // add native event listener - applicable to elements only
         if (tNode.type === 3 /* Element */) {
             var native = getNativeByTNode(tNode, lView);
+            var resolved = eventTargetResolver ? eventTargetResolver(native) : {};
+            var target = resolved.target || native;
             ngDevMode && ngDevMode.rendererAddEventListener++;
             var renderer = lView[RENDERER];
             var lCleanup = getCleanup(lView);
@@ -6578,16 +6568,22 @@
             // In order to match current behavior, native DOM event listeners must be added for all
             // events (including outputs).
             if (isProceduralRenderer(renderer)) {
-                var cleanupFn = renderer.listen(native, eventName, listenerFn);
+                // The first argument of `listen` function in Procedural Renderer is:
+                // - either a target name (as a string) in case of global target (window, document, body)
+                // - or element reference (in all other cases)
+                var cleanupFn = renderer.listen(resolved.name || target, eventName, listenerFn);
                 lCleanup.push(listenerFn, cleanupFn);
                 useCaptureOrSubIdx = lCleanupIndex + 1;
             }
             else {
                 var wrappedListener = wrapListenerWithPreventDefault(listenerFn);
-                native.addEventListener(eventName, wrappedListener, useCapture);
+                target.addEventListener(eventName, wrappedListener, useCapture);
                 lCleanup.push(wrappedListener);
             }
-            tCleanup && tCleanup.push(eventName, tNode.index, lCleanupIndex, useCaptureOrSubIdx);
+            var idxOrTargetGetter = eventTargetResolver ?
+                function (_lView) { return eventTargetResolver(readElementValue(_lView[tNode.index])).target; } :
+                tNode.index;
+            tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, useCaptureOrSubIdx);
         }
         // subscribe to directive outputs
         if (tNode.outputs === undefined) {
@@ -6687,7 +6683,8 @@
             }
             else {
                 ngDevMode && ngDevMode.rendererSetAttribute++;
-                var strValue = sanitizer == null ? stringify$1(value) : sanitizer(value);
+                var tNode = getTNode(index, lView);
+                var strValue = sanitizer == null ? stringify$1(value) : sanitizer(value, tNode.tagName || '', name);
                 isProceduralRenderer(renderer) ? renderer.setAttribute(element_1, name, strValue) :
                     element_1.setAttribute(name, strValue);
             }
@@ -6762,7 +6759,7 @@
             var renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
             // It is assumed that the sanitizer is only added when the compiler determines that the property
             // is risky, so sanitization can be done without further checks.
-            value = sanitizer != null ? sanitizer(value) : value;
+            value = sanitizer != null ? sanitizer(value, tNode.tagName || '', propName) : value;
             ngDevMode && ngDevMode.rendererSetProperty++;
             if (isProceduralRenderer(renderer)) {
                 renderer.setProperty(element, propName, value);
@@ -10762,7 +10759,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0+15.sha-4613864');
+    var VERSION = new Version('7.2.0+56.sha-c3aa24c');
 
     /**
      * @license
@@ -12173,14 +12170,16 @@
     function removeNode(index, viewData) {
         var removedPhTNode = getTNode(index, viewData);
         var removedPhRNode = getNativeByIndex(index, viewData);
-        removeChild(removedPhTNode, removedPhRNode || null, viewData);
+        if (removedPhRNode) {
+            removeChild(removedPhTNode, removedPhRNode, viewData);
+        }
         removedPhTNode.detached = true;
         ngDevMode && ngDevMode.rendererRemoveNode++;
         var slotValue = load(index);
         if (isLContainer(slotValue)) {
             var lContainer = slotValue;
             if (removedPhTNode.type !== 0 /* Container */) {
-                removeChild(removedPhTNode, lContainer[NATIVE] || null, viewData);
+                removeChild(removedPhTNode, lContainer[NATIVE], viewData);
             }
             lContainer[RENDER_PARENT] = null;
         }
@@ -12222,8 +12221,6 @@
     function i18nAttributes(index, values) {
         var tView = getLView()[TVIEW];
         ngDevMode && assertDefined(tView, "tView should be defined");
-        ngDevMode &&
-            assertEqual(tView.firstTemplatePass, true, "You should only call i18nEnd on first template pass");
         if (tView.firstTemplatePass && tView.data[index + HEADER_OFFSET] === null) {
             i18nAttributesFirstPass(tView, index, values);
         }
@@ -13561,6 +13558,111 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
+     * An unmodifiable list of items that Angular keeps up to date when the state
+     * of the application changes.
+     *
+     * The type of object that {@link ViewChildren}, {@link ContentChildren}, and {@link QueryList}
+     * provide.
+     *
+     * Implements an iterable interface, therefore it can be used in both ES6
+     * javascript `for (var i of items)` loops as well as in Angular templates with
+     * `*ngFor="let i of myList"`.
+     *
+     * Changes can be observed by subscribing to the changes `Observable`.
+     *
+     * NOTE: In the future this class will implement an `Observable` interface.
+     *
+     * @usageNotes
+     * ### Example
+     * ```typescript
+     * @Component({...})
+     * class Container {
+     *   @ViewChildren(Item) items:QueryList<Item>;
+     * }
+     * ```
+     *
+     * @publicApi
+     */
+    var QueryList = /** @class */ (function () {
+        function QueryList() {
+            this.dirty = true;
+            this._results = [];
+            this.changes = new EventEmitter();
+            this.length = 0;
+        }
+        /**
+         * See
+         * [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
+         */
+        QueryList.prototype.map = function (fn) { return this._results.map(fn); };
+        /**
+         * See
+         * [Array.filter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter)
+         */
+        QueryList.prototype.filter = function (fn) {
+            return this._results.filter(fn);
+        };
+        /**
+         * See
+         * [Array.find](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find)
+         */
+        QueryList.prototype.find = function (fn) {
+            return this._results.find(fn);
+        };
+        /**
+         * See
+         * [Array.reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)
+         */
+        QueryList.prototype.reduce = function (fn, init) {
+            return this._results.reduce(fn, init);
+        };
+        /**
+         * See
+         * [Array.forEach](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach)
+         */
+        QueryList.prototype.forEach = function (fn) { this._results.forEach(fn); };
+        /**
+         * See
+         * [Array.some](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
+         */
+        QueryList.prototype.some = function (fn) {
+            return this._results.some(fn);
+        };
+        QueryList.prototype.toArray = function () { return this._results.slice(); };
+        QueryList.prototype[getSymbolIterator()] = function () { return this._results[getSymbolIterator()](); };
+        QueryList.prototype.toString = function () { return this._results.toString(); };
+        QueryList.prototype.reset = function (res) {
+            this._results = flatten$1(res);
+            this.dirty = false;
+            this.length = this._results.length;
+            this.last = this._results[this.length - 1];
+            this.first = this._results[0];
+        };
+        QueryList.prototype.notifyOnChanges = function () { this.changes.emit(this); };
+        /** internal */
+        QueryList.prototype.setDirty = function () { this.dirty = true; };
+        /** internal */
+        QueryList.prototype.destroy = function () {
+            this.changes.complete();
+            this.changes.unsubscribe();
+        };
+        return QueryList;
+    }());
+    function flatten$1(list) {
+        return list.reduce(function (flat, item) {
+            var flatItem = Array.isArray(item) ? flatten$1(item) : item;
+            return flat.concat(flatItem);
+        }, []);
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
      * Represents an embedded template that can be used to instantiate embedded views.
      * To instantiate embedded views based on a template, use the `ViewContainerRef`
      * method `createEmbeddedView()`.
@@ -13835,89 +13937,6 @@
             containerValues: null
         };
     }
-    var QueryList_ = /** @class */ (function () {
-        function QueryList_() {
-            this.dirty = true;
-            this.changes = new EventEmitter();
-            this._values = [];
-            /** @internal */
-            this._valuesTree = [];
-        }
-        Object.defineProperty(QueryList_.prototype, "length", {
-            get: function () { return this._values.length; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(QueryList_.prototype, "first", {
-            get: function () {
-                var values = this._values;
-                return values.length ? values[0] : null;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(QueryList_.prototype, "last", {
-            get: function () {
-                var values = this._values;
-                return values.length ? values[values.length - 1] : null;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        /**
-         * See
-         * [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
-         */
-        QueryList_.prototype.map = function (fn) { return this._values.map(fn); };
-        /**
-         * See
-         * [Array.filter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter)
-         */
-        QueryList_.prototype.filter = function (fn) {
-            return this._values.filter(fn);
-        };
-        /**
-         * See
-         * [Array.find](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find)
-         */
-        QueryList_.prototype.find = function (fn) {
-            return this._values.find(fn);
-        };
-        /**
-         * See
-         * [Array.reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)
-         */
-        QueryList_.prototype.reduce = function (fn, init) {
-            return this._values.reduce(fn, init);
-        };
-        /**
-         * See
-         * [Array.forEach](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach)
-         */
-        QueryList_.prototype.forEach = function (fn) { this._values.forEach(fn); };
-        /**
-         * See
-         * [Array.some](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
-         */
-        QueryList_.prototype.some = function (fn) {
-            return this._values.some(fn);
-        };
-        QueryList_.prototype.toArray = function () { return this._values.slice(0); };
-        QueryList_.prototype[getSymbolIterator()] = function () { return this._values[getSymbolIterator()](); };
-        QueryList_.prototype.toString = function () { return this._values.toString(); };
-        QueryList_.prototype.reset = function (res) {
-            this._values = flatten(res);
-            this.dirty = false;
-        };
-        QueryList_.prototype.notifyOnChanges = function () { this.changes.emit(this); };
-        QueryList_.prototype.setDirty = function () { this.dirty = true; };
-        QueryList_.prototype.destroy = function () {
-            this.changes.complete();
-            this.changes.unsubscribe();
-        };
-        return QueryList_;
-    }());
-    var QueryList = QueryList_;
     /**
      * Creates and returns a QueryList.
      *
@@ -13934,6 +13953,7 @@
         ngDevMode && assertPreviousIsParent(getIsParent());
         var queryList = new QueryList();
         var queries = getOrCreateCurrentQueries(LQueries_);
+        queryList._valuesTree = [];
         queries.track(queryList, predicate, descend, read);
         storeCleanupWithContext(getLView(), queryList, queryList.destroy);
         if (memoryIndex != null) {
@@ -13949,7 +13969,7 @@
     function queryRefresh(queryList) {
         var queryListImpl = queryList;
         if (queryList.dirty) {
-            queryList.reset(queryListImpl._valuesTree);
+            queryList.reset(queryListImpl._valuesTree || []);
             queryList.notifyOnChanges();
             return true;
         }
@@ -14265,6 +14285,37 @@
         throw new Error('unsafe value used in a script context');
     }
     /**
+     * Detects which sanitizer to use for URL property, based on tag name and prop name.
+     *
+     * The rules are based on the RESOURCE_URL context config from
+     * `packages/compiler/src/schema/dom_security_schema.ts`.
+     * If tag and prop names don't match Resource URL schema, use URL sanitizer.
+     */
+    function getUrlSanitizer(tag, prop) {
+        if ((prop === 'src' && (tag === 'embed' || tag === 'frame' || tag === 'iframe' ||
+            tag === 'media' || tag === 'script')) ||
+            (prop === 'href' && (tag === 'base' || tag === 'link'))) {
+            return sanitizeResourceUrl;
+        }
+        return sanitizeUrl;
+    }
+    /**
+     * Sanitizes URL, selecting sanitizer function based on tag and property names.
+     *
+     * This function is used in case we can't define security context at compile time, when only prop
+     * name is available. This happens when we generate host bindings for Directives/Components. The
+     * host element is unknown at compile time, so we defer calculation of specific sanitizer to
+     * runtime.
+     *
+     * @param unsafeUrl untrusted `url`, typically from the user.
+     * @param tag target element tag name.
+     * @param prop name of the property that contains the value.
+     * @returns `url` string which is safe to bind.
+     */
+    function sanitizeUrlOrResourceUrl(unsafeUrl, tag, prop) {
+        return getUrlSanitizer(tag, prop)(unsafeUrl);
+    }
+    /**
      * The default style sanitizer will handle sanitization for style properties by
      * sanitizing any CSS property that can include a `url` value (usually image-based properties)
      */
@@ -14383,12 +14434,16 @@
         'ɵi18nEnd': i18nEnd,
         'ɵi18nApply': i18nApply,
         'ɵi18nPostprocess': i18nPostprocess,
+        'ɵresolveWindow': resolveWindow,
+        'ɵresolveDocument': resolveDocument,
+        'ɵresolveBody': resolveBody,
         'ɵsanitizeHtml': sanitizeHtml,
         'ɵsanitizeStyle': sanitizeStyle,
         'ɵdefaultStyleSanitizer': defaultStyleSanitizer,
         'ɵsanitizeResourceUrl': sanitizeResourceUrl,
         'ɵsanitizeScript': sanitizeScript,
-        'ɵsanitizeUrl': sanitizeUrl
+        'ɵsanitizeUrl': sanitizeUrl,
+        'ɵsanitizeUrlOrResourceUrl': sanitizeUrlOrResourceUrl
     };
 
     /**
@@ -14857,7 +14912,7 @@
     function compileNgModuleDefs(moduleType, ngModule) {
         ngDevMode && assertDefined(moduleType, 'Required value moduleType');
         ngDevMode && assertDefined(ngModule, 'Required value ngModule');
-        var declarations = flatten$1(ngModule.declarations || EMPTY_ARRAY$2);
+        var declarations = flatten$2(ngModule.declarations || EMPTY_ARRAY$2);
         var ngModuleDef = null;
         Object.defineProperty(moduleType, NG_MODULE_DEF, {
             configurable: true,
@@ -14865,11 +14920,11 @@
                 if (ngModuleDef === null) {
                     ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, "ng://" + moduleType.name + "/ngModuleDef.js", {
                         type: moduleType,
-                        bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$2, resolveForwardRef),
+                        bootstrap: flatten$2(ngModule.bootstrap || EMPTY_ARRAY$2, resolveForwardRef),
                         declarations: declarations.map(resolveForwardRef),
-                        imports: flatten$1(ngModule.imports || EMPTY_ARRAY$2, resolveForwardRef)
+                        imports: flatten$2(ngModule.imports || EMPTY_ARRAY$2, resolveForwardRef)
                             .map(expandModuleWithProviders),
-                        exports: flatten$1(ngModule.exports || EMPTY_ARRAY$2, resolveForwardRef)
+                        exports: flatten$2(ngModule.exports || EMPTY_ARRAY$2, resolveForwardRef)
                             .map(expandModuleWithProviders),
                         emitInline: true,
                     });
@@ -14911,14 +14966,14 @@
         var ngModuleDef = getNgModuleDef(moduleType, true);
         var errors = [];
         ngModuleDef.declarations.forEach(verifyDeclarationsHaveDefinitions);
-        var combinedDeclarations = __spread(ngModuleDef.declarations.map(resolveForwardRef), flatten$1(ngModuleDef.imports.map(computeCombinedExports), resolveForwardRef));
+        var combinedDeclarations = __spread(ngModuleDef.declarations.map(resolveForwardRef), flatten$2(ngModuleDef.imports.map(computeCombinedExports), resolveForwardRef));
         ngModuleDef.exports.forEach(verifyExportsAreDeclaredOrReExported);
         ngModuleDef.declarations.forEach(verifyDeclarationIsUnique);
         ngModuleDef.declarations.forEach(verifyComponentEntryComponentsIsPartOfNgModule);
         var ngModule = getAnnotation(moduleType, 'NgModule');
         if (ngModule) {
             ngModule.imports &&
-                flatten$1(ngModule.imports, unwrapModuleWithProvidersImports)
+                flatten$2(ngModule.imports, unwrapModuleWithProvidersImports)
                     .forEach(verifySemanticsOfNgModuleDef);
             ngModule.bootstrap && ngModule.bootstrap.forEach(verifyComponentIsPartOfNgModule);
             ngModule.entryComponents && ngModule.entryComponents.forEach(verifyComponentIsPartOfNgModule);
@@ -15031,7 +15086,7 @@
     function computeCombinedExports(type) {
         type = resolveForwardRef(type);
         var ngModuleDef = getNgModuleDef(type, true);
-        return __spread(flatten$1(ngModuleDef.exports.map(function (type) {
+        return __spread(flatten$2(ngModuleDef.exports.map(function (type) {
             var ngModuleDef = getNgModuleDef(type);
             if (ngModuleDef) {
                 verifySemanticsOfNgModuleDef(type);
@@ -15048,7 +15103,7 @@
      * the `ngSelectorScope` property of the declared type.
      */
     function setScopeOnDeclaredComponents(moduleType, ngModule) {
-        var declarations = flatten$1(ngModule.declarations || EMPTY_ARRAY$2);
+        var declarations = flatten$2(ngModule.declarations || EMPTY_ARRAY$2);
         var transitiveScopes = transitiveScopesFor(moduleType);
         declarations.forEach(function (declaration) {
             if (declaration.hasOwnProperty(NG_COMPONENT_DEF)) {
@@ -15150,11 +15205,11 @@
         def.transitiveCompileScopes = scopes;
         return scopes;
     }
-    function flatten$1(values, mapFn) {
+    function flatten$2(values, mapFn) {
         var out = [];
         values.forEach(function (value) {
             if (Array.isArray(value)) {
-                out.push.apply(out, __spread(flatten$1(value, mapFn)));
+                out.push.apply(out, __spread(flatten$2(value, mapFn)));
             }
             else {
                 out.push(mapFn ? mapFn(value) : value);
@@ -18138,111 +18193,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    /**
-     * An unmodifiable list of items that Angular keeps up to date when the state
-     * of the application changes.
-     *
-     * The type of object that {@link ViewChildren}, {@link ContentChildren}, and {@link QueryList}
-     * provide.
-     *
-     * Implements an iterable interface, therefore it can be used in both ES6
-     * javascript `for (var i of items)` loops as well as in Angular templates with
-     * `*ngFor="let i of myList"`.
-     *
-     * Changes can be observed by subscribing to the changes `Observable`.
-     *
-     * NOTE: In the future this class will implement an `Observable` interface.
-     *
-     * @usageNotes
-     * ### Example
-     * ```typescript
-     * @Component({...})
-     * class Container {
-     *   @ViewChildren(Item) items:QueryList<Item>;
-     * }
-     * ```
-     *
-     * @publicApi
-     */
-    var QueryList$1 = /** @class */ (function () {
-        function QueryList() {
-            this.dirty = true;
-            this._results = [];
-            this.changes = new EventEmitter();
-            this.length = 0;
-        }
-        /**
-         * See
-         * [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
-         */
-        QueryList.prototype.map = function (fn) { return this._results.map(fn); };
-        /**
-         * See
-         * [Array.filter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter)
-         */
-        QueryList.prototype.filter = function (fn) {
-            return this._results.filter(fn);
-        };
-        /**
-         * See
-         * [Array.find](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find)
-         */
-        QueryList.prototype.find = function (fn) {
-            return this._results.find(fn);
-        };
-        /**
-         * See
-         * [Array.reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)
-         */
-        QueryList.prototype.reduce = function (fn, init) {
-            return this._results.reduce(fn, init);
-        };
-        /**
-         * See
-         * [Array.forEach](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach)
-         */
-        QueryList.prototype.forEach = function (fn) { this._results.forEach(fn); };
-        /**
-         * See
-         * [Array.some](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
-         */
-        QueryList.prototype.some = function (fn) {
-            return this._results.some(fn);
-        };
-        QueryList.prototype.toArray = function () { return this._results.slice(); };
-        QueryList.prototype[getSymbolIterator()] = function () { return this._results[getSymbolIterator()](); };
-        QueryList.prototype.toString = function () { return this._results.toString(); };
-        QueryList.prototype.reset = function (res) {
-            this._results = flatten$2(res);
-            this.dirty = false;
-            this.length = this._results.length;
-            this.last = this._results[this.length - 1];
-            this.first = this._results[0];
-        };
-        QueryList.prototype.notifyOnChanges = function () { this.changes.emit(this); };
-        /** internal */
-        QueryList.prototype.setDirty = function () { this.dirty = true; };
-        /** internal */
-        QueryList.prototype.destroy = function () {
-            this.changes.complete();
-            this.changes.unsubscribe();
-        };
-        return QueryList;
-    }());
-    function flatten$2(list) {
-        return list.reduce(function (flat, item) {
-            var flatItem = Array.isArray(item) ? flatten$2(item) : item;
-            return flat.concat(flatItem);
-        }, []);
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     var _SEPARATOR = '#';
     var FACTORY_CLASS_SUFFIX = 'NgFactory';
     /**
@@ -20165,6 +20115,7 @@
             useClass: ApplicationRef,
             deps: [NgZone, Console, Injector, ErrorHandler, ComponentFactoryResolver, ApplicationInitStatus]
         },
+        { provide: SCHEDULER, deps: [NgZone], useFactory: zoneSchedulerFactory },
         {
             provide: ApplicationInitStatus,
             useClass: ApplicationInitStatus,
@@ -20180,6 +20131,24 @@
             deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
         },
     ];
+    /**
+     * Schedule work at next available slot.
+     *
+     * In Ivy this is just `requestAnimationFrame`. For compatibility reasons when bootstrapped
+     * using `platformRef.bootstrap` we need to use `NgZone.onStable` as the scheduling mechanism.
+     * This overrides the scheduling mechanism in Ivy to `NgZone.onStable`.
+     *
+     * @param ngZone NgZone to use for scheduling.
+     */
+    function zoneSchedulerFactory(ngZone) {
+        var queue = [];
+        ngZone.onStable.subscribe(function () {
+            while (queue.length) {
+                queue.pop()();
+            }
+        });
+        return function (fn) { queue.push(fn); };
+    }
     /**
      * Configures the root injector for an app with
      * providers of `@angular/core` dependencies that `ApplicationRef` needs
@@ -22364,7 +22333,7 @@
         };
     }
     function createQuery$1() {
-        return new QueryList$1();
+        return new QueryList();
     }
     function dirtyParentQueries(view) {
         var queryIds = view.def.nodeMatchedQueries;
@@ -24386,6 +24355,7 @@
     exports.ɵangular_packages_core_core_p = _iterableDiffersFactory;
     exports.ɵangular_packages_core_core_q = _keyValueDiffersFactory;
     exports.ɵangular_packages_core_core_r = _localeFactory;
+    exports.ɵangular_packages_core_core_t = zoneSchedulerFactory;
     exports.ɵangular_packages_core_core_g = _appIdRandomProviderFactory;
     exports.ɵangular_packages_core_core_n = DefaultIterableDifferFactory;
     exports.ɵangular_packages_core_core_o = DefaultKeyValueDifferFactory;
@@ -24396,26 +24366,28 @@
     exports.ɵangular_packages_core_core_e = ReflectiveDependency;
     exports.ɵangular_packages_core_core_f = resolveReflectiveProviders;
     exports.ɵangular_packages_core_core_k = getModuleFactory__PRE_R3__;
-    exports.ɵangular_packages_core_core_t = wtfEnabled;
-    exports.ɵangular_packages_core_core_v = createScope;
-    exports.ɵangular_packages_core_core_u = detectWTF;
-    exports.ɵangular_packages_core_core_y = endTimeRange;
-    exports.ɵangular_packages_core_core_w = leave;
-    exports.ɵangular_packages_core_core_x = startTimeRange;
-    exports.ɵangular_packages_core_core_bb = injectAttributeImpl;
-    exports.ɵangular_packages_core_core_bc = getLView;
-    exports.ɵangular_packages_core_core_bd = getPreviousOrParentTNode;
-    exports.ɵangular_packages_core_core_be = nextContextImpl;
-    exports.ɵangular_packages_core_core_bh = BoundPlayerFactory;
-    exports.ɵangular_packages_core_core_bk = loadInternal;
+    exports.ɵangular_packages_core_core_u = wtfEnabled;
+    exports.ɵangular_packages_core_core_w = createScope;
+    exports.ɵangular_packages_core_core_v = detectWTF;
+    exports.ɵangular_packages_core_core_z = endTimeRange;
+    exports.ɵangular_packages_core_core_x = leave;
+    exports.ɵangular_packages_core_core_y = startTimeRange;
+    exports.ɵangular_packages_core_core_bc = SCHEDULER;
+    exports.ɵangular_packages_core_core_bd = injectAttributeImpl;
+    exports.ɵangular_packages_core_core_be = getLView;
+    exports.ɵangular_packages_core_core_bf = getPreviousOrParentTNode;
+    exports.ɵangular_packages_core_core_bg = nextContextImpl;
+    exports.ɵangular_packages_core_core_bl = BoundPlayerFactory;
+    exports.ɵangular_packages_core_core_bi = loadInternal;
     exports.ɵangular_packages_core_core_h = createElementRef;
     exports.ɵangular_packages_core_core_i = createTemplateRef;
     exports.ɵangular_packages_core_core_j = createViewRef;
+    exports.ɵangular_packages_core_core_bj = getUrlSanitizer;
     exports.ɵangular_packages_core_core_a = makeParamDecorator;
     exports.ɵangular_packages_core_core_b = makePropDecorator;
-    exports.ɵangular_packages_core_core_bi = getClosureSafeProperty;
-    exports.ɵangular_packages_core_core_z = _def;
-    exports.ɵangular_packages_core_core_ba = DebugContext;
+    exports.ɵangular_packages_core_core_bm = getClosureSafeProperty;
+    exports.ɵangular_packages_core_core_ba = _def;
+    exports.ɵangular_packages_core_core_bb = DebugContext;
     exports.createPlatform = createPlatform;
     exports.assertPlatform = assertPlatform;
     exports.destroyPlatform = destroyPlatform;
@@ -24508,7 +24480,7 @@
     exports.NgModuleRef = NgModuleRef;
     exports.NgModuleFactoryLoader = NgModuleFactoryLoader;
     exports.getModuleFactory = getModuleFactory;
-    exports.QueryList = QueryList$1;
+    exports.QueryList = QueryList;
     exports.SystemJsNgModuleLoader = SystemJsNgModuleLoader;
     exports.SystemJsNgModuleLoaderConfig = SystemJsNgModuleLoaderConfig;
     exports.TemplateRef = TemplateRef;
@@ -24653,6 +24625,9 @@
     exports.ɵi18nApply = i18nApply;
     exports.ɵi18nPostprocess = i18nPostprocess;
     exports.ɵsetClassMetadata = setClassMetadata;
+    exports.ɵresolveWindow = resolveWindow;
+    exports.ɵresolveDocument = resolveDocument;
+    exports.ɵresolveBody = resolveBody;
     exports.ɵcompileComponent = compileComponent;
     exports.ɵcompileDirective = compileDirective;
     exports.ɵcompileNgModule = compileNgModule;
@@ -24664,6 +24639,7 @@
     exports.ɵsanitizeStyle = sanitizeStyle;
     exports.ɵsanitizeUrl = sanitizeUrl;
     exports.ɵsanitizeResourceUrl = sanitizeResourceUrl;
+    exports.ɵsanitizeUrlOrResourceUrl = sanitizeUrlOrResourceUrl;
     exports.ɵbypassSanitizationTrustHtml = bypassSanitizationTrustHtml;
     exports.ɵbypassSanitizationTrustStyle = bypassSanitizationTrustStyle;
     exports.ɵbypassSanitizationTrustScript = bypassSanitizationTrustScript;
