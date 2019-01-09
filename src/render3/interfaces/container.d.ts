@@ -17,8 +17,7 @@ import { HOST, LView, NEXT, PARENT, QUERIES } from './view';
 export declare const ACTIVE_INDEX = 0;
 export declare const VIEWS = 1;
 export declare const NATIVE = 6;
-export declare const RENDER_PARENT = 7;
-export declare const LCONTAINER_LENGTH = 8;
+export declare const LCONTAINER_LENGTH = 7;
 /**
  * The state associated with a container.
  *
@@ -71,26 +70,5 @@ export interface LContainer extends Array<any> {
     [HOST]: RElement | RComment | StylingContext | LView;
     /** The comment element that serves as an anchor for this LContainer. */
     [NATIVE]: RComment;
-    /**
-     * Parent Element which will contain the location where all of the views will be
-     * inserted into to.
-     *
-     * If `renderParent` is `null` it is headless. This means that it is contained
-     * in another view which in turn is contained in another container and
-     * therefore it does not yet have its own parent.
-     *
-     * If `renderParent` is not `null` then it may be:
-     * - same as `tContainerNode.parent` in which case it is just a normal container.
-     * - different from `tContainerNode.parent` in which case it has been re-projected.
-     *   In other words `tContainerNode.parent` is logical parent where as
-     *   `tContainerNode.projectedParent` is render parent.
-     *
-     * When views are inserted into `LContainer` then `renderParent` is:
-     * - `null`, we are in a view, keep going up a hierarchy until actual
-     *   `renderParent` is found.
-     * - not `null`, then use the `projectedParent.native` as the `RElement` to insert
-     * views into.
-     */
-    [RENDER_PARENT]: RElement | null;
 }
 export declare const unusedValueExportToPlacateAjd = 1;
