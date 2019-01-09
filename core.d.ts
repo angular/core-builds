@@ -16,13 +16,14 @@ export { createScope as ɵangular_packages_core_core_w, detectWTF as ɵangular_p
 export { SCHEDULER as ɵangular_packages_core_core_bc } from './src/render3/component_ref';
 export { injectAttributeImpl as ɵangular_packages_core_core_bd } from './src/render3/di';
 export { TElementNode as ɵangular_packages_core_core_bh } from './src/render3/interfaces/node';
-export { PlayerFactoryBuildFn as ɵangular_packages_core_core_bj } from './src/render3/interfaces/player';
-export { LView as ɵangular_packages_core_core_bm } from './src/render3/interfaces/view';
+export { PlayerFactoryBuildFn as ɵangular_packages_core_core_bk } from './src/render3/interfaces/player';
+export { LView as ɵangular_packages_core_core_bn } from './src/render3/interfaces/view';
 export { getLView as ɵangular_packages_core_core_be, getPreviousOrParentTNode as ɵangular_packages_core_core_bf, nextContextImpl as ɵangular_packages_core_core_bg } from './src/render3/state';
-export { BoundPlayerFactory as ɵangular_packages_core_core_bk } from './src/render3/styling/player_factory';
+export { BoundPlayerFactory as ɵangular_packages_core_core_bl } from './src/render3/styling/player_factory';
 export { loadInternal as ɵangular_packages_core_core_bi } from './src/render3/util';
 export { createElementRef as ɵangular_packages_core_core_h, createTemplateRef as ɵangular_packages_core_core_i, createViewRef as ɵangular_packages_core_core_j } from './src/render3/view_engine_compatibility';
+export { getUrlSanitizer as ɵangular_packages_core_core_bj } from './src/sanitization/sanitization';
 export { makeParamDecorator as ɵangular_packages_core_core_a, makePropDecorator as ɵangular_packages_core_core_b } from './src/util/decorators';
-export { getClosureSafeProperty as ɵangular_packages_core_core_bl } from './src/util/property';
+export { getClosureSafeProperty as ɵangular_packages_core_core_bm } from './src/util/property';
 export { _def as ɵangular_packages_core_core_ba } from './src/view/provider';
 export { DebugContext as ɵangular_packages_core_core_bb } from './src/view/types';

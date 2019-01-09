@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+55.sha-1de4031
+ * @license Angular v7.2.0+56.sha-c3aa24c
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -6683,7 +6683,8 @@
             }
             else {
                 ngDevMode && ngDevMode.rendererSetAttribute++;
-                var strValue = sanitizer == null ? stringify$1(value) : sanitizer(value);
+                var tNode = getTNode(index, lView);
+                var strValue = sanitizer == null ? stringify$1(value) : sanitizer(value, tNode.tagName || '', name);
                 isProceduralRenderer(renderer) ? renderer.setAttribute(element_1, name, strValue) :
                     element_1.setAttribute(name, strValue);
             }
@@ -6758,7 +6759,7 @@
             var renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
             // It is assumed that the sanitizer is only added when the compiler determines that the property
             // is risky, so sanitization can be done without further checks.
-            value = sanitizer != null ? sanitizer(value) : value;
+            value = sanitizer != null ? sanitizer(value, tNode.tagName || '', propName) : value;
             ngDevMode && ngDevMode.rendererSetProperty++;
             if (isProceduralRenderer(renderer)) {
                 renderer.setProperty(element, propName, value);
@@ -10758,7 +10759,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0+55.sha-1de4031');
+    var VERSION = new Version('7.2.0+56.sha-c3aa24c');
 
     /**
      * @license
@@ -14284,6 +14285,37 @@
         throw new Error('unsafe value used in a script context');
     }
     /**
+     * Detects which sanitizer to use for URL property, based on tag name and prop name.
+     *
+     * The rules are based on the RESOURCE_URL context config from
+     * `packages/compiler/src/schema/dom_security_schema.ts`.
+     * If tag and prop names don't match Resource URL schema, use URL sanitizer.
+     */
+    function getUrlSanitizer(tag, prop) {
+        if ((prop === 'src' && (tag === 'embed' || tag === 'frame' || tag === 'iframe' ||
+            tag === 'media' || tag === 'script')) ||
+            (prop === 'href' && (tag === 'base' || tag === 'link'))) {
+            return sanitizeResourceUrl;
+        }
+        return sanitizeUrl;
+    }
+    /**
+     * Sanitizes URL, selecting sanitizer function based on tag and property names.
+     *
+     * This function is used in case we can't define security context at compile time, when only prop
+     * name is available. This happens when we generate host bindings for Directives/Components. The
+     * host element is unknown at compile time, so we defer calculation of specific sanitizer to
+     * runtime.
+     *
+     * @param unsafeUrl untrusted `url`, typically from the user.
+     * @param tag target element tag name.
+     * @param prop name of the property that contains the value.
+     * @returns `url` string which is safe to bind.
+     */
+    function sanitizeUrlOrResourceUrl(unsafeUrl, tag, prop) {
+        return getUrlSanitizer(tag, prop)(unsafeUrl);
+    }
+    /**
      * The default style sanitizer will handle sanitization for style properties by
      * sanitizing any CSS property that can include a `url` value (usually image-based properties)
      */
@@ -14410,7 +14442,8 @@
         'ɵdefaultStyleSanitizer': defaultStyleSanitizer,
         'ɵsanitizeResourceUrl': sanitizeResourceUrl,
         'ɵsanitizeScript': sanitizeScript,
-        'ɵsanitizeUrl': sanitizeUrl
+        'ɵsanitizeUrl': sanitizeUrl,
+        'ɵsanitizeUrlOrResourceUrl': sanitizeUrlOrResourceUrl
     };
 
     /**
@@ -24344,14 +24377,15 @@
     exports.ɵangular_packages_core_core_be = getLView;
     exports.ɵangular_packages_core_core_bf = getPreviousOrParentTNode;
     exports.ɵangular_packages_core_core_bg = nextContextImpl;
-    exports.ɵangular_packages_core_core_bk = BoundPlayerFactory;
+    exports.ɵangular_packages_core_core_bl = BoundPlayerFactory;
     exports.ɵangular_packages_core_core_bi = loadInternal;
     exports.ɵangular_packages_core_core_h = createElementRef;
     exports.ɵangular_packages_core_core_i = createTemplateRef;
     exports.ɵangular_packages_core_core_j = createViewRef;
+    exports.ɵangular_packages_core_core_bj = getUrlSanitizer;
     exports.ɵangular_packages_core_core_a = makeParamDecorator;
     exports.ɵangular_packages_core_core_b = makePropDecorator;
-    exports.ɵangular_packages_core_core_bl = getClosureSafeProperty;
+    exports.ɵangular_packages_core_core_bm = getClosureSafeProperty;
     exports.ɵangular_packages_core_core_ba = _def;
     exports.ɵangular_packages_core_core_bb = DebugContext;
     exports.createPlatform = createPlatform;
@@ -24605,6 +24639,7 @@
     exports.ɵsanitizeStyle = sanitizeStyle;
     exports.ɵsanitizeUrl = sanitizeUrl;
     exports.ɵsanitizeResourceUrl = sanitizeResourceUrl;
+    exports.ɵsanitizeUrlOrResourceUrl = sanitizeUrlOrResourceUrl;
     exports.ɵbypassSanitizationTrustHtml = bypassSanitizationTrustHtml;
     exports.ɵbypassSanitizationTrustStyle = bypassSanitizationTrustStyle;
     exports.ɵbypassSanitizationTrustScript = bypassSanitizationTrustScript;
