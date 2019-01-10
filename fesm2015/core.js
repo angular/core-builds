@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+95.sha-dffcb9c
+ * @license Angular v7.2.0+99.sha-e8a57f0
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2790,11 +2790,15 @@ function leaveView(newView) {
         lView[FLAGS] &= ~1 /* CreationMode */;
     }
     else {
-        executeHooks(lView, tView.viewHooks, tView.viewCheckHooks, checkNoChangesMode);
-        // Views are clean and in update mode after being checked, so these bits are cleared
-        lView[FLAGS] &= ~(8 /* Dirty */ | 2 /* FirstLViewPass */);
-        lView[FLAGS] |= 32 /* RunInit */;
-        lView[BINDING_INDEX] = tView.bindingStartIndex;
+        try {
+            executeHooks(lView, tView.viewHooks, tView.viewCheckHooks, checkNoChangesMode);
+        }
+        finally {
+            // Views are clean and in update mode after being checked, so these bits are cleared
+            lView[FLAGS] &= ~(8 /* Dirty */ | 2 /* FirstLViewPass */);
+            lView[FLAGS] |= 32 /* RunInit */;
+            lView[BINDING_INDEX] = tView.bindingStartIndex;
+        }
     }
     enterView(newView, null);
 }
@@ -13716,7 +13720,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.0+95.sha-dffcb9c');
+const VERSION = new Version('7.2.0+99.sha-e8a57f0');
 
 /**
  * @fileoverview added by tsickle
@@ -16832,7 +16836,13 @@ function isPure(index) {
 function unwrapValue(newValue) {
     if (WrappedValue.isWrapped(newValue)) {
         newValue = WrappedValue.unwrap(newValue);
-        getLView()[getBindingRoot()] = NO_CHANGE;
+        /** @type {?} */
+        const lView = getLView();
+        // The NO_CHANGE value needs to be written at the index where the impacted binding value is
+        // stored
+        /** @type {?} */
+        const bindingToInvalidateIdx = lView[BINDING_INDEX];
+        lView[bindingToInvalidateIdx] = NO_CHANGE;
     }
     return newValue;
 }
