@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+94.sha-ee60c76
+ * @license Angular v7.2.0+97.sha-3bafc00
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -13716,7 +13716,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.0+94.sha-ee60c76');
+const VERSION = new Version('7.2.0+97.sha-3bafc00');
 
 /**
  * @fileoverview added by tsickle
@@ -16832,7 +16832,13 @@ function isPure(index) {
 function unwrapValue(newValue) {
     if (WrappedValue.isWrapped(newValue)) {
         newValue = WrappedValue.unwrap(newValue);
-        getLView()[getBindingRoot()] = NO_CHANGE;
+        /** @type {?} */
+        const lView = getLView();
+        // The NO_CHANGE value needs to be written at the index where the impacted binding value is
+        // stored
+        /** @type {?} */
+        const bindingToInvalidateIdx = lView[BINDING_INDEX];
+        lView[bindingToInvalidateIdx] = NO_CHANGE;
     }
     return newValue;
 }
