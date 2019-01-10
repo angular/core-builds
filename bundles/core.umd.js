@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+80.sha-11325ba
+ * @license Angular v7.2.0+81.sha-8934b73
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -4139,12 +4139,12 @@
             // We've got a parent which is an element in the current view. We just need to verify if the
             // parent element is not a component. Component's content nodes are not inserted immediately
             // because they will be projected, and so doing insert at this point would be wasteful.
-            // Since the projection would than move it to its final destination.
-            if (!(parent.flags & 1 /* isComponent */)) {
-                return getNativeByTNode(parent, currentView);
+            // Since the projection would then move it to its final destination.
+            if (parent.flags & 1 /* isComponent */) {
+                return null;
             }
             else {
-                return null;
+                return getNativeByTNode(parent, currentView);
             }
         }
     }
@@ -10707,7 +10707,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0+80.sha-11325ba');
+    var VERSION = new Version('7.2.0+81.sha-8934b73');
 
     /**
      * @license
