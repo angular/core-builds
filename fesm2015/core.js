@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+87.sha-6003145
+ * @license Angular v7.2.0+88.sha-142553a
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -13696,7 +13696,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.0+87.sha-6003145');
+const VERSION = new Version('7.2.0+88.sha-142553a');
 
 /**
  * @fileoverview added by tsickle
@@ -19235,7 +19235,7 @@ function directiveMetadata(type, metadata) {
         },
         typeSourceSpan: (/** @type {?} */ (null)),
         usesInheritance: !extendsDirectlyFromObject(type),
-        exportAs: metadata.exportAs || null,
+        exportAs: extractExportAs(metadata.exportAs),
         providers: metadata.providers || null,
     };
 }
@@ -19283,6 +19283,16 @@ function extractQueriesMetadata(type, propMetadata, isQueryAnn) {
         }
     }
     return queriesMeta;
+}
+/**
+ * @param {?} exportAs
+ * @return {?}
+ */
+function extractExportAs(exportAs) {
+    if (exportAs === undefined) {
+        return null;
+    }
+    return exportAs.split(',').map(part => part.trim());
 }
 /**
  * @param {?} value
