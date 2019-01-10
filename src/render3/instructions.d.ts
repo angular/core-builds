@@ -538,8 +538,18 @@ export declare function projection(nodeIndex: number, selectorIndex?: number, at
  * @returns The state passed in
  */
 export declare function addToViewTree<T extends LView | LContainer>(lView: LView, adjustedHostIndex: number, state: T): T;
-/** Marks current view and all ancestors dirty */
-export declare function markViewDirty(lView: LView): void;
+/**
+ * Marks current view and all ancestors dirty.
+ *
+ * Returns the root view because it is found as a byproduct of marking the view tree
+ * dirty, and can be used by methods that consume markViewDirty() to easily schedule
+ * change detection. Otherwise, such methods would need to traverse up the view tree
+ * an additional time to get the root view and schedule a tick on it.
+ *
+ * @param lView The starting LView to mark dirty
+ * @returns the root LView
+ */
+export declare function markViewDirty(lView: LView): LView;
 /**
  * Used to schedule change detection on the whole application.
  *

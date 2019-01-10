@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+100.sha-feebe03
+ * @license Angular v7.2.0+102.sha-b05baa5
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -7791,16 +7791,24 @@ function wrapListenerWithPreventDefault(listenerFn) {
         }
     };
 }
-/** Marks current view and all ancestors dirty */
+/**
+ * Marks current view and all ancestors dirty.
+ *
+ * Returns the root view because it is found as a byproduct of marking the view tree
+ * dirty, and can be used by methods that consume markViewDirty() to easily schedule
+ * change detection. Otherwise, such methods would need to traverse up the view tree
+ * an additional time to get the root view and schedule a tick on it.
+ *
+ * @param lView The starting LView to mark dirty
+ * @returns the root LView
+ */
 function markViewDirty(lView) {
     while (lView && !(lView[FLAGS] & 128 /* IsRoot */)) {
         lView[FLAGS] |= 8 /* Dirty */;
         lView = lView[PARENT];
     }
     lView[FLAGS] |= 8 /* Dirty */;
-    ngDevMode && assertDefined(lView[CONTEXT], 'rootContext should be defined');
-    var rootContext = lView[CONTEXT];
-    scheduleTick(rootContext, 1 /* DetectChanges */);
+    return lView;
 }
 /**
  * Used to schedule change detection on the whole application.
@@ -7956,7 +7964,9 @@ function updateViewQuery(viewQuery, view, component) {
  */
 function markDirty(component) {
     ngDevMode && assertDefined(component, 'component');
-    markViewDirty(getComponentViewByInstance(component));
+    var rootView = markViewDirty(getComponentViewByInstance(component));
+    ngDevMode && assertDefined(rootView[CONTEXT], 'rootContext should be defined');
+    scheduleTick(rootView[CONTEXT], 1 /* DetectChanges */);
 }
 ///////////////////////////////
 //// Bindings & interpolations
@@ -10667,7 +10677,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.2.0+100.sha-feebe03');
+var VERSION = new Version('7.2.0+102.sha-b05baa5');
 
 /**
  * @license
