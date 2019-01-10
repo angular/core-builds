@@ -165,6 +165,10 @@ export declare function defineComponent<T>(componentDefinition: {
      */
     template: ComponentTemplate<T>;
     /**
+     * An array of `ngContent[selector]` values that were found in the template.
+     */
+    ngContentSelectors?: string[];
+    /**
      * Additional set of instructions specific to view query processing. This could be seen as a
      * set of instruction to be inserted into the template function.
      *

@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+98.sha-a6ba789
+ * @license Angular v7.2.0+100.sha-feebe03
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1033,6 +1033,7 @@ function defineComponent(componentDefinition) {
         vars: componentDefinition.vars,
         factory: componentDefinition.factory,
         template: componentDefinition.template || (/** @type {?} */ (null)),
+        ngContentSelectors: componentDefinition.ngContentSelectors,
         hostBindings: componentDefinition.hostBindings || null,
         contentQueries: componentDefinition.contentQueries || null,
         contentQueriesRefresh: componentDefinition.contentQueriesRefresh || null,
@@ -13700,7 +13701,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.0+98.sha-a6ba789');
+const VERSION = new Version('7.2.0+100.sha-feebe03');
 
 /**
  * @fileoverview added by tsickle
@@ -13796,7 +13797,10 @@ class ComponentFactory$1 extends ComponentFactory {
         this.ngModule = ngModule;
         this.componentType = componentDef.type;
         this.selector = (/** @type {?} */ (componentDef.selectors[0][0]));
-        this.ngContentSelectors = [];
+        // The component definition does not include the wildcard ('*') selector in its list.
+        // It is implicitly expected as the first item in the projectable nodes array.
+        this.ngContentSelectors =
+            componentDef.ngContentSelectors ? ['*', ...componentDef.ngContentSelectors] : [];
     }
     /**
      * @return {?}
