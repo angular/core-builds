@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+98.sha-a6ba789
+ * @license Angular v7.2.0+100.sha-feebe03
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -967,6 +967,7 @@
             vars: componentDefinition.vars,
             factory: componentDefinition.factory,
             template: componentDefinition.template || null,
+            ngContentSelectors: componentDefinition.ngContentSelectors,
             hostBindings: componentDefinition.hostBindings || null,
             contentQueries: componentDefinition.contentQueries || null,
             contentQueriesRefresh: componentDefinition.contentQueriesRefresh || null,
@@ -10711,7 +10712,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0+98.sha-a6ba789');
+    var VERSION = new Version('7.2.0+100.sha-feebe03');
 
     /**
      * @license
@@ -10792,7 +10793,10 @@
             _this.ngModule = ngModule;
             _this.componentType = componentDef.type;
             _this.selector = componentDef.selectors[0][0];
-            _this.ngContentSelectors = [];
+            // The component definition does not include the wildcard ('*') selector in its list.
+            // It is implicitly expected as the first item in the projectable nodes array.
+            _this.ngContentSelectors =
+                componentDef.ngContentSelectors ? __spread(['*'], componentDef.ngContentSelectors) : [];
             return _this;
         }
         Object.defineProperty(ComponentFactory$$1.prototype, "inputs", {
