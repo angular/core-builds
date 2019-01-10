@@ -101,6 +101,7 @@ export declare class TestBedRender3 implements Injector, TestBed {
     private _rootProviderOverrides;
     private _providerOverridesByToken;
     private _templateOverrides;
+    private _resolvers;
     private _providers;
     private _declarations;
     private _imports;
@@ -172,14 +173,5 @@ export declare class TestBedRender3 implements Injector, TestBed {
     private _createTestModule;
     private _getMetaWithOverrides;
     private _compileNgModule;
-    /**
-     * Compute the pair of transitive scopes (compilation scope and exported scope) for a given
-     * module.
-     *
-     * This operation is memoized and the result is cached on the module's definition. It can be
-     * called on modules with components that have not fully compiled yet, but the result should not
-     * be used until they have.
-     */
-    private _transitiveScopesFor;
 }
 export declare function _getTestBedRender3(): TestBedRender3;

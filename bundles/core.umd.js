@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+83.sha-94c0b7a
+ * @license Angular v7.2.0+84.sha-4694c93
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -10707,7 +10707,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0+83.sha-94c0b7a');
+    var VERSION = new Version('7.2.0+84.sha-4694c93');
 
     /**
      * @license
@@ -15084,7 +15084,7 @@
      * on modules with components that have not fully compiled yet, but the result should not be used
      * until they have.
      */
-    function transitiveScopesFor(moduleType) {
+    function transitiveScopesFor(moduleType, processNgModuleFn) {
         if (!isNgModule(moduleType)) {
             throw new Error(moduleType.name + " does not have an ngModuleDef");
         }
@@ -15115,24 +15115,27 @@
             }
         });
         def.imports.forEach(function (imported) {
-            var importedTyped = imported;
-            if (!isNgModule(importedTyped)) {
-                throw new Error("Importing " + importedTyped.name + " which does not have an ngModuleDef");
+            var importedType = imported;
+            if (!isNgModule(importedType)) {
+                throw new Error("Importing " + importedType.name + " which does not have an ngModuleDef");
+            }
+            if (processNgModuleFn) {
+                processNgModuleFn(importedType);
             }
             // When this module imports another, the imported module's exported directives and pipes are
             // added to the compilation scope of this module.
-            var importedScope = transitiveScopesFor(importedTyped);
+            var importedScope = transitiveScopesFor(importedType, processNgModuleFn);
             importedScope.exported.directives.forEach(function (entry) { return scopes.compilation.directives.add(entry); });
             importedScope.exported.pipes.forEach(function (entry) { return scopes.compilation.pipes.add(entry); });
         });
         def.exports.forEach(function (exported) {
-            var exportedTyped = exported;
+            var exportedType = exported;
             // Either the type is a module, a pipe, or a component/directive (which may not have an
             // ngComponentDef as it might be compiled asynchronously).
-            if (isNgModule(exportedTyped)) {
+            if (isNgModule(exportedType)) {
                 // When this module exports another, the exported module's exported directives and pipes are
                 // added to both the compilation and exported scopes of this module.
-                var exportedScope = transitiveScopesFor(exportedTyped);
+                var exportedScope = transitiveScopesFor(exportedType, processNgModuleFn);
                 exportedScope.exported.directives.forEach(function (entry) {
                     scopes.compilation.directives.add(entry);
                     scopes.exported.directives.add(entry);
@@ -15142,11 +15145,11 @@
                     scopes.exported.pipes.add(entry);
                 });
             }
-            else if (getPipeDef(exportedTyped)) {
-                scopes.exported.pipes.add(exportedTyped);
+            else if (getPipeDef(exportedType)) {
+                scopes.exported.pipes.add(exportedType);
             }
             else {
-                scopes.exported.directives.add(exportedTyped);
+                scopes.exported.directives.add(exportedType);
             }
         });
         def.transitiveCompileScopes = scopes;
@@ -24581,6 +24584,7 @@
     exports.ɵcompileNgModuleDefs = compileNgModuleDefs;
     exports.ɵpatchComponentDefWithScope = patchComponentDefWithScope;
     exports.ɵresetCompiledComponents = resetCompiledComponents;
+    exports.ɵtransitiveScopesFor = transitiveScopesFor;
     exports.ɵcompilePipe = compilePipe;
     exports.ɵsanitizeHtml = sanitizeHtml;
     exports.ɵsanitizeStyle = sanitizeStyle;
