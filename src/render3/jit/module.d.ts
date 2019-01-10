@@ -38,4 +38,4 @@ export declare function patchComponentDefWithScope<C>(componentDef: ComponentDef
  * on modules with components that have not fully compiled yet, but the result should not be used
  * until they have.
  */
-export declare function transitiveScopesFor<T>(moduleType: Type<T>): NgModuleTransitiveScopes;
+export declare function transitiveScopesFor<T>(moduleType: Type<T>, processNgModuleFn?: (ngModule: NgModuleType) => void): NgModuleTransitiveScopes;
