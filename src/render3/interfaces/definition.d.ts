@@ -55,7 +55,7 @@ export declare const enum DirectiveDefFlags {
 export interface PipeType<T> extends Type<T> {
     ngPipeDef: never;
 }
-export declare type DirectiveDefWithMeta<T, Selector extends string, ExportAs extends string, InputMap extends {
+export declare type DirectiveDefWithMeta<T, Selector extends string, ExportAs extends string[], InputMap extends {
     [key: string]: string;
 }, OutputMap extends {
     [key: string]: string;
@@ -150,7 +150,7 @@ export interface DirectiveDef<T> extends BaseDef<T> {
      */
     readonly features: DirectiveDefFeature[] | null;
 }
-export declare type ComponentDefWithMeta<T, Selector extends String, ExportAs extends string, InputMap extends {
+export declare type ComponentDefWithMeta<T, Selector extends String, ExportAs extends string[], InputMap extends {
     [key: string]: string;
 }, OutputMap extends {
     [key: string]: string;
