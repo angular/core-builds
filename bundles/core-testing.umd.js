@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-rc.0+79.sha-d4b476f
+ * @license Angular v7.2.0-rc.0+82.sha-c18c46a
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -7,8 +7,8 @@
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@angular/core')) :
     typeof define === 'function' && define.amd ? define('@angular/core/testing', ['exports', '@angular/core'], factory) :
-    (factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}, global.ng.core.testing = {}),global.ng.core));
-}(this, (function (exports,core) { 'use strict';
+    (global = global || self, factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}, global.ng.core.testing = {}), global.ng.core));
+}(this, function (exports, core) { 'use strict';
 
     /**
      * @license
@@ -2132,5 +2132,5 @@
 
     Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));
 //# sourceMappingURL=core-testing.umd.js.map
