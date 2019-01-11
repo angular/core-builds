@@ -6,9 +6,9 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { ApplicationRef } from '../application_ref';
-import { Provider } from '../di/provider';
+import { Provider } from '../di/interface/provider';
+import { Type } from '../interface/type';
 import { compileNgModule as render3CompileNgModule } from '../render3/jit/module';
-import { Type } from '../type';
 import { TypeDecorator } from '../util/decorators';
 /**
  * Represents the expansion of an `NgModule` into its scopes.

@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import './ng_dev_mode';
+import '../util/ng_dev_mode';
 import { ComponentInstance, DirectiveInstance, Player } from './interfaces/player';
 /**
  * Adds a player to an element, directive or component instance that will later be

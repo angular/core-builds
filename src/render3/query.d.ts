@@ -5,8 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { Type } from '../interface/type';
 import { QueryList } from '../linker/query_list';
-import { Type } from '../type';
 import { TContainerNode, TElementContainerNode, TElementNode } from './interfaces/node';
 import { LQueries } from './interfaces/query';
 /**

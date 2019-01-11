@@ -6,10 +6,10 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { InjectionToken } from '../di/injection_token';
-import { StaticProvider } from '../di/provider';
+import { StaticProvider } from '../di/interface/provider';
 import { MissingTranslationStrategy } from '../i18n/tokens';
+import { Type } from '../interface/type';
 import { ViewEncapsulation } from '../metadata';
-import { Type } from '../type';
 import { ComponentFactory } from './component_factory';
 import { NgModuleFactory } from './ng_module_factory';
 /**

@@ -7,9 +7,9 @@
  */
 import { InjectionToken } from '../../di/injection_token';
 import { Injector } from '../../di/injector';
+import { Type } from '../../interface/type';
 import { QueryList } from '../../linker';
 import { Sanitizer } from '../../sanitization/security';
-import { Type } from '../../type';
 import { LContainer } from './container';
 import { ComponentDef, ComponentQuery, ComponentTemplate, DirectiveDef, DirectiveDefList, HostBindingsFunction, PipeDef, PipeDefList } from './definition';
 import { I18nUpdateOpCodes, TI18n } from './i18n';
