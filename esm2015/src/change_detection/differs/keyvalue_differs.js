@@ -202,7 +202,7 @@ export class KeyValueDiffers {
     }
 }
 /** @nocollapse */
-KeyValueDiffers.ngInjectableDef = defineInjectable({
+/** @nocollapse */ KeyValueDiffers.ngInjectableDef = defineInjectable({
     providedIn: 'root',
     factory: () => new KeyValueDiffers([new DefaultKeyValueDifferFactory()])
 });

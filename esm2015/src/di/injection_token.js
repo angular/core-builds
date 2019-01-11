@@ -63,13 +63,13 @@ export class InjectionToken {
          */
         this.ngMetadataName = 'InjectionToken';
         if (options !== undefined) {
-            this.ngInjectableDef = defineInjectable({
+            /** @nocollapse */ this.ngInjectableDef = defineInjectable({
                 providedIn: options.providedIn || 'root',
                 factory: options.factory,
             });
         }
         else {
-            this.ngInjectableDef = undefined;
+            /** @nocollapse */ this.ngInjectableDef = undefined;
         }
     }
     /**
