@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+103.sha-885f1af
+ * @license Angular v7.2.0+104.sha-b78351c
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -7,8 +7,8 @@
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs'), require('rxjs/operators')) :
     typeof define === 'function' && define.amd ? define('@angular/core', ['exports', 'rxjs', 'rxjs/operators'], factory) :
-    (factory((global.ng = global.ng || {}, global.ng.core = {}),global.rxjs,global.rxjs.operators));
-}(this, (function (exports,rxjs,operators) { 'use strict';
+    (global = global || self, factory((global.ng = global.ng || {}, global.ng.core = {}), global.rxjs, global.rxjs.operators));
+}(this, function (exports, rxjs, operators) { 'use strict';
 
     /*! *****************************************************************************
     Copyright (c) Microsoft Corporation. All rights reserved.
@@ -10760,7 +10760,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0+103.sha-885f1af');
+    var VERSION = new Version('7.2.0+104.sha-b78351c');
 
     /**
      * @license
@@ -24493,6 +24493,7 @@
     exports.INJECTOR = INJECTOR$1;
     exports.Injector = Injector;
     exports.inject = inject;
+    exports.ɵinject = inject;
     exports.ReflectiveInjector = ReflectiveInjector;
     exports.createInjector = createInjector;
     exports.ResolvedReflectiveFactory = ResolvedReflectiveFactory;
@@ -24515,6 +24516,7 @@
     exports.CompilerFactory = CompilerFactory;
     exports.ModuleWithComponentFactories = ModuleWithComponentFactories;
     exports.ComponentFactory = ComponentFactory;
+    exports.ɵComponentFactory = ComponentFactory;
     exports.ComponentRef = ComponentRef;
     exports.ComponentFactoryResolver = ComponentFactoryResolver;
     exports.ElementRef = ElementRef;
@@ -24544,12 +24546,10 @@
     exports.ɵisListLikeIterable = isListLikeIterable$1;
     exports.ɵisDefaultChangeDetectionStrategy = isDefaultChangeDetectionStrategy;
     exports.ɵConsole = Console;
-    exports.ɵinject = inject;
     exports.ɵsetCurrentInjector = setCurrentInjector;
     exports.ɵgetInjectableDef = getInjectableDef;
     exports.ɵAPP_ROOT = APP_ROOT;
     exports.ɵivyEnabled = ivyEnabled;
-    exports.ɵComponentFactory = ComponentFactory;
     exports.ɵCodegenComponentFactoryResolver = CodegenComponentFactoryResolver;
     exports.ɵresolveComponentResources = resolveComponentResources;
     exports.ɵReflectionCapabilities = ReflectionCapabilities;
@@ -24750,5 +24750,5 @@
 
     Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));
 //# sourceMappingURL=core.umd.js.map
