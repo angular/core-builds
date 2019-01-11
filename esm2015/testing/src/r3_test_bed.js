@@ -447,7 +447,7 @@ export class TestBedRender3 {
         /** @type {?} */
         const rootElId = `root${_nextRootElementId++}`;
         testComponentRenderer.insertRootElement(rootElId);
-        /** @nocollapse @type {?} */
+        /** @type {?} */
         const componentDef = ((/** @type {?} */ (type))).ngComponentDef;
         if (!componentDef) {
             throw new Error(`It looks like '${stringify(type)}' has not been IVY compiled - it has no 'ngComponentDef' field`);

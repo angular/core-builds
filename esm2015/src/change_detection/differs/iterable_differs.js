@@ -236,7 +236,7 @@ export class IterableDiffers {
     }
 }
 /** @nocollapse */
-/** @nocollapse */ IterableDiffers.ngInjectableDef = defineInjectable({
+IterableDiffers.ngInjectableDef = defineInjectable({
     providedIn: 'root',
     factory: () => new IterableDiffers([new DefaultIterableDifferFactory()])
 });

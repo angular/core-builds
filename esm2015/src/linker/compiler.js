@@ -125,7 +125,7 @@ export class Compiler {
 Compiler.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */ Compiler.ngInjectableDef = i0.defineInjectable({ token: Compiler, factory: function Compiler_Factory(t) { return new (t || Compiler)(); }, providedIn: null });
+Compiler.ngInjectableDef = i0.defineInjectable({ token: Compiler, factory: function Compiler_Factory(t) { return new (t || Compiler)(); }, providedIn: null });
 /*@__PURE__*/ i0.setClassMetadata(Compiler, [{
         type: Injectable
     }], null, null);

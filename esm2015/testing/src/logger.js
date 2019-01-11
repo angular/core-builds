@@ -41,7 +41,7 @@ Log.decorators = [
 ];
 /** @nocollapse */
 Log.ctorParameters = () => [];
-/** @nocollapse */ Log.ngInjectableDef = i0.defineInjectable({ token: Log, factory: function Log_Factory(t) { return new (t || Log)(); }, providedIn: null });
+Log.ngInjectableDef = i0.defineInjectable({ token: Log, factory: function Log_Factory(t) { return new (t || Log)(); }, providedIn: null });
 /*@__PURE__*/ i0.ɵsetClassMetadata(Log, [{
         type: Injectable
     }], function () { return []; }, null);

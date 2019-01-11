@@ -49,7 +49,7 @@ if (false) {
  */
 function render2CompileInjectable(injectableType, options) {
     if (options && options.providedIn !== undefined && !getInjectableDef(injectableType)) {
-        /** @nocollapse */ injectableType.ngInjectableDef = defineInjectable({
+        injectableType.ngInjectableDef = defineInjectable({
             providedIn: options.providedIn,
             factory: convertInjectableProviderToFactory(injectableType, options),
         });

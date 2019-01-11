@@ -353,7 +353,7 @@ PlatformRef.decorators = [
 PlatformRef.ctorParameters = () => [
     { type: Injector }
 ];
-/** @nocollapse */ PlatformRef.ngInjectableDef = i0.defineInjectable({ token: PlatformRef, factory: function PlatformRef_Factory(t) { return new (t || PlatformRef)(i0.inject(Injector)); }, providedIn: null });
+PlatformRef.ngInjectableDef = i0.defineInjectable({ token: PlatformRef, factory: function PlatformRef_Factory(t) { return new (t || PlatformRef)(i0.inject(Injector)); }, providedIn: null });
 /*@__PURE__*/ i0.setClassMetadata(PlatformRef, [{
         type: Injectable
     }], function () { return [{
@@ -686,7 +686,7 @@ ApplicationRef.ctorParameters = () => [
     { type: ComponentFactoryResolver },
     { type: ApplicationInitStatus }
 ];
-/** @nocollapse */ ApplicationRef.ngInjectableDef = i0.defineInjectable({ token: ApplicationRef, factory: function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(i0.inject(NgZone), i0.inject(Console), i0.inject(Injector), i0.inject(ErrorHandler), i0.inject(ComponentFactoryResolver), i0.inject(ApplicationInitStatus)); }, providedIn: null });
+ApplicationRef.ngInjectableDef = i0.defineInjectable({ token: ApplicationRef, factory: function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(i0.inject(NgZone), i0.inject(Console), i0.inject(Injector), i0.inject(ErrorHandler), i0.inject(ComponentFactoryResolver), i0.inject(ApplicationInitStatus)); }, providedIn: null });
 /*@__PURE__*/ i0.setClassMetadata(ApplicationRef, [{
         type: Injectable
     }], function () { return [{

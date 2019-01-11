@@ -70,7 +70,7 @@ export function InputDecorator() { }
 const initializeBaseDef = (target) => {
     /** @type {?} */
     const constructor = target.constructor;
-    /** @nocollapse @type {?} */
+    /** @type {?} */
     const inheritedBaseDef = constructor.ngBaseDef;
     /** @type {?} */
     const baseDef = constructor.ngBaseDef = {
@@ -95,7 +95,7 @@ const updateBaseDefFromIOProp = (getProp) => (target, name, ...args) => {
     if (!constructor.hasOwnProperty(NG_BASE_DEF)) {
         initializeBaseDef(target);
     }
-    /** @nocollapse @type {?} */
+    /** @type {?} */
     const baseDef = constructor.ngBaseDef;
     /** @type {?} */
     const defProp = getProp(baseDef);

@@ -325,7 +325,7 @@ export function getPipeDef(type) {
  */
 export function getNgModuleDef(type, throwNotFound) {
     /** @type {?} */
-    /** @nocollapse */ const ngModuleDef = ((/** @type {?} */ (type)))[NG_MODULE_DEF] || null;
+    const ngModuleDef = ((/** @type {?} */ (type)))[NG_MODULE_DEF] || null;
     if (!ngModuleDef && throwNotFound === true) {
         throw new Error(`Type ${stringify(type)} does not have 'ngModuleDef' property.`);
     }

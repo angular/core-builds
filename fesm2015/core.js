@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+128.sha-091a8a6
+ * @license Angular v7.2.0+126.sha-df292c2
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -165,13 +165,13 @@ class InjectionToken {
          */
         this.ngMetadataName = 'InjectionToken';
         if (options !== undefined) {
-            /** @nocollapse */ this.ngInjectableDef = defineInjectable({
+            this.ngInjectableDef = defineInjectable({
                 providedIn: options.providedIn || 'root',
                 factory: options.factory,
             });
         }
         else {
-            /** @nocollapse */ this.ngInjectableDef = undefined;
+            this.ngInjectableDef = undefined;
         }
     }
     /**
@@ -2020,7 +2020,7 @@ function getPipeDef(type) {
  */
 function getNgModuleDef(type, throwNotFound) {
     /** @type {?} */
-    /** @nocollapse */ const ngModuleDef = ((/** @type {?} */ (type)))[NG_MODULE_DEF] || null;
+    const ngModuleDef = ((/** @type {?} */ (type)))[NG_MODULE_DEF] || null;
     if (!ngModuleDef && throwNotFound === true) {
         throw new Error(`Type ${stringify(type)} does not have 'ngModuleDef' property.`);
     }
@@ -10944,7 +10944,7 @@ function InheritDefinitionFeature(definition) {
             // Don't use getComponentDef/getDirectiveDef. This logic relies on inheritance.
             superDef = superType.ngDirectiveDef;
         }
-        /** @nocollapse @type {?} */
+        /** @type {?} */
         const baseDef = ((/** @type {?} */ (superType))).ngBaseDef;
         // Some fields in the definition may be empty, if there were no values to put in them that
         // would've justified object creation. Unwrap them if necessary.
@@ -11307,12 +11307,13 @@ class Injector {
 Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
 Injector.NULL = new NullInjector();
 /** @nocollapse */
-/** @nocollapse */ Injector.ngInjectableDef = defineInjectable({
+Injector.ngInjectableDef = defineInjectable({
     providedIn: (/** @type {?} */ ('any')),
     factory: () => inject(INJECTOR$1),
 });
-/** @internal */
-/** @nocollapse */
+/**
+ * \@internal
+ */
 Injector.__NG_ELEMENT_ID__ = () => SWITCH_INJECTOR_FACTORY();
 /** @type {?} */
 const SWITCH_INJECTOR_FACTORY__POST_R3__ = function () {
@@ -13387,8 +13388,9 @@ class ElementRef {
      */
     constructor(nativeElement) { this.nativeElement = nativeElement; }
 }
-/** @internal */
-/** @nocollapse */
+/**
+ * \@internal
+ */
 ElementRef.__NG_ELEMENT_ID__ = () => SWITCH_ELEMENT_REF_FACTORY(ElementRef);
 /** @type {?} */
 const SWITCH_ELEMENT_REF_FACTORY__POST_R3__ = injectElementRef;
@@ -13493,8 +13495,9 @@ RendererStyleFlags2[RendererStyleFlags2.DashCase] = 'DashCase';
  */
 class Renderer2 {
 }
-/** @internal */
-/** @nocollapse */
+/**
+ * \@internal
+ */
 Renderer2.__NG_ELEMENT_ID__ = () => SWITCH_RENDERER2_FACTORY();
 /** @type {?} */
 const SWITCH_RENDERER2_FACTORY__POST_R3__ = injectRenderer2;
@@ -13567,7 +13570,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.0+128.sha-091a8a6');
+const VERSION = new Version('7.2.0+126.sha-df292c2');
 
 /**
  * @fileoverview added by tsickle
@@ -16125,7 +16128,7 @@ class NgModuleRef$1 extends NgModuleRef {
         this.injector = this;
         this.destroyCbs = [];
         /** @type {?} */
-        /** @nocollapse */ const ngModuleDef = getNgModuleDef(ngModuleType);
+        const ngModuleDef = getNgModuleDef(ngModuleType);
         ngDevMode && assertDefined(ngModuleDef, `NgModule '${stringify(ngModuleType)}' is not a subtype of 'NgModuleType'.`);
         this._bootstrapComponents = (/** @type {?} */ (ngModuleDef)).bootstrap;
         /** @type {?} */
@@ -16987,8 +16990,9 @@ function flatten$1(list) {
  */
 class TemplateRef {
 }
-/** @internal */
-/** @nocollapse */
+/**
+ * \@internal
+ */
 TemplateRef.__NG_ELEMENT_ID__ = () => SWITCH_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef);
 /** @type {?} */
 const SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ = injectTemplateRef;
@@ -18538,7 +18542,7 @@ function compileNgModuleDefs(moduleType, ngModule) {
     /** @type {?} */
     const declarations = flatten$2(ngModule.declarations || EMPTY_ARRAY$2);
     /** @type {?} */
-    /** @nocollapse */ let ngModuleDef = null;
+    let ngModuleDef = null;
     Object.defineProperty(moduleType, NG_MODULE_DEF, {
         configurable: true,
         get: () => {
@@ -18561,7 +18565,7 @@ function compileNgModuleDefs(moduleType, ngModule) {
         registerNgModuleType(ngModule.id, moduleType);
     }
     /** @type {?} */
-    /** @nocollapse */ let ngInjectorDef = null;
+    let ngInjectorDef = null;
     Object.defineProperty(moduleType, NG_INJECTOR_DEF, {
         get: () => {
             if (ngInjectorDef === null) {
@@ -18595,7 +18599,7 @@ function verifySemanticsOfNgModuleDef(moduleType) {
     verifiedNgModule.set(moduleType, true);
     moduleType = resolveForwardRef(moduleType);
     /** @type {?} */
-    /** @nocollapse */ const ngModuleDef = getNgModuleDef(moduleType, true);
+    const ngModuleDef = getNgModuleDef(moduleType, true);
     /** @type {?} */
     const errors = [];
     ngModuleDef.declarations.forEach(verifyDeclarationsHaveDefinitions);
@@ -18777,10 +18781,10 @@ function resetCompiledComponents() {
 function computeCombinedExports(type) {
     type = resolveForwardRef(type);
     /** @type {?} */
-    /** @nocollapse */ const ngModuleDef = getNgModuleDef(type, true);
+    const ngModuleDef = getNgModuleDef(type, true);
     return [...flatten$2(ngModuleDef.exports.map((type) => {
             /** @type {?} */
-            /** @nocollapse */ const ngModuleDef = getNgModuleDef(type);
+            const ngModuleDef = getNgModuleDef(type);
             if (ngModuleDef) {
                 verifySemanticsOfNgModuleDef((/** @type {?} */ ((/** @type {?} */ (type)))));
                 return computeCombinedExports(type);
@@ -18984,7 +18988,7 @@ function isNgModule(value) {
  */
 function compileComponent(type, metadata) {
     /** @type {?} */
-    /** @nocollapse */ let ngComponentDef = null;
+    let ngComponentDef = null;
     // Metadata may have resources which need to be resolved.
     maybeQueueResolutionOfComponentResources(metadata);
     Object.defineProperty(type, NG_COMPONENT_DEF, {
@@ -19049,7 +19053,7 @@ function hasSelectorScope(component) {
  */
 function compileDirective(type, directive) {
     /** @type {?} */
-    /** @nocollapse */ let ngDirectiveDef = null;
+    let ngDirectiveDef = null;
     Object.defineProperty(type, NG_DIRECTIVE_DEF, {
         get: () => {
             if (ngDirectiveDef === null) {
@@ -19193,7 +19197,7 @@ function splitByComma(value) {
  */
 function compilePipe(type, meta) {
     /** @type {?} */
-    /** @nocollapse */ let ngPipeDef = null;
+    let ngPipeDef = null;
     Object.defineProperty(type, NG_PIPE_DEF, {
         get: () => {
             if (ngPipeDef === null) {
@@ -19245,7 +19249,7 @@ const Pipe = makeDecorator('Pipe', (p) => (Object.assign({ pure: true }, p)), un
 const initializeBaseDef = (target) => {
     /** @type {?} */
     const constructor = target.constructor;
-    /** @nocollapse @type {?} */
+    /** @type {?} */
     const inheritedBaseDef = constructor.ngBaseDef;
     /** @type {?} */
     const baseDef = constructor.ngBaseDef = {
@@ -19270,7 +19274,7 @@ const updateBaseDefFromIOProp = (getProp) => (target, name, ...args) => {
     if (!constructor.hasOwnProperty(NG_BASE_DEF)) {
         initializeBaseDef(target);
     }
-    /** @nocollapse @type {?} */
+    /** @type {?} */
     const baseDef = constructor.ngBaseDef;
     /** @type {?} */
     const defProp = getProp(baseDef);
@@ -20899,7 +20903,7 @@ ApplicationInitStatus.decorators = [
 ApplicationInitStatus.ctorParameters = () => [
     { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional }] }
 ];
-/** @nocollapse */ ApplicationInitStatus.ngInjectableDef = defineInjectable({ token: ApplicationInitStatus, factory: function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(inject(APP_INITIALIZER, 8)); }, providedIn: null });
+ApplicationInitStatus.ngInjectableDef = defineInjectable({ token: ApplicationInitStatus, factory: function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(inject(APP_INITIALIZER, 8)); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(ApplicationInitStatus, [{
         type: Injectable
     }], function () { return [{
@@ -21012,7 +21016,7 @@ class Console {
 Console.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */ Console.ngInjectableDef = defineInjectable({ token: Console, factory: function Console_Factory(t) { return new (t || Console)(); }, providedIn: null });
+Console.ngInjectableDef = defineInjectable({ token: Console, factory: function Console_Factory(t) { return new (t || Console)(); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(Console, [{
         type: Injectable
     }], null, null);
@@ -21120,7 +21124,7 @@ class Compiler {
 Compiler.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */ Compiler.ngInjectableDef = defineInjectable({ token: Compiler, factory: function Compiler_Factory(t) { return new (t || Compiler)(); }, providedIn: null });
+Compiler.ngInjectableDef = defineInjectable({ token: Compiler, factory: function Compiler_Factory(t) { return new (t || Compiler)(); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(Compiler, [{
         type: Injectable
     }], null, null);
@@ -21858,7 +21862,7 @@ Testability.decorators = [
 Testability.ctorParameters = () => [
     { type: NgZone }
 ];
-/** @nocollapse */ Testability.ngInjectableDef = defineInjectable({ token: Testability, factory: function Testability_Factory(t) { return new (t || Testability)(inject(NgZone)); }, providedIn: null });
+Testability.ngInjectableDef = defineInjectable({ token: Testability, factory: function Testability_Factory(t) { return new (t || Testability)(inject(NgZone)); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(Testability, [{
         type: Injectable
     }], function () { return [{
@@ -21928,7 +21932,7 @@ TestabilityRegistry.decorators = [
 ];
 /** @nocollapse */
 TestabilityRegistry.ctorParameters = () => [];
-/** @nocollapse */ TestabilityRegistry.ngInjectableDef = defineInjectable({ token: TestabilityRegistry, factory: function TestabilityRegistry_Factory(t) { return new (t || TestabilityRegistry)(); }, providedIn: null });
+TestabilityRegistry.ngInjectableDef = defineInjectable({ token: TestabilityRegistry, factory: function TestabilityRegistry_Factory(t) { return new (t || TestabilityRegistry)(); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(TestabilityRegistry, [{
         type: Injectable
     }], function () { return []; }, null);
@@ -22256,7 +22260,7 @@ PlatformRef.decorators = [
 PlatformRef.ctorParameters = () => [
     { type: Injector }
 ];
-/** @nocollapse */ PlatformRef.ngInjectableDef = defineInjectable({ token: PlatformRef, factory: function PlatformRef_Factory(t) { return new (t || PlatformRef)(inject(Injector)); }, providedIn: null });
+PlatformRef.ngInjectableDef = defineInjectable({ token: PlatformRef, factory: function PlatformRef_Factory(t) { return new (t || PlatformRef)(inject(Injector)); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(PlatformRef, [{
         type: Injectable
     }], function () { return [{
@@ -22567,7 +22571,7 @@ ApplicationRef.ctorParameters = () => [
     { type: ComponentFactoryResolver },
     { type: ApplicationInitStatus }
 ];
-/** @nocollapse */ ApplicationRef.ngInjectableDef = defineInjectable({ token: ApplicationRef, factory: function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(inject(NgZone), inject(Console), inject(Injector), inject(ErrorHandler), inject(ComponentFactoryResolver), inject(ApplicationInitStatus)); }, providedIn: null });
+ApplicationRef.ngInjectableDef = defineInjectable({ token: ApplicationRef, factory: function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(inject(NgZone), inject(Console), inject(Injector), inject(ErrorHandler), inject(ComponentFactoryResolver), inject(ApplicationInitStatus)); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(ApplicationRef, [{
         type: Injectable
     }], function () { return [{
@@ -22699,7 +22703,7 @@ SystemJsNgModuleLoader.ctorParameters = () => [
     { type: Compiler },
     { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional }] }
 ];
-/** @nocollapse */ SystemJsNgModuleLoader.ngInjectableDef = defineInjectable({ token: SystemJsNgModuleLoader, factory: function SystemJsNgModuleLoader_Factory(t) { return new (t || SystemJsNgModuleLoader)(inject(Compiler), inject(SystemJsNgModuleLoaderConfig, 8)); }, providedIn: null });
+SystemJsNgModuleLoader.ngInjectableDef = defineInjectable({ token: SystemJsNgModuleLoader, factory: function SystemJsNgModuleLoader_Factory(t) { return new (t || SystemJsNgModuleLoader)(inject(Compiler), inject(SystemJsNgModuleLoaderConfig, 8)); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(SystemJsNgModuleLoader, [{
         type: Injectable
     }], function () { return [{
@@ -22745,8 +22749,9 @@ function checkNotEmpty(value, modulePath, exportName) {
  */
 class ViewContainerRef {
 }
-/** @internal */
-/** @nocollapse */
+/**
+ * \@internal
+ */
 ViewContainerRef.__NG_ELEMENT_ID__ = () => SWITCH_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef);
 /** @type {?} */
 const SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ = injectViewContainerRef;
@@ -22802,8 +22807,9 @@ const SWITCH_VIEW_CONTAINER_REF_FACTORY = SWITCH_VIEW_CONTAINER_REF_FACTORY__POS
  */
 class ChangeDetectorRef {
 }
-/** @internal */
-/** @nocollapse */
+/**
+ * \@internal
+ */
 ChangeDetectorRef.__NG_ELEMENT_ID__ = () => SWITCH_CHANGE_DETECTOR_REF_FACTORY();
 /** @type {?} */
 const SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ = injectChangeDetectorRef;
@@ -24764,7 +24770,7 @@ class IterableDiffers {
     }
 }
 /** @nocollapse */
-/** @nocollapse */ IterableDiffers.ngInjectableDef = defineInjectable({
+IterableDiffers.ngInjectableDef = defineInjectable({
     providedIn: 'root',
     factory: () => new IterableDiffers([new DefaultIterableDifferFactory()])
 });
@@ -24856,7 +24862,7 @@ class KeyValueDiffers {
     }
 }
 /** @nocollapse */
-/** @nocollapse */ KeyValueDiffers.ngInjectableDef = defineInjectable({
+KeyValueDiffers.ngInjectableDef = defineInjectable({
     providedIn: 'root',
     factory: () => new KeyValueDiffers([new DefaultKeyValueDifferFactory()])
 });
@@ -25093,8 +25099,8 @@ ApplicationModule.decorators = [
 ApplicationModule.ctorParameters = () => [
     { type: ApplicationRef }
 ];
-/** @nocollapse */ ApplicationModule.ngModuleDef = defineNgModule({ type: ApplicationModule, bootstrap: [], declarations: [], imports: [], exports: [] });
-/** @nocollapse */ ApplicationModule.ngInjectorDef = defineInjector({ factory: function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(inject(ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS, imports: [] });
+ApplicationModule.ngModuleDef = defineNgModule({ type: ApplicationModule, bootstrap: [], declarations: [], imports: [], exports: [] });
+ApplicationModule.ngInjectorDef = defineInjector({ factory: function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(inject(ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS, imports: [] });
 /*@__PURE__*/ setClassMetadata(ApplicationModule, [{
         type: NgModule,
         args: [{ providers: APPLICATION_MODULE_PROVIDERS }]

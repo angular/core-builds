@@ -33,7 +33,7 @@ export class Console {
 Console.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */ Console.ngInjectableDef = i0.defineInjectable({ token: Console, factory: function Console_Factory(t) { return new (t || Console)(); }, providedIn: null });
+Console.ngInjectableDef = i0.defineInjectable({ token: Console, factory: function Console_Factory(t) { return new (t || Console)(); }, providedIn: null });
 /*@__PURE__*/ i0.setClassMetadata(Console, [{
         type: Injectable
     }], null, null);

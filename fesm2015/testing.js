@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+128.sha-091a8a6
+ * @license Angular v7.2.0+126.sha-df292c2
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1396,7 +1396,7 @@ class TestBedRender3 {
         /** @type {?} */
         const rootElId = `root${_nextRootElementId++}`;
         testComponentRenderer.insertRootElement(rootElId);
-        /** @nocollapse @type {?} */
+        /** @type {?} */
         const componentDef = ((/** @type {?} */ (type))).ngComponentDef;
         if (!componentDef) {
             throw new Error(`It looks like '${ɵstringify(type)}' has not been IVY compiled - it has no 'ngComponentDef' field`);
@@ -1821,7 +1821,7 @@ class TestingCompiler extends Compiler {
 TestingCompiler.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */ TestingCompiler.ngInjectableDef = defineInjectable({ token: TestingCompiler, factory: function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory((t || TestingCompiler)); }, providedIn: null });
+TestingCompiler.ngInjectableDef = defineInjectable({ token: TestingCompiler, factory: function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory((t || TestingCompiler)); }, providedIn: null });
 const ɵTestingCompiler_BaseFactory = ɵgetInheritedFactory(TestingCompiler);
 /*@__PURE__*/ ɵsetClassMetadata(TestingCompiler, [{
         type: Injectable

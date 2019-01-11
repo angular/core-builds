@@ -110,7 +110,7 @@ export function compileNgModuleDefs(moduleType, ngModule) {
     /** @type {?} */
     const declarations = flatten(ngModule.declarations || EMPTY_ARRAY);
     /** @type {?} */
-    /** @nocollapse */ let ngModuleDef = null;
+    let ngModuleDef = null;
     Object.defineProperty(moduleType, NG_MODULE_DEF, {
         configurable: true,
         get: () => {
@@ -133,7 +133,7 @@ export function compileNgModuleDefs(moduleType, ngModule) {
         registerNgModuleType(ngModule.id, moduleType);
     }
     /** @type {?} */
-    /** @nocollapse */ let ngInjectorDef = null;
+    let ngInjectorDef = null;
     Object.defineProperty(moduleType, NG_INJECTOR_DEF, {
         get: () => {
             if (ngInjectorDef === null) {
@@ -167,7 +167,7 @@ function verifySemanticsOfNgModuleDef(moduleType) {
     verifiedNgModule.set(moduleType, true);
     moduleType = resolveForwardRef(moduleType);
     /** @type {?} */
-    /** @nocollapse */ const ngModuleDef = getNgModuleDef(moduleType, true);
+    const ngModuleDef = getNgModuleDef(moduleType, true);
     /** @type {?} */
     const errors = [];
     ngModuleDef.declarations.forEach(verifyDeclarationsHaveDefinitions);
@@ -349,10 +349,10 @@ export function resetCompiledComponents() {
 function computeCombinedExports(type) {
     type = resolveForwardRef(type);
     /** @type {?} */
-    /** @nocollapse */ const ngModuleDef = getNgModuleDef(type, true);
+    const ngModuleDef = getNgModuleDef(type, true);
     return [...flatten(ngModuleDef.exports.map((type) => {
             /** @type {?} */
-            /** @nocollapse */ const ngModuleDef = getNgModuleDef(type);
+            const ngModuleDef = getNgModuleDef(type);
             if (ngModuleDef) {
                 verifySemanticsOfNgModuleDef((/** @type {?} */ ((/** @type {?} */ (type)))));
                 return computeCombinedExports(type);

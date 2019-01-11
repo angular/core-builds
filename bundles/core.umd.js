@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+128.sha-091a8a6
+ * @license Angular v7.2.0+126.sha-df292c2
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8947,7 +8947,6 @@
             factory: function () { return inject(INJECTOR$1); },
         });
         /** @internal */
-        /** @nocollapse */
         Injector.__NG_ELEMENT_ID__ = function () { return SWITCH_INJECTOR_FACTORY(); };
         return Injector;
     }());
@@ -10571,7 +10570,6 @@
             this.nativeElement = nativeElement;
         }
         /** @internal */
-        /** @nocollapse */
         ElementRef.__NG_ELEMENT_ID__ = function () { return SWITCH_ELEMENT_REF_FACTORY(ElementRef); };
         return ElementRef;
     }());
@@ -10677,7 +10675,6 @@
         function Renderer2() {
         }
         /** @internal */
-        /** @nocollapse */
         Renderer2.__NG_ELEMENT_ID__ = function () { return SWITCH_RENDERER2_FACTORY(); };
         return Renderer2;
     }());
@@ -10734,7 +10731,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0+128.sha-091a8a6');
+    var VERSION = new Version('7.2.0+126.sha-df292c2');
 
     /**
      * @license
@@ -13665,7 +13662,6 @@
         function TemplateRef() {
         }
         /** @internal */
-        /** @nocollapse */
         TemplateRef.__NG_ELEMENT_ID__ = function () { return SWITCH_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef); };
         return TemplateRef;
     }());
@@ -18198,7 +18194,6 @@
         function ViewContainerRef() {
         }
         /** @internal */
-        /** @nocollapse */
         ViewContainerRef.__NG_ELEMENT_ID__ = function () { return SWITCH_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef); };
         return ViewContainerRef;
     }());
@@ -18258,7 +18253,6 @@
         function ChangeDetectorRef() {
         }
         /** @internal */
-        /** @nocollapse */
         ChangeDetectorRef.__NG_ELEMENT_ID__ = function () { return SWITCH_CHANGE_DETECTOR_REF_FACTORY(); };
         return ChangeDetectorRef;
     }());

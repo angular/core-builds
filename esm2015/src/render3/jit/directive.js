@@ -33,7 +33,7 @@ import { getReflect, reflectDependencies } from './util';
  */
 export function compileComponent(type, metadata) {
     /** @type {?} */
-    /** @nocollapse */ let ngComponentDef = null;
+    let ngComponentDef = null;
     // Metadata may have resources which need to be resolved.
     maybeQueueResolutionOfComponentResources(metadata);
     Object.defineProperty(type, NG_COMPONENT_DEF, {
@@ -98,7 +98,7 @@ function hasSelectorScope(component) {
  */
 export function compileDirective(type, directive) {
     /** @type {?} */
-    /** @nocollapse */ let ngDirectiveDef = null;
+    let ngDirectiveDef = null;
     Object.defineProperty(type, NG_DIRECTIVE_DEF, {
         get: () => {
             if (ngDirectiveDef === null) {

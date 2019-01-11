@@ -21,7 +21,7 @@ import { reflectDependencies } from './util';
  */
 export function compilePipe(type, meta) {
     /** @type {?} */
-    /** @nocollapse */ let ngPipeDef = null;
+    let ngPipeDef = null;
     Object.defineProperty(type, NG_PIPE_DEF, {
         get: () => {
             if (ngPipeDef === null) {
