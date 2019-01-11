@@ -51,7 +51,7 @@ export function isNodeMatchingSelector(tNode, selector, isProjectionMode) {
     ngDevMode && assertDefined(selector[0], 'Selector should have a tag name');
     var mode = 4 /* ELEMENT */;
     var nodeAttrs = tNode.attrs;
-    var selectOnlyMarkerIdx = nodeAttrs ? nodeAttrs.indexOf(1 /* SelectOnly */) : -1;
+    var selectOnlyMarkerIdx = nodeAttrs ? nodeAttrs.indexOf(3 /* SelectOnly */) : -1;
     // When processing ":not" selectors, we skip to the next ":not" if the
     // current one doesn't match
     var skipToNextSelector = false;
@@ -140,7 +140,7 @@ function findAttrIndexInNode(name, attrs) {
             i += 4;
         }
         else {
-            if (maybeAttrName === 1 /* SelectOnly */) {
+            if (maybeAttrName === 3 /* SelectOnly */) {
                 selectOnlyMode = true;
             }
             i += selectOnlyMode ? 1 : 2;

@@ -11,9 +11,7 @@ import { NgModuleDef } from '../metadata/ng_module';
 import { ViewEncapsulation } from '../metadata/view';
 import { Type } from '../type';
 import { BaseDef, ComponentDef, ComponentDefFeature, ComponentQuery, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveTypesOrFactory, HostBindingsFunction, PipeDef, PipeType, PipeTypesOrFactory } from './interfaces/definition';
-import { CssSelectorList, SelectorFlags } from './interfaces/projection';
-export declare const EMPTY: {};
-export declare const EMPTY_ARRAY: any[];
+import { CssSelectorList } from './interfaces/projection';
 /**
  * Create a component definition object.
  *
@@ -167,6 +165,10 @@ export declare function defineComponent<T>(componentDefinition: {
      */
     template: ComponentTemplate<T>;
     /**
+     * An array of `ngContent[selector]` values that were found in the template.
+     */
+    ngContentSelectors?: string[];
+    /**
      * Additional set of instructions specific to view query processing. This could be seen as a
      * set of instruction to be inserted into the template function.
      *
@@ -316,7 +318,7 @@ export declare const defineDirective: <T>(directiveDefinition: {
      */
     type: Type<T>;
     /** The selectors that will be used to match nodes to this directive. */
-    selectors: (string | SelectorFlags)[][];
+    selectors: (string | import("@angular/core/src/render3/interfaces/projection").SelectorFlags)[][];
     /**
      * Factory method used to create an instance of directive.
      */

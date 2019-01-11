@@ -377,16 +377,6 @@ export interface TView {
      */
     destroyHooks: HookData | null;
     /**
-     * Array of pipe ngOnDestroy hooks that should be executed when this view is destroyed.
-     *
-     * Even indices: Index of pipe in data
-     * Odd indices: Hook function
-     *
-     * These must be stored separately from directive destroy hooks because their contexts
-     * are stored in data.
-     */
-    pipeDestroyHooks: HookData | null;
-    /**
      * When a view is destroyed, listeners need to be released and outputs need to be
      * unsubscribed. This cleanup array stores both listener data (in chunks of 4)
      * and output data (in chunks of 2) for a particular view. Combining the arrays
@@ -395,7 +385,11 @@ export interface TView {
      *
      * If it's a native DOM listener or output subscription being stored:
      * 1st index is: event name  `name = tView.cleanup[i+0]`
-     * 2nd index is: index of native element `element = lView[tView.cleanup[i+1]]`
+     * 2nd index is: index of native element or a function that retrieves global target (window,
+     *               document or body) reference based on the native element:
+     *    `typeof idxOrTargetGetter === 'function'`: global target getter function
+     *    `typeof idxOrTargetGetter === 'number'`: index of native element
+     *
      * 3rd index is: index of listener function `listener = lView[CLEANUP][tView.cleanup[i+2]]`
      * 4th index is: `useCaptureOrIndx = tView.cleanup[i+3]`
      *    `typeof useCaptureOrIndx == 'boolean' : useCapture boolean

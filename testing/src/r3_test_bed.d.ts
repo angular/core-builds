@@ -99,13 +99,18 @@ export declare class TestBedRender3 implements Injector, TestBed {
     private _pipeOverrides;
     private _providerOverrides;
     private _rootProviderOverrides;
+    private _providerOverridesByToken;
+    private _templateOverrides;
+    private _resolvers;
     private _providers;
     private _declarations;
     private _imports;
     private _schemas;
     private _activeFixtures;
     private _moduleRef;
+    private _testModuleType;
     private _instantiated;
+    private _initiaNgDefs;
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
      * angular module. These are common to every test in the suite.
@@ -161,8 +166,12 @@ export declare class TestBedRender3 implements Injector, TestBed {
     }): void;
     createComponent<T>(type: Type<T>): ComponentFixture<T>;
     private _initIfNeeded;
+    private _storeNgDef;
+    private _getProviderOverrides;
     private _getResolvers;
     private _assertNotInstantiated;
     private _createTestModule;
+    private _getMetaWithOverrides;
+    private _compileNgModule;
 }
 export declare function _getTestBedRender3(): TestBedRender3;

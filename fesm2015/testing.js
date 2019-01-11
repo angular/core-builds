@@ -1,10 +1,10 @@
 /**
- * @license Angular v7.2.0-rc.0+20.sha-1c0ac25
+ * @license Angular v7.2.0+103.sha-7de7e1b
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, ApplicationInitStatus, Injector, NgZone, ɵRender3ComponentFactory, ɵRender3NgModuleRef, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, ɵresetCompiledComponents, Compiler, Injectable, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵivyEnabled, ɵoverrideComponentView, ɵoverrideProvider } from '@angular/core';
+import { RendererFactory2, getDebugNode, ɵstringify, Component, Directive, NgModule, Pipe, ɵReflectionCapabilities, InjectionToken, ApplicationInitStatus, Injector, NgZone, resolveForwardRef, ɵNG_COMPONENT_DEF, ɵNG_DIRECTIVE_DEF, ɵNG_INJECTOR_DEF, ɵNG_MODULE_DEF, ɵNG_PIPE_DEF, ɵRender3ComponentFactory, ɵRender3NgModuleRef, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModuleDefs, ɵcompilePipe, ɵgetInjectableDef, ɵpatchComponentDefWithScope, ɵresetCompiledComponents, ɵtransitiveScopesFor, Compiler, Injectable, Optional, SkipSelf, ɵAPP_ROOT, ɵclearOverrides, ɵivyEnabled, ɵoverrideComponentView, ɵoverrideProvider } from '@angular/core';
 
 /**
  * @fileoverview added by tsickle
@@ -872,7 +872,12 @@ class OverrideResolver {
      */
     setOverrides(overrides) {
         this.overrides.clear();
-        overrides.forEach(([type, override]) => this.overrides.set(type, override));
+        overrides.forEach(([type, override]) => {
+            /** @type {?} */
+            const overrides = this.overrides.get(type) || [];
+            overrides.push(override);
+            this.overrides.set(type, overrides);
+        });
     }
     /**
      * @param {?} type
@@ -892,11 +897,13 @@ class OverrideResolver {
             resolved = this.getAnnotation(type);
             if (resolved) {
                 /** @type {?} */
-                const override = this.overrides.get(type);
-                if (override) {
+                const overrides = this.overrides.get(type);
+                if (overrides) {
                     /** @type {?} */
                     const overrider = new MetadataOverrider();
-                    resolved = overrider.overrideMetadata(this.type, resolved, override);
+                    overrides.forEach(override => {
+                        resolved = overrider.overrideMetadata(this.type, (/** @type {?} */ (resolved)), override);
+                    });
                 }
             }
             this.resolved.set(type, resolved);
@@ -962,6 +969,8 @@ const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
  */
 /** @type {?} */
 let _nextRootElementId = 0;
+/** @type {?} */
+const EMPTY_ARRAY = [];
 /**
  * \@description
  * Configures and initializes environment for unit testing and provides methods for
@@ -984,6 +993,9 @@ class TestBedRender3 {
         this._pipeOverrides = [];
         this._providerOverrides = [];
         this._rootProviderOverrides = [];
+        this._providerOverridesByToken = new Map();
+        this._templateOverrides = new Map();
+        this._resolvers = (/** @type {?} */ (null));
         // test module configuration
         this._providers = [];
         this._declarations = [];
@@ -991,7 +1003,12 @@ class TestBedRender3 {
         this._schemas = [];
         this._activeFixtures = [];
         this._moduleRef = (/** @type {?} */ (null));
+        this._testModuleType = (/** @type {?} */ (null));
         this._instantiated = false;
+        // Map that keeps initial version of component/directive/pipe defs in case
+        // we compile a Type again, thus overriding respective static fields. This is
+        // required to make sure we restore defs to their initial states between test runs
+        this._initiaNgDefs = new Map();
     }
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
@@ -1112,7 +1129,10 @@ class TestBedRender3 {
      * @return {?}
      */
     overrideTemplateUsingTestingModule(component, template) {
-        throw new Error('Render3TestBed.overrideTemplateUsingTestingModule is not implemented yet');
+        if (this._instantiated) {
+            throw new Error('Cannot override template when the test module has already been instantiated');
+        }
+        this._templateOverrides.set(component, template);
     }
     /**
      * @param {?} token
@@ -1201,12 +1221,16 @@ class TestBedRender3 {
         this._pipeOverrides = [];
         this._providerOverrides = [];
         this._rootProviderOverrides = [];
+        this._providerOverridesByToken.clear();
+        this._templateOverrides.clear();
+        this._resolvers = (/** @type {?} */ (null));
         // reset test module config
         this._providers = [];
         this._declarations = [];
         this._imports = [];
         this._schemas = [];
         this._moduleRef = (/** @type {?} */ (null));
+        this._testModuleType = (/** @type {?} */ (null));
         this._instantiated = false;
         this._activeFixtures.forEach((fixture) => {
             try {
@@ -1220,6 +1244,11 @@ class TestBedRender3 {
             }
         });
         this._activeFixtures = [];
+        // restore initial component/directive/pipe defs
+        this._initiaNgDefs.forEach((value, type) => {
+            Object.defineProperty(type, value[0], value[1]);
+        });
+        this._initiaNgDefs.clear();
     }
     /**
      * @param {?} config
@@ -1328,18 +1357,22 @@ class TestBedRender3 {
      */
     overrideProvider(token, provider) {
         /** @type {?} */
+        const providerDef = provider.useFactory ?
+            { provide: token, useFactory: provider.useFactory, deps: provider.deps || [] } :
+            { provide: token, useValue: provider.useValue };
+        /** @type {?} */
         let injectableDef;
         /** @type {?} */
         const isRoot = (typeof token !== 'string' && (injectableDef = ɵgetInjectableDef(token)) &&
             injectableDef.providedIn === 'root');
         /** @type {?} */
-        const overrides = isRoot ? this._rootProviderOverrides : this._providerOverrides;
-        if (provider.useFactory) {
-            overrides.push({ provide: token, useFactory: provider.useFactory, deps: provider.deps || [] });
-        }
-        else {
-            overrides.push({ provide: token, useValue: provider.useValue });
-        }
+        const overridesBucket = isRoot ? this._rootProviderOverrides : this._providerOverrides;
+        overridesBucket.push(providerDef);
+        // keep all overrides grouped by token as well for fast lookups using token
+        /** @type {?} */
+        const overridesForToken = this._providerOverridesByToken.get(token) || [];
+        overridesForToken.push(providerDef);
+        this._providerOverridesByToken.set(token, overridesForToken);
     }
     /**
      * @param {?} token
@@ -1394,18 +1427,42 @@ class TestBedRender3 {
         if (this._instantiated) {
             return;
         }
-        /** @type {?} */
-        const resolvers = this._getResolvers();
-        /** @type {?} */
-        const testModuleType = this._createTestModule();
-        compileNgModule(testModuleType, resolvers);
+        this._resolvers = this._getResolvers();
+        this._testModuleType = this._createTestModule();
+        this._compileNgModule(this._testModuleType);
         /** @type {?} */
         const parentInjector = this.platform.injector;
-        this._moduleRef = new ɵRender3NgModuleRef(testModuleType, parentInjector);
+        this._moduleRef = new ɵRender3NgModuleRef(this._testModuleType, parentInjector);
         // ApplicationInitStatus.runInitializers() is marked @internal
         // to core. Cast it to any before accessing it.
         ((/** @type {?} */ (this._moduleRef.injector.get(ApplicationInitStatus)))).runInitializers();
         this._instantiated = true;
+    }
+    /**
+     * @private
+     * @param {?} prop
+     * @param {?} type
+     * @return {?}
+     */
+    _storeNgDef(prop, type) {
+        if (!this._initiaNgDefs.has(type)) {
+            /** @type {?} */
+            const currentDef = Object.getOwnPropertyDescriptor(type, prop);
+            this._initiaNgDefs.set(type, [prop, currentDef]);
+        }
+    }
+    // get overrides for a specific provider (if any)
+    /**
+     * @private
+     * @param {?} provider
+     * @return {?}
+     */
+    _getProviderOverrides(provider) {
+        /** @type {?} */
+        const token = typeof provider === 'object' && provider.hasOwnProperty('provide') ?
+            provider.provide :
+            provider;
+        return this._providerOverridesByToken.get(token) || [];
     }
     // creates resolvers taking overrides into account
     /**
@@ -1471,6 +1528,94 @@ class TestBedRender3 {
         ];
         return (/** @type {?} */ (DynamicTestModule));
     }
+    /**
+     * @private
+     * @param {?} meta
+     * @param {?=} type
+     * @return {?}
+     */
+    _getMetaWithOverrides(meta, type) {
+        /** @type {?} */
+        const overrides = {};
+        if (meta.providers && meta.providers.length) {
+            /** @type {?} */
+            const providerOverrides = flatten(meta.providers, (provider) => this._getProviderOverrides(provider));
+            if (providerOverrides.length) {
+                overrides.providers = [...meta.providers, ...providerOverrides];
+            }
+        }
+        /** @type {?} */
+        const hasTemplateOverride = !!type && this._templateOverrides.has(type);
+        if (hasTemplateOverride) {
+            overrides.template = this._templateOverrides.get((/** @type {?} */ (type)));
+        }
+        return Object.keys(overrides).length ? Object.assign({}, meta, overrides) : meta;
+    }
+    /**
+     * @private
+     * @param {?} moduleType
+     * @return {?}
+     */
+    _compileNgModule(moduleType) {
+        /** @type {?} */
+        const ngModule = this._resolvers.module.resolve(moduleType);
+        if (ngModule === null) {
+            throw new Error(`${ɵstringify(moduleType)} has no @NgModule annotation`);
+        }
+        this._storeNgDef(ɵNG_MODULE_DEF, moduleType);
+        this._storeNgDef(ɵNG_INJECTOR_DEF, moduleType);
+        /** @type {?} */
+        const metadata = this._getMetaWithOverrides(ngModule);
+        ɵcompileNgModuleDefs(moduleType, metadata);
+        /** @type {?} */
+        const declarations = flatten(ngModule.declarations || EMPTY_ARRAY, resolveForwardRef);
+        /** @type {?} */
+        const compiledComponents = [];
+        // Compile the components, directives and pipes declared by this module
+        declarations.forEach(declaration => {
+            /** @type {?} */
+            const component = this._resolvers.component.resolve(declaration);
+            if (component) {
+                this._storeNgDef(ɵNG_COMPONENT_DEF, declaration);
+                /** @type {?} */
+                const metadata = this._getMetaWithOverrides(component, declaration);
+                ɵcompileComponent(declaration, metadata);
+                compiledComponents.push(declaration);
+                return;
+            }
+            /** @type {?} */
+            const directive = this._resolvers.directive.resolve(declaration);
+            if (directive) {
+                this._storeNgDef(ɵNG_DIRECTIVE_DEF, declaration);
+                /** @type {?} */
+                const metadata = this._getMetaWithOverrides(directive);
+                ɵcompileDirective(declaration, metadata);
+                return;
+            }
+            /** @type {?} */
+            const pipe = this._resolvers.pipe.resolve(declaration);
+            if (pipe) {
+                this._storeNgDef(ɵNG_PIPE_DEF, declaration);
+                ɵcompilePipe(declaration, pipe);
+                return;
+            }
+        });
+        // Compile transitive modules, components, directives and pipes
+        /** @type {?} */
+        const calcTransitiveScopesFor = (moduleType) => ɵtransitiveScopesFor(moduleType, (ngModule) => this._compileNgModule(ngModule));
+        /** @type {?} */
+        const transitiveScope = calcTransitiveScopesFor(moduleType);
+        compiledComponents.forEach(cmp => {
+            /** @type {?} */
+            const scope = this._templateOverrides.has(cmp) ?
+                // if we have template override via `TestBed.overrideTemplateUsingTestingModule` -
+                // define Component scope as TestingModule scope, instead of the scope of NgModule
+                // where this Component was declared
+                calcTransitiveScopesFor(this._testModuleType) :
+                transitiveScope;
+            ɵpatchComponentDefWithScope(((/** @type {?} */ (cmp))).ngComponentDef, scope);
+        });
+    }
 }
 /** @type {?} */
 let testBed;
@@ -1480,163 +1625,24 @@ let testBed;
 function _getTestBedRender3() {
     return testBed = testBed || new TestBedRender3();
 }
-// Module compiler
-/** @type {?} */
-const EMPTY_ARRAY = [];
-/**
- * @param {?} moduleType
- * @param {?} resolvers
- * @return {?}
- */
-function compileNgModule(moduleType, resolvers) {
-    /** @type {?} */
-    const ngModule = resolvers.module.resolve(moduleType);
-    if (ngModule === null) {
-        throw new Error(`${ɵstringify(moduleType)} has not @NgModule annotation`);
-    }
-    ɵcompileNgModuleDefs(moduleType, ngModule);
-    /** @type {?} */
-    const declarations = flatten(ngModule.declarations || EMPTY_ARRAY);
-    /** @type {?} */
-    const compiledComponents = [];
-    // Compile the components, directives and pipes declared by this module
-    declarations.forEach(declaration => {
-        /** @type {?} */
-        const component = resolvers.component.resolve(declaration);
-        if (component) {
-            ɵcompileComponent(declaration, component);
-            compiledComponents.push(declaration);
-            return;
-        }
-        /** @type {?} */
-        const directive = resolvers.directive.resolve(declaration);
-        if (directive) {
-            ɵcompileDirective(declaration, directive);
-            return;
-        }
-        /** @type {?} */
-        const pipe = resolvers.pipe.resolve(declaration);
-        if (pipe) {
-            ɵcompilePipe(declaration, pipe);
-            return;
-        }
-    });
-    // Compile transitive modules, components, directives and pipes
-    /** @type {?} */
-    const transitiveScope = transitiveScopesFor(moduleType, resolvers);
-    compiledComponents.forEach(cmp => ɵpatchComponentDefWithScope(((/** @type {?} */ (cmp))).ngComponentDef, transitiveScope));
-}
-/**
- * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
- *
- * This operation is memoized and the result is cached on the module's definition. It can be called
- * on modules with components that have not fully compiled yet, but the result should not be used
- * until they have.
- * @template T
- * @param {?} moduleType
- * @param {?} resolvers
- * @return {?}
- */
-function transitiveScopesFor(moduleType, resolvers) {
-    if (!isNgModule(moduleType)) {
-        throw new Error(`${moduleType.name} does not have an ngModuleDef`);
-    }
-    /** @nocollapse @type {?} */
-    const def = moduleType.ngModuleDef;
-    if (def.transitiveCompileScopes !== null) {
-        return def.transitiveCompileScopes;
-    }
-    /** @type {?} */
-    const scopes = {
-        compilation: {
-            directives: new Set(),
-            pipes: new Set(),
-        },
-        exported: {
-            directives: new Set(),
-            pipes: new Set(),
-        },
-    };
-    def.declarations.forEach(declared => {
-        /** @type {?} */
-        const declaredWithDefs = (/** @type {?} */ (declared));
-        if (declaredWithDefs.ngPipeDef !== undefined) {
-            scopes.compilation.pipes.add(declared);
-        }
-        else {
-            scopes.compilation.directives.add(declared);
-        }
-    });
-    def.imports.forEach((imported) => {
-        /** @type {?} */
-        const ngModule = resolvers.module.resolve(imported);
-        if (ngModule === null) {
-            throw new Error(`Importing ${imported.name} which does not have an @ngModule`);
-        }
-        else {
-            compileNgModule(imported, resolvers);
-        }
-        // When this module imports another, the imported module's exported directives and pipes are
-        // added to the compilation scope of this module.
-        /** @type {?} */
-        const importedScope = transitiveScopesFor(imported, resolvers);
-        importedScope.exported.directives.forEach(entry => scopes.compilation.directives.add(entry));
-        importedScope.exported.pipes.forEach(entry => scopes.compilation.pipes.add(entry));
-    });
-    def.exports.forEach((exported) => {
-        /** @type {?} */
-        const exportedTyped = (/** @type {?} */ (exported));
-        // Either the type is a module, a pipe, or a component/directive (which may not have an
-        // ngComponentDef as it might be compiled asynchronously).
-        if (isNgModule(exportedTyped)) {
-            // When this module exports another, the exported module's exported directives and pipes are
-            // added to both the compilation and exported scopes of this module.
-            /** @type {?} */
-            const exportedScope = transitiveScopesFor(exportedTyped, resolvers);
-            exportedScope.exported.directives.forEach(entry => {
-                scopes.compilation.directives.add(entry);
-                scopes.exported.directives.add(entry);
-            });
-            exportedScope.exported.pipes.forEach(entry => {
-                scopes.compilation.pipes.add(entry);
-                scopes.exported.pipes.add(entry);
-            });
-        }
-        else if (exportedTyped.ngPipeDef !== undefined) {
-            scopes.exported.pipes.add(exportedTyped);
-        }
-        else {
-            scopes.exported.directives.add(exportedTyped);
-        }
-    });
-    def.transitiveCompileScopes = scopes;
-    return scopes;
-}
 /**
  * @template T
  * @param {?} values
+ * @param {?=} mapFn
  * @return {?}
  */
-function flatten(values) {
+function flatten(values, mapFn) {
     /** @type {?} */
     const out = [];
     values.forEach(value => {
         if (Array.isArray(value)) {
-            out.push(...flatten(value));
+            out.push(...flatten(value, mapFn));
         }
         else {
-            out.push(value);
+            out.push(mapFn ? mapFn(value) : value);
         }
     });
     return out;
-}
-/**
- * @template T
- * @param {?} value
- * @return {?}
- */
-function isNgModule(value) {
-    return ((/** @type {?} */ (value))).ngModuleDef !== undefined;
 }
 
 /**

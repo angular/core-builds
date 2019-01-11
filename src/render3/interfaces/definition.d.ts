@@ -55,7 +55,7 @@ export declare const enum DirectiveDefFlags {
 export interface PipeType<T> extends Type<T> {
     ngPipeDef: never;
 }
-export declare type DirectiveDefWithMeta<T, Selector extends string, ExportAs extends string, InputMap extends {
+export declare type DirectiveDefWithMeta<T, Selector extends string, ExportAs extends string[], InputMap extends {
     [key: string]: string;
 }, OutputMap extends {
     [key: string]: string;
@@ -150,7 +150,7 @@ export interface DirectiveDef<T> extends BaseDef<T> {
      */
     readonly features: DirectiveDefFeature[] | null;
 }
-export declare type ComponentDefWithMeta<T, Selector extends String, ExportAs extends string, InputMap extends {
+export declare type ComponentDefWithMeta<T, Selector extends String, ExportAs extends string[], InputMap extends {
     [key: string]: string;
 }, OutputMap extends {
     [key: string]: string;
@@ -176,6 +176,10 @@ export interface ComponentDef<T> extends DirectiveDef<T> {
      * The View template of the component.
      */
     readonly template: ComponentTemplate<T>;
+    /**
+     * An array of `ngContent[selector]` values that were found in the template.
+     */
+    readonly ngContentSelectors?: string[];
     /**
      * A set of styles that the component needs to be present for component to render correctly.
      */
@@ -299,6 +303,3 @@ export declare type PipeDefList = PipeDef<any>[];
 export declare type PipeTypesOrFactory = (() => DirectiveTypeList) | DirectiveTypeList;
 export declare type PipeTypeList = (PipeDef<any> | Type<any>)[];
 export declare const unusedValueExportToPlacateAjd = 1;
-export declare const enum InitialStylingFlags {
-    VALUES_MODE = 1
-}
