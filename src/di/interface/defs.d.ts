@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Type } from '../type';
+import { Type } from '../../interface/type';
 import { ClassProvider, ConstructorProvider, ExistingProvider, FactoryProvider, StaticClassProvider, ValueProvider } from './provider';
 /**
  * Information about how a type or `InjectionToken` interfaces with the DI system.
@@ -149,3 +149,5 @@ export declare function getInjectableDef<T>(type: any): InjectableDef<T> | null;
  * @param type type which may have `ngInjectorDef`
  */
 export declare function getInjectorDef<T>(type: any): InjectorDef<T> | null;
+export declare const NG_INJECTABLE_DEF: string;
+export declare const NG_INJECTOR_DEF: string;

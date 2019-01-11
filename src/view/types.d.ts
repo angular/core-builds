@@ -7,6 +7,7 @@
  */
 import { Injector } from '../di';
 import { ErrorHandler } from '../error_handler';
+import { Type } from '../interface/type';
 import { ComponentFactory } from '../linker/component_factory';
 import { NgModuleRef } from '../linker/ng_module_factory';
 import { QueryList } from '../linker/query_list';
@@ -14,7 +15,6 @@ import { TemplateRef } from '../linker/template_ref';
 import { ViewContainerRef } from '../linker/view_container_ref';
 import { Renderer2, RendererFactory2, RendererType2 } from '../render/api';
 import { Sanitizer, SecurityContext } from '../sanitization/security';
-import { Type } from '../type';
 /**
  * Factory for ViewDefinitions/NgModuleDefinitions.
  * We use a function so we can reexeute it in case an error happens and use the given logger

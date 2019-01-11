@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Injector } from '../di/injector';
-import { Type } from '../type';
+import { Type } from '../interface/type';
 import { ComponentFactoryResolver } from './component_factory_resolver';
 /**
  * Represents an instance of an NgModule created via a {@link NgModuleFactory}.

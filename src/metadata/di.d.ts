@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { InjectionToken } from '../di/injection_token';
-import { Type } from '../type';
+import { Type } from '../interface/type';
 /**
  * This token can be used to create a virtual provider that will populate the
  * `entryComponents` fields of components and ng modules based on its `useValue`.

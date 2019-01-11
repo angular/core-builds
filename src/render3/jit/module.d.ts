@@ -5,8 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { Type } from '../../interface/type';
 import { NgModule, NgModuleTransitiveScopes } from '../../metadata/ng_module';
-import { Type } from '../../type';
 import { ComponentDef } from '../interfaces/definition';
 import { NgModuleType } from '../ng_module_ref';
 /**

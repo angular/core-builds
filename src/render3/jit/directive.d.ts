@@ -5,9 +5,9 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { Type } from '../../interface/type';
 import { Query } from '../../metadata/di';
 import { Component, Directive } from '../../metadata/directives';
-import { Type } from '../../type';
 import { R3QueryMetadataFacade } from './compiler_facade_interface';
 /**
  * Compile an Angular component according to its decorator metadata, and patch the resulting

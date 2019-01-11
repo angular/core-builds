@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Injector } from '../di/injector';
-import { Type } from '../type';
+import { Type } from '../interface/type';
 import { ComponentFactory, ComponentRef } from './component_factory';
 import { NgModuleRef } from './ng_module_factory';
 export declare function noComponentFactoryError(component: Function): Error;
