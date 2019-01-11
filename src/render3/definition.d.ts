@@ -133,7 +133,7 @@ export declare function defineComponent<T>(componentDefinition: {
      *
      * See: {@link Directive.exportAs}
      */
-    exportAs?: string;
+    exportAs?: string[];
     /**
      * Template function use for rendering DOM.
      *
@@ -406,7 +406,7 @@ export declare const defineDirective: <T>(directiveDefinition: {
      *
      * See: {@link Directive.exportAs}
      */
-    exportAs?: string | undefined;
+    exportAs?: string[] | undefined;
 }) => never;
 /**
  * Create a pipe definition object.
