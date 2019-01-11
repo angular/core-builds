@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Type } from '../type';
+import { Type } from '../interface/type';
 /**
  * Adds decorator, constructor, and property metadata to a given type via static metadata fields
  * on the type.

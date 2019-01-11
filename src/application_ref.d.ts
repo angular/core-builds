@@ -8,11 +8,11 @@ import * as i0 from './r3_symbols';
  */
 import { Observable } from 'rxjs';
 import { InjectionToken, Injector, StaticProvider } from './di';
+import { Type } from './interface/type';
 import { CompilerOptions } from './linker/compiler';
 import { ComponentFactory, ComponentRef } from './linker/component_factory';
 import { NgModuleFactory, NgModuleRef } from './linker/ng_module_factory';
 import { ViewRef } from './linker/view_ref';
-import { Type } from './type';
 import { NgZone } from './zone/ng_zone';
 export declare function compileNgModuleFactory__POST_R3__<M>(injector: Injector, options: CompilerOptions, moduleType: Type<M>): Promise<NgModuleFactory<M>>;
 export declare const ALLOW_MULTIPLE_PLATFORMS: InjectionToken<boolean>;

@@ -8,11 +8,11 @@
 import { ChangeDetectorRef as ViewEngine_ChangeDetectorRef } from '../change_detection/change_detector_ref';
 import { InjectionToken } from '../di/injection_token';
 import { Injector } from '../di/injector';
+import { Type } from '../interface/type';
 import { ComponentFactory as viewEngine_ComponentFactory, ComponentRef as viewEngine_ComponentRef } from '../linker/component_factory';
 import { ComponentFactoryResolver as viewEngine_ComponentFactoryResolver } from '../linker/component_factory_resolver';
 import { ElementRef as viewEngine_ElementRef } from '../linker/element_ref';
 import { NgModuleRef as viewEngine_NgModuleRef } from '../linker/ng_module_factory';
-import { Type } from '../type';
 import { ComponentDef } from './interfaces/definition';
 import { TContainerNode, TElementContainerNode, TElementNode } from './interfaces/node';
 import { LView, RootContext } from './interfaces/view';

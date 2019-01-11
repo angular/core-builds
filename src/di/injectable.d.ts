@@ -5,11 +5,11 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { Type } from '../interface/type';
 import { compileInjectable as render3CompileInjectable } from '../render3/jit/injectable';
-import { Type } from '../type';
 import { TypeDecorator } from '../util/decorators';
-import { InjectableDef } from './defs';
-import { ClassSansProvider, ConstructorSansProvider, ExistingSansProvider, FactorySansProvider, StaticClassSansProvider, ValueSansProvider } from './provider';
+import { InjectableDef } from './interface/defs';
+import { ClassSansProvider, ConstructorSansProvider, ExistingSansProvider, FactorySansProvider, StaticClassSansProvider, ValueSansProvider } from './interface/provider';
 /**
  * Injectable providers used in `@Injectable` decorator.
  *

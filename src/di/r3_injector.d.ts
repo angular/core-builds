@@ -5,12 +5,12 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Type } from '../type';
-import { InjectorType } from './defs';
+import { Type } from '../interface/type';
 import { InjectionToken } from './injection_token';
 import { Injector } from './injector';
 import { InjectFlags } from './injector_compatibility';
-import { ClassProvider, ConstructorProvider, ExistingProvider, FactoryProvider, StaticClassProvider, StaticProvider, TypeProvider, ValueProvider } from './provider';
+import { InjectorType } from './interface/defs';
+import { ClassProvider, ConstructorProvider, ExistingProvider, FactoryProvider, StaticClassProvider, StaticProvider, TypeProvider, ValueProvider } from './interface/provider';
 /**
  * Internal type for a single provider in a deep provider array.
  */

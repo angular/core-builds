@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import './ng_dev_mode';
+import '../util/ng_dev_mode';
 import { LContext } from './interfaces/context';
 import { LView } from './interfaces/view';
 /** Returns the matching `LContext` data for a given DOM node, directive or component instance.

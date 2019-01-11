@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { ViewEncapsulation } from '../../core';
-import { Type } from '../../type';
+import { Type } from '../../interface/type';
 import { CssSelectorList } from './projection';
 /**
  * Definition of what a template rendering function should look like for a component.
