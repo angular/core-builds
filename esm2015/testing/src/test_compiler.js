@@ -86,7 +86,7 @@ export class TestingCompiler extends Compiler {
 TestingCompiler.decorators = [
     { type: Injectable },
 ];
-TestingCompiler.ngInjectableDef = i0.defineInjectable({ token: TestingCompiler, factory: function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory((t || TestingCompiler)); }, providedIn: null });
+/** @nocollapse */ TestingCompiler.ngInjectableDef = i0.defineInjectable({ token: TestingCompiler, factory: function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory((t || TestingCompiler)); }, providedIn: null });
 const ɵTestingCompiler_BaseFactory = i0.ɵgetInheritedFactory(TestingCompiler);
 /*@__PURE__*/ i0.ɵsetClassMetadata(TestingCompiler, [{
         type: Injectable

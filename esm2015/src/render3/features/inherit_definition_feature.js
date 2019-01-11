@@ -51,7 +51,7 @@ export function InheritDefinitionFeature(definition) {
             // Don't use getComponentDef/getDirectiveDef. This logic relies on inheritance.
             superDef = superType.ngDirectiveDef;
         }
-        /** @type {?} */
+        /** @nocollapse @type {?} */
         const baseDef = ((/** @type {?} */ (superType))).ngBaseDef;
         // Some fields in the definition may be empty, if there were no values to put in them that
         // would've justified object creation. Unwrap them if necessary.

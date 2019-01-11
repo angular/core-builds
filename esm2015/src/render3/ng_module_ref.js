@@ -49,7 +49,7 @@ export class NgModuleRef extends viewEngine_NgModuleRef {
         this.injector = this;
         this.destroyCbs = [];
         /** @type {?} */
-        const ngModuleDef = getNgModuleDef(ngModuleType);
+        /** @nocollapse */ const ngModuleDef = getNgModuleDef(ngModuleType);
         ngDevMode && assertDefined(ngModuleDef, `NgModule '${stringify(ngModuleType)}' is not a subtype of 'NgModuleType'.`);
         this._bootstrapComponents = (/** @type {?} */ (ngModuleDef)).bootstrap;
         /** @type {?} */

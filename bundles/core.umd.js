@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+122.sha-8c3f98f
+ * @license Angular v7.2.0+128.sha-091a8a6
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8947,6 +8947,7 @@
             factory: function () { return inject(INJECTOR$1); },
         });
         /** @internal */
+        /** @nocollapse */
         Injector.__NG_ELEMENT_ID__ = function () { return SWITCH_INJECTOR_FACTORY(); };
         return Injector;
     }());
@@ -10570,6 +10571,7 @@
             this.nativeElement = nativeElement;
         }
         /** @internal */
+        /** @nocollapse */
         ElementRef.__NG_ELEMENT_ID__ = function () { return SWITCH_ELEMENT_REF_FACTORY(ElementRef); };
         return ElementRef;
     }());
@@ -10675,6 +10677,7 @@
         function Renderer2() {
         }
         /** @internal */
+        /** @nocollapse */
         Renderer2.__NG_ELEMENT_ID__ = function () { return SWITCH_RENDERER2_FACTORY(); };
         return Renderer2;
     }());
@@ -10731,7 +10734,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0+122.sha-8c3f98f');
+    var VERSION = new Version('7.2.0+128.sha-091a8a6');
 
     /**
      * @license
@@ -13662,6 +13665,7 @@
         function TemplateRef() {
         }
         /** @internal */
+        /** @nocollapse */
         TemplateRef.__NG_ELEMENT_ID__ = function () { return SWITCH_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef); };
         return TemplateRef;
     }());
@@ -14445,17 +14449,17 @@
      */
     function registerModuleFactory(id, factory) {
         var existing = modules.get(id);
-        assertNotExisting(id, existing && existing.moduleType);
+        assertSameOrNotExisting(id, existing && existing.moduleType, factory.moduleType);
         modules.set(id, factory);
     }
-    function assertNotExisting(id, type) {
-        if (type) {
+    function assertSameOrNotExisting(id, type, incoming) {
+        if (type && type !== incoming) {
             throw new Error("Duplicate module registered for " + id + " - " + stringify(type) + " vs " + stringify(type.name));
         }
     }
     function registerNgModuleType(id, ngModuleType) {
         var existing = modules.get(id);
-        assertNotExisting(id, existing);
+        assertSameOrNotExisting(id, existing, ngModuleType);
         modules.set(id, ngModuleType);
     }
     function getModuleFactory__POST_R3__(id) {
@@ -18194,6 +18198,7 @@
         function ViewContainerRef() {
         }
         /** @internal */
+        /** @nocollapse */
         ViewContainerRef.__NG_ELEMENT_ID__ = function () { return SWITCH_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef); };
         return ViewContainerRef;
     }());
@@ -18253,6 +18258,7 @@
         function ChangeDetectorRef() {
         }
         /** @internal */
+        /** @nocollapse */
         ChangeDetectorRef.__NG_ELEMENT_ID__ = function () { return SWITCH_CHANGE_DETECTOR_REF_FACTORY(); };
         return ChangeDetectorRef;
     }());
@@ -24483,6 +24489,7 @@
     exports.ɵcompileNgModuleDefs = compileNgModuleDefs;
     exports.ɵpatchComponentDefWithScope = patchComponentDefWithScope;
     exports.ɵresetCompiledComponents = resetCompiledComponents;
+    exports.ɵflushModuleScopingQueueAsMuchAsPossible = flushModuleScopingQueueAsMuchAsPossible;
     exports.ɵtransitiveScopesFor = transitiveScopesFor;
     exports.ɵcompilePipe = compilePipe;
     exports.ɵsanitizeHtml = sanitizeHtml;
