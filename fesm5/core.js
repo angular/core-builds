@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+128.sha-091a8a6
+ * @license Angular v7.2.0+126.sha-df292c2
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8916,7 +8916,6 @@ var Injector = /** @class */ (function () {
         factory: function () { return inject(INJECTOR$1); },
     });
     /** @internal */
-    /** @nocollapse */
     Injector.__NG_ELEMENT_ID__ = function () { return SWITCH_INJECTOR_FACTORY(); };
     return Injector;
 }());
@@ -10541,7 +10540,6 @@ var ElementRef = /** @class */ (function () {
         this.nativeElement = nativeElement;
     }
     /** @internal */
-    /** @nocollapse */
     ElementRef.__NG_ELEMENT_ID__ = function () { return SWITCH_ELEMENT_REF_FACTORY(ElementRef); };
     return ElementRef;
 }());
@@ -10653,7 +10651,6 @@ var Renderer2 = /** @class */ (function () {
     function Renderer2() {
     }
     /** @internal */
-    /** @nocollapse */
     Renderer2.__NG_ELEMENT_ID__ = function () { return SWITCH_RENDERER2_FACTORY(); };
     return Renderer2;
 }());
@@ -10721,7 +10718,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.2.0+128.sha-091a8a6');
+var VERSION = new Version('7.2.0+126.sha-df292c2');
 
 /**
  * @license
@@ -13652,7 +13649,6 @@ var TemplateRef = /** @class */ (function () {
     function TemplateRef() {
     }
     /** @internal */
-    /** @nocollapse */
     TemplateRef.__NG_ELEMENT_ID__ = function () { return SWITCH_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef); };
     return TemplateRef;
 }());
@@ -18289,7 +18285,6 @@ var ViewContainerRef = /** @class */ (function () {
     function ViewContainerRef() {
     }
     /** @internal */
-    /** @nocollapse */
     ViewContainerRef.__NG_ELEMENT_ID__ = function () { return SWITCH_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef); };
     return ViewContainerRef;
 }());
@@ -18350,7 +18345,6 @@ var ChangeDetectorRef = /** @class */ (function () {
     function ChangeDetectorRef() {
     }
     /** @internal */
-    /** @nocollapse */
     ChangeDetectorRef.__NG_ELEMENT_ID__ = function () { return SWITCH_CHANGE_DETECTOR_REF_FACTORY(); };
     return ChangeDetectorRef;
 }());
