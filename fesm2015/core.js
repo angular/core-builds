@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+104.sha-b78351c
+ * @license Angular v7.2.0+105.sha-9277142
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -9229,8 +9229,11 @@ function cacheMatchingLocalNames(tNode, localRefs, exportsMap) {
  */
 function saveNameToExportMap(index, def, exportsMap) {
     if (exportsMap) {
-        if (def.exportAs)
-            exportsMap[def.exportAs] = index;
+        if (def.exportAs) {
+            for (let i = 0; i < def.exportAs.length; i++) {
+                exportsMap[def.exportAs[i]] = index;
+            }
+        }
         if (((/** @type {?} */ (def))).template)
             exportsMap[''] = index;
     }
@@ -13567,7 +13570,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.0+104.sha-b78351c');
+const VERSION = new Version('7.2.0+105.sha-9277142');
 
 /**
  * @fileoverview added by tsickle
