@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 /**
  * Use in directives and components to emit custom events synchronously
  * or asynchronously, and register handlers for those events by subscribing
@@ -85,5 +85,5 @@ export declare class EventEmitter<T> extends Subject<T> {
      * @param complete When supplied, a custom handler for a completion
      * notification from this emitter.
      */
-    subscribe(generatorOrNext?: any, error?: any, complete?: any): any;
+    subscribe(generatorOrNext?: any, error?: any, complete?: any): Subscription;
 }
