@@ -5,11 +5,11 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import './ng_dev_mode';
+import '../util/ng_dev_mode';
 import { ChangeDetectionStrategy } from '../change_detection/constants';
+import { Type } from '../interface/type';
 import { NgModuleDef } from '../metadata/ng_module';
 import { ViewEncapsulation } from '../metadata/view';
-import { Type } from '../type';
 import { BaseDef, ComponentDef, ComponentDefFeature, ComponentQuery, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveTypesOrFactory, HostBindingsFunction, PipeDef, PipeType, PipeTypesOrFactory } from './interfaces/definition';
 import { CssSelectorList } from './interfaces/projection';
 /**
@@ -133,7 +133,7 @@ export declare function defineComponent<T>(componentDefinition: {
      *
      * See: {@link Directive.exportAs}
      */
-    exportAs?: string;
+    exportAs?: string[];
     /**
      * Template function use for rendering DOM.
      *
@@ -406,7 +406,7 @@ export declare const defineDirective: <T>(directiveDefinition: {
      *
      * See: {@link Directive.exportAs}
      */
-    exportAs?: string | undefined;
+    exportAs?: string[] | undefined;
 }) => never;
 /**
  * Create a pipe definition object.

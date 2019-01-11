@@ -8,12 +8,12 @@
 import { ApplicationRef } from '../application_ref';
 import { ChangeDetectorRef } from '../change_detection/change_detection';
 import { Injector } from '../di/injector';
+import { Type } from '../interface/type';
 import { ComponentFactory } from '../linker/component_factory';
 import { NgModuleRef } from '../linker/ng_module_factory';
 import { ViewContainerRef } from '../linker/view_container_ref';
 import { EmbeddedViewRef, InternalViewRef } from '../linker/view_ref';
 import { Renderer as RendererV1 } from '../render/api';
-import { Type } from '../type';
 import { ElementData, NgModuleDefinition, NodeDef, TemplateData, ViewContainerData, ViewData, ViewDefinitionFactory } from './types';
 export declare function createComponentFactory(selector: string, componentType: Type<any>, viewDefFactory: ViewDefinitionFactory, inputs: {
     [propName: string]: string;

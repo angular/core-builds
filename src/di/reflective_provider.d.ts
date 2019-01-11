@@ -5,8 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { Provider } from './interface/provider';
 import { Self, SkipSelf } from './metadata';
-import { Provider } from './provider';
 import { ReflectiveKey } from './reflective_key';
 /**
  * `Dependency` is used by the framework to extend DI.

@@ -5,10 +5,10 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Type } from '../type';
+import { Type } from '../interface/type';
 import { InjectionToken } from './injection_token';
 import { InjectFlags } from './injector_compatibility';
-import { StaticProvider } from './provider';
+import { StaticProvider } from './interface/provider';
 export declare const SOURCE = "__source";
 export declare const THROW_IF_NOT_FOUND: Object;
 /**

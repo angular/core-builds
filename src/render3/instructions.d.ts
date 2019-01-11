@@ -8,10 +8,10 @@
 import { InjectionToken } from '../di/injection_token';
 import { Injector } from '../di/injector';
 import { InjectFlags } from '../di/injector_compatibility';
+import { Type } from '../interface/type';
 import { QueryList } from '../linker';
 import { Sanitizer } from '../sanitization/security';
 import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
-import { Type } from '../type';
 import { LContainer } from './interfaces/container';
 import { ComponentDef, ComponentQuery, ComponentTemplate, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { LocalRefExtractor, TAttributes, TContainerNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from './interfaces/node';

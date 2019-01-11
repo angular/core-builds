@@ -5,8 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-export { InjectableDef, InjectorDef, defineInjectable, defineInjector } from './di/defs';
 export { inject } from './di/injector_compatibility';
+export { InjectableDef, InjectorDef, defineInjectable, defineInjector } from './di/interface/defs';
 export { NgModuleDef, NgModuleDefWithMeta } from './metadata/ng_module';
 export { defineNgModule } from './render3/definition';
 export { setClassMetadata } from './render3/metadata';

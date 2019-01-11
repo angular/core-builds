@@ -110,6 +110,7 @@ export declare class TestBedRender3 implements Injector, TestBed {
     private _moduleRef;
     private _testModuleType;
     private _instantiated;
+    private _globalCompilationChecked;
     private _initiaNgDefs;
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
@@ -172,6 +173,18 @@ export declare class TestBedRender3 implements Injector, TestBed {
     private _assertNotInstantiated;
     private _createTestModule;
     private _getMetaWithOverrides;
-    private _compileNgModule;
+    /**
+     * Check whether the module scoping queue should be flushed, and flush it if needed.
+     *
+     * When the TestBed is reset, it clears the JIT module compilation queue, cancelling any
+     * in-progress module compilation. This creates a potential hazard - the very first time the
+     * TestBed is initialized (or if it's reset without being initialized), there may be pending
+     * compilations of modules declared in global scope. These compilations should be finished.
+     *
+     * To ensure that globally declared modules have their components scoped properly, this function
+     * is called whenever TestBed is initialized or reset. The _first_ time that this happens, prior
+     * to any other operations, the scoping queue is flushed.
+     */
+    private _checkGlobalCompilationFinished;
 }
 export declare function _getTestBedRender3(): TestBedRender3;

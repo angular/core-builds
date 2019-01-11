@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Injector } from './injector';
-import { Provider } from './provider';
+import { Provider } from './interface/provider';
 import { ResolvedReflectiveProvider } from './reflective_provider';
 /**
  * A ReflectiveDependency injection container used for instantiating objects and resolving

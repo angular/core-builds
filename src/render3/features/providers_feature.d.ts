@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Provider } from '../../di/provider';
+import { Provider } from '../../di/interface/provider';
 import { DirectiveDef } from '../interfaces/definition';
 /**
  * This feature resolves the providers of a directive (or component),

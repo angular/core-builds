@@ -1,14 +1,14 @@
 /**
- * @license Angular v7.2.0+101.sha-ad6569c
- * (c) 2010-2018 Google, Inc. https://angular.io/
+ * @license Angular v7.2.0+128.sha-091a8a6
+ * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
 
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@angular/core')) :
     typeof define === 'function' && define.amd ? define('@angular/core/testing', ['exports', '@angular/core'], factory) :
-    (factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}, global.ng.core.testing = {}),global.ng.core));
-}(this, (function (exports,core) { 'use strict';
+    (global = global || self, factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}, global.ng.core.testing = {}), global.ng.core));
+}(this, function (exports, core) { 'use strict';
 
     /**
      * @license
@@ -996,6 +996,7 @@
             this._moduleRef = null;
             this._testModuleType = null;
             this._instantiated = false;
+            this._globalCompilationChecked = false;
             // Map that keeps initial version of component/directive/pipe defs in case
             // we compile a Type again, thus overriding respective static fields. This is
             // required to make sure we restore defs to their initial states between test runs
@@ -1128,6 +1129,7 @@
             this.ngModule = null;
         };
         TestBedRender3.prototype.resetTestingModule = function () {
+            this._checkGlobalCompilationFinished();
             core.ɵresetCompiledComponents();
             // reset metadata overrides
             this._moduleOverrides = [];
@@ -1269,6 +1271,7 @@
         };
         // internal methods
         TestBedRender3.prototype._initIfNeeded = function () {
+            this._checkGlobalCompilationFinished();
             if (this._instantiated) {
                 return;
             }
@@ -1290,7 +1293,7 @@
         };
         // get overrides for a specific provider (if any)
         TestBedRender3.prototype._getProviderOverrides = function (provider) {
-            var token = typeof provider === 'object' && provider.hasOwnProperty('provide') ?
+            var token = provider && typeof provider === 'object' && provider.hasOwnProperty('provide') ?
                 provider.provide :
                 provider;
             return this._providerOverridesByToken.get(token) || [];
@@ -1314,6 +1317,7 @@
             }
         };
         TestBedRender3.prototype._createTestModule = function () {
+            var _this = this;
             var rootProviderOverrides = this._rootProviderOverrides;
             var RootScopeModule = /** @class */ (function () {
                 function RootScopeModule() {
@@ -1327,7 +1331,10 @@
                 return RootScopeModule;
             }());
             var ngZone = new core.NgZone({ enableLongStackTrace: true });
-            var providers = __spread([{ provide: core.NgZone, useValue: ngZone }], this._providers, this._providerOverrides);
+            var providers = __spread([
+                { provide: core.NgZone, useValue: ngZone },
+                { provide: core.Compiler, useFactory: function () { return new R3TestCompiler(_this); } }
+            ], this._providers, this._providerOverrides);
             var declarations = this._declarations;
             var imports = [RootScopeModule, this.ngModule, this._imports];
             var schemas = this._schemas;
@@ -1345,7 +1352,12 @@
             var _this = this;
             var overrides = {};
             if (meta.providers && meta.providers.length) {
-                var providerOverrides = flatten(meta.providers, function (provider) { return _this._getProviderOverrides(provider); });
+                // There are two flattening operations here. The inner flatten() operates on the metadata's
+                // providers and applies a mapping function which retrieves overrides for each incoming
+                // provider. The outer flatten() then flattens the produced overrides array. If this is not
+                // done, the array can contain other empty arrays (e.g. `[[], []]`) which leak into the
+                // providers array and contaminate any error messages that might be generated.
+                var providerOverrides = flatten(flatten(meta.providers, function (provider) { return _this._getProviderOverrides(provider); }));
                 if (providerOverrides.length) {
                     overrides.providers = __spread(meta.providers, providerOverrides);
                 }
@@ -1356,6 +1368,9 @@
             }
             return Object.keys(overrides).length ? __assign({}, meta, overrides) : meta;
         };
+        /**
+         * @internal
+         */
         TestBedRender3.prototype._compileNgModule = function (moduleType) {
             var _this = this;
             var ngModule = this._resolvers.module.resolve(moduleType);
@@ -1405,6 +1420,26 @@
                 core.ɵpatchComponentDefWithScope(cmp.ngComponentDef, scope);
             });
         };
+        /**
+         * Check whether the module scoping queue should be flushed, and flush it if needed.
+         *
+         * When the TestBed is reset, it clears the JIT module compilation queue, cancelling any
+         * in-progress module compilation. This creates a potential hazard - the very first time the
+         * TestBed is initialized (or if it's reset without being initialized), there may be pending
+         * compilations of modules declared in global scope. These compilations should be finished.
+         *
+         * To ensure that globally declared modules have their components scoped properly, this function
+         * is called whenever TestBed is initialized or reset. The _first_ time that this happens, prior
+         * to any other operations, the scoping queue is flushed.
+         */
+        TestBedRender3.prototype._checkGlobalCompilationFinished = function () {
+            // !this._instantiated should not be necessary, but is left in as an additional guard that
+            // compilations queued in tests (after instantiation) are never flushed accidentally.
+            if (!this._globalCompilationChecked && !this._instantiated) {
+                core.ɵflushModuleScopingQueueAsMuchAsPossible();
+            }
+            this._globalCompilationChecked = true;
+        };
         return TestBedRender3;
     }());
     var testBed;
@@ -1423,6 +1458,28 @@
         });
         return out;
     }
+    var R3TestCompiler = /** @class */ (function () {
+        function R3TestCompiler(testBed) {
+            this.testBed = testBed;
+        }
+        R3TestCompiler.prototype.compileModuleSync = function (moduleType) {
+            this.testBed._compileNgModule(moduleType);
+            return new core.ɵNgModuleFactory(moduleType);
+        };
+        R3TestCompiler.prototype.compileModuleAsync = function (moduleType) {
+            return Promise.resolve(this.compileModuleSync(moduleType));
+        };
+        R3TestCompiler.prototype.compileModuleAndAllComponentsSync = function (moduleType) {
+            return new core.ModuleWithComponentFactories(this.compileModuleSync(moduleType), []);
+        };
+        R3TestCompiler.prototype.compileModuleAndAllComponentsAsync = function (moduleType) {
+            return Promise.resolve(this.compileModuleAndAllComponentsSync(moduleType));
+        };
+        R3TestCompiler.prototype.clearCache = function () { };
+        R3TestCompiler.prototype.clearCacheFor = function (type) { };
+        R3TestCompiler.prototype.getModuleId = function (moduleType) { return undefined; };
+        return R3TestCompiler;
+    }());
 
     /**
      * @license
@@ -2137,5 +2194,5 @@
 
     Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));
 //# sourceMappingURL=core-testing.umd.js.map
