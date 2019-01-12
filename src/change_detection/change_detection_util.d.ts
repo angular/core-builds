@@ -40,21 +40,6 @@ export declare class WrappedValue {
     /** Returns true if `value` is a wrapped value. */
     static isWrapped(value: any): value is WrappedValue;
 }
-/**
- * Represents a basic change from a previous to a new value.
- *
- * @publicApi
- */
-export declare class SimpleChange {
-    previousValue: any;
-    currentValue: any;
-    firstChange: boolean;
-    constructor(previousValue: any, currentValue: any, firstChange: boolean);
-    /**
-     * Check whether the new value is the first value assigned.
-     */
-    isFirstChange(): boolean;
-}
 export declare function isListLikeIterable(obj: any): boolean;
 export declare function areIterablesEqual(a: any, b: any, comparator: (a: any, b: any) => boolean): boolean;
 export declare function iterateListLike(obj: any, fn: (p: any) => any): void;

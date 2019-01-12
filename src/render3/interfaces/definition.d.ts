@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { ViewEncapsulation } from '../../core';
+import { SimpleChanges, ViewEncapsulation } from '../../core';
 import { Type } from '../../interface/type';
 import { CssSelectorList } from './projection';
 /**
@@ -140,6 +140,7 @@ export interface DirectiveDef<T> extends BaseDef<T> {
     readonly attributes: string[] | null;
     onInit: (() => void) | null;
     doCheck: (() => void) | null;
+    onChanges: ((changes: SimpleChanges) => void) | null;
     afterContentInit: (() => void) | null;
     afterContentChecked: (() => void) | null;
     afterViewInit: (() => void) | null;
