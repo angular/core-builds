@@ -7,7 +7,7 @@
  */
 import { Type } from '../interface/type';
 import { InjectionToken } from './injection_token';
-import { InjectFlags } from './injector_compatibility';
+import { InjectFlags } from './interface/injector';
 import { StaticProvider } from './interface/provider';
 export declare const SOURCE = "__source";
 export declare const THROW_IF_NOT_FOUND: Object;
@@ -65,7 +65,6 @@ export declare abstract class Injector {
     /** @nocollapse */
     static ngInjectableDef: never;
 }
-export declare const SWITCH_INJECTOR_FACTORY__POST_R3__: () => import("@angular/core/src/render3/di").NodeInjector;
 export declare const USE_VALUE: string;
 export declare class StaticInjector implements Injector {
     readonly parent: Injector;

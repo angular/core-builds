@@ -8,8 +8,8 @@
 import { Type } from '../interface/type';
 import { compileInjectable as render3CompileInjectable } from '../render3/jit/injectable';
 import { TypeDecorator } from '../util/decorators';
-import { InjectableDef } from './interface/defs';
 import { ClassSansProvider, ConstructorSansProvider, ExistingSansProvider, FactorySansProvider, StaticClassSansProvider, ValueSansProvider } from './interface/provider';
+import { InjectableDef } from './interface/defs';
 /**
  * Injectable providers used in `@Injectable` decorator.
  *

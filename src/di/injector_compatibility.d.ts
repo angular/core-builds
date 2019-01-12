@@ -8,25 +8,7 @@
 import { Type } from '../interface/type';
 import { InjectionToken } from './injection_token';
 import { Injector } from './injector';
-/**
- * Injection flags for DI.
- *
- * @publicApi
- */
-export declare enum InjectFlags {
-    Default = 0,
-    /**
-     * Specifies that an injector should retrieve a dependency from any injector until reaching the
-     * host element of the current component. (Only used with Element Injector)
-     */
-    Host = 1,
-    /** Don't descend into ancestors of the node requesting injection. */
-    Self = 2,
-    /** Skip the node that is requesting injection. */
-    SkipSelf = 4,
-    /** Inject `defaultValue` instead if token not found. */
-    Optional = 8
-}
+import { InjectFlags } from './interface/injector';
 export declare function setCurrentInjector(injector: Injector | null | undefined): Injector | undefined | null;
 /**
  * Sets the current inject implementation.
