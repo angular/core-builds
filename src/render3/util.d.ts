@@ -19,7 +19,10 @@ import { LView, RootContext, TData } from './interfaces/view';
  * Constraints are relaxed in checkNoChanges mode. See `devModeEqual` for details.
  */
 export declare function isDifferent(a: any, b: any): boolean;
-export declare function stringify(value: any): string;
+/**
+ * Used for stringify render output in Ivy.
+ */
+export declare function renderStringify(value: any): string;
 /**
  * Flattens an array in non-recursive way. Input arrays are not modified.
  */

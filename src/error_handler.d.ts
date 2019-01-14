@@ -33,4 +33,3 @@
 export declare class ErrorHandler {
     handleError(error: any): void;
 }
-export declare function wrappedError(message: string, originalError: any): Error;
