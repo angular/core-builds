@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { SimpleChanges } from '../change_detection/simple_change';
+import { SimpleChanges } from '../interface/simple_change';
 declare type Constructor<T> = new (...args: any[]) => T;
 /**
  * Checks an object to see if it's an exact instance of a particular type
