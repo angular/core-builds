@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+169.sha-d12db4e
+ * @license Angular v7.2.0+170.sha-f1fb62d
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16158,8 +16158,10 @@ class ElementRef {
      */
     constructor(nativeElement) { this.nativeElement = nativeElement; }
 }
-/** @internal */
-/** @nocollapse */
+/**
+ * \@internal
+ * @nocollapse
+ */
 ElementRef.__NG_ELEMENT_ID__ = () => SWITCH_ELEMENT_REF_FACTORY(ElementRef);
 /** @type {?} */
 const SWITCH_ELEMENT_REF_FACTORY__POST_R3__ = injectElementRef;
@@ -16266,8 +16268,10 @@ RendererStyleFlags2[RendererStyleFlags2.DashCase] = 'DashCase';
  */
 class Renderer2 {
 }
-/** @internal */
-/** @nocollapse */
+/**
+ * \@internal
+ * @nocollapse
+ */
 Renderer2.__NG_ELEMENT_ID__ = () => SWITCH_RENDERER2_FACTORY();
 /** @type {?} */
 const SWITCH_RENDERER2_FACTORY__POST_R3__ = injectRenderer2;
@@ -16307,7 +16311,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.0+169.sha-d12db4e');
+const VERSION = new Version('7.2.0+170.sha-f1fb62d');
 
 /**
  * @fileoverview added by tsickle
@@ -19131,8 +19135,10 @@ function flatten$1(list) {
  */
 class TemplateRef {
 }
-/** @internal */
-/** @nocollapse */
+/**
+ * \@internal
+ * @nocollapse
+ */
 TemplateRef.__NG_ELEMENT_ID__ = () => SWITCH_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef);
 /** @type {?} */
 const SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ = injectTemplateRef;
@@ -22756,8 +22762,10 @@ function checkNotEmpty(value, modulePath, exportName) {
  */
 class ViewContainerRef {
 }
-/** @internal */
-/** @nocollapse */
+/**
+ * \@internal
+ * @nocollapse
+ */
 ViewContainerRef.__NG_ELEMENT_ID__ = () => SWITCH_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef);
 /** @type {?} */
 const SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ = injectViewContainerRef;
@@ -22815,8 +22823,10 @@ const SWITCH_VIEW_CONTAINER_REF_FACTORY = SWITCH_VIEW_CONTAINER_REF_FACTORY__PRE
  */
 class ChangeDetectorRef {
 }
-/** @internal */
-/** @nocollapse */
+/**
+ * \@internal
+ * @nocollapse
+ */
 ChangeDetectorRef.__NG_ELEMENT_ID__ = () => SWITCH_CHANGE_DETECTOR_REF_FACTORY();
 /** @type {?} */
 const SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ = injectChangeDetectorRef;

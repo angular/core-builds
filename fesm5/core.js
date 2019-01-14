@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+169.sha-d12db4e
+ * @license Angular v7.2.0+170.sha-f1fb62d
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12948,8 +12948,10 @@ var ElementRef = /** @class */ (function () {
     function ElementRef(nativeElement) {
         this.nativeElement = nativeElement;
     }
-    /** @internal */
-    /** @nocollapse */
+    /**
+     * @internal
+     * @nocollapse
+     */
     ElementRef.__NG_ELEMENT_ID__ = function () { return SWITCH_ELEMENT_REF_FACTORY(ElementRef); };
     return ElementRef;
 }());
@@ -13060,8 +13062,10 @@ var RendererStyleFlags2;
 var Renderer2 = /** @class */ (function () {
     function Renderer2() {
     }
-    /** @internal */
-    /** @nocollapse */
+    /**
+     * @internal
+     * @nocollapse
+     */
     Renderer2.__NG_ELEMENT_ID__ = function () { return SWITCH_RENDERER2_FACTORY(); };
     return Renderer2;
 }());
@@ -13093,7 +13097,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.2.0+169.sha-d12db4e');
+var VERSION = new Version('7.2.0+170.sha-f1fb62d');
 
 /**
  * @license
@@ -15509,8 +15513,10 @@ function flatten$1(list) {
 var TemplateRef = /** @class */ (function () {
     function TemplateRef() {
     }
-    /** @internal */
-    /** @nocollapse */
+    /**
+     * @internal
+     * @nocollapse
+     */
     TemplateRef.__NG_ELEMENT_ID__ = function () { return SWITCH_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef); };
     return TemplateRef;
 }());
@@ -18453,8 +18459,10 @@ function checkNotEmpty(value, modulePath, exportName) {
 var ViewContainerRef = /** @class */ (function () {
     function ViewContainerRef() {
     }
-    /** @internal */
-    /** @nocollapse */
+    /**
+     * @internal
+     * @nocollapse
+     */
     ViewContainerRef.__NG_ELEMENT_ID__ = function () { return SWITCH_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef); };
     return ViewContainerRef;
 }());
@@ -18514,8 +18522,10 @@ var SWITCH_VIEW_CONTAINER_REF_FACTORY = SWITCH_VIEW_CONTAINER_REF_FACTORY__PRE_R
 var ChangeDetectorRef = /** @class */ (function () {
     function ChangeDetectorRef() {
     }
-    /** @internal */
-    /** @nocollapse */
+    /**
+     * @internal
+     * @nocollapse
+     */
     ChangeDetectorRef.__NG_ELEMENT_ID__ = function () { return SWITCH_CHANGE_DETECTOR_REF_FACTORY(); };
     return ChangeDetectorRef;
 }());
