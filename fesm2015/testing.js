@@ -1,10 +1,11 @@
 /**
- * @license Angular v7.2.0+189.sha-3a31a27
+ * @license Angular v7.2.0+190.sha-29bff0f
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, InjectionToken, Injector, ɵresetCompiledComponents, ɵgetInjectableDef, NgZone, ɵRender3ComponentFactory, ɵRender3NgModuleRef, ApplicationInitStatus, Compiler, ɵNG_MODULE_DEF, ɵNG_INJECTOR_DEF, ɵcompileNgModuleDefs, resolveForwardRef, ɵNG_COMPONENT_DEF, ɵcompileComponent, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵflushModuleScopingQueueAsMuchAsPossible, ɵNgModuleFactory, ModuleWithComponentFactories, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, ɵivyEnabled, Optional, SkipSelf } from '@angular/core';
+import { getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, InjectionToken, Injector, ɵresetCompiledComponents, resolveForwardRef, ɵcompileComponent, ɵgetInjectableDef, NgZone, ɵRender3ComponentFactory, ɵRender3NgModuleRef, ApplicationInitStatus, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ɵNG_MODULE_DEF, ɵNG_INJECTOR_DEF, ɵcompileNgModuleDefs, ɵNG_COMPONENT_DEF, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵflushModuleScopingQueueAsMuchAsPossible, ModuleWithComponentFactories, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, ɵivyEnabled, Optional, SkipSelf } from '@angular/core';
+import { ResourceLoader } from '@angular/compiler';
 
 /**
  * @fileoverview added by tsickle
@@ -695,6 +696,115 @@ class AsyncTestCompleter {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Used to resolve resource URLs on `\@Component` when used with JIT compilation.
+ *
+ * Example:
+ * ```
+ * \@Component({
+ *   selector: 'my-comp',
+ *   templateUrl: 'my-comp.html', // This requires asynchronous resolution
+ * })
+ * class MyComponnent{
+ * }
+ *
+ * // Calling `renderComponent` will fail because `MyComponent`'s `\@Compenent.templateUrl`
+ * // needs to be resolved because `renderComponent` is synchronous process.
+ * // renderComponent(MyComponent);
+ *
+ * // Calling `resolveComponentResources` will resolve `\@Compenent.templateUrl` into
+ * // `\@Compenent.template`, which would allow `renderComponent` to proceed in synchronous manner.
+ * // Use browser's `fetch` function as the default resource resolution strategy.
+ * resolveComponentResources(fetch).then(() => {
+ *   // After resolution all URLs have been converted into strings.
+ *   renderComponent(MyComponent);
+ * });
+ *
+ * ```
+ *
+ * NOTE: In AOT the resolution happens during compilation, and so there should be no need
+ * to call this method outside JIT mode.
+ *
+ * @param {?} resourceResolver a function which is responsible to returning a `Promise` of the resolved
+ * URL. Browser's `fetch` method is a good default implementation.
+ * @return {?}
+ */
+function resolveComponentResources(resourceResolver) {
+    // Store all promises which are fetching the resources.
+    /** @type {?} */
+    const urlFetches = [];
+    // Cache so that we don't fetch the same resource more than once.
+    /** @type {?} */
+    const urlMap = new Map();
+    /**
+     * @param {?} url
+     * @return {?}
+     */
+    function cachedResourceResolve(url) {
+        /** @type {?} */
+        let promise = urlMap.get(url);
+        if (!promise) {
+            /** @type {?} */
+            const resp = resourceResolver(url);
+            urlMap.set(url, promise = resp.then(unwrapResponse));
+            urlFetches.push(promise);
+        }
+        return promise;
+    }
+    componentResourceResolutionQueue.forEach((component) => {
+        if (component.templateUrl) {
+            cachedResourceResolve(component.templateUrl).then((template) => {
+                component.template = template;
+                component.templateUrl = undefined;
+            });
+        }
+        /** @type {?} */
+        const styleUrls = component.styleUrls;
+        /** @type {?} */
+        const styles = component.styles || (component.styles = []);
+        /** @type {?} */
+        const styleOffset = component.styles.length;
+        styleUrls && styleUrls.forEach((styleUrl, index) => {
+            styles.push(''); // pre-allocate array.
+            cachedResourceResolve(styleUrl).then((style) => {
+                styles[styleOffset + index] = style;
+                styleUrls.splice(styleUrls.indexOf(styleUrl), 1);
+                if (styleUrls.length == 0) {
+                    component.styleUrls = undefined;
+                }
+            });
+        });
+    });
+    clearResolutionOfComponentResourcesQueue();
+    return Promise.all(urlFetches).then(() => null);
+}
+/** @type {?} */
+const componentResourceResolutionQueue = new Set();
+/**
+ * @return {?}
+ */
+function clearResolutionOfComponentResourcesQueue() {
+    componentResourceResolutionQueue.clear();
+}
+/**
+ * @param {?} response
+ * @return {?}
+ */
+function unwrapResponse(response) {
+    return typeof response == 'string' ? response : response.text();
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
 /** @type {?} */
 let _nextReferenceId = 0;
 class MetadataOverrider {
@@ -992,16 +1102,19 @@ class TestBedRender3 {
         this._directiveOverrides = [];
         this._pipeOverrides = [];
         this._providerOverrides = [];
+        this._compilerProviders = [];
         this._rootProviderOverrides = [];
         this._providerOverridesByToken = new Map();
         this._templateOverrides = new Map();
         this._resolvers = (/** @type {?} */ (null));
         // test module configuration
         this._providers = [];
+        this._compilerOptions = [];
         this._declarations = [];
         this._imports = [];
         this._schemas = [];
         this._activeFixtures = [];
+        this._compilerInjector = (/** @type {?} */ (null));
         this._moduleRef = (/** @type {?} */ (null));
         this._testModuleType = (/** @type {?} */ (null));
         this._instantiated = false;
@@ -1228,11 +1341,13 @@ class TestBedRender3 {
         this._resolvers = (/** @type {?} */ (null));
         // reset test module config
         this._providers = [];
+        this._compilerOptions = [];
         this._declarations = [];
         this._imports = [];
         this._schemas = [];
         this._moduleRef = (/** @type {?} */ (null));
         this._testModuleType = (/** @type {?} */ (null));
+        this._compilerInjector = (/** @type {?} */ (null));
         this._instantiated = false;
         this._activeFixtures.forEach((fixture) => {
             try {
@@ -1251,6 +1366,7 @@ class TestBedRender3 {
             Object.defineProperty(type, value[0], value[1]);
         });
         this._initiaNgDefs.clear();
+        clearResolutionOfComponentResourcesQueue();
     }
     /**
      * @param {?} config
@@ -1262,6 +1378,7 @@ class TestBedRender3 {
         }
         if (config.providers) {
             this._providerOverrides.push(...config.providers);
+            this._compilerProviders.push(...config.providers);
         }
     }
     /**
@@ -1287,9 +1404,40 @@ class TestBedRender3 {
      * @return {?}
      */
     compileComponents() {
-        // assume for now that components don't use templateUrl / stylesUrl to unblock further testing
-        // TODO(pk): plug into the ivy's resource fetching pipeline
-        return Promise.resolve();
+        /** @type {?} */
+        const resolvers = this._getResolvers();
+        /** @type {?} */
+        const declarations = flatten(this._declarations || EMPTY_ARRAY, resolveForwardRef);
+        /** @type {?} */
+        const componentOverrides = [];
+        // Compile the components declared by this module
+        declarations.forEach(declaration => {
+            /** @type {?} */
+            const component = resolvers.component.resolve(declaration);
+            if (component) {
+                // We make a copy of the metadata to ensure that we don't mutate the original metadata
+                /** @type {?} */
+                const metadata = Object.assign({}, component);
+                ɵcompileComponent(declaration, metadata);
+                componentOverrides.push([declaration, metadata]);
+            }
+        });
+        /** @type {?} */
+        let resourceLoader;
+        return resolveComponentResources(url => {
+            if (!resourceLoader) {
+                resourceLoader = this.compilerInjector.get(ResourceLoader);
+            }
+            return Promise.resolve(resourceLoader.get(url));
+        })
+            .then(() => {
+            componentOverrides.forEach((override) => {
+                // Once resolved, we override the existing metadata, ensuring that the resolved
+                // resources
+                // are only available until the next TestBed reset (when `resetTestingModule` is called)
+                this.overrideComponent(override[0], { set: override[1] });
+            });
+        });
     }
     /**
      * @param {?} token
@@ -1535,6 +1683,34 @@ class TestBedRender3 {
             { type: NgModule, args: [{ providers, declarations, imports, schemas, jit: true },] },
         ];
         return (/** @type {?} */ (DynamicTestModule));
+    }
+    /**
+     * @return {?}
+     */
+    get compilerInjector() {
+        if (this._compilerInjector !== undefined) {
+            this._compilerInjector;
+        }
+        /** @type {?} */
+        const providers = [];
+        /** @type {?} */
+        const compilerOptions = this.platform.injector.get(COMPILER_OPTIONS);
+        compilerOptions.forEach(opts => {
+            if (opts.providers) {
+                providers.push(opts.providers);
+            }
+        });
+        providers.push(...this._compilerProviders);
+        // TODO(ocombe): make this work with an Injector directly instead of creating a module for it
+        class CompilerModule {
+        }
+        CompilerModule.decorators = [
+            { type: NgModule, args: [{ providers },] },
+        ];
+        /** @type {?} */
+        const CompilerModuleFactory = new ɵNgModuleFactory(CompilerModule);
+        this._compilerInjector = CompilerModuleFactory.create(this.platform.injector).injector;
+        return this._compilerInjector;
     }
     /**
      * @private

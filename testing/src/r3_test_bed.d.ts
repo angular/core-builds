@@ -98,15 +98,18 @@ export declare class TestBedRender3 implements Injector, TestBed {
     private _directiveOverrides;
     private _pipeOverrides;
     private _providerOverrides;
+    private _compilerProviders;
     private _rootProviderOverrides;
     private _providerOverridesByToken;
     private _templateOverrides;
     private _resolvers;
     private _providers;
+    private _compilerOptions;
     private _declarations;
     private _imports;
     private _schemas;
     private _activeFixtures;
+    private _compilerInjector;
     private _moduleRef;
     private _testModuleType;
     private _instantiated;
@@ -172,6 +175,7 @@ export declare class TestBedRender3 implements Injector, TestBed {
     private _getResolvers;
     private _assertNotInstantiated;
     private _createTestModule;
+    readonly compilerInjector: Injector;
     private _getMetaWithOverrides;
     /**
      * Check whether the module scoping queue should be flushed, and flush it if needed.

@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+189.sha-3a31a27
+ * @license Angular v7.2.0+190.sha-29bff0f
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3113,7 +3113,7 @@
                 });
             });
         });
-        componentResourceResolutionQueue.clear();
+        clearResolutionOfComponentResourcesQueue();
         return Promise.all(urlFetches).then(function () { return null; });
     }
     var componentResourceResolutionQueue = new Set();
@@ -3124,6 +3124,9 @@
     }
     function componentNeedsResolution(component) {
         return component.templateUrl || component.styleUrls && component.styleUrls.length;
+    }
+    function clearResolutionOfComponentResourcesQueue() {
+        componentResourceResolutionQueue.clear();
     }
     function unwrapResponse(response) {
         return typeof response == 'string' ? response : response.text();
@@ -13252,7 +13255,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0+189.sha-3a31a27');
+    var VERSION = new Version('7.2.0+190.sha-29bff0f');
 
     /**
      * @license
@@ -24821,6 +24824,7 @@
     exports.ɵAPP_ROOT = APP_ROOT;
     exports.ɵivyEnabled = ivyEnabled;
     exports.ɵCodegenComponentFactoryResolver = CodegenComponentFactoryResolver;
+    exports.ɵclearResolutionOfComponentResourcesQueue = clearResolutionOfComponentResourcesQueue;
     exports.ɵresolveComponentResources = resolveComponentResources;
     exports.ɵReflectionCapabilities = ReflectionCapabilities;
     exports.ɵRenderDebugInfo = RenderDebugInfo;
