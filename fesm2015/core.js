@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+179.sha-6930451
+ * @license Angular v7.2.0+180.sha-da8ee29
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7753,6 +7753,30 @@ function getSanitizer() {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * Determine if the argument is shaped like a Promise
+ */
+function isPromise(obj) {
+    // allow any Promise/A+ compliant thenable.
+    // It's up to the caller to ensure that obj.then conforms to the spec
+    return !!obj && typeof obj.then === 'function';
+}
+/**
+ * Determine if the argument is an Observable
+ */
+function isObservable(obj) {
+    // TODO: use isObservable once we update pass rxjs 6.1
+    // https://github.com/ReactiveX/rxjs/blob/master/CHANGELOG.md#610-2018-05-03
+    return !!obj && typeof obj.subscribe === 'function';
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 function normalizeDebugBindingName(name) {
     // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
     name = camelCaseToDashCase(name.replace(/[$@]/g, '_'));
@@ -12055,7 +12079,12 @@ function listener(eventName, listenerFn, useCapture = false, eventTargetResolver
                 /** @type {?} */
                 const directive = unwrapOnChangesDirectiveWrapper(lView[directiveIndex]);
                 /** @type {?} */
-                const subscription = directive[minifiedName].subscribe(listenerFn);
+                const output = directive[minifiedName];
+                if (ngDevMode && !isObservable(output)) {
+                    throw new Error(`@Output ${minifiedName} not initialized in '${directive.constructor.name}'.`);
+                }
+                /** @type {?} */
+                const subscription = output.subscribe(listenerFn);
                 /** @type {?} */
                 const idx = lCleanup.length;
                 lCleanup.push(listenerFn, subscription);
@@ -16318,7 +16347,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.0+179.sha-6930451');
+const VERSION = new Version('7.2.0+180.sha-da8ee29');
 
 /**
  * @fileoverview added by tsickle
@@ -20734,30 +20763,6 @@ const SWITCH_COMPILE_NGMODULE = SWITCH_COMPILE_NGMODULE__POST_R3__;
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Determine if the argument is shaped like a Promise
- */
-function isPromise(obj) {
-    // allow any Promise/A+ compliant thenable.
-    // It's up to the caller to ensure that obj.then conforms to the spec
-    return !!obj && typeof obj.then === 'function';
-}
-/**
- * Determine if the argument is an Observable
- */
-function isObservable(obj) {
-    // TODO: use isObservable once we update pass rxjs 6.1
-    // https://github.com/ReactiveX/rxjs/blob/master/CHANGELOG.md#610-2018-05-03
-    return !!obj && typeof obj.subscribe === 'function';
-}
 
 /**
  * @fileoverview added by tsickle
