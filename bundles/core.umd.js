@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+171.sha-cfb4145
+ * @license Angular v7.2.0+173.sha-b5c2ef2
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4452,8 +4452,9 @@
     function getOrCreateCurrentQueries(QueryType) {
         var lView = getLView();
         var currentQueries = lView[QUERIES];
-        // if this is the first content query on a node, any existing LQueries needs to be cloned
-        // in subsequent template passes, the cloning occurs before directive instantiation.
+        // If this is the first content query on a node, any existing LQueries needs to be cloned.
+        // In subsequent template passes, the cloning occurs before directive instantiation
+        // in `createDirectivesAndLocals`.
         if (previousOrParentTNode && previousOrParentTNode !== lView[HOST_NODE] &&
             !isContentQueryHost(previousOrParentTNode)) {
             currentQueries && (currentQueries = lView[QUERIES] = currentQueries.clone());
@@ -9529,18 +9530,26 @@
      * @param localRefs Local refs of the node in question
      * @param localRefExtractor mapping function that extracts local ref value from TNode
      */
-    function createDirectivesAndLocals(tView, viewData, localRefs, localRefExtractor) {
+    function createDirectivesAndLocals(tView, lView, localRefs, localRefExtractor) {
         if (localRefExtractor === void 0) { localRefExtractor = getNativeByTNode; }
         if (!getBindingsEnabled())
             return;
         var previousOrParentTNode = getPreviousOrParentTNode();
         if (getFirstTemplatePass()) {
             ngDevMode && ngDevMode.firstTemplatePass++;
-            resolveDirectives(tView, viewData, findDirectiveMatches(tView, viewData, previousOrParentTNode), previousOrParentTNode, localRefs || null);
+            resolveDirectives(tView, lView, findDirectiveMatches(tView, lView, previousOrParentTNode), previousOrParentTNode, localRefs || null);
         }
-        instantiateAllDirectives(tView, viewData, previousOrParentTNode);
-        invokeDirectivesHostBindings(tView, viewData, previousOrParentTNode);
-        saveResolvedLocalsInData(viewData, previousOrParentTNode, localRefExtractor);
+        else {
+            // During first template pass, queries are created or cloned when first requested
+            // using `getOrCreateCurrentQueries`. For subsequent template passes, we clone
+            // any current LQueries here up-front if the current node hosts a content query.
+            if (isContentQueryHost(getPreviousOrParentTNode()) && lView[QUERIES]) {
+                lView[QUERIES] = lView[QUERIES].clone();
+            }
+        }
+        instantiateAllDirectives(tView, lView, previousOrParentTNode);
+        invokeDirectivesHostBindings(tView, lView, previousOrParentTNode);
+        saveResolvedLocalsInData(lView, previousOrParentTNode, localRefExtractor);
     }
     /**
      * Takes a list of local names and indices and pushes the resolved local variable values
@@ -13142,7 +13151,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0+171.sha-cfb4145');
+    var VERSION = new Version('7.2.0+173.sha-b5c2ef2');
 
     /**
      * @license
