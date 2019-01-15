@@ -53,13 +53,6 @@ export declare function defineComponent<T>(componentDefinition: {
      */
     vars: number;
     /**
-     * Static attributes to set on host element.
-     *
-     * Even indices: attribute name
-     * Odd indices: attribute value
-     */
-    attributes?: string[];
-    /**
      * A map of input names.
      *
      * The format is in: `{[actualPropertyName: string]:(string|[string, string])}`.
@@ -323,13 +316,6 @@ export declare const defineDirective: <T>(directiveDefinition: {
      * Factory method used to create an instance of directive.
      */
     factory: (t: Type<T> | null) => T;
-    /**
-     * Static attributes to set on host element.
-     *
-     * Even indices: attribute name
-     * Odd indices: attribute value
-     */
-    attributes?: string[] | undefined;
     /**
      * A map of input names.
      *
