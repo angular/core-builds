@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+174.sha-fa53150
+ * @license Angular v7.2.0+176.sha-60fecc1
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6342,13 +6342,11 @@ function discoverLocalRefs(lView, nodeIndex) {
     if (tNode && tNode.localNames) {
         /** @type {?} */
         const result = {};
+        /** @type {?} */
+        let localIndex = tNode.index + 1;
         for (let i = 0; i < tNode.localNames.length; i += 2) {
-            /** @type {?} */
-            const localRefName = tNode.localNames[i];
-            /** @type {?} */
-            const directiveIndex = (/** @type {?} */ (tNode.localNames[i + 1]));
-            result[localRefName] =
-                directiveIndex === -1 ? (/** @type {?} */ (getNativeByTNode(tNode, lView))) : lView[directiveIndex];
+            result[tNode.localNames[i]] = lView[localIndex];
+            localIndex++;
         }
         return result;
     }
@@ -16241,7 +16239,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.0+174.sha-fa53150');
+const VERSION = new Version('7.2.0+176.sha-60fecc1');
 
 /**
  * @fileoverview added by tsickle
