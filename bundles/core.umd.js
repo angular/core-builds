@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+177.sha-06e5bf1
+ * @license Angular v7.2.0+178.sha-e62eeed
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7443,193 +7443,6 @@
     }
 
     /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var NG_TEMPLATE_SELECTOR = 'ng-template';
-    function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
-        var nodeClassesLen = nodeClassAttrVal.length;
-        var matchIndex = nodeClassAttrVal.indexOf(cssClassToMatch);
-        var matchEndIdx = matchIndex + cssClassToMatch.length;
-        if (matchIndex === -1 // no match
-            || (matchIndex > 0 && nodeClassAttrVal[matchIndex - 1] !== ' ') // no space before
-            ||
-                (matchEndIdx < nodeClassesLen && nodeClassAttrVal[matchEndIdx] !== ' ')) // no space after
-         {
-            return false;
-        }
-        return true;
-    }
-    /**
-     * Function that checks whether a given tNode matches tag-based selector and has a valid type.
-     *
-     * Matching can be perfomed in 2 modes: projection mode (when we project nodes) and regular
-     * directive matching mode. In "projection" mode, we do not need to check types, so if tag name
-     * matches selector, we declare a match. In "directive matching" mode, we also check whether tNode
-     * is of expected type:
-     * - whether tNode has either Element or ElementContainer type
-     * - or if we want to match "ng-template" tag, we check for Container type
-     */
-    function hasTagAndTypeMatch(tNode, currentSelector, isProjectionMode) {
-        return currentSelector === tNode.tagName &&
-            (isProjectionMode ||
-                (tNode.type === 3 /* Element */ || tNode.type === 4 /* ElementContainer */) ||
-                (tNode.type === 0 /* Container */ && currentSelector === NG_TEMPLATE_SELECTOR));
-    }
-    /**
-     * A utility function to match an Ivy node static data against a simple CSS selector
-     *
-     * @param node static data to match
-     * @param selector
-     * @returns true if node matches the selector.
-     */
-    function isNodeMatchingSelector(tNode, selector, isProjectionMode) {
-        ngDevMode && assertDefined(selector[0], 'Selector should have a tag name');
-        var mode = 4 /* ELEMENT */;
-        var nodeAttrs = tNode.attrs;
-        var selectOnlyMarkerIdx = nodeAttrs ? nodeAttrs.indexOf(3 /* SelectOnly */) : -1;
-        // When processing ":not" selectors, we skip to the next ":not" if the
-        // current one doesn't match
-        var skipToNextSelector = false;
-        for (var i = 0; i < selector.length; i++) {
-            var current = selector[i];
-            if (typeof current === 'number') {
-                // If we finish processing a :not selector and it hasn't failed, return false
-                if (!skipToNextSelector && !isPositive(mode) && !isPositive(current)) {
-                    return false;
-                }
-                // If we are skipping to the next :not() and this mode flag is positive,
-                // it's a part of the current :not() selector, and we should keep skipping
-                if (skipToNextSelector && isPositive(current))
-                    continue;
-                skipToNextSelector = false;
-                mode = current | (mode & 1 /* NOT */);
-                continue;
-            }
-            if (skipToNextSelector)
-                continue;
-            if (mode & 4 /* ELEMENT */) {
-                mode = 2 /* ATTRIBUTE */ | mode & 1 /* NOT */;
-                if (current !== '' && !hasTagAndTypeMatch(tNode, current, isProjectionMode) ||
-                    current === '' && selector.length === 1) {
-                    if (isPositive(mode))
-                        return false;
-                    skipToNextSelector = true;
-                }
-            }
-            else {
-                var attrName = mode & 8 /* CLASS */ ? 'class' : current;
-                var attrIndexInNode = findAttrIndexInNode(attrName, nodeAttrs);
-                if (attrIndexInNode === -1) {
-                    if (isPositive(mode))
-                        return false;
-                    skipToNextSelector = true;
-                    continue;
-                }
-                var selectorAttrValue = mode & 8 /* CLASS */ ? current : selector[++i];
-                if (selectorAttrValue !== '') {
-                    var nodeAttrValue = void 0;
-                    var maybeAttrName = nodeAttrs[attrIndexInNode];
-                    if (selectOnlyMarkerIdx > -1 && attrIndexInNode > selectOnlyMarkerIdx) {
-                        nodeAttrValue = '';
-                    }
-                    else {
-                        ngDevMode && assertNotEqual(maybeAttrName, 0 /* NamespaceURI */, 'We do not match directives on namespaced attributes');
-                        nodeAttrValue = nodeAttrs[attrIndexInNode + 1];
-                    }
-                    if (mode & 8 /* CLASS */ &&
-                        !isCssClassMatching(nodeAttrValue, selectorAttrValue) ||
-                        mode & 2 /* ATTRIBUTE */ && selectorAttrValue !== nodeAttrValue) {
-                        if (isPositive(mode))
-                            return false;
-                        skipToNextSelector = true;
-                    }
-                }
-            }
-        }
-        return isPositive(mode) || skipToNextSelector;
-    }
-    function isPositive(mode) {
-        return (mode & 1 /* NOT */) === 0;
-    }
-    /**
-     * Examines an attributes definition array from a node to find the index of the
-     * attribute with the specified name.
-     *
-     * NOTE: Will not find namespaced attributes.
-     *
-     * @param name the name of the attribute to find
-     * @param attrs the attribute array to examine
-     */
-    function findAttrIndexInNode(name, attrs) {
-        if (attrs === null)
-            return -1;
-        var selectOnlyMode = false;
-        var i = 0;
-        while (i < attrs.length) {
-            var maybeAttrName = attrs[i];
-            if (maybeAttrName === name) {
-                return i;
-            }
-            else if (maybeAttrName === 0 /* NamespaceURI */) {
-                // NOTE(benlesh): will not find namespaced attributes. This is by design.
-                i += 4;
-            }
-            else {
-                if (maybeAttrName === 3 /* SelectOnly */) {
-                    selectOnlyMode = true;
-                }
-                i += selectOnlyMode ? 1 : 2;
-            }
-        }
-        return -1;
-    }
-    function isNodeMatchingSelectorList(tNode, selector, isProjectionMode) {
-        if (isProjectionMode === void 0) { isProjectionMode = false; }
-        for (var i = 0; i < selector.length; i++) {
-            if (isNodeMatchingSelector(tNode, selector[i], isProjectionMode)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    function getProjectAsAttrValue(tNode) {
-        var nodeAttrs = tNode.attrs;
-        if (nodeAttrs != null) {
-            var ngProjectAsAttrIdx = nodeAttrs.indexOf(NG_PROJECT_AS_ATTR_NAME);
-            // only check for ngProjectAs in attribute names, don't accidentally match attribute's value
-            // (attribute names are stored at even indexes)
-            if ((ngProjectAsAttrIdx & 1) === 0) {
-                return nodeAttrs[ngProjectAsAttrIdx + 1];
-            }
-        }
-        return null;
-    }
-    /**
-     * Checks a given node against matching selectors and returns
-     * selector index (or 0 if none matched).
-     *
-     * This function takes into account the ngProjectAs attribute: if present its value will be compared
-     * to the raw (un-parsed) CSS selector instead of using standard selector matching logic.
-     */
-    function matchingSelectorIndex(tNode, selectors, textSelectors) {
-        var ngProjectAsAttrVal = getProjectAsAttrValue(tNode);
-        for (var i = 0; i < selectors.length; i++) {
-            // if a node has the ngProjectAs attribute match it against unparsed selector
-            // match a node against a parsed selector only if ngProjectAs attribute is not present
-            if (ngProjectAsAttrVal === textSelectors[i] ||
-                ngProjectAsAttrVal === null &&
-                    isNodeMatchingSelectorList(tNode, selectors[i], /* isProjectionMode */ true)) {
-                return i + 1; // first matching selector "captures" a given node
-            }
-        }
-        return 0;
-    }
-
-    /**
      * Combines the binding value and a factory for an animation player.
      *
      * Used to bind a player to an element template binding (currently only
@@ -9013,6 +8826,213 @@
             context[6 /* CachedClassValueOrInitialClassString */] = className;
         }
         return className;
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var NG_TEMPLATE_SELECTOR = 'ng-template';
+    function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
+        var nodeClassesLen = nodeClassAttrVal.length;
+        var matchIndex = nodeClassAttrVal.indexOf(cssClassToMatch);
+        var matchEndIdx = matchIndex + cssClassToMatch.length;
+        if (matchIndex === -1 // no match
+            || (matchIndex > 0 && nodeClassAttrVal[matchIndex - 1] !== ' ') // no space before
+            ||
+                (matchEndIdx < nodeClassesLen && nodeClassAttrVal[matchEndIdx] !== ' ')) // no space after
+         {
+            return false;
+        }
+        return true;
+    }
+    /**
+     * Function that checks whether a given tNode matches tag-based selector and has a valid type.
+     *
+     * Matching can be perfomed in 2 modes: projection mode (when we project nodes) and regular
+     * directive matching mode. In "projection" mode, we do not need to check types, so if tag name
+     * matches selector, we declare a match. In "directive matching" mode, we also check whether tNode
+     * is of expected type:
+     * - whether tNode has either Element or ElementContainer type
+     * - or if we want to match "ng-template" tag, we check for Container type
+     */
+    function hasTagAndTypeMatch(tNode, currentSelector, isProjectionMode) {
+        return currentSelector === tNode.tagName &&
+            (isProjectionMode ||
+                (tNode.type === 3 /* Element */ || tNode.type === 4 /* ElementContainer */) ||
+                (tNode.type === 0 /* Container */ && currentSelector === NG_TEMPLATE_SELECTOR));
+    }
+    /**
+     * A utility function to match an Ivy node static data against a simple CSS selector
+     *
+     * @param node static data to match
+     * @param selector
+     * @returns true if node matches the selector.
+     */
+    function isNodeMatchingSelector(tNode, selector, isProjectionMode) {
+        ngDevMode && assertDefined(selector[0], 'Selector should have a tag name');
+        var mode = 4 /* ELEMENT */;
+        var nodeAttrs = tNode.attrs;
+        var selectOnlyMarkerIdx = nodeAttrs ? nodeAttrs.indexOf(3 /* SelectOnly */) : -1;
+        // When processing ":not" selectors, we skip to the next ":not" if the
+        // current one doesn't match
+        var skipToNextSelector = false;
+        for (var i = 0; i < selector.length; i++) {
+            var current = selector[i];
+            if (typeof current === 'number') {
+                // If we finish processing a :not selector and it hasn't failed, return false
+                if (!skipToNextSelector && !isPositive(mode) && !isPositive(current)) {
+                    return false;
+                }
+                // If we are skipping to the next :not() and this mode flag is positive,
+                // it's a part of the current :not() selector, and we should keep skipping
+                if (skipToNextSelector && isPositive(current))
+                    continue;
+                skipToNextSelector = false;
+                mode = current | (mode & 1 /* NOT */);
+                continue;
+            }
+            if (skipToNextSelector)
+                continue;
+            if (mode & 4 /* ELEMENT */) {
+                mode = 2 /* ATTRIBUTE */ | mode & 1 /* NOT */;
+                if (current !== '' && !hasTagAndTypeMatch(tNode, current, isProjectionMode) ||
+                    current === '' && selector.length === 1) {
+                    if (isPositive(mode))
+                        return false;
+                    skipToNextSelector = true;
+                }
+            }
+            else {
+                var selectorAttrValue = mode & 8 /* CLASS */ ? current : selector[++i];
+                // special case for matching against classes when a tNode has been instantiated with
+                // class and style values as separate attribute values (e.g. ['title', CLASS, 'foo'])
+                if ((mode & 8 /* CLASS */) && tNode.stylingTemplate) {
+                    if (!isCssClassMatching(readClassValueFromTNode(tNode), selectorAttrValue)) {
+                        if (isPositive(mode))
+                            return false;
+                        skipToNextSelector = true;
+                    }
+                    continue;
+                }
+                var attrName = (mode & 8 /* CLASS */) ? 'class' : current;
+                var attrIndexInNode = findAttrIndexInNode(attrName, nodeAttrs);
+                if (attrIndexInNode === -1) {
+                    if (isPositive(mode))
+                        return false;
+                    skipToNextSelector = true;
+                    continue;
+                }
+                if (selectorAttrValue !== '') {
+                    var nodeAttrValue = void 0;
+                    var maybeAttrName = nodeAttrs[attrIndexInNode];
+                    if (selectOnlyMarkerIdx > -1 && attrIndexInNode > selectOnlyMarkerIdx) {
+                        nodeAttrValue = '';
+                    }
+                    else {
+                        ngDevMode && assertNotEqual(maybeAttrName, 0 /* NamespaceURI */, 'We do not match directives on namespaced attributes');
+                        nodeAttrValue = nodeAttrs[attrIndexInNode + 1];
+                    }
+                    var compareAgainstClassName = mode & 8 /* CLASS */ ? nodeAttrValue : null;
+                    if (compareAgainstClassName &&
+                        !isCssClassMatching(compareAgainstClassName, selectorAttrValue) ||
+                        mode & 2 /* ATTRIBUTE */ && selectorAttrValue !== nodeAttrValue) {
+                        if (isPositive(mode))
+                            return false;
+                        skipToNextSelector = true;
+                    }
+                }
+            }
+        }
+        return isPositive(mode) || skipToNextSelector;
+    }
+    function isPositive(mode) {
+        return (mode & 1 /* NOT */) === 0;
+    }
+    function readClassValueFromTNode(tNode) {
+        // comparing against CSS class values is complex because the compiler doesn't place them as
+        // regular attributes when an element is created. Instead, the classes (and styles for
+        // that matter) are placed in a special styling context that is used for resolving all
+        // class/style values across static attributes, [style]/[class] and [style.prop]/[class.name]
+        // bindings. Therefore if and when the styling context exists then the class values are to be
+        // extracted by the context helper code below...
+        return tNode.stylingTemplate ? getInitialClassNameValue(tNode.stylingTemplate) : '';
+    }
+    /**
+     * Examines an attributes definition array from a node to find the index of the
+     * attribute with the specified name.
+     *
+     * NOTE: Will not find namespaced attributes.
+     *
+     * @param name the name of the attribute to find
+     * @param attrs the attribute array to examine
+     */
+    function findAttrIndexInNode(name, attrs) {
+        if (attrs === null)
+            return -1;
+        var selectOnlyMode = false;
+        var i = 0;
+        while (i < attrs.length) {
+            var maybeAttrName = attrs[i];
+            if (maybeAttrName === name) {
+                return i;
+            }
+            else if (maybeAttrName === 0 /* NamespaceURI */) {
+                // NOTE(benlesh): will not find namespaced attributes. This is by design.
+                i += 4;
+            }
+            else {
+                if (maybeAttrName === 3 /* SelectOnly */) {
+                    selectOnlyMode = true;
+                }
+                i += selectOnlyMode ? 1 : 2;
+            }
+        }
+        return -1;
+    }
+    function isNodeMatchingSelectorList(tNode, selector, isProjectionMode) {
+        if (isProjectionMode === void 0) { isProjectionMode = false; }
+        for (var i = 0; i < selector.length; i++) {
+            if (isNodeMatchingSelector(tNode, selector[i], isProjectionMode)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    function getProjectAsAttrValue(tNode) {
+        var nodeAttrs = tNode.attrs;
+        if (nodeAttrs != null) {
+            var ngProjectAsAttrIdx = nodeAttrs.indexOf(NG_PROJECT_AS_ATTR_NAME);
+            // only check for ngProjectAs in attribute names, don't accidentally match attribute's value
+            // (attribute names are stored at even indexes)
+            if ((ngProjectAsAttrIdx & 1) === 0) {
+                return nodeAttrs[ngProjectAsAttrIdx + 1];
+            }
+        }
+        return null;
+    }
+    /**
+     * Checks a given node against matching selectors and returns
+     * selector index (or 0 if none matched).
+     *
+     * This function takes into account the ngProjectAs attribute: if present its value will be compared
+     * to the raw (un-parsed) CSS selector instead of using standard selector matching logic.
+     */
+    function matchingSelectorIndex(tNode, selectors, textSelectors) {
+        var ngProjectAsAttrVal = getProjectAsAttrValue(tNode);
+        for (var i = 0; i < selectors.length; i++) {
+            // if a node has the ngProjectAs attribute match it against unparsed selector
+            // match a node against a parsed selector only if ngProjectAs attribute is not present
+            if (ngProjectAsAttrVal === textSelectors[i] ||
+                ngProjectAsAttrVal === null &&
+                    isNodeMatchingSelectorList(tNode, selectors[i], /* isProjectionMode */ true)) {
+                return i + 1; // first matching selector "captures" a given node
+            }
+        }
+        return 0;
     }
 
     /**
@@ -13064,7 +13084,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0+177.sha-06e5bf1');
+    var VERSION = new Version('7.2.0+178.sha-e62eeed');
 
     /**
      * @license
