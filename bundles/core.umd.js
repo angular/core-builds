@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0-rc.0+123.sha-42ccea5
+ * @license Angular v7.2.0-rc.0+124.sha-9faad4b
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -231,7 +231,7 @@
      *
      * Use an `InjectionToken` whenever the type you are injecting is not reified (does not have a
      * runtime representation) such as when injecting an interface, callable type, array or
-     * parametrized type.
+     * parameterized type.
      *
      * `InjectionToken` is parameterized on `T` which is the type of object which will be returned by
      * the `Injector`. This provides additional level of type safety.
@@ -10344,7 +10344,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.0-rc.0+123.sha-42ccea5');
+    var VERSION = new Version('7.2.0-rc.0+124.sha-9faad4b');
 
     /**
      * @license
