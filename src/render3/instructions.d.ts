@@ -5,9 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { InjectionToken } from '../di/injection_token';
-import { Injector } from '../di/injector';
-import { InjectFlags } from '../di/injector_compatibility';
+import { InjectFlags, InjectionToken, Injector } from '../di';
 import { Type } from '../interface/type';
 import { QueryList } from '../linker';
 import { Sanitizer } from '../sanitization/security';

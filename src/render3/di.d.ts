@@ -5,9 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { InjectionToken } from '../di/injection_token';
+import { InjectFlags, InjectionToken } from '../di';
 import { Injector } from '../di/injector';
-import { InjectFlags } from '../di/injector_compatibility';
 import { Type } from '../interface/type';
 import { RelativeInjectorLocation } from './interfaces/injector';
 import { TContainerNode, TElementContainerNode, TElementNode, TNode } from './interfaces/node';
@@ -83,6 +82,10 @@ export declare function injectAttributeImpl(tNode: TNode, attrNameToInject: stri
  * Look for the injector providing the token by walking up the node injector tree and then
  * the module injector tree.
  *
+ * This function patches `token` with `__NG_ELEMENT_ID__` which contains the id for the bloom
+ * filter. Negative values are reserved for special objects.
+ *   - `-1` is reserved for injecting `Injector` (implemented by `NodeInjector`)
+ *
  * @param tNode The Node where the search for the injector should start
  * @param lView The `LView` that contains the `tNode`
  * @param token The token to look for
@@ -120,10 +123,10 @@ export declare function getNodeInjectable(tData: TData, lData: LView, index: num
  *
  * @param token the injection token
  * @returns the matching bit to check in the bloom filter or `null` if the token is not known.
+ *   When the returned value is negative then it represents special values such as `Injector`.
  */
 export declare function bloomHashBitOrFactory(token: Type<any> | InjectionToken<any> | string): number | Function | undefined;
 export declare function bloomHasToken(bloomHash: number, injectorIndex: number, injectorView: LView | TData): boolean;
-export declare function injectInjector(): NodeInjector;
 export declare class NodeInjector implements Injector {
     private _tNode;
     private _lView;

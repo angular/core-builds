@@ -7,6 +7,7 @@
  */
 import { InjectionToken } from '../../di/injection_token';
 import { Injector } from '../../di/injector';
+import { SimpleChanges } from '../../interface/simple_change';
 import { Type } from '../../interface/type';
 import { QueryList } from '../../linker';
 import { Sanitizer } from '../../sanitization/security';
@@ -464,7 +465,7 @@ export interface RootContext {
  * Even indices: Directive index
  * Odd indices: Hook function
  */
-export declare type HookData = (number | (() => void))[];
+export declare type HookData = (number | (() => void) | ((changes: SimpleChanges) => void))[];
 /**
  * Static data that corresponds to the instance-specific data array on an LView.
  *
