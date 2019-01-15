@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+190.sha-29bff0f
+ * @license Angular v7.2.0+192.sha-f983e99
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9224,8 +9224,6 @@ function createEmbeddedViewAndNode(tView, context, declarationView, renderer, qu
 function renderEmbeddedTemplate(viewToRender, tView, context) {
     var _isParent = getIsParent();
     var _previousOrParentTNode = getPreviousOrParentTNode();
-    setIsParent(true);
-    setPreviousOrParentTNode(null);
     var oldView;
     if (viewToRender[FLAGS] & 128 /* IsRoot */) {
         // This is a root view inside the view tree
@@ -13139,7 +13137,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.2.0+190.sha-29bff0f');
+var VERSION = new Version('7.2.0+192.sha-f983e99');
 
 /**
  * @license
