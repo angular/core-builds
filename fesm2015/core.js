@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+178.sha-e62eeed
+ * @license Angular v7.2.0+179.sha-6930451
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4485,7 +4485,6 @@ function defineComponent(componentDefinition) {
         hostBindings: componentDefinition.hostBindings || null,
         contentQueries: componentDefinition.contentQueries || null,
         contentQueriesRefresh: componentDefinition.contentQueriesRefresh || null,
-        attributes: componentDefinition.attributes || null,
         declaredInputs: declaredInputs,
         inputs: (/** @type {?} */ (null)),
         // assigned in noSideEffects
@@ -9311,10 +9310,11 @@ function initializeStaticContext(attrs) {
  * @param {?} context the existing styling context
  * @param {?} attrs an array of new static styling attributes that will be
  *              assigned to the context
+ * @param {?} startingIndex
  * @param {?} directive the directive instance with which static data is associated with.
  * @return {?}
  */
-function patchContextWithStaticAttrs(context, attrs, directive) {
+function patchContextWithStaticAttrs(context, attrs, startingIndex, directive) {
     // If the styling context has already been patched with the given directive's bindings,
     // then there is no point in doing it again. The reason why this may happen (the directive
     // styling being patched twice) is because the `stylingBinding` function is called each time
@@ -9330,7 +9330,7 @@ function patchContextWithStaticAttrs(context, attrs, directive) {
         let initialStyles = null;
         /** @type {?} */
         let mode = -1;
-        for (let i = 0; i < attrs.length; i++) {
+        for (let i = startingIndex; i < attrs.length; i++) {
             /** @type {?} */
             const attr = attrs[i];
             if (typeof attr == 'number') {
@@ -11914,9 +11914,31 @@ function createViewBlueprint(bindingStartIndex, initialViewLength) {
     return blueprint;
 }
 /**
- * @param {?} native
- * @param {?} attrs
- * @return {?}
+ * Assigns all attribute values to the provided element via the inferred renderer.
+ *
+ * This function accepts two forms of attribute entries:
+ *
+ * default: (key, value):
+ *  attrs = [key1, value1, key2, value2]
+ *
+ * namespaced: (NAMESPACE_MARKER, uri, name, value)
+ *  attrs = [NAMESPACE_MARKER, uri, name, value, NAMESPACE_MARKER, uri, name, value]
+ *
+ * The `attrs` array can contain a mix of both the default and namespaced entries.
+ * The "default" values are set without a marker, but if the function comes across
+ * a marker value then it will attempt to set a namespaced value. If the marker is
+ * not of a namespaced value then the function will quit and return the index value
+ * where it stopped during the iteration of the attrs array.
+ *
+ * See [AttributeMarker] to understand what the namespace marker value is.
+ *
+ * Note that this instruction does not support assigning style and class values to
+ * an element. See `elementStart` and `elementHostAttrs` to learn how styling values
+ * are applied to an element.
+ *
+ * @param {?} native The element that the attributes will be assigned to
+ * @param {?} attrs The attribute array of values that will be assigned to the element
+ * @return {?} the index value that was last accessed in the attributes array
  */
 function setUpAttributes(native, attrs) {
     /** @type {?} */
@@ -11927,31 +11949,33 @@ function setUpAttributes(native, attrs) {
     let i = 0;
     while (i < attrs.length) {
         /** @type {?} */
-        const attrName = attrs[i++];
-        if (typeof attrName == 'number') {
-            if (attrName === 0 /* NamespaceURI */) {
-                // Namespaced attributes
-                /** @type {?} */
-                const namespaceURI = (/** @type {?} */ (attrs[i++]));
-                /** @type {?} */
-                const attrName = (/** @type {?} */ (attrs[i++]));
-                /** @type {?} */
-                const attrVal = (/** @type {?} */ (attrs[i++]));
-                ngDevMode && ngDevMode.rendererSetAttribute++;
-                isProc ?
-                    ((/** @type {?} */ (renderer)))
-                        .setAttribute(native, attrName, attrVal, namespaceURI) :
-                    native.setAttributeNS(namespaceURI, attrName, attrVal);
-            }
-            else {
-                // All other `AttributeMarker`s are ignored here.
+        const value = attrs[i];
+        if (typeof value === 'number') {
+            // only namespaces are supported. Other value types (such as style/class
+            // entries) are not supported in this function.
+            if (value !== 0 /* NamespaceURI */) {
                 break;
             }
+            // we just landed on the marker value ... therefore
+            // we should skip to the next entry
+            i++;
+            /** @type {?} */
+            const namespaceURI = (/** @type {?} */ (attrs[i++]));
+            /** @type {?} */
+            const attrName = (/** @type {?} */ (attrs[i++]));
+            /** @type {?} */
+            const attrVal = (/** @type {?} */ (attrs[i++]));
+            ngDevMode && ngDevMode.rendererSetAttribute++;
+            isProc ?
+                ((/** @type {?} */ (renderer))).setAttribute(native, attrName, attrVal, namespaceURI) :
+                native.setAttributeNS(namespaceURI, attrName, attrVal);
         }
         else {
             /// attrName is string;
             /** @type {?} */
-            const attrVal = attrs[i++];
+            const attrName = (/** @type {?} */ (value));
+            /** @type {?} */
+            const attrVal = attrs[++i];
             if (attrName !== NG_PROJECT_AS_ATTR_NAME) {
                 // Standard attributes
                 ngDevMode && ngDevMode.rendererSetAttribute++;
@@ -11967,8 +11991,14 @@ function setUpAttributes(native, attrs) {
                         native.setAttribute((/** @type {?} */ (attrName)), (/** @type {?} */ (attrVal)));
                 }
             }
+            i++;
         }
     }
+    // another piece of code may iterate over the same attributes array. Therefore
+    // it may be helpful to return the exact spot where the attributes array exited
+    // whether by running into an unsupported marker or if all the static values were
+    // iterated over.
+    return i;
 }
 /**
  * @param {?} text
@@ -12506,20 +12536,42 @@ function elementStyling(classBindingNames, styleBindingNames, styleSanitizer, di
     updateContextWithBindings((/** @type {?} */ (tNode.stylingTemplate)), directive || null, classBindingNames, styleBindingNames, styleSanitizer, hasClassInput(tNode));
 }
 /**
- * Assign static styling values to a host element.
+ * Assign static attribute values to a host element.
+ *
+ * This instruction will assign static attribute values as well as class and style
+ * values to an element within the host bindings function. Since attribute values
+ * can consist of different types of values, the `attrs` array must include the values in
+ * the following format:
+ *
+ * attrs = [
+ *   // static attributes (like `title`, `name`, `id`...)
+ *   attr1, value1, attr2, value,
+ *
+ *   // a single namespace value (like `x:id`)
+ *   NAMESPACE_MARKER, namespaceUri1, name1, value1,
+ *
+ *   // another single namespace value (like `x:name`)
+ *   NAMESPACE_MARKER, namespaceUri2, name2, value2,
+ *
+ *   // a series of CSS classes that will be applied to the element (no spaces)
+ *   CLASSES_MARKER, class1, class2, class3,
+ *
+ *   // a series of CSS styles (property + value) that will be applied to the element
+ *   STYLES_MARKER, prop1, value1, prop2, value2
+ * ]
+ *
+ * All non-class and non-style attributes must be defined at the start of the list
+ * first before all class and style values are set. When there is a change in value
+ * type (like when classes and styles are introduced) a marker must be used to separate
+ * the entries. The marker values themselves are set via entries found in the
+ * [AttributeMarker] enum.
  *
  * NOTE: This instruction is meant to used from `hostBindings` function only.
  *
  * \@publicApi
  * @param {?} directive A directive instance the styling is associated with.
- * @param {?} attrs An array containing class and styling information. The values must be marked with
- *              `AttributeMarker`.
- *
- *        ```
- *        var attrs = [AttributeMarker.Classes, 'foo', 'bar',
- *                     AttributeMarker.Styles, 'width', '100px', 'height, '200px']
- *        elementHostAttrs(directive, attrs);
- *        ```
+ * @param {?} attrs An array of static values (attributes, classes and styles) with the correct marker
+ * values.
  *
  * @return {?}
  */
@@ -12529,7 +12581,13 @@ function elementHostAttrs(directive, attrs) {
     if (!tNode.stylingTemplate) {
         tNode.stylingTemplate = initializeStaticContext(attrs);
     }
-    patchContextWithStaticAttrs(tNode.stylingTemplate, attrs, directive);
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const native = (/** @type {?} */ (getNativeByTNode(tNode, lView)));
+    /** @type {?} */
+    const i = setUpAttributes(native, attrs);
+    patchContextWithStaticAttrs(tNode.stylingTemplate, attrs, i, directive);
 }
 /**
  * Apply styling binding to the element.
@@ -12954,10 +13012,6 @@ function postProcessBaseDirective(lView, previousOrParentTNode, directive, def) 
     attachPatchData(directive, lView);
     if (native) {
         attachPatchData(native, lView);
-    }
-    // TODO(misko): setUpAttributes should be a feature for better treeshakability.
-    if (def.attributes != null && previousOrParentTNode.type == 3 /* Element */) {
-        setUpAttributes((/** @type {?} */ (native)), (/** @type {?} */ (def.attributes)));
     }
 }
 /**
@@ -16343,7 +16397,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.0+178.sha-e62eeed');
+const VERSION = new Version('7.2.0+179.sha-6930451');
 
 /**
  * @fileoverview added by tsickle
