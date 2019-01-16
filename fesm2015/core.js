@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+193.sha-3b7a571
+ * @license Angular v7.2.0+196.sha-9a81f0d
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16430,7 +16430,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.0+193.sha-3b7a571');
+const VERSION = new Version('7.2.0+196.sha-9a81f0d');
 
 /**
  * @fileoverview added by tsickle
@@ -17112,19 +17112,18 @@ function i18nStartFirstPass(tView, index, message, subTemplateIndex) {
         else {
             // Even indexes are text (including bindings & ICU expressions)
             /** @type {?} */
-            const parts = value.split(ICU_REGEXP);
+            const parts = extractParts(value);
             for (let j = 0; j < parts.length; j++) {
-                value = parts[j];
                 if (j & 1) {
                     // Odd indexes are ICU expressions
                     // Create the comment node that will anchor the ICU expression
                     allocExpando(viewData);
                     /** @type {?} */
                     const icuNodeIndex = tView.blueprint.length - 1 - HEADER_OFFSET;
-                    createOpCodes.push(COMMENT_MARKER, ngDevMode ? `ICU ${icuNodeIndex}` : '', parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                    createOpCodes.push(COMMENT_MARKER, ngDevMode ? `ICU ${icuNodeIndex}` : '', icuNodeIndex, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
                     // Update codes for the ICU expression
                     /** @type {?} */
-                    const icuExpression = parseICUBlock(value.substr(1, value.length - 2));
+                    const icuExpression = (/** @type {?} */ (parts[j]));
                     /** @type {?} */
                     const mask = getBindingMask(icuExpression);
                     icuStart(icuExpressions, icuExpression, icuNodeIndex, icuNodeIndex);
@@ -17137,17 +17136,21 @@ function i18nStartFirstPass(tView, index, message, subTemplateIndex) {
                     2, // skip 2 opCodes if not changed
                     icuNodeIndex << 2 /* SHIFT_REF */ | 3 /* IcuUpdate */, tIcuIndex);
                 }
-                else if (value !== '') {
+                else if (parts[j] !== '') {
+                    /** @type {?} */
+                    const text$$1 = (/** @type {?} */ (parts[j]));
                     // Even indexes are text (including bindings)
                     /** @type {?} */
-                    const hasBinding = value.match(BINDING_REGEXP);
+                    const hasBinding = text$$1.match(BINDING_REGEXP);
                     // Create text nodes
                     allocExpando(viewData);
+                    /** @type {?} */
+                    const textNodeIndex = tView.blueprint.length - 1 - HEADER_OFFSET;
                     createOpCodes.push(
                     // If there is a binding, the value will be set during update
-                    hasBinding ? '' : value, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                    hasBinding ? '' : text$$1, textNodeIndex, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
                     if (hasBinding) {
-                        addAllToArray(generateBindingUpdateOpCodes(value, tView.blueprint.length - 1 - HEADER_OFFSET), updateOpCodes);
+                        addAllToArray(generateBindingUpdateOpCodes(text$$1, tView.blueprint.length - 1 - HEADER_OFFSET), updateOpCodes);
                     }
                 }
             }
@@ -17298,7 +17301,7 @@ function i18nEndFirstPass(tView) {
     /** @type {?} */
     const previousOrParentTNode = getPreviousOrParentTNode();
     /** @type {?} */
-    const visitedPlaceholders = readCreateOpCodes(rootIndex, tI18n.create, tI18n.expandoStartIndex, viewData);
+    const visitedPlaceholders = readCreateOpCodes(rootIndex, tI18n.create, tI18n.icus, viewData);
     // Remove deleted placeholders
     // The last placeholder that was added before `i18nEnd` is `previousOrParentTNode`
     for (let i = rootIndex + 1; i <= previousOrParentTNode.index - HEADER_OFFSET; i++) {
@@ -17310,11 +17313,11 @@ function i18nEndFirstPass(tView) {
 /**
  * @param {?} index
  * @param {?} createOpCodes
- * @param {?} expandoStartIndex
+ * @param {?} icus
  * @param {?} viewData
  * @return {?}
  */
-function readCreateOpCodes(index, createOpCodes, expandoStartIndex, viewData) {
+function readCreateOpCodes(index, createOpCodes, icus, viewData) {
     /** @type {?} */
     const renderer = getLView()[RENDERER];
     /** @type {?} */
@@ -17329,10 +17332,11 @@ function readCreateOpCodes(index, createOpCodes, expandoStartIndex, viewData) {
         if (typeof opCode == 'string') {
             /** @type {?} */
             const textRNode = createTextNode(opCode, renderer);
+            /** @type {?} */
+            const textNodeIndex = (/** @type {?} */ (createOpCodes[++i]));
             ngDevMode && ngDevMode.rendererCreateTextNode++;
             previousTNode = currentTNode;
-            currentTNode =
-                createNodeAtIndex(expandoStartIndex++, 3 /* Element */, textRNode, null, null);
+            currentTNode = createNodeAtIndex(textNodeIndex, 3 /* Element */, textRNode, null, null);
             setIsParent(false);
         }
         else if (typeof opCode == 'number') {
@@ -17393,12 +17397,15 @@ function readCreateOpCodes(index, createOpCodes, expandoStartIndex, viewData) {
                 case COMMENT_MARKER:
                     /** @type {?} */
                     const commentValue = (/** @type {?} */ (createOpCodes[++i]));
+                    /** @type {?} */
+                    const commentNodeIndex = (/** @type {?} */ (createOpCodes[++i]));
                     ngDevMode && assertEqual(typeof commentValue, 'string', `Expected "${commentValue}" to be a comment node value`);
                     /** @type {?} */
                     const commentRNode = renderer.createComment(commentValue);
                     ngDevMode && ngDevMode.rendererCreateComment++;
                     previousTNode = currentTNode;
-                    currentTNode = createNodeAtIndex(expandoStartIndex++, 5 /* IcuContainer */, commentRNode, null, null);
+                    currentTNode =
+                        createNodeAtIndex(commentNodeIndex, 5 /* IcuContainer */, commentRNode, null, null);
                     attachPatchData(commentRNode, viewData);
                     ((/** @type {?} */ (currentTNode))).activeCaseIndex = null;
                     // We will add the case nodes later, during the update phase
@@ -17407,12 +17414,14 @@ function readCreateOpCodes(index, createOpCodes, expandoStartIndex, viewData) {
                 case ELEMENT_MARKER:
                     /** @type {?} */
                     const tagNameValue = (/** @type {?} */ (createOpCodes[++i]));
+                    /** @type {?} */
+                    const elementNodeIndex = (/** @type {?} */ (createOpCodes[++i]));
                     ngDevMode && assertEqual(typeof tagNameValue, 'string', `Expected "${tagNameValue}" to be an element node tag name`);
                     /** @type {?} */
                     const elementRNode = renderer.createElement(tagNameValue);
                     ngDevMode && ngDevMode.rendererCreateElement++;
                     previousTNode = currentTNode;
-                    currentTNode = createNodeAtIndex(expandoStartIndex++, 3 /* Element */, elementRNode, tagNameValue, null);
+                    currentTNode = createNodeAtIndex(elementNodeIndex, 3 /* Element */, elementRNode, tagNameValue, null);
                     break;
                 default:
                     throw new Error(`Unable to determine the type of mutate operation for "${opCode}"`);
@@ -17513,7 +17522,7 @@ function readUpdateOpCodes(updateOpCodes, icus, bindingsStartIndex, changeMask, 
                                 const caseIndex = getCaseIndex(tIcu, value);
                                 icuTNode.activeCaseIndex = caseIndex !== -1 ? caseIndex : null;
                                 // Add the nodes for the new case
-                                readCreateOpCodes(-1, tIcu.create[caseIndex], tIcu.expandoStartIndex, viewData);
+                                readCreateOpCodes(-1, tIcu.create[caseIndex], icus, viewData);
                                 caseCreated = true;
                                 break;
                             case 3 /* IcuUpdate */:
@@ -18268,7 +18277,7 @@ function parseNodes(currentNode, icuCase, parentIndex, nestedIcus, tIcus, expand
                         icuCase.vars--;
                     }
                     else {
-                        icuCase.create.push(ELEMENT_MARKER, tagName, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                        icuCase.create.push(ELEMENT_MARKER, tagName, newIndex, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
                         /** @type {?} */
                         const elAttrs = element$$1.attributes;
                         for (let i = 0; i < elAttrs.length; i++) {
@@ -18311,7 +18320,7 @@ function parseNodes(currentNode, icuCase, parentIndex, nestedIcus, tIcus, expand
                     const value = currentNode.textContent || '';
                     /** @type {?} */
                     const hasBinding = value.match(BINDING_REGEXP);
-                    icuCase.create.push(hasBinding ? '' : value, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                    icuCase.create.push(hasBinding ? '' : value, newIndex, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
                     icuCase.remove.push(newIndex << 3 /* SHIFT_REF */ | 3 /* Remove */);
                     if (hasBinding) {
                         addAllToArray(generateBindingUpdateOpCodes(value, newIndex), icuCase.update);
@@ -18327,7 +18336,7 @@ function parseNodes(currentNode, icuCase, parentIndex, nestedIcus, tIcus, expand
                         /** @type {?} */
                         const newLocal = ngDevMode ? `nested ICU ${nestedIcuIndex}` : '';
                         // Create the comment node that will anchor the ICU expression
-                        icuCase.create.push(COMMENT_MARKER, newLocal, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                        icuCase.create.push(COMMENT_MARKER, newLocal, newIndex, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
                         /** @type {?} */
                         const nestedIcu = nestedIcus[nestedIcuIndex];
                         nestedIcusToCreate.push([nestedIcu, newIndex]);
