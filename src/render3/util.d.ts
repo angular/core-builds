@@ -96,3 +96,10 @@ export declare const defaultScheduler: any;
  * @param arr The array to which you want to add the items
  */
 export declare function addAllToArray(items: any[], arr: any[]): void;
+/**
+ * Given a current view, finds the nearest component's host (LElement).
+ *
+ * @param lView LView for which we want a host element node
+ * @returns The host node
+ */
+export declare function findComponentView(lView: LView): LView;
