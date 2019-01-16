@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+196.sha-9a81f0d
+ * @license Angular v7.2.0+198.sha-bac71ef
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1435,6 +1435,10 @@ var TestBedRender3 = /** @class */ (function () {
     /**
      * @internal
      */
+    TestBedRender3.prototype._getModuleResolver = function () { return this._resolvers.module; };
+    /**
+     * @internal
+     */
     TestBedRender3.prototype._compileNgModule = function (moduleType) {
         var _this = this;
         var ngModule = this._resolvers.module.resolve(moduleType);
@@ -1483,6 +1487,17 @@ var TestBedRender3 = /** @class */ (function () {
                 transitiveScope;
             ɵpatchComponentDefWithScope(cmp.ngComponentDef, scope);
         });
+    };
+    /**
+     * @internal
+     */
+    TestBedRender3.prototype._getComponentFactories = function (moduleType) {
+        var _this = this;
+        return moduleType.ngModuleDef.declarations.reduce(function (factories, declaration) {
+            var componentDef = declaration.ngComponentDef;
+            componentDef && factories.push(new ɵRender3ComponentFactory(componentDef, _this._moduleRef));
+            return factories;
+        }, []);
     };
     /**
      * Check whether the module scoping queue should be flushed, and flush it if needed.
@@ -1534,14 +1549,19 @@ var R3TestCompiler = /** @class */ (function () {
         return Promise.resolve(this.compileModuleSync(moduleType));
     };
     R3TestCompiler.prototype.compileModuleAndAllComponentsSync = function (moduleType) {
-        return new ModuleWithComponentFactories(this.compileModuleSync(moduleType), []);
+        var ngModuleFactory = this.compileModuleSync(moduleType);
+        var componentFactories = this.testBed._getComponentFactories(moduleType);
+        return new ModuleWithComponentFactories(ngModuleFactory, componentFactories);
     };
     R3TestCompiler.prototype.compileModuleAndAllComponentsAsync = function (moduleType) {
         return Promise.resolve(this.compileModuleAndAllComponentsSync(moduleType));
     };
     R3TestCompiler.prototype.clearCache = function () { };
     R3TestCompiler.prototype.clearCacheFor = function (type) { };
-    R3TestCompiler.prototype.getModuleId = function (moduleType) { return undefined; };
+    R3TestCompiler.prototype.getModuleId = function (moduleType) {
+        var meta = this.testBed._getModuleResolver().resolve(moduleType);
+        return meta && meta.id || undefined;
+    };
     return R3TestCompiler;
 }());
 

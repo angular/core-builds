@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+196.sha-9a81f0d
+ * @license Angular v7.2.0+198.sha-bac71ef
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1742,6 +1742,11 @@ class TestBedRender3 {
     }
     /**
      * \@internal
+     * @return {?}
+     */
+    _getModuleResolver() { return this._resolvers.module; }
+    /**
+     * \@internal
      * @param {?} moduleType
      * @return {?}
      */
@@ -1804,6 +1809,19 @@ class TestBedRender3 {
                 transitiveScope;
             ɵpatchComponentDefWithScope(((/** @type {?} */ (cmp))).ngComponentDef, scope);
         });
+    }
+    /**
+     * \@internal
+     * @param {?} moduleType
+     * @return {?}
+     */
+    _getComponentFactories(moduleType) {
+        return moduleType.ngModuleDef.declarations.reduce((factories, declaration) => {
+            /** @nocollapse @type {?} */
+            const componentDef = ((/** @type {?} */ (declaration))).ngComponentDef;
+            componentDef && factories.push(new ɵRender3ComponentFactory(componentDef, this._moduleRef));
+            return factories;
+        }, (/** @type {?} */ ([])));
     }
     /**
      * Check whether the module scoping queue should be flushed, and flush it if needed.
@@ -1885,7 +1903,11 @@ class R3TestCompiler {
      * @return {?}
      */
     compileModuleAndAllComponentsSync(moduleType) {
-        return new ModuleWithComponentFactories(this.compileModuleSync(moduleType), []);
+        /** @type {?} */
+        const ngModuleFactory = this.compileModuleSync(moduleType);
+        /** @type {?} */
+        const componentFactories = this.testBed._getComponentFactories((/** @type {?} */ (moduleType)));
+        return new ModuleWithComponentFactories(ngModuleFactory, componentFactories);
     }
     /**
      * @template T
@@ -1908,7 +1930,11 @@ class R3TestCompiler {
      * @param {?} moduleType
      * @return {?}
      */
-    getModuleId(moduleType) { return undefined; }
+    getModuleId(moduleType) {
+        /** @type {?} */
+        const meta = this.testBed._getModuleResolver().resolve(moduleType);
+        return meta && meta.id || undefined;
+    }
 }
 
 /**
