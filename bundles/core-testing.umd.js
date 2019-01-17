@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.0+7.sha-8a08ff1
+ * @license Angular v8.0.0-beta.0+8.sha-1f7d3b9
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -940,7 +940,9 @@
         };
         OverrideResolver.prototype.getAnnotation = function (type) {
             var _this = this;
-            return reflection.annotations(type).find(function (a) { return a instanceof _this.type; }) || null;
+            // We should always return the last match from filter(), or we may return superclass data by
+            // mistake.
+            return reflection.annotations(type).filter(function (a) { return a instanceof _this.type; }).pop() || null;
         };
         OverrideResolver.prototype.resolve = function (type) {
             var _this = this;
