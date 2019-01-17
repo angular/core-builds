@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.0+1.sha-a570fdf
+ * @license Angular v8.0.0-beta.0+6.sha-50cf2ac
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11127,8 +11127,8 @@
                 }
                 else {
                     pData[bucketIndex] = componentChild;
-                    componentChild.next = null;
                 }
+                componentChild.next = null;
                 tails[bucketIndex] = componentChild;
                 componentChild = nextNode;
             }
@@ -13253,7 +13253,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.0+1.sha-a570fdf');
+    var VERSION = new Version('8.0.0-beta.0+6.sha-50cf2ac');
 
     /**
      * @license

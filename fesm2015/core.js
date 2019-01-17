@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.0+1.sha-a570fdf
+ * @license Angular v8.0.0-beta.0+6.sha-50cf2ac
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13754,8 +13754,8 @@ function projectionDef(selectors, textSelectors) {
             }
             else {
                 pData[bucketIndex] = componentChild;
-                componentChild.next = null;
             }
+            componentChild.next = null;
             tails[bucketIndex] = componentChild;
             componentChild = nextNode;
         }
@@ -16430,7 +16430,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.0+1.sha-a570fdf');
+const VERSION = new Version('8.0.0-beta.0+6.sha-50cf2ac');
 
 /**
  * @fileoverview added by tsickle
