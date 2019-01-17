@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.0+7.sha-8a08ff1
+ * @license Angular v8.0.0-beta.0+8.sha-1f7d3b9
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16430,7 +16430,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.0+7.sha-8a08ff1');
+const VERSION = new Version('8.0.0-beta.0+8.sha-1f7d3b9');
 
 /**
  * @fileoverview added by tsickle
@@ -18492,7 +18492,7 @@ function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
     /** @type {?} */
     const clazz = (/** @type {?} */ (type));
     if (decorators !== null) {
-        if (clazz.decorators !== undefined) {
+        if (clazz.hasOwnProperty('decorators') && clazz.decorators !== undefined) {
             clazz.decorators.push(...decorators);
         }
         else {

@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.0+7.sha-8a08ff1
+ * @license Angular v8.0.0-beta.0+8.sha-1f7d3b9
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -994,7 +994,9 @@ class OverrideResolver {
      * @return {?}
      */
     getAnnotation(type) {
-        return reflection.annotations(type).find(a => a instanceof this.type) || null;
+        // We should always return the last match from filter(), or we may return superclass data by
+        // mistake.
+        return reflection.annotations(type).filter(a => a instanceof this.type).pop() || null;
     }
     /**
      * @param {?} type
