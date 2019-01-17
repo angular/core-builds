@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.0+11.sha-e172e97
+ * @license Angular v8.0.0-beta.0+14.sha-a0cdefb
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6992,16 +6992,16 @@
         while (tNode) {
             var nextTNode = null;
             if (tNode.type === 3 /* Element */) {
-                executeNodeAction(action, renderer, renderParent, getNativeByTNode(tNode, currentView), beforeNode);
+                executeNodeAction(action, renderer, renderParent, getNativeByTNode(tNode, currentView), tNode, beforeNode);
                 var nodeOrContainer = currentView[tNode.index];
                 if (isLContainer(nodeOrContainer)) {
                     // This element has an LContainer, and its comment needs to be handled
-                    executeNodeAction(action, renderer, renderParent, nodeOrContainer[NATIVE], beforeNode);
+                    executeNodeAction(action, renderer, renderParent, nodeOrContainer[NATIVE], tNode, beforeNode);
                 }
             }
             else if (tNode.type === 0 /* Container */) {
                 var lContainer = currentView[tNode.index];
-                executeNodeAction(action, renderer, renderParent, lContainer[NATIVE], beforeNode);
+                executeNodeAction(action, renderer, renderParent, lContainer[NATIVE], tNode, beforeNode);
                 if (lContainer[VIEWS].length) {
                     currentView = lContainer[VIEWS][0];
                     nextTNode = currentView[TVIEW].node;
@@ -7067,12 +7067,12 @@
      * NOTE: for performance reasons, the possible actions are inlined within the function instead of
      * being passed as an argument.
      */
-    function executeNodeAction(action, renderer, parent, node, beforeNode) {
+    function executeNodeAction(action, renderer, parent, node, tNode, beforeNode) {
         if (action === 0 /* Insert */) {
             nativeInsertBefore(renderer, parent, node, beforeNode || null);
         }
         else if (action === 1 /* Detach */) {
-            nativeRemoveChild(renderer, parent, node);
+            nativeRemoveChild(renderer, parent, node, isComponent(tNode));
         }
         else if (action === 2 /* Destroy */) {
             ngDevMode && ngDevMode.rendererDestroyNode++;
@@ -7417,8 +7417,8 @@
     /**
      * Removes a native child node from a given native parent node.
      */
-    function nativeRemoveChild(renderer, parent, child) {
-        isProceduralRenderer(renderer) ? renderer.removeChild(parent, child) :
+    function nativeRemoveChild(renderer, parent, child, isHostElement) {
+        isProceduralRenderer(renderer) ? renderer.removeChild(parent, child, isHostElement) :
             parent.removeChild(child);
     }
     /**
@@ -13254,7 +13254,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.0+11.sha-e172e97');
+    var VERSION = new Version('8.0.0-beta.0+14.sha-a0cdefb');
 
     /**
      * @license
