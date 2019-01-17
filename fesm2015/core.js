@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.0+8.sha-1f7d3b9
+ * @license Angular v8.0.0-beta.0+9.sha-896cf35
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11503,11 +11503,13 @@ function renderComponentOrTemplate(hostView, context, templateFn) {
     const oldView = enterView(hostView, hostView[HOST_NODE]);
     /** @type {?} */
     const normalExecutionPath = !getCheckNoChangesMode();
+    /** @type {?} */
+    const creationModeIsActive = isCreationMode(hostView);
     try {
-        if (normalExecutionPath && rendererFactory.begin) {
+        if (normalExecutionPath && !creationModeIsActive && rendererFactory.begin) {
             rendererFactory.begin();
         }
-        if (isCreationMode(hostView)) {
+        if (creationModeIsActive) {
             // creation mode pass
             if (templateFn) {
                 namespaceHTML();
@@ -11521,7 +11523,7 @@ function renderComponentOrTemplate(hostView, context, templateFn) {
         refreshDescendantViews(hostView);
     }
     finally {
-        if (normalExecutionPath && rendererFactory.end) {
+        if (normalExecutionPath && !creationModeIsActive && rendererFactory.end) {
             rendererFactory.end();
         }
         leaveView(oldView);
@@ -16351,7 +16353,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.0+8.sha-1f7d3b9');
+const VERSION = new Version('8.0.0-beta.0+9.sha-896cf35');
 
 /**
  * @fileoverview added by tsickle
@@ -16509,8 +16511,6 @@ class ComponentFactory$1 extends ComponentFactory {
         /** @type {?} */
         let tElementNode;
         try {
-            if (rendererFactory.begin)
-                rendererFactory.begin();
             /** @type {?} */
             const componentView = createRootComponentView(hostRNode, this.componentDef, rootLView, rendererFactory, renderer);
             tElementNode = (/** @type {?} */ (getTNode(0, rootLView)));
@@ -16558,8 +16558,6 @@ class ComponentFactory$1 extends ComponentFactory {
         }
         finally {
             leaveView(oldLView);
-            if (rendererFactory.end)
-                rendererFactory.end();
         }
         /** @type {?} */
         const componentRef = new ComponentRef$1(this.componentType, component, createElementRef(ElementRef, tElementNode, rootLView), rootLView, tElementNode);

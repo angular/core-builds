@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.0+8.sha-1f7d3b9
+ * @license Angular v8.0.0-beta.0+9.sha-896cf35
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9304,11 +9304,12 @@
         var rendererFactory = hostView[RENDERER_FACTORY];
         var oldView = enterView(hostView, hostView[HOST_NODE]);
         var normalExecutionPath = !getCheckNoChangesMode();
+        var creationModeIsActive = isCreationMode(hostView);
         try {
-            if (normalExecutionPath && rendererFactory.begin) {
+            if (normalExecutionPath && !creationModeIsActive && rendererFactory.begin) {
                 rendererFactory.begin();
             }
-            if (isCreationMode(hostView)) {
+            if (creationModeIsActive) {
                 // creation mode pass
                 if (templateFn) {
                     namespaceHTML();
@@ -9322,7 +9323,7 @@
             refreshDescendantViews(hostView);
         }
         finally {
-            if (normalExecutionPath && rendererFactory.end) {
+            if (normalExecutionPath && !creationModeIsActive && rendererFactory.end) {
                 rendererFactory.end();
             }
             leaveView(oldView);
@@ -13167,7 +13168,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.0+8.sha-1f7d3b9');
+    var VERSION = new Version('8.0.0-beta.0+9.sha-896cf35');
 
     /**
      * @license
@@ -13294,8 +13295,6 @@
             var component;
             var tElementNode;
             try {
-                if (rendererFactory.begin)
-                    rendererFactory.begin();
                 var componentView = createRootComponentView(hostRNode, this.componentDef, rootLView, rendererFactory, renderer);
                 tElementNode = getTNode(0, rootLView);
                 // Transform the arrays of native nodes into a structure that can be consumed by the
@@ -13335,8 +13334,6 @@
             }
             finally {
                 leaveView(oldLView);
-                if (rendererFactory.end)
-                    rendererFactory.end();
             }
             var componentRef = new ComponentRef$1(this.componentType, component, createElementRef(ElementRef, tElementNode, rootLView), rootLView, tElementNode);
             if (isInternalRootView) {
