@@ -104,7 +104,7 @@ export declare function nativeInsertBefore(renderer: Renderer3, parent: RElement
 /**
  * Removes a native child node from a given native parent node.
  */
-export declare function nativeRemoveChild(renderer: Renderer3, parent: RElement, child: RNode): void;
+export declare function nativeRemoveChild(renderer: Renderer3, parent: RElement, child: RNode, isHostElement?: boolean): void;
 /**
  * Returns a native parent of a given native node.
  */
