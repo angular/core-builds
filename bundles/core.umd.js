@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.0+3.sha-808898d
+ * @license Angular v8.0.0-beta.0+21.sha-45bf911
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2519,10 +2519,7 @@
              * Set of values instantiated by this injector which contain `ngOnDestroy` lifecycle hooks.
              */
             this.onDestroy = new Set();
-            /**
-             * Flag indicating that this injector was previously destroyed.
-             */
-            this.destroyed = false;
+            this._destroyed = false;
             // Start off by creating Records for every provider declared in every InjectorType
             // included transitively in `def`.
             var dedupStack = [];
@@ -2536,6 +2533,14 @@
             // Eagerly instantiate the InjectorType classes themselves.
             this.injectorDefTypes.forEach(function (defType) { return _this.get(defType); });
         }
+        Object.defineProperty(R3Injector.prototype, "destroyed", {
+            /**
+             * Flag indicating that this injector was previously destroyed.
+             */
+            get: function () { return this._destroyed; },
+            enumerable: true,
+            configurable: true
+        });
         /**
          * Destroy the injector and release references to every instance or provider associated with it.
          *
@@ -2545,7 +2550,7 @@
         R3Injector.prototype.destroy = function () {
             this.assertNotDestroyed();
             // Set destroyed = true first, in case lifecycle hooks re-enter destroy().
-            this.destroyed = true;
+            this._destroyed = true;
             try {
                 // Call all the lifecycle hooks.
                 this.onDestroy.forEach(function (service) { return service.ngOnDestroy(); });
@@ -2595,7 +2600,7 @@
             }
         };
         R3Injector.prototype.assertNotDestroyed = function () {
-            if (this.destroyed) {
+            if (this._destroyed) {
                 throw new Error('Injector has already been destroyed.');
             }
         };
@@ -6992,16 +6997,16 @@
         while (tNode) {
             var nextTNode = null;
             if (tNode.type === 3 /* Element */) {
-                executeNodeAction(action, renderer, renderParent, getNativeByTNode(tNode, currentView), beforeNode);
+                executeNodeAction(action, renderer, renderParent, getNativeByTNode(tNode, currentView), tNode, beforeNode);
                 var nodeOrContainer = currentView[tNode.index];
                 if (isLContainer(nodeOrContainer)) {
                     // This element has an LContainer, and its comment needs to be handled
-                    executeNodeAction(action, renderer, renderParent, nodeOrContainer[NATIVE], beforeNode);
+                    executeNodeAction(action, renderer, renderParent, nodeOrContainer[NATIVE], tNode, beforeNode);
                 }
             }
             else if (tNode.type === 0 /* Container */) {
                 var lContainer = currentView[tNode.index];
-                executeNodeAction(action, renderer, renderParent, lContainer[NATIVE], beforeNode);
+                executeNodeAction(action, renderer, renderParent, lContainer[NATIVE], tNode, beforeNode);
                 if (lContainer[VIEWS].length) {
                     currentView = lContainer[VIEWS][0];
                     nextTNode = currentView[TVIEW].node;
@@ -7067,12 +7072,12 @@
      * NOTE: for performance reasons, the possible actions are inlined within the function instead of
      * being passed as an argument.
      */
-    function executeNodeAction(action, renderer, parent, node, beforeNode) {
+    function executeNodeAction(action, renderer, parent, node, tNode, beforeNode) {
         if (action === 0 /* Insert */) {
             nativeInsertBefore(renderer, parent, node, beforeNode || null);
         }
         else if (action === 1 /* Detach */) {
-            nativeRemoveChild(renderer, parent, node);
+            nativeRemoveChild(renderer, parent, node, isComponent(tNode));
         }
         else if (action === 2 /* Destroy */) {
             ngDevMode && ngDevMode.rendererDestroyNode++;
@@ -7417,8 +7422,8 @@
     /**
      * Removes a native child node from a given native parent node.
      */
-    function nativeRemoveChild(renderer, parent, child) {
-        isProceduralRenderer(renderer) ? renderer.removeChild(parent, child) :
+    function nativeRemoveChild(renderer, parent, child, isHostElement) {
+        isProceduralRenderer(renderer) ? renderer.removeChild(parent, child, isHostElement) :
             parent.removeChild(child);
     }
     /**
@@ -9381,11 +9386,12 @@
         var rendererFactory = hostView[RENDERER_FACTORY];
         var oldView = enterView(hostView, hostView[HOST_NODE]);
         var normalExecutionPath = !getCheckNoChangesMode();
+        var creationModeIsActive = isCreationMode(hostView);
         try {
-            if (normalExecutionPath && rendererFactory.begin) {
+            if (normalExecutionPath && !creationModeIsActive && rendererFactory.begin) {
                 rendererFactory.begin();
             }
-            if (isCreationMode(hostView)) {
+            if (creationModeIsActive) {
                 // creation mode pass
                 if (templateFn) {
                     namespaceHTML();
@@ -9399,7 +9405,7 @@
             refreshDescendantViews(hostView);
         }
         finally {
-            if (normalExecutionPath && rendererFactory.end) {
+            if (normalExecutionPath && !creationModeIsActive && rendererFactory.end) {
                 rendererFactory.end();
             }
             leaveView(oldView);
@@ -9803,6 +9809,33 @@
      */
     function listener(eventName, listenerFn, useCapture, eventTargetResolver) {
         if (useCapture === void 0) { useCapture = false; }
+        listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver);
+    }
+    /**
+     * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component.
+     *
+     * This instruction is for compatibility purposes and is designed to ensure that a
+     * synthetic host listener (e.g. `@HostListener('@foo.start')`) properly gets rendered
+     * in the component's renderer. Normally all host listeners are evaluated with the
+     * parent component's renderer, but, in the case of animation @triggers, they need
+     * to be evaluated with the sub component's renderer (because that's where the
+     * animation triggers are defined).
+     *
+     * Do not use this instruction as a replacement for `listener`. This instruction
+     * only exists to ensure compatibility with the ViewEngine's host binding behavior.
+     *
+     * @param eventName Name of the event
+     * @param listenerFn The function to be called when event emits
+     * @param useCapture Whether or not to use capture in event listener
+     * @param eventTargetResolver Function that returns global target information in case this listener
+     * should be attached to a global object like window, document or body
+     */
+    function componentHostSyntheticListener(eventName, listenerFn, useCapture, eventTargetResolver) {
+        if (useCapture === void 0) { useCapture = false; }
+        listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver, loadComponentRenderer);
+    }
+    function listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver, loadRendererFn) {
+        if (useCapture === void 0) { useCapture = false; }
         var lView = getLView();
         var tNode = getPreviousOrParentTNode();
         var tView = lView[TVIEW];
@@ -9815,7 +9848,7 @@
             var resolved = eventTargetResolver ? eventTargetResolver(native) : {};
             var target = resolved.target || native;
             ngDevMode && ngDevMode.rendererAddEventListener++;
-            var renderer = lView[RENDERER];
+            var renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
             var lCleanup = getCleanup(lView);
             var lCleanupIndex = lCleanup.length;
             var useCaptureOrSubIdx = useCapture;
@@ -9979,7 +10012,7 @@
      * synthetic host binding (e.g. `@HostBinding('@foo')`) properly gets rendered in
      * the component's renderer. Normally all host bindings are evaluated with the parent
      * component's renderer, but, in the case of animation @triggers, they need to be
-     * evaluated with the sub components renderer (because that's where the animation
+     * evaluated with the sub component's renderer (because that's where the animation
      * triggers are defined).
      *
      * Do not use this instruction as a replacement for `elementProperty`. This instruction
@@ -9995,10 +10028,6 @@
      */
     function componentHostSyntheticProperty(index, propName, value, sanitizer, nativeOnly) {
         elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadComponentRenderer);
-    }
-    function loadComponentRenderer(tNode, lView) {
-        var componentLView = lView[tNode.index];
-        return componentLView[RENDERER];
     }
     function elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadRendererFn) {
         if (value === NO_CHANGE)
@@ -11654,6 +11683,14 @@
     function getTViewCleanup(view) {
         return view[TVIEW].cleanup || (view[TVIEW].cleanup = []);
     }
+    /**
+     * There are cases where the sub component's renderer needs to be included
+     * instead of the current renderer (see the componentSyntheticHost* instructions).
+     */
+    function loadComponentRenderer(tNode, lView) {
+        var componentLView = lView[tNode.index];
+        return componentLView[RENDERER];
+    }
 
     /**
      * @license
@@ -13253,7 +13290,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.0+3.sha-808898d');
+    var VERSION = new Version('8.0.0-beta.0+21.sha-45bf911');
 
     /**
      * @license
@@ -13380,8 +13417,6 @@
             var component;
             var tElementNode;
             try {
-                if (rendererFactory.begin)
-                    rendererFactory.begin();
                 var componentView = createRootComponentView(hostRNode, this.componentDef, rootLView, rendererFactory, renderer);
                 tElementNode = getTNode(0, rootLView);
                 // Transform the arrays of native nodes into a structure that can be consumed by the
@@ -13421,8 +13456,6 @@
             }
             finally {
                 leaveView(oldLView);
-                if (rendererFactory.end)
-                    rendererFactory.end();
             }
             var componentRef = new ComponentRef$1(this.componentType, component, createElementRef(ElementRef, tElementNode, rootLView), rootLView, tElementNode);
             if (isInternalRootView) {
@@ -13465,7 +13498,7 @@
             ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
             this.destroyCbs.forEach(function (fn) { return fn(); });
             this.destroyCbs = null;
-            this.hostView.destroy();
+            !this.hostView.destroyed && this.hostView.destroy();
         };
         ComponentRef$$1.prototype.onDestroy = function (callback) {
             ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
@@ -14941,6 +14974,8 @@
         });
         NgModuleRef$$1.prototype.destroy = function () {
             ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
+            var injector = this._r3Injector;
+            !injector.destroyed && injector.destroy();
             this.destroyCbs.forEach(function (fn) { return fn(); });
             this.destroyCbs = null;
         };
@@ -14983,7 +15018,7 @@
         var _a;
         var clazz = type;
         if (decorators !== null) {
-            if (clazz.decorators !== undefined) {
+            if (clazz.hasOwnProperty('decorators') && clazz.decorators !== undefined) {
                 (_a = clazz.decorators).push.apply(_a, __spread(decorators));
             }
             else {
@@ -16065,6 +16100,7 @@
         'ɵprojection': projection,
         'ɵelementProperty': elementProperty,
         'ɵcomponentHostSyntheticProperty': componentHostSyntheticProperty,
+        'ɵcomponentHostSyntheticListener': componentHostSyntheticListener,
         'ɵpipeBind1': pipeBind1,
         'ɵpipeBind2': pipeBind2,
         'ɵpipeBind3': pipeBind3,
@@ -24920,6 +24956,7 @@
     exports.ɵelementEnd = elementEnd;
     exports.ɵelementProperty = elementProperty;
     exports.ɵcomponentHostSyntheticProperty = componentHostSyntheticProperty;
+    exports.ɵcomponentHostSyntheticListener = componentHostSyntheticListener;
     exports.ɵprojectionDef = projectionDef;
     exports.ɵreference = reference;
     exports.ɵenableBindings = enableBindings;
