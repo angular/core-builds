@@ -43,7 +43,8 @@ export declare class R3Injector {
     /**
      * Flag indicating that this injector was previously destroyed.
      */
-    private destroyed;
+    readonly destroyed: boolean;
+    private _destroyed;
     constructor(def: InjectorType<any>, additionalProviders: StaticProvider[] | null, parent: Injector);
     /**
      * Destroy the injector and release references to every instance or provider associated with it.
