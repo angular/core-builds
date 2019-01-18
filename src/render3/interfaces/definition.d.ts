@@ -131,13 +131,6 @@ export interface DirectiveDef<T> extends BaseDef<T> {
     contentQueriesRefresh: ((directiveIndex: number, queryIndex: number) => void) | null;
     /** Refreshes host bindings on the associated directive. */
     hostBindings: HostBindingsFunction<T> | null;
-    /**
-     * Static attributes to set on host element.
-     *
-     * Even indices: attribute name
-     * Odd indices: attribute value
-     */
-    readonly attributes: string[] | null;
     onInit: (() => void) | null;
     doCheck: (() => void) | null;
     onChanges: ((changes: SimpleChanges) => void) | null;

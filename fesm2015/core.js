@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.0+170.sha-f1fb62d
+ * @license Angular v8.0.0-beta.0+3.sha-808898d
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1162,7 +1162,7 @@ const SWITCH_COMPILE_INJECTABLE = SWITCH_COMPILE_INJECTABLE__PRE_R3__;
  *
  * Use an `InjectionToken` whenever the type you are injecting is not reified (does not have a
  * runtime representation) such as when injecting an interface, callable type, array or
- * parametrized type.
+ * parameterized type.
  *
  * `InjectionToken` is parameterized on `T` which is the type of object which will be returned by
  * the `Injector`. This provides additional level of type safety.
@@ -3548,7 +3548,7 @@ function resolveComponentResources(resourceResolver) {
             });
         });
     });
-    componentResourceResolutionQueue.clear();
+    clearResolutionOfComponentResourcesQueue();
     return Promise.all(urlFetches).then(() => null);
 }
 /** @type {?} */
@@ -3568,6 +3568,12 @@ function maybeQueueResolutionOfComponentResources(metadata) {
  */
 function componentNeedsResolution(component) {
     return component.templateUrl || component.styleUrls && component.styleUrls.length;
+}
+/**
+ * @return {?}
+ */
+function clearResolutionOfComponentResourcesQueue() {
+    componentResourceResolutionQueue.clear();
 }
 /**
  * @param {?} response
@@ -4485,7 +4491,6 @@ function defineComponent(componentDefinition) {
         hostBindings: componentDefinition.hostBindings || null,
         contentQueries: componentDefinition.contentQueries || null,
         contentQueriesRefresh: componentDefinition.contentQueriesRefresh || null,
-        attributes: componentDefinition.attributes || null,
         declaredInputs: declaredInputs,
         inputs: (/** @type {?} */ (null)),
         // assigned in noSideEffects
@@ -5200,8 +5205,9 @@ function getOrCreateCurrentQueries(QueryType) {
     const lView = getLView();
     /** @type {?} */
     let currentQueries = lView[QUERIES];
-    // if this is the first content query on a node, any existing LQueries needs to be cloned
-    // in subsequent template passes, the cloning occurs before directive instantiation.
+    // If this is the first content query on a node, any existing LQueries needs to be cloned.
+    // In subsequent template passes, the cloning occurs before directive instantiation
+    // in `createDirectivesAndLocals`.
     if (previousOrParentTNode && previousOrParentTNode !== lView[HOST_NODE] &&
         !isContentQueryHost(previousOrParentTNode)) {
         currentQueries && (currentQueries = lView[QUERIES] = currentQueries.clone());
@@ -6413,13 +6419,11 @@ function discoverLocalRefs(lView, nodeIndex) {
     if (tNode && tNode.localNames) {
         /** @type {?} */
         const result = {};
+        /** @type {?} */
+        let localIndex = tNode.index + 1;
         for (let i = 0; i < tNode.localNames.length; i += 2) {
-            /** @type {?} */
-            const localRefName = tNode.localNames[i];
-            /** @type {?} */
-            const directiveIndex = (/** @type {?} */ (tNode.localNames[i + 1]));
-            result[localRefName] =
-                directiveIndex === -1 ? (/** @type {?} */ (getNativeByTNode(tNode, lView))) : lView[directiveIndex];
+            result[tNode.localNames[i]] = lView[localIndex];
+            localIndex++;
         }
         return result;
     }
@@ -7827,6 +7831,30 @@ function getSanitizer() {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * Determine if the argument is shaped like a Promise
+ */
+function isPromise(obj) {
+    // allow any Promise/A+ compliant thenable.
+    // It's up to the caller to ensure that obj.then conforms to the spec
+    return !!obj && typeof obj.then === 'function';
+}
+/**
+ * Determine if the argument is an Observable
+ */
+function isObservable(obj) {
+    // TODO: use isObservable once we update pass rxjs 6.1
+    // https://github.com/ReactiveX/rxjs/blob/master/CHANGELOG.md#610-2018-05-03
+    return !!obj && typeof obj.subscribe === 'function';
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 function normalizeDebugBindingName(name) {
     // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
     name = camelCaseToDashCase(name.replace(/[$@]/g, '_'));
@@ -8967,238 +8995,6 @@ function appendProjectedNode(projectedTNode, tProjectionNode, currentView, proje
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
-/** @type {?} */
-const NG_TEMPLATE_SELECTOR = 'ng-template';
-/**
- * @param {?} nodeClassAttrVal
- * @param {?} cssClassToMatch
- * @return {?}
- */
-function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
-    /** @type {?} */
-    const nodeClassesLen = nodeClassAttrVal.length;
-    /** @type {?} */
-    const matchIndex = (/** @type {?} */ (nodeClassAttrVal)).indexOf(cssClassToMatch);
-    /** @type {?} */
-    const matchEndIdx = matchIndex + cssClassToMatch.length;
-    if (matchIndex === -1 // no match
-        || (matchIndex > 0 && (/** @type {?} */ (nodeClassAttrVal))[matchIndex - 1] !== ' ') // no space before
-        ||
-            (matchEndIdx < nodeClassesLen && (/** @type {?} */ (nodeClassAttrVal))[matchEndIdx] !== ' ')) // no space after
-     {
-        return false;
-    }
-    return true;
-}
-/**
- * Function that checks whether a given tNode matches tag-based selector and has a valid type.
- *
- * Matching can be perfomed in 2 modes: projection mode (when we project nodes) and regular
- * directive matching mode. In "projection" mode, we do not need to check types, so if tag name
- * matches selector, we declare a match. In "directive matching" mode, we also check whether tNode
- * is of expected type:
- * - whether tNode has either Element or ElementContainer type
- * - or if we want to match "ng-template" tag, we check for Container type
- * @param {?} tNode
- * @param {?} currentSelector
- * @param {?} isProjectionMode
- * @return {?}
- */
-function hasTagAndTypeMatch(tNode, currentSelector, isProjectionMode) {
-    return currentSelector === tNode.tagName &&
-        (isProjectionMode ||
-            (tNode.type === 3 /* Element */ || tNode.type === 4 /* ElementContainer */) ||
-            (tNode.type === 0 /* Container */ && currentSelector === NG_TEMPLATE_SELECTOR));
-}
-/**
- * A utility function to match an Ivy node static data against a simple CSS selector
- *
- * @param {?} tNode
- * @param {?} selector
- * @param {?} isProjectionMode
- * @return {?} true if node matches the selector.
- */
-function isNodeMatchingSelector(tNode, selector, isProjectionMode) {
-    ngDevMode && assertDefined(selector[0], 'Selector should have a tag name');
-    /** @type {?} */
-    let mode = 4 /* ELEMENT */;
-    /** @type {?} */
-    const nodeAttrs = (/** @type {?} */ (tNode.attrs));
-    /** @type {?} */
-    const selectOnlyMarkerIdx = nodeAttrs ? nodeAttrs.indexOf(3 /* SelectOnly */) : -1;
-    // When processing ":not" selectors, we skip to the next ":not" if the
-    // current one doesn't match
-    /** @type {?} */
-    let skipToNextSelector = false;
-    for (let i = 0; i < selector.length; i++) {
-        /** @type {?} */
-        const current = selector[i];
-        if (typeof current === 'number') {
-            // If we finish processing a :not selector and it hasn't failed, return false
-            if (!skipToNextSelector && !isPositive(mode) && !isPositive((/** @type {?} */ (current)))) {
-                return false;
-            }
-            // If we are skipping to the next :not() and this mode flag is positive,
-            // it's a part of the current :not() selector, and we should keep skipping
-            if (skipToNextSelector && isPositive(current))
-                continue;
-            skipToNextSelector = false;
-            mode = ((/** @type {?} */ (current))) | (mode & 1 /* NOT */);
-            continue;
-        }
-        if (skipToNextSelector)
-            continue;
-        if (mode & 4 /* ELEMENT */) {
-            mode = 2 /* ATTRIBUTE */ | mode & 1 /* NOT */;
-            if (current !== '' && !hasTagAndTypeMatch(tNode, current, isProjectionMode) ||
-                current === '' && selector.length === 1) {
-                if (isPositive(mode))
-                    return false;
-                skipToNextSelector = true;
-            }
-        }
-        else {
-            /** @type {?} */
-            const attrName = mode & 8 /* CLASS */ ? 'class' : current;
-            /** @type {?} */
-            const attrIndexInNode = findAttrIndexInNode(attrName, nodeAttrs);
-            if (attrIndexInNode === -1) {
-                if (isPositive(mode))
-                    return false;
-                skipToNextSelector = true;
-                continue;
-            }
-            /** @type {?} */
-            const selectorAttrValue = mode & 8 /* CLASS */ ? current : selector[++i];
-            if (selectorAttrValue !== '') {
-                /** @type {?} */
-                let nodeAttrValue;
-                /** @type {?} */
-                const maybeAttrName = nodeAttrs[attrIndexInNode];
-                if (selectOnlyMarkerIdx > -1 && attrIndexInNode > selectOnlyMarkerIdx) {
-                    nodeAttrValue = '';
-                }
-                else {
-                    ngDevMode && assertNotEqual(maybeAttrName, 0 /* NamespaceURI */, 'We do not match directives on namespaced attributes');
-                    nodeAttrValue = (/** @type {?} */ (nodeAttrs[attrIndexInNode + 1]));
-                }
-                if (mode & 8 /* CLASS */ &&
-                    !isCssClassMatching((/** @type {?} */ (nodeAttrValue)), (/** @type {?} */ (selectorAttrValue))) ||
-                    mode & 2 /* ATTRIBUTE */ && selectorAttrValue !== nodeAttrValue) {
-                    if (isPositive(mode))
-                        return false;
-                    skipToNextSelector = true;
-                }
-            }
-        }
-    }
-    return isPositive(mode) || skipToNextSelector;
-}
-/**
- * @param {?} mode
- * @return {?}
- */
-function isPositive(mode) {
-    return (mode & 1 /* NOT */) === 0;
-}
-/**
- * Examines an attributes definition array from a node to find the index of the
- * attribute with the specified name.
- *
- * NOTE: Will not find namespaced attributes.
- *
- * @param {?} name the name of the attribute to find
- * @param {?} attrs the attribute array to examine
- * @return {?}
- */
-function findAttrIndexInNode(name, attrs) {
-    if (attrs === null)
-        return -1;
-    /** @type {?} */
-    let selectOnlyMode = false;
-    /** @type {?} */
-    let i = 0;
-    while (i < attrs.length) {
-        /** @type {?} */
-        const maybeAttrName = attrs[i];
-        if (maybeAttrName === name) {
-            return i;
-        }
-        else if (maybeAttrName === 0 /* NamespaceURI */) {
-            // NOTE(benlesh): will not find namespaced attributes. This is by design.
-            i += 4;
-        }
-        else {
-            if (maybeAttrName === 3 /* SelectOnly */) {
-                selectOnlyMode = true;
-            }
-            i += selectOnlyMode ? 1 : 2;
-        }
-    }
-    return -1;
-}
-/**
- * @param {?} tNode
- * @param {?} selector
- * @param {?=} isProjectionMode
- * @return {?}
- */
-function isNodeMatchingSelectorList(tNode, selector, isProjectionMode = false) {
-    for (let i = 0; i < selector.length; i++) {
-        if (isNodeMatchingSelector(tNode, selector[i], isProjectionMode)) {
-            return true;
-        }
-    }
-    return false;
-}
-/**
- * @param {?} tNode
- * @return {?}
- */
-function getProjectAsAttrValue(tNode) {
-    /** @type {?} */
-    const nodeAttrs = tNode.attrs;
-    if (nodeAttrs != null) {
-        /** @type {?} */
-        const ngProjectAsAttrIdx = nodeAttrs.indexOf(NG_PROJECT_AS_ATTR_NAME);
-        // only check for ngProjectAs in attribute names, don't accidentally match attribute's value
-        // (attribute names are stored at even indexes)
-        if ((ngProjectAsAttrIdx & 1) === 0) {
-            return (/** @type {?} */ (nodeAttrs[ngProjectAsAttrIdx + 1]));
-        }
-    }
-    return null;
-}
-/**
- * Checks a given node against matching selectors and returns
- * selector index (or 0 if none matched).
- *
- * This function takes into account the ngProjectAs attribute: if present its value will be compared
- * to the raw (un-parsed) CSS selector instead of using standard selector matching logic.
- * @param {?} tNode
- * @param {?} selectors
- * @param {?} textSelectors
- * @return {?}
- */
-function matchingSelectorIndex(tNode, selectors, textSelectors) {
-    /** @type {?} */
-    const ngProjectAsAttrVal = getProjectAsAttrValue(tNode);
-    for (let i = 0; i < selectors.length; i++) {
-        // if a node has the ngProjectAs attribute match it against unparsed selector
-        // match a node against a parsed selector only if ngProjectAs attribute is not present
-        if (ngProjectAsAttrVal === textSelectors[i] ||
-            ngProjectAsAttrVal === null &&
-                isNodeMatchingSelectorList(tNode, selectors[i], /* isProjectionMode */ true)) {
-            return i + 1; // first matching selector "captures" a given node
-        }
-    }
-    return 0;
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
 /**
  * Combines the binding value and a factory for an animation player.
  *
@@ -9544,10 +9340,11 @@ function initializeStaticContext(attrs) {
  * @param {?} context the existing styling context
  * @param {?} attrs an array of new static styling attributes that will be
  *              assigned to the context
+ * @param {?} startingIndex
  * @param {?} directive the directive instance with which static data is associated with.
  * @return {?}
  */
-function patchContextWithStaticAttrs(context, attrs, directive) {
+function patchContextWithStaticAttrs(context, attrs, startingIndex, directive) {
     // If the styling context has already been patched with the given directive's bindings,
     // then there is no point in doing it again. The reason why this may happen (the directive
     // styling being patched twice) is because the `stylingBinding` function is called each time
@@ -9563,7 +9360,7 @@ function patchContextWithStaticAttrs(context, attrs, directive) {
         let initialStyles = null;
         /** @type {?} */
         let mode = -1;
-        for (let i = 0; i < attrs.length; i++) {
+        for (let i = startingIndex; i < attrs.length; i++) {
             /** @type {?} */
             const attr = attrs[i];
             if (typeof attr == 'number') {
@@ -11196,6 +10993,263 @@ function getInitialClassNameValue(context) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
+/** @type {?} */
+const NG_TEMPLATE_SELECTOR = 'ng-template';
+/**
+ * @param {?} nodeClassAttrVal
+ * @param {?} cssClassToMatch
+ * @return {?}
+ */
+function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
+    /** @type {?} */
+    const nodeClassesLen = nodeClassAttrVal.length;
+    /** @type {?} */
+    const matchIndex = (/** @type {?} */ (nodeClassAttrVal)).indexOf(cssClassToMatch);
+    /** @type {?} */
+    const matchEndIdx = matchIndex + cssClassToMatch.length;
+    if (matchIndex === -1 // no match
+        || (matchIndex > 0 && (/** @type {?} */ (nodeClassAttrVal))[matchIndex - 1] !== ' ') // no space before
+        ||
+            (matchEndIdx < nodeClassesLen && (/** @type {?} */ (nodeClassAttrVal))[matchEndIdx] !== ' ')) // no space after
+     {
+        return false;
+    }
+    return true;
+}
+/**
+ * Function that checks whether a given tNode matches tag-based selector and has a valid type.
+ *
+ * Matching can be perfomed in 2 modes: projection mode (when we project nodes) and regular
+ * directive matching mode. In "projection" mode, we do not need to check types, so if tag name
+ * matches selector, we declare a match. In "directive matching" mode, we also check whether tNode
+ * is of expected type:
+ * - whether tNode has either Element or ElementContainer type
+ * - or if we want to match "ng-template" tag, we check for Container type
+ * @param {?} tNode
+ * @param {?} currentSelector
+ * @param {?} isProjectionMode
+ * @return {?}
+ */
+function hasTagAndTypeMatch(tNode, currentSelector, isProjectionMode) {
+    return currentSelector === tNode.tagName &&
+        (isProjectionMode ||
+            (tNode.type === 3 /* Element */ || tNode.type === 4 /* ElementContainer */) ||
+            (tNode.type === 0 /* Container */ && currentSelector === NG_TEMPLATE_SELECTOR));
+}
+/**
+ * A utility function to match an Ivy node static data against a simple CSS selector
+ *
+ * @param {?} tNode
+ * @param {?} selector
+ * @param {?} isProjectionMode
+ * @return {?} true if node matches the selector.
+ */
+function isNodeMatchingSelector(tNode, selector, isProjectionMode) {
+    ngDevMode && assertDefined(selector[0], 'Selector should have a tag name');
+    /** @type {?} */
+    let mode = 4 /* ELEMENT */;
+    /** @type {?} */
+    const nodeAttrs = (/** @type {?} */ (tNode.attrs));
+    /** @type {?} */
+    const selectOnlyMarkerIdx = nodeAttrs ? nodeAttrs.indexOf(3 /* SelectOnly */) : -1;
+    // When processing ":not" selectors, we skip to the next ":not" if the
+    // current one doesn't match
+    /** @type {?} */
+    let skipToNextSelector = false;
+    for (let i = 0; i < selector.length; i++) {
+        /** @type {?} */
+        const current = selector[i];
+        if (typeof current === 'number') {
+            // If we finish processing a :not selector and it hasn't failed, return false
+            if (!skipToNextSelector && !isPositive(mode) && !isPositive((/** @type {?} */ (current)))) {
+                return false;
+            }
+            // If we are skipping to the next :not() and this mode flag is positive,
+            // it's a part of the current :not() selector, and we should keep skipping
+            if (skipToNextSelector && isPositive(current))
+                continue;
+            skipToNextSelector = false;
+            mode = ((/** @type {?} */ (current))) | (mode & 1 /* NOT */);
+            continue;
+        }
+        if (skipToNextSelector)
+            continue;
+        if (mode & 4 /* ELEMENT */) {
+            mode = 2 /* ATTRIBUTE */ | mode & 1 /* NOT */;
+            if (current !== '' && !hasTagAndTypeMatch(tNode, current, isProjectionMode) ||
+                current === '' && selector.length === 1) {
+                if (isPositive(mode))
+                    return false;
+                skipToNextSelector = true;
+            }
+        }
+        else {
+            /** @type {?} */
+            const selectorAttrValue = mode & 8 /* CLASS */ ? current : selector[++i];
+            // special case for matching against classes when a tNode has been instantiated with
+            // class and style values as separate attribute values (e.g. ['title', CLASS, 'foo'])
+            if ((mode & 8 /* CLASS */) && tNode.stylingTemplate) {
+                if (!isCssClassMatching(readClassValueFromTNode(tNode), (/** @type {?} */ (selectorAttrValue)))) {
+                    if (isPositive(mode))
+                        return false;
+                    skipToNextSelector = true;
+                }
+                continue;
+            }
+            /** @type {?} */
+            const attrName = (mode & 8 /* CLASS */) ? 'class' : current;
+            /** @type {?} */
+            const attrIndexInNode = findAttrIndexInNode(attrName, nodeAttrs);
+            if (attrIndexInNode === -1) {
+                if (isPositive(mode))
+                    return false;
+                skipToNextSelector = true;
+                continue;
+            }
+            if (selectorAttrValue !== '') {
+                /** @type {?} */
+                let nodeAttrValue;
+                /** @type {?} */
+                const maybeAttrName = nodeAttrs[attrIndexInNode];
+                if (selectOnlyMarkerIdx > -1 && attrIndexInNode > selectOnlyMarkerIdx) {
+                    nodeAttrValue = '';
+                }
+                else {
+                    ngDevMode && assertNotEqual(maybeAttrName, 0 /* NamespaceURI */, 'We do not match directives on namespaced attributes');
+                    nodeAttrValue = (/** @type {?} */ (nodeAttrs[attrIndexInNode + 1]));
+                }
+                /** @type {?} */
+                const compareAgainstClassName = mode & 8 /* CLASS */ ? nodeAttrValue : null;
+                if (compareAgainstClassName &&
+                    !isCssClassMatching(compareAgainstClassName, (/** @type {?} */ (selectorAttrValue))) ||
+                    mode & 2 /* ATTRIBUTE */ && selectorAttrValue !== nodeAttrValue) {
+                    if (isPositive(mode))
+                        return false;
+                    skipToNextSelector = true;
+                }
+            }
+        }
+    }
+    return isPositive(mode) || skipToNextSelector;
+}
+/**
+ * @param {?} mode
+ * @return {?}
+ */
+function isPositive(mode) {
+    return (mode & 1 /* NOT */) === 0;
+}
+/**
+ * @param {?} tNode
+ * @return {?}
+ */
+function readClassValueFromTNode(tNode) {
+    // comparing against CSS class values is complex because the compiler doesn't place them as
+    // regular attributes when an element is created. Instead, the classes (and styles for
+    // that matter) are placed in a special styling context that is used for resolving all
+    // class/style values across static attributes, [style]/[class] and [style.prop]/[class.name]
+    // bindings. Therefore if and when the styling context exists then the class values are to be
+    // extracted by the context helper code below...
+    return tNode.stylingTemplate ? getInitialClassNameValue(tNode.stylingTemplate) : '';
+}
+/**
+ * Examines an attributes definition array from a node to find the index of the
+ * attribute with the specified name.
+ *
+ * NOTE: Will not find namespaced attributes.
+ *
+ * @param {?} name the name of the attribute to find
+ * @param {?} attrs the attribute array to examine
+ * @return {?}
+ */
+function findAttrIndexInNode(name, attrs) {
+    if (attrs === null)
+        return -1;
+    /** @type {?} */
+    let selectOnlyMode = false;
+    /** @type {?} */
+    let i = 0;
+    while (i < attrs.length) {
+        /** @type {?} */
+        const maybeAttrName = attrs[i];
+        if (maybeAttrName === name) {
+            return i;
+        }
+        else if (maybeAttrName === 0 /* NamespaceURI */) {
+            // NOTE(benlesh): will not find namespaced attributes. This is by design.
+            i += 4;
+        }
+        else {
+            if (maybeAttrName === 3 /* SelectOnly */) {
+                selectOnlyMode = true;
+            }
+            i += selectOnlyMode ? 1 : 2;
+        }
+    }
+    return -1;
+}
+/**
+ * @param {?} tNode
+ * @param {?} selector
+ * @param {?=} isProjectionMode
+ * @return {?}
+ */
+function isNodeMatchingSelectorList(tNode, selector, isProjectionMode = false) {
+    for (let i = 0; i < selector.length; i++) {
+        if (isNodeMatchingSelector(tNode, selector[i], isProjectionMode)) {
+            return true;
+        }
+    }
+    return false;
+}
+/**
+ * @param {?} tNode
+ * @return {?}
+ */
+function getProjectAsAttrValue(tNode) {
+    /** @type {?} */
+    const nodeAttrs = tNode.attrs;
+    if (nodeAttrs != null) {
+        /** @type {?} */
+        const ngProjectAsAttrIdx = nodeAttrs.indexOf(NG_PROJECT_AS_ATTR_NAME);
+        // only check for ngProjectAs in attribute names, don't accidentally match attribute's value
+        // (attribute names are stored at even indexes)
+        if ((ngProjectAsAttrIdx & 1) === 0) {
+            return (/** @type {?} */ (nodeAttrs[ngProjectAsAttrIdx + 1]));
+        }
+    }
+    return null;
+}
+/**
+ * Checks a given node against matching selectors and returns
+ * selector index (or 0 if none matched).
+ *
+ * This function takes into account the ngProjectAs attribute: if present its value will be compared
+ * to the raw (un-parsed) CSS selector instead of using standard selector matching logic.
+ * @param {?} tNode
+ * @param {?} selectors
+ * @param {?} textSelectors
+ * @return {?}
+ */
+function matchingSelectorIndex(tNode, selectors, textSelectors) {
+    /** @type {?} */
+    const ngProjectAsAttrVal = getProjectAsAttrValue(tNode);
+    for (let i = 0; i < selectors.length; i++) {
+        // if a node has the ngProjectAs attribute match it against unparsed selector
+        // match a node against a parsed selector only if ngProjectAs attribute is not present
+        if (ngProjectAsAttrVal === textSelectors[i] ||
+            ngProjectAsAttrVal === null &&
+                isNodeMatchingSelectorList(tNode, selectors[i], /* isProjectionMode */ true)) {
+            return i + 1; // first matching selector "captures" a given node
+        }
+    }
+    return 0;
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
 /**
  * A permanent marker promise which signifies that the current CD tree is
  * clean.
@@ -11465,8 +11519,6 @@ function renderEmbeddedTemplate(viewToRender, tView, context) {
     const _isParent = getIsParent();
     /** @type {?} */
     const _previousOrParentTNode = getPreviousOrParentTNode();
-    setIsParent(true);
-    setPreviousOrParentTNode((/** @type {?} */ (null)));
     /** @type {?} */
     let oldView;
     if (viewToRender[FLAGS] & 128 /* IsRoot */) {
@@ -11748,23 +11800,31 @@ function elementCreate(name, overriddenRenderer) {
  * Creates directive instances and populates local refs.
  *
  * @param {?} tView
- * @param {?} viewData
+ * @param {?} lView
  * @param {?} localRefs Local refs of the node in question
  * @param {?=} localRefExtractor mapping function that extracts local ref value from TNode
  * @return {?}
  */
-function createDirectivesAndLocals(tView, viewData, localRefs, localRefExtractor = getNativeByTNode) {
+function createDirectivesAndLocals(tView, lView, localRefs, localRefExtractor = getNativeByTNode) {
     if (!getBindingsEnabled())
         return;
     /** @type {?} */
     const previousOrParentTNode = getPreviousOrParentTNode();
     if (getFirstTemplatePass()) {
         ngDevMode && ngDevMode.firstTemplatePass++;
-        resolveDirectives(tView, viewData, findDirectiveMatches(tView, viewData, previousOrParentTNode), previousOrParentTNode, localRefs || null);
+        resolveDirectives(tView, lView, findDirectiveMatches(tView, lView, previousOrParentTNode), previousOrParentTNode, localRefs || null);
     }
-    instantiateAllDirectives(tView, viewData, previousOrParentTNode);
-    invokeDirectivesHostBindings(tView, viewData, previousOrParentTNode);
-    saveResolvedLocalsInData(viewData, previousOrParentTNode, localRefExtractor);
+    else {
+        // During first template pass, queries are created or cloned when first requested
+        // using `getOrCreateCurrentQueries`. For subsequent template passes, we clone
+        // any current LQueries here up-front if the current node hosts a content query.
+        if (isContentQueryHost(getPreviousOrParentTNode()) && lView[QUERIES]) {
+            lView[QUERIES] = (/** @type {?} */ (lView[QUERIES])).clone();
+        }
+    }
+    instantiateAllDirectives(tView, lView, previousOrParentTNode);
+    invokeDirectivesHostBindings(tView, lView, previousOrParentTNode);
+    saveResolvedLocalsInData(lView, previousOrParentTNode, localRefExtractor);
 }
 /**
  * Takes a list of local names and indices and pushes the resolved local variable values
@@ -11882,9 +11942,31 @@ function createViewBlueprint(bindingStartIndex, initialViewLength) {
     return blueprint;
 }
 /**
- * @param {?} native
- * @param {?} attrs
- * @return {?}
+ * Assigns all attribute values to the provided element via the inferred renderer.
+ *
+ * This function accepts two forms of attribute entries:
+ *
+ * default: (key, value):
+ *  attrs = [key1, value1, key2, value2]
+ *
+ * namespaced: (NAMESPACE_MARKER, uri, name, value)
+ *  attrs = [NAMESPACE_MARKER, uri, name, value, NAMESPACE_MARKER, uri, name, value]
+ *
+ * The `attrs` array can contain a mix of both the default and namespaced entries.
+ * The "default" values are set without a marker, but if the function comes across
+ * a marker value then it will attempt to set a namespaced value. If the marker is
+ * not of a namespaced value then the function will quit and return the index value
+ * where it stopped during the iteration of the attrs array.
+ *
+ * See [AttributeMarker] to understand what the namespace marker value is.
+ *
+ * Note that this instruction does not support assigning style and class values to
+ * an element. See `elementStart` and `elementHostAttrs` to learn how styling values
+ * are applied to an element.
+ *
+ * @param {?} native The element that the attributes will be assigned to
+ * @param {?} attrs The attribute array of values that will be assigned to the element
+ * @return {?} the index value that was last accessed in the attributes array
  */
 function setUpAttributes(native, attrs) {
     /** @type {?} */
@@ -11895,31 +11977,33 @@ function setUpAttributes(native, attrs) {
     let i = 0;
     while (i < attrs.length) {
         /** @type {?} */
-        const attrName = attrs[i++];
-        if (typeof attrName == 'number') {
-            if (attrName === 0 /* NamespaceURI */) {
-                // Namespaced attributes
-                /** @type {?} */
-                const namespaceURI = (/** @type {?} */ (attrs[i++]));
-                /** @type {?} */
-                const attrName = (/** @type {?} */ (attrs[i++]));
-                /** @type {?} */
-                const attrVal = (/** @type {?} */ (attrs[i++]));
-                ngDevMode && ngDevMode.rendererSetAttribute++;
-                isProc ?
-                    ((/** @type {?} */ (renderer)))
-                        .setAttribute(native, attrName, attrVal, namespaceURI) :
-                    native.setAttributeNS(namespaceURI, attrName, attrVal);
-            }
-            else {
-                // All other `AttributeMarker`s are ignored here.
+        const value = attrs[i];
+        if (typeof value === 'number') {
+            // only namespaces are supported. Other value types (such as style/class
+            // entries) are not supported in this function.
+            if (value !== 0 /* NamespaceURI */) {
                 break;
             }
+            // we just landed on the marker value ... therefore
+            // we should skip to the next entry
+            i++;
+            /** @type {?} */
+            const namespaceURI = (/** @type {?} */ (attrs[i++]));
+            /** @type {?} */
+            const attrName = (/** @type {?} */ (attrs[i++]));
+            /** @type {?} */
+            const attrVal = (/** @type {?} */ (attrs[i++]));
+            ngDevMode && ngDevMode.rendererSetAttribute++;
+            isProc ?
+                ((/** @type {?} */ (renderer))).setAttribute(native, attrName, attrVal, namespaceURI) :
+                native.setAttributeNS(namespaceURI, attrName, attrVal);
         }
         else {
             /// attrName is string;
             /** @type {?} */
-            const attrVal = attrs[i++];
+            const attrName = (/** @type {?} */ (value));
+            /** @type {?} */
+            const attrVal = attrs[++i];
             if (attrName !== NG_PROJECT_AS_ATTR_NAME) {
                 // Standard attributes
                 ngDevMode && ngDevMode.rendererSetAttribute++;
@@ -11935,8 +12019,14 @@ function setUpAttributes(native, attrs) {
                         native.setAttribute((/** @type {?} */ (attrName)), (/** @type {?} */ (attrVal)));
                 }
             }
+            i++;
         }
     }
+    // another piece of code may iterate over the same attributes array. Therefore
+    // it may be helpful to return the exact spot where the attributes array exited
+    // whether by running into an unsupported marker or if all the static values were
+    // iterated over.
+    return i;
 }
 /**
  * @param {?} text
@@ -12065,7 +12155,12 @@ function listener(eventName, listenerFn, useCapture = false, eventTargetResolver
                 /** @type {?} */
                 const directive = unwrapOnChangesDirectiveWrapper(lView[directiveIndex]);
                 /** @type {?} */
-                const subscription = directive[minifiedName].subscribe(listenerFn);
+                const output = directive[minifiedName];
+                if (ngDevMode && !isObservable(output)) {
+                    throw new Error(`@Output ${minifiedName} not initialized in '${directive.constructor.name}'.`);
+                }
+                /** @type {?} */
+                const subscription = output.subscribe(listenerFn);
                 /** @type {?} */
                 const idx = lCleanup.length;
                 lCleanup.push(listenerFn, subscription);
@@ -12474,20 +12569,42 @@ function elementStyling(classBindingNames, styleBindingNames, styleSanitizer, di
     updateContextWithBindings((/** @type {?} */ (tNode.stylingTemplate)), directive || null, classBindingNames, styleBindingNames, styleSanitizer, hasClassInput(tNode));
 }
 /**
- * Assign static styling values to a host element.
+ * Assign static attribute values to a host element.
+ *
+ * This instruction will assign static attribute values as well as class and style
+ * values to an element within the host bindings function. Since attribute values
+ * can consist of different types of values, the `attrs` array must include the values in
+ * the following format:
+ *
+ * attrs = [
+ *   // static attributes (like `title`, `name`, `id`...)
+ *   attr1, value1, attr2, value,
+ *
+ *   // a single namespace value (like `x:id`)
+ *   NAMESPACE_MARKER, namespaceUri1, name1, value1,
+ *
+ *   // another single namespace value (like `x:name`)
+ *   NAMESPACE_MARKER, namespaceUri2, name2, value2,
+ *
+ *   // a series of CSS classes that will be applied to the element (no spaces)
+ *   CLASSES_MARKER, class1, class2, class3,
+ *
+ *   // a series of CSS styles (property + value) that will be applied to the element
+ *   STYLES_MARKER, prop1, value1, prop2, value2
+ * ]
+ *
+ * All non-class and non-style attributes must be defined at the start of the list
+ * first before all class and style values are set. When there is a change in value
+ * type (like when classes and styles are introduced) a marker must be used to separate
+ * the entries. The marker values themselves are set via entries found in the
+ * [AttributeMarker] enum.
  *
  * NOTE: This instruction is meant to used from `hostBindings` function only.
  *
  * \@publicApi
  * @param {?} directive A directive instance the styling is associated with.
- * @param {?} attrs An array containing class and styling information. The values must be marked with
- *              `AttributeMarker`.
- *
- *        ```
- *        var attrs = [AttributeMarker.Classes, 'foo', 'bar',
- *                     AttributeMarker.Styles, 'width', '100px', 'height, '200px']
- *        elementHostAttrs(directive, attrs);
- *        ```
+ * @param {?} attrs An array of static values (attributes, classes and styles) with the correct marker
+ * values.
  *
  * @return {?}
  */
@@ -12497,7 +12614,13 @@ function elementHostAttrs(directive, attrs) {
     if (!tNode.stylingTemplate) {
         tNode.stylingTemplate = initializeStaticContext(attrs);
     }
-    patchContextWithStaticAttrs(tNode.stylingTemplate, attrs, directive);
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const native = (/** @type {?} */ (getNativeByTNode(tNode, lView)));
+    /** @type {?} */
+    const i = setUpAttributes(native, attrs);
+    patchContextWithStaticAttrs(tNode.stylingTemplate, attrs, i, directive);
 }
 /**
  * Apply styling binding to the element.
@@ -12922,10 +13045,6 @@ function postProcessBaseDirective(lView, previousOrParentTNode, directive, def) 
     attachPatchData(directive, lView);
     if (native) {
         attachPatchData(native, lView);
-    }
-    // TODO(misko): setUpAttributes should be a feature for better treeshakability.
-    if (def.attributes != null && previousOrParentTNode.type == 3 /* Element */) {
-        setUpAttributes((/** @type {?} */ (native)), (/** @type {?} */ (def.attributes)));
     }
 }
 /**
@@ -13635,8 +13754,8 @@ function projectionDef(selectors, textSelectors) {
             }
             else {
                 pData[bucketIndex] = componentChild;
-                componentChild.next = null;
             }
+            componentChild.next = null;
             tails[bucketIndex] = componentChild;
             componentChild = nextNode;
         }
@@ -16311,7 +16430,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.0+170.sha-f1fb62d');
+const VERSION = new Version('8.0.0-beta.0+3.sha-808898d');
 
 /**
  * @fileoverview added by tsickle
@@ -16993,19 +17112,18 @@ function i18nStartFirstPass(tView, index, message, subTemplateIndex) {
         else {
             // Even indexes are text (including bindings & ICU expressions)
             /** @type {?} */
-            const parts = value.split(ICU_REGEXP);
+            const parts = extractParts(value);
             for (let j = 0; j < parts.length; j++) {
-                value = parts[j];
                 if (j & 1) {
                     // Odd indexes are ICU expressions
                     // Create the comment node that will anchor the ICU expression
                     allocExpando(viewData);
                     /** @type {?} */
                     const icuNodeIndex = tView.blueprint.length - 1 - HEADER_OFFSET;
-                    createOpCodes.push(COMMENT_MARKER, ngDevMode ? `ICU ${icuNodeIndex}` : '', parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                    createOpCodes.push(COMMENT_MARKER, ngDevMode ? `ICU ${icuNodeIndex}` : '', icuNodeIndex, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
                     // Update codes for the ICU expression
                     /** @type {?} */
-                    const icuExpression = parseICUBlock(value.substr(1, value.length - 2));
+                    const icuExpression = (/** @type {?} */ (parts[j]));
                     /** @type {?} */
                     const mask = getBindingMask(icuExpression);
                     icuStart(icuExpressions, icuExpression, icuNodeIndex, icuNodeIndex);
@@ -17018,17 +17136,21 @@ function i18nStartFirstPass(tView, index, message, subTemplateIndex) {
                     2, // skip 2 opCodes if not changed
                     icuNodeIndex << 2 /* SHIFT_REF */ | 3 /* IcuUpdate */, tIcuIndex);
                 }
-                else if (value !== '') {
+                else if (parts[j] !== '') {
+                    /** @type {?} */
+                    const text$$1 = (/** @type {?} */ (parts[j]));
                     // Even indexes are text (including bindings)
                     /** @type {?} */
-                    const hasBinding = value.match(BINDING_REGEXP);
+                    const hasBinding = text$$1.match(BINDING_REGEXP);
                     // Create text nodes
                     allocExpando(viewData);
+                    /** @type {?} */
+                    const textNodeIndex = tView.blueprint.length - 1 - HEADER_OFFSET;
                     createOpCodes.push(
                     // If there is a binding, the value will be set during update
-                    hasBinding ? '' : value, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                    hasBinding ? '' : text$$1, textNodeIndex, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
                     if (hasBinding) {
-                        addAllToArray(generateBindingUpdateOpCodes(value, tView.blueprint.length - 1 - HEADER_OFFSET), updateOpCodes);
+                        addAllToArray(generateBindingUpdateOpCodes(text$$1, tView.blueprint.length - 1 - HEADER_OFFSET), updateOpCodes);
                     }
                 }
             }
@@ -17179,7 +17301,7 @@ function i18nEndFirstPass(tView) {
     /** @type {?} */
     const previousOrParentTNode = getPreviousOrParentTNode();
     /** @type {?} */
-    const visitedPlaceholders = readCreateOpCodes(rootIndex, tI18n.create, tI18n.expandoStartIndex, viewData);
+    const visitedPlaceholders = readCreateOpCodes(rootIndex, tI18n.create, tI18n.icus, viewData);
     // Remove deleted placeholders
     // The last placeholder that was added before `i18nEnd` is `previousOrParentTNode`
     for (let i = rootIndex + 1; i <= previousOrParentTNode.index - HEADER_OFFSET; i++) {
@@ -17191,11 +17313,11 @@ function i18nEndFirstPass(tView) {
 /**
  * @param {?} index
  * @param {?} createOpCodes
- * @param {?} expandoStartIndex
+ * @param {?} icus
  * @param {?} viewData
  * @return {?}
  */
-function readCreateOpCodes(index, createOpCodes, expandoStartIndex, viewData) {
+function readCreateOpCodes(index, createOpCodes, icus, viewData) {
     /** @type {?} */
     const renderer = getLView()[RENDERER];
     /** @type {?} */
@@ -17210,10 +17332,11 @@ function readCreateOpCodes(index, createOpCodes, expandoStartIndex, viewData) {
         if (typeof opCode == 'string') {
             /** @type {?} */
             const textRNode = createTextNode(opCode, renderer);
+            /** @type {?} */
+            const textNodeIndex = (/** @type {?} */ (createOpCodes[++i]));
             ngDevMode && ngDevMode.rendererCreateTextNode++;
             previousTNode = currentTNode;
-            currentTNode =
-                createNodeAtIndex(expandoStartIndex++, 3 /* Element */, textRNode, null, null);
+            currentTNode = createNodeAtIndex(textNodeIndex, 3 /* Element */, textRNode, null, null);
             setIsParent(false);
         }
         else if (typeof opCode == 'number') {
@@ -17274,12 +17397,15 @@ function readCreateOpCodes(index, createOpCodes, expandoStartIndex, viewData) {
                 case COMMENT_MARKER:
                     /** @type {?} */
                     const commentValue = (/** @type {?} */ (createOpCodes[++i]));
+                    /** @type {?} */
+                    const commentNodeIndex = (/** @type {?} */ (createOpCodes[++i]));
                     ngDevMode && assertEqual(typeof commentValue, 'string', `Expected "${commentValue}" to be a comment node value`);
                     /** @type {?} */
                     const commentRNode = renderer.createComment(commentValue);
                     ngDevMode && ngDevMode.rendererCreateComment++;
                     previousTNode = currentTNode;
-                    currentTNode = createNodeAtIndex(expandoStartIndex++, 5 /* IcuContainer */, commentRNode, null, null);
+                    currentTNode =
+                        createNodeAtIndex(commentNodeIndex, 5 /* IcuContainer */, commentRNode, null, null);
                     attachPatchData(commentRNode, viewData);
                     ((/** @type {?} */ (currentTNode))).activeCaseIndex = null;
                     // We will add the case nodes later, during the update phase
@@ -17288,12 +17414,14 @@ function readCreateOpCodes(index, createOpCodes, expandoStartIndex, viewData) {
                 case ELEMENT_MARKER:
                     /** @type {?} */
                     const tagNameValue = (/** @type {?} */ (createOpCodes[++i]));
+                    /** @type {?} */
+                    const elementNodeIndex = (/** @type {?} */ (createOpCodes[++i]));
                     ngDevMode && assertEqual(typeof tagNameValue, 'string', `Expected "${tagNameValue}" to be an element node tag name`);
                     /** @type {?} */
                     const elementRNode = renderer.createElement(tagNameValue);
                     ngDevMode && ngDevMode.rendererCreateElement++;
                     previousTNode = currentTNode;
-                    currentTNode = createNodeAtIndex(expandoStartIndex++, 3 /* Element */, elementRNode, tagNameValue, null);
+                    currentTNode = createNodeAtIndex(elementNodeIndex, 3 /* Element */, elementRNode, tagNameValue, null);
                     break;
                 default:
                     throw new Error(`Unable to determine the type of mutate operation for "${opCode}"`);
@@ -17394,7 +17522,7 @@ function readUpdateOpCodes(updateOpCodes, icus, bindingsStartIndex, changeMask, 
                                 const caseIndex = getCaseIndex(tIcu, value);
                                 icuTNode.activeCaseIndex = caseIndex !== -1 ? caseIndex : null;
                                 // Add the nodes for the new case
-                                readCreateOpCodes(-1, tIcu.create[caseIndex], tIcu.expandoStartIndex, viewData);
+                                readCreateOpCodes(-1, tIcu.create[caseIndex], icus, viewData);
                                 caseCreated = true;
                                 break;
                             case 3 /* IcuUpdate */:
@@ -18149,7 +18277,7 @@ function parseNodes(currentNode, icuCase, parentIndex, nestedIcus, tIcus, expand
                         icuCase.vars--;
                     }
                     else {
-                        icuCase.create.push(ELEMENT_MARKER, tagName, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                        icuCase.create.push(ELEMENT_MARKER, tagName, newIndex, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
                         /** @type {?} */
                         const elAttrs = element$$1.attributes;
                         for (let i = 0; i < elAttrs.length; i++) {
@@ -18192,7 +18320,7 @@ function parseNodes(currentNode, icuCase, parentIndex, nestedIcus, tIcus, expand
                     const value = currentNode.textContent || '';
                     /** @type {?} */
                     const hasBinding = value.match(BINDING_REGEXP);
-                    icuCase.create.push(hasBinding ? '' : value, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                    icuCase.create.push(hasBinding ? '' : value, newIndex, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
                     icuCase.remove.push(newIndex << 3 /* SHIFT_REF */ | 3 /* Remove */);
                     if (hasBinding) {
                         addAllToArray(generateBindingUpdateOpCodes(value, newIndex), icuCase.update);
@@ -18208,7 +18336,7 @@ function parseNodes(currentNode, icuCase, parentIndex, nestedIcus, tIcus, expand
                         /** @type {?} */
                         const newLocal = ngDevMode ? `nested ICU ${nestedIcuIndex}` : '';
                         // Create the comment node that will anchor the ICU expression
-                        icuCase.create.push(COMMENT_MARKER, newLocal, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                        icuCase.create.push(COMMENT_MARKER, newLocal, newIndex, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
                         /** @type {?} */
                         const nestedIcu = nestedIcus[nestedIcuIndex];
                         nestedIcusToCreate.push([nestedIcu, newIndex]);
@@ -20767,30 +20895,6 @@ const SWITCH_COMPILE_NGMODULE = SWITCH_COMPILE_NGMODULE__PRE_R3__;
  */
 
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Determine if the argument is shaped like a Promise
- */
-function isPromise(obj) {
-    // allow any Promise/A+ compliant thenable.
-    // It's up to the caller to ensure that obj.then conforms to the spec
-    return !!obj && typeof obj.then === 'function';
-}
-/**
- * Determine if the argument is an Observable
- */
-function isObservable(obj) {
-    // TODO: use isObservable once we update pass rxjs 6.1
-    // https://github.com/ReactiveX/rxjs/blob/master/CHANGELOG.md#610-2018-05-03
-    return !!obj && typeof obj.subscribe === 'function';
-}
-
-/**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
@@ -21116,7 +21220,18 @@ const Compiler_compileModuleAsync = Compiler_compileModuleAsync__PRE_R3__;
 const Compiler_compileModuleAndAllComponentsSync__PRE_R3__ = (/** @type {?} */ (_throwError));
 /** @type {?} */
 const Compiler_compileModuleAndAllComponentsSync__POST_R3__ = function (moduleType) {
-    return new ModuleWithComponentFactories(Compiler_compileModuleSync__POST_R3__(moduleType), []);
+    /** @type {?} */
+    const ngModuleFactory = Compiler_compileModuleSync__POST_R3__(moduleType);
+    /** @type {?} */
+    const moduleDef = (/** @type {?} */ (getNgModuleDef(moduleType)));
+    /** @type {?} */
+    const componentFactories = moduleDef.declarations.reduce((factories, declaration) => {
+        /** @type {?} */
+        const componentDef = getComponentDef(declaration);
+        componentDef && factories.push(new ComponentFactory$1(componentDef));
+        return factories;
+    }, (/** @type {?} */ ([])));
+    return new ModuleWithComponentFactories(ngModuleFactory, componentFactories);
 };
 /** @type {?} */
 const Compiler_compileModuleAndAllComponentsSync = Compiler_compileModuleAndAllComponentsSync__PRE_R3__;
@@ -31205,5 +31320,5 @@ class NgModuleFactory_ extends NgModuleFactory {
  * Generated bundle index. Do not edit.
  */
 
-export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_q, _iterableDiffersFactory as ɵangular_packages_core_core_n, _keyValueDiffersFactory as ɵangular_packages_core_core_o, _localeFactory as ɵangular_packages_core_core_p, zoneSchedulerFactory as ɵangular_packages_core_core_r, _appIdRandomProviderFactory as ɵangular_packages_core_core_e, DefaultIterableDifferFactory as ɵangular_packages_core_core_l, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_m, DebugElement__PRE_R3__ as ɵangular_packages_core_core_k, DebugNode__PRE_R3__ as ɵangular_packages_core_core_j, injectInjectorOnly as ɵangular_packages_core_core_a, ReflectiveInjector_ as ɵangular_packages_core_core_b, ReflectiveDependency as ɵangular_packages_core_core_c, resolveReflectiveProviders as ɵangular_packages_core_core_d, getModuleFactory__PRE_R3__ as ɵangular_packages_core_core_i, wtfEnabled as ɵangular_packages_core_core_s, createScope as ɵangular_packages_core_core_u, detectWTF as ɵangular_packages_core_core_t, endTimeRange as ɵangular_packages_core_core_x, leave as ɵangular_packages_core_core_v, startTimeRange as ɵangular_packages_core_core_w, SCHEDULER as ɵangular_packages_core_core_ba, injectAttributeImpl as ɵangular_packages_core_core_bb, getLView as ɵangular_packages_core_core_bc, getPreviousOrParentTNode as ɵangular_packages_core_core_bd, nextContextImpl as ɵangular_packages_core_core_be, BoundPlayerFactory as ɵangular_packages_core_core_bj, loadInternal as ɵangular_packages_core_core_bg, createElementRef as ɵangular_packages_core_core_f, createTemplateRef as ɵangular_packages_core_core_g, createViewRef as ɵangular_packages_core_core_h, getUrlSanitizer as ɵangular_packages_core_core_bh, makeParamDecorator as ɵangular_packages_core_core_bk, makePropDecorator as ɵangular_packages_core_core_bl, getClosureSafeProperty as ɵangular_packages_core_core_bn, _def as ɵangular_packages_core_core_y, DebugContext as ɵangular_packages_core_core_z, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, InjectFlags, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, INJECTOR, Injector, inject, inject as ɵinject, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual$1 as ɵdevModeEqual, isListLikeIterable$1 as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR$1 as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineBase as ɵdefineBase, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, directiveInject as ɵdirectiveInject, injectAttribute as ɵinjectAttribute, getFactoryOf$1 as ɵgetFactoryOf, getInheritedFactory as ɵgetInheritedFactory, templateRefExtractor as ɵtemplateRefExtractor, ProvidersFeature as ɵProvidersFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, container as ɵcontainer, nextContext as ɵnextContext, elementStart as ɵelementStart, namespaceHTML as ɵnamespaceHTML, namespaceMathML as ɵnamespaceMathML, namespaceSVG as ɵnamespaceSVG, element as ɵelement, listener as ɵlistener, text as ɵtext, embeddedViewStart as ɵembeddedViewStart, query as ɵquery, registerContentQuery as ɵregisterContentQuery, projection as ɵprojection, bind as ɵbind, interpolation1 as ɵinterpolation1, interpolation2 as ɵinterpolation2, interpolation3 as ɵinterpolation3, interpolation4 as ɵinterpolation4, interpolation5 as ɵinterpolation5, interpolation6 as ɵinterpolation6, interpolation7 as ɵinterpolation7, interpolation8 as ɵinterpolation8, interpolationV as ɵinterpolationV, pipeBind1 as ɵpipeBind1, pipeBind2 as ɵpipeBind2, pipeBind3 as ɵpipeBind3, pipeBind4 as ɵpipeBind4, pipeBindV as ɵpipeBindV, pureFunction0 as ɵpureFunction0, pureFunction1 as ɵpureFunction1, pureFunction2 as ɵpureFunction2, pureFunction3 as ɵpureFunction3, pureFunction4 as ɵpureFunction4, pureFunction5 as ɵpureFunction5, pureFunction6 as ɵpureFunction6, pureFunction7 as ɵpureFunction7, pureFunction8 as ɵpureFunction8, pureFunctionV as ɵpureFunctionV, getCurrentView as ɵgetCurrentView, getHostElement as ɵgetHostElement, restoreView as ɵrestoreView, containerRefreshStart as ɵcontainerRefreshStart, containerRefreshEnd as ɵcontainerRefreshEnd, queryRefresh as ɵqueryRefresh, loadQueryList as ɵloadQueryList, elementEnd as ɵelementEnd, elementProperty as ɵelementProperty, componentHostSyntheticProperty as ɵcomponentHostSyntheticProperty, projectionDef as ɵprojectionDef, reference as ɵreference, enableBindings as ɵenableBindings, disableBindings as ɵdisableBindings, allocHostVars as ɵallocHostVars, elementAttribute as ɵelementAttribute, elementContainerStart as ɵelementContainerStart, elementContainerEnd as ɵelementContainerEnd, elementStyling as ɵelementStyling, elementHostAttrs as ɵelementHostAttrs, elementStylingMap as ɵelementStylingMap, elementStyleProp as ɵelementStyleProp, elementStylingApply as ɵelementStylingApply, elementClassProp as ɵelementClassProp, textBinding as ɵtextBinding, template as ɵtemplate, embeddedViewEnd as ɵembeddedViewEnd, store as ɵstore, load as ɵload, pipe as ɵpipe, whenRendered as ɵwhenRendered, i18n as ɵi18n, i18nAttributes as ɵi18nAttributes, i18nExp as ɵi18nExp, i18nStart as ɵi18nStart, i18nEnd as ɵi18nEnd, i18nApply as ɵi18nApply, i18nPostprocess as ɵi18nPostprocess, setClassMetadata as ɵsetClassMetadata, resolveWindow as ɵresolveWindow, resolveDocument as ɵresolveDocument, resolveBody as ɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, sanitizeUrlOrResourceUrl as ɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$4 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue$1 as ɵunv, viewDef as ɵvid };
+export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_q, _iterableDiffersFactory as ɵangular_packages_core_core_n, _keyValueDiffersFactory as ɵangular_packages_core_core_o, _localeFactory as ɵangular_packages_core_core_p, zoneSchedulerFactory as ɵangular_packages_core_core_r, _appIdRandomProviderFactory as ɵangular_packages_core_core_e, DefaultIterableDifferFactory as ɵangular_packages_core_core_l, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_m, DebugElement__PRE_R3__ as ɵangular_packages_core_core_k, DebugNode__PRE_R3__ as ɵangular_packages_core_core_j, injectInjectorOnly as ɵangular_packages_core_core_a, ReflectiveInjector_ as ɵangular_packages_core_core_b, ReflectiveDependency as ɵangular_packages_core_core_c, resolveReflectiveProviders as ɵangular_packages_core_core_d, getModuleFactory__PRE_R3__ as ɵangular_packages_core_core_i, wtfEnabled as ɵangular_packages_core_core_s, createScope as ɵangular_packages_core_core_u, detectWTF as ɵangular_packages_core_core_t, endTimeRange as ɵangular_packages_core_core_x, leave as ɵangular_packages_core_core_v, startTimeRange as ɵangular_packages_core_core_w, SCHEDULER as ɵangular_packages_core_core_ba, injectAttributeImpl as ɵangular_packages_core_core_bb, getLView as ɵangular_packages_core_core_bc, getPreviousOrParentTNode as ɵangular_packages_core_core_bd, nextContextImpl as ɵangular_packages_core_core_be, BoundPlayerFactory as ɵangular_packages_core_core_bj, loadInternal as ɵangular_packages_core_core_bg, createElementRef as ɵangular_packages_core_core_f, createTemplateRef as ɵangular_packages_core_core_g, createViewRef as ɵangular_packages_core_core_h, getUrlSanitizer as ɵangular_packages_core_core_bh, makeParamDecorator as ɵangular_packages_core_core_bk, makePropDecorator as ɵangular_packages_core_core_bl, getClosureSafeProperty as ɵangular_packages_core_core_bn, _def as ɵangular_packages_core_core_y, DebugContext as ɵangular_packages_core_core_z, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, InjectFlags, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, INJECTOR, Injector, inject, inject as ɵinject, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual$1 as ɵdevModeEqual, isListLikeIterable$1 as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR$1 as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineBase as ɵdefineBase, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, directiveInject as ɵdirectiveInject, injectAttribute as ɵinjectAttribute, getFactoryOf$1 as ɵgetFactoryOf, getInheritedFactory as ɵgetInheritedFactory, templateRefExtractor as ɵtemplateRefExtractor, ProvidersFeature as ɵProvidersFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, container as ɵcontainer, nextContext as ɵnextContext, elementStart as ɵelementStart, namespaceHTML as ɵnamespaceHTML, namespaceMathML as ɵnamespaceMathML, namespaceSVG as ɵnamespaceSVG, element as ɵelement, listener as ɵlistener, text as ɵtext, embeddedViewStart as ɵembeddedViewStart, query as ɵquery, registerContentQuery as ɵregisterContentQuery, projection as ɵprojection, bind as ɵbind, interpolation1 as ɵinterpolation1, interpolation2 as ɵinterpolation2, interpolation3 as ɵinterpolation3, interpolation4 as ɵinterpolation4, interpolation5 as ɵinterpolation5, interpolation6 as ɵinterpolation6, interpolation7 as ɵinterpolation7, interpolation8 as ɵinterpolation8, interpolationV as ɵinterpolationV, pipeBind1 as ɵpipeBind1, pipeBind2 as ɵpipeBind2, pipeBind3 as ɵpipeBind3, pipeBind4 as ɵpipeBind4, pipeBindV as ɵpipeBindV, pureFunction0 as ɵpureFunction0, pureFunction1 as ɵpureFunction1, pureFunction2 as ɵpureFunction2, pureFunction3 as ɵpureFunction3, pureFunction4 as ɵpureFunction4, pureFunction5 as ɵpureFunction5, pureFunction6 as ɵpureFunction6, pureFunction7 as ɵpureFunction7, pureFunction8 as ɵpureFunction8, pureFunctionV as ɵpureFunctionV, getCurrentView as ɵgetCurrentView, getHostElement as ɵgetHostElement, restoreView as ɵrestoreView, containerRefreshStart as ɵcontainerRefreshStart, containerRefreshEnd as ɵcontainerRefreshEnd, queryRefresh as ɵqueryRefresh, loadQueryList as ɵloadQueryList, elementEnd as ɵelementEnd, elementProperty as ɵelementProperty, componentHostSyntheticProperty as ɵcomponentHostSyntheticProperty, projectionDef as ɵprojectionDef, reference as ɵreference, enableBindings as ɵenableBindings, disableBindings as ɵdisableBindings, allocHostVars as ɵallocHostVars, elementAttribute as ɵelementAttribute, elementContainerStart as ɵelementContainerStart, elementContainerEnd as ɵelementContainerEnd, elementStyling as ɵelementStyling, elementHostAttrs as ɵelementHostAttrs, elementStylingMap as ɵelementStylingMap, elementStyleProp as ɵelementStyleProp, elementStylingApply as ɵelementStylingApply, elementClassProp as ɵelementClassProp, textBinding as ɵtextBinding, template as ɵtemplate, embeddedViewEnd as ɵembeddedViewEnd, store as ɵstore, load as ɵload, pipe as ɵpipe, whenRendered as ɵwhenRendered, i18n as ɵi18n, i18nAttributes as ɵi18nAttributes, i18nExp as ɵi18nExp, i18nStart as ɵi18nStart, i18nEnd as ɵi18nEnd, i18nApply as ɵi18nApply, i18nPostprocess as ɵi18nPostprocess, setClassMetadata as ɵsetClassMetadata, resolveWindow as ɵresolveWindow, resolveDocument as ɵresolveDocument, resolveBody as ɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, sanitizeUrlOrResourceUrl as ɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$4 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue$1 as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map

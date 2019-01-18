@@ -38,7 +38,7 @@ export declare function initializeStaticContext(attrs: TAttributes): StylingCont
  *              assigned to the context
  * @param directive the directive instance with which static data is associated with.
  */
-export declare function patchContextWithStaticAttrs(context: StylingContext, attrs: TAttributes, directive: any): void;
+export declare function patchContextWithStaticAttrs(context: StylingContext, attrs: TAttributes, startingIndex: number, directive: any): void;
 /**
  * Runs through the initial styling data present in the context and renders
  * them via the renderer on the element.
