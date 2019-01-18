@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.0+15.sha-73616ab
+ * @license Angular v8.0.0-beta.0+18.sha-a58fd21
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9804,6 +9804,33 @@
      */
     function listener(eventName, listenerFn, useCapture, eventTargetResolver) {
         if (useCapture === void 0) { useCapture = false; }
+        listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver);
+    }
+    /**
+     * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component.
+     *
+     * This instruction is for compatibility purposes and is designed to ensure that a
+     * synthetic host listener (e.g. `@HostListener('@foo.start')`) properly gets rendered
+     * in the component's renderer. Normally all host listeners are evaluated with the
+     * parent component's renderer, but, in the case of animation @triggers, they need
+     * to be evaluated with the sub component's renderer (because that's where the
+     * animation triggers are defined).
+     *
+     * Do not use this instruction as a replacement for `listener`. This instruction
+     * only exists to ensure compatibility with the ViewEngine's host binding behavior.
+     *
+     * @param eventName Name of the event
+     * @param listenerFn The function to be called when event emits
+     * @param useCapture Whether or not to use capture in event listener
+     * @param eventTargetResolver Function that returns global target information in case this listener
+     * should be attached to a global object like window, document or body
+     */
+    function componentHostSyntheticListener(eventName, listenerFn, useCapture, eventTargetResolver) {
+        if (useCapture === void 0) { useCapture = false; }
+        listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver, loadComponentRenderer);
+    }
+    function listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver, loadRendererFn) {
+        if (useCapture === void 0) { useCapture = false; }
         var lView = getLView();
         var tNode = getPreviousOrParentTNode();
         var tView = lView[TVIEW];
@@ -9816,7 +9843,7 @@
             var resolved = eventTargetResolver ? eventTargetResolver(native) : {};
             var target = resolved.target || native;
             ngDevMode && ngDevMode.rendererAddEventListener++;
-            var renderer = lView[RENDERER];
+            var renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
             var lCleanup = getCleanup(lView);
             var lCleanupIndex = lCleanup.length;
             var useCaptureOrSubIdx = useCapture;
@@ -9980,7 +10007,7 @@
      * synthetic host binding (e.g. `@HostBinding('@foo')`) properly gets rendered in
      * the component's renderer. Normally all host bindings are evaluated with the parent
      * component's renderer, but, in the case of animation @triggers, they need to be
-     * evaluated with the sub components renderer (because that's where the animation
+     * evaluated with the sub component's renderer (because that's where the animation
      * triggers are defined).
      *
      * Do not use this instruction as a replacement for `elementProperty`. This instruction
@@ -9996,10 +10023,6 @@
      */
     function componentHostSyntheticProperty(index, propName, value, sanitizer, nativeOnly) {
         elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadComponentRenderer);
-    }
-    function loadComponentRenderer(tNode, lView) {
-        var componentLView = lView[tNode.index];
-        return componentLView[RENDERER];
     }
     function elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadRendererFn) {
         if (value === NO_CHANGE)
@@ -11655,6 +11678,14 @@
     function getTViewCleanup(view) {
         return view[TVIEW].cleanup || (view[TVIEW].cleanup = []);
     }
+    /**
+     * There are cases where the sub component's renderer needs to be included
+     * instead of the current renderer (see the componentSyntheticHost* instructions).
+     */
+    function loadComponentRenderer(tNode, lView) {
+        var componentLView = lView[tNode.index];
+        return componentLView[RENDERER];
+    }
 
     /**
      * @license
@@ -13254,7 +13285,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.0+15.sha-73616ab');
+    var VERSION = new Version('8.0.0-beta.0+18.sha-a58fd21');
 
     /**
      * @license
@@ -16062,6 +16093,7 @@
         'ɵprojection': projection,
         'ɵelementProperty': elementProperty,
         'ɵcomponentHostSyntheticProperty': componentHostSyntheticProperty,
+        'ɵcomponentHostSyntheticListener': componentHostSyntheticListener,
         'ɵpipeBind1': pipeBind1,
         'ɵpipeBind2': pipeBind2,
         'ɵpipeBind3': pipeBind3,
@@ -24917,6 +24949,7 @@
     exports.ɵelementEnd = elementEnd;
     exports.ɵelementProperty = elementProperty;
     exports.ɵcomponentHostSyntheticProperty = componentHostSyntheticProperty;
+    exports.ɵcomponentHostSyntheticListener = componentHostSyntheticListener;
     exports.ɵprojectionDef = projectionDef;
     exports.ɵreference = reference;
     exports.ɵenableBindings = enableBindings;
