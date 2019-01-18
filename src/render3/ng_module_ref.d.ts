@@ -7,6 +7,7 @@
  */
 import { Injector } from '../di/injector';
 import { InjectFlags } from '../di/interface/injector';
+import { R3Injector } from '../di/r3_injector';
 import { Type } from '../interface/type';
 import { ComponentFactoryResolver as viewEngine_ComponentFactoryResolver } from '../linker/component_factory_resolver';
 import { InternalNgModuleRef, NgModuleFactory as viewEngine_NgModuleFactory, NgModuleRef as viewEngine_NgModuleRef } from '../linker/ng_module_factory';
@@ -17,7 +18,7 @@ export interface NgModuleType<T = any> extends Type<T> {
 export declare class NgModuleRef<T> extends viewEngine_NgModuleRef<T> implements InternalNgModuleRef<T> {
     _parent: Injector | null;
     _bootstrapComponents: Type<any>[];
-    _r3Injector: Injector;
+    _r3Injector: R3Injector;
     injector: Injector;
     instance: T;
     destroyCbs: (() => void)[] | null;

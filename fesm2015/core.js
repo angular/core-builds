@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.0+19.sha-2b9cc85
+ * @license Angular v8.0.0-beta.0+20.sha-ab2bf83
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2828,10 +2828,7 @@ class R3Injector {
          * Set of values instantiated by this injector which contain `ngOnDestroy` lifecycle hooks.
          */
         this.onDestroy = new Set();
-        /**
-         * Flag indicating that this injector was previously destroyed.
-         */
-        this.destroyed = false;
+        this._destroyed = false;
         // Start off by creating Records for every provider declared in every InjectorType
         // included transitively in `def`.
         /** @type {?} */
@@ -2847,6 +2844,11 @@ class R3Injector {
         this.injectorDefTypes.forEach(defType => this.get(defType));
     }
     /**
+     * Flag indicating that this injector was previously destroyed.
+     * @return {?}
+     */
+    get destroyed() { return this._destroyed; }
+    /**
      * Destroy the injector and release references to every instance or provider associated with it.
      *
      * Also calls the `OnDestroy` lifecycle hooks of every instance that was created for which a
@@ -2856,7 +2858,7 @@ class R3Injector {
     destroy() {
         this.assertNotDestroyed();
         // Set destroyed = true first, in case lifecycle hooks re-enter destroy().
-        this.destroyed = true;
+        this._destroyed = true;
         try {
             // Call all the lifecycle hooks.
             this.onDestroy.forEach(service => service.ngOnDestroy());
@@ -2919,7 +2921,7 @@ class R3Injector {
      * @return {?}
      */
     assertNotDestroyed() {
-        if (this.destroyed) {
+        if (this._destroyed) {
             throw new Error('Injector has already been destroyed.');
         }
     }
@@ -16471,7 +16473,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.0+19.sha-2b9cc85');
+const VERSION = new Version('8.0.0-beta.0+20.sha-ab2bf83');
 
 /**
  * @fileoverview added by tsickle
@@ -16727,7 +16729,7 @@ class ComponentRef$1 extends ComponentRef {
         ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
         (/** @type {?} */ (this.destroyCbs)).forEach(fn => fn());
         this.destroyCbs = null;
-        this.hostView.destroy();
+        !this.hostView.destroyed && this.hostView.destroy();
     }
     /**
      * @param {?} callback
@@ -18449,7 +18451,7 @@ class NgModuleRef$1 extends NgModuleRef {
             },
             COMPONENT_FACTORY_RESOLVER
         ];
-        this._r3Injector = createInjector(ngModuleType, _parent, additionalProviders);
+        this._r3Injector = (/** @type {?} */ (createInjector(ngModuleType, _parent, additionalProviders)));
         this.instance = this.get(ngModuleType);
     }
     /**
@@ -18475,6 +18477,9 @@ class NgModuleRef$1 extends NgModuleRef {
      */
     destroy() {
         ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
+        /** @type {?} */
+        const injector = this._r3Injector;
+        !injector.destroyed && injector.destroy();
         (/** @type {?} */ (this.destroyCbs)).forEach(fn => fn());
         this.destroyCbs = null;
     }
