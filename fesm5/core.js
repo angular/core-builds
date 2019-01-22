@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.0+62.sha-18a9afc
+ * @license Angular v8.0.0-beta.0+63.sha-ea1b5c1
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8416,13 +8416,13 @@ function setStyle(native, prop, value, renderer, sanitizer, store, playerBuilder
         ngDevMode && ngDevMode.rendererSetStyle++;
         isProceduralRenderer(renderer) ?
             renderer.setStyle(native, prop, value, RendererStyleFlags3.DashCase) :
-            native['style'].setProperty(prop, value);
+            native.style[prop] = value;
     }
     else {
         ngDevMode && ngDevMode.rendererRemoveStyle++;
         isProceduralRenderer(renderer) ?
             renderer.removeStyle(native, prop, RendererStyleFlags3.DashCase) :
-            native['style'].removeProperty(prop);
+            native.style[prop] = '';
     }
 }
 /**
@@ -13174,7 +13174,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.0+62.sha-18a9afc');
+var VERSION = new Version('8.0.0-beta.0+63.sha-ea1b5c1');
 
 /**
  * @license
