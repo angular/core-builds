@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.0+29.sha-6bd20e8
+ * @license Angular v8.0.0-beta.0+31.sha-058aafc
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7553,7 +7553,7 @@ function getStylingContext(index, viewData) {
 function isStylingContext(value) {
     // Not an LView or an LContainer
     return Array.isArray(value) && typeof value[0 /* MasterFlagPosition */] === 'number' &&
-        Array.isArray(value[2 /* InitialStyleValuesPosition */]);
+        value.length !== LCONTAINER_LENGTH;
 }
 function isAnimationProp(name) {
     return name[0] === ANIMATION_PROP_PREFIX;
@@ -13174,7 +13174,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.0+29.sha-6bd20e8');
+var VERSION = new Version('8.0.0-beta.0+31.sha-058aafc');
 
 /**
  * @license
