@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.0+41.sha-f99082f
+ * @license Angular v8.0.0-beta.0+42.sha-d336bff
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13204,7 +13204,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.0+41.sha-f99082f');
+    var VERSION = new Version('8.0.0-beta.0+42.sha-d336bff');
 
     /**
      * @license
@@ -24759,6 +24759,7 @@
     exports.ɵpureFunction8 = pureFunction8;
     exports.ɵpureFunctionV = pureFunctionV;
     exports.ɵgetCurrentView = getCurrentView;
+    exports.ɵgetDirectives = getDirectives;
     exports.ɵgetHostElement = getHostElement;
     exports.ɵrestoreView = restoreView;
     exports.ɵcontainerRefreshStart = containerRefreshStart;
