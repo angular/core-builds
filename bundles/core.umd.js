@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+12.sha-9f9024b
+ * @license Angular v8.0.0-beta.1+13.sha-9098225
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4410,6 +4410,18 @@
     }
     function setBindingRoot(value) {
         bindingRootIndex = value;
+    }
+    /**
+     * Current index of a View Query which needs to be processed next.
+     * We iterate over the list of View Queries stored in LView and increment current query index.
+     */
+    var viewQueryIndex = 0;
+    function getCurrentViewQueryIndex() {
+        // top level variables should not be exported for performance reasons (PERF_NOTES.md)
+        return viewQueryIndex;
+    }
+    function setCurrentViewQueryIndex(value) {
+        viewQueryIndex = value;
     }
     /**
      * Swap the current state with a new state.
@@ -9606,6 +9618,7 @@
             data: blueprint.slice(),
             childIndex: -1,
             bindingStartIndex: bindingStartIndex,
+            viewQueryStartIndex: initialViewLength,
             expandoStartIndex: initialViewLength,
             expandoInstructions: null,
             firstTemplatePass: true,
@@ -11330,26 +11343,23 @@
         var hostTView = hostView[TVIEW];
         var oldView = enterView(hostView, hostView[HOST_NODE]);
         var templateFn = hostTView.template;
-        var viewQuery = hostTView.viewQuery;
+        var creationMode = isCreationMode(hostView);
         try {
             namespaceHTML();
-            createViewQuery(viewQuery, hostView, component);
+            creationMode && executeViewQueryFn(hostView, hostTView, component);
             templateFn(getRenderFlags(hostView), component);
             refreshDescendantViews(hostView);
-            updateViewQuery(viewQuery, hostView, component);
+            !creationMode && executeViewQueryFn(hostView, hostTView, component);
         }
         finally {
             leaveView(oldView);
         }
     }
-    function createViewQuery(viewQuery, view, component) {
-        if (viewQuery && isCreationMode(view)) {
-            viewQuery(1 /* Create */, component);
-        }
-    }
-    function updateViewQuery(viewQuery, view, component) {
-        if (viewQuery && !isCreationMode(view)) {
-            viewQuery(2 /* Update */, component);
+    function executeViewQueryFn(lView, tView, component) {
+        var viewQuery = tView.viewQuery;
+        if (viewQuery) {
+            setCurrentViewQueryIndex(tView.viewQueryStartIndex);
+            viewQuery(getRenderFlags(lView), component);
         }
     }
     /**
@@ -13319,7 +13329,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.1+12.sha-9f9024b');
+    var VERSION = new Version('8.0.0-beta.1+13.sha-9098225');
 
     /**
      * @license
@@ -15976,25 +15986,20 @@
     /**
      * Creates and returns a QueryList.
      *
-     * @param memoryIndex The index in memory where the QueryList should be saved. If null,
-     * this is is a content query and the QueryList will be saved later through directiveCreate.
      * @param predicate The type for which the query will search
      * @param descend Whether or not to descend into children
      * @param read What to save in the query
      * @returns QueryList<T>
      */
-    function query(memoryIndex, predicate, descend, 
+    function query(
     // TODO: "read" should be an AbstractType (FW-486)
-    read) {
+    predicate, descend, read) {
         ngDevMode && assertPreviousIsParent(getIsParent());
         var queryList = new QueryList();
         var queries = getOrCreateCurrentQueries(LQueries_);
         queryList._valuesTree = [];
         queries.track(queryList, predicate, descend, read);
         storeCleanupWithContext(getLView(), queryList, queryList.destroy);
-        if (memoryIndex != null) {
-            store(memoryIndex, queryList);
-        }
         return queryList;
     }
     /**
@@ -16010,6 +16015,36 @@
             return true;
         }
         return false;
+    }
+    /**
+     * Creates new QueryList, stores the reference in LView and returns QueryList.
+     *
+     * @param predicate The type for which the query will search
+     * @param descend Whether or not to descend into children
+     * @param read What to save in the query
+     * @returns QueryList<T>
+     */
+    function viewQuery(
+    // TODO: "read" should be an AbstractType (FW-486)
+    predicate, descend, read) {
+        var lView = getLView();
+        var tView = lView[TVIEW];
+        if (tView.firstTemplatePass) {
+            tView.expandoStartIndex++;
+        }
+        var index = getCurrentViewQueryIndex();
+        var viewQuery = query(predicate, descend, read);
+        store(index, viewQuery);
+        setCurrentViewQueryIndex(index + 1);
+        return viewQuery;
+    }
+    /**
+    * Loads current View Query and moves the pointer/index to the next View Query in LView.
+    */
+    function loadViewQuery() {
+        var index = getCurrentViewQueryIndex();
+        setCurrentViewQueryIndex(index + 1);
+        return load(index);
     }
 
     /**
@@ -16119,6 +16154,8 @@
         'ɵpipe': pipe,
         'ɵquery': query,
         'ɵqueryRefresh': queryRefresh,
+        'ɵviewQuery': viewQuery,
+        'ɵloadViewQuery': loadViewQuery,
         'ɵregisterContentQuery': registerContentQuery,
         'ɵreference': reference,
         'ɵelementStyling': elementStyling,
@@ -24945,6 +24982,8 @@
     exports.ɵcontainerRefreshStart = containerRefreshStart;
     exports.ɵcontainerRefreshEnd = containerRefreshEnd;
     exports.ɵqueryRefresh = queryRefresh;
+    exports.ɵviewQuery = viewQuery;
+    exports.ɵloadViewQuery = loadViewQuery;
     exports.ɵloadQueryList = loadQueryList;
     exports.ɵelementEnd = elementEnd;
     exports.ɵelementProperty = elementProperty;

@@ -75,17 +75,28 @@ export declare class LQueries_ implements LQueries {
 /**
  * Creates and returns a QueryList.
  *
- * @param memoryIndex The index in memory where the QueryList should be saved. If null,
- * this is is a content query and the QueryList will be saved later through directiveCreate.
  * @param predicate The type for which the query will search
  * @param descend Whether or not to descend into children
  * @param read What to save in the query
  * @returns QueryList<T>
  */
-export declare function query<T>(memoryIndex: number | null, predicate: Type<any> | string[], descend?: boolean, read?: any): QueryList<T>;
+export declare function query<T>(predicate: Type<any> | string[], descend?: boolean, read?: any): QueryList<T>;
 /**
  * Refreshes a query by combining matches from all active views and removing matches from deleted
  * views.
  * Returns true if a query got dirty during change detection, false otherwise.
  */
 export declare function queryRefresh(queryList: QueryList<any>): boolean;
+/**
+ * Creates new QueryList, stores the reference in LView and returns QueryList.
+ *
+ * @param predicate The type for which the query will search
+ * @param descend Whether or not to descend into children
+ * @param read What to save in the query
+ * @returns QueryList<T>
+ */
+export declare function viewQuery<T>(predicate: Type<any> | string[], descend?: boolean, read?: any): QueryList<T>;
+/**
+* Loads current View Query and moves the pointer/index to the next View Query in LView.
+*/
+export declare function loadViewQuery<T>(): T;

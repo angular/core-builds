@@ -86,6 +86,8 @@ export declare function getFirstTemplatePass(): boolean;
 export declare function setFirstTemplatePass(value: boolean): void;
 export declare function getBindingRoot(): number;
 export declare function setBindingRoot(value: number): void;
+export declare function getCurrentViewQueryIndex(): number;
+export declare function setCurrentViewQueryIndex(value: number): void;
 /**
  * Swap the current state with a new state.
  *

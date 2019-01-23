@@ -23,7 +23,7 @@ export { NgModuleFactory, NgModuleRef, NgModuleType } from './ng_module_ref';
 export { AttributeMarker } from './interfaces/node';
 export { setClassMetadata, } from './metadata';
 export { pipe, pipeBind1, pipeBind2, pipeBind3, pipeBind4, pipeBindV, } from './pipe';
-export { query, queryRefresh, } from './query';
+export { query, queryRefresh, viewQuery, loadViewQuery, } from './query';
 export { registerContentQuery, loadQueryList, } from './instructions';
 export { pureFunction0, pureFunction1, pureFunction2, pureFunction3, pureFunction4, pureFunction5, pureFunction6, pureFunction7, pureFunction8, pureFunctionV, } from './pure_function';
 export { templateRefExtractor } from './view_engine_compatibility_prebound';
