@@ -173,7 +173,7 @@ export declare function defineComponent<T>(componentDefinition: {
     /**
      * A list of optional features to apply.
      *
-     * See: {@link NgOnChangesFeature}, {@link ProvidersFeature}
+     * See: {@link ProvidersFeature}
      */
     features?: ComponentDefFeature[];
     /**
@@ -374,7 +374,7 @@ export declare const defineDirective: <T>(directiveDefinition: {
     /**
      * A list of optional features to apply.
      *
-     * See: {@link NgOnChangesFeature}, {@link ProvidersFeature}, {@link InheritDefinitionFeature}
+     * See: {@link ProvidersFeature}, {@link InheritDefinitionFeature}
      */
     features?: DirectiveDefFeature[] | undefined;
     /**
