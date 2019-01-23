@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+2.sha-d8f2318
+ * @license Angular v8.0.0-beta.1+11.sha-03c8528
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3933,106 +3933,6 @@ function isFactory(obj) {
 }
 
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Represents a basic change from a previous to a new value for a single
- * property on a directive instance. Passed as a value in a
- * {@link SimpleChanges} object to the `ngOnChanges` hook.
- *
- * @see `OnChanges`
- *
- * @publicApi
- */
-class SimpleChange {
-    constructor(previousValue, currentValue, firstChange) {
-        this.previousValue = previousValue;
-        this.currentValue = currentValue;
-        this.firstChange = firstChange;
-    }
-    /**
-     * Check whether the new value is the first value assigned.
-     */
-    isFirstChange() { return this.firstChange; }
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Checks an object to see if it's an exact instance of a particular type
- * without traversing the inheritance hierarchy like `instanceof` does.
- * @template T
- * @param {?} obj The object to check
- * @param {?} type The type to check the object against
- * @return {?}
- */
-function isExactInstanceOf(obj, type) {
-    return obj != null && typeof obj == 'object' && Object.getPrototypeOf(obj) == type.prototype;
-}
-/**
- * Checks to see if an object is an instance of {\@link OnChangesDirectiveWrapper}
- * @param {?} obj the object to check (generally from `LView`)
- * @return {?}
- */
-function isOnChangesDirectiveWrapper(obj) {
-    return isExactInstanceOf(obj, OnChangesDirectiveWrapper);
-}
-/**
- * Removes the `OnChangesDirectiveWrapper` if present.
- *
- * @template T
- * @param {?} obj to unwrap.
- * @return {?}
- */
-function unwrapOnChangesDirectiveWrapper(obj) {
-    return isOnChangesDirectiveWrapper(obj) ? obj.instance : obj;
-}
-/**
- * A class that wraps directive instances for storage in LView when directives
- * have onChanges hooks to deal with.
- * @template T
- */
-class OnChangesDirectiveWrapper {
-    /**
-     * @param {?} instance
-     */
-    constructor(instance) {
-        this.instance = instance;
-        this.seenProps = new Set();
-        this.previous = {};
-        this.changes = null;
-    }
-}
-/**
- * Updates the `changes` property on the `wrapper` instance, such that when it's
- * checked in {\@link callHooks} it will fire the related `onChanges` hook.
- * @param {?} wrapper the wrapper for the directive instance
- * @param {?} declaredName the declared name to be used in `SimpleChange`
- * @param {?} value The new value for the property
- * @return {?}
- */
-function recordChange(wrapper, declaredName, value) {
-    /** @type {?} */
-    const simpleChanges = wrapper.changes || (wrapper.changes = {});
-    /** @type {?} */
-    const firstChange = !wrapper.seenProps.has(declaredName);
-    if (firstChange) {
-        wrapper.seenProps.add(declaredName);
-    }
-    /** @type {?} */
-    const previous = wrapper.previous;
-    /** @type {?} */
-    const previousValue = previous[declaredName];
-    simpleChanges[declaredName] = new SimpleChange(firstChange ? undefined : previousValue && previousValue.currentValue, value, firstChange);
-}
-
-/**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
@@ -4074,11 +3974,7 @@ function renderStringify(value) {
  */
 function loadInternal(view, index) {
     ngDevMode && assertDataInRange(view, index + HEADER_OFFSET);
-    /** @type {?} */
-    const record = view[index + HEADER_OFFSET];
-    // If we're storing an array because of a directive or component with ngOnChanges,
-    // return the directive or component instance.
-    return isOnChangesDirectiveWrapper(record) ? record.instance : record;
+    return view[index + HEADER_OFFSET];
 }
 /**
  * Takes the value of a slot in `LView` and returns the element node.
@@ -4427,7 +4323,6 @@ function defineComponent(componentDefinition) {
         outputs: (/** @type {?} */ (null)),
         // assigned in noSideEffects
         exportAs: componentDefinition.exportAs || null,
-        onChanges: typePrototype.ngOnChanges || null,
         onInit: typePrototype.ngOnInit || null,
         doCheck: typePrototype.ngDoCheck || null,
         afterContentInit: typePrototype.ngAfterContentInit || null,
@@ -4450,6 +4345,7 @@ function defineComponent(componentDefinition) {
         id: 'c',
         styles: componentDefinition.styles || EMPTY_ARRAY$2,
         _: (/** @type {?} */ (null)),
+        setInput: null,
     };
     def._ = (/** @type {?} */ (noSideEffects(() => {
         /** @type {?} */
@@ -4566,19 +4462,20 @@ function defineNgModule(def) {
  * }
  * ```
  *
- * @param {?} obj
+ * @template T
+ * @param {?=} obj
  * @param {?=} secondary
  * @return {?}
  */
 function invertObject(obj, secondary) {
     if (obj == null)
-        return EMPTY_OBJ;
+        return (/** @type {?} */ (EMPTY_OBJ));
     /** @type {?} */
     const newLookup = {};
     for (const minifiedKey in obj) {
         if (obj.hasOwnProperty(minifiedKey)) {
             /** @type {?} */
-            let publicName = obj[minifiedKey];
+            let publicName = (/** @type {?} */ (obj[minifiedKey]));
             /** @type {?} */
             let declaredName = publicName;
             if (Array.isArray(publicName)) {
@@ -4587,7 +4484,7 @@ function invertObject(obj, secondary) {
             }
             newLookup[publicName] = minifiedKey;
             if (secondary) {
-                (secondary[publicName] = declaredName);
+                (secondary[publicName] = (/** @type {?} */ (declaredName)));
             }
         }
     }
@@ -4611,9 +4508,9 @@ function defineBase(baseDefinition) {
     /** @type {?} */
     const declaredInputs = (/** @type {?} */ ({}));
     return {
-        inputs: invertObject(baseDefinition.inputs, declaredInputs),
+        inputs: invertObject((/** @type {?} */ (baseDefinition.inputs)), declaredInputs),
         declaredInputs: declaredInputs,
-        outputs: invertObject(baseDefinition.outputs),
+        outputs: invertObject((/** @type {?} */ (baseDefinition.outputs))),
     };
 }
 /**
@@ -4801,11 +4698,7 @@ function typeName(type) {
 function registerPreOrderHooks(directiveIndex, directiveDef, tView) {
     ngDevMode &&
         assertEqual(tView.firstTemplatePass, true, 'Should only be called on first template pass');
-    const { onChanges, onInit, doCheck } = directiveDef;
-    if (onChanges) {
-        (tView.initHooks || (tView.initHooks = [])).push(-directiveIndex, onChanges);
-        (tView.checkHooks || (tView.checkHooks = [])).push(-directiveIndex, onChanges);
-    }
+    const { onInit, doCheck } = directiveDef;
     if (onInit) {
         (tView.initHooks || (tView.initHooks = [])).push(directiveIndex, onInit);
     }
@@ -4903,7 +4796,7 @@ function executeHooks(currentView, firstPassHooks, checkHooks, checkNoChangesMod
 }
 /**
  * Calls lifecycle hooks with their contexts, skipping init hooks if it's not
- * the first LView pass, and skipping onChanges hooks if there are no changes present.
+ * the first LView pass
  *
  * @param {?} currentView The current view
  * @param {?} arr The array in which the hooks are found
@@ -4911,31 +4804,7 @@ function executeHooks(currentView, firstPassHooks, checkHooks, checkNoChangesMod
  */
 function callHooks(currentView, arr) {
     for (let i = 0; i < arr.length; i += 2) {
-        /** @type {?} */
-        const directiveIndex = (/** @type {?} */ (arr[i]));
-        /** @type {?} */
-        const hook = (/** @type {?} */ (arr[i + 1]));
-        // Negative indices signal that we're dealing with an `onChanges` hook.
-        /** @type {?} */
-        const isOnChangesHook = directiveIndex < 0;
-        /** @type {?} */
-        const directiveOrWrappedDirective = currentView[isOnChangesHook ? -directiveIndex : directiveIndex];
-        /** @type {?} */
-        const directive = unwrapOnChangesDirectiveWrapper(directiveOrWrappedDirective);
-        if (isOnChangesHook) {
-            /** @type {?} */
-            const onChanges = directiveOrWrappedDirective;
-            /** @type {?} */
-            const changes = onChanges.changes;
-            if (changes) {
-                onChanges.previous = changes;
-                onChanges.changes = null;
-                hook.call(onChanges.instance, changes);
-            }
-        }
-        else {
-            hook.call(directive);
-        }
+        ((/** @type {?} */ (arr[i + 1]))).call(currentView[(/** @type {?} */ (arr[i]))]);
     }
 }
 
@@ -5875,9 +5744,6 @@ function getNodeInjectable(tData, lData, index, tNode) {
             setTNodeAndViewData(savePreviousOrParentTNode, saveLView);
         }
     }
-    else {
-        value = unwrapOnChangesDirectiveWrapper(value);
-    }
     return value;
 }
 /**
@@ -6294,7 +6160,7 @@ function findViaDirective(lView, directiveInstance) {
         /** @type {?} */
         const directiveIndexEnd = tNode.directiveEnd;
         for (let i = directiveIndexStart; i < directiveIndexEnd; i++) {
-            if (unwrapOnChangesDirectiveWrapper(lView[i]) === directiveInstance) {
+            if (lView[i] === directiveInstance) {
                 return tNode.index;
             }
         }
@@ -8287,13 +8153,21 @@ function walkTNodeTree(viewToWalk, action, renderer, renderParent, beforeNode) {
             const componentHost = (/** @type {?} */ (componentView[HOST_NODE]));
             /** @type {?} */
             const head = ((/** @type {?} */ (componentHost.projection)))[(/** @type {?} */ (tNode.projection))];
-            // Must store both the TNode and the view because this projection node could be nested
-            // deeply inside embedded views, and we need to get back down to this particular nested view.
-            projectionNodeStack[++projectionNodeIndex] = tNode;
-            projectionNodeStack[++projectionNodeIndex] = (/** @type {?} */ (currentView));
-            if (head) {
-                currentView = (/** @type {?} */ (componentView[PARENT]));
-                nextTNode = (/** @type {?} */ (currentView[TVIEW].data[head.index]));
+            if (Array.isArray(head)) {
+                for (let nativeNode of head) {
+                    executeNodeAction(action, renderer, renderParent, nativeNode, tNode, beforeNode);
+                }
+            }
+            else {
+                // Must store both the TNode and the view because this projection node could be nested
+                // deeply inside embedded views, and we need to get back down to this particular nested
+                // view.
+                projectionNodeStack[++projectionNodeIndex] = tNode;
+                projectionNodeStack[++projectionNodeIndex] = (/** @type {?} */ (currentView));
+                if (head) {
+                    currentView = (/** @type {?} */ (componentView[PARENT]));
+                    nextTNode = (/** @type {?} */ (currentView[TVIEW].data[head.index]));
+                }
             }
         }
         else {
@@ -8761,6 +8635,35 @@ function nativeInsertBefore(renderer, parent, child, beforeNode) {
     }
 }
 /**
+ * @param {?} renderer
+ * @param {?} parent
+ * @param {?} child
+ * @return {?}
+ */
+function nativeAppendChild(renderer, parent, child) {
+    if (isProceduralRenderer(renderer)) {
+        renderer.appendChild(parent, child);
+    }
+    else {
+        parent.appendChild(child);
+    }
+}
+/**
+ * @param {?} renderer
+ * @param {?} parent
+ * @param {?} child
+ * @param {?} beforeNode
+ * @return {?}
+ */
+function nativeAppendOrInsertBefore(renderer, parent, child, beforeNode) {
+    if (beforeNode) {
+        nativeInsertBefore(renderer, parent, child, beforeNode);
+    }
+    else {
+        nativeAppendChild(renderer, parent, child);
+    }
+}
+/**
  * Removes a native child node from a given native parent node.
  * @param {?} renderer
  * @param {?} parent
@@ -8791,11 +8694,34 @@ function nativeNextSibling(renderer, node) {
     return isProceduralRenderer(renderer) ? renderer.nextSibling(node) : node.nextSibling;
 }
 /**
- * Appends the `child` element to the `parent`.
+ * Finds a native "anchor" node for cases where we can't append a native child directly
+ * (`appendChild`) and need to use a reference (anchor) node for the `insertBefore` operation.
+ * @param {?} parentTNode
+ * @param {?} lView
+ * @return {?}
+ */
+function getNativeAnchorNode(parentTNode, lView) {
+    if (parentTNode.type === 2 /* View */) {
+        /** @type {?} */
+        const lContainer = (/** @type {?} */ (getLContainer((/** @type {?} */ (parentTNode)), lView)));
+        /** @type {?} */
+        const views = lContainer[VIEWS];
+        /** @type {?} */
+        const index = views.indexOf(lView);
+        return getBeforeNodeForView(index, views, lContainer[NATIVE]);
+    }
+    else if (parentTNode.type === 4 /* ElementContainer */ ||
+        parentTNode.type === 5 /* IcuContainer */) {
+        return getNativeByTNode(parentTNode, lView);
+    }
+    return null;
+}
+/**
+ * Appends the `child` native node (or a collection of nodes) to the `parent`.
  *
  * The element insertion might be delayed {\@link canInsertNativeNode}.
  *
- * @param {?} childEl The child that should be appended
+ * @param {?} childEl The native child (or children) that should be appended
  * @param {?} childTNode The TNode of the child element
  * @param {?} currentView The current LView
  * @return {?} Whether or not the child was appended
@@ -8808,24 +8734,15 @@ function appendChild(childEl, childTNode, currentView) {
         const renderer = currentView[RENDERER];
         /** @type {?} */
         const parentTNode = childTNode.parent || (/** @type {?} */ (currentView[HOST_NODE]));
-        if (parentTNode.type === 2 /* View */) {
-            /** @type {?} */
-            const lContainer = (/** @type {?} */ (getLContainer((/** @type {?} */ (parentTNode)), currentView)));
-            /** @type {?} */
-            const views = lContainer[VIEWS];
-            /** @type {?} */
-            const index = views.indexOf(currentView);
-            nativeInsertBefore(renderer, renderParent, childEl, getBeforeNodeForView(index, views, lContainer[NATIVE]));
-        }
-        else if (parentTNode.type === 4 /* ElementContainer */ ||
-            parentTNode.type === 5 /* IcuContainer */) {
-            /** @type {?} */
-            const anchorNode = getNativeByTNode(parentTNode, currentView);
-            nativeInsertBefore(renderer, renderParent, childEl, anchorNode);
+        /** @type {?} */
+        const anchorNode = getNativeAnchorNode(parentTNode, currentView);
+        if (Array.isArray(childEl)) {
+            for (let nativeNode of childEl) {
+                nativeAppendOrInsertBefore(renderer, renderParent, nativeNode, anchorNode);
+            }
         }
         else {
-            isProceduralRenderer(renderer) ? renderer.appendChild(renderParent, childEl) :
-                renderParent.appendChild(childEl);
+            nativeAppendOrInsertBefore(renderer, renderParent, childEl, anchorNode);
         }
     }
 }
@@ -11257,7 +11174,7 @@ function setHostBindings(tView, viewData) {
                 // If it's not a number, it's a host binding function that needs to be executed.
                 if (instruction !== null) {
                     viewData[BINDING_INDEX] = bindingRootIndex;
-                    instruction(2 /* Update */, unwrapOnChangesDirectiveWrapper(viewData[currentDirectiveIndex]), currentElementIndex);
+                    instruction(2 /* Update */, readElementValue(viewData[currentDirectiveIndex]), currentElementIndex);
                 }
                 currentDirectiveIndex++;
             }
@@ -11845,7 +11762,6 @@ function createTView(viewIndex, templateFn, consts, vars, directives, pipes, vie
         expandoStartIndex: initialViewLength,
         expandoInstructions: null,
         firstTemplatePass: true,
-        changesHooks: null,
         initHooks: null,
         checkHooks: null,
         contentHooks: null,
@@ -12112,21 +12028,18 @@ function listenerInternal(eventName, listenerFn, useCapture = false, eventTarget
         if (propsLength) {
             /** @type {?} */
             const lCleanup = getCleanup(lView);
-            // Subscribe to listeners for each output, and setup clean up for each.
-            for (let i = 0; i < propsLength;) {
+            for (let i = 0; i < propsLength; i += 3) {
                 /** @type {?} */
-                const directiveIndex = (/** @type {?} */ (props[i++]));
+                const index = (/** @type {?} */ (props[i]));
+                ngDevMode && assertDataInRange(lView, index);
                 /** @type {?} */
-                const minifiedName = (/** @type {?} */ (props[i++]));
+                const minifiedName = props[i + 2];
                 /** @type {?} */
-                const declaredName = (/** @type {?} */ (props[i++]));
-                ngDevMode && assertDataInRange(lView, (/** @type {?} */ (directiveIndex)));
+                const directiveInstance = lView[index];
                 /** @type {?} */
-                const directive = unwrapOnChangesDirectiveWrapper(lView[directiveIndex]);
-                /** @type {?} */
-                const output = directive[minifiedName];
+                const output = directiveInstance[minifiedName];
                 if (ngDevMode && !isObservable(output)) {
-                    throw new Error(`@Output ${minifiedName} not initialized in '${directive.constructor.name}'.`);
+                    throw new Error(`@Output ${minifiedName} not initialized in '${directiveInstance.constructor.name}'.`);
                 }
                 /** @type {?} */
                 const subscription = output.subscribe(listenerFn);
@@ -12205,7 +12118,7 @@ function elementEnd() {
     if (hasClassInput(previousOrParentTNode)) {
         /** @type {?} */
         const stylingContext = getStylingContext(previousOrParentTNode.index, lView);
-        setInputsForProperty(lView, (/** @type {?} */ (previousOrParentTNode.inputs)), 'class', getInitialClassNameValue(stylingContext));
+        setInputsForProperty(lView, (/** @type {?} */ ((/** @type {?} */ (previousOrParentTNode.inputs))['class'])), getInitialClassNameValue(stylingContext));
     }
 }
 /**
@@ -12314,7 +12227,7 @@ function elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, 
     let dataValue;
     if (!nativeOnly && (inputData = initializeTNodeInputs(tNode)) &&
         (dataValue = inputData[propName])) {
-        setInputsForProperty(lView, inputData, propName, value);
+        setInputsForProperty(lView, dataValue, value);
         if (isComponent(tNode))
             markDirtyIfOnPush(lView, index + HEADER_OFFSET);
         if (ngDevMode) {
@@ -12392,24 +12305,33 @@ function createTNode(lView, type, adjustedIndex, tagName, attrs, tViews) {
  * Set the inputs of directives at the current node to corresponding value.
  *
  * @param {?} lView the `LView` which contains the directives.
- * @param {?} inputAliases mapping between the public "input" name and privately-known,
- * possibly minified, property names to write to.
- * @param {?} publicName public binding name. (This is the `<div [publicName]=value>`)
+ * @param {?} inputs
  * @param {?} value Value to set.
  * @return {?}
  */
-function setInputsForProperty(lView, inputAliases, publicName, value) {
+function setInputsForProperty(lView, inputs, value) {
     /** @type {?} */
-    const inputs = inputAliases[publicName];
+    const tView = lView[TVIEW];
     for (let i = 0; i < inputs.length;) {
         /** @type {?} */
-        const directiveIndex = (/** @type {?} */ (inputs[i++]));
+        const index = (/** @type {?} */ (inputs[i++]));
+        /** @type {?} */
+        const publicName = (/** @type {?} */ (inputs[i++]));
         /** @type {?} */
         const privateName = (/** @type {?} */ (inputs[i++]));
         /** @type {?} */
-        const declaredName = (/** @type {?} */ (inputs[i++]));
-        ngDevMode && assertDataInRange(lView, directiveIndex);
-        recordChangeAndUpdateProperty(lView[directiveIndex], declaredName, privateName, value);
+        const instance = lView[index];
+        ngDevMode && assertDataInRange(lView, index);
+        /** @type {?} */
+        const def = (/** @type {?} */ (tView.data[index]));
+        /** @type {?} */
+        const setInput = def.setInput;
+        if (setInput) {
+            (/** @type {?} */ (def.setInput))(instance, value, publicName, privateName);
+        }
+        else {
+            instance[privateName] = value;
+        }
     }
 }
 /**
@@ -12421,17 +12343,11 @@ function setInputsForProperty(lView, inputAliases, publicName, value) {
  * @return {?}
  */
 function setNgReflectProperties(lView, element, type, inputs, value) {
-    for (let i = 0; i < inputs.length;) {
-        /** @type {?} */
-        const directiveIndex = (/** @type {?} */ (inputs[i++]));
-        /** @type {?} */
-        const privateName = (/** @type {?} */ (inputs[i++]));
-        /** @type {?} */
-        const declaredName = (/** @type {?} */ (inputs[i++]));
+    for (let i = 0; i < inputs.length; i += 3) {
         /** @type {?} */
         const renderer = lView[RENDERER];
         /** @type {?} */
-        const attrName = normalizeDebugBindingName(privateName);
+        const attrName = normalizeDebugBindingName((/** @type {?} */ (inputs[i + 2])));
         /** @type {?} */
         const debugValue = normalizeDebugBindingValue(value);
         if (type === 3 /* Element */) {
@@ -12476,21 +12392,16 @@ function generatePropertyAliases(tNode, direction) {
             /** @type {?} */
             const directiveDef = (/** @type {?} */ (defs[i]));
             /** @type {?} */
-            const publicToMinifiedNames = isInput ? directiveDef.inputs : directiveDef.outputs;
-            /** @type {?} */
-            const publicToDeclaredNames = isInput ? directiveDef.declaredInputs : null;
-            for (let publicName in publicToMinifiedNames) {
-                if (publicToMinifiedNames.hasOwnProperty(publicName)) {
+            const propertyAliasMap = isInput ? directiveDef.inputs : directiveDef.outputs;
+            for (let publicName in propertyAliasMap) {
+                if (propertyAliasMap.hasOwnProperty(publicName)) {
                     propStore = propStore || {};
                     /** @type {?} */
-                    const minifiedName = publicToMinifiedNames[publicName];
+                    const internalName = propertyAliasMap[publicName];
                     /** @type {?} */
-                    const declaredName = publicToDeclaredNames ? publicToDeclaredNames[publicName] : minifiedName;
-                    /** @type {?} */
-                    const aliases = propStore.hasOwnProperty(publicName) ?
-                        propStore[publicName] :
-                        propStore[publicName] = [];
-                    aliases.push(i, minifiedName, declaredName);
+                    const hasProperty = propStore.hasOwnProperty(publicName);
+                    hasProperty ? propStore[publicName].push(i, publicName, internalName) :
+                        (propStore[publicName] = [i, publicName, internalName]);
                 }
             }
         }
@@ -12719,7 +12630,7 @@ function elementStylingMap(index, classes, styles, directive) {
         const initialClasses = getInitialClassNameValue(stylingContext);
         /** @type {?} */
         const classInputVal = (initialClasses.length ? (initialClasses + ' ') : '') + ((/** @type {?} */ (classes)));
-        setInputsForProperty(lView, (/** @type {?} */ (tNode.inputs)), 'class', classInputVal);
+        setInputsForProperty(lView, (/** @type {?} */ ((/** @type {?} */ (tNode.inputs))['class'])), classInputVal);
     }
     else {
         updateStylingMap(stylingContext, classes, styles);
@@ -12899,7 +12810,7 @@ function invokeDirectivesHostBindings(tView, viewData, tNode) {
         /** @type {?} */
         const def = (/** @type {?} */ (tView.data[i]));
         /** @type {?} */
-        const directive = unwrapOnChangesDirectiveWrapper(viewData[i]);
+        const directive = viewData[i];
         if (def.hostBindings) {
             /** @type {?} */
             const previousExpandoLength = expando.length;
@@ -12960,30 +12871,26 @@ function prefillHostVars(tView, lView, totalHostVars) {
 /**
  * Process a directive on the current node after its creation.
  * @template T
- * @param {?} lView
+ * @param {?} viewData
  * @param {?} directive
  * @param {?} def
  * @param {?} directiveDefIdx
  * @return {?}
  */
-function postProcessDirective(lView, directive, def, directiveDefIdx) {
-    if (def.onChanges) {
-        // We have onChanges, wrap it so that we can track changes.
-        lView[directiveDefIdx] = new OnChangesDirectiveWrapper(lView[directiveDefIdx]);
-    }
+function postProcessDirective(viewData, directive, def, directiveDefIdx) {
     /** @type {?} */
     const previousOrParentTNode = getPreviousOrParentTNode();
-    postProcessBaseDirective(lView, previousOrParentTNode, directive, def);
+    postProcessBaseDirective(viewData, previousOrParentTNode, directive, def);
     ngDevMode && assertDefined(previousOrParentTNode, 'previousOrParentTNode');
     if (previousOrParentTNode && previousOrParentTNode.attrs) {
-        setInputsFromAttrs(lView, directiveDefIdx, def, previousOrParentTNode);
+        setInputsFromAttrs(directiveDefIdx, directive, def, previousOrParentTNode);
     }
     if (def.contentQueries) {
         def.contentQueries(directiveDefIdx);
     }
     if (isComponentDef(def)) {
         /** @type {?} */
-        const componentView = getComponentViewByIndex(previousOrParentTNode.index, lView);
+        const componentView = getComponentViewByIndex(previousOrParentTNode.index, viewData);
         componentView[CONTEXT] = directive;
     }
 }
@@ -13189,61 +13096,38 @@ function addComponentLogic(lView, previousOrParentTNode, def) {
  * Sets initial input properties on directive instances from attribute data
  *
  * @template T
- * @param {?} lView
  * @param {?} directiveIndex Index of the directive in directives array
+ * @param {?} instance Instance of the directive on which to set the initial inputs
  * @param {?} def
  * @param {?} tNode The static data for this node
  * @return {?}
  */
-function setInputsFromAttrs(lView, directiveIndex, def, tNode) {
+function setInputsFromAttrs(directiveIndex, instance, def, tNode) {
     /** @type {?} */
     let initialInputData = (/** @type {?} */ (tNode.initialInputs));
     if (initialInputData === undefined || directiveIndex >= initialInputData.length) {
-        initialInputData = generateInitialInputs(directiveIndex, def, tNode);
+        initialInputData = generateInitialInputs(directiveIndex, def.inputs, tNode);
     }
     /** @type {?} */
     const initialInputs = initialInputData[directiveIndex];
     if (initialInputs) {
         /** @type {?} */
-        const directiveOrWrappedDirective = lView[directiveIndex];
+        const setInput = def.setInput;
         for (let i = 0; i < initialInputs.length;) {
+            /** @type {?} */
+            const publicName = initialInputs[i++];
             /** @type {?} */
             const privateName = initialInputs[i++];
             /** @type {?} */
-            const declaredName = initialInputs[i++];
-            /** @type {?} */
-            const attrValue = initialInputs[i++];
-            recordChangeAndUpdateProperty(directiveOrWrappedDirective, declaredName, privateName, attrValue);
+            const value = initialInputs[i++];
+            if (setInput) {
+                (/** @type {?} */ (def.setInput))(instance, value, publicName, privateName);
+            }
+            else {
+                ((/** @type {?} */ (instance)))[privateName] = value;
+            }
         }
     }
-}
-/**
- * Checks to see if the instanced passed as `directiveOrWrappedDirective` is wrapped in {\@link
- * OnChangesDirectiveWrapper} or not.
- * If it is, it will update the related {\@link SimpleChanges} object with the change to signal
- * `ngOnChanges` hook
- * should fire, then it will unwrap the instance. After that, it will set the property with the key
- * provided
- * in `privateName` on the instance with the passed value.
- * @template T, K
- * @param {?} directiveOrWrappedDirective The directive instance or a directive instance wrapped in
- * {\@link OnChangesDirectiveWrapper}
- * @param {?} declaredName The original, declared name of the property to update.
- * @param {?} privateName The private, possibly minified name of the property to update.
- * @param {?} value The value to update the property with.
- * @return {?}
- */
-function recordChangeAndUpdateProperty(directiveOrWrappedDirective, declaredName, privateName, value) {
-    /** @type {?} */
-    let instance;
-    if (isOnChangesDirectiveWrapper(directiveOrWrappedDirective)) {
-        instance = unwrapOnChangesDirectiveWrapper(directiveOrWrappedDirective);
-        recordChange(directiveOrWrappedDirective, declaredName, value);
-    }
-    else {
-        instance = directiveOrWrappedDirective;
-    }
-    instance[privateName] = value;
 }
 /**
  * Generates initialInputData for a node and stores it in the template's static storage
@@ -13257,11 +13141,11 @@ function recordChangeAndUpdateProperty(directiveOrWrappedDirective, declaredName
  * <my-component name="Bess"></my-component>
  *
  * @param {?} directiveIndex Index to store the initial input data
- * @param {?} directiveDef
+ * @param {?} inputs The list of inputs from the directive def
  * @param {?} tNode The static data on this node
  * @return {?}
  */
-function generateInitialInputs(directiveIndex, directiveDef, tNode) {
+function generateInitialInputs(directiveIndex, inputs, tNode) {
     /** @type {?} */
     const initialInputData = tNode.initialInputs || (tNode.initialInputs = []);
     initialInputData[directiveIndex] = null;
@@ -13282,15 +13166,13 @@ function generateInitialInputs(directiveIndex, directiveDef, tNode) {
             continue;
         }
         /** @type {?} */
-        const privateName = directiveDef.inputs[attrName];
-        /** @type {?} */
-        const declaredName = directiveDef.declaredInputs[attrName];
+        const minifiedInputName = inputs[attrName];
         /** @type {?} */
         const attrValue = attrs[i + 1];
-        if (privateName !== undefined) {
+        if (minifiedInputName !== undefined) {
             /** @type {?} */
             const inputsToStore = initialInputData[directiveIndex] || (initialInputData[directiveIndex] = []);
-            inputsToStore.push(privateName, declaredName, (/** @type {?} */ (attrValue)));
+            inputsToStore.push(attrName, minifiedInputName, (/** @type {?} */ (attrValue)));
         }
         i += 2;
     }
@@ -13759,36 +13641,46 @@ function projection(nodeIndex, selectorIndex = 0, attrs) {
     let projectedView = (/** @type {?} */ (componentView[PARENT]));
     /** @type {?} */
     let projectionNodeIndex = -1;
-    while (nodeToProject) {
-        if (nodeToProject.type === 1 /* Projection */) {
-            // This node is re-projected, so we must go up the tree to get its projected nodes.
-            /** @type {?} */
-            const currentComponentView = findComponentView(projectedView);
-            /** @type {?} */
-            const currentComponentHost = (/** @type {?} */ (currentComponentView[HOST_NODE]));
-            /** @type {?} */
-            const firstProjectedNode = ((/** @type {?} */ (currentComponentHost.projection)))[(/** @type {?} */ (nodeToProject.projection))];
-            if (firstProjectedNode) {
-                projectionNodeStack$1[++projectionNodeIndex] = nodeToProject;
-                projectionNodeStack$1[++projectionNodeIndex] = projectedView;
-                nodeToProject = firstProjectedNode;
-                projectedView = (/** @type {?} */ (currentComponentView[PARENT]));
-                continue;
+    if (Array.isArray(nodeToProject)) {
+        appendChild(nodeToProject, tProjectionNode, lView);
+    }
+    else {
+        while (nodeToProject) {
+            if (nodeToProject.type === 1 /* Projection */) {
+                // This node is re-projected, so we must go up the tree to get its projected nodes.
+                /** @type {?} */
+                const currentComponentView = findComponentView(projectedView);
+                /** @type {?} */
+                const currentComponentHost = (/** @type {?} */ (currentComponentView[HOST_NODE]));
+                /** @type {?} */
+                const firstProjectedNode = ((/** @type {?} */ (currentComponentHost.projection)))[(/** @type {?} */ (nodeToProject.projection))];
+                if (firstProjectedNode) {
+                    if (Array.isArray(firstProjectedNode)) {
+                        appendChild(firstProjectedNode, tProjectionNode, lView);
+                    }
+                    else {
+                        projectionNodeStack$1[++projectionNodeIndex] = nodeToProject;
+                        projectionNodeStack$1[++projectionNodeIndex] = projectedView;
+                        nodeToProject = firstProjectedNode;
+                        projectedView = (/** @type {?} */ (currentComponentView[PARENT]));
+                        continue;
+                    }
+                }
             }
+            else {
+                // This flag must be set now or we won't know that this node is projected
+                // if the nodes are inserted into a container later.
+                nodeToProject.flags |= 2 /* isProjected */;
+                appendProjectedNode(nodeToProject, tProjectionNode, lView, projectedView);
+            }
+            // If we are finished with a list of re-projected nodes, we need to get
+            // back to the root projection node that was re-projected.
+            if (nodeToProject.next === null && projectedView !== (/** @type {?} */ (componentView[PARENT]))) {
+                projectedView = (/** @type {?} */ (projectionNodeStack$1[projectionNodeIndex--]));
+                nodeToProject = (/** @type {?} */ (projectionNodeStack$1[projectionNodeIndex--]));
+            }
+            nodeToProject = nodeToProject.next;
         }
-        else {
-            // This flag must be set now or we won't know that this node is projected
-            // if the nodes are inserted into a container later.
-            nodeToProject.flags |= 2 /* isProjected */;
-            appendProjectedNode(nodeToProject, tProjectionNode, lView, projectedView);
-        }
-        // If we are finished with a list of re-projected nodes, we need to get
-        // back to the root projection node that was re-projected.
-        if (nodeToProject.next === null && projectedView !== (/** @type {?} */ (componentView[PARENT]))) {
-            projectedView = (/** @type {?} */ (projectionNodeStack$1[projectionNodeIndex--]));
-            nodeToProject = (/** @type {?} */ (projectionNodeStack$1[projectionNodeIndex--]));
-        }
-        nodeToProject = nodeToProject.next;
     }
 }
 /**
@@ -14896,6 +14788,7 @@ function InheritDefinitionFeature(definition) {
             writeableDef.outputs = maybeUnwrapEmpty(definition.outputs);
         }
         if (baseDef) {
+            // Merge inputs and outputs
             fillProperties(definition.inputs, baseDef.inputs);
             fillProperties(definition.declaredInputs, baseDef.declaredInputs);
             fillProperties(definition.outputs, baseDef.outputs);
@@ -14981,7 +14874,6 @@ function InheritDefinitionFeature(definition) {
             definition.doCheck = definition.doCheck || superDef.doCheck;
             definition.onDestroy = definition.onDestroy || superDef.onDestroy;
             definition.onInit = definition.onInit || superDef.onInit;
-            definition.onChanges = definition.onChanges || superDef.onChanges;
             // Run parent features
             /** @type {?} */
             const features = superDef.features;
@@ -15009,7 +14901,6 @@ function InheritDefinitionFeature(definition) {
                 definition.doCheck = definition.doCheck || superPrototype.ngDoCheck;
                 definition.onDestroy = definition.onDestroy || superPrototype.ngOnDestroy;
                 definition.onInit = definition.onInit || superPrototype.ngOnInit;
-                definition.onChanges = definition.onChanges || superPrototype.ngOnChanges;
             }
         }
         superType = Object.getPrototypeOf(superType);
@@ -15029,6 +14920,142 @@ function maybeUnwrapEmpty(value) {
     else {
         return value;
     }
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Represents a basic change from a previous to a new value for a single
+ * property on a directive instance. Passed as a value in a
+ * {@link SimpleChanges} object to the `ngOnChanges` hook.
+ *
+ * @see `OnChanges`
+ *
+ * @publicApi
+ */
+class SimpleChange {
+    constructor(previousValue, currentValue, firstChange) {
+        this.previousValue = previousValue;
+        this.currentValue = currentValue;
+        this.firstChange = firstChange;
+    }
+    /**
+     * Check whether the new value is the first value assigned.
+     */
+    isFirstChange() { return this.firstChange; }
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * The NgOnChangesFeature decorates a component with support for the ngOnChanges
+ * lifecycle hook, so it should be included in any component that implements
+ * that hook.
+ *
+ * If the component or directive uses inheritance, the NgOnChangesFeature MUST
+ * be included as a feature AFTER {\@link InheritDefinitionFeature}, otherwise
+ * inherited properties will not be propagated to the ngOnChanges lifecycle
+ * hook.
+ *
+ * Example usage:
+ *
+ * ```
+ * static ngComponentDef = defineComponent({
+ *   ...
+ *   inputs: {name: 'publicName'},
+ *   features: [NgOnChangesFeature()]
+ * });
+ * ```
+ * @template T
+ * @return {?}
+ */
+function NgOnChangesFeature() {
+    // This option ensures that the ngOnChanges lifecycle hook will be inherited
+    // from superclasses (in InheritDefinitionFeature).
+    ((/** @type {?} */ (NgOnChangesFeatureImpl))).ngInherit = true;
+    return NgOnChangesFeatureImpl;
+}
+/**
+ * @template T
+ * @param {?} definition
+ * @return {?}
+ */
+function NgOnChangesFeatureImpl(definition) {
+    if (definition.type.prototype.ngOnChanges) {
+        definition.setInput = ngOnChangesSetInput;
+        /** @type {?} */
+        const prevDoCheck = definition.doCheck;
+        /** @type {?} */
+        const prevOnInit = definition.onInit;
+        definition.onInit = wrapOnChanges(prevOnInit);
+        definition.doCheck = wrapOnChanges(prevDoCheck);
+    }
+}
+/**
+ * @param {?} hook
+ * @return {?}
+ */
+function wrapOnChanges(hook) {
+    return function () {
+        /** @type {?} */
+        const simpleChangesStore = getSimpleChangesStore(this);
+        /** @type {?} */
+        const current = simpleChangesStore && simpleChangesStore.current;
+        if (current) {
+            (/** @type {?} */ (simpleChangesStore)).previous = current;
+            (/** @type {?} */ (simpleChangesStore)).current = null;
+            this.ngOnChanges(current);
+        }
+        hook && hook.call(this);
+    };
+}
+/**
+ * @template T
+ * @this {?}
+ * @param {?} instance
+ * @param {?} value
+ * @param {?} publicName
+ * @param {?} privateName
+ * @return {?}
+ */
+function ngOnChangesSetInput(instance, value, publicName, privateName) {
+    /** @type {?} */
+    const simpleChangesStore = getSimpleChangesStore(instance) ||
+        setSimpleChangesStore(instance, { previous: EMPTY_OBJ, current: null });
+    /** @type {?} */
+    const current = simpleChangesStore.current || (simpleChangesStore.current = {});
+    /** @type {?} */
+    const previous = simpleChangesStore.previous;
+    /** @type {?} */
+    const declaredName = ((/** @type {?} */ (this.declaredInputs)))[publicName];
+    /** @type {?} */
+    const previousChange = previous[declaredName];
+    current[declaredName] = new SimpleChange(previousChange && previousChange.currentValue, value, previous === EMPTY_OBJ);
+    ((/** @type {?} */ (instance)))[privateName] = value;
+}
+/** @type {?} */
+const SIMPLE_CHANGES_STORE = '__ngSimpleChanges__';
+/**
+ * @param {?} instance
+ * @return {?}
+ */
+function getSimpleChangesStore(instance) {
+    return instance[SIMPLE_CHANGES_STORE] || null;
+}
+/**
+ * @param {?} instance
+ * @param {?} store
+ * @return {?}
+ */
+function setSimpleChangesStore(instance, store) {
+    return instance[SIMPLE_CHANGES_STORE] = store;
 }
 
 /**
@@ -15766,8 +15793,7 @@ class ViewRef {
      * @return {?}
      */
     _lookUpContext() {
-        return this._context =
-            unwrapOnChangesDirectiveWrapper((/** @type {?} */ ((/** @type {?} */ (this._lView[PARENT]))[this._componentIndex])));
+        return this._context = (/** @type {?} */ ((/** @type {?} */ (this._lView[PARENT]))[this._componentIndex]));
     }
 }
 /**
@@ -16394,7 +16420,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.1+2.sha-d8f2318');
+const VERSION = new Version('8.0.0-beta.1+11.sha-03c8528');
 
 /**
  * @fileoverview added by tsickle
@@ -16555,40 +16581,12 @@ class ComponentFactory$1 extends ComponentFactory {
             /** @type {?} */
             const componentView = createRootComponentView(hostRNode, this.componentDef, rootLView, rendererFactory, renderer);
             tElementNode = (/** @type {?} */ (getTNode(0, rootLView)));
-            // Transform the arrays of native nodes into a structure that can be consumed by the
-            // projection instruction. This is needed to support the reprojection of these nodes.
             if (projectableNodes) {
-                /** @type {?} */
-                let index = 0;
-                /** @type {?} */
-                const tView = rootLView[TVIEW];
-                /** @type {?} */
-                const projection$$1 = tElementNode.projection = [];
-                for (let i = 0; i < projectableNodes.length; i++) {
-                    /** @type {?} */
-                    const nodeList = projectableNodes[i];
-                    /** @type {?} */
-                    let firstTNode = null;
-                    /** @type {?} */
-                    let previousTNode = null;
-                    for (let j = 0; j < nodeList.length; j++) {
-                        if (tView.firstTemplatePass) {
-                            // For dynamically created components such as ComponentRef, we create a new TView for
-                            // each insert. This is not ideal since we should be sharing the TViews.
-                            // Also the logic here should be shared with `component.ts`'s `renderComponent`
-                            // method.
-                            tView.expandoStartIndex++;
-                            tView.blueprint.splice(++index + HEADER_OFFSET, 0, null);
-                            tView.data.splice(index + HEADER_OFFSET, 0, null);
-                            rootLView.splice(index + HEADER_OFFSET, 0, null);
-                        }
-                        /** @type {?} */
-                        const tNode = createNodeAtIndex(index, 3 /* Element */, (/** @type {?} */ (nodeList[j])), null, null);
-                        previousTNode ? (previousTNode.next = tNode) : (firstTNode = tNode);
-                        previousTNode = tNode;
-                    }
-                    projection$$1.push((/** @type {?} */ (firstTNode)));
-                }
+                // projectable nodes can be passed as array of arrays or an array of iterables (ngUpgrade
+                // case). Here we do normalize passed data structure to be an array of arrays to avoid
+                // complex checks down the line.
+                tElementNode.projection =
+                    projectableNodes.map((nodesforSlot) => { return Array.from(nodesforSlot); });
             }
             // TODO: should LifecycleHooksFeature and other host features be generated by the compiler and
             // executed here?
@@ -19689,6 +19687,7 @@ const angularCoreEnv = {
     'inject': inject,
     'ɵinjectAttribute': injectAttribute,
     'ɵtemplateRefExtractor': templateRefExtractor,
+    'ɵNgOnChangesFeature': NgOnChangesFeature,
     'ɵProvidersFeature': ProvidersFeature,
     'ɵInheritDefinitionFeature': InheritDefinitionFeature,
     'ɵelementAttribute': elementAttribute,
@@ -20497,6 +20496,9 @@ function directiveMetadata(type, metadata) {
         inputs: metadata.inputs || EMPTY_ARRAY$2,
         outputs: metadata.outputs || EMPTY_ARRAY$2,
         queries: extractQueriesMetadata(type, propMetadata, isContentQuery),
+        lifecycle: {
+            usesOnChanges: type.prototype.ngOnChanges !== undefined,
+        },
         typeSourceSpan: (/** @type {?} */ (null)),
         usesInheritance: !extendsDirectlyFromObject(type),
         exportAs: extractExportAs(metadata.exportAs),
@@ -20662,55 +20664,35 @@ const initializeBaseDef = (target) => {
     }
 };
 /**
- * Returns a function that will update the static definition on a class to have the
- * appropriate input or output mapping.
- *
- * Will also add an {\@link ngBaseDef} property to a directive if no `ngDirectiveDef`
- * or `ngComponentDef` is present. This is done because a class may have {\@link InputDecorator}s and
- * {\@link OutputDecorator}s without having a {\@link ComponentDecorator} or {\@link DirectiveDecorator},
- * and those inputs and outputs should still be inheritable, we need to add an
- * `ngBaseDef` property if there are no existing `ngComponentDef` or `ngDirectiveDef`
- * properties, so that we can track the inputs and outputs for inheritance purposes.
- *
- * @see InputDecorator / OutputDecorator / InheritenceFeature
- * @param {?} getPropertyToUpdate A function that maps to either the `inputs` property or the
- * `outputs` property of a definition.
- * @return {?} A function that, the called, will add a `ngBaseDef` if no other definition is present,
- * then update the `inputs` or `outputs` on it, depending on what was selected by `getPropertyToUpdate`
- *
- *
+ * Does the work of creating the `ngBaseDef` property for the \@Input and \@Output decorators.
+ * \@param key "inputs" or "outputs"
+ * @type {?}
  */
-function getOrCreateDefinitionAndUpdateMappingFor(getPropertyToUpdate) {
-    return function updateIOProp(target, name, ...args) {
-        /** @type {?} */
-        const constructor = target.constructor;
-        /** @type {?} */
-        let def = constructor[NG_COMPONENT_DEF] || constructor[NG_DIRECTIVE_DEF] || constructor[NG_BASE_DEF];
-        if (!def) {
-            initializeBaseDef(target);
-            def = constructor[NG_BASE_DEF];
-        }
-        /** @type {?} */
-        const defProp = getPropertyToUpdate(def);
-        // Use of `in` because we *do* want to check the prototype chain here.
-        if (!(name in defProp)) {
-            defProp[name] = args[0];
-        }
-    };
-}
+const updateBaseDefFromIOProp = (getProp) => (target, name, ...args) => {
+    /** @type {?} */
+    const constructor = target.constructor;
+    if (!constructor.hasOwnProperty(NG_BASE_DEF)) {
+        initializeBaseDef(target);
+    }
+    /** @nocollapse @type {?} */
+    const baseDef = constructor.ngBaseDef;
+    /** @type {?} */
+    const defProp = getProp(baseDef);
+    defProp[name] = args[0];
+};
 /**
  * \@Annotation
  * \@publicApi
  * @type {?}
  */
-const Input = makePropDecorator('Input', (bindingPropertyName) => ({ bindingPropertyName }), undefined, getOrCreateDefinitionAndUpdateMappingFor(def => def.inputs || {}));
+const Input = makePropDecorator('Input', (bindingPropertyName) => ({ bindingPropertyName }), undefined, updateBaseDefFromIOProp(baseDef => baseDef.inputs || {}));
 // WARNING: interface has both a type and a value, skipping emit
 /**
  * \@Annotation
  * \@publicApi
  * @type {?}
  */
-const Output = makePropDecorator('Output', (bindingPropertyName) => ({ bindingPropertyName }), undefined, getOrCreateDefinitionAndUpdateMappingFor(def => def.outputs || {}));
+const Output = makePropDecorator('Output', (bindingPropertyName) => ({ bindingPropertyName }), undefined, updateBaseDefFromIOProp(baseDef => baseDef.outputs || {}));
 // WARNING: interface has both a type and a value, skipping emit
 /**
  * \@Annotation
@@ -31310,5 +31292,5 @@ class NgModuleFactory_ extends NgModuleFactory {
  * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, InjectFlags, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, INJECTOR, Injector, inject, inject as ɵinject, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual$1 as ɵdevModeEqual, isListLikeIterable$1 as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR$1 as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineBase as ɵdefineBase, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, directiveInject as ɵdirectiveInject, injectAttribute as ɵinjectAttribute, getFactoryOf$1 as ɵgetFactoryOf, getInheritedFactory as ɵgetInheritedFactory, templateRefExtractor as ɵtemplateRefExtractor, ProvidersFeature as ɵProvidersFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, container as ɵcontainer, nextContext as ɵnextContext, elementStart as ɵelementStart, namespaceHTML as ɵnamespaceHTML, namespaceMathML as ɵnamespaceMathML, namespaceSVG as ɵnamespaceSVG, element as ɵelement, listener as ɵlistener, text as ɵtext, embeddedViewStart as ɵembeddedViewStart, query as ɵquery, registerContentQuery as ɵregisterContentQuery, projection as ɵprojection, bind as ɵbind, interpolation1 as ɵinterpolation1, interpolation2 as ɵinterpolation2, interpolation3 as ɵinterpolation3, interpolation4 as ɵinterpolation4, interpolation5 as ɵinterpolation5, interpolation6 as ɵinterpolation6, interpolation7 as ɵinterpolation7, interpolation8 as ɵinterpolation8, interpolationV as ɵinterpolationV, pipeBind1 as ɵpipeBind1, pipeBind2 as ɵpipeBind2, pipeBind3 as ɵpipeBind3, pipeBind4 as ɵpipeBind4, pipeBindV as ɵpipeBindV, pureFunction0 as ɵpureFunction0, pureFunction1 as ɵpureFunction1, pureFunction2 as ɵpureFunction2, pureFunction3 as ɵpureFunction3, pureFunction4 as ɵpureFunction4, pureFunction5 as ɵpureFunction5, pureFunction6 as ɵpureFunction6, pureFunction7 as ɵpureFunction7, pureFunction8 as ɵpureFunction8, pureFunctionV as ɵpureFunctionV, getCurrentView as ɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, restoreView as ɵrestoreView, containerRefreshStart as ɵcontainerRefreshStart, containerRefreshEnd as ɵcontainerRefreshEnd, queryRefresh as ɵqueryRefresh, loadQueryList as ɵloadQueryList, elementEnd as ɵelementEnd, elementProperty as ɵelementProperty, componentHostSyntheticProperty as ɵcomponentHostSyntheticProperty, componentHostSyntheticListener as ɵcomponentHostSyntheticListener, projectionDef as ɵprojectionDef, reference as ɵreference, enableBindings as ɵenableBindings, disableBindings as ɵdisableBindings, allocHostVars as ɵallocHostVars, elementAttribute as ɵelementAttribute, elementContainerStart as ɵelementContainerStart, elementContainerEnd as ɵelementContainerEnd, elementStyling as ɵelementStyling, elementHostAttrs as ɵelementHostAttrs, elementStylingMap as ɵelementStylingMap, elementStyleProp as ɵelementStyleProp, elementStylingApply as ɵelementStylingApply, elementClassProp as ɵelementClassProp, textBinding as ɵtextBinding, template as ɵtemplate, embeddedViewEnd as ɵembeddedViewEnd, store as ɵstore, load as ɵload, pipe as ɵpipe, whenRendered as ɵwhenRendered, i18n as ɵi18n, i18nAttributes as ɵi18nAttributes, i18nExp as ɵi18nExp, i18nStart as ɵi18nStart, i18nEnd as ɵi18nEnd, i18nApply as ɵi18nApply, i18nPostprocess as ɵi18nPostprocess, setClassMetadata as ɵsetClassMetadata, resolveWindow as ɵresolveWindow, resolveDocument as ɵresolveDocument, resolveBody as ɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, sanitizeUrlOrResourceUrl as ɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$4 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue$1 as ɵunv, viewDef as ɵvid };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, InjectFlags, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, INJECTOR, Injector, inject, inject as ɵinject, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual$1 as ɵdevModeEqual, isListLikeIterable$1 as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR$1 as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineBase as ɵdefineBase, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, directiveInject as ɵdirectiveInject, injectAttribute as ɵinjectAttribute, getFactoryOf$1 as ɵgetFactoryOf, getInheritedFactory as ɵgetInheritedFactory, templateRefExtractor as ɵtemplateRefExtractor, ProvidersFeature as ɵProvidersFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, NgOnChangesFeature as ɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, container as ɵcontainer, nextContext as ɵnextContext, elementStart as ɵelementStart, namespaceHTML as ɵnamespaceHTML, namespaceMathML as ɵnamespaceMathML, namespaceSVG as ɵnamespaceSVG, element as ɵelement, listener as ɵlistener, text as ɵtext, embeddedViewStart as ɵembeddedViewStart, query as ɵquery, registerContentQuery as ɵregisterContentQuery, projection as ɵprojection, bind as ɵbind, interpolation1 as ɵinterpolation1, interpolation2 as ɵinterpolation2, interpolation3 as ɵinterpolation3, interpolation4 as ɵinterpolation4, interpolation5 as ɵinterpolation5, interpolation6 as ɵinterpolation6, interpolation7 as ɵinterpolation7, interpolation8 as ɵinterpolation8, interpolationV as ɵinterpolationV, pipeBind1 as ɵpipeBind1, pipeBind2 as ɵpipeBind2, pipeBind3 as ɵpipeBind3, pipeBind4 as ɵpipeBind4, pipeBindV as ɵpipeBindV, pureFunction0 as ɵpureFunction0, pureFunction1 as ɵpureFunction1, pureFunction2 as ɵpureFunction2, pureFunction3 as ɵpureFunction3, pureFunction4 as ɵpureFunction4, pureFunction5 as ɵpureFunction5, pureFunction6 as ɵpureFunction6, pureFunction7 as ɵpureFunction7, pureFunction8 as ɵpureFunction8, pureFunctionV as ɵpureFunctionV, getCurrentView as ɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, restoreView as ɵrestoreView, containerRefreshStart as ɵcontainerRefreshStart, containerRefreshEnd as ɵcontainerRefreshEnd, queryRefresh as ɵqueryRefresh, loadQueryList as ɵloadQueryList, elementEnd as ɵelementEnd, elementProperty as ɵelementProperty, componentHostSyntheticProperty as ɵcomponentHostSyntheticProperty, componentHostSyntheticListener as ɵcomponentHostSyntheticListener, projectionDef as ɵprojectionDef, reference as ɵreference, enableBindings as ɵenableBindings, disableBindings as ɵdisableBindings, allocHostVars as ɵallocHostVars, elementAttribute as ɵelementAttribute, elementContainerStart as ɵelementContainerStart, elementContainerEnd as ɵelementContainerEnd, elementStyling as ɵelementStyling, elementHostAttrs as ɵelementHostAttrs, elementStylingMap as ɵelementStylingMap, elementStyleProp as ɵelementStyleProp, elementStylingApply as ɵelementStylingApply, elementClassProp as ɵelementClassProp, textBinding as ɵtextBinding, template as ɵtemplate, embeddedViewEnd as ɵembeddedViewEnd, store as ɵstore, load as ɵload, pipe as ɵpipe, whenRendered as ɵwhenRendered, i18n as ɵi18n, i18nAttributes as ɵi18nAttributes, i18nExp as ɵi18nExp, i18nStart as ɵi18nStart, i18nEnd as ɵi18nEnd, i18nApply as ɵi18nApply, i18nPostprocess as ɵi18nPostprocess, setClassMetadata as ɵsetClassMetadata, resolveWindow as ɵresolveWindow, resolveDocument as ɵresolveDocument, resolveBody as ɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, sanitizeUrlOrResourceUrl as ɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$4 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue$1 as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map

@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { RNode } from './renderer';
 import { StylingContext } from './styling';
 import { LView, TView } from './view';
 /**
@@ -300,8 +301,11 @@ export interface TNode {
      *     `getHost(currentTNode).projection[currentTNode.projection]`.
      * - When projecting nodes the parent node retrieved may be a `<ng-content>` node, in which case
      *   the process is recursive in nature (not implementation).
+     *
+     * If `projection` is of type `RNode[][]` than we have a collection of native nodes passed as
+     * projectable nodes during dynamic component creation.
      */
-    projection: (TNode | null)[] | number | null;
+    projection: (TNode | RNode[])[] | number | null;
 }
 /** Static data for an element  */
 export interface TElementNode extends TNode {
@@ -317,10 +321,10 @@ export interface TElementNode extends TNode {
     tViews: null;
     /**
      * If this is a component TNode with projection, this will be an array of projected
-     * TNodes (see TNode.projection for more info). If it's a regular element node or a
-     * component without projection, it will be null.
+     * TNodes or native nodes (see TNode.projection for more info). If it's a regular element node or
+     * a component without projection, it will be null.
      */
-    projection: (TNode | null)[] | null;
+    projection: (TNode | RNode[])[] | null;
 }
 /** Static data for a text node */
 export interface TTextNode extends TNode {
@@ -418,12 +422,11 @@ export declare type PropertyAliases = {
 /**
  * Store the runtime input or output names for all the directives.
  *
- * Values are stored in triplets:
- * - i + 0: directive index
- * - i + 1: minified / internal name
- * - i + 2: declared name
+ * i+0: directive instance index
+ * i+1: publicName
+ * i+2: privateName
  *
- * e.g. [0, 'minifiedName', 'declaredPropertyName']
+ * e.g. [0, 'change', 'change-minified']
  */
 export declare type PropertyAliasValue = (number | string)[];
 /**
@@ -434,26 +437,26 @@ export declare type PropertyAliasValue = (number | string)[];
  *
  * Within each sub-array:
  *
- * Even indices: minified/internal input name
- * Odd indices: initial value
+ * i+0: attribute name
+ * i+1: minified/internal input name
+ * i+2: initial value
  *
  * If a directive on a node does not have any input properties
  * that should be set from attributes, its index is set to null
  * to avoid a sparse array.
  *
- * e.g. [null, ['role-min', 'button']]
+ * e.g. [null, ['role-min', 'minified-input', 'button']]
  */
 export declare type InitialInputData = (InitialInputs | null)[];
 /**
  * Used by InitialInputData to store input properties
  * that should be set once from attributes.
  *
- * The inputs come in triplets of:
- * i + 0: minified/internal input name
- * i + 1: declared input name (needed for OnChanges)
- * i + 2: initial value
+ * i+0: attribute name
+ * i+1: minified/internal input name
+ * i+2: initial value
  *
- * e.g. ['minifiedName', 'declaredName', 'value']
+ * e.g. ['role-min', 'minified-input', 'button']
  */
 export declare type InitialInputs = string[];
 export declare const unusedValueExportToPlacateAjd = 1;
