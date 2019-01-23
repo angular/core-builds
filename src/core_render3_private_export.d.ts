@@ -19,7 +19,7 @@ export { Player as ɵPlayer, PlayerFactory as ɵPlayerFactory, PlayState as ɵPl
 export { LContext as ɵLContext, } from './render3/interfaces/context';
 export { bindPlayerFactory as ɵbindPlayerFactory, } from './render3/styling/player_factory';
 export { addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, } from './render3/players';
-export { compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__ } from './application_ref';
+export { compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__ } from './application_ref';
 export { SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, } from './metadata/directives';
 export { SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, } from './metadata/ng_module';
 export { getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, } from './debug/debug_node';
