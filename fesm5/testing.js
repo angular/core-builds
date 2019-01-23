@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+3.sha-cf8770f
+ * @license Angular v8.0.0-beta.1+10.sha-5430d2b
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -966,6 +966,7 @@ var ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
  */
 var _nextRootElementId = 0;
 var EMPTY_ARRAY = [];
+var UNDEFINED = Symbol('UNDEFINED');
 /**
  * @description
  * Configures and initializes environment for unit testing and provides methods for
@@ -1151,6 +1152,7 @@ var TestBedRender3 = /** @class */ (function () {
         // reset test module config
         this._providers = [];
         this._compilerOptions = [];
+        this._compilerProviders = [];
         this._declarations = [];
         this._imports = [];
         this._schemas = [];
@@ -1240,7 +1242,8 @@ var TestBedRender3 = /** @class */ (function () {
         if (token === TestBedRender3) {
             return this;
         }
-        return this._moduleRef.injector.get(token, notFoundValue);
+        var result = this._moduleRef.injector.get(token, UNDEFINED);
+        return result === UNDEFINED ? this.compilerInjector.get(token, notFoundValue) : result;
     };
     TestBedRender3.prototype.execute = function (tokens, fn, context) {
         var _this = this;
@@ -1387,8 +1390,8 @@ var TestBedRender3 = /** @class */ (function () {
     };
     Object.defineProperty(TestBedRender3.prototype, "compilerInjector", {
         get: function () {
-            if (this._compilerInjector !== undefined) {
-                this._compilerInjector;
+            if (this._compilerInjector !== null) {
+                return this._compilerInjector;
             }
             var providers = [];
             var compilerOptions = this.platform.injector.get(COMPILER_OPTIONS);
@@ -1643,7 +1646,7 @@ var TestingCompilerFactory = /** @class */ (function () {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var UNDEFINED = new Object();
+var UNDEFINED$1 = new Object();
 var _nextRootElementId$1 = 0;
 /**
  * @description
@@ -1982,8 +1985,8 @@ var TestBedViewEngine = /** @class */ (function () {
         }
         // Tests can inject things from the ng module and from the compiler,
         // but the ng module can't inject things from the compiler and vice versa.
-        var result = this._moduleRef.injector.get(token, UNDEFINED);
-        return result === UNDEFINED ? this._compiler.injector.get(token, notFoundValue) : result;
+        var result = this._moduleRef.injector.get(token, UNDEFINED$1);
+        return result === UNDEFINED$1 ? this._compiler.injector.get(token, notFoundValue) : result;
     };
     TestBedViewEngine.prototype.execute = function (tokens, fn, context) {
         var _this = this;
