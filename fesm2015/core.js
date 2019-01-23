@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+6.sha-583061d
+ * @license Angular v8.0.0-beta.1+1.sha-1fd6735
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8359,21 +8359,13 @@ function walkTNodeTree(viewToWalk, action, renderer, renderParent, beforeNode) {
             const componentHost = (/** @type {?} */ (componentView[HOST_NODE]));
             /** @type {?} */
             const head = ((/** @type {?} */ (componentHost.projection)))[(/** @type {?} */ (tNode.projection))];
-            if (Array.isArray(head)) {
-                for (let nativeNode of head) {
-                    executeNodeAction(action, renderer, renderParent, nativeNode, tNode, beforeNode);
-                }
-            }
-            else {
-                // Must store both the TNode and the view because this projection node could be nested
-                // deeply inside embedded views, and we need to get back down to this particular nested
-                // view.
-                projectionNodeStack[++projectionNodeIndex] = tNode;
-                projectionNodeStack[++projectionNodeIndex] = (/** @type {?} */ (currentView));
-                if (head) {
-                    currentView = (/** @type {?} */ (componentView[PARENT]));
-                    nextTNode = (/** @type {?} */ (currentView[TVIEW].data[head.index]));
-                }
+            // Must store both the TNode and the view because this projection node could be nested
+            // deeply inside embedded views, and we need to get back down to this particular nested view.
+            projectionNodeStack[++projectionNodeIndex] = tNode;
+            projectionNodeStack[++projectionNodeIndex] = (/** @type {?} */ (currentView));
+            if (head) {
+                currentView = (/** @type {?} */ (componentView[PARENT]));
+                nextTNode = (/** @type {?} */ (currentView[TVIEW].data[head.index]));
             }
         }
         else {
@@ -8841,35 +8833,6 @@ function nativeInsertBefore(renderer, parent, child, beforeNode) {
     }
 }
 /**
- * @param {?} renderer
- * @param {?} parent
- * @param {?} child
- * @return {?}
- */
-function nativeAppendChild(renderer, parent, child) {
-    if (isProceduralRenderer(renderer)) {
-        renderer.appendChild(parent, child);
-    }
-    else {
-        parent.appendChild(child);
-    }
-}
-/**
- * @param {?} renderer
- * @param {?} parent
- * @param {?} child
- * @param {?} beforeNode
- * @return {?}
- */
-function nativeAppendOrInsertBefore(renderer, parent, child, beforeNode) {
-    if (beforeNode) {
-        nativeInsertBefore(renderer, parent, child, beforeNode);
-    }
-    else {
-        nativeAppendChild(renderer, parent, child);
-    }
-}
-/**
  * Removes a native child node from a given native parent node.
  * @param {?} renderer
  * @param {?} parent
@@ -8900,34 +8863,11 @@ function nativeNextSibling(renderer, node) {
     return isProceduralRenderer(renderer) ? renderer.nextSibling(node) : node.nextSibling;
 }
 /**
- * Finds a native "anchor" node for cases where we can't append a native child directly
- * (`appendChild`) and need to use a reference (anchor) node for the `insertBefore` operation.
- * @param {?} parentTNode
- * @param {?} lView
- * @return {?}
- */
-function getNativeAnchorNode(parentTNode, lView) {
-    if (parentTNode.type === 2 /* View */) {
-        /** @type {?} */
-        const lContainer = (/** @type {?} */ (getLContainer((/** @type {?} */ (parentTNode)), lView)));
-        /** @type {?} */
-        const views = lContainer[VIEWS];
-        /** @type {?} */
-        const index = views.indexOf(lView);
-        return getBeforeNodeForView(index, views, lContainer[NATIVE]);
-    }
-    else if (parentTNode.type === 4 /* ElementContainer */ ||
-        parentTNode.type === 5 /* IcuContainer */) {
-        return getNativeByTNode(parentTNode, lView);
-    }
-    return null;
-}
-/**
- * Appends the `child` native node (or a collection of nodes) to the `parent`.
+ * Appends the `child` element to the `parent`.
  *
  * The element insertion might be delayed {\@link canInsertNativeNode}.
  *
- * @param {?} childEl The native child (or children) that should be appended
+ * @param {?} childEl The child that should be appended
  * @param {?} childTNode The TNode of the child element
  * @param {?} currentView The current LView
  * @return {?} Whether or not the child was appended
@@ -8940,15 +8880,24 @@ function appendChild(childEl, childTNode, currentView) {
         const renderer = currentView[RENDERER];
         /** @type {?} */
         const parentTNode = childTNode.parent || (/** @type {?} */ (currentView[HOST_NODE]));
-        /** @type {?} */
-        const anchorNode = getNativeAnchorNode(parentTNode, currentView);
-        if (Array.isArray(childEl)) {
-            for (let nativeNode of childEl) {
-                nativeAppendOrInsertBefore(renderer, renderParent, nativeNode, anchorNode);
-            }
+        if (parentTNode.type === 2 /* View */) {
+            /** @type {?} */
+            const lContainer = (/** @type {?} */ (getLContainer((/** @type {?} */ (parentTNode)), currentView)));
+            /** @type {?} */
+            const views = lContainer[VIEWS];
+            /** @type {?} */
+            const index = views.indexOf(currentView);
+            nativeInsertBefore(renderer, renderParent, childEl, getBeforeNodeForView(index, views, lContainer[NATIVE]));
+        }
+        else if (parentTNode.type === 4 /* ElementContainer */ ||
+            parentTNode.type === 5 /* IcuContainer */) {
+            /** @type {?} */
+            const anchorNode = getNativeByTNode(parentTNode, currentView);
+            nativeInsertBefore(renderer, renderParent, childEl, anchorNode);
         }
         else {
-            nativeAppendOrInsertBefore(renderer, renderParent, childEl, anchorNode);
+            isProceduralRenderer(renderer) ? renderer.appendChild(renderParent, childEl) :
+                renderParent.appendChild(childEl);
         }
     }
 }
@@ -13882,46 +13831,36 @@ function projection(nodeIndex, selectorIndex = 0, attrs) {
     let projectedView = (/** @type {?} */ (componentView[PARENT]));
     /** @type {?} */
     let projectionNodeIndex = -1;
-    if (Array.isArray(nodeToProject)) {
-        appendChild(nodeToProject, tProjectionNode, lView);
-    }
-    else {
-        while (nodeToProject) {
-            if (nodeToProject.type === 1 /* Projection */) {
-                // This node is re-projected, so we must go up the tree to get its projected nodes.
-                /** @type {?} */
-                const currentComponentView = findComponentView(projectedView);
-                /** @type {?} */
-                const currentComponentHost = (/** @type {?} */ (currentComponentView[HOST_NODE]));
-                /** @type {?} */
-                const firstProjectedNode = ((/** @type {?} */ (currentComponentHost.projection)))[(/** @type {?} */ (nodeToProject.projection))];
-                if (firstProjectedNode) {
-                    if (Array.isArray(firstProjectedNode)) {
-                        appendChild(firstProjectedNode, tProjectionNode, lView);
-                    }
-                    else {
-                        projectionNodeStack$1[++projectionNodeIndex] = nodeToProject;
-                        projectionNodeStack$1[++projectionNodeIndex] = projectedView;
-                        nodeToProject = firstProjectedNode;
-                        projectedView = (/** @type {?} */ (currentComponentView[PARENT]));
-                        continue;
-                    }
-                }
+    while (nodeToProject) {
+        if (nodeToProject.type === 1 /* Projection */) {
+            // This node is re-projected, so we must go up the tree to get its projected nodes.
+            /** @type {?} */
+            const currentComponentView = findComponentView(projectedView);
+            /** @type {?} */
+            const currentComponentHost = (/** @type {?} */ (currentComponentView[HOST_NODE]));
+            /** @type {?} */
+            const firstProjectedNode = ((/** @type {?} */ (currentComponentHost.projection)))[(/** @type {?} */ (nodeToProject.projection))];
+            if (firstProjectedNode) {
+                projectionNodeStack$1[++projectionNodeIndex] = nodeToProject;
+                projectionNodeStack$1[++projectionNodeIndex] = projectedView;
+                nodeToProject = firstProjectedNode;
+                projectedView = (/** @type {?} */ (currentComponentView[PARENT]));
+                continue;
             }
-            else {
-                // This flag must be set now or we won't know that this node is projected
-                // if the nodes are inserted into a container later.
-                nodeToProject.flags |= 2 /* isProjected */;
-                appendProjectedNode(nodeToProject, tProjectionNode, lView, projectedView);
-            }
-            // If we are finished with a list of re-projected nodes, we need to get
-            // back to the root projection node that was re-projected.
-            if (nodeToProject.next === null && projectedView !== (/** @type {?} */ (componentView[PARENT]))) {
-                projectedView = (/** @type {?} */ (projectionNodeStack$1[projectionNodeIndex--]));
-                nodeToProject = (/** @type {?} */ (projectionNodeStack$1[projectionNodeIndex--]));
-            }
-            nodeToProject = nodeToProject.next;
         }
+        else {
+            // This flag must be set now or we won't know that this node is projected
+            // if the nodes are inserted into a container later.
+            nodeToProject.flags |= 2 /* isProjected */;
+            appendProjectedNode(nodeToProject, tProjectionNode, lView, projectedView);
+        }
+        // If we are finished with a list of re-projected nodes, we need to get
+        // back to the root projection node that was re-projected.
+        if (nodeToProject.next === null && projectedView !== (/** @type {?} */ (componentView[PARENT]))) {
+            projectedView = (/** @type {?} */ (projectionNodeStack$1[projectionNodeIndex--]));
+            nodeToProject = (/** @type {?} */ (projectionNodeStack$1[projectionNodeIndex--]));
+        }
+        nodeToProject = nodeToProject.next;
     }
 }
 /**
@@ -16534,7 +16473,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.1+6.sha-583061d');
+const VERSION = new Version('8.0.0-beta.1+1.sha-1fd6735');
 
 /**
  * @fileoverview added by tsickle
@@ -16695,12 +16634,40 @@ class ComponentFactory$1 extends ComponentFactory {
             /** @type {?} */
             const componentView = createRootComponentView(hostRNode, this.componentDef, rootLView, rendererFactory, renderer);
             tElementNode = (/** @type {?} */ (getTNode(0, rootLView)));
+            // Transform the arrays of native nodes into a structure that can be consumed by the
+            // projection instruction. This is needed to support the reprojection of these nodes.
             if (projectableNodes) {
-                // projectable nodes can be passed as array of arrays or an array of iterables (ngUpgrade
-                // case). Here we do normalize passed data structure to be an array of arrays to avoid
-                // complex checks down the line.
-                tElementNode.projection =
-                    projectableNodes.map((nodesforSlot) => { return Array.from(nodesforSlot); });
+                /** @type {?} */
+                let index = 0;
+                /** @type {?} */
+                const tView = rootLView[TVIEW];
+                /** @type {?} */
+                const projection$$1 = tElementNode.projection = [];
+                for (let i = 0; i < projectableNodes.length; i++) {
+                    /** @type {?} */
+                    const nodeList = projectableNodes[i];
+                    /** @type {?} */
+                    let firstTNode = null;
+                    /** @type {?} */
+                    let previousTNode = null;
+                    for (let j = 0; j < nodeList.length; j++) {
+                        if (tView.firstTemplatePass) {
+                            // For dynamically created components such as ComponentRef, we create a new TView for
+                            // each insert. This is not ideal since we should be sharing the TViews.
+                            // Also the logic here should be shared with `component.ts`'s `renderComponent`
+                            // method.
+                            tView.expandoStartIndex++;
+                            tView.blueprint.splice(++index + HEADER_OFFSET, 0, null);
+                            tView.data.splice(index + HEADER_OFFSET, 0, null);
+                            rootLView.splice(index + HEADER_OFFSET, 0, null);
+                        }
+                        /** @type {?} */
+                        const tNode = createNodeAtIndex(index, 3 /* Element */, (/** @type {?} */ (nodeList[j])), null, null);
+                        previousTNode ? (previousTNode.next = tNode) : (firstTNode = tNode);
+                        previousTNode = tNode;
+                    }
+                    projection$$1.push((/** @type {?} */ (firstTNode)));
+                }
             }
             // TODO: should LifecycleHooksFeature and other host features be generated by the compiler and
             // executed here?

@@ -114,16 +114,16 @@ export declare function nativeParentNode(renderer: Renderer3, node: RNode): REle
  */
 export declare function nativeNextSibling(renderer: Renderer3, node: RNode): RNode | null;
 /**
- * Appends the `child` native node (or a collection of nodes) to the `parent`.
+ * Appends the `child` element to the `parent`.
  *
  * The element insertion might be delayed {@link canInsertNativeNode}.
  *
- * @param childEl The native child (or children) that should be appended
+ * @param childEl The child that should be appended
  * @param childTNode The TNode of the child element
  * @param currentView The current LView
  * @returns Whether or not the child was appended
  */
-export declare function appendChild(childEl: RNode | RNode[], childTNode: TNode, currentView: LView): void;
+export declare function appendChild(childEl: RNode, childTNode: TNode, currentView: LView): void;
 export declare function getBeforeNodeForView(index: number, views: LView[], containerNative: RComment): RComment | RElement;
 /**
  * Removes the `child` element from the DOM if not in view and not projected.
