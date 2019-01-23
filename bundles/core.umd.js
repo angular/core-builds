@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+17.sha-317cc92
+ * @license Angular v8.0.0-beta.1+18.sha-cbd6264
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13338,7 +13338,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.1+17.sha-317cc92');
+    var VERSION = new Version('8.0.0-beta.1+18.sha-cbd6264');
 
     /**
      * @license
@@ -16512,6 +16512,7 @@
             // It is implicitly expected as the first item in the projectable nodes array.
             _this.ngContentSelectors =
                 componentDef.ngContentSelectors ? __spread(['*'], componentDef.ngContentSelectors) : [];
+            _this.isBoundToModule = !!ngModule;
             return _this;
         }
         Object.defineProperty(ComponentFactory$$1.prototype, "inputs", {
@@ -21105,6 +21106,13 @@
         ngDevMode && assertNgModuleType(moduleType);
         return Promise.resolve(new NgModuleFactory$1(moduleType));
     }
+    var isBoundToModule = isBoundToModule__PRE_R3__;
+    function isBoundToModule__PRE_R3__(cf) {
+        return cf instanceof ComponentFactoryBoundToModule;
+    }
+    function isBoundToModule__POST_R3__(cf) {
+        return cf.isBoundToModule;
+    }
     var ALLOW_MULTIPLE_PLATFORMS = new InjectionToken('AllowMultipleToken');
     /**
      * A token for third-party components that can register themselves with NgProbe.
@@ -21476,9 +21484,7 @@
             }
             this.componentTypes.push(componentFactory.componentType);
             // Create a factory associated with the current module if it's not bound to some other
-            var ngModule = componentFactory instanceof ComponentFactoryBoundToModule ?
-                null :
-                this._injector.get(NgModuleRef);
+            var ngModule = isBoundToModule(componentFactory) ? null : this._injector.get(NgModuleRef);
             var selectorOrNode = rootSelectorOrNode || componentFactory.selector;
             var compRef = componentFactory.create(Injector.NULL, [], selectorOrNode, ngModule);
             compRef.onDestroy(function () { _this._unloadComponent(compRef); });
@@ -25061,6 +25067,7 @@
     exports.ɵaddPlayer = addPlayer;
     exports.ɵgetPlayers = getPlayers;
     exports.ɵcompileNgModuleFactory__POST_R3__ = compileNgModuleFactory__POST_R3__;
+    exports.ɵisBoundToModule__POST_R3__ = isBoundToModule__POST_R3__;
     exports.ɵSWITCH_COMPILE_COMPONENT__POST_R3__ = SWITCH_COMPILE_COMPONENT__POST_R3__;
     exports.ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__ = SWITCH_COMPILE_DIRECTIVE__POST_R3__;
     exports.ɵSWITCH_COMPILE_PIPE__POST_R3__ = SWITCH_COMPILE_PIPE__POST_R3__;
