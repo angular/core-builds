@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+15.sha-32c61f4
+ * @license Angular v8.0.0-beta.1+17.sha-317cc92
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8180,8 +8180,8 @@ function getLContainer(tNode, embeddedView) {
  */
 function getContainerRenderParent(tViewNode, view) {
     /** @type {?} */
-    const container = getLContainer(tViewNode, view);
-    return container ? nativeParentNode(view[RENDERER], container[NATIVE]) : null;
+    const container$$1 = getLContainer(tViewNode, view);
+    return container$$1 ? nativeParentNode(view[RENDERER], container$$1[NATIVE]) : null;
 }
 /**
  * Stack used to keep track of projection nodes in walkTNodeTree.
@@ -8384,9 +8384,9 @@ function destroyViewTree(rootView) {
         else {
             // If container, traverse down to its first LView.
             /** @type {?} */
-            const container = (/** @type {?} */ (viewOrContainer));
-            if (container[VIEWS].length)
-                next = container[VIEWS][0];
+            const container$$1 = (/** @type {?} */ (viewOrContainer));
+            if (container$$1[VIEWS].length)
+                next = container$$1[VIEWS][0];
         }
         if (next == null) {
             // Only clean up view when moving to the side or up, as destroy hooks
@@ -8587,12 +8587,12 @@ function removeListeners(lView) {
                     idxOrTargetGetter(lView) :
                     readElementValue(lView[idxOrTargetGetter]);
                 /** @type {?} */
-                const listener = lCleanup[tCleanup[i + 2]];
+                const listener$$1 = lCleanup[tCleanup[i + 2]];
                 /** @type {?} */
                 const useCaptureOrSubIdx = tCleanup[i + 3];
                 if (typeof useCaptureOrSubIdx === 'boolean') {
                     // DOM listener
-                    target.removeEventListener(tCleanup[i], listener, useCaptureOrSubIdx);
+                    target.removeEventListener(tCleanup[i], listener$$1, useCaptureOrSubIdx);
                 }
                 else {
                     if (useCaptureOrSubIdx >= 0) {
@@ -8645,7 +8645,7 @@ function executeOnDestroys(view) {
  *   `<component><content>delayed due to projection</content></component>`
  * - Parent container is disconnected: This can happen when we are inserting a view into
  *   parent container, which itself is disconnected. For example the parent container is part
- *   of a View which has not be inserted or is mare for projection but has not been inserted
+ *   of a View which has not be inserted or is made for projection but has not been inserted
  *   into destination.
  * @param {?} tNode
  * @param {?} currentView
@@ -8683,16 +8683,25 @@ function getRenderParent(tNode, currentView) {
     }
     else {
         ngDevMode && assertNodeType(parent, 3 /* Element */);
-        // We've got a parent which is an element in the current view. We just need to verify if the
-        // parent element is not a component. Component's content nodes are not inserted immediately
-        // because they will be projected, and so doing insert at this point would be wasteful.
-        // Since the projection would then move it to its final destination.
         if (parent.flags & 1 /* isComponent */) {
-            return null;
+            /** @type {?} */
+            const tData = currentView[TVIEW].data;
+            /** @type {?} */
+            const tNode = (/** @type {?} */ (tData[parent.index]));
+            /** @type {?} */
+            const encapsulation = ((/** @type {?} */ (tData[tNode.directiveStart]))).encapsulation;
+            // We've got a parent which is an element in the current view. We just need to verify if the
+            // parent element is not a component. Component's content nodes are not inserted immediately
+            // because they will be projected, and so doing insert at this point would be wasteful.
+            // Since the projection would then move it to its final destination. Note that we can't
+            // make this assumption when using the Shadow DOM, because the native projection placeholders
+            // (<content> or <slot>) have to be in place as elements are being inserted.
+            if (encapsulation !== ViewEncapsulation.ShadowDom &&
+                encapsulation !== ViewEncapsulation.Native) {
+                return null;
+            }
         }
-        else {
-            return (/** @type {?} */ (getNativeByTNode(parent, currentView)));
-        }
+        return (/** @type {?} */ (getNativeByTNode(parent, currentView)));
     }
 }
 /**
@@ -16520,7 +16529,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.1+15.sha-32c61f4');
+const VERSION = new Version('8.0.0-beta.1+17.sha-317cc92');
 
 /**
  * @fileoverview added by tsickle
