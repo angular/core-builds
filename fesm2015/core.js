@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+14.sha-22a43cf
+ * @license Angular v8.0.0-beta.1+15.sha-32c61f4
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16441,7 +16441,4357 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.1+14.sha-22a43cf');
+const VERSION = new Version('8.0.0-beta.1+15.sha-32c61f4');
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+class DefaultIterableDifferFactory {
+    constructor() { }
+    /**
+     * @param {?} obj
+     * @return {?}
+     */
+    supports(obj) { return isListLikeIterable$1(obj); }
+    /**
+     * @template V
+     * @param {?=} trackByFn
+     * @return {?}
+     */
+    create(trackByFn) {
+        return new DefaultIterableDiffer(trackByFn);
+    }
+}
+/** @type {?} */
+const trackByIdentity = (index, item) => item;
+/**
+ * @deprecated v4.0.0 - Should not be part of public API.
+ * \@publicApi
+ * @template V
+ */
+class DefaultIterableDiffer {
+    /**
+     * @param {?=} trackByFn
+     */
+    constructor(trackByFn) {
+        this.length = 0;
+        // Keeps track of the used records at any point in time (during & across `_check()` calls)
+        this._linkedRecords = null;
+        // Keeps track of the removed records at any point in time during `_check()` calls.
+        this._unlinkedRecords = null;
+        this._previousItHead = null;
+        this._itHead = null;
+        this._itTail = null;
+        this._additionsHead = null;
+        this._additionsTail = null;
+        this._movesHead = null;
+        this._movesTail = null;
+        this._removalsHead = null;
+        this._removalsTail = null;
+        // Keeps track of records where custom track by is the same, but item identity has changed
+        this._identityChangesHead = null;
+        this._identityChangesTail = null;
+        this._trackByFn = trackByFn || trackByIdentity;
+    }
+    /**
+     * @param {?} fn
+     * @return {?}
+     */
+    forEachItem(fn) {
+        /** @type {?} */
+        let record;
+        for (record = this._itHead; record !== null; record = record._next) {
+            fn(record);
+        }
+    }
+    /**
+     * @param {?} fn
+     * @return {?}
+     */
+    forEachOperation(fn) {
+        /** @type {?} */
+        let nextIt = this._itHead;
+        /** @type {?} */
+        let nextRemove = this._removalsHead;
+        /** @type {?} */
+        let addRemoveOffset = 0;
+        /** @type {?} */
+        let moveOffsets = null;
+        while (nextIt || nextRemove) {
+            // Figure out which is the next record to process
+            // Order: remove, add, move
+            /** @type {?} */
+            const record = !nextRemove ||
+                nextIt &&
+                    (/** @type {?} */ (nextIt.currentIndex)) <
+                        getPreviousIndex(nextRemove, addRemoveOffset, moveOffsets) ?
+                (/** @type {?} */ (nextIt)) :
+                nextRemove;
+            /** @type {?} */
+            const adjPreviousIndex = getPreviousIndex(record, addRemoveOffset, moveOffsets);
+            /** @type {?} */
+            const currentIndex = record.currentIndex;
+            // consume the item, and adjust the addRemoveOffset and update moveDistance if necessary
+            if (record === nextRemove) {
+                addRemoveOffset--;
+                nextRemove = nextRemove._nextRemoved;
+            }
+            else {
+                nextIt = (/** @type {?} */ (nextIt))._next;
+                if (record.previousIndex == null) {
+                    addRemoveOffset++;
+                }
+                else {
+                    // INVARIANT:  currentIndex < previousIndex
+                    if (!moveOffsets)
+                        moveOffsets = [];
+                    /** @type {?} */
+                    const localMovePreviousIndex = adjPreviousIndex - addRemoveOffset;
+                    /** @type {?} */
+                    const localCurrentIndex = (/** @type {?} */ (currentIndex)) - addRemoveOffset;
+                    if (localMovePreviousIndex != localCurrentIndex) {
+                        for (let i = 0; i < localMovePreviousIndex; i++) {
+                            /** @type {?} */
+                            const offset = i < moveOffsets.length ? moveOffsets[i] : (moveOffsets[i] = 0);
+                            /** @type {?} */
+                            const index = offset + i;
+                            if (localCurrentIndex <= index && index < localMovePreviousIndex) {
+                                moveOffsets[i] = offset + 1;
+                            }
+                        }
+                        /** @type {?} */
+                        const previousIndex = record.previousIndex;
+                        moveOffsets[previousIndex] = localCurrentIndex - localMovePreviousIndex;
+                    }
+                }
+            }
+            if (adjPreviousIndex !== currentIndex) {
+                fn(record, adjPreviousIndex, currentIndex);
+            }
+        }
+    }
+    /**
+     * @param {?} fn
+     * @return {?}
+     */
+    forEachPreviousItem(fn) {
+        /** @type {?} */
+        let record;
+        for (record = this._previousItHead; record !== null; record = record._nextPrevious) {
+            fn(record);
+        }
+    }
+    /**
+     * @param {?} fn
+     * @return {?}
+     */
+    forEachAddedItem(fn) {
+        /** @type {?} */
+        let record;
+        for (record = this._additionsHead; record !== null; record = record._nextAdded) {
+            fn(record);
+        }
+    }
+    /**
+     * @param {?} fn
+     * @return {?}
+     */
+    forEachMovedItem(fn) {
+        /** @type {?} */
+        let record;
+        for (record = this._movesHead; record !== null; record = record._nextMoved) {
+            fn(record);
+        }
+    }
+    /**
+     * @param {?} fn
+     * @return {?}
+     */
+    forEachRemovedItem(fn) {
+        /** @type {?} */
+        let record;
+        for (record = this._removalsHead; record !== null; record = record._nextRemoved) {
+            fn(record);
+        }
+    }
+    /**
+     * @param {?} fn
+     * @return {?}
+     */
+    forEachIdentityChange(fn) {
+        /** @type {?} */
+        let record;
+        for (record = this._identityChangesHead; record !== null; record = record._nextIdentityChange) {
+            fn(record);
+        }
+    }
+    /**
+     * @param {?} collection
+     * @return {?}
+     */
+    diff(collection) {
+        if (collection == null)
+            collection = [];
+        if (!isListLikeIterable$1(collection)) {
+            throw new Error(`Error trying to diff '${stringify(collection)}'. Only arrays and iterables are allowed`);
+        }
+        if (this.check(collection)) {
+            return this;
+        }
+        else {
+            return null;
+        }
+    }
+    /**
+     * @return {?}
+     */
+    onDestroy() { }
+    /**
+     * @param {?} collection
+     * @return {?}
+     */
+    check(collection) {
+        this._reset();
+        /** @type {?} */
+        let record = this._itHead;
+        /** @type {?} */
+        let mayBeDirty = false;
+        /** @type {?} */
+        let index;
+        /** @type {?} */
+        let item;
+        /** @type {?} */
+        let itemTrackBy;
+        if (Array.isArray(collection)) {
+            ((/** @type {?} */ (this))).length = collection.length;
+            for (let index = 0; index < this.length; index++) {
+                item = collection[index];
+                itemTrackBy = this._trackByFn(index, item);
+                if (record === null || !looseIdentical(record.trackById, itemTrackBy)) {
+                    record = this._mismatch(record, item, itemTrackBy, index);
+                    mayBeDirty = true;
+                }
+                else {
+                    if (mayBeDirty) {
+                        // TODO(misko): can we limit this to duplicates only?
+                        record = this._verifyReinsertion(record, item, itemTrackBy, index);
+                    }
+                    if (!looseIdentical(record.item, item))
+                        this._addIdentityChange(record, item);
+                }
+                record = record._next;
+            }
+        }
+        else {
+            index = 0;
+            iterateListLike$1(collection, (item) => {
+                itemTrackBy = this._trackByFn(index, item);
+                if (record === null || !looseIdentical(record.trackById, itemTrackBy)) {
+                    record = this._mismatch(record, item, itemTrackBy, index);
+                    mayBeDirty = true;
+                }
+                else {
+                    if (mayBeDirty) {
+                        // TODO(misko): can we limit this to duplicates only?
+                        record = this._verifyReinsertion(record, item, itemTrackBy, index);
+                    }
+                    if (!looseIdentical(record.item, item))
+                        this._addIdentityChange(record, item);
+                }
+                record = record._next;
+                index++;
+            });
+            ((/** @type {?} */ (this))).length = index;
+        }
+        this._truncate(record);
+        ((/** @type {?} */ (this))).collection = collection;
+        return this.isDirty;
+    }
+    /* CollectionChanges is considered dirty if it has any additions, moves, removals, or identity
+       * changes.
+       */
+    /**
+     * @return {?}
+     */
+    get isDirty() {
+        return this._additionsHead !== null || this._movesHead !== null ||
+            this._removalsHead !== null || this._identityChangesHead !== null;
+    }
+    /**
+     * Reset the state of the change objects to show no changes. This means set previousKey to
+     * currentKey, and clear all of the queues (additions, moves, removals).
+     * Set the previousIndexes of moved and added items to their currentIndexes
+     * Reset the list of additions, moves and removals
+     *
+     * \@internal
+     * @return {?}
+     */
+    _reset() {
+        if (this.isDirty) {
+            /** @type {?} */
+            let record;
+            /** @type {?} */
+            let nextRecord;
+            for (record = this._previousItHead = this._itHead; record !== null; record = record._next) {
+                record._nextPrevious = record._next;
+            }
+            for (record = this._additionsHead; record !== null; record = record._nextAdded) {
+                record.previousIndex = record.currentIndex;
+            }
+            this._additionsHead = this._additionsTail = null;
+            for (record = this._movesHead; record !== null; record = nextRecord) {
+                record.previousIndex = record.currentIndex;
+                nextRecord = record._nextMoved;
+            }
+            this._movesHead = this._movesTail = null;
+            this._removalsHead = this._removalsTail = null;
+            this._identityChangesHead = this._identityChangesTail = null;
+            // TODO(vicb): when assert gets supported
+            // assert(!this.isDirty);
+        }
+    }
+    /**
+     * This is the core function which handles differences between collections.
+     *
+     * - `record` is the record which we saw at this position last time. If null then it is a new
+     *   item.
+     * - `item` is the current item in the collection
+     * - `index` is the position of the item in the collection
+     *
+     * \@internal
+     * @param {?} record
+     * @param {?} item
+     * @param {?} itemTrackBy
+     * @param {?} index
+     * @return {?}
+     */
+    _mismatch(record, item, itemTrackBy, index) {
+        // The previous record after which we will append the current one.
+        /** @type {?} */
+        let previousRecord;
+        if (record === null) {
+            previousRecord = this._itTail;
+        }
+        else {
+            previousRecord = record._prev;
+            // Remove the record from the collection since we know it does not match the item.
+            this._remove(record);
+        }
+        // Attempt to see if we have seen the item before.
+        record = this._linkedRecords === null ? null : this._linkedRecords.get(itemTrackBy, index);
+        if (record !== null) {
+            // We have seen this before, we need to move it forward in the collection.
+            // But first we need to check if identity changed, so we can update in view if necessary
+            if (!looseIdentical(record.item, item))
+                this._addIdentityChange(record, item);
+            this._moveAfter(record, previousRecord, index);
+        }
+        else {
+            // Never seen it, check evicted list.
+            record = this._unlinkedRecords === null ? null : this._unlinkedRecords.get(itemTrackBy, null);
+            if (record !== null) {
+                // It is an item which we have evicted earlier: reinsert it back into the list.
+                // But first we need to check if identity changed, so we can update in view if necessary
+                if (!looseIdentical(record.item, item))
+                    this._addIdentityChange(record, item);
+                this._reinsertAfter(record, previousRecord, index);
+            }
+            else {
+                // It is a new item: add it.
+                record =
+                    this._addAfter(new IterableChangeRecord_(item, itemTrackBy), previousRecord, index);
+            }
+        }
+        return record;
+    }
+    /**
+     * This check is only needed if an array contains duplicates. (Short circuit of nothing dirty)
+     *
+     * Use case: `[a, a]` => `[b, a, a]`
+     *
+     * If we did not have this check then the insertion of `b` would:
+     *   1) evict first `a`
+     *   2) insert `b` at `0` index.
+     *   3) leave `a` at index `1` as is. <-- this is wrong!
+     *   3) reinsert `a` at index 2. <-- this is wrong!
+     *
+     * The correct behavior is:
+     *   1) evict first `a`
+     *   2) insert `b` at `0` index.
+     *   3) reinsert `a` at index 1.
+     *   3) move `a` at from `1` to `2`.
+     *
+     *
+     * Double check that we have not evicted a duplicate item. We need to check if the item type may
+     * have already been removed:
+     * The insertion of b will evict the first 'a'. If we don't reinsert it now it will be reinserted
+     * at the end. Which will show up as the two 'a's switching position. This is incorrect, since a
+     * better way to think of it is as insert of 'b' rather then switch 'a' with 'b' and then add 'a'
+     * at the end.
+     *
+     * \@internal
+     * @param {?} record
+     * @param {?} item
+     * @param {?} itemTrackBy
+     * @param {?} index
+     * @return {?}
+     */
+    _verifyReinsertion(record, item, itemTrackBy, index) {
+        /** @type {?} */
+        let reinsertRecord = this._unlinkedRecords === null ? null : this._unlinkedRecords.get(itemTrackBy, null);
+        if (reinsertRecord !== null) {
+            record = this._reinsertAfter(reinsertRecord, (/** @type {?} */ (record._prev)), index);
+        }
+        else if (record.currentIndex != index) {
+            record.currentIndex = index;
+            this._addToMoves(record, index);
+        }
+        return record;
+    }
+    /**
+     * Get rid of any excess {\@link IterableChangeRecord_}s from the previous collection
+     *
+     * - `record` The first excess {\@link IterableChangeRecord_}.
+     *
+     * \@internal
+     * @param {?} record
+     * @return {?}
+     */
+    _truncate(record) {
+        // Anything after that needs to be removed;
+        while (record !== null) {
+            /** @type {?} */
+            const nextRecord = record._next;
+            this._addToRemovals(this._unlink(record));
+            record = nextRecord;
+        }
+        if (this._unlinkedRecords !== null) {
+            this._unlinkedRecords.clear();
+        }
+        if (this._additionsTail !== null) {
+            this._additionsTail._nextAdded = null;
+        }
+        if (this._movesTail !== null) {
+            this._movesTail._nextMoved = null;
+        }
+        if (this._itTail !== null) {
+            this._itTail._next = null;
+        }
+        if (this._removalsTail !== null) {
+            this._removalsTail._nextRemoved = null;
+        }
+        if (this._identityChangesTail !== null) {
+            this._identityChangesTail._nextIdentityChange = null;
+        }
+    }
+    /**
+     * \@internal
+     * @param {?} record
+     * @param {?} prevRecord
+     * @param {?} index
+     * @return {?}
+     */
+    _reinsertAfter(record, prevRecord, index) {
+        if (this._unlinkedRecords !== null) {
+            this._unlinkedRecords.remove(record);
+        }
+        /** @type {?} */
+        const prev = record._prevRemoved;
+        /** @type {?} */
+        const next = record._nextRemoved;
+        if (prev === null) {
+            this._removalsHead = next;
+        }
+        else {
+            prev._nextRemoved = next;
+        }
+        if (next === null) {
+            this._removalsTail = prev;
+        }
+        else {
+            next._prevRemoved = prev;
+        }
+        this._insertAfter(record, prevRecord, index);
+        this._addToMoves(record, index);
+        return record;
+    }
+    /**
+     * \@internal
+     * @param {?} record
+     * @param {?} prevRecord
+     * @param {?} index
+     * @return {?}
+     */
+    _moveAfter(record, prevRecord, index) {
+        this._unlink(record);
+        this._insertAfter(record, prevRecord, index);
+        this._addToMoves(record, index);
+        return record;
+    }
+    /**
+     * \@internal
+     * @param {?} record
+     * @param {?} prevRecord
+     * @param {?} index
+     * @return {?}
+     */
+    _addAfter(record, prevRecord, index) {
+        this._insertAfter(record, prevRecord, index);
+        if (this._additionsTail === null) {
+            // TODO(vicb):
+            // assert(this._additionsHead === null);
+            this._additionsTail = this._additionsHead = record;
+        }
+        else {
+            // TODO(vicb):
+            // assert(_additionsTail._nextAdded === null);
+            // assert(record._nextAdded === null);
+            this._additionsTail = this._additionsTail._nextAdded = record;
+        }
+        return record;
+    }
+    /**
+     * \@internal
+     * @param {?} record
+     * @param {?} prevRecord
+     * @param {?} index
+     * @return {?}
+     */
+    _insertAfter(record, prevRecord, index) {
+        // TODO(vicb):
+        // assert(record != prevRecord);
+        // assert(record._next === null);
+        // assert(record._prev === null);
+        // TODO(vicb):
+        // assert(record != prevRecord);
+        // assert(record._next === null);
+        // assert(record._prev === null);
+        /** @type {?} */
+        const next = prevRecord === null ? this._itHead : prevRecord._next;
+        // TODO(vicb):
+        // assert(next != record);
+        // assert(prevRecord != record);
+        record._next = next;
+        record._prev = prevRecord;
+        if (next === null) {
+            this._itTail = record;
+        }
+        else {
+            next._prev = record;
+        }
+        if (prevRecord === null) {
+            this._itHead = record;
+        }
+        else {
+            prevRecord._next = record;
+        }
+        if (this._linkedRecords === null) {
+            this._linkedRecords = new _DuplicateMap();
+        }
+        this._linkedRecords.put(record);
+        record.currentIndex = index;
+        return record;
+    }
+    /**
+     * \@internal
+     * @param {?} record
+     * @return {?}
+     */
+    _remove(record) {
+        return this._addToRemovals(this._unlink(record));
+    }
+    /**
+     * \@internal
+     * @param {?} record
+     * @return {?}
+     */
+    _unlink(record) {
+        if (this._linkedRecords !== null) {
+            this._linkedRecords.remove(record);
+        }
+        /** @type {?} */
+        const prev = record._prev;
+        /** @type {?} */
+        const next = record._next;
+        // TODO(vicb):
+        // assert((record._prev = null) === null);
+        // assert((record._next = null) === null);
+        if (prev === null) {
+            this._itHead = next;
+        }
+        else {
+            prev._next = next;
+        }
+        if (next === null) {
+            this._itTail = prev;
+        }
+        else {
+            next._prev = prev;
+        }
+        return record;
+    }
+    /**
+     * \@internal
+     * @param {?} record
+     * @param {?} toIndex
+     * @return {?}
+     */
+    _addToMoves(record, toIndex) {
+        // TODO(vicb):
+        // assert(record._nextMoved === null);
+        if (record.previousIndex === toIndex) {
+            return record;
+        }
+        if (this._movesTail === null) {
+            // TODO(vicb):
+            // assert(_movesHead === null);
+            this._movesTail = this._movesHead = record;
+        }
+        else {
+            // TODO(vicb):
+            // assert(_movesTail._nextMoved === null);
+            this._movesTail = this._movesTail._nextMoved = record;
+        }
+        return record;
+    }
+    /**
+     * @private
+     * @param {?} record
+     * @return {?}
+     */
+    _addToRemovals(record) {
+        if (this._unlinkedRecords === null) {
+            this._unlinkedRecords = new _DuplicateMap();
+        }
+        this._unlinkedRecords.put(record);
+        record.currentIndex = null;
+        record._nextRemoved = null;
+        if (this._removalsTail === null) {
+            // TODO(vicb):
+            // assert(_removalsHead === null);
+            this._removalsTail = this._removalsHead = record;
+            record._prevRemoved = null;
+        }
+        else {
+            // TODO(vicb):
+            // assert(_removalsTail._nextRemoved === null);
+            // assert(record._nextRemoved === null);
+            record._prevRemoved = this._removalsTail;
+            this._removalsTail = this._removalsTail._nextRemoved = record;
+        }
+        return record;
+    }
+    /**
+     * \@internal
+     * @param {?} record
+     * @param {?} item
+     * @return {?}
+     */
+    _addIdentityChange(record, item) {
+        record.item = item;
+        if (this._identityChangesTail === null) {
+            this._identityChangesTail = this._identityChangesHead = record;
+        }
+        else {
+            this._identityChangesTail = this._identityChangesTail._nextIdentityChange = record;
+        }
+        return record;
+    }
+}
+/**
+ * @template V
+ */
+class IterableChangeRecord_ {
+    /**
+     * @param {?} item
+     * @param {?} trackById
+     */
+    constructor(item, trackById) {
+        this.item = item;
+        this.trackById = trackById;
+        this.currentIndex = null;
+        this.previousIndex = null;
+        /**
+         * \@internal
+         */
+        this._nextPrevious = null;
+        /**
+         * \@internal
+         */
+        this._prev = null;
+        /**
+         * \@internal
+         */
+        this._next = null;
+        /**
+         * \@internal
+         */
+        this._prevDup = null;
+        /**
+         * \@internal
+         */
+        this._nextDup = null;
+        /**
+         * \@internal
+         */
+        this._prevRemoved = null;
+        /**
+         * \@internal
+         */
+        this._nextRemoved = null;
+        /**
+         * \@internal
+         */
+        this._nextAdded = null;
+        /**
+         * \@internal
+         */
+        this._nextMoved = null;
+        /**
+         * \@internal
+         */
+        this._nextIdentityChange = null;
+    }
+}
+// A linked list of CollectionChangeRecords with the same IterableChangeRecord_.item
+/**
+ * @template V
+ */
+class _DuplicateItemRecordList {
+    constructor() {
+        /**
+         * \@internal
+         */
+        this._head = null;
+        /**
+         * \@internal
+         */
+        this._tail = null;
+    }
+    /**
+     * Append the record to the list of duplicates.
+     *
+     * Note: by design all records in the list of duplicates hold the same value in record.item.
+     * @param {?} record
+     * @return {?}
+     */
+    add(record) {
+        if (this._head === null) {
+            this._head = this._tail = record;
+            record._nextDup = null;
+            record._prevDup = null;
+        }
+        else {
+            // TODO(vicb):
+            // assert(record.item ==  _head.item ||
+            //       record.item is num && record.item.isNaN && _head.item is num && _head.item.isNaN);
+            (/** @type {?} */ (this._tail))._nextDup = record;
+            record._prevDup = this._tail;
+            record._nextDup = null;
+            this._tail = record;
+        }
+    }
+    // Returns a IterableChangeRecord_ having IterableChangeRecord_.trackById == trackById and
+    // IterableChangeRecord_.currentIndex >= atOrAfterIndex
+    /**
+     * @param {?} trackById
+     * @param {?} atOrAfterIndex
+     * @return {?}
+     */
+    get(trackById, atOrAfterIndex) {
+        /** @type {?} */
+        let record;
+        for (record = this._head; record !== null; record = record._nextDup) {
+            if ((atOrAfterIndex === null || atOrAfterIndex <= (/** @type {?} */ (record.currentIndex))) &&
+                looseIdentical(record.trackById, trackById)) {
+                return record;
+            }
+        }
+        return null;
+    }
+    /**
+     * Remove one {\@link IterableChangeRecord_} from the list of duplicates.
+     *
+     * Returns whether the list of duplicates is empty.
+     * @param {?} record
+     * @return {?}
+     */
+    remove(record) {
+        // TODO(vicb):
+        // assert(() {
+        //  // verify that the record being removed is in the list.
+        //  for (IterableChangeRecord_ cursor = _head; cursor != null; cursor = cursor._nextDup) {
+        //    if (identical(cursor, record)) return true;
+        //  }
+        //  return false;
+        //});
+        // TODO(vicb):
+        // assert(() {
+        //  // verify that the record being removed is in the list.
+        //  for (IterableChangeRecord_ cursor = _head; cursor != null; cursor = cursor._nextDup) {
+        //    if (identical(cursor, record)) return true;
+        //  }
+        //  return false;
+        //});
+        /** @type {?} */
+        const prev = record._prevDup;
+        /** @type {?} */
+        const next = record._nextDup;
+        if (prev === null) {
+            this._head = next;
+        }
+        else {
+            prev._nextDup = next;
+        }
+        if (next === null) {
+            this._tail = prev;
+        }
+        else {
+            next._prevDup = prev;
+        }
+        return this._head === null;
+    }
+}
+/**
+ * @template V
+ */
+class _DuplicateMap {
+    constructor() {
+        this.map = new Map();
+    }
+    /**
+     * @param {?} record
+     * @return {?}
+     */
+    put(record) {
+        /** @type {?} */
+        const key = record.trackById;
+        /** @type {?} */
+        let duplicates = this.map.get(key);
+        if (!duplicates) {
+            duplicates = new _DuplicateItemRecordList();
+            this.map.set(key, duplicates);
+        }
+        duplicates.add(record);
+    }
+    /**
+     * Retrieve the `value` using key. Because the IterableChangeRecord_ value may be one which we
+     * have already iterated over, we use the `atOrAfterIndex` to pretend it is not there.
+     *
+     * Use case: `[a, b, c, a, a]` if we are at index `3` which is the second `a` then asking if we
+     * have any more `a`s needs to return the second `a`.
+     * @param {?} trackById
+     * @param {?} atOrAfterIndex
+     * @return {?}
+     */
+    get(trackById, atOrAfterIndex) {
+        /** @type {?} */
+        const key = trackById;
+        /** @type {?} */
+        const recordList = this.map.get(key);
+        return recordList ? recordList.get(trackById, atOrAfterIndex) : null;
+    }
+    /**
+     * Removes a {\@link IterableChangeRecord_} from the list of duplicates.
+     *
+     * The list of duplicates also is removed from the map if it gets empty.
+     * @param {?} record
+     * @return {?}
+     */
+    remove(record) {
+        /** @type {?} */
+        const key = record.trackById;
+        /** @type {?} */
+        const recordList = (/** @type {?} */ (this.map.get(key)));
+        // Remove the list of duplicates when it gets empty
+        if (recordList.remove(record)) {
+            this.map.delete(key);
+        }
+        return record;
+    }
+    /**
+     * @return {?}
+     */
+    get isEmpty() { return this.map.size === 0; }
+    /**
+     * @return {?}
+     */
+    clear() { this.map.clear(); }
+}
+/**
+ * @param {?} item
+ * @param {?} addRemoveOffset
+ * @param {?} moveOffsets
+ * @return {?}
+ */
+function getPreviousIndex(item, addRemoveOffset, moveOffsets) {
+    /** @type {?} */
+    const previousIndex = item.previousIndex;
+    if (previousIndex === null)
+        return previousIndex;
+    /** @type {?} */
+    let moveOffset = 0;
+    if (moveOffsets && previousIndex < moveOffsets.length) {
+        moveOffset = moveOffsets[previousIndex];
+    }
+    return previousIndex + addRemoveOffset + moveOffset;
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * @template K, V
+ */
+class DefaultKeyValueDifferFactory {
+    constructor() { }
+    /**
+     * @param {?} obj
+     * @return {?}
+     */
+    supports(obj) { return obj instanceof Map || isJsObject$1(obj); }
+    /**
+     * @template K, V
+     * @return {?}
+     */
+    create() { return new DefaultKeyValueDiffer(); }
+}
+/**
+ * @template K, V
+ */
+class DefaultKeyValueDiffer {
+    constructor() {
+        this._records = new Map();
+        this._mapHead = null;
+        // _appendAfter is used in the check loop
+        this._appendAfter = null;
+        this._previousMapHead = null;
+        this._changesHead = null;
+        this._changesTail = null;
+        this._additionsHead = null;
+        this._additionsTail = null;
+        this._removalsHead = null;
+        this._removalsTail = null;
+    }
+    /**
+     * @return {?}
+     */
+    get isDirty() {
+        return this._additionsHead !== null || this._changesHead !== null ||
+            this._removalsHead !== null;
+    }
+    /**
+     * @param {?} fn
+     * @return {?}
+     */
+    forEachItem(fn) {
+        /** @type {?} */
+        let record;
+        for (record = this._mapHead; record !== null; record = record._next) {
+            fn(record);
+        }
+    }
+    /**
+     * @param {?} fn
+     * @return {?}
+     */
+    forEachPreviousItem(fn) {
+        /** @type {?} */
+        let record;
+        for (record = this._previousMapHead; record !== null; record = record._nextPrevious) {
+            fn(record);
+        }
+    }
+    /**
+     * @param {?} fn
+     * @return {?}
+     */
+    forEachChangedItem(fn) {
+        /** @type {?} */
+        let record;
+        for (record = this._changesHead; record !== null; record = record._nextChanged) {
+            fn(record);
+        }
+    }
+    /**
+     * @param {?} fn
+     * @return {?}
+     */
+    forEachAddedItem(fn) {
+        /** @type {?} */
+        let record;
+        for (record = this._additionsHead; record !== null; record = record._nextAdded) {
+            fn(record);
+        }
+    }
+    /**
+     * @param {?} fn
+     * @return {?}
+     */
+    forEachRemovedItem(fn) {
+        /** @type {?} */
+        let record;
+        for (record = this._removalsHead; record !== null; record = record._nextRemoved) {
+            fn(record);
+        }
+    }
+    /**
+     * @param {?=} map
+     * @return {?}
+     */
+    diff(map) {
+        if (!map) {
+            map = new Map();
+        }
+        else if (!(map instanceof Map || isJsObject$1(map))) {
+            throw new Error(`Error trying to diff '${stringify(map)}'. Only maps and objects are allowed`);
+        }
+        return this.check(map) ? this : null;
+    }
+    /**
+     * @return {?}
+     */
+    onDestroy() { }
+    /**
+     * Check the current state of the map vs the previous.
+     * The algorithm is optimised for when the keys do no change.
+     * @param {?} map
+     * @return {?}
+     */
+    check(map) {
+        this._reset();
+        /** @type {?} */
+        let insertBefore = this._mapHead;
+        this._appendAfter = null;
+        this._forEach(map, (value, key) => {
+            if (insertBefore && insertBefore.key === key) {
+                this._maybeAddToChanges(insertBefore, value);
+                this._appendAfter = insertBefore;
+                insertBefore = insertBefore._next;
+            }
+            else {
+                /** @type {?} */
+                const record = this._getOrCreateRecordForKey(key, value);
+                insertBefore = this._insertBeforeOrAppend(insertBefore, record);
+            }
+        });
+        // Items remaining at the end of the list have been deleted
+        if (insertBefore) {
+            if (insertBefore._prev) {
+                insertBefore._prev._next = null;
+            }
+            this._removalsHead = insertBefore;
+            for (let record = insertBefore; record !== null; record = record._nextRemoved) {
+                if (record === this._mapHead) {
+                    this._mapHead = null;
+                }
+                this._records.delete(record.key);
+                record._nextRemoved = record._next;
+                record.previousValue = record.currentValue;
+                record.currentValue = null;
+                record._prev = null;
+                record._next = null;
+            }
+        }
+        // Make sure tails have no next records from previous runs
+        if (this._changesTail)
+            this._changesTail._nextChanged = null;
+        if (this._additionsTail)
+            this._additionsTail._nextAdded = null;
+        return this.isDirty;
+    }
+    /**
+     * Inserts a record before `before` or append at the end of the list when `before` is null.
+     *
+     * Notes:
+     * - This method appends at `this._appendAfter`,
+     * - This method updates `this._appendAfter`,
+     * - The return value is the new value for the insertion pointer.
+     * @private
+     * @param {?} before
+     * @param {?} record
+     * @return {?}
+     */
+    _insertBeforeOrAppend(before, record) {
+        if (before) {
+            /** @type {?} */
+            const prev = before._prev;
+            record._next = before;
+            record._prev = prev;
+            before._prev = record;
+            if (prev) {
+                prev._next = record;
+            }
+            if (before === this._mapHead) {
+                this._mapHead = record;
+            }
+            this._appendAfter = before;
+            return before;
+        }
+        if (this._appendAfter) {
+            this._appendAfter._next = record;
+            record._prev = this._appendAfter;
+        }
+        else {
+            this._mapHead = record;
+        }
+        this._appendAfter = record;
+        return null;
+    }
+    /**
+     * @private
+     * @param {?} key
+     * @param {?} value
+     * @return {?}
+     */
+    _getOrCreateRecordForKey(key, value) {
+        if (this._records.has(key)) {
+            /** @type {?} */
+            const record = (/** @type {?} */ (this._records.get(key)));
+            this._maybeAddToChanges(record, value);
+            /** @type {?} */
+            const prev = record._prev;
+            /** @type {?} */
+            const next = record._next;
+            if (prev) {
+                prev._next = next;
+            }
+            if (next) {
+                next._prev = prev;
+            }
+            record._next = null;
+            record._prev = null;
+            return record;
+        }
+        /** @type {?} */
+        const record = new KeyValueChangeRecord_(key);
+        this._records.set(key, record);
+        record.currentValue = value;
+        this._addToAdditions(record);
+        return record;
+    }
+    /**
+     * \@internal
+     * @return {?}
+     */
+    _reset() {
+        if (this.isDirty) {
+            /** @type {?} */
+            let record;
+            // let `_previousMapHead` contain the state of the map before the changes
+            this._previousMapHead = this._mapHead;
+            for (record = this._previousMapHead; record !== null; record = record._next) {
+                record._nextPrevious = record._next;
+            }
+            // Update `record.previousValue` with the value of the item before the changes
+            // We need to update all changed items (that's those which have been added and changed)
+            for (record = this._changesHead; record !== null; record = record._nextChanged) {
+                record.previousValue = record.currentValue;
+            }
+            for (record = this._additionsHead; record != null; record = record._nextAdded) {
+                record.previousValue = record.currentValue;
+            }
+            this._changesHead = this._changesTail = null;
+            this._additionsHead = this._additionsTail = null;
+            this._removalsHead = null;
+        }
+    }
+    // Add the record or a given key to the list of changes only when the value has actually changed
+    /**
+     * @private
+     * @param {?} record
+     * @param {?} newValue
+     * @return {?}
+     */
+    _maybeAddToChanges(record, newValue) {
+        if (!looseIdentical(newValue, record.currentValue)) {
+            record.previousValue = record.currentValue;
+            record.currentValue = newValue;
+            this._addToChanges(record);
+        }
+    }
+    /**
+     * @private
+     * @param {?} record
+     * @return {?}
+     */
+    _addToAdditions(record) {
+        if (this._additionsHead === null) {
+            this._additionsHead = this._additionsTail = record;
+        }
+        else {
+            (/** @type {?} */ (this._additionsTail))._nextAdded = record;
+            this._additionsTail = record;
+        }
+    }
+    /**
+     * @private
+     * @param {?} record
+     * @return {?}
+     */
+    _addToChanges(record) {
+        if (this._changesHead === null) {
+            this._changesHead = this._changesTail = record;
+        }
+        else {
+            (/** @type {?} */ (this._changesTail))._nextChanged = record;
+            this._changesTail = record;
+        }
+    }
+    /**
+     * \@internal
+     * @private
+     * @template K, V
+     * @param {?} obj
+     * @param {?} fn
+     * @return {?}
+     */
+    _forEach(obj, fn) {
+        if (obj instanceof Map) {
+            obj.forEach(fn);
+        }
+        else {
+            Object.keys(obj).forEach(k => fn(obj[k], k));
+        }
+    }
+}
+/**
+ * @template K, V
+ */
+class KeyValueChangeRecord_ {
+    /**
+     * @param {?} key
+     */
+    constructor(key) {
+        this.key = key;
+        this.previousValue = null;
+        this.currentValue = null;
+        /**
+         * \@internal
+         */
+        this._nextPrevious = null;
+        /**
+         * \@internal
+         */
+        this._next = null;
+        /**
+         * \@internal
+         */
+        this._prev = null;
+        /**
+         * \@internal
+         */
+        this._nextAdded = null;
+        /**
+         * \@internal
+         */
+        this._nextRemoved = null;
+        /**
+         * \@internal
+         */
+        this._nextChanged = null;
+    }
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
+ *
+ * \@publicApi
+ */
+class IterableDiffers {
+    /**
+     * @param {?} factories
+     */
+    constructor(factories) { this.factories = factories; }
+    /**
+     * @param {?} factories
+     * @param {?=} parent
+     * @return {?}
+     */
+    static create(factories, parent) {
+        if (parent != null) {
+            /** @type {?} */
+            const copied = parent.factories.slice();
+            factories = factories.concat(copied);
+        }
+        return new IterableDiffers(factories);
+    }
+    /**
+     * Takes an array of {\@link IterableDifferFactory} and returns a provider used to extend the
+     * inherited {\@link IterableDiffers} instance with the provided factories and return a new
+     * {\@link IterableDiffers} instance.
+     *
+     * \@usageNotes
+     * ### Example
+     *
+     * The following example shows how to extend an existing list of factories,
+     * which will only be applied to the injector for this component and its children.
+     * This step is all that's required to make a new {\@link IterableDiffer} available.
+     *
+     * ```
+     * \@Component({
+     *   viewProviders: [
+     *     IterableDiffers.extend([new ImmutableListDiffer()])
+     *   ]
+     * })
+     * ```
+     * @param {?} factories
+     * @return {?}
+     */
+    static extend(factories) {
+        return {
+            provide: IterableDiffers,
+            useFactory: (parent) => {
+                if (!parent) {
+                    // Typically would occur when calling IterableDiffers.extend inside of dependencies passed
+                    // to
+                    // bootstrap(), which would override default pipes instead of extending them.
+                    throw new Error('Cannot extend IterableDiffers without a parent injector');
+                }
+                return IterableDiffers.create(factories, parent);
+            },
+            // Dependency technically isn't optional, but we can provide a better error message this way.
+            deps: [[IterableDiffers, new SkipSelf(), new Optional()]]
+        };
+    }
+    /**
+     * @param {?} iterable
+     * @return {?}
+     */
+    find(iterable) {
+        /** @type {?} */
+        const factory = this.factories.find(f => f.supports(iterable));
+        if (factory != null) {
+            return factory;
+        }
+        else {
+            throw new Error(`Cannot find a differ supporting object '${iterable}' of type '${getTypeNameForDebugging(iterable)}'`);
+        }
+    }
+}
+/** @nocollapse */
+/** @nocollapse */ IterableDiffers.ngInjectableDef = defineInjectable({
+    providedIn: 'root',
+    factory: () => new IterableDiffers([new DefaultIterableDifferFactory()])
+});
+/**
+ * @param {?} type
+ * @return {?}
+ */
+function getTypeNameForDebugging(type) {
+    return type['name'] || typeof type;
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
+ *
+ * \@publicApi
+ */
+class KeyValueDiffers {
+    /**
+     * @param {?} factories
+     */
+    constructor(factories) { this.factories = factories; }
+    /**
+     * @template S
+     * @param {?} factories
+     * @param {?=} parent
+     * @return {?}
+     */
+    static create(factories, parent) {
+        if (parent) {
+            /** @type {?} */
+            const copied = parent.factories.slice();
+            factories = factories.concat(copied);
+        }
+        return new KeyValueDiffers(factories);
+    }
+    /**
+     * Takes an array of {\@link KeyValueDifferFactory} and returns a provider used to extend the
+     * inherited {\@link KeyValueDiffers} instance with the provided factories and return a new
+     * {\@link KeyValueDiffers} instance.
+     *
+     * \@usageNotes
+     * ### Example
+     *
+     * The following example shows how to extend an existing list of factories,
+     * which will only be applied to the injector for this component and its children.
+     * This step is all that's required to make a new {\@link KeyValueDiffer} available.
+     *
+     * ```
+     * \@Component({
+     *   viewProviders: [
+     *     KeyValueDiffers.extend([new ImmutableMapDiffer()])
+     *   ]
+     * })
+     * ```
+     * @template S
+     * @param {?} factories
+     * @return {?}
+     */
+    static extend(factories) {
+        return {
+            provide: KeyValueDiffers,
+            useFactory: (parent) => {
+                if (!parent) {
+                    // Typically would occur when calling KeyValueDiffers.extend inside of dependencies passed
+                    // to bootstrap(), which would override default pipes instead of extending them.
+                    throw new Error('Cannot extend KeyValueDiffers without a parent injector');
+                }
+                return KeyValueDiffers.create(factories, parent);
+            },
+            // Dependency technically isn't optional, but we can provide a better error message this way.
+            deps: [[KeyValueDiffers, new SkipSelf(), new Optional()]]
+        };
+    }
+    /**
+     * @param {?} kv
+     * @return {?}
+     */
+    find(kv) {
+        /** @type {?} */
+        const factory = this.factories.find(f => f.supports(kv));
+        if (factory) {
+            return factory;
+        }
+        throw new Error(`Cannot find a differ supporting object '${kv}'`);
+    }
+}
+/** @nocollapse */
+/** @nocollapse */ KeyValueDiffers.ngInjectableDef = defineInjectable({
+    providedIn: 'root',
+    factory: () => new KeyValueDiffers([new DefaultKeyValueDifferFactory()])
+});
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Base class for Angular Views, provides change detection functionality.
+ * A change-detection tree collects all views that are to be checked for changes.
+ * Use the methods to add and remove views from the tree, initiate change-detection,
+ * and explicitly mark views as _dirty_, meaning that they have changed and need to be rerendered.
+ *
+ * \@usageNotes
+ *
+ * The following examples demonstrate how to modify default change-detection behavior
+ * to perform explicit detection when needed.
+ *
+ * ### Use `markForCheck()` with `CheckOnce` strategy
+ *
+ * The following example sets the `OnPush` change-detection strategy for a component
+ * (`CheckOnce`, rather than the default `CheckAlways`), then forces a second check
+ * after an interval. See [live demo](http://plnkr.co/edit/GC512b?p=preview).
+ *
+ * <code-example path="core/ts/change_detect/change-detection.ts"
+ * region="mark-for-check"></code-example>
+ *
+ * ### Detach change detector to limit how often check occurs
+ *
+ * The following example defines a component with a large list of read-only data
+ * that is expected to change constantly, many times per second.
+ * To improve performance, we want to check and update the list
+ * less often than the changes actually occur. To do that, we detach
+ * the component's change detector and perform an explicit local check every five seconds.
+ *
+ * <code-example path="core/ts/change_detect/change-detection.ts" region="detach"></code-example>
+ *
+ *
+ * ### Reattaching a detached component
+ *
+ * The following example creates a component displaying live data.
+ * The component detaches its change detector from the main change detector tree
+ * when the `live` property is set to false, and reattaches it when the property
+ * becomes true.
+ *
+ * <code-example path="core/ts/change_detect/change-detection.ts" region="reattach"></code-example>
+ *
+ * \@publicApi
+ * @abstract
+ */
+class ChangeDetectorRef {
+}
+/**
+ * \@internal
+ * @nocollapse
+ */
+ChangeDetectorRef.__NG_ELEMENT_ID__ = () => SWITCH_CHANGE_DETECTOR_REF_FACTORY();
+/** @type {?} */
+const SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ = injectChangeDetectorRef;
+/** @type {?} */
+const SWITCH_CHANGE_DETECTOR_REF_FACTORY = SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__;
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Structural diffing for `Object`s and `Map`s.
+ * @type {?}
+ */
+const keyValDiff = [new DefaultKeyValueDifferFactory()];
+/**
+ * Structural diffing for `Iterable` types such as `Array`s.
+ * @type {?}
+ */
+const iterableDiff = [new DefaultIterableDifferFactory()];
+/** @type {?} */
+const defaultIterableDiffers = new IterableDiffers(iterableDiff);
+/** @type {?} */
+const defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Represents an embedded template that can be used to instantiate embedded views.
+ * To instantiate embedded views based on a template, use the `ViewContainerRef`
+ * method `createEmbeddedView()`.
+ *
+ * Access a `TemplateRef` instance by placing a directive on an `<ng-template>`
+ * element (or directive prefixed with `*`). The `TemplateRef` for the embedded view
+ * is injected into the constructor of the directive,
+ * using the `TemplateRef` token.
+ *
+ * You can also use a `Query` to find a `TemplateRef` associated with
+ * a component or a directive.
+ *
+ * @see `ViewContainerRef`
+ * @see [Navigate the Component Tree with DI](guide/dependency-injection-navtree)
+ *
+ * \@publicApi
+ * @abstract
+ * @template C
+ */
+class TemplateRef {
+}
+/**
+ * \@internal
+ * @nocollapse
+ */
+TemplateRef.__NG_ELEMENT_ID__ = () => SWITCH_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef);
+/** @type {?} */
+const SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ = injectTemplateRef;
+/** @type {?} */
+const SWITCH_TEMPLATE_REF_FACTORY = SWITCH_TEMPLATE_REF_FACTORY__POST_R3__;
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Represents a container where one or more views can be attached to a component.
+ *
+ * Can contain *host views* (created by instantiating a
+ * component with the `createComponent()` method), and *embedded views*
+ * (created by instantiating a `TemplateRef` with the `createEmbeddedView()` method).
+ *
+ * A view container instance can contain other view containers,
+ * creating a [view hierarchy](guide/glossary#view-tree).
+ *
+ * @see `ComponentRef`
+ * @see `EmbeddedViewRef`
+ *
+ * \@publicApi
+ * @abstract
+ */
+class ViewContainerRef {
+}
+/**
+ * \@internal
+ * @nocollapse
+ */
+ViewContainerRef.__NG_ELEMENT_ID__ = () => SWITCH_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef);
+/** @type {?} */
+const SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ = injectViewContainerRef;
+/** @type {?} */
+const SWITCH_VIEW_CONTAINER_REF_FACTORY = SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__;
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * @param {?} error
+ * @return {?}
+ */
+function getDebugContext(error) {
+    return ((/** @type {?} */ (error)))[ERROR_DEBUG_CONTEXT];
+}
+/**
+ * @param {?} error
+ * @return {?}
+ */
+function getOriginalError(error) {
+    return ((/** @type {?} */ (error)))[ERROR_ORIGINAL_ERROR];
+}
+/**
+ * @param {?} error
+ * @return {?}
+ */
+function getErrorLogger(error) {
+    return ((/** @type {?} */ (error)))[ERROR_LOGGER] || defaultErrorLogger;
+}
+/**
+ * @param {?} console
+ * @param {...?} values
+ * @return {?}
+ */
+function defaultErrorLogger(console, ...values) {
+    ((/** @type {?} */ (console.error)))(...values);
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * @param {?} context
+ * @param {?} oldValue
+ * @param {?} currValue
+ * @param {?} isFirstCheck
+ * @return {?}
+ */
+function expressionChangedAfterItHasBeenCheckedError(context, oldValue, currValue, isFirstCheck) {
+    /** @type {?} */
+    let msg = `ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value: '${oldValue}'. Current value: '${currValue}'.`;
+    if (isFirstCheck) {
+        msg +=
+            ` It seems like the view has been created after its parent and its children have been dirty checked.` +
+                ` Has it been created in a change detection hook ?`;
+    }
+    return viewDebugError(msg, context);
+}
+/**
+ * @param {?} err
+ * @param {?} context
+ * @return {?}
+ */
+function viewWrappedDebugError(err, context) {
+    if (!(err instanceof Error)) {
+        // errors that are not Error instances don't have a stack,
+        // so it is ok to wrap them into a new Error object...
+        err = new Error(err.toString());
+    }
+    _addDebugContext(err, context);
+    return err;
+}
+/**
+ * @param {?} msg
+ * @param {?} context
+ * @return {?}
+ */
+function viewDebugError(msg, context) {
+    /** @type {?} */
+    const err = new Error(msg);
+    _addDebugContext(err, context);
+    return err;
+}
+/**
+ * @param {?} err
+ * @param {?} context
+ * @return {?}
+ */
+function _addDebugContext(err, context) {
+    ((/** @type {?} */ (err)))[ERROR_DEBUG_CONTEXT] = context;
+    ((/** @type {?} */ (err)))[ERROR_LOGGER] = context.logError.bind(context);
+}
+/**
+ * @param {?} err
+ * @return {?}
+ */
+function isViewDebugError(err) {
+    return !!getDebugContext(err);
+}
+/**
+ * @param {?} action
+ * @return {?}
+ */
+function viewDestroyedError(action) {
+    return new Error(`ViewDestroyedError: Attempt to use a destroyed view: ${action}`);
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+// Called before each cycle of a view's check to detect whether this is in the
+// initState for which we need to call ngOnInit, ngAfterContentInit or ngAfterViewInit
+// lifecycle methods. Returns true if this check cycle should call lifecycle
+// methods.
+/**
+ * @param {?} view
+ * @param {?} priorInitState
+ * @param {?} newInitState
+ * @return {?}
+ */
+function shiftInitState(view, priorInitState, newInitState) {
+    // Only update the InitState if we are currently in the prior state.
+    // For example, only move into CallingInit if we are in BeforeInit. Only
+    // move into CallingContentInit if we are in CallingInit. Normally this will
+    // always be true because of how checkCycle is called in checkAndUpdateView.
+    // However, if checkAndUpdateView is called recursively or if an exception is
+    // thrown while checkAndUpdateView is running, checkAndUpdateView starts over
+    // from the beginning. This ensures the state is monotonically increasing,
+    // terminating in the AfterInit state, which ensures the Init methods are called
+    // at least once and only once.
+    /** @type {?} */
+    const state = view.state;
+    /** @type {?} */
+    const initState = state & 1792 /* InitState_Mask */;
+    if (initState === priorInitState) {
+        view.state = (state & ~1792 /* InitState_Mask */) | newInitState;
+        view.initIndex = -1;
+        return true;
+    }
+    return initState === newInitState;
+}
+// Returns true if the lifecycle init method should be called for the node with
+// the given init index.
+/**
+ * @param {?} view
+ * @param {?} initState
+ * @param {?} index
+ * @return {?}
+ */
+function shouldCallLifecycleInitHook(view, initState, index) {
+    if ((view.state & 1792 /* InitState_Mask */) === initState && view.initIndex <= index) {
+        view.initIndex = index + 1;
+        return true;
+    }
+    return false;
+}
+/**
+ * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
+ * @param {?} view
+ * @param {?} index
+ * @return {?}
+ */
+function asTextData(view, index) {
+    return (/** @type {?} */ (view.nodes[index]));
+}
+/**
+ * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
+ * @param {?} view
+ * @param {?} index
+ * @return {?}
+ */
+function asElementData(view, index) {
+    return (/** @type {?} */ (view.nodes[index]));
+}
+/**
+ * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
+ * @param {?} view
+ * @param {?} index
+ * @return {?}
+ */
+function asProviderData(view, index) {
+    return (/** @type {?} */ (view.nodes[index]));
+}
+/**
+ * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
+ * @param {?} view
+ * @param {?} index
+ * @return {?}
+ */
+function asPureExpressionData(view, index) {
+    return (/** @type {?} */ (view.nodes[index]));
+}
+/**
+ * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
+ * @param {?} view
+ * @param {?} index
+ * @return {?}
+ */
+function asQueryList(view, index) {
+    return (/** @type {?} */ (view.nodes[index]));
+}
+// WARNING: interface has both a type and a value, skipping emit
+/**
+ * This object is used to prevent cycles in the source files and to have a place where
+ * debug mode can hook it. It is lazily filled when `isDevMode` is known.
+ * @type {?}
+ */
+const Services = {
+    setCurrentNode: (/** @type {?} */ (undefined)),
+    createRootView: (/** @type {?} */ (undefined)),
+    createEmbeddedView: (/** @type {?} */ (undefined)),
+    createComponentView: (/** @type {?} */ (undefined)),
+    createNgModuleRef: (/** @type {?} */ (undefined)),
+    overrideProvider: (/** @type {?} */ (undefined)),
+    overrideComponentView: (/** @type {?} */ (undefined)),
+    clearOverrides: (/** @type {?} */ (undefined)),
+    checkAndUpdateView: (/** @type {?} */ (undefined)),
+    checkNoChangesView: (/** @type {?} */ (undefined)),
+    destroyView: (/** @type {?} */ (undefined)),
+    resolveDep: (/** @type {?} */ (undefined)),
+    createDebugContext: (/** @type {?} */ (undefined)),
+    handleEvent: (/** @type {?} */ (undefined)),
+    updateDirectives: (/** @type {?} */ (undefined)),
+    updateRenderer: (/** @type {?} */ (undefined)),
+    dirtyParentQueries: (/** @type {?} */ (undefined)),
+};
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/** @type {?} */
+const NOOP = () => { };
+/** @type {?} */
+const _tokenKeyCache = new Map();
+/**
+ * @param {?} token
+ * @return {?}
+ */
+function tokenKey(token) {
+    /** @type {?} */
+    let key = _tokenKeyCache.get(token);
+    if (!key) {
+        key = stringify(token) + '_' + _tokenKeyCache.size;
+        _tokenKeyCache.set(token, key);
+    }
+    return key;
+}
+/**
+ * @param {?} view
+ * @param {?} nodeIdx
+ * @param {?} bindingIdx
+ * @param {?} value
+ * @return {?}
+ */
+function unwrapValue(view, nodeIdx, bindingIdx, value) {
+    if (WrappedValue.isWrapped(value)) {
+        value = WrappedValue.unwrap(value);
+        /** @type {?} */
+        const globalBindingIdx = view.def.nodes[nodeIdx].bindingIndex + bindingIdx;
+        /** @type {?} */
+        const oldValue = WrappedValue.unwrap(view.oldValues[globalBindingIdx]);
+        view.oldValues[globalBindingIdx] = new WrappedValue(oldValue);
+    }
+    return value;
+}
+/** @type {?} */
+const UNDEFINED_RENDERER_TYPE_ID = '$$undefined';
+/** @type {?} */
+const EMPTY_RENDERER_TYPE_ID = '$$empty';
+// Attention: this function is called as top level function.
+// Putting any logic in here will destroy closure tree shaking!
+/**
+ * @param {?} values
+ * @return {?}
+ */
+function createRendererType2(values) {
+    return {
+        id: UNDEFINED_RENDERER_TYPE_ID,
+        styles: values.styles,
+        encapsulation: values.encapsulation,
+        data: values.data
+    };
+}
+/** @type {?} */
+let _renderCompCount$1 = 0;
+/**
+ * @param {?=} type
+ * @return {?}
+ */
+function resolveRendererType2(type) {
+    if (type && type.id === UNDEFINED_RENDERER_TYPE_ID) {
+        // first time we see this RendererType2. Initialize it...
+        /** @type {?} */
+        const isFilled = ((type.encapsulation != null && type.encapsulation !== ViewEncapsulation.None) ||
+            type.styles.length || Object.keys(type.data).length);
+        if (isFilled) {
+            type.id = `c${_renderCompCount$1++}`;
+        }
+        else {
+            type.id = EMPTY_RENDERER_TYPE_ID;
+        }
+    }
+    if (type && type.id === EMPTY_RENDERER_TYPE_ID) {
+        type = null;
+    }
+    return type || null;
+}
+/**
+ * @param {?} view
+ * @param {?} def
+ * @param {?} bindingIdx
+ * @param {?} value
+ * @return {?}
+ */
+function checkBinding(view, def, bindingIdx, value) {
+    /** @type {?} */
+    const oldValues = view.oldValues;
+    if ((view.state & 2 /* FirstCheck */) ||
+        !looseIdentical(oldValues[def.bindingIndex + bindingIdx], value)) {
+        return true;
+    }
+    return false;
+}
+/**
+ * @param {?} view
+ * @param {?} def
+ * @param {?} bindingIdx
+ * @param {?} value
+ * @return {?}
+ */
+function checkAndUpdateBinding(view, def, bindingIdx, value) {
+    if (checkBinding(view, def, bindingIdx, value)) {
+        view.oldValues[def.bindingIndex + bindingIdx] = value;
+        return true;
+    }
+    return false;
+}
+/**
+ * @param {?} view
+ * @param {?} def
+ * @param {?} bindingIdx
+ * @param {?} value
+ * @return {?}
+ */
+function checkBindingNoChanges(view, def, bindingIdx, value) {
+    /** @type {?} */
+    const oldValue = view.oldValues[def.bindingIndex + bindingIdx];
+    if ((view.state & 1 /* BeforeFirstCheck */) || !devModeEqual$1(oldValue, value)) {
+        /** @type {?} */
+        const bindingName = def.bindings[bindingIdx].name;
+        throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, def.nodeIndex), `${bindingName}: ${oldValue}`, `${bindingName}: ${value}`, (view.state & 1 /* BeforeFirstCheck */) !== 0);
+    }
+}
+/**
+ * @param {?} view
+ * @return {?}
+ */
+function markParentViewsForCheck(view) {
+    /** @type {?} */
+    let currView = view;
+    while (currView) {
+        if (currView.def.flags & 2 /* OnPush */) {
+            currView.state |= 8 /* ChecksEnabled */;
+        }
+        currView = currView.viewContainerParent || currView.parent;
+    }
+}
+/**
+ * @param {?} view
+ * @param {?} endView
+ * @return {?}
+ */
+function markParentViewsForCheckProjectedViews(view, endView) {
+    /** @type {?} */
+    let currView = view;
+    while (currView && currView !== endView) {
+        currView.state |= 64 /* CheckProjectedViews */;
+        currView = currView.viewContainerParent || currView.parent;
+    }
+}
+/**
+ * @param {?} view
+ * @param {?} nodeIndex
+ * @param {?} eventName
+ * @param {?} event
+ * @return {?}
+ */
+function dispatchEvent(view, nodeIndex, eventName, event) {
+    try {
+        /** @type {?} */
+        const nodeDef = view.def.nodes[nodeIndex];
+        /** @type {?} */
+        const startView = nodeDef.flags & 33554432 /* ComponentView */ ?
+            asElementData(view, nodeIndex).componentView :
+            view;
+        markParentViewsForCheck(startView);
+        return Services.handleEvent(view, nodeIndex, eventName, event);
+    }
+    catch (e) {
+        // Attention: Don't rethrow, as it would cancel Observable subscriptions!
+        view.root.errorHandler.handleError(e);
+    }
+}
+/**
+ * @param {?} view
+ * @return {?}
+ */
+function declaredViewContainer(view) {
+    if (view.parent) {
+        /** @type {?} */
+        const parentView = view.parent;
+        return asElementData(parentView, (/** @type {?} */ (view.parentNodeDef)).nodeIndex);
+    }
+    return null;
+}
+/**
+ * for component views, this is the host element.
+ * for embedded views, this is the index of the parent node
+ * that contains the view container.
+ * @param {?} view
+ * @return {?}
+ */
+function viewParentEl(view) {
+    /** @type {?} */
+    const parentView = view.parent;
+    if (parentView) {
+        return (/** @type {?} */ (view.parentNodeDef)).parent;
+    }
+    else {
+        return null;
+    }
+}
+/**
+ * @param {?} view
+ * @param {?} def
+ * @return {?}
+ */
+function renderNode(view, def) {
+    switch (def.flags & 201347067 /* Types */) {
+        case 1 /* TypeElement */:
+            return asElementData(view, def.nodeIndex).renderElement;
+        case 2 /* TypeText */:
+            return asTextData(view, def.nodeIndex).renderText;
+    }
+}
+/**
+ * @param {?} target
+ * @param {?} name
+ * @return {?}
+ */
+function elementEventFullName(target, name) {
+    return target ? `${target}:${name}` : name;
+}
+/**
+ * @param {?} view
+ * @return {?}
+ */
+function isComponentView(view) {
+    return !!view.parent && !!((/** @type {?} */ (view.parentNodeDef)).flags & 32768 /* Component */);
+}
+/**
+ * @param {?} view
+ * @return {?}
+ */
+function isEmbeddedView(view) {
+    return !!view.parent && !((/** @type {?} */ (view.parentNodeDef)).flags & 32768 /* Component */);
+}
+/**
+ * @param {?} queryId
+ * @return {?}
+ */
+function filterQueryId(queryId) {
+    return 1 << (queryId % 32);
+}
+/**
+ * @param {?} matchedQueriesDsl
+ * @return {?}
+ */
+function splitMatchedQueriesDsl(matchedQueriesDsl) {
+    /** @type {?} */
+    const matchedQueries = {};
+    /** @type {?} */
+    let matchedQueryIds = 0;
+    /** @type {?} */
+    const references = {};
+    if (matchedQueriesDsl) {
+        matchedQueriesDsl.forEach(([queryId, valueType]) => {
+            if (typeof queryId === 'number') {
+                matchedQueries[queryId] = valueType;
+                matchedQueryIds |= filterQueryId(queryId);
+            }
+            else {
+                references[queryId] = valueType;
+            }
+        });
+    }
+    return { matchedQueries, references, matchedQueryIds };
+}
+/**
+ * @param {?} deps
+ * @param {?=} sourceName
+ * @return {?}
+ */
+function splitDepsDsl(deps, sourceName) {
+    return deps.map(value => {
+        /** @type {?} */
+        let token;
+        /** @type {?} */
+        let flags;
+        if (Array.isArray(value)) {
+            [flags, token] = value;
+        }
+        else {
+            flags = 0 /* None */;
+            token = value;
+        }
+        if (token && (typeof token === 'function' || typeof token === 'object') && sourceName) {
+            Object.defineProperty(token, SOURCE, { value: sourceName, configurable: true });
+        }
+        return { flags, token, tokenKey: tokenKey(token) };
+    });
+}
+/**
+ * @param {?} view
+ * @param {?} renderHost
+ * @param {?} def
+ * @return {?}
+ */
+function getParentRenderElement(view, renderHost, def) {
+    /** @type {?} */
+    let renderParent = def.renderParent;
+    if (renderParent) {
+        if ((renderParent.flags & 1 /* TypeElement */) === 0 ||
+            (renderParent.flags & 33554432 /* ComponentView */) === 0 ||
+            ((/** @type {?} */ (renderParent.element)).componentRendererType &&
+                (/** @type {?} */ ((/** @type {?} */ (renderParent.element)).componentRendererType)).encapsulation ===
+                    ViewEncapsulation.Native)) {
+            // only children of non components, or children of components with native encapsulation should
+            // be attached.
+            return asElementData(view, (/** @type {?} */ (def.renderParent)).nodeIndex).renderElement;
+        }
+    }
+    else {
+        return renderHost;
+    }
+}
+/** @type {?} */
+const DEFINITION_CACHE = new WeakMap();
+/**
+ * @template D
+ * @param {?} factory
+ * @return {?}
+ */
+function resolveDefinition(factory) {
+    /** @type {?} */
+    let value = (/** @type {?} */ ((/** @type {?} */ (DEFINITION_CACHE.get(factory)))));
+    if (!value) {
+        value = factory(() => NOOP);
+        value.factory = factory;
+        DEFINITION_CACHE.set(factory, value);
+    }
+    return value;
+}
+/**
+ * @param {?} view
+ * @return {?}
+ */
+function rootRenderNodes(view) {
+    /** @type {?} */
+    const renderNodes = [];
+    visitRootRenderNodes(view, 0 /* Collect */, undefined, undefined, renderNodes);
+    return renderNodes;
+}
+/**
+ * @param {?} view
+ * @param {?} action
+ * @param {?} parentNode
+ * @param {?} nextSibling
+ * @param {?=} target
+ * @return {?}
+ */
+function visitRootRenderNodes(view, action, parentNode, nextSibling, target) {
+    // We need to re-compute the parent node in case the nodes have been moved around manually
+    if (action === 3 /* RemoveChild */) {
+        parentNode = view.renderer.parentNode(renderNode(view, (/** @type {?} */ (view.def.lastRenderRootNode))));
+    }
+    visitSiblingRenderNodes(view, action, 0, view.def.nodes.length - 1, parentNode, nextSibling, target);
+}
+/**
+ * @param {?} view
+ * @param {?} action
+ * @param {?} startIndex
+ * @param {?} endIndex
+ * @param {?} parentNode
+ * @param {?} nextSibling
+ * @param {?=} target
+ * @return {?}
+ */
+function visitSiblingRenderNodes(view, action, startIndex, endIndex, parentNode, nextSibling, target) {
+    for (let i = startIndex; i <= endIndex; i++) {
+        /** @type {?} */
+        const nodeDef = view.def.nodes[i];
+        if (nodeDef.flags & (1 /* TypeElement */ | 2 /* TypeText */ | 8 /* TypeNgContent */)) {
+            visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target);
+        }
+        // jump to next sibling
+        i += nodeDef.childCount;
+    }
+}
+/**
+ * @param {?} view
+ * @param {?} ngContentIndex
+ * @param {?} action
+ * @param {?} parentNode
+ * @param {?} nextSibling
+ * @param {?=} target
+ * @return {?}
+ */
+function visitProjectedRenderNodes(view, ngContentIndex, action, parentNode, nextSibling, target) {
+    /** @type {?} */
+    let compView = view;
+    while (compView && !isComponentView(compView)) {
+        compView = compView.parent;
+    }
+    /** @type {?} */
+    const hostView = (/** @type {?} */ (compView)).parent;
+    /** @type {?} */
+    const hostElDef = viewParentEl((/** @type {?} */ (compView)));
+    /** @type {?} */
+    const startIndex = (/** @type {?} */ (hostElDef)).nodeIndex + 1;
+    /** @type {?} */
+    const endIndex = (/** @type {?} */ (hostElDef)).nodeIndex + (/** @type {?} */ (hostElDef)).childCount;
+    for (let i = startIndex; i <= endIndex; i++) {
+        /** @type {?} */
+        const nodeDef = (/** @type {?} */ (hostView)).def.nodes[i];
+        if (nodeDef.ngContentIndex === ngContentIndex) {
+            visitRenderNode((/** @type {?} */ (hostView)), nodeDef, action, parentNode, nextSibling, target);
+        }
+        // jump to next sibling
+        i += nodeDef.childCount;
+    }
+    if (!(/** @type {?} */ (hostView)).parent) {
+        // a root view
+        /** @type {?} */
+        const projectedNodes = view.root.projectableNodes[ngContentIndex];
+        if (projectedNodes) {
+            for (let i = 0; i < projectedNodes.length; i++) {
+                execRenderNodeAction(view, projectedNodes[i], action, parentNode, nextSibling, target);
+            }
+        }
+    }
+}
+/**
+ * @param {?} view
+ * @param {?} nodeDef
+ * @param {?} action
+ * @param {?} parentNode
+ * @param {?} nextSibling
+ * @param {?=} target
+ * @return {?}
+ */
+function visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target) {
+    if (nodeDef.flags & 8 /* TypeNgContent */) {
+        visitProjectedRenderNodes(view, (/** @type {?} */ (nodeDef.ngContent)).index, action, parentNode, nextSibling, target);
+    }
+    else {
+        /** @type {?} */
+        const rn = renderNode(view, nodeDef);
+        if (action === 3 /* RemoveChild */ && (nodeDef.flags & 33554432 /* ComponentView */) &&
+            (nodeDef.bindingFlags & 48 /* CatSyntheticProperty */)) {
+            // Note: we might need to do both actions.
+            if (nodeDef.bindingFlags & (16 /* SyntheticProperty */)) {
+                execRenderNodeAction(view, rn, action, parentNode, nextSibling, target);
+            }
+            if (nodeDef.bindingFlags & (32 /* SyntheticHostProperty */)) {
+                /** @type {?} */
+                const compView = asElementData(view, nodeDef.nodeIndex).componentView;
+                execRenderNodeAction(compView, rn, action, parentNode, nextSibling, target);
+            }
+        }
+        else {
+            execRenderNodeAction(view, rn, action, parentNode, nextSibling, target);
+        }
+        if (nodeDef.flags & 16777216 /* EmbeddedViews */) {
+            /** @type {?} */
+            const embeddedViews = (/** @type {?} */ (asElementData(view, nodeDef.nodeIndex).viewContainer))._embeddedViews;
+            for (let k = 0; k < embeddedViews.length; k++) {
+                visitRootRenderNodes(embeddedViews[k], action, parentNode, nextSibling, target);
+            }
+        }
+        if (nodeDef.flags & 1 /* TypeElement */ && !(/** @type {?} */ (nodeDef.element)).name) {
+            visitSiblingRenderNodes(view, action, nodeDef.nodeIndex + 1, nodeDef.nodeIndex + nodeDef.childCount, parentNode, nextSibling, target);
+        }
+    }
+}
+/**
+ * @param {?} view
+ * @param {?} renderNode
+ * @param {?} action
+ * @param {?} parentNode
+ * @param {?} nextSibling
+ * @param {?=} target
+ * @return {?}
+ */
+function execRenderNodeAction(view, renderNode, action, parentNode, nextSibling, target) {
+    /** @type {?} */
+    const renderer = view.renderer;
+    switch (action) {
+        case 1 /* AppendChild */:
+            renderer.appendChild(parentNode, renderNode);
+            break;
+        case 2 /* InsertBefore */:
+            renderer.insertBefore(parentNode, renderNode, nextSibling);
+            break;
+        case 3 /* RemoveChild */:
+            renderer.removeChild(parentNode, renderNode);
+            break;
+        case 0 /* Collect */:
+            (/** @type {?} */ (target)).push(renderNode);
+            break;
+    }
+}
+/** @type {?} */
+const NS_PREFIX_RE = /^:([^:]+):(.+)$/;
+/**
+ * @param {?} name
+ * @return {?}
+ */
+function splitNamespace(name) {
+    if (name[0] === ':') {
+        /** @type {?} */
+        const match = (/** @type {?} */ (name.match(NS_PREFIX_RE)));
+        return [match[1], match[2]];
+    }
+    return ['', name];
+}
+/**
+ * @param {?} bindings
+ * @return {?}
+ */
+function calcBindingFlags(bindings) {
+    /** @type {?} */
+    let flags = 0;
+    for (let i = 0; i < bindings.length; i++) {
+        flags |= bindings[i].flags;
+    }
+    return flags;
+}
+/**
+ * @param {?} valueCount
+ * @param {?} constAndInterp
+ * @return {?}
+ */
+function interpolate(valueCount, constAndInterp) {
+    /** @type {?} */
+    let result = '';
+    for (let i = 0; i < valueCount * 2; i = i + 2) {
+        result = result + constAndInterp[i] + _toStringWithNull(constAndInterp[i + 1]);
+    }
+    return result + constAndInterp[valueCount * 2];
+}
+/**
+ * @param {?} valueCount
+ * @param {?} c0
+ * @param {?} a1
+ * @param {?} c1
+ * @param {?=} a2
+ * @param {?=} c2
+ * @param {?=} a3
+ * @param {?=} c3
+ * @param {?=} a4
+ * @param {?=} c4
+ * @param {?=} a5
+ * @param {?=} c5
+ * @param {?=} a6
+ * @param {?=} c6
+ * @param {?=} a7
+ * @param {?=} c7
+ * @param {?=} a8
+ * @param {?=} c8
+ * @param {?=} a9
+ * @param {?=} c9
+ * @return {?}
+ */
+function inlineInterpolate(valueCount, c0, a1, c1, a2, c2, a3, c3, a4, c4, a5, c5, a6, c6, a7, c7, a8, c8, a9, c9) {
+    switch (valueCount) {
+        case 1:
+            return c0 + _toStringWithNull(a1) + c1;
+        case 2:
+            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2;
+        case 3:
+            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
+                c3;
+        case 4:
+            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
+                c3 + _toStringWithNull(a4) + c4;
+        case 5:
+            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
+                c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5;
+        case 6:
+            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
+                c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) + c6;
+        case 7:
+            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
+                c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) +
+                c6 + _toStringWithNull(a7) + c7;
+        case 8:
+            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
+                c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) +
+                c6 + _toStringWithNull(a7) + c7 + _toStringWithNull(a8) + c8;
+        case 9:
+            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
+                c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) +
+                c6 + _toStringWithNull(a7) + c7 + _toStringWithNull(a8) + c8 + _toStringWithNull(a9) + c9;
+        default:
+            throw new Error(`Does not support more than 9 expressions`);
+    }
+}
+/**
+ * @param {?} v
+ * @return {?}
+ */
+function _toStringWithNull(v) {
+    return v != null ? v.toString() : '';
+}
+/** @type {?} */
+const EMPTY_ARRAY$3 = [];
+/** @type {?} */
+const EMPTY_MAP = {};
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/** @type {?} */
+const UNDEFINED_VALUE = new Object();
+/** @type {?} */
+const InjectorRefTokenKey = tokenKey(Injector);
+/** @type {?} */
+const INJECTORRefTokenKey = tokenKey(INJECTOR);
+/** @type {?} */
+const NgModuleRefTokenKey = tokenKey(NgModuleRef);
+/**
+ * @param {?} flags
+ * @param {?} token
+ * @param {?} value
+ * @param {?} deps
+ * @return {?}
+ */
+function moduleProvideDef(flags, token, value, deps) {
+    // Need to resolve forwardRefs as e.g. for `useValue` we
+    // lowered the expression and then stopped evaluating it,
+    // i.e. also didn't unwrap it.
+    value = resolveForwardRef(value);
+    /** @type {?} */
+    const depDefs = splitDepsDsl(deps, stringify(token));
+    return {
+        // will bet set by the module definition
+        index: -1,
+        deps: depDefs, flags, token, value
+    };
+}
+/**
+ * @param {?} providers
+ * @return {?}
+ */
+function moduleDef(providers) {
+    /** @type {?} */
+    const providersByKey = {};
+    /** @type {?} */
+    const modules = [];
+    /** @type {?} */
+    let isRoot = false;
+    for (let i = 0; i < providers.length; i++) {
+        /** @type {?} */
+        const provider = providers[i];
+        if (provider.token === APP_ROOT && provider.value === true) {
+            isRoot = true;
+        }
+        if (provider.flags & 1073741824 /* TypeNgModule */) {
+            modules.push(provider.token);
+        }
+        provider.index = i;
+        providersByKey[tokenKey(provider.token)] = provider;
+    }
+    return {
+        // Will be filled later...
+        factory: null,
+        providersByKey,
+        providers,
+        modules,
+        isRoot,
+    };
+}
+/**
+ * @param {?} data
+ * @return {?}
+ */
+function initNgModule(data) {
+    /** @type {?} */
+    const def = data._def;
+    /** @type {?} */
+    const providers = data._providers = new Array(def.providers.length);
+    for (let i = 0; i < def.providers.length; i++) {
+        /** @type {?} */
+        const provDef = def.providers[i];
+        if (!(provDef.flags & 4096 /* LazyProvider */)) {
+            // Make sure the provider has not been already initialized outside this loop.
+            if (providers[i] === undefined) {
+                providers[i] = _createProviderInstance(data, provDef);
+            }
+        }
+    }
+}
+/**
+ * @param {?} data
+ * @param {?} depDef
+ * @param {?=} notFoundValue
+ * @return {?}
+ */
+function resolveNgModuleDep(data, depDef, notFoundValue = Injector.THROW_IF_NOT_FOUND) {
+    /** @type {?} */
+    const former = setCurrentInjector(data);
+    try {
+        if (depDef.flags & 8 /* Value */) {
+            return depDef.token;
+        }
+        if (depDef.flags & 2 /* Optional */) {
+            notFoundValue = null;
+        }
+        if (depDef.flags & 1 /* SkipSelf */) {
+            return data._parent.get(depDef.token, notFoundValue);
+        }
+        /** @type {?} */
+        const tokenKey$$1 = depDef.tokenKey;
+        switch (tokenKey$$1) {
+            case InjectorRefTokenKey:
+            case INJECTORRefTokenKey:
+            case NgModuleRefTokenKey:
+                return data;
+        }
+        /** @type {?} */
+        const providerDef = data._def.providersByKey[tokenKey$$1];
+        /** @type {?} */
+        let injectableDef;
+        if (providerDef) {
+            /** @type {?} */
+            let providerInstance = data._providers[providerDef.index];
+            if (providerInstance === undefined) {
+                providerInstance = data._providers[providerDef.index] =
+                    _createProviderInstance(data, providerDef);
+            }
+            return providerInstance === UNDEFINED_VALUE ? undefined : providerInstance;
+        }
+        else if ((injectableDef = getInjectableDef(depDef.token)) && targetsModule(data, injectableDef)) {
+            /** @type {?} */
+            const index = data._providers.length;
+            data._def.providersByKey[depDef.tokenKey] = {
+                flags: 1024 /* TypeFactoryProvider */ | 4096 /* LazyProvider */,
+                value: injectableDef.factory,
+                deps: [], index,
+                token: depDef.token,
+            };
+            data._providers[index] = UNDEFINED_VALUE;
+            return (data._providers[index] =
+                _createProviderInstance(data, data._def.providersByKey[depDef.tokenKey]));
+        }
+        else if (depDef.flags & 4 /* Self */) {
+            return notFoundValue;
+        }
+        return data._parent.get(depDef.token, notFoundValue);
+    }
+    finally {
+        setCurrentInjector(former);
+    }
+}
+/**
+ * @param {?} ngModule
+ * @param {?} scope
+ * @return {?}
+ */
+function moduleTransitivelyPresent(ngModule, scope) {
+    return ngModule._def.modules.indexOf(scope) > -1;
+}
+/**
+ * @param {?} ngModule
+ * @param {?} def
+ * @return {?}
+ */
+function targetsModule(ngModule, def) {
+    return def.providedIn != null && (moduleTransitivelyPresent(ngModule, def.providedIn) ||
+        def.providedIn === 'root' && ngModule._def.isRoot);
+}
+/**
+ * @param {?} ngModule
+ * @param {?} providerDef
+ * @return {?}
+ */
+function _createProviderInstance(ngModule, providerDef) {
+    /** @type {?} */
+    let injectable;
+    switch (providerDef.flags & 201347067 /* Types */) {
+        case 512 /* TypeClassProvider */:
+            injectable = _createClass(ngModule, providerDef.value, providerDef.deps);
+            break;
+        case 1024 /* TypeFactoryProvider */:
+            injectable = _callFactory(ngModule, providerDef.value, providerDef.deps);
+            break;
+        case 2048 /* TypeUseExistingProvider */:
+            injectable = resolveNgModuleDep(ngModule, providerDef.deps[0]);
+            break;
+        case 256 /* TypeValueProvider */:
+            injectable = providerDef.value;
+            break;
+    }
+    // The read of `ngOnDestroy` here is slightly expensive as it's megamorphic, so it should be
+    // avoided if possible. The sequence of checks here determines whether ngOnDestroy needs to be
+    // checked. It might not if the `injectable` isn't an object or if NodeFlags.OnDestroy is already
+    // set (ngOnDestroy was detected statically).
+    if (injectable !== UNDEFINED_VALUE && injectable != null && typeof injectable === 'object' &&
+        !(providerDef.flags & 131072 /* OnDestroy */) && typeof injectable.ngOnDestroy === 'function') {
+        providerDef.flags |= 131072 /* OnDestroy */;
+    }
+    return injectable === undefined ? UNDEFINED_VALUE : injectable;
+}
+/**
+ * @param {?} ngModule
+ * @param {?} ctor
+ * @param {?} deps
+ * @return {?}
+ */
+function _createClass(ngModule, ctor, deps) {
+    /** @type {?} */
+    const len = deps.length;
+    switch (len) {
+        case 0:
+            return new ctor();
+        case 1:
+            return new ctor(resolveNgModuleDep(ngModule, deps[0]));
+        case 2:
+            return new ctor(resolveNgModuleDep(ngModule, deps[0]), resolveNgModuleDep(ngModule, deps[1]));
+        case 3:
+            return new ctor(resolveNgModuleDep(ngModule, deps[0]), resolveNgModuleDep(ngModule, deps[1]), resolveNgModuleDep(ngModule, deps[2]));
+        default:
+            /** @type {?} */
+            const depValues = new Array(len);
+            for (let i = 0; i < len; i++) {
+                depValues[i] = resolveNgModuleDep(ngModule, deps[i]);
+            }
+            return new ctor(...depValues);
+    }
+}
+/**
+ * @param {?} ngModule
+ * @param {?} factory
+ * @param {?} deps
+ * @return {?}
+ */
+function _callFactory(ngModule, factory, deps) {
+    /** @type {?} */
+    const len = deps.length;
+    switch (len) {
+        case 0:
+            return factory();
+        case 1:
+            return factory(resolveNgModuleDep(ngModule, deps[0]));
+        case 2:
+            return factory(resolveNgModuleDep(ngModule, deps[0]), resolveNgModuleDep(ngModule, deps[1]));
+        case 3:
+            return factory(resolveNgModuleDep(ngModule, deps[0]), resolveNgModuleDep(ngModule, deps[1]), resolveNgModuleDep(ngModule, deps[2]));
+        default:
+            /** @type {?} */
+            const depValues = Array(len);
+            for (let i = 0; i < len; i++) {
+                depValues[i] = resolveNgModuleDep(ngModule, deps[i]);
+            }
+            return factory(...depValues);
+    }
+}
+/**
+ * @param {?} ngModule
+ * @param {?} lifecycles
+ * @return {?}
+ */
+function callNgModuleLifecycle(ngModule, lifecycles) {
+    /** @type {?} */
+    const def = ngModule._def;
+    /** @type {?} */
+    const destroyed = new Set();
+    for (let i = 0; i < def.providers.length; i++) {
+        /** @type {?} */
+        const provDef = def.providers[i];
+        if (provDef.flags & 131072 /* OnDestroy */) {
+            /** @type {?} */
+            const instance = ngModule._providers[i];
+            if (instance && instance !== UNDEFINED_VALUE) {
+                /** @type {?} */
+                const onDestroy = instance.ngOnDestroy;
+                if (typeof onDestroy === 'function' && !destroyed.has(instance)) {
+                    onDestroy.apply(instance);
+                    destroyed.add(instance);
+                }
+            }
+        }
+    }
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * @param {?} parentView
+ * @param {?} elementData
+ * @param {?} viewIndex
+ * @param {?} view
+ * @return {?}
+ */
+function attachEmbeddedView(parentView, elementData, viewIndex, view) {
+    /** @type {?} */
+    let embeddedViews = (/** @type {?} */ (elementData.viewContainer))._embeddedViews;
+    if (viewIndex === null || viewIndex === undefined) {
+        viewIndex = embeddedViews.length;
+    }
+    view.viewContainerParent = parentView;
+    addToArray(embeddedViews, (/** @type {?} */ (viewIndex)), view);
+    attachProjectedView(elementData, view);
+    Services.dirtyParentQueries(view);
+    /** @type {?} */
+    const prevView = (/** @type {?} */ (viewIndex)) > 0 ? embeddedViews[(/** @type {?} */ (viewIndex)) - 1] : null;
+    renderAttachEmbeddedView(elementData, prevView, view);
+}
+/**
+ * @param {?} vcElementData
+ * @param {?} view
+ * @return {?}
+ */
+function attachProjectedView(vcElementData, view) {
+    /** @type {?} */
+    const dvcElementData = declaredViewContainer(view);
+    if (!dvcElementData || dvcElementData === vcElementData ||
+        view.state & 16 /* IsProjectedView */) {
+        return;
+    }
+    // Note: For performance reasons, we
+    // - add a view to template._projectedViews only 1x throughout its lifetime,
+    //   and remove it not until the view is destroyed.
+    //   (hard, as when a parent view is attached/detached we would need to attach/detach all
+    //    nested projected views as well, even across component boundaries).
+    // - don't track the insertion order of views in the projected views array
+    //   (hard, as when the views of the same template are inserted different view containers)
+    view.state |= 16 /* IsProjectedView */;
+    /** @type {?} */
+    let projectedViews = dvcElementData.template._projectedViews;
+    if (!projectedViews) {
+        projectedViews = dvcElementData.template._projectedViews = [];
+    }
+    projectedViews.push(view);
+    // Note: we are changing the NodeDef here as we cannot calculate
+    // the fact whether a template is used for projection during compilation.
+    markNodeAsProjectedTemplate((/** @type {?} */ (view.parent)).def, (/** @type {?} */ (view.parentNodeDef)));
+}
+/**
+ * @param {?} viewDef
+ * @param {?} nodeDef
+ * @return {?}
+ */
+function markNodeAsProjectedTemplate(viewDef, nodeDef) {
+    if (nodeDef.flags & 4 /* ProjectedTemplate */) {
+        return;
+    }
+    viewDef.nodeFlags |= 4 /* ProjectedTemplate */;
+    nodeDef.flags |= 4 /* ProjectedTemplate */;
+    /** @type {?} */
+    let parentNodeDef = nodeDef.parent;
+    while (parentNodeDef) {
+        parentNodeDef.childFlags |= 4 /* ProjectedTemplate */;
+        parentNodeDef = parentNodeDef.parent;
+    }
+}
+/**
+ * @param {?} elementData
+ * @param {?=} viewIndex
+ * @return {?}
+ */
+function detachEmbeddedView(elementData, viewIndex) {
+    /** @type {?} */
+    const embeddedViews = (/** @type {?} */ (elementData.viewContainer))._embeddedViews;
+    if (viewIndex == null || viewIndex >= embeddedViews.length) {
+        viewIndex = embeddedViews.length - 1;
+    }
+    if (viewIndex < 0) {
+        return null;
+    }
+    /** @type {?} */
+    const view = embeddedViews[viewIndex];
+    view.viewContainerParent = null;
+    removeFromArray(embeddedViews, viewIndex);
+    // See attachProjectedView for why we don't update projectedViews here.
+    Services.dirtyParentQueries(view);
+    renderDetachView(view);
+    return view;
+}
+/**
+ * @param {?} view
+ * @return {?}
+ */
+function detachProjectedView(view) {
+    if (!(view.state & 16 /* IsProjectedView */)) {
+        return;
+    }
+    /** @type {?} */
+    const dvcElementData = declaredViewContainer(view);
+    if (dvcElementData) {
+        /** @type {?} */
+        const projectedViews = dvcElementData.template._projectedViews;
+        if (projectedViews) {
+            removeFromArray(projectedViews, projectedViews.indexOf(view));
+            Services.dirtyParentQueries(view);
+        }
+    }
+}
+/**
+ * @param {?} elementData
+ * @param {?} oldViewIndex
+ * @param {?} newViewIndex
+ * @return {?}
+ */
+function moveEmbeddedView(elementData, oldViewIndex, newViewIndex) {
+    /** @type {?} */
+    const embeddedViews = (/** @type {?} */ (elementData.viewContainer))._embeddedViews;
+    /** @type {?} */
+    const view = embeddedViews[oldViewIndex];
+    removeFromArray(embeddedViews, oldViewIndex);
+    if (newViewIndex == null) {
+        newViewIndex = embeddedViews.length;
+    }
+    addToArray(embeddedViews, newViewIndex, view);
+    // Note: Don't need to change projectedViews as the order in there
+    // as always invalid...
+    Services.dirtyParentQueries(view);
+    renderDetachView(view);
+    /** @type {?} */
+    const prevView = newViewIndex > 0 ? embeddedViews[newViewIndex - 1] : null;
+    renderAttachEmbeddedView(elementData, prevView, view);
+    return view;
+}
+/**
+ * @param {?} elementData
+ * @param {?} prevView
+ * @param {?} view
+ * @return {?}
+ */
+function renderAttachEmbeddedView(elementData, prevView, view) {
+    /** @type {?} */
+    const prevRenderNode = prevView ? renderNode(prevView, (/** @type {?} */ (prevView.def.lastRenderRootNode))) :
+        elementData.renderElement;
+    /** @type {?} */
+    const parentNode = view.renderer.parentNode(prevRenderNode);
+    /** @type {?} */
+    const nextSibling = view.renderer.nextSibling(prevRenderNode);
+    // Note: We can't check if `nextSibling` is present, as on WebWorkers it will always be!
+    // However, browsers automatically do `appendChild` when there is no `nextSibling`.
+    visitRootRenderNodes(view, 2 /* InsertBefore */, parentNode, nextSibling, undefined);
+}
+/**
+ * @param {?} view
+ * @return {?}
+ */
+function renderDetachView(view) {
+    visitRootRenderNodes(view, 3 /* RemoveChild */, null, null, undefined);
+}
+/**
+ * @param {?} arr
+ * @param {?} index
+ * @param {?} value
+ * @return {?}
+ */
+function addToArray(arr, index, value) {
+    // perf: array.push is faster than array.splice!
+    if (index >= arr.length) {
+        arr.push(value);
+    }
+    else {
+        arr.splice(index, 0, value);
+    }
+}
+/**
+ * @param {?} arr
+ * @param {?} index
+ * @return {?}
+ */
+function removeFromArray(arr, index) {
+    // perf: array.pop is faster than array.splice!
+    if (index >= arr.length - 1) {
+        arr.pop();
+    }
+    else {
+        arr.splice(index, 1);
+    }
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/** @type {?} */
+const EMPTY_CONTEXT = new Object();
+// Attention: this function is called as top level function.
+// Putting any logic in here will destroy closure tree shaking!
+/**
+ * @param {?} selector
+ * @param {?} componentType
+ * @param {?} viewDefFactory
+ * @param {?} inputs
+ * @param {?} outputs
+ * @param {?} ngContentSelectors
+ * @return {?}
+ */
+function createComponentFactory(selector, componentType, viewDefFactory, inputs, outputs, ngContentSelectors) {
+    return new ComponentFactory_(selector, componentType, viewDefFactory, inputs, outputs, ngContentSelectors);
+}
+/**
+ * @param {?} componentFactory
+ * @return {?}
+ */
+function getComponentViewDefinitionFactory(componentFactory) {
+    return ((/** @type {?} */ (componentFactory))).viewDefFactory;
+}
+class ComponentFactory_ extends ComponentFactory {
+    /**
+     * @param {?} selector
+     * @param {?} componentType
+     * @param {?} viewDefFactory
+     * @param {?} _inputs
+     * @param {?} _outputs
+     * @param {?} ngContentSelectors
+     */
+    constructor(selector, componentType, viewDefFactory, _inputs, _outputs, ngContentSelectors) {
+        // Attention: this ctor is called as top level function.
+        // Putting any logic in here will destroy closure tree shaking!
+        super();
+        this.selector = selector;
+        this.componentType = componentType;
+        this._inputs = _inputs;
+        this._outputs = _outputs;
+        this.ngContentSelectors = ngContentSelectors;
+        this.viewDefFactory = viewDefFactory;
+    }
+    /**
+     * @return {?}
+     */
+    get inputs() {
+        /** @type {?} */
+        const inputsArr = [];
+        /** @type {?} */
+        const inputs = (/** @type {?} */ (this._inputs));
+        for (let propName in inputs) {
+            /** @type {?} */
+            const templateName = inputs[propName];
+            inputsArr.push({ propName, templateName });
+        }
+        return inputsArr;
+    }
+    /**
+     * @return {?}
+     */
+    get outputs() {
+        /** @type {?} */
+        const outputsArr = [];
+        for (let propName in this._outputs) {
+            /** @type {?} */
+            const templateName = this._outputs[propName];
+            outputsArr.push({ propName, templateName });
+        }
+        return outputsArr;
+    }
+    /**
+     * Creates a new component.
+     * @param {?} injector
+     * @param {?=} projectableNodes
+     * @param {?=} rootSelectorOrNode
+     * @param {?=} ngModule
+     * @return {?}
+     */
+    create(injector, projectableNodes, rootSelectorOrNode, ngModule) {
+        if (!ngModule) {
+            throw new Error('ngModule should be provided');
+        }
+        /** @type {?} */
+        const viewDef = resolveDefinition(this.viewDefFactory);
+        /** @type {?} */
+        const componentNodeIndex = (/** @type {?} */ ((/** @type {?} */ (viewDef.nodes[0].element)).componentProvider)).nodeIndex;
+        /** @type {?} */
+        const view = Services.createRootView(injector, projectableNodes || [], rootSelectorOrNode, viewDef, ngModule, EMPTY_CONTEXT);
+        /** @type {?} */
+        const component = asProviderData(view, componentNodeIndex).instance;
+        if (rootSelectorOrNode) {
+            view.renderer.setAttribute(asElementData(view, 0).renderElement, 'ng-version', VERSION.full);
+        }
+        return new ComponentRef_(view, new ViewRef_(view), component);
+    }
+}
+class ComponentRef_ extends ComponentRef {
+    /**
+     * @param {?} _view
+     * @param {?} _viewRef
+     * @param {?} _component
+     */
+    constructor(_view, _viewRef, _component) {
+        super();
+        this._view = _view;
+        this._viewRef = _viewRef;
+        this._component = _component;
+        this._elDef = this._view.def.nodes[0];
+        this.hostView = _viewRef;
+        this.changeDetectorRef = _viewRef;
+        this.instance = _component;
+    }
+    /**
+     * @return {?}
+     */
+    get location() {
+        return new ElementRef(asElementData(this._view, this._elDef.nodeIndex).renderElement);
+    }
+    /**
+     * @return {?}
+     */
+    get injector() { return new Injector_(this._view, this._elDef); }
+    /**
+     * @return {?}
+     */
+    get componentType() { return (/** @type {?} */ (this._component.constructor)); }
+    /**
+     * @return {?}
+     */
+    destroy() { this._viewRef.destroy(); }
+    /**
+     * @param {?} callback
+     * @return {?}
+     */
+    onDestroy(callback) { this._viewRef.onDestroy(callback); }
+}
+/**
+ * @param {?} view
+ * @param {?} elDef
+ * @param {?} elData
+ * @return {?}
+ */
+function createViewContainerData(view, elDef, elData) {
+    return new ViewContainerRef_(view, elDef, elData);
+}
+class ViewContainerRef_ {
+    /**
+     * @param {?} _view
+     * @param {?} _elDef
+     * @param {?} _data
+     */
+    constructor(_view, _elDef, _data) {
+        this._view = _view;
+        this._elDef = _elDef;
+        this._data = _data;
+        /**
+         * \@internal
+         */
+        this._embeddedViews = [];
+    }
+    /**
+     * @return {?}
+     */
+    get element() { return new ElementRef(this._data.renderElement); }
+    /**
+     * @return {?}
+     */
+    get injector() { return new Injector_(this._view, this._elDef); }
+    /**
+     * @deprecated No replacement
+     * @return {?}
+     */
+    get parentInjector() {
+        /** @type {?} */
+        let view = this._view;
+        /** @type {?} */
+        let elDef = this._elDef.parent;
+        while (!elDef && view) {
+            elDef = viewParentEl(view);
+            view = (/** @type {?} */ (view.parent));
+        }
+        return view ? new Injector_(view, elDef) : new Injector_(this._view, null);
+    }
+    /**
+     * @return {?}
+     */
+    clear() {
+        /** @type {?} */
+        const len = this._embeddedViews.length;
+        for (let i = len - 1; i >= 0; i--) {
+            /** @type {?} */
+            const view = (/** @type {?} */ (detachEmbeddedView(this._data, i)));
+            Services.destroyView(view);
+        }
+    }
+    /**
+     * @param {?} index
+     * @return {?}
+     */
+    get(index) {
+        /** @type {?} */
+        const view = this._embeddedViews[index];
+        if (view) {
+            /** @type {?} */
+            const ref = new ViewRef_(view);
+            ref.attachToViewContainerRef(this);
+            return ref;
+        }
+        return null;
+    }
+    /**
+     * @return {?}
+     */
+    get length() { return this._embeddedViews.length; }
+    /**
+     * @template C
+     * @param {?} templateRef
+     * @param {?=} context
+     * @param {?=} index
+     * @return {?}
+     */
+    createEmbeddedView(templateRef, context, index) {
+        /** @type {?} */
+        const viewRef = templateRef.createEmbeddedView(context || (/** @type {?} */ ({})));
+        this.insert(viewRef, index);
+        return viewRef;
+    }
+    /**
+     * @template C
+     * @param {?} componentFactory
+     * @param {?=} index
+     * @param {?=} injector
+     * @param {?=} projectableNodes
+     * @param {?=} ngModuleRef
+     * @return {?}
+     */
+    createComponent(componentFactory, index, injector, projectableNodes, ngModuleRef) {
+        /** @type {?} */
+        const contextInjector = injector || this.parentInjector;
+        if (!ngModuleRef && !(componentFactory instanceof ComponentFactoryBoundToModule)) {
+            ngModuleRef = contextInjector.get(NgModuleRef);
+        }
+        /** @type {?} */
+        const componentRef = componentFactory.create(contextInjector, projectableNodes, undefined, ngModuleRef);
+        this.insert(componentRef.hostView, index);
+        return componentRef;
+    }
+    /**
+     * @param {?} viewRef
+     * @param {?=} index
+     * @return {?}
+     */
+    insert(viewRef, index) {
+        if (viewRef.destroyed) {
+            throw new Error('Cannot insert a destroyed View in a ViewContainer!');
+        }
+        /** @type {?} */
+        const viewRef_ = (/** @type {?} */ (viewRef));
+        /** @type {?} */
+        const viewData = viewRef_._view;
+        attachEmbeddedView(this._view, this._data, index, viewData);
+        viewRef_.attachToViewContainerRef(this);
+        return viewRef;
+    }
+    /**
+     * @param {?} viewRef
+     * @param {?} currentIndex
+     * @return {?}
+     */
+    move(viewRef, currentIndex) {
+        if (viewRef.destroyed) {
+            throw new Error('Cannot move a destroyed View in a ViewContainer!');
+        }
+        /** @type {?} */
+        const previousIndex = this._embeddedViews.indexOf(viewRef._view);
+        moveEmbeddedView(this._data, previousIndex, currentIndex);
+        return viewRef;
+    }
+    /**
+     * @param {?} viewRef
+     * @return {?}
+     */
+    indexOf(viewRef) {
+        return this._embeddedViews.indexOf(((/** @type {?} */ (viewRef)))._view);
+    }
+    /**
+     * @param {?=} index
+     * @return {?}
+     */
+    remove(index) {
+        /** @type {?} */
+        const viewData = detachEmbeddedView(this._data, index);
+        if (viewData) {
+            Services.destroyView(viewData);
+        }
+    }
+    /**
+     * @param {?=} index
+     * @return {?}
+     */
+    detach(index) {
+        /** @type {?} */
+        const view = detachEmbeddedView(this._data, index);
+        return view ? new ViewRef_(view) : null;
+    }
+}
+/**
+ * @param {?} view
+ * @return {?}
+ */
+function createChangeDetectorRef(view) {
+    return new ViewRef_(view);
+}
+class ViewRef_ {
+    /**
+     * @param {?} _view
+     */
+    constructor(_view) {
+        this._view = _view;
+        this._viewContainerRef = null;
+        this._appRef = null;
+    }
+    /**
+     * @return {?}
+     */
+    get rootNodes() { return rootRenderNodes(this._view); }
+    /**
+     * @return {?}
+     */
+    get context() { return this._view.context; }
+    /**
+     * @return {?}
+     */
+    get destroyed() { return (this._view.state & 128 /* Destroyed */) !== 0; }
+    /**
+     * @return {?}
+     */
+    markForCheck() { markParentViewsForCheck(this._view); }
+    /**
+     * @return {?}
+     */
+    detach() { this._view.state &= ~4 /* Attached */; }
+    /**
+     * @return {?}
+     */
+    detectChanges() {
+        /** @type {?} */
+        const fs = this._view.root.rendererFactory;
+        if (fs.begin) {
+            fs.begin();
+        }
+        try {
+            Services.checkAndUpdateView(this._view);
+        }
+        finally {
+            if (fs.end) {
+                fs.end();
+            }
+        }
+    }
+    /**
+     * @return {?}
+     */
+    checkNoChanges() { Services.checkNoChangesView(this._view); }
+    /**
+     * @return {?}
+     */
+    reattach() { this._view.state |= 4 /* Attached */; }
+    /**
+     * @param {?} callback
+     * @return {?}
+     */
+    onDestroy(callback) {
+        if (!this._view.disposables) {
+            this._view.disposables = [];
+        }
+        this._view.disposables.push((/** @type {?} */ (callback)));
+    }
+    /**
+     * @return {?}
+     */
+    destroy() {
+        if (this._appRef) {
+            this._appRef.detachView(this);
+        }
+        else if (this._viewContainerRef) {
+            this._viewContainerRef.detach(this._viewContainerRef.indexOf(this));
+        }
+        Services.destroyView(this._view);
+    }
+    /**
+     * @return {?}
+     */
+    detachFromAppRef() {
+        this._appRef = null;
+        renderDetachView(this._view);
+        Services.dirtyParentQueries(this._view);
+    }
+    /**
+     * @param {?} appRef
+     * @return {?}
+     */
+    attachToAppRef(appRef) {
+        if (this._viewContainerRef) {
+            throw new Error('This view is already attached to a ViewContainer!');
+        }
+        this._appRef = appRef;
+    }
+    /**
+     * @param {?} vcRef
+     * @return {?}
+     */
+    attachToViewContainerRef(vcRef) {
+        if (this._appRef) {
+            throw new Error('This view is already attached directly to the ApplicationRef!');
+        }
+        this._viewContainerRef = vcRef;
+    }
+}
+/**
+ * @param {?} view
+ * @param {?} def
+ * @return {?}
+ */
+function createTemplateData(view, def) {
+    return new TemplateRef_(view, def);
+}
+class TemplateRef_ extends TemplateRef {
+    /**
+     * @param {?} _parentView
+     * @param {?} _def
+     */
+    constructor(_parentView, _def) {
+        super();
+        this._parentView = _parentView;
+        this._def = _def;
+    }
+    /**
+     * @param {?} context
+     * @return {?}
+     */
+    createEmbeddedView(context) {
+        return new ViewRef_(Services.createEmbeddedView(this._parentView, this._def, (/** @type {?} */ ((/** @type {?} */ (this._def.element)).template)), context));
+    }
+    /**
+     * @return {?}
+     */
+    get elementRef() {
+        return new ElementRef(asElementData(this._parentView, this._def.nodeIndex).renderElement);
+    }
+}
+/**
+ * @param {?} view
+ * @param {?} elDef
+ * @return {?}
+ */
+function createInjector$1(view, elDef) {
+    return new Injector_(view, elDef);
+}
+class Injector_ {
+    /**
+     * @param {?} view
+     * @param {?} elDef
+     */
+    constructor(view, elDef) {
+        this.view = view;
+        this.elDef = elDef;
+    }
+    /**
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @return {?}
+     */
+    get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND) {
+        /** @type {?} */
+        const allowPrivateServices = this.elDef ? (this.elDef.flags & 33554432 /* ComponentView */) !== 0 : false;
+        return Services.resolveDep(this.view, this.elDef, allowPrivateServices, { flags: 0 /* None */, token, tokenKey: tokenKey(token) }, notFoundValue);
+    }
+}
+/**
+ * @param {?} view
+ * @param {?} index
+ * @return {?}
+ */
+function nodeValue(view, index) {
+    /** @type {?} */
+    const def = view.def.nodes[index];
+    if (def.flags & 1 /* TypeElement */) {
+        /** @type {?} */
+        const elData = asElementData(view, def.nodeIndex);
+        return (/** @type {?} */ (def.element)).template ? elData.template : elData.renderElement;
+    }
+    else if (def.flags & 2 /* TypeText */) {
+        return asTextData(view, def.nodeIndex).renderText;
+    }
+    else if (def.flags & (20224 /* CatProvider */ | 16 /* TypePipe */)) {
+        return asProviderData(view, def.nodeIndex).instance;
+    }
+    throw new Error(`Illegal state: read nodeValue for node index ${index}`);
+}
+/**
+ * @param {?} view
+ * @return {?}
+ */
+function createRendererV1(view) {
+    return new RendererAdapter(view.renderer);
+}
+class RendererAdapter {
+    /**
+     * @param {?} delegate
+     */
+    constructor(delegate) {
+        this.delegate = delegate;
+    }
+    /**
+     * @param {?} selectorOrNode
+     * @return {?}
+     */
+    selectRootElement(selectorOrNode) {
+        return this.delegate.selectRootElement(selectorOrNode);
+    }
+    /**
+     * @param {?} parent
+     * @param {?} namespaceAndName
+     * @return {?}
+     */
+    createElement(parent, namespaceAndName) {
+        const [ns, name] = splitNamespace(namespaceAndName);
+        /** @type {?} */
+        const el = this.delegate.createElement(name, ns);
+        if (parent) {
+            this.delegate.appendChild(parent, el);
+        }
+        return el;
+    }
+    /**
+     * @param {?} hostElement
+     * @return {?}
+     */
+    createViewRoot(hostElement) { return hostElement; }
+    /**
+     * @param {?} parentElement
+     * @return {?}
+     */
+    createTemplateAnchor(parentElement) {
+        /** @type {?} */
+        const comment = this.delegate.createComment('');
+        if (parentElement) {
+            this.delegate.appendChild(parentElement, comment);
+        }
+        return comment;
+    }
+    /**
+     * @param {?} parentElement
+     * @param {?} value
+     * @return {?}
+     */
+    createText(parentElement, value) {
+        /** @type {?} */
+        const node = this.delegate.createText(value);
+        if (parentElement) {
+            this.delegate.appendChild(parentElement, node);
+        }
+        return node;
+    }
+    /**
+     * @param {?} parentElement
+     * @param {?} nodes
+     * @return {?}
+     */
+    projectNodes(parentElement, nodes) {
+        for (let i = 0; i < nodes.length; i++) {
+            this.delegate.appendChild(parentElement, nodes[i]);
+        }
+    }
+    /**
+     * @param {?} node
+     * @param {?} viewRootNodes
+     * @return {?}
+     */
+    attachViewAfter(node, viewRootNodes) {
+        /** @type {?} */
+        const parentElement = this.delegate.parentNode(node);
+        /** @type {?} */
+        const nextSibling = this.delegate.nextSibling(node);
+        for (let i = 0; i < viewRootNodes.length; i++) {
+            this.delegate.insertBefore(parentElement, viewRootNodes[i], nextSibling);
+        }
+    }
+    /**
+     * @param {?} viewRootNodes
+     * @return {?}
+     */
+    detachView(viewRootNodes) {
+        for (let i = 0; i < viewRootNodes.length; i++) {
+            /** @type {?} */
+            const node = viewRootNodes[i];
+            /** @type {?} */
+            const parentElement = this.delegate.parentNode(node);
+            this.delegate.removeChild(parentElement, node);
+        }
+    }
+    /**
+     * @param {?} hostElement
+     * @param {?} viewAllNodes
+     * @return {?}
+     */
+    destroyView(hostElement, viewAllNodes) {
+        for (let i = 0; i < viewAllNodes.length; i++) {
+            (/** @type {?} */ (this.delegate.destroyNode))(viewAllNodes[i]);
+        }
+    }
+    /**
+     * @param {?} renderElement
+     * @param {?} name
+     * @param {?} callback
+     * @return {?}
+     */
+    listen(renderElement, name, callback) {
+        return this.delegate.listen(renderElement, name, (/** @type {?} */ (callback)));
+    }
+    /**
+     * @param {?} target
+     * @param {?} name
+     * @param {?} callback
+     * @return {?}
+     */
+    listenGlobal(target, name, callback) {
+        return this.delegate.listen(target, name, (/** @type {?} */ (callback)));
+    }
+    /**
+     * @param {?} renderElement
+     * @param {?} propertyName
+     * @param {?} propertyValue
+     * @return {?}
+     */
+    setElementProperty(renderElement, propertyName, propertyValue) {
+        this.delegate.setProperty(renderElement, propertyName, propertyValue);
+    }
+    /**
+     * @param {?} renderElement
+     * @param {?} namespaceAndName
+     * @param {?=} attributeValue
+     * @return {?}
+     */
+    setElementAttribute(renderElement, namespaceAndName, attributeValue) {
+        const [ns, name] = splitNamespace(namespaceAndName);
+        if (attributeValue != null) {
+            this.delegate.setAttribute(renderElement, name, attributeValue, ns);
+        }
+        else {
+            this.delegate.removeAttribute(renderElement, name, ns);
+        }
+    }
+    /**
+     * @param {?} renderElement
+     * @param {?} propertyName
+     * @param {?} propertyValue
+     * @return {?}
+     */
+    setBindingDebugInfo(renderElement, propertyName, propertyValue) { }
+    /**
+     * @param {?} renderElement
+     * @param {?} className
+     * @param {?} isAdd
+     * @return {?}
+     */
+    setElementClass(renderElement, className, isAdd) {
+        if (isAdd) {
+            this.delegate.addClass(renderElement, className);
+        }
+        else {
+            this.delegate.removeClass(renderElement, className);
+        }
+    }
+    /**
+     * @param {?} renderElement
+     * @param {?} styleName
+     * @param {?=} styleValue
+     * @return {?}
+     */
+    setElementStyle(renderElement, styleName, styleValue) {
+        if (styleValue != null) {
+            this.delegate.setStyle(renderElement, styleName, styleValue);
+        }
+        else {
+            this.delegate.removeStyle(renderElement, styleName);
+        }
+    }
+    /**
+     * @param {?} renderElement
+     * @param {?} methodName
+     * @param {?} args
+     * @return {?}
+     */
+    invokeElementMethod(renderElement, methodName, args) {
+        ((/** @type {?} */ (renderElement)))[methodName].apply(renderElement, args);
+    }
+    /**
+     * @param {?} renderNode
+     * @param {?} text
+     * @return {?}
+     */
+    setText(renderNode$$1, text) { this.delegate.setValue(renderNode$$1, text); }
+    /**
+     * @return {?}
+     */
+    animate() { throw new Error('Renderer.animate is no longer supported!'); }
+}
+/**
+ * @param {?} moduleType
+ * @param {?} parent
+ * @param {?} bootstrapComponents
+ * @param {?} def
+ * @return {?}
+ */
+function createNgModuleRef(moduleType, parent, bootstrapComponents, def) {
+    return new NgModuleRef_(moduleType, parent, bootstrapComponents, def);
+}
+class NgModuleRef_ {
+    /**
+     * @param {?} _moduleType
+     * @param {?} _parent
+     * @param {?} _bootstrapComponents
+     * @param {?} _def
+     */
+    constructor(_moduleType, _parent, _bootstrapComponents, _def) {
+        this._moduleType = _moduleType;
+        this._parent = _parent;
+        this._bootstrapComponents = _bootstrapComponents;
+        this._def = _def;
+        this._destroyListeners = [];
+        this._destroyed = false;
+        this.injector = this;
+        initNgModule(this);
+    }
+    /**
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @param {?=} injectFlags
+     * @return {?}
+     */
+    get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND, injectFlags = InjectFlags.Default) {
+        /** @type {?} */
+        let flags = 0 /* None */;
+        if (injectFlags & InjectFlags.SkipSelf) {
+            flags |= 1 /* SkipSelf */;
+        }
+        else if (injectFlags & InjectFlags.Self) {
+            flags |= 4 /* Self */;
+        }
+        return resolveNgModuleDep(this, { token: token, tokenKey: tokenKey(token), flags: flags }, notFoundValue);
+    }
+    /**
+     * @return {?}
+     */
+    get instance() { return this.get(this._moduleType); }
+    /**
+     * @return {?}
+     */
+    get componentFactoryResolver() { return this.get(ComponentFactoryResolver); }
+    /**
+     * @return {?}
+     */
+    destroy() {
+        if (this._destroyed) {
+            throw new Error(`The ng module ${stringify(this.instance.constructor)} has already been destroyed.`);
+        }
+        this._destroyed = true;
+        callNgModuleLifecycle(this, 131072 /* OnDestroy */);
+        this._destroyListeners.forEach((listener) => listener());
+    }
+    /**
+     * @param {?} callback
+     * @return {?}
+     */
+    onDestroy(callback) { this._destroyListeners.push(callback); }
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/** @type {?} */
+const RendererV1TokenKey = tokenKey(Renderer);
+/** @type {?} */
+const Renderer2TokenKey = tokenKey(Renderer2);
+/** @type {?} */
+const ElementRefTokenKey = tokenKey(ElementRef);
+/** @type {?} */
+const ViewContainerRefTokenKey = tokenKey(ViewContainerRef);
+/** @type {?} */
+const TemplateRefTokenKey = tokenKey(TemplateRef);
+/** @type {?} */
+const ChangeDetectorRefTokenKey = tokenKey(ChangeDetectorRef);
+/** @type {?} */
+const InjectorRefTokenKey$1 = tokenKey(Injector);
+/** @type {?} */
+const INJECTORRefTokenKey$1 = tokenKey(INJECTOR);
+/**
+ * @param {?} checkIndex
+ * @param {?} flags
+ * @param {?} matchedQueries
+ * @param {?} childCount
+ * @param {?} ctor
+ * @param {?} deps
+ * @param {?=} props
+ * @param {?=} outputs
+ * @return {?}
+ */
+function directiveDef(checkIndex, flags, matchedQueries, childCount, ctor, deps, props, outputs) {
+    /** @type {?} */
+    const bindings = [];
+    if (props) {
+        for (let prop in props) {
+            const [bindingIndex, nonMinifiedName] = props[prop];
+            bindings[bindingIndex] = {
+                flags: 8 /* TypeProperty */,
+                name: prop, nonMinifiedName,
+                ns: null,
+                securityContext: null,
+                suffix: null
+            };
+        }
+    }
+    /** @type {?} */
+    const outputDefs = [];
+    if (outputs) {
+        for (let propName in outputs) {
+            outputDefs.push({ type: 1 /* DirectiveOutput */, propName, target: null, eventName: outputs[propName] });
+        }
+    }
+    flags |= 16384 /* TypeDirective */;
+    return _def(checkIndex, flags, matchedQueries, childCount, ctor, ctor, deps, bindings, outputDefs);
+}
+/**
+ * @param {?} flags
+ * @param {?} ctor
+ * @param {?} deps
+ * @return {?}
+ */
+function pipeDef(flags, ctor, deps) {
+    flags |= 16 /* TypePipe */;
+    return _def(-1, flags, null, 0, ctor, ctor, deps);
+}
+/**
+ * @param {?} flags
+ * @param {?} matchedQueries
+ * @param {?} token
+ * @param {?} value
+ * @param {?} deps
+ * @return {?}
+ */
+function providerDef(flags, matchedQueries, token, value, deps) {
+    return _def(-1, flags, matchedQueries, 0, token, value, deps);
+}
+/**
+ * @param {?} checkIndex
+ * @param {?} flags
+ * @param {?} matchedQueriesDsl
+ * @param {?} childCount
+ * @param {?} token
+ * @param {?} value
+ * @param {?} deps
+ * @param {?=} bindings
+ * @param {?=} outputs
+ * @return {?}
+ */
+function _def(checkIndex, flags, matchedQueriesDsl, childCount, token, value, deps, bindings, outputs) {
+    const { matchedQueries, references, matchedQueryIds } = splitMatchedQueriesDsl(matchedQueriesDsl);
+    if (!outputs) {
+        outputs = [];
+    }
+    if (!bindings) {
+        bindings = [];
+    }
+    // Need to resolve forwardRefs as e.g. for `useValue` we
+    // lowered the expression and then stopped evaluating it,
+    // i.e. also didn't unwrap it.
+    value = resolveForwardRef(value);
+    /** @type {?} */
+    const depDefs = splitDepsDsl(deps, stringify(token));
+    return {
+        // will bet set by the view definition
+        nodeIndex: -1,
+        parent: null,
+        renderParent: null,
+        bindingIndex: -1,
+        outputIndex: -1,
+        // regular values
+        checkIndex,
+        flags,
+        childFlags: 0,
+        directChildFlags: 0,
+        childMatchedQueries: 0, matchedQueries, matchedQueryIds, references,
+        ngContentIndex: -1, childCount, bindings,
+        bindingFlags: calcBindingFlags(bindings), outputs,
+        element: null,
+        provider: { token, value, deps: depDefs },
+        text: null,
+        query: null,
+        ngContent: null
+    };
+}
+/**
+ * @param {?} view
+ * @param {?} def
+ * @return {?}
+ */
+function createProviderInstance(view, def) {
+    return _createProviderInstance$1(view, def);
+}
+/**
+ * @param {?} view
+ * @param {?} def
+ * @return {?}
+ */
+function createPipeInstance(view, def) {
+    // deps are looked up from component.
+    /** @type {?} */
+    let compView = view;
+    while (compView.parent && !isComponentView(compView)) {
+        compView = compView.parent;
+    }
+    // pipes can see the private services of the component
+    /** @type {?} */
+    const allowPrivateServices = true;
+    // pipes are always eager and classes!
+    return createClass((/** @type {?} */ (compView.parent)), (/** @type {?} */ (viewParentEl(compView))), allowPrivateServices, (/** @type {?} */ (def.provider)).value, (/** @type {?} */ (def.provider)).deps);
+}
+/**
+ * @param {?} view
+ * @param {?} def
+ * @return {?}
+ */
+function createDirectiveInstance(view, def) {
+    // components can see other private services, other directives can't.
+    /** @type {?} */
+    const allowPrivateServices = (def.flags & 32768 /* Component */) > 0;
+    // directives are always eager and classes!
+    /** @type {?} */
+    const instance = createClass(view, (/** @type {?} */ (def.parent)), allowPrivateServices, (/** @type {?} */ (def.provider)).value, (/** @type {?} */ (def.provider)).deps);
+    if (def.outputs.length) {
+        for (let i = 0; i < def.outputs.length; i++) {
+            /** @type {?} */
+            const output = def.outputs[i];
+            /** @type {?} */
+            const outputObservable = instance[(/** @type {?} */ (output.propName))];
+            if (isObservable(outputObservable)) {
+                /** @type {?} */
+                const subscription = outputObservable.subscribe(eventHandlerClosure(view, (/** @type {?} */ (def.parent)).nodeIndex, output.eventName));
+                (/** @type {?} */ (view.disposables))[def.outputIndex + i] = subscription.unsubscribe.bind(subscription);
+            }
+            else {
+                throw new Error(`@Output ${output.propName} not initialized in '${instance.constructor.name}'.`);
+            }
+        }
+    }
+    return instance;
+}
+/**
+ * @param {?} view
+ * @param {?} index
+ * @param {?} eventName
+ * @return {?}
+ */
+function eventHandlerClosure(view, index, eventName) {
+    return (event) => dispatchEvent(view, index, eventName, event);
+}
+/**
+ * @param {?} view
+ * @param {?} def
+ * @param {?} v0
+ * @param {?} v1
+ * @param {?} v2
+ * @param {?} v3
+ * @param {?} v4
+ * @param {?} v5
+ * @param {?} v6
+ * @param {?} v7
+ * @param {?} v8
+ * @param {?} v9
+ * @return {?}
+ */
+function checkAndUpdateDirectiveInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
+    /** @type {?} */
+    const providerData = asProviderData(view, def.nodeIndex);
+    /** @type {?} */
+    const directive = providerData.instance;
+    /** @type {?} */
+    let changed = false;
+    /** @type {?} */
+    let changes = (/** @type {?} */ (undefined));
+    /** @type {?} */
+    const bindLen = def.bindings.length;
+    if (bindLen > 0 && checkBinding(view, def, 0, v0)) {
+        changed = true;
+        changes = updateProp(view, providerData, def, 0, v0, changes);
+    }
+    if (bindLen > 1 && checkBinding(view, def, 1, v1)) {
+        changed = true;
+        changes = updateProp(view, providerData, def, 1, v1, changes);
+    }
+    if (bindLen > 2 && checkBinding(view, def, 2, v2)) {
+        changed = true;
+        changes = updateProp(view, providerData, def, 2, v2, changes);
+    }
+    if (bindLen > 3 && checkBinding(view, def, 3, v3)) {
+        changed = true;
+        changes = updateProp(view, providerData, def, 3, v3, changes);
+    }
+    if (bindLen > 4 && checkBinding(view, def, 4, v4)) {
+        changed = true;
+        changes = updateProp(view, providerData, def, 4, v4, changes);
+    }
+    if (bindLen > 5 && checkBinding(view, def, 5, v5)) {
+        changed = true;
+        changes = updateProp(view, providerData, def, 5, v5, changes);
+    }
+    if (bindLen > 6 && checkBinding(view, def, 6, v6)) {
+        changed = true;
+        changes = updateProp(view, providerData, def, 6, v6, changes);
+    }
+    if (bindLen > 7 && checkBinding(view, def, 7, v7)) {
+        changed = true;
+        changes = updateProp(view, providerData, def, 7, v7, changes);
+    }
+    if (bindLen > 8 && checkBinding(view, def, 8, v8)) {
+        changed = true;
+        changes = updateProp(view, providerData, def, 8, v8, changes);
+    }
+    if (bindLen > 9 && checkBinding(view, def, 9, v9)) {
+        changed = true;
+        changes = updateProp(view, providerData, def, 9, v9, changes);
+    }
+    if (changes) {
+        directive.ngOnChanges(changes);
+    }
+    if ((def.flags & 65536 /* OnInit */) &&
+        shouldCallLifecycleInitHook(view, 256 /* InitState_CallingOnInit */, def.nodeIndex)) {
+        directive.ngOnInit();
+    }
+    if (def.flags & 262144 /* DoCheck */) {
+        directive.ngDoCheck();
+    }
+    return changed;
+}
+/**
+ * @param {?} view
+ * @param {?} def
+ * @param {?} values
+ * @return {?}
+ */
+function checkAndUpdateDirectiveDynamic(view, def, values) {
+    /** @type {?} */
+    const providerData = asProviderData(view, def.nodeIndex);
+    /** @type {?} */
+    const directive = providerData.instance;
+    /** @type {?} */
+    let changed = false;
+    /** @type {?} */
+    let changes = (/** @type {?} */ (undefined));
+    for (let i = 0; i < values.length; i++) {
+        if (checkBinding(view, def, i, values[i])) {
+            changed = true;
+            changes = updateProp(view, providerData, def, i, values[i], changes);
+        }
+    }
+    if (changes) {
+        directive.ngOnChanges(changes);
+    }
+    if ((def.flags & 65536 /* OnInit */) &&
+        shouldCallLifecycleInitHook(view, 256 /* InitState_CallingOnInit */, def.nodeIndex)) {
+        directive.ngOnInit();
+    }
+    if (def.flags & 262144 /* DoCheck */) {
+        directive.ngDoCheck();
+    }
+    return changed;
+}
+/**
+ * @param {?} view
+ * @param {?} def
+ * @return {?}
+ */
+function _createProviderInstance$1(view, def) {
+    // private services can see other private services
+    /** @type {?} */
+    const allowPrivateServices = (def.flags & 8192 /* PrivateProvider */) > 0;
+    /** @type {?} */
+    const providerDef = def.provider;
+    switch (def.flags & 201347067 /* Types */) {
+        case 512 /* TypeClassProvider */:
+            return createClass(view, (/** @type {?} */ (def.parent)), allowPrivateServices, (/** @type {?} */ (providerDef)).value, (/** @type {?} */ (providerDef)).deps);
+        case 1024 /* TypeFactoryProvider */:
+            return callFactory(view, (/** @type {?} */ (def.parent)), allowPrivateServices, (/** @type {?} */ (providerDef)).value, (/** @type {?} */ (providerDef)).deps);
+        case 2048 /* TypeUseExistingProvider */:
+            return resolveDep(view, (/** @type {?} */ (def.parent)), allowPrivateServices, (/** @type {?} */ (providerDef)).deps[0]);
+        case 256 /* TypeValueProvider */:
+            return (/** @type {?} */ (providerDef)).value;
+    }
+}
+/**
+ * @param {?} view
+ * @param {?} elDef
+ * @param {?} allowPrivateServices
+ * @param {?} ctor
+ * @param {?} deps
+ * @return {?}
+ */
+function createClass(view, elDef, allowPrivateServices, ctor, deps) {
+    /** @type {?} */
+    const len = deps.length;
+    switch (len) {
+        case 0:
+            return new ctor();
+        case 1:
+            return new ctor(resolveDep(view, elDef, allowPrivateServices, deps[0]));
+        case 2:
+            return new ctor(resolveDep(view, elDef, allowPrivateServices, deps[0]), resolveDep(view, elDef, allowPrivateServices, deps[1]));
+        case 3:
+            return new ctor(resolveDep(view, elDef, allowPrivateServices, deps[0]), resolveDep(view, elDef, allowPrivateServices, deps[1]), resolveDep(view, elDef, allowPrivateServices, deps[2]));
+        default:
+            /** @type {?} */
+            const depValues = new Array(len);
+            for (let i = 0; i < len; i++) {
+                depValues[i] = resolveDep(view, elDef, allowPrivateServices, deps[i]);
+            }
+            return new ctor(...depValues);
+    }
+}
+/**
+ * @param {?} view
+ * @param {?} elDef
+ * @param {?} allowPrivateServices
+ * @param {?} factory
+ * @param {?} deps
+ * @return {?}
+ */
+function callFactory(view, elDef, allowPrivateServices, factory, deps) {
+    /** @type {?} */
+    const len = deps.length;
+    switch (len) {
+        case 0:
+            return factory();
+        case 1:
+            return factory(resolveDep(view, elDef, allowPrivateServices, deps[0]));
+        case 2:
+            return factory(resolveDep(view, elDef, allowPrivateServices, deps[0]), resolveDep(view, elDef, allowPrivateServices, deps[1]));
+        case 3:
+            return factory(resolveDep(view, elDef, allowPrivateServices, deps[0]), resolveDep(view, elDef, allowPrivateServices, deps[1]), resolveDep(view, elDef, allowPrivateServices, deps[2]));
+        default:
+            /** @type {?} */
+            const depValues = Array(len);
+            for (let i = 0; i < len; i++) {
+                depValues[i] = resolveDep(view, elDef, allowPrivateServices, deps[i]);
+            }
+            return factory(...depValues);
+    }
+}
+// This default value is when checking the hierarchy for a token.
+//
+// It means both:
+// - the token is not provided by the current injector,
+// - only the element injectors should be checked (ie do not check module injectors
+//
+//          mod1
+//         /
+//       el1   mod2
+//         \  /
+//         el2
+//
+// When requesting el2.injector.get(token), we should check in the following order and return the
+// first found value:
+// - el2.injector.get(token, default)
+// - el1.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) -> do not check the module
+// - mod2.injector.get(token, default)
+/** @type {?} */
+const NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
+/**
+ * @param {?} view
+ * @param {?} elDef
+ * @param {?} allowPrivateServices
+ * @param {?} depDef
+ * @param {?=} notFoundValue
+ * @return {?}
+ */
+function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue = Injector.THROW_IF_NOT_FOUND) {
+    if (depDef.flags & 8 /* Value */) {
+        return depDef.token;
+    }
+    /** @type {?} */
+    const startView = view;
+    if (depDef.flags & 2 /* Optional */) {
+        notFoundValue = null;
+    }
+    /** @type {?} */
+    const tokenKey$$1 = depDef.tokenKey;
+    if (tokenKey$$1 === ChangeDetectorRefTokenKey) {
+        // directives on the same element as a component should be able to control the change detector
+        // of that component as well.
+        allowPrivateServices = !!(elDef && (/** @type {?} */ (elDef.element)).componentView);
+    }
+    if (elDef && (depDef.flags & 1 /* SkipSelf */)) {
+        allowPrivateServices = false;
+        elDef = (/** @type {?} */ (elDef.parent));
+    }
+    /** @type {?} */
+    let searchView = view;
+    while (searchView) {
+        if (elDef) {
+            switch (tokenKey$$1) {
+                case RendererV1TokenKey: {
+                    /** @type {?} */
+                    const compView = findCompView(searchView, elDef, allowPrivateServices);
+                    return createRendererV1(compView);
+                }
+                case Renderer2TokenKey: {
+                    /** @type {?} */
+                    const compView = findCompView(searchView, elDef, allowPrivateServices);
+                    return compView.renderer;
+                }
+                case ElementRefTokenKey:
+                    return new ElementRef(asElementData(searchView, elDef.nodeIndex).renderElement);
+                case ViewContainerRefTokenKey:
+                    return asElementData(searchView, elDef.nodeIndex).viewContainer;
+                case TemplateRefTokenKey: {
+                    if ((/** @type {?} */ (elDef.element)).template) {
+                        return asElementData(searchView, elDef.nodeIndex).template;
+                    }
+                    break;
+                }
+                case ChangeDetectorRefTokenKey: {
+                    /** @type {?} */
+                    let cdView = findCompView(searchView, elDef, allowPrivateServices);
+                    return createChangeDetectorRef(cdView);
+                }
+                case InjectorRefTokenKey$1:
+                case INJECTORRefTokenKey$1:
+                    return createInjector$1(searchView, elDef);
+                default:
+                    /** @type {?} */
+                    const providerDef = (/** @type {?} */ ((allowPrivateServices ? (/** @type {?} */ (elDef.element)).allProviders :
+                        (/** @type {?} */ (elDef.element)).publicProviders)))[tokenKey$$1];
+                    if (providerDef) {
+                        /** @type {?} */
+                        let providerData = asProviderData(searchView, providerDef.nodeIndex);
+                        if (!providerData) {
+                            providerData = { instance: _createProviderInstance$1(searchView, providerDef) };
+                            searchView.nodes[providerDef.nodeIndex] = (/** @type {?} */ (providerData));
+                        }
+                        return providerData.instance;
+                    }
+            }
+        }
+        allowPrivateServices = isComponentView(searchView);
+        elDef = (/** @type {?} */ (viewParentEl(searchView)));
+        searchView = (/** @type {?} */ (searchView.parent));
+        if (depDef.flags & 4 /* Self */) {
+            searchView = null;
+        }
+    }
+    /** @type {?} */
+    const value = startView.root.injector.get(depDef.token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR);
+    if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR ||
+        notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) {
+        // Return the value from the root element injector when
+        // - it provides it
+        //   (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
+        // - the module injector should not be checked
+        //   (notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
+        return value;
+    }
+    return startView.root.ngModule.injector.get(depDef.token, notFoundValue);
+}
+/**
+ * @param {?} view
+ * @param {?} elDef
+ * @param {?} allowPrivateServices
+ * @return {?}
+ */
+function findCompView(view, elDef, allowPrivateServices) {
+    /** @type {?} */
+    let compView;
+    if (allowPrivateServices) {
+        compView = asElementData(view, elDef.nodeIndex).componentView;
+    }
+    else {
+        compView = view;
+        while (compView.parent && !isComponentView(compView)) {
+            compView = compView.parent;
+        }
+    }
+    return compView;
+}
+/**
+ * @param {?} view
+ * @param {?} providerData
+ * @param {?} def
+ * @param {?} bindingIdx
+ * @param {?} value
+ * @param {?} changes
+ * @return {?}
+ */
+function updateProp(view, providerData, def, bindingIdx, value, changes) {
+    if (def.flags & 32768 /* Component */) {
+        /** @type {?} */
+        const compView = asElementData(view, (/** @type {?} */ (def.parent)).nodeIndex).componentView;
+        if (compView.def.flags & 2 /* OnPush */) {
+            compView.state |= 8 /* ChecksEnabled */;
+        }
+    }
+    /** @type {?} */
+    const binding = def.bindings[bindingIdx];
+    /** @type {?} */
+    const propName = (/** @type {?} */ (binding.name));
+    // Note: This is still safe with Closure Compiler as
+    // the user passed in the property name as an object has to `providerDef`,
+    // so Closure Compiler will have renamed the property correctly already.
+    providerData.instance[propName] = value;
+    if (def.flags & 524288 /* OnChanges */) {
+        changes = changes || {};
+        /** @type {?} */
+        const oldValue = WrappedValue.unwrap(view.oldValues[def.bindingIndex + bindingIdx]);
+        /** @type {?} */
+        const binding = def.bindings[bindingIdx];
+        changes[(/** @type {?} */ (binding.nonMinifiedName))] =
+            new SimpleChange(oldValue, value, (view.state & 2 /* FirstCheck */) !== 0);
+    }
+    view.oldValues[def.bindingIndex + bindingIdx] = value;
+    return changes;
+}
+// This function calls the ngAfterContentCheck, ngAfterContentInit,
+// ngAfterViewCheck, and ngAfterViewInit lifecycle hooks (depending on the node
+// flags in lifecycle). Unlike ngDoCheck, ngOnChanges and ngOnInit, which are
+// called during a pre-order traversal of the view tree (that is calling the
+// parent hooks before the child hooks) these events are sent in using a
+// post-order traversal of the tree (children before parents). This changes the
+// meaning of initIndex in the view state. For ngOnInit, initIndex tracks the
+// expected nodeIndex which a ngOnInit should be called. When sending
+// ngAfterContentInit and ngAfterViewInit it is the expected count of
+// ngAfterContentInit or ngAfterViewInit methods that have been called. This
+// ensure that despite being called recursively or after picking up after an
+// exception, the ngAfterContentInit or ngAfterViewInit will be called on the
+// correct nodes. Consider for example, the following (where E is an element
+// and D is a directive)
+//  Tree:       pre-order index  post-order index
+//    E1        0                6
+//      E2      1                1
+//       D3     2                0
+//      E4      3                5
+//       E5     4                4
+//        E6    5                2
+//        E7    6                3
+// As can be seen, the post-order index has an unclear relationship to the
+// pre-order index (postOrderIndex === preOrderIndex - parentCount +
+// childCount). Since number of calls to ngAfterContentInit and ngAfterViewInit
+// are stable (will be the same for the same view regardless of exceptions or
+// recursion) we just need to count them which will roughly correspond to the
+// post-order index (it skips elements and directives that do not have
+// lifecycle hooks).
+//
+// For example, if an exception is raised in the E6.onAfterViewInit() the
+// initIndex is left at 3 (by shouldCallLifecycleInitHook() which set it to
+// initIndex + 1). When checkAndUpdateView() is called again D3, E2 and E6 will
+// not have their ngAfterViewInit() called but, starting with E7, the rest of
+// the view will begin getting ngAfterViewInit() called until a check and
+// pass is complete.
+//
+// This algorthim also handles recursion. Consider if E4's ngAfterViewInit()
+// indirectly calls E1's ChangeDetectorRef.detectChanges(). The expected
+// initIndex is set to 6, the recusive checkAndUpdateView() starts walk again.
+// D3, E2, E6, E7, E5 and E4 are skipped, ngAfterViewInit() is called on E1.
+// When the recursion returns the initIndex will be 7 so E1 is skipped as it
+// has already been called in the recursively called checkAnUpdateView().
+/**
+ * @param {?} view
+ * @param {?} lifecycles
+ * @return {?}
+ */
+function callLifecycleHooksChildrenFirst(view, lifecycles) {
+    if (!(view.def.nodeFlags & lifecycles)) {
+        return;
+    }
+    /** @type {?} */
+    const nodes = view.def.nodes;
+    /** @type {?} */
+    let initIndex = 0;
+    for (let i = 0; i < nodes.length; i++) {
+        /** @type {?} */
+        const nodeDef = nodes[i];
+        /** @type {?} */
+        let parent = nodeDef.parent;
+        if (!parent && nodeDef.flags & lifecycles) {
+            // matching root node (e.g. a pipe)
+            callProviderLifecycles(view, i, nodeDef.flags & lifecycles, initIndex++);
+        }
+        if ((nodeDef.childFlags & lifecycles) === 0) {
+            // no child matches one of the lifecycles
+            i += nodeDef.childCount;
+        }
+        while (parent && (parent.flags & 1 /* TypeElement */) &&
+            i === parent.nodeIndex + parent.childCount) {
+            // last child of an element
+            if (parent.directChildFlags & lifecycles) {
+                initIndex = callElementProvidersLifecycles(view, parent, lifecycles, initIndex);
+            }
+            parent = parent.parent;
+        }
+    }
+}
+/**
+ * @param {?} view
+ * @param {?} elDef
+ * @param {?} lifecycles
+ * @param {?} initIndex
+ * @return {?}
+ */
+function callElementProvidersLifecycles(view, elDef, lifecycles, initIndex) {
+    for (let i = elDef.nodeIndex + 1; i <= elDef.nodeIndex + elDef.childCount; i++) {
+        /** @type {?} */
+        const nodeDef = view.def.nodes[i];
+        if (nodeDef.flags & lifecycles) {
+            callProviderLifecycles(view, i, nodeDef.flags & lifecycles, initIndex++);
+        }
+        // only visit direct children
+        i += nodeDef.childCount;
+    }
+    return initIndex;
+}
+/**
+ * @param {?} view
+ * @param {?} index
+ * @param {?} lifecycles
+ * @param {?} initIndex
+ * @return {?}
+ */
+function callProviderLifecycles(view, index, lifecycles, initIndex) {
+    /** @type {?} */
+    const providerData = asProviderData(view, index);
+    if (!providerData) {
+        return;
+    }
+    /** @type {?} */
+    const provider = providerData.instance;
+    if (!provider) {
+        return;
+    }
+    Services.setCurrentNode(view, index);
+    if (lifecycles & 1048576 /* AfterContentInit */ &&
+        shouldCallLifecycleInitHook(view, 512 /* InitState_CallingAfterContentInit */, initIndex)) {
+        provider.ngAfterContentInit();
+    }
+    if (lifecycles & 2097152 /* AfterContentChecked */) {
+        provider.ngAfterContentChecked();
+    }
+    if (lifecycles & 4194304 /* AfterViewInit */ &&
+        shouldCallLifecycleInitHook(view, 768 /* InitState_CallingAfterViewInit */, initIndex)) {
+        provider.ngAfterViewInit();
+    }
+    if (lifecycles & 8388608 /* AfterViewChecked */) {
+        provider.ngAfterViewChecked();
+    }
+    if (lifecycles & 131072 /* OnDestroy */) {
+        provider.ngOnDestroy();
+    }
+}
 
 /**
  * @fileoverview added by tsickle
@@ -16497,8 +20847,6 @@ const SCHEDULER = new InjectionToken('SCHEDULER_TOKEN', {
     providedIn: 'root',
     factory: () => defaultScheduler,
 });
-/** @type {?} */
-const NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
 /**
  * @param {?} rootViewInjector
  * @param {?} moduleInjector
@@ -18840,7 +23188,7 @@ function getPipeDef$1(name, registry) {
 function pipeBind1(index, slotOffset, v1) {
     /** @type {?} */
     const pipeInstance = load(index);
-    return unwrapValue(isPure(index) ? pureFunction1(slotOffset, pipeInstance.transform, v1, pipeInstance) :
+    return unwrapValue$1(isPure(index) ? pureFunction1(slotOffset, pipeInstance.transform, v1, pipeInstance) :
         pipeInstance.transform(v1));
 }
 /**
@@ -18858,7 +23206,7 @@ function pipeBind1(index, slotOffset, v1) {
 function pipeBind2(index, slotOffset, v1, v2) {
     /** @type {?} */
     const pipeInstance = load(index);
-    return unwrapValue(isPure(index) ? pureFunction2(slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
+    return unwrapValue$1(isPure(index) ? pureFunction2(slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
         pipeInstance.transform(v1, v2));
 }
 /**
@@ -18877,7 +23225,7 @@ function pipeBind2(index, slotOffset, v1, v2) {
 function pipeBind3(index, slotOffset, v1, v2, v3) {
     /** @type {?} */
     const pipeInstance = load(index);
-    return unwrapValue(isPure(index) ? pureFunction3(slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
+    return unwrapValue$1(isPure(index) ? pureFunction3(slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
         pipeInstance.transform(v1, v2, v3));
 }
 /**
@@ -18897,7 +23245,7 @@ function pipeBind3(index, slotOffset, v1, v2, v3) {
 function pipeBind4(index, slotOffset, v1, v2, v3, v4) {
     /** @type {?} */
     const pipeInstance = load(index);
-    return unwrapValue(isPure(index) ?
+    return unwrapValue$1(isPure(index) ?
         pureFunction4(slotOffset, pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
         pipeInstance.transform(v1, v2, v3, v4));
 }
@@ -18915,7 +23263,7 @@ function pipeBind4(index, slotOffset, v1, v2, v3, v4) {
 function pipeBindV(index, slotOffset, values) {
     /** @type {?} */
     const pipeInstance = load(index);
-    return unwrapValue(isPure(index) ? pureFunctionV(slotOffset, pipeInstance.transform, values, pipeInstance) :
+    return unwrapValue$1(isPure(index) ? pureFunctionV(slotOffset, pipeInstance.transform, values, pipeInstance) :
         pipeInstance.transform.apply(pipeInstance, values));
 }
 /**
@@ -18933,7 +23281,7 @@ function isPure(index) {
  * @param {?} newValue the pipe transformation output.
  * @return {?}
  */
-function unwrapValue(newValue) {
+function unwrapValue$1(newValue) {
     if (WrappedValue.isWrapped(newValue)) {
         newValue = WrappedValue.unwrap(newValue);
         /** @type {?} */
@@ -19218,42 +23566,6 @@ function flatten$1(list) {
         return ((/** @type {?} */ (flat))).concat(flatItem);
     }, []);
 }
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Represents an embedded template that can be used to instantiate embedded views.
- * To instantiate embedded views based on a template, use the `ViewContainerRef`
- * method `createEmbeddedView()`.
- *
- * Access a `TemplateRef` instance by placing a directive on an `<ng-template>`
- * element (or directive prefixed with `*`). The `TemplateRef` for the embedded view
- * is injected into the constructor of the directive,
- * using the `TemplateRef` token.
- *
- * You can also use a `Query` to find a `TemplateRef` associated with
- * a component or a directive.
- *
- * @see `ViewContainerRef`
- * @see [Navigate the Component Tree with DI](guide/dependency-injection-navtree)
- *
- * \@publicApi
- * @abstract
- * @template C
- */
-class TemplateRef {
-}
-/**
- * \@internal
- * @nocollapse
- */
-TemplateRef.__NG_ELEMENT_ID__ = () => SWITCH_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef);
-/** @type {?} */
-const SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ = injectTemplateRef;
-/** @type {?} */
-const SWITCH_TEMPLATE_REF_FACTORY = SWITCH_TEMPLATE_REF_FACTORY__POST_R3__;
 
 /**
  * @fileoverview added by tsickle
@@ -19918,7 +24230,7 @@ function noModuleError(id) {
  * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
-const EMPTY_ARRAY$3 = [];
+const EMPTY_ARRAY$4 = [];
 /** @type {?} */
 const moduleQueue = [];
 /**
@@ -19996,7 +24308,7 @@ function compileNgModuleDefs(moduleType, ngModule) {
     ngDevMode && assertDefined(moduleType, 'Required value moduleType');
     ngDevMode && assertDefined(ngModule, 'Required value ngModule');
     /** @type {?} */
-    const declarations = flatten$2(ngModule.declarations || EMPTY_ARRAY$3);
+    const declarations = flatten$2(ngModule.declarations || EMPTY_ARRAY$4);
     /** @type {?} */
     /** @nocollapse */ let ngModuleDef = null;
     Object.defineProperty(moduleType, NG_MODULE_DEF, {
@@ -20005,11 +24317,11 @@ function compileNgModuleDefs(moduleType, ngModule) {
             if (ngModuleDef === null) {
                 ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, `ng://${moduleType.name}/ngModuleDef.js`, {
                     type: moduleType,
-                    bootstrap: flatten$2(ngModule.bootstrap || EMPTY_ARRAY$3, resolveForwardRef),
+                    bootstrap: flatten$2(ngModule.bootstrap || EMPTY_ARRAY$4, resolveForwardRef),
                     declarations: declarations.map(resolveForwardRef),
-                    imports: flatten$2(ngModule.imports || EMPTY_ARRAY$3, resolveForwardRef)
+                    imports: flatten$2(ngModule.imports || EMPTY_ARRAY$4, resolveForwardRef)
                         .map(expandModuleWithProviders),
-                    exports: flatten$2(ngModule.exports || EMPTY_ARRAY$3, resolveForwardRef)
+                    exports: flatten$2(ngModule.exports || EMPTY_ARRAY$4, resolveForwardRef)
                         .map(expandModuleWithProviders),
                     emitInline: true,
                 });
@@ -20031,10 +24343,10 @@ function compileNgModuleDefs(moduleType, ngModule) {
                     name: moduleType.name,
                     type: moduleType,
                     deps: reflectDependencies(moduleType),
-                    providers: ngModule.providers || EMPTY_ARRAY$3,
+                    providers: ngModule.providers || EMPTY_ARRAY$4,
                     imports: [
-                        (ngModule.imports || EMPTY_ARRAY$3).map(resolveForwardRef),
-                        (ngModule.exports || EMPTY_ARRAY$3).map(resolveForwardRef),
+                        (ngModule.imports || EMPTY_ARRAY$4).map(resolveForwardRef),
+                        (ngModule.exports || EMPTY_ARRAY$4).map(resolveForwardRef),
                     ],
                 };
                 ngInjectorDef = getCompilerFacade().compileInjector(angularCoreEnv, `ng://${moduleType.name}/ngInjectorDef.js`, meta);
@@ -20260,7 +24572,7 @@ function computeCombinedExports(type) {
  */
 function setScopeOnDeclaredComponents(moduleType, ngModule) {
     /** @type {?} */
-    const declarations = flatten$2(ngModule.declarations || EMPTY_ARRAY$3);
+    const declarations = flatten$2(ngModule.declarations || EMPTY_ARRAY$4);
     /** @type {?} */
     const transitiveScopes = transitiveScopesFor(moduleType);
     declarations.forEach(declaration => {
@@ -21054,40 +25366,6 @@ Console.decorators = [
 /*@__PURE__*/ setClassMetadata(Console, [{
         type: Injectable
     }], null, null);
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * @param {?} error
- * @return {?}
- */
-function getDebugContext(error) {
-    return ((/** @type {?} */ (error)))[ERROR_DEBUG_CONTEXT];
-}
-/**
- * @param {?} error
- * @return {?}
- */
-function getOriginalError(error) {
-    return ((/** @type {?} */ (error)))[ERROR_ORIGINAL_ERROR];
-}
-/**
- * @param {?} error
- * @return {?}
- */
-function getErrorLogger(error) {
-    return ((/** @type {?} */ (error)))[ERROR_LOGGER] || defaultErrorLogger;
-}
-/**
- * @param {?} console
- * @param {...?} values
- * @return {?}
- */
-function defaultErrorLogger(console, ...values) {
-    ((/** @type {?} */ (console.error)))(...values);
-}
 
 /**
  * @fileoverview added by tsickle
@@ -22895,97 +27173,6 @@ function checkNotEmpty(value, modulePath, exportName) {
  * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
- * Represents a container where one or more views can be attached to a component.
- *
- * Can contain *host views* (created by instantiating a
- * component with the `createComponent()` method), and *embedded views*
- * (created by instantiating a `TemplateRef` with the `createEmbeddedView()` method).
- *
- * A view container instance can contain other view containers,
- * creating a [view hierarchy](guide/glossary#view-tree).
- *
- * @see `ComponentRef`
- * @see `EmbeddedViewRef`
- *
- * \@publicApi
- * @abstract
- */
-class ViewContainerRef {
-}
-/**
- * \@internal
- * @nocollapse
- */
-ViewContainerRef.__NG_ELEMENT_ID__ = () => SWITCH_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef);
-/** @type {?} */
-const SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ = injectViewContainerRef;
-/** @type {?} */
-const SWITCH_VIEW_CONTAINER_REF_FACTORY = SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__;
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Base class for Angular Views, provides change detection functionality.
- * A change-detection tree collects all views that are to be checked for changes.
- * Use the methods to add and remove views from the tree, initiate change-detection,
- * and explicitly mark views as _dirty_, meaning that they have changed and need to be rerendered.
- *
- * \@usageNotes
- *
- * The following examples demonstrate how to modify default change-detection behavior
- * to perform explicit detection when needed.
- *
- * ### Use `markForCheck()` with `CheckOnce` strategy
- *
- * The following example sets the `OnPush` change-detection strategy for a component
- * (`CheckOnce`, rather than the default `CheckAlways`), then forces a second check
- * after an interval. See [live demo](http://plnkr.co/edit/GC512b?p=preview).
- *
- * <code-example path="core/ts/change_detect/change-detection.ts"
- * region="mark-for-check"></code-example>
- *
- * ### Detach change detector to limit how often check occurs
- *
- * The following example defines a component with a large list of read-only data
- * that is expected to change constantly, many times per second.
- * To improve performance, we want to check and update the list
- * less often than the changes actually occur. To do that, we detach
- * the component's change detector and perform an explicit local check every five seconds.
- *
- * <code-example path="core/ts/change_detect/change-detection.ts" region="detach"></code-example>
- *
- *
- * ### Reattaching a detached component
- *
- * The following example creates a component displaying live data.
- * The component detaches its change detector from the main change detector tree
- * when the `live` property is set to false, and reattaches it when the property
- * becomes true.
- *
- * <code-example path="core/ts/change_detect/change-detection.ts" region="reattach"></code-example>
- *
- * \@publicApi
- * @abstract
- */
-class ChangeDetectorRef {
-}
-/**
- * \@internal
- * @nocollapse
- */
-ChangeDetectorRef.__NG_ELEMENT_ID__ = () => SWITCH_CHANGE_DETECTOR_REF_FACTORY();
-/** @type {?} */
-const SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ = injectChangeDetectorRef;
-/** @type {?} */
-const SWITCH_CHANGE_DETECTOR_REF_FACTORY = SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__;
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
  * Represents an Angular [view](guide/glossary#view),
  * specifically the [host view](guide/glossary#view-tree) that is defined by a component.
  * Also serves as the base class
@@ -23606,1455 +27793,6 @@ const DebugElement = (/** @type {?} */ (DebugElement__PRE_R3__));
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
-class DefaultIterableDifferFactory {
-    constructor() { }
-    /**
-     * @param {?} obj
-     * @return {?}
-     */
-    supports(obj) { return isListLikeIterable$1(obj); }
-    /**
-     * @template V
-     * @param {?=} trackByFn
-     * @return {?}
-     */
-    create(trackByFn) {
-        return new DefaultIterableDiffer(trackByFn);
-    }
-}
-/** @type {?} */
-const trackByIdentity = (index, item) => item;
-/**
- * @deprecated v4.0.0 - Should not be part of public API.
- * \@publicApi
- * @template V
- */
-class DefaultIterableDiffer {
-    /**
-     * @param {?=} trackByFn
-     */
-    constructor(trackByFn) {
-        this.length = 0;
-        // Keeps track of the used records at any point in time (during & across `_check()` calls)
-        this._linkedRecords = null;
-        // Keeps track of the removed records at any point in time during `_check()` calls.
-        this._unlinkedRecords = null;
-        this._previousItHead = null;
-        this._itHead = null;
-        this._itTail = null;
-        this._additionsHead = null;
-        this._additionsTail = null;
-        this._movesHead = null;
-        this._movesTail = null;
-        this._removalsHead = null;
-        this._removalsTail = null;
-        // Keeps track of records where custom track by is the same, but item identity has changed
-        this._identityChangesHead = null;
-        this._identityChangesTail = null;
-        this._trackByFn = trackByFn || trackByIdentity;
-    }
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    forEachItem(fn) {
-        /** @type {?} */
-        let record;
-        for (record = this._itHead; record !== null; record = record._next) {
-            fn(record);
-        }
-    }
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    forEachOperation(fn) {
-        /** @type {?} */
-        let nextIt = this._itHead;
-        /** @type {?} */
-        let nextRemove = this._removalsHead;
-        /** @type {?} */
-        let addRemoveOffset = 0;
-        /** @type {?} */
-        let moveOffsets = null;
-        while (nextIt || nextRemove) {
-            // Figure out which is the next record to process
-            // Order: remove, add, move
-            /** @type {?} */
-            const record = !nextRemove ||
-                nextIt &&
-                    (/** @type {?} */ (nextIt.currentIndex)) <
-                        getPreviousIndex(nextRemove, addRemoveOffset, moveOffsets) ?
-                (/** @type {?} */ (nextIt)) :
-                nextRemove;
-            /** @type {?} */
-            const adjPreviousIndex = getPreviousIndex(record, addRemoveOffset, moveOffsets);
-            /** @type {?} */
-            const currentIndex = record.currentIndex;
-            // consume the item, and adjust the addRemoveOffset and update moveDistance if necessary
-            if (record === nextRemove) {
-                addRemoveOffset--;
-                nextRemove = nextRemove._nextRemoved;
-            }
-            else {
-                nextIt = (/** @type {?} */ (nextIt))._next;
-                if (record.previousIndex == null) {
-                    addRemoveOffset++;
-                }
-                else {
-                    // INVARIANT:  currentIndex < previousIndex
-                    if (!moveOffsets)
-                        moveOffsets = [];
-                    /** @type {?} */
-                    const localMovePreviousIndex = adjPreviousIndex - addRemoveOffset;
-                    /** @type {?} */
-                    const localCurrentIndex = (/** @type {?} */ (currentIndex)) - addRemoveOffset;
-                    if (localMovePreviousIndex != localCurrentIndex) {
-                        for (let i = 0; i < localMovePreviousIndex; i++) {
-                            /** @type {?} */
-                            const offset = i < moveOffsets.length ? moveOffsets[i] : (moveOffsets[i] = 0);
-                            /** @type {?} */
-                            const index = offset + i;
-                            if (localCurrentIndex <= index && index < localMovePreviousIndex) {
-                                moveOffsets[i] = offset + 1;
-                            }
-                        }
-                        /** @type {?} */
-                        const previousIndex = record.previousIndex;
-                        moveOffsets[previousIndex] = localCurrentIndex - localMovePreviousIndex;
-                    }
-                }
-            }
-            if (adjPreviousIndex !== currentIndex) {
-                fn(record, adjPreviousIndex, currentIndex);
-            }
-        }
-    }
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    forEachPreviousItem(fn) {
-        /** @type {?} */
-        let record;
-        for (record = this._previousItHead; record !== null; record = record._nextPrevious) {
-            fn(record);
-        }
-    }
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    forEachAddedItem(fn) {
-        /** @type {?} */
-        let record;
-        for (record = this._additionsHead; record !== null; record = record._nextAdded) {
-            fn(record);
-        }
-    }
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    forEachMovedItem(fn) {
-        /** @type {?} */
-        let record;
-        for (record = this._movesHead; record !== null; record = record._nextMoved) {
-            fn(record);
-        }
-    }
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    forEachRemovedItem(fn) {
-        /** @type {?} */
-        let record;
-        for (record = this._removalsHead; record !== null; record = record._nextRemoved) {
-            fn(record);
-        }
-    }
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    forEachIdentityChange(fn) {
-        /** @type {?} */
-        let record;
-        for (record = this._identityChangesHead; record !== null; record = record._nextIdentityChange) {
-            fn(record);
-        }
-    }
-    /**
-     * @param {?} collection
-     * @return {?}
-     */
-    diff(collection) {
-        if (collection == null)
-            collection = [];
-        if (!isListLikeIterable$1(collection)) {
-            throw new Error(`Error trying to diff '${stringify(collection)}'. Only arrays and iterables are allowed`);
-        }
-        if (this.check(collection)) {
-            return this;
-        }
-        else {
-            return null;
-        }
-    }
-    /**
-     * @return {?}
-     */
-    onDestroy() { }
-    /**
-     * @param {?} collection
-     * @return {?}
-     */
-    check(collection) {
-        this._reset();
-        /** @type {?} */
-        let record = this._itHead;
-        /** @type {?} */
-        let mayBeDirty = false;
-        /** @type {?} */
-        let index;
-        /** @type {?} */
-        let item;
-        /** @type {?} */
-        let itemTrackBy;
-        if (Array.isArray(collection)) {
-            ((/** @type {?} */ (this))).length = collection.length;
-            for (let index = 0; index < this.length; index++) {
-                item = collection[index];
-                itemTrackBy = this._trackByFn(index, item);
-                if (record === null || !looseIdentical(record.trackById, itemTrackBy)) {
-                    record = this._mismatch(record, item, itemTrackBy, index);
-                    mayBeDirty = true;
-                }
-                else {
-                    if (mayBeDirty) {
-                        // TODO(misko): can we limit this to duplicates only?
-                        record = this._verifyReinsertion(record, item, itemTrackBy, index);
-                    }
-                    if (!looseIdentical(record.item, item))
-                        this._addIdentityChange(record, item);
-                }
-                record = record._next;
-            }
-        }
-        else {
-            index = 0;
-            iterateListLike$1(collection, (item) => {
-                itemTrackBy = this._trackByFn(index, item);
-                if (record === null || !looseIdentical(record.trackById, itemTrackBy)) {
-                    record = this._mismatch(record, item, itemTrackBy, index);
-                    mayBeDirty = true;
-                }
-                else {
-                    if (mayBeDirty) {
-                        // TODO(misko): can we limit this to duplicates only?
-                        record = this._verifyReinsertion(record, item, itemTrackBy, index);
-                    }
-                    if (!looseIdentical(record.item, item))
-                        this._addIdentityChange(record, item);
-                }
-                record = record._next;
-                index++;
-            });
-            ((/** @type {?} */ (this))).length = index;
-        }
-        this._truncate(record);
-        ((/** @type {?} */ (this))).collection = collection;
-        return this.isDirty;
-    }
-    /* CollectionChanges is considered dirty if it has any additions, moves, removals, or identity
-       * changes.
-       */
-    /**
-     * @return {?}
-     */
-    get isDirty() {
-        return this._additionsHead !== null || this._movesHead !== null ||
-            this._removalsHead !== null || this._identityChangesHead !== null;
-    }
-    /**
-     * Reset the state of the change objects to show no changes. This means set previousKey to
-     * currentKey, and clear all of the queues (additions, moves, removals).
-     * Set the previousIndexes of moved and added items to their currentIndexes
-     * Reset the list of additions, moves and removals
-     *
-     * \@internal
-     * @return {?}
-     */
-    _reset() {
-        if (this.isDirty) {
-            /** @type {?} */
-            let record;
-            /** @type {?} */
-            let nextRecord;
-            for (record = this._previousItHead = this._itHead; record !== null; record = record._next) {
-                record._nextPrevious = record._next;
-            }
-            for (record = this._additionsHead; record !== null; record = record._nextAdded) {
-                record.previousIndex = record.currentIndex;
-            }
-            this._additionsHead = this._additionsTail = null;
-            for (record = this._movesHead; record !== null; record = nextRecord) {
-                record.previousIndex = record.currentIndex;
-                nextRecord = record._nextMoved;
-            }
-            this._movesHead = this._movesTail = null;
-            this._removalsHead = this._removalsTail = null;
-            this._identityChangesHead = this._identityChangesTail = null;
-            // TODO(vicb): when assert gets supported
-            // assert(!this.isDirty);
-        }
-    }
-    /**
-     * This is the core function which handles differences between collections.
-     *
-     * - `record` is the record which we saw at this position last time. If null then it is a new
-     *   item.
-     * - `item` is the current item in the collection
-     * - `index` is the position of the item in the collection
-     *
-     * \@internal
-     * @param {?} record
-     * @param {?} item
-     * @param {?} itemTrackBy
-     * @param {?} index
-     * @return {?}
-     */
-    _mismatch(record, item, itemTrackBy, index) {
-        // The previous record after which we will append the current one.
-        /** @type {?} */
-        let previousRecord;
-        if (record === null) {
-            previousRecord = this._itTail;
-        }
-        else {
-            previousRecord = record._prev;
-            // Remove the record from the collection since we know it does not match the item.
-            this._remove(record);
-        }
-        // Attempt to see if we have seen the item before.
-        record = this._linkedRecords === null ? null : this._linkedRecords.get(itemTrackBy, index);
-        if (record !== null) {
-            // We have seen this before, we need to move it forward in the collection.
-            // But first we need to check if identity changed, so we can update in view if necessary
-            if (!looseIdentical(record.item, item))
-                this._addIdentityChange(record, item);
-            this._moveAfter(record, previousRecord, index);
-        }
-        else {
-            // Never seen it, check evicted list.
-            record = this._unlinkedRecords === null ? null : this._unlinkedRecords.get(itemTrackBy, null);
-            if (record !== null) {
-                // It is an item which we have evicted earlier: reinsert it back into the list.
-                // But first we need to check if identity changed, so we can update in view if necessary
-                if (!looseIdentical(record.item, item))
-                    this._addIdentityChange(record, item);
-                this._reinsertAfter(record, previousRecord, index);
-            }
-            else {
-                // It is a new item: add it.
-                record =
-                    this._addAfter(new IterableChangeRecord_(item, itemTrackBy), previousRecord, index);
-            }
-        }
-        return record;
-    }
-    /**
-     * This check is only needed if an array contains duplicates. (Short circuit of nothing dirty)
-     *
-     * Use case: `[a, a]` => `[b, a, a]`
-     *
-     * If we did not have this check then the insertion of `b` would:
-     *   1) evict first `a`
-     *   2) insert `b` at `0` index.
-     *   3) leave `a` at index `1` as is. <-- this is wrong!
-     *   3) reinsert `a` at index 2. <-- this is wrong!
-     *
-     * The correct behavior is:
-     *   1) evict first `a`
-     *   2) insert `b` at `0` index.
-     *   3) reinsert `a` at index 1.
-     *   3) move `a` at from `1` to `2`.
-     *
-     *
-     * Double check that we have not evicted a duplicate item. We need to check if the item type may
-     * have already been removed:
-     * The insertion of b will evict the first 'a'. If we don't reinsert it now it will be reinserted
-     * at the end. Which will show up as the two 'a's switching position. This is incorrect, since a
-     * better way to think of it is as insert of 'b' rather then switch 'a' with 'b' and then add 'a'
-     * at the end.
-     *
-     * \@internal
-     * @param {?} record
-     * @param {?} item
-     * @param {?} itemTrackBy
-     * @param {?} index
-     * @return {?}
-     */
-    _verifyReinsertion(record, item, itemTrackBy, index) {
-        /** @type {?} */
-        let reinsertRecord = this._unlinkedRecords === null ? null : this._unlinkedRecords.get(itemTrackBy, null);
-        if (reinsertRecord !== null) {
-            record = this._reinsertAfter(reinsertRecord, (/** @type {?} */ (record._prev)), index);
-        }
-        else if (record.currentIndex != index) {
-            record.currentIndex = index;
-            this._addToMoves(record, index);
-        }
-        return record;
-    }
-    /**
-     * Get rid of any excess {\@link IterableChangeRecord_}s from the previous collection
-     *
-     * - `record` The first excess {\@link IterableChangeRecord_}.
-     *
-     * \@internal
-     * @param {?} record
-     * @return {?}
-     */
-    _truncate(record) {
-        // Anything after that needs to be removed;
-        while (record !== null) {
-            /** @type {?} */
-            const nextRecord = record._next;
-            this._addToRemovals(this._unlink(record));
-            record = nextRecord;
-        }
-        if (this._unlinkedRecords !== null) {
-            this._unlinkedRecords.clear();
-        }
-        if (this._additionsTail !== null) {
-            this._additionsTail._nextAdded = null;
-        }
-        if (this._movesTail !== null) {
-            this._movesTail._nextMoved = null;
-        }
-        if (this._itTail !== null) {
-            this._itTail._next = null;
-        }
-        if (this._removalsTail !== null) {
-            this._removalsTail._nextRemoved = null;
-        }
-        if (this._identityChangesTail !== null) {
-            this._identityChangesTail._nextIdentityChange = null;
-        }
-    }
-    /**
-     * \@internal
-     * @param {?} record
-     * @param {?} prevRecord
-     * @param {?} index
-     * @return {?}
-     */
-    _reinsertAfter(record, prevRecord, index) {
-        if (this._unlinkedRecords !== null) {
-            this._unlinkedRecords.remove(record);
-        }
-        /** @type {?} */
-        const prev = record._prevRemoved;
-        /** @type {?} */
-        const next = record._nextRemoved;
-        if (prev === null) {
-            this._removalsHead = next;
-        }
-        else {
-            prev._nextRemoved = next;
-        }
-        if (next === null) {
-            this._removalsTail = prev;
-        }
-        else {
-            next._prevRemoved = prev;
-        }
-        this._insertAfter(record, prevRecord, index);
-        this._addToMoves(record, index);
-        return record;
-    }
-    /**
-     * \@internal
-     * @param {?} record
-     * @param {?} prevRecord
-     * @param {?} index
-     * @return {?}
-     */
-    _moveAfter(record, prevRecord, index) {
-        this._unlink(record);
-        this._insertAfter(record, prevRecord, index);
-        this._addToMoves(record, index);
-        return record;
-    }
-    /**
-     * \@internal
-     * @param {?} record
-     * @param {?} prevRecord
-     * @param {?} index
-     * @return {?}
-     */
-    _addAfter(record, prevRecord, index) {
-        this._insertAfter(record, prevRecord, index);
-        if (this._additionsTail === null) {
-            // TODO(vicb):
-            // assert(this._additionsHead === null);
-            this._additionsTail = this._additionsHead = record;
-        }
-        else {
-            // TODO(vicb):
-            // assert(_additionsTail._nextAdded === null);
-            // assert(record._nextAdded === null);
-            this._additionsTail = this._additionsTail._nextAdded = record;
-        }
-        return record;
-    }
-    /**
-     * \@internal
-     * @param {?} record
-     * @param {?} prevRecord
-     * @param {?} index
-     * @return {?}
-     */
-    _insertAfter(record, prevRecord, index) {
-        // TODO(vicb):
-        // assert(record != prevRecord);
-        // assert(record._next === null);
-        // assert(record._prev === null);
-        // TODO(vicb):
-        // assert(record != prevRecord);
-        // assert(record._next === null);
-        // assert(record._prev === null);
-        /** @type {?} */
-        const next = prevRecord === null ? this._itHead : prevRecord._next;
-        // TODO(vicb):
-        // assert(next != record);
-        // assert(prevRecord != record);
-        record._next = next;
-        record._prev = prevRecord;
-        if (next === null) {
-            this._itTail = record;
-        }
-        else {
-            next._prev = record;
-        }
-        if (prevRecord === null) {
-            this._itHead = record;
-        }
-        else {
-            prevRecord._next = record;
-        }
-        if (this._linkedRecords === null) {
-            this._linkedRecords = new _DuplicateMap();
-        }
-        this._linkedRecords.put(record);
-        record.currentIndex = index;
-        return record;
-    }
-    /**
-     * \@internal
-     * @param {?} record
-     * @return {?}
-     */
-    _remove(record) {
-        return this._addToRemovals(this._unlink(record));
-    }
-    /**
-     * \@internal
-     * @param {?} record
-     * @return {?}
-     */
-    _unlink(record) {
-        if (this._linkedRecords !== null) {
-            this._linkedRecords.remove(record);
-        }
-        /** @type {?} */
-        const prev = record._prev;
-        /** @type {?} */
-        const next = record._next;
-        // TODO(vicb):
-        // assert((record._prev = null) === null);
-        // assert((record._next = null) === null);
-        if (prev === null) {
-            this._itHead = next;
-        }
-        else {
-            prev._next = next;
-        }
-        if (next === null) {
-            this._itTail = prev;
-        }
-        else {
-            next._prev = prev;
-        }
-        return record;
-    }
-    /**
-     * \@internal
-     * @param {?} record
-     * @param {?} toIndex
-     * @return {?}
-     */
-    _addToMoves(record, toIndex) {
-        // TODO(vicb):
-        // assert(record._nextMoved === null);
-        if (record.previousIndex === toIndex) {
-            return record;
-        }
-        if (this._movesTail === null) {
-            // TODO(vicb):
-            // assert(_movesHead === null);
-            this._movesTail = this._movesHead = record;
-        }
-        else {
-            // TODO(vicb):
-            // assert(_movesTail._nextMoved === null);
-            this._movesTail = this._movesTail._nextMoved = record;
-        }
-        return record;
-    }
-    /**
-     * @private
-     * @param {?} record
-     * @return {?}
-     */
-    _addToRemovals(record) {
-        if (this._unlinkedRecords === null) {
-            this._unlinkedRecords = new _DuplicateMap();
-        }
-        this._unlinkedRecords.put(record);
-        record.currentIndex = null;
-        record._nextRemoved = null;
-        if (this._removalsTail === null) {
-            // TODO(vicb):
-            // assert(_removalsHead === null);
-            this._removalsTail = this._removalsHead = record;
-            record._prevRemoved = null;
-        }
-        else {
-            // TODO(vicb):
-            // assert(_removalsTail._nextRemoved === null);
-            // assert(record._nextRemoved === null);
-            record._prevRemoved = this._removalsTail;
-            this._removalsTail = this._removalsTail._nextRemoved = record;
-        }
-        return record;
-    }
-    /**
-     * \@internal
-     * @param {?} record
-     * @param {?} item
-     * @return {?}
-     */
-    _addIdentityChange(record, item) {
-        record.item = item;
-        if (this._identityChangesTail === null) {
-            this._identityChangesTail = this._identityChangesHead = record;
-        }
-        else {
-            this._identityChangesTail = this._identityChangesTail._nextIdentityChange = record;
-        }
-        return record;
-    }
-}
-/**
- * @template V
- */
-class IterableChangeRecord_ {
-    /**
-     * @param {?} item
-     * @param {?} trackById
-     */
-    constructor(item, trackById) {
-        this.item = item;
-        this.trackById = trackById;
-        this.currentIndex = null;
-        this.previousIndex = null;
-        /**
-         * \@internal
-         */
-        this._nextPrevious = null;
-        /**
-         * \@internal
-         */
-        this._prev = null;
-        /**
-         * \@internal
-         */
-        this._next = null;
-        /**
-         * \@internal
-         */
-        this._prevDup = null;
-        /**
-         * \@internal
-         */
-        this._nextDup = null;
-        /**
-         * \@internal
-         */
-        this._prevRemoved = null;
-        /**
-         * \@internal
-         */
-        this._nextRemoved = null;
-        /**
-         * \@internal
-         */
-        this._nextAdded = null;
-        /**
-         * \@internal
-         */
-        this._nextMoved = null;
-        /**
-         * \@internal
-         */
-        this._nextIdentityChange = null;
-    }
-}
-// A linked list of CollectionChangeRecords with the same IterableChangeRecord_.item
-/**
- * @template V
- */
-class _DuplicateItemRecordList {
-    constructor() {
-        /**
-         * \@internal
-         */
-        this._head = null;
-        /**
-         * \@internal
-         */
-        this._tail = null;
-    }
-    /**
-     * Append the record to the list of duplicates.
-     *
-     * Note: by design all records in the list of duplicates hold the same value in record.item.
-     * @param {?} record
-     * @return {?}
-     */
-    add(record) {
-        if (this._head === null) {
-            this._head = this._tail = record;
-            record._nextDup = null;
-            record._prevDup = null;
-        }
-        else {
-            // TODO(vicb):
-            // assert(record.item ==  _head.item ||
-            //       record.item is num && record.item.isNaN && _head.item is num && _head.item.isNaN);
-            (/** @type {?} */ (this._tail))._nextDup = record;
-            record._prevDup = this._tail;
-            record._nextDup = null;
-            this._tail = record;
-        }
-    }
-    // Returns a IterableChangeRecord_ having IterableChangeRecord_.trackById == trackById and
-    // IterableChangeRecord_.currentIndex >= atOrAfterIndex
-    /**
-     * @param {?} trackById
-     * @param {?} atOrAfterIndex
-     * @return {?}
-     */
-    get(trackById, atOrAfterIndex) {
-        /** @type {?} */
-        let record;
-        for (record = this._head; record !== null; record = record._nextDup) {
-            if ((atOrAfterIndex === null || atOrAfterIndex <= (/** @type {?} */ (record.currentIndex))) &&
-                looseIdentical(record.trackById, trackById)) {
-                return record;
-            }
-        }
-        return null;
-    }
-    /**
-     * Remove one {\@link IterableChangeRecord_} from the list of duplicates.
-     *
-     * Returns whether the list of duplicates is empty.
-     * @param {?} record
-     * @return {?}
-     */
-    remove(record) {
-        // TODO(vicb):
-        // assert(() {
-        //  // verify that the record being removed is in the list.
-        //  for (IterableChangeRecord_ cursor = _head; cursor != null; cursor = cursor._nextDup) {
-        //    if (identical(cursor, record)) return true;
-        //  }
-        //  return false;
-        //});
-        // TODO(vicb):
-        // assert(() {
-        //  // verify that the record being removed is in the list.
-        //  for (IterableChangeRecord_ cursor = _head; cursor != null; cursor = cursor._nextDup) {
-        //    if (identical(cursor, record)) return true;
-        //  }
-        //  return false;
-        //});
-        /** @type {?} */
-        const prev = record._prevDup;
-        /** @type {?} */
-        const next = record._nextDup;
-        if (prev === null) {
-            this._head = next;
-        }
-        else {
-            prev._nextDup = next;
-        }
-        if (next === null) {
-            this._tail = prev;
-        }
-        else {
-            next._prevDup = prev;
-        }
-        return this._head === null;
-    }
-}
-/**
- * @template V
- */
-class _DuplicateMap {
-    constructor() {
-        this.map = new Map();
-    }
-    /**
-     * @param {?} record
-     * @return {?}
-     */
-    put(record) {
-        /** @type {?} */
-        const key = record.trackById;
-        /** @type {?} */
-        let duplicates = this.map.get(key);
-        if (!duplicates) {
-            duplicates = new _DuplicateItemRecordList();
-            this.map.set(key, duplicates);
-        }
-        duplicates.add(record);
-    }
-    /**
-     * Retrieve the `value` using key. Because the IterableChangeRecord_ value may be one which we
-     * have already iterated over, we use the `atOrAfterIndex` to pretend it is not there.
-     *
-     * Use case: `[a, b, c, a, a]` if we are at index `3` which is the second `a` then asking if we
-     * have any more `a`s needs to return the second `a`.
-     * @param {?} trackById
-     * @param {?} atOrAfterIndex
-     * @return {?}
-     */
-    get(trackById, atOrAfterIndex) {
-        /** @type {?} */
-        const key = trackById;
-        /** @type {?} */
-        const recordList = this.map.get(key);
-        return recordList ? recordList.get(trackById, atOrAfterIndex) : null;
-    }
-    /**
-     * Removes a {\@link IterableChangeRecord_} from the list of duplicates.
-     *
-     * The list of duplicates also is removed from the map if it gets empty.
-     * @param {?} record
-     * @return {?}
-     */
-    remove(record) {
-        /** @type {?} */
-        const key = record.trackById;
-        /** @type {?} */
-        const recordList = (/** @type {?} */ (this.map.get(key)));
-        // Remove the list of duplicates when it gets empty
-        if (recordList.remove(record)) {
-            this.map.delete(key);
-        }
-        return record;
-    }
-    /**
-     * @return {?}
-     */
-    get isEmpty() { return this.map.size === 0; }
-    /**
-     * @return {?}
-     */
-    clear() { this.map.clear(); }
-}
-/**
- * @param {?} item
- * @param {?} addRemoveOffset
- * @param {?} moveOffsets
- * @return {?}
- */
-function getPreviousIndex(item, addRemoveOffset, moveOffsets) {
-    /** @type {?} */
-    const previousIndex = item.previousIndex;
-    if (previousIndex === null)
-        return previousIndex;
-    /** @type {?} */
-    let moveOffset = 0;
-    if (moveOffsets && previousIndex < moveOffsets.length) {
-        moveOffset = moveOffsets[previousIndex];
-    }
-    return previousIndex + addRemoveOffset + moveOffset;
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * @template K, V
- */
-class DefaultKeyValueDifferFactory {
-    constructor() { }
-    /**
-     * @param {?} obj
-     * @return {?}
-     */
-    supports(obj) { return obj instanceof Map || isJsObject$1(obj); }
-    /**
-     * @template K, V
-     * @return {?}
-     */
-    create() { return new DefaultKeyValueDiffer(); }
-}
-/**
- * @template K, V
- */
-class DefaultKeyValueDiffer {
-    constructor() {
-        this._records = new Map();
-        this._mapHead = null;
-        // _appendAfter is used in the check loop
-        this._appendAfter = null;
-        this._previousMapHead = null;
-        this._changesHead = null;
-        this._changesTail = null;
-        this._additionsHead = null;
-        this._additionsTail = null;
-        this._removalsHead = null;
-        this._removalsTail = null;
-    }
-    /**
-     * @return {?}
-     */
-    get isDirty() {
-        return this._additionsHead !== null || this._changesHead !== null ||
-            this._removalsHead !== null;
-    }
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    forEachItem(fn) {
-        /** @type {?} */
-        let record;
-        for (record = this._mapHead; record !== null; record = record._next) {
-            fn(record);
-        }
-    }
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    forEachPreviousItem(fn) {
-        /** @type {?} */
-        let record;
-        for (record = this._previousMapHead; record !== null; record = record._nextPrevious) {
-            fn(record);
-        }
-    }
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    forEachChangedItem(fn) {
-        /** @type {?} */
-        let record;
-        for (record = this._changesHead; record !== null; record = record._nextChanged) {
-            fn(record);
-        }
-    }
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    forEachAddedItem(fn) {
-        /** @type {?} */
-        let record;
-        for (record = this._additionsHead; record !== null; record = record._nextAdded) {
-            fn(record);
-        }
-    }
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    forEachRemovedItem(fn) {
-        /** @type {?} */
-        let record;
-        for (record = this._removalsHead; record !== null; record = record._nextRemoved) {
-            fn(record);
-        }
-    }
-    /**
-     * @param {?=} map
-     * @return {?}
-     */
-    diff(map) {
-        if (!map) {
-            map = new Map();
-        }
-        else if (!(map instanceof Map || isJsObject$1(map))) {
-            throw new Error(`Error trying to diff '${stringify(map)}'. Only maps and objects are allowed`);
-        }
-        return this.check(map) ? this : null;
-    }
-    /**
-     * @return {?}
-     */
-    onDestroy() { }
-    /**
-     * Check the current state of the map vs the previous.
-     * The algorithm is optimised for when the keys do no change.
-     * @param {?} map
-     * @return {?}
-     */
-    check(map) {
-        this._reset();
-        /** @type {?} */
-        let insertBefore = this._mapHead;
-        this._appendAfter = null;
-        this._forEach(map, (value, key) => {
-            if (insertBefore && insertBefore.key === key) {
-                this._maybeAddToChanges(insertBefore, value);
-                this._appendAfter = insertBefore;
-                insertBefore = insertBefore._next;
-            }
-            else {
-                /** @type {?} */
-                const record = this._getOrCreateRecordForKey(key, value);
-                insertBefore = this._insertBeforeOrAppend(insertBefore, record);
-            }
-        });
-        // Items remaining at the end of the list have been deleted
-        if (insertBefore) {
-            if (insertBefore._prev) {
-                insertBefore._prev._next = null;
-            }
-            this._removalsHead = insertBefore;
-            for (let record = insertBefore; record !== null; record = record._nextRemoved) {
-                if (record === this._mapHead) {
-                    this._mapHead = null;
-                }
-                this._records.delete(record.key);
-                record._nextRemoved = record._next;
-                record.previousValue = record.currentValue;
-                record.currentValue = null;
-                record._prev = null;
-                record._next = null;
-            }
-        }
-        // Make sure tails have no next records from previous runs
-        if (this._changesTail)
-            this._changesTail._nextChanged = null;
-        if (this._additionsTail)
-            this._additionsTail._nextAdded = null;
-        return this.isDirty;
-    }
-    /**
-     * Inserts a record before `before` or append at the end of the list when `before` is null.
-     *
-     * Notes:
-     * - This method appends at `this._appendAfter`,
-     * - This method updates `this._appendAfter`,
-     * - The return value is the new value for the insertion pointer.
-     * @private
-     * @param {?} before
-     * @param {?} record
-     * @return {?}
-     */
-    _insertBeforeOrAppend(before, record) {
-        if (before) {
-            /** @type {?} */
-            const prev = before._prev;
-            record._next = before;
-            record._prev = prev;
-            before._prev = record;
-            if (prev) {
-                prev._next = record;
-            }
-            if (before === this._mapHead) {
-                this._mapHead = record;
-            }
-            this._appendAfter = before;
-            return before;
-        }
-        if (this._appendAfter) {
-            this._appendAfter._next = record;
-            record._prev = this._appendAfter;
-        }
-        else {
-            this._mapHead = record;
-        }
-        this._appendAfter = record;
-        return null;
-    }
-    /**
-     * @private
-     * @param {?} key
-     * @param {?} value
-     * @return {?}
-     */
-    _getOrCreateRecordForKey(key, value) {
-        if (this._records.has(key)) {
-            /** @type {?} */
-            const record = (/** @type {?} */ (this._records.get(key)));
-            this._maybeAddToChanges(record, value);
-            /** @type {?} */
-            const prev = record._prev;
-            /** @type {?} */
-            const next = record._next;
-            if (prev) {
-                prev._next = next;
-            }
-            if (next) {
-                next._prev = prev;
-            }
-            record._next = null;
-            record._prev = null;
-            return record;
-        }
-        /** @type {?} */
-        const record = new KeyValueChangeRecord_(key);
-        this._records.set(key, record);
-        record.currentValue = value;
-        this._addToAdditions(record);
-        return record;
-    }
-    /**
-     * \@internal
-     * @return {?}
-     */
-    _reset() {
-        if (this.isDirty) {
-            /** @type {?} */
-            let record;
-            // let `_previousMapHead` contain the state of the map before the changes
-            this._previousMapHead = this._mapHead;
-            for (record = this._previousMapHead; record !== null; record = record._next) {
-                record._nextPrevious = record._next;
-            }
-            // Update `record.previousValue` with the value of the item before the changes
-            // We need to update all changed items (that's those which have been added and changed)
-            for (record = this._changesHead; record !== null; record = record._nextChanged) {
-                record.previousValue = record.currentValue;
-            }
-            for (record = this._additionsHead; record != null; record = record._nextAdded) {
-                record.previousValue = record.currentValue;
-            }
-            this._changesHead = this._changesTail = null;
-            this._additionsHead = this._additionsTail = null;
-            this._removalsHead = null;
-        }
-    }
-    // Add the record or a given key to the list of changes only when the value has actually changed
-    /**
-     * @private
-     * @param {?} record
-     * @param {?} newValue
-     * @return {?}
-     */
-    _maybeAddToChanges(record, newValue) {
-        if (!looseIdentical(newValue, record.currentValue)) {
-            record.previousValue = record.currentValue;
-            record.currentValue = newValue;
-            this._addToChanges(record);
-        }
-    }
-    /**
-     * @private
-     * @param {?} record
-     * @return {?}
-     */
-    _addToAdditions(record) {
-        if (this._additionsHead === null) {
-            this._additionsHead = this._additionsTail = record;
-        }
-        else {
-            (/** @type {?} */ (this._additionsTail))._nextAdded = record;
-            this._additionsTail = record;
-        }
-    }
-    /**
-     * @private
-     * @param {?} record
-     * @return {?}
-     */
-    _addToChanges(record) {
-        if (this._changesHead === null) {
-            this._changesHead = this._changesTail = record;
-        }
-        else {
-            (/** @type {?} */ (this._changesTail))._nextChanged = record;
-            this._changesTail = record;
-        }
-    }
-    /**
-     * \@internal
-     * @private
-     * @template K, V
-     * @param {?} obj
-     * @param {?} fn
-     * @return {?}
-     */
-    _forEach(obj, fn) {
-        if (obj instanceof Map) {
-            obj.forEach(fn);
-        }
-        else {
-            Object.keys(obj).forEach(k => fn(obj[k], k));
-        }
-    }
-}
-/**
- * @template K, V
- */
-class KeyValueChangeRecord_ {
-    /**
-     * @param {?} key
-     */
-    constructor(key) {
-        this.key = key;
-        this.previousValue = null;
-        this.currentValue = null;
-        /**
-         * \@internal
-         */
-        this._nextPrevious = null;
-        /**
-         * \@internal
-         */
-        this._next = null;
-        /**
-         * \@internal
-         */
-        this._prev = null;
-        /**
-         * \@internal
-         */
-        this._nextAdded = null;
-        /**
-         * \@internal
-         */
-        this._nextRemoved = null;
-        /**
-         * \@internal
-         */
-        this._nextChanged = null;
-    }
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
- *
- * \@publicApi
- */
-class IterableDiffers {
-    /**
-     * @param {?} factories
-     */
-    constructor(factories) { this.factories = factories; }
-    /**
-     * @param {?} factories
-     * @param {?=} parent
-     * @return {?}
-     */
-    static create(factories, parent) {
-        if (parent != null) {
-            /** @type {?} */
-            const copied = parent.factories.slice();
-            factories = factories.concat(copied);
-        }
-        return new IterableDiffers(factories);
-    }
-    /**
-     * Takes an array of {\@link IterableDifferFactory} and returns a provider used to extend the
-     * inherited {\@link IterableDiffers} instance with the provided factories and return a new
-     * {\@link IterableDiffers} instance.
-     *
-     * \@usageNotes
-     * ### Example
-     *
-     * The following example shows how to extend an existing list of factories,
-     * which will only be applied to the injector for this component and its children.
-     * This step is all that's required to make a new {\@link IterableDiffer} available.
-     *
-     * ```
-     * \@Component({
-     *   viewProviders: [
-     *     IterableDiffers.extend([new ImmutableListDiffer()])
-     *   ]
-     * })
-     * ```
-     * @param {?} factories
-     * @return {?}
-     */
-    static extend(factories) {
-        return {
-            provide: IterableDiffers,
-            useFactory: (parent) => {
-                if (!parent) {
-                    // Typically would occur when calling IterableDiffers.extend inside of dependencies passed
-                    // to
-                    // bootstrap(), which would override default pipes instead of extending them.
-                    throw new Error('Cannot extend IterableDiffers without a parent injector');
-                }
-                return IterableDiffers.create(factories, parent);
-            },
-            // Dependency technically isn't optional, but we can provide a better error message this way.
-            deps: [[IterableDiffers, new SkipSelf(), new Optional()]]
-        };
-    }
-    /**
-     * @param {?} iterable
-     * @return {?}
-     */
-    find(iterable) {
-        /** @type {?} */
-        const factory = this.factories.find(f => f.supports(iterable));
-        if (factory != null) {
-            return factory;
-        }
-        else {
-            throw new Error(`Cannot find a differ supporting object '${iterable}' of type '${getTypeNameForDebugging(iterable)}'`);
-        }
-    }
-}
-/** @nocollapse */
-/** @nocollapse */ IterableDiffers.ngInjectableDef = defineInjectable({
-    providedIn: 'root',
-    factory: () => new IterableDiffers([new DefaultIterableDifferFactory()])
-});
-/**
- * @param {?} type
- * @return {?}
- */
-function getTypeNameForDebugging(type) {
-    return type['name'] || typeof type;
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
- *
- * \@publicApi
- */
-class KeyValueDiffers {
-    /**
-     * @param {?} factories
-     */
-    constructor(factories) { this.factories = factories; }
-    /**
-     * @template S
-     * @param {?} factories
-     * @param {?=} parent
-     * @return {?}
-     */
-    static create(factories, parent) {
-        if (parent) {
-            /** @type {?} */
-            const copied = parent.factories.slice();
-            factories = factories.concat(copied);
-        }
-        return new KeyValueDiffers(factories);
-    }
-    /**
-     * Takes an array of {\@link KeyValueDifferFactory} and returns a provider used to extend the
-     * inherited {\@link KeyValueDiffers} instance with the provided factories and return a new
-     * {\@link KeyValueDiffers} instance.
-     *
-     * \@usageNotes
-     * ### Example
-     *
-     * The following example shows how to extend an existing list of factories,
-     * which will only be applied to the injector for this component and its children.
-     * This step is all that's required to make a new {\@link KeyValueDiffer} available.
-     *
-     * ```
-     * \@Component({
-     *   viewProviders: [
-     *     KeyValueDiffers.extend([new ImmutableMapDiffer()])
-     *   ]
-     * })
-     * ```
-     * @template S
-     * @param {?} factories
-     * @return {?}
-     */
-    static extend(factories) {
-        return {
-            provide: KeyValueDiffers,
-            useFactory: (parent) => {
-                if (!parent) {
-                    // Typically would occur when calling KeyValueDiffers.extend inside of dependencies passed
-                    // to bootstrap(), which would override default pipes instead of extending them.
-                    throw new Error('Cannot extend KeyValueDiffers without a parent injector');
-                }
-                return KeyValueDiffers.create(factories, parent);
-            },
-            // Dependency technically isn't optional, but we can provide a better error message this way.
-            deps: [[KeyValueDiffers, new SkipSelf(), new Optional()]]
-        };
-    }
-    /**
-     * @param {?} kv
-     * @return {?}
-     */
-    find(kv) {
-        /** @type {?} */
-        const factory = this.factories.find(f => f.supports(kv));
-        if (factory) {
-            return factory;
-        }
-        throw new Error(`Cannot find a differ supporting object '${kv}'`);
-    }
-}
-/** @nocollapse */
-/** @nocollapse */ KeyValueDiffers.ngInjectableDef = defineInjectable({
-    providedIn: 'root',
-    factory: () => new KeyValueDiffers([new DefaultKeyValueDifferFactory()])
-});
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Structural diffing for `Object`s and `Map`s.
- * @type {?}
- */
-const keyValDiff = [new DefaultKeyValueDifferFactory()];
-/**
- * Structural diffing for `Iterable` types such as `Array`s.
- * @type {?}
- */
-const iterableDiff = [new DefaultIterableDifferFactory()];
-/** @type {?} */
-const defaultIterableDiffers = new IterableDiffers(iterableDiff);
-/** @type {?} */
-const defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
 
 /**
  * @fileoverview added by tsickle
@@ -25288,801 +28026,6 @@ ApplicationModule.ctorParameters = () => [
 const SWITCH_IVY_ENABLED__POST_R3__ = true;
 /** @type {?} */
 const ivyEnabled = SWITCH_IVY_ENABLED__POST_R3__;
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-// Called before each cycle of a view's check to detect whether this is in the
-// initState for which we need to call ngOnInit, ngAfterContentInit or ngAfterViewInit
-// lifecycle methods. Returns true if this check cycle should call lifecycle
-// methods.
-/**
- * @param {?} view
- * @param {?} priorInitState
- * @param {?} newInitState
- * @return {?}
- */
-function shiftInitState(view, priorInitState, newInitState) {
-    // Only update the InitState if we are currently in the prior state.
-    // For example, only move into CallingInit if we are in BeforeInit. Only
-    // move into CallingContentInit if we are in CallingInit. Normally this will
-    // always be true because of how checkCycle is called in checkAndUpdateView.
-    // However, if checkAndUpdateView is called recursively or if an exception is
-    // thrown while checkAndUpdateView is running, checkAndUpdateView starts over
-    // from the beginning. This ensures the state is monotonically increasing,
-    // terminating in the AfterInit state, which ensures the Init methods are called
-    // at least once and only once.
-    /** @type {?} */
-    const state = view.state;
-    /** @type {?} */
-    const initState = state & 1792 /* InitState_Mask */;
-    if (initState === priorInitState) {
-        view.state = (state & ~1792 /* InitState_Mask */) | newInitState;
-        view.initIndex = -1;
-        return true;
-    }
-    return initState === newInitState;
-}
-// Returns true if the lifecycle init method should be called for the node with
-// the given init index.
-/**
- * @param {?} view
- * @param {?} initState
- * @param {?} index
- * @return {?}
- */
-function shouldCallLifecycleInitHook(view, initState, index) {
-    if ((view.state & 1792 /* InitState_Mask */) === initState && view.initIndex <= index) {
-        view.initIndex = index + 1;
-        return true;
-    }
-    return false;
-}
-/**
- * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
- * @param {?} view
- * @param {?} index
- * @return {?}
- */
-function asTextData(view, index) {
-    return (/** @type {?} */ (view.nodes[index]));
-}
-/**
- * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
- * @param {?} view
- * @param {?} index
- * @return {?}
- */
-function asElementData(view, index) {
-    return (/** @type {?} */ (view.nodes[index]));
-}
-/**
- * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
- * @param {?} view
- * @param {?} index
- * @return {?}
- */
-function asProviderData(view, index) {
-    return (/** @type {?} */ (view.nodes[index]));
-}
-/**
- * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
- * @param {?} view
- * @param {?} index
- * @return {?}
- */
-function asPureExpressionData(view, index) {
-    return (/** @type {?} */ (view.nodes[index]));
-}
-/**
- * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
- * @param {?} view
- * @param {?} index
- * @return {?}
- */
-function asQueryList(view, index) {
-    return (/** @type {?} */ (view.nodes[index]));
-}
-// WARNING: interface has both a type and a value, skipping emit
-/**
- * This object is used to prevent cycles in the source files and to have a place where
- * debug mode can hook it. It is lazily filled when `isDevMode` is known.
- * @type {?}
- */
-const Services = {
-    setCurrentNode: (/** @type {?} */ (undefined)),
-    createRootView: (/** @type {?} */ (undefined)),
-    createEmbeddedView: (/** @type {?} */ (undefined)),
-    createComponentView: (/** @type {?} */ (undefined)),
-    createNgModuleRef: (/** @type {?} */ (undefined)),
-    overrideProvider: (/** @type {?} */ (undefined)),
-    overrideComponentView: (/** @type {?} */ (undefined)),
-    clearOverrides: (/** @type {?} */ (undefined)),
-    checkAndUpdateView: (/** @type {?} */ (undefined)),
-    checkNoChangesView: (/** @type {?} */ (undefined)),
-    destroyView: (/** @type {?} */ (undefined)),
-    resolveDep: (/** @type {?} */ (undefined)),
-    createDebugContext: (/** @type {?} */ (undefined)),
-    handleEvent: (/** @type {?} */ (undefined)),
-    updateDirectives: (/** @type {?} */ (undefined)),
-    updateRenderer: (/** @type {?} */ (undefined)),
-    dirtyParentQueries: (/** @type {?} */ (undefined)),
-};
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * @param {?} context
- * @param {?} oldValue
- * @param {?} currValue
- * @param {?} isFirstCheck
- * @return {?}
- */
-function expressionChangedAfterItHasBeenCheckedError(context, oldValue, currValue, isFirstCheck) {
-    /** @type {?} */
-    let msg = `ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value: '${oldValue}'. Current value: '${currValue}'.`;
-    if (isFirstCheck) {
-        msg +=
-            ` It seems like the view has been created after its parent and its children have been dirty checked.` +
-                ` Has it been created in a change detection hook ?`;
-    }
-    return viewDebugError(msg, context);
-}
-/**
- * @param {?} err
- * @param {?} context
- * @return {?}
- */
-function viewWrappedDebugError(err, context) {
-    if (!(err instanceof Error)) {
-        // errors that are not Error instances don't have a stack,
-        // so it is ok to wrap them into a new Error object...
-        err = new Error(err.toString());
-    }
-    _addDebugContext(err, context);
-    return err;
-}
-/**
- * @param {?} msg
- * @param {?} context
- * @return {?}
- */
-function viewDebugError(msg, context) {
-    /** @type {?} */
-    const err = new Error(msg);
-    _addDebugContext(err, context);
-    return err;
-}
-/**
- * @param {?} err
- * @param {?} context
- * @return {?}
- */
-function _addDebugContext(err, context) {
-    ((/** @type {?} */ (err)))[ERROR_DEBUG_CONTEXT] = context;
-    ((/** @type {?} */ (err)))[ERROR_LOGGER] = context.logError.bind(context);
-}
-/**
- * @param {?} err
- * @return {?}
- */
-function isViewDebugError(err) {
-    return !!getDebugContext(err);
-}
-/**
- * @param {?} action
- * @return {?}
- */
-function viewDestroyedError(action) {
-    return new Error(`ViewDestroyedError: Attempt to use a destroyed view: ${action}`);
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/** @type {?} */
-const NOOP = () => { };
-/** @type {?} */
-const _tokenKeyCache = new Map();
-/**
- * @param {?} token
- * @return {?}
- */
-function tokenKey(token) {
-    /** @type {?} */
-    let key = _tokenKeyCache.get(token);
-    if (!key) {
-        key = stringify(token) + '_' + _tokenKeyCache.size;
-        _tokenKeyCache.set(token, key);
-    }
-    return key;
-}
-/**
- * @param {?} view
- * @param {?} nodeIdx
- * @param {?} bindingIdx
- * @param {?} value
- * @return {?}
- */
-function unwrapValue$1(view, nodeIdx, bindingIdx, value) {
-    if (WrappedValue.isWrapped(value)) {
-        value = WrappedValue.unwrap(value);
-        /** @type {?} */
-        const globalBindingIdx = view.def.nodes[nodeIdx].bindingIndex + bindingIdx;
-        /** @type {?} */
-        const oldValue = WrappedValue.unwrap(view.oldValues[globalBindingIdx]);
-        view.oldValues[globalBindingIdx] = new WrappedValue(oldValue);
-    }
-    return value;
-}
-/** @type {?} */
-const UNDEFINED_RENDERER_TYPE_ID = '$$undefined';
-/** @type {?} */
-const EMPTY_RENDERER_TYPE_ID = '$$empty';
-// Attention: this function is called as top level function.
-// Putting any logic in here will destroy closure tree shaking!
-/**
- * @param {?} values
- * @return {?}
- */
-function createRendererType2(values) {
-    return {
-        id: UNDEFINED_RENDERER_TYPE_ID,
-        styles: values.styles,
-        encapsulation: values.encapsulation,
-        data: values.data
-    };
-}
-/** @type {?} */
-let _renderCompCount$1 = 0;
-/**
- * @param {?=} type
- * @return {?}
- */
-function resolveRendererType2(type) {
-    if (type && type.id === UNDEFINED_RENDERER_TYPE_ID) {
-        // first time we see this RendererType2. Initialize it...
-        /** @type {?} */
-        const isFilled = ((type.encapsulation != null && type.encapsulation !== ViewEncapsulation.None) ||
-            type.styles.length || Object.keys(type.data).length);
-        if (isFilled) {
-            type.id = `c${_renderCompCount$1++}`;
-        }
-        else {
-            type.id = EMPTY_RENDERER_TYPE_ID;
-        }
-    }
-    if (type && type.id === EMPTY_RENDERER_TYPE_ID) {
-        type = null;
-    }
-    return type || null;
-}
-/**
- * @param {?} view
- * @param {?} def
- * @param {?} bindingIdx
- * @param {?} value
- * @return {?}
- */
-function checkBinding(view, def, bindingIdx, value) {
-    /** @type {?} */
-    const oldValues = view.oldValues;
-    if ((view.state & 2 /* FirstCheck */) ||
-        !looseIdentical(oldValues[def.bindingIndex + bindingIdx], value)) {
-        return true;
-    }
-    return false;
-}
-/**
- * @param {?} view
- * @param {?} def
- * @param {?} bindingIdx
- * @param {?} value
- * @return {?}
- */
-function checkAndUpdateBinding(view, def, bindingIdx, value) {
-    if (checkBinding(view, def, bindingIdx, value)) {
-        view.oldValues[def.bindingIndex + bindingIdx] = value;
-        return true;
-    }
-    return false;
-}
-/**
- * @param {?} view
- * @param {?} def
- * @param {?} bindingIdx
- * @param {?} value
- * @return {?}
- */
-function checkBindingNoChanges(view, def, bindingIdx, value) {
-    /** @type {?} */
-    const oldValue = view.oldValues[def.bindingIndex + bindingIdx];
-    if ((view.state & 1 /* BeforeFirstCheck */) || !devModeEqual$1(oldValue, value)) {
-        /** @type {?} */
-        const bindingName = def.bindings[bindingIdx].name;
-        throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, def.nodeIndex), `${bindingName}: ${oldValue}`, `${bindingName}: ${value}`, (view.state & 1 /* BeforeFirstCheck */) !== 0);
-    }
-}
-/**
- * @param {?} view
- * @return {?}
- */
-function markParentViewsForCheck(view) {
-    /** @type {?} */
-    let currView = view;
-    while (currView) {
-        if (currView.def.flags & 2 /* OnPush */) {
-            currView.state |= 8 /* ChecksEnabled */;
-        }
-        currView = currView.viewContainerParent || currView.parent;
-    }
-}
-/**
- * @param {?} view
- * @param {?} endView
- * @return {?}
- */
-function markParentViewsForCheckProjectedViews(view, endView) {
-    /** @type {?} */
-    let currView = view;
-    while (currView && currView !== endView) {
-        currView.state |= 64 /* CheckProjectedViews */;
-        currView = currView.viewContainerParent || currView.parent;
-    }
-}
-/**
- * @param {?} view
- * @param {?} nodeIndex
- * @param {?} eventName
- * @param {?} event
- * @return {?}
- */
-function dispatchEvent(view, nodeIndex, eventName, event) {
-    try {
-        /** @type {?} */
-        const nodeDef = view.def.nodes[nodeIndex];
-        /** @type {?} */
-        const startView = nodeDef.flags & 33554432 /* ComponentView */ ?
-            asElementData(view, nodeIndex).componentView :
-            view;
-        markParentViewsForCheck(startView);
-        return Services.handleEvent(view, nodeIndex, eventName, event);
-    }
-    catch (e) {
-        // Attention: Don't rethrow, as it would cancel Observable subscriptions!
-        view.root.errorHandler.handleError(e);
-    }
-}
-/**
- * @param {?} view
- * @return {?}
- */
-function declaredViewContainer(view) {
-    if (view.parent) {
-        /** @type {?} */
-        const parentView = view.parent;
-        return asElementData(parentView, (/** @type {?} */ (view.parentNodeDef)).nodeIndex);
-    }
-    return null;
-}
-/**
- * for component views, this is the host element.
- * for embedded views, this is the index of the parent node
- * that contains the view container.
- * @param {?} view
- * @return {?}
- */
-function viewParentEl(view) {
-    /** @type {?} */
-    const parentView = view.parent;
-    if (parentView) {
-        return (/** @type {?} */ (view.parentNodeDef)).parent;
-    }
-    else {
-        return null;
-    }
-}
-/**
- * @param {?} view
- * @param {?} def
- * @return {?}
- */
-function renderNode(view, def) {
-    switch (def.flags & 201347067 /* Types */) {
-        case 1 /* TypeElement */:
-            return asElementData(view, def.nodeIndex).renderElement;
-        case 2 /* TypeText */:
-            return asTextData(view, def.nodeIndex).renderText;
-    }
-}
-/**
- * @param {?} target
- * @param {?} name
- * @return {?}
- */
-function elementEventFullName(target, name) {
-    return target ? `${target}:${name}` : name;
-}
-/**
- * @param {?} view
- * @return {?}
- */
-function isComponentView(view) {
-    return !!view.parent && !!((/** @type {?} */ (view.parentNodeDef)).flags & 32768 /* Component */);
-}
-/**
- * @param {?} view
- * @return {?}
- */
-function isEmbeddedView(view) {
-    return !!view.parent && !((/** @type {?} */ (view.parentNodeDef)).flags & 32768 /* Component */);
-}
-/**
- * @param {?} queryId
- * @return {?}
- */
-function filterQueryId(queryId) {
-    return 1 << (queryId % 32);
-}
-/**
- * @param {?} matchedQueriesDsl
- * @return {?}
- */
-function splitMatchedQueriesDsl(matchedQueriesDsl) {
-    /** @type {?} */
-    const matchedQueries = {};
-    /** @type {?} */
-    let matchedQueryIds = 0;
-    /** @type {?} */
-    const references = {};
-    if (matchedQueriesDsl) {
-        matchedQueriesDsl.forEach(([queryId, valueType]) => {
-            if (typeof queryId === 'number') {
-                matchedQueries[queryId] = valueType;
-                matchedQueryIds |= filterQueryId(queryId);
-            }
-            else {
-                references[queryId] = valueType;
-            }
-        });
-    }
-    return { matchedQueries, references, matchedQueryIds };
-}
-/**
- * @param {?} deps
- * @param {?=} sourceName
- * @return {?}
- */
-function splitDepsDsl(deps, sourceName) {
-    return deps.map(value => {
-        /** @type {?} */
-        let token;
-        /** @type {?} */
-        let flags;
-        if (Array.isArray(value)) {
-            [flags, token] = value;
-        }
-        else {
-            flags = 0 /* None */;
-            token = value;
-        }
-        if (token && (typeof token === 'function' || typeof token === 'object') && sourceName) {
-            Object.defineProperty(token, SOURCE, { value: sourceName, configurable: true });
-        }
-        return { flags, token, tokenKey: tokenKey(token) };
-    });
-}
-/**
- * @param {?} view
- * @param {?} renderHost
- * @param {?} def
- * @return {?}
- */
-function getParentRenderElement(view, renderHost, def) {
-    /** @type {?} */
-    let renderParent = def.renderParent;
-    if (renderParent) {
-        if ((renderParent.flags & 1 /* TypeElement */) === 0 ||
-            (renderParent.flags & 33554432 /* ComponentView */) === 0 ||
-            ((/** @type {?} */ (renderParent.element)).componentRendererType &&
-                (/** @type {?} */ ((/** @type {?} */ (renderParent.element)).componentRendererType)).encapsulation ===
-                    ViewEncapsulation.Native)) {
-            // only children of non components, or children of components with native encapsulation should
-            // be attached.
-            return asElementData(view, (/** @type {?} */ (def.renderParent)).nodeIndex).renderElement;
-        }
-    }
-    else {
-        return renderHost;
-    }
-}
-/** @type {?} */
-const DEFINITION_CACHE = new WeakMap();
-/**
- * @template D
- * @param {?} factory
- * @return {?}
- */
-function resolveDefinition(factory) {
-    /** @type {?} */
-    let value = (/** @type {?} */ ((/** @type {?} */ (DEFINITION_CACHE.get(factory)))));
-    if (!value) {
-        value = factory(() => NOOP);
-        value.factory = factory;
-        DEFINITION_CACHE.set(factory, value);
-    }
-    return value;
-}
-/**
- * @param {?} view
- * @return {?}
- */
-function rootRenderNodes(view) {
-    /** @type {?} */
-    const renderNodes = [];
-    visitRootRenderNodes(view, 0 /* Collect */, undefined, undefined, renderNodes);
-    return renderNodes;
-}
-/**
- * @param {?} view
- * @param {?} action
- * @param {?} parentNode
- * @param {?} nextSibling
- * @param {?=} target
- * @return {?}
- */
-function visitRootRenderNodes(view, action, parentNode, nextSibling, target) {
-    // We need to re-compute the parent node in case the nodes have been moved around manually
-    if (action === 3 /* RemoveChild */) {
-        parentNode = view.renderer.parentNode(renderNode(view, (/** @type {?} */ (view.def.lastRenderRootNode))));
-    }
-    visitSiblingRenderNodes(view, action, 0, view.def.nodes.length - 1, parentNode, nextSibling, target);
-}
-/**
- * @param {?} view
- * @param {?} action
- * @param {?} startIndex
- * @param {?} endIndex
- * @param {?} parentNode
- * @param {?} nextSibling
- * @param {?=} target
- * @return {?}
- */
-function visitSiblingRenderNodes(view, action, startIndex, endIndex, parentNode, nextSibling, target) {
-    for (let i = startIndex; i <= endIndex; i++) {
-        /** @type {?} */
-        const nodeDef = view.def.nodes[i];
-        if (nodeDef.flags & (1 /* TypeElement */ | 2 /* TypeText */ | 8 /* TypeNgContent */)) {
-            visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target);
-        }
-        // jump to next sibling
-        i += nodeDef.childCount;
-    }
-}
-/**
- * @param {?} view
- * @param {?} ngContentIndex
- * @param {?} action
- * @param {?} parentNode
- * @param {?} nextSibling
- * @param {?=} target
- * @return {?}
- */
-function visitProjectedRenderNodes(view, ngContentIndex, action, parentNode, nextSibling, target) {
-    /** @type {?} */
-    let compView = view;
-    while (compView && !isComponentView(compView)) {
-        compView = compView.parent;
-    }
-    /** @type {?} */
-    const hostView = (/** @type {?} */ (compView)).parent;
-    /** @type {?} */
-    const hostElDef = viewParentEl((/** @type {?} */ (compView)));
-    /** @type {?} */
-    const startIndex = (/** @type {?} */ (hostElDef)).nodeIndex + 1;
-    /** @type {?} */
-    const endIndex = (/** @type {?} */ (hostElDef)).nodeIndex + (/** @type {?} */ (hostElDef)).childCount;
-    for (let i = startIndex; i <= endIndex; i++) {
-        /** @type {?} */
-        const nodeDef = (/** @type {?} */ (hostView)).def.nodes[i];
-        if (nodeDef.ngContentIndex === ngContentIndex) {
-            visitRenderNode((/** @type {?} */ (hostView)), nodeDef, action, parentNode, nextSibling, target);
-        }
-        // jump to next sibling
-        i += nodeDef.childCount;
-    }
-    if (!(/** @type {?} */ (hostView)).parent) {
-        // a root view
-        /** @type {?} */
-        const projectedNodes = view.root.projectableNodes[ngContentIndex];
-        if (projectedNodes) {
-            for (let i = 0; i < projectedNodes.length; i++) {
-                execRenderNodeAction(view, projectedNodes[i], action, parentNode, nextSibling, target);
-            }
-        }
-    }
-}
-/**
- * @param {?} view
- * @param {?} nodeDef
- * @param {?} action
- * @param {?} parentNode
- * @param {?} nextSibling
- * @param {?=} target
- * @return {?}
- */
-function visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target) {
-    if (nodeDef.flags & 8 /* TypeNgContent */) {
-        visitProjectedRenderNodes(view, (/** @type {?} */ (nodeDef.ngContent)).index, action, parentNode, nextSibling, target);
-    }
-    else {
-        /** @type {?} */
-        const rn = renderNode(view, nodeDef);
-        if (action === 3 /* RemoveChild */ && (nodeDef.flags & 33554432 /* ComponentView */) &&
-            (nodeDef.bindingFlags & 48 /* CatSyntheticProperty */)) {
-            // Note: we might need to do both actions.
-            if (nodeDef.bindingFlags & (16 /* SyntheticProperty */)) {
-                execRenderNodeAction(view, rn, action, parentNode, nextSibling, target);
-            }
-            if (nodeDef.bindingFlags & (32 /* SyntheticHostProperty */)) {
-                /** @type {?} */
-                const compView = asElementData(view, nodeDef.nodeIndex).componentView;
-                execRenderNodeAction(compView, rn, action, parentNode, nextSibling, target);
-            }
-        }
-        else {
-            execRenderNodeAction(view, rn, action, parentNode, nextSibling, target);
-        }
-        if (nodeDef.flags & 16777216 /* EmbeddedViews */) {
-            /** @type {?} */
-            const embeddedViews = (/** @type {?} */ (asElementData(view, nodeDef.nodeIndex).viewContainer))._embeddedViews;
-            for (let k = 0; k < embeddedViews.length; k++) {
-                visitRootRenderNodes(embeddedViews[k], action, parentNode, nextSibling, target);
-            }
-        }
-        if (nodeDef.flags & 1 /* TypeElement */ && !(/** @type {?} */ (nodeDef.element)).name) {
-            visitSiblingRenderNodes(view, action, nodeDef.nodeIndex + 1, nodeDef.nodeIndex + nodeDef.childCount, parentNode, nextSibling, target);
-        }
-    }
-}
-/**
- * @param {?} view
- * @param {?} renderNode
- * @param {?} action
- * @param {?} parentNode
- * @param {?} nextSibling
- * @param {?=} target
- * @return {?}
- */
-function execRenderNodeAction(view, renderNode, action, parentNode, nextSibling, target) {
-    /** @type {?} */
-    const renderer = view.renderer;
-    switch (action) {
-        case 1 /* AppendChild */:
-            renderer.appendChild(parentNode, renderNode);
-            break;
-        case 2 /* InsertBefore */:
-            renderer.insertBefore(parentNode, renderNode, nextSibling);
-            break;
-        case 3 /* RemoveChild */:
-            renderer.removeChild(parentNode, renderNode);
-            break;
-        case 0 /* Collect */:
-            (/** @type {?} */ (target)).push(renderNode);
-            break;
-    }
-}
-/** @type {?} */
-const NS_PREFIX_RE = /^:([^:]+):(.+)$/;
-/**
- * @param {?} name
- * @return {?}
- */
-function splitNamespace(name) {
-    if (name[0] === ':') {
-        /** @type {?} */
-        const match = (/** @type {?} */ (name.match(NS_PREFIX_RE)));
-        return [match[1], match[2]];
-    }
-    return ['', name];
-}
-/**
- * @param {?} bindings
- * @return {?}
- */
-function calcBindingFlags(bindings) {
-    /** @type {?} */
-    let flags = 0;
-    for (let i = 0; i < bindings.length; i++) {
-        flags |= bindings[i].flags;
-    }
-    return flags;
-}
-/**
- * @param {?} valueCount
- * @param {?} constAndInterp
- * @return {?}
- */
-function interpolate(valueCount, constAndInterp) {
-    /** @type {?} */
-    let result = '';
-    for (let i = 0; i < valueCount * 2; i = i + 2) {
-        result = result + constAndInterp[i] + _toStringWithNull(constAndInterp[i + 1]);
-    }
-    return result + constAndInterp[valueCount * 2];
-}
-/**
- * @param {?} valueCount
- * @param {?} c0
- * @param {?} a1
- * @param {?} c1
- * @param {?=} a2
- * @param {?=} c2
- * @param {?=} a3
- * @param {?=} c3
- * @param {?=} a4
- * @param {?=} c4
- * @param {?=} a5
- * @param {?=} c5
- * @param {?=} a6
- * @param {?=} c6
- * @param {?=} a7
- * @param {?=} c7
- * @param {?=} a8
- * @param {?=} c8
- * @param {?=} a9
- * @param {?=} c9
- * @return {?}
- */
-function inlineInterpolate(valueCount, c0, a1, c1, a2, c2, a3, c3, a4, c4, a5, c5, a6, c6, a7, c7, a8, c8, a9, c9) {
-    switch (valueCount) {
-        case 1:
-            return c0 + _toStringWithNull(a1) + c1;
-        case 2:
-            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2;
-        case 3:
-            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
-                c3;
-        case 4:
-            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
-                c3 + _toStringWithNull(a4) + c4;
-        case 5:
-            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
-                c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5;
-        case 6:
-            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
-                c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) + c6;
-        case 7:
-            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
-                c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) +
-                c6 + _toStringWithNull(a7) + c7;
-        case 8:
-            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
-                c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) +
-                c6 + _toStringWithNull(a7) + c7 + _toStringWithNull(a8) + c8;
-        case 9:
-            return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
-                c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) +
-                c6 + _toStringWithNull(a7) + c7 + _toStringWithNull(a8) + c8 + _toStringWithNull(a9) + c9;
-        default:
-            throw new Error(`Does not support more than 9 expressions`);
-    }
-}
-/**
- * @param {?} v
- * @return {?}
- */
-function _toStringWithNull(v) {
-    return v != null ? v.toString() : '';
-}
-/** @type {?} */
-const EMPTY_ARRAY$4 = [];
-/** @type {?} */
-const EMPTY_MAP = {};
 
 /**
  * @fileoverview added by tsickle
@@ -26502,1951 +28445,6 @@ function setElementProperty(view, binding, renderNode$$1, name, value) {
     /** @type {?} */
     let renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
     view.renderer.setProperty(renderNode$$1, name, renderValue);
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/** @type {?} */
-const UNDEFINED_VALUE = new Object();
-/** @type {?} */
-const InjectorRefTokenKey = tokenKey(Injector);
-/** @type {?} */
-const INJECTORRefTokenKey = tokenKey(INJECTOR);
-/** @type {?} */
-const NgModuleRefTokenKey = tokenKey(NgModuleRef);
-/**
- * @param {?} flags
- * @param {?} token
- * @param {?} value
- * @param {?} deps
- * @return {?}
- */
-function moduleProvideDef(flags, token, value, deps) {
-    // Need to resolve forwardRefs as e.g. for `useValue` we
-    // lowered the expression and then stopped evaluating it,
-    // i.e. also didn't unwrap it.
-    value = resolveForwardRef(value);
-    /** @type {?} */
-    const depDefs = splitDepsDsl(deps, stringify(token));
-    return {
-        // will bet set by the module definition
-        index: -1,
-        deps: depDefs, flags, token, value
-    };
-}
-/**
- * @param {?} providers
- * @return {?}
- */
-function moduleDef(providers) {
-    /** @type {?} */
-    const providersByKey = {};
-    /** @type {?} */
-    const modules = [];
-    /** @type {?} */
-    let isRoot = false;
-    for (let i = 0; i < providers.length; i++) {
-        /** @type {?} */
-        const provider = providers[i];
-        if (provider.token === APP_ROOT && provider.value === true) {
-            isRoot = true;
-        }
-        if (provider.flags & 1073741824 /* TypeNgModule */) {
-            modules.push(provider.token);
-        }
-        provider.index = i;
-        providersByKey[tokenKey(provider.token)] = provider;
-    }
-    return {
-        // Will be filled later...
-        factory: null,
-        providersByKey,
-        providers,
-        modules,
-        isRoot,
-    };
-}
-/**
- * @param {?} data
- * @return {?}
- */
-function initNgModule(data) {
-    /** @type {?} */
-    const def = data._def;
-    /** @type {?} */
-    const providers = data._providers = new Array(def.providers.length);
-    for (let i = 0; i < def.providers.length; i++) {
-        /** @type {?} */
-        const provDef = def.providers[i];
-        if (!(provDef.flags & 4096 /* LazyProvider */)) {
-            // Make sure the provider has not been already initialized outside this loop.
-            if (providers[i] === undefined) {
-                providers[i] = _createProviderInstance(data, provDef);
-            }
-        }
-    }
-}
-/**
- * @param {?} data
- * @param {?} depDef
- * @param {?=} notFoundValue
- * @return {?}
- */
-function resolveNgModuleDep(data, depDef, notFoundValue = Injector.THROW_IF_NOT_FOUND) {
-    /** @type {?} */
-    const former = setCurrentInjector(data);
-    try {
-        if (depDef.flags & 8 /* Value */) {
-            return depDef.token;
-        }
-        if (depDef.flags & 2 /* Optional */) {
-            notFoundValue = null;
-        }
-        if (depDef.flags & 1 /* SkipSelf */) {
-            return data._parent.get(depDef.token, notFoundValue);
-        }
-        /** @type {?} */
-        const tokenKey$$1 = depDef.tokenKey;
-        switch (tokenKey$$1) {
-            case InjectorRefTokenKey:
-            case INJECTORRefTokenKey:
-            case NgModuleRefTokenKey:
-                return data;
-        }
-        /** @type {?} */
-        const providerDef = data._def.providersByKey[tokenKey$$1];
-        /** @type {?} */
-        let injectableDef;
-        if (providerDef) {
-            /** @type {?} */
-            let providerInstance = data._providers[providerDef.index];
-            if (providerInstance === undefined) {
-                providerInstance = data._providers[providerDef.index] =
-                    _createProviderInstance(data, providerDef);
-            }
-            return providerInstance === UNDEFINED_VALUE ? undefined : providerInstance;
-        }
-        else if ((injectableDef = getInjectableDef(depDef.token)) && targetsModule(data, injectableDef)) {
-            /** @type {?} */
-            const index = data._providers.length;
-            data._def.providersByKey[depDef.tokenKey] = {
-                flags: 1024 /* TypeFactoryProvider */ | 4096 /* LazyProvider */,
-                value: injectableDef.factory,
-                deps: [], index,
-                token: depDef.token,
-            };
-            data._providers[index] = UNDEFINED_VALUE;
-            return (data._providers[index] =
-                _createProviderInstance(data, data._def.providersByKey[depDef.tokenKey]));
-        }
-        else if (depDef.flags & 4 /* Self */) {
-            return notFoundValue;
-        }
-        return data._parent.get(depDef.token, notFoundValue);
-    }
-    finally {
-        setCurrentInjector(former);
-    }
-}
-/**
- * @param {?} ngModule
- * @param {?} scope
- * @return {?}
- */
-function moduleTransitivelyPresent(ngModule, scope) {
-    return ngModule._def.modules.indexOf(scope) > -1;
-}
-/**
- * @param {?} ngModule
- * @param {?} def
- * @return {?}
- */
-function targetsModule(ngModule, def) {
-    return def.providedIn != null && (moduleTransitivelyPresent(ngModule, def.providedIn) ||
-        def.providedIn === 'root' && ngModule._def.isRoot);
-}
-/**
- * @param {?} ngModule
- * @param {?} providerDef
- * @return {?}
- */
-function _createProviderInstance(ngModule, providerDef) {
-    /** @type {?} */
-    let injectable;
-    switch (providerDef.flags & 201347067 /* Types */) {
-        case 512 /* TypeClassProvider */:
-            injectable = _createClass(ngModule, providerDef.value, providerDef.deps);
-            break;
-        case 1024 /* TypeFactoryProvider */:
-            injectable = _callFactory(ngModule, providerDef.value, providerDef.deps);
-            break;
-        case 2048 /* TypeUseExistingProvider */:
-            injectable = resolveNgModuleDep(ngModule, providerDef.deps[0]);
-            break;
-        case 256 /* TypeValueProvider */:
-            injectable = providerDef.value;
-            break;
-    }
-    // The read of `ngOnDestroy` here is slightly expensive as it's megamorphic, so it should be
-    // avoided if possible. The sequence of checks here determines whether ngOnDestroy needs to be
-    // checked. It might not if the `injectable` isn't an object or if NodeFlags.OnDestroy is already
-    // set (ngOnDestroy was detected statically).
-    if (injectable !== UNDEFINED_VALUE && injectable != null && typeof injectable === 'object' &&
-        !(providerDef.flags & 131072 /* OnDestroy */) && typeof injectable.ngOnDestroy === 'function') {
-        providerDef.flags |= 131072 /* OnDestroy */;
-    }
-    return injectable === undefined ? UNDEFINED_VALUE : injectable;
-}
-/**
- * @param {?} ngModule
- * @param {?} ctor
- * @param {?} deps
- * @return {?}
- */
-function _createClass(ngModule, ctor, deps) {
-    /** @type {?} */
-    const len = deps.length;
-    switch (len) {
-        case 0:
-            return new ctor();
-        case 1:
-            return new ctor(resolveNgModuleDep(ngModule, deps[0]));
-        case 2:
-            return new ctor(resolveNgModuleDep(ngModule, deps[0]), resolveNgModuleDep(ngModule, deps[1]));
-        case 3:
-            return new ctor(resolveNgModuleDep(ngModule, deps[0]), resolveNgModuleDep(ngModule, deps[1]), resolveNgModuleDep(ngModule, deps[2]));
-        default:
-            /** @type {?} */
-            const depValues = new Array(len);
-            for (let i = 0; i < len; i++) {
-                depValues[i] = resolveNgModuleDep(ngModule, deps[i]);
-            }
-            return new ctor(...depValues);
-    }
-}
-/**
- * @param {?} ngModule
- * @param {?} factory
- * @param {?} deps
- * @return {?}
- */
-function _callFactory(ngModule, factory, deps) {
-    /** @type {?} */
-    const len = deps.length;
-    switch (len) {
-        case 0:
-            return factory();
-        case 1:
-            return factory(resolveNgModuleDep(ngModule, deps[0]));
-        case 2:
-            return factory(resolveNgModuleDep(ngModule, deps[0]), resolveNgModuleDep(ngModule, deps[1]));
-        case 3:
-            return factory(resolveNgModuleDep(ngModule, deps[0]), resolveNgModuleDep(ngModule, deps[1]), resolveNgModuleDep(ngModule, deps[2]));
-        default:
-            /** @type {?} */
-            const depValues = Array(len);
-            for (let i = 0; i < len; i++) {
-                depValues[i] = resolveNgModuleDep(ngModule, deps[i]);
-            }
-            return factory(...depValues);
-    }
-}
-/**
- * @param {?} ngModule
- * @param {?} lifecycles
- * @return {?}
- */
-function callNgModuleLifecycle(ngModule, lifecycles) {
-    /** @type {?} */
-    const def = ngModule._def;
-    /** @type {?} */
-    const destroyed = new Set();
-    for (let i = 0; i < def.providers.length; i++) {
-        /** @type {?} */
-        const provDef = def.providers[i];
-        if (provDef.flags & 131072 /* OnDestroy */) {
-            /** @type {?} */
-            const instance = ngModule._providers[i];
-            if (instance && instance !== UNDEFINED_VALUE) {
-                /** @type {?} */
-                const onDestroy = instance.ngOnDestroy;
-                if (typeof onDestroy === 'function' && !destroyed.has(instance)) {
-                    onDestroy.apply(instance);
-                    destroyed.add(instance);
-                }
-            }
-        }
-    }
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * @param {?} parentView
- * @param {?} elementData
- * @param {?} viewIndex
- * @param {?} view
- * @return {?}
- */
-function attachEmbeddedView(parentView, elementData, viewIndex, view) {
-    /** @type {?} */
-    let embeddedViews = (/** @type {?} */ (elementData.viewContainer))._embeddedViews;
-    if (viewIndex === null || viewIndex === undefined) {
-        viewIndex = embeddedViews.length;
-    }
-    view.viewContainerParent = parentView;
-    addToArray(embeddedViews, (/** @type {?} */ (viewIndex)), view);
-    attachProjectedView(elementData, view);
-    Services.dirtyParentQueries(view);
-    /** @type {?} */
-    const prevView = (/** @type {?} */ (viewIndex)) > 0 ? embeddedViews[(/** @type {?} */ (viewIndex)) - 1] : null;
-    renderAttachEmbeddedView(elementData, prevView, view);
-}
-/**
- * @param {?} vcElementData
- * @param {?} view
- * @return {?}
- */
-function attachProjectedView(vcElementData, view) {
-    /** @type {?} */
-    const dvcElementData = declaredViewContainer(view);
-    if (!dvcElementData || dvcElementData === vcElementData ||
-        view.state & 16 /* IsProjectedView */) {
-        return;
-    }
-    // Note: For performance reasons, we
-    // - add a view to template._projectedViews only 1x throughout its lifetime,
-    //   and remove it not until the view is destroyed.
-    //   (hard, as when a parent view is attached/detached we would need to attach/detach all
-    //    nested projected views as well, even across component boundaries).
-    // - don't track the insertion order of views in the projected views array
-    //   (hard, as when the views of the same template are inserted different view containers)
-    view.state |= 16 /* IsProjectedView */;
-    /** @type {?} */
-    let projectedViews = dvcElementData.template._projectedViews;
-    if (!projectedViews) {
-        projectedViews = dvcElementData.template._projectedViews = [];
-    }
-    projectedViews.push(view);
-    // Note: we are changing the NodeDef here as we cannot calculate
-    // the fact whether a template is used for projection during compilation.
-    markNodeAsProjectedTemplate((/** @type {?} */ (view.parent)).def, (/** @type {?} */ (view.parentNodeDef)));
-}
-/**
- * @param {?} viewDef
- * @param {?} nodeDef
- * @return {?}
- */
-function markNodeAsProjectedTemplate(viewDef, nodeDef) {
-    if (nodeDef.flags & 4 /* ProjectedTemplate */) {
-        return;
-    }
-    viewDef.nodeFlags |= 4 /* ProjectedTemplate */;
-    nodeDef.flags |= 4 /* ProjectedTemplate */;
-    /** @type {?} */
-    let parentNodeDef = nodeDef.parent;
-    while (parentNodeDef) {
-        parentNodeDef.childFlags |= 4 /* ProjectedTemplate */;
-        parentNodeDef = parentNodeDef.parent;
-    }
-}
-/**
- * @param {?} elementData
- * @param {?=} viewIndex
- * @return {?}
- */
-function detachEmbeddedView(elementData, viewIndex) {
-    /** @type {?} */
-    const embeddedViews = (/** @type {?} */ (elementData.viewContainer))._embeddedViews;
-    if (viewIndex == null || viewIndex >= embeddedViews.length) {
-        viewIndex = embeddedViews.length - 1;
-    }
-    if (viewIndex < 0) {
-        return null;
-    }
-    /** @type {?} */
-    const view = embeddedViews[viewIndex];
-    view.viewContainerParent = null;
-    removeFromArray(embeddedViews, viewIndex);
-    // See attachProjectedView for why we don't update projectedViews here.
-    Services.dirtyParentQueries(view);
-    renderDetachView(view);
-    return view;
-}
-/**
- * @param {?} view
- * @return {?}
- */
-function detachProjectedView(view) {
-    if (!(view.state & 16 /* IsProjectedView */)) {
-        return;
-    }
-    /** @type {?} */
-    const dvcElementData = declaredViewContainer(view);
-    if (dvcElementData) {
-        /** @type {?} */
-        const projectedViews = dvcElementData.template._projectedViews;
-        if (projectedViews) {
-            removeFromArray(projectedViews, projectedViews.indexOf(view));
-            Services.dirtyParentQueries(view);
-        }
-    }
-}
-/**
- * @param {?} elementData
- * @param {?} oldViewIndex
- * @param {?} newViewIndex
- * @return {?}
- */
-function moveEmbeddedView(elementData, oldViewIndex, newViewIndex) {
-    /** @type {?} */
-    const embeddedViews = (/** @type {?} */ (elementData.viewContainer))._embeddedViews;
-    /** @type {?} */
-    const view = embeddedViews[oldViewIndex];
-    removeFromArray(embeddedViews, oldViewIndex);
-    if (newViewIndex == null) {
-        newViewIndex = embeddedViews.length;
-    }
-    addToArray(embeddedViews, newViewIndex, view);
-    // Note: Don't need to change projectedViews as the order in there
-    // as always invalid...
-    Services.dirtyParentQueries(view);
-    renderDetachView(view);
-    /** @type {?} */
-    const prevView = newViewIndex > 0 ? embeddedViews[newViewIndex - 1] : null;
-    renderAttachEmbeddedView(elementData, prevView, view);
-    return view;
-}
-/**
- * @param {?} elementData
- * @param {?} prevView
- * @param {?} view
- * @return {?}
- */
-function renderAttachEmbeddedView(elementData, prevView, view) {
-    /** @type {?} */
-    const prevRenderNode = prevView ? renderNode(prevView, (/** @type {?} */ (prevView.def.lastRenderRootNode))) :
-        elementData.renderElement;
-    /** @type {?} */
-    const parentNode = view.renderer.parentNode(prevRenderNode);
-    /** @type {?} */
-    const nextSibling = view.renderer.nextSibling(prevRenderNode);
-    // Note: We can't check if `nextSibling` is present, as on WebWorkers it will always be!
-    // However, browsers automatically do `appendChild` when there is no `nextSibling`.
-    visitRootRenderNodes(view, 2 /* InsertBefore */, parentNode, nextSibling, undefined);
-}
-/**
- * @param {?} view
- * @return {?}
- */
-function renderDetachView(view) {
-    visitRootRenderNodes(view, 3 /* RemoveChild */, null, null, undefined);
-}
-/**
- * @param {?} arr
- * @param {?} index
- * @param {?} value
- * @return {?}
- */
-function addToArray(arr, index, value) {
-    // perf: array.push is faster than array.splice!
-    if (index >= arr.length) {
-        arr.push(value);
-    }
-    else {
-        arr.splice(index, 0, value);
-    }
-}
-/**
- * @param {?} arr
- * @param {?} index
- * @return {?}
- */
-function removeFromArray(arr, index) {
-    // perf: array.pop is faster than array.splice!
-    if (index >= arr.length - 1) {
-        arr.pop();
-    }
-    else {
-        arr.splice(index, 1);
-    }
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/** @type {?} */
-const EMPTY_CONTEXT = new Object();
-// Attention: this function is called as top level function.
-// Putting any logic in here will destroy closure tree shaking!
-/**
- * @param {?} selector
- * @param {?} componentType
- * @param {?} viewDefFactory
- * @param {?} inputs
- * @param {?} outputs
- * @param {?} ngContentSelectors
- * @return {?}
- */
-function createComponentFactory(selector, componentType, viewDefFactory, inputs, outputs, ngContentSelectors) {
-    return new ComponentFactory_(selector, componentType, viewDefFactory, inputs, outputs, ngContentSelectors);
-}
-/**
- * @param {?} componentFactory
- * @return {?}
- */
-function getComponentViewDefinitionFactory(componentFactory) {
-    return ((/** @type {?} */ (componentFactory))).viewDefFactory;
-}
-class ComponentFactory_ extends ComponentFactory {
-    /**
-     * @param {?} selector
-     * @param {?} componentType
-     * @param {?} viewDefFactory
-     * @param {?} _inputs
-     * @param {?} _outputs
-     * @param {?} ngContentSelectors
-     */
-    constructor(selector, componentType, viewDefFactory, _inputs, _outputs, ngContentSelectors) {
-        // Attention: this ctor is called as top level function.
-        // Putting any logic in here will destroy closure tree shaking!
-        super();
-        this.selector = selector;
-        this.componentType = componentType;
-        this._inputs = _inputs;
-        this._outputs = _outputs;
-        this.ngContentSelectors = ngContentSelectors;
-        this.viewDefFactory = viewDefFactory;
-    }
-    /**
-     * @return {?}
-     */
-    get inputs() {
-        /** @type {?} */
-        const inputsArr = [];
-        /** @type {?} */
-        const inputs = (/** @type {?} */ (this._inputs));
-        for (let propName in inputs) {
-            /** @type {?} */
-            const templateName = inputs[propName];
-            inputsArr.push({ propName, templateName });
-        }
-        return inputsArr;
-    }
-    /**
-     * @return {?}
-     */
-    get outputs() {
-        /** @type {?} */
-        const outputsArr = [];
-        for (let propName in this._outputs) {
-            /** @type {?} */
-            const templateName = this._outputs[propName];
-            outputsArr.push({ propName, templateName });
-        }
-        return outputsArr;
-    }
-    /**
-     * Creates a new component.
-     * @param {?} injector
-     * @param {?=} projectableNodes
-     * @param {?=} rootSelectorOrNode
-     * @param {?=} ngModule
-     * @return {?}
-     */
-    create(injector, projectableNodes, rootSelectorOrNode, ngModule) {
-        if (!ngModule) {
-            throw new Error('ngModule should be provided');
-        }
-        /** @type {?} */
-        const viewDef = resolveDefinition(this.viewDefFactory);
-        /** @type {?} */
-        const componentNodeIndex = (/** @type {?} */ ((/** @type {?} */ (viewDef.nodes[0].element)).componentProvider)).nodeIndex;
-        /** @type {?} */
-        const view = Services.createRootView(injector, projectableNodes || [], rootSelectorOrNode, viewDef, ngModule, EMPTY_CONTEXT);
-        /** @type {?} */
-        const component = asProviderData(view, componentNodeIndex).instance;
-        if (rootSelectorOrNode) {
-            view.renderer.setAttribute(asElementData(view, 0).renderElement, 'ng-version', VERSION.full);
-        }
-        return new ComponentRef_(view, new ViewRef_(view), component);
-    }
-}
-class ComponentRef_ extends ComponentRef {
-    /**
-     * @param {?} _view
-     * @param {?} _viewRef
-     * @param {?} _component
-     */
-    constructor(_view, _viewRef, _component) {
-        super();
-        this._view = _view;
-        this._viewRef = _viewRef;
-        this._component = _component;
-        this._elDef = this._view.def.nodes[0];
-        this.hostView = _viewRef;
-        this.changeDetectorRef = _viewRef;
-        this.instance = _component;
-    }
-    /**
-     * @return {?}
-     */
-    get location() {
-        return new ElementRef(asElementData(this._view, this._elDef.nodeIndex).renderElement);
-    }
-    /**
-     * @return {?}
-     */
-    get injector() { return new Injector_(this._view, this._elDef); }
-    /**
-     * @return {?}
-     */
-    get componentType() { return (/** @type {?} */ (this._component.constructor)); }
-    /**
-     * @return {?}
-     */
-    destroy() { this._viewRef.destroy(); }
-    /**
-     * @param {?} callback
-     * @return {?}
-     */
-    onDestroy(callback) { this._viewRef.onDestroy(callback); }
-}
-/**
- * @param {?} view
- * @param {?} elDef
- * @param {?} elData
- * @return {?}
- */
-function createViewContainerData(view, elDef, elData) {
-    return new ViewContainerRef_(view, elDef, elData);
-}
-class ViewContainerRef_ {
-    /**
-     * @param {?} _view
-     * @param {?} _elDef
-     * @param {?} _data
-     */
-    constructor(_view, _elDef, _data) {
-        this._view = _view;
-        this._elDef = _elDef;
-        this._data = _data;
-        /**
-         * \@internal
-         */
-        this._embeddedViews = [];
-    }
-    /**
-     * @return {?}
-     */
-    get element() { return new ElementRef(this._data.renderElement); }
-    /**
-     * @return {?}
-     */
-    get injector() { return new Injector_(this._view, this._elDef); }
-    /**
-     * @deprecated No replacement
-     * @return {?}
-     */
-    get parentInjector() {
-        /** @type {?} */
-        let view = this._view;
-        /** @type {?} */
-        let elDef = this._elDef.parent;
-        while (!elDef && view) {
-            elDef = viewParentEl(view);
-            view = (/** @type {?} */ (view.parent));
-        }
-        return view ? new Injector_(view, elDef) : new Injector_(this._view, null);
-    }
-    /**
-     * @return {?}
-     */
-    clear() {
-        /** @type {?} */
-        const len = this._embeddedViews.length;
-        for (let i = len - 1; i >= 0; i--) {
-            /** @type {?} */
-            const view = (/** @type {?} */ (detachEmbeddedView(this._data, i)));
-            Services.destroyView(view);
-        }
-    }
-    /**
-     * @param {?} index
-     * @return {?}
-     */
-    get(index) {
-        /** @type {?} */
-        const view = this._embeddedViews[index];
-        if (view) {
-            /** @type {?} */
-            const ref = new ViewRef_(view);
-            ref.attachToViewContainerRef(this);
-            return ref;
-        }
-        return null;
-    }
-    /**
-     * @return {?}
-     */
-    get length() { return this._embeddedViews.length; }
-    /**
-     * @template C
-     * @param {?} templateRef
-     * @param {?=} context
-     * @param {?=} index
-     * @return {?}
-     */
-    createEmbeddedView(templateRef, context, index) {
-        /** @type {?} */
-        const viewRef = templateRef.createEmbeddedView(context || (/** @type {?} */ ({})));
-        this.insert(viewRef, index);
-        return viewRef;
-    }
-    /**
-     * @template C
-     * @param {?} componentFactory
-     * @param {?=} index
-     * @param {?=} injector
-     * @param {?=} projectableNodes
-     * @param {?=} ngModuleRef
-     * @return {?}
-     */
-    createComponent(componentFactory, index, injector, projectableNodes, ngModuleRef) {
-        /** @type {?} */
-        const contextInjector = injector || this.parentInjector;
-        if (!ngModuleRef && !(componentFactory instanceof ComponentFactoryBoundToModule)) {
-            ngModuleRef = contextInjector.get(NgModuleRef);
-        }
-        /** @type {?} */
-        const componentRef = componentFactory.create(contextInjector, projectableNodes, undefined, ngModuleRef);
-        this.insert(componentRef.hostView, index);
-        return componentRef;
-    }
-    /**
-     * @param {?} viewRef
-     * @param {?=} index
-     * @return {?}
-     */
-    insert(viewRef, index) {
-        if (viewRef.destroyed) {
-            throw new Error('Cannot insert a destroyed View in a ViewContainer!');
-        }
-        /** @type {?} */
-        const viewRef_ = (/** @type {?} */ (viewRef));
-        /** @type {?} */
-        const viewData = viewRef_._view;
-        attachEmbeddedView(this._view, this._data, index, viewData);
-        viewRef_.attachToViewContainerRef(this);
-        return viewRef;
-    }
-    /**
-     * @param {?} viewRef
-     * @param {?} currentIndex
-     * @return {?}
-     */
-    move(viewRef, currentIndex) {
-        if (viewRef.destroyed) {
-            throw new Error('Cannot move a destroyed View in a ViewContainer!');
-        }
-        /** @type {?} */
-        const previousIndex = this._embeddedViews.indexOf(viewRef._view);
-        moveEmbeddedView(this._data, previousIndex, currentIndex);
-        return viewRef;
-    }
-    /**
-     * @param {?} viewRef
-     * @return {?}
-     */
-    indexOf(viewRef) {
-        return this._embeddedViews.indexOf(((/** @type {?} */ (viewRef)))._view);
-    }
-    /**
-     * @param {?=} index
-     * @return {?}
-     */
-    remove(index) {
-        /** @type {?} */
-        const viewData = detachEmbeddedView(this._data, index);
-        if (viewData) {
-            Services.destroyView(viewData);
-        }
-    }
-    /**
-     * @param {?=} index
-     * @return {?}
-     */
-    detach(index) {
-        /** @type {?} */
-        const view = detachEmbeddedView(this._data, index);
-        return view ? new ViewRef_(view) : null;
-    }
-}
-/**
- * @param {?} view
- * @return {?}
- */
-function createChangeDetectorRef(view) {
-    return new ViewRef_(view);
-}
-class ViewRef_ {
-    /**
-     * @param {?} _view
-     */
-    constructor(_view) {
-        this._view = _view;
-        this._viewContainerRef = null;
-        this._appRef = null;
-    }
-    /**
-     * @return {?}
-     */
-    get rootNodes() { return rootRenderNodes(this._view); }
-    /**
-     * @return {?}
-     */
-    get context() { return this._view.context; }
-    /**
-     * @return {?}
-     */
-    get destroyed() { return (this._view.state & 128 /* Destroyed */) !== 0; }
-    /**
-     * @return {?}
-     */
-    markForCheck() { markParentViewsForCheck(this._view); }
-    /**
-     * @return {?}
-     */
-    detach() { this._view.state &= ~4 /* Attached */; }
-    /**
-     * @return {?}
-     */
-    detectChanges() {
-        /** @type {?} */
-        const fs = this._view.root.rendererFactory;
-        if (fs.begin) {
-            fs.begin();
-        }
-        try {
-            Services.checkAndUpdateView(this._view);
-        }
-        finally {
-            if (fs.end) {
-                fs.end();
-            }
-        }
-    }
-    /**
-     * @return {?}
-     */
-    checkNoChanges() { Services.checkNoChangesView(this._view); }
-    /**
-     * @return {?}
-     */
-    reattach() { this._view.state |= 4 /* Attached */; }
-    /**
-     * @param {?} callback
-     * @return {?}
-     */
-    onDestroy(callback) {
-        if (!this._view.disposables) {
-            this._view.disposables = [];
-        }
-        this._view.disposables.push((/** @type {?} */ (callback)));
-    }
-    /**
-     * @return {?}
-     */
-    destroy() {
-        if (this._appRef) {
-            this._appRef.detachView(this);
-        }
-        else if (this._viewContainerRef) {
-            this._viewContainerRef.detach(this._viewContainerRef.indexOf(this));
-        }
-        Services.destroyView(this._view);
-    }
-    /**
-     * @return {?}
-     */
-    detachFromAppRef() {
-        this._appRef = null;
-        renderDetachView(this._view);
-        Services.dirtyParentQueries(this._view);
-    }
-    /**
-     * @param {?} appRef
-     * @return {?}
-     */
-    attachToAppRef(appRef) {
-        if (this._viewContainerRef) {
-            throw new Error('This view is already attached to a ViewContainer!');
-        }
-        this._appRef = appRef;
-    }
-    /**
-     * @param {?} vcRef
-     * @return {?}
-     */
-    attachToViewContainerRef(vcRef) {
-        if (this._appRef) {
-            throw new Error('This view is already attached directly to the ApplicationRef!');
-        }
-        this._viewContainerRef = vcRef;
-    }
-}
-/**
- * @param {?} view
- * @param {?} def
- * @return {?}
- */
-function createTemplateData(view, def) {
-    return new TemplateRef_(view, def);
-}
-class TemplateRef_ extends TemplateRef {
-    /**
-     * @param {?} _parentView
-     * @param {?} _def
-     */
-    constructor(_parentView, _def) {
-        super();
-        this._parentView = _parentView;
-        this._def = _def;
-    }
-    /**
-     * @param {?} context
-     * @return {?}
-     */
-    createEmbeddedView(context) {
-        return new ViewRef_(Services.createEmbeddedView(this._parentView, this._def, (/** @type {?} */ ((/** @type {?} */ (this._def.element)).template)), context));
-    }
-    /**
-     * @return {?}
-     */
-    get elementRef() {
-        return new ElementRef(asElementData(this._parentView, this._def.nodeIndex).renderElement);
-    }
-}
-/**
- * @param {?} view
- * @param {?} elDef
- * @return {?}
- */
-function createInjector$1(view, elDef) {
-    return new Injector_(view, elDef);
-}
-class Injector_ {
-    /**
-     * @param {?} view
-     * @param {?} elDef
-     */
-    constructor(view, elDef) {
-        this.view = view;
-        this.elDef = elDef;
-    }
-    /**
-     * @param {?} token
-     * @param {?=} notFoundValue
-     * @return {?}
-     */
-    get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND) {
-        /** @type {?} */
-        const allowPrivateServices = this.elDef ? (this.elDef.flags & 33554432 /* ComponentView */) !== 0 : false;
-        return Services.resolveDep(this.view, this.elDef, allowPrivateServices, { flags: 0 /* None */, token, tokenKey: tokenKey(token) }, notFoundValue);
-    }
-}
-/**
- * @param {?} view
- * @param {?} index
- * @return {?}
- */
-function nodeValue(view, index) {
-    /** @type {?} */
-    const def = view.def.nodes[index];
-    if (def.flags & 1 /* TypeElement */) {
-        /** @type {?} */
-        const elData = asElementData(view, def.nodeIndex);
-        return (/** @type {?} */ (def.element)).template ? elData.template : elData.renderElement;
-    }
-    else if (def.flags & 2 /* TypeText */) {
-        return asTextData(view, def.nodeIndex).renderText;
-    }
-    else if (def.flags & (20224 /* CatProvider */ | 16 /* TypePipe */)) {
-        return asProviderData(view, def.nodeIndex).instance;
-    }
-    throw new Error(`Illegal state: read nodeValue for node index ${index}`);
-}
-/**
- * @param {?} view
- * @return {?}
- */
-function createRendererV1(view) {
-    return new RendererAdapter(view.renderer);
-}
-class RendererAdapter {
-    /**
-     * @param {?} delegate
-     */
-    constructor(delegate) {
-        this.delegate = delegate;
-    }
-    /**
-     * @param {?} selectorOrNode
-     * @return {?}
-     */
-    selectRootElement(selectorOrNode) {
-        return this.delegate.selectRootElement(selectorOrNode);
-    }
-    /**
-     * @param {?} parent
-     * @param {?} namespaceAndName
-     * @return {?}
-     */
-    createElement(parent, namespaceAndName) {
-        const [ns, name] = splitNamespace(namespaceAndName);
-        /** @type {?} */
-        const el = this.delegate.createElement(name, ns);
-        if (parent) {
-            this.delegate.appendChild(parent, el);
-        }
-        return el;
-    }
-    /**
-     * @param {?} hostElement
-     * @return {?}
-     */
-    createViewRoot(hostElement) { return hostElement; }
-    /**
-     * @param {?} parentElement
-     * @return {?}
-     */
-    createTemplateAnchor(parentElement) {
-        /** @type {?} */
-        const comment = this.delegate.createComment('');
-        if (parentElement) {
-            this.delegate.appendChild(parentElement, comment);
-        }
-        return comment;
-    }
-    /**
-     * @param {?} parentElement
-     * @param {?} value
-     * @return {?}
-     */
-    createText(parentElement, value) {
-        /** @type {?} */
-        const node = this.delegate.createText(value);
-        if (parentElement) {
-            this.delegate.appendChild(parentElement, node);
-        }
-        return node;
-    }
-    /**
-     * @param {?} parentElement
-     * @param {?} nodes
-     * @return {?}
-     */
-    projectNodes(parentElement, nodes) {
-        for (let i = 0; i < nodes.length; i++) {
-            this.delegate.appendChild(parentElement, nodes[i]);
-        }
-    }
-    /**
-     * @param {?} node
-     * @param {?} viewRootNodes
-     * @return {?}
-     */
-    attachViewAfter(node, viewRootNodes) {
-        /** @type {?} */
-        const parentElement = this.delegate.parentNode(node);
-        /** @type {?} */
-        const nextSibling = this.delegate.nextSibling(node);
-        for (let i = 0; i < viewRootNodes.length; i++) {
-            this.delegate.insertBefore(parentElement, viewRootNodes[i], nextSibling);
-        }
-    }
-    /**
-     * @param {?} viewRootNodes
-     * @return {?}
-     */
-    detachView(viewRootNodes) {
-        for (let i = 0; i < viewRootNodes.length; i++) {
-            /** @type {?} */
-            const node = viewRootNodes[i];
-            /** @type {?} */
-            const parentElement = this.delegate.parentNode(node);
-            this.delegate.removeChild(parentElement, node);
-        }
-    }
-    /**
-     * @param {?} hostElement
-     * @param {?} viewAllNodes
-     * @return {?}
-     */
-    destroyView(hostElement, viewAllNodes) {
-        for (let i = 0; i < viewAllNodes.length; i++) {
-            (/** @type {?} */ (this.delegate.destroyNode))(viewAllNodes[i]);
-        }
-    }
-    /**
-     * @param {?} renderElement
-     * @param {?} name
-     * @param {?} callback
-     * @return {?}
-     */
-    listen(renderElement, name, callback) {
-        return this.delegate.listen(renderElement, name, (/** @type {?} */ (callback)));
-    }
-    /**
-     * @param {?} target
-     * @param {?} name
-     * @param {?} callback
-     * @return {?}
-     */
-    listenGlobal(target, name, callback) {
-        return this.delegate.listen(target, name, (/** @type {?} */ (callback)));
-    }
-    /**
-     * @param {?} renderElement
-     * @param {?} propertyName
-     * @param {?} propertyValue
-     * @return {?}
-     */
-    setElementProperty(renderElement, propertyName, propertyValue) {
-        this.delegate.setProperty(renderElement, propertyName, propertyValue);
-    }
-    /**
-     * @param {?} renderElement
-     * @param {?} namespaceAndName
-     * @param {?=} attributeValue
-     * @return {?}
-     */
-    setElementAttribute(renderElement, namespaceAndName, attributeValue) {
-        const [ns, name] = splitNamespace(namespaceAndName);
-        if (attributeValue != null) {
-            this.delegate.setAttribute(renderElement, name, attributeValue, ns);
-        }
-        else {
-            this.delegate.removeAttribute(renderElement, name, ns);
-        }
-    }
-    /**
-     * @param {?} renderElement
-     * @param {?} propertyName
-     * @param {?} propertyValue
-     * @return {?}
-     */
-    setBindingDebugInfo(renderElement, propertyName, propertyValue) { }
-    /**
-     * @param {?} renderElement
-     * @param {?} className
-     * @param {?} isAdd
-     * @return {?}
-     */
-    setElementClass(renderElement, className, isAdd) {
-        if (isAdd) {
-            this.delegate.addClass(renderElement, className);
-        }
-        else {
-            this.delegate.removeClass(renderElement, className);
-        }
-    }
-    /**
-     * @param {?} renderElement
-     * @param {?} styleName
-     * @param {?=} styleValue
-     * @return {?}
-     */
-    setElementStyle(renderElement, styleName, styleValue) {
-        if (styleValue != null) {
-            this.delegate.setStyle(renderElement, styleName, styleValue);
-        }
-        else {
-            this.delegate.removeStyle(renderElement, styleName);
-        }
-    }
-    /**
-     * @param {?} renderElement
-     * @param {?} methodName
-     * @param {?} args
-     * @return {?}
-     */
-    invokeElementMethod(renderElement, methodName, args) {
-        ((/** @type {?} */ (renderElement)))[methodName].apply(renderElement, args);
-    }
-    /**
-     * @param {?} renderNode
-     * @param {?} text
-     * @return {?}
-     */
-    setText(renderNode$$1, text) { this.delegate.setValue(renderNode$$1, text); }
-    /**
-     * @return {?}
-     */
-    animate() { throw new Error('Renderer.animate is no longer supported!'); }
-}
-/**
- * @param {?} moduleType
- * @param {?} parent
- * @param {?} bootstrapComponents
- * @param {?} def
- * @return {?}
- */
-function createNgModuleRef(moduleType, parent, bootstrapComponents, def) {
-    return new NgModuleRef_(moduleType, parent, bootstrapComponents, def);
-}
-class NgModuleRef_ {
-    /**
-     * @param {?} _moduleType
-     * @param {?} _parent
-     * @param {?} _bootstrapComponents
-     * @param {?} _def
-     */
-    constructor(_moduleType, _parent, _bootstrapComponents, _def) {
-        this._moduleType = _moduleType;
-        this._parent = _parent;
-        this._bootstrapComponents = _bootstrapComponents;
-        this._def = _def;
-        this._destroyListeners = [];
-        this._destroyed = false;
-        this.injector = this;
-        initNgModule(this);
-    }
-    /**
-     * @param {?} token
-     * @param {?=} notFoundValue
-     * @param {?=} injectFlags
-     * @return {?}
-     */
-    get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND, injectFlags = InjectFlags.Default) {
-        /** @type {?} */
-        let flags = 0 /* None */;
-        if (injectFlags & InjectFlags.SkipSelf) {
-            flags |= 1 /* SkipSelf */;
-        }
-        else if (injectFlags & InjectFlags.Self) {
-            flags |= 4 /* Self */;
-        }
-        return resolveNgModuleDep(this, { token: token, tokenKey: tokenKey(token), flags: flags }, notFoundValue);
-    }
-    /**
-     * @return {?}
-     */
-    get instance() { return this.get(this._moduleType); }
-    /**
-     * @return {?}
-     */
-    get componentFactoryResolver() { return this.get(ComponentFactoryResolver); }
-    /**
-     * @return {?}
-     */
-    destroy() {
-        if (this._destroyed) {
-            throw new Error(`The ng module ${stringify(this.instance.constructor)} has already been destroyed.`);
-        }
-        this._destroyed = true;
-        callNgModuleLifecycle(this, 131072 /* OnDestroy */);
-        this._destroyListeners.forEach((listener) => listener());
-    }
-    /**
-     * @param {?} callback
-     * @return {?}
-     */
-    onDestroy(callback) { this._destroyListeners.push(callback); }
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/** @type {?} */
-const RendererV1TokenKey = tokenKey(Renderer);
-/** @type {?} */
-const Renderer2TokenKey = tokenKey(Renderer2);
-/** @type {?} */
-const ElementRefTokenKey = tokenKey(ElementRef);
-/** @type {?} */
-const ViewContainerRefTokenKey = tokenKey(ViewContainerRef);
-/** @type {?} */
-const TemplateRefTokenKey = tokenKey(TemplateRef);
-/** @type {?} */
-const ChangeDetectorRefTokenKey = tokenKey(ChangeDetectorRef);
-/** @type {?} */
-const InjectorRefTokenKey$1 = tokenKey(Injector);
-/** @type {?} */
-const INJECTORRefTokenKey$1 = tokenKey(INJECTOR);
-/**
- * @param {?} checkIndex
- * @param {?} flags
- * @param {?} matchedQueries
- * @param {?} childCount
- * @param {?} ctor
- * @param {?} deps
- * @param {?=} props
- * @param {?=} outputs
- * @return {?}
- */
-function directiveDef(checkIndex, flags, matchedQueries, childCount, ctor, deps, props, outputs) {
-    /** @type {?} */
-    const bindings = [];
-    if (props) {
-        for (let prop in props) {
-            const [bindingIndex, nonMinifiedName] = props[prop];
-            bindings[bindingIndex] = {
-                flags: 8 /* TypeProperty */,
-                name: prop, nonMinifiedName,
-                ns: null,
-                securityContext: null,
-                suffix: null
-            };
-        }
-    }
-    /** @type {?} */
-    const outputDefs = [];
-    if (outputs) {
-        for (let propName in outputs) {
-            outputDefs.push({ type: 1 /* DirectiveOutput */, propName, target: null, eventName: outputs[propName] });
-        }
-    }
-    flags |= 16384 /* TypeDirective */;
-    return _def(checkIndex, flags, matchedQueries, childCount, ctor, ctor, deps, bindings, outputDefs);
-}
-/**
- * @param {?} flags
- * @param {?} ctor
- * @param {?} deps
- * @return {?}
- */
-function pipeDef(flags, ctor, deps) {
-    flags |= 16 /* TypePipe */;
-    return _def(-1, flags, null, 0, ctor, ctor, deps);
-}
-/**
- * @param {?} flags
- * @param {?} matchedQueries
- * @param {?} token
- * @param {?} value
- * @param {?} deps
- * @return {?}
- */
-function providerDef(flags, matchedQueries, token, value, deps) {
-    return _def(-1, flags, matchedQueries, 0, token, value, deps);
-}
-/**
- * @param {?} checkIndex
- * @param {?} flags
- * @param {?} matchedQueriesDsl
- * @param {?} childCount
- * @param {?} token
- * @param {?} value
- * @param {?} deps
- * @param {?=} bindings
- * @param {?=} outputs
- * @return {?}
- */
-function _def(checkIndex, flags, matchedQueriesDsl, childCount, token, value, deps, bindings, outputs) {
-    const { matchedQueries, references, matchedQueryIds } = splitMatchedQueriesDsl(matchedQueriesDsl);
-    if (!outputs) {
-        outputs = [];
-    }
-    if (!bindings) {
-        bindings = [];
-    }
-    // Need to resolve forwardRefs as e.g. for `useValue` we
-    // lowered the expression and then stopped evaluating it,
-    // i.e. also didn't unwrap it.
-    value = resolveForwardRef(value);
-    /** @type {?} */
-    const depDefs = splitDepsDsl(deps, stringify(token));
-    return {
-        // will bet set by the view definition
-        nodeIndex: -1,
-        parent: null,
-        renderParent: null,
-        bindingIndex: -1,
-        outputIndex: -1,
-        // regular values
-        checkIndex,
-        flags,
-        childFlags: 0,
-        directChildFlags: 0,
-        childMatchedQueries: 0, matchedQueries, matchedQueryIds, references,
-        ngContentIndex: -1, childCount, bindings,
-        bindingFlags: calcBindingFlags(bindings), outputs,
-        element: null,
-        provider: { token, value, deps: depDefs },
-        text: null,
-        query: null,
-        ngContent: null
-    };
-}
-/**
- * @param {?} view
- * @param {?} def
- * @return {?}
- */
-function createProviderInstance(view, def) {
-    return _createProviderInstance$1(view, def);
-}
-/**
- * @param {?} view
- * @param {?} def
- * @return {?}
- */
-function createPipeInstance(view, def) {
-    // deps are looked up from component.
-    /** @type {?} */
-    let compView = view;
-    while (compView.parent && !isComponentView(compView)) {
-        compView = compView.parent;
-    }
-    // pipes can see the private services of the component
-    /** @type {?} */
-    const allowPrivateServices = true;
-    // pipes are always eager and classes!
-    return createClass((/** @type {?} */ (compView.parent)), (/** @type {?} */ (viewParentEl(compView))), allowPrivateServices, (/** @type {?} */ (def.provider)).value, (/** @type {?} */ (def.provider)).deps);
-}
-/**
- * @param {?} view
- * @param {?} def
- * @return {?}
- */
-function createDirectiveInstance(view, def) {
-    // components can see other private services, other directives can't.
-    /** @type {?} */
-    const allowPrivateServices = (def.flags & 32768 /* Component */) > 0;
-    // directives are always eager and classes!
-    /** @type {?} */
-    const instance = createClass(view, (/** @type {?} */ (def.parent)), allowPrivateServices, (/** @type {?} */ (def.provider)).value, (/** @type {?} */ (def.provider)).deps);
-    if (def.outputs.length) {
-        for (let i = 0; i < def.outputs.length; i++) {
-            /** @type {?} */
-            const output = def.outputs[i];
-            /** @type {?} */
-            const outputObservable = instance[(/** @type {?} */ (output.propName))];
-            if (isObservable(outputObservable)) {
-                /** @type {?} */
-                const subscription = outputObservable.subscribe(eventHandlerClosure(view, (/** @type {?} */ (def.parent)).nodeIndex, output.eventName));
-                (/** @type {?} */ (view.disposables))[def.outputIndex + i] = subscription.unsubscribe.bind(subscription);
-            }
-            else {
-                throw new Error(`@Output ${output.propName} not initialized in '${instance.constructor.name}'.`);
-            }
-        }
-    }
-    return instance;
-}
-/**
- * @param {?} view
- * @param {?} index
- * @param {?} eventName
- * @return {?}
- */
-function eventHandlerClosure(view, index, eventName) {
-    return (event) => dispatchEvent(view, index, eventName, event);
-}
-/**
- * @param {?} view
- * @param {?} def
- * @param {?} v0
- * @param {?} v1
- * @param {?} v2
- * @param {?} v3
- * @param {?} v4
- * @param {?} v5
- * @param {?} v6
- * @param {?} v7
- * @param {?} v8
- * @param {?} v9
- * @return {?}
- */
-function checkAndUpdateDirectiveInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
-    /** @type {?} */
-    const providerData = asProviderData(view, def.nodeIndex);
-    /** @type {?} */
-    const directive = providerData.instance;
-    /** @type {?} */
-    let changed = false;
-    /** @type {?} */
-    let changes = (/** @type {?} */ (undefined));
-    /** @type {?} */
-    const bindLen = def.bindings.length;
-    if (bindLen > 0 && checkBinding(view, def, 0, v0)) {
-        changed = true;
-        changes = updateProp(view, providerData, def, 0, v0, changes);
-    }
-    if (bindLen > 1 && checkBinding(view, def, 1, v1)) {
-        changed = true;
-        changes = updateProp(view, providerData, def, 1, v1, changes);
-    }
-    if (bindLen > 2 && checkBinding(view, def, 2, v2)) {
-        changed = true;
-        changes = updateProp(view, providerData, def, 2, v2, changes);
-    }
-    if (bindLen > 3 && checkBinding(view, def, 3, v3)) {
-        changed = true;
-        changes = updateProp(view, providerData, def, 3, v3, changes);
-    }
-    if (bindLen > 4 && checkBinding(view, def, 4, v4)) {
-        changed = true;
-        changes = updateProp(view, providerData, def, 4, v4, changes);
-    }
-    if (bindLen > 5 && checkBinding(view, def, 5, v5)) {
-        changed = true;
-        changes = updateProp(view, providerData, def, 5, v5, changes);
-    }
-    if (bindLen > 6 && checkBinding(view, def, 6, v6)) {
-        changed = true;
-        changes = updateProp(view, providerData, def, 6, v6, changes);
-    }
-    if (bindLen > 7 && checkBinding(view, def, 7, v7)) {
-        changed = true;
-        changes = updateProp(view, providerData, def, 7, v7, changes);
-    }
-    if (bindLen > 8 && checkBinding(view, def, 8, v8)) {
-        changed = true;
-        changes = updateProp(view, providerData, def, 8, v8, changes);
-    }
-    if (bindLen > 9 && checkBinding(view, def, 9, v9)) {
-        changed = true;
-        changes = updateProp(view, providerData, def, 9, v9, changes);
-    }
-    if (changes) {
-        directive.ngOnChanges(changes);
-    }
-    if ((def.flags & 65536 /* OnInit */) &&
-        shouldCallLifecycleInitHook(view, 256 /* InitState_CallingOnInit */, def.nodeIndex)) {
-        directive.ngOnInit();
-    }
-    if (def.flags & 262144 /* DoCheck */) {
-        directive.ngDoCheck();
-    }
-    return changed;
-}
-/**
- * @param {?} view
- * @param {?} def
- * @param {?} values
- * @return {?}
- */
-function checkAndUpdateDirectiveDynamic(view, def, values) {
-    /** @type {?} */
-    const providerData = asProviderData(view, def.nodeIndex);
-    /** @type {?} */
-    const directive = providerData.instance;
-    /** @type {?} */
-    let changed = false;
-    /** @type {?} */
-    let changes = (/** @type {?} */ (undefined));
-    for (let i = 0; i < values.length; i++) {
-        if (checkBinding(view, def, i, values[i])) {
-            changed = true;
-            changes = updateProp(view, providerData, def, i, values[i], changes);
-        }
-    }
-    if (changes) {
-        directive.ngOnChanges(changes);
-    }
-    if ((def.flags & 65536 /* OnInit */) &&
-        shouldCallLifecycleInitHook(view, 256 /* InitState_CallingOnInit */, def.nodeIndex)) {
-        directive.ngOnInit();
-    }
-    if (def.flags & 262144 /* DoCheck */) {
-        directive.ngDoCheck();
-    }
-    return changed;
-}
-/**
- * @param {?} view
- * @param {?} def
- * @return {?}
- */
-function _createProviderInstance$1(view, def) {
-    // private services can see other private services
-    /** @type {?} */
-    const allowPrivateServices = (def.flags & 8192 /* PrivateProvider */) > 0;
-    /** @type {?} */
-    const providerDef = def.provider;
-    switch (def.flags & 201347067 /* Types */) {
-        case 512 /* TypeClassProvider */:
-            return createClass(view, (/** @type {?} */ (def.parent)), allowPrivateServices, (/** @type {?} */ (providerDef)).value, (/** @type {?} */ (providerDef)).deps);
-        case 1024 /* TypeFactoryProvider */:
-            return callFactory(view, (/** @type {?} */ (def.parent)), allowPrivateServices, (/** @type {?} */ (providerDef)).value, (/** @type {?} */ (providerDef)).deps);
-        case 2048 /* TypeUseExistingProvider */:
-            return resolveDep(view, (/** @type {?} */ (def.parent)), allowPrivateServices, (/** @type {?} */ (providerDef)).deps[0]);
-        case 256 /* TypeValueProvider */:
-            return (/** @type {?} */ (providerDef)).value;
-    }
-}
-/**
- * @param {?} view
- * @param {?} elDef
- * @param {?} allowPrivateServices
- * @param {?} ctor
- * @param {?} deps
- * @return {?}
- */
-function createClass(view, elDef, allowPrivateServices, ctor, deps) {
-    /** @type {?} */
-    const len = deps.length;
-    switch (len) {
-        case 0:
-            return new ctor();
-        case 1:
-            return new ctor(resolveDep(view, elDef, allowPrivateServices, deps[0]));
-        case 2:
-            return new ctor(resolveDep(view, elDef, allowPrivateServices, deps[0]), resolveDep(view, elDef, allowPrivateServices, deps[1]));
-        case 3:
-            return new ctor(resolveDep(view, elDef, allowPrivateServices, deps[0]), resolveDep(view, elDef, allowPrivateServices, deps[1]), resolveDep(view, elDef, allowPrivateServices, deps[2]));
-        default:
-            /** @type {?} */
-            const depValues = new Array(len);
-            for (let i = 0; i < len; i++) {
-                depValues[i] = resolveDep(view, elDef, allowPrivateServices, deps[i]);
-            }
-            return new ctor(...depValues);
-    }
-}
-/**
- * @param {?} view
- * @param {?} elDef
- * @param {?} allowPrivateServices
- * @param {?} factory
- * @param {?} deps
- * @return {?}
- */
-function callFactory(view, elDef, allowPrivateServices, factory, deps) {
-    /** @type {?} */
-    const len = deps.length;
-    switch (len) {
-        case 0:
-            return factory();
-        case 1:
-            return factory(resolveDep(view, elDef, allowPrivateServices, deps[0]));
-        case 2:
-            return factory(resolveDep(view, elDef, allowPrivateServices, deps[0]), resolveDep(view, elDef, allowPrivateServices, deps[1]));
-        case 3:
-            return factory(resolveDep(view, elDef, allowPrivateServices, deps[0]), resolveDep(view, elDef, allowPrivateServices, deps[1]), resolveDep(view, elDef, allowPrivateServices, deps[2]));
-        default:
-            /** @type {?} */
-            const depValues = Array(len);
-            for (let i = 0; i < len; i++) {
-                depValues[i] = resolveDep(view, elDef, allowPrivateServices, deps[i]);
-            }
-            return factory(...depValues);
-    }
-}
-// This default value is when checking the hierarchy for a token.
-//
-// It means both:
-// - the token is not provided by the current injector,
-// - only the element injectors should be checked (ie do not check module injectors
-//
-//          mod1
-//         /
-//       el1   mod2
-//         \  /
-//         el2
-//
-// When requesting el2.injector.get(token), we should check in the following order and return the
-// first found value:
-// - el2.injector.get(token, default)
-// - el1.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) -> do not check the module
-// - mod2.injector.get(token, default)
-/** @type {?} */
-const NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR$1 = {};
-/**
- * @param {?} view
- * @param {?} elDef
- * @param {?} allowPrivateServices
- * @param {?} depDef
- * @param {?=} notFoundValue
- * @return {?}
- */
-function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue = Injector.THROW_IF_NOT_FOUND) {
-    if (depDef.flags & 8 /* Value */) {
-        return depDef.token;
-    }
-    /** @type {?} */
-    const startView = view;
-    if (depDef.flags & 2 /* Optional */) {
-        notFoundValue = null;
-    }
-    /** @type {?} */
-    const tokenKey$$1 = depDef.tokenKey;
-    if (tokenKey$$1 === ChangeDetectorRefTokenKey) {
-        // directives on the same element as a component should be able to control the change detector
-        // of that component as well.
-        allowPrivateServices = !!(elDef && (/** @type {?} */ (elDef.element)).componentView);
-    }
-    if (elDef && (depDef.flags & 1 /* SkipSelf */)) {
-        allowPrivateServices = false;
-        elDef = (/** @type {?} */ (elDef.parent));
-    }
-    /** @type {?} */
-    let searchView = view;
-    while (searchView) {
-        if (elDef) {
-            switch (tokenKey$$1) {
-                case RendererV1TokenKey: {
-                    /** @type {?} */
-                    const compView = findCompView(searchView, elDef, allowPrivateServices);
-                    return createRendererV1(compView);
-                }
-                case Renderer2TokenKey: {
-                    /** @type {?} */
-                    const compView = findCompView(searchView, elDef, allowPrivateServices);
-                    return compView.renderer;
-                }
-                case ElementRefTokenKey:
-                    return new ElementRef(asElementData(searchView, elDef.nodeIndex).renderElement);
-                case ViewContainerRefTokenKey:
-                    return asElementData(searchView, elDef.nodeIndex).viewContainer;
-                case TemplateRefTokenKey: {
-                    if ((/** @type {?} */ (elDef.element)).template) {
-                        return asElementData(searchView, elDef.nodeIndex).template;
-                    }
-                    break;
-                }
-                case ChangeDetectorRefTokenKey: {
-                    /** @type {?} */
-                    let cdView = findCompView(searchView, elDef, allowPrivateServices);
-                    return createChangeDetectorRef(cdView);
-                }
-                case InjectorRefTokenKey$1:
-                case INJECTORRefTokenKey$1:
-                    return createInjector$1(searchView, elDef);
-                default:
-                    /** @type {?} */
-                    const providerDef = (/** @type {?} */ ((allowPrivateServices ? (/** @type {?} */ (elDef.element)).allProviders :
-                        (/** @type {?} */ (elDef.element)).publicProviders)))[tokenKey$$1];
-                    if (providerDef) {
-                        /** @type {?} */
-                        let providerData = asProviderData(searchView, providerDef.nodeIndex);
-                        if (!providerData) {
-                            providerData = { instance: _createProviderInstance$1(searchView, providerDef) };
-                            searchView.nodes[providerDef.nodeIndex] = (/** @type {?} */ (providerData));
-                        }
-                        return providerData.instance;
-                    }
-            }
-        }
-        allowPrivateServices = isComponentView(searchView);
-        elDef = (/** @type {?} */ (viewParentEl(searchView)));
-        searchView = (/** @type {?} */ (searchView.parent));
-        if (depDef.flags & 4 /* Self */) {
-            searchView = null;
-        }
-    }
-    /** @type {?} */
-    const value = startView.root.injector.get(depDef.token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR$1);
-    if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR$1 ||
-        notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR$1) {
-        // Return the value from the root element injector when
-        // - it provides it
-        //   (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
-        // - the module injector should not be checked
-        //   (notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
-        return value;
-    }
-    return startView.root.ngModule.injector.get(depDef.token, notFoundValue);
-}
-/**
- * @param {?} view
- * @param {?} elDef
- * @param {?} allowPrivateServices
- * @return {?}
- */
-function findCompView(view, elDef, allowPrivateServices) {
-    /** @type {?} */
-    let compView;
-    if (allowPrivateServices) {
-        compView = asElementData(view, elDef.nodeIndex).componentView;
-    }
-    else {
-        compView = view;
-        while (compView.parent && !isComponentView(compView)) {
-            compView = compView.parent;
-        }
-    }
-    return compView;
-}
-/**
- * @param {?} view
- * @param {?} providerData
- * @param {?} def
- * @param {?} bindingIdx
- * @param {?} value
- * @param {?} changes
- * @return {?}
- */
-function updateProp(view, providerData, def, bindingIdx, value, changes) {
-    if (def.flags & 32768 /* Component */) {
-        /** @type {?} */
-        const compView = asElementData(view, (/** @type {?} */ (def.parent)).nodeIndex).componentView;
-        if (compView.def.flags & 2 /* OnPush */) {
-            compView.state |= 8 /* ChecksEnabled */;
-        }
-    }
-    /** @type {?} */
-    const binding = def.bindings[bindingIdx];
-    /** @type {?} */
-    const propName = (/** @type {?} */ (binding.name));
-    // Note: This is still safe with Closure Compiler as
-    // the user passed in the property name as an object has to `providerDef`,
-    // so Closure Compiler will have renamed the property correctly already.
-    providerData.instance[propName] = value;
-    if (def.flags & 524288 /* OnChanges */) {
-        changes = changes || {};
-        /** @type {?} */
-        const oldValue = WrappedValue.unwrap(view.oldValues[def.bindingIndex + bindingIdx]);
-        /** @type {?} */
-        const binding = def.bindings[bindingIdx];
-        changes[(/** @type {?} */ (binding.nonMinifiedName))] =
-            new SimpleChange(oldValue, value, (view.state & 2 /* FirstCheck */) !== 0);
-    }
-    view.oldValues[def.bindingIndex + bindingIdx] = value;
-    return changes;
-}
-// This function calls the ngAfterContentCheck, ngAfterContentInit,
-// ngAfterViewCheck, and ngAfterViewInit lifecycle hooks (depending on the node
-// flags in lifecycle). Unlike ngDoCheck, ngOnChanges and ngOnInit, which are
-// called during a pre-order traversal of the view tree (that is calling the
-// parent hooks before the child hooks) these events are sent in using a
-// post-order traversal of the tree (children before parents). This changes the
-// meaning of initIndex in the view state. For ngOnInit, initIndex tracks the
-// expected nodeIndex which a ngOnInit should be called. When sending
-// ngAfterContentInit and ngAfterViewInit it is the expected count of
-// ngAfterContentInit or ngAfterViewInit methods that have been called. This
-// ensure that despite being called recursively or after picking up after an
-// exception, the ngAfterContentInit or ngAfterViewInit will be called on the
-// correct nodes. Consider for example, the following (where E is an element
-// and D is a directive)
-//  Tree:       pre-order index  post-order index
-//    E1        0                6
-//      E2      1                1
-//       D3     2                0
-//      E4      3                5
-//       E5     4                4
-//        E6    5                2
-//        E7    6                3
-// As can be seen, the post-order index has an unclear relationship to the
-// pre-order index (postOrderIndex === preOrderIndex - parentCount +
-// childCount). Since number of calls to ngAfterContentInit and ngAfterViewInit
-// are stable (will be the same for the same view regardless of exceptions or
-// recursion) we just need to count them which will roughly correspond to the
-// post-order index (it skips elements and directives that do not have
-// lifecycle hooks).
-//
-// For example, if an exception is raised in the E6.onAfterViewInit() the
-// initIndex is left at 3 (by shouldCallLifecycleInitHook() which set it to
-// initIndex + 1). When checkAndUpdateView() is called again D3, E2 and E6 will
-// not have their ngAfterViewInit() called but, starting with E7, the rest of
-// the view will begin getting ngAfterViewInit() called until a check and
-// pass is complete.
-//
-// This algorthim also handles recursion. Consider if E4's ngAfterViewInit()
-// indirectly calls E1's ChangeDetectorRef.detectChanges(). The expected
-// initIndex is set to 6, the recusive checkAndUpdateView() starts walk again.
-// D3, E2, E6, E7, E5 and E4 are skipped, ngAfterViewInit() is called on E1.
-// When the recursion returns the initIndex will be 7 so E1 is skipped as it
-// has already been called in the recursively called checkAnUpdateView().
-/**
- * @param {?} view
- * @param {?} lifecycles
- * @return {?}
- */
-function callLifecycleHooksChildrenFirst(view, lifecycles) {
-    if (!(view.def.nodeFlags & lifecycles)) {
-        return;
-    }
-    /** @type {?} */
-    const nodes = view.def.nodes;
-    /** @type {?} */
-    let initIndex = 0;
-    for (let i = 0; i < nodes.length; i++) {
-        /** @type {?} */
-        const nodeDef = nodes[i];
-        /** @type {?} */
-        let parent = nodeDef.parent;
-        if (!parent && nodeDef.flags & lifecycles) {
-            // matching root node (e.g. a pipe)
-            callProviderLifecycles(view, i, nodeDef.flags & lifecycles, initIndex++);
-        }
-        if ((nodeDef.childFlags & lifecycles) === 0) {
-            // no child matches one of the lifecycles
-            i += nodeDef.childCount;
-        }
-        while (parent && (parent.flags & 1 /* TypeElement */) &&
-            i === parent.nodeIndex + parent.childCount) {
-            // last child of an element
-            if (parent.directChildFlags & lifecycles) {
-                initIndex = callElementProvidersLifecycles(view, parent, lifecycles, initIndex);
-            }
-            parent = parent.parent;
-        }
-    }
-}
-/**
- * @param {?} view
- * @param {?} elDef
- * @param {?} lifecycles
- * @param {?} initIndex
- * @return {?}
- */
-function callElementProvidersLifecycles(view, elDef, lifecycles, initIndex) {
-    for (let i = elDef.nodeIndex + 1; i <= elDef.nodeIndex + elDef.childCount; i++) {
-        /** @type {?} */
-        const nodeDef = view.def.nodes[i];
-        if (nodeDef.flags & lifecycles) {
-            callProviderLifecycles(view, i, nodeDef.flags & lifecycles, initIndex++);
-        }
-        // only visit direct children
-        i += nodeDef.childCount;
-    }
-    return initIndex;
-}
-/**
- * @param {?} view
- * @param {?} index
- * @param {?} lifecycles
- * @param {?} initIndex
- * @return {?}
- */
-function callProviderLifecycles(view, index, lifecycles, initIndex) {
-    /** @type {?} */
-    const providerData = asProviderData(view, index);
-    if (!providerData) {
-        return;
-    }
-    /** @type {?} */
-    const provider = providerData.instance;
-    if (!provider) {
-        return;
-    }
-    Services.setCurrentNode(view, index);
-    if (lifecycles & 1048576 /* AfterContentInit */ &&
-        shouldCallLifecycleInitHook(view, 512 /* InitState_CallingAfterContentInit */, initIndex)) {
-        provider.ngAfterContentInit();
-    }
-    if (lifecycles & 2097152 /* AfterContentChecked */) {
-        provider.ngAfterContentChecked();
-    }
-    if (lifecycles & 4194304 /* AfterViewInit */ &&
-        shouldCallLifecycleInitHook(view, 768 /* InitState_CallingAfterViewInit */, initIndex)) {
-        provider.ngAfterViewInit();
-    }
-    if (lifecycles & 8388608 /* AfterViewChecked */) {
-        provider.ngAfterViewChecked();
-    }
-    if (lifecycles & 131072 /* OnDestroy */) {
-        provider.ngOnDestroy();
-    }
 }
 
 /**
@@ -31348,5 +31346,5 @@ class NgModuleFactory_ extends NgModuleFactory {
  * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, InjectFlags, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, INJECTOR, Injector, inject, inject as ɵinject, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual$1 as ɵdevModeEqual, isListLikeIterable$1 as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR$1 as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineBase as ɵdefineBase, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, directiveInject as ɵdirectiveInject, injectAttribute as ɵinjectAttribute, getFactoryOf$1 as ɵgetFactoryOf, getInheritedFactory as ɵgetInheritedFactory, templateRefExtractor as ɵtemplateRefExtractor, ProvidersFeature as ɵProvidersFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, NgOnChangesFeature as ɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, container as ɵcontainer, nextContext as ɵnextContext, elementStart as ɵelementStart, namespaceHTML as ɵnamespaceHTML, namespaceMathML as ɵnamespaceMathML, namespaceSVG as ɵnamespaceSVG, element as ɵelement, listener as ɵlistener, text as ɵtext, embeddedViewStart as ɵembeddedViewStart, query as ɵquery, registerContentQuery as ɵregisterContentQuery, projection as ɵprojection, bind as ɵbind, interpolation1 as ɵinterpolation1, interpolation2 as ɵinterpolation2, interpolation3 as ɵinterpolation3, interpolation4 as ɵinterpolation4, interpolation5 as ɵinterpolation5, interpolation6 as ɵinterpolation6, interpolation7 as ɵinterpolation7, interpolation8 as ɵinterpolation8, interpolationV as ɵinterpolationV, pipeBind1 as ɵpipeBind1, pipeBind2 as ɵpipeBind2, pipeBind3 as ɵpipeBind3, pipeBind4 as ɵpipeBind4, pipeBindV as ɵpipeBindV, pureFunction0 as ɵpureFunction0, pureFunction1 as ɵpureFunction1, pureFunction2 as ɵpureFunction2, pureFunction3 as ɵpureFunction3, pureFunction4 as ɵpureFunction4, pureFunction5 as ɵpureFunction5, pureFunction6 as ɵpureFunction6, pureFunction7 as ɵpureFunction7, pureFunction8 as ɵpureFunction8, pureFunctionV as ɵpureFunctionV, getCurrentView as ɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, restoreView as ɵrestoreView, containerRefreshStart as ɵcontainerRefreshStart, containerRefreshEnd as ɵcontainerRefreshEnd, queryRefresh as ɵqueryRefresh, viewQuery as ɵviewQuery, loadViewQuery as ɵloadViewQuery, loadQueryList as ɵloadQueryList, elementEnd as ɵelementEnd, elementProperty as ɵelementProperty, componentHostSyntheticProperty as ɵcomponentHostSyntheticProperty, componentHostSyntheticListener as ɵcomponentHostSyntheticListener, projectionDef as ɵprojectionDef, reference as ɵreference, enableBindings as ɵenableBindings, disableBindings as ɵdisableBindings, allocHostVars as ɵallocHostVars, elementAttribute as ɵelementAttribute, elementContainerStart as ɵelementContainerStart, elementContainerEnd as ɵelementContainerEnd, elementStyling as ɵelementStyling, elementHostAttrs as ɵelementHostAttrs, elementStylingMap as ɵelementStylingMap, elementStyleProp as ɵelementStyleProp, elementStylingApply as ɵelementStylingApply, elementClassProp as ɵelementClassProp, textBinding as ɵtextBinding, template as ɵtemplate, embeddedViewEnd as ɵembeddedViewEnd, store as ɵstore, load as ɵload, pipe as ɵpipe, whenRendered as ɵwhenRendered, i18n as ɵi18n, i18nAttributes as ɵi18nAttributes, i18nExp as ɵi18nExp, i18nStart as ɵi18nStart, i18nEnd as ɵi18nEnd, i18nApply as ɵi18nApply, i18nPostprocess as ɵi18nPostprocess, setClassMetadata as ɵsetClassMetadata, resolveWindow as ɵresolveWindow, resolveDocument as ɵresolveDocument, resolveBody as ɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, sanitizeUrlOrResourceUrl as ɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$4 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue$1 as ɵunv, viewDef as ɵvid };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, InjectFlags, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, INJECTOR, Injector, inject, inject as ɵinject, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual$1 as ɵdevModeEqual, isListLikeIterable$1 as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineBase as ɵdefineBase, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, directiveInject as ɵdirectiveInject, injectAttribute as ɵinjectAttribute, getFactoryOf$1 as ɵgetFactoryOf, getInheritedFactory as ɵgetInheritedFactory, templateRefExtractor as ɵtemplateRefExtractor, ProvidersFeature as ɵProvidersFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, NgOnChangesFeature as ɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, container as ɵcontainer, nextContext as ɵnextContext, elementStart as ɵelementStart, namespaceHTML as ɵnamespaceHTML, namespaceMathML as ɵnamespaceMathML, namespaceSVG as ɵnamespaceSVG, element as ɵelement, listener as ɵlistener, text as ɵtext, embeddedViewStart as ɵembeddedViewStart, query as ɵquery, registerContentQuery as ɵregisterContentQuery, projection as ɵprojection, bind as ɵbind, interpolation1 as ɵinterpolation1, interpolation2 as ɵinterpolation2, interpolation3 as ɵinterpolation3, interpolation4 as ɵinterpolation4, interpolation5 as ɵinterpolation5, interpolation6 as ɵinterpolation6, interpolation7 as ɵinterpolation7, interpolation8 as ɵinterpolation8, interpolationV as ɵinterpolationV, pipeBind1 as ɵpipeBind1, pipeBind2 as ɵpipeBind2, pipeBind3 as ɵpipeBind3, pipeBind4 as ɵpipeBind4, pipeBindV as ɵpipeBindV, pureFunction0 as ɵpureFunction0, pureFunction1 as ɵpureFunction1, pureFunction2 as ɵpureFunction2, pureFunction3 as ɵpureFunction3, pureFunction4 as ɵpureFunction4, pureFunction5 as ɵpureFunction5, pureFunction6 as ɵpureFunction6, pureFunction7 as ɵpureFunction7, pureFunction8 as ɵpureFunction8, pureFunctionV as ɵpureFunctionV, getCurrentView as ɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, restoreView as ɵrestoreView, containerRefreshStart as ɵcontainerRefreshStart, containerRefreshEnd as ɵcontainerRefreshEnd, queryRefresh as ɵqueryRefresh, viewQuery as ɵviewQuery, loadViewQuery as ɵloadViewQuery, loadQueryList as ɵloadQueryList, elementEnd as ɵelementEnd, elementProperty as ɵelementProperty, componentHostSyntheticProperty as ɵcomponentHostSyntheticProperty, componentHostSyntheticListener as ɵcomponentHostSyntheticListener, projectionDef as ɵprojectionDef, reference as ɵreference, enableBindings as ɵenableBindings, disableBindings as ɵdisableBindings, allocHostVars as ɵallocHostVars, elementAttribute as ɵelementAttribute, elementContainerStart as ɵelementContainerStart, elementContainerEnd as ɵelementContainerEnd, elementStyling as ɵelementStyling, elementHostAttrs as ɵelementHostAttrs, elementStylingMap as ɵelementStylingMap, elementStyleProp as ɵelementStyleProp, elementStylingApply as ɵelementStylingApply, elementClassProp as ɵelementClassProp, textBinding as ɵtextBinding, template as ɵtemplate, embeddedViewEnd as ɵembeddedViewEnd, store as ɵstore, load as ɵload, pipe as ɵpipe, whenRendered as ɵwhenRendered, i18n as ɵi18n, i18nAttributes as ɵi18nAttributes, i18nExp as ɵi18nExp, i18nStart as ɵi18nStart, i18nEnd as ɵi18nEnd, i18nApply as ɵi18nApply, i18nPostprocess as ɵi18nPostprocess, setClassMetadata as ɵsetClassMetadata, resolveWindow as ɵresolveWindow, resolveDocument as ɵresolveDocument, resolveBody as ɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, sanitizeUrlOrResourceUrl as ɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$3 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map
