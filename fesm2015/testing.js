@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+2.sha-d8f2318
+ * @license Angular v8.0.0-beta.1+11.sha-03c8528
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1083,6 +1083,8 @@ const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
 let _nextRootElementId = 0;
 /** @type {?} */
 const EMPTY_ARRAY = [];
+/** @type {?} */
+const UNDEFINED = Symbol('UNDEFINED');
 /**
  * \@description
  * Configures and initializes environment for unit testing and provides methods for
@@ -1344,6 +1346,7 @@ class TestBedRender3 {
         // reset test module config
         this._providers = [];
         this._compilerOptions = [];
+        this._compilerProviders = [];
         this._declarations = [];
         this._imports = [];
         this._schemas = [];
@@ -1451,7 +1454,9 @@ class TestBedRender3 {
         if (token === TestBedRender3) {
             return this;
         }
-        return this._moduleRef.injector.get(token, notFoundValue);
+        /** @type {?} */
+        const result = this._moduleRef.injector.get(token, UNDEFINED);
+        return result === UNDEFINED ? this.compilerInjector.get(token, notFoundValue) : result;
     }
     /**
      * @param {?} tokens
@@ -1690,8 +1695,8 @@ class TestBedRender3 {
      * @return {?}
      */
     get compilerInjector() {
-        if (this._compilerInjector !== undefined) {
-            this._compilerInjector;
+        if (this._compilerInjector !== null) {
+            return this._compilerInjector;
         }
         /** @type {?} */
         const providers = [];
@@ -2032,7 +2037,7 @@ class TestingCompilerFactory {
  * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
-const UNDEFINED = new Object();
+const UNDEFINED$1 = new Object();
 /** @type {?} */
 let _nextRootElementId$1 = 0;
 // WARNING: interface has both a type and a value, skipping emit
@@ -2457,8 +2462,8 @@ class TestBedViewEngine {
         // Tests can inject things from the ng module and from the compiler,
         // but the ng module can't inject things from the compiler and vice versa.
         /** @type {?} */
-        const result = this._moduleRef.injector.get(token, UNDEFINED);
-        return result === UNDEFINED ? this._compiler.injector.get(token, notFoundValue) : result;
+        const result = this._moduleRef.injector.get(token, UNDEFINED$1);
+        return result === UNDEFINED$1 ? this._compiler.injector.get(token, notFoundValue) : result;
     }
     /**
      * @param {?} tokens
