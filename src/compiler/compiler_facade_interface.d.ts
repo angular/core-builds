@@ -101,9 +101,6 @@ export interface R3DirectiveMetadataFacade {
     propMetadata: {
         [key: string]: any[];
     };
-    lifecycle: {
-        usesOnChanges: boolean;
-    };
     inputs: string[];
     outputs: string[];
     usesInheritance: boolean;

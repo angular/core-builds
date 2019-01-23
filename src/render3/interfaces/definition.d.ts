@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { ViewEncapsulation } from '../../core';
+import { SimpleChanges, ViewEncapsulation } from '../../core';
 import { Type } from '../../interface/type';
 import { CssSelectorList } from './projection';
 /**
@@ -83,7 +83,7 @@ export interface BaseDef<T> {
      * public or minified name.
      */
     readonly declaredInputs: {
-        [P in keyof T]: string;
+        [P in keyof T]: P;
     };
     /**
      * A dictionary mapping the outputs' minified property names to their public API names, which
@@ -91,7 +91,7 @@ export interface BaseDef<T> {
      * (as in `@Output('alias') propertyName: any;`).
      */
     readonly outputs: {
-        [P in keyof T]: string;
+        [P in keyof T]: P;
     };
 }
 /**
@@ -133,6 +133,7 @@ export interface DirectiveDef<T> extends BaseDef<T> {
     hostBindings: HostBindingsFunction<T> | null;
     onInit: (() => void) | null;
     doCheck: (() => void) | null;
+    onChanges: ((changes: SimpleChanges) => void) | null;
     afterContentInit: (() => void) | null;
     afterContentChecked: (() => void) | null;
     afterViewInit: (() => void) | null;
@@ -142,7 +143,6 @@ export interface DirectiveDef<T> extends BaseDef<T> {
      * The features applied to this directive
      */
     readonly features: DirectiveDefFeature[] | null;
-    setInput: ((this: DirectiveDef<T>, instance: T, value: any, publicName: string, privateName: string) => void) | null;
 }
 export declare type ComponentDefWithMeta<T, Selector extends String, ExportAs extends string[], InputMap extends {
     [key: string]: string;
@@ -271,26 +271,10 @@ export interface PipeDef<T> {
 export declare type PipeDefWithMeta<T, Name extends string> = PipeDef<T>;
 export interface DirectiveDefFeature {
     <T>(directiveDef: DirectiveDef<T>): void;
-    /**
-     * Marks a feature as something that {@link InheritDefinitionFeature} will execute
-     * during inheritance.
-     *
-     * NOTE: DO NOT SET IN ROOT OF MODULE! Doing so will result in tree-shakers/bundlers
-     * identifying the change as a side effect, and the feature will be included in
-     * every bundle.
-     */
     ngInherit?: true;
 }
 export interface ComponentDefFeature {
     <T>(componentDef: ComponentDef<T>): void;
-    /**
-     * Marks a feature as something that {@link InheritDefinitionFeature} will execute
-     * during inheritance.
-     *
-     * NOTE: DO NOT SET IN ROOT OF MODULE! Doing so will result in tree-shakers/bundlers
-     * identifying the change as a side effect, and the feature will be included in
-     * every bundle.
-     */
     ngInherit?: true;
 }
 /**
