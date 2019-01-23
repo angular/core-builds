@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+18.sha-cbd6264
+ * @license Angular v8.0.0-beta.1+20.sha-d4ecffe
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8108,8 +8108,8 @@ function getLContainer(tNode, embeddedView) {
  */
 function getContainerRenderParent(tViewNode, view) {
     /** @type {?} */
-    const container$$1 = getLContainer(tViewNode, view);
-    return container$$1 ? nativeParentNode(view[RENDERER], container$$1[NATIVE]) : null;
+    const container = getLContainer(tViewNode, view);
+    return container ? nativeParentNode(view[RENDERER], container[NATIVE]) : null;
 }
 /**
  * Stack used to keep track of projection nodes in walkTNodeTree.
@@ -8312,9 +8312,9 @@ function destroyViewTree(rootView) {
         else {
             // If container, traverse down to its first LView.
             /** @type {?} */
-            const container$$1 = (/** @type {?} */ (viewOrContainer));
-            if (container$$1[VIEWS].length)
-                next = container$$1[VIEWS][0];
+            const container = (/** @type {?} */ (viewOrContainer));
+            if (container[VIEWS].length)
+                next = container[VIEWS][0];
         }
         if (next == null) {
             // Only clean up view when moving to the side or up, as destroy hooks
@@ -8515,12 +8515,12 @@ function removeListeners(lView) {
                     idxOrTargetGetter(lView) :
                     readElementValue(lView[idxOrTargetGetter]);
                 /** @type {?} */
-                const listener$$1 = lCleanup[tCleanup[i + 2]];
+                const listener = lCleanup[tCleanup[i + 2]];
                 /** @type {?} */
                 const useCaptureOrSubIdx = tCleanup[i + 3];
                 if (typeof useCaptureOrSubIdx === 'boolean') {
                     // DOM listener
-                    target.removeEventListener(tCleanup[i], listener$$1, useCaptureOrSubIdx);
+                    target.removeEventListener(tCleanup[i], listener, useCaptureOrSubIdx);
                 }
                 else {
                     if (useCaptureOrSubIdx >= 0) {
@@ -16450,7 +16450,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.1+18.sha-cbd6264');
+const VERSION = new Version('8.0.0-beta.1+20.sha-d4ecffe');
 
 /**
  * @fileoverview added by tsickle
