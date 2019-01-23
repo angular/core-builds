@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+18.sha-cbd6264
+ * @license Angular v8.0.0-beta.1+20.sha-d4ecffe
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6860,8 +6860,8 @@
      * Might be null if a view is not yet attached to any container.
      */
     function getContainerRenderParent(tViewNode, view) {
-        var container$$1 = getLContainer(tViewNode, view);
-        return container$$1 ? nativeParentNode(view[RENDERER], container$$1[NATIVE]) : null;
+        var container = getLContainer(tViewNode, view);
+        return container ? nativeParentNode(view[RENDERER], container[NATIVE]) : null;
     }
     /**
      * Stack used to keep track of projection nodes in walkTNodeTree.
@@ -7038,9 +7038,9 @@
             }
             else {
                 // If container, traverse down to its first LView.
-                var container$$1 = viewOrContainer;
-                if (container$$1[VIEWS].length)
-                    next = container$$1[VIEWS][0];
+                var container = viewOrContainer;
+                if (container[VIEWS].length)
+                    next = container[VIEWS][0];
             }
             if (next == null) {
                 // Only clean up view when moving to the side or up, as destroy hooks
@@ -7215,11 +7215,11 @@
                     var target = typeof idxOrTargetGetter === 'function' ?
                         idxOrTargetGetter(lView) :
                         readElementValue(lView[idxOrTargetGetter]);
-                    var listener$$1 = lCleanup[tCleanup[i + 2]];
+                    var listener = lCleanup[tCleanup[i + 2]];
                     var useCaptureOrSubIdx = tCleanup[i + 3];
                     if (typeof useCaptureOrSubIdx === 'boolean') {
                         // DOM listener
-                        target.removeEventListener(tCleanup[i], listener$$1, useCaptureOrSubIdx);
+                        target.removeEventListener(tCleanup[i], listener, useCaptureOrSubIdx);
                     }
                     else {
                         if (useCaptureOrSubIdx >= 0) {
@@ -13338,7 +13338,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.1+18.sha-cbd6264');
+    var VERSION = new Version('8.0.0-beta.1+20.sha-d4ecffe');
 
     /**
      * @license
