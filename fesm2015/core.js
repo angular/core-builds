@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+13.sha-9098225
+ * @license Angular v8.0.0-beta.1+14.sha-22a43cf
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10244,16 +10244,19 @@ function setClass(native, className, add, renderer, store, playerBuilder) {
         if (playerBuilder) {
             playerBuilder.setValue(className, add);
         }
+        // DOMTokenList will throw if we try to add or remove an empty string.
     }
-    else if (add) {
-        ngDevMode && ngDevMode.rendererAddClass++;
-        isProceduralRenderer(renderer) ? renderer.addClass(native, className) :
-            native['classList'].add(className);
-    }
-    else {
-        ngDevMode && ngDevMode.rendererRemoveClass++;
-        isProceduralRenderer(renderer) ? renderer.removeClass(native, className) :
-            native['classList'].remove(className);
+    else if (className !== '') {
+        if (add) {
+            ngDevMode && ngDevMode.rendererAddClass++;
+            isProceduralRenderer(renderer) ? renderer.addClass(native, className) :
+                native['classList'].add(className);
+        }
+        else {
+            ngDevMode && ngDevMode.rendererRemoveClass++;
+            isProceduralRenderer(renderer) ? renderer.removeClass(native, className) :
+                native['classList'].remove(className);
+        }
     }
 }
 /**
@@ -16517,7 +16520,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.1+13.sha-9098225');
+const VERSION = new Version('8.0.0-beta.1+14.sha-22a43cf');
 
 /**
  * @fileoverview added by tsickle
