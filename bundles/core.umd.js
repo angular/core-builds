@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+15.sha-32c61f4
+ * @license Angular v8.0.0-beta.1+17.sha-317cc92
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6783,8 +6783,8 @@
      * Might be null if a view is not yet attached to any container.
      */
     function getContainerRenderParent(tViewNode, view) {
-        var container = getLContainer(tViewNode, view);
-        return container ? nativeParentNode(view[RENDERER], container[NATIVE]) : null;
+        var container$$1 = getLContainer(tViewNode, view);
+        return container$$1 ? nativeParentNode(view[RENDERER], container$$1[NATIVE]) : null;
     }
     /**
      * Stack used to keep track of projection nodes in walkTNodeTree.
@@ -6961,9 +6961,9 @@
             }
             else {
                 // If container, traverse down to its first LView.
-                var container = viewOrContainer;
-                if (container[VIEWS].length)
-                    next = container[VIEWS][0];
+                var container$$1 = viewOrContainer;
+                if (container$$1[VIEWS].length)
+                    next = container$$1[VIEWS][0];
             }
             if (next == null) {
                 // Only clean up view when moving to the side or up, as destroy hooks
@@ -7138,11 +7138,11 @@
                     var target = typeof idxOrTargetGetter === 'function' ?
                         idxOrTargetGetter(lView) :
                         readElementValue(lView[idxOrTargetGetter]);
-                    var listener = lCleanup[tCleanup[i + 2]];
+                    var listener$$1 = lCleanup[tCleanup[i + 2]];
                     var useCaptureOrSubIdx = tCleanup[i + 3];
                     if (typeof useCaptureOrSubIdx === 'boolean') {
                         // DOM listener
-                        target.removeEventListener(tCleanup[i], listener, useCaptureOrSubIdx);
+                        target.removeEventListener(tCleanup[i], listener$$1, useCaptureOrSubIdx);
                     }
                     else {
                         if (useCaptureOrSubIdx >= 0) {
@@ -7187,7 +7187,7 @@
      *   `<component><content>delayed due to projection</content></component>`
      * - Parent container is disconnected: This can happen when we are inserting a view into
      *   parent container, which itself is disconnected. For example the parent container is part
-     *   of a View which has not be inserted or is mare for projection but has not been inserted
+     *   of a View which has not be inserted or is made for projection but has not been inserted
      *   into destination.
      */
     function getRenderParent(tNode, currentView) {
@@ -7220,16 +7220,22 @@
         }
         else {
             ngDevMode && assertNodeType(parent, 3 /* Element */);
-            // We've got a parent which is an element in the current view. We just need to verify if the
-            // parent element is not a component. Component's content nodes are not inserted immediately
-            // because they will be projected, and so doing insert at this point would be wasteful.
-            // Since the projection would then move it to its final destination.
             if (parent.flags & 1 /* isComponent */) {
-                return null;
+                var tData = currentView[TVIEW].data;
+                var tNode_1 = tData[parent.index];
+                var encapsulation = tData[tNode_1.directiveStart].encapsulation;
+                // We've got a parent which is an element in the current view. We just need to verify if the
+                // parent element is not a component. Component's content nodes are not inserted immediately
+                // because they will be projected, and so doing insert at this point would be wasteful.
+                // Since the projection would then move it to its final destination. Note that we can't
+                // make this assumption when using the Shadow DOM, because the native projection placeholders
+                // (<content> or <slot>) have to be in place as elements are being inserted.
+                if (encapsulation !== exports.ViewEncapsulation.ShadowDom &&
+                    encapsulation !== exports.ViewEncapsulation.Native) {
+                    return null;
+                }
             }
-            else {
-                return getNativeByTNode(parent, currentView);
-            }
+            return getNativeByTNode(parent, currentView);
         }
     }
     /**
@@ -13246,7 +13252,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.1+15.sha-32c61f4');
+    var VERSION = new Version('8.0.0-beta.1+17.sha-317cc92');
 
     /**
      * @license
