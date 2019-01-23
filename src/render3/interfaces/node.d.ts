@@ -422,11 +422,12 @@ export declare type PropertyAliases = {
 /**
  * Store the runtime input or output names for all the directives.
  *
- * i+0: directive instance index
- * i+1: publicName
- * i+2: privateName
+ * Values are stored in triplets:
+ * - i + 0: directive index
+ * - i + 1: minified / internal name
+ * - i + 2: declared name
  *
- * e.g. [0, 'change', 'change-minified']
+ * e.g. [0, 'minifiedName', 'declaredPropertyName']
  */
 export declare type PropertyAliasValue = (number | string)[];
 /**
@@ -437,26 +438,26 @@ export declare type PropertyAliasValue = (number | string)[];
  *
  * Within each sub-array:
  *
- * i+0: attribute name
- * i+1: minified/internal input name
- * i+2: initial value
+ * Even indices: minified/internal input name
+ * Odd indices: initial value
  *
  * If a directive on a node does not have any input properties
  * that should be set from attributes, its index is set to null
  * to avoid a sparse array.
  *
- * e.g. [null, ['role-min', 'minified-input', 'button']]
+ * e.g. [null, ['role-min', 'button']]
  */
 export declare type InitialInputData = (InitialInputs | null)[];
 /**
  * Used by InitialInputData to store input properties
  * that should be set once from attributes.
  *
- * i+0: attribute name
- * i+1: minified/internal input name
- * i+2: initial value
+ * The inputs come in triplets of:
+ * i + 0: minified/internal input name
+ * i + 1: declared input name (needed for OnChanges)
+ * i + 2: initial value
  *
- * e.g. ['role-min', 'minified-input', 'button']
+ * e.g. ['minifiedName', 'declaredName', 'value']
  */
 export declare type InitialInputs = string[];
 export declare const unusedValueExportToPlacateAjd = 1;
