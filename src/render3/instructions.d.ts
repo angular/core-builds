@@ -230,8 +230,9 @@ export declare function elementEnd(): void;
  * @param value value The attribute is removed when value is `null` or `undefined`.
  *                  Otherwise the attribute value is set to the stringified value.
  * @param sanitizer An optional function used to sanitize the value.
+ * @param namespace Optional namespace to use when setting the attribute.
  */
-export declare function elementAttribute(index: number, name: string, value: any, sanitizer?: SanitizerFn | null): void;
+export declare function elementAttribute(index: number, name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): void;
 /**
  * Update a property on an element.
  *

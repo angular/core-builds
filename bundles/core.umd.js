@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+7.sha-030350f
+ * @license Angular v8.0.0-beta.1+12.sha-9f9024b
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3437,97 +3437,6 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * Represents a basic change from a previous to a new value for a single
-     * property on a directive instance. Passed as a value in a
-     * {@link SimpleChanges} object to the `ngOnChanges` hook.
-     *
-     * @see `OnChanges`
-     *
-     * @publicApi
-     */
-    var SimpleChange = /** @class */ (function () {
-        function SimpleChange(previousValue, currentValue, firstChange) {
-            this.previousValue = previousValue;
-            this.currentValue = currentValue;
-            this.firstChange = firstChange;
-        }
-        /**
-         * Check whether the new value is the first value assigned.
-         */
-        SimpleChange.prototype.isFirstChange = function () { return this.firstChange; };
-        return SimpleChange;
-    }());
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Checks an object to see if it's an exact instance of a particular type
-     * without traversing the inheritance hierarchy like `instanceof` does.
-     * @param obj The object to check
-     * @param type The type to check the object against
-     */
-    function isExactInstanceOf(obj, type) {
-        return obj != null && typeof obj == 'object' && Object.getPrototypeOf(obj) == type.prototype;
-    }
-    /**
-     * Checks to see if an object is an instance of {@link OnChangesDirectiveWrapper}
-     * @param obj the object to check (generally from `LView`)
-     */
-    function isOnChangesDirectiveWrapper(obj) {
-        return isExactInstanceOf(obj, OnChangesDirectiveWrapper);
-    }
-    /**
-     * Removes the `OnChangesDirectiveWrapper` if present.
-     *
-     * @param obj to unwrap.
-     */
-    function unwrapOnChangesDirectiveWrapper(obj) {
-        return isOnChangesDirectiveWrapper(obj) ? obj.instance : obj;
-    }
-    /**
-     * A class that wraps directive instances for storage in LView when directives
-     * have onChanges hooks to deal with.
-     */
-    var OnChangesDirectiveWrapper = /** @class */ (function () {
-        function OnChangesDirectiveWrapper(instance) {
-            this.instance = instance;
-            this.seenProps = new Set();
-            this.previous = {};
-            this.changes = null;
-        }
-        return OnChangesDirectiveWrapper;
-    }());
-    /**
-     * Updates the `changes` property on the `wrapper` instance, such that when it's
-     * checked in {@link callHooks} it will fire the related `onChanges` hook.
-     * @param wrapper the wrapper for the directive instance
-     * @param declaredName the declared name to be used in `SimpleChange`
-     * @param value The new value for the property
-     */
-    function recordChange(wrapper, declaredName, value) {
-        var simpleChanges = wrapper.changes || (wrapper.changes = {});
-        var firstChange = !wrapper.seenProps.has(declaredName);
-        if (firstChange) {
-            wrapper.seenProps.add(declaredName);
-        }
-        var previous = wrapper.previous;
-        var previousValue = previous[declaredName];
-        simpleChanges[declaredName] = new SimpleChange(firstChange ? undefined : previousValue && previousValue.currentValue, value, firstChange);
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
      * Returns whether the values are different from a change detection stand point.
      *
      * Constraints are relaxed in checkNoChanges mode. See `devModeEqual` for details.
@@ -3554,10 +3463,7 @@
     /** Retrieves a value from any `LView` or `TData`. */
     function loadInternal(view, index) {
         ngDevMode && assertDataInRange(view, index + HEADER_OFFSET);
-        var record = view[index + HEADER_OFFSET];
-        // If we're storing an array because of a directive or component with ngOnChanges,
-        // return the directive or component instance.
-        return isOnChangesDirectiveWrapper(record) ? record.instance : record;
+        return view[index + HEADER_OFFSET];
     }
     /**
      * Takes the value of a slot in `LView` and returns the element node.
@@ -3810,7 +3716,6 @@
             inputs: null,
             outputs: null,
             exportAs: componentDefinition.exportAs || null,
-            onChanges: typePrototype.ngOnChanges || null,
             onInit: typePrototype.ngOnInit || null,
             doCheck: typePrototype.ngDoCheck || null,
             afterContentInit: typePrototype.ngAfterContentInit || null,
@@ -3831,6 +3736,7 @@
             id: 'c',
             styles: componentDefinition.styles || EMPTY_ARRAY$2,
             _: null,
+            setInput: null,
         };
         def._ = noSideEffects(function () {
             var directiveTypes = componentDefinition.directives;
@@ -4113,11 +4019,7 @@
     function registerPreOrderHooks(directiveIndex, directiveDef, tView) {
         ngDevMode &&
             assertEqual(tView.firstTemplatePass, true, 'Should only be called on first template pass');
-        var onChanges = directiveDef.onChanges, onInit = directiveDef.onInit, doCheck = directiveDef.doCheck;
-        if (onChanges) {
-            (tView.initHooks || (tView.initHooks = [])).push(-directiveIndex, onChanges);
-            (tView.checkHooks || (tView.checkHooks = [])).push(-directiveIndex, onChanges);
-        }
+        var onInit = directiveDef.onInit, doCheck = directiveDef.doCheck;
         if (onInit) {
             (tView.initHooks || (tView.initHooks = [])).push(directiveIndex, onInit);
         }
@@ -4210,31 +4112,14 @@
     }
     /**
      * Calls lifecycle hooks with their contexts, skipping init hooks if it's not
-     * the first LView pass, and skipping onChanges hooks if there are no changes present.
+     * the first LView pass
      *
      * @param currentView The current view
      * @param arr The array in which the hooks are found
      */
     function callHooks(currentView, arr) {
         for (var i = 0; i < arr.length; i += 2) {
-            var directiveIndex = arr[i];
-            var hook = arr[i + 1];
-            // Negative indices signal that we're dealing with an `onChanges` hook.
-            var isOnChangesHook = directiveIndex < 0;
-            var directiveOrWrappedDirective = currentView[isOnChangesHook ? -directiveIndex : directiveIndex];
-            var directive = unwrapOnChangesDirectiveWrapper(directiveOrWrappedDirective);
-            if (isOnChangesHook) {
-                var onChanges = directiveOrWrappedDirective;
-                var changes = onChanges.changes;
-                if (changes) {
-                    onChanges.previous = changes;
-                    onChanges.changes = null;
-                    hook.call(onChanges.instance, changes);
-                }
-            }
-            else {
-                hook.call(directive);
-            }
+            arr[i + 1].call(currentView[arr[i]]);
         }
     }
 
@@ -4978,9 +4863,6 @@
                 setTNodeAndViewData(savePreviousOrParentTNode, saveLView);
             }
         }
-        else {
-            value = unwrapOnChangesDirectiveWrapper(value);
-        }
         return value;
     }
     /**
@@ -5303,7 +5185,7 @@
             var directiveIndexStart = tNode.directiveStart;
             var directiveIndexEnd = tNode.directiveEnd;
             for (var i = directiveIndexStart; i < directiveIndexEnd; i++) {
-                if (unwrapOnChangesDirectiveWrapper(lView[i]) === directiveInstance) {
+                if (lView[i] === directiveInstance) {
                     return tNode.index;
                 }
             }
@@ -9192,7 +9074,7 @@
                     // If it's not a number, it's a host binding function that needs to be executed.
                     if (instruction !== null) {
                         viewData[BINDING_INDEX] = bindingRootIndex;
-                        instruction(2 /* Update */, unwrapOnChangesDirectiveWrapper(viewData[currentDirectiveIndex]), currentElementIndex);
+                        instruction(2 /* Update */, readElementValue(viewData[currentDirectiveIndex]), currentElementIndex);
                     }
                     currentDirectiveIndex++;
                 }
@@ -9650,7 +9532,6 @@
             expandoStartIndex: initialViewLength,
             expandoInstructions: null,
             firstTemplatePass: true,
-            changesHooks: null,
             initHooks: null,
             checkHooks: null,
             contentHooks: null,
@@ -9866,16 +9747,14 @@
             var propsLength = props.length;
             if (propsLength) {
                 var lCleanup = getCleanup(lView);
-                // Subscribe to listeners for each output, and setup clean up for each.
-                for (var i = 0; i < propsLength;) {
-                    var directiveIndex = props[i++];
-                    var minifiedName = props[i++];
-                    var declaredName = props[i++];
-                    ngDevMode && assertDataInRange(lView, directiveIndex);
-                    var directive = unwrapOnChangesDirectiveWrapper(lView[directiveIndex]);
-                    var output = directive[minifiedName];
+                for (var i = 0; i < propsLength; i += 3) {
+                    var index = props[i];
+                    ngDevMode && assertDataInRange(lView, index);
+                    var minifiedName = props[i + 2];
+                    var directiveInstance = lView[index];
+                    var output = directiveInstance[minifiedName];
                     if (ngDevMode && !isObservable(output)) {
-                        throw new Error("@Output " + minifiedName + " not initialized in '" + directive.constructor.name + "'.");
+                        throw new Error("@Output " + minifiedName + " not initialized in '" + directiveInstance.constructor.name + "'.");
                     }
                     var subscription = output.subscribe(listenerFn);
                     var idx = lCleanup.length;
@@ -9937,7 +9816,7 @@
         // context can be instantiated properly.
         if (hasClassInput(previousOrParentTNode)) {
             var stylingContext = getStylingContext(previousOrParentTNode.index, lView);
-            setInputsForProperty(lView, previousOrParentTNode.inputs, 'class', getInitialClassNameValue(stylingContext));
+            setInputsForProperty(lView, previousOrParentTNode.inputs['class'], getInitialClassNameValue(stylingContext));
         }
     }
     /**
@@ -9948,8 +9827,9 @@
      * @param value value The attribute is removed when value is `null` or `undefined`.
      *                  Otherwise the attribute value is set to the stringified value.
      * @param sanitizer An optional function used to sanitize the value.
+     * @param namespace Optional namespace to use when setting the attribute.
      */
-    function elementAttribute(index, name, value, sanitizer) {
+    function elementAttribute(index, name, value, sanitizer, namespace) {
         if (value !== NO_CHANGE) {
             ngDevMode && validateAttribute(name);
             var lView = getLView();
@@ -9957,15 +9837,20 @@
             var element_1 = getNativeByIndex(index, lView);
             if (value == null) {
                 ngDevMode && ngDevMode.rendererRemoveAttribute++;
-                isProceduralRenderer(renderer) ? renderer.removeAttribute(element_1, name) :
+                isProceduralRenderer(renderer) ? renderer.removeAttribute(element_1, name, namespace) :
                     element_1.removeAttribute(name);
             }
             else {
                 ngDevMode && ngDevMode.rendererSetAttribute++;
                 var tNode = getTNode(index, lView);
                 var strValue = sanitizer == null ? renderStringify(value) : sanitizer(value, tNode.tagName || '', name);
-                isProceduralRenderer(renderer) ? renderer.setAttribute(element_1, name, strValue) :
-                    element_1.setAttribute(name, strValue);
+                if (isProceduralRenderer(renderer)) {
+                    renderer.setAttribute(element_1, name, strValue, namespace);
+                }
+                else {
+                    namespace ? element_1.setAttributeNS(namespace, name, strValue) :
+                        element_1.setAttribute(name, strValue);
+                }
             }
         }
     }
@@ -10021,7 +9906,7 @@
         var dataValue;
         if (!nativeOnly && (inputData = initializeTNodeInputs(tNode)) &&
             (dataValue = inputData[propName])) {
-            setInputsForProperty(lView, inputData, propName, value);
+            setInputsForProperty(lView, dataValue, value);
             if (isComponent(tNode))
                 markDirtyIfOnPush(lView, index + HEADER_OFFSET);
             if (ngDevMode) {
@@ -10095,27 +9980,31 @@
      * @param lView the `LView` which contains the directives.
      * @param inputAliases mapping between the public "input" name and privately-known,
      * possibly minified, property names to write to.
-     * @param publicName public binding name. (This is the `<div [publicName]=value>`)
      * @param value Value to set.
      */
-    function setInputsForProperty(lView, inputAliases, publicName, value) {
-        var inputs = inputAliases[publicName];
+    function setInputsForProperty(lView, inputs, value) {
+        var tView = lView[TVIEW];
         for (var i = 0; i < inputs.length;) {
-            var directiveIndex = inputs[i++];
+            var index = inputs[i++];
+            var publicName = inputs[i++];
             var privateName = inputs[i++];
-            var declaredName = inputs[i++];
-            ngDevMode && assertDataInRange(lView, directiveIndex);
-            recordChangeAndUpdateProperty(lView[directiveIndex], declaredName, privateName, value);
+            var instance = lView[index];
+            ngDevMode && assertDataInRange(lView, index);
+            var def = tView.data[index];
+            var setInput = def.setInput;
+            if (setInput) {
+                def.setInput(instance, value, publicName, privateName);
+            }
+            else {
+                instance[privateName] = value;
+            }
         }
     }
     function setNgReflectProperties(lView, element, type, inputs, value) {
         var _a;
-        for (var i = 0; i < inputs.length;) {
-            var directiveIndex = inputs[i++];
-            var privateName = inputs[i++];
-            var declaredName = inputs[i++];
+        for (var i = 0; i < inputs.length; i += 3) {
             var renderer = lView[RENDERER];
-            var attrName = normalizeDebugBindingName(privateName);
+            var attrName = normalizeDebugBindingName(inputs[i + 2]);
             var debugValue = normalizeDebugBindingValue(value);
             if (type === 3 /* Element */) {
                 isProceduralRenderer(renderer) ?
@@ -10150,17 +10039,14 @@
             var defs = tView.data;
             for (var i = start; i < end; i++) {
                 var directiveDef = defs[i];
-                var publicToMinifiedNames = isInput ? directiveDef.inputs : directiveDef.outputs;
-                var publicToDeclaredNames = isInput ? directiveDef.declaredInputs : null;
-                for (var publicName in publicToMinifiedNames) {
-                    if (publicToMinifiedNames.hasOwnProperty(publicName)) {
+                var propertyAliasMap = isInput ? directiveDef.inputs : directiveDef.outputs;
+                for (var publicName in propertyAliasMap) {
+                    if (propertyAliasMap.hasOwnProperty(publicName)) {
                         propStore = propStore || {};
-                        var minifiedName = publicToMinifiedNames[publicName];
-                        var declaredName = publicToDeclaredNames ? publicToDeclaredNames[publicName] : minifiedName;
-                        var aliases = propStore.hasOwnProperty(publicName) ?
-                            propStore[publicName] :
-                            propStore[publicName] = [];
-                        aliases.push(i, minifiedName, declaredName);
+                        var internalName = propertyAliasMap[publicName];
+                        var hasProperty = propStore.hasOwnProperty(publicName);
+                        hasProperty ? propStore[publicName].push(i, publicName, internalName) :
+                            (propStore[publicName] = [i, publicName, internalName]);
                     }
                 }
             }
@@ -10365,7 +10251,7 @@
         if (hasClassInput(tNode) && classes !== NO_CHANGE) {
             var initialClasses = getInitialClassNameValue(stylingContext);
             var classInputVal = (initialClasses.length ? (initialClasses + ' ') : '') + classes;
-            setInputsForProperty(lView, tNode.inputs, 'class', classInputVal);
+            setInputsForProperty(lView, tNode.inputs['class'], classInputVal);
         }
         else {
             updateStylingMap(stylingContext, classes, styles);
@@ -10491,7 +10377,7 @@
         var firstTemplatePass = getFirstTemplatePass();
         for (var i = start; i < end; i++) {
             var def = tView.data[i];
-            var directive = unwrapOnChangesDirectiveWrapper(viewData[i]);
+            var directive = viewData[i];
             if (def.hostBindings) {
                 var previousExpandoLength = expando.length;
                 setCurrentDirectiveDef(def);
@@ -10540,22 +10426,18 @@
     /**
      * Process a directive on the current node after its creation.
      */
-    function postProcessDirective(lView, directive, def, directiveDefIdx) {
-        if (def.onChanges) {
-            // We have onChanges, wrap it so that we can track changes.
-            lView[directiveDefIdx] = new OnChangesDirectiveWrapper(lView[directiveDefIdx]);
-        }
+    function postProcessDirective(viewData, directive, def, directiveDefIdx) {
         var previousOrParentTNode = getPreviousOrParentTNode();
-        postProcessBaseDirective(lView, previousOrParentTNode, directive, def);
+        postProcessBaseDirective(viewData, previousOrParentTNode, directive, def);
         ngDevMode && assertDefined(previousOrParentTNode, 'previousOrParentTNode');
         if (previousOrParentTNode && previousOrParentTNode.attrs) {
-            setInputsFromAttrs(lView, directiveDefIdx, def, previousOrParentTNode);
+            setInputsFromAttrs(directiveDefIdx, directive, def, previousOrParentTNode);
         }
         if (def.contentQueries) {
             def.contentQueries(directiveDefIdx);
         }
         if (isComponentDef(def)) {
-            var componentView = getComponentViewByIndex(previousOrParentTNode.index, lView);
+            var componentView = getComponentViewByIndex(previousOrParentTNode.index, viewData);
             componentView[CONTEXT] = directive;
         }
     }
@@ -10704,46 +10586,26 @@
      * @param inputs The list of inputs from the directive def
      * @param tNode The static data for this node
      */
-    function setInputsFromAttrs(lView, directiveIndex, def, tNode) {
+    function setInputsFromAttrs(directiveIndex, instance, def, tNode) {
         var initialInputData = tNode.initialInputs;
         if (initialInputData === undefined || directiveIndex >= initialInputData.length) {
-            initialInputData = generateInitialInputs(directiveIndex, def, tNode);
+            initialInputData = generateInitialInputs(directiveIndex, def.inputs, tNode);
         }
         var initialInputs = initialInputData[directiveIndex];
         if (initialInputs) {
-            var directiveOrWrappedDirective = lView[directiveIndex];
+            var setInput = def.setInput;
             for (var i = 0; i < initialInputs.length;) {
+                var publicName = initialInputs[i++];
                 var privateName = initialInputs[i++];
-                var declaredName = initialInputs[i++];
-                var attrValue = initialInputs[i++];
-                recordChangeAndUpdateProperty(directiveOrWrappedDirective, declaredName, privateName, attrValue);
+                var value = initialInputs[i++];
+                if (setInput) {
+                    def.setInput(instance, value, publicName, privateName);
+                }
+                else {
+                    instance[privateName] = value;
+                }
             }
         }
-    }
-    /**
-     * Checks to see if the instanced passed as `directiveOrWrappedDirective` is wrapped in {@link
-     * OnChangesDirectiveWrapper} or not.
-     * If it is, it will update the related {@link SimpleChanges} object with the change to signal
-     * `ngOnChanges` hook
-     * should fire, then it will unwrap the instance. After that, it will set the property with the key
-     * provided
-     * in `privateName` on the instance with the passed value.
-     * @param directiveOrWrappedDirective The directive instance or a directive instance wrapped in
-     * {@link OnChangesDirectiveWrapper}
-     * @param declaredName The original, declared name of the property to update.
-     * @param privateName The private, possibly minified name of the property to update.
-     * @param value The value to update the property with.
-     */
-    function recordChangeAndUpdateProperty(directiveOrWrappedDirective, declaredName, privateName, value) {
-        var instance;
-        if (isOnChangesDirectiveWrapper(directiveOrWrappedDirective)) {
-            instance = unwrapOnChangesDirectiveWrapper(directiveOrWrappedDirective);
-            recordChange(directiveOrWrappedDirective, declaredName, value);
-        }
-        else {
-            instance = directiveOrWrappedDirective;
-        }
-        instance[privateName] = value;
     }
     /**
      * Generates initialInputData for a node and stores it in the template's static storage
@@ -10760,7 +10622,7 @@
      * @param inputs The list of inputs from the directive def
      * @param tNode The static data on this node
      */
-    function generateInitialInputs(directiveIndex, directiveDef, tNode) {
+    function generateInitialInputs(directiveIndex, inputs, tNode) {
         var initialInputData = tNode.initialInputs || (tNode.initialInputs = []);
         initialInputData[directiveIndex] = null;
         var attrs = tNode.attrs;
@@ -10776,12 +10638,11 @@
                 i += 4;
                 continue;
             }
-            var privateName = directiveDef.inputs[attrName];
-            var declaredName = directiveDef.declaredInputs[attrName];
+            var minifiedInputName = inputs[attrName];
             var attrValue = attrs[i + 1];
-            if (privateName !== undefined) {
+            if (minifiedInputName !== undefined) {
                 var inputsToStore = initialInputData[directiveIndex] || (initialInputData[directiveIndex] = []);
-                inputsToStore.push(privateName, declaredName, attrValue);
+                inputsToStore.push(attrName, minifiedInputName, attrValue);
             }
             i += 2;
         }
@@ -12017,6 +11878,7 @@
                 writeableDef.outputs = maybeUnwrapEmpty(definition.outputs);
             }
             if (baseDef) {
+                // Merge inputs and outputs
                 fillProperties(definition.inputs, baseDef.inputs);
                 fillProperties(definition.declaredInputs, baseDef.declaredInputs);
                 fillProperties(definition.outputs, baseDef.outputs);
@@ -12094,7 +11956,6 @@
                 definition.doCheck = definition.doCheck || superDef.doCheck;
                 definition.onDestroy = definition.onDestroy || superDef.onDestroy;
                 definition.onInit = definition.onInit || superDef.onInit;
-                definition.onChanges = definition.onChanges || superDef.onChanges;
                 // Run parent features
                 var features = superDef.features;
                 if (features) {
@@ -12130,7 +11991,6 @@
                     definition.doCheck = definition.doCheck || superPrototype.ngDoCheck;
                     definition.onDestroy = definition.onDestroy || superPrototype.ngOnDestroy;
                     definition.onInit = definition.onInit || superPrototype.ngOnInit;
-                    definition.onChanges = definition.onChanges || superPrototype.ngOnChanges;
                 }
             }
             superType = Object.getPrototypeOf(superType);
@@ -12151,6 +12011,107 @@
         else {
             return value;
         }
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Represents a basic change from a previous to a new value for a single
+     * property on a directive instance. Passed as a value in a
+     * {@link SimpleChanges} object to the `ngOnChanges` hook.
+     *
+     * @see `OnChanges`
+     *
+     * @publicApi
+     */
+    var SimpleChange = /** @class */ (function () {
+        function SimpleChange(previousValue, currentValue, firstChange) {
+            this.previousValue = previousValue;
+            this.currentValue = currentValue;
+            this.firstChange = firstChange;
+        }
+        /**
+         * Check whether the new value is the first value assigned.
+         */
+        SimpleChange.prototype.isFirstChange = function () { return this.firstChange; };
+        return SimpleChange;
+    }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * The NgOnChangesFeature decorates a component with support for the ngOnChanges
+     * lifecycle hook, so it should be included in any component that implements
+     * that hook.
+     *
+     * If the component or directive uses inheritance, the NgOnChangesFeature MUST
+     * be included as a feature AFTER {@link InheritDefinitionFeature}, otherwise
+     * inherited properties will not be propagated to the ngOnChanges lifecycle
+     * hook.
+     *
+     * Example usage:
+     *
+     * ```
+     * static ngComponentDef = defineComponent({
+     *   ...
+     *   inputs: {name: 'publicName'},
+     *   features: [NgOnChangesFeature()]
+     * });
+     * ```
+     */
+    function NgOnChangesFeature() {
+        // This option ensures that the ngOnChanges lifecycle hook will be inherited
+        // from superclasses (in InheritDefinitionFeature).
+        NgOnChangesFeatureImpl.ngInherit = true;
+        return NgOnChangesFeatureImpl;
+    }
+    function NgOnChangesFeatureImpl(definition) {
+        if (definition.type.prototype.ngOnChanges) {
+            definition.setInput = ngOnChangesSetInput;
+            var prevDoCheck = definition.doCheck;
+            var prevOnInit = definition.onInit;
+            definition.onInit = wrapOnChanges(prevOnInit);
+            definition.doCheck = wrapOnChanges(prevDoCheck);
+        }
+    }
+    function wrapOnChanges(hook) {
+        return function () {
+            var simpleChangesStore = getSimpleChangesStore(this);
+            var current = simpleChangesStore && simpleChangesStore.current;
+            if (current) {
+                simpleChangesStore.previous = current;
+                simpleChangesStore.current = null;
+                this.ngOnChanges(current);
+            }
+            hook && hook.call(this);
+        };
+    }
+    function ngOnChangesSetInput(instance, value, publicName, privateName) {
+        var simpleChangesStore = getSimpleChangesStore(instance) ||
+            setSimpleChangesStore(instance, { previous: EMPTY_OBJ, current: null });
+        var current = simpleChangesStore.current || (simpleChangesStore.current = {});
+        var previous = simpleChangesStore.previous;
+        var declaredName = this.declaredInputs[publicName];
+        var previousChange = previous[declaredName];
+        current[declaredName] = new SimpleChange(previousChange && previousChange.currentValue, value, previous === EMPTY_OBJ);
+        instance[privateName] = value;
+    }
+    var SIMPLE_CHANGES_STORE = '__ngSimpleChanges__';
+    function getSimpleChangesStore(instance) {
+        return instance[SIMPLE_CHANGES_STORE] || null;
+    }
+    function setSimpleChangesStore(instance, store) {
+        return instance[SIMPLE_CHANGES_STORE] = store;
     }
 
     /**
@@ -12768,8 +12729,7 @@
             this._appRef = appRef;
         };
         ViewRef.prototype._lookUpContext = function () {
-            return this._context =
-                unwrapOnChangesDirectiveWrapper(this._lView[PARENT][this._componentIndex]);
+            return this._context = this._lView[PARENT][this._componentIndex];
         };
         return ViewRef;
     }());
@@ -13273,7 +13233,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.1+7.sha-030350f');
+    var VERSION = new Version('8.0.0-beta.1+12.sha-9f9024b');
 
     /**
      * @license
@@ -16014,6 +15974,7 @@
         'inject': inject,
         'ɵinjectAttribute': injectAttribute,
         'ɵtemplateRefExtractor': templateRefExtractor,
+        'ɵNgOnChangesFeature': NgOnChangesFeature,
         'ɵProvidersFeature': ProvidersFeature,
         'ɵInheritDefinitionFeature': InheritDefinitionFeature,
         'ɵelementAttribute': elementAttribute,
@@ -16649,6 +16610,9 @@
             inputs: metadata.inputs || EMPTY_ARRAY$2,
             outputs: metadata.outputs || EMPTY_ARRAY$2,
             queries: extractQueriesMetadata(type, propMetadata, isContentQuery),
+            lifecycle: {
+                usesOnChanges: type.prototype.ngOnChanges !== undefined,
+            },
             typeSourceSpan: null,
             usesInheritance: !extendsDirectlyFromObject(type),
             exportAs: extractExportAs(metadata.exportAs),
@@ -16771,55 +16735,34 @@
         }
     };
     /**
-     * Returns a function that will update the static definition on a class to have the
-     * appropriate input or output mapping.
-     *
-     * Will also add an {@link ngBaseDef} property to a directive if no `ngDirectiveDef`
-     * or `ngComponentDef` is present. This is done because a class may have {@link InputDecorator}s and
-     * {@link OutputDecorator}s without having a {@link ComponentDecorator} or {@link DirectiveDecorator},
-     * and those inputs and outputs should still be inheritable, we need to add an
-     * `ngBaseDef` property if there are no existing `ngComponentDef` or `ngDirectiveDef`
-     * properties, so that we can track the inputs and outputs for inheritance purposes.
-     *
-     * @param getPropertyToUpdate A function that maps to either the `inputs` property or the
-     * `outputs` property of a definition.
-     * @returns A function that, the called, will add a `ngBaseDef` if no other definition is present,
-     * then update the `inputs` or `outputs` on it, depending on what was selected by `getPropertyToUpdate`
-     *
-     *
-     * @see InputDecorator
-     * @see OutputDecorator
-     * @see InheritenceFeature
+     * Does the work of creating the `ngBaseDef` property for the @Input and @Output decorators.
+     * @param key "inputs" or "outputs"
      */
-    function getOrCreateDefinitionAndUpdateMappingFor(getPropertyToUpdate) {
-        return function updateIOProp(target, name) {
+    var updateBaseDefFromIOProp = function (getProp) {
+        return function (target, name) {
             var args = [];
             for (var _i = 2; _i < arguments.length; _i++) {
                 args[_i - 2] = arguments[_i];
             }
             var constructor = target.constructor;
-            var def = constructor[NG_COMPONENT_DEF] || constructor[NG_DIRECTIVE_DEF] || constructor[NG_BASE_DEF];
-            if (!def) {
+            if (!constructor.hasOwnProperty(NG_BASE_DEF)) {
                 initializeBaseDef(target);
-                def = constructor[NG_BASE_DEF];
             }
-            var defProp = getPropertyToUpdate(def);
-            // Use of `in` because we *do* want to check the prototype chain here.
-            if (!(name in defProp)) {
-                defProp[name] = args[0];
-            }
+            var baseDef = constructor.ngBaseDef;
+            var defProp = getProp(baseDef);
+            defProp[name] = args[0];
         };
-    }
+    };
     /**
      * @Annotation
      * @publicApi
      */
-    var Input = makePropDecorator('Input', function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); }, undefined, getOrCreateDefinitionAndUpdateMappingFor(function (def) { return def.inputs || {}; }));
+    var Input = makePropDecorator('Input', function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); }, undefined, updateBaseDefFromIOProp(function (baseDef) { return baseDef.inputs || {}; }));
     /**
      * @Annotation
      * @publicApi
      */
-    var Output = makePropDecorator('Output', function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); }, undefined, getOrCreateDefinitionAndUpdateMappingFor(function (def) { return def.outputs || {}; }));
+    var Output = makePropDecorator('Output', function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); }, undefined, updateBaseDefFromIOProp(function (baseDef) { return baseDef.outputs || {}; }));
     /**
      * @Annotation
      * @publicApi
@@ -24763,6 +24706,7 @@
     exports.ɵtemplateRefExtractor = templateRefExtractor;
     exports.ɵProvidersFeature = ProvidersFeature;
     exports.ɵInheritDefinitionFeature = InheritDefinitionFeature;
+    exports.ɵNgOnChangesFeature = NgOnChangesFeature;
     exports.ɵLifecycleHooksFeature = LifecycleHooksFeature;
     exports.ɵRender3NgModuleRef = NgModuleRef$1;
     exports.ɵmarkDirty = markDirty;
