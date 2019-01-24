@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+20.sha-d4ecffe
+ * @license Angular v8.0.0-beta.1+21.sha-c1fb9c2
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11472,6 +11472,7 @@
         var adjustedIndex = index + HEADER_OFFSET;
         if (adjustedIndex >= tView.data.length) {
             tView.data[adjustedIndex] = null;
+            tView.blueprint[adjustedIndex] = null;
         }
         lView[adjustedIndex] = value;
     }
@@ -13252,7 +13253,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.1+20.sha-d4ecffe');
+    var VERSION = new Version('8.0.0-beta.1+21.sha-c1fb9c2');
 
     /**
      * @license
@@ -18988,7 +18989,7 @@
         }
         var index = getCurrentViewQueryIndex();
         var viewQuery = query(predicate, descend, read);
-        store(index, viewQuery);
+        store(index - HEADER_OFFSET, viewQuery);
         setCurrentViewQueryIndex(index + 1);
         return viewQuery;
     }
@@ -18998,7 +18999,7 @@
     function loadViewQuery() {
         var index = getCurrentViewQueryIndex();
         setCurrentViewQueryIndex(index + 1);
-        return load(index);
+        return load(index - HEADER_OFFSET);
     }
 
     /**
