@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+39.sha-7496630
+ * @license Angular v8.0.0-beta.1+41.sha-2da82db
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16640,7 +16640,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.1+39.sha-7496630');
+const VERSION = new Version('8.0.0-beta.1+41.sha-2da82db');
 
 /**
  * @fileoverview added by tsickle
@@ -21260,7 +21260,7 @@ const COMMENT_MARKER = {
 /** @type {?} */
 const MARKER = `�`;
 /** @type {?} */
-const ICU_BLOCK_REGEX = /^\s*(�\d+:?\d*�)\s*,\s*(select|plural)\s*,/;
+const ICU_BLOCK_REGEXP = /^\s*(�\d+:?\d*�)\s*,\s*(select|plural)\s*,/;
 /** @type {?} */
 const SUBTEMPLATE_REGEXP = /�\/?\*(\d+:\d+)�/gi;
 /** @type {?} */
@@ -21269,13 +21269,21 @@ const PH_REGEXP = /�(\/?[#*]\d+):?\d*�/gi;
 const BINDING_REGEXP = /�(\d+):?\d*�/gi;
 /** @type {?} */
 const ICU_REGEXP = /({\s*�\d+:?\d*�\s*,\s*\S{6}\s*,[\s\S]*})/gi;
-// i18nPostproocess regexps
+// i18nPostprocess consts
 /** @type {?} */
-const PP_PLACEHOLDERS = /\[(�.+?�?)\]/g;
+const ROOT_TEMPLATE_ID = 0;
 /** @type {?} */
-const PP_ICU_VARS = /({\s*)(VAR_(PLURAL|SELECT)(_\d+)?)(\s*,)/g;
+const PP_MULTI_VALUE_PLACEHOLDERS_REGEXP = /\[(�.+?�?)\]/;
 /** @type {?} */
-const PP_ICUS = /�I18N_EXP_(ICU(_\d+)?)�/g;
+const PP_PLACEHOLDERS_REGEXP = /\[(�.+?�?)\]|(�\/?\*\d+:\d+�)/g;
+/** @type {?} */
+const PP_ICU_VARS_REGEXP = /({\s*)(VAR_(PLURAL|SELECT)(_\d+)?)(\s*,)/g;
+/** @type {?} */
+const PP_ICUS_REGEXP = /�I18N_EXP_(ICU(_\d+)?)�/g;
+/** @type {?} */
+const PP_CLOSE_TEMPLATE_REGEXP = /\/\*/;
+/** @type {?} */
+const PP_TEMPLATE_ID_REGEXP = /\d+\:(\d+)/;
 /**
  * Breaks pattern into strings and top level {...} blocks.
  * Can be used to break a message into text and ICU expressions, or to break an ICU expression into
@@ -21311,7 +21319,7 @@ function extractParts(pattern) {
                 // End of the block.
                 /** @type {?} */
                 const block = pattern.substring(prevPos, pos);
-                if (ICU_BLOCK_REGEX.test(block)) {
+                if (ICU_BLOCK_REGEXP.test(block)) {
                     results.push(parseICUBlock(block));
                 }
                 else if (block) { // Don't push empty strings
@@ -21354,7 +21362,7 @@ function parseICUBlock(pattern) {
     let icuType = 1 /* plural */;
     /** @type {?} */
     let mainBinding = 0;
-    pattern = pattern.replace(ICU_BLOCK_REGEX, function (str, binding, type) {
+    pattern = pattern.replace(ICU_BLOCK_REGEXP, function (str, binding, type) {
         if (type === 'select') {
             icuType = 0 /* select */;
         }
@@ -21751,42 +21759,90 @@ function appendI18nNode(tNode, parentTNode, previousTNode) {
  *
  */
 function i18nPostprocess(message, replacements = {}) {
-    //
-    // Step 1: resolve all multi-value cases (like [�*1:1��#2:1�|�#4:1�|�5�])
-    //
-    /** @type {?} */
-    const matches = {};
-    /** @type {?} */
-    let result = message.replace(PP_PLACEHOLDERS, (_match, content) => {
-        if (!matches[content]) {
-            matches[content] = content.split('|');
+    /**
+     * Step 1: resolve all multi-value placeholders like [�#5�|�*1:1��#2:1�|�#4:1�]
+     *
+     * Note: due to the way we process nested templates (BFS), multi-value placeholders are typically
+     * grouped by templates, for example: [�#5�|�#6�|�#1:1�|�#3:2�] where �#5� and �#6� belong to root
+     * template, �#1:1� belong to nested template with index 1 and �#1:2� - nested template with index
+     * 3. However in real templates the order might be different: i.e. �#1:1� and/or �#3:2� may go in
+     * front of �#6�. The post processing step restores the right order by keeping track of the
+     * template id stack and looks for placeholders that belong to the currently active template.
+     * @type {?}
+     */
+    let result = message;
+    if (PP_MULTI_VALUE_PLACEHOLDERS_REGEXP.test(message)) {
+        /** @type {?} */
+        const matches = {};
+        /** @type {?} */
+        const templateIdsStack = [ROOT_TEMPLATE_ID];
+        result = result.replace(PP_PLACEHOLDERS_REGEXP, (m, phs, tmpl) => {
+            /** @type {?} */
+            const content = phs || tmpl;
+            if (!matches[content]) {
+                /** @type {?} */
+                const placeholders = [];
+                content.split('|').forEach((placeholder) => {
+                    /** @type {?} */
+                    const match = placeholder.match(PP_TEMPLATE_ID_REGEXP);
+                    /** @type {?} */
+                    const templateId = match ? parseInt(match[1], 10) : ROOT_TEMPLATE_ID;
+                    /** @type {?} */
+                    const isCloseTemplateTag = PP_CLOSE_TEMPLATE_REGEXP.test(placeholder);
+                    placeholders.push([templateId, isCloseTemplateTag, placeholder]);
+                });
+                matches[content] = placeholders;
+            }
+            if (!matches[content].length) {
+                throw new Error(`i18n postprocess: unmatched placeholder - ${content}`);
+            }
+            /** @type {?} */
+            const currentTemplateId = templateIdsStack[templateIdsStack.length - 1];
+            /** @type {?} */
+            const placeholders = matches[content];
+            /** @type {?} */
+            let idx = 0;
+            // find placeholder index that matches current template id
+            for (let i = 0; i < placeholders.length; i++) {
+                if (placeholders[i][0] === currentTemplateId) {
+                    idx = i;
+                    break;
+                }
+            }
+            // update template id stack based on the current tag extracted
+            const [templateId, isCloseTemplateTag, placeholder] = placeholders[idx];
+            if (isCloseTemplateTag) {
+                templateIdsStack.pop();
+            }
+            else if (currentTemplateId !== templateId) {
+                templateIdsStack.push(templateId);
+            }
+            // remove processed tag from the list
+            placeholders.splice(idx, 1);
+            return placeholder;
+        });
+        // verify that we injected all values
+        /** @type {?} */
+        const hasUnmatchedValues = Object.keys(matches).some(key => !!matches[key].length);
+        if (hasUnmatchedValues) {
+            throw new Error(`i18n postprocess: unmatched values - ${JSON.stringify(matches)}`);
         }
-        if (!matches[content].length) {
-            throw new Error(`i18n postprocess: unmatched placeholder - ${content}`);
-        }
-        return (/** @type {?} */ (matches[content].shift()));
-    });
-    // verify that we injected all values
-    /** @type {?} */
-    const hasUnmatchedValues = Object.keys(matches).some(key => !!matches[key].length);
-    if (hasUnmatchedValues) {
-        throw new Error(`i18n postprocess: unmatched values - ${JSON.stringify(matches)}`);
     }
     // return current result if no replacements specified
     if (!Object.keys(replacements).length) {
         return result;
     }
-    //
-    // Step 2: replace all ICU vars (like "VAR_PLURAL")
-    //
-    result = result.replace(PP_ICU_VARS, (match, start, key, _type, _idx, end) => {
+    /**
+     * Step 2: replace all ICU vars (like "VAR_PLURAL")
+     */
+    result = result.replace(PP_ICU_VARS_REGEXP, (match, start, key, _type, _idx, end) => {
         return replacements.hasOwnProperty(key) ? `${start}${replacements[key]}${end}` : match;
     });
-    //
-    // Step 3: replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�)
-    // in case multiple ICUs have the same placeholder name
-    //
-    result = result.replace(PP_ICUS, (match, key) => {
+    /**
+     * Step 3: replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�) in case
+     * multiple ICUs have the same placeholder name
+     */
+    result = result.replace(PP_ICUS_REGEXP, (match, key) => {
         if (replacements.hasOwnProperty(key)) {
             /** @type {?} */
             const list = (/** @type {?} */ (replacements[key]));
