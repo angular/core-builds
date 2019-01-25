@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+43.sha-3d5a919
+ * @license Angular v8.0.0-beta.1+35.sha-fdc2b0b
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9240,20 +9240,16 @@
         ngDevMode &&
             assertLessThan(adjustedIndex, lView.length, "Slot should have been initialized with null");
         lView[adjustedIndex] = native;
-        var previousOrParentTNode = getPreviousOrParentTNode();
-        var isParent = getIsParent();
         var tNode = tView.data[adjustedIndex];
         if (tNode == null) {
-            var parent_1 = isParent ? previousOrParentTNode : previousOrParentTNode && previousOrParentTNode.parent;
-            // Parents cannot cross component boundaries because components will be used in multiple places,
-            // so it's only set if the view is the same.
-            var parentInSameView = parent_1 && parent_1 !== lView[HOST_NODE];
-            var tParentNode = parentInSameView ? parent_1 : null;
-            tNode = tView.data[adjustedIndex] = createTNode(tParentNode, type, adjustedIndex, name, attrs);
+            // TODO(misko): Refactor createTNode so that it does not depend on LView.
+            tNode = tView.data[adjustedIndex] = createTNode(lView, type, adjustedIndex, name, attrs, null);
         }
         // Now link ourselves into the tree.
         // We need this even if tNode exists, otherwise we might end up pointing to unexisting tNodes when
         // we use i18n (especially with ICU expressions that update the DOM during the update phase).
+        var previousOrParentTNode = getPreviousOrParentTNode();
+        var isParent = getIsParent();
         if (previousOrParentTNode) {
             if (isParent && previousOrParentTNode.child == null &&
                 (tNode.parent !== null || previousOrParentTNode.type === 2 /* View */)) {
@@ -9271,17 +9267,13 @@
         setIsParent(true);
         return tNode;
     }
-    function assignTViewNodeToLView(tView, tParentNode, index, lView) {
+    function createViewNode(index, view) {
         // View nodes are not stored in data because they can be added / removed at runtime (which
         // would cause indices to change). Their TNodes are instead stored in tView.node.
-        var tNode = tView.node;
-        if (tNode == null) {
-            ngDevMode && tParentNode &&
-                assertNodeOfPossibleTypes(tParentNode, 3 /* Element */, 0 /* Container */);
-            tView.node = tNode = createTNode(tParentNode, //
-            2 /* View */, index, null, null);
+        if (view[TVIEW].node == null) {
+            view[TVIEW].node = createTNode(view, 2 /* View */, index, null, null, null);
         }
-        return lView[HOST_NODE] = tNode;
+        return view[HOST_NODE] = view[TVIEW].node;
     }
     /**
      * When elements are created dynamically after a view blueprint is created (e.g. through
@@ -9312,7 +9304,7 @@
         if (queries) {
             lView[QUERIES] = queries.createView();
         }
-        assignTViewNodeToLView(tView, null, -1, lView);
+        createViewNode(-1, lView);
         if (tView.firstTemplatePass) {
             tView.node.injectorIndex = injectorIndex;
         }
@@ -10106,8 +10098,14 @@
      * @param tViews Any TViews attached to this node
      * @returns the TNode object
      */
-    function createTNode(tParent, type, adjustedIndex, tagName, attrs) {
+    function createTNode(lView, type, adjustedIndex, tagName, attrs, tViews) {
+        var previousOrParentTNode = getPreviousOrParentTNode();
         ngDevMode && ngDevMode.tNode++;
+        var parent = getIsParent() ? previousOrParentTNode : previousOrParentTNode && previousOrParentTNode.parent;
+        // Parents cannot cross component boundaries because components will be used in multiple places,
+        // so it's only set if the view is the same.
+        var parentInSameView = parent && lView && parent !== lView[HOST_NODE];
+        var tParent = parentInSameView ? parent : null;
         return {
             type: type,
             index: adjustedIndex,
@@ -10124,7 +10122,7 @@
             initialInputs: undefined,
             inputs: undefined,
             outputs: undefined,
-            tViews: null,
+            tViews: tViews,
             next: null,
             child: null,
             parent: tParent,
@@ -11018,9 +11016,7 @@
             if (lContainer[QUERIES]) {
                 viewToRender[QUERIES] = lContainer[QUERIES].createView();
             }
-            var tParentNode = getIsParent() ? previousOrParentTNode :
-                previousOrParentTNode && previousOrParentTNode.parent;
-            assignTViewNodeToLView(viewToRender[TVIEW], tParentNode, viewBlockId, viewToRender);
+            createViewNode(viewBlockId, viewToRender);
             enterView(viewToRender, viewToRender[TVIEW].node);
         }
         if (lContainer) {
@@ -13501,7 +13497,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.1+43.sha-3d5a919');
+    var VERSION = new Version('8.0.0-beta.1+35.sha-fdc2b0b');
 
     /**
      * @license
@@ -16765,7 +16761,7 @@
             _this.destroyCbs = [];
             _this.instance = instance;
             _this.hostView = _this.changeDetectorRef = new RootViewRef(_rootLView);
-            _this.hostView._tViewNode = assignTViewNodeToLView(_rootLView[TVIEW], null, -1, _rootLView);
+            _this.hostView._tViewNode = createViewNode(-1, _rootLView);
             _this.componentType = componentType;
             return _this;
         }
@@ -16819,19 +16815,15 @@
      * found in the LICENSE file at https://angular.io/license
      */
     var MARKER = "\uFFFD";
-    var ICU_BLOCK_REGEXP = /^\s*(�\d+:?\d*�)\s*,\s*(select|plural)\s*,/;
+    var ICU_BLOCK_REGEX = /^\s*(�\d+:?\d*�)\s*,\s*(select|plural)\s*,/;
     var SUBTEMPLATE_REGEXP = /�\/?\*(\d+:\d+)�/gi;
     var PH_REGEXP = /�(\/?[#*]\d+):?\d*�/gi;
     var BINDING_REGEXP = /�(\d+):?\d*�/gi;
     var ICU_REGEXP = /({\s*�\d+:?\d*�\s*,\s*\S{6}\s*,[\s\S]*})/gi;
-    // i18nPostprocess consts
-    var ROOT_TEMPLATE_ID = 0;
-    var PP_MULTI_VALUE_PLACEHOLDERS_REGEXP = /\[(�.+?�?)\]/;
-    var PP_PLACEHOLDERS_REGEXP = /\[(�.+?�?)\]|(�\/?\*\d+:\d+�)/g;
-    var PP_ICU_VARS_REGEXP = /({\s*)(VAR_(PLURAL|SELECT)(_\d+)?)(\s*,)/g;
-    var PP_ICUS_REGEXP = /�I18N_EXP_(ICU(_\d+)?)�/g;
-    var PP_CLOSE_TEMPLATE_REGEXP = /\/\*/;
-    var PP_TEMPLATE_ID_REGEXP = /\d+\:(\d+)/;
+    // i18nPostproocess regexps
+    var PP_PLACEHOLDERS = /\[(�.+?�?)\]/g;
+    var PP_ICU_VARS = /({\s*)(VAR_(PLURAL|SELECT)(_\d+)?)(\s*,)/g;
+    var PP_ICUS = /�I18N_EXP_(ICU(_\d+)?)�/g;
     /**
      * Breaks pattern into strings and top level {...} blocks.
      * Can be used to break a message into text and ICU expressions, or to break an ICU expression into
@@ -16859,7 +16851,7 @@
                 if (braceStack.length == 0) {
                     // End of the block.
                     var block = pattern.substring(prevPos, pos);
-                    if (ICU_BLOCK_REGEXP.test(block)) {
+                    if (ICU_BLOCK_REGEX.test(block)) {
                         results.push(parseICUBlock(block));
                     }
                     else if (block) { // Don't push empty strings
@@ -16895,7 +16887,7 @@
         var values = [];
         var icuType = 1 /* plural */;
         var mainBinding = 0;
-        pattern = pattern.replace(ICU_BLOCK_REGEXP, function (str, binding, type) {
+        pattern = pattern.replace(ICU_BLOCK_REGEX, function (str, binding, type) {
             if (type === 'select') {
                 icuType = 0 /* select */;
             }
@@ -17224,78 +17216,39 @@
      */
     function i18nPostprocess(message, replacements) {
         if (replacements === void 0) { replacements = {}; }
-        /**
-         * Step 1: resolve all multi-value placeholders like [�#5�|�*1:1��#2:1�|�#4:1�]
-         *
-         * Note: due to the way we process nested templates (BFS), multi-value placeholders are typically
-         * grouped by templates, for example: [�#5�|�#6�|�#1:1�|�#3:2�] where �#5� and �#6� belong to root
-         * template, �#1:1� belong to nested template with index 1 and �#1:2� - nested template with index
-         * 3. However in real templates the order might be different: i.e. �#1:1� and/or �#3:2� may go in
-         * front of �#6�. The post processing step restores the right order by keeping track of the
-         * template id stack and looks for placeholders that belong to the currently active template.
-         */
-        var result = message;
-        if (PP_MULTI_VALUE_PLACEHOLDERS_REGEXP.test(message)) {
-            var matches_1 = {};
-            var templateIdsStack_1 = [ROOT_TEMPLATE_ID];
-            result = result.replace(PP_PLACEHOLDERS_REGEXP, function (m, phs, tmpl) {
-                var content = phs || tmpl;
-                if (!matches_1[content]) {
-                    var placeholders_1 = [];
-                    content.split('|').forEach(function (placeholder) {
-                        var match = placeholder.match(PP_TEMPLATE_ID_REGEXP);
-                        var templateId = match ? parseInt(match[1], 10) : ROOT_TEMPLATE_ID;
-                        var isCloseTemplateTag = PP_CLOSE_TEMPLATE_REGEXP.test(placeholder);
-                        placeholders_1.push([templateId, isCloseTemplateTag, placeholder]);
-                    });
-                    matches_1[content] = placeholders_1;
-                }
-                if (!matches_1[content].length) {
-                    throw new Error("i18n postprocess: unmatched placeholder - " + content);
-                }
-                var currentTemplateId = templateIdsStack_1[templateIdsStack_1.length - 1];
-                var placeholders = matches_1[content];
-                var idx = 0;
-                // find placeholder index that matches current template id
-                for (var i = 0; i < placeholders.length; i++) {
-                    if (placeholders[i][0] === currentTemplateId) {
-                        idx = i;
-                        break;
-                    }
-                }
-                // update template id stack based on the current tag extracted
-                var _a = __read(placeholders[idx], 3), templateId = _a[0], isCloseTemplateTag = _a[1], placeholder = _a[2];
-                if (isCloseTemplateTag) {
-                    templateIdsStack_1.pop();
-                }
-                else if (currentTemplateId !== templateId) {
-                    templateIdsStack_1.push(templateId);
-                }
-                // remove processed tag from the list
-                placeholders.splice(idx, 1);
-                return placeholder;
-            });
-            // verify that we injected all values
-            var hasUnmatchedValues = Object.keys(matches_1).some(function (key) { return !!matches_1[key].length; });
-            if (hasUnmatchedValues) {
-                throw new Error("i18n postprocess: unmatched values - " + JSON.stringify(matches_1));
+        //
+        // Step 1: resolve all multi-value cases (like [�*1:1��#2:1�|�#4:1�|�5�])
+        //
+        var matches = {};
+        var result = message.replace(PP_PLACEHOLDERS, function (_match, content) {
+            if (!matches[content]) {
+                matches[content] = content.split('|');
             }
+            if (!matches[content].length) {
+                throw new Error("i18n postprocess: unmatched placeholder - " + content);
+            }
+            return matches[content].shift();
+        });
+        // verify that we injected all values
+        var hasUnmatchedValues = Object.keys(matches).some(function (key) { return !!matches[key].length; });
+        if (hasUnmatchedValues) {
+            throw new Error("i18n postprocess: unmatched values - " + JSON.stringify(matches));
         }
         // return current result if no replacements specified
         if (!Object.keys(replacements).length) {
             return result;
         }
-        /**
-         * Step 2: replace all ICU vars (like "VAR_PLURAL")
-         */
-        result = result.replace(PP_ICU_VARS_REGEXP, function (match, start, key, _type, _idx, end) {
+        //
+        // Step 2: replace all ICU vars (like "VAR_PLURAL")
+        //
+        result = result.replace(PP_ICU_VARS, function (match, start, key, _type, _idx, end) {
             return replacements.hasOwnProperty(key) ? "" + start + replacements[key] + end : match;
         });
-        /**
-         * Step 3: replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�) in case
-         * multiple ICUs have the same placeholder name
-         */
-        result = result.replace(PP_ICUS_REGEXP, function (match, key) {
+        //
+        // Step 3: replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�)
+        // in case multiple ICUs have the same placeholder name
+        //
+        result = result.replace(PP_ICUS, function (match, key) {
             if (replacements.hasOwnProperty(key)) {
                 var list = replacements[key];
                 if (!list.length) {

@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+43.sha-3d5a919
+ * @license Angular v8.0.0-beta.1+35.sha-fdc2b0b
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11384,25 +11384,18 @@ function createNodeAtIndex(index, type, native, name, attrs) {
         assertLessThan(adjustedIndex, lView.length, `Slot should have been initialized with null`);
     lView[adjustedIndex] = native;
     /** @type {?} */
-    const previousOrParentTNode = getPreviousOrParentTNode();
-    /** @type {?} */
-    const isParent = getIsParent();
-    /** @type {?} */
     let tNode = (/** @type {?} */ (tView.data[adjustedIndex]));
     if (tNode == null) {
-        /** @type {?} */
-        const parent = isParent ? previousOrParentTNode : previousOrParentTNode && previousOrParentTNode.parent;
-        // Parents cannot cross component boundaries because components will be used in multiple places,
-        // so it's only set if the view is the same.
-        /** @type {?} */
-        const parentInSameView = parent && parent !== lView[HOST_NODE];
-        /** @type {?} */
-        const tParentNode = parentInSameView ? (/** @type {?} */ (parent)) : null;
-        tNode = tView.data[adjustedIndex] = createTNode(tParentNode, type, adjustedIndex, name, attrs);
+        // TODO(misko): Refactor createTNode so that it does not depend on LView.
+        tNode = tView.data[adjustedIndex] = createTNode(lView, type, adjustedIndex, name, attrs, null);
     }
     // Now link ourselves into the tree.
     // We need this even if tNode exists, otherwise we might end up pointing to unexisting tNodes when
     // we use i18n (especially with ICU expressions that update the DOM during the update phase).
+    /** @type {?} */
+    const previousOrParentTNode = getPreviousOrParentTNode();
+    /** @type {?} */
+    const isParent = getIsParent();
     if (previousOrParentTNode) {
         if (isParent && previousOrParentTNode.child == null &&
             (tNode.parent !== null || previousOrParentTNode.type === 2 /* View */)) {
@@ -11421,24 +11414,17 @@ function createNodeAtIndex(index, type, native, name, attrs) {
     return (/** @type {?} */ (tNode));
 }
 /**
- * @param {?} tView
- * @param {?} tParentNode
  * @param {?} index
- * @param {?} lView
+ * @param {?} view
  * @return {?}
  */
-function assignTViewNodeToLView(tView, tParentNode, index, lView) {
+function createViewNode(index, view) {
     // View nodes are not stored in data because they can be added / removed at runtime (which
     // would cause indices to change). Their TNodes are instead stored in tView.node.
-    /** @type {?} */
-    let tNode = tView.node;
-    if (tNode == null) {
-        ngDevMode && tParentNode &&
-            assertNodeOfPossibleTypes(tParentNode, 3 /* Element */, 0 /* Container */);
-        tView.node = tNode = (/** @type {?} */ (createTNode((/** @type {?} */ (tParentNode)), //
-        2 /* View */, index, null, null)));
+    if (view[TVIEW].node == null) {
+        view[TVIEW].node = (/** @type {?} */ (createTNode(view, 2 /* View */, index, null, null, null)));
     }
-    return lView[HOST_NODE] = (/** @type {?} */ (tNode));
+    return view[HOST_NODE] = (/** @type {?} */ (view[TVIEW].node));
 }
 /**
  * When elements are created dynamically after a view blueprint is created (e.g. through
@@ -11483,7 +11469,7 @@ function createEmbeddedViewAndNode(tView, context, declarationView, renderer, qu
     if (queries) {
         lView[QUERIES] = queries.createView();
     }
-    assignTViewNodeToLView(tView, null, -1, lView);
+    createViewNode(-1, lView);
     if (tView.firstTemplatePass) {
         (/** @type {?} */ (tView.node)).injectorIndex = injectorIndex;
     }
@@ -12451,15 +12437,26 @@ function savePropertyDebugData(tNode, lView, propName, tData, nativeOnly) {
 /**
  * Constructs a TNode object from the arguments.
  *
- * @param {?} tParent
+ * @param {?} lView
  * @param {?} type The type of the node
  * @param {?} adjustedIndex The index of the TNode in TView.data, adjusted for HEADER_OFFSET
  * @param {?} tagName The tag name of the node
  * @param {?} attrs The attributes defined on this node
+ * @param {?} tViews Any TViews attached to this node
  * @return {?} the TNode object
  */
-function createTNode(tParent, type, adjustedIndex, tagName, attrs) {
+function createTNode(lView, type, adjustedIndex, tagName, attrs, tViews) {
+    /** @type {?} */
+    const previousOrParentTNode = getPreviousOrParentTNode();
     ngDevMode && ngDevMode.tNode++;
+    /** @type {?} */
+    const parent = getIsParent() ? previousOrParentTNode : previousOrParentTNode && previousOrParentTNode.parent;
+    // Parents cannot cross component boundaries because components will be used in multiple places,
+    // so it's only set if the view is the same.
+    /** @type {?} */
+    const parentInSameView = parent && lView && parent !== lView[HOST_NODE];
+    /** @type {?} */
+    const tParent = parentInSameView ? (/** @type {?} */ (parent)) : null;
     return {
         type: type,
         index: adjustedIndex,
@@ -12476,7 +12473,7 @@ function createTNode(tParent, type, adjustedIndex, tagName, attrs) {
         initialInputs: undefined,
         inputs: undefined,
         outputs: undefined,
-        tViews: null,
+        tViews: tViews,
         next: null,
         child: null,
         parent: tParent,
@@ -13614,10 +13611,7 @@ function embeddedViewStart(viewBlockId, consts, vars) {
         if (lContainer[QUERIES]) {
             viewToRender[QUERIES] = (/** @type {?} */ (lContainer[QUERIES])).createView();
         }
-        /** @type {?} */
-        const tParentNode = getIsParent() ? previousOrParentTNode :
-            previousOrParentTNode && previousOrParentTNode.parent;
-        assignTViewNodeToLView(viewToRender[TVIEW], tParentNode, viewBlockId, viewToRender);
+        createViewNode(viewBlockId, viewToRender);
         enterView(viewToRender, viewToRender[TVIEW].node);
     }
     if (lContainer) {
@@ -16725,7 +16719,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.1+43.sha-3d5a919');
+const VERSION = new Version('8.0.0-beta.1+35.sha-fdc2b0b');
 
 /**
  * @fileoverview added by tsickle
@@ -21299,7 +21293,7 @@ class ComponentRef$1 extends ComponentRef {
         this.destroyCbs = [];
         this.instance = instance;
         this.hostView = this.changeDetectorRef = new RootViewRef(_rootLView);
-        this.hostView._tViewNode = assignTViewNodeToLView(_rootLView[TVIEW], null, -1, _rootLView);
+        this.hostView._tViewNode = createViewNode(-1, _rootLView);
         this.componentType = componentType;
     }
     /**
@@ -21356,7 +21350,7 @@ const COMMENT_MARKER = {
 /** @type {?} */
 const MARKER = `�`;
 /** @type {?} */
-const ICU_BLOCK_REGEXP = /^\s*(�\d+:?\d*�)\s*,\s*(select|plural)\s*,/;
+const ICU_BLOCK_REGEX = /^\s*(�\d+:?\d*�)\s*,\s*(select|plural)\s*,/;
 /** @type {?} */
 const SUBTEMPLATE_REGEXP = /�\/?\*(\d+:\d+)�/gi;
 /** @type {?} */
@@ -21365,21 +21359,13 @@ const PH_REGEXP = /�(\/?[#*]\d+):?\d*�/gi;
 const BINDING_REGEXP = /�(\d+):?\d*�/gi;
 /** @type {?} */
 const ICU_REGEXP = /({\s*�\d+:?\d*�\s*,\s*\S{6}\s*,[\s\S]*})/gi;
-// i18nPostprocess consts
+// i18nPostproocess regexps
 /** @type {?} */
-const ROOT_TEMPLATE_ID = 0;
+const PP_PLACEHOLDERS = /\[(�.+?�?)\]/g;
 /** @type {?} */
-const PP_MULTI_VALUE_PLACEHOLDERS_REGEXP = /\[(�.+?�?)\]/;
+const PP_ICU_VARS = /({\s*)(VAR_(PLURAL|SELECT)(_\d+)?)(\s*,)/g;
 /** @type {?} */
-const PP_PLACEHOLDERS_REGEXP = /\[(�.+?�?)\]|(�\/?\*\d+:\d+�)/g;
-/** @type {?} */
-const PP_ICU_VARS_REGEXP = /({\s*)(VAR_(PLURAL|SELECT)(_\d+)?)(\s*,)/g;
-/** @type {?} */
-const PP_ICUS_REGEXP = /�I18N_EXP_(ICU(_\d+)?)�/g;
-/** @type {?} */
-const PP_CLOSE_TEMPLATE_REGEXP = /\/\*/;
-/** @type {?} */
-const PP_TEMPLATE_ID_REGEXP = /\d+\:(\d+)/;
+const PP_ICUS = /�I18N_EXP_(ICU(_\d+)?)�/g;
 /**
  * Breaks pattern into strings and top level {...} blocks.
  * Can be used to break a message into text and ICU expressions, or to break an ICU expression into
@@ -21415,7 +21401,7 @@ function extractParts(pattern) {
                 // End of the block.
                 /** @type {?} */
                 const block = pattern.substring(prevPos, pos);
-                if (ICU_BLOCK_REGEXP.test(block)) {
+                if (ICU_BLOCK_REGEX.test(block)) {
                     results.push(parseICUBlock(block));
                 }
                 else if (block) { // Don't push empty strings
@@ -21458,7 +21444,7 @@ function parseICUBlock(pattern) {
     let icuType = 1 /* plural */;
     /** @type {?} */
     let mainBinding = 0;
-    pattern = pattern.replace(ICU_BLOCK_REGEXP, function (str, binding, type) {
+    pattern = pattern.replace(ICU_BLOCK_REGEX, function (str, binding, type) {
         if (type === 'select') {
             icuType = 0 /* select */;
         }
@@ -21855,90 +21841,42 @@ function appendI18nNode(tNode, parentTNode, previousTNode) {
  *
  */
 function i18nPostprocess(message, replacements = {}) {
-    /**
-     * Step 1: resolve all multi-value placeholders like [�#5�|�*1:1��#2:1�|�#4:1�]
-     *
-     * Note: due to the way we process nested templates (BFS), multi-value placeholders are typically
-     * grouped by templates, for example: [�#5�|�#6�|�#1:1�|�#3:2�] where �#5� and �#6� belong to root
-     * template, �#1:1� belong to nested template with index 1 and �#1:2� - nested template with index
-     * 3. However in real templates the order might be different: i.e. �#1:1� and/or �#3:2� may go in
-     * front of �#6�. The post processing step restores the right order by keeping track of the
-     * template id stack and looks for placeholders that belong to the currently active template.
-     * @type {?}
-     */
-    let result = message;
-    if (PP_MULTI_VALUE_PLACEHOLDERS_REGEXP.test(message)) {
-        /** @type {?} */
-        const matches = {};
-        /** @type {?} */
-        const templateIdsStack = [ROOT_TEMPLATE_ID];
-        result = result.replace(PP_PLACEHOLDERS_REGEXP, (m, phs, tmpl) => {
-            /** @type {?} */
-            const content = phs || tmpl;
-            if (!matches[content]) {
-                /** @type {?} */
-                const placeholders = [];
-                content.split('|').forEach((placeholder) => {
-                    /** @type {?} */
-                    const match = placeholder.match(PP_TEMPLATE_ID_REGEXP);
-                    /** @type {?} */
-                    const templateId = match ? parseInt(match[1], 10) : ROOT_TEMPLATE_ID;
-                    /** @type {?} */
-                    const isCloseTemplateTag = PP_CLOSE_TEMPLATE_REGEXP.test(placeholder);
-                    placeholders.push([templateId, isCloseTemplateTag, placeholder]);
-                });
-                matches[content] = placeholders;
-            }
-            if (!matches[content].length) {
-                throw new Error(`i18n postprocess: unmatched placeholder - ${content}`);
-            }
-            /** @type {?} */
-            const currentTemplateId = templateIdsStack[templateIdsStack.length - 1];
-            /** @type {?} */
-            const placeholders = matches[content];
-            /** @type {?} */
-            let idx = 0;
-            // find placeholder index that matches current template id
-            for (let i = 0; i < placeholders.length; i++) {
-                if (placeholders[i][0] === currentTemplateId) {
-                    idx = i;
-                    break;
-                }
-            }
-            // update template id stack based on the current tag extracted
-            const [templateId, isCloseTemplateTag, placeholder] = placeholders[idx];
-            if (isCloseTemplateTag) {
-                templateIdsStack.pop();
-            }
-            else if (currentTemplateId !== templateId) {
-                templateIdsStack.push(templateId);
-            }
-            // remove processed tag from the list
-            placeholders.splice(idx, 1);
-            return placeholder;
-        });
-        // verify that we injected all values
-        /** @type {?} */
-        const hasUnmatchedValues = Object.keys(matches).some(key => !!matches[key].length);
-        if (hasUnmatchedValues) {
-            throw new Error(`i18n postprocess: unmatched values - ${JSON.stringify(matches)}`);
+    //
+    // Step 1: resolve all multi-value cases (like [�*1:1��#2:1�|�#4:1�|�5�])
+    //
+    /** @type {?} */
+    const matches = {};
+    /** @type {?} */
+    let result = message.replace(PP_PLACEHOLDERS, (_match, content) => {
+        if (!matches[content]) {
+            matches[content] = content.split('|');
         }
+        if (!matches[content].length) {
+            throw new Error(`i18n postprocess: unmatched placeholder - ${content}`);
+        }
+        return (/** @type {?} */ (matches[content].shift()));
+    });
+    // verify that we injected all values
+    /** @type {?} */
+    const hasUnmatchedValues = Object.keys(matches).some(key => !!matches[key].length);
+    if (hasUnmatchedValues) {
+        throw new Error(`i18n postprocess: unmatched values - ${JSON.stringify(matches)}`);
     }
     // return current result if no replacements specified
     if (!Object.keys(replacements).length) {
         return result;
     }
-    /**
-     * Step 2: replace all ICU vars (like "VAR_PLURAL")
-     */
-    result = result.replace(PP_ICU_VARS_REGEXP, (match, start, key, _type, _idx, end) => {
+    //
+    // Step 2: replace all ICU vars (like "VAR_PLURAL")
+    //
+    result = result.replace(PP_ICU_VARS, (match, start, key, _type, _idx, end) => {
         return replacements.hasOwnProperty(key) ? `${start}${replacements[key]}${end}` : match;
     });
-    /**
-     * Step 3: replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�) in case
-     * multiple ICUs have the same placeholder name
-     */
-    result = result.replace(PP_ICUS_REGEXP, (match, key) => {
+    //
+    // Step 3: replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�)
+    // in case multiple ICUs have the same placeholder name
+    //
+    result = result.replace(PP_ICUS, (match, key) => {
         if (replacements.hasOwnProperty(key)) {
             /** @type {?} */
             const list = (/** @type {?} */ (replacements[key]));
