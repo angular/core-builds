@@ -485,7 +485,22 @@ export declare type HookData = (number | (() => void))[];
  * Each pipe's definition is stored here at the same index as its pipe instance in
  * the data array.
  *
+ * Each host property's name is stored here at the same index as its value in the
+ * data array.
+ *
+ * Each property binding name is stored here at the same index as its value in
+ * the data array. If the binding is an interpolation, the static string values
+ * are stored parallel to the dynamic values. Example:
+ *
+ * id="prefix {{ v0 }} a {{ v1 }} b {{ v2 }} suffix"
+ *
+ * LView       |   TView.data
+ *------------------------
+ *  v0 value   |   'a'
+ *  v1 value   |   'b'
+ *  v2 value   |   id � prefix � suffix
+ *
  * Injector bloom filters are also stored here.
  */
-export declare type TData = (TNode | PipeDef<any> | DirectiveDef<any> | ComponentDef<any> | number | Type<any> | InjectionToken<any> | TI18n | I18nUpdateOpCodes | null)[];
+export declare type TData = (TNode | PipeDef<any> | DirectiveDef<any> | ComponentDef<any> | number | Type<any> | InjectionToken<any> | TI18n | I18nUpdateOpCodes | null | string)[];
 export declare const unusedValueExportToPlacateAjd = 1;
