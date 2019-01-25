@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.0+21.sha-45bf911
+ * @license Angular v8.0.0-beta.1+43.sha-3d5a919
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3514,97 +3514,6 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * Represents a basic change from a previous to a new value for a single
-     * property on a directive instance. Passed as a value in a
-     * {@link SimpleChanges} object to the `ngOnChanges` hook.
-     *
-     * @see `OnChanges`
-     *
-     * @publicApi
-     */
-    var SimpleChange = /** @class */ (function () {
-        function SimpleChange(previousValue, currentValue, firstChange) {
-            this.previousValue = previousValue;
-            this.currentValue = currentValue;
-            this.firstChange = firstChange;
-        }
-        /**
-         * Check whether the new value is the first value assigned.
-         */
-        SimpleChange.prototype.isFirstChange = function () { return this.firstChange; };
-        return SimpleChange;
-    }());
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Checks an object to see if it's an exact instance of a particular type
-     * without traversing the inheritance hierarchy like `instanceof` does.
-     * @param obj The object to check
-     * @param type The type to check the object against
-     */
-    function isExactInstanceOf(obj, type) {
-        return obj != null && typeof obj == 'object' && Object.getPrototypeOf(obj) == type.prototype;
-    }
-    /**
-     * Checks to see if an object is an instance of {@link OnChangesDirectiveWrapper}
-     * @param obj the object to check (generally from `LView`)
-     */
-    function isOnChangesDirectiveWrapper(obj) {
-        return isExactInstanceOf(obj, OnChangesDirectiveWrapper);
-    }
-    /**
-     * Removes the `OnChangesDirectiveWrapper` if present.
-     *
-     * @param obj to unwrap.
-     */
-    function unwrapOnChangesDirectiveWrapper(obj) {
-        return isOnChangesDirectiveWrapper(obj) ? obj.instance : obj;
-    }
-    /**
-     * A class that wraps directive instances for storage in LView when directives
-     * have onChanges hooks to deal with.
-     */
-    var OnChangesDirectiveWrapper = /** @class */ (function () {
-        function OnChangesDirectiveWrapper(instance) {
-            this.instance = instance;
-            this.seenProps = new Set();
-            this.previous = {};
-            this.changes = null;
-        }
-        return OnChangesDirectiveWrapper;
-    }());
-    /**
-     * Updates the `changes` property on the `wrapper` instance, such that when it's
-     * checked in {@link callHooks} it will fire the related `onChanges` hook.
-     * @param wrapper the wrapper for the directive instance
-     * @param declaredName the declared name to be used in `SimpleChange`
-     * @param value The new value for the property
-     */
-    function recordChange(wrapper, declaredName, value) {
-        var simpleChanges = wrapper.changes || (wrapper.changes = {});
-        var firstChange = !wrapper.seenProps.has(declaredName);
-        if (firstChange) {
-            wrapper.seenProps.add(declaredName);
-        }
-        var previous = wrapper.previous;
-        var previousValue = previous[declaredName];
-        simpleChanges[declaredName] = new SimpleChange(firstChange ? undefined : previousValue && previousValue.currentValue, value, firstChange);
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
      * Returns whether the values are different from a change detection stand point.
      *
      * Constraints are relaxed in checkNoChanges mode. See `devModeEqual` for details.
@@ -3631,10 +3540,7 @@
     /** Retrieves a value from any `LView` or `TData`. */
     function loadInternal(view, index) {
         ngDevMode && assertDataInRange(view, index + HEADER_OFFSET);
-        var record = view[index + HEADER_OFFSET];
-        // If we're storing an array because of a directive or component with ngOnChanges,
-        // return the directive or component instance.
-        return isOnChangesDirectiveWrapper(record) ? record.instance : record;
+        return view[index + HEADER_OFFSET];
     }
     /**
      * Takes the value of a slot in `LView` and returns the element node.
@@ -3824,6 +3730,28 @@
     function resolveBody(element) {
         return { name: 'body', target: element.ownerDocument.body };
     }
+    /**
+     * The special delimiter we use to separate property names, prefixes, and suffixes
+     * in property binding metadata. See storeBindingMetadata().
+     *
+     * We intentionally use the Unicode "REPLACEMENT CHARACTER" (U+FFFD) as a delimiter
+     * because it is a very uncommon character that is unlikely to be part of a user's
+     * property names or interpolation strings. If it is in fact used in a property
+     * binding, DebugElement.properties will not return the correct value for that
+     * binding. However, there should be no runtime effect for real applications.
+     *
+     * This character is typically rendered as a question mark inside of a diamond.
+     * See https://en.wikipedia.org/wiki/Specials_(Unicode_block)
+     *
+     */
+    var INTERPOLATION_DELIMITER = "\uFFFD";
+    /**
+     * Determines whether or not the given string is a property metadata string.
+     * See storeBindingMetadata().
+     */
+    function isPropMetadataString(str) {
+        return str.indexOf(INTERPOLATION_DELIMITER) >= 0;
+    }
 
     /**
      * @license
@@ -3887,7 +3815,6 @@
             inputs: null,
             outputs: null,
             exportAs: componentDefinition.exportAs || null,
-            onChanges: typePrototype.ngOnChanges || null,
             onInit: typePrototype.ngOnInit || null,
             doCheck: typePrototype.ngDoCheck || null,
             afterContentInit: typePrototype.ngAfterContentInit || null,
@@ -3908,6 +3835,7 @@
             id: 'c',
             styles: componentDefinition.styles || EMPTY_ARRAY$2,
             _: null,
+            setInput: null,
         };
         def._ = noSideEffects(function () {
             var directiveTypes = componentDefinition.directives;
@@ -4190,11 +4118,7 @@
     function registerPreOrderHooks(directiveIndex, directiveDef, tView) {
         ngDevMode &&
             assertEqual(tView.firstTemplatePass, true, 'Should only be called on first template pass');
-        var onChanges = directiveDef.onChanges, onInit = directiveDef.onInit, doCheck = directiveDef.doCheck;
-        if (onChanges) {
-            (tView.initHooks || (tView.initHooks = [])).push(-directiveIndex, onChanges);
-            (tView.checkHooks || (tView.checkHooks = [])).push(-directiveIndex, onChanges);
-        }
+        var onInit = directiveDef.onInit, doCheck = directiveDef.doCheck;
         if (onInit) {
             (tView.initHooks || (tView.initHooks = [])).push(directiveIndex, onInit);
         }
@@ -4287,31 +4211,14 @@
     }
     /**
      * Calls lifecycle hooks with their contexts, skipping init hooks if it's not
-     * the first LView pass, and skipping onChanges hooks if there are no changes present.
+     * the first LView pass
      *
      * @param currentView The current view
      * @param arr The array in which the hooks are found
      */
     function callHooks(currentView, arr) {
         for (var i = 0; i < arr.length; i += 2) {
-            var directiveIndex = arr[i];
-            var hook = arr[i + 1];
-            // Negative indices signal that we're dealing with an `onChanges` hook.
-            var isOnChangesHook = directiveIndex < 0;
-            var directiveOrWrappedDirective = currentView[isOnChangesHook ? -directiveIndex : directiveIndex];
-            var directive = unwrapOnChangesDirectiveWrapper(directiveOrWrappedDirective);
-            if (isOnChangesHook) {
-                var onChanges = directiveOrWrappedDirective;
-                var changes = onChanges.changes;
-                if (changes) {
-                    onChanges.previous = changes;
-                    onChanges.changes = null;
-                    hook.call(onChanges.instance, changes);
-                }
-            }
-            else {
-                hook.call(directive);
-            }
+            arr[i + 1].call(currentView[arr[i]]);
         }
     }
 
@@ -4525,6 +4432,18 @@
     }
     function setBindingRoot(value) {
         bindingRootIndex = value;
+    }
+    /**
+     * Current index of a View Query which needs to be processed next.
+     * We iterate over the list of View Queries stored in LView and increment current query index.
+     */
+    var viewQueryIndex = 0;
+    function getCurrentViewQueryIndex() {
+        // top level variables should not be exported for performance reasons (PERF_NOTES.md)
+        return viewQueryIndex;
+    }
+    function setCurrentViewQueryIndex(value) {
+        viewQueryIndex = value;
     }
     /**
      * Swap the current state with a new state.
@@ -5055,9 +4974,6 @@
                 setTNodeAndViewData(savePreviousOrParentTNode, saveLView);
             }
         }
-        else {
-            value = unwrapOnChangesDirectiveWrapper(value);
-        }
         return value;
     }
     /**
@@ -5380,7 +5296,7 @@
             var directiveIndexStart = tNode.directiveStart;
             var directiveIndexEnd = tNode.directiveEnd;
             for (var i = directiveIndexStart; i < directiveIndexEnd; i++) {
-                if (unwrapOnChangesDirectiveWrapper(lView[i]) === directiveInstance) {
+                if (lView[i] === directiveInstance) {
                     return tNode.index;
                 }
             }
@@ -6990,6 +6906,7 @@
      * Insert.
      */
     function walkTNodeTree(viewToWalk, action, renderer, renderParent, beforeNode) {
+        var e_1, _a;
         var rootTNode = viewToWalk[TVIEW].node;
         var projectionNodeIndex = -1;
         var currentView = viewToWalk;
@@ -7019,13 +6936,31 @@
                 var componentView = findComponentView(currentView);
                 var componentHost = componentView[HOST_NODE];
                 var head = componentHost.projection[tNode.projection];
-                // Must store both the TNode and the view because this projection node could be nested
-                // deeply inside embedded views, and we need to get back down to this particular nested view.
-                projectionNodeStack[++projectionNodeIndex] = tNode;
-                projectionNodeStack[++projectionNodeIndex] = currentView;
-                if (head) {
-                    currentView = componentView[PARENT];
-                    nextTNode = currentView[TVIEW].data[head.index];
+                if (Array.isArray(head)) {
+                    try {
+                        for (var head_1 = __values(head), head_1_1 = head_1.next(); !head_1_1.done; head_1_1 = head_1.next()) {
+                            var nativeNode = head_1_1.value;
+                            executeNodeAction(action, renderer, renderParent, nativeNode, tNode, beforeNode);
+                        }
+                    }
+                    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                    finally {
+                        try {
+                            if (head_1_1 && !head_1_1.done && (_a = head_1.return)) _a.call(head_1);
+                        }
+                        finally { if (e_1) throw e_1.error; }
+                    }
+                }
+                else {
+                    // Must store both the TNode and the view because this projection node could be nested
+                    // deeply inside embedded views, and we need to get back down to this particular nested
+                    // view.
+                    projectionNodeStack[++projectionNodeIndex] = tNode;
+                    projectionNodeStack[++projectionNodeIndex] = currentView;
+                    if (head) {
+                        currentView = componentView[PARENT];
+                        nextTNode = currentView[TVIEW].data[head.index];
+                    }
                 }
             }
             else {
@@ -7351,7 +7286,7 @@
      *   `<component><content>delayed due to projection</content></component>`
      * - Parent container is disconnected: This can happen when we are inserting a view into
      *   parent container, which itself is disconnected. For example the parent container is part
-     *   of a View which has not be inserted or is mare for projection but has not been inserted
+     *   of a View which has not be inserted or is made for projection but has not been inserted
      *   into destination.
      */
     function getRenderParent(tNode, currentView) {
@@ -7384,16 +7319,22 @@
         }
         else {
             ngDevMode && assertNodeType(parent, 3 /* Element */);
-            // We've got a parent which is an element in the current view. We just need to verify if the
-            // parent element is not a component. Component's content nodes are not inserted immediately
-            // because they will be projected, and so doing insert at this point would be wasteful.
-            // Since the projection would then move it to its final destination.
             if (parent.flags & 1 /* isComponent */) {
-                return null;
+                var tData = currentView[TVIEW].data;
+                var tNode_1 = tData[parent.index];
+                var encapsulation = tData[tNode_1.directiveStart].encapsulation;
+                // We've got a parent which is an element in the current view. We just need to verify if the
+                // parent element is not a component. Component's content nodes are not inserted immediately
+                // because they will be projected, and so doing insert at this point would be wasteful.
+                // Since the projection would then move it to its final destination. Note that we can't
+                // make this assumption when using the Shadow DOM, because the native projection placeholders
+                // (<content> or <slot>) have to be in place as elements are being inserted.
+                if (encapsulation !== exports.ViewEncapsulation.ShadowDom &&
+                    encapsulation !== exports.ViewEncapsulation.Native) {
+                    return null;
+                }
             }
-            else {
-                return getNativeByTNode(parent, currentView);
-            }
+            return getNativeByTNode(parent, currentView);
         }
     }
     /**
@@ -7419,6 +7360,22 @@
             parent.insertBefore(child, beforeNode, true);
         }
     }
+    function nativeAppendChild(renderer, parent, child) {
+        if (isProceduralRenderer(renderer)) {
+            renderer.appendChild(parent, child);
+        }
+        else {
+            parent.appendChild(child);
+        }
+    }
+    function nativeAppendOrInsertBefore(renderer, parent, child, beforeNode) {
+        if (beforeNode) {
+            nativeInsertBefore(renderer, parent, child, beforeNode);
+        }
+        else {
+            nativeAppendChild(renderer, parent, child);
+        }
+    }
     /**
      * Removes a native child node from a given native parent node.
      */
@@ -7439,34 +7396,58 @@
         return isProceduralRenderer(renderer) ? renderer.nextSibling(node) : node.nextSibling;
     }
     /**
-     * Appends the `child` element to the `parent`.
+     * Finds a native "anchor" node for cases where we can't append a native child directly
+     * (`appendChild`) and need to use a reference (anchor) node for the `insertBefore` operation.
+     * @param parentTNode
+     * @param lView
+     */
+    function getNativeAnchorNode(parentTNode, lView) {
+        if (parentTNode.type === 2 /* View */) {
+            var lContainer = getLContainer(parentTNode, lView);
+            var views = lContainer[VIEWS];
+            var index = views.indexOf(lView);
+            return getBeforeNodeForView(index, views, lContainer[NATIVE]);
+        }
+        else if (parentTNode.type === 4 /* ElementContainer */ ||
+            parentTNode.type === 5 /* IcuContainer */) {
+            return getNativeByTNode(parentTNode, lView);
+        }
+        return null;
+    }
+    /**
+     * Appends the `child` native node (or a collection of nodes) to the `parent`.
      *
      * The element insertion might be delayed {@link canInsertNativeNode}.
      *
-     * @param childEl The child that should be appended
+     * @param childEl The native child (or children) that should be appended
      * @param childTNode The TNode of the child element
      * @param currentView The current LView
      * @returns Whether or not the child was appended
      */
     function appendChild(childEl, childTNode, currentView) {
+        var e_2, _a;
         var renderParent = getRenderParent(childTNode, currentView);
         if (renderParent != null) {
             var renderer = currentView[RENDERER];
             var parentTNode = childTNode.parent || currentView[HOST_NODE];
-            if (parentTNode.type === 2 /* View */) {
-                var lContainer = getLContainer(parentTNode, currentView);
-                var views = lContainer[VIEWS];
-                var index = views.indexOf(currentView);
-                nativeInsertBefore(renderer, renderParent, childEl, getBeforeNodeForView(index, views, lContainer[NATIVE]));
-            }
-            else if (parentTNode.type === 4 /* ElementContainer */ ||
-                parentTNode.type === 5 /* IcuContainer */) {
-                var anchorNode = getNativeByTNode(parentTNode, currentView);
-                nativeInsertBefore(renderer, renderParent, childEl, anchorNode);
+            var anchorNode = getNativeAnchorNode(parentTNode, currentView);
+            if (Array.isArray(childEl)) {
+                try {
+                    for (var childEl_1 = __values(childEl), childEl_1_1 = childEl_1.next(); !childEl_1_1.done; childEl_1_1 = childEl_1.next()) {
+                        var nativeNode = childEl_1_1.value;
+                        nativeAppendOrInsertBefore(renderer, renderParent, nativeNode, anchorNode);
+                    }
+                }
+                catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                finally {
+                    try {
+                        if (childEl_1_1 && !childEl_1_1.done && (_a = childEl_1.return)) _a.call(childEl_1);
+                    }
+                    finally { if (e_2) throw e_2.error; }
+                }
             }
             else {
-                isProceduralRenderer(renderer) ? renderer.appendChild(renderParent, childEl) :
-                    renderParent.appendChild(childEl);
+                nativeAppendOrInsertBefore(renderer, renderParent, childEl, anchorNode);
             }
         }
     }
@@ -7665,7 +7646,7 @@
     function isStylingContext(value) {
         // Not an LView or an LContainer
         return Array.isArray(value) && typeof value[0 /* MasterFlagPosition */] === 'number' &&
-            Array.isArray(value[2 /* InitialStyleValuesPosition */]);
+            value.length !== LCONTAINER_LENGTH;
     }
     function isAnimationProp(name) {
         return name[0] === ANIMATION_PROP_PREFIX;
@@ -8528,13 +8509,13 @@
             ngDevMode && ngDevMode.rendererSetStyle++;
             isProceduralRenderer(renderer) ?
                 renderer.setStyle(native, prop, value, RendererStyleFlags3.DashCase) :
-                native['style'].setProperty(prop, value);
+                native.style[prop] = value;
         }
         else {
             ngDevMode && ngDevMode.rendererRemoveStyle++;
             isProceduralRenderer(renderer) ?
                 renderer.removeStyle(native, prop, RendererStyleFlags3.DashCase) :
-                native['style'].removeProperty(prop);
+                native.style[prop] = '';
         }
     }
     /**
@@ -8557,16 +8538,19 @@
             if (playerBuilder) {
                 playerBuilder.setValue(className, add);
             }
+            // DOMTokenList will throw if we try to add or remove an empty string.
         }
-        else if (add) {
-            ngDevMode && ngDevMode.rendererAddClass++;
-            isProceduralRenderer(renderer) ? renderer.addClass(native, className) :
-                native['classList'].add(className);
-        }
-        else {
-            ngDevMode && ngDevMode.rendererRemoveClass++;
-            isProceduralRenderer(renderer) ? renderer.removeClass(native, className) :
-                native['classList'].remove(className);
+        else if (className !== '') {
+            if (add) {
+                ngDevMode && ngDevMode.rendererAddClass++;
+                isProceduralRenderer(renderer) ? renderer.addClass(native, className) :
+                    native['classList'].add(className);
+            }
+            else {
+                ngDevMode && ngDevMode.rendererRemoveClass++;
+                isProceduralRenderer(renderer) ? renderer.removeClass(native, className) :
+                    native['classList'].remove(className);
+            }
         }
     }
     function setSanitizeFlag(context, index, sanitizeYes) {
@@ -9210,7 +9194,7 @@
                     // If it's not a number, it's a host binding function that needs to be executed.
                     if (instruction !== null) {
                         viewData[BINDING_INDEX] = bindingRootIndex;
-                        instruction(2 /* Update */, unwrapOnChangesDirectiveWrapper(viewData[currentDirectiveIndex]), currentElementIndex);
+                        instruction(2 /* Update */, readElementValue(viewData[currentDirectiveIndex]), currentElementIndex);
                     }
                     currentDirectiveIndex++;
                 }
@@ -9256,16 +9240,20 @@
         ngDevMode &&
             assertLessThan(adjustedIndex, lView.length, "Slot should have been initialized with null");
         lView[adjustedIndex] = native;
+        var previousOrParentTNode = getPreviousOrParentTNode();
+        var isParent = getIsParent();
         var tNode = tView.data[adjustedIndex];
         if (tNode == null) {
-            // TODO(misko): Refactor createTNode so that it does not depend on LView.
-            tNode = tView.data[adjustedIndex] = createTNode(lView, type, adjustedIndex, name, attrs, null);
+            var parent_1 = isParent ? previousOrParentTNode : previousOrParentTNode && previousOrParentTNode.parent;
+            // Parents cannot cross component boundaries because components will be used in multiple places,
+            // so it's only set if the view is the same.
+            var parentInSameView = parent_1 && parent_1 !== lView[HOST_NODE];
+            var tParentNode = parentInSameView ? parent_1 : null;
+            tNode = tView.data[adjustedIndex] = createTNode(tParentNode, type, adjustedIndex, name, attrs);
         }
         // Now link ourselves into the tree.
         // We need this even if tNode exists, otherwise we might end up pointing to unexisting tNodes when
         // we use i18n (especially with ICU expressions that update the DOM during the update phase).
-        var previousOrParentTNode = getPreviousOrParentTNode();
-        var isParent = getIsParent();
         if (previousOrParentTNode) {
             if (isParent && previousOrParentTNode.child == null &&
                 (tNode.parent !== null || previousOrParentTNode.type === 2 /* View */)) {
@@ -9283,13 +9271,17 @@
         setIsParent(true);
         return tNode;
     }
-    function createViewNode(index, view) {
+    function assignTViewNodeToLView(tView, tParentNode, index, lView) {
         // View nodes are not stored in data because they can be added / removed at runtime (which
         // would cause indices to change). Their TNodes are instead stored in tView.node.
-        if (view[TVIEW].node == null) {
-            view[TVIEW].node = createTNode(view, 2 /* View */, index, null, null, null);
+        var tNode = tView.node;
+        if (tNode == null) {
+            ngDevMode && tParentNode &&
+                assertNodeOfPossibleTypes(tParentNode, 3 /* Element */, 0 /* Container */);
+            tView.node = tNode = createTNode(tParentNode, //
+            2 /* View */, index, null, null);
         }
-        return view[HOST_NODE] = view[TVIEW].node;
+        return lView[HOST_NODE] = tNode;
     }
     /**
      * When elements are created dynamically after a view blueprint is created (e.g. through
@@ -9320,7 +9312,7 @@
         if (queries) {
             lView[QUERIES] = queries.createView();
         }
-        createViewNode(-1, lView);
+        assignTViewNodeToLView(tView, null, -1, lView);
         if (tView.firstTemplatePass) {
             tView.node.injectorIndex = injectorIndex;
         }
@@ -9473,6 +9465,10 @@
         appendChild(native, tNode, lView);
         createDirectivesAndLocals(tView, lView, localRefs);
         attachPatchData(native, lView);
+        var currentQueries = lView[QUERIES];
+        if (currentQueries) {
+            currentQueries.addNode(tNode);
+        }
     }
     /** Mark the end of the <ng-container>. */
     function elementContainerEnd() {
@@ -9490,7 +9486,8 @@
         ngDevMode && assertNodeType(previousOrParentTNode, 4 /* ElementContainer */);
         var currentQueries = lView[QUERIES];
         if (currentQueries) {
-            lView[QUERIES] = currentQueries.addNode(previousOrParentTNode);
+            lView[QUERIES] =
+                isContentQueryHost(previousOrParentTNode) ? currentQueries.parent : currentQueries;
         }
         registerPostOrderHooks(tView, previousOrParentTNode);
     }
@@ -9549,6 +9546,10 @@
         // it will take that over for us (this will be removed once #FW-882 is in).
         if (tNode.stylingTemplate && (tNode.flags & 8 /* hasClassInput */) === 0) {
             renderInitialStylesAndClasses(native, tNode.stylingTemplate, lView[RENDERER]);
+        }
+        var currentQueries = lView[QUERIES];
+        if (currentQueries) {
+            currentQueries.addNode(tNode);
         }
     }
     /**
@@ -9662,13 +9663,13 @@
             template: templateFn,
             viewQuery: viewQuery,
             node: null,
-            data: blueprint.slice(),
+            data: blueprint.slice().fill(null, bindingStartIndex),
             childIndex: -1,
             bindingStartIndex: bindingStartIndex,
+            viewQueryStartIndex: initialViewLength,
             expandoStartIndex: initialViewLength,
             expandoInstructions: null,
             firstTemplatePass: true,
-            changesHooks: null,
             initHooks: null,
             checkHooks: null,
             contentHooks: null,
@@ -9884,16 +9885,14 @@
             var propsLength = props.length;
             if (propsLength) {
                 var lCleanup = getCleanup(lView);
-                // Subscribe to listeners for each output, and setup clean up for each.
-                for (var i = 0; i < propsLength;) {
-                    var directiveIndex = props[i++];
-                    var minifiedName = props[i++];
-                    var declaredName = props[i++];
-                    ngDevMode && assertDataInRange(lView, directiveIndex);
-                    var directive = unwrapOnChangesDirectiveWrapper(lView[directiveIndex]);
-                    var output = directive[minifiedName];
+                for (var i = 0; i < propsLength; i += 3) {
+                    var index = props[i];
+                    ngDevMode && assertDataInRange(lView, index);
+                    var minifiedName = props[i + 2];
+                    var directiveInstance = lView[index];
+                    var output = directiveInstance[minifiedName];
                     if (ngDevMode && !isObservable(output)) {
-                        throw new Error("@Output " + minifiedName + " not initialized in '" + directive.constructor.name + "'.");
+                        throw new Error("@Output " + minifiedName + " not initialized in '" + directiveInstance.constructor.name + "'.");
                     }
                     var subscription = output.subscribe(listenerFn);
                     var idx = lCleanup.length;
@@ -9946,7 +9945,8 @@
         var lView = getLView();
         var currentQueries = lView[QUERIES];
         if (currentQueries) {
-            lView[QUERIES] = currentQueries.addNode(previousOrParentTNode);
+            lView[QUERIES] =
+                isContentQueryHost(previousOrParentTNode) ? currentQueries.parent : currentQueries;
         }
         registerPostOrderHooks(getLView()[TVIEW], previousOrParentTNode);
         decreaseElementDepthCount();
@@ -9955,7 +9955,7 @@
         // context can be instantiated properly.
         if (hasClassInput(previousOrParentTNode)) {
             var stylingContext = getStylingContext(previousOrParentTNode.index, lView);
-            setInputsForProperty(lView, previousOrParentTNode.inputs, 'class', getInitialClassNameValue(stylingContext));
+            setInputsForProperty(lView, previousOrParentTNode.inputs['class'], getInitialClassNameValue(stylingContext));
         }
     }
     /**
@@ -9966,8 +9966,9 @@
      * @param value value The attribute is removed when value is `null` or `undefined`.
      *                  Otherwise the attribute value is set to the stringified value.
      * @param sanitizer An optional function used to sanitize the value.
+     * @param namespace Optional namespace to use when setting the attribute.
      */
-    function elementAttribute(index, name, value, sanitizer) {
+    function elementAttribute(index, name, value, sanitizer, namespace) {
         if (value !== NO_CHANGE) {
             ngDevMode && validateAttribute(name);
             var lView = getLView();
@@ -9975,15 +9976,20 @@
             var element_1 = getNativeByIndex(index, lView);
             if (value == null) {
                 ngDevMode && ngDevMode.rendererRemoveAttribute++;
-                isProceduralRenderer(renderer) ? renderer.removeAttribute(element_1, name) :
+                isProceduralRenderer(renderer) ? renderer.removeAttribute(element_1, name, namespace) :
                     element_1.removeAttribute(name);
             }
             else {
                 ngDevMode && ngDevMode.rendererSetAttribute++;
                 var tNode = getTNode(index, lView);
                 var strValue = sanitizer == null ? renderStringify(value) : sanitizer(value, tNode.tagName || '', name);
-                isProceduralRenderer(renderer) ? renderer.setAttribute(element_1, name, strValue) :
-                    element_1.setAttribute(name, strValue);
+                if (isProceduralRenderer(renderer)) {
+                    renderer.setAttribute(element_1, name, strValue, namespace);
+                }
+                else {
+                    namespace ? element_1.setAttributeNS(namespace, name, strValue) :
+                        element_1.setAttribute(name, strValue);
+                }
             }
         }
     }
@@ -10039,7 +10045,7 @@
         var dataValue;
         if (!nativeOnly && (inputData = initializeTNodeInputs(tNode)) &&
             (dataValue = inputData[propName])) {
-            setInputsForProperty(lView, inputData, propName, value);
+            setInputsForProperty(lView, dataValue, value);
             if (isComponent(tNode))
                 markDirtyIfOnPush(lView, index + HEADER_OFFSET);
             if (ngDevMode) {
@@ -10053,6 +10059,7 @@
                 validateProperty(propName);
                 ngDevMode.rendererSetProperty++;
             }
+            savePropertyDebugData(tNode, lView, propName, lView[TVIEW].data, nativeOnly);
             var renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
             // It is assumed that the sanitizer is only added when the compiler determines that the property
             // is risky, so sanitization can be done without further checks.
@@ -10067,6 +10074,29 @@
         }
     }
     /**
+     * Stores debugging data for this property binding on first template pass.
+     * This enables features like DebugElement.properties.
+     */
+    function savePropertyDebugData(tNode, lView, propName, tData, nativeOnly) {
+        var lastBindingIndex = lView[BINDING_INDEX] - 1;
+        // Bind/interpolation functions save binding metadata in the last binding index,
+        // but leave the property name blank. If the interpolation delimiter is at the 0
+        // index, we know that this is our first pass and the property name still needs to
+        // be set.
+        var bindingMetadata = tData[lastBindingIndex];
+        if (bindingMetadata[0] == INTERPOLATION_DELIMITER) {
+            tData[lastBindingIndex] = propName + bindingMetadata;
+            // We don't want to store indices for host bindings because they are stored in a
+            // different part of LView (the expando section).
+            if (!nativeOnly) {
+                if (tNode.propertyMetadataStartIndex == -1) {
+                    tNode.propertyMetadataStartIndex = lastBindingIndex;
+                }
+                tNode.propertyMetadataEndIndex = lastBindingIndex + 1;
+            }
+        }
+    }
+    /**
      * Constructs a TNode object from the arguments.
      *
      * @param type The type of the node
@@ -10076,20 +10106,16 @@
      * @param tViews Any TViews attached to this node
      * @returns the TNode object
      */
-    function createTNode(lView, type, adjustedIndex, tagName, attrs, tViews) {
-        var previousOrParentTNode = getPreviousOrParentTNode();
+    function createTNode(tParent, type, adjustedIndex, tagName, attrs) {
         ngDevMode && ngDevMode.tNode++;
-        var parent = getIsParent() ? previousOrParentTNode : previousOrParentTNode && previousOrParentTNode.parent;
-        // Parents cannot cross component boundaries because components will be used in multiple places,
-        // so it's only set if the view is the same.
-        var parentInSameView = parent && lView && parent !== lView[HOST_NODE];
-        var tParent = parentInSameView ? parent : null;
         return {
             type: type,
             index: adjustedIndex,
             injectorIndex: tParent ? tParent.injectorIndex : -1,
             directiveStart: -1,
             directiveEnd: -1,
+            propertyMetadataStartIndex: -1,
+            propertyMetadataEndIndex: -1,
             flags: 0,
             providerIndexes: 0,
             tagName: tagName,
@@ -10098,7 +10124,7 @@
             initialInputs: undefined,
             inputs: undefined,
             outputs: undefined,
-            tViews: tViews,
+            tViews: null,
             next: null,
             child: null,
             parent: tParent,
@@ -10113,27 +10139,31 @@
      * @param lView the `LView` which contains the directives.
      * @param inputAliases mapping between the public "input" name and privately-known,
      * possibly minified, property names to write to.
-     * @param publicName public binding name. (This is the `<div [publicName]=value>`)
      * @param value Value to set.
      */
-    function setInputsForProperty(lView, inputAliases, publicName, value) {
-        var inputs = inputAliases[publicName];
+    function setInputsForProperty(lView, inputs, value) {
+        var tView = lView[TVIEW];
         for (var i = 0; i < inputs.length;) {
-            var directiveIndex = inputs[i++];
+            var index = inputs[i++];
+            var publicName = inputs[i++];
             var privateName = inputs[i++];
-            var declaredName = inputs[i++];
-            ngDevMode && assertDataInRange(lView, directiveIndex);
-            recordChangeAndUpdateProperty(lView[directiveIndex], declaredName, privateName, value);
+            var instance = lView[index];
+            ngDevMode && assertDataInRange(lView, index);
+            var def = tView.data[index];
+            var setInput = def.setInput;
+            if (setInput) {
+                def.setInput(instance, value, publicName, privateName);
+            }
+            else {
+                instance[privateName] = value;
+            }
         }
     }
     function setNgReflectProperties(lView, element, type, inputs, value) {
         var _a;
-        for (var i = 0; i < inputs.length;) {
-            var directiveIndex = inputs[i++];
-            var privateName = inputs[i++];
-            var declaredName = inputs[i++];
+        for (var i = 0; i < inputs.length; i += 3) {
             var renderer = lView[RENDERER];
-            var attrName = normalizeDebugBindingName(privateName);
+            var attrName = normalizeDebugBindingName(inputs[i + 2]);
             var debugValue = normalizeDebugBindingValue(value);
             if (type === 3 /* Element */) {
                 isProceduralRenderer(renderer) ?
@@ -10168,17 +10198,14 @@
             var defs = tView.data;
             for (var i = start; i < end; i++) {
                 var directiveDef = defs[i];
-                var publicToMinifiedNames = isInput ? directiveDef.inputs : directiveDef.outputs;
-                var publicToDeclaredNames = isInput ? directiveDef.declaredInputs : null;
-                for (var publicName in publicToMinifiedNames) {
-                    if (publicToMinifiedNames.hasOwnProperty(publicName)) {
+                var propertyAliasMap = isInput ? directiveDef.inputs : directiveDef.outputs;
+                for (var publicName in propertyAliasMap) {
+                    if (propertyAliasMap.hasOwnProperty(publicName)) {
                         propStore = propStore || {};
-                        var minifiedName = publicToMinifiedNames[publicName];
-                        var declaredName = publicToDeclaredNames ? publicToDeclaredNames[publicName] : minifiedName;
-                        var aliases = propStore.hasOwnProperty(publicName) ?
-                            propStore[publicName] :
-                            propStore[publicName] = [];
-                        aliases.push(i, minifiedName, declaredName);
+                        var internalName = propertyAliasMap[publicName];
+                        var hasProperty = propStore.hasOwnProperty(publicName);
+                        hasProperty ? propStore[publicName].push(i, publicName, internalName) :
+                            (propStore[publicName] = [i, publicName, internalName]);
                     }
                 }
             }
@@ -10383,7 +10410,7 @@
         if (hasClassInput(tNode) && classes !== NO_CHANGE) {
             var initialClasses = getInitialClassNameValue(stylingContext);
             var classInputVal = (initialClasses.length ? (initialClasses + ' ') : '') + classes;
-            setInputsForProperty(lView, tNode.inputs, 'class', classInputVal);
+            setInputsForProperty(lView, tNode.inputs['class'], classInputVal);
         }
         else {
             updateStylingMap(stylingContext, classes, styles);
@@ -10509,7 +10536,7 @@
         var firstTemplatePass = getFirstTemplatePass();
         for (var i = start; i < end; i++) {
             var def = tView.data[i];
-            var directive = unwrapOnChangesDirectiveWrapper(viewData[i]);
+            var directive = viewData[i];
             if (def.hostBindings) {
                 var previousExpandoLength = expando.length;
                 setCurrentDirectiveDef(def);
@@ -10558,22 +10585,18 @@
     /**
      * Process a directive on the current node after its creation.
      */
-    function postProcessDirective(lView, directive, def, directiveDefIdx) {
-        if (def.onChanges) {
-            // We have onChanges, wrap it so that we can track changes.
-            lView[directiveDefIdx] = new OnChangesDirectiveWrapper(lView[directiveDefIdx]);
-        }
+    function postProcessDirective(viewData, directive, def, directiveDefIdx) {
         var previousOrParentTNode = getPreviousOrParentTNode();
-        postProcessBaseDirective(lView, previousOrParentTNode, directive, def);
+        postProcessBaseDirective(viewData, previousOrParentTNode, directive, def);
         ngDevMode && assertDefined(previousOrParentTNode, 'previousOrParentTNode');
         if (previousOrParentTNode && previousOrParentTNode.attrs) {
-            setInputsFromAttrs(lView, directiveDefIdx, def, previousOrParentTNode);
+            setInputsFromAttrs(directiveDefIdx, directive, def, previousOrParentTNode);
         }
         if (def.contentQueries) {
             def.contentQueries(directiveDefIdx);
         }
         if (isComponentDef(def)) {
-            var componentView = getComponentViewByIndex(previousOrParentTNode.index, lView);
+            var componentView = getComponentViewByIndex(previousOrParentTNode.index, viewData);
             componentView[CONTEXT] = directive;
         }
     }
@@ -10722,46 +10745,26 @@
      * @param inputs The list of inputs from the directive def
      * @param tNode The static data for this node
      */
-    function setInputsFromAttrs(lView, directiveIndex, def, tNode) {
+    function setInputsFromAttrs(directiveIndex, instance, def, tNode) {
         var initialInputData = tNode.initialInputs;
         if (initialInputData === undefined || directiveIndex >= initialInputData.length) {
-            initialInputData = generateInitialInputs(directiveIndex, def, tNode);
+            initialInputData = generateInitialInputs(directiveIndex, def.inputs, tNode);
         }
         var initialInputs = initialInputData[directiveIndex];
         if (initialInputs) {
-            var directiveOrWrappedDirective = lView[directiveIndex];
+            var setInput = def.setInput;
             for (var i = 0; i < initialInputs.length;) {
+                var publicName = initialInputs[i++];
                 var privateName = initialInputs[i++];
-                var declaredName = initialInputs[i++];
-                var attrValue = initialInputs[i++];
-                recordChangeAndUpdateProperty(directiveOrWrappedDirective, declaredName, privateName, attrValue);
+                var value = initialInputs[i++];
+                if (setInput) {
+                    def.setInput(instance, value, publicName, privateName);
+                }
+                else {
+                    instance[privateName] = value;
+                }
             }
         }
-    }
-    /**
-     * Checks to see if the instanced passed as `directiveOrWrappedDirective` is wrapped in {@link
-     * OnChangesDirectiveWrapper} or not.
-     * If it is, it will update the related {@link SimpleChanges} object with the change to signal
-     * `ngOnChanges` hook
-     * should fire, then it will unwrap the instance. After that, it will set the property with the key
-     * provided
-     * in `privateName` on the instance with the passed value.
-     * @param directiveOrWrappedDirective The directive instance or a directive instance wrapped in
-     * {@link OnChangesDirectiveWrapper}
-     * @param declaredName The original, declared name of the property to update.
-     * @param privateName The private, possibly minified name of the property to update.
-     * @param value The value to update the property with.
-     */
-    function recordChangeAndUpdateProperty(directiveOrWrappedDirective, declaredName, privateName, value) {
-        var instance;
-        if (isOnChangesDirectiveWrapper(directiveOrWrappedDirective)) {
-            instance = unwrapOnChangesDirectiveWrapper(directiveOrWrappedDirective);
-            recordChange(directiveOrWrappedDirective, declaredName, value);
-        }
-        else {
-            instance = directiveOrWrappedDirective;
-        }
-        instance[privateName] = value;
     }
     /**
      * Generates initialInputData for a node and stores it in the template's static storage
@@ -10778,7 +10781,7 @@
      * @param inputs The list of inputs from the directive def
      * @param tNode The static data on this node
      */
-    function generateInitialInputs(directiveIndex, directiveDef, tNode) {
+    function generateInitialInputs(directiveIndex, inputs, tNode) {
         var initialInputData = tNode.initialInputs || (tNode.initialInputs = []);
         initialInputData[directiveIndex] = null;
         var attrs = tNode.attrs;
@@ -10794,12 +10797,11 @@
                 i += 4;
                 continue;
             }
-            var privateName = directiveDef.inputs[attrName];
-            var declaredName = directiveDef.declaredInputs[attrName];
+            var minifiedInputName = inputs[attrName];
             var attrValue = attrs[i + 1];
-            if (privateName !== undefined) {
+            if (minifiedInputName !== undefined) {
                 var inputsToStore = initialInputData[directiveIndex] || (initialInputData[directiveIndex] = []);
-                inputsToStore.push(privateName, declaredName, attrValue);
+                inputsToStore.push(attrName, minifiedInputName, attrValue);
             }
             i += 2;
         }
@@ -11016,7 +11018,9 @@
             if (lContainer[QUERIES]) {
                 viewToRender[QUERIES] = lContainer[QUERIES].createView();
             }
-            createViewNode(viewBlockId, viewToRender);
+            var tParentNode = getIsParent() ? previousOrParentTNode :
+                previousOrParentTNode && previousOrParentTNode.parent;
+            assignTViewNodeToLView(viewToRender[TVIEW], tParentNode, viewBlockId, viewToRender);
             enterView(viewToRender, viewToRender[TVIEW].node);
         }
         if (lContainer) {
@@ -11195,33 +11199,43 @@
         var nodeToProject = componentNode.projection[selectorIndex];
         var projectedView = componentView[PARENT];
         var projectionNodeIndex = -1;
-        while (nodeToProject) {
-            if (nodeToProject.type === 1 /* Projection */) {
-                // This node is re-projected, so we must go up the tree to get its projected nodes.
-                var currentComponentView = findComponentView(projectedView);
-                var currentComponentHost = currentComponentView[HOST_NODE];
-                var firstProjectedNode = currentComponentHost.projection[nodeToProject.projection];
-                if (firstProjectedNode) {
-                    projectionNodeStack$1[++projectionNodeIndex] = nodeToProject;
-                    projectionNodeStack$1[++projectionNodeIndex] = projectedView;
-                    nodeToProject = firstProjectedNode;
-                    projectedView = currentComponentView[PARENT];
-                    continue;
+        if (Array.isArray(nodeToProject)) {
+            appendChild(nodeToProject, tProjectionNode, lView);
+        }
+        else {
+            while (nodeToProject) {
+                if (nodeToProject.type === 1 /* Projection */) {
+                    // This node is re-projected, so we must go up the tree to get its projected nodes.
+                    var currentComponentView = findComponentView(projectedView);
+                    var currentComponentHost = currentComponentView[HOST_NODE];
+                    var firstProjectedNode = currentComponentHost.projection[nodeToProject.projection];
+                    if (firstProjectedNode) {
+                        if (Array.isArray(firstProjectedNode)) {
+                            appendChild(firstProjectedNode, tProjectionNode, lView);
+                        }
+                        else {
+                            projectionNodeStack$1[++projectionNodeIndex] = nodeToProject;
+                            projectionNodeStack$1[++projectionNodeIndex] = projectedView;
+                            nodeToProject = firstProjectedNode;
+                            projectedView = currentComponentView[PARENT];
+                            continue;
+                        }
+                    }
                 }
+                else {
+                    // This flag must be set now or we won't know that this node is projected
+                    // if the nodes are inserted into a container later.
+                    nodeToProject.flags |= 2 /* isProjected */;
+                    appendProjectedNode(nodeToProject, tProjectionNode, lView, projectedView);
+                }
+                // If we are finished with a list of re-projected nodes, we need to get
+                // back to the root projection node that was re-projected.
+                if (nodeToProject.next === null && projectedView !== componentView[PARENT]) {
+                    projectedView = projectionNodeStack$1[projectionNodeIndex--];
+                    nodeToProject = projectionNodeStack$1[projectionNodeIndex--];
+                }
+                nodeToProject = nodeToProject.next;
             }
-            else {
-                // This flag must be set now or we won't know that this node is projected
-                // if the nodes are inserted into a container later.
-                nodeToProject.flags |= 2 /* isProjected */;
-                appendProjectedNode(nodeToProject, tProjectionNode, lView, projectedView);
-            }
-            // If we are finished with a list of re-projected nodes, we need to get
-            // back to the root projection node that was re-projected.
-            if (nodeToProject.next === null && projectedView !== componentView[PARENT]) {
-                projectedView = projectionNodeStack$1[projectionNodeIndex--];
-                nodeToProject = projectionNodeStack$1[projectionNodeIndex--];
-            }
-            nodeToProject = nodeToProject.next;
         }
     }
     /**
@@ -11400,26 +11414,23 @@
         var hostTView = hostView[TVIEW];
         var oldView = enterView(hostView, hostView[HOST_NODE]);
         var templateFn = hostTView.template;
-        var viewQuery = hostTView.viewQuery;
+        var creationMode = isCreationMode(hostView);
         try {
             namespaceHTML();
-            createViewQuery(viewQuery, hostView, component);
+            creationMode && executeViewQueryFn(hostView, hostTView, component);
             templateFn(getRenderFlags(hostView), component);
             refreshDescendantViews(hostView);
-            updateViewQuery(viewQuery, hostView, component);
+            !creationMode && executeViewQueryFn(hostView, hostTView, component);
         }
         finally {
             leaveView(oldView);
         }
     }
-    function createViewQuery(viewQuery, view, component) {
-        if (viewQuery && isCreationMode(view)) {
-            viewQuery(1 /* Create */, component);
-        }
-    }
-    function updateViewQuery(viewQuery, view, component) {
-        if (viewQuery && !isCreationMode(view)) {
-            viewQuery(2 /* Update */, component);
+    function executeViewQueryFn(lView, tView, component) {
+        var viewQuery = tView.viewQuery;
+        if (viewQuery) {
+            setCurrentViewQueryIndex(tView.viewQueryStartIndex);
+            viewQuery(getRenderFlags(lView), component);
         }
     }
     /**
@@ -11454,7 +11465,9 @@
      */
     function bind(value) {
         var lView = getLView();
-        return bindingUpdated(lView, lView[BINDING_INDEX]++, value) ? value : NO_CHANGE;
+        var bindingIndex = lView[BINDING_INDEX]++;
+        storeBindingMetadata(lView);
+        return bindingUpdated(lView, bindingIndex, value) ? value : NO_CHANGE;
     }
     /**
      * Allocates the necessary amount of slots for host vars.
@@ -11486,12 +11499,21 @@
         ngDevMode && assertEqual(values.length % 2, 1, 'should have an odd number of values');
         var different = false;
         var lView = getLView();
+        var tData = lView[TVIEW].data;
         var bindingIndex = lView[BINDING_INDEX];
+        if (tData[bindingIndex] == null) {
+            // 2 is the index of the first static interstitial value (ie. not prefix)
+            for (var i = 2; i < values.length; i += 2) {
+                tData[bindingIndex++] = values[i];
+            }
+            bindingIndex = lView[BINDING_INDEX];
+        }
         for (var i = 1; i < values.length; i += 2) {
             // Check if bindings (odd indexes) have changed
             bindingUpdated(lView, bindingIndex++, values[i]) && (different = true);
         }
         lView[BINDING_INDEX] = bindingIndex;
+        storeBindingMetadata(lView, values[0], values[values.length - 1]);
         if (!different) {
             return NO_CHANGE;
         }
@@ -11511,22 +11533,36 @@
      */
     function interpolation1(prefix, v0, suffix) {
         var lView = getLView();
-        var different = bindingUpdated(lView, lView[BINDING_INDEX], v0);
-        lView[BINDING_INDEX] += 1;
+        var different = bindingUpdated(lView, lView[BINDING_INDEX]++, v0);
+        storeBindingMetadata(lView, prefix, suffix);
         return different ? prefix + renderStringify(v0) + suffix : NO_CHANGE;
     }
     /** Creates an interpolation binding with 2 expressions. */
     function interpolation2(prefix, v0, i0, v1, suffix) {
         var lView = getLView();
-        var different = bindingUpdated2(lView, lView[BINDING_INDEX], v0, v1);
+        var bindingIndex = lView[BINDING_INDEX];
+        var different = bindingUpdated2(lView, bindingIndex, v0, v1);
         lView[BINDING_INDEX] += 2;
+        // Only set static strings the first time (data will be null subsequent runs).
+        var data = storeBindingMetadata(lView, prefix, suffix);
+        if (data) {
+            lView[TVIEW].data[bindingIndex] = i0;
+        }
         return different ? prefix + renderStringify(v0) + i0 + renderStringify(v1) + suffix : NO_CHANGE;
     }
     /** Creates an interpolation binding with 3 expressions. */
     function interpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
         var lView = getLView();
-        var different = bindingUpdated3(lView, lView[BINDING_INDEX], v0, v1, v2);
+        var bindingIndex = lView[BINDING_INDEX];
+        var different = bindingUpdated3(lView, bindingIndex, v0, v1, v2);
         lView[BINDING_INDEX] += 3;
+        // Only set static strings the first time (data will be null subsequent runs).
+        var data = storeBindingMetadata(lView, prefix, suffix);
+        if (data) {
+            var tData = lView[TVIEW].data;
+            tData[bindingIndex] = i0;
+            tData[bindingIndex + 1] = i1;
+        }
         return different ?
             prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + suffix :
             NO_CHANGE;
@@ -11534,8 +11570,17 @@
     /** Create an interpolation binding with 4 expressions. */
     function interpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
         var lView = getLView();
-        var different = bindingUpdated4(lView, lView[BINDING_INDEX], v0, v1, v2, v3);
+        var bindingIndex = lView[BINDING_INDEX];
+        var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
         lView[BINDING_INDEX] += 4;
+        // Only set static strings the first time (data will be null subsequent runs).
+        var data = storeBindingMetadata(lView, prefix, suffix);
+        if (data) {
+            var tData = lView[TVIEW].data;
+            tData[bindingIndex] = i0;
+            tData[bindingIndex + 1] = i1;
+            tData[bindingIndex + 2] = i2;
+        }
         return different ?
             prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
                 renderStringify(v3) + suffix :
@@ -11548,6 +11593,15 @@
         var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
         different = bindingUpdated(lView, bindingIndex + 4, v4) || different;
         lView[BINDING_INDEX] += 5;
+        // Only set static strings the first time (data will be null subsequent runs).
+        var data = storeBindingMetadata(lView, prefix, suffix);
+        if (data) {
+            var tData = lView[TVIEW].data;
+            tData[bindingIndex] = i0;
+            tData[bindingIndex + 1] = i1;
+            tData[bindingIndex + 2] = i2;
+            tData[bindingIndex + 3] = i3;
+        }
         return different ?
             prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
                 renderStringify(v3) + i3 + renderStringify(v4) + suffix :
@@ -11560,6 +11614,16 @@
         var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
         different = bindingUpdated2(lView, bindingIndex + 4, v4, v5) || different;
         lView[BINDING_INDEX] += 6;
+        // Only set static strings the first time (data will be null subsequent runs).
+        var data = storeBindingMetadata(lView, prefix, suffix);
+        if (data) {
+            var tData = lView[TVIEW].data;
+            tData[bindingIndex] = i0;
+            tData[bindingIndex + 1] = i1;
+            tData[bindingIndex + 2] = i2;
+            tData[bindingIndex + 3] = i3;
+            tData[bindingIndex + 4] = i4;
+        }
         return different ?
             prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
                 renderStringify(v3) + i3 + renderStringify(v4) + i4 + renderStringify(v5) + suffix :
@@ -11572,6 +11636,17 @@
         var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
         different = bindingUpdated3(lView, bindingIndex + 4, v4, v5, v6) || different;
         lView[BINDING_INDEX] += 7;
+        // Only set static strings the first time (data will be null subsequent runs).
+        var data = storeBindingMetadata(lView, prefix, suffix);
+        if (data) {
+            var tData = lView[TVIEW].data;
+            tData[bindingIndex] = i0;
+            tData[bindingIndex + 1] = i1;
+            tData[bindingIndex + 2] = i2;
+            tData[bindingIndex + 3] = i3;
+            tData[bindingIndex + 4] = i4;
+            tData[bindingIndex + 5] = i5;
+        }
         return different ?
             prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
                 renderStringify(v3) + i3 + renderStringify(v4) + i4 + renderStringify(v5) + i5 +
@@ -11585,11 +11660,47 @@
         var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
         different = bindingUpdated4(lView, bindingIndex + 4, v4, v5, v6, v7) || different;
         lView[BINDING_INDEX] += 8;
+        // Only set static strings the first time (data will be null subsequent runs).
+        var data = storeBindingMetadata(lView, prefix, suffix);
+        if (data) {
+            var tData = lView[TVIEW].data;
+            tData[bindingIndex] = i0;
+            tData[bindingIndex + 1] = i1;
+            tData[bindingIndex + 2] = i2;
+            tData[bindingIndex + 3] = i3;
+            tData[bindingIndex + 4] = i4;
+            tData[bindingIndex + 5] = i5;
+            tData[bindingIndex + 6] = i6;
+        }
         return different ?
             prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
                 renderStringify(v3) + i3 + renderStringify(v4) + i4 + renderStringify(v5) + i5 +
                 renderStringify(v6) + i6 + renderStringify(v7) + suffix :
             NO_CHANGE;
+    }
+    /**
+     * Creates binding metadata for a particular binding and stores it in
+     * TView.data. These are generated in order to support DebugElement.properties.
+     *
+     * Each binding / interpolation will have one (including attribute bindings)
+     * because at the time of binding, we don't know to which instruction the binding
+     * belongs. It is always stored in TView.data at the index of the last binding
+     * value in LView (e.g. for interpolation8, it would be stored at the index of
+     * the 8th value).
+     *
+     * @param lView The LView that contains the current binding index.
+     * @param prefix The static prefix string
+     * @param suffix The static suffix string
+     *
+     * @returns Newly created binding metadata string for this binding or null
+     */
+    function storeBindingMetadata(lView, prefix, suffix) {
+        if (prefix === void 0) { prefix = ''; }
+        if (suffix === void 0) { suffix = ''; }
+        var tData = lView[TVIEW].data;
+        var lastBindingIndex = lView[BINDING_INDEX] - 1;
+        var value = INTERPOLATION_DELIMITER + prefix + INTERPOLATION_DELIMITER + suffix;
+        return tData[lastBindingIndex] == null ? (tData[lastBindingIndex] = value) : null;
     }
     /** Store a value in the `data` at a given `index`. */
     function store(index, value) {
@@ -11600,6 +11711,7 @@
         var adjustedIndex = index + HEADER_OFFSET;
         if (adjustedIndex >= tView.data.length) {
             tView.data[adjustedIndex] = null;
+            tView.blueprint[adjustedIndex] = null;
         }
         lView[adjustedIndex] = value;
     }
@@ -12025,6 +12137,7 @@
                 writeableDef.outputs = maybeUnwrapEmpty(definition.outputs);
             }
             if (baseDef) {
+                // Merge inputs and outputs
                 fillProperties(definition.inputs, baseDef.inputs);
                 fillProperties(definition.declaredInputs, baseDef.declaredInputs);
                 fillProperties(definition.outputs, baseDef.outputs);
@@ -12102,7 +12215,6 @@
                 definition.doCheck = definition.doCheck || superDef.doCheck;
                 definition.onDestroy = definition.onDestroy || superDef.onDestroy;
                 definition.onInit = definition.onInit || superDef.onInit;
-                definition.onChanges = definition.onChanges || superDef.onChanges;
                 // Run parent features
                 var features = superDef.features;
                 if (features) {
@@ -12138,7 +12250,6 @@
                     definition.doCheck = definition.doCheck || superPrototype.ngDoCheck;
                     definition.onDestroy = definition.onDestroy || superPrototype.ngOnDestroy;
                     definition.onInit = definition.onInit || superPrototype.ngOnInit;
-                    definition.onChanges = definition.onChanges || superPrototype.ngOnChanges;
                 }
             }
             superType = Object.getPrototypeOf(superType);
@@ -12159,6 +12270,107 @@
         else {
             return value;
         }
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Represents a basic change from a previous to a new value for a single
+     * property on a directive instance. Passed as a value in a
+     * {@link SimpleChanges} object to the `ngOnChanges` hook.
+     *
+     * @see `OnChanges`
+     *
+     * @publicApi
+     */
+    var SimpleChange = /** @class */ (function () {
+        function SimpleChange(previousValue, currentValue, firstChange) {
+            this.previousValue = previousValue;
+            this.currentValue = currentValue;
+            this.firstChange = firstChange;
+        }
+        /**
+         * Check whether the new value is the first value assigned.
+         */
+        SimpleChange.prototype.isFirstChange = function () { return this.firstChange; };
+        return SimpleChange;
+    }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * The NgOnChangesFeature decorates a component with support for the ngOnChanges
+     * lifecycle hook, so it should be included in any component that implements
+     * that hook.
+     *
+     * If the component or directive uses inheritance, the NgOnChangesFeature MUST
+     * be included as a feature AFTER {@link InheritDefinitionFeature}, otherwise
+     * inherited properties will not be propagated to the ngOnChanges lifecycle
+     * hook.
+     *
+     * Example usage:
+     *
+     * ```
+     * static ngComponentDef = defineComponent({
+     *   ...
+     *   inputs: {name: 'publicName'},
+     *   features: [NgOnChangesFeature()]
+     * });
+     * ```
+     */
+    function NgOnChangesFeature() {
+        // This option ensures that the ngOnChanges lifecycle hook will be inherited
+        // from superclasses (in InheritDefinitionFeature).
+        NgOnChangesFeatureImpl.ngInherit = true;
+        return NgOnChangesFeatureImpl;
+    }
+    function NgOnChangesFeatureImpl(definition) {
+        if (definition.type.prototype.ngOnChanges) {
+            definition.setInput = ngOnChangesSetInput;
+            var prevDoCheck = definition.doCheck;
+            var prevOnInit = definition.onInit;
+            definition.onInit = wrapOnChanges(prevOnInit);
+            definition.doCheck = wrapOnChanges(prevDoCheck);
+        }
+    }
+    function wrapOnChanges(hook) {
+        return function () {
+            var simpleChangesStore = getSimpleChangesStore(this);
+            var current = simpleChangesStore && simpleChangesStore.current;
+            if (current) {
+                simpleChangesStore.previous = current;
+                simpleChangesStore.current = null;
+                this.ngOnChanges(current);
+            }
+            hook && hook.call(this);
+        };
+    }
+    function ngOnChangesSetInput(instance, value, publicName, privateName) {
+        var simpleChangesStore = getSimpleChangesStore(instance) ||
+            setSimpleChangesStore(instance, { previous: EMPTY_OBJ, current: null });
+        var current = simpleChangesStore.current || (simpleChangesStore.current = {});
+        var previous = simpleChangesStore.previous;
+        var declaredName = this.declaredInputs[publicName];
+        var previousChange = previous[declaredName];
+        current[declaredName] = new SimpleChange(previousChange && previousChange.currentValue, value, previous === EMPTY_OBJ);
+        instance[privateName] = value;
+    }
+    var SIMPLE_CHANGES_STORE = '__ngSimpleChanges__';
+    function getSimpleChangesStore(instance) {
+        return instance[SIMPLE_CHANGES_STORE] || null;
+    }
+    function setSimpleChangesStore(instance, store) {
+        return instance[SIMPLE_CHANGES_STORE] = store;
     }
 
     /**
@@ -12776,8 +12988,7 @@
             this._appRef = appRef;
         };
         ViewRef.prototype._lookUpContext = function () {
-            return this._context =
-                unwrapOnChangesDirectiveWrapper(this._lView[PARENT][this._componentIndex]);
+            return this._context = this._lView[PARENT][this._componentIndex];
         };
         return ViewRef;
     }());
@@ -13290,7 +13501,3097 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.0+21.sha-45bf911');
+    var VERSION = new Version('8.0.0-beta.1+43.sha-3d5a919');
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var DefaultIterableDifferFactory = /** @class */ (function () {
+        function DefaultIterableDifferFactory() {
+        }
+        DefaultIterableDifferFactory.prototype.supports = function (obj) { return isListLikeIterable$1(obj); };
+        DefaultIterableDifferFactory.prototype.create = function (trackByFn) {
+            return new DefaultIterableDiffer(trackByFn);
+        };
+        return DefaultIterableDifferFactory;
+    }());
+    var trackByIdentity = function (index, item) { return item; };
+    /**
+     * @deprecated v4.0.0 - Should not be part of public API.
+     * @publicApi
+     */
+    var DefaultIterableDiffer = /** @class */ (function () {
+        function DefaultIterableDiffer(trackByFn) {
+            this.length = 0;
+            // Keeps track of the used records at any point in time (during & across `_check()` calls)
+            this._linkedRecords = null;
+            // Keeps track of the removed records at any point in time during `_check()` calls.
+            this._unlinkedRecords = null;
+            this._previousItHead = null;
+            this._itHead = null;
+            this._itTail = null;
+            this._additionsHead = null;
+            this._additionsTail = null;
+            this._movesHead = null;
+            this._movesTail = null;
+            this._removalsHead = null;
+            this._removalsTail = null;
+            // Keeps track of records where custom track by is the same, but item identity has changed
+            this._identityChangesHead = null;
+            this._identityChangesTail = null;
+            this._trackByFn = trackByFn || trackByIdentity;
+        }
+        DefaultIterableDiffer.prototype.forEachItem = function (fn) {
+            var record;
+            for (record = this._itHead; record !== null; record = record._next) {
+                fn(record);
+            }
+        };
+        DefaultIterableDiffer.prototype.forEachOperation = function (fn) {
+            var nextIt = this._itHead;
+            var nextRemove = this._removalsHead;
+            var addRemoveOffset = 0;
+            var moveOffsets = null;
+            while (nextIt || nextRemove) {
+                // Figure out which is the next record to process
+                // Order: remove, add, move
+                var record = !nextRemove ||
+                    nextIt &&
+                        nextIt.currentIndex <
+                            getPreviousIndex(nextRemove, addRemoveOffset, moveOffsets) ?
+                    nextIt :
+                    nextRemove;
+                var adjPreviousIndex = getPreviousIndex(record, addRemoveOffset, moveOffsets);
+                var currentIndex = record.currentIndex;
+                // consume the item, and adjust the addRemoveOffset and update moveDistance if necessary
+                if (record === nextRemove) {
+                    addRemoveOffset--;
+                    nextRemove = nextRemove._nextRemoved;
+                }
+                else {
+                    nextIt = nextIt._next;
+                    if (record.previousIndex == null) {
+                        addRemoveOffset++;
+                    }
+                    else {
+                        // INVARIANT:  currentIndex < previousIndex
+                        if (!moveOffsets)
+                            moveOffsets = [];
+                        var localMovePreviousIndex = adjPreviousIndex - addRemoveOffset;
+                        var localCurrentIndex = currentIndex - addRemoveOffset;
+                        if (localMovePreviousIndex != localCurrentIndex) {
+                            for (var i = 0; i < localMovePreviousIndex; i++) {
+                                var offset = i < moveOffsets.length ? moveOffsets[i] : (moveOffsets[i] = 0);
+                                var index = offset + i;
+                                if (localCurrentIndex <= index && index < localMovePreviousIndex) {
+                                    moveOffsets[i] = offset + 1;
+                                }
+                            }
+                            var previousIndex = record.previousIndex;
+                            moveOffsets[previousIndex] = localCurrentIndex - localMovePreviousIndex;
+                        }
+                    }
+                }
+                if (adjPreviousIndex !== currentIndex) {
+                    fn(record, adjPreviousIndex, currentIndex);
+                }
+            }
+        };
+        DefaultIterableDiffer.prototype.forEachPreviousItem = function (fn) {
+            var record;
+            for (record = this._previousItHead; record !== null; record = record._nextPrevious) {
+                fn(record);
+            }
+        };
+        DefaultIterableDiffer.prototype.forEachAddedItem = function (fn) {
+            var record;
+            for (record = this._additionsHead; record !== null; record = record._nextAdded) {
+                fn(record);
+            }
+        };
+        DefaultIterableDiffer.prototype.forEachMovedItem = function (fn) {
+            var record;
+            for (record = this._movesHead; record !== null; record = record._nextMoved) {
+                fn(record);
+            }
+        };
+        DefaultIterableDiffer.prototype.forEachRemovedItem = function (fn) {
+            var record;
+            for (record = this._removalsHead; record !== null; record = record._nextRemoved) {
+                fn(record);
+            }
+        };
+        DefaultIterableDiffer.prototype.forEachIdentityChange = function (fn) {
+            var record;
+            for (record = this._identityChangesHead; record !== null; record = record._nextIdentityChange) {
+                fn(record);
+            }
+        };
+        DefaultIterableDiffer.prototype.diff = function (collection) {
+            if (collection == null)
+                collection = [];
+            if (!isListLikeIterable$1(collection)) {
+                throw new Error("Error trying to diff '" + stringify(collection) + "'. Only arrays and iterables are allowed");
+            }
+            if (this.check(collection)) {
+                return this;
+            }
+            else {
+                return null;
+            }
+        };
+        DefaultIterableDiffer.prototype.onDestroy = function () { };
+        DefaultIterableDiffer.prototype.check = function (collection) {
+            var _this = this;
+            this._reset();
+            var record = this._itHead;
+            var mayBeDirty = false;
+            var index;
+            var item;
+            var itemTrackBy;
+            if (Array.isArray(collection)) {
+                this.length = collection.length;
+                for (var index_1 = 0; index_1 < this.length; index_1++) {
+                    item = collection[index_1];
+                    itemTrackBy = this._trackByFn(index_1, item);
+                    if (record === null || !looseIdentical(record.trackById, itemTrackBy)) {
+                        record = this._mismatch(record, item, itemTrackBy, index_1);
+                        mayBeDirty = true;
+                    }
+                    else {
+                        if (mayBeDirty) {
+                            // TODO(misko): can we limit this to duplicates only?
+                            record = this._verifyReinsertion(record, item, itemTrackBy, index_1);
+                        }
+                        if (!looseIdentical(record.item, item))
+                            this._addIdentityChange(record, item);
+                    }
+                    record = record._next;
+                }
+            }
+            else {
+                index = 0;
+                iterateListLike$1(collection, function (item) {
+                    itemTrackBy = _this._trackByFn(index, item);
+                    if (record === null || !looseIdentical(record.trackById, itemTrackBy)) {
+                        record = _this._mismatch(record, item, itemTrackBy, index);
+                        mayBeDirty = true;
+                    }
+                    else {
+                        if (mayBeDirty) {
+                            // TODO(misko): can we limit this to duplicates only?
+                            record = _this._verifyReinsertion(record, item, itemTrackBy, index);
+                        }
+                        if (!looseIdentical(record.item, item))
+                            _this._addIdentityChange(record, item);
+                    }
+                    record = record._next;
+                    index++;
+                });
+                this.length = index;
+            }
+            this._truncate(record);
+            this.collection = collection;
+            return this.isDirty;
+        };
+        Object.defineProperty(DefaultIterableDiffer.prototype, "isDirty", {
+            /* CollectionChanges is considered dirty if it has any additions, moves, removals, or identity
+             * changes.
+             */
+            get: function () {
+                return this._additionsHead !== null || this._movesHead !== null ||
+                    this._removalsHead !== null || this._identityChangesHead !== null;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * Reset the state of the change objects to show no changes. This means set previousKey to
+         * currentKey, and clear all of the queues (additions, moves, removals).
+         * Set the previousIndexes of moved and added items to their currentIndexes
+         * Reset the list of additions, moves and removals
+         *
+         * @internal
+         */
+        DefaultIterableDiffer.prototype._reset = function () {
+            if (this.isDirty) {
+                var record = void 0;
+                var nextRecord = void 0;
+                for (record = this._previousItHead = this._itHead; record !== null; record = record._next) {
+                    record._nextPrevious = record._next;
+                }
+                for (record = this._additionsHead; record !== null; record = record._nextAdded) {
+                    record.previousIndex = record.currentIndex;
+                }
+                this._additionsHead = this._additionsTail = null;
+                for (record = this._movesHead; record !== null; record = nextRecord) {
+                    record.previousIndex = record.currentIndex;
+                    nextRecord = record._nextMoved;
+                }
+                this._movesHead = this._movesTail = null;
+                this._removalsHead = this._removalsTail = null;
+                this._identityChangesHead = this._identityChangesTail = null;
+                // TODO(vicb): when assert gets supported
+                // assert(!this.isDirty);
+            }
+        };
+        /**
+         * This is the core function which handles differences between collections.
+         *
+         * - `record` is the record which we saw at this position last time. If null then it is a new
+         *   item.
+         * - `item` is the current item in the collection
+         * - `index` is the position of the item in the collection
+         *
+         * @internal
+         */
+        DefaultIterableDiffer.prototype._mismatch = function (record, item, itemTrackBy, index) {
+            // The previous record after which we will append the current one.
+            var previousRecord;
+            if (record === null) {
+                previousRecord = this._itTail;
+            }
+            else {
+                previousRecord = record._prev;
+                // Remove the record from the collection since we know it does not match the item.
+                this._remove(record);
+            }
+            // Attempt to see if we have seen the item before.
+            record = this._linkedRecords === null ? null : this._linkedRecords.get(itemTrackBy, index);
+            if (record !== null) {
+                // We have seen this before, we need to move it forward in the collection.
+                // But first we need to check if identity changed, so we can update in view if necessary
+                if (!looseIdentical(record.item, item))
+                    this._addIdentityChange(record, item);
+                this._moveAfter(record, previousRecord, index);
+            }
+            else {
+                // Never seen it, check evicted list.
+                record = this._unlinkedRecords === null ? null : this._unlinkedRecords.get(itemTrackBy, null);
+                if (record !== null) {
+                    // It is an item which we have evicted earlier: reinsert it back into the list.
+                    // But first we need to check if identity changed, so we can update in view if necessary
+                    if (!looseIdentical(record.item, item))
+                        this._addIdentityChange(record, item);
+                    this._reinsertAfter(record, previousRecord, index);
+                }
+                else {
+                    // It is a new item: add it.
+                    record =
+                        this._addAfter(new IterableChangeRecord_(item, itemTrackBy), previousRecord, index);
+                }
+            }
+            return record;
+        };
+        /**
+         * This check is only needed if an array contains duplicates. (Short circuit of nothing dirty)
+         *
+         * Use case: `[a, a]` => `[b, a, a]`
+         *
+         * If we did not have this check then the insertion of `b` would:
+         *   1) evict first `a`
+         *   2) insert `b` at `0` index.
+         *   3) leave `a` at index `1` as is. <-- this is wrong!
+         *   3) reinsert `a` at index 2. <-- this is wrong!
+         *
+         * The correct behavior is:
+         *   1) evict first `a`
+         *   2) insert `b` at `0` index.
+         *   3) reinsert `a` at index 1.
+         *   3) move `a` at from `1` to `2`.
+         *
+         *
+         * Double check that we have not evicted a duplicate item. We need to check if the item type may
+         * have already been removed:
+         * The insertion of b will evict the first 'a'. If we don't reinsert it now it will be reinserted
+         * at the end. Which will show up as the two 'a's switching position. This is incorrect, since a
+         * better way to think of it is as insert of 'b' rather then switch 'a' with 'b' and then add 'a'
+         * at the end.
+         *
+         * @internal
+         */
+        DefaultIterableDiffer.prototype._verifyReinsertion = function (record, item, itemTrackBy, index) {
+            var reinsertRecord = this._unlinkedRecords === null ? null : this._unlinkedRecords.get(itemTrackBy, null);
+            if (reinsertRecord !== null) {
+                record = this._reinsertAfter(reinsertRecord, record._prev, index);
+            }
+            else if (record.currentIndex != index) {
+                record.currentIndex = index;
+                this._addToMoves(record, index);
+            }
+            return record;
+        };
+        /**
+         * Get rid of any excess {@link IterableChangeRecord_}s from the previous collection
+         *
+         * - `record` The first excess {@link IterableChangeRecord_}.
+         *
+         * @internal
+         */
+        DefaultIterableDiffer.prototype._truncate = function (record) {
+            // Anything after that needs to be removed;
+            while (record !== null) {
+                var nextRecord = record._next;
+                this._addToRemovals(this._unlink(record));
+                record = nextRecord;
+            }
+            if (this._unlinkedRecords !== null) {
+                this._unlinkedRecords.clear();
+            }
+            if (this._additionsTail !== null) {
+                this._additionsTail._nextAdded = null;
+            }
+            if (this._movesTail !== null) {
+                this._movesTail._nextMoved = null;
+            }
+            if (this._itTail !== null) {
+                this._itTail._next = null;
+            }
+            if (this._removalsTail !== null) {
+                this._removalsTail._nextRemoved = null;
+            }
+            if (this._identityChangesTail !== null) {
+                this._identityChangesTail._nextIdentityChange = null;
+            }
+        };
+        /** @internal */
+        DefaultIterableDiffer.prototype._reinsertAfter = function (record, prevRecord, index) {
+            if (this._unlinkedRecords !== null) {
+                this._unlinkedRecords.remove(record);
+            }
+            var prev = record._prevRemoved;
+            var next = record._nextRemoved;
+            if (prev === null) {
+                this._removalsHead = next;
+            }
+            else {
+                prev._nextRemoved = next;
+            }
+            if (next === null) {
+                this._removalsTail = prev;
+            }
+            else {
+                next._prevRemoved = prev;
+            }
+            this._insertAfter(record, prevRecord, index);
+            this._addToMoves(record, index);
+            return record;
+        };
+        /** @internal */
+        DefaultIterableDiffer.prototype._moveAfter = function (record, prevRecord, index) {
+            this._unlink(record);
+            this._insertAfter(record, prevRecord, index);
+            this._addToMoves(record, index);
+            return record;
+        };
+        /** @internal */
+        DefaultIterableDiffer.prototype._addAfter = function (record, prevRecord, index) {
+            this._insertAfter(record, prevRecord, index);
+            if (this._additionsTail === null) {
+                // TODO(vicb):
+                // assert(this._additionsHead === null);
+                this._additionsTail = this._additionsHead = record;
+            }
+            else {
+                // TODO(vicb):
+                // assert(_additionsTail._nextAdded === null);
+                // assert(record._nextAdded === null);
+                this._additionsTail = this._additionsTail._nextAdded = record;
+            }
+            return record;
+        };
+        /** @internal */
+        DefaultIterableDiffer.prototype._insertAfter = function (record, prevRecord, index) {
+            // TODO(vicb):
+            // assert(record != prevRecord);
+            // assert(record._next === null);
+            // assert(record._prev === null);
+            var next = prevRecord === null ? this._itHead : prevRecord._next;
+            // TODO(vicb):
+            // assert(next != record);
+            // assert(prevRecord != record);
+            record._next = next;
+            record._prev = prevRecord;
+            if (next === null) {
+                this._itTail = record;
+            }
+            else {
+                next._prev = record;
+            }
+            if (prevRecord === null) {
+                this._itHead = record;
+            }
+            else {
+                prevRecord._next = record;
+            }
+            if (this._linkedRecords === null) {
+                this._linkedRecords = new _DuplicateMap();
+            }
+            this._linkedRecords.put(record);
+            record.currentIndex = index;
+            return record;
+        };
+        /** @internal */
+        DefaultIterableDiffer.prototype._remove = function (record) {
+            return this._addToRemovals(this._unlink(record));
+        };
+        /** @internal */
+        DefaultIterableDiffer.prototype._unlink = function (record) {
+            if (this._linkedRecords !== null) {
+                this._linkedRecords.remove(record);
+            }
+            var prev = record._prev;
+            var next = record._next;
+            // TODO(vicb):
+            // assert((record._prev = null) === null);
+            // assert((record._next = null) === null);
+            if (prev === null) {
+                this._itHead = next;
+            }
+            else {
+                prev._next = next;
+            }
+            if (next === null) {
+                this._itTail = prev;
+            }
+            else {
+                next._prev = prev;
+            }
+            return record;
+        };
+        /** @internal */
+        DefaultIterableDiffer.prototype._addToMoves = function (record, toIndex) {
+            // TODO(vicb):
+            // assert(record._nextMoved === null);
+            if (record.previousIndex === toIndex) {
+                return record;
+            }
+            if (this._movesTail === null) {
+                // TODO(vicb):
+                // assert(_movesHead === null);
+                this._movesTail = this._movesHead = record;
+            }
+            else {
+                // TODO(vicb):
+                // assert(_movesTail._nextMoved === null);
+                this._movesTail = this._movesTail._nextMoved = record;
+            }
+            return record;
+        };
+        DefaultIterableDiffer.prototype._addToRemovals = function (record) {
+            if (this._unlinkedRecords === null) {
+                this._unlinkedRecords = new _DuplicateMap();
+            }
+            this._unlinkedRecords.put(record);
+            record.currentIndex = null;
+            record._nextRemoved = null;
+            if (this._removalsTail === null) {
+                // TODO(vicb):
+                // assert(_removalsHead === null);
+                this._removalsTail = this._removalsHead = record;
+                record._prevRemoved = null;
+            }
+            else {
+                // TODO(vicb):
+                // assert(_removalsTail._nextRemoved === null);
+                // assert(record._nextRemoved === null);
+                record._prevRemoved = this._removalsTail;
+                this._removalsTail = this._removalsTail._nextRemoved = record;
+            }
+            return record;
+        };
+        /** @internal */
+        DefaultIterableDiffer.prototype._addIdentityChange = function (record, item) {
+            record.item = item;
+            if (this._identityChangesTail === null) {
+                this._identityChangesTail = this._identityChangesHead = record;
+            }
+            else {
+                this._identityChangesTail = this._identityChangesTail._nextIdentityChange = record;
+            }
+            return record;
+        };
+        return DefaultIterableDiffer;
+    }());
+    var IterableChangeRecord_ = /** @class */ (function () {
+        function IterableChangeRecord_(item, trackById) {
+            this.item = item;
+            this.trackById = trackById;
+            this.currentIndex = null;
+            this.previousIndex = null;
+            /** @internal */
+            this._nextPrevious = null;
+            /** @internal */
+            this._prev = null;
+            /** @internal */
+            this._next = null;
+            /** @internal */
+            this._prevDup = null;
+            /** @internal */
+            this._nextDup = null;
+            /** @internal */
+            this._prevRemoved = null;
+            /** @internal */
+            this._nextRemoved = null;
+            /** @internal */
+            this._nextAdded = null;
+            /** @internal */
+            this._nextMoved = null;
+            /** @internal */
+            this._nextIdentityChange = null;
+        }
+        return IterableChangeRecord_;
+    }());
+    // A linked list of CollectionChangeRecords with the same IterableChangeRecord_.item
+    var _DuplicateItemRecordList = /** @class */ (function () {
+        function _DuplicateItemRecordList() {
+            /** @internal */
+            this._head = null;
+            /** @internal */
+            this._tail = null;
+        }
+        /**
+         * Append the record to the list of duplicates.
+         *
+         * Note: by design all records in the list of duplicates hold the same value in record.item.
+         */
+        _DuplicateItemRecordList.prototype.add = function (record) {
+            if (this._head === null) {
+                this._head = this._tail = record;
+                record._nextDup = null;
+                record._prevDup = null;
+            }
+            else {
+                // TODO(vicb):
+                // assert(record.item ==  _head.item ||
+                //       record.item is num && record.item.isNaN && _head.item is num && _head.item.isNaN);
+                this._tail._nextDup = record;
+                record._prevDup = this._tail;
+                record._nextDup = null;
+                this._tail = record;
+            }
+        };
+        // Returns a IterableChangeRecord_ having IterableChangeRecord_.trackById == trackById and
+        // IterableChangeRecord_.currentIndex >= atOrAfterIndex
+        _DuplicateItemRecordList.prototype.get = function (trackById, atOrAfterIndex) {
+            var record;
+            for (record = this._head; record !== null; record = record._nextDup) {
+                if ((atOrAfterIndex === null || atOrAfterIndex <= record.currentIndex) &&
+                    looseIdentical(record.trackById, trackById)) {
+                    return record;
+                }
+            }
+            return null;
+        };
+        /**
+         * Remove one {@link IterableChangeRecord_} from the list of duplicates.
+         *
+         * Returns whether the list of duplicates is empty.
+         */
+        _DuplicateItemRecordList.prototype.remove = function (record) {
+            // TODO(vicb):
+            // assert(() {
+            //  // verify that the record being removed is in the list.
+            //  for (IterableChangeRecord_ cursor = _head; cursor != null; cursor = cursor._nextDup) {
+            //    if (identical(cursor, record)) return true;
+            //  }
+            //  return false;
+            //});
+            var prev = record._prevDup;
+            var next = record._nextDup;
+            if (prev === null) {
+                this._head = next;
+            }
+            else {
+                prev._nextDup = next;
+            }
+            if (next === null) {
+                this._tail = prev;
+            }
+            else {
+                next._prevDup = prev;
+            }
+            return this._head === null;
+        };
+        return _DuplicateItemRecordList;
+    }());
+    var _DuplicateMap = /** @class */ (function () {
+        function _DuplicateMap() {
+            this.map = new Map();
+        }
+        _DuplicateMap.prototype.put = function (record) {
+            var key = record.trackById;
+            var duplicates = this.map.get(key);
+            if (!duplicates) {
+                duplicates = new _DuplicateItemRecordList();
+                this.map.set(key, duplicates);
+            }
+            duplicates.add(record);
+        };
+        /**
+         * Retrieve the `value` using key. Because the IterableChangeRecord_ value may be one which we
+         * have already iterated over, we use the `atOrAfterIndex` to pretend it is not there.
+         *
+         * Use case: `[a, b, c, a, a]` if we are at index `3` which is the second `a` then asking if we
+         * have any more `a`s needs to return the second `a`.
+         */
+        _DuplicateMap.prototype.get = function (trackById, atOrAfterIndex) {
+            var key = trackById;
+            var recordList = this.map.get(key);
+            return recordList ? recordList.get(trackById, atOrAfterIndex) : null;
+        };
+        /**
+         * Removes a {@link IterableChangeRecord_} from the list of duplicates.
+         *
+         * The list of duplicates also is removed from the map if it gets empty.
+         */
+        _DuplicateMap.prototype.remove = function (record) {
+            var key = record.trackById;
+            var recordList = this.map.get(key);
+            // Remove the list of duplicates when it gets empty
+            if (recordList.remove(record)) {
+                this.map.delete(key);
+            }
+            return record;
+        };
+        Object.defineProperty(_DuplicateMap.prototype, "isEmpty", {
+            get: function () { return this.map.size === 0; },
+            enumerable: true,
+            configurable: true
+        });
+        _DuplicateMap.prototype.clear = function () { this.map.clear(); };
+        return _DuplicateMap;
+    }());
+    function getPreviousIndex(item, addRemoveOffset, moveOffsets) {
+        var previousIndex = item.previousIndex;
+        if (previousIndex === null)
+            return previousIndex;
+        var moveOffset = 0;
+        if (moveOffsets && previousIndex < moveOffsets.length) {
+            moveOffset = moveOffsets[previousIndex];
+        }
+        return previousIndex + addRemoveOffset + moveOffset;
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var DefaultKeyValueDifferFactory = /** @class */ (function () {
+        function DefaultKeyValueDifferFactory() {
+        }
+        DefaultKeyValueDifferFactory.prototype.supports = function (obj) { return obj instanceof Map || isJsObject$1(obj); };
+        DefaultKeyValueDifferFactory.prototype.create = function () { return new DefaultKeyValueDiffer(); };
+        return DefaultKeyValueDifferFactory;
+    }());
+    var DefaultKeyValueDiffer = /** @class */ (function () {
+        function DefaultKeyValueDiffer() {
+            this._records = new Map();
+            this._mapHead = null;
+            // _appendAfter is used in the check loop
+            this._appendAfter = null;
+            this._previousMapHead = null;
+            this._changesHead = null;
+            this._changesTail = null;
+            this._additionsHead = null;
+            this._additionsTail = null;
+            this._removalsHead = null;
+            this._removalsTail = null;
+        }
+        Object.defineProperty(DefaultKeyValueDiffer.prototype, "isDirty", {
+            get: function () {
+                return this._additionsHead !== null || this._changesHead !== null ||
+                    this._removalsHead !== null;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        DefaultKeyValueDiffer.prototype.forEachItem = function (fn) {
+            var record;
+            for (record = this._mapHead; record !== null; record = record._next) {
+                fn(record);
+            }
+        };
+        DefaultKeyValueDiffer.prototype.forEachPreviousItem = function (fn) {
+            var record;
+            for (record = this._previousMapHead; record !== null; record = record._nextPrevious) {
+                fn(record);
+            }
+        };
+        DefaultKeyValueDiffer.prototype.forEachChangedItem = function (fn) {
+            var record;
+            for (record = this._changesHead; record !== null; record = record._nextChanged) {
+                fn(record);
+            }
+        };
+        DefaultKeyValueDiffer.prototype.forEachAddedItem = function (fn) {
+            var record;
+            for (record = this._additionsHead; record !== null; record = record._nextAdded) {
+                fn(record);
+            }
+        };
+        DefaultKeyValueDiffer.prototype.forEachRemovedItem = function (fn) {
+            var record;
+            for (record = this._removalsHead; record !== null; record = record._nextRemoved) {
+                fn(record);
+            }
+        };
+        DefaultKeyValueDiffer.prototype.diff = function (map) {
+            if (!map) {
+                map = new Map();
+            }
+            else if (!(map instanceof Map || isJsObject$1(map))) {
+                throw new Error("Error trying to diff '" + stringify(map) + "'. Only maps and objects are allowed");
+            }
+            return this.check(map) ? this : null;
+        };
+        DefaultKeyValueDiffer.prototype.onDestroy = function () { };
+        /**
+         * Check the current state of the map vs the previous.
+         * The algorithm is optimised for when the keys do no change.
+         */
+        DefaultKeyValueDiffer.prototype.check = function (map) {
+            var _this = this;
+            this._reset();
+            var insertBefore = this._mapHead;
+            this._appendAfter = null;
+            this._forEach(map, function (value, key) {
+                if (insertBefore && insertBefore.key === key) {
+                    _this._maybeAddToChanges(insertBefore, value);
+                    _this._appendAfter = insertBefore;
+                    insertBefore = insertBefore._next;
+                }
+                else {
+                    var record = _this._getOrCreateRecordForKey(key, value);
+                    insertBefore = _this._insertBeforeOrAppend(insertBefore, record);
+                }
+            });
+            // Items remaining at the end of the list have been deleted
+            if (insertBefore) {
+                if (insertBefore._prev) {
+                    insertBefore._prev._next = null;
+                }
+                this._removalsHead = insertBefore;
+                for (var record = insertBefore; record !== null; record = record._nextRemoved) {
+                    if (record === this._mapHead) {
+                        this._mapHead = null;
+                    }
+                    this._records.delete(record.key);
+                    record._nextRemoved = record._next;
+                    record.previousValue = record.currentValue;
+                    record.currentValue = null;
+                    record._prev = null;
+                    record._next = null;
+                }
+            }
+            // Make sure tails have no next records from previous runs
+            if (this._changesTail)
+                this._changesTail._nextChanged = null;
+            if (this._additionsTail)
+                this._additionsTail._nextAdded = null;
+            return this.isDirty;
+        };
+        /**
+         * Inserts a record before `before` or append at the end of the list when `before` is null.
+         *
+         * Notes:
+         * - This method appends at `this._appendAfter`,
+         * - This method updates `this._appendAfter`,
+         * - The return value is the new value for the insertion pointer.
+         */
+        DefaultKeyValueDiffer.prototype._insertBeforeOrAppend = function (before, record) {
+            if (before) {
+                var prev = before._prev;
+                record._next = before;
+                record._prev = prev;
+                before._prev = record;
+                if (prev) {
+                    prev._next = record;
+                }
+                if (before === this._mapHead) {
+                    this._mapHead = record;
+                }
+                this._appendAfter = before;
+                return before;
+            }
+            if (this._appendAfter) {
+                this._appendAfter._next = record;
+                record._prev = this._appendAfter;
+            }
+            else {
+                this._mapHead = record;
+            }
+            this._appendAfter = record;
+            return null;
+        };
+        DefaultKeyValueDiffer.prototype._getOrCreateRecordForKey = function (key, value) {
+            if (this._records.has(key)) {
+                var record_1 = this._records.get(key);
+                this._maybeAddToChanges(record_1, value);
+                var prev = record_1._prev;
+                var next = record_1._next;
+                if (prev) {
+                    prev._next = next;
+                }
+                if (next) {
+                    next._prev = prev;
+                }
+                record_1._next = null;
+                record_1._prev = null;
+                return record_1;
+            }
+            var record = new KeyValueChangeRecord_(key);
+            this._records.set(key, record);
+            record.currentValue = value;
+            this._addToAdditions(record);
+            return record;
+        };
+        /** @internal */
+        DefaultKeyValueDiffer.prototype._reset = function () {
+            if (this.isDirty) {
+                var record = void 0;
+                // let `_previousMapHead` contain the state of the map before the changes
+                this._previousMapHead = this._mapHead;
+                for (record = this._previousMapHead; record !== null; record = record._next) {
+                    record._nextPrevious = record._next;
+                }
+                // Update `record.previousValue` with the value of the item before the changes
+                // We need to update all changed items (that's those which have been added and changed)
+                for (record = this._changesHead; record !== null; record = record._nextChanged) {
+                    record.previousValue = record.currentValue;
+                }
+                for (record = this._additionsHead; record != null; record = record._nextAdded) {
+                    record.previousValue = record.currentValue;
+                }
+                this._changesHead = this._changesTail = null;
+                this._additionsHead = this._additionsTail = null;
+                this._removalsHead = null;
+            }
+        };
+        // Add the record or a given key to the list of changes only when the value has actually changed
+        DefaultKeyValueDiffer.prototype._maybeAddToChanges = function (record, newValue) {
+            if (!looseIdentical(newValue, record.currentValue)) {
+                record.previousValue = record.currentValue;
+                record.currentValue = newValue;
+                this._addToChanges(record);
+            }
+        };
+        DefaultKeyValueDiffer.prototype._addToAdditions = function (record) {
+            if (this._additionsHead === null) {
+                this._additionsHead = this._additionsTail = record;
+            }
+            else {
+                this._additionsTail._nextAdded = record;
+                this._additionsTail = record;
+            }
+        };
+        DefaultKeyValueDiffer.prototype._addToChanges = function (record) {
+            if (this._changesHead === null) {
+                this._changesHead = this._changesTail = record;
+            }
+            else {
+                this._changesTail._nextChanged = record;
+                this._changesTail = record;
+            }
+        };
+        /** @internal */
+        DefaultKeyValueDiffer.prototype._forEach = function (obj, fn) {
+            if (obj instanceof Map) {
+                obj.forEach(fn);
+            }
+            else {
+                Object.keys(obj).forEach(function (k) { return fn(obj[k], k); });
+            }
+        };
+        return DefaultKeyValueDiffer;
+    }());
+    var KeyValueChangeRecord_ = /** @class */ (function () {
+        function KeyValueChangeRecord_(key) {
+            this.key = key;
+            this.previousValue = null;
+            this.currentValue = null;
+            /** @internal */
+            this._nextPrevious = null;
+            /** @internal */
+            this._next = null;
+            /** @internal */
+            this._prev = null;
+            /** @internal */
+            this._nextAdded = null;
+            /** @internal */
+            this._nextRemoved = null;
+            /** @internal */
+            this._nextChanged = null;
+        }
+        return KeyValueChangeRecord_;
+    }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
+     *
+     * @publicApi
+     */
+    var IterableDiffers = /** @class */ (function () {
+        function IterableDiffers(factories) {
+            this.factories = factories;
+        }
+        IterableDiffers.create = function (factories, parent) {
+            if (parent != null) {
+                var copied = parent.factories.slice();
+                factories = factories.concat(copied);
+            }
+            return new IterableDiffers(factories);
+        };
+        /**
+         * Takes an array of {@link IterableDifferFactory} and returns a provider used to extend the
+         * inherited {@link IterableDiffers} instance with the provided factories and return a new
+         * {@link IterableDiffers} instance.
+         *
+         * @usageNotes
+         * ### Example
+         *
+         * The following example shows how to extend an existing list of factories,
+         * which will only be applied to the injector for this component and its children.
+         * This step is all that's required to make a new {@link IterableDiffer} available.
+         *
+         * ```
+         * @Component({
+         *   viewProviders: [
+         *     IterableDiffers.extend([new ImmutableListDiffer()])
+         *   ]
+         * })
+         * ```
+         */
+        IterableDiffers.extend = function (factories) {
+            return {
+                provide: IterableDiffers,
+                useFactory: function (parent) {
+                    if (!parent) {
+                        // Typically would occur when calling IterableDiffers.extend inside of dependencies passed
+                        // to
+                        // bootstrap(), which would override default pipes instead of extending them.
+                        throw new Error('Cannot extend IterableDiffers without a parent injector');
+                    }
+                    return IterableDiffers.create(factories, parent);
+                },
+                // Dependency technically isn't optional, but we can provide a better error message this way.
+                deps: [[IterableDiffers, new SkipSelf(), new Optional()]]
+            };
+        };
+        IterableDiffers.prototype.find = function (iterable) {
+            var factory = this.factories.find(function (f) { return f.supports(iterable); });
+            if (factory != null) {
+                return factory;
+            }
+            else {
+                throw new Error("Cannot find a differ supporting object '" + iterable + "' of type '" + getTypeNameForDebugging(iterable) + "'");
+            }
+        };
+        /** @nocollapse */
+        IterableDiffers.ngInjectableDef = defineInjectable({
+            providedIn: 'root',
+            factory: function () { return new IterableDiffers([new DefaultIterableDifferFactory()]); }
+        });
+        return IterableDiffers;
+    }());
+    function getTypeNameForDebugging(type) {
+        return type['name'] || typeof type;
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
+     *
+     * @publicApi
+     */
+    var KeyValueDiffers = /** @class */ (function () {
+        function KeyValueDiffers(factories) {
+            this.factories = factories;
+        }
+        KeyValueDiffers.create = function (factories, parent) {
+            if (parent) {
+                var copied = parent.factories.slice();
+                factories = factories.concat(copied);
+            }
+            return new KeyValueDiffers(factories);
+        };
+        /**
+         * Takes an array of {@link KeyValueDifferFactory} and returns a provider used to extend the
+         * inherited {@link KeyValueDiffers} instance with the provided factories and return a new
+         * {@link KeyValueDiffers} instance.
+         *
+         * @usageNotes
+         * ### Example
+         *
+         * The following example shows how to extend an existing list of factories,
+         * which will only be applied to the injector for this component and its children.
+         * This step is all that's required to make a new {@link KeyValueDiffer} available.
+         *
+         * ```
+         * @Component({
+         *   viewProviders: [
+         *     KeyValueDiffers.extend([new ImmutableMapDiffer()])
+         *   ]
+         * })
+         * ```
+         */
+        KeyValueDiffers.extend = function (factories) {
+            return {
+                provide: KeyValueDiffers,
+                useFactory: function (parent) {
+                    if (!parent) {
+                        // Typically would occur when calling KeyValueDiffers.extend inside of dependencies passed
+                        // to bootstrap(), which would override default pipes instead of extending them.
+                        throw new Error('Cannot extend KeyValueDiffers without a parent injector');
+                    }
+                    return KeyValueDiffers.create(factories, parent);
+                },
+                // Dependency technically isn't optional, but we can provide a better error message this way.
+                deps: [[KeyValueDiffers, new SkipSelf(), new Optional()]]
+            };
+        };
+        KeyValueDiffers.prototype.find = function (kv) {
+            var factory = this.factories.find(function (f) { return f.supports(kv); });
+            if (factory) {
+                return factory;
+            }
+            throw new Error("Cannot find a differ supporting object '" + kv + "'");
+        };
+        /** @nocollapse */
+        KeyValueDiffers.ngInjectableDef = defineInjectable({
+            providedIn: 'root',
+            factory: function () { return new KeyValueDiffers([new DefaultKeyValueDifferFactory()]); }
+        });
+        return KeyValueDiffers;
+    }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Base class for Angular Views, provides change detection functionality.
+     * A change-detection tree collects all views that are to be checked for changes.
+     * Use the methods to add and remove views from the tree, initiate change-detection,
+     * and explicitly mark views as _dirty_, meaning that they have changed and need to be rerendered.
+     *
+     * @usageNotes
+     *
+     * The following examples demonstrate how to modify default change-detection behavior
+     * to perform explicit detection when needed.
+     *
+     * ### Use `markForCheck()` with `CheckOnce` strategy
+     *
+     * The following example sets the `OnPush` change-detection strategy for a component
+     * (`CheckOnce`, rather than the default `CheckAlways`), then forces a second check
+     * after an interval. See [live demo](http://plnkr.co/edit/GC512b?p=preview).
+     *
+     * <code-example path="core/ts/change_detect/change-detection.ts"
+     * region="mark-for-check"></code-example>
+     *
+     * ### Detach change detector to limit how often check occurs
+     *
+     * The following example defines a component with a large list of read-only data
+     * that is expected to change constantly, many times per second.
+     * To improve performance, we want to check and update the list
+     * less often than the changes actually occur. To do that, we detach
+     * the component's change detector and perform an explicit local check every five seconds.
+     *
+     * <code-example path="core/ts/change_detect/change-detection.ts" region="detach"></code-example>
+     *
+     *
+     * ### Reattaching a detached component
+     *
+     * The following example creates a component displaying live data.
+     * The component detaches its change detector from the main change detector tree
+     * when the `live` property is set to false, and reattaches it when the property
+     * becomes true.
+     *
+     * <code-example path="core/ts/change_detect/change-detection.ts" region="reattach"></code-example>
+     *
+     * @publicApi
+     */
+    var ChangeDetectorRef = /** @class */ (function () {
+        function ChangeDetectorRef() {
+        }
+        /**
+         * @internal
+         * @nocollapse
+         */
+        ChangeDetectorRef.__NG_ELEMENT_ID__ = function () { return SWITCH_CHANGE_DETECTOR_REF_FACTORY(); };
+        return ChangeDetectorRef;
+    }());
+    var SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ = injectChangeDetectorRef;
+    var SWITCH_CHANGE_DETECTOR_REF_FACTORY__PRE_R3__ = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+    };
+    var SWITCH_CHANGE_DETECTOR_REF_FACTORY = SWITCH_CHANGE_DETECTOR_REF_FACTORY__PRE_R3__;
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Structural diffing for `Object`s and `Map`s.
+     */
+    var keyValDiff = [new DefaultKeyValueDifferFactory()];
+    /**
+     * Structural diffing for `Iterable` types such as `Array`s.
+     */
+    var iterableDiff = [new DefaultIterableDifferFactory()];
+    var defaultIterableDiffers = new IterableDiffers(iterableDiff);
+    var defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Represents an embedded template that can be used to instantiate embedded views.
+     * To instantiate embedded views based on a template, use the `ViewContainerRef`
+     * method `createEmbeddedView()`.
+     *
+     * Access a `TemplateRef` instance by placing a directive on an `<ng-template>`
+     * element (or directive prefixed with `*`). The `TemplateRef` for the embedded view
+     * is injected into the constructor of the directive,
+     * using the `TemplateRef` token.
+     *
+     * You can also use a `Query` to find a `TemplateRef` associated with
+     * a component or a directive.
+     *
+     * @see `ViewContainerRef`
+     * @see [Navigate the Component Tree with DI](guide/dependency-injection-navtree)
+     *
+     * @publicApi
+     */
+    var TemplateRef = /** @class */ (function () {
+        function TemplateRef() {
+        }
+        /**
+         * @internal
+         * @nocollapse
+         */
+        TemplateRef.__NG_ELEMENT_ID__ = function () { return SWITCH_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef); };
+        return TemplateRef;
+    }());
+    var SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ = injectTemplateRef;
+    var SWITCH_TEMPLATE_REF_FACTORY__PRE_R3__ = noop;
+    var SWITCH_TEMPLATE_REF_FACTORY = SWITCH_TEMPLATE_REF_FACTORY__PRE_R3__;
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Represents a container where one or more views can be attached to a component.
+     *
+     * Can contain *host views* (created by instantiating a
+     * component with the `createComponent()` method), and *embedded views*
+     * (created by instantiating a `TemplateRef` with the `createEmbeddedView()` method).
+     *
+     * A view container instance can contain other view containers,
+     * creating a [view hierarchy](guide/glossary#view-tree).
+     *
+     * @see `ComponentRef`
+     * @see `EmbeddedViewRef`
+     *
+     * @publicApi
+     */
+    var ViewContainerRef = /** @class */ (function () {
+        function ViewContainerRef() {
+        }
+        /**
+         * @internal
+         * @nocollapse
+         */
+        ViewContainerRef.__NG_ELEMENT_ID__ = function () { return SWITCH_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef); };
+        return ViewContainerRef;
+    }());
+    var SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ = injectViewContainerRef;
+    var SWITCH_VIEW_CONTAINER_REF_FACTORY__PRE_R3__ = noop;
+    var SWITCH_VIEW_CONTAINER_REF_FACTORY = SWITCH_VIEW_CONTAINER_REF_FACTORY__PRE_R3__;
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    function getDebugContext(error) {
+        return error[ERROR_DEBUG_CONTEXT];
+    }
+    function getOriginalError(error) {
+        return error[ERROR_ORIGINAL_ERROR];
+    }
+    function getErrorLogger(error) {
+        return error[ERROR_LOGGER] || defaultErrorLogger;
+    }
+    function defaultErrorLogger(console) {
+        var values = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            values[_i - 1] = arguments[_i];
+        }
+        console.error.apply(console, __spread(values));
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    function expressionChangedAfterItHasBeenCheckedError(context, oldValue, currValue, isFirstCheck) {
+        var msg = "ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value: '" + oldValue + "'. Current value: '" + currValue + "'.";
+        if (isFirstCheck) {
+            msg +=
+                " It seems like the view has been created after its parent and its children have been dirty checked." +
+                    " Has it been created in a change detection hook ?";
+        }
+        return viewDebugError(msg, context);
+    }
+    function viewWrappedDebugError(err, context) {
+        if (!(err instanceof Error)) {
+            // errors that are not Error instances don't have a stack,
+            // so it is ok to wrap them into a new Error object...
+            err = new Error(err.toString());
+        }
+        _addDebugContext(err, context);
+        return err;
+    }
+    function viewDebugError(msg, context) {
+        var err = new Error(msg);
+        _addDebugContext(err, context);
+        return err;
+    }
+    function _addDebugContext(err, context) {
+        err[ERROR_DEBUG_CONTEXT] = context;
+        err[ERROR_LOGGER] = context.logError.bind(context);
+    }
+    function isViewDebugError(err) {
+        return !!getDebugContext(err);
+    }
+    function viewDestroyedError(action) {
+        return new Error("ViewDestroyedError: Attempt to use a destroyed view: " + action);
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    // Called before each cycle of a view's check to detect whether this is in the
+    // initState for which we need to call ngOnInit, ngAfterContentInit or ngAfterViewInit
+    // lifecycle methods. Returns true if this check cycle should call lifecycle
+    // methods.
+    function shiftInitState(view, priorInitState, newInitState) {
+        // Only update the InitState if we are currently in the prior state.
+        // For example, only move into CallingInit if we are in BeforeInit. Only
+        // move into CallingContentInit if we are in CallingInit. Normally this will
+        // always be true because of how checkCycle is called in checkAndUpdateView.
+        // However, if checkAndUpdateView is called recursively or if an exception is
+        // thrown while checkAndUpdateView is running, checkAndUpdateView starts over
+        // from the beginning. This ensures the state is monotonically increasing,
+        // terminating in the AfterInit state, which ensures the Init methods are called
+        // at least once and only once.
+        var state = view.state;
+        var initState = state & 1792 /* InitState_Mask */;
+        if (initState === priorInitState) {
+            view.state = (state & ~1792 /* InitState_Mask */) | newInitState;
+            view.initIndex = -1;
+            return true;
+        }
+        return initState === newInitState;
+    }
+    // Returns true if the lifecycle init method should be called for the node with
+    // the given init index.
+    function shouldCallLifecycleInitHook(view, initState, index) {
+        if ((view.state & 1792 /* InitState_Mask */) === initState && view.initIndex <= index) {
+            view.initIndex = index + 1;
+            return true;
+        }
+        return false;
+    }
+    /**
+     * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
+     */
+    function asTextData(view, index) {
+        return view.nodes[index];
+    }
+    /**
+     * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
+     */
+    function asElementData(view, index) {
+        return view.nodes[index];
+    }
+    /**
+     * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
+     */
+    function asProviderData(view, index) {
+        return view.nodes[index];
+    }
+    /**
+     * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
+     */
+    function asPureExpressionData(view, index) {
+        return view.nodes[index];
+    }
+    /**
+     * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
+     */
+    function asQueryList(view, index) {
+        return view.nodes[index];
+    }
+    var DebugContext = /** @class */ (function () {
+        function DebugContext() {
+        }
+        return DebugContext;
+    }());
+    /**
+     * This object is used to prevent cycles in the source files and to have a place where
+     * debug mode can hook it. It is lazily filled when `isDevMode` is known.
+     */
+    var Services = {
+        setCurrentNode: undefined,
+        createRootView: undefined,
+        createEmbeddedView: undefined,
+        createComponentView: undefined,
+        createNgModuleRef: undefined,
+        overrideProvider: undefined,
+        overrideComponentView: undefined,
+        clearOverrides: undefined,
+        checkAndUpdateView: undefined,
+        checkNoChangesView: undefined,
+        destroyView: undefined,
+        resolveDep: undefined,
+        createDebugContext: undefined,
+        handleEvent: undefined,
+        updateDirectives: undefined,
+        updateRenderer: undefined,
+        dirtyParentQueries: undefined,
+    };
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var NOOP = function () { };
+    var _tokenKeyCache = new Map();
+    function tokenKey(token) {
+        var key = _tokenKeyCache.get(token);
+        if (!key) {
+            key = stringify(token) + '_' + _tokenKeyCache.size;
+            _tokenKeyCache.set(token, key);
+        }
+        return key;
+    }
+    function unwrapValue(view, nodeIdx, bindingIdx, value) {
+        if (WrappedValue.isWrapped(value)) {
+            value = WrappedValue.unwrap(value);
+            var globalBindingIdx = view.def.nodes[nodeIdx].bindingIndex + bindingIdx;
+            var oldValue = WrappedValue.unwrap(view.oldValues[globalBindingIdx]);
+            view.oldValues[globalBindingIdx] = new WrappedValue(oldValue);
+        }
+        return value;
+    }
+    var UNDEFINED_RENDERER_TYPE_ID = '$$undefined';
+    var EMPTY_RENDERER_TYPE_ID = '$$empty';
+    // Attention: this function is called as top level function.
+    // Putting any logic in here will destroy closure tree shaking!
+    function createRendererType2(values) {
+        return {
+            id: UNDEFINED_RENDERER_TYPE_ID,
+            styles: values.styles,
+            encapsulation: values.encapsulation,
+            data: values.data
+        };
+    }
+    var _renderCompCount$1 = 0;
+    function resolveRendererType2(type) {
+        if (type && type.id === UNDEFINED_RENDERER_TYPE_ID) {
+            // first time we see this RendererType2. Initialize it...
+            var isFilled = ((type.encapsulation != null && type.encapsulation !== exports.ViewEncapsulation.None) ||
+                type.styles.length || Object.keys(type.data).length);
+            if (isFilled) {
+                type.id = "c" + _renderCompCount$1++;
+            }
+            else {
+                type.id = EMPTY_RENDERER_TYPE_ID;
+            }
+        }
+        if (type && type.id === EMPTY_RENDERER_TYPE_ID) {
+            type = null;
+        }
+        return type || null;
+    }
+    function checkBinding(view, def, bindingIdx, value) {
+        var oldValues = view.oldValues;
+        if ((view.state & 2 /* FirstCheck */) ||
+            !looseIdentical(oldValues[def.bindingIndex + bindingIdx], value)) {
+            return true;
+        }
+        return false;
+    }
+    function checkAndUpdateBinding(view, def, bindingIdx, value) {
+        if (checkBinding(view, def, bindingIdx, value)) {
+            view.oldValues[def.bindingIndex + bindingIdx] = value;
+            return true;
+        }
+        return false;
+    }
+    function checkBindingNoChanges(view, def, bindingIdx, value) {
+        var oldValue = view.oldValues[def.bindingIndex + bindingIdx];
+        if ((view.state & 1 /* BeforeFirstCheck */) || !devModeEqual$1(oldValue, value)) {
+            var bindingName = def.bindings[bindingIdx].name;
+            throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, def.nodeIndex), bindingName + ": " + oldValue, bindingName + ": " + value, (view.state & 1 /* BeforeFirstCheck */) !== 0);
+        }
+    }
+    function markParentViewsForCheck(view) {
+        var currView = view;
+        while (currView) {
+            if (currView.def.flags & 2 /* OnPush */) {
+                currView.state |= 8 /* ChecksEnabled */;
+            }
+            currView = currView.viewContainerParent || currView.parent;
+        }
+    }
+    function markParentViewsForCheckProjectedViews(view, endView) {
+        var currView = view;
+        while (currView && currView !== endView) {
+            currView.state |= 64 /* CheckProjectedViews */;
+            currView = currView.viewContainerParent || currView.parent;
+        }
+    }
+    function dispatchEvent(view, nodeIndex, eventName, event) {
+        try {
+            var nodeDef = view.def.nodes[nodeIndex];
+            var startView = nodeDef.flags & 33554432 /* ComponentView */ ?
+                asElementData(view, nodeIndex).componentView :
+                view;
+            markParentViewsForCheck(startView);
+            return Services.handleEvent(view, nodeIndex, eventName, event);
+        }
+        catch (e) {
+            // Attention: Don't rethrow, as it would cancel Observable subscriptions!
+            view.root.errorHandler.handleError(e);
+        }
+    }
+    function declaredViewContainer(view) {
+        if (view.parent) {
+            var parentView = view.parent;
+            return asElementData(parentView, view.parentNodeDef.nodeIndex);
+        }
+        return null;
+    }
+    /**
+     * for component views, this is the host element.
+     * for embedded views, this is the index of the parent node
+     * that contains the view container.
+     */
+    function viewParentEl(view) {
+        var parentView = view.parent;
+        if (parentView) {
+            return view.parentNodeDef.parent;
+        }
+        else {
+            return null;
+        }
+    }
+    function renderNode(view, def) {
+        switch (def.flags & 201347067 /* Types */) {
+            case 1 /* TypeElement */:
+                return asElementData(view, def.nodeIndex).renderElement;
+            case 2 /* TypeText */:
+                return asTextData(view, def.nodeIndex).renderText;
+        }
+    }
+    function elementEventFullName(target, name) {
+        return target ? target + ":" + name : name;
+    }
+    function isComponentView(view) {
+        return !!view.parent && !!(view.parentNodeDef.flags & 32768 /* Component */);
+    }
+    function isEmbeddedView(view) {
+        return !!view.parent && !(view.parentNodeDef.flags & 32768 /* Component */);
+    }
+    function filterQueryId(queryId) {
+        return 1 << (queryId % 32);
+    }
+    function splitMatchedQueriesDsl(matchedQueriesDsl) {
+        var matchedQueries = {};
+        var matchedQueryIds = 0;
+        var references = {};
+        if (matchedQueriesDsl) {
+            matchedQueriesDsl.forEach(function (_a) {
+                var _b = __read(_a, 2), queryId = _b[0], valueType = _b[1];
+                if (typeof queryId === 'number') {
+                    matchedQueries[queryId] = valueType;
+                    matchedQueryIds |= filterQueryId(queryId);
+                }
+                else {
+                    references[queryId] = valueType;
+                }
+            });
+        }
+        return { matchedQueries: matchedQueries, references: references, matchedQueryIds: matchedQueryIds };
+    }
+    function splitDepsDsl(deps, sourceName) {
+        return deps.map(function (value) {
+            var _a;
+            var token;
+            var flags;
+            if (Array.isArray(value)) {
+                _a = __read(value, 2), flags = _a[0], token = _a[1];
+            }
+            else {
+                flags = 0 /* None */;
+                token = value;
+            }
+            if (token && (typeof token === 'function' || typeof token === 'object') && sourceName) {
+                Object.defineProperty(token, SOURCE, { value: sourceName, configurable: true });
+            }
+            return { flags: flags, token: token, tokenKey: tokenKey(token) };
+        });
+    }
+    function getParentRenderElement(view, renderHost, def) {
+        var renderParent = def.renderParent;
+        if (renderParent) {
+            if ((renderParent.flags & 1 /* TypeElement */) === 0 ||
+                (renderParent.flags & 33554432 /* ComponentView */) === 0 ||
+                (renderParent.element.componentRendererType &&
+                    renderParent.element.componentRendererType.encapsulation ===
+                        exports.ViewEncapsulation.Native)) {
+                // only children of non components, or children of components with native encapsulation should
+                // be attached.
+                return asElementData(view, def.renderParent.nodeIndex).renderElement;
+            }
+        }
+        else {
+            return renderHost;
+        }
+    }
+    var DEFINITION_CACHE = new WeakMap();
+    function resolveDefinition(factory) {
+        var value = DEFINITION_CACHE.get(factory);
+        if (!value) {
+            value = factory(function () { return NOOP; });
+            value.factory = factory;
+            DEFINITION_CACHE.set(factory, value);
+        }
+        return value;
+    }
+    function rootRenderNodes(view) {
+        var renderNodes = [];
+        visitRootRenderNodes(view, 0 /* Collect */, undefined, undefined, renderNodes);
+        return renderNodes;
+    }
+    function visitRootRenderNodes(view, action, parentNode, nextSibling, target) {
+        // We need to re-compute the parent node in case the nodes have been moved around manually
+        if (action === 3 /* RemoveChild */) {
+            parentNode = view.renderer.parentNode(renderNode(view, view.def.lastRenderRootNode));
+        }
+        visitSiblingRenderNodes(view, action, 0, view.def.nodes.length - 1, parentNode, nextSibling, target);
+    }
+    function visitSiblingRenderNodes(view, action, startIndex, endIndex, parentNode, nextSibling, target) {
+        for (var i = startIndex; i <= endIndex; i++) {
+            var nodeDef = view.def.nodes[i];
+            if (nodeDef.flags & (1 /* TypeElement */ | 2 /* TypeText */ | 8 /* TypeNgContent */)) {
+                visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target);
+            }
+            // jump to next sibling
+            i += nodeDef.childCount;
+        }
+    }
+    function visitProjectedRenderNodes(view, ngContentIndex, action, parentNode, nextSibling, target) {
+        var compView = view;
+        while (compView && !isComponentView(compView)) {
+            compView = compView.parent;
+        }
+        var hostView = compView.parent;
+        var hostElDef = viewParentEl(compView);
+        var startIndex = hostElDef.nodeIndex + 1;
+        var endIndex = hostElDef.nodeIndex + hostElDef.childCount;
+        for (var i = startIndex; i <= endIndex; i++) {
+            var nodeDef = hostView.def.nodes[i];
+            if (nodeDef.ngContentIndex === ngContentIndex) {
+                visitRenderNode(hostView, nodeDef, action, parentNode, nextSibling, target);
+            }
+            // jump to next sibling
+            i += nodeDef.childCount;
+        }
+        if (!hostView.parent) {
+            // a root view
+            var projectedNodes = view.root.projectableNodes[ngContentIndex];
+            if (projectedNodes) {
+                for (var i = 0; i < projectedNodes.length; i++) {
+                    execRenderNodeAction(view, projectedNodes[i], action, parentNode, nextSibling, target);
+                }
+            }
+        }
+    }
+    function visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target) {
+        if (nodeDef.flags & 8 /* TypeNgContent */) {
+            visitProjectedRenderNodes(view, nodeDef.ngContent.index, action, parentNode, nextSibling, target);
+        }
+        else {
+            var rn = renderNode(view, nodeDef);
+            if (action === 3 /* RemoveChild */ && (nodeDef.flags & 33554432 /* ComponentView */) &&
+                (nodeDef.bindingFlags & 48 /* CatSyntheticProperty */)) {
+                // Note: we might need to do both actions.
+                if (nodeDef.bindingFlags & (16 /* SyntheticProperty */)) {
+                    execRenderNodeAction(view, rn, action, parentNode, nextSibling, target);
+                }
+                if (nodeDef.bindingFlags & (32 /* SyntheticHostProperty */)) {
+                    var compView = asElementData(view, nodeDef.nodeIndex).componentView;
+                    execRenderNodeAction(compView, rn, action, parentNode, nextSibling, target);
+                }
+            }
+            else {
+                execRenderNodeAction(view, rn, action, parentNode, nextSibling, target);
+            }
+            if (nodeDef.flags & 16777216 /* EmbeddedViews */) {
+                var embeddedViews = asElementData(view, nodeDef.nodeIndex).viewContainer._embeddedViews;
+                for (var k = 0; k < embeddedViews.length; k++) {
+                    visitRootRenderNodes(embeddedViews[k], action, parentNode, nextSibling, target);
+                }
+            }
+            if (nodeDef.flags & 1 /* TypeElement */ && !nodeDef.element.name) {
+                visitSiblingRenderNodes(view, action, nodeDef.nodeIndex + 1, nodeDef.nodeIndex + nodeDef.childCount, parentNode, nextSibling, target);
+            }
+        }
+    }
+    function execRenderNodeAction(view, renderNode, action, parentNode, nextSibling, target) {
+        var renderer = view.renderer;
+        switch (action) {
+            case 1 /* AppendChild */:
+                renderer.appendChild(parentNode, renderNode);
+                break;
+            case 2 /* InsertBefore */:
+                renderer.insertBefore(parentNode, renderNode, nextSibling);
+                break;
+            case 3 /* RemoveChild */:
+                renderer.removeChild(parentNode, renderNode);
+                break;
+            case 0 /* Collect */:
+                target.push(renderNode);
+                break;
+        }
+    }
+    var NS_PREFIX_RE = /^:([^:]+):(.+)$/;
+    function splitNamespace(name) {
+        if (name[0] === ':') {
+            var match = name.match(NS_PREFIX_RE);
+            return [match[1], match[2]];
+        }
+        return ['', name];
+    }
+    function calcBindingFlags(bindings) {
+        var flags = 0;
+        for (var i = 0; i < bindings.length; i++) {
+            flags |= bindings[i].flags;
+        }
+        return flags;
+    }
+    function interpolate(valueCount, constAndInterp) {
+        var result = '';
+        for (var i = 0; i < valueCount * 2; i = i + 2) {
+            result = result + constAndInterp[i] + _toStringWithNull(constAndInterp[i + 1]);
+        }
+        return result + constAndInterp[valueCount * 2];
+    }
+    function inlineInterpolate(valueCount, c0, a1, c1, a2, c2, a3, c3, a4, c4, a5, c5, a6, c6, a7, c7, a8, c8, a9, c9) {
+        switch (valueCount) {
+            case 1:
+                return c0 + _toStringWithNull(a1) + c1;
+            case 2:
+                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2;
+            case 3:
+                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
+                    c3;
+            case 4:
+                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
+                    c3 + _toStringWithNull(a4) + c4;
+            case 5:
+                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
+                    c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5;
+            case 6:
+                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
+                    c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) + c6;
+            case 7:
+                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
+                    c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) +
+                    c6 + _toStringWithNull(a7) + c7;
+            case 8:
+                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
+                    c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) +
+                    c6 + _toStringWithNull(a7) + c7 + _toStringWithNull(a8) + c8;
+            case 9:
+                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
+                    c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) +
+                    c6 + _toStringWithNull(a7) + c7 + _toStringWithNull(a8) + c8 + _toStringWithNull(a9) + c9;
+            default:
+                throw new Error("Does not support more than 9 expressions");
+        }
+    }
+    function _toStringWithNull(v) {
+        return v != null ? v.toString() : '';
+    }
+    var EMPTY_ARRAY$3 = [];
+    var EMPTY_MAP = {};
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var UNDEFINED_VALUE = new Object();
+    var InjectorRefTokenKey = tokenKey(Injector);
+    var INJECTORRefTokenKey = tokenKey(INJECTOR);
+    var NgModuleRefTokenKey = tokenKey(NgModuleRef);
+    function moduleProvideDef(flags, token, value, deps) {
+        // Need to resolve forwardRefs as e.g. for `useValue` we
+        // lowered the expression and then stopped evaluating it,
+        // i.e. also didn't unwrap it.
+        value = resolveForwardRef(value);
+        var depDefs = splitDepsDsl(deps, stringify(token));
+        return {
+            // will bet set by the module definition
+            index: -1,
+            deps: depDefs, flags: flags, token: token, value: value
+        };
+    }
+    function moduleDef(providers) {
+        var providersByKey = {};
+        var modules = [];
+        var isRoot = false;
+        for (var i = 0; i < providers.length; i++) {
+            var provider = providers[i];
+            if (provider.token === APP_ROOT && provider.value === true) {
+                isRoot = true;
+            }
+            if (provider.flags & 1073741824 /* TypeNgModule */) {
+                modules.push(provider.token);
+            }
+            provider.index = i;
+            providersByKey[tokenKey(provider.token)] = provider;
+        }
+        return {
+            // Will be filled later...
+            factory: null,
+            providersByKey: providersByKey,
+            providers: providers,
+            modules: modules,
+            isRoot: isRoot,
+        };
+    }
+    function initNgModule(data) {
+        var def = data._def;
+        var providers = data._providers = new Array(def.providers.length);
+        for (var i = 0; i < def.providers.length; i++) {
+            var provDef = def.providers[i];
+            if (!(provDef.flags & 4096 /* LazyProvider */)) {
+                // Make sure the provider has not been already initialized outside this loop.
+                if (providers[i] === undefined) {
+                    providers[i] = _createProviderInstance(data, provDef);
+                }
+            }
+        }
+    }
+    function resolveNgModuleDep(data, depDef, notFoundValue) {
+        if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
+        var former = setCurrentInjector(data);
+        try {
+            if (depDef.flags & 8 /* Value */) {
+                return depDef.token;
+            }
+            if (depDef.flags & 2 /* Optional */) {
+                notFoundValue = null;
+            }
+            if (depDef.flags & 1 /* SkipSelf */) {
+                return data._parent.get(depDef.token, notFoundValue);
+            }
+            var tokenKey_1 = depDef.tokenKey;
+            switch (tokenKey_1) {
+                case InjectorRefTokenKey:
+                case INJECTORRefTokenKey:
+                case NgModuleRefTokenKey:
+                    return data;
+            }
+            var providerDef = data._def.providersByKey[tokenKey_1];
+            var injectableDef = void 0;
+            if (providerDef) {
+                var providerInstance = data._providers[providerDef.index];
+                if (providerInstance === undefined) {
+                    providerInstance = data._providers[providerDef.index] =
+                        _createProviderInstance(data, providerDef);
+                }
+                return providerInstance === UNDEFINED_VALUE ? undefined : providerInstance;
+            }
+            else if ((injectableDef = getInjectableDef(depDef.token)) && targetsModule(data, injectableDef)) {
+                var index = data._providers.length;
+                data._def.providersByKey[depDef.tokenKey] = {
+                    flags: 1024 /* TypeFactoryProvider */ | 4096 /* LazyProvider */,
+                    value: injectableDef.factory,
+                    deps: [], index: index,
+                    token: depDef.token,
+                };
+                data._providers[index] = UNDEFINED_VALUE;
+                return (data._providers[index] =
+                    _createProviderInstance(data, data._def.providersByKey[depDef.tokenKey]));
+            }
+            else if (depDef.flags & 4 /* Self */) {
+                return notFoundValue;
+            }
+            return data._parent.get(depDef.token, notFoundValue);
+        }
+        finally {
+            setCurrentInjector(former);
+        }
+    }
+    function moduleTransitivelyPresent(ngModule, scope) {
+        return ngModule._def.modules.indexOf(scope) > -1;
+    }
+    function targetsModule(ngModule, def) {
+        return def.providedIn != null && (moduleTransitivelyPresent(ngModule, def.providedIn) ||
+            def.providedIn === 'root' && ngModule._def.isRoot);
+    }
+    function _createProviderInstance(ngModule, providerDef) {
+        var injectable;
+        switch (providerDef.flags & 201347067 /* Types */) {
+            case 512 /* TypeClassProvider */:
+                injectable = _createClass(ngModule, providerDef.value, providerDef.deps);
+                break;
+            case 1024 /* TypeFactoryProvider */:
+                injectable = _callFactory(ngModule, providerDef.value, providerDef.deps);
+                break;
+            case 2048 /* TypeUseExistingProvider */:
+                injectable = resolveNgModuleDep(ngModule, providerDef.deps[0]);
+                break;
+            case 256 /* TypeValueProvider */:
+                injectable = providerDef.value;
+                break;
+        }
+        // The read of `ngOnDestroy` here is slightly expensive as it's megamorphic, so it should be
+        // avoided if possible. The sequence of checks here determines whether ngOnDestroy needs to be
+        // checked. It might not if the `injectable` isn't an object or if NodeFlags.OnDestroy is already
+        // set (ngOnDestroy was detected statically).
+        if (injectable !== UNDEFINED_VALUE && injectable != null && typeof injectable === 'object' &&
+            !(providerDef.flags & 131072 /* OnDestroy */) && typeof injectable.ngOnDestroy === 'function') {
+            providerDef.flags |= 131072 /* OnDestroy */;
+        }
+        return injectable === undefined ? UNDEFINED_VALUE : injectable;
+    }
+    function _createClass(ngModule, ctor, deps) {
+        var len = deps.length;
+        switch (len) {
+            case 0:
+                return new ctor();
+            case 1:
+                return new ctor(resolveNgModuleDep(ngModule, deps[0]));
+            case 2:
+                return new ctor(resolveNgModuleDep(ngModule, deps[0]), resolveNgModuleDep(ngModule, deps[1]));
+            case 3:
+                return new ctor(resolveNgModuleDep(ngModule, deps[0]), resolveNgModuleDep(ngModule, deps[1]), resolveNgModuleDep(ngModule, deps[2]));
+            default:
+                var depValues = new Array(len);
+                for (var i = 0; i < len; i++) {
+                    depValues[i] = resolveNgModuleDep(ngModule, deps[i]);
+                }
+                return new (ctor.bind.apply(ctor, __spread([void 0], depValues)))();
+        }
+    }
+    function _callFactory(ngModule, factory, deps) {
+        var len = deps.length;
+        switch (len) {
+            case 0:
+                return factory();
+            case 1:
+                return factory(resolveNgModuleDep(ngModule, deps[0]));
+            case 2:
+                return factory(resolveNgModuleDep(ngModule, deps[0]), resolveNgModuleDep(ngModule, deps[1]));
+            case 3:
+                return factory(resolveNgModuleDep(ngModule, deps[0]), resolveNgModuleDep(ngModule, deps[1]), resolveNgModuleDep(ngModule, deps[2]));
+            default:
+                var depValues = Array(len);
+                for (var i = 0; i < len; i++) {
+                    depValues[i] = resolveNgModuleDep(ngModule, deps[i]);
+                }
+                return factory.apply(void 0, __spread(depValues));
+        }
+    }
+    function callNgModuleLifecycle(ngModule, lifecycles) {
+        var def = ngModule._def;
+        var destroyed = new Set();
+        for (var i = 0; i < def.providers.length; i++) {
+            var provDef = def.providers[i];
+            if (provDef.flags & 131072 /* OnDestroy */) {
+                var instance = ngModule._providers[i];
+                if (instance && instance !== UNDEFINED_VALUE) {
+                    var onDestroy = instance.ngOnDestroy;
+                    if (typeof onDestroy === 'function' && !destroyed.has(instance)) {
+                        onDestroy.apply(instance);
+                        destroyed.add(instance);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    function attachEmbeddedView(parentView, elementData, viewIndex, view) {
+        var embeddedViews = elementData.viewContainer._embeddedViews;
+        if (viewIndex === null || viewIndex === undefined) {
+            viewIndex = embeddedViews.length;
+        }
+        view.viewContainerParent = parentView;
+        addToArray(embeddedViews, viewIndex, view);
+        attachProjectedView(elementData, view);
+        Services.dirtyParentQueries(view);
+        var prevView = viewIndex > 0 ? embeddedViews[viewIndex - 1] : null;
+        renderAttachEmbeddedView(elementData, prevView, view);
+    }
+    function attachProjectedView(vcElementData, view) {
+        var dvcElementData = declaredViewContainer(view);
+        if (!dvcElementData || dvcElementData === vcElementData ||
+            view.state & 16 /* IsProjectedView */) {
+            return;
+        }
+        // Note: For performance reasons, we
+        // - add a view to template._projectedViews only 1x throughout its lifetime,
+        //   and remove it not until the view is destroyed.
+        //   (hard, as when a parent view is attached/detached we would need to attach/detach all
+        //    nested projected views as well, even across component boundaries).
+        // - don't track the insertion order of views in the projected views array
+        //   (hard, as when the views of the same template are inserted different view containers)
+        view.state |= 16 /* IsProjectedView */;
+        var projectedViews = dvcElementData.template._projectedViews;
+        if (!projectedViews) {
+            projectedViews = dvcElementData.template._projectedViews = [];
+        }
+        projectedViews.push(view);
+        // Note: we are changing the NodeDef here as we cannot calculate
+        // the fact whether a template is used for projection during compilation.
+        markNodeAsProjectedTemplate(view.parent.def, view.parentNodeDef);
+    }
+    function markNodeAsProjectedTemplate(viewDef, nodeDef) {
+        if (nodeDef.flags & 4 /* ProjectedTemplate */) {
+            return;
+        }
+        viewDef.nodeFlags |= 4 /* ProjectedTemplate */;
+        nodeDef.flags |= 4 /* ProjectedTemplate */;
+        var parentNodeDef = nodeDef.parent;
+        while (parentNodeDef) {
+            parentNodeDef.childFlags |= 4 /* ProjectedTemplate */;
+            parentNodeDef = parentNodeDef.parent;
+        }
+    }
+    function detachEmbeddedView(elementData, viewIndex) {
+        var embeddedViews = elementData.viewContainer._embeddedViews;
+        if (viewIndex == null || viewIndex >= embeddedViews.length) {
+            viewIndex = embeddedViews.length - 1;
+        }
+        if (viewIndex < 0) {
+            return null;
+        }
+        var view = embeddedViews[viewIndex];
+        view.viewContainerParent = null;
+        removeFromArray(embeddedViews, viewIndex);
+        // See attachProjectedView for why we don't update projectedViews here.
+        Services.dirtyParentQueries(view);
+        renderDetachView(view);
+        return view;
+    }
+    function detachProjectedView(view) {
+        if (!(view.state & 16 /* IsProjectedView */)) {
+            return;
+        }
+        var dvcElementData = declaredViewContainer(view);
+        if (dvcElementData) {
+            var projectedViews = dvcElementData.template._projectedViews;
+            if (projectedViews) {
+                removeFromArray(projectedViews, projectedViews.indexOf(view));
+                Services.dirtyParentQueries(view);
+            }
+        }
+    }
+    function moveEmbeddedView(elementData, oldViewIndex, newViewIndex) {
+        var embeddedViews = elementData.viewContainer._embeddedViews;
+        var view = embeddedViews[oldViewIndex];
+        removeFromArray(embeddedViews, oldViewIndex);
+        if (newViewIndex == null) {
+            newViewIndex = embeddedViews.length;
+        }
+        addToArray(embeddedViews, newViewIndex, view);
+        // Note: Don't need to change projectedViews as the order in there
+        // as always invalid...
+        Services.dirtyParentQueries(view);
+        renderDetachView(view);
+        var prevView = newViewIndex > 0 ? embeddedViews[newViewIndex - 1] : null;
+        renderAttachEmbeddedView(elementData, prevView, view);
+        return view;
+    }
+    function renderAttachEmbeddedView(elementData, prevView, view) {
+        var prevRenderNode = prevView ? renderNode(prevView, prevView.def.lastRenderRootNode) :
+            elementData.renderElement;
+        var parentNode = view.renderer.parentNode(prevRenderNode);
+        var nextSibling = view.renderer.nextSibling(prevRenderNode);
+        // Note: We can't check if `nextSibling` is present, as on WebWorkers it will always be!
+        // However, browsers automatically do `appendChild` when there is no `nextSibling`.
+        visitRootRenderNodes(view, 2 /* InsertBefore */, parentNode, nextSibling, undefined);
+    }
+    function renderDetachView(view) {
+        visitRootRenderNodes(view, 3 /* RemoveChild */, null, null, undefined);
+    }
+    function addToArray(arr, index, value) {
+        // perf: array.push is faster than array.splice!
+        if (index >= arr.length) {
+            arr.push(value);
+        }
+        else {
+            arr.splice(index, 0, value);
+        }
+    }
+    function removeFromArray(arr, index) {
+        // perf: array.pop is faster than array.splice!
+        if (index >= arr.length - 1) {
+            arr.pop();
+        }
+        else {
+            arr.splice(index, 1);
+        }
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var EMPTY_CONTEXT = new Object();
+    // Attention: this function is called as top level function.
+    // Putting any logic in here will destroy closure tree shaking!
+    function createComponentFactory(selector, componentType, viewDefFactory, inputs, outputs, ngContentSelectors) {
+        return new ComponentFactory_(selector, componentType, viewDefFactory, inputs, outputs, ngContentSelectors);
+    }
+    function getComponentViewDefinitionFactory(componentFactory) {
+        return componentFactory.viewDefFactory;
+    }
+    var ComponentFactory_ = /** @class */ (function (_super) {
+        __extends(ComponentFactory_, _super);
+        function ComponentFactory_(selector, componentType, viewDefFactory, _inputs, _outputs, ngContentSelectors) {
+            var _this = 
+            // Attention: this ctor is called as top level function.
+            // Putting any logic in here will destroy closure tree shaking!
+            _super.call(this) || this;
+            _this.selector = selector;
+            _this.componentType = componentType;
+            _this._inputs = _inputs;
+            _this._outputs = _outputs;
+            _this.ngContentSelectors = ngContentSelectors;
+            _this.viewDefFactory = viewDefFactory;
+            return _this;
+        }
+        Object.defineProperty(ComponentFactory_.prototype, "inputs", {
+            get: function () {
+                var inputsArr = [];
+                var inputs = this._inputs;
+                for (var propName in inputs) {
+                    var templateName = inputs[propName];
+                    inputsArr.push({ propName: propName, templateName: templateName });
+                }
+                return inputsArr;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ComponentFactory_.prototype, "outputs", {
+            get: function () {
+                var outputsArr = [];
+                for (var propName in this._outputs) {
+                    var templateName = this._outputs[propName];
+                    outputsArr.push({ propName: propName, templateName: templateName });
+                }
+                return outputsArr;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * Creates a new component.
+         */
+        ComponentFactory_.prototype.create = function (injector, projectableNodes, rootSelectorOrNode, ngModule) {
+            if (!ngModule) {
+                throw new Error('ngModule should be provided');
+            }
+            var viewDef = resolveDefinition(this.viewDefFactory);
+            var componentNodeIndex = viewDef.nodes[0].element.componentProvider.nodeIndex;
+            var view = Services.createRootView(injector, projectableNodes || [], rootSelectorOrNode, viewDef, ngModule, EMPTY_CONTEXT);
+            var component = asProviderData(view, componentNodeIndex).instance;
+            if (rootSelectorOrNode) {
+                view.renderer.setAttribute(asElementData(view, 0).renderElement, 'ng-version', VERSION.full);
+            }
+            return new ComponentRef_(view, new ViewRef_(view), component);
+        };
+        return ComponentFactory_;
+    }(ComponentFactory));
+    var ComponentRef_ = /** @class */ (function (_super) {
+        __extends(ComponentRef_, _super);
+        function ComponentRef_(_view, _viewRef, _component) {
+            var _this = _super.call(this) || this;
+            _this._view = _view;
+            _this._viewRef = _viewRef;
+            _this._component = _component;
+            _this._elDef = _this._view.def.nodes[0];
+            _this.hostView = _viewRef;
+            _this.changeDetectorRef = _viewRef;
+            _this.instance = _component;
+            return _this;
+        }
+        Object.defineProperty(ComponentRef_.prototype, "location", {
+            get: function () {
+                return new ElementRef(asElementData(this._view, this._elDef.nodeIndex).renderElement);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ComponentRef_.prototype, "injector", {
+            get: function () { return new Injector_(this._view, this._elDef); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ComponentRef_.prototype, "componentType", {
+            get: function () { return this._component.constructor; },
+            enumerable: true,
+            configurable: true
+        });
+        ComponentRef_.prototype.destroy = function () { this._viewRef.destroy(); };
+        ComponentRef_.prototype.onDestroy = function (callback) { this._viewRef.onDestroy(callback); };
+        return ComponentRef_;
+    }(ComponentRef));
+    function createViewContainerData(view, elDef, elData) {
+        return new ViewContainerRef_(view, elDef, elData);
+    }
+    var ViewContainerRef_ = /** @class */ (function () {
+        function ViewContainerRef_(_view, _elDef, _data) {
+            this._view = _view;
+            this._elDef = _elDef;
+            this._data = _data;
+            /**
+             * @internal
+             */
+            this._embeddedViews = [];
+        }
+        Object.defineProperty(ViewContainerRef_.prototype, "element", {
+            get: function () { return new ElementRef(this._data.renderElement); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewContainerRef_.prototype, "injector", {
+            get: function () { return new Injector_(this._view, this._elDef); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewContainerRef_.prototype, "parentInjector", {
+            /** @deprecated No replacement */
+            get: function () {
+                var view = this._view;
+                var elDef = this._elDef.parent;
+                while (!elDef && view) {
+                    elDef = viewParentEl(view);
+                    view = view.parent;
+                }
+                return view ? new Injector_(view, elDef) : new Injector_(this._view, null);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        ViewContainerRef_.prototype.clear = function () {
+            var len = this._embeddedViews.length;
+            for (var i = len - 1; i >= 0; i--) {
+                var view = detachEmbeddedView(this._data, i);
+                Services.destroyView(view);
+            }
+        };
+        ViewContainerRef_.prototype.get = function (index) {
+            var view = this._embeddedViews[index];
+            if (view) {
+                var ref = new ViewRef_(view);
+                ref.attachToViewContainerRef(this);
+                return ref;
+            }
+            return null;
+        };
+        Object.defineProperty(ViewContainerRef_.prototype, "length", {
+            get: function () { return this._embeddedViews.length; },
+            enumerable: true,
+            configurable: true
+        });
+        ViewContainerRef_.prototype.createEmbeddedView = function (templateRef, context, index) {
+            var viewRef = templateRef.createEmbeddedView(context || {});
+            this.insert(viewRef, index);
+            return viewRef;
+        };
+        ViewContainerRef_.prototype.createComponent = function (componentFactory, index, injector, projectableNodes, ngModuleRef) {
+            var contextInjector = injector || this.parentInjector;
+            if (!ngModuleRef && !(componentFactory instanceof ComponentFactoryBoundToModule)) {
+                ngModuleRef = contextInjector.get(NgModuleRef);
+            }
+            var componentRef = componentFactory.create(contextInjector, projectableNodes, undefined, ngModuleRef);
+            this.insert(componentRef.hostView, index);
+            return componentRef;
+        };
+        ViewContainerRef_.prototype.insert = function (viewRef, index) {
+            if (viewRef.destroyed) {
+                throw new Error('Cannot insert a destroyed View in a ViewContainer!');
+            }
+            var viewRef_ = viewRef;
+            var viewData = viewRef_._view;
+            attachEmbeddedView(this._view, this._data, index, viewData);
+            viewRef_.attachToViewContainerRef(this);
+            return viewRef;
+        };
+        ViewContainerRef_.prototype.move = function (viewRef, currentIndex) {
+            if (viewRef.destroyed) {
+                throw new Error('Cannot move a destroyed View in a ViewContainer!');
+            }
+            var previousIndex = this._embeddedViews.indexOf(viewRef._view);
+            moveEmbeddedView(this._data, previousIndex, currentIndex);
+            return viewRef;
+        };
+        ViewContainerRef_.prototype.indexOf = function (viewRef) {
+            return this._embeddedViews.indexOf(viewRef._view);
+        };
+        ViewContainerRef_.prototype.remove = function (index) {
+            var viewData = detachEmbeddedView(this._data, index);
+            if (viewData) {
+                Services.destroyView(viewData);
+            }
+        };
+        ViewContainerRef_.prototype.detach = function (index) {
+            var view = detachEmbeddedView(this._data, index);
+            return view ? new ViewRef_(view) : null;
+        };
+        return ViewContainerRef_;
+    }());
+    function createChangeDetectorRef(view) {
+        return new ViewRef_(view);
+    }
+    var ViewRef_ = /** @class */ (function () {
+        function ViewRef_(_view) {
+            this._view = _view;
+            this._viewContainerRef = null;
+            this._appRef = null;
+        }
+        Object.defineProperty(ViewRef_.prototype, "rootNodes", {
+            get: function () { return rootRenderNodes(this._view); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewRef_.prototype, "context", {
+            get: function () { return this._view.context; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewRef_.prototype, "destroyed", {
+            get: function () { return (this._view.state & 128 /* Destroyed */) !== 0; },
+            enumerable: true,
+            configurable: true
+        });
+        ViewRef_.prototype.markForCheck = function () { markParentViewsForCheck(this._view); };
+        ViewRef_.prototype.detach = function () { this._view.state &= ~4 /* Attached */; };
+        ViewRef_.prototype.detectChanges = function () {
+            var fs = this._view.root.rendererFactory;
+            if (fs.begin) {
+                fs.begin();
+            }
+            try {
+                Services.checkAndUpdateView(this._view);
+            }
+            finally {
+                if (fs.end) {
+                    fs.end();
+                }
+            }
+        };
+        ViewRef_.prototype.checkNoChanges = function () { Services.checkNoChangesView(this._view); };
+        ViewRef_.prototype.reattach = function () { this._view.state |= 4 /* Attached */; };
+        ViewRef_.prototype.onDestroy = function (callback) {
+            if (!this._view.disposables) {
+                this._view.disposables = [];
+            }
+            this._view.disposables.push(callback);
+        };
+        ViewRef_.prototype.destroy = function () {
+            if (this._appRef) {
+                this._appRef.detachView(this);
+            }
+            else if (this._viewContainerRef) {
+                this._viewContainerRef.detach(this._viewContainerRef.indexOf(this));
+            }
+            Services.destroyView(this._view);
+        };
+        ViewRef_.prototype.detachFromAppRef = function () {
+            this._appRef = null;
+            renderDetachView(this._view);
+            Services.dirtyParentQueries(this._view);
+        };
+        ViewRef_.prototype.attachToAppRef = function (appRef) {
+            if (this._viewContainerRef) {
+                throw new Error('This view is already attached to a ViewContainer!');
+            }
+            this._appRef = appRef;
+        };
+        ViewRef_.prototype.attachToViewContainerRef = function (vcRef) {
+            if (this._appRef) {
+                throw new Error('This view is already attached directly to the ApplicationRef!');
+            }
+            this._viewContainerRef = vcRef;
+        };
+        return ViewRef_;
+    }());
+    function createTemplateData(view, def) {
+        return new TemplateRef_(view, def);
+    }
+    var TemplateRef_ = /** @class */ (function (_super) {
+        __extends(TemplateRef_, _super);
+        function TemplateRef_(_parentView, _def) {
+            var _this = _super.call(this) || this;
+            _this._parentView = _parentView;
+            _this._def = _def;
+            return _this;
+        }
+        TemplateRef_.prototype.createEmbeddedView = function (context) {
+            return new ViewRef_(Services.createEmbeddedView(this._parentView, this._def, this._def.element.template, context));
+        };
+        Object.defineProperty(TemplateRef_.prototype, "elementRef", {
+            get: function () {
+                return new ElementRef(asElementData(this._parentView, this._def.nodeIndex).renderElement);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return TemplateRef_;
+    }(TemplateRef));
+    function createInjector$1(view, elDef) {
+        return new Injector_(view, elDef);
+    }
+    var Injector_ = /** @class */ (function () {
+        function Injector_(view, elDef) {
+            this.view = view;
+            this.elDef = elDef;
+        }
+        Injector_.prototype.get = function (token, notFoundValue) {
+            if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
+            var allowPrivateServices = this.elDef ? (this.elDef.flags & 33554432 /* ComponentView */) !== 0 : false;
+            return Services.resolveDep(this.view, this.elDef, allowPrivateServices, { flags: 0 /* None */, token: token, tokenKey: tokenKey(token) }, notFoundValue);
+        };
+        return Injector_;
+    }());
+    function nodeValue(view, index) {
+        var def = view.def.nodes[index];
+        if (def.flags & 1 /* TypeElement */) {
+            var elData = asElementData(view, def.nodeIndex);
+            return def.element.template ? elData.template : elData.renderElement;
+        }
+        else if (def.flags & 2 /* TypeText */) {
+            return asTextData(view, def.nodeIndex).renderText;
+        }
+        else if (def.flags & (20224 /* CatProvider */ | 16 /* TypePipe */)) {
+            return asProviderData(view, def.nodeIndex).instance;
+        }
+        throw new Error("Illegal state: read nodeValue for node index " + index);
+    }
+    function createRendererV1(view) {
+        return new RendererAdapter(view.renderer);
+    }
+    var RendererAdapter = /** @class */ (function () {
+        function RendererAdapter(delegate) {
+            this.delegate = delegate;
+        }
+        RendererAdapter.prototype.selectRootElement = function (selectorOrNode) {
+            return this.delegate.selectRootElement(selectorOrNode);
+        };
+        RendererAdapter.prototype.createElement = function (parent, namespaceAndName) {
+            var _a = __read(splitNamespace(namespaceAndName), 2), ns = _a[0], name = _a[1];
+            var el = this.delegate.createElement(name, ns);
+            if (parent) {
+                this.delegate.appendChild(parent, el);
+            }
+            return el;
+        };
+        RendererAdapter.prototype.createViewRoot = function (hostElement) { return hostElement; };
+        RendererAdapter.prototype.createTemplateAnchor = function (parentElement) {
+            var comment = this.delegate.createComment('');
+            if (parentElement) {
+                this.delegate.appendChild(parentElement, comment);
+            }
+            return comment;
+        };
+        RendererAdapter.prototype.createText = function (parentElement, value) {
+            var node = this.delegate.createText(value);
+            if (parentElement) {
+                this.delegate.appendChild(parentElement, node);
+            }
+            return node;
+        };
+        RendererAdapter.prototype.projectNodes = function (parentElement, nodes) {
+            for (var i = 0; i < nodes.length; i++) {
+                this.delegate.appendChild(parentElement, nodes[i]);
+            }
+        };
+        RendererAdapter.prototype.attachViewAfter = function (node, viewRootNodes) {
+            var parentElement = this.delegate.parentNode(node);
+            var nextSibling = this.delegate.nextSibling(node);
+            for (var i = 0; i < viewRootNodes.length; i++) {
+                this.delegate.insertBefore(parentElement, viewRootNodes[i], nextSibling);
+            }
+        };
+        RendererAdapter.prototype.detachView = function (viewRootNodes) {
+            for (var i = 0; i < viewRootNodes.length; i++) {
+                var node = viewRootNodes[i];
+                var parentElement = this.delegate.parentNode(node);
+                this.delegate.removeChild(parentElement, node);
+            }
+        };
+        RendererAdapter.prototype.destroyView = function (hostElement, viewAllNodes) {
+            for (var i = 0; i < viewAllNodes.length; i++) {
+                this.delegate.destroyNode(viewAllNodes[i]);
+            }
+        };
+        RendererAdapter.prototype.listen = function (renderElement, name, callback) {
+            return this.delegate.listen(renderElement, name, callback);
+        };
+        RendererAdapter.prototype.listenGlobal = function (target, name, callback) {
+            return this.delegate.listen(target, name, callback);
+        };
+        RendererAdapter.prototype.setElementProperty = function (renderElement, propertyName, propertyValue) {
+            this.delegate.setProperty(renderElement, propertyName, propertyValue);
+        };
+        RendererAdapter.prototype.setElementAttribute = function (renderElement, namespaceAndName, attributeValue) {
+            var _a = __read(splitNamespace(namespaceAndName), 2), ns = _a[0], name = _a[1];
+            if (attributeValue != null) {
+                this.delegate.setAttribute(renderElement, name, attributeValue, ns);
+            }
+            else {
+                this.delegate.removeAttribute(renderElement, name, ns);
+            }
+        };
+        RendererAdapter.prototype.setBindingDebugInfo = function (renderElement, propertyName, propertyValue) { };
+        RendererAdapter.prototype.setElementClass = function (renderElement, className, isAdd) {
+            if (isAdd) {
+                this.delegate.addClass(renderElement, className);
+            }
+            else {
+                this.delegate.removeClass(renderElement, className);
+            }
+        };
+        RendererAdapter.prototype.setElementStyle = function (renderElement, styleName, styleValue) {
+            if (styleValue != null) {
+                this.delegate.setStyle(renderElement, styleName, styleValue);
+            }
+            else {
+                this.delegate.removeStyle(renderElement, styleName);
+            }
+        };
+        RendererAdapter.prototype.invokeElementMethod = function (renderElement, methodName, args) {
+            renderElement[methodName].apply(renderElement, args);
+        };
+        RendererAdapter.prototype.setText = function (renderNode$$1, text) { this.delegate.setValue(renderNode$$1, text); };
+        RendererAdapter.prototype.animate = function () { throw new Error('Renderer.animate is no longer supported!'); };
+        return RendererAdapter;
+    }());
+    function createNgModuleRef(moduleType, parent, bootstrapComponents, def) {
+        return new NgModuleRef_(moduleType, parent, bootstrapComponents, def);
+    }
+    var NgModuleRef_ = /** @class */ (function () {
+        function NgModuleRef_(_moduleType, _parent, _bootstrapComponents, _def) {
+            this._moduleType = _moduleType;
+            this._parent = _parent;
+            this._bootstrapComponents = _bootstrapComponents;
+            this._def = _def;
+            this._destroyListeners = [];
+            this._destroyed = false;
+            this.injector = this;
+            initNgModule(this);
+        }
+        NgModuleRef_.prototype.get = function (token, notFoundValue, injectFlags) {
+            if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
+            if (injectFlags === void 0) { injectFlags = exports.InjectFlags.Default; }
+            var flags = 0 /* None */;
+            if (injectFlags & exports.InjectFlags.SkipSelf) {
+                flags |= 1 /* SkipSelf */;
+            }
+            else if (injectFlags & exports.InjectFlags.Self) {
+                flags |= 4 /* Self */;
+            }
+            return resolveNgModuleDep(this, { token: token, tokenKey: tokenKey(token), flags: flags }, notFoundValue);
+        };
+        Object.defineProperty(NgModuleRef_.prototype, "instance", {
+            get: function () { return this.get(this._moduleType); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(NgModuleRef_.prototype, "componentFactoryResolver", {
+            get: function () { return this.get(ComponentFactoryResolver); },
+            enumerable: true,
+            configurable: true
+        });
+        NgModuleRef_.prototype.destroy = function () {
+            if (this._destroyed) {
+                throw new Error("The ng module " + stringify(this.instance.constructor) + " has already been destroyed.");
+            }
+            this._destroyed = true;
+            callNgModuleLifecycle(this, 131072 /* OnDestroy */);
+            this._destroyListeners.forEach(function (listener) { return listener(); });
+        };
+        NgModuleRef_.prototype.onDestroy = function (callback) { this._destroyListeners.push(callback); };
+        return NgModuleRef_;
+    }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var RendererV1TokenKey = tokenKey(Renderer);
+    var Renderer2TokenKey = tokenKey(Renderer2);
+    var ElementRefTokenKey = tokenKey(ElementRef);
+    var ViewContainerRefTokenKey = tokenKey(ViewContainerRef);
+    var TemplateRefTokenKey = tokenKey(TemplateRef);
+    var ChangeDetectorRefTokenKey = tokenKey(ChangeDetectorRef);
+    var InjectorRefTokenKey$1 = tokenKey(Injector);
+    var INJECTORRefTokenKey$1 = tokenKey(INJECTOR);
+    function directiveDef(checkIndex, flags, matchedQueries, childCount, ctor, deps, props, outputs) {
+        var bindings = [];
+        if (props) {
+            for (var prop in props) {
+                var _a = __read(props[prop], 2), bindingIndex = _a[0], nonMinifiedName = _a[1];
+                bindings[bindingIndex] = {
+                    flags: 8 /* TypeProperty */,
+                    name: prop, nonMinifiedName: nonMinifiedName,
+                    ns: null,
+                    securityContext: null,
+                    suffix: null
+                };
+            }
+        }
+        var outputDefs = [];
+        if (outputs) {
+            for (var propName in outputs) {
+                outputDefs.push({ type: 1 /* DirectiveOutput */, propName: propName, target: null, eventName: outputs[propName] });
+            }
+        }
+        flags |= 16384 /* TypeDirective */;
+        return _def(checkIndex, flags, matchedQueries, childCount, ctor, ctor, deps, bindings, outputDefs);
+    }
+    function pipeDef(flags, ctor, deps) {
+        flags |= 16 /* TypePipe */;
+        return _def(-1, flags, null, 0, ctor, ctor, deps);
+    }
+    function providerDef(flags, matchedQueries, token, value, deps) {
+        return _def(-1, flags, matchedQueries, 0, token, value, deps);
+    }
+    function _def(checkIndex, flags, matchedQueriesDsl, childCount, token, value, deps, bindings, outputs) {
+        var _a = splitMatchedQueriesDsl(matchedQueriesDsl), matchedQueries = _a.matchedQueries, references = _a.references, matchedQueryIds = _a.matchedQueryIds;
+        if (!outputs) {
+            outputs = [];
+        }
+        if (!bindings) {
+            bindings = [];
+        }
+        // Need to resolve forwardRefs as e.g. for `useValue` we
+        // lowered the expression and then stopped evaluating it,
+        // i.e. also didn't unwrap it.
+        value = resolveForwardRef(value);
+        var depDefs = splitDepsDsl(deps, stringify(token));
+        return {
+            // will bet set by the view definition
+            nodeIndex: -1,
+            parent: null,
+            renderParent: null,
+            bindingIndex: -1,
+            outputIndex: -1,
+            // regular values
+            checkIndex: checkIndex,
+            flags: flags,
+            childFlags: 0,
+            directChildFlags: 0,
+            childMatchedQueries: 0, matchedQueries: matchedQueries, matchedQueryIds: matchedQueryIds, references: references,
+            ngContentIndex: -1, childCount: childCount, bindings: bindings,
+            bindingFlags: calcBindingFlags(bindings), outputs: outputs,
+            element: null,
+            provider: { token: token, value: value, deps: depDefs },
+            text: null,
+            query: null,
+            ngContent: null
+        };
+    }
+    function createProviderInstance(view, def) {
+        return _createProviderInstance$1(view, def);
+    }
+    function createPipeInstance(view, def) {
+        // deps are looked up from component.
+        var compView = view;
+        while (compView.parent && !isComponentView(compView)) {
+            compView = compView.parent;
+        }
+        // pipes can see the private services of the component
+        var allowPrivateServices = true;
+        // pipes are always eager and classes!
+        return createClass(compView.parent, viewParentEl(compView), allowPrivateServices, def.provider.value, def.provider.deps);
+    }
+    function createDirectiveInstance(view, def) {
+        // components can see other private services, other directives can't.
+        var allowPrivateServices = (def.flags & 32768 /* Component */) > 0;
+        // directives are always eager and classes!
+        var instance = createClass(view, def.parent, allowPrivateServices, def.provider.value, def.provider.deps);
+        if (def.outputs.length) {
+            for (var i = 0; i < def.outputs.length; i++) {
+                var output = def.outputs[i];
+                var outputObservable = instance[output.propName];
+                if (isObservable(outputObservable)) {
+                    var subscription = outputObservable.subscribe(eventHandlerClosure(view, def.parent.nodeIndex, output.eventName));
+                    view.disposables[def.outputIndex + i] = subscription.unsubscribe.bind(subscription);
+                }
+                else {
+                    throw new Error("@Output " + output.propName + " not initialized in '" + instance.constructor.name + "'.");
+                }
+            }
+        }
+        return instance;
+    }
+    function eventHandlerClosure(view, index, eventName) {
+        return function (event) { return dispatchEvent(view, index, eventName, event); };
+    }
+    function checkAndUpdateDirectiveInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
+        var providerData = asProviderData(view, def.nodeIndex);
+        var directive = providerData.instance;
+        var changed = false;
+        var changes = undefined;
+        var bindLen = def.bindings.length;
+        if (bindLen > 0 && checkBinding(view, def, 0, v0)) {
+            changed = true;
+            changes = updateProp(view, providerData, def, 0, v0, changes);
+        }
+        if (bindLen > 1 && checkBinding(view, def, 1, v1)) {
+            changed = true;
+            changes = updateProp(view, providerData, def, 1, v1, changes);
+        }
+        if (bindLen > 2 && checkBinding(view, def, 2, v2)) {
+            changed = true;
+            changes = updateProp(view, providerData, def, 2, v2, changes);
+        }
+        if (bindLen > 3 && checkBinding(view, def, 3, v3)) {
+            changed = true;
+            changes = updateProp(view, providerData, def, 3, v3, changes);
+        }
+        if (bindLen > 4 && checkBinding(view, def, 4, v4)) {
+            changed = true;
+            changes = updateProp(view, providerData, def, 4, v4, changes);
+        }
+        if (bindLen > 5 && checkBinding(view, def, 5, v5)) {
+            changed = true;
+            changes = updateProp(view, providerData, def, 5, v5, changes);
+        }
+        if (bindLen > 6 && checkBinding(view, def, 6, v6)) {
+            changed = true;
+            changes = updateProp(view, providerData, def, 6, v6, changes);
+        }
+        if (bindLen > 7 && checkBinding(view, def, 7, v7)) {
+            changed = true;
+            changes = updateProp(view, providerData, def, 7, v7, changes);
+        }
+        if (bindLen > 8 && checkBinding(view, def, 8, v8)) {
+            changed = true;
+            changes = updateProp(view, providerData, def, 8, v8, changes);
+        }
+        if (bindLen > 9 && checkBinding(view, def, 9, v9)) {
+            changed = true;
+            changes = updateProp(view, providerData, def, 9, v9, changes);
+        }
+        if (changes) {
+            directive.ngOnChanges(changes);
+        }
+        if ((def.flags & 65536 /* OnInit */) &&
+            shouldCallLifecycleInitHook(view, 256 /* InitState_CallingOnInit */, def.nodeIndex)) {
+            directive.ngOnInit();
+        }
+        if (def.flags & 262144 /* DoCheck */) {
+            directive.ngDoCheck();
+        }
+        return changed;
+    }
+    function checkAndUpdateDirectiveDynamic(view, def, values) {
+        var providerData = asProviderData(view, def.nodeIndex);
+        var directive = providerData.instance;
+        var changed = false;
+        var changes = undefined;
+        for (var i = 0; i < values.length; i++) {
+            if (checkBinding(view, def, i, values[i])) {
+                changed = true;
+                changes = updateProp(view, providerData, def, i, values[i], changes);
+            }
+        }
+        if (changes) {
+            directive.ngOnChanges(changes);
+        }
+        if ((def.flags & 65536 /* OnInit */) &&
+            shouldCallLifecycleInitHook(view, 256 /* InitState_CallingOnInit */, def.nodeIndex)) {
+            directive.ngOnInit();
+        }
+        if (def.flags & 262144 /* DoCheck */) {
+            directive.ngDoCheck();
+        }
+        return changed;
+    }
+    function _createProviderInstance$1(view, def) {
+        // private services can see other private services
+        var allowPrivateServices = (def.flags & 8192 /* PrivateProvider */) > 0;
+        var providerDef = def.provider;
+        switch (def.flags & 201347067 /* Types */) {
+            case 512 /* TypeClassProvider */:
+                return createClass(view, def.parent, allowPrivateServices, providerDef.value, providerDef.deps);
+            case 1024 /* TypeFactoryProvider */:
+                return callFactory(view, def.parent, allowPrivateServices, providerDef.value, providerDef.deps);
+            case 2048 /* TypeUseExistingProvider */:
+                return resolveDep(view, def.parent, allowPrivateServices, providerDef.deps[0]);
+            case 256 /* TypeValueProvider */:
+                return providerDef.value;
+        }
+    }
+    function createClass(view, elDef, allowPrivateServices, ctor, deps) {
+        var len = deps.length;
+        switch (len) {
+            case 0:
+                return new ctor();
+            case 1:
+                return new ctor(resolveDep(view, elDef, allowPrivateServices, deps[0]));
+            case 2:
+                return new ctor(resolveDep(view, elDef, allowPrivateServices, deps[0]), resolveDep(view, elDef, allowPrivateServices, deps[1]));
+            case 3:
+                return new ctor(resolveDep(view, elDef, allowPrivateServices, deps[0]), resolveDep(view, elDef, allowPrivateServices, deps[1]), resolveDep(view, elDef, allowPrivateServices, deps[2]));
+            default:
+                var depValues = new Array(len);
+                for (var i = 0; i < len; i++) {
+                    depValues[i] = resolveDep(view, elDef, allowPrivateServices, deps[i]);
+                }
+                return new (ctor.bind.apply(ctor, __spread([void 0], depValues)))();
+        }
+    }
+    function callFactory(view, elDef, allowPrivateServices, factory, deps) {
+        var len = deps.length;
+        switch (len) {
+            case 0:
+                return factory();
+            case 1:
+                return factory(resolveDep(view, elDef, allowPrivateServices, deps[0]));
+            case 2:
+                return factory(resolveDep(view, elDef, allowPrivateServices, deps[0]), resolveDep(view, elDef, allowPrivateServices, deps[1]));
+            case 3:
+                return factory(resolveDep(view, elDef, allowPrivateServices, deps[0]), resolveDep(view, elDef, allowPrivateServices, deps[1]), resolveDep(view, elDef, allowPrivateServices, deps[2]));
+            default:
+                var depValues = Array(len);
+                for (var i = 0; i < len; i++) {
+                    depValues[i] = resolveDep(view, elDef, allowPrivateServices, deps[i]);
+                }
+                return factory.apply(void 0, __spread(depValues));
+        }
+    }
+    // This default value is when checking the hierarchy for a token.
+    //
+    // It means both:
+    // - the token is not provided by the current injector,
+    // - only the element injectors should be checked (ie do not check module injectors
+    //
+    //          mod1
+    //         /
+    //       el1   mod2
+    //         \  /
+    //         el2
+    //
+    // When requesting el2.injector.get(token), we should check in the following order and return the
+    // first found value:
+    // - el2.injector.get(token, default)
+    // - el1.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) -> do not check the module
+    // - mod2.injector.get(token, default)
+    var NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
+    function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue) {
+        if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
+        if (depDef.flags & 8 /* Value */) {
+            return depDef.token;
+        }
+        var startView = view;
+        if (depDef.flags & 2 /* Optional */) {
+            notFoundValue = null;
+        }
+        var tokenKey$$1 = depDef.tokenKey;
+        if (tokenKey$$1 === ChangeDetectorRefTokenKey) {
+            // directives on the same element as a component should be able to control the change detector
+            // of that component as well.
+            allowPrivateServices = !!(elDef && elDef.element.componentView);
+        }
+        if (elDef && (depDef.flags & 1 /* SkipSelf */)) {
+            allowPrivateServices = false;
+            elDef = elDef.parent;
+        }
+        var searchView = view;
+        while (searchView) {
+            if (elDef) {
+                switch (tokenKey$$1) {
+                    case RendererV1TokenKey: {
+                        var compView = findCompView(searchView, elDef, allowPrivateServices);
+                        return createRendererV1(compView);
+                    }
+                    case Renderer2TokenKey: {
+                        var compView = findCompView(searchView, elDef, allowPrivateServices);
+                        return compView.renderer;
+                    }
+                    case ElementRefTokenKey:
+                        return new ElementRef(asElementData(searchView, elDef.nodeIndex).renderElement);
+                    case ViewContainerRefTokenKey:
+                        return asElementData(searchView, elDef.nodeIndex).viewContainer;
+                    case TemplateRefTokenKey: {
+                        if (elDef.element.template) {
+                            return asElementData(searchView, elDef.nodeIndex).template;
+                        }
+                        break;
+                    }
+                    case ChangeDetectorRefTokenKey: {
+                        var cdView = findCompView(searchView, elDef, allowPrivateServices);
+                        return createChangeDetectorRef(cdView);
+                    }
+                    case InjectorRefTokenKey$1:
+                    case INJECTORRefTokenKey$1:
+                        return createInjector$1(searchView, elDef);
+                    default:
+                        var providerDef_1 = (allowPrivateServices ? elDef.element.allProviders :
+                            elDef.element.publicProviders)[tokenKey$$1];
+                        if (providerDef_1) {
+                            var providerData = asProviderData(searchView, providerDef_1.nodeIndex);
+                            if (!providerData) {
+                                providerData = { instance: _createProviderInstance$1(searchView, providerDef_1) };
+                                searchView.nodes[providerDef_1.nodeIndex] = providerData;
+                            }
+                            return providerData.instance;
+                        }
+                }
+            }
+            allowPrivateServices = isComponentView(searchView);
+            elDef = viewParentEl(searchView);
+            searchView = searchView.parent;
+            if (depDef.flags & 4 /* Self */) {
+                searchView = null;
+            }
+        }
+        var value = startView.root.injector.get(depDef.token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR);
+        if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR ||
+            notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) {
+            // Return the value from the root element injector when
+            // - it provides it
+            //   (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
+            // - the module injector should not be checked
+            //   (notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
+            return value;
+        }
+        return startView.root.ngModule.injector.get(depDef.token, notFoundValue);
+    }
+    function findCompView(view, elDef, allowPrivateServices) {
+        var compView;
+        if (allowPrivateServices) {
+            compView = asElementData(view, elDef.nodeIndex).componentView;
+        }
+        else {
+            compView = view;
+            while (compView.parent && !isComponentView(compView)) {
+                compView = compView.parent;
+            }
+        }
+        return compView;
+    }
+    function updateProp(view, providerData, def, bindingIdx, value, changes) {
+        if (def.flags & 32768 /* Component */) {
+            var compView = asElementData(view, def.parent.nodeIndex).componentView;
+            if (compView.def.flags & 2 /* OnPush */) {
+                compView.state |= 8 /* ChecksEnabled */;
+            }
+        }
+        var binding = def.bindings[bindingIdx];
+        var propName = binding.name;
+        // Note: This is still safe with Closure Compiler as
+        // the user passed in the property name as an object has to `providerDef`,
+        // so Closure Compiler will have renamed the property correctly already.
+        providerData.instance[propName] = value;
+        if (def.flags & 524288 /* OnChanges */) {
+            changes = changes || {};
+            var oldValue = WrappedValue.unwrap(view.oldValues[def.bindingIndex + bindingIdx]);
+            var binding_1 = def.bindings[bindingIdx];
+            changes[binding_1.nonMinifiedName] =
+                new SimpleChange(oldValue, value, (view.state & 2 /* FirstCheck */) !== 0);
+        }
+        view.oldValues[def.bindingIndex + bindingIdx] = value;
+        return changes;
+    }
+    // This function calls the ngAfterContentCheck, ngAfterContentInit,
+    // ngAfterViewCheck, and ngAfterViewInit lifecycle hooks (depending on the node
+    // flags in lifecycle). Unlike ngDoCheck, ngOnChanges and ngOnInit, which are
+    // called during a pre-order traversal of the view tree (that is calling the
+    // parent hooks before the child hooks) these events are sent in using a
+    // post-order traversal of the tree (children before parents). This changes the
+    // meaning of initIndex in the view state. For ngOnInit, initIndex tracks the
+    // expected nodeIndex which a ngOnInit should be called. When sending
+    // ngAfterContentInit and ngAfterViewInit it is the expected count of
+    // ngAfterContentInit or ngAfterViewInit methods that have been called. This
+    // ensure that despite being called recursively or after picking up after an
+    // exception, the ngAfterContentInit or ngAfterViewInit will be called on the
+    // correct nodes. Consider for example, the following (where E is an element
+    // and D is a directive)
+    //  Tree:       pre-order index  post-order index
+    //    E1        0                6
+    //      E2      1                1
+    //       D3     2                0
+    //      E4      3                5
+    //       E5     4                4
+    //        E6    5                2
+    //        E7    6                3
+    // As can be seen, the post-order index has an unclear relationship to the
+    // pre-order index (postOrderIndex === preOrderIndex - parentCount +
+    // childCount). Since number of calls to ngAfterContentInit and ngAfterViewInit
+    // are stable (will be the same for the same view regardless of exceptions or
+    // recursion) we just need to count them which will roughly correspond to the
+    // post-order index (it skips elements and directives that do not have
+    // lifecycle hooks).
+    //
+    // For example, if an exception is raised in the E6.onAfterViewInit() the
+    // initIndex is left at 3 (by shouldCallLifecycleInitHook() which set it to
+    // initIndex + 1). When checkAndUpdateView() is called again D3, E2 and E6 will
+    // not have their ngAfterViewInit() called but, starting with E7, the rest of
+    // the view will begin getting ngAfterViewInit() called until a check and
+    // pass is complete.
+    //
+    // This algorthim also handles recursion. Consider if E4's ngAfterViewInit()
+    // indirectly calls E1's ChangeDetectorRef.detectChanges(). The expected
+    // initIndex is set to 6, the recusive checkAndUpdateView() starts walk again.
+    // D3, E2, E6, E7, E5 and E4 are skipped, ngAfterViewInit() is called on E1.
+    // When the recursion returns the initIndex will be 7 so E1 is skipped as it
+    // has already been called in the recursively called checkAnUpdateView().
+    function callLifecycleHooksChildrenFirst(view, lifecycles) {
+        if (!(view.def.nodeFlags & lifecycles)) {
+            return;
+        }
+        var nodes = view.def.nodes;
+        var initIndex = 0;
+        for (var i = 0; i < nodes.length; i++) {
+            var nodeDef = nodes[i];
+            var parent_1 = nodeDef.parent;
+            if (!parent_1 && nodeDef.flags & lifecycles) {
+                // matching root node (e.g. a pipe)
+                callProviderLifecycles(view, i, nodeDef.flags & lifecycles, initIndex++);
+            }
+            if ((nodeDef.childFlags & lifecycles) === 0) {
+                // no child matches one of the lifecycles
+                i += nodeDef.childCount;
+            }
+            while (parent_1 && (parent_1.flags & 1 /* TypeElement */) &&
+                i === parent_1.nodeIndex + parent_1.childCount) {
+                // last child of an element
+                if (parent_1.directChildFlags & lifecycles) {
+                    initIndex = callElementProvidersLifecycles(view, parent_1, lifecycles, initIndex);
+                }
+                parent_1 = parent_1.parent;
+            }
+        }
+    }
+    function callElementProvidersLifecycles(view, elDef, lifecycles, initIndex) {
+        for (var i = elDef.nodeIndex + 1; i <= elDef.nodeIndex + elDef.childCount; i++) {
+            var nodeDef = view.def.nodes[i];
+            if (nodeDef.flags & lifecycles) {
+                callProviderLifecycles(view, i, nodeDef.flags & lifecycles, initIndex++);
+            }
+            // only visit direct children
+            i += nodeDef.childCount;
+        }
+        return initIndex;
+    }
+    function callProviderLifecycles(view, index, lifecycles, initIndex) {
+        var providerData = asProviderData(view, index);
+        if (!providerData) {
+            return;
+        }
+        var provider = providerData.instance;
+        if (!provider) {
+            return;
+        }
+        Services.setCurrentNode(view, index);
+        if (lifecycles & 1048576 /* AfterContentInit */ &&
+            shouldCallLifecycleInitHook(view, 512 /* InitState_CallingAfterContentInit */, initIndex)) {
+            provider.ngAfterContentInit();
+        }
+        if (lifecycles & 2097152 /* AfterContentChecked */) {
+            provider.ngAfterContentChecked();
+        }
+        if (lifecycles & 4194304 /* AfterViewInit */ &&
+            shouldCallLifecycleInitHook(view, 768 /* InitState_CallingAfterViewInit */, initIndex)) {
+            provider.ngAfterViewInit();
+        }
+        if (lifecycles & 8388608 /* AfterViewChecked */) {
+            provider.ngAfterViewChecked();
+        }
+        if (lifecycles & 131072 /* OnDestroy */) {
+            provider.ngOnDestroy();
+        }
+    }
 
     /**
      * @license
@@ -13338,7 +16639,6 @@
         providedIn: 'root',
         factory: function () { return defaultScheduler; },
     });
-    var NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
     function createChainedInjector(rootViewInjector, moduleInjector) {
         return {
             get: function (token, notFoundValue) {
@@ -13375,6 +16675,7 @@
             // It is implicitly expected as the first item in the projectable nodes array.
             _this.ngContentSelectors =
                 componentDef.ngContentSelectors ? __spread(['*'], componentDef.ngContentSelectors) : [];
+            _this.isBoundToModule = !!ngModule;
             return _this;
         }
         Object.defineProperty(ComponentFactory$$1.prototype, "inputs", {
@@ -13419,33 +16720,12 @@
             try {
                 var componentView = createRootComponentView(hostRNode, this.componentDef, rootLView, rendererFactory, renderer);
                 tElementNode = getTNode(0, rootLView);
-                // Transform the arrays of native nodes into a structure that can be consumed by the
-                // projection instruction. This is needed to support the reprojection of these nodes.
                 if (projectableNodes) {
-                    var index = 0;
-                    var tView = rootLView[TVIEW];
-                    var projection$$1 = tElementNode.projection = [];
-                    for (var i = 0; i < projectableNodes.length; i++) {
-                        var nodeList = projectableNodes[i];
-                        var firstTNode = null;
-                        var previousTNode = null;
-                        for (var j = 0; j < nodeList.length; j++) {
-                            if (tView.firstTemplatePass) {
-                                // For dynamically created components such as ComponentRef, we create a new TView for
-                                // each insert. This is not ideal since we should be sharing the TViews.
-                                // Also the logic here should be shared with `component.ts`'s `renderComponent`
-                                // method.
-                                tView.expandoStartIndex++;
-                                tView.blueprint.splice(++index + HEADER_OFFSET, 0, null);
-                                tView.data.splice(index + HEADER_OFFSET, 0, null);
-                                rootLView.splice(index + HEADER_OFFSET, 0, null);
-                            }
-                            var tNode = createNodeAtIndex(index, 3 /* Element */, nodeList[j], null, null);
-                            previousTNode ? (previousTNode.next = tNode) : (firstTNode = tNode);
-                            previousTNode = tNode;
-                        }
-                        projection$$1.push(firstTNode);
-                    }
+                    // projectable nodes can be passed as array of arrays or an array of iterables (ngUpgrade
+                    // case). Here we do normalize passed data structure to be an array of arrays to avoid
+                    // complex checks down the line.
+                    tElementNode.projection =
+                        projectableNodes.map(function (nodesforSlot) { return Array.from(nodesforSlot); });
                 }
                 // TODO: should LifecycleHooksFeature and other host features be generated by the compiler and
                 // executed here?
@@ -13485,7 +16765,7 @@
             _this.destroyCbs = [];
             _this.instance = instance;
             _this.hostView = _this.changeDetectorRef = new RootViewRef(_rootLView);
-            _this.hostView._tViewNode = createViewNode(-1, _rootLView);
+            _this.hostView._tViewNode = assignTViewNodeToLView(_rootLView[TVIEW], null, -1, _rootLView);
             _this.componentType = componentType;
             return _this;
         }
@@ -13539,15 +16819,19 @@
      * found in the LICENSE file at https://angular.io/license
      */
     var MARKER = "\uFFFD";
-    var ICU_BLOCK_REGEX = /^\s*(�\d+:?\d*�)\s*,\s*(select|plural)\s*,/;
+    var ICU_BLOCK_REGEXP = /^\s*(�\d+:?\d*�)\s*,\s*(select|plural)\s*,/;
     var SUBTEMPLATE_REGEXP = /�\/?\*(\d+:\d+)�/gi;
     var PH_REGEXP = /�(\/?[#*]\d+):?\d*�/gi;
     var BINDING_REGEXP = /�(\d+):?\d*�/gi;
     var ICU_REGEXP = /({\s*�\d+:?\d*�\s*,\s*\S{6}\s*,[\s\S]*})/gi;
-    // i18nPostproocess regexps
-    var PP_PLACEHOLDERS = /\[(�.+?�?)\]/g;
-    var PP_ICU_VARS = /({\s*)(VAR_(PLURAL|SELECT)(_\d+)?)(\s*,)/g;
-    var PP_ICUS = /�I18N_EXP_(ICU(_\d+)?)�/g;
+    // i18nPostprocess consts
+    var ROOT_TEMPLATE_ID = 0;
+    var PP_MULTI_VALUE_PLACEHOLDERS_REGEXP = /\[(�.+?�?)\]/;
+    var PP_PLACEHOLDERS_REGEXP = /\[(�.+?�?)\]|(�\/?\*\d+:\d+�)/g;
+    var PP_ICU_VARS_REGEXP = /({\s*)(VAR_(PLURAL|SELECT)(_\d+)?)(\s*,)/g;
+    var PP_ICUS_REGEXP = /�I18N_EXP_(ICU(_\d+)?)�/g;
+    var PP_CLOSE_TEMPLATE_REGEXP = /\/\*/;
+    var PP_TEMPLATE_ID_REGEXP = /\d+\:(\d+)/;
     /**
      * Breaks pattern into strings and top level {...} blocks.
      * Can be used to break a message into text and ICU expressions, or to break an ICU expression into
@@ -13575,7 +16859,7 @@
                 if (braceStack.length == 0) {
                     // End of the block.
                     var block = pattern.substring(prevPos, pos);
-                    if (ICU_BLOCK_REGEX.test(block)) {
+                    if (ICU_BLOCK_REGEXP.test(block)) {
                         results.push(parseICUBlock(block));
                     }
                     else if (block) { // Don't push empty strings
@@ -13611,7 +16895,7 @@
         var values = [];
         var icuType = 1 /* plural */;
         var mainBinding = 0;
-        pattern = pattern.replace(ICU_BLOCK_REGEX, function (str, binding, type) {
+        pattern = pattern.replace(ICU_BLOCK_REGEXP, function (str, binding, type) {
             if (type === 'select') {
                 icuType = 0 /* select */;
             }
@@ -13940,39 +17224,78 @@
      */
     function i18nPostprocess(message, replacements) {
         if (replacements === void 0) { replacements = {}; }
-        //
-        // Step 1: resolve all multi-value cases (like [�*1:1��#2:1�|�#4:1�|�5�])
-        //
-        var matches = {};
-        var result = message.replace(PP_PLACEHOLDERS, function (_match, content) {
-            if (!matches[content]) {
-                matches[content] = content.split('|');
+        /**
+         * Step 1: resolve all multi-value placeholders like [�#5�|�*1:1��#2:1�|�#4:1�]
+         *
+         * Note: due to the way we process nested templates (BFS), multi-value placeholders are typically
+         * grouped by templates, for example: [�#5�|�#6�|�#1:1�|�#3:2�] where �#5� and �#6� belong to root
+         * template, �#1:1� belong to nested template with index 1 and �#1:2� - nested template with index
+         * 3. However in real templates the order might be different: i.e. �#1:1� and/or �#3:2� may go in
+         * front of �#6�. The post processing step restores the right order by keeping track of the
+         * template id stack and looks for placeholders that belong to the currently active template.
+         */
+        var result = message;
+        if (PP_MULTI_VALUE_PLACEHOLDERS_REGEXP.test(message)) {
+            var matches_1 = {};
+            var templateIdsStack_1 = [ROOT_TEMPLATE_ID];
+            result = result.replace(PP_PLACEHOLDERS_REGEXP, function (m, phs, tmpl) {
+                var content = phs || tmpl;
+                if (!matches_1[content]) {
+                    var placeholders_1 = [];
+                    content.split('|').forEach(function (placeholder) {
+                        var match = placeholder.match(PP_TEMPLATE_ID_REGEXP);
+                        var templateId = match ? parseInt(match[1], 10) : ROOT_TEMPLATE_ID;
+                        var isCloseTemplateTag = PP_CLOSE_TEMPLATE_REGEXP.test(placeholder);
+                        placeholders_1.push([templateId, isCloseTemplateTag, placeholder]);
+                    });
+                    matches_1[content] = placeholders_1;
+                }
+                if (!matches_1[content].length) {
+                    throw new Error("i18n postprocess: unmatched placeholder - " + content);
+                }
+                var currentTemplateId = templateIdsStack_1[templateIdsStack_1.length - 1];
+                var placeholders = matches_1[content];
+                var idx = 0;
+                // find placeholder index that matches current template id
+                for (var i = 0; i < placeholders.length; i++) {
+                    if (placeholders[i][0] === currentTemplateId) {
+                        idx = i;
+                        break;
+                    }
+                }
+                // update template id stack based on the current tag extracted
+                var _a = __read(placeholders[idx], 3), templateId = _a[0], isCloseTemplateTag = _a[1], placeholder = _a[2];
+                if (isCloseTemplateTag) {
+                    templateIdsStack_1.pop();
+                }
+                else if (currentTemplateId !== templateId) {
+                    templateIdsStack_1.push(templateId);
+                }
+                // remove processed tag from the list
+                placeholders.splice(idx, 1);
+                return placeholder;
+            });
+            // verify that we injected all values
+            var hasUnmatchedValues = Object.keys(matches_1).some(function (key) { return !!matches_1[key].length; });
+            if (hasUnmatchedValues) {
+                throw new Error("i18n postprocess: unmatched values - " + JSON.stringify(matches_1));
             }
-            if (!matches[content].length) {
-                throw new Error("i18n postprocess: unmatched placeholder - " + content);
-            }
-            return matches[content].shift();
-        });
-        // verify that we injected all values
-        var hasUnmatchedValues = Object.keys(matches).some(function (key) { return !!matches[key].length; });
-        if (hasUnmatchedValues) {
-            throw new Error("i18n postprocess: unmatched values - " + JSON.stringify(matches));
         }
         // return current result if no replacements specified
         if (!Object.keys(replacements).length) {
             return result;
         }
-        //
-        // Step 2: replace all ICU vars (like "VAR_PLURAL")
-        //
-        result = result.replace(PP_ICU_VARS, function (match, start, key, _type, _idx, end) {
+        /**
+         * Step 2: replace all ICU vars (like "VAR_PLURAL")
+         */
+        result = result.replace(PP_ICU_VARS_REGEXP, function (match, start, key, _type, _idx, end) {
             return replacements.hasOwnProperty(key) ? "" + start + replacements[key] + end : match;
         });
-        //
-        // Step 3: replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�)
-        // in case multiple ICUs have the same placeholder name
-        //
-        result = result.replace(PP_ICUS, function (match, key) {
+        /**
+         * Step 3: replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�) in case
+         * multiple ICUs have the same placeholder name
+         */
+        result = result.replace(PP_ICUS_REGEXP, function (match, key) {
             if (replacements.hasOwnProperty(key)) {
                 var list = replacements[key];
                 if (!list.length) {
@@ -15357,7 +18680,7 @@
      */
     function pipeBind1(index, slotOffset, v1) {
         var pipeInstance = load(index);
-        return unwrapValue(isPure(index) ? pureFunction1(slotOffset, pipeInstance.transform, v1, pipeInstance) :
+        return unwrapValue$1(isPure(index) ? pureFunction1(slotOffset, pipeInstance.transform, v1, pipeInstance) :
             pipeInstance.transform(v1));
     }
     /**
@@ -15373,7 +18696,7 @@
      */
     function pipeBind2(index, slotOffset, v1, v2) {
         var pipeInstance = load(index);
-        return unwrapValue(isPure(index) ? pureFunction2(slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
+        return unwrapValue$1(isPure(index) ? pureFunction2(slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
             pipeInstance.transform(v1, v2));
     }
     /**
@@ -15390,7 +18713,7 @@
      */
     function pipeBind3(index, slotOffset, v1, v2, v3) {
         var pipeInstance = load(index);
-        return unwrapValue(isPure(index) ? pureFunction3(slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
+        return unwrapValue$1(isPure(index) ? pureFunction3(slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
             pipeInstance.transform(v1, v2, v3));
     }
     /**
@@ -15408,7 +18731,7 @@
      */
     function pipeBind4(index, slotOffset, v1, v2, v3, v4) {
         var pipeInstance = load(index);
-        return unwrapValue(isPure(index) ?
+        return unwrapValue$1(isPure(index) ?
             pureFunction4(slotOffset, pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
             pipeInstance.transform(v1, v2, v3, v4));
     }
@@ -15424,7 +18747,7 @@
      */
     function pipeBindV(index, slotOffset, values) {
         var pipeInstance = load(index);
-        return unwrapValue(isPure(index) ? pureFunctionV(slotOffset, pipeInstance.transform, values, pipeInstance) :
+        return unwrapValue$1(isPure(index) ? pureFunctionV(slotOffset, pipeInstance.transform, values, pipeInstance) :
             pipeInstance.transform.apply(pipeInstance, values));
     }
     function isPure(index) {
@@ -15437,7 +18760,7 @@
      *
      * @param newValue the pipe transformation output.
      */
-    function unwrapValue(newValue) {
+    function unwrapValue$1(newValue) {
         if (WrappedValue.isWrapped(newValue)) {
             newValue = WrappedValue.unwrap(newValue);
             var lView = getLView();
@@ -15679,45 +19002,6 @@
             return flat.concat(flatItem);
         }, []);
     }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Represents an embedded template that can be used to instantiate embedded views.
-     * To instantiate embedded views based on a template, use the `ViewContainerRef`
-     * method `createEmbeddedView()`.
-     *
-     * Access a `TemplateRef` instance by placing a directive on an `<ng-template>`
-     * element (or directive prefixed with `*`). The `TemplateRef` for the embedded view
-     * is injected into the constructor of the directive,
-     * using the `TemplateRef` token.
-     *
-     * You can also use a `Query` to find a `TemplateRef` associated with
-     * a component or a directive.
-     *
-     * @see `ViewContainerRef`
-     * @see [Navigate the Component Tree with DI](guide/dependency-injection-navtree)
-     *
-     * @publicApi
-     */
-    var TemplateRef = /** @class */ (function () {
-        function TemplateRef() {
-        }
-        /**
-         * @internal
-         * @nocollapse
-         */
-        TemplateRef.__NG_ELEMENT_ID__ = function () { return SWITCH_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef); };
-        return TemplateRef;
-    }());
-    var SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ = injectTemplateRef;
-    var SWITCH_TEMPLATE_REF_FACTORY__PRE_R3__ = noop;
-    var SWITCH_TEMPLATE_REF_FACTORY = SWITCH_TEMPLATE_REF_FACTORY__PRE_R3__;
 
     /**
      * @license
@@ -15968,25 +19252,20 @@
     /**
      * Creates and returns a QueryList.
      *
-     * @param memoryIndex The index in memory where the QueryList should be saved. If null,
-     * this is is a content query and the QueryList will be saved later through directiveCreate.
      * @param predicate The type for which the query will search
      * @param descend Whether or not to descend into children
      * @param read What to save in the query
      * @returns QueryList<T>
      */
-    function query(memoryIndex, predicate, descend, 
+    function query(
     // TODO: "read" should be an AbstractType (FW-486)
-    read) {
+    predicate, descend, read) {
         ngDevMode && assertPreviousIsParent(getIsParent());
         var queryList = new QueryList();
         var queries = getOrCreateCurrentQueries(LQueries_);
         queryList._valuesTree = [];
         queries.track(queryList, predicate, descend, read);
         storeCleanupWithContext(getLView(), queryList, queryList.destroy);
-        if (memoryIndex != null) {
-            store(memoryIndex, queryList);
-        }
         return queryList;
     }
     /**
@@ -16002,6 +19281,36 @@
             return true;
         }
         return false;
+    }
+    /**
+     * Creates new QueryList, stores the reference in LView and returns QueryList.
+     *
+     * @param predicate The type for which the query will search
+     * @param descend Whether or not to descend into children
+     * @param read What to save in the query
+     * @returns QueryList<T>
+     */
+    function viewQuery(
+    // TODO: "read" should be an AbstractType (FW-486)
+    predicate, descend, read) {
+        var lView = getLView();
+        var tView = lView[TVIEW];
+        if (tView.firstTemplatePass) {
+            tView.expandoStartIndex++;
+        }
+        var index = getCurrentViewQueryIndex();
+        var viewQuery = query(predicate, descend, read);
+        store(index - HEADER_OFFSET, viewQuery);
+        setCurrentViewQueryIndex(index + 1);
+        return viewQuery;
+    }
+    /**
+    * Loads current View Query and moves the pointer/index to the next View Query in LView.
+    */
+    function loadViewQuery() {
+        var index = getCurrentViewQueryIndex();
+        setCurrentViewQueryIndex(index + 1);
+        return load(index - HEADER_OFFSET);
     }
 
     /**
@@ -16053,6 +19362,7 @@
         'inject': inject,
         'ɵinjectAttribute': injectAttribute,
         'ɵtemplateRefExtractor': templateRefExtractor,
+        'ɵNgOnChangesFeature': NgOnChangesFeature,
         'ɵProvidersFeature': ProvidersFeature,
         'ɵInheritDefinitionFeature': InheritDefinitionFeature,
         'ɵelementAttribute': elementAttribute,
@@ -16110,6 +19420,8 @@
         'ɵpipe': pipe,
         'ɵquery': query,
         'ɵqueryRefresh': queryRefresh,
+        'ɵviewQuery': viewQuery,
+        'ɵloadViewQuery': loadViewQuery,
         'ɵregisterContentQuery': registerContentQuery,
         'ɵreference': reference,
         'ɵelementStyling': elementStyling,
@@ -16213,7 +19525,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var EMPTY_ARRAY$3 = [];
+    var EMPTY_ARRAY$4 = [];
     var moduleQueue = [];
     /**
      * Enqueues moduleDef to be checked later to see if scope can be set on its
@@ -16277,7 +19589,7 @@
     function compileNgModuleDefs(moduleType, ngModule) {
         ngDevMode && assertDefined(moduleType, 'Required value moduleType');
         ngDevMode && assertDefined(ngModule, 'Required value ngModule');
-        var declarations = flatten$2(ngModule.declarations || EMPTY_ARRAY$3);
+        var declarations = flatten$2(ngModule.declarations || EMPTY_ARRAY$4);
         var ngModuleDef = null;
         Object.defineProperty(moduleType, NG_MODULE_DEF, {
             configurable: true,
@@ -16285,11 +19597,11 @@
                 if (ngModuleDef === null) {
                     ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, "ng://" + moduleType.name + "/ngModuleDef.js", {
                         type: moduleType,
-                        bootstrap: flatten$2(ngModule.bootstrap || EMPTY_ARRAY$3, resolveForwardRef),
+                        bootstrap: flatten$2(ngModule.bootstrap || EMPTY_ARRAY$4, resolveForwardRef),
                         declarations: declarations.map(resolveForwardRef),
-                        imports: flatten$2(ngModule.imports || EMPTY_ARRAY$3, resolveForwardRef)
+                        imports: flatten$2(ngModule.imports || EMPTY_ARRAY$4, resolveForwardRef)
                             .map(expandModuleWithProviders),
-                        exports: flatten$2(ngModule.exports || EMPTY_ARRAY$3, resolveForwardRef)
+                        exports: flatten$2(ngModule.exports || EMPTY_ARRAY$4, resolveForwardRef)
                             .map(expandModuleWithProviders),
                         emitInline: true,
                     });
@@ -16309,10 +19621,10 @@
                         name: moduleType.name,
                         type: moduleType,
                         deps: reflectDependencies(moduleType),
-                        providers: ngModule.providers || EMPTY_ARRAY$3,
+                        providers: ngModule.providers || EMPTY_ARRAY$4,
                         imports: [
-                            (ngModule.imports || EMPTY_ARRAY$3).map(resolveForwardRef),
-                            (ngModule.exports || EMPTY_ARRAY$3).map(resolveForwardRef),
+                            (ngModule.imports || EMPTY_ARRAY$4).map(resolveForwardRef),
+                            (ngModule.exports || EMPTY_ARRAY$4).map(resolveForwardRef),
                         ],
                     };
                     ngInjectorDef = getCompilerFacade().compileInjector(angularCoreEnv, "ng://" + moduleType.name + "/ngInjectorDef.js", meta);
@@ -16468,7 +19780,7 @@
      * the `ngSelectorScope` property of the declared type.
      */
     function setScopeOnDeclaredComponents(moduleType, ngModule) {
-        var declarations = flatten$2(ngModule.declarations || EMPTY_ARRAY$3);
+        var declarations = flatten$2(ngModule.declarations || EMPTY_ARRAY$4);
         var transitiveScopes = transitiveScopesFor(moduleType);
         declarations.forEach(function (declaration) {
             if (declaration.hasOwnProperty(NG_COMPONENT_DEF)) {
@@ -16701,6 +20013,9 @@
             inputs: metadata.inputs || EMPTY_ARRAY$2,
             outputs: metadata.outputs || EMPTY_ARRAY$2,
             queries: extractQueriesMetadata(type, propMetadata, isContentQuery),
+            lifecycle: {
+                usesOnChanges: type.prototype.ngOnChanges !== undefined,
+            },
             typeSourceSpan: null,
             usesInheritance: !extendsDirectlyFromObject(type),
             exportAs: extractExportAs(metadata.exportAs),
@@ -16830,55 +20145,34 @@
         }
     };
     /**
-     * Returns a function that will update the static definition on a class to have the
-     * appropriate input or output mapping.
-     *
-     * Will also add an {@link ngBaseDef} property to a directive if no `ngDirectiveDef`
-     * or `ngComponentDef` is present. This is done because a class may have {@link InputDecorator}s and
-     * {@link OutputDecorator}s without having a {@link ComponentDecorator} or {@link DirectiveDecorator},
-     * and those inputs and outputs should still be inheritable, we need to add an
-     * `ngBaseDef` property if there are no existing `ngComponentDef` or `ngDirectiveDef`
-     * properties, so that we can track the inputs and outputs for inheritance purposes.
-     *
-     * @param getPropertyToUpdate A function that maps to either the `inputs` property or the
-     * `outputs` property of a definition.
-     * @returns A function that, the called, will add a `ngBaseDef` if no other definition is present,
-     * then update the `inputs` or `outputs` on it, depending on what was selected by `getPropertyToUpdate`
-     *
-     *
-     * @see InputDecorator
-     * @see OutputDecorator
-     * @see InheritenceFeature
+     * Does the work of creating the `ngBaseDef` property for the @Input and @Output decorators.
+     * @param key "inputs" or "outputs"
      */
-    function getOrCreateDefinitionAndUpdateMappingFor(getPropertyToUpdate) {
-        return function updateIOProp(target, name) {
+    var updateBaseDefFromIOProp = function (getProp) {
+        return function (target, name) {
             var args = [];
             for (var _i = 2; _i < arguments.length; _i++) {
                 args[_i - 2] = arguments[_i];
             }
             var constructor = target.constructor;
-            var def = constructor[NG_COMPONENT_DEF] || constructor[NG_DIRECTIVE_DEF] || constructor[NG_BASE_DEF];
-            if (!def) {
+            if (!constructor.hasOwnProperty(NG_BASE_DEF)) {
                 initializeBaseDef(target);
-                def = constructor[NG_BASE_DEF];
             }
-            var defProp = getPropertyToUpdate(def);
-            // Use of `in` because we *do* want to check the prototype chain here.
-            if (!(name in defProp)) {
-                defProp[name] = args[0];
-            }
+            var baseDef = constructor.ngBaseDef;
+            var defProp = getProp(baseDef);
+            defProp[name] = args[0];
         };
-    }
+    };
     /**
      * @Annotation
      * @publicApi
      */
-    var Input = makePropDecorator('Input', function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); }, undefined, getOrCreateDefinitionAndUpdateMappingFor(function (def) { return def.inputs || {}; }));
+    var Input = makePropDecorator('Input', function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); }, undefined, updateBaseDefFromIOProp(function (baseDef) { return baseDef.inputs || {}; }));
     /**
      * @Annotation
      * @publicApi
      */
-    var Output = makePropDecorator('Output', function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); }, undefined, getOrCreateDefinitionAndUpdateMappingFor(function (def) { return def.outputs || {}; }));
+    var Output = makePropDecorator('Output', function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); }, undefined, updateBaseDefFromIOProp(function (baseDef) { return baseDef.outputs || {}; }));
     /**
      * @Annotation
      * @publicApi
@@ -17137,30 +20431,6 @@
         ], Console);
         return Console;
     }());
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    function getDebugContext(error) {
-        return error[ERROR_DEBUG_CONTEXT];
-    }
-    function getOriginalError(error) {
-        return error[ERROR_ORIGINAL_ERROR];
-    }
-    function getErrorLogger(error) {
-        return error[ERROR_LOGGER] || defaultErrorLogger;
-    }
-    function defaultErrorLogger(console) {
-        var values = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            values[_i - 1] = arguments[_i];
-        }
-        console.error.apply(console, __spread(values));
-    }
 
     /**
      * @license
@@ -18042,6 +21312,13 @@
         ngDevMode && assertNgModuleType(moduleType);
         return Promise.resolve(new NgModuleFactory$1(moduleType));
     }
+    var isBoundToModule = isBoundToModule__PRE_R3__;
+    function isBoundToModule__PRE_R3__(cf) {
+        return cf instanceof ComponentFactoryBoundToModule;
+    }
+    function isBoundToModule__POST_R3__(cf) {
+        return cf.isBoundToModule;
+    }
     var ALLOW_MULTIPLE_PLATFORMS = new InjectionToken('AllowMultipleToken');
     /**
      * A token for third-party components that can register themselves with NgProbe.
@@ -18413,9 +21690,7 @@
             }
             this.componentTypes.push(componentFactory.componentType);
             // Create a factory associated with the current module if it's not bound to some other
-            var ngModule = componentFactory instanceof ComponentFactoryBoundToModule ?
-                null :
-                this._injector.get(NgModuleRef);
+            var ngModule = isBoundToModule(componentFactory) ? null : this._injector.get(NgModuleRef);
             var selectorOrNode = rootSelectorOrNode || componentFactory.selector;
             var compRef = componentFactory.create(Injector.NULL, [], selectorOrNode, ngModule);
             compRef.onDestroy(function () { _this._unloadComponent(compRef); });
@@ -18612,110 +21887,6 @@
         }
         return value;
     }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Represents a container where one or more views can be attached to a component.
-     *
-     * Can contain *host views* (created by instantiating a
-     * component with the `createComponent()` method), and *embedded views*
-     * (created by instantiating a `TemplateRef` with the `createEmbeddedView()` method).
-     *
-     * A view container instance can contain other view containers,
-     * creating a [view hierarchy](guide/glossary#view-tree).
-     *
-     * @see `ComponentRef`
-     * @see `EmbeddedViewRef`
-     *
-     * @publicApi
-     */
-    var ViewContainerRef = /** @class */ (function () {
-        function ViewContainerRef() {
-        }
-        /**
-         * @internal
-         * @nocollapse
-         */
-        ViewContainerRef.__NG_ELEMENT_ID__ = function () { return SWITCH_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef); };
-        return ViewContainerRef;
-    }());
-    var SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ = injectViewContainerRef;
-    var SWITCH_VIEW_CONTAINER_REF_FACTORY__PRE_R3__ = noop;
-    var SWITCH_VIEW_CONTAINER_REF_FACTORY = SWITCH_VIEW_CONTAINER_REF_FACTORY__PRE_R3__;
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Base class for Angular Views, provides change detection functionality.
-     * A change-detection tree collects all views that are to be checked for changes.
-     * Use the methods to add and remove views from the tree, initiate change-detection,
-     * and explicitly mark views as _dirty_, meaning that they have changed and need to be rerendered.
-     *
-     * @usageNotes
-     *
-     * The following examples demonstrate how to modify default change-detection behavior
-     * to perform explicit detection when needed.
-     *
-     * ### Use `markForCheck()` with `CheckOnce` strategy
-     *
-     * The following example sets the `OnPush` change-detection strategy for a component
-     * (`CheckOnce`, rather than the default `CheckAlways`), then forces a second check
-     * after an interval. See [live demo](http://plnkr.co/edit/GC512b?p=preview).
-     *
-     * <code-example path="core/ts/change_detect/change-detection.ts"
-     * region="mark-for-check"></code-example>
-     *
-     * ### Detach change detector to limit how often check occurs
-     *
-     * The following example defines a component with a large list of read-only data
-     * that is expected to change constantly, many times per second.
-     * To improve performance, we want to check and update the list
-     * less often than the changes actually occur. To do that, we detach
-     * the component's change detector and perform an explicit local check every five seconds.
-     *
-     * <code-example path="core/ts/change_detect/change-detection.ts" region="detach"></code-example>
-     *
-     *
-     * ### Reattaching a detached component
-     *
-     * The following example creates a component displaying live data.
-     * The component detaches its change detector from the main change detector tree
-     * when the `live` property is set to false, and reattaches it when the property
-     * becomes true.
-     *
-     * <code-example path="core/ts/change_detect/change-detection.ts" region="reattach"></code-example>
-     *
-     * @publicApi
-     */
-    var ChangeDetectorRef = /** @class */ (function () {
-        function ChangeDetectorRef() {
-        }
-        /**
-         * @internal
-         * @nocollapse
-         */
-        ChangeDetectorRef.__NG_ELEMENT_ID__ = function () { return SWITCH_CHANGE_DETECTOR_REF_FACTORY(); };
-        return ChangeDetectorRef;
-    }());
-    var SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ = injectChangeDetectorRef;
-    var SWITCH_CHANGE_DETECTOR_REF_FACTORY__PRE_R3__ = function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-    };
-    var SWITCH_CHANGE_DETECTOR_REF_FACTORY = SWITCH_CHANGE_DETECTOR_REF_FACTORY__PRE_R3__;
 
     /**
      * @license
@@ -19043,15 +22214,26 @@
             configurable: true
         });
         Object.defineProperty(DebugElement__POST_R3__.prototype, "properties", {
+            /**
+             *  Gets a map of property names to property values for an element.
+             *
+             *  This map includes:
+             *  - Regular property bindings (e.g. `[id]="id"`)
+             *  - Host property bindings (e.g. `host: { '[id]': "id" }`)
+             *  - Interpolated property bindings (e.g. `id="{{ value }}")
+             *
+             *  It does not include:
+             *  - input property bindings (e.g. `[myCustomInput]="value"`)
+             *  - attribute bindings (e.g. `[attr.role]="menu"`)
+             */
             get: function () {
                 var context = loadLContext(this.nativeNode);
                 var lView = context.lView;
-                var tView = lView[TVIEW];
-                var tNode = tView.data[context.nodeIndex];
-                var properties = {};
-                // TODO: https://angular-team.atlassian.net/browse/FW-681
-                // Missing implementation here...
-                return properties;
+                var tData = lView[TVIEW].data;
+                var tNode = tData[context.nodeIndex];
+                var properties = collectPropertyBindings(tNode, lView, tData);
+                var hostProperties = collectHostPropertyBindings(tNode, lView, tData);
+                return __assign({}, properties, hostProperties);
             },
             enumerable: true,
             configurable: true
@@ -19205,6 +22387,79 @@
             });
         }
     }
+    /**
+     * Iterates through the property bindings for a given node and generates
+     * a map of property names to values. This map only contains property bindings
+     * defined in templates, not in host bindings.
+     */
+    function collectPropertyBindings(tNode, lView, tData) {
+        var properties = {};
+        var bindingIndex = getFirstBindingIndex(tNode.propertyMetadataStartIndex, tData);
+        while (bindingIndex < tNode.propertyMetadataEndIndex) {
+            var value = '';
+            var propMetadata = tData[bindingIndex];
+            while (!isPropMetadataString(propMetadata)) {
+                // This is the first value for an interpolation. We need to build up
+                // the full interpolation by combining runtime values in LView with
+                // the static interstitial values stored in TData.
+                value += renderStringify(lView[bindingIndex]) + tData[bindingIndex];
+                propMetadata = tData[++bindingIndex];
+            }
+            value += lView[bindingIndex];
+            // Property metadata string has 3 parts: property name, prefix, and suffix
+            var metadataParts = propMetadata.split(INTERPOLATION_DELIMITER);
+            var propertyName = metadataParts[0];
+            // Attr bindings don't have property names and should be skipped
+            if (propertyName) {
+                // Wrap value with prefix and suffix (will be '' for normal bindings)
+                properties[propertyName] = metadataParts[1] + value + metadataParts[2];
+            }
+            bindingIndex++;
+        }
+        return properties;
+    }
+    /**
+     * Retrieves the first binding index that holds values for this property
+     * binding.
+     *
+     * For normal bindings (e.g. `[id]="id"`), the binding index is the
+     * same as the metadata index. For interpolations (e.g. `id="{{id}}-{{name}}"`),
+     * there can be multiple binding values, so we might have to loop backwards
+     * from the metadata index until we find the first one.
+     *
+     * @param metadataIndex The index of the first property metadata string for
+     * this node.
+     * @param tData The data array for the current TView
+     * @returns The first binding index for this binding
+     */
+    function getFirstBindingIndex(metadataIndex, tData) {
+        var currentBindingIndex = metadataIndex - 1;
+        // If the slot before the metadata holds a string, we know that this
+        // metadata applies to an interpolation with at least 2 bindings, and
+        // we need to search further to access the first binding value.
+        var currentValue = tData[currentBindingIndex];
+        // We need to iterate until we hit either a:
+        // - TNode (it is an element slot marking the end of `consts` section), OR a
+        // - metadata string (slot is attribute metadata or a previous node's property metadata)
+        while (typeof currentValue === 'string' && !isPropMetadataString(currentValue)) {
+            currentValue = tData[--currentBindingIndex];
+        }
+        return currentBindingIndex + 1;
+    }
+    function collectHostPropertyBindings(tNode, lView, tData) {
+        var properties = {};
+        // Host binding values for a node are stored after directives on that node
+        var hostPropIndex = tNode.directiveEnd;
+        var propMetadata = tData[hostPropIndex];
+        // When we reach a value in TView.data that is not a string, we know we've
+        // hit the next node's providers and directives and should stop copying data.
+        while (typeof propMetadata === 'string') {
+            var propertyName = propMetadata.split(INTERPOLATION_DELIMITER)[0];
+            properties[propertyName] = lView[hostPropIndex];
+            propMetadata = tData[++hostPropIndex];
+        }
+        return properties;
+    }
     // Need to keep the nodes in a global Map so that multiple angular apps are supported.
     var _nativeNodeToDebugNode = new Map();
     function getDebugNode__PRE_R3__(nativeNode) {
@@ -19236,1106 +22491,6 @@
      * @publicApi
      */
     var DebugElement = DebugElement__PRE_R3__;
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var DefaultIterableDifferFactory = /** @class */ (function () {
-        function DefaultIterableDifferFactory() {
-        }
-        DefaultIterableDifferFactory.prototype.supports = function (obj) { return isListLikeIterable$1(obj); };
-        DefaultIterableDifferFactory.prototype.create = function (trackByFn) {
-            return new DefaultIterableDiffer(trackByFn);
-        };
-        return DefaultIterableDifferFactory;
-    }());
-    var trackByIdentity = function (index, item) { return item; };
-    /**
-     * @deprecated v4.0.0 - Should not be part of public API.
-     * @publicApi
-     */
-    var DefaultIterableDiffer = /** @class */ (function () {
-        function DefaultIterableDiffer(trackByFn) {
-            this.length = 0;
-            // Keeps track of the used records at any point in time (during & across `_check()` calls)
-            this._linkedRecords = null;
-            // Keeps track of the removed records at any point in time during `_check()` calls.
-            this._unlinkedRecords = null;
-            this._previousItHead = null;
-            this._itHead = null;
-            this._itTail = null;
-            this._additionsHead = null;
-            this._additionsTail = null;
-            this._movesHead = null;
-            this._movesTail = null;
-            this._removalsHead = null;
-            this._removalsTail = null;
-            // Keeps track of records where custom track by is the same, but item identity has changed
-            this._identityChangesHead = null;
-            this._identityChangesTail = null;
-            this._trackByFn = trackByFn || trackByIdentity;
-        }
-        DefaultIterableDiffer.prototype.forEachItem = function (fn) {
-            var record;
-            for (record = this._itHead; record !== null; record = record._next) {
-                fn(record);
-            }
-        };
-        DefaultIterableDiffer.prototype.forEachOperation = function (fn) {
-            var nextIt = this._itHead;
-            var nextRemove = this._removalsHead;
-            var addRemoveOffset = 0;
-            var moveOffsets = null;
-            while (nextIt || nextRemove) {
-                // Figure out which is the next record to process
-                // Order: remove, add, move
-                var record = !nextRemove ||
-                    nextIt &&
-                        nextIt.currentIndex <
-                            getPreviousIndex(nextRemove, addRemoveOffset, moveOffsets) ?
-                    nextIt :
-                    nextRemove;
-                var adjPreviousIndex = getPreviousIndex(record, addRemoveOffset, moveOffsets);
-                var currentIndex = record.currentIndex;
-                // consume the item, and adjust the addRemoveOffset and update moveDistance if necessary
-                if (record === nextRemove) {
-                    addRemoveOffset--;
-                    nextRemove = nextRemove._nextRemoved;
-                }
-                else {
-                    nextIt = nextIt._next;
-                    if (record.previousIndex == null) {
-                        addRemoveOffset++;
-                    }
-                    else {
-                        // INVARIANT:  currentIndex < previousIndex
-                        if (!moveOffsets)
-                            moveOffsets = [];
-                        var localMovePreviousIndex = adjPreviousIndex - addRemoveOffset;
-                        var localCurrentIndex = currentIndex - addRemoveOffset;
-                        if (localMovePreviousIndex != localCurrentIndex) {
-                            for (var i = 0; i < localMovePreviousIndex; i++) {
-                                var offset = i < moveOffsets.length ? moveOffsets[i] : (moveOffsets[i] = 0);
-                                var index = offset + i;
-                                if (localCurrentIndex <= index && index < localMovePreviousIndex) {
-                                    moveOffsets[i] = offset + 1;
-                                }
-                            }
-                            var previousIndex = record.previousIndex;
-                            moveOffsets[previousIndex] = localCurrentIndex - localMovePreviousIndex;
-                        }
-                    }
-                }
-                if (adjPreviousIndex !== currentIndex) {
-                    fn(record, adjPreviousIndex, currentIndex);
-                }
-            }
-        };
-        DefaultIterableDiffer.prototype.forEachPreviousItem = function (fn) {
-            var record;
-            for (record = this._previousItHead; record !== null; record = record._nextPrevious) {
-                fn(record);
-            }
-        };
-        DefaultIterableDiffer.prototype.forEachAddedItem = function (fn) {
-            var record;
-            for (record = this._additionsHead; record !== null; record = record._nextAdded) {
-                fn(record);
-            }
-        };
-        DefaultIterableDiffer.prototype.forEachMovedItem = function (fn) {
-            var record;
-            for (record = this._movesHead; record !== null; record = record._nextMoved) {
-                fn(record);
-            }
-        };
-        DefaultIterableDiffer.prototype.forEachRemovedItem = function (fn) {
-            var record;
-            for (record = this._removalsHead; record !== null; record = record._nextRemoved) {
-                fn(record);
-            }
-        };
-        DefaultIterableDiffer.prototype.forEachIdentityChange = function (fn) {
-            var record;
-            for (record = this._identityChangesHead; record !== null; record = record._nextIdentityChange) {
-                fn(record);
-            }
-        };
-        DefaultIterableDiffer.prototype.diff = function (collection) {
-            if (collection == null)
-                collection = [];
-            if (!isListLikeIterable$1(collection)) {
-                throw new Error("Error trying to diff '" + stringify(collection) + "'. Only arrays and iterables are allowed");
-            }
-            if (this.check(collection)) {
-                return this;
-            }
-            else {
-                return null;
-            }
-        };
-        DefaultIterableDiffer.prototype.onDestroy = function () { };
-        DefaultIterableDiffer.prototype.check = function (collection) {
-            var _this = this;
-            this._reset();
-            var record = this._itHead;
-            var mayBeDirty = false;
-            var index;
-            var item;
-            var itemTrackBy;
-            if (Array.isArray(collection)) {
-                this.length = collection.length;
-                for (var index_1 = 0; index_1 < this.length; index_1++) {
-                    item = collection[index_1];
-                    itemTrackBy = this._trackByFn(index_1, item);
-                    if (record === null || !looseIdentical(record.trackById, itemTrackBy)) {
-                        record = this._mismatch(record, item, itemTrackBy, index_1);
-                        mayBeDirty = true;
-                    }
-                    else {
-                        if (mayBeDirty) {
-                            // TODO(misko): can we limit this to duplicates only?
-                            record = this._verifyReinsertion(record, item, itemTrackBy, index_1);
-                        }
-                        if (!looseIdentical(record.item, item))
-                            this._addIdentityChange(record, item);
-                    }
-                    record = record._next;
-                }
-            }
-            else {
-                index = 0;
-                iterateListLike$1(collection, function (item) {
-                    itemTrackBy = _this._trackByFn(index, item);
-                    if (record === null || !looseIdentical(record.trackById, itemTrackBy)) {
-                        record = _this._mismatch(record, item, itemTrackBy, index);
-                        mayBeDirty = true;
-                    }
-                    else {
-                        if (mayBeDirty) {
-                            // TODO(misko): can we limit this to duplicates only?
-                            record = _this._verifyReinsertion(record, item, itemTrackBy, index);
-                        }
-                        if (!looseIdentical(record.item, item))
-                            _this._addIdentityChange(record, item);
-                    }
-                    record = record._next;
-                    index++;
-                });
-                this.length = index;
-            }
-            this._truncate(record);
-            this.collection = collection;
-            return this.isDirty;
-        };
-        Object.defineProperty(DefaultIterableDiffer.prototype, "isDirty", {
-            /* CollectionChanges is considered dirty if it has any additions, moves, removals, or identity
-             * changes.
-             */
-            get: function () {
-                return this._additionsHead !== null || this._movesHead !== null ||
-                    this._removalsHead !== null || this._identityChangesHead !== null;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        /**
-         * Reset the state of the change objects to show no changes. This means set previousKey to
-         * currentKey, and clear all of the queues (additions, moves, removals).
-         * Set the previousIndexes of moved and added items to their currentIndexes
-         * Reset the list of additions, moves and removals
-         *
-         * @internal
-         */
-        DefaultIterableDiffer.prototype._reset = function () {
-            if (this.isDirty) {
-                var record = void 0;
-                var nextRecord = void 0;
-                for (record = this._previousItHead = this._itHead; record !== null; record = record._next) {
-                    record._nextPrevious = record._next;
-                }
-                for (record = this._additionsHead; record !== null; record = record._nextAdded) {
-                    record.previousIndex = record.currentIndex;
-                }
-                this._additionsHead = this._additionsTail = null;
-                for (record = this._movesHead; record !== null; record = nextRecord) {
-                    record.previousIndex = record.currentIndex;
-                    nextRecord = record._nextMoved;
-                }
-                this._movesHead = this._movesTail = null;
-                this._removalsHead = this._removalsTail = null;
-                this._identityChangesHead = this._identityChangesTail = null;
-                // TODO(vicb): when assert gets supported
-                // assert(!this.isDirty);
-            }
-        };
-        /**
-         * This is the core function which handles differences between collections.
-         *
-         * - `record` is the record which we saw at this position last time. If null then it is a new
-         *   item.
-         * - `item` is the current item in the collection
-         * - `index` is the position of the item in the collection
-         *
-         * @internal
-         */
-        DefaultIterableDiffer.prototype._mismatch = function (record, item, itemTrackBy, index) {
-            // The previous record after which we will append the current one.
-            var previousRecord;
-            if (record === null) {
-                previousRecord = this._itTail;
-            }
-            else {
-                previousRecord = record._prev;
-                // Remove the record from the collection since we know it does not match the item.
-                this._remove(record);
-            }
-            // Attempt to see if we have seen the item before.
-            record = this._linkedRecords === null ? null : this._linkedRecords.get(itemTrackBy, index);
-            if (record !== null) {
-                // We have seen this before, we need to move it forward in the collection.
-                // But first we need to check if identity changed, so we can update in view if necessary
-                if (!looseIdentical(record.item, item))
-                    this._addIdentityChange(record, item);
-                this._moveAfter(record, previousRecord, index);
-            }
-            else {
-                // Never seen it, check evicted list.
-                record = this._unlinkedRecords === null ? null : this._unlinkedRecords.get(itemTrackBy, null);
-                if (record !== null) {
-                    // It is an item which we have evicted earlier: reinsert it back into the list.
-                    // But first we need to check if identity changed, so we can update in view if necessary
-                    if (!looseIdentical(record.item, item))
-                        this._addIdentityChange(record, item);
-                    this._reinsertAfter(record, previousRecord, index);
-                }
-                else {
-                    // It is a new item: add it.
-                    record =
-                        this._addAfter(new IterableChangeRecord_(item, itemTrackBy), previousRecord, index);
-                }
-            }
-            return record;
-        };
-        /**
-         * This check is only needed if an array contains duplicates. (Short circuit of nothing dirty)
-         *
-         * Use case: `[a, a]` => `[b, a, a]`
-         *
-         * If we did not have this check then the insertion of `b` would:
-         *   1) evict first `a`
-         *   2) insert `b` at `0` index.
-         *   3) leave `a` at index `1` as is. <-- this is wrong!
-         *   3) reinsert `a` at index 2. <-- this is wrong!
-         *
-         * The correct behavior is:
-         *   1) evict first `a`
-         *   2) insert `b` at `0` index.
-         *   3) reinsert `a` at index 1.
-         *   3) move `a` at from `1` to `2`.
-         *
-         *
-         * Double check that we have not evicted a duplicate item. We need to check if the item type may
-         * have already been removed:
-         * The insertion of b will evict the first 'a'. If we don't reinsert it now it will be reinserted
-         * at the end. Which will show up as the two 'a's switching position. This is incorrect, since a
-         * better way to think of it is as insert of 'b' rather then switch 'a' with 'b' and then add 'a'
-         * at the end.
-         *
-         * @internal
-         */
-        DefaultIterableDiffer.prototype._verifyReinsertion = function (record, item, itemTrackBy, index) {
-            var reinsertRecord = this._unlinkedRecords === null ? null : this._unlinkedRecords.get(itemTrackBy, null);
-            if (reinsertRecord !== null) {
-                record = this._reinsertAfter(reinsertRecord, record._prev, index);
-            }
-            else if (record.currentIndex != index) {
-                record.currentIndex = index;
-                this._addToMoves(record, index);
-            }
-            return record;
-        };
-        /**
-         * Get rid of any excess {@link IterableChangeRecord_}s from the previous collection
-         *
-         * - `record` The first excess {@link IterableChangeRecord_}.
-         *
-         * @internal
-         */
-        DefaultIterableDiffer.prototype._truncate = function (record) {
-            // Anything after that needs to be removed;
-            while (record !== null) {
-                var nextRecord = record._next;
-                this._addToRemovals(this._unlink(record));
-                record = nextRecord;
-            }
-            if (this._unlinkedRecords !== null) {
-                this._unlinkedRecords.clear();
-            }
-            if (this._additionsTail !== null) {
-                this._additionsTail._nextAdded = null;
-            }
-            if (this._movesTail !== null) {
-                this._movesTail._nextMoved = null;
-            }
-            if (this._itTail !== null) {
-                this._itTail._next = null;
-            }
-            if (this._removalsTail !== null) {
-                this._removalsTail._nextRemoved = null;
-            }
-            if (this._identityChangesTail !== null) {
-                this._identityChangesTail._nextIdentityChange = null;
-            }
-        };
-        /** @internal */
-        DefaultIterableDiffer.prototype._reinsertAfter = function (record, prevRecord, index) {
-            if (this._unlinkedRecords !== null) {
-                this._unlinkedRecords.remove(record);
-            }
-            var prev = record._prevRemoved;
-            var next = record._nextRemoved;
-            if (prev === null) {
-                this._removalsHead = next;
-            }
-            else {
-                prev._nextRemoved = next;
-            }
-            if (next === null) {
-                this._removalsTail = prev;
-            }
-            else {
-                next._prevRemoved = prev;
-            }
-            this._insertAfter(record, prevRecord, index);
-            this._addToMoves(record, index);
-            return record;
-        };
-        /** @internal */
-        DefaultIterableDiffer.prototype._moveAfter = function (record, prevRecord, index) {
-            this._unlink(record);
-            this._insertAfter(record, prevRecord, index);
-            this._addToMoves(record, index);
-            return record;
-        };
-        /** @internal */
-        DefaultIterableDiffer.prototype._addAfter = function (record, prevRecord, index) {
-            this._insertAfter(record, prevRecord, index);
-            if (this._additionsTail === null) {
-                // TODO(vicb):
-                // assert(this._additionsHead === null);
-                this._additionsTail = this._additionsHead = record;
-            }
-            else {
-                // TODO(vicb):
-                // assert(_additionsTail._nextAdded === null);
-                // assert(record._nextAdded === null);
-                this._additionsTail = this._additionsTail._nextAdded = record;
-            }
-            return record;
-        };
-        /** @internal */
-        DefaultIterableDiffer.prototype._insertAfter = function (record, prevRecord, index) {
-            // TODO(vicb):
-            // assert(record != prevRecord);
-            // assert(record._next === null);
-            // assert(record._prev === null);
-            var next = prevRecord === null ? this._itHead : prevRecord._next;
-            // TODO(vicb):
-            // assert(next != record);
-            // assert(prevRecord != record);
-            record._next = next;
-            record._prev = prevRecord;
-            if (next === null) {
-                this._itTail = record;
-            }
-            else {
-                next._prev = record;
-            }
-            if (prevRecord === null) {
-                this._itHead = record;
-            }
-            else {
-                prevRecord._next = record;
-            }
-            if (this._linkedRecords === null) {
-                this._linkedRecords = new _DuplicateMap();
-            }
-            this._linkedRecords.put(record);
-            record.currentIndex = index;
-            return record;
-        };
-        /** @internal */
-        DefaultIterableDiffer.prototype._remove = function (record) {
-            return this._addToRemovals(this._unlink(record));
-        };
-        /** @internal */
-        DefaultIterableDiffer.prototype._unlink = function (record) {
-            if (this._linkedRecords !== null) {
-                this._linkedRecords.remove(record);
-            }
-            var prev = record._prev;
-            var next = record._next;
-            // TODO(vicb):
-            // assert((record._prev = null) === null);
-            // assert((record._next = null) === null);
-            if (prev === null) {
-                this._itHead = next;
-            }
-            else {
-                prev._next = next;
-            }
-            if (next === null) {
-                this._itTail = prev;
-            }
-            else {
-                next._prev = prev;
-            }
-            return record;
-        };
-        /** @internal */
-        DefaultIterableDiffer.prototype._addToMoves = function (record, toIndex) {
-            // TODO(vicb):
-            // assert(record._nextMoved === null);
-            if (record.previousIndex === toIndex) {
-                return record;
-            }
-            if (this._movesTail === null) {
-                // TODO(vicb):
-                // assert(_movesHead === null);
-                this._movesTail = this._movesHead = record;
-            }
-            else {
-                // TODO(vicb):
-                // assert(_movesTail._nextMoved === null);
-                this._movesTail = this._movesTail._nextMoved = record;
-            }
-            return record;
-        };
-        DefaultIterableDiffer.prototype._addToRemovals = function (record) {
-            if (this._unlinkedRecords === null) {
-                this._unlinkedRecords = new _DuplicateMap();
-            }
-            this._unlinkedRecords.put(record);
-            record.currentIndex = null;
-            record._nextRemoved = null;
-            if (this._removalsTail === null) {
-                // TODO(vicb):
-                // assert(_removalsHead === null);
-                this._removalsTail = this._removalsHead = record;
-                record._prevRemoved = null;
-            }
-            else {
-                // TODO(vicb):
-                // assert(_removalsTail._nextRemoved === null);
-                // assert(record._nextRemoved === null);
-                record._prevRemoved = this._removalsTail;
-                this._removalsTail = this._removalsTail._nextRemoved = record;
-            }
-            return record;
-        };
-        /** @internal */
-        DefaultIterableDiffer.prototype._addIdentityChange = function (record, item) {
-            record.item = item;
-            if (this._identityChangesTail === null) {
-                this._identityChangesTail = this._identityChangesHead = record;
-            }
-            else {
-                this._identityChangesTail = this._identityChangesTail._nextIdentityChange = record;
-            }
-            return record;
-        };
-        return DefaultIterableDiffer;
-    }());
-    var IterableChangeRecord_ = /** @class */ (function () {
-        function IterableChangeRecord_(item, trackById) {
-            this.item = item;
-            this.trackById = trackById;
-            this.currentIndex = null;
-            this.previousIndex = null;
-            /** @internal */
-            this._nextPrevious = null;
-            /** @internal */
-            this._prev = null;
-            /** @internal */
-            this._next = null;
-            /** @internal */
-            this._prevDup = null;
-            /** @internal */
-            this._nextDup = null;
-            /** @internal */
-            this._prevRemoved = null;
-            /** @internal */
-            this._nextRemoved = null;
-            /** @internal */
-            this._nextAdded = null;
-            /** @internal */
-            this._nextMoved = null;
-            /** @internal */
-            this._nextIdentityChange = null;
-        }
-        return IterableChangeRecord_;
-    }());
-    // A linked list of CollectionChangeRecords with the same IterableChangeRecord_.item
-    var _DuplicateItemRecordList = /** @class */ (function () {
-        function _DuplicateItemRecordList() {
-            /** @internal */
-            this._head = null;
-            /** @internal */
-            this._tail = null;
-        }
-        /**
-         * Append the record to the list of duplicates.
-         *
-         * Note: by design all records in the list of duplicates hold the same value in record.item.
-         */
-        _DuplicateItemRecordList.prototype.add = function (record) {
-            if (this._head === null) {
-                this._head = this._tail = record;
-                record._nextDup = null;
-                record._prevDup = null;
-            }
-            else {
-                // TODO(vicb):
-                // assert(record.item ==  _head.item ||
-                //       record.item is num && record.item.isNaN && _head.item is num && _head.item.isNaN);
-                this._tail._nextDup = record;
-                record._prevDup = this._tail;
-                record._nextDup = null;
-                this._tail = record;
-            }
-        };
-        // Returns a IterableChangeRecord_ having IterableChangeRecord_.trackById == trackById and
-        // IterableChangeRecord_.currentIndex >= atOrAfterIndex
-        _DuplicateItemRecordList.prototype.get = function (trackById, atOrAfterIndex) {
-            var record;
-            for (record = this._head; record !== null; record = record._nextDup) {
-                if ((atOrAfterIndex === null || atOrAfterIndex <= record.currentIndex) &&
-                    looseIdentical(record.trackById, trackById)) {
-                    return record;
-                }
-            }
-            return null;
-        };
-        /**
-         * Remove one {@link IterableChangeRecord_} from the list of duplicates.
-         *
-         * Returns whether the list of duplicates is empty.
-         */
-        _DuplicateItemRecordList.prototype.remove = function (record) {
-            // TODO(vicb):
-            // assert(() {
-            //  // verify that the record being removed is in the list.
-            //  for (IterableChangeRecord_ cursor = _head; cursor != null; cursor = cursor._nextDup) {
-            //    if (identical(cursor, record)) return true;
-            //  }
-            //  return false;
-            //});
-            var prev = record._prevDup;
-            var next = record._nextDup;
-            if (prev === null) {
-                this._head = next;
-            }
-            else {
-                prev._nextDup = next;
-            }
-            if (next === null) {
-                this._tail = prev;
-            }
-            else {
-                next._prevDup = prev;
-            }
-            return this._head === null;
-        };
-        return _DuplicateItemRecordList;
-    }());
-    var _DuplicateMap = /** @class */ (function () {
-        function _DuplicateMap() {
-            this.map = new Map();
-        }
-        _DuplicateMap.prototype.put = function (record) {
-            var key = record.trackById;
-            var duplicates = this.map.get(key);
-            if (!duplicates) {
-                duplicates = new _DuplicateItemRecordList();
-                this.map.set(key, duplicates);
-            }
-            duplicates.add(record);
-        };
-        /**
-         * Retrieve the `value` using key. Because the IterableChangeRecord_ value may be one which we
-         * have already iterated over, we use the `atOrAfterIndex` to pretend it is not there.
-         *
-         * Use case: `[a, b, c, a, a]` if we are at index `3` which is the second `a` then asking if we
-         * have any more `a`s needs to return the second `a`.
-         */
-        _DuplicateMap.prototype.get = function (trackById, atOrAfterIndex) {
-            var key = trackById;
-            var recordList = this.map.get(key);
-            return recordList ? recordList.get(trackById, atOrAfterIndex) : null;
-        };
-        /**
-         * Removes a {@link IterableChangeRecord_} from the list of duplicates.
-         *
-         * The list of duplicates also is removed from the map if it gets empty.
-         */
-        _DuplicateMap.prototype.remove = function (record) {
-            var key = record.trackById;
-            var recordList = this.map.get(key);
-            // Remove the list of duplicates when it gets empty
-            if (recordList.remove(record)) {
-                this.map.delete(key);
-            }
-            return record;
-        };
-        Object.defineProperty(_DuplicateMap.prototype, "isEmpty", {
-            get: function () { return this.map.size === 0; },
-            enumerable: true,
-            configurable: true
-        });
-        _DuplicateMap.prototype.clear = function () { this.map.clear(); };
-        return _DuplicateMap;
-    }());
-    function getPreviousIndex(item, addRemoveOffset, moveOffsets) {
-        var previousIndex = item.previousIndex;
-        if (previousIndex === null)
-            return previousIndex;
-        var moveOffset = 0;
-        if (moveOffsets && previousIndex < moveOffsets.length) {
-            moveOffset = moveOffsets[previousIndex];
-        }
-        return previousIndex + addRemoveOffset + moveOffset;
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var DefaultKeyValueDifferFactory = /** @class */ (function () {
-        function DefaultKeyValueDifferFactory() {
-        }
-        DefaultKeyValueDifferFactory.prototype.supports = function (obj) { return obj instanceof Map || isJsObject$1(obj); };
-        DefaultKeyValueDifferFactory.prototype.create = function () { return new DefaultKeyValueDiffer(); };
-        return DefaultKeyValueDifferFactory;
-    }());
-    var DefaultKeyValueDiffer = /** @class */ (function () {
-        function DefaultKeyValueDiffer() {
-            this._records = new Map();
-            this._mapHead = null;
-            // _appendAfter is used in the check loop
-            this._appendAfter = null;
-            this._previousMapHead = null;
-            this._changesHead = null;
-            this._changesTail = null;
-            this._additionsHead = null;
-            this._additionsTail = null;
-            this._removalsHead = null;
-            this._removalsTail = null;
-        }
-        Object.defineProperty(DefaultKeyValueDiffer.prototype, "isDirty", {
-            get: function () {
-                return this._additionsHead !== null || this._changesHead !== null ||
-                    this._removalsHead !== null;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        DefaultKeyValueDiffer.prototype.forEachItem = function (fn) {
-            var record;
-            for (record = this._mapHead; record !== null; record = record._next) {
-                fn(record);
-            }
-        };
-        DefaultKeyValueDiffer.prototype.forEachPreviousItem = function (fn) {
-            var record;
-            for (record = this._previousMapHead; record !== null; record = record._nextPrevious) {
-                fn(record);
-            }
-        };
-        DefaultKeyValueDiffer.prototype.forEachChangedItem = function (fn) {
-            var record;
-            for (record = this._changesHead; record !== null; record = record._nextChanged) {
-                fn(record);
-            }
-        };
-        DefaultKeyValueDiffer.prototype.forEachAddedItem = function (fn) {
-            var record;
-            for (record = this._additionsHead; record !== null; record = record._nextAdded) {
-                fn(record);
-            }
-        };
-        DefaultKeyValueDiffer.prototype.forEachRemovedItem = function (fn) {
-            var record;
-            for (record = this._removalsHead; record !== null; record = record._nextRemoved) {
-                fn(record);
-            }
-        };
-        DefaultKeyValueDiffer.prototype.diff = function (map) {
-            if (!map) {
-                map = new Map();
-            }
-            else if (!(map instanceof Map || isJsObject$1(map))) {
-                throw new Error("Error trying to diff '" + stringify(map) + "'. Only maps and objects are allowed");
-            }
-            return this.check(map) ? this : null;
-        };
-        DefaultKeyValueDiffer.prototype.onDestroy = function () { };
-        /**
-         * Check the current state of the map vs the previous.
-         * The algorithm is optimised for when the keys do no change.
-         */
-        DefaultKeyValueDiffer.prototype.check = function (map) {
-            var _this = this;
-            this._reset();
-            var insertBefore = this._mapHead;
-            this._appendAfter = null;
-            this._forEach(map, function (value, key) {
-                if (insertBefore && insertBefore.key === key) {
-                    _this._maybeAddToChanges(insertBefore, value);
-                    _this._appendAfter = insertBefore;
-                    insertBefore = insertBefore._next;
-                }
-                else {
-                    var record = _this._getOrCreateRecordForKey(key, value);
-                    insertBefore = _this._insertBeforeOrAppend(insertBefore, record);
-                }
-            });
-            // Items remaining at the end of the list have been deleted
-            if (insertBefore) {
-                if (insertBefore._prev) {
-                    insertBefore._prev._next = null;
-                }
-                this._removalsHead = insertBefore;
-                for (var record = insertBefore; record !== null; record = record._nextRemoved) {
-                    if (record === this._mapHead) {
-                        this._mapHead = null;
-                    }
-                    this._records.delete(record.key);
-                    record._nextRemoved = record._next;
-                    record.previousValue = record.currentValue;
-                    record.currentValue = null;
-                    record._prev = null;
-                    record._next = null;
-                }
-            }
-            // Make sure tails have no next records from previous runs
-            if (this._changesTail)
-                this._changesTail._nextChanged = null;
-            if (this._additionsTail)
-                this._additionsTail._nextAdded = null;
-            return this.isDirty;
-        };
-        /**
-         * Inserts a record before `before` or append at the end of the list when `before` is null.
-         *
-         * Notes:
-         * - This method appends at `this._appendAfter`,
-         * - This method updates `this._appendAfter`,
-         * - The return value is the new value for the insertion pointer.
-         */
-        DefaultKeyValueDiffer.prototype._insertBeforeOrAppend = function (before, record) {
-            if (before) {
-                var prev = before._prev;
-                record._next = before;
-                record._prev = prev;
-                before._prev = record;
-                if (prev) {
-                    prev._next = record;
-                }
-                if (before === this._mapHead) {
-                    this._mapHead = record;
-                }
-                this._appendAfter = before;
-                return before;
-            }
-            if (this._appendAfter) {
-                this._appendAfter._next = record;
-                record._prev = this._appendAfter;
-            }
-            else {
-                this._mapHead = record;
-            }
-            this._appendAfter = record;
-            return null;
-        };
-        DefaultKeyValueDiffer.prototype._getOrCreateRecordForKey = function (key, value) {
-            if (this._records.has(key)) {
-                var record_1 = this._records.get(key);
-                this._maybeAddToChanges(record_1, value);
-                var prev = record_1._prev;
-                var next = record_1._next;
-                if (prev) {
-                    prev._next = next;
-                }
-                if (next) {
-                    next._prev = prev;
-                }
-                record_1._next = null;
-                record_1._prev = null;
-                return record_1;
-            }
-            var record = new KeyValueChangeRecord_(key);
-            this._records.set(key, record);
-            record.currentValue = value;
-            this._addToAdditions(record);
-            return record;
-        };
-        /** @internal */
-        DefaultKeyValueDiffer.prototype._reset = function () {
-            if (this.isDirty) {
-                var record = void 0;
-                // let `_previousMapHead` contain the state of the map before the changes
-                this._previousMapHead = this._mapHead;
-                for (record = this._previousMapHead; record !== null; record = record._next) {
-                    record._nextPrevious = record._next;
-                }
-                // Update `record.previousValue` with the value of the item before the changes
-                // We need to update all changed items (that's those which have been added and changed)
-                for (record = this._changesHead; record !== null; record = record._nextChanged) {
-                    record.previousValue = record.currentValue;
-                }
-                for (record = this._additionsHead; record != null; record = record._nextAdded) {
-                    record.previousValue = record.currentValue;
-                }
-                this._changesHead = this._changesTail = null;
-                this._additionsHead = this._additionsTail = null;
-                this._removalsHead = null;
-            }
-        };
-        // Add the record or a given key to the list of changes only when the value has actually changed
-        DefaultKeyValueDiffer.prototype._maybeAddToChanges = function (record, newValue) {
-            if (!looseIdentical(newValue, record.currentValue)) {
-                record.previousValue = record.currentValue;
-                record.currentValue = newValue;
-                this._addToChanges(record);
-            }
-        };
-        DefaultKeyValueDiffer.prototype._addToAdditions = function (record) {
-            if (this._additionsHead === null) {
-                this._additionsHead = this._additionsTail = record;
-            }
-            else {
-                this._additionsTail._nextAdded = record;
-                this._additionsTail = record;
-            }
-        };
-        DefaultKeyValueDiffer.prototype._addToChanges = function (record) {
-            if (this._changesHead === null) {
-                this._changesHead = this._changesTail = record;
-            }
-            else {
-                this._changesTail._nextChanged = record;
-                this._changesTail = record;
-            }
-        };
-        /** @internal */
-        DefaultKeyValueDiffer.prototype._forEach = function (obj, fn) {
-            if (obj instanceof Map) {
-                obj.forEach(fn);
-            }
-            else {
-                Object.keys(obj).forEach(function (k) { return fn(obj[k], k); });
-            }
-        };
-        return DefaultKeyValueDiffer;
-    }());
-    var KeyValueChangeRecord_ = /** @class */ (function () {
-        function KeyValueChangeRecord_(key) {
-            this.key = key;
-            this.previousValue = null;
-            this.currentValue = null;
-            /** @internal */
-            this._nextPrevious = null;
-            /** @internal */
-            this._next = null;
-            /** @internal */
-            this._prev = null;
-            /** @internal */
-            this._nextAdded = null;
-            /** @internal */
-            this._nextRemoved = null;
-            /** @internal */
-            this._nextChanged = null;
-        }
-        return KeyValueChangeRecord_;
-    }());
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
-     *
-     * @publicApi
-     */
-    var IterableDiffers = /** @class */ (function () {
-        function IterableDiffers(factories) {
-            this.factories = factories;
-        }
-        IterableDiffers.create = function (factories, parent) {
-            if (parent != null) {
-                var copied = parent.factories.slice();
-                factories = factories.concat(copied);
-            }
-            return new IterableDiffers(factories);
-        };
-        /**
-         * Takes an array of {@link IterableDifferFactory} and returns a provider used to extend the
-         * inherited {@link IterableDiffers} instance with the provided factories and return a new
-         * {@link IterableDiffers} instance.
-         *
-         * @usageNotes
-         * ### Example
-         *
-         * The following example shows how to extend an existing list of factories,
-         * which will only be applied to the injector for this component and its children.
-         * This step is all that's required to make a new {@link IterableDiffer} available.
-         *
-         * ```
-         * @Component({
-         *   viewProviders: [
-         *     IterableDiffers.extend([new ImmutableListDiffer()])
-         *   ]
-         * })
-         * ```
-         */
-        IterableDiffers.extend = function (factories) {
-            return {
-                provide: IterableDiffers,
-                useFactory: function (parent) {
-                    if (!parent) {
-                        // Typically would occur when calling IterableDiffers.extend inside of dependencies passed
-                        // to
-                        // bootstrap(), which would override default pipes instead of extending them.
-                        throw new Error('Cannot extend IterableDiffers without a parent injector');
-                    }
-                    return IterableDiffers.create(factories, parent);
-                },
-                // Dependency technically isn't optional, but we can provide a better error message this way.
-                deps: [[IterableDiffers, new SkipSelf(), new Optional()]]
-            };
-        };
-        IterableDiffers.prototype.find = function (iterable) {
-            var factory = this.factories.find(function (f) { return f.supports(iterable); });
-            if (factory != null) {
-                return factory;
-            }
-            else {
-                throw new Error("Cannot find a differ supporting object '" + iterable + "' of type '" + getTypeNameForDebugging(iterable) + "'");
-            }
-        };
-        /** @nocollapse */
-        IterableDiffers.ngInjectableDef = defineInjectable({
-            providedIn: 'root',
-            factory: function () { return new IterableDiffers([new DefaultIterableDifferFactory()]); }
-        });
-        return IterableDiffers;
-    }());
-    function getTypeNameForDebugging(type) {
-        return type['name'] || typeof type;
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
-     *
-     * @publicApi
-     */
-    var KeyValueDiffers = /** @class */ (function () {
-        function KeyValueDiffers(factories) {
-            this.factories = factories;
-        }
-        KeyValueDiffers.create = function (factories, parent) {
-            if (parent) {
-                var copied = parent.factories.slice();
-                factories = factories.concat(copied);
-            }
-            return new KeyValueDiffers(factories);
-        };
-        /**
-         * Takes an array of {@link KeyValueDifferFactory} and returns a provider used to extend the
-         * inherited {@link KeyValueDiffers} instance with the provided factories and return a new
-         * {@link KeyValueDiffers} instance.
-         *
-         * @usageNotes
-         * ### Example
-         *
-         * The following example shows how to extend an existing list of factories,
-         * which will only be applied to the injector for this component and its children.
-         * This step is all that's required to make a new {@link KeyValueDiffer} available.
-         *
-         * ```
-         * @Component({
-         *   viewProviders: [
-         *     KeyValueDiffers.extend([new ImmutableMapDiffer()])
-         *   ]
-         * })
-         * ```
-         */
-        KeyValueDiffers.extend = function (factories) {
-            return {
-                provide: KeyValueDiffers,
-                useFactory: function (parent) {
-                    if (!parent) {
-                        // Typically would occur when calling KeyValueDiffers.extend inside of dependencies passed
-                        // to bootstrap(), which would override default pipes instead of extending them.
-                        throw new Error('Cannot extend KeyValueDiffers without a parent injector');
-                    }
-                    return KeyValueDiffers.create(factories, parent);
-                },
-                // Dependency technically isn't optional, but we can provide a better error message this way.
-                deps: [[KeyValueDiffers, new SkipSelf(), new Optional()]]
-            };
-        };
-        KeyValueDiffers.prototype.find = function (kv) {
-            var factory = this.factories.find(function (f) { return f.supports(kv); });
-            if (factory) {
-                return factory;
-            }
-            throw new Error("Cannot find a differ supporting object '" + kv + "'");
-        };
-        /** @nocollapse */
-        KeyValueDiffers.ngInjectableDef = defineInjectable({
-            providedIn: 'root',
-            factory: function () { return new KeyValueDiffers([new DefaultKeyValueDifferFactory()]); }
-        });
-        return KeyValueDiffers;
-    }());
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Structural diffing for `Object`s and `Map`s.
-     */
-    var keyValDiff = [new DefaultKeyValueDifferFactory()];
-    /**
-     * Structural diffing for `Iterable` types such as `Array`s.
-     */
-    var iterableDiff = [new DefaultIterableDifferFactory()];
-    var defaultIterableDiffers = new IterableDiffers(iterableDiff);
-    var defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
 
     /**
      * @license
@@ -20540,516 +22695,6 @@
     var SWITCH_IVY_ENABLED__POST_R3__ = true;
     var SWITCH_IVY_ENABLED__PRE_R3__ = false;
     var ivyEnabled = SWITCH_IVY_ENABLED__PRE_R3__;
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    // Called before each cycle of a view's check to detect whether this is in the
-    // initState for which we need to call ngOnInit, ngAfterContentInit or ngAfterViewInit
-    // lifecycle methods. Returns true if this check cycle should call lifecycle
-    // methods.
-    function shiftInitState(view, priorInitState, newInitState) {
-        // Only update the InitState if we are currently in the prior state.
-        // For example, only move into CallingInit if we are in BeforeInit. Only
-        // move into CallingContentInit if we are in CallingInit. Normally this will
-        // always be true because of how checkCycle is called in checkAndUpdateView.
-        // However, if checkAndUpdateView is called recursively or if an exception is
-        // thrown while checkAndUpdateView is running, checkAndUpdateView starts over
-        // from the beginning. This ensures the state is monotonically increasing,
-        // terminating in the AfterInit state, which ensures the Init methods are called
-        // at least once and only once.
-        var state = view.state;
-        var initState = state & 1792 /* InitState_Mask */;
-        if (initState === priorInitState) {
-            view.state = (state & ~1792 /* InitState_Mask */) | newInitState;
-            view.initIndex = -1;
-            return true;
-        }
-        return initState === newInitState;
-    }
-    // Returns true if the lifecycle init method should be called for the node with
-    // the given init index.
-    function shouldCallLifecycleInitHook(view, initState, index) {
-        if ((view.state & 1792 /* InitState_Mask */) === initState && view.initIndex <= index) {
-            view.initIndex = index + 1;
-            return true;
-        }
-        return false;
-    }
-    /**
-     * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
-     */
-    function asTextData(view, index) {
-        return view.nodes[index];
-    }
-    /**
-     * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
-     */
-    function asElementData(view, index) {
-        return view.nodes[index];
-    }
-    /**
-     * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
-     */
-    function asProviderData(view, index) {
-        return view.nodes[index];
-    }
-    /**
-     * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
-     */
-    function asPureExpressionData(view, index) {
-        return view.nodes[index];
-    }
-    /**
-     * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
-     */
-    function asQueryList(view, index) {
-        return view.nodes[index];
-    }
-    var DebugContext = /** @class */ (function () {
-        function DebugContext() {
-        }
-        return DebugContext;
-    }());
-    /**
-     * This object is used to prevent cycles in the source files and to have a place where
-     * debug mode can hook it. It is lazily filled when `isDevMode` is known.
-     */
-    var Services = {
-        setCurrentNode: undefined,
-        createRootView: undefined,
-        createEmbeddedView: undefined,
-        createComponentView: undefined,
-        createNgModuleRef: undefined,
-        overrideProvider: undefined,
-        overrideComponentView: undefined,
-        clearOverrides: undefined,
-        checkAndUpdateView: undefined,
-        checkNoChangesView: undefined,
-        destroyView: undefined,
-        resolveDep: undefined,
-        createDebugContext: undefined,
-        handleEvent: undefined,
-        updateDirectives: undefined,
-        updateRenderer: undefined,
-        dirtyParentQueries: undefined,
-    };
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    function expressionChangedAfterItHasBeenCheckedError(context, oldValue, currValue, isFirstCheck) {
-        var msg = "ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value: '" + oldValue + "'. Current value: '" + currValue + "'.";
-        if (isFirstCheck) {
-            msg +=
-                " It seems like the view has been created after its parent and its children have been dirty checked." +
-                    " Has it been created in a change detection hook ?";
-        }
-        return viewDebugError(msg, context);
-    }
-    function viewWrappedDebugError(err, context) {
-        if (!(err instanceof Error)) {
-            // errors that are not Error instances don't have a stack,
-            // so it is ok to wrap them into a new Error object...
-            err = new Error(err.toString());
-        }
-        _addDebugContext(err, context);
-        return err;
-    }
-    function viewDebugError(msg, context) {
-        var err = new Error(msg);
-        _addDebugContext(err, context);
-        return err;
-    }
-    function _addDebugContext(err, context) {
-        err[ERROR_DEBUG_CONTEXT] = context;
-        err[ERROR_LOGGER] = context.logError.bind(context);
-    }
-    function isViewDebugError(err) {
-        return !!getDebugContext(err);
-    }
-    function viewDestroyedError(action) {
-        return new Error("ViewDestroyedError: Attempt to use a destroyed view: " + action);
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var NOOP = function () { };
-    var _tokenKeyCache = new Map();
-    function tokenKey(token) {
-        var key = _tokenKeyCache.get(token);
-        if (!key) {
-            key = stringify(token) + '_' + _tokenKeyCache.size;
-            _tokenKeyCache.set(token, key);
-        }
-        return key;
-    }
-    function unwrapValue$1(view, nodeIdx, bindingIdx, value) {
-        if (WrappedValue.isWrapped(value)) {
-            value = WrappedValue.unwrap(value);
-            var globalBindingIdx = view.def.nodes[nodeIdx].bindingIndex + bindingIdx;
-            var oldValue = WrappedValue.unwrap(view.oldValues[globalBindingIdx]);
-            view.oldValues[globalBindingIdx] = new WrappedValue(oldValue);
-        }
-        return value;
-    }
-    var UNDEFINED_RENDERER_TYPE_ID = '$$undefined';
-    var EMPTY_RENDERER_TYPE_ID = '$$empty';
-    // Attention: this function is called as top level function.
-    // Putting any logic in here will destroy closure tree shaking!
-    function createRendererType2(values) {
-        return {
-            id: UNDEFINED_RENDERER_TYPE_ID,
-            styles: values.styles,
-            encapsulation: values.encapsulation,
-            data: values.data
-        };
-    }
-    var _renderCompCount$1 = 0;
-    function resolveRendererType2(type) {
-        if (type && type.id === UNDEFINED_RENDERER_TYPE_ID) {
-            // first time we see this RendererType2. Initialize it...
-            var isFilled = ((type.encapsulation != null && type.encapsulation !== exports.ViewEncapsulation.None) ||
-                type.styles.length || Object.keys(type.data).length);
-            if (isFilled) {
-                type.id = "c" + _renderCompCount$1++;
-            }
-            else {
-                type.id = EMPTY_RENDERER_TYPE_ID;
-            }
-        }
-        if (type && type.id === EMPTY_RENDERER_TYPE_ID) {
-            type = null;
-        }
-        return type || null;
-    }
-    function checkBinding(view, def, bindingIdx, value) {
-        var oldValues = view.oldValues;
-        if ((view.state & 2 /* FirstCheck */) ||
-            !looseIdentical(oldValues[def.bindingIndex + bindingIdx], value)) {
-            return true;
-        }
-        return false;
-    }
-    function checkAndUpdateBinding(view, def, bindingIdx, value) {
-        if (checkBinding(view, def, bindingIdx, value)) {
-            view.oldValues[def.bindingIndex + bindingIdx] = value;
-            return true;
-        }
-        return false;
-    }
-    function checkBindingNoChanges(view, def, bindingIdx, value) {
-        var oldValue = view.oldValues[def.bindingIndex + bindingIdx];
-        if ((view.state & 1 /* BeforeFirstCheck */) || !devModeEqual$1(oldValue, value)) {
-            var bindingName = def.bindings[bindingIdx].name;
-            throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, def.nodeIndex), bindingName + ": " + oldValue, bindingName + ": " + value, (view.state & 1 /* BeforeFirstCheck */) !== 0);
-        }
-    }
-    function markParentViewsForCheck(view) {
-        var currView = view;
-        while (currView) {
-            if (currView.def.flags & 2 /* OnPush */) {
-                currView.state |= 8 /* ChecksEnabled */;
-            }
-            currView = currView.viewContainerParent || currView.parent;
-        }
-    }
-    function markParentViewsForCheckProjectedViews(view, endView) {
-        var currView = view;
-        while (currView && currView !== endView) {
-            currView.state |= 64 /* CheckProjectedViews */;
-            currView = currView.viewContainerParent || currView.parent;
-        }
-    }
-    function dispatchEvent(view, nodeIndex, eventName, event) {
-        try {
-            var nodeDef = view.def.nodes[nodeIndex];
-            var startView = nodeDef.flags & 33554432 /* ComponentView */ ?
-                asElementData(view, nodeIndex).componentView :
-                view;
-            markParentViewsForCheck(startView);
-            return Services.handleEvent(view, nodeIndex, eventName, event);
-        }
-        catch (e) {
-            // Attention: Don't rethrow, as it would cancel Observable subscriptions!
-            view.root.errorHandler.handleError(e);
-        }
-    }
-    function declaredViewContainer(view) {
-        if (view.parent) {
-            var parentView = view.parent;
-            return asElementData(parentView, view.parentNodeDef.nodeIndex);
-        }
-        return null;
-    }
-    /**
-     * for component views, this is the host element.
-     * for embedded views, this is the index of the parent node
-     * that contains the view container.
-     */
-    function viewParentEl(view) {
-        var parentView = view.parent;
-        if (parentView) {
-            return view.parentNodeDef.parent;
-        }
-        else {
-            return null;
-        }
-    }
-    function renderNode(view, def) {
-        switch (def.flags & 201347067 /* Types */) {
-            case 1 /* TypeElement */:
-                return asElementData(view, def.nodeIndex).renderElement;
-            case 2 /* TypeText */:
-                return asTextData(view, def.nodeIndex).renderText;
-        }
-    }
-    function elementEventFullName(target, name) {
-        return target ? target + ":" + name : name;
-    }
-    function isComponentView(view) {
-        return !!view.parent && !!(view.parentNodeDef.flags & 32768 /* Component */);
-    }
-    function isEmbeddedView(view) {
-        return !!view.parent && !(view.parentNodeDef.flags & 32768 /* Component */);
-    }
-    function filterQueryId(queryId) {
-        return 1 << (queryId % 32);
-    }
-    function splitMatchedQueriesDsl(matchedQueriesDsl) {
-        var matchedQueries = {};
-        var matchedQueryIds = 0;
-        var references = {};
-        if (matchedQueriesDsl) {
-            matchedQueriesDsl.forEach(function (_a) {
-                var _b = __read(_a, 2), queryId = _b[0], valueType = _b[1];
-                if (typeof queryId === 'number') {
-                    matchedQueries[queryId] = valueType;
-                    matchedQueryIds |= filterQueryId(queryId);
-                }
-                else {
-                    references[queryId] = valueType;
-                }
-            });
-        }
-        return { matchedQueries: matchedQueries, references: references, matchedQueryIds: matchedQueryIds };
-    }
-    function splitDepsDsl(deps, sourceName) {
-        return deps.map(function (value) {
-            var _a;
-            var token;
-            var flags;
-            if (Array.isArray(value)) {
-                _a = __read(value, 2), flags = _a[0], token = _a[1];
-            }
-            else {
-                flags = 0 /* None */;
-                token = value;
-            }
-            if (token && (typeof token === 'function' || typeof token === 'object') && sourceName) {
-                Object.defineProperty(token, SOURCE, { value: sourceName, configurable: true });
-            }
-            return { flags: flags, token: token, tokenKey: tokenKey(token) };
-        });
-    }
-    function getParentRenderElement(view, renderHost, def) {
-        var renderParent = def.renderParent;
-        if (renderParent) {
-            if ((renderParent.flags & 1 /* TypeElement */) === 0 ||
-                (renderParent.flags & 33554432 /* ComponentView */) === 0 ||
-                (renderParent.element.componentRendererType &&
-                    renderParent.element.componentRendererType.encapsulation ===
-                        exports.ViewEncapsulation.Native)) {
-                // only children of non components, or children of components with native encapsulation should
-                // be attached.
-                return asElementData(view, def.renderParent.nodeIndex).renderElement;
-            }
-        }
-        else {
-            return renderHost;
-        }
-    }
-    var DEFINITION_CACHE = new WeakMap();
-    function resolveDefinition(factory) {
-        var value = DEFINITION_CACHE.get(factory);
-        if (!value) {
-            value = factory(function () { return NOOP; });
-            value.factory = factory;
-            DEFINITION_CACHE.set(factory, value);
-        }
-        return value;
-    }
-    function rootRenderNodes(view) {
-        var renderNodes = [];
-        visitRootRenderNodes(view, 0 /* Collect */, undefined, undefined, renderNodes);
-        return renderNodes;
-    }
-    function visitRootRenderNodes(view, action, parentNode, nextSibling, target) {
-        // We need to re-compute the parent node in case the nodes have been moved around manually
-        if (action === 3 /* RemoveChild */) {
-            parentNode = view.renderer.parentNode(renderNode(view, view.def.lastRenderRootNode));
-        }
-        visitSiblingRenderNodes(view, action, 0, view.def.nodes.length - 1, parentNode, nextSibling, target);
-    }
-    function visitSiblingRenderNodes(view, action, startIndex, endIndex, parentNode, nextSibling, target) {
-        for (var i = startIndex; i <= endIndex; i++) {
-            var nodeDef = view.def.nodes[i];
-            if (nodeDef.flags & (1 /* TypeElement */ | 2 /* TypeText */ | 8 /* TypeNgContent */)) {
-                visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target);
-            }
-            // jump to next sibling
-            i += nodeDef.childCount;
-        }
-    }
-    function visitProjectedRenderNodes(view, ngContentIndex, action, parentNode, nextSibling, target) {
-        var compView = view;
-        while (compView && !isComponentView(compView)) {
-            compView = compView.parent;
-        }
-        var hostView = compView.parent;
-        var hostElDef = viewParentEl(compView);
-        var startIndex = hostElDef.nodeIndex + 1;
-        var endIndex = hostElDef.nodeIndex + hostElDef.childCount;
-        for (var i = startIndex; i <= endIndex; i++) {
-            var nodeDef = hostView.def.nodes[i];
-            if (nodeDef.ngContentIndex === ngContentIndex) {
-                visitRenderNode(hostView, nodeDef, action, parentNode, nextSibling, target);
-            }
-            // jump to next sibling
-            i += nodeDef.childCount;
-        }
-        if (!hostView.parent) {
-            // a root view
-            var projectedNodes = view.root.projectableNodes[ngContentIndex];
-            if (projectedNodes) {
-                for (var i = 0; i < projectedNodes.length; i++) {
-                    execRenderNodeAction(view, projectedNodes[i], action, parentNode, nextSibling, target);
-                }
-            }
-        }
-    }
-    function visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target) {
-        if (nodeDef.flags & 8 /* TypeNgContent */) {
-            visitProjectedRenderNodes(view, nodeDef.ngContent.index, action, parentNode, nextSibling, target);
-        }
-        else {
-            var rn = renderNode(view, nodeDef);
-            if (action === 3 /* RemoveChild */ && (nodeDef.flags & 33554432 /* ComponentView */) &&
-                (nodeDef.bindingFlags & 48 /* CatSyntheticProperty */)) {
-                // Note: we might need to do both actions.
-                if (nodeDef.bindingFlags & (16 /* SyntheticProperty */)) {
-                    execRenderNodeAction(view, rn, action, parentNode, nextSibling, target);
-                }
-                if (nodeDef.bindingFlags & (32 /* SyntheticHostProperty */)) {
-                    var compView = asElementData(view, nodeDef.nodeIndex).componentView;
-                    execRenderNodeAction(compView, rn, action, parentNode, nextSibling, target);
-                }
-            }
-            else {
-                execRenderNodeAction(view, rn, action, parentNode, nextSibling, target);
-            }
-            if (nodeDef.flags & 16777216 /* EmbeddedViews */) {
-                var embeddedViews = asElementData(view, nodeDef.nodeIndex).viewContainer._embeddedViews;
-                for (var k = 0; k < embeddedViews.length; k++) {
-                    visitRootRenderNodes(embeddedViews[k], action, parentNode, nextSibling, target);
-                }
-            }
-            if (nodeDef.flags & 1 /* TypeElement */ && !nodeDef.element.name) {
-                visitSiblingRenderNodes(view, action, nodeDef.nodeIndex + 1, nodeDef.nodeIndex + nodeDef.childCount, parentNode, nextSibling, target);
-            }
-        }
-    }
-    function execRenderNodeAction(view, renderNode, action, parentNode, nextSibling, target) {
-        var renderer = view.renderer;
-        switch (action) {
-            case 1 /* AppendChild */:
-                renderer.appendChild(parentNode, renderNode);
-                break;
-            case 2 /* InsertBefore */:
-                renderer.insertBefore(parentNode, renderNode, nextSibling);
-                break;
-            case 3 /* RemoveChild */:
-                renderer.removeChild(parentNode, renderNode);
-                break;
-            case 0 /* Collect */:
-                target.push(renderNode);
-                break;
-        }
-    }
-    var NS_PREFIX_RE = /^:([^:]+):(.+)$/;
-    function splitNamespace(name) {
-        if (name[0] === ':') {
-            var match = name.match(NS_PREFIX_RE);
-            return [match[1], match[2]];
-        }
-        return ['', name];
-    }
-    function calcBindingFlags(bindings) {
-        var flags = 0;
-        for (var i = 0; i < bindings.length; i++) {
-            flags |= bindings[i].flags;
-        }
-        return flags;
-    }
-    function interpolate(valueCount, constAndInterp) {
-        var result = '';
-        for (var i = 0; i < valueCount * 2; i = i + 2) {
-            result = result + constAndInterp[i] + _toStringWithNull(constAndInterp[i + 1]);
-        }
-        return result + constAndInterp[valueCount * 2];
-    }
-    function inlineInterpolate(valueCount, c0, a1, c1, a2, c2, a3, c3, a4, c4, a5, c5, a6, c6, a7, c7, a8, c8, a9, c9) {
-        switch (valueCount) {
-            case 1:
-                return c0 + _toStringWithNull(a1) + c1;
-            case 2:
-                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2;
-            case 3:
-                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
-                    c3;
-            case 4:
-                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
-                    c3 + _toStringWithNull(a4) + c4;
-            case 5:
-                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
-                    c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5;
-            case 6:
-                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
-                    c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) + c6;
-            case 7:
-                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
-                    c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) +
-                    c6 + _toStringWithNull(a7) + c7;
-            case 8:
-                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
-                    c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) +
-                    c6 + _toStringWithNull(a7) + c7 + _toStringWithNull(a8) + c8;
-            case 9:
-                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
-                    c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) +
-                    c6 + _toStringWithNull(a7) + c7 + _toStringWithNull(a8) + c8 + _toStringWithNull(a9) + c9;
-            default:
-                throw new Error("Does not support more than 9 expressions");
-        }
-    }
-    function _toStringWithNull(v) {
-        return v != null ? v.toString() : '';
-    }
-    var EMPTY_ARRAY$4 = [];
-    var EMPTY_MAP = {};
 
     /**
      * @license
@@ -21336,1319 +22981,6 @@
         var securityContext = binding.securityContext;
         var renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
         view.renderer.setProperty(renderNode$$1, name, renderValue);
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var UNDEFINED_VALUE = new Object();
-    var InjectorRefTokenKey = tokenKey(Injector);
-    var INJECTORRefTokenKey = tokenKey(INJECTOR);
-    var NgModuleRefTokenKey = tokenKey(NgModuleRef);
-    function moduleProvideDef(flags, token, value, deps) {
-        // Need to resolve forwardRefs as e.g. for `useValue` we
-        // lowered the expression and then stopped evaluating it,
-        // i.e. also didn't unwrap it.
-        value = resolveForwardRef(value);
-        var depDefs = splitDepsDsl(deps, stringify(token));
-        return {
-            // will bet set by the module definition
-            index: -1,
-            deps: depDefs, flags: flags, token: token, value: value
-        };
-    }
-    function moduleDef(providers) {
-        var providersByKey = {};
-        var modules = [];
-        var isRoot = false;
-        for (var i = 0; i < providers.length; i++) {
-            var provider = providers[i];
-            if (provider.token === APP_ROOT && provider.value === true) {
-                isRoot = true;
-            }
-            if (provider.flags & 1073741824 /* TypeNgModule */) {
-                modules.push(provider.token);
-            }
-            provider.index = i;
-            providersByKey[tokenKey(provider.token)] = provider;
-        }
-        return {
-            // Will be filled later...
-            factory: null,
-            providersByKey: providersByKey,
-            providers: providers,
-            modules: modules,
-            isRoot: isRoot,
-        };
-    }
-    function initNgModule(data) {
-        var def = data._def;
-        var providers = data._providers = new Array(def.providers.length);
-        for (var i = 0; i < def.providers.length; i++) {
-            var provDef = def.providers[i];
-            if (!(provDef.flags & 4096 /* LazyProvider */)) {
-                // Make sure the provider has not been already initialized outside this loop.
-                if (providers[i] === undefined) {
-                    providers[i] = _createProviderInstance(data, provDef);
-                }
-            }
-        }
-    }
-    function resolveNgModuleDep(data, depDef, notFoundValue) {
-        if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
-        var former = setCurrentInjector(data);
-        try {
-            if (depDef.flags & 8 /* Value */) {
-                return depDef.token;
-            }
-            if (depDef.flags & 2 /* Optional */) {
-                notFoundValue = null;
-            }
-            if (depDef.flags & 1 /* SkipSelf */) {
-                return data._parent.get(depDef.token, notFoundValue);
-            }
-            var tokenKey_1 = depDef.tokenKey;
-            switch (tokenKey_1) {
-                case InjectorRefTokenKey:
-                case INJECTORRefTokenKey:
-                case NgModuleRefTokenKey:
-                    return data;
-            }
-            var providerDef = data._def.providersByKey[tokenKey_1];
-            var injectableDef = void 0;
-            if (providerDef) {
-                var providerInstance = data._providers[providerDef.index];
-                if (providerInstance === undefined) {
-                    providerInstance = data._providers[providerDef.index] =
-                        _createProviderInstance(data, providerDef);
-                }
-                return providerInstance === UNDEFINED_VALUE ? undefined : providerInstance;
-            }
-            else if ((injectableDef = getInjectableDef(depDef.token)) && targetsModule(data, injectableDef)) {
-                var index = data._providers.length;
-                data._def.providersByKey[depDef.tokenKey] = {
-                    flags: 1024 /* TypeFactoryProvider */ | 4096 /* LazyProvider */,
-                    value: injectableDef.factory,
-                    deps: [], index: index,
-                    token: depDef.token,
-                };
-                data._providers[index] = UNDEFINED_VALUE;
-                return (data._providers[index] =
-                    _createProviderInstance(data, data._def.providersByKey[depDef.tokenKey]));
-            }
-            else if (depDef.flags & 4 /* Self */) {
-                return notFoundValue;
-            }
-            return data._parent.get(depDef.token, notFoundValue);
-        }
-        finally {
-            setCurrentInjector(former);
-        }
-    }
-    function moduleTransitivelyPresent(ngModule, scope) {
-        return ngModule._def.modules.indexOf(scope) > -1;
-    }
-    function targetsModule(ngModule, def) {
-        return def.providedIn != null && (moduleTransitivelyPresent(ngModule, def.providedIn) ||
-            def.providedIn === 'root' && ngModule._def.isRoot);
-    }
-    function _createProviderInstance(ngModule, providerDef) {
-        var injectable;
-        switch (providerDef.flags & 201347067 /* Types */) {
-            case 512 /* TypeClassProvider */:
-                injectable = _createClass(ngModule, providerDef.value, providerDef.deps);
-                break;
-            case 1024 /* TypeFactoryProvider */:
-                injectable = _callFactory(ngModule, providerDef.value, providerDef.deps);
-                break;
-            case 2048 /* TypeUseExistingProvider */:
-                injectable = resolveNgModuleDep(ngModule, providerDef.deps[0]);
-                break;
-            case 256 /* TypeValueProvider */:
-                injectable = providerDef.value;
-                break;
-        }
-        // The read of `ngOnDestroy` here is slightly expensive as it's megamorphic, so it should be
-        // avoided if possible. The sequence of checks here determines whether ngOnDestroy needs to be
-        // checked. It might not if the `injectable` isn't an object or if NodeFlags.OnDestroy is already
-        // set (ngOnDestroy was detected statically).
-        if (injectable !== UNDEFINED_VALUE && injectable != null && typeof injectable === 'object' &&
-            !(providerDef.flags & 131072 /* OnDestroy */) && typeof injectable.ngOnDestroy === 'function') {
-            providerDef.flags |= 131072 /* OnDestroy */;
-        }
-        return injectable === undefined ? UNDEFINED_VALUE : injectable;
-    }
-    function _createClass(ngModule, ctor, deps) {
-        var len = deps.length;
-        switch (len) {
-            case 0:
-                return new ctor();
-            case 1:
-                return new ctor(resolveNgModuleDep(ngModule, deps[0]));
-            case 2:
-                return new ctor(resolveNgModuleDep(ngModule, deps[0]), resolveNgModuleDep(ngModule, deps[1]));
-            case 3:
-                return new ctor(resolveNgModuleDep(ngModule, deps[0]), resolveNgModuleDep(ngModule, deps[1]), resolveNgModuleDep(ngModule, deps[2]));
-            default:
-                var depValues = new Array(len);
-                for (var i = 0; i < len; i++) {
-                    depValues[i] = resolveNgModuleDep(ngModule, deps[i]);
-                }
-                return new (ctor.bind.apply(ctor, __spread([void 0], depValues)))();
-        }
-    }
-    function _callFactory(ngModule, factory, deps) {
-        var len = deps.length;
-        switch (len) {
-            case 0:
-                return factory();
-            case 1:
-                return factory(resolveNgModuleDep(ngModule, deps[0]));
-            case 2:
-                return factory(resolveNgModuleDep(ngModule, deps[0]), resolveNgModuleDep(ngModule, deps[1]));
-            case 3:
-                return factory(resolveNgModuleDep(ngModule, deps[0]), resolveNgModuleDep(ngModule, deps[1]), resolveNgModuleDep(ngModule, deps[2]));
-            default:
-                var depValues = Array(len);
-                for (var i = 0; i < len; i++) {
-                    depValues[i] = resolveNgModuleDep(ngModule, deps[i]);
-                }
-                return factory.apply(void 0, __spread(depValues));
-        }
-    }
-    function callNgModuleLifecycle(ngModule, lifecycles) {
-        var def = ngModule._def;
-        var destroyed = new Set();
-        for (var i = 0; i < def.providers.length; i++) {
-            var provDef = def.providers[i];
-            if (provDef.flags & 131072 /* OnDestroy */) {
-                var instance = ngModule._providers[i];
-                if (instance && instance !== UNDEFINED_VALUE) {
-                    var onDestroy = instance.ngOnDestroy;
-                    if (typeof onDestroy === 'function' && !destroyed.has(instance)) {
-                        onDestroy.apply(instance);
-                        destroyed.add(instance);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    function attachEmbeddedView(parentView, elementData, viewIndex, view) {
-        var embeddedViews = elementData.viewContainer._embeddedViews;
-        if (viewIndex === null || viewIndex === undefined) {
-            viewIndex = embeddedViews.length;
-        }
-        view.viewContainerParent = parentView;
-        addToArray(embeddedViews, viewIndex, view);
-        attachProjectedView(elementData, view);
-        Services.dirtyParentQueries(view);
-        var prevView = viewIndex > 0 ? embeddedViews[viewIndex - 1] : null;
-        renderAttachEmbeddedView(elementData, prevView, view);
-    }
-    function attachProjectedView(vcElementData, view) {
-        var dvcElementData = declaredViewContainer(view);
-        if (!dvcElementData || dvcElementData === vcElementData ||
-            view.state & 16 /* IsProjectedView */) {
-            return;
-        }
-        // Note: For performance reasons, we
-        // - add a view to template._projectedViews only 1x throughout its lifetime,
-        //   and remove it not until the view is destroyed.
-        //   (hard, as when a parent view is attached/detached we would need to attach/detach all
-        //    nested projected views as well, even across component boundaries).
-        // - don't track the insertion order of views in the projected views array
-        //   (hard, as when the views of the same template are inserted different view containers)
-        view.state |= 16 /* IsProjectedView */;
-        var projectedViews = dvcElementData.template._projectedViews;
-        if (!projectedViews) {
-            projectedViews = dvcElementData.template._projectedViews = [];
-        }
-        projectedViews.push(view);
-        // Note: we are changing the NodeDef here as we cannot calculate
-        // the fact whether a template is used for projection during compilation.
-        markNodeAsProjectedTemplate(view.parent.def, view.parentNodeDef);
-    }
-    function markNodeAsProjectedTemplate(viewDef, nodeDef) {
-        if (nodeDef.flags & 4 /* ProjectedTemplate */) {
-            return;
-        }
-        viewDef.nodeFlags |= 4 /* ProjectedTemplate */;
-        nodeDef.flags |= 4 /* ProjectedTemplate */;
-        var parentNodeDef = nodeDef.parent;
-        while (parentNodeDef) {
-            parentNodeDef.childFlags |= 4 /* ProjectedTemplate */;
-            parentNodeDef = parentNodeDef.parent;
-        }
-    }
-    function detachEmbeddedView(elementData, viewIndex) {
-        var embeddedViews = elementData.viewContainer._embeddedViews;
-        if (viewIndex == null || viewIndex >= embeddedViews.length) {
-            viewIndex = embeddedViews.length - 1;
-        }
-        if (viewIndex < 0) {
-            return null;
-        }
-        var view = embeddedViews[viewIndex];
-        view.viewContainerParent = null;
-        removeFromArray(embeddedViews, viewIndex);
-        // See attachProjectedView for why we don't update projectedViews here.
-        Services.dirtyParentQueries(view);
-        renderDetachView(view);
-        return view;
-    }
-    function detachProjectedView(view) {
-        if (!(view.state & 16 /* IsProjectedView */)) {
-            return;
-        }
-        var dvcElementData = declaredViewContainer(view);
-        if (dvcElementData) {
-            var projectedViews = dvcElementData.template._projectedViews;
-            if (projectedViews) {
-                removeFromArray(projectedViews, projectedViews.indexOf(view));
-                Services.dirtyParentQueries(view);
-            }
-        }
-    }
-    function moveEmbeddedView(elementData, oldViewIndex, newViewIndex) {
-        var embeddedViews = elementData.viewContainer._embeddedViews;
-        var view = embeddedViews[oldViewIndex];
-        removeFromArray(embeddedViews, oldViewIndex);
-        if (newViewIndex == null) {
-            newViewIndex = embeddedViews.length;
-        }
-        addToArray(embeddedViews, newViewIndex, view);
-        // Note: Don't need to change projectedViews as the order in there
-        // as always invalid...
-        Services.dirtyParentQueries(view);
-        renderDetachView(view);
-        var prevView = newViewIndex > 0 ? embeddedViews[newViewIndex - 1] : null;
-        renderAttachEmbeddedView(elementData, prevView, view);
-        return view;
-    }
-    function renderAttachEmbeddedView(elementData, prevView, view) {
-        var prevRenderNode = prevView ? renderNode(prevView, prevView.def.lastRenderRootNode) :
-            elementData.renderElement;
-        var parentNode = view.renderer.parentNode(prevRenderNode);
-        var nextSibling = view.renderer.nextSibling(prevRenderNode);
-        // Note: We can't check if `nextSibling` is present, as on WebWorkers it will always be!
-        // However, browsers automatically do `appendChild` when there is no `nextSibling`.
-        visitRootRenderNodes(view, 2 /* InsertBefore */, parentNode, nextSibling, undefined);
-    }
-    function renderDetachView(view) {
-        visitRootRenderNodes(view, 3 /* RemoveChild */, null, null, undefined);
-    }
-    function addToArray(arr, index, value) {
-        // perf: array.push is faster than array.splice!
-        if (index >= arr.length) {
-            arr.push(value);
-        }
-        else {
-            arr.splice(index, 0, value);
-        }
-    }
-    function removeFromArray(arr, index) {
-        // perf: array.pop is faster than array.splice!
-        if (index >= arr.length - 1) {
-            arr.pop();
-        }
-        else {
-            arr.splice(index, 1);
-        }
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var EMPTY_CONTEXT = new Object();
-    // Attention: this function is called as top level function.
-    // Putting any logic in here will destroy closure tree shaking!
-    function createComponentFactory(selector, componentType, viewDefFactory, inputs, outputs, ngContentSelectors) {
-        return new ComponentFactory_(selector, componentType, viewDefFactory, inputs, outputs, ngContentSelectors);
-    }
-    function getComponentViewDefinitionFactory(componentFactory) {
-        return componentFactory.viewDefFactory;
-    }
-    var ComponentFactory_ = /** @class */ (function (_super) {
-        __extends(ComponentFactory_, _super);
-        function ComponentFactory_(selector, componentType, viewDefFactory, _inputs, _outputs, ngContentSelectors) {
-            var _this = 
-            // Attention: this ctor is called as top level function.
-            // Putting any logic in here will destroy closure tree shaking!
-            _super.call(this) || this;
-            _this.selector = selector;
-            _this.componentType = componentType;
-            _this._inputs = _inputs;
-            _this._outputs = _outputs;
-            _this.ngContentSelectors = ngContentSelectors;
-            _this.viewDefFactory = viewDefFactory;
-            return _this;
-        }
-        Object.defineProperty(ComponentFactory_.prototype, "inputs", {
-            get: function () {
-                var inputsArr = [];
-                var inputs = this._inputs;
-                for (var propName in inputs) {
-                    var templateName = inputs[propName];
-                    inputsArr.push({ propName: propName, templateName: templateName });
-                }
-                return inputsArr;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(ComponentFactory_.prototype, "outputs", {
-            get: function () {
-                var outputsArr = [];
-                for (var propName in this._outputs) {
-                    var templateName = this._outputs[propName];
-                    outputsArr.push({ propName: propName, templateName: templateName });
-                }
-                return outputsArr;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        /**
-         * Creates a new component.
-         */
-        ComponentFactory_.prototype.create = function (injector, projectableNodes, rootSelectorOrNode, ngModule) {
-            if (!ngModule) {
-                throw new Error('ngModule should be provided');
-            }
-            var viewDef = resolveDefinition(this.viewDefFactory);
-            var componentNodeIndex = viewDef.nodes[0].element.componentProvider.nodeIndex;
-            var view = Services.createRootView(injector, projectableNodes || [], rootSelectorOrNode, viewDef, ngModule, EMPTY_CONTEXT);
-            var component = asProviderData(view, componentNodeIndex).instance;
-            if (rootSelectorOrNode) {
-                view.renderer.setAttribute(asElementData(view, 0).renderElement, 'ng-version', VERSION.full);
-            }
-            return new ComponentRef_(view, new ViewRef_(view), component);
-        };
-        return ComponentFactory_;
-    }(ComponentFactory));
-    var ComponentRef_ = /** @class */ (function (_super) {
-        __extends(ComponentRef_, _super);
-        function ComponentRef_(_view, _viewRef, _component) {
-            var _this = _super.call(this) || this;
-            _this._view = _view;
-            _this._viewRef = _viewRef;
-            _this._component = _component;
-            _this._elDef = _this._view.def.nodes[0];
-            _this.hostView = _viewRef;
-            _this.changeDetectorRef = _viewRef;
-            _this.instance = _component;
-            return _this;
-        }
-        Object.defineProperty(ComponentRef_.prototype, "location", {
-            get: function () {
-                return new ElementRef(asElementData(this._view, this._elDef.nodeIndex).renderElement);
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(ComponentRef_.prototype, "injector", {
-            get: function () { return new Injector_(this._view, this._elDef); },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(ComponentRef_.prototype, "componentType", {
-            get: function () { return this._component.constructor; },
-            enumerable: true,
-            configurable: true
-        });
-        ComponentRef_.prototype.destroy = function () { this._viewRef.destroy(); };
-        ComponentRef_.prototype.onDestroy = function (callback) { this._viewRef.onDestroy(callback); };
-        return ComponentRef_;
-    }(ComponentRef));
-    function createViewContainerData(view, elDef, elData) {
-        return new ViewContainerRef_(view, elDef, elData);
-    }
-    var ViewContainerRef_ = /** @class */ (function () {
-        function ViewContainerRef_(_view, _elDef, _data) {
-            this._view = _view;
-            this._elDef = _elDef;
-            this._data = _data;
-            /**
-             * @internal
-             */
-            this._embeddedViews = [];
-        }
-        Object.defineProperty(ViewContainerRef_.prototype, "element", {
-            get: function () { return new ElementRef(this._data.renderElement); },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(ViewContainerRef_.prototype, "injector", {
-            get: function () { return new Injector_(this._view, this._elDef); },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(ViewContainerRef_.prototype, "parentInjector", {
-            /** @deprecated No replacement */
-            get: function () {
-                var view = this._view;
-                var elDef = this._elDef.parent;
-                while (!elDef && view) {
-                    elDef = viewParentEl(view);
-                    view = view.parent;
-                }
-                return view ? new Injector_(view, elDef) : new Injector_(this._view, null);
-            },
-            enumerable: true,
-            configurable: true
-        });
-        ViewContainerRef_.prototype.clear = function () {
-            var len = this._embeddedViews.length;
-            for (var i = len - 1; i >= 0; i--) {
-                var view = detachEmbeddedView(this._data, i);
-                Services.destroyView(view);
-            }
-        };
-        ViewContainerRef_.prototype.get = function (index) {
-            var view = this._embeddedViews[index];
-            if (view) {
-                var ref = new ViewRef_(view);
-                ref.attachToViewContainerRef(this);
-                return ref;
-            }
-            return null;
-        };
-        Object.defineProperty(ViewContainerRef_.prototype, "length", {
-            get: function () { return this._embeddedViews.length; },
-            enumerable: true,
-            configurable: true
-        });
-        ViewContainerRef_.prototype.createEmbeddedView = function (templateRef, context, index) {
-            var viewRef = templateRef.createEmbeddedView(context || {});
-            this.insert(viewRef, index);
-            return viewRef;
-        };
-        ViewContainerRef_.prototype.createComponent = function (componentFactory, index, injector, projectableNodes, ngModuleRef) {
-            var contextInjector = injector || this.parentInjector;
-            if (!ngModuleRef && !(componentFactory instanceof ComponentFactoryBoundToModule)) {
-                ngModuleRef = contextInjector.get(NgModuleRef);
-            }
-            var componentRef = componentFactory.create(contextInjector, projectableNodes, undefined, ngModuleRef);
-            this.insert(componentRef.hostView, index);
-            return componentRef;
-        };
-        ViewContainerRef_.prototype.insert = function (viewRef, index) {
-            if (viewRef.destroyed) {
-                throw new Error('Cannot insert a destroyed View in a ViewContainer!');
-            }
-            var viewRef_ = viewRef;
-            var viewData = viewRef_._view;
-            attachEmbeddedView(this._view, this._data, index, viewData);
-            viewRef_.attachToViewContainerRef(this);
-            return viewRef;
-        };
-        ViewContainerRef_.prototype.move = function (viewRef, currentIndex) {
-            if (viewRef.destroyed) {
-                throw new Error('Cannot move a destroyed View in a ViewContainer!');
-            }
-            var previousIndex = this._embeddedViews.indexOf(viewRef._view);
-            moveEmbeddedView(this._data, previousIndex, currentIndex);
-            return viewRef;
-        };
-        ViewContainerRef_.prototype.indexOf = function (viewRef) {
-            return this._embeddedViews.indexOf(viewRef._view);
-        };
-        ViewContainerRef_.prototype.remove = function (index) {
-            var viewData = detachEmbeddedView(this._data, index);
-            if (viewData) {
-                Services.destroyView(viewData);
-            }
-        };
-        ViewContainerRef_.prototype.detach = function (index) {
-            var view = detachEmbeddedView(this._data, index);
-            return view ? new ViewRef_(view) : null;
-        };
-        return ViewContainerRef_;
-    }());
-    function createChangeDetectorRef(view) {
-        return new ViewRef_(view);
-    }
-    var ViewRef_ = /** @class */ (function () {
-        function ViewRef_(_view) {
-            this._view = _view;
-            this._viewContainerRef = null;
-            this._appRef = null;
-        }
-        Object.defineProperty(ViewRef_.prototype, "rootNodes", {
-            get: function () { return rootRenderNodes(this._view); },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(ViewRef_.prototype, "context", {
-            get: function () { return this._view.context; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(ViewRef_.prototype, "destroyed", {
-            get: function () { return (this._view.state & 128 /* Destroyed */) !== 0; },
-            enumerable: true,
-            configurable: true
-        });
-        ViewRef_.prototype.markForCheck = function () { markParentViewsForCheck(this._view); };
-        ViewRef_.prototype.detach = function () { this._view.state &= ~4 /* Attached */; };
-        ViewRef_.prototype.detectChanges = function () {
-            var fs = this._view.root.rendererFactory;
-            if (fs.begin) {
-                fs.begin();
-            }
-            try {
-                Services.checkAndUpdateView(this._view);
-            }
-            finally {
-                if (fs.end) {
-                    fs.end();
-                }
-            }
-        };
-        ViewRef_.prototype.checkNoChanges = function () { Services.checkNoChangesView(this._view); };
-        ViewRef_.prototype.reattach = function () { this._view.state |= 4 /* Attached */; };
-        ViewRef_.prototype.onDestroy = function (callback) {
-            if (!this._view.disposables) {
-                this._view.disposables = [];
-            }
-            this._view.disposables.push(callback);
-        };
-        ViewRef_.prototype.destroy = function () {
-            if (this._appRef) {
-                this._appRef.detachView(this);
-            }
-            else if (this._viewContainerRef) {
-                this._viewContainerRef.detach(this._viewContainerRef.indexOf(this));
-            }
-            Services.destroyView(this._view);
-        };
-        ViewRef_.prototype.detachFromAppRef = function () {
-            this._appRef = null;
-            renderDetachView(this._view);
-            Services.dirtyParentQueries(this._view);
-        };
-        ViewRef_.prototype.attachToAppRef = function (appRef) {
-            if (this._viewContainerRef) {
-                throw new Error('This view is already attached to a ViewContainer!');
-            }
-            this._appRef = appRef;
-        };
-        ViewRef_.prototype.attachToViewContainerRef = function (vcRef) {
-            if (this._appRef) {
-                throw new Error('This view is already attached directly to the ApplicationRef!');
-            }
-            this._viewContainerRef = vcRef;
-        };
-        return ViewRef_;
-    }());
-    function createTemplateData(view, def) {
-        return new TemplateRef_(view, def);
-    }
-    var TemplateRef_ = /** @class */ (function (_super) {
-        __extends(TemplateRef_, _super);
-        function TemplateRef_(_parentView, _def) {
-            var _this = _super.call(this) || this;
-            _this._parentView = _parentView;
-            _this._def = _def;
-            return _this;
-        }
-        TemplateRef_.prototype.createEmbeddedView = function (context) {
-            return new ViewRef_(Services.createEmbeddedView(this._parentView, this._def, this._def.element.template, context));
-        };
-        Object.defineProperty(TemplateRef_.prototype, "elementRef", {
-            get: function () {
-                return new ElementRef(asElementData(this._parentView, this._def.nodeIndex).renderElement);
-            },
-            enumerable: true,
-            configurable: true
-        });
-        return TemplateRef_;
-    }(TemplateRef));
-    function createInjector$1(view, elDef) {
-        return new Injector_(view, elDef);
-    }
-    var Injector_ = /** @class */ (function () {
-        function Injector_(view, elDef) {
-            this.view = view;
-            this.elDef = elDef;
-        }
-        Injector_.prototype.get = function (token, notFoundValue) {
-            if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
-            var allowPrivateServices = this.elDef ? (this.elDef.flags & 33554432 /* ComponentView */) !== 0 : false;
-            return Services.resolveDep(this.view, this.elDef, allowPrivateServices, { flags: 0 /* None */, token: token, tokenKey: tokenKey(token) }, notFoundValue);
-        };
-        return Injector_;
-    }());
-    function nodeValue(view, index) {
-        var def = view.def.nodes[index];
-        if (def.flags & 1 /* TypeElement */) {
-            var elData = asElementData(view, def.nodeIndex);
-            return def.element.template ? elData.template : elData.renderElement;
-        }
-        else if (def.flags & 2 /* TypeText */) {
-            return asTextData(view, def.nodeIndex).renderText;
-        }
-        else if (def.flags & (20224 /* CatProvider */ | 16 /* TypePipe */)) {
-            return asProviderData(view, def.nodeIndex).instance;
-        }
-        throw new Error("Illegal state: read nodeValue for node index " + index);
-    }
-    function createRendererV1(view) {
-        return new RendererAdapter(view.renderer);
-    }
-    var RendererAdapter = /** @class */ (function () {
-        function RendererAdapter(delegate) {
-            this.delegate = delegate;
-        }
-        RendererAdapter.prototype.selectRootElement = function (selectorOrNode) {
-            return this.delegate.selectRootElement(selectorOrNode);
-        };
-        RendererAdapter.prototype.createElement = function (parent, namespaceAndName) {
-            var _a = __read(splitNamespace(namespaceAndName), 2), ns = _a[0], name = _a[1];
-            var el = this.delegate.createElement(name, ns);
-            if (parent) {
-                this.delegate.appendChild(parent, el);
-            }
-            return el;
-        };
-        RendererAdapter.prototype.createViewRoot = function (hostElement) { return hostElement; };
-        RendererAdapter.prototype.createTemplateAnchor = function (parentElement) {
-            var comment = this.delegate.createComment('');
-            if (parentElement) {
-                this.delegate.appendChild(parentElement, comment);
-            }
-            return comment;
-        };
-        RendererAdapter.prototype.createText = function (parentElement, value) {
-            var node = this.delegate.createText(value);
-            if (parentElement) {
-                this.delegate.appendChild(parentElement, node);
-            }
-            return node;
-        };
-        RendererAdapter.prototype.projectNodes = function (parentElement, nodes) {
-            for (var i = 0; i < nodes.length; i++) {
-                this.delegate.appendChild(parentElement, nodes[i]);
-            }
-        };
-        RendererAdapter.prototype.attachViewAfter = function (node, viewRootNodes) {
-            var parentElement = this.delegate.parentNode(node);
-            var nextSibling = this.delegate.nextSibling(node);
-            for (var i = 0; i < viewRootNodes.length; i++) {
-                this.delegate.insertBefore(parentElement, viewRootNodes[i], nextSibling);
-            }
-        };
-        RendererAdapter.prototype.detachView = function (viewRootNodes) {
-            for (var i = 0; i < viewRootNodes.length; i++) {
-                var node = viewRootNodes[i];
-                var parentElement = this.delegate.parentNode(node);
-                this.delegate.removeChild(parentElement, node);
-            }
-        };
-        RendererAdapter.prototype.destroyView = function (hostElement, viewAllNodes) {
-            for (var i = 0; i < viewAllNodes.length; i++) {
-                this.delegate.destroyNode(viewAllNodes[i]);
-            }
-        };
-        RendererAdapter.prototype.listen = function (renderElement, name, callback) {
-            return this.delegate.listen(renderElement, name, callback);
-        };
-        RendererAdapter.prototype.listenGlobal = function (target, name, callback) {
-            return this.delegate.listen(target, name, callback);
-        };
-        RendererAdapter.prototype.setElementProperty = function (renderElement, propertyName, propertyValue) {
-            this.delegate.setProperty(renderElement, propertyName, propertyValue);
-        };
-        RendererAdapter.prototype.setElementAttribute = function (renderElement, namespaceAndName, attributeValue) {
-            var _a = __read(splitNamespace(namespaceAndName), 2), ns = _a[0], name = _a[1];
-            if (attributeValue != null) {
-                this.delegate.setAttribute(renderElement, name, attributeValue, ns);
-            }
-            else {
-                this.delegate.removeAttribute(renderElement, name, ns);
-            }
-        };
-        RendererAdapter.prototype.setBindingDebugInfo = function (renderElement, propertyName, propertyValue) { };
-        RendererAdapter.prototype.setElementClass = function (renderElement, className, isAdd) {
-            if (isAdd) {
-                this.delegate.addClass(renderElement, className);
-            }
-            else {
-                this.delegate.removeClass(renderElement, className);
-            }
-        };
-        RendererAdapter.prototype.setElementStyle = function (renderElement, styleName, styleValue) {
-            if (styleValue != null) {
-                this.delegate.setStyle(renderElement, styleName, styleValue);
-            }
-            else {
-                this.delegate.removeStyle(renderElement, styleName);
-            }
-        };
-        RendererAdapter.prototype.invokeElementMethod = function (renderElement, methodName, args) {
-            renderElement[methodName].apply(renderElement, args);
-        };
-        RendererAdapter.prototype.setText = function (renderNode$$1, text) { this.delegate.setValue(renderNode$$1, text); };
-        RendererAdapter.prototype.animate = function () { throw new Error('Renderer.animate is no longer supported!'); };
-        return RendererAdapter;
-    }());
-    function createNgModuleRef(moduleType, parent, bootstrapComponents, def) {
-        return new NgModuleRef_(moduleType, parent, bootstrapComponents, def);
-    }
-    var NgModuleRef_ = /** @class */ (function () {
-        function NgModuleRef_(_moduleType, _parent, _bootstrapComponents, _def) {
-            this._moduleType = _moduleType;
-            this._parent = _parent;
-            this._bootstrapComponents = _bootstrapComponents;
-            this._def = _def;
-            this._destroyListeners = [];
-            this._destroyed = false;
-            this.injector = this;
-            initNgModule(this);
-        }
-        NgModuleRef_.prototype.get = function (token, notFoundValue, injectFlags) {
-            if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
-            if (injectFlags === void 0) { injectFlags = exports.InjectFlags.Default; }
-            var flags = 0 /* None */;
-            if (injectFlags & exports.InjectFlags.SkipSelf) {
-                flags |= 1 /* SkipSelf */;
-            }
-            else if (injectFlags & exports.InjectFlags.Self) {
-                flags |= 4 /* Self */;
-            }
-            return resolveNgModuleDep(this, { token: token, tokenKey: tokenKey(token), flags: flags }, notFoundValue);
-        };
-        Object.defineProperty(NgModuleRef_.prototype, "instance", {
-            get: function () { return this.get(this._moduleType); },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(NgModuleRef_.prototype, "componentFactoryResolver", {
-            get: function () { return this.get(ComponentFactoryResolver); },
-            enumerable: true,
-            configurable: true
-        });
-        NgModuleRef_.prototype.destroy = function () {
-            if (this._destroyed) {
-                throw new Error("The ng module " + stringify(this.instance.constructor) + " has already been destroyed.");
-            }
-            this._destroyed = true;
-            callNgModuleLifecycle(this, 131072 /* OnDestroy */);
-            this._destroyListeners.forEach(function (listener) { return listener(); });
-        };
-        NgModuleRef_.prototype.onDestroy = function (callback) { this._destroyListeners.push(callback); };
-        return NgModuleRef_;
-    }());
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var RendererV1TokenKey = tokenKey(Renderer);
-    var Renderer2TokenKey = tokenKey(Renderer2);
-    var ElementRefTokenKey = tokenKey(ElementRef);
-    var ViewContainerRefTokenKey = tokenKey(ViewContainerRef);
-    var TemplateRefTokenKey = tokenKey(TemplateRef);
-    var ChangeDetectorRefTokenKey = tokenKey(ChangeDetectorRef);
-    var InjectorRefTokenKey$1 = tokenKey(Injector);
-    var INJECTORRefTokenKey$1 = tokenKey(INJECTOR);
-    function directiveDef(checkIndex, flags, matchedQueries, childCount, ctor, deps, props, outputs) {
-        var bindings = [];
-        if (props) {
-            for (var prop in props) {
-                var _a = __read(props[prop], 2), bindingIndex = _a[0], nonMinifiedName = _a[1];
-                bindings[bindingIndex] = {
-                    flags: 8 /* TypeProperty */,
-                    name: prop, nonMinifiedName: nonMinifiedName,
-                    ns: null,
-                    securityContext: null,
-                    suffix: null
-                };
-            }
-        }
-        var outputDefs = [];
-        if (outputs) {
-            for (var propName in outputs) {
-                outputDefs.push({ type: 1 /* DirectiveOutput */, propName: propName, target: null, eventName: outputs[propName] });
-            }
-        }
-        flags |= 16384 /* TypeDirective */;
-        return _def(checkIndex, flags, matchedQueries, childCount, ctor, ctor, deps, bindings, outputDefs);
-    }
-    function pipeDef(flags, ctor, deps) {
-        flags |= 16 /* TypePipe */;
-        return _def(-1, flags, null, 0, ctor, ctor, deps);
-    }
-    function providerDef(flags, matchedQueries, token, value, deps) {
-        return _def(-1, flags, matchedQueries, 0, token, value, deps);
-    }
-    function _def(checkIndex, flags, matchedQueriesDsl, childCount, token, value, deps, bindings, outputs) {
-        var _a = splitMatchedQueriesDsl(matchedQueriesDsl), matchedQueries = _a.matchedQueries, references = _a.references, matchedQueryIds = _a.matchedQueryIds;
-        if (!outputs) {
-            outputs = [];
-        }
-        if (!bindings) {
-            bindings = [];
-        }
-        // Need to resolve forwardRefs as e.g. for `useValue` we
-        // lowered the expression and then stopped evaluating it,
-        // i.e. also didn't unwrap it.
-        value = resolveForwardRef(value);
-        var depDefs = splitDepsDsl(deps, stringify(token));
-        return {
-            // will bet set by the view definition
-            nodeIndex: -1,
-            parent: null,
-            renderParent: null,
-            bindingIndex: -1,
-            outputIndex: -1,
-            // regular values
-            checkIndex: checkIndex,
-            flags: flags,
-            childFlags: 0,
-            directChildFlags: 0,
-            childMatchedQueries: 0, matchedQueries: matchedQueries, matchedQueryIds: matchedQueryIds, references: references,
-            ngContentIndex: -1, childCount: childCount, bindings: bindings,
-            bindingFlags: calcBindingFlags(bindings), outputs: outputs,
-            element: null,
-            provider: { token: token, value: value, deps: depDefs },
-            text: null,
-            query: null,
-            ngContent: null
-        };
-    }
-    function createProviderInstance(view, def) {
-        return _createProviderInstance$1(view, def);
-    }
-    function createPipeInstance(view, def) {
-        // deps are looked up from component.
-        var compView = view;
-        while (compView.parent && !isComponentView(compView)) {
-            compView = compView.parent;
-        }
-        // pipes can see the private services of the component
-        var allowPrivateServices = true;
-        // pipes are always eager and classes!
-        return createClass(compView.parent, viewParentEl(compView), allowPrivateServices, def.provider.value, def.provider.deps);
-    }
-    function createDirectiveInstance(view, def) {
-        // components can see other private services, other directives can't.
-        var allowPrivateServices = (def.flags & 32768 /* Component */) > 0;
-        // directives are always eager and classes!
-        var instance = createClass(view, def.parent, allowPrivateServices, def.provider.value, def.provider.deps);
-        if (def.outputs.length) {
-            for (var i = 0; i < def.outputs.length; i++) {
-                var output = def.outputs[i];
-                var outputObservable = instance[output.propName];
-                if (isObservable(outputObservable)) {
-                    var subscription = outputObservable.subscribe(eventHandlerClosure(view, def.parent.nodeIndex, output.eventName));
-                    view.disposables[def.outputIndex + i] = subscription.unsubscribe.bind(subscription);
-                }
-                else {
-                    throw new Error("@Output " + output.propName + " not initialized in '" + instance.constructor.name + "'.");
-                }
-            }
-        }
-        return instance;
-    }
-    function eventHandlerClosure(view, index, eventName) {
-        return function (event) { return dispatchEvent(view, index, eventName, event); };
-    }
-    function checkAndUpdateDirectiveInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
-        var providerData = asProviderData(view, def.nodeIndex);
-        var directive = providerData.instance;
-        var changed = false;
-        var changes = undefined;
-        var bindLen = def.bindings.length;
-        if (bindLen > 0 && checkBinding(view, def, 0, v0)) {
-            changed = true;
-            changes = updateProp(view, providerData, def, 0, v0, changes);
-        }
-        if (bindLen > 1 && checkBinding(view, def, 1, v1)) {
-            changed = true;
-            changes = updateProp(view, providerData, def, 1, v1, changes);
-        }
-        if (bindLen > 2 && checkBinding(view, def, 2, v2)) {
-            changed = true;
-            changes = updateProp(view, providerData, def, 2, v2, changes);
-        }
-        if (bindLen > 3 && checkBinding(view, def, 3, v3)) {
-            changed = true;
-            changes = updateProp(view, providerData, def, 3, v3, changes);
-        }
-        if (bindLen > 4 && checkBinding(view, def, 4, v4)) {
-            changed = true;
-            changes = updateProp(view, providerData, def, 4, v4, changes);
-        }
-        if (bindLen > 5 && checkBinding(view, def, 5, v5)) {
-            changed = true;
-            changes = updateProp(view, providerData, def, 5, v5, changes);
-        }
-        if (bindLen > 6 && checkBinding(view, def, 6, v6)) {
-            changed = true;
-            changes = updateProp(view, providerData, def, 6, v6, changes);
-        }
-        if (bindLen > 7 && checkBinding(view, def, 7, v7)) {
-            changed = true;
-            changes = updateProp(view, providerData, def, 7, v7, changes);
-        }
-        if (bindLen > 8 && checkBinding(view, def, 8, v8)) {
-            changed = true;
-            changes = updateProp(view, providerData, def, 8, v8, changes);
-        }
-        if (bindLen > 9 && checkBinding(view, def, 9, v9)) {
-            changed = true;
-            changes = updateProp(view, providerData, def, 9, v9, changes);
-        }
-        if (changes) {
-            directive.ngOnChanges(changes);
-        }
-        if ((def.flags & 65536 /* OnInit */) &&
-            shouldCallLifecycleInitHook(view, 256 /* InitState_CallingOnInit */, def.nodeIndex)) {
-            directive.ngOnInit();
-        }
-        if (def.flags & 262144 /* DoCheck */) {
-            directive.ngDoCheck();
-        }
-        return changed;
-    }
-    function checkAndUpdateDirectiveDynamic(view, def, values) {
-        var providerData = asProviderData(view, def.nodeIndex);
-        var directive = providerData.instance;
-        var changed = false;
-        var changes = undefined;
-        for (var i = 0; i < values.length; i++) {
-            if (checkBinding(view, def, i, values[i])) {
-                changed = true;
-                changes = updateProp(view, providerData, def, i, values[i], changes);
-            }
-        }
-        if (changes) {
-            directive.ngOnChanges(changes);
-        }
-        if ((def.flags & 65536 /* OnInit */) &&
-            shouldCallLifecycleInitHook(view, 256 /* InitState_CallingOnInit */, def.nodeIndex)) {
-            directive.ngOnInit();
-        }
-        if (def.flags & 262144 /* DoCheck */) {
-            directive.ngDoCheck();
-        }
-        return changed;
-    }
-    function _createProviderInstance$1(view, def) {
-        // private services can see other private services
-        var allowPrivateServices = (def.flags & 8192 /* PrivateProvider */) > 0;
-        var providerDef = def.provider;
-        switch (def.flags & 201347067 /* Types */) {
-            case 512 /* TypeClassProvider */:
-                return createClass(view, def.parent, allowPrivateServices, providerDef.value, providerDef.deps);
-            case 1024 /* TypeFactoryProvider */:
-                return callFactory(view, def.parent, allowPrivateServices, providerDef.value, providerDef.deps);
-            case 2048 /* TypeUseExistingProvider */:
-                return resolveDep(view, def.parent, allowPrivateServices, providerDef.deps[0]);
-            case 256 /* TypeValueProvider */:
-                return providerDef.value;
-        }
-    }
-    function createClass(view, elDef, allowPrivateServices, ctor, deps) {
-        var len = deps.length;
-        switch (len) {
-            case 0:
-                return new ctor();
-            case 1:
-                return new ctor(resolveDep(view, elDef, allowPrivateServices, deps[0]));
-            case 2:
-                return new ctor(resolveDep(view, elDef, allowPrivateServices, deps[0]), resolveDep(view, elDef, allowPrivateServices, deps[1]));
-            case 3:
-                return new ctor(resolveDep(view, elDef, allowPrivateServices, deps[0]), resolveDep(view, elDef, allowPrivateServices, deps[1]), resolveDep(view, elDef, allowPrivateServices, deps[2]));
-            default:
-                var depValues = new Array(len);
-                for (var i = 0; i < len; i++) {
-                    depValues[i] = resolveDep(view, elDef, allowPrivateServices, deps[i]);
-                }
-                return new (ctor.bind.apply(ctor, __spread([void 0], depValues)))();
-        }
-    }
-    function callFactory(view, elDef, allowPrivateServices, factory, deps) {
-        var len = deps.length;
-        switch (len) {
-            case 0:
-                return factory();
-            case 1:
-                return factory(resolveDep(view, elDef, allowPrivateServices, deps[0]));
-            case 2:
-                return factory(resolveDep(view, elDef, allowPrivateServices, deps[0]), resolveDep(view, elDef, allowPrivateServices, deps[1]));
-            case 3:
-                return factory(resolveDep(view, elDef, allowPrivateServices, deps[0]), resolveDep(view, elDef, allowPrivateServices, deps[1]), resolveDep(view, elDef, allowPrivateServices, deps[2]));
-            default:
-                var depValues = Array(len);
-                for (var i = 0; i < len; i++) {
-                    depValues[i] = resolveDep(view, elDef, allowPrivateServices, deps[i]);
-                }
-                return factory.apply(void 0, __spread(depValues));
-        }
-    }
-    // This default value is when checking the hierarchy for a token.
-    //
-    // It means both:
-    // - the token is not provided by the current injector,
-    // - only the element injectors should be checked (ie do not check module injectors
-    //
-    //          mod1
-    //         /
-    //       el1   mod2
-    //         \  /
-    //         el2
-    //
-    // When requesting el2.injector.get(token), we should check in the following order and return the
-    // first found value:
-    // - el2.injector.get(token, default)
-    // - el1.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) -> do not check the module
-    // - mod2.injector.get(token, default)
-    var NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR$1 = {};
-    function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue) {
-        if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
-        if (depDef.flags & 8 /* Value */) {
-            return depDef.token;
-        }
-        var startView = view;
-        if (depDef.flags & 2 /* Optional */) {
-            notFoundValue = null;
-        }
-        var tokenKey$$1 = depDef.tokenKey;
-        if (tokenKey$$1 === ChangeDetectorRefTokenKey) {
-            // directives on the same element as a component should be able to control the change detector
-            // of that component as well.
-            allowPrivateServices = !!(elDef && elDef.element.componentView);
-        }
-        if (elDef && (depDef.flags & 1 /* SkipSelf */)) {
-            allowPrivateServices = false;
-            elDef = elDef.parent;
-        }
-        var searchView = view;
-        while (searchView) {
-            if (elDef) {
-                switch (tokenKey$$1) {
-                    case RendererV1TokenKey: {
-                        var compView = findCompView(searchView, elDef, allowPrivateServices);
-                        return createRendererV1(compView);
-                    }
-                    case Renderer2TokenKey: {
-                        var compView = findCompView(searchView, elDef, allowPrivateServices);
-                        return compView.renderer;
-                    }
-                    case ElementRefTokenKey:
-                        return new ElementRef(asElementData(searchView, elDef.nodeIndex).renderElement);
-                    case ViewContainerRefTokenKey:
-                        return asElementData(searchView, elDef.nodeIndex).viewContainer;
-                    case TemplateRefTokenKey: {
-                        if (elDef.element.template) {
-                            return asElementData(searchView, elDef.nodeIndex).template;
-                        }
-                        break;
-                    }
-                    case ChangeDetectorRefTokenKey: {
-                        var cdView = findCompView(searchView, elDef, allowPrivateServices);
-                        return createChangeDetectorRef(cdView);
-                    }
-                    case InjectorRefTokenKey$1:
-                    case INJECTORRefTokenKey$1:
-                        return createInjector$1(searchView, elDef);
-                    default:
-                        var providerDef_1 = (allowPrivateServices ? elDef.element.allProviders :
-                            elDef.element.publicProviders)[tokenKey$$1];
-                        if (providerDef_1) {
-                            var providerData = asProviderData(searchView, providerDef_1.nodeIndex);
-                            if (!providerData) {
-                                providerData = { instance: _createProviderInstance$1(searchView, providerDef_1) };
-                                searchView.nodes[providerDef_1.nodeIndex] = providerData;
-                            }
-                            return providerData.instance;
-                        }
-                }
-            }
-            allowPrivateServices = isComponentView(searchView);
-            elDef = viewParentEl(searchView);
-            searchView = searchView.parent;
-            if (depDef.flags & 4 /* Self */) {
-                searchView = null;
-            }
-        }
-        var value = startView.root.injector.get(depDef.token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR$1);
-        if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR$1 ||
-            notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR$1) {
-            // Return the value from the root element injector when
-            // - it provides it
-            //   (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
-            // - the module injector should not be checked
-            //   (notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
-            return value;
-        }
-        return startView.root.ngModule.injector.get(depDef.token, notFoundValue);
-    }
-    function findCompView(view, elDef, allowPrivateServices) {
-        var compView;
-        if (allowPrivateServices) {
-            compView = asElementData(view, elDef.nodeIndex).componentView;
-        }
-        else {
-            compView = view;
-            while (compView.parent && !isComponentView(compView)) {
-                compView = compView.parent;
-            }
-        }
-        return compView;
-    }
-    function updateProp(view, providerData, def, bindingIdx, value, changes) {
-        if (def.flags & 32768 /* Component */) {
-            var compView = asElementData(view, def.parent.nodeIndex).componentView;
-            if (compView.def.flags & 2 /* OnPush */) {
-                compView.state |= 8 /* ChecksEnabled */;
-            }
-        }
-        var binding = def.bindings[bindingIdx];
-        var propName = binding.name;
-        // Note: This is still safe with Closure Compiler as
-        // the user passed in the property name as an object has to `providerDef`,
-        // so Closure Compiler will have renamed the property correctly already.
-        providerData.instance[propName] = value;
-        if (def.flags & 524288 /* OnChanges */) {
-            changes = changes || {};
-            var oldValue = WrappedValue.unwrap(view.oldValues[def.bindingIndex + bindingIdx]);
-            var binding_1 = def.bindings[bindingIdx];
-            changes[binding_1.nonMinifiedName] =
-                new SimpleChange(oldValue, value, (view.state & 2 /* FirstCheck */) !== 0);
-        }
-        view.oldValues[def.bindingIndex + bindingIdx] = value;
-        return changes;
-    }
-    // This function calls the ngAfterContentCheck, ngAfterContentInit,
-    // ngAfterViewCheck, and ngAfterViewInit lifecycle hooks (depending on the node
-    // flags in lifecycle). Unlike ngDoCheck, ngOnChanges and ngOnInit, which are
-    // called during a pre-order traversal of the view tree (that is calling the
-    // parent hooks before the child hooks) these events are sent in using a
-    // post-order traversal of the tree (children before parents). This changes the
-    // meaning of initIndex in the view state. For ngOnInit, initIndex tracks the
-    // expected nodeIndex which a ngOnInit should be called. When sending
-    // ngAfterContentInit and ngAfterViewInit it is the expected count of
-    // ngAfterContentInit or ngAfterViewInit methods that have been called. This
-    // ensure that despite being called recursively or after picking up after an
-    // exception, the ngAfterContentInit or ngAfterViewInit will be called on the
-    // correct nodes. Consider for example, the following (where E is an element
-    // and D is a directive)
-    //  Tree:       pre-order index  post-order index
-    //    E1        0                6
-    //      E2      1                1
-    //       D3     2                0
-    //      E4      3                5
-    //       E5     4                4
-    //        E6    5                2
-    //        E7    6                3
-    // As can be seen, the post-order index has an unclear relationship to the
-    // pre-order index (postOrderIndex === preOrderIndex - parentCount +
-    // childCount). Since number of calls to ngAfterContentInit and ngAfterViewInit
-    // are stable (will be the same for the same view regardless of exceptions or
-    // recursion) we just need to count them which will roughly correspond to the
-    // post-order index (it skips elements and directives that do not have
-    // lifecycle hooks).
-    //
-    // For example, if an exception is raised in the E6.onAfterViewInit() the
-    // initIndex is left at 3 (by shouldCallLifecycleInitHook() which set it to
-    // initIndex + 1). When checkAndUpdateView() is called again D3, E2 and E6 will
-    // not have their ngAfterViewInit() called but, starting with E7, the rest of
-    // the view will begin getting ngAfterViewInit() called until a check and
-    // pass is complete.
-    //
-    // This algorthim also handles recursion. Consider if E4's ngAfterViewInit()
-    // indirectly calls E1's ChangeDetectorRef.detectChanges(). The expected
-    // initIndex is set to 6, the recusive checkAndUpdateView() starts walk again.
-    // D3, E2, E6, E7, E5 and E4 are skipped, ngAfterViewInit() is called on E1.
-    // When the recursion returns the initIndex will be 7 so E1 is skipped as it
-    // has already been called in the recursively called checkAnUpdateView().
-    function callLifecycleHooksChildrenFirst(view, lifecycles) {
-        if (!(view.def.nodeFlags & lifecycles)) {
-            return;
-        }
-        var nodes = view.def.nodes;
-        var initIndex = 0;
-        for (var i = 0; i < nodes.length; i++) {
-            var nodeDef = nodes[i];
-            var parent_1 = nodeDef.parent;
-            if (!parent_1 && nodeDef.flags & lifecycles) {
-                // matching root node (e.g. a pipe)
-                callProviderLifecycles(view, i, nodeDef.flags & lifecycles, initIndex++);
-            }
-            if ((nodeDef.childFlags & lifecycles) === 0) {
-                // no child matches one of the lifecycles
-                i += nodeDef.childCount;
-            }
-            while (parent_1 && (parent_1.flags & 1 /* TypeElement */) &&
-                i === parent_1.nodeIndex + parent_1.childCount) {
-                // last child of an element
-                if (parent_1.directChildFlags & lifecycles) {
-                    initIndex = callElementProvidersLifecycles(view, parent_1, lifecycles, initIndex);
-                }
-                parent_1 = parent_1.parent;
-            }
-        }
-    }
-    function callElementProvidersLifecycles(view, elDef, lifecycles, initIndex) {
-        for (var i = elDef.nodeIndex + 1; i <= elDef.nodeIndex + elDef.childCount; i++) {
-            var nodeDef = view.def.nodes[i];
-            if (nodeDef.flags & lifecycles) {
-                callProviderLifecycles(view, i, nodeDef.flags & lifecycles, initIndex++);
-            }
-            // only visit direct children
-            i += nodeDef.childCount;
-        }
-        return initIndex;
-    }
-    function callProviderLifecycles(view, index, lifecycles, initIndex) {
-        var providerData = asProviderData(view, index);
-        if (!providerData) {
-            return;
-        }
-        var provider = providerData.instance;
-        if (!provider) {
-            return;
-        }
-        Services.setCurrentNode(view, index);
-        if (lifecycles & 1048576 /* AfterContentInit */ &&
-            shouldCallLifecycleInitHook(view, 512 /* InitState_CallingAfterContentInit */, initIndex)) {
-            provider.ngAfterContentInit();
-        }
-        if (lifecycles & 2097152 /* AfterContentChecked */) {
-            provider.ngAfterContentChecked();
-        }
-        if (lifecycles & 4194304 /* AfterViewInit */ &&
-            shouldCallLifecycleInitHook(view, 768 /* InitState_CallingAfterViewInit */, initIndex)) {
-            provider.ngAfterViewInit();
-        }
-        if (lifecycles & 8388608 /* AfterViewChecked */) {
-            provider.ngAfterViewChecked();
-        }
-        if (lifecycles & 131072 /* OnDestroy */) {
-            provider.ngOnDestroy();
-        }
     }
 
     /**
@@ -24886,7 +25218,7 @@
     exports.ɵinitServicesIfNeeded = initServicesIfNeeded;
     exports.ɵoverrideComponentView = overrideComponentView;
     exports.ɵoverrideProvider = overrideProvider;
-    exports.ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR$1;
+    exports.ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR;
     exports.ɵdefineBase = defineBase;
     exports.ɵdefineComponent = defineComponent;
     exports.ɵdefineDirective = defineDirective;
@@ -24903,6 +25235,7 @@
     exports.ɵtemplateRefExtractor = templateRefExtractor;
     exports.ɵProvidersFeature = ProvidersFeature;
     exports.ɵInheritDefinitionFeature = InheritDefinitionFeature;
+    exports.ɵNgOnChangesFeature = NgOnChangesFeature;
     exports.ɵLifecycleHooksFeature = LifecycleHooksFeature;
     exports.ɵRender3NgModuleRef = NgModuleRef$1;
     exports.ɵmarkDirty = markDirty;
@@ -24947,11 +25280,14 @@
     exports.ɵpureFunction8 = pureFunction8;
     exports.ɵpureFunctionV = pureFunctionV;
     exports.ɵgetCurrentView = getCurrentView;
+    exports.ɵgetDirectives = getDirectives;
     exports.ɵgetHostElement = getHostElement;
     exports.ɵrestoreView = restoreView;
     exports.ɵcontainerRefreshStart = containerRefreshStart;
     exports.ɵcontainerRefreshEnd = containerRefreshEnd;
     exports.ɵqueryRefresh = queryRefresh;
+    exports.ɵviewQuery = viewQuery;
+    exports.ɵloadViewQuery = loadViewQuery;
     exports.ɵloadQueryList = loadQueryList;
     exports.ɵelementEnd = elementEnd;
     exports.ɵelementProperty = elementProperty;
@@ -25021,6 +25357,7 @@
     exports.ɵaddPlayer = addPlayer;
     exports.ɵgetPlayers = getPlayers;
     exports.ɵcompileNgModuleFactory__POST_R3__ = compileNgModuleFactory__POST_R3__;
+    exports.ɵisBoundToModule__POST_R3__ = isBoundToModule__POST_R3__;
     exports.ɵSWITCH_COMPILE_COMPONENT__POST_R3__ = SWITCH_COMPILE_COMPONENT__POST_R3__;
     exports.ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__ = SWITCH_COMPILE_DIRECTIVE__POST_R3__;
     exports.ɵSWITCH_COMPILE_PIPE__POST_R3__ = SWITCH_COMPILE_PIPE__POST_R3__;
@@ -25041,7 +25378,7 @@
     exports.ɵpublishGlobalUtil = publishGlobalUtil;
     exports.ɵpublishDefaultGlobalUtils = publishDefaultGlobalUtils;
     exports.ɵregisterModuleFactory = registerModuleFactory;
-    exports.ɵEMPTY_ARRAY = EMPTY_ARRAY$4;
+    exports.ɵEMPTY_ARRAY = EMPTY_ARRAY$3;
     exports.ɵEMPTY_MAP = EMPTY_MAP;
     exports.ɵand = anchorDef;
     exports.ɵccf = createComponentFactory;
@@ -25064,7 +25401,7 @@
     exports.ɵppd = purePipeDef;
     exports.ɵqud = queryDef;
     exports.ɵted = textDef;
-    exports.ɵunv = unwrapValue$1;
+    exports.ɵunv = unwrapValue;
     exports.ɵvid = viewDef;
 
     Object.defineProperty(exports, '__esModule', { value: true });

@@ -45,7 +45,7 @@ export declare function createNodeAtIndex(index: number, type: TNodeType.Contain
 export declare function createNodeAtIndex(index: number, type: TNodeType.Projection, native: null, name: null, attrs: TAttributes | null): TProjectionNode;
 export declare function createNodeAtIndex(index: number, type: TNodeType.ElementContainer, native: RComment, name: string | null, attrs: TAttributes | null): TElementContainerNode;
 export declare function createNodeAtIndex(index: number, type: TNodeType.IcuContainer, native: RComment, name: null, attrs: TAttributes | null): TElementContainerNode;
-export declare function createViewNode(index: number, view: LView): TViewNode;
+export declare function assignTViewNodeToLView(tView: TView, tParentNode: TNode | null, index: number, lView: LView): TViewNode;
 /**
  * When elements are created dynamically after a view blueprint is created (e.g. through
  * i18nApply() or ComponentFactory.create), we need to adjust the blueprint for future
@@ -230,8 +230,9 @@ export declare function elementEnd(): void;
  * @param value value The attribute is removed when value is `null` or `undefined`.
  *                  Otherwise the attribute value is set to the stringified value.
  * @param sanitizer An optional function used to sanitize the value.
+ * @param namespace Optional namespace to use when setting the attribute.
  */
-export declare function elementAttribute(index: number, name: string, value: any, sanitizer?: SanitizerFn | null): void;
+export declare function elementAttribute(index: number, name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): void;
 /**
  * Update a property on an element.
  *
@@ -280,7 +281,7 @@ export declare function componentHostSyntheticProperty<T>(index: number, propNam
  * @param tViews Any TViews attached to this node
  * @returns the TNode object
  */
-export declare function createTNode(lView: LView, type: TNodeType, adjustedIndex: number, tagName: string | null, attrs: TAttributes | null, tViews: TView[] | null): TNode;
+export declare function createTNode(tParent: TElementNode | TContainerNode | null, type: TNodeType, adjustedIndex: number, tagName: string | null, attrs: TAttributes | null): TNode;
 /**
  * Assign any inline style values to the element during creation mode.
  *

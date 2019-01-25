@@ -43,6 +43,7 @@ export declare class ComponentFactory<T> extends viewEngine_ComponentFactory<T> 
     selector: string;
     componentType: Type<any>;
     ngContentSelectors: string[];
+    isBoundToModule: boolean;
     readonly inputs: {
         propName: string;
         templateName: string;

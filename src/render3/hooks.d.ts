@@ -69,7 +69,7 @@ export declare function executeInitHooks(currentView: LView, tView: TView, check
 export declare function executeHooks(currentView: LView, firstPassHooks: HookData | null, checkHooks: HookData | null, checkNoChangesMode: boolean): void;
 /**
  * Calls lifecycle hooks with their contexts, skipping init hooks if it's not
- * the first LView pass, and skipping onChanges hooks if there are no changes present.
+ * the first LView pass
  *
  * @param currentView The current view
  * @param arr The array in which the hooks are found
