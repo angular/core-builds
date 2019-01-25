@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+41.sha-2da82db
+ * @license Angular v8.0.0-beta.1+43.sha-3d5a919
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11384,18 +11384,25 @@ function createNodeAtIndex(index, type, native, name, attrs) {
         assertLessThan(adjustedIndex, lView.length, `Slot should have been initialized with null`);
     lView[adjustedIndex] = native;
     /** @type {?} */
+    const previousOrParentTNode = getPreviousOrParentTNode();
+    /** @type {?} */
+    const isParent = getIsParent();
+    /** @type {?} */
     let tNode = (/** @type {?} */ (tView.data[adjustedIndex]));
     if (tNode == null) {
-        // TODO(misko): Refactor createTNode so that it does not depend on LView.
-        tNode = tView.data[adjustedIndex] = createTNode(lView, type, adjustedIndex, name, attrs, null);
+        /** @type {?} */
+        const parent = isParent ? previousOrParentTNode : previousOrParentTNode && previousOrParentTNode.parent;
+        // Parents cannot cross component boundaries because components will be used in multiple places,
+        // so it's only set if the view is the same.
+        /** @type {?} */
+        const parentInSameView = parent && parent !== lView[HOST_NODE];
+        /** @type {?} */
+        const tParentNode = parentInSameView ? (/** @type {?} */ (parent)) : null;
+        tNode = tView.data[adjustedIndex] = createTNode(tParentNode, type, adjustedIndex, name, attrs);
     }
     // Now link ourselves into the tree.
     // We need this even if tNode exists, otherwise we might end up pointing to unexisting tNodes when
     // we use i18n (especially with ICU expressions that update the DOM during the update phase).
-    /** @type {?} */
-    const previousOrParentTNode = getPreviousOrParentTNode();
-    /** @type {?} */
-    const isParent = getIsParent();
     if (previousOrParentTNode) {
         if (isParent && previousOrParentTNode.child == null &&
             (tNode.parent !== null || previousOrParentTNode.type === 2 /* View */)) {
@@ -11414,17 +11421,24 @@ function createNodeAtIndex(index, type, native, name, attrs) {
     return (/** @type {?} */ (tNode));
 }
 /**
+ * @param {?} tView
+ * @param {?} tParentNode
  * @param {?} index
- * @param {?} view
+ * @param {?} lView
  * @return {?}
  */
-function createViewNode(index, view) {
+function assignTViewNodeToLView(tView, tParentNode, index, lView) {
     // View nodes are not stored in data because they can be added / removed at runtime (which
     // would cause indices to change). Their TNodes are instead stored in tView.node.
-    if (view[TVIEW].node == null) {
-        view[TVIEW].node = (/** @type {?} */ (createTNode(view, 2 /* View */, index, null, null, null)));
+    /** @type {?} */
+    let tNode = tView.node;
+    if (tNode == null) {
+        ngDevMode && tParentNode &&
+            assertNodeOfPossibleTypes(tParentNode, 3 /* Element */, 0 /* Container */);
+        tView.node = tNode = (/** @type {?} */ (createTNode((/** @type {?} */ (tParentNode)), //
+        2 /* View */, index, null, null)));
     }
-    return view[HOST_NODE] = (/** @type {?} */ (view[TVIEW].node));
+    return lView[HOST_NODE] = (/** @type {?} */ (tNode));
 }
 /**
  * When elements are created dynamically after a view blueprint is created (e.g. through
@@ -11469,7 +11483,7 @@ function createEmbeddedViewAndNode(tView, context, declarationView, renderer, qu
     if (queries) {
         lView[QUERIES] = queries.createView();
     }
-    createViewNode(-1, lView);
+    assignTViewNodeToLView(tView, null, -1, lView);
     if (tView.firstTemplatePass) {
         (/** @type {?} */ (tView.node)).injectorIndex = injectorIndex;
     }
@@ -12437,26 +12451,15 @@ function savePropertyDebugData(tNode, lView, propName, tData, nativeOnly) {
 /**
  * Constructs a TNode object from the arguments.
  *
- * @param {?} lView
+ * @param {?} tParent
  * @param {?} type The type of the node
  * @param {?} adjustedIndex The index of the TNode in TView.data, adjusted for HEADER_OFFSET
  * @param {?} tagName The tag name of the node
  * @param {?} attrs The attributes defined on this node
- * @param {?} tViews Any TViews attached to this node
  * @return {?} the TNode object
  */
-function createTNode(lView, type, adjustedIndex, tagName, attrs, tViews) {
-    /** @type {?} */
-    const previousOrParentTNode = getPreviousOrParentTNode();
+function createTNode(tParent, type, adjustedIndex, tagName, attrs) {
     ngDevMode && ngDevMode.tNode++;
-    /** @type {?} */
-    const parent = getIsParent() ? previousOrParentTNode : previousOrParentTNode && previousOrParentTNode.parent;
-    // Parents cannot cross component boundaries because components will be used in multiple places,
-    // so it's only set if the view is the same.
-    /** @type {?} */
-    const parentInSameView = parent && lView && parent !== lView[HOST_NODE];
-    /** @type {?} */
-    const tParent = parentInSameView ? (/** @type {?} */ (parent)) : null;
     return {
         type: type,
         index: adjustedIndex,
@@ -12473,7 +12476,7 @@ function createTNode(lView, type, adjustedIndex, tagName, attrs, tViews) {
         initialInputs: undefined,
         inputs: undefined,
         outputs: undefined,
-        tViews: tViews,
+        tViews: null,
         next: null,
         child: null,
         parent: tParent,
@@ -13611,7 +13614,10 @@ function embeddedViewStart(viewBlockId, consts, vars) {
         if (lContainer[QUERIES]) {
             viewToRender[QUERIES] = (/** @type {?} */ (lContainer[QUERIES])).createView();
         }
-        createViewNode(viewBlockId, viewToRender);
+        /** @type {?} */
+        const tParentNode = getIsParent() ? previousOrParentTNode :
+            previousOrParentTNode && previousOrParentTNode.parent;
+        assignTViewNodeToLView(viewToRender[TVIEW], tParentNode, viewBlockId, viewToRender);
         enterView(viewToRender, viewToRender[TVIEW].node);
     }
     if (lContainer) {
@@ -16719,7 +16725,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.1+41.sha-2da82db');
+const VERSION = new Version('8.0.0-beta.1+43.sha-3d5a919');
 
 /**
  * @fileoverview added by tsickle
@@ -21293,7 +21299,7 @@ class ComponentRef$1 extends ComponentRef {
         this.destroyCbs = [];
         this.instance = instance;
         this.hostView = this.changeDetectorRef = new RootViewRef(_rootLView);
-        this.hostView._tViewNode = createViewNode(-1, _rootLView);
+        this.hostView._tViewNode = assignTViewNodeToLView(_rootLView[TVIEW], null, -1, _rootLView);
         this.componentType = componentType;
     }
     /**
