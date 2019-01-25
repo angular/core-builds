@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+29.sha-b2811e5
+ * @license Angular v8.0.0-beta.1+39.sha-7496630
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3729,6 +3729,28 @@
     }
     function resolveBody(element) {
         return { name: 'body', target: element.ownerDocument.body };
+    }
+    /**
+     * The special delimiter we use to separate property names, prefixes, and suffixes
+     * in property binding metadata. See storeBindingMetadata().
+     *
+     * We intentionally use the Unicode "REPLACEMENT CHARACTER" (U+FFFD) as a delimiter
+     * because it is a very uncommon character that is unlikely to be part of a user's
+     * property names or interpolation strings. If it is in fact used in a property
+     * binding, DebugElement.properties will not return the correct value for that
+     * binding. However, there should be no runtime effect for real applications.
+     *
+     * This character is typically rendered as a question mark inside of a diamond.
+     * See https://en.wikipedia.org/wiki/Specials_(Unicode_block)
+     *
+     */
+    var INTERPOLATION_DELIMITER = "\uFFFD";
+    /**
+     * Determines whether or not the given string is a property metadata string.
+     * See storeBindingMetadata().
+     */
+    function isPropMetadataString(str) {
+        return str.indexOf(INTERPOLATION_DELIMITER) >= 0;
     }
 
     /**
@@ -9435,6 +9457,10 @@
         appendChild(native, tNode, lView);
         createDirectivesAndLocals(tView, lView, localRefs);
         attachPatchData(native, lView);
+        var currentQueries = lView[QUERIES];
+        if (currentQueries) {
+            currentQueries.addNode(tNode);
+        }
     }
     /** Mark the end of the <ng-container>. */
     function elementContainerEnd() {
@@ -9452,7 +9478,8 @@
         ngDevMode && assertNodeType(previousOrParentTNode, 4 /* ElementContainer */);
         var currentQueries = lView[QUERIES];
         if (currentQueries) {
-            lView[QUERIES] = currentQueries.addNode(previousOrParentTNode);
+            lView[QUERIES] =
+                isContentQueryHost(previousOrParentTNode) ? currentQueries.parent : currentQueries;
         }
         registerPostOrderHooks(tView, previousOrParentTNode);
     }
@@ -9511,6 +9538,10 @@
         // it will take that over for us (this will be removed once #FW-882 is in).
         if (tNode.stylingTemplate && (tNode.flags & 8 /* hasClassInput */) === 0) {
             renderInitialStylesAndClasses(native, tNode.stylingTemplate, lView[RENDERER]);
+        }
+        var currentQueries = lView[QUERIES];
+        if (currentQueries) {
+            currentQueries.addNode(tNode);
         }
     }
     /**
@@ -9624,7 +9655,7 @@
             template: templateFn,
             viewQuery: viewQuery,
             node: null,
-            data: blueprint.slice(),
+            data: blueprint.slice().fill(null, bindingStartIndex),
             childIndex: -1,
             bindingStartIndex: bindingStartIndex,
             viewQueryStartIndex: initialViewLength,
@@ -9906,7 +9937,8 @@
         var lView = getLView();
         var currentQueries = lView[QUERIES];
         if (currentQueries) {
-            lView[QUERIES] = currentQueries.addNode(previousOrParentTNode);
+            lView[QUERIES] =
+                isContentQueryHost(previousOrParentTNode) ? currentQueries.parent : currentQueries;
         }
         registerPostOrderHooks(getLView()[TVIEW], previousOrParentTNode);
         decreaseElementDepthCount();
@@ -10019,6 +10051,7 @@
                 validateProperty(propName);
                 ngDevMode.rendererSetProperty++;
             }
+            savePropertyDebugData(tNode, lView, propName, lView[TVIEW].data, nativeOnly);
             var renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
             // It is assumed that the sanitizer is only added when the compiler determines that the property
             // is risky, so sanitization can be done without further checks.
@@ -10029,6 +10062,29 @@
             else if (!isAnimationProp(propName)) {
                 element.setProperty ? element.setProperty(propName, value) :
                     element[propName] = value;
+            }
+        }
+    }
+    /**
+     * Stores debugging data for this property binding on first template pass.
+     * This enables features like DebugElement.properties.
+     */
+    function savePropertyDebugData(tNode, lView, propName, tData, nativeOnly) {
+        var lastBindingIndex = lView[BINDING_INDEX] - 1;
+        // Bind/interpolation functions save binding metadata in the last binding index,
+        // but leave the property name blank. If the interpolation delimiter is at the 0
+        // index, we know that this is our first pass and the property name still needs to
+        // be set.
+        var bindingMetadata = tData[lastBindingIndex];
+        if (bindingMetadata[0] == INTERPOLATION_DELIMITER) {
+            tData[lastBindingIndex] = propName + bindingMetadata;
+            // We don't want to store indices for host bindings because they are stored in a
+            // different part of LView (the expando section).
+            if (!nativeOnly) {
+                if (tNode.propertyMetadataStartIndex == -1) {
+                    tNode.propertyMetadataStartIndex = lastBindingIndex;
+                }
+                tNode.propertyMetadataEndIndex = lastBindingIndex + 1;
             }
         }
     }
@@ -10056,6 +10112,8 @@
             injectorIndex: tParent ? tParent.injectorIndex : -1,
             directiveStart: -1,
             directiveEnd: -1,
+            propertyMetadataStartIndex: -1,
+            propertyMetadataEndIndex: -1,
             flags: 0,
             providerIndexes: 0,
             tagName: tagName,
@@ -11403,7 +11461,9 @@
      */
     function bind(value) {
         var lView = getLView();
-        return bindingUpdated(lView, lView[BINDING_INDEX]++, value) ? value : NO_CHANGE;
+        var bindingIndex = lView[BINDING_INDEX]++;
+        storeBindingMetadata(lView);
+        return bindingUpdated(lView, bindingIndex, value) ? value : NO_CHANGE;
     }
     /**
      * Allocates the necessary amount of slots for host vars.
@@ -11435,12 +11495,21 @@
         ngDevMode && assertEqual(values.length % 2, 1, 'should have an odd number of values');
         var different = false;
         var lView = getLView();
+        var tData = lView[TVIEW].data;
         var bindingIndex = lView[BINDING_INDEX];
+        if (tData[bindingIndex] == null) {
+            // 2 is the index of the first static interstitial value (ie. not prefix)
+            for (var i = 2; i < values.length; i += 2) {
+                tData[bindingIndex++] = values[i];
+            }
+            bindingIndex = lView[BINDING_INDEX];
+        }
         for (var i = 1; i < values.length; i += 2) {
             // Check if bindings (odd indexes) have changed
             bindingUpdated(lView, bindingIndex++, values[i]) && (different = true);
         }
         lView[BINDING_INDEX] = bindingIndex;
+        storeBindingMetadata(lView, values[0], values[values.length - 1]);
         if (!different) {
             return NO_CHANGE;
         }
@@ -11460,22 +11529,36 @@
      */
     function interpolation1(prefix, v0, suffix) {
         var lView = getLView();
-        var different = bindingUpdated(lView, lView[BINDING_INDEX], v0);
-        lView[BINDING_INDEX] += 1;
+        var different = bindingUpdated(lView, lView[BINDING_INDEX]++, v0);
+        storeBindingMetadata(lView, prefix, suffix);
         return different ? prefix + renderStringify(v0) + suffix : NO_CHANGE;
     }
     /** Creates an interpolation binding with 2 expressions. */
     function interpolation2(prefix, v0, i0, v1, suffix) {
         var lView = getLView();
-        var different = bindingUpdated2(lView, lView[BINDING_INDEX], v0, v1);
+        var bindingIndex = lView[BINDING_INDEX];
+        var different = bindingUpdated2(lView, bindingIndex, v0, v1);
         lView[BINDING_INDEX] += 2;
+        // Only set static strings the first time (data will be null subsequent runs).
+        var data = storeBindingMetadata(lView, prefix, suffix);
+        if (data) {
+            lView[TVIEW].data[bindingIndex] = i0;
+        }
         return different ? prefix + renderStringify(v0) + i0 + renderStringify(v1) + suffix : NO_CHANGE;
     }
     /** Creates an interpolation binding with 3 expressions. */
     function interpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
         var lView = getLView();
-        var different = bindingUpdated3(lView, lView[BINDING_INDEX], v0, v1, v2);
+        var bindingIndex = lView[BINDING_INDEX];
+        var different = bindingUpdated3(lView, bindingIndex, v0, v1, v2);
         lView[BINDING_INDEX] += 3;
+        // Only set static strings the first time (data will be null subsequent runs).
+        var data = storeBindingMetadata(lView, prefix, suffix);
+        if (data) {
+            var tData = lView[TVIEW].data;
+            tData[bindingIndex] = i0;
+            tData[bindingIndex + 1] = i1;
+        }
         return different ?
             prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + suffix :
             NO_CHANGE;
@@ -11483,8 +11566,17 @@
     /** Create an interpolation binding with 4 expressions. */
     function interpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
         var lView = getLView();
-        var different = bindingUpdated4(lView, lView[BINDING_INDEX], v0, v1, v2, v3);
+        var bindingIndex = lView[BINDING_INDEX];
+        var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
         lView[BINDING_INDEX] += 4;
+        // Only set static strings the first time (data will be null subsequent runs).
+        var data = storeBindingMetadata(lView, prefix, suffix);
+        if (data) {
+            var tData = lView[TVIEW].data;
+            tData[bindingIndex] = i0;
+            tData[bindingIndex + 1] = i1;
+            tData[bindingIndex + 2] = i2;
+        }
         return different ?
             prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
                 renderStringify(v3) + suffix :
@@ -11497,6 +11589,15 @@
         var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
         different = bindingUpdated(lView, bindingIndex + 4, v4) || different;
         lView[BINDING_INDEX] += 5;
+        // Only set static strings the first time (data will be null subsequent runs).
+        var data = storeBindingMetadata(lView, prefix, suffix);
+        if (data) {
+            var tData = lView[TVIEW].data;
+            tData[bindingIndex] = i0;
+            tData[bindingIndex + 1] = i1;
+            tData[bindingIndex + 2] = i2;
+            tData[bindingIndex + 3] = i3;
+        }
         return different ?
             prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
                 renderStringify(v3) + i3 + renderStringify(v4) + suffix :
@@ -11509,6 +11610,16 @@
         var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
         different = bindingUpdated2(lView, bindingIndex + 4, v4, v5) || different;
         lView[BINDING_INDEX] += 6;
+        // Only set static strings the first time (data will be null subsequent runs).
+        var data = storeBindingMetadata(lView, prefix, suffix);
+        if (data) {
+            var tData = lView[TVIEW].data;
+            tData[bindingIndex] = i0;
+            tData[bindingIndex + 1] = i1;
+            tData[bindingIndex + 2] = i2;
+            tData[bindingIndex + 3] = i3;
+            tData[bindingIndex + 4] = i4;
+        }
         return different ?
             prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
                 renderStringify(v3) + i3 + renderStringify(v4) + i4 + renderStringify(v5) + suffix :
@@ -11521,6 +11632,17 @@
         var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
         different = bindingUpdated3(lView, bindingIndex + 4, v4, v5, v6) || different;
         lView[BINDING_INDEX] += 7;
+        // Only set static strings the first time (data will be null subsequent runs).
+        var data = storeBindingMetadata(lView, prefix, suffix);
+        if (data) {
+            var tData = lView[TVIEW].data;
+            tData[bindingIndex] = i0;
+            tData[bindingIndex + 1] = i1;
+            tData[bindingIndex + 2] = i2;
+            tData[bindingIndex + 3] = i3;
+            tData[bindingIndex + 4] = i4;
+            tData[bindingIndex + 5] = i5;
+        }
         return different ?
             prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
                 renderStringify(v3) + i3 + renderStringify(v4) + i4 + renderStringify(v5) + i5 +
@@ -11534,11 +11656,47 @@
         var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
         different = bindingUpdated4(lView, bindingIndex + 4, v4, v5, v6, v7) || different;
         lView[BINDING_INDEX] += 8;
+        // Only set static strings the first time (data will be null subsequent runs).
+        var data = storeBindingMetadata(lView, prefix, suffix);
+        if (data) {
+            var tData = lView[TVIEW].data;
+            tData[bindingIndex] = i0;
+            tData[bindingIndex + 1] = i1;
+            tData[bindingIndex + 2] = i2;
+            tData[bindingIndex + 3] = i3;
+            tData[bindingIndex + 4] = i4;
+            tData[bindingIndex + 5] = i5;
+            tData[bindingIndex + 6] = i6;
+        }
         return different ?
             prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
                 renderStringify(v3) + i3 + renderStringify(v4) + i4 + renderStringify(v5) + i5 +
                 renderStringify(v6) + i6 + renderStringify(v7) + suffix :
             NO_CHANGE;
+    }
+    /**
+     * Creates binding metadata for a particular binding and stores it in
+     * TView.data. These are generated in order to support DebugElement.properties.
+     *
+     * Each binding / interpolation will have one (including attribute bindings)
+     * because at the time of binding, we don't know to which instruction the binding
+     * belongs. It is always stored in TView.data at the index of the last binding
+     * value in LView (e.g. for interpolation8, it would be stored at the index of
+     * the 8th value).
+     *
+     * @param lView The LView that contains the current binding index.
+     * @param prefix The static prefix string
+     * @param suffix The static suffix string
+     *
+     * @returns Newly created binding metadata string for this binding or null
+     */
+    function storeBindingMetadata(lView, prefix, suffix) {
+        if (prefix === void 0) { prefix = ''; }
+        if (suffix === void 0) { suffix = ''; }
+        var tData = lView[TVIEW].data;
+        var lastBindingIndex = lView[BINDING_INDEX] - 1;
+        var value = INTERPOLATION_DELIMITER + prefix + INTERPOLATION_DELIMITER + suffix;
+        return tData[lastBindingIndex] == null ? (tData[lastBindingIndex] = value) : null;
     }
     /** Store a value in the `data` at a given `index`. */
     function store(index, value) {
@@ -13339,7 +13497,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.1+29.sha-b2811e5');
+    var VERSION = new Version('8.0.0-beta.1+39.sha-7496630');
 
     /**
      * @license
@@ -22009,15 +22167,26 @@
             configurable: true
         });
         Object.defineProperty(DebugElement__POST_R3__.prototype, "properties", {
+            /**
+             *  Gets a map of property names to property values for an element.
+             *
+             *  This map includes:
+             *  - Regular property bindings (e.g. `[id]="id"`)
+             *  - Host property bindings (e.g. `host: { '[id]': "id" }`)
+             *  - Interpolated property bindings (e.g. `id="{{ value }}")
+             *
+             *  It does not include:
+             *  - input property bindings (e.g. `[myCustomInput]="value"`)
+             *  - attribute bindings (e.g. `[attr.role]="menu"`)
+             */
             get: function () {
                 var context = loadLContext(this.nativeNode);
                 var lView = context.lView;
-                var tView = lView[TVIEW];
-                var tNode = tView.data[context.nodeIndex];
-                var properties = {};
-                // TODO: https://angular-team.atlassian.net/browse/FW-681
-                // Missing implementation here...
-                return properties;
+                var tData = lView[TVIEW].data;
+                var tNode = tData[context.nodeIndex];
+                var properties = collectPropertyBindings(tNode, lView, tData);
+                var hostProperties = collectHostPropertyBindings(tNode, lView, tData);
+                return __assign({}, properties, hostProperties);
             },
             enumerable: true,
             configurable: true
@@ -22170,6 +22339,79 @@
                 }
             });
         }
+    }
+    /**
+     * Iterates through the property bindings for a given node and generates
+     * a map of property names to values. This map only contains property bindings
+     * defined in templates, not in host bindings.
+     */
+    function collectPropertyBindings(tNode, lView, tData) {
+        var properties = {};
+        var bindingIndex = getFirstBindingIndex(tNode.propertyMetadataStartIndex, tData);
+        while (bindingIndex < tNode.propertyMetadataEndIndex) {
+            var value = '';
+            var propMetadata = tData[bindingIndex];
+            while (!isPropMetadataString(propMetadata)) {
+                // This is the first value for an interpolation. We need to build up
+                // the full interpolation by combining runtime values in LView with
+                // the static interstitial values stored in TData.
+                value += renderStringify(lView[bindingIndex]) + tData[bindingIndex];
+                propMetadata = tData[++bindingIndex];
+            }
+            value += lView[bindingIndex];
+            // Property metadata string has 3 parts: property name, prefix, and suffix
+            var metadataParts = propMetadata.split(INTERPOLATION_DELIMITER);
+            var propertyName = metadataParts[0];
+            // Attr bindings don't have property names and should be skipped
+            if (propertyName) {
+                // Wrap value with prefix and suffix (will be '' for normal bindings)
+                properties[propertyName] = metadataParts[1] + value + metadataParts[2];
+            }
+            bindingIndex++;
+        }
+        return properties;
+    }
+    /**
+     * Retrieves the first binding index that holds values for this property
+     * binding.
+     *
+     * For normal bindings (e.g. `[id]="id"`), the binding index is the
+     * same as the metadata index. For interpolations (e.g. `id="{{id}}-{{name}}"`),
+     * there can be multiple binding values, so we might have to loop backwards
+     * from the metadata index until we find the first one.
+     *
+     * @param metadataIndex The index of the first property metadata string for
+     * this node.
+     * @param tData The data array for the current TView
+     * @returns The first binding index for this binding
+     */
+    function getFirstBindingIndex(metadataIndex, tData) {
+        var currentBindingIndex = metadataIndex - 1;
+        // If the slot before the metadata holds a string, we know that this
+        // metadata applies to an interpolation with at least 2 bindings, and
+        // we need to search further to access the first binding value.
+        var currentValue = tData[currentBindingIndex];
+        // We need to iterate until we hit either a:
+        // - TNode (it is an element slot marking the end of `consts` section), OR a
+        // - metadata string (slot is attribute metadata or a previous node's property metadata)
+        while (typeof currentValue === 'string' && !isPropMetadataString(currentValue)) {
+            currentValue = tData[--currentBindingIndex];
+        }
+        return currentBindingIndex + 1;
+    }
+    function collectHostPropertyBindings(tNode, lView, tData) {
+        var properties = {};
+        // Host binding values for a node are stored after directives on that node
+        var hostPropIndex = tNode.directiveEnd;
+        var propMetadata = tData[hostPropIndex];
+        // When we reach a value in TView.data that is not a string, we know we've
+        // hit the next node's providers and directives and should stop copying data.
+        while (typeof propMetadata === 'string') {
+            var propertyName = propMetadata.split(INTERPOLATION_DELIMITER)[0];
+            properties[propertyName] = lView[hostPropIndex];
+            propMetadata = tData[++hostPropIndex];
+        }
+        return properties;
     }
     // Need to keep the nodes in a global Map so that multiple angular apps are supported.
     var _nativeNodeToDebugNode = new Map();

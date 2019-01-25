@@ -114,6 +114,18 @@ declare class DebugElement__POST_R3__ extends DebugNode__POST_R3__ implements De
     constructor(nativeNode: Element);
     readonly nativeElement: Element | null;
     readonly name: string;
+    /**
+     *  Gets a map of property names to property values for an element.
+     *
+     *  This map includes:
+     *  - Regular property bindings (e.g. `[id]="id"`)
+     *  - Host property bindings (e.g. `host: { '[id]': "id" }`)
+     *  - Interpolated property bindings (e.g. `id="{{ value }}")
+     *
+     *  It does not include:
+     *  - input property bindings (e.g. `[myCustomInput]="value"`)
+     *  - attribute bindings (e.g. `[attr.role]="menu"`)
+     */
     readonly properties: {
         [key: string]: any;
     };
