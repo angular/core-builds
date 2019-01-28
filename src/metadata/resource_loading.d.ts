@@ -42,5 +42,5 @@ export declare function resolveComponentResources(resourceResolver: (url: string
     text(): Promise<string>;
 }>)): Promise<null>;
 export declare function maybeQueueResolutionOfComponentResources(metadata: Component): void;
-export declare function componentNeedsResolution(component: Component): string | number | undefined;
+export declare function componentNeedsResolution(component: Component): boolean;
 export declare function clearResolutionOfComponentResourcesQueue(): void;

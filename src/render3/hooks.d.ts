@@ -66,7 +66,7 @@ export declare function executeInitHooks(currentView: LView, tView: TView, check
  * @param checkHooks An Array of hooks to run if we're not in the first view pass.
  * @param checkNoChangesMode Whether or not we're in no changes mode.
  */
-export declare function executeHooks(currentView: LView, firstPassHooks: HookData | null, checkHooks: HookData | null, checkNoChangesMode: boolean): void;
+export declare function executeHooks(currentView: LView, firstPassHooks: HookData | null, checkHooks: HookData | null, checkNoChangesMode: boolean, initPhase: number): void;
 /**
  * Calls lifecycle hooks with their contexts, skipping init hooks if it's not
  * the first LView pass
@@ -74,4 +74,4 @@ export declare function executeHooks(currentView: LView, firstPassHooks: HookDat
  * @param currentView The current view
  * @param arr The array in which the hooks are found
  */
-export declare function callHooks(currentView: LView, arr: HookData): void;
+export declare function callHooks(currentView: LView, arr: HookData, initPhase?: number): void;
