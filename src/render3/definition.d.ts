@@ -213,6 +213,7 @@ export declare function defineComponent<T>(componentDefinition: {
      */
     pipes?: PipeTypesOrFactory | null;
 }): never;
+export declare function setComponentScope(type: ComponentType<any>, directives: Type<any>[], pipes: Type<any>[]): void;
 export declare function extractDirectiveDef(type: DirectiveType<any> & ComponentType<any>): DirectiveDef<any> | ComponentDef<any>;
 export declare function extractPipeDef(type: PipeType<any>): PipeDef<any>;
 export declare function defineNgModule<T>(def: {
