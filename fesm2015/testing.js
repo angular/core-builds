@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+35.sha-fdc2b0b
+ * @license Angular v8.0.0-beta.1+56.sha-fd8dbd5
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -788,6 +788,13 @@ function resolveComponentResources(resourceResolver) {
 /** @type {?} */
 const componentResourceResolutionQueue = new Set();
 /**
+ * @param {?} component
+ * @return {?}
+ */
+function componentNeedsResolution(component) {
+    return !!(component.templateUrl || component.styleUrls && component.styleUrls.length);
+}
+/**
  * @return {?}
  */
 function clearResolutionOfComponentResourcesQueue() {
@@ -1423,6 +1430,8 @@ class TestBedRender3 {
         const declarations = flatten(this._declarations || EMPTY_ARRAY, resolveForwardRef);
         /** @type {?} */
         const componentOverrides = [];
+        /** @type {?} */
+        let hasAsyncResources = false;
         // Compile the components declared by this module
         declarations.forEach(declaration => {
             /** @type {?} */
@@ -1433,24 +1442,35 @@ class TestBedRender3 {
                 const metadata = Object.assign({}, component);
                 ɵcompileComponent(declaration, metadata);
                 componentOverrides.push([declaration, metadata]);
+                hasAsyncResources = hasAsyncResources || componentNeedsResolution(component);
             }
         });
         /** @type {?} */
-        let resourceLoader;
-        return resolveComponentResources(url => {
-            if (!resourceLoader) {
-                resourceLoader = this.compilerInjector.get(ResourceLoader);
-            }
-            return Promise.resolve(resourceLoader.get(url));
-        })
-            .then(() => {
+        const overrideComponents = () => {
             componentOverrides.forEach((override) => {
-                // Once resolved, we override the existing metadata, ensuring that the resolved
-                // resources
+                // Override the existing metadata, ensuring that the resolved resources
                 // are only available until the next TestBed reset (when `resetTestingModule` is called)
                 this.overrideComponent(override[0], { set: override[1] });
             });
-        });
+        };
+        // If the component has no async resources (templateUrl, styleUrls), we can finish
+        // synchronously. This is important so that users who mistakenly treat `compileComponents`
+        // as synchronous don't encounter an error, as ViewEngine was tolerant of this.
+        if (!hasAsyncResources) {
+            overrideComponents();
+            return Promise.resolve();
+        }
+        else {
+            /** @type {?} */
+            let resourceLoader;
+            return resolveComponentResources(url => {
+                if (!resourceLoader) {
+                    resourceLoader = this.compilerInjector.get(ResourceLoader);
+                }
+                return Promise.resolve(resourceLoader.get(url));
+            })
+                .then(overrideComponents);
+        }
     }
     /**
      * @param {?} token
