@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+56.sha-fd8dbd5
+ * @license Angular v8.0.0-beta.1+68.sha-6e16338
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3779,6 +3779,11 @@
         });
         return def;
     }
+    function setComponentScope(type, directives, pipes) {
+        var def = type.ngComponentDef;
+        def.directiveDefs = function () { return directives.map(extractDirectiveDef); };
+        def.pipeDefs = function () { return pipes.map(extractPipeDef); };
+    }
     function extractDirectiveDef(type) {
         var def = getComponentDef(type) || getDirectiveDef(type);
         if (ngDevMode && !def) {
@@ -6458,8 +6463,7 @@
     var defaultStyleSanitizer = function (prop, value) {
         if (value === undefined) {
             return prop === 'background-image' || prop === 'background' || prop === 'border-image' ||
-                prop === 'filter' || prop === 'filter' || prop === 'list-style' ||
-                prop === 'list-style-image';
+                prop === 'filter' || prop === 'list-style' || prop === 'list-style-image';
         }
         return sanitizeStyle(value);
     };
@@ -13438,7 +13442,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.1+56.sha-fd8dbd5');
+    var VERSION = new Version('8.0.0-beta.1+68.sha-6e16338');
 
     /**
      * @license
@@ -19361,6 +19365,7 @@
         'ɵresolveWindow': resolveWindow,
         'ɵresolveDocument': resolveDocument,
         'ɵresolveBody': resolveBody,
+        'ɵsetComponentScope': setComponentScope,
         'ɵsanitizeHtml': sanitizeHtml,
         'ɵsanitizeStyle': sanitizeStyle,
         'ɵdefaultStyleSanitizer': defaultStyleSanitizer,
@@ -25064,6 +25069,7 @@
     exports.ɵinjectAttribute = injectAttribute;
     exports.ɵgetFactoryOf = getFactoryOf$1;
     exports.ɵgetInheritedFactory = getInheritedFactory;
+    exports.ɵsetComponentScope = setComponentScope;
     exports.ɵtemplateRefExtractor = templateRefExtractor;
     exports.ɵProvidersFeature = ProvidersFeature;
     exports.ɵInheritDefinitionFeature = InheritDefinitionFeature;
@@ -25168,6 +25174,8 @@
     exports.ɵcompilePipe = compilePipe;
     exports.ɵsanitizeHtml = sanitizeHtml;
     exports.ɵsanitizeStyle = sanitizeStyle;
+    exports.ɵdefaultStyleSanitizer = defaultStyleSanitizer;
+    exports.ɵsanitizeScript = sanitizeScript;
     exports.ɵsanitizeUrl = sanitizeUrl;
     exports.ɵsanitizeResourceUrl = sanitizeResourceUrl;
     exports.ɵsanitizeUrlOrResourceUrl = sanitizeUrlOrResourceUrl;
