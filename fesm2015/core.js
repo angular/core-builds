@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+86.sha-b87bf39
+ * @license Angular v8.0.0-beta.1+89.sha-ec414b4
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3140,7 +3140,7 @@ function deepForEach(input, fn) {
  * @return {?}
  */
 function isValueProvider(value) {
-    return value && typeof value == 'object' && USE_VALUE$2 in value;
+    return value !== null && typeof value == 'object' && USE_VALUE$2 in value;
 }
 /**
  * @param {?} value
@@ -3175,7 +3175,7 @@ function hasDeps(value) {
  * @return {?}
  */
 function hasOnDestroy(value) {
-    return typeof value === 'object' && value != null && ((/** @type {?} */ (value))).ngOnDestroy &&
+    return value !== null && typeof value === 'object' &&
         typeof ((/** @type {?} */ (value))).ngOnDestroy === 'function';
 }
 /**
@@ -3929,7 +3929,7 @@ const FactoryPrototype = NodeInjectorFactory.prototype;
  */
 function isFactory(obj) {
     // See: https://jsperf.com/instanceof-vs-getprototypeof
-    return obj != null && typeof obj == 'object' && Object.getPrototypeOf(obj) == FactoryPrototype;
+    return obj !== null && typeof obj == 'object' && Object.getPrototypeOf(obj) == FactoryPrototype;
 }
 
 /**
@@ -14825,6 +14825,7 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
         /** @type {?} */
         const componentView = createRootComponentView(hostRNode, componentDef, rootView, rendererFactory, renderer, sanitizer);
         component = createRootComponent(componentView, componentDef, rootView, rootContext, opts.hostFeatures || null);
+        addToViewTree(rootView, HEADER_OFFSET, componentView);
         refreshDescendantViews(rootView); // creation mode pass
         rootView[FLAGS] &= ~4 /* CreationMode */;
         refreshDescendantViews(rootView); // update mode pass
@@ -16650,7 +16651,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.1+86.sha-b87bf39');
+const VERSION = new Version('8.0.0-beta.1+89.sha-ec414b4');
 
 /**
  * @fileoverview added by tsickle
@@ -19246,7 +19247,7 @@ function _createProviderInstance(ngModule, providerDef) {
     // avoided if possible. The sequence of checks here determines whether ngOnDestroy needs to be
     // checked. It might not if the `injectable` isn't an object or if NodeFlags.OnDestroy is already
     // set (ngOnDestroy was detected statically).
-    if (injectable !== UNDEFINED_VALUE && injectable != null && typeof injectable === 'object' &&
+    if (injectable !== UNDEFINED_VALUE && injectable !== null && typeof injectable === 'object' &&
         !(providerDef.flags & 131072 /* OnDestroy */) && typeof injectable.ngOnDestroy === 'function') {
         providerDef.flags |= 131072 /* OnDestroy */;
     }
