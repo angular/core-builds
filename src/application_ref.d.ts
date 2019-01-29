@@ -1,4 +1,3 @@
-import * as i0 from './r3_symbols';
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -14,6 +13,7 @@ import { ComponentFactory, ComponentRef } from './linker/component_factory';
 import { NgModuleFactory, NgModuleRef } from './linker/ng_module_factory';
 import { ViewRef } from './linker/view_ref';
 import { NgZone } from './zone/ng_zone';
+import * as i0 from "./r3_symbols";
 export declare function compileNgModuleFactory__POST_R3__<M>(injector: Injector, options: CompilerOptions, moduleType: Type<M>): Promise<NgModuleFactory<M>>;
 export declare function isBoundToModule__PRE_R3__<C>(cf: ComponentFactory<C>): boolean;
 export declare function isBoundToModule__POST_R3__<C>(cf: ComponentFactory<C>): boolean;

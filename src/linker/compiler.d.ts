@@ -1,11 +1,3 @@
-import * as i0 from '../r3_symbols';
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 import { InjectionToken } from '../di/injection_token';
 import { StaticProvider } from '../di/interface/provider';
 import { MissingTranslationStrategy } from '../i18n/tokens';
@@ -13,6 +5,7 @@ import { Type } from '../interface/type';
 import { ViewEncapsulation } from '../metadata';
 import { ComponentFactory } from './component_factory';
 import { NgModuleFactory } from './ng_module_factory';
+import * as i0 from "../r3_symbols";
 /**
  * Combination of NgModuleFactory and ComponentFactorys.
  *

@@ -1,4 +1,3 @@
-import * as i0 from '@angular/core';
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -8,6 +7,7 @@ import * as i0 from '@angular/core';
  */
 import { Compiler, CompilerOptions, Component, ComponentFactory, Directive, Injector, NgModule, Pipe, Type } from '@angular/core';
 import { MetadataOverride } from './metadata_override';
+import * as i0 from "@angular/core";
 /**
  * Special interface to the compiler only used by testing
  *

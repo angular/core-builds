@@ -1,14 +1,7 @@
-import * as i0 from '../r3_symbols';
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 import { Compiler } from './compiler';
 import { NgModuleFactory } from './ng_module_factory';
 import { NgModuleFactoryLoader } from './ng_module_factory_loader';
+import * as i0 from "../r3_symbols";
 /**
  * Configuration for SystemJsNgModuleLoader.
  * token.

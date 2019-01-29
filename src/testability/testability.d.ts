@@ -1,12 +1,5 @@
-import * as i0 from '../r3_symbols';
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 import { NgZone } from '../zone/ng_zone';
+import * as i0 from "../r3_symbols";
 /**
  * Testability API.
  * `declare` keyword causes tsickle to generate externs, so these methods are
