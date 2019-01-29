@@ -669,7 +669,7 @@ export class TestBedRender3 {
         CompilerModule.decorators = [
             { type: NgModule, args: [{ providers },] },
         ];
-        /** @nocollapse */ CompilerModule.ngModuleDef = i0.ɵdefineNgModule({ type: CompilerModule, bootstrap: [], declarations: [], imports: [], exports: [] });
+        /** @nocollapse */ CompilerModule.ngModuleDef = i0.ɵdefineNgModule({ type: CompilerModule });
         /** @nocollapse */ CompilerModule.ngInjectorDef = i0.defineInjector({ factory: function CompilerModule_Factory(t) { return new (t || CompilerModule)(); }, providers: providers, imports: [] });
         /*@__PURE__*/ i0.ɵsetClassMetadata(CompilerModule, [{
                 type: NgModule,

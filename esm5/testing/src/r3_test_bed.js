@@ -470,7 +470,7 @@ var TestBedRender3 = /** @class */ (function () {
             var CompilerModule = /** @class */ (function () {
                 function CompilerModule() {
                 }
-                CompilerModule.ngModuleDef = i0.ɵdefineNgModule({ type: CompilerModule, bootstrap: [], declarations: [], imports: [], exports: [] });
+                CompilerModule.ngModuleDef = i0.ɵdefineNgModule({ type: CompilerModule });
                 CompilerModule.ngInjectorDef = i0.defineInjector({ factory: function CompilerModule_Factory(t) { return new (t || CompilerModule)(); }, providers: providers, imports: [] });
                 return CompilerModule;
             }());

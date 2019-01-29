@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+68.sha-6e16338
+ * @license Angular v8.0.0-beta.1+83.sha-e18a52e
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1412,7 +1412,7 @@ var TestBedRender3 = /** @class */ (function () {
             var CompilerModule = /** @class */ (function () {
                 function CompilerModule() {
                 }
-                CompilerModule.ngModuleDef = ɵdefineNgModule({ type: CompilerModule, bootstrap: [], declarations: [], imports: [], exports: [] });
+                CompilerModule.ngModuleDef = ɵdefineNgModule({ type: CompilerModule });
                 CompilerModule.ngInjectorDef = defineInjector({ factory: function CompilerModule_Factory(t) { return new (t || CompilerModule)(); }, providers: providers, imports: [] });
                 return CompilerModule;
             }());

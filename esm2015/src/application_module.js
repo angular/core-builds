@@ -114,7 +114,7 @@ ApplicationModule.decorators = [
 ApplicationModule.ctorParameters = () => [
     { type: ApplicationRef }
 ];
-/** @nocollapse */ ApplicationModule.ngModuleDef = i0.defineNgModule({ type: ApplicationModule, bootstrap: [], declarations: [], imports: [], exports: [] });
+/** @nocollapse */ ApplicationModule.ngModuleDef = i0.defineNgModule({ type: ApplicationModule });
 /** @nocollapse */ ApplicationModule.ngInjectorDef = i0.defineInjector({ factory: function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(i0.inject(ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS, imports: [] });
 /*@__PURE__*/ i0.setClassMetadata(ApplicationModule, [{
         type: NgModule,

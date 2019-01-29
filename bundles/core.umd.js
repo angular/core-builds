@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+68.sha-6e16338
+ * @license Angular v8.0.0-beta.1+83.sha-e18a52e
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4391,16 +4391,16 @@
         bindingRootIndex = value;
     }
     /**
-     * Current index of a View Query which needs to be processed next.
-     * We iterate over the list of View Queries stored in LView and increment current query index.
+     * Current index of a View or Content Query which needs to be processed next.
+     * We iterate over the list of Queries and increment current query index at every step.
      */
-    var viewQueryIndex = 0;
-    function getCurrentViewQueryIndex() {
+    var currentQueryIndex = 0;
+    function getCurrentQueryIndex() {
         // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-        return viewQueryIndex;
+        return currentQueryIndex;
     }
-    function setCurrentViewQueryIndex(value) {
-        viewQueryIndex = value;
+    function setCurrentQueryIndex(value) {
+        currentQueryIndex = value;
     }
     /**
      * Swap the current state with a new state.
@@ -9159,10 +9159,11 @@
     /** Refreshes content queries for all directives in the given view. */
     function refreshContentQueries(tView) {
         if (tView.contentQueries != null) {
-            for (var i = 0; i < tView.contentQueries.length; i += 2) {
+            setCurrentQueryIndex(0);
+            for (var i = 0; i < tView.contentQueries.length; i++) {
                 var directiveDefIdx = tView.contentQueries[i];
                 var directiveDef = tView.data[directiveDefIdx];
-                directiveDef.contentQueriesRefresh(directiveDefIdx - HEADER_OFFSET, tView.contentQueries[i + 1]);
+                directiveDef.contentQueriesRefresh(directiveDefIdx - HEADER_OFFSET);
             }
         }
     }
@@ -11383,7 +11384,7 @@
     function executeViewQueryFn(lView, tView, component) {
         var viewQuery = tView.viewQuery;
         if (viewQuery) {
-            setCurrentViewQueryIndex(tView.viewQueryStartIndex);
+            setCurrentQueryIndex(tView.viewQueryStartIndex);
             viewQuery(getRenderFlags(lView), component);
         }
     }
@@ -11681,13 +11682,6 @@
         var contextLView = getContextLView();
         return loadInternal(contextLView, index);
     }
-    function loadQueryList(queryListIdx) {
-        var lView = getLView();
-        ngDevMode &&
-            assertDefined(lView[CONTENT_QUERIES], 'Content QueryList array should be defined if reading a query.');
-        ngDevMode && assertDataInRange(lView[CONTENT_QUERIES], queryListIdx);
-        return lView[CONTENT_QUERIES][queryListIdx];
-    }
     /** Retrieves a value from current `viewData`. */
     function load(index) {
         return loadInternal(getLView(), index);
@@ -11702,22 +11696,6 @@
      */
     function injectAttribute(attrNameToInject) {
         return injectAttributeImpl(getPreviousOrParentTNode(), attrNameToInject);
-    }
-    /**
-     * Registers a QueryList, associated with a content query, for later refresh (part of a view
-     * refresh).
-     */
-    function registerContentQuery(queryList, currentDirectiveIndex) {
-        var viewData = getLView();
-        var tView = viewData[TVIEW];
-        var savedContentQueriesLength = (viewData[CONTENT_QUERIES] || (viewData[CONTENT_QUERIES] = [])).push(queryList);
-        if (getFirstTemplatePass()) {
-            var tViewContentQueries = tView.contentQueries || (tView.contentQueries = []);
-            var lastSavedDirectiveIndex = tView.contentQueries.length ? tView.contentQueries[tView.contentQueries.length - 2] : -1;
-            if (currentDirectiveIndex !== lastSavedDirectiveIndex) {
-                tViewContentQueries.push(currentDirectiveIndex, savedContentQueriesLength - 1);
-            }
-        }
     }
     var CLEAN_PROMISE = _CLEAN_PROMISE;
     function initializeTNodeInputs(tNode) {
@@ -12132,9 +12110,9 @@
                 var superContentQueries_1 = superDef.contentQueries;
                 if (superContentQueries_1) {
                     if (prevContentQueries_1) {
-                        definition.contentQueries = function (dirIndex) {
-                            superContentQueries_1(dirIndex);
-                            prevContentQueries_1(dirIndex);
+                        definition.contentQueries = function (directiveIndex) {
+                            superContentQueries_1(directiveIndex);
+                            prevContentQueries_1(directiveIndex);
                         };
                     }
                     else {
@@ -12146,9 +12124,9 @@
                 var superContentQueriesRefresh_1 = superDef.contentQueriesRefresh;
                 if (superContentQueriesRefresh_1) {
                     if (prevContentQueriesRefresh_1) {
-                        definition.contentQueriesRefresh = function (directiveIndex, queryIndex) {
-                            superContentQueriesRefresh_1(directiveIndex, queryIndex);
-                            prevContentQueriesRefresh_1(directiveIndex, queryIndex);
+                        definition.contentQueriesRefresh = function (directiveIndex) {
+                            superContentQueriesRefresh_1(directiveIndex);
+                            prevContentQueriesRefresh_1(directiveIndex);
                         };
                     }
                     else {
@@ -13442,7 +13420,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.1+68.sha-6e16338');
+    var VERSION = new Version('8.0.0-beta.1+83.sha-e18a52e');
 
     /**
      * @license
@@ -19219,19 +19197,54 @@
         if (tView.firstTemplatePass) {
             tView.expandoStartIndex++;
         }
-        var index = getCurrentViewQueryIndex();
+        var index = getCurrentQueryIndex();
         var viewQuery = query(predicate, descend, read);
         store(index - HEADER_OFFSET, viewQuery);
-        setCurrentViewQueryIndex(index + 1);
+        setCurrentQueryIndex(index + 1);
         return viewQuery;
     }
     /**
     * Loads current View Query and moves the pointer/index to the next View Query in LView.
     */
     function loadViewQuery() {
-        var index = getCurrentViewQueryIndex();
-        setCurrentViewQueryIndex(index + 1);
+        var index = getCurrentQueryIndex();
+        setCurrentQueryIndex(index + 1);
         return load(index - HEADER_OFFSET);
+    }
+    /**
+     * Registers a QueryList, associated with a content query, for later refresh (part of a view
+     * refresh).
+     *
+     * @param directiveIndex Current directive index
+     * @param predicate The type for which the query will search
+     * @param descend Whether or not to descend into children
+     * @param read What to save in the query
+     * @returns QueryList<T>
+     */
+    function contentQuery(directiveIndex, predicate, descend, 
+    // TODO: "read" should be an AbstractType (FW-486)
+    read) {
+        var lView = getLView();
+        var tView = lView[TVIEW];
+        var contentQuery = query(predicate, descend, read);
+        (lView[CONTENT_QUERIES] || (lView[CONTENT_QUERIES] = [])).push(contentQuery);
+        if (getFirstTemplatePass()) {
+            var tViewContentQueries = tView.contentQueries || (tView.contentQueries = []);
+            var lastSavedDirectiveIndex = tView.contentQueries.length ? tView.contentQueries[tView.contentQueries.length - 1] : -1;
+            if (directiveIndex !== lastSavedDirectiveIndex) {
+                tViewContentQueries.push(directiveIndex);
+            }
+        }
+        return contentQuery;
+    }
+    function loadContentQuery() {
+        var lView = getLView();
+        ngDevMode &&
+            assertDefined(lView[CONTENT_QUERIES], 'Content QueryList array should be defined if reading a query.');
+        var index = getCurrentQueryIndex();
+        ngDevMode && assertDataInRange(lView[CONTENT_QUERIES], index);
+        setCurrentQueryIndex(index + 1);
+        return lView[CONTENT_QUERIES][index];
     }
 
     /**
@@ -19292,7 +19305,6 @@
         'ɵnextContext': nextContext,
         'ɵcontainerRefreshStart': containerRefreshStart,
         'ɵcontainerRefreshEnd': containerRefreshEnd,
-        'ɵloadQueryList': loadQueryList,
         'ɵnamespaceHTML': namespaceHTML,
         'ɵnamespaceMathML': namespaceMathML,
         'ɵnamespaceSVG': namespaceSVG,
@@ -19339,11 +19351,11 @@
         'ɵpipeBindV': pipeBindV,
         'ɵprojectionDef': projectionDef,
         'ɵpipe': pipe,
-        'ɵquery': query,
         'ɵqueryRefresh': queryRefresh,
         'ɵviewQuery': viewQuery,
         'ɵloadViewQuery': loadViewQuery,
-        'ɵregisterContentQuery': registerContentQuery,
+        'ɵcontentQuery': contentQuery,
+        'ɵloadContentQuery': loadContentQuery,
         'ɵreference': reference,
         'ɵelementStyling': elementStyling,
         'ɵelementHostAttrs': elementHostAttrs,
@@ -22553,7 +22565,7 @@
         // Inject ApplicationRef to make it eager...
         function ApplicationModule(appRef) {
         }
-        ApplicationModule.ngModuleDef = defineNgModule({ type: ApplicationModule, bootstrap: [], declarations: [], imports: [], exports: [] });
+        ApplicationModule.ngModuleDef = defineNgModule({ type: ApplicationModule });
         ApplicationModule.ngInjectorDef = defineInjector({ factory: function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(inject(ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS, imports: [] });
         return ApplicationModule;
     }());
@@ -25089,8 +25101,6 @@
     exports.ɵlistener = listener;
     exports.ɵtext = text;
     exports.ɵembeddedViewStart = embeddedViewStart;
-    exports.ɵquery = query;
-    exports.ɵregisterContentQuery = registerContentQuery;
     exports.ɵprojection = projection;
     exports.ɵbind = bind;
     exports.ɵinterpolation1 = interpolation1;
@@ -25126,7 +25136,8 @@
     exports.ɵqueryRefresh = queryRefresh;
     exports.ɵviewQuery = viewQuery;
     exports.ɵloadViewQuery = loadViewQuery;
-    exports.ɵloadQueryList = loadQueryList;
+    exports.ɵcontentQuery = contentQuery;
+    exports.ɵloadContentQuery = loadContentQuery;
     exports.ɵelementEnd = elementEnd;
     exports.ɵelementProperty = elementProperty;
     exports.ɵcomponentHostSyntheticProperty = componentHostSyntheticProperty;

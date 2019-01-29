@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+68.sha-6e16338
+ * @license Angular v8.0.0-beta.1+83.sha-e18a52e
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1742,7 +1742,7 @@ class TestBedRender3 {
         CompilerModule.decorators = [
             { type: NgModule, args: [{ providers },] },
         ];
-        /** @nocollapse */ CompilerModule.ngModuleDef = ɵdefineNgModule({ type: CompilerModule, bootstrap: [], declarations: [], imports: [], exports: [] });
+        /** @nocollapse */ CompilerModule.ngModuleDef = ɵdefineNgModule({ type: CompilerModule });
         /** @nocollapse */ CompilerModule.ngInjectorDef = defineInjector({ factory: function CompilerModule_Factory(t) { return new (t || CompilerModule)(); }, providers: providers, imports: [] });
         /*@__PURE__*/ ɵsetClassMetadata(CompilerModule, [{
                 type: NgModule,
