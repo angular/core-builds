@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+86.sha-b87bf39
+ * @license Angular v8.0.0-beta.1+89.sha-ec414b4
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2820,7 +2820,7 @@
         input.forEach(function (value) { return Array.isArray(value) ? deepForEach(value, fn) : fn(value); });
     }
     function isValueProvider(value) {
-        return value && typeof value == 'object' && USE_VALUE$2 in value;
+        return value !== null && typeof value == 'object' && USE_VALUE$2 in value;
     }
     function isExistingProvider(value) {
         return !!(value && value.useExisting);
@@ -2835,7 +2835,7 @@
         return !!value.deps;
     }
     function hasOnDestroy(value) {
-        return typeof value === 'object' && value != null && value.ngOnDestroy &&
+        return value !== null && typeof value === 'object' &&
             typeof value.ngOnDestroy === 'function';
     }
     function couldBeInjectableType(value) {
@@ -3503,7 +3503,7 @@
     var FactoryPrototype = NodeInjectorFactory.prototype;
     function isFactory(obj) {
         // See: https://jsperf.com/instanceof-vs-getprototypeof
-        return obj != null && typeof obj == 'object' && Object.getPrototypeOf(obj) == FactoryPrototype;
+        return obj !== null && typeof obj == 'object' && Object.getPrototypeOf(obj) == FactoryPrototype;
     }
 
     /**
@@ -11980,6 +11980,7 @@
                 rendererFactory.begin();
             var componentView = createRootComponentView(hostRNode, componentDef, rootView, rendererFactory, renderer, sanitizer);
             component = createRootComponent(componentView, componentDef, rootView, rootContext, opts.hostFeatures || null);
+            addToViewTree(rootView, HEADER_OFFSET, componentView);
             refreshDescendantViews(rootView); // creation mode pass
             rootView[FLAGS] &= ~4 /* CreationMode */;
             refreshDescendantViews(rootView); // update mode pass
@@ -13506,7 +13507,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.1+86.sha-b87bf39');
+    var VERSION = new Version('8.0.0-beta.1+89.sha-ec414b4');
 
     /**
      * @license
@@ -15423,7 +15424,7 @@
         // avoided if possible. The sequence of checks here determines whether ngOnDestroy needs to be
         // checked. It might not if the `injectable` isn't an object or if NodeFlags.OnDestroy is already
         // set (ngOnDestroy was detected statically).
-        if (injectable !== UNDEFINED_VALUE && injectable != null && typeof injectable === 'object' &&
+        if (injectable !== UNDEFINED_VALUE && injectable !== null && typeof injectable === 'object' &&
             !(providerDef.flags & 131072 /* OnDestroy */) && typeof injectable.ngOnDestroy === 'function') {
             providerDef.flags |= 131072 /* OnDestroy */;
         }
