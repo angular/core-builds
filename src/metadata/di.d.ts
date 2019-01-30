@@ -171,8 +171,6 @@ export interface ContentChildDecorator {
 /**
  * Type of the ContentChild metadata.
  *
- * @see `ContentChild`.
- *
  * @publicApi
  */
 export declare type ContentChild = Query;

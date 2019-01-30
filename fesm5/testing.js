@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+43.sha-3d5a919
+ * @license Angular v8.0.0-beta.1+109.sha-a227c52
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -701,6 +701,9 @@ function resolveComponentResources(resourceResolver) {
     return Promise.all(urlFetches).then(function () { return null; });
 }
 var componentResourceResolutionQueue = new Set();
+function componentNeedsResolution(component) {
+    return !!(component.templateUrl || component.styleUrls && component.styleUrls.length);
+}
 function clearResolutionOfComponentResourcesQueue() {
     componentResourceResolutionQueue.clear();
 }
@@ -1210,6 +1213,7 @@ var TestBedRender3 = /** @class */ (function () {
         var resolvers = this._getResolvers();
         var declarations = flatten(this._declarations || EMPTY_ARRAY, resolveForwardRef);
         var componentOverrides = [];
+        var hasAsyncResources = false;
         // Compile the components declared by this module
         declarations.forEach(function (declaration) {
             var component = resolvers.component.resolve(declaration);
@@ -1218,23 +1222,33 @@ var TestBedRender3 = /** @class */ (function () {
                 var metadata = __assign({}, component);
                 ɵcompileComponent(declaration, metadata);
                 componentOverrides.push([declaration, metadata]);
+                hasAsyncResources = hasAsyncResources || componentNeedsResolution(component);
             }
         });
-        var resourceLoader;
-        return resolveComponentResources(function (url) {
-            if (!resourceLoader) {
-                resourceLoader = _this.compilerInjector.get(ResourceLoader);
-            }
-            return Promise.resolve(resourceLoader.get(url));
-        })
-            .then(function () {
+        var overrideComponents = function () {
             componentOverrides.forEach(function (override) {
-                // Once resolved, we override the existing metadata, ensuring that the resolved
-                // resources
+                // Override the existing metadata, ensuring that the resolved resources
                 // are only available until the next TestBed reset (when `resetTestingModule` is called)
                 _this.overrideComponent(override[0], { set: override[1] });
             });
-        });
+        };
+        // If the component has no async resources (templateUrl, styleUrls), we can finish
+        // synchronously. This is important so that users who mistakenly treat `compileComponents`
+        // as synchronous don't encounter an error, as ViewEngine was tolerant of this.
+        if (!hasAsyncResources) {
+            overrideComponents();
+            return Promise.resolve();
+        }
+        else {
+            var resourceLoader_1;
+            return resolveComponentResources(function (url) {
+                if (!resourceLoader_1) {
+                    resourceLoader_1 = _this.compilerInjector.get(ResourceLoader);
+                }
+                return Promise.resolve(resourceLoader_1.get(url));
+            })
+                .then(overrideComponents);
+        }
     };
     TestBedRender3.prototype.get = function (token, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }

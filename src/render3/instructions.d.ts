@@ -7,7 +7,6 @@
  */
 import { InjectFlags, InjectionToken, Injector } from '../di';
 import { Type } from '../interface/type';
-import { QueryList } from '../linker';
 import { Sanitizer } from '../sanitization/security';
 import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
 import { LContainer } from './interfaces/container';
@@ -731,7 +730,6 @@ export declare function store<T>(index: number, value: T): void;
  * @param index The index of the local ref in contextViewData.
  */
 export declare function reference<T>(index: number): T;
-export declare function loadQueryList<T>(queryListIdx: number): QueryList<T>;
 /** Retrieves a value from current `viewData`. */
 export declare function load<T>(index: number): T;
 /**
@@ -761,11 +759,6 @@ export declare function directiveInject<T>(token: Type<T> | InjectionToken<T>, f
  * Facade for the attribute injection from DI.
  */
 export declare function injectAttribute(attrNameToInject: string): string | null;
-/**
- * Registers a QueryList, associated with a content query, for later refresh (part of a view
- * refresh).
- */
-export declare function registerContentQuery<Q>(queryList: QueryList<Q>, currentDirectiveIndex: number): void;
 export declare const CLEAN_PROMISE: Promise<null>;
 /**
  * Returns the current OpaqueViewState instance.

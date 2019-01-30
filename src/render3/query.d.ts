@@ -100,3 +100,15 @@ export declare function viewQuery<T>(predicate: Type<any> | string[], descend?: 
 * Loads current View Query and moves the pointer/index to the next View Query in LView.
 */
 export declare function loadViewQuery<T>(): T;
+/**
+ * Registers a QueryList, associated with a content query, for later refresh (part of a view
+ * refresh).
+ *
+ * @param directiveIndex Current directive index
+ * @param predicate The type for which the query will search
+ * @param descend Whether or not to descend into children
+ * @param read What to save in the query
+ * @returns QueryList<T>
+ */
+export declare function contentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend?: boolean, read?: any): QueryList<T>;
+export declare function loadContentQuery<T>(): QueryList<T>;

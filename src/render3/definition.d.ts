@@ -120,7 +120,7 @@ export declare function defineComponent<T>(componentDefinition: {
      */
     contentQueries?: ((dirIndex: number) => void);
     /** Refreshes content queries associated with directives in a given view */
-    contentQueriesRefresh?: ((directiveIndex: number, queryIndex: number) => void);
+    contentQueriesRefresh?: ((directiveIndex: number) => void);
     /**
      * Defines the name that can be used in the template to assign this directive to a variable.
      *
@@ -213,6 +213,7 @@ export declare function defineComponent<T>(componentDefinition: {
      */
     pipes?: PipeTypesOrFactory | null;
 }): never;
+export declare function setComponentScope(type: ComponentType<any>, directives: Type<any>[], pipes: Type<any>[]): void;
 export declare function extractDirectiveDef(type: DirectiveType<any> & ComponentType<any>): DirectiveDef<any> | ComponentDef<any>;
 export declare function extractPipeDef(type: PipeType<any>): PipeDef<any>;
 export declare function defineNgModule<T>(def: {
