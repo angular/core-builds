@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+100.sha-ad49962
+ * @license Angular v8.0.0-beta.1+109.sha-a227c52
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13462,7 +13462,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.1+100.sha-ad49962');
+var VERSION = new Version('8.0.0-beta.1+109.sha-a227c52');
 
 /**
  * @license
@@ -19073,16 +19073,18 @@ function copyQueriesToView(query) {
 }
 function insertView$1(index, query) {
     while (query) {
-        ngDevMode &&
-            assertDefined(query.containerValues, 'View queries need to have a pointer to container values.');
+        ngDevMode && assertViewQueryhasPointerToDeclarationContainer(query);
         query.containerValues.splice(index, 0, query.values);
+        // mark a query as dirty only when inserted view had matching modes
+        if (query.values.length) {
+            query.list.setDirty();
+        }
         query = query.next;
     }
 }
 function removeView$1(query) {
     while (query) {
-        ngDevMode &&
-            assertDefined(query.containerValues, 'View queries need to have a pointer to container values.');
+        ngDevMode && assertViewQueryhasPointerToDeclarationContainer(query);
         var containerValues = query.containerValues;
         var viewValuesIdx = containerValues.indexOf(query.values);
         var removed = containerValues.splice(viewValuesIdx, 1);
@@ -19093,6 +19095,9 @@ function removeView$1(query) {
         }
         query = query.next;
     }
+}
+function assertViewQueryhasPointerToDeclarationContainer(query) {
+    assertDefined(query.containerValues, 'View queries need to have a pointer to container values.');
 }
 /**
  * Iterates over local names for a given node and returns directive index
@@ -19648,6 +19653,7 @@ function verifySemanticsOfNgModuleDef(moduleType) {
         ngModule.imports &&
             flatten$2(ngModule.imports, unwrapModuleWithProvidersImports)
                 .forEach(verifySemanticsOfNgModuleDef);
+        ngModule.bootstrap && ngModule.bootstrap.forEach(verifyCorrectBootstrapType);
         ngModule.bootstrap && ngModule.bootstrap.forEach(verifyComponentIsPartOfNgModule);
         ngModule.entryComponents && ngModule.entryComponents.forEach(verifyComponentIsPartOfNgModule);
     }
@@ -19695,6 +19701,12 @@ function verifySemanticsOfNgModuleDef(moduleType) {
         var existingModule = ownerNgModule.get(type);
         if (!existingModule) {
             errors.push("Component " + renderStringify(type) + " is not part of any NgModule or the module has not been imported into your module.");
+        }
+    }
+    function verifyCorrectBootstrapType(type) {
+        type = resolveForwardRef(type);
+        if (!getComponentDef(type)) {
+            errors.push(renderStringify(type) + " cannot be used as an entry component.");
         }
     }
     function verifyComponentEntryComponentsIsPartOfNgModule(type) {
@@ -19941,8 +19953,9 @@ function compileComponent(type, metadata) {
                     error.push("Did you run and wait for 'resolveComponentResources()'?");
                     throw new Error(error.join('\n'));
                 }
-                var meta = __assign({}, directiveMetadata(type, metadata), { template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY$2, animations: metadata.animations, viewQueries: extractQueriesMetadata(type, getReflect().propMetadata(type), isViewQuery), directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
-                ngComponentDef = compiler.compileComponent(angularCoreEnv, "ng://" + renderStringify(type) + "/template.html", meta);
+                var sourceMapUrl = "ng://" + renderStringify(type) + "/template.html";
+                var meta = __assign({}, directiveMetadata(type, metadata), { typeSourceSpan: compiler.createParseSourceSpan('Component', renderStringify(type), sourceMapUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY$2, animations: metadata.animations, viewQueries: extractQueriesMetadata(type, getReflect().propMetadata(type), isViewQuery), directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
+                ngComponentDef = compiler.compileComponent(angularCoreEnv, sourceMapUrl, meta);
                 // When NgModule decorator executed, we enqueued the module definition such that
                 // it would only dequeue and add itself as module scope to all of its declarations,
                 // but only if  if all of its declarations had resolved. This call runs the check
@@ -19979,8 +19992,13 @@ function compileDirective(type, directive) {
     Object.defineProperty(type, NG_DIRECTIVE_DEF, {
         get: function () {
             if (ngDirectiveDef === null) {
+                var name_1 = type && type.name;
+                var sourceMapUrl = "ng://" + name_1 + "/ngDirectiveDef.js";
+                var compiler = getCompilerFacade();
                 var facade = directiveMetadata(type, directive);
-                ngDirectiveDef = getCompilerFacade().compileDirective(angularCoreEnv, "ng://" + (type && type.name) + "/ngDirectiveDef.js", facade);
+                facade.typeSourceSpan =
+                    compiler.createParseSourceSpan('Directive', renderStringify(type), sourceMapUrl);
+                ngDirectiveDef = compiler.compileDirective(angularCoreEnv, sourceMapUrl, facade);
             }
             return ngDirectiveDef;
         },
@@ -20034,11 +20052,15 @@ function extractQueriesMetadata(type, propMetadata, isQueryAnn) {
     var queriesMeta = [];
     var _loop_1 = function (field) {
         if (propMetadata.hasOwnProperty(field)) {
-            propMetadata[field].forEach(function (ann) {
+            var annotations_1 = propMetadata[field];
+            annotations_1.forEach(function (ann) {
                 if (isQueryAnn(ann)) {
                     if (!ann.selector) {
                         throw new Error("Can't construct a query for the property \"" + field + "\" of " +
                             ("\"" + renderStringify(type) + "\" since the query selector wasn't defined."));
+                    }
+                    if (annotations_1.some(isInputAnn)) {
+                        throw new Error("Cannot combine @Input decorators with query decorators");
                     }
                     queriesMeta.push(convertToR3QueryMetadata(field, ann));
                 }
@@ -20063,6 +20085,9 @@ function isContentQuery(value) {
 function isViewQuery(value) {
     var name = value.ngMetadataName;
     return name === 'ViewChild' || name === 'ViewChildren';
+}
+function isInputAnn(value) {
+    return value.ngMetadataName === 'Input';
 }
 function splitByComma(value) {
     return value.split(',').map(function (piece) { return piece.trim(); });
