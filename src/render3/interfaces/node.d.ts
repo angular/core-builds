@@ -29,7 +29,7 @@ export declare const enum TNodeFlags {
     isComponent = 1,
     /** This bit is set if the node has been projected */
     isProjected = 2,
-    /** This bit is set if the node has any content queries */
+    /** This bit is set if any directive on this node has content queries */
     hasContentQuery = 4,
     /** This bit is set if the node has any directives that contain [class properties */
     hasClassInput = 8

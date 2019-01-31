@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.2+6.sha-9efb39c
+ * @license Angular v8.0.0-beta.2+8.sha-1b6d8a7
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9218,7 +9218,7 @@ function allocExpando(view) {
  * either through ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
  * Such lViewNode will then be renderer with renderEmbeddedTemplate() (see below).
  */
-function createEmbeddedViewAndNode(tView, context, declarationView, renderer, queries, injectorIndex) {
+function createEmbeddedViewAndNode(tView, context, declarationView, queries, injectorIndex) {
     var _isParent = getIsParent();
     var _previousOrParentTNode = getPreviousOrParentTNode();
     setIsParent(true);
@@ -10766,19 +10766,14 @@ function template(index, templateFn, consts, vars, tagName, attrs, localRefs, lo
     var lView = getLView();
     var tView = lView[TVIEW];
     // TODO: consider a separate node type for templates
-    var tNode = containerInternal(index, tagName || null, attrs || null);
+    var tContainerNode = containerInternal(index, tagName || null, attrs || null);
     if (tView.firstTemplatePass) {
-        tNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null);
+        tContainerNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null);
     }
     createDirectivesAndLocals(tView, lView, localRefs, localRefExtractor);
-    var currentQueries = lView[QUERIES];
-    var previousOrParentTNode = getPreviousOrParentTNode();
-    var native = getNativeByTNode(previousOrParentTNode, lView);
-    attachPatchData(native, lView);
-    if (currentQueries) {
-        lView[QUERIES] = currentQueries.addNode(previousOrParentTNode);
-    }
-    registerPostOrderHooks(tView, tNode);
+    addTContainerToQueries(lView, tContainerNode);
+    attachPatchData(getNativeByTNode(tContainerNode, lView), lView);
+    registerPostOrderHooks(tView, tContainerNode);
     setIsParent(false);
 }
 /**
@@ -10796,6 +10791,7 @@ function container(index) {
     if (lView[TVIEW].firstTemplatePass) {
         tNode.tViews = [];
     }
+    addTContainerToQueries(lView, tNode);
     setIsParent(false);
 }
 function containerInternal(index, tagName, attrs) {
@@ -10810,13 +10806,25 @@ function containerInternal(index, tagName, attrs) {
     // Containers are added to the current view tree instead of their embedded views
     // because views can be removed and re-inserted.
     addToViewTree(lView, index + HEADER_OFFSET, lContainer);
-    var currentQueries = lView[QUERIES];
-    if (currentQueries) {
-        // prepare place for matching nodes from views inserted into a given container
-        lContainer[QUERIES] = currentQueries.container();
-    }
     ngDevMode && assertNodeType(getPreviousOrParentTNode(), 0 /* Container */);
     return tNode;
+}
+/**
+ * Reporting a TContainer node queries is a 2-step process as we need to:
+ * - check if the container node itself is matching (query might match a <ng-template> node);
+ * - prepare room for nodes from views that might be created based on the TemplateRef linked to this
+ * container.
+ *
+ * Those 2 operations need to happen in the specific order (match the container node itself, then
+ * prepare space for nodes from views).
+ */
+function addTContainerToQueries(lView, tContainerNode) {
+    var queries = lView[QUERIES];
+    if (queries) {
+        lView[QUERIES] = queries.addNode(tContainerNode);
+        var lContainer = lView[tContainerNode.index];
+        lContainer[QUERIES] = queries.container();
+    }
 }
 /**
  * Sets a container up to receive views.
@@ -12971,18 +12979,18 @@ function createTemplateRef(TemplateRefToken, ElementRefToken, hostTNode, hostVie
         // TODO: Fix class name, should be TemplateRef, but there appears to be a rollup bug
         R3TemplateRef = /** @class */ (function (_super) {
             __extends(TemplateRef_, _super);
-            function TemplateRef_(_declarationParentView, elementRef, _tView, _renderer, _queries, _injectorIndex) {
+            function TemplateRef_(_declarationParentView, elementRef, _tView, _renderer, _hostLContainer, _injectorIndex) {
                 var _this = _super.call(this) || this;
                 _this._declarationParentView = _declarationParentView;
                 _this.elementRef = elementRef;
                 _this._tView = _tView;
                 _this._renderer = _renderer;
-                _this._queries = _queries;
+                _this._hostLContainer = _hostLContainer;
                 _this._injectorIndex = _injectorIndex;
                 return _this;
             }
             TemplateRef_.prototype.createEmbeddedView = function (context, container$$1, hostTNode, hostView, index) {
-                var lView = createEmbeddedViewAndNode(this._tView, context, this._declarationParentView, this._renderer, this._queries, this._injectorIndex);
+                var lView = createEmbeddedViewAndNode(this._tView, context, this._declarationParentView, this._hostLContainer[QUERIES], this._injectorIndex);
                 if (container$$1) {
                     insertView(lView, container$$1, hostView, index, hostTNode.index);
                 }
@@ -12997,7 +13005,7 @@ function createTemplateRef(TemplateRefToken, ElementRefToken, hostTNode, hostVie
     if (hostTNode.type === 0 /* Container */) {
         var hostContainer = hostView[hostTNode.index];
         ngDevMode && assertDefined(hostTNode.tViews, 'TView must be allocated');
-        return new R3TemplateRef(hostView, createElementRef(ElementRefToken, hostTNode, hostView), hostTNode.tViews, getLView()[RENDERER], hostContainer[QUERIES], hostTNode.injectorIndex);
+        return new R3TemplateRef(hostView, createElementRef(ElementRefToken, hostTNode, hostView), hostTNode.tViews, getLView()[RENDERER], hostContainer, hostTNode.injectorIndex);
     }
     else {
         return null;
@@ -13387,7 +13395,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.2+6.sha-9efb39c');
+var VERSION = new Version('8.0.0-beta.2+8.sha-1b6d8a7');
 
 /**
  * @license

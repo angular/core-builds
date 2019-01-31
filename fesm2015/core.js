@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.2+6.sha-9efb39c
+ * @license Angular v8.0.0-beta.2+8.sha-1b6d8a7
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11428,12 +11428,11 @@ function allocExpando(view) {
  * @param {?} tView
  * @param {?} context
  * @param {?} declarationView
- * @param {?} renderer
  * @param {?} queries
  * @param {?} injectorIndex
  * @return {?}
  */
-function createEmbeddedViewAndNode(tView, context, declarationView, renderer, queries, injectorIndex) {
+function createEmbeddedViewAndNode(tView, context, declarationView, queries, injectorIndex) {
     /** @type {?} */
     const _isParent = getIsParent();
     /** @type {?} */
@@ -13371,22 +13370,14 @@ function template(index, templateFn, consts, vars, tagName, attrs, localRefs, lo
     const tView = lView[TVIEW];
     // TODO: consider a separate node type for templates
     /** @type {?} */
-    const tNode = containerInternal(index, tagName || null, attrs || null);
+    const tContainerNode = containerInternal(index, tagName || null, attrs || null);
     if (tView.firstTemplatePass) {
-        tNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null);
+        tContainerNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null);
     }
     createDirectivesAndLocals(tView, lView, localRefs, localRefExtractor);
-    /** @type {?} */
-    const currentQueries = lView[QUERIES];
-    /** @type {?} */
-    const previousOrParentTNode = getPreviousOrParentTNode();
-    /** @type {?} */
-    const native = getNativeByTNode(previousOrParentTNode, lView);
-    attachPatchData(native, lView);
-    if (currentQueries) {
-        lView[QUERIES] = currentQueries.addNode((/** @type {?} */ (previousOrParentTNode)));
-    }
-    registerPostOrderHooks(tView, tNode);
+    addTContainerToQueries(lView, tContainerNode);
+    attachPatchData(getNativeByTNode(tContainerNode, lView), lView);
+    registerPostOrderHooks(tView, tContainerNode);
     setIsParent(false);
 }
 /**
@@ -13407,6 +13398,7 @@ function container(index) {
     if (lView[TVIEW].firstTemplatePass) {
         tNode.tViews = [];
     }
+    addTContainerToQueries(lView, tNode);
     setIsParent(false);
 }
 /**
@@ -13432,14 +13424,30 @@ function containerInternal(index, tagName, attrs) {
     // Containers are added to the current view tree instead of their embedded views
     // because views can be removed and re-inserted.
     addToViewTree(lView, index + HEADER_OFFSET, lContainer);
-    /** @type {?} */
-    const currentQueries = lView[QUERIES];
-    if (currentQueries) {
-        // prepare place for matching nodes from views inserted into a given container
-        lContainer[QUERIES] = currentQueries.container();
-    }
     ngDevMode && assertNodeType(getPreviousOrParentTNode(), 0 /* Container */);
     return tNode;
+}
+/**
+ * Reporting a TContainer node queries is a 2-step process as we need to:
+ * - check if the container node itself is matching (query might match a <ng-template> node);
+ * - prepare room for nodes from views that might be created based on the TemplateRef linked to this
+ * container.
+ *
+ * Those 2 operations need to happen in the specific order (match the container node itself, then
+ * prepare space for nodes from views).
+ * @param {?} lView
+ * @param {?} tContainerNode
+ * @return {?}
+ */
+function addTContainerToQueries(lView, tContainerNode) {
+    /** @type {?} */
+    const queries = lView[QUERIES];
+    if (queries) {
+        lView[QUERIES] = queries.addNode(tContainerNode);
+        /** @type {?} */
+        const lContainer = lView[tContainerNode.index];
+        lContainer[QUERIES] = queries.container();
+    }
 }
 /**
  * Sets a container up to receive views.
@@ -16118,16 +16126,16 @@ function createTemplateRef(TemplateRefToken, ElementRefToken, hostTNode, hostVie
              * @param {?} elementRef
              * @param {?} _tView
              * @param {?} _renderer
-             * @param {?} _queries
+             * @param {?} _hostLContainer
              * @param {?} _injectorIndex
              */
-            constructor(_declarationParentView, elementRef, _tView, _renderer, _queries, _injectorIndex) {
+            constructor(_declarationParentView, elementRef, _tView, _renderer, _hostLContainer, _injectorIndex) {
                 super();
                 this._declarationParentView = _declarationParentView;
                 this.elementRef = elementRef;
                 this._tView = _tView;
                 this._renderer = _renderer;
-                this._queries = _queries;
+                this._hostLContainer = _hostLContainer;
                 this._injectorIndex = _injectorIndex;
             }
             /**
@@ -16140,7 +16148,7 @@ function createTemplateRef(TemplateRefToken, ElementRefToken, hostTNode, hostVie
              */
             createEmbeddedView(context, container$$1, hostTNode, hostView, index) {
                 /** @type {?} */
-                const lView = createEmbeddedViewAndNode(this._tView, context, this._declarationParentView, this._renderer, this._queries, this._injectorIndex);
+                const lView = createEmbeddedViewAndNode(this._tView, context, this._declarationParentView, this._hostLContainer[QUERIES], this._injectorIndex);
                 if (container$$1) {
                     insertView(lView, container$$1, (/** @type {?} */ (hostView)), (/** @type {?} */ (index)), (/** @type {?} */ (hostTNode)).index);
                 }
@@ -16156,7 +16164,7 @@ function createTemplateRef(TemplateRefToken, ElementRefToken, hostTNode, hostVie
         /** @type {?} */
         const hostContainer = hostView[hostTNode.index];
         ngDevMode && assertDefined(hostTNode.tViews, 'TView must be allocated');
-        return new R3TemplateRef(hostView, createElementRef(ElementRefToken, hostTNode, hostView), (/** @type {?} */ (hostTNode.tViews)), getLView()[RENDERER], hostContainer[QUERIES], hostTNode.injectorIndex);
+        return new R3TemplateRef(hostView, createElementRef(ElementRefToken, hostTNode, hostView), (/** @type {?} */ (hostTNode.tViews)), getLView()[RENDERER], hostContainer, hostTNode.injectorIndex);
     }
     else {
         return null;
@@ -16635,7 +16643,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.2+6.sha-9efb39c');
+const VERSION = new Version('8.0.0-beta.2+8.sha-1b6d8a7');
 
 /**
  * @fileoverview added by tsickle
