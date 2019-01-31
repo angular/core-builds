@@ -82,8 +82,6 @@ export declare function isCreationMode(view?: LView): boolean;
 export declare function getContextLView(): LView;
 export declare function getCheckNoChangesMode(): boolean;
 export declare function setCheckNoChangesMode(mode: boolean): void;
-export declare function getFirstTemplatePass(): boolean;
-export declare function setFirstTemplatePass(value: boolean): void;
 export declare function getBindingRoot(): number;
 export declare function setBindingRoot(value: number): void;
 export declare function getCurrentQueryIndex(): number;
