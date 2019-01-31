@@ -14,6 +14,12 @@
  * tools are patched (window.ng).
  * */
 export declare const GLOBAL_PUBLISH_EXPANDO_KEY = "ng";
+/**
+ * Publishes a collection of default debug tools onto`window.ng`.
+ *
+ * These functions are available globally when Angular is in development
+ * mode and are automatically stripped away from prod mode is on.
+ */
 export declare function publishDefaultGlobalUtils(): void;
 export declare type GlobalDevModeContainer = {
     [GLOBAL_PUBLISH_EXPANDO_KEY]: {
@@ -21,7 +27,7 @@ export declare type GlobalDevModeContainer = {
     };
 };
 /**
- * Publishes the given function to `window.ngDevMode` so that it can be
+ * Publishes the given function to `window.ng` so that it can be
  * used from the browser console when an application is not in production.
  */
 export declare function publishGlobalUtil(name: string, fn: Function): void;

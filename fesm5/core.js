@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.2+4.sha-c0b3835
+ * @license Angular v8.0.0-beta.2+6.sha-9efb39c
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11782,13 +11782,13 @@ function getPlayers(ref) {
  * tools are patched (window.ng).
  * */
 var GLOBAL_PUBLISH_EXPANDO_KEY = 'ng';
-/*
- * Publishes a collection of default debug tools onto `window._ng_`.
+var _published = false;
+/**
+ * Publishes a collection of default debug tools onto`window.ng`.
  *
  * These functions are available globally when Angular is in development
  * mode and are automatically stripped away from prod mode is on.
  */
-var _published = false;
 function publishDefaultGlobalUtils() {
     if (!_published) {
         _published = true;
@@ -11805,7 +11805,7 @@ function publishDefaultGlobalUtils() {
     }
 }
 /**
- * Publishes the given function to `window.ngDevMode` so that it can be
+ * Publishes the given function to `window.ng` so that it can be
  * used from the browser console when an application is not in production.
  */
 function publishGlobalUtil(name, fn) {
@@ -13387,7 +13387,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.2+4.sha-c0b3835');
+var VERSION = new Version('8.0.0-beta.2+6.sha-9efb39c');
 
 /**
  * @license
