@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.1+109.sha-a227c52
+ * @license Angular v8.0.0-beta.2+3.sha-35e45dc
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5141,24 +5141,6 @@ function setCheckNoChangesMode(mode) {
     checkNoChangesMode = mode;
 }
 /**
- * Whether or not this is the first time the current view has been processed.
- * @type {?}
- */
-let firstTemplatePass = true;
-/**
- * @return {?}
- */
-function getFirstTemplatePass() {
-    return firstTemplatePass;
-}
-/**
- * @param {?} value
- * @return {?}
- */
-function setFirstTemplatePass(value) {
-    firstTemplatePass = value;
-}
-/**
  * The root index from which pure function instructions should calculate their binding
  * indices. In component views, this is TView.bindingStartIndex. In a host binding
  * context, this is the TView.expandoStartIndex + any dirs/hostVars before the given dir.
@@ -5217,7 +5199,6 @@ function enterView(newView, hostTNode) {
     if (newView) {
         /** @type {?} */
         const tView = newView[TVIEW];
-        firstTemplatePass = tView.firstTemplatePass;
         bindingRootIndex = tView.bindingStartIndex;
     }
     previousOrParentTNode = (/** @type {?} */ (hostTNode));
@@ -8508,14 +8489,14 @@ function getLViewChild(lView) {
  * @return {?}
  */
 function destroyLView(view) {
-    /** @type {?} */
-    const renderer = view[RENDERER];
-    if (isProceduralRenderer(renderer) && renderer.destroyNode) {
-        walkTNodeTree(view, 2 /* Destroy */, renderer, null);
+    if (!(view[FLAGS] & 128 /* Destroyed */)) {
+        /** @type {?} */
+        const renderer = view[RENDERER];
+        if (isProceduralRenderer(renderer) && renderer.destroyNode) {
+            walkTNodeTree(view, 2 /* Destroy */, renderer, null);
+        }
+        destroyViewTree(view);
     }
-    destroyViewTree(view);
-    // Sets the destroyed flag
-    view[FLAGS] |= 128 /* Destroyed */;
 }
 /**
  * Determines which LViewOrLContainer to jump to when traversing back up the
@@ -8555,6 +8536,12 @@ function cleanUpView(viewOrContainer) {
     if (((/** @type {?} */ (viewOrContainer))).length >= HEADER_OFFSET) {
         /** @type {?} */
         const view = (/** @type {?} */ (viewOrContainer));
+        // Mark the LView as destroyed *before* executing the onDestroy hooks. An onDestroy hook
+        // runs arbitrary user code, which could include its own `viewRef.destroy()` (or similar). If
+        // We don't flag the view as destroyed before the hooks, this could lead to an infinite loop.
+        // This also aligns with the ViewEngine behavior. It also means that the onDestroy hook is
+        // really more of an "afterDestroy" hook if you think about it.
+        view[FLAGS] |= 128 /* Destroyed */;
         executeOnDestroys(view);
         removeListeners(view);
         /** @type {?} */
@@ -11222,7 +11209,6 @@ function refreshDescendantViews(lView) {
     const tView = lView[TVIEW];
     // This needs to be set before children are processed to support recursive components
     tView.firstTemplatePass = false;
-    setFirstTemplatePass(false);
     // Resetting the bindingIndex of the current LView as the next steps may trigger change detection.
     lView[BINDING_INDEX] = tView.bindingStartIndex;
     // If this is a creation pass, we should not call lifecycle hooks or evaluate bindings.
@@ -11506,7 +11492,6 @@ function renderEmbeddedTemplate(viewToRender, tView, context) {
             // off firstTemplatePass. If we don't set it here, instances will perform directive
             // matching, etc again and again.
             viewToRender[TVIEW].firstTemplatePass = false;
-            setFirstTemplatePass(false);
             refreshDescendantViews(viewToRender);
         }
         finally {
@@ -11792,7 +11777,7 @@ function createDirectivesAndLocals(tView, lView, localRefs, localRefExtractor = 
         return;
     /** @type {?} */
     const previousOrParentTNode = getPreviousOrParentTNode();
-    if (getFirstTemplatePass()) {
+    if (tView.firstTemplatePass) {
         ngDevMode && ngDevMode.firstTemplatePass++;
         resolveDirectives(tView, lView, findDirectiveMatches(tView, lView, previousOrParentTNode), previousOrParentTNode, localRefs || null);
     }
@@ -12893,7 +12878,7 @@ function instantiateRootComponent(tView, viewData, def) {
  */
 function resolveDirectives(tView, viewData, directives, tNode, localRefs) {
     // Please make sure to have explicit type for `exportsMap`. Inferred type triggers bug in tsickle.
-    ngDevMode && assertEqual(getFirstTemplatePass(), true, 'should run on first template pass only');
+    ngDevMode && assertEqual(tView.firstTemplatePass, true, 'should run on first template pass only');
     /** @type {?} */
     const exportsMap = localRefs ? { '': -1 } : null;
     if (directives) {
@@ -12938,7 +12923,7 @@ function instantiateAllDirectives(tView, lView, tNode) {
     const start = tNode.directiveStart;
     /** @type {?} */
     const end = tNode.directiveEnd;
-    if (!getFirstTemplatePass() && start < end) {
+    if (!tView.firstTemplatePass && start < end) {
         getOrCreateNodeInjectorForNode((/** @type {?} */ (tNode)), lView);
     }
     for (let i = start; i < end; i++) {
@@ -12966,7 +12951,7 @@ function invokeDirectivesHostBindings(tView, viewData, tNode) {
     /** @type {?} */
     const expando = (/** @type {?} */ (tView.expandoInstructions));
     /** @type {?} */
-    const firstTemplatePass = getFirstTemplatePass();
+    const firstTemplatePass = tView.firstTemplatePass;
     for (let i = start; i < end; i++) {
         /** @type {?} */
         const def = (/** @type {?} */ (tView.data[i]));
@@ -13022,7 +13007,7 @@ function generateExpandoInstructionBlock(tView, tNode, directiveCount) {
  */
 function prefillHostVars(tView, lView, totalHostVars) {
     ngDevMode &&
-        assertEqual(getFirstTemplatePass(), true, 'Should only be called in first template pass.');
+        assertEqual(tView.firstTemplatePass, true, 'Should only be called in first template pass.');
     for (let i = 0; i < totalHostVars; i++) {
         lView.push(NO_CHANGE);
         tView.blueprint.push(NO_CHANGE);
@@ -13083,7 +13068,7 @@ function postProcessBaseDirective(lView, previousOrParentTNode, directive, def) 
  * @return {?}
  */
 function findDirectiveMatches(tView, viewData, tNode) {
-    ngDevMode && assertEqual(getFirstTemplatePass(), true, 'should run on first template pass only');
+    ngDevMode && assertEqual(tView.firstTemplatePass, true, 'should run on first template pass only');
     /** @type {?} */
     const registry = tView.directiveRegistry;
     /** @type {?} */
@@ -13116,10 +13101,10 @@ function findDirectiveMatches(tView, viewData, tNode) {
  * @return {?}
  */
 function queueComponentIndexForCheck(previousOrParentTNode) {
-    ngDevMode &&
-        assertEqual(getFirstTemplatePass(), true, 'Should only be called in first template pass.');
     /** @type {?} */
     const tView = getLView()[TVIEW];
+    ngDevMode &&
+        assertEqual(tView.firstTemplatePass, true, 'Should only be called in first template pass.');
     (tView.components || (tView.components = [])).push(previousOrParentTNode.index);
 }
 /**
@@ -13132,7 +13117,7 @@ function queueComponentIndexForCheck(previousOrParentTNode) {
  */
 function queueHostBindingForCheck(tView, def, hostVars) {
     ngDevMode &&
-        assertEqual(getFirstTemplatePass(), true, 'Should only be called in first template pass.');
+        assertEqual(tView.firstTemplatePass, true, 'Should only be called in first template pass.');
     /** @type {?} */
     const expando = (/** @type {?} */ (tView.expandoInstructions));
     /** @type {?} */
@@ -13200,7 +13185,6 @@ function saveNameToExportMap(index, def, exportsMap) {
  * @return {?}
  */
 function initNodeFlags(tNode, index, numberOfDirectives) {
-    ngDevMode && assertEqual(getFirstTemplatePass(), true, 'expected firstTemplatePass to be true');
     /** @type {?} */
     const flags = tNode.flags;
     ngDevMode && assertEqual(flags === 0 || flags === 1 /* isComponent */, true, 'expected node flags to not be initialized');
@@ -13249,7 +13233,7 @@ function addComponentLogic(lView, previousOrParentTNode, def) {
     // so this is a regular element, wrap it with the component view
     componentView[HOST] = lView[previousOrParentTNode.index];
     lView[previousOrParentTNode.index] = componentView;
-    if (getFirstTemplatePass()) {
+    if (lView[TVIEW].firstTemplatePass) {
         queueComponentIndexForCheck(previousOrParentTNode);
     }
 }
@@ -13388,7 +13372,7 @@ function template(index, templateFn, consts, vars, tagName, attrs, localRefs, lo
     // TODO: consider a separate node type for templates
     /** @type {?} */
     const tNode = containerInternal(index, tagName || null, attrs || null);
-    if (getFirstTemplatePass()) {
+    if (tView.firstTemplatePass) {
         tNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null);
     }
     createDirectivesAndLocals(tView, lView, localRefs, localRefExtractor);
@@ -13418,7 +13402,11 @@ function template(index, templateFn, consts, vars, tagName, attrs, localRefs, lo
 function container(index) {
     /** @type {?} */
     const tNode = containerInternal(index, null, null);
-    getFirstTemplatePass() && (tNode.tViews = []);
+    /** @type {?} */
+    const lView = getLView();
+    if (lView[TVIEW].firstTemplatePass) {
+        tNode.tViews = [];
+    }
     setIsParent(false);
 }
 /**
@@ -13862,12 +13850,10 @@ function projection(nodeIndex, selectorIndex = 0, attrs) {
 function addToViewTree(lView, adjustedHostIndex, state) {
     /** @type {?} */
     const tView = lView[TVIEW];
-    /** @type {?} */
-    const firstTemplatePass = getFirstTemplatePass();
     if (lView[TAIL]) {
         (/** @type {?} */ (lView[TAIL]))[NEXT] = state;
     }
-    else if (firstTemplatePass) {
+    else if (tView.firstTemplatePass) {
         tView.childIndex = adjustedHostIndex;
     }
     lView[TAIL] = state;
@@ -14150,12 +14136,12 @@ function bind(value) {
  * @return {?}
  */
 function allocHostVars(count) {
-    if (!getFirstTemplatePass())
-        return;
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
     const tView = lView[TVIEW];
+    if (!tView.firstTemplatePass)
+        return;
     queueHostBindingForCheck(tView, (/** @type {?} */ (getCurrentDirectiveDef())), count);
     prefillHostVars(tView, lView, count);
 }
@@ -16651,7 +16637,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.1+109.sha-a227c52');
+const VERSION = new Version('8.0.0-beta.2+3.sha-35e45dc');
 
 /**
  * @fileoverview added by tsickle
@@ -24305,7 +24291,7 @@ read) {
     /** @type {?} */
     const contentQuery = query(predicate, descend, read);
     (lView[CONTENT_QUERIES] || (lView[CONTENT_QUERIES] = [])).push(contentQuery);
-    if (getFirstTemplatePass()) {
+    if (tView.firstTemplatePass) {
         /** @type {?} */
         const tViewContentQueries = tView.contentQueries || (tView.contentQueries = []);
         /** @type {?} */
