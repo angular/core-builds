@@ -89,7 +89,7 @@ export function getViewComponent(element) {
         // As long as lView[HOST] is null we know we are part of sub-template such as `*ngIf`
         lView = lView[PARENT];
     }
-    return lView[FLAGS] & 256 /* IsRoot */ ? null : lView[CONTEXT];
+    return lView[FLAGS] & 512 /* IsRoot */ ? null : lView[CONTEXT];
 }
 /**
  * Returns the `RootContext` instance that is associated with
@@ -194,7 +194,7 @@ export function getRootView(componentOrView) {
         ngDevMode && assertDefined(componentOrView, 'component');
         lView = readPatchedLView(componentOrView);
     }
-    while (lView && !(lView[FLAGS] & 256 /* IsRoot */)) {
+    while (lView && !(lView[FLAGS] & 512 /* IsRoot */)) {
         lView = lView[PARENT];
     }
     return lView;

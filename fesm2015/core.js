@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.2+12.sha-8930f60
+ * @license Angular v8.0.0-beta.2+17.sha-72c3695
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4140,7 +4140,7 @@ function isLContainer(value) {
  * @return {?}
  */
 function isRootView(target) {
-    return (target[FLAGS] & 256 /* IsRoot */) !== 0;
+    return (target[FLAGS] & 512 /* IsRoot */) !== 0;
 }
 /**
  * Retrieve the root view from any component by walking the parent `LView` until
@@ -4153,7 +4153,7 @@ function getRootView(target) {
     ngDevMode && assertDefined(target, 'component');
     /** @type {?} */
     let lView = Array.isArray(target) ? ((/** @type {?} */ (target))) : (/** @type {?} */ (readPatchedLView(target)));
-    while (lView && !(lView[FLAGS] & 256 /* IsRoot */)) {
+    while (lView && !(lView[FLAGS] & 512 /* IsRoot */)) {
         lView = (/** @type {?} */ (lView[PARENT]));
     }
     return lView;
@@ -4912,7 +4912,7 @@ function executeHooks(currentView, firstPassHooks, checkHooks, checkNoChangesMod
     // The init phase state must be always checked here as it may have been recursively updated
     if ((currentView[FLAGS] & 3 /* InitPhaseStateMask */) === initPhase &&
         initPhase !== 3 /* InitPhaseCompleted */) {
-        currentView[FLAGS] &= 511 /* IndexWithinInitPhaseReset */;
+        currentView[FLAGS] &= 1023 /* IndexWithinInitPhaseReset */;
         currentView[FLAGS] += 1 /* InitPhaseStateIncrementer */;
     }
 }
@@ -4940,11 +4940,11 @@ function callHooks(currentView, arr, initPhase) {
         if (isInitHook) {
             initHooksCount++;
             /** @type {?} */
-            const indexWithintInitPhase = currentView[FLAGS] >> 9 /* IndexWithinInitPhaseShift */;
+            const indexWithintInitPhase = currentView[FLAGS] >> 10 /* IndexWithinInitPhaseShift */;
             // The init phase state must be always checked here as it may have been recursively updated
             if (indexWithintInitPhase < initHooksCount &&
                 (currentView[FLAGS] & 3 /* InitPhaseStateMask */) === initPhase) {
-                currentView[FLAGS] += 512 /* IndexWithinInitPhaseIncrementer */;
+                currentView[FLAGS] += 1024 /* IndexWithinInitPhaseIncrementer */;
                 hook.call(directive);
             }
         }
@@ -5329,7 +5329,7 @@ function leaveView(newView) {
         }
         finally {
             // Views are clean and in update mode after being checked, so these bits are cleared
-            lView[FLAGS] &= ~(32 /* Dirty */ | 8 /* FirstLViewPass */);
+            lView[FLAGS] &= ~(64 /* Dirty */ | 8 /* FirstLViewPass */);
             lView[BINDING_INDEX] = tView.bindingStartIndex;
         }
     }
@@ -6464,7 +6464,7 @@ function getViewComponent(element) {
         // As long as lView[HOST] is null we know we are part of sub-template such as `*ngIf`
         lView = (/** @type {?} */ (lView[PARENT]));
     }
-    return lView[FLAGS] & 256 /* IsRoot */ ? null : (/** @type {?} */ (lView[CONTEXT]));
+    return lView[FLAGS] & 512 /* IsRoot */ ? null : (/** @type {?} */ (lView[CONTEXT]));
 }
 /**
  * Returns the `RootContext` instance that is associated with
@@ -6595,7 +6595,7 @@ function getRootView$1(componentOrView) {
         ngDevMode && assertDefined(componentOrView, 'component');
         lView = (/** @type {?} */ (readPatchedLView(componentOrView)));
     }
-    while (lView && !(lView[FLAGS] & 256 /* IsRoot */)) {
+    while (lView && !(lView[FLAGS] & 512 /* IsRoot */)) {
         lView = (/** @type {?} */ (lView[PARENT]));
     }
     return lView;
@@ -8495,7 +8495,7 @@ function insertView(lView, lContainer, parentView, index, containerIndex) {
         (/** @type {?} */ (lView[QUERIES])).insertView(index);
     }
     // Sets the attached flag
-    lView[FLAGS] |= 64 /* Attached */;
+    lView[FLAGS] |= 128 /* Attached */;
 }
 /**
  * Detaches a view from a container.
@@ -8526,7 +8526,7 @@ function detachView(lContainer, removeIndex, detached) {
     viewToDetach[CONTAINER_INDEX] = -1;
     viewToDetach[PARENT] = null;
     // Unsets the attached flag
-    viewToDetach[FLAGS] &= ~64 /* Attached */;
+    viewToDetach[FLAGS] &= ~128 /* Attached */;
     return viewToDetach;
 }
 /**
@@ -8561,7 +8561,7 @@ function getLViewChild(lView) {
  * @return {?}
  */
 function destroyLView(view) {
-    if (!(view[FLAGS] & 128 /* Destroyed */)) {
+    if (!(view[FLAGS] & 256 /* Destroyed */)) {
         /** @type {?} */
         const renderer = view[RENDERER];
         if (isProceduralRenderer(renderer) && renderer.destroyNode) {
@@ -8613,7 +8613,7 @@ function cleanUpView(viewOrContainer) {
         // We don't flag the view as destroyed before the hooks, this could lead to an infinite loop.
         // This also aligns with the ViewEngine behavior. It also means that the onDestroy hook is
         // really more of an "afterDestroy" hook if you think about it.
-        view[FLAGS] |= 128 /* Destroyed */;
+        view[FLAGS] |= 256 /* Destroyed */;
         executeOnDestroys(view);
         removeListeners(view);
         /** @type {?} */
@@ -11389,7 +11389,7 @@ function refreshChildComponents(components) {
 function createLView(parentLView, tView, context, flags, rendererFactory, renderer, sanitizer, injector) {
     /** @type {?} */
     const lView = (/** @type {?} */ (tView.blueprint.slice()));
-    lView[FLAGS] = flags | 4 /* CreationMode */ | 64 /* Attached */ | 8 /* FirstLViewPass */;
+    lView[FLAGS] = flags | 4 /* CreationMode */ | 128 /* Attached */ | 8 /* FirstLViewPass */;
     lView[PARENT] = lView[DECLARATION_VIEW] = parentLView;
     lView[CONTEXT] = context;
     lView[RENDERER_FACTORY] = (/** @type {?} */ ((rendererFactory || parentLView && parentLView[RENDERER_FACTORY])));
@@ -11547,7 +11547,7 @@ function renderEmbeddedTemplate(viewToRender, tView, context) {
     const _previousOrParentTNode = getPreviousOrParentTNode();
     /** @type {?} */
     let oldView;
-    if (viewToRender[FLAGS] & 256 /* IsRoot */) {
+    if (viewToRender[FLAGS] & 512 /* IsRoot */) {
         // This is a root view inside the view tree
         tickRootContext(getRootContext(viewToRender));
     }
@@ -12182,16 +12182,16 @@ function listenerInternal(eventName, listenerFn, useCapture = false, eventTarget
             // The first argument of `listen` function in Procedural Renderer is:
             // - either a target name (as a string) in case of global target (window, document, body)
             // - or element reference (in all other cases)
+            listenerFn = wrapListener(tNode, lView, listenerFn, false /** preventDefault */);
             /** @type {?} */
             const cleanupFn = renderer.listen(resolved.name || target, eventName, listenerFn);
             lCleanup.push(listenerFn, cleanupFn);
             useCaptureOrSubIdx = lCleanupIndex + 1;
         }
         else {
-            /** @type {?} */
-            const wrappedListener = wrapListenerWithPreventDefault(listenerFn);
-            target.addEventListener(eventName, wrappedListener, useCapture);
-            lCleanup.push(wrappedListener);
+            listenerFn = wrapListener(tNode, lView, listenerFn, true /** preventDefault */);
+            target.addEventListener(eventName, listenerFn, useCapture);
+            lCleanup.push(listenerFn);
         }
         /** @type {?} */
         const idxOrTargetGetter = eventTargetResolver ?
@@ -13298,7 +13298,7 @@ function addComponentLogic(lView, previousOrParentTNode, def) {
     /** @type {?} */
     const rendererFactory = lView[RENDERER_FACTORY];
     /** @type {?} */
-    const componentView = addToViewTree(lView, (/** @type {?} */ (previousOrParentTNode.index)), createLView(lView, tView, null, def.onPush ? 32 /* Dirty */ : 16 /* CheckAlways */, rendererFactory, lView[RENDERER_FACTORY].createRenderer((/** @type {?} */ (native)), def)));
+    const componentView = addToViewTree(lView, (/** @type {?} */ (previousOrParentTNode.index)), createLView(lView, tView, null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, rendererFactory, lView[RENDERER_FACTORY].createRenderer((/** @type {?} */ (native)), def)));
     componentView[HOST_NODE] = (/** @type {?} */ (previousOrParentTNode));
     // Component view will always be created before any injected LContainers,
     // so this is a regular element, wrap it with the component view
@@ -13735,7 +13735,7 @@ function componentRefresh(adjustedElementIndex) {
     const hostView = getComponentViewByIndex(adjustedElementIndex, lView);
     ngDevMode && assertNodeType((/** @type {?} */ (lView[TVIEW].data[adjustedElementIndex])), 3 /* Element */);
     // Only attached CheckAlways components or attached, dirty OnPush components should be checked
-    if (viewAttached(hostView) && hostView[FLAGS] & (16 /* CheckAlways */ | 32 /* Dirty */)) {
+    if (viewAttached(hostView) && hostView[FLAGS] & (16 /* CheckAlways */ | 64 /* Dirty */)) {
         syncViewWithBlueprint(hostView);
         checkView(hostView, hostView[CONTEXT]);
     }
@@ -13780,7 +13780,7 @@ function syncViewWithBlueprint(componentView) {
  * @return {?}
  */
 function viewAttached(view) {
-    return (view[FLAGS] & 64 /* Attached */) === 64 /* Attached */;
+    return (view[FLAGS] & 128 /* Attached */) === 128 /* Attached */;
 }
 /**
  * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
@@ -13952,21 +13952,40 @@ function markDirtyIfOnPush(lView, viewIndex) {
     /** @type {?} */
     const childComponentLView = getComponentViewByIndex(viewIndex, lView);
     if (!(childComponentLView[FLAGS] & 16 /* CheckAlways */)) {
-        childComponentLView[FLAGS] |= 32 /* Dirty */;
+        childComponentLView[FLAGS] |= 64 /* Dirty */;
     }
 }
 /**
- * Wraps an event listener with preventDefault behavior.
- * @param {?} listenerFn
+ * Wraps an event listener with a function that marks ancestors dirty and prevents default behavior,
+ * if applicable.
+ *
+ * @param {?} tNode The TNode associated with this listener
+ * @param {?} lView The LView that contains this listener
+ * @param {?} listenerFn The listener function to call
+ * @param {?} wrapWithPreventDefault Whether or not to prevent default behavior
+ * (the procedural renderer does this already, so in those cases, we should skip)
  * @return {?}
  */
-function wrapListenerWithPreventDefault(listenerFn) {
-    return function wrapListenerIn_preventDefault(e) {
-        if (listenerFn(e) === false) {
+function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
+    // Note: we are performing most of the work in the listener function itself
+    // to optimize listener registration.
+    return function wrapListenerIn_markDirtyAndPreventDefault(e) {
+        // In order to be backwards compatible with View Engine, events on component host nodes
+        // must also mark the component view itself dirty (i.e. the view that it owns).
+        /** @type {?} */
+        const startView = tNode.flags & 1 /* isComponent */ ? getComponentViewByIndex(tNode.index, lView) : lView;
+        // See interfaces/view.ts for more on LViewFlags.ManualOnPush
+        if ((lView[FLAGS] & 32 /* ManualOnPush */) === 0) {
+            markViewDirty(startView);
+        }
+        /** @type {?} */
+        const result = listenerFn(e);
+        if (wrapWithPreventDefault && result === false) {
             e.preventDefault();
             // Necessary for legacy browsers that don't support preventDefault (e.g. IE)
             e.returnValue = false;
         }
+        return result;
     };
 }
 /**
@@ -13981,11 +14000,14 @@ function wrapListenerWithPreventDefault(listenerFn) {
  * @return {?} the root LView
  */
 function markViewDirty(lView) {
-    while (lView && !(lView[FLAGS] & 256 /* IsRoot */)) {
-        lView[FLAGS] |= 32 /* Dirty */;
+    while (lView && !(lView[FLAGS] & 512 /* IsRoot */)) {
+        lView[FLAGS] |= 64 /* Dirty */;
         lView = (/** @type {?} */ (lView[PARENT]));
     }
-    lView[FLAGS] |= 32 /* Dirty */;
+    // Detached views do not have a PARENT and also aren't root views
+    if (lView) {
+        lView[FLAGS] |= 64 /* Dirty */;
+    }
     return lView;
 }
 /**
@@ -14187,7 +14209,7 @@ function executeViewQueryFn(lView, tView, component) {
 function markDirty(component) {
     ngDevMode && assertDefined(component, 'component');
     /** @type {?} */
-    const rootView = markViewDirty(getComponentViewByInstance(component));
+    const rootView = (/** @type {?} */ (markViewDirty(getComponentViewByInstance(component))));
     ngDevMode && assertDefined(rootView[CONTEXT], 'rootContext should be defined');
     scheduleTick((/** @type {?} */ (rootView[CONTEXT])), 1 /* DetectChanges */);
 }
@@ -14871,8 +14893,8 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     /** @type {?} */
     const hostRNode = locateHostElement(rendererFactory, opts.host || componentTag);
     /** @type {?} */
-    const rootFlags = componentDef.onPush ? 32 /* Dirty */ | 256 /* IsRoot */ :
-        16 /* CheckAlways */ | 256 /* IsRoot */;
+    const rootFlags = componentDef.onPush ? 64 /* Dirty */ | 512 /* IsRoot */ :
+        16 /* CheckAlways */ | 512 /* IsRoot */;
     /** @type {?} */
     const rootContext = createRootContext(opts.scheduler, opts.playerHandler);
     /** @type {?} */
@@ -14918,7 +14940,7 @@ function createRootComponentView(rNode, def, rootView, rendererFactory, renderer
     /** @type {?} */
     const tView = rootView[TVIEW];
     /** @type {?} */
-    const componentView = createLView(rootView, getOrCreateTView(def.template, def.consts, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery), null, def.onPush ? 32 /* Dirty */ : 16 /* CheckAlways */, rendererFactory, renderer, sanitizer);
+    const componentView = createLView(rootView, getOrCreateTView(def.template, def.consts, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery), null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, rendererFactory, renderer, sanitizer);
     /** @type {?} */
     const tNode = createNodeAtIndex(0, 3 /* Element */, rNode, null, null);
     if (tView.firstTemplatePass) {
@@ -15857,7 +15879,7 @@ class ViewRef {
      * @return {?}
      */
     get destroyed() {
-        return (this._lView[FLAGS] & 128 /* Destroyed */) === 128 /* Destroyed */;
+        return (this._lView[FLAGS] & 256 /* Destroyed */) === 256 /* Destroyed */;
     }
     /**
      * @return {?}
@@ -15970,7 +15992,7 @@ class ViewRef {
      * ```
      * @return {?}
      */
-    detach() { this._lView[FLAGS] &= ~64 /* Attached */; }
+    detach() { this._lView[FLAGS] &= ~128 /* Attached */; }
     /**
      * Re-attaches a view to the change detection tree.
      *
@@ -16027,7 +16049,7 @@ class ViewRef {
      * ```
      * @return {?}
      */
-    reattach() { this._lView[FLAGS] |= 64 /* Attached */; }
+    reattach() { this._lView[FLAGS] |= 128 /* Attached */; }
     /**
      * Checks the view and its children.
      *
@@ -16722,7 +16744,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.2+12.sha-8930f60');
+const VERSION = new Version('8.0.0-beta.2+17.sha-72c3695');
 
 /**
  * @fileoverview added by tsickle
@@ -21217,8 +21239,8 @@ class ComponentFactory$1 extends ComponentFactory {
             elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef)) :
             locateHostElement(rendererFactory, rootSelectorOrNode);
         /** @type {?} */
-        const rootFlags = this.componentDef.onPush ? 32 /* Dirty */ | 256 /* IsRoot */ :
-            16 /* CheckAlways */ | 256 /* IsRoot */;
+        const rootFlags = this.componentDef.onPush ? 64 /* Dirty */ | 512 /* IsRoot */ :
+            16 /* CheckAlways */ | 512 /* IsRoot */;
         /** @type {?} */
         const rootContext = !isInternalRootView ? rootViewInjector.get(ROOT_CONTEXT) : createRootContext();
         /** @type {?} */

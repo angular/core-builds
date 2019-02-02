@@ -176,7 +176,7 @@ export function isLContainer(value) {
  * @return {?}
  */
 export function isRootView(target) {
-    return (target[FLAGS] & 256 /* IsRoot */) !== 0;
+    return (target[FLAGS] & 512 /* IsRoot */) !== 0;
 }
 /**
  * Retrieve the root view from any component by walking the parent `LView` until
@@ -189,7 +189,7 @@ export function getRootView(target) {
     ngDevMode && assertDefined(target, 'component');
     /** @type {?} */
     let lView = Array.isArray(target) ? ((/** @type {?} */ (target))) : (/** @type {?} */ (readPatchedLView(target)));
-    while (lView && !(lView[FLAGS] & 256 /* IsRoot */)) {
+    while (lView && !(lView[FLAGS] & 512 /* IsRoot */)) {
         lView = (/** @type {?} */ (lView[PARENT]));
     }
     return lView;

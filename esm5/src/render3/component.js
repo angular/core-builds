@@ -47,8 +47,8 @@ export function renderComponent(componentType /* Type as workaround for: Microso
     // The first index of the first selector is the tag name.
     var componentTag = componentDef.selectors[0][0];
     var hostRNode = locateHostElement(rendererFactory, opts.host || componentTag);
-    var rootFlags = componentDef.onPush ? 32 /* Dirty */ | 256 /* IsRoot */ :
-        16 /* CheckAlways */ | 256 /* IsRoot */;
+    var rootFlags = componentDef.onPush ? 64 /* Dirty */ | 512 /* IsRoot */ :
+        16 /* CheckAlways */ | 512 /* IsRoot */;
     var rootContext = createRootContext(opts.scheduler, opts.playerHandler);
     var renderer = rendererFactory.createRenderer(hostRNode, componentDef);
     var rootView = createLView(null, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags, rendererFactory, renderer, undefined, opts.injector || null);
@@ -85,7 +85,7 @@ export function renderComponent(componentType /* Type as workaround for: Microso
 export function createRootComponentView(rNode, def, rootView, rendererFactory, renderer, sanitizer) {
     resetComponentState();
     var tView = rootView[TVIEW];
-    var componentView = createLView(rootView, getOrCreateTView(def.template, def.consts, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery), null, def.onPush ? 32 /* Dirty */ : 16 /* CheckAlways */, rendererFactory, renderer, sanitizer);
+    var componentView = createLView(rootView, getOrCreateTView(def.template, def.consts, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery), null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, rendererFactory, renderer, sanitizer);
     var tNode = createNodeAtIndex(0, 3 /* Element */, rNode, null, null);
     if (tView.firstTemplatePass) {
         diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, rootView), rootView, def.type);

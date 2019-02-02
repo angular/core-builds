@@ -589,7 +589,7 @@ export declare function addToViewTree<T extends LView | LContainer>(lView: LView
  * @param lView The starting LView to mark dirty
  * @returns the root LView
  */
-export declare function markViewDirty(lView: LView): LView;
+export declare function markViewDirty(lView: LView): LView | null;
 /**
  * Used to schedule change detection on the whole application.
  *
