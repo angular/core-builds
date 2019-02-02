@@ -165,8 +165,8 @@ export class ComponentFactory extends viewEngine_ComponentFactory {
             elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef)) :
             locateHostElement(rendererFactory, rootSelectorOrNode);
         /** @type {?} */
-        const rootFlags = this.componentDef.onPush ? 32 /* Dirty */ | 256 /* IsRoot */ :
-            16 /* CheckAlways */ | 256 /* IsRoot */;
+        const rootFlags = this.componentDef.onPush ? 64 /* Dirty */ | 512 /* IsRoot */ :
+            16 /* CheckAlways */ | 512 /* IsRoot */;
         /** @type {?} */
         const rootContext = !isInternalRootView ? rootViewInjector.get(ROOT_CONTEXT) : createRootContext();
         /** @type {?} */

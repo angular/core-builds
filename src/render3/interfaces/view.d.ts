@@ -203,20 +203,36 @@ export declare const enum LViewFlags {
     FirstLViewPass = 8,
     /** Whether this view has default change detection strategy (checks always) or onPush */
     CheckAlways = 16,
-    /** Whether or not this view is currently dirty (needing check) */
-    Dirty = 32,
-    /** Whether or not this view is currently attached to change detection tree. */
-    Attached = 64,
-    /** Whether or not this view is destroyed. */
-    Destroyed = 128,
-    /** Whether or not this view is the root view */
-    IsRoot = 256,
     /**
-     * Index of the current init phase on last 23 bits
+     * Whether or not manual change detection is turned on for onPush components.
+     *
+     * This is a special mode that only marks components dirty in two cases:
+     * 1) There has been a change to an @Input property
+     * 2) `markDirty()` has been called manually by the user
+     *
+     * Note that in this mode, the firing of events does NOT mark components
+     * dirty automatically.
+     *
+     * Manual mode is turned off by default for backwards compatibility, as events
+     * automatically mark OnPush components dirty in View Engine.
+     *
+     * TODO: Add a public API to ChangeDetectionStrategy to turn this mode on
      */
-    IndexWithinInitPhaseIncrementer = 512,
-    IndexWithinInitPhaseShift = 9,
-    IndexWithinInitPhaseReset = 511
+    ManualOnPush = 32,
+    /** Whether or not this view is currently dirty (needing check) */
+    Dirty = 64,
+    /** Whether or not this view is currently attached to change detection tree. */
+    Attached = 128,
+    /** Whether or not this view is destroyed. */
+    Destroyed = 256,
+    /** Whether or not this view is the root view */
+    IsRoot = 512,
+    /**
+     * Index of the current init phase on last 22 bits
+     */
+    IndexWithinInitPhaseIncrementer = 1024,
+    IndexWithinInitPhaseShift = 10,
+    IndexWithinInitPhaseReset = 1023
 }
 /**
  * Possible states of the init phase:

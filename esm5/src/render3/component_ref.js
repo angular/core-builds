@@ -129,8 +129,8 @@ var ComponentFactory = /** @class */ (function (_super) {
         var hostRNode = isInternalRootView ?
             elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef)) :
             locateHostElement(rendererFactory, rootSelectorOrNode);
-        var rootFlags = this.componentDef.onPush ? 32 /* Dirty */ | 256 /* IsRoot */ :
-            16 /* CheckAlways */ | 256 /* IsRoot */;
+        var rootFlags = this.componentDef.onPush ? 64 /* Dirty */ | 512 /* IsRoot */ :
+            16 /* CheckAlways */ | 512 /* IsRoot */;
         var rootContext = !isInternalRootView ? rootViewInjector.get(ROOT_CONTEXT) : createRootContext();
         var renderer = rendererFactory.createRenderer(hostRNode, this.componentDef);
         if (rootSelectorOrNode && hostRNode) {
