@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.2+21.sha-4dfcbc6
+ * @license Angular v8.0.0-beta.2+22.sha-52d3795
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6989,7 +6989,6 @@
      *  @param rootView The view to destroy
      */
     function destroyViewTree(rootView) {
-        var e_2, _a;
         // If the view has no children, we can clean it up and return early.
         if (rootView[TVIEW].childIndex === -1) {
             return cleanUpView(rootView);
@@ -6997,19 +6996,17 @@
         var viewOrContainer = getLViewChild(rootView);
         while (viewOrContainer) {
             var next = null;
-            if (isLContainer(viewOrContainer)) {
-                // If container, traverse down to its first LView.
-                var container = viewOrContainer;
-                var viewsInContainer = container[VIEWS];
-                if (viewsInContainer.length) {
-                    next = viewsInContainer[0];
-                }
-            }
-            else {
+            if (viewOrContainer.length >= HEADER_OFFSET) {
                 // If LView, traverse down to child.
                 var view = viewOrContainer;
                 if (view[TVIEW].childIndex > -1)
                     next = getLViewChild(view);
+            }
+            else {
+                // If container, traverse down to its first LView.
+                var container = viewOrContainer;
+                if (container[VIEWS].length)
+                    next = container[VIEWS][0];
             }
             if (next == null) {
                 // Only clean up view when moving to the side or up, as destroy hooks
@@ -7017,25 +7014,6 @@
                 while (viewOrContainer && !viewOrContainer[NEXT] && viewOrContainer !== rootView) {
                     cleanUpView(viewOrContainer);
                     viewOrContainer = getParentState(viewOrContainer, rootView);
-                    if (isLContainer(viewOrContainer)) {
-                        // this view will be destroyed so we need to notify queries that a view is detached
-                        var viewsInContainer = viewOrContainer[VIEWS];
-                        try {
-                            for (var viewsInContainer_1 = __values(viewsInContainer), viewsInContainer_1_1 = viewsInContainer_1.next(); !viewsInContainer_1_1.done; viewsInContainer_1_1 = viewsInContainer_1.next()) {
-                                var viewToDetach = viewsInContainer_1_1.value;
-                                if (viewToDetach[QUERIES]) {
-                                    viewToDetach[QUERIES].removeView();
-                                }
-                            }
-                        }
-                        catch (e_2_1) { e_2 = { error: e_2_1 }; }
-                        finally {
-                            try {
-                                if (viewsInContainer_1_1 && !viewsInContainer_1_1.done && (_a = viewsInContainer_1.return)) _a.call(viewsInContainer_1);
-                            }
-                            finally { if (e_2) throw e_2.error; }
-                        }
-                    }
                 }
                 cleanUpView(viewOrContainer || rootView);
                 next = viewOrContainer && viewOrContainer[NEXT];
@@ -7397,7 +7375,7 @@
      * @returns Whether or not the child was appended
      */
     function appendChild(childEl, childTNode, currentView) {
-        var e_3, _a;
+        var e_2, _a;
         var renderParent = getRenderParent(childTNode, currentView);
         if (renderParent != null) {
             var renderer = currentView[RENDERER];
@@ -7410,12 +7388,12 @@
                         nativeAppendOrInsertBefore(renderer, renderParent, nativeNode, anchorNode);
                     }
                 }
-                catch (e_3_1) { e_3 = { error: e_3_1 }; }
+                catch (e_2_1) { e_2 = { error: e_2_1 }; }
                 finally {
                     try {
                         if (childEl_1_1 && !childEl_1_1.done && (_a = childEl_1.return)) _a.call(childEl_1);
                     }
-                    finally { if (e_3) throw e_3.error; }
+                    finally { if (e_2) throw e_2.error; }
                 }
             }
             else {
@@ -13471,7 +13449,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.2+21.sha-4dfcbc6');
+    var VERSION = new Version('8.0.0-beta.2+22.sha-52d3795');
 
     /**
      * @license
