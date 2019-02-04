@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.2+23.sha-3d52271
+ * @license Angular v8.0.0-beta.2+26.sha-fc88a79
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6663,6 +6663,124 @@ function sortListeners(a, b) {
  */
 function isDirectiveDefHack(obj) {
     return obj.type !== undefined && obj.template !== undefined && obj.declaredInputs !== undefined;
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * @param {?} error
+ * @return {?}
+ */
+function getDebugContext(error) {
+    return ((/** @type {?} */ (error)))[ERROR_DEBUG_CONTEXT];
+}
+/**
+ * @param {?} error
+ * @return {?}
+ */
+function getOriginalError(error) {
+    return ((/** @type {?} */ (error)))[ERROR_ORIGINAL_ERROR];
+}
+/**
+ * @param {?} error
+ * @return {?}
+ */
+function getErrorLogger(error) {
+    return ((/** @type {?} */ (error)))[ERROR_LOGGER] || defaultErrorLogger;
+}
+/**
+ * @param {?} console
+ * @param {...?} values
+ * @return {?}
+ */
+function defaultErrorLogger(console, ...values) {
+    ((/** @type {?} */ (console.error)))(...values);
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Provides a hook for centralized exception handling.
+ *
+ * The default implementation of `ErrorHandler` prints error messages to the `console`. To
+ * intercept error handling, write a custom exception handler that replaces this default as
+ * appropriate for your app.
+ *
+ * \@usageNotes
+ * ### Example
+ *
+ * ```
+ * class MyErrorHandler implements ErrorHandler {
+ *   handleError(error) {
+ *     // do something with the exception
+ *   }
+ * }
+ *
+ * \@NgModule({
+ *   providers: [{provide: ErrorHandler, useClass: MyErrorHandler}]
+ * })
+ * class MyModule {}
+ * ```
+ *
+ * \@publicApi
+ */
+class ErrorHandler {
+    constructor() {
+        /**
+         * \@internal
+         */
+        this._console = console;
+    }
+    /**
+     * @param {?} error
+     * @return {?}
+     */
+    handleError(error) {
+        /** @type {?} */
+        const originalError = this._findOriginalError(error);
+        /** @type {?} */
+        const context = this._findContext(error);
+        // Note: Browser consoles show the place from where console.error was called.
+        // We can use this to give users additional information about the error.
+        /** @type {?} */
+        const errorLogger = getErrorLogger(error);
+        errorLogger(this._console, `ERROR`, error);
+        if (originalError) {
+            errorLogger(this._console, `ORIGINAL ERROR`, originalError);
+        }
+        if (context) {
+            errorLogger(this._console, 'ERROR CONTEXT', context);
+        }
+    }
+    /**
+     * \@internal
+     * @param {?} error
+     * @return {?}
+     */
+    _findContext(error) {
+        if (error) {
+            return getDebugContext(error) ? getDebugContext(error) :
+                this._findContext(getOriginalError(error));
+        }
+        return null;
+    }
+    /**
+     * \@internal
+     * @param {?} error
+     * @return {?}
+     */
+    _findOriginalError(error) {
+        /** @type {?} */
+        let e = getOriginalError(error);
+        while (e && getOriginalError(e)) {
+            e = getOriginalError(e);
+        }
+        return e;
+    }
 }
 
 /**
@@ -13906,14 +14024,19 @@ function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
         if ((lView[FLAGS] & 32 /* ManualOnPush */) === 0) {
             markViewDirty(startView);
         }
-        /** @type {?} */
-        const result = listenerFn(e);
-        if (wrapWithPreventDefault && result === false) {
-            e.preventDefault();
-            // Necessary for legacy browsers that don't support preventDefault (e.g. IE)
-            e.returnValue = false;
+        try {
+            /** @type {?} */
+            const result = listenerFn(e);
+            if (wrapWithPreventDefault && result === false) {
+                e.preventDefault();
+                // Necessary for legacy browsers that don't support preventDefault (e.g. IE)
+                e.returnValue = false;
+            }
+            return result;
         }
-        return result;
+        catch (error) {
+            handleError(lView, error);
+        }
     };
 }
 /**
@@ -14021,12 +14144,20 @@ function detectChangesInternal(view, context) {
     const rendererFactory = view[RENDERER_FACTORY];
     if (rendererFactory.begin)
         rendererFactory.begin();
-    if (isCreationMode(view)) {
-        checkView(view, context); // creation mode pass
+    try {
+        if (isCreationMode(view)) {
+            checkView(view, context); // creation mode pass
+        }
+        checkView(view, context); // update mode pass
     }
-    checkView(view, context); // update mode pass
-    if (rendererFactory.end)
-        rendererFactory.end();
+    catch (error) {
+        handleError(view, error);
+        throw error;
+    }
+    finally {
+        if (rendererFactory.end)
+            rendererFactory.end();
+    }
 }
 /**
  * Synchronously perform change detection on a root view and its components.
@@ -14657,6 +14788,19 @@ function loadComponentRenderer(tNode, lView) {
     /** @type {?} */
     const componentLView = (/** @type {?} */ (lView[tNode.index]));
     return componentLView[RENDERER];
+}
+/**
+ * Handles an error thrown in an LView.
+ * @param {?} lView
+ * @param {?} error
+ * @return {?}
+ */
+function handleError(lView, error) {
+    /** @type {?} */
+    const injector = lView[INJECTOR$1];
+    /** @type {?} */
+    const errorHandler = injector ? injector.get(ErrorHandler, null) : null;
+    errorHandler && errorHandler.handleError(error);
 }
 
 /**
@@ -16665,7 +16809,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.2+23.sha-3d52271');
+const VERSION = new Version('8.0.0-beta.2+26.sha-fc88a79');
 
 /**
  * @fileoverview added by tsickle
@@ -18242,40 +18386,6 @@ ViewContainerRef.__NG_ELEMENT_ID__ = () => SWITCH_VIEW_CONTAINER_REF_FACTORY(Vie
 const SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ = injectViewContainerRef;
 /** @type {?} */
 const SWITCH_VIEW_CONTAINER_REF_FACTORY = SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__;
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * @param {?} error
- * @return {?}
- */
-function getDebugContext(error) {
-    return ((/** @type {?} */ (error)))[ERROR_DEBUG_CONTEXT];
-}
-/**
- * @param {?} error
- * @return {?}
- */
-function getOriginalError(error) {
-    return ((/** @type {?} */ (error)))[ERROR_ORIGINAL_ERROR];
-}
-/**
- * @param {?} error
- * @return {?}
- */
-function getErrorLogger(error) {
-    return ((/** @type {?} */ (error)))[ERROR_LOGGER] || defaultErrorLogger;
-}
-/**
- * @param {?} console
- * @param {...?} values
- * @return {?}
- */
-function defaultErrorLogger(console, ...values) {
-    ((/** @type {?} */ (console.error)))(...values);
-}
 
 /**
  * @fileoverview added by tsickle
@@ -25736,90 +25846,6 @@ Console.decorators = [
 /*@__PURE__*/ setClassMetadata(Console, [{
         type: Injectable
     }], null, null);
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Provides a hook for centralized exception handling.
- *
- * The default implementation of `ErrorHandler` prints error messages to the `console`. To
- * intercept error handling, write a custom exception handler that replaces this default as
- * appropriate for your app.
- *
- * \@usageNotes
- * ### Example
- *
- * ```
- * class MyErrorHandler implements ErrorHandler {
- *   handleError(error) {
- *     // do something with the exception
- *   }
- * }
- *
- * \@NgModule({
- *   providers: [{provide: ErrorHandler, useClass: MyErrorHandler}]
- * })
- * class MyModule {}
- * ```
- *
- * \@publicApi
- */
-class ErrorHandler {
-    constructor() {
-        /**
-         * \@internal
-         */
-        this._console = console;
-    }
-    /**
-     * @param {?} error
-     * @return {?}
-     */
-    handleError(error) {
-        /** @type {?} */
-        const originalError = this._findOriginalError(error);
-        /** @type {?} */
-        const context = this._findContext(error);
-        // Note: Browser consoles show the place from where console.error was called.
-        // We can use this to give users additional information about the error.
-        /** @type {?} */
-        const errorLogger = getErrorLogger(error);
-        errorLogger(this._console, `ERROR`, error);
-        if (originalError) {
-            errorLogger(this._console, `ORIGINAL ERROR`, originalError);
-        }
-        if (context) {
-            errorLogger(this._console, 'ERROR CONTEXT', context);
-        }
-    }
-    /**
-     * \@internal
-     * @param {?} error
-     * @return {?}
-     */
-    _findContext(error) {
-        if (error) {
-            return getDebugContext(error) ? getDebugContext(error) :
-                this._findContext(getOriginalError(error));
-        }
-        return null;
-    }
-    /**
-     * \@internal
-     * @param {?} error
-     * @return {?}
-     */
-    _findOriginalError(error) {
-        /** @type {?} */
-        let e = getOriginalError(error);
-        while (e && getOriginalError(e)) {
-            e = getOriginalError(e);
-        }
-        return e;
-    }
-}
 
 /**
  * @fileoverview added by tsickle
