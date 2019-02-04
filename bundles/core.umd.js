@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.3+9.sha-5f9d574
+ * @license Angular v7.2.3+16.sha-c64e666
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -10787,7 +10787,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.3+9.sha-5f9d574');
+    var VERSION = new Version('7.2.3+16.sha-c64e666');
 
     /**
      * @license
@@ -14295,8 +14295,7 @@
     var defaultStyleSanitizer = function (prop, value) {
         if (value === undefined) {
             return prop === 'background-image' || prop === 'background' || prop === 'border-image' ||
-                prop === 'filter' || prop === 'filter' || prop === 'list-style' ||
-                prop === 'list-style-image';
+                prop === 'filter' || prop === 'list-style' || prop === 'list-style-image';
         }
         return sanitizeStyle(value);
     };
@@ -24687,6 +24686,8 @@
     exports.ɵcompilePipe = compilePipe;
     exports.ɵsanitizeHtml = sanitizeHtml;
     exports.ɵsanitizeStyle = sanitizeStyle;
+    exports.ɵdefaultStyleSanitizer = defaultStyleSanitizer;
+    exports.ɵsanitizeScript = sanitizeScript;
     exports.ɵsanitizeUrl = sanitizeUrl;
     exports.ɵsanitizeResourceUrl = sanitizeResourceUrl;
     exports.ɵbypassSanitizationTrustHtml = bypassSanitizationTrustHtml;
