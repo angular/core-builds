@@ -11,6 +11,7 @@
  * @publicApi
  */
 export declare enum InjectFlags {
+    /** Check self and check parent injector if needed */
     Default = 0,
     /**
      * Specifies that an injector should retrieve a dependency from any injector until reaching the

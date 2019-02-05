@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.2+36.sha-7219639
+ * @license Angular v8.0.0-beta.2+38.sha-07fb4b5
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -195,6 +195,7 @@ const Attribute = makeParamDecorator('Attribute', (attributeName) => ({ attribut
 var InjectFlags;
 (function (InjectFlags) {
     // TODO(alxhub): make this 'const' when ngc no longer writes exports of it into ngfactory files.
+    /** Check self and check parent injector if needed */
     InjectFlags[InjectFlags["Default"] = 0] = "Default";
     /**
      * Specifies that an injector should retrieve a dependency from any injector until reaching the
@@ -1261,7 +1262,10 @@ class NullInjector {
             // reason why correctly written application should cause this exception.
             // TODO(misko): uncomment the next line once `ngDevMode` works with closure.
             // if(ngDevMode) debugger;
-            throw new Error(`NullInjectorError: No provider for ${stringify(token)}!`);
+            /** @type {?} */
+            const error = new Error(`NullInjectorError: No provider for ${stringify(token)}!`);
+            error.name = 'NullInjectorError';
+            throw error;
         }
         return notFoundValue;
     }
@@ -1368,15 +1372,7 @@ class StaticInjector {
             return tryResolveToken(token, record, this._records, this.parent, notFoundValue, flags);
         }
         catch (e) {
-            /** @type {?} */
-            const tokenPath = e[NG_TEMP_TOKEN_PATH];
-            if (token[SOURCE]) {
-                tokenPath.unshift(token[SOURCE]);
-            }
-            e.message = formatError('\n' + e.message, tokenPath, this.source);
-            e[NG_TOKEN_PATH] = tokenPath;
-            e[NG_TEMP_TOKEN_PATH] = null;
-            throw e;
+            return catchInjectorError(e, token, 'StaticInjectorError', this.source);
         }
     }
     /**
@@ -1635,12 +1631,31 @@ function computeDeps(provider) {
     return deps;
 }
 /**
+ * @param {?} e
+ * @param {?} token
+ * @param {?} injectorErrorName
+ * @param {?} source
+ * @return {?}
+ */
+function catchInjectorError(e, token, injectorErrorName, source) {
+    /** @type {?} */
+    const tokenPath = e[NG_TEMP_TOKEN_PATH];
+    if (token[SOURCE]) {
+        tokenPath.unshift(token[SOURCE]);
+    }
+    e.message = formatError('\n' + e.message, tokenPath, injectorErrorName, source);
+    e[NG_TOKEN_PATH] = tokenPath;
+    e[NG_TEMP_TOKEN_PATH] = null;
+    throw e;
+}
+/**
  * @param {?} text
  * @param {?} obj
+ * @param {?} injectorErrorName
  * @param {?=} source
  * @return {?}
  */
-function formatError(text, obj, source = null) {
+function formatError(text, obj, injectorErrorName, source = null) {
     text = text && text.charAt(0) === '\n' && text.charAt(1) == NO_NEW_LINE ? text.substr(2) : text;
     /** @type {?} */
     let context = stringify(obj);
@@ -1659,7 +1674,7 @@ function formatError(text, obj, source = null) {
         }
         context = `{${parts.join(', ')}}`;
     }
-    return `StaticInjectorError${source ? '(' + source + ')' : ''}[${context}]: ${text.replace(NEW_LINE, '\n  ')}`;
+    return `${injectorErrorName}${source ? '(' + source + ')' : ''}[${context}]: ${text.replace(NEW_LINE, '\n  ')}`;
 }
 /**
  * @param {?} text
@@ -1667,7 +1682,7 @@ function formatError(text, obj, source = null) {
  * @return {?}
  */
 function staticError(text, obj) {
-    return new Error(formatError(text, obj));
+    return new Error(formatError(text, obj, 'StaticInjectorError'));
 }
 
 /**
@@ -15062,19 +15077,21 @@ function getNullInjector() {
  * @param {?} defType
  * @param {?=} parent
  * @param {?=} additionalProviders
+ * @param {?=} name
  * @return {?}
  */
-function createInjector(defType, parent = null, additionalProviders = null) {
+function createInjector(defType, parent = null, additionalProviders = null, name) {
     parent = parent || getNullInjector();
-    return new R3Injector(defType, additionalProviders, parent);
+    return new R3Injector(defType, additionalProviders, parent, name);
 }
 class R3Injector {
     /**
      * @param {?} def
      * @param {?} additionalProviders
      * @param {?} parent
+     * @param {?=} source
      */
-    constructor(def, additionalProviders, parent) {
+    constructor(def, additionalProviders, parent, source = null) {
         this.parent = parent;
         /**
          * Map of tokens to records which contain the instances of those tokens.
@@ -15102,6 +15119,8 @@ class R3Injector {
         this.isRootInjector = this.records.has(APP_ROOT);
         // Eagerly instantiate the InjectorType classes themselves.
         this.injectorDefTypes.forEach(defType => this.get(defType));
+        // Source name, used for debugging
+        this.source = source || (def instanceof Array ? null : stringify(def));
     }
     /**
      * Flag indicating that this injector was previously destroyed.
@@ -15137,7 +15156,7 @@ class R3Injector {
      * @param {?=} flags
      * @return {?}
      */
-    get(token, notFoundValue = THROW_IF_NOT_FOUND, flags = InjectFlags.Default) {
+    get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND, flags = InjectFlags.Default) {
         this.assertNotDestroyed();
         // Set the injection context.
         /** @type {?} */
@@ -15169,7 +15188,25 @@ class R3Injector {
             // the NullInjector, otherwise it's the parent.
             /** @type {?} */
             const nextInjector = !(flags & InjectFlags.Self) ? this.parent : getNullInjector();
-            return nextInjector.get(token, notFoundValue);
+            return nextInjector.get(token, flags & InjectFlags.Optional ? null : notFoundValue);
+        }
+        catch (e) {
+            if (e.name === 'NullInjectorError') {
+                /** @type {?} */
+                const path = e[NG_TEMP_TOKEN_PATH] = e[NG_TEMP_TOKEN_PATH] || [];
+                path.unshift(stringify(token));
+                if (previousInjector) {
+                    // We still have a parent injector, keep throwing
+                    throw e;
+                }
+                else {
+                    // Format & throw the final error message when we don't have any previous injector
+                    return catchInjectorError(e, token, 'R3InjectorError', this.source);
+                }
+            }
+            else {
+                throw e;
+            }
         }
         finally {
             // Lastly, clean up the state by restoring the previous injector.
@@ -16888,7 +16925,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.2+36.sha-7219639');
+const VERSION = new Version('8.0.0-beta.2+38.sha-07fb4b5');
 
 /**
  * @fileoverview added by tsickle
@@ -23220,7 +23257,7 @@ class NgModuleRef$1 extends NgModuleRef {
             },
             COMPONENT_FACTORY_RESOLVER
         ];
-        this._r3Injector = (/** @type {?} */ (createInjector(ngModuleType, _parent, additionalProviders)));
+        this._r3Injector = (/** @type {?} */ (createInjector(ngModuleType, _parent, additionalProviders, stringify(ngModuleType))));
         this.instance = this.get(ngModuleType);
     }
     /**

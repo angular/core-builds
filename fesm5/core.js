@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.2+36.sha-7219639
+ * @license Angular v8.0.0-beta.2+38.sha-07fb4b5
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -206,6 +206,7 @@ var Attribute = makeParamDecorator('Attribute', function (attributeName) { retur
 var InjectFlags;
 (function (InjectFlags) {
     // TODO(alxhub): make this 'const' when ngc no longer writes exports of it into ngfactory files.
+    /** Check self and check parent injector if needed */
     InjectFlags[InjectFlags["Default"] = 0] = "Default";
     /**
      * Specifies that an injector should retrieve a dependency from any injector until reaching the
@@ -1175,7 +1176,9 @@ var NullInjector = /** @class */ (function () {
             // reason why correctly written application should cause this exception.
             // TODO(misko): uncomment the next line once `ngDevMode` works with closure.
             // if(ngDevMode) debugger;
-            throw new Error("NullInjectorError: No provider for " + stringify(token) + "!");
+            var error = new Error("NullInjectorError: No provider for " + stringify(token) + "!");
+            error.name = 'NullInjectorError';
+            throw error;
         }
         return notFoundValue;
     };
@@ -1262,14 +1265,7 @@ var StaticInjector = /** @class */ (function () {
             return tryResolveToken(token, record, this._records, this.parent, notFoundValue, flags);
         }
         catch (e) {
-            var tokenPath = e[NG_TEMP_TOKEN_PATH];
-            if (token[SOURCE]) {
-                tokenPath.unshift(token[SOURCE]);
-            }
-            e.message = formatError('\n' + e.message, tokenPath, this.source);
-            e[NG_TOKEN_PATH] = tokenPath;
-            e[NG_TEMP_TOKEN_PATH] = null;
-            throw e;
+            return catchInjectorError(e, token, 'StaticInjectorError', this.source);
         }
     };
     StaticInjector.prototype.toString = function () {
@@ -1463,7 +1459,17 @@ function computeDeps(provider) {
     }
     return deps;
 }
-function formatError(text, obj, source) {
+function catchInjectorError(e, token, injectorErrorName, source) {
+    var tokenPath = e[NG_TEMP_TOKEN_PATH];
+    if (token[SOURCE]) {
+        tokenPath.unshift(token[SOURCE]);
+    }
+    e.message = formatError('\n' + e.message, tokenPath, injectorErrorName, source);
+    e[NG_TOKEN_PATH] = tokenPath;
+    e[NG_TEMP_TOKEN_PATH] = null;
+    throw e;
+}
+function formatError(text, obj, injectorErrorName, source) {
     if (source === void 0) { source = null; }
     text = text && text.charAt(0) === '\n' && text.charAt(1) == NO_NEW_LINE ? text.substr(2) : text;
     var context = stringify(obj);
@@ -1480,10 +1486,10 @@ function formatError(text, obj, source) {
         }
         context = "{" + parts.join(', ') + "}";
     }
-    return "StaticInjectorError" + (source ? '(' + source + ')' : '') + "[" + context + "]: " + text.replace(NEW_LINE, '\n  ');
+    return "" + injectorErrorName + (source ? '(' + source + ')' : '') + "[" + context + "]: " + text.replace(NEW_LINE, '\n  ');
 }
 function staticError(text, obj) {
-    return new Error(formatError(text, obj));
+    return new Error(formatError(text, obj, 'StaticInjectorError'));
 }
 
 /**
@@ -12126,14 +12132,15 @@ function getNullInjector() {
  *
  * @publicApi
  */
-function createInjector(defType, parent, additionalProviders) {
+function createInjector(defType, parent, additionalProviders, name) {
     if (parent === void 0) { parent = null; }
     if (additionalProviders === void 0) { additionalProviders = null; }
     parent = parent || getNullInjector();
-    return new R3Injector(defType, additionalProviders, parent);
+    return new R3Injector(defType, additionalProviders, parent, name);
 }
 var R3Injector = /** @class */ (function () {
-    function R3Injector(def, additionalProviders, parent) {
+    function R3Injector(def, additionalProviders, parent, source) {
+        if (source === void 0) { source = null; }
         var _this = this;
         this.parent = parent;
         /**
@@ -12161,6 +12168,8 @@ var R3Injector = /** @class */ (function () {
         this.isRootInjector = this.records.has(APP_ROOT);
         // Eagerly instantiate the InjectorType classes themselves.
         this.injectorDefTypes.forEach(function (defType) { return _this.get(defType); });
+        // Source name, used for debugging
+        this.source = source || (def instanceof Array ? null : stringify(def));
     }
     Object.defineProperty(R3Injector.prototype, "destroyed", {
         /**
@@ -12192,7 +12201,7 @@ var R3Injector = /** @class */ (function () {
         }
     };
     R3Injector.prototype.get = function (token, notFoundValue, flags) {
-        if (notFoundValue === void 0) { notFoundValue = THROW_IF_NOT_FOUND; }
+        if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
         if (flags === void 0) { flags = InjectFlags.Default; }
         this.assertNotDestroyed();
         // Set the injection context.
@@ -12221,7 +12230,24 @@ var R3Injector = /** @class */ (function () {
             // Select the next injector based on the Self flag - if self is set, the next injector is
             // the NullInjector, otherwise it's the parent.
             var nextInjector = !(flags & InjectFlags.Self) ? this.parent : getNullInjector();
-            return nextInjector.get(token, notFoundValue);
+            return nextInjector.get(token, flags & InjectFlags.Optional ? null : notFoundValue);
+        }
+        catch (e) {
+            if (e.name === 'NullInjectorError') {
+                var path = e[NG_TEMP_TOKEN_PATH] = e[NG_TEMP_TOKEN_PATH] || [];
+                path.unshift(stringify(token));
+                if (previousInjector) {
+                    // We still have a parent injector, keep throwing
+                    throw e;
+                }
+                else {
+                    // Format & throw the final error message when we don't have any previous injector
+                    return catchInjectorError(e, token, 'R3InjectorError', this.source);
+                }
+            }
+            else {
+                throw e;
+            }
         }
         finally {
             // Lastly, clean up the state by restoring the previous injector.
@@ -13605,7 +13631,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.2+36.sha-7219639');
+var VERSION = new Version('8.0.0-beta.2+38.sha-07fb4b5');
 
 /**
  * @license
@@ -18356,7 +18382,7 @@ var NgModuleRef$1 = /** @class */ (function (_super) {
             },
             COMPONENT_FACTORY_RESOLVER
         ];
-        _this._r3Injector = createInjector(ngModuleType, _parent, additionalProviders);
+        _this._r3Injector = createInjector(ngModuleType, _parent, additionalProviders, stringify(ngModuleType));
         _this.instance = _this.get(ngModuleType);
         return _this;
     }
