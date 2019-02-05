@@ -20,7 +20,7 @@ declare type SingleProvider = TypeProvider | ValueProvider | ClassProvider | Con
  *
  * @publicApi
  */
-export declare function createInjector(defType: any, parent?: Injector | null, additionalProviders?: StaticProvider[] | null): Injector;
+export declare function createInjector(defType: any, parent?: Injector | null, additionalProviders?: StaticProvider[] | null, name?: string): Injector;
 export declare class R3Injector {
     readonly parent: Injector;
     /**
@@ -40,12 +40,13 @@ export declare class R3Injector {
      * root scope.
      */
     private readonly isRootInjector;
+    readonly source: string | null;
     /**
      * Flag indicating that this injector was previously destroyed.
      */
     readonly destroyed: boolean;
     private _destroyed;
-    constructor(def: InjectorType<any>, additionalProviders: StaticProvider[] | null, parent: Injector);
+    constructor(def: InjectorType<any>, additionalProviders: StaticProvider[] | null, parent: Injector, source?: string | null);
     /**
      * Destroy the injector and release references to every instance or provider associated with it.
      *
