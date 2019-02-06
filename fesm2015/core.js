@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+14.sha-5ebc0da
+ * @license Angular v8.0.0-beta.3+15.sha-22d3226
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8050,22 +8050,19 @@ function destroyViewTree(rootView) {
     while (viewOrContainer) {
         /** @type {?} */
         let next = null;
-        if (isLContainer(viewOrContainer)) {
-            // If container, traverse down to its first LView.
-            /** @type {?} */
-            const container = (/** @type {?} */ (viewOrContainer));
-            /** @type {?} */
-            const viewsInContainer = container[VIEWS];
-            if (viewsInContainer.length) {
-                next = viewsInContainer[0];
-            }
-        }
-        else {
+        if (viewOrContainer.length >= HEADER_OFFSET) {
             // If LView, traverse down to child.
             /** @type {?} */
             const view = (/** @type {?} */ (viewOrContainer));
             if (view[TVIEW].childIndex > -1)
                 next = getLViewChild(view);
+        }
+        else {
+            // If container, traverse down to its first LView.
+            /** @type {?} */
+            const container = (/** @type {?} */ (viewOrContainer));
+            if (container[VIEWS].length)
+                next = container[VIEWS][0];
         }
         if (next == null) {
             // Only clean up view when moving to the side or up, as destroy hooks
@@ -8073,16 +8070,6 @@ function destroyViewTree(rootView) {
             while (viewOrContainer && !(/** @type {?} */ (viewOrContainer))[NEXT] && viewOrContainer !== rootView) {
                 cleanUpView(viewOrContainer);
                 viewOrContainer = getParentState(viewOrContainer, rootView);
-                if (isLContainer(viewOrContainer)) {
-                    // this view will be destroyed so we need to notify queries that a view is detached
-                    /** @type {?} */
-                    const viewsInContainer = ((/** @type {?} */ (viewOrContainer)))[VIEWS];
-                    for (let viewToDetach of viewsInContainer) {
-                        if (viewToDetach[QUERIES]) {
-                            (/** @type {?} */ (viewToDetach[QUERIES])).removeView();
-                        }
-                    }
-                }
             }
             cleanUpView(viewOrContainer || rootView);
             next = viewOrContainer && (/** @type {?} */ (viewOrContainer))[NEXT];
@@ -16955,7 +16942,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.3+14.sha-5ebc0da');
+const VERSION = new Version('8.0.0-beta.3+15.sha-22d3226');
 
 /**
  * @fileoverview added by tsickle
