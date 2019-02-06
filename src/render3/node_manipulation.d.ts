@@ -102,10 +102,6 @@ export declare function getParentState(state: LView | LContainer, rootView: LVie
  */
 export declare function nativeInsertBefore(renderer: Renderer3, parent: RElement, child: RNode, beforeNode: RNode | null): void;
 /**
- * Removes a native child node from a given native parent node.
- */
-export declare function nativeRemoveChild(renderer: Renderer3, parent: RElement, child: RNode, isHostElement?: boolean): void;
-/**
  * Returns a native parent of a given native node.
  */
 export declare function nativeParentNode(renderer: Renderer3, node: RNode): RElement | null;
@@ -126,14 +122,15 @@ export declare function nativeNextSibling(renderer: Renderer3, node: RNode): RNo
 export declare function appendChild(childEl: RNode | RNode[], childTNode: TNode, currentView: LView): void;
 export declare function getBeforeNodeForView(index: number, views: LView[], containerNative: RComment): RComment | RElement;
 /**
- * Removes the `child` element from the DOM if not in view and not projected.
+ * Removes a native node itself using a given renderer. To remove the node we are looking up its
+ * parent from the native tree as not all platforms / browsers support the equivalent of
+ * node.remove().
  *
- * @param childTNode The TNode of the child to remove
- * @param childEl The child that should be removed
- * @param currentView The current LView
- * @returns Whether or not the child was removed
+ * @param renderer A renderer to be used
+ * @param rNode The native node that should be removed
+ * @param isHostElement A flag indicating if a node to be removed is a host of a component.
  */
-export declare function removeChild(childTNode: TNode, childEl: RNode, currentView: LView): void;
+export declare function nativeRemoveNode(renderer: Renderer3, rNode: RNode, isHostElement?: boolean): void;
 /**
  * Appends a projected node to the DOM, or in the case of a projected container,
  * appends the nodes from all of the container's active views to the DOM.
