@@ -24,7 +24,7 @@ export declare const PARENT = 2;
 export declare const NEXT = 3;
 export declare const QUERIES = 4;
 export declare const HOST = 5;
-export declare const HOST_NODE = 6;
+export declare const T_HOST = 6;
 export declare const BINDING_INDEX = 7;
 export declare const CLEANUP = 8;
 export declare const CONTEXT = 9;
@@ -97,7 +97,7 @@ export interface LView extends Array<any> {
      *
      * If null, this is the root view of an application (root component is in this view).
      */
-    [HOST_NODE]: TViewNode | TElementNode | null;
+    [T_HOST]: TViewNode | TElementNode | null;
     /**
      * The binding index we should access next.
      *
