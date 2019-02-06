@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+1.sha-ed0cf7e
+ * @license Angular v8.0.0-beta.3+2.sha-5a2c3ff
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -942,10 +942,21 @@
             });
         };
         OverrideResolver.prototype.getAnnotation = function (type) {
-            var _this = this;
-            // We should always return the last match from filter(), or we may return superclass data by
-            // mistake.
-            return reflection.annotations(type).filter(function (a) { return a instanceof _this.type; }).pop() || null;
+            var annotations = reflection.annotations(type);
+            // Try to find the nearest known Type annotation and make sure that this annotation is an
+            // instance of the type we are looking for, so we can use it for resolution. Note: there might
+            // be multiple known annotations found due to the fact that Components can extend Directives (so
+            // both Directive and Component annotations would be present), so we always check if the known
+            // annotation has the right type.
+            for (var i = annotations.length - 1; i >= 0; i--) {
+                var annotation = annotations[i];
+                var isKnownType = annotation instanceof i0.Directive || annotation instanceof i0.Component ||
+                    annotation instanceof i0.Pipe || annotation instanceof i0.NgModule;
+                if (isKnownType) {
+                    return annotation instanceof this.type ? annotation : null;
+                }
+            }
+            return null;
         };
         OverrideResolver.prototype.resolve = function (type) {
             var _this = this;
@@ -1253,7 +1264,19 @@
             this._activeFixtures = [];
             // restore initial component/directive/pipe defs
             this._initiaNgDefs.forEach(function (value, type) {
-                Object.defineProperty(type, value[0], value[1]);
+                var _a = __read(value, 2), prop = _a[0], descriptor = _a[1];
+                if (!descriptor) {
+                    // Delete operations are generally undesirable since they have performance implications on
+                    // objects they were applied to. In this particular case, situations where this code is
+                    // invoked should be quite rare to cause any noticable impact, since it's applied only to
+                    // some test cases (for example when class with no annotations extends some @Component) when
+                    // we need to clear 'ngComponentDef' field on a given class to restore its original state
+                    // (before applying overrides and running tests).
+                    delete type[prop];
+                }
+                else {
+                    Object.defineProperty(type, prop, descriptor);
+                }
             });
             this._initiaNgDefs.clear();
             clearResolutionOfComponentResourcesQueue();
