@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+5.sha-3f73dfa
+ * @license Angular v8.0.0-beta.3+6.sha-baf103c
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8975,13 +8975,24 @@ function assignTViewNodeToLView(tView, tParentNode, index, lView) {
  * i18nApply() or ComponentFactory.create), we need to adjust the blueprint for future
  * template passes.
  */
-function allocExpando(view) {
+function allocExpando(view, numSlotsToAlloc) {
     var tView = view[TVIEW];
     if (tView.firstTemplatePass) {
-        tView.expandoStartIndex++;
-        tView.blueprint.push(null);
-        tView.data.push(null);
-        view.push(null);
+        for (var i = 0; i < numSlotsToAlloc; i++) {
+            tView.blueprint.push(null);
+            tView.data.push(null);
+            view.push(null);
+        }
+        // We should only increment the expando start index if there aren't already directives
+        // and injectors saved in the "expando" section
+        if (!tView.expandoInstructions) {
+            tView.expandoStartIndex += numSlotsToAlloc;
+        }
+        else {
+            // Since we're adding the dynamic nodes into the expando section, we need to let the host
+            // bindings know that they should skip x slots
+            tView.expandoInstructions.push(numSlotsToAlloc);
+        }
     }
 }
 /**
@@ -13633,7 +13644,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.3+5.sha-3f73dfa');
+var VERSION = new Version('8.0.0-beta.3+6.sha-baf103c');
 
 /**
  * @license
@@ -17187,12 +17198,17 @@ function i18nStart(index, message, subTemplateIndex) {
         i18nStartFirstPass(tView, index, message, subTemplateIndex);
     }
 }
+// Count for the number of vars that will be allocated for each i18n block.
+// It is global because this is used in multiple functions that include loops and recursive calls.
+// This is reset to 0 when `i18nStartFirstPass` is called.
+var i18nVarsCount;
 /**
  * See `i18nStart` above.
  */
 function i18nStartFirstPass(tView, index, message, subTemplateIndex) {
     var viewData = getLView();
-    var expandoStartIndex = tView.blueprint.length - HEADER_OFFSET;
+    var startIndex = tView.blueprint.length - HEADER_OFFSET;
+    i18nVarsCount = 0;
     var previousOrParentTNode = getPreviousOrParentTNode();
     var parentTNode = getIsParent() ? getPreviousOrParentTNode() :
         previousOrParentTNode && previousOrParentTNode.parent;
@@ -17240,8 +17256,7 @@ function i18nStartFirstPass(tView, index, message, subTemplateIndex) {
                 if (j & 1) {
                     // Odd indexes are ICU expressions
                     // Create the comment node that will anchor the ICU expression
-                    allocExpando(viewData);
-                    var icuNodeIndex = tView.blueprint.length - 1 - HEADER_OFFSET;
+                    var icuNodeIndex = startIndex + i18nVarsCount++;
                     createOpCodes.push(COMMENT_MARKER, ngDevMode ? "ICU " + icuNodeIndex : '', icuNodeIndex, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
                     // Update codes for the ICU expression
                     var icuExpression = parts[j];
@@ -17260,22 +17275,21 @@ function i18nStartFirstPass(tView, index, message, subTemplateIndex) {
                     // Even indexes are text (including bindings)
                     var hasBinding = text$$1.match(BINDING_REGEXP);
                     // Create text nodes
-                    allocExpando(viewData);
-                    var textNodeIndex = tView.blueprint.length - 1 - HEADER_OFFSET;
+                    var textNodeIndex = startIndex + i18nVarsCount++;
                     createOpCodes.push(
                     // If there is a binding, the value will be set during update
                     hasBinding ? '' : text$$1, textNodeIndex, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
                     if (hasBinding) {
-                        addAllToArray(generateBindingUpdateOpCodes(text$$1, tView.blueprint.length - 1 - HEADER_OFFSET), updateOpCodes);
+                        addAllToArray(generateBindingUpdateOpCodes(text$$1, textNodeIndex), updateOpCodes);
                     }
                 }
             }
         }
     }
+    allocExpando(viewData, i18nVarsCount);
     // NOTE: local var needed to properly assert the type of `TI18n`.
     var tI18n = {
-        vars: tView.blueprint.length - HEADER_OFFSET - expandoStartIndex,
-        expandoStartIndex: expandoStartIndex,
+        vars: i18nVarsCount,
         create: createOpCodes,
         update: updateOpCodes,
         icus: icuExpressions.length ? icuExpressions : null,
@@ -18209,18 +18223,15 @@ function icuStart(tIcus, icuExpression, startIndex, expandoStartIndex) {
     var tIcu = {
         type: icuExpression.type,
         vars: vars,
-        expandoStartIndex: expandoStartIndex + 1, childIcus: childIcus,
+        childIcus: childIcus,
         cases: icuExpression.cases,
         create: createCodes,
         remove: removeCodes,
         update: updateCodes
     };
     tIcus.push(tIcu);
-    var lView = getLView();
-    var worstCaseSize = Math.max.apply(Math, __spread(vars));
-    for (var i = 0; i < worstCaseSize; i++) {
-        allocExpando(lView);
-    }
+    // Adding the maximum possible of vars needed (based on the cases with the most vars)
+    i18nVarsCount += Math.max.apply(Math, __spread(vars));
 }
 /**
  * Transforms a string template into an HTML template and a list of instructions used to update

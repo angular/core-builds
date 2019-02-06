@@ -50,7 +50,7 @@ export declare function assignTViewNodeToLView(tView: TView, tParentNode: TNode 
  * i18nApply() or ComponentFactory.create), we need to adjust the blueprint for future
  * template passes.
  */
-export declare function allocExpando(view: LView): void;
+export declare function allocExpando(view: LView, numSlotsToAlloc: number): void;
 /**
  *
  * @param hostNode Existing node to render into.
