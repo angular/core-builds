@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+2.sha-5a2c3ff
+ * @license Angular v8.0.0-beta.3+5.sha-3f73dfa
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7922,7 +7922,7 @@ function executeNodeAction(action, renderer, parent, node, tNode, beforeNode) {
         nativeInsertBefore(renderer, (/** @type {?} */ (parent)), node, beforeNode || null);
     }
     else if (action === 1 /* Detach */) {
-        nativeRemoveChild(renderer, (/** @type {?} */ (parent)), node, isComponent(tNode));
+        nativeRemoveNode(renderer, node, isComponent(tNode));
     }
     else if (action === 2 /* Destroy */) {
         ngDevMode && ngDevMode.rendererDestroyNode++;
@@ -8375,7 +8375,7 @@ function nativeAppendOrInsertBefore(renderer, parent, child, beforeNode) {
     }
 }
 /**
- * Removes a native child node from a given native parent node.
+ * Removes a node from the DOM given its native parent.
  * @param {?} renderer
  * @param {?} parent
  * @param {?} child
@@ -8383,8 +8383,12 @@ function nativeAppendOrInsertBefore(renderer, parent, child, beforeNode) {
  * @return {?}
  */
 function nativeRemoveChild(renderer, parent, child, isHostElement) {
-    isProceduralRenderer(renderer) ? renderer.removeChild((/** @type {?} */ (parent)), child, isHostElement) :
+    if (isProceduralRenderer(renderer)) {
+        renderer.removeChild(parent, child, isHostElement);
+    }
+    else {
         parent.removeChild(child);
+    }
 }
 /**
  * Returns a native parent of a given native node.
@@ -8489,19 +8493,20 @@ function getBeforeNodeForView(index, views, containerNative) {
     }
 }
 /**
- * Removes the `child` element from the DOM if not in view and not projected.
+ * Removes a native node itself using a given renderer. To remove the node we are looking up its
+ * parent from the native tree as not all platforms / browsers support the equivalent of
+ * node.remove().
  *
- * @param {?} childTNode The TNode of the child to remove
- * @param {?} childEl The child that should be removed
- * @param {?} currentView The current LView
- * @return {?} Whether or not the child was removed
+ * @param {?} renderer A renderer to be used
+ * @param {?} rNode The native node that should be removed
+ * @param {?=} isHostElement A flag indicating if a node to be removed is a host of a component.
+ * @return {?}
  */
-function removeChild(childTNode, childEl, currentView) {
+function nativeRemoveNode(renderer, rNode, isHostElement) {
     /** @type {?} */
-    const parentNative = getRenderParent(childTNode, currentView);
-    // We only remove the element if it already has a render parent.
-    if (parentNative) {
-        nativeRemoveChild(currentView[RENDERER], parentNative, childEl);
+    const nativeParent = nativeParentNode(renderer, rNode);
+    if (nativeParent) {
+        nativeRemoveChild(renderer, nativeParent, rNode, isHostElement);
     }
 }
 /**
@@ -16846,7 +16851,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.3+2.sha-5a2c3ff');
+const VERSION = new Version('8.0.0-beta.3+5.sha-3f73dfa');
 
 /**
  * @fileoverview added by tsickle
@@ -22305,7 +22310,7 @@ function removeNode(index, viewData) {
     /** @type {?} */
     const removedPhRNode = getNativeByIndex(index, viewData);
     if (removedPhRNode) {
-        removeChild(removedPhTNode, removedPhRNode, viewData);
+        nativeRemoveNode(viewData[RENDERER], removedPhRNode);
     }
     removedPhTNode.detached = true;
     ngDevMode && ngDevMode.rendererRemoveNode++;
@@ -22315,7 +22320,7 @@ function removeNode(index, viewData) {
         /** @type {?} */
         const lContainer = (/** @type {?} */ (slotValue));
         if (removedPhTNode.type !== 0 /* Container */) {
-            removeChild(removedPhTNode, lContainer[NATIVE], viewData);
+            nativeRemoveNode(viewData[RENDERER], lContainer[NATIVE]);
         }
     }
 }
