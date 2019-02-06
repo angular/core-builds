@@ -68,7 +68,7 @@ export declare function renderTemplate<T>(hostNode: RElement, templateFn: Compon
  * either through ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
  * Such lViewNode will then be renderer with renderEmbeddedTemplate() (see below).
  */
-export declare function createEmbeddedViewAndNode<T>(tView: TView, context: T, declarationView: LView, renderer: Renderer3, queries: LQueries | null, injectorIndex: number): LView;
+export declare function createEmbeddedViewAndNode<T>(tView: TView, context: T, declarationView: LView, queries: LQueries | null, injectorIndex: number): LView;
 /**
  * Used for rendering embedded views (e.g. dynamically created views)
  *
@@ -589,7 +589,7 @@ export declare function addToViewTree<T extends LView | LContainer>(lView: LView
  * @param lView The starting LView to mark dirty
  * @returns the root LView
  */
-export declare function markViewDirty(lView: LView): LView;
+export declare function markViewDirty(lView: LView): LView | null;
 /**
  * Used to schedule change detection on the whole application.
  *

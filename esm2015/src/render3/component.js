@@ -120,8 +120,8 @@ export function renderComponent(componentType /* Type as workaround for: Microso
     /** @type {?} */
     const hostRNode = locateHostElement(rendererFactory, opts.host || componentTag);
     /** @type {?} */
-    const rootFlags = componentDef.onPush ? 32 /* Dirty */ | 256 /* IsRoot */ :
-        16 /* CheckAlways */ | 256 /* IsRoot */;
+    const rootFlags = componentDef.onPush ? 64 /* Dirty */ | 512 /* IsRoot */ :
+        16 /* CheckAlways */ | 512 /* IsRoot */;
     /** @type {?} */
     const rootContext = createRootContext(opts.scheduler, opts.playerHandler);
     /** @type {?} */
@@ -167,7 +167,7 @@ export function createRootComponentView(rNode, def, rootView, rendererFactory, r
     /** @type {?} */
     const tView = rootView[TVIEW];
     /** @type {?} */
-    const componentView = createLView(rootView, getOrCreateTView(def.template, def.consts, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery), null, def.onPush ? 32 /* Dirty */ : 16 /* CheckAlways */, rendererFactory, renderer, sanitizer);
+    const componentView = createLView(rootView, getOrCreateTView(def.template, def.consts, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery), null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, rendererFactory, renderer, sanitizer);
     /** @type {?} */
     const tNode = createNodeAtIndex(0, 3 /* Element */, rNode, null, null);
     if (tView.firstTemplatePass) {

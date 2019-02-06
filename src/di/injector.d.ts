@@ -66,6 +66,7 @@ export declare abstract class Injector {
     static ngInjectableDef: never;
 }
 export declare const USE_VALUE: string;
+export declare const NG_TEMP_TOKEN_PATH = "ngTempTokenPath";
 export declare class StaticInjector implements Injector {
     readonly parent: Injector;
     readonly source: string | null;
@@ -75,3 +76,4 @@ export declare class StaticInjector implements Injector {
     get(token: any, notFoundValue?: any): any;
     toString(): string;
 }
+export declare function catchInjectorError(e: any, token: any, injectorErrorName: string, source: string | null): never;

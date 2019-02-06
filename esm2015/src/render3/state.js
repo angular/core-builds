@@ -384,7 +384,7 @@ export function leaveView(newView) {
         }
         finally {
             // Views are clean and in update mode after being checked, so these bits are cleared
-            lView[FLAGS] &= ~(32 /* Dirty */ | 8 /* FirstLViewPass */);
+            lView[FLAGS] &= ~(64 /* Dirty */ | 8 /* FirstLViewPass */);
             lView[BINDING_INDEX] = tView.bindingStartIndex;
         }
     }
