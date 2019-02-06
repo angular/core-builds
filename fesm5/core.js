@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+1.sha-ed0cf7e
+ * @license Angular v8.0.0-beta.3+2.sha-5a2c3ff
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13631,7 +13631,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.3+1.sha-ed0cf7e');
+var VERSION = new Version('8.0.0-beta.3+2.sha-5a2c3ff');
 
 /**
  * @license
@@ -19953,9 +19953,12 @@ function setScopeOnDeclaredComponents(moduleType, ngModule) {
  * a given module.
  */
 function patchComponentDefWithScope(componentDef, transitiveScopes) {
-    componentDef.directiveDefs = function () { return Array.from(transitiveScopes.compilation.directives)
-        .map(function (dir) { return getDirectiveDef(dir) || getComponentDef(dir); })
-        .filter(function (def) { return !!def; }); };
+    componentDef.directiveDefs = function () {
+        return Array.from(transitiveScopes.compilation.directives)
+            .map(function (dir) { return dir.hasOwnProperty(NG_COMPONENT_DEF) ? getComponentDef(dir) :
+            getDirectiveDef(dir); })
+            .filter(function (def) { return !!def; });
+    };
     componentDef.pipeDefs = function () {
         return Array.from(transitiveScopes.compilation.pipes).map(function (pipe) { return getPipeDef(pipe); });
     };
