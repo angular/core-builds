@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+42.sha-264ef72
+ * @license Angular v8.0.0-beta.3+43.sha-7660d0d
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7885,7 +7885,7 @@ function walkTNodeTree(viewToWalk, action, renderer, renderParent, beforeNode) {
              */
             while (!nextTNode) {
                 // If parent is null, we're crossing the view boundary, so we should get the host TNode.
-                tNode = tNode.parent || currentView[TVIEW].node;
+                tNode = tNode.parent || currentView[T_HOST];
                 if (tNode === null || tNode === rootTNode)
                     return null;
                 // When exiting a container, the beforeNode must be restored to the previous value
@@ -7893,9 +7893,28 @@ function walkTNodeTree(viewToWalk, action, renderer, renderParent, beforeNode) {
                     currentView = (/** @type {?} */ (currentView[PARENT]));
                     beforeNode = currentView[tNode.index][NATIVE];
                 }
-                if (tNode.type === 2 /* View */ && currentView[NEXT]) {
-                    currentView = (/** @type {?} */ (currentView[NEXT]));
-                    nextTNode = currentView[TVIEW].node;
+                if (tNode.type === 2 /* View */) {
+                    /**
+                     * If current lView doesn't have next pointer, we try to find it by going up parents
+                     * chain until:
+                     * - we find an lView with a next pointer
+                     * - or find a tNode with a parent that has a next pointer
+                     * - or reach root TNode (in which case we exit, since we traversed all nodes)
+                     */
+                    while (!currentView[NEXT] && currentView[PARENT] &&
+                        !(tNode.parent && tNode.parent.next)) {
+                        if (tNode === rootTNode)
+                            return null;
+                        currentView = (/** @type {?} */ (currentView[PARENT]));
+                        tNode = (/** @type {?} */ (currentView[T_HOST]));
+                    }
+                    if (currentView[NEXT]) {
+                        currentView = (/** @type {?} */ (currentView[NEXT]));
+                        nextTNode = currentView[T_HOST];
+                    }
+                    else {
+                        nextTNode = tNode.next;
+                    }
                 }
                 else {
                     nextTNode = tNode.next;
@@ -16863,7 +16882,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.3+42.sha-264ef72');
+const VERSION = new Version('8.0.0-beta.3+43.sha-7660d0d');
 
 /**
  * @fileoverview added by tsickle
