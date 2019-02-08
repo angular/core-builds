@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+53.sha-94f042b
+ * @license Angular v8.0.0-beta.3+68.sha-7115e7c
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9842,6 +9842,8 @@
     function validateAgainstUnknownProperties(element, propName, tNode) {
         // If prop is not a known property of the HTML element...
         if (!(propName in element) &&
+            // and we are in a browser context... (web worker nodes should be skipped)
+            typeof Node === 'function' && element instanceof Node &&
             // and isn't a synthetic animation property...
             propName[0] !== ANIMATION_PROP_PREFIX) {
             // ... it is probably a user error and we should throw.
@@ -13711,7 +13713,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.3+53.sha-94f042b');
+    var VERSION = new Version('8.0.0-beta.3+68.sha-7115e7c');
 
     /**
      * @license
