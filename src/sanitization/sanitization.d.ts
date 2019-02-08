@@ -97,5 +97,5 @@ export declare function sanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string, pr
  * sanitizing any CSS property that can include a `url` value (usually image-based properties)
  */
 export declare const defaultStyleSanitizer: StyleSanitizeFn;
-export declare function validateProperty(name: string): void;
-export declare function validateAttribute(name: string): void;
+export declare function validateAgainstEventProperties(name: string): void;
+export declare function validateAgainstEventAttributes(name: string): void;

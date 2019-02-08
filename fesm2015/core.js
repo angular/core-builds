@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+43.sha-7660d0d
+ * @license Angular v8.0.0-beta.3+47.sha-b65fe62
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7356,7 +7356,7 @@ const defaultStyleSanitizer = ((/** @type {?} */ (function (prop, value) {
  * @param {?} name
  * @return {?}
  */
-function validateProperty(name) {
+function validateAgainstEventProperties(name) {
     if (name.toLowerCase().startsWith('on')) {
         /** @type {?} */
         const msg = `Binding to event property '${name}' is disallowed for security reasons, ` +
@@ -7370,7 +7370,7 @@ function validateProperty(name) {
  * @param {?} name
  * @return {?}
  */
-function validateAttribute(name) {
+function validateAgainstEventAttributes(name) {
     if (name.toLowerCase().startsWith('on')) {
         /** @type {?} */
         const msg = `Binding to event attribute '${name}' is disallowed for security reasons, ` +
@@ -11984,7 +11984,7 @@ function elementEnd() {
  */
 function elementAttribute(index, name, value, sanitizer, namespace) {
     if (value !== NO_CHANGE) {
-        ngDevMode && validateAttribute(name);
+        ngDevMode && validateAgainstEventAttributes(name);
         /** @type {?} */
         const lView = getLView();
         /** @type {?} */
@@ -12094,7 +12094,8 @@ function elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, 
     }
     else if (tNode.type === 3 /* Element */) {
         if (ngDevMode) {
-            validateProperty(propName);
+            validateAgainstEventProperties(propName);
+            validateAgainstUnknownProperties(element, propName, tNode);
             ngDevMode.rendererSetProperty++;
         }
         savePropertyDebugData(tNode, lView, propName, lView[TVIEW].data, nativeOnly);
@@ -12110,6 +12111,21 @@ function elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, 
             ((/** @type {?} */ (element))).setProperty ? ((/** @type {?} */ (element))).setProperty(propName, value) :
                 ((/** @type {?} */ (element)))[propName] = value;
         }
+    }
+}
+/**
+ * @param {?} element
+ * @param {?} propName
+ * @param {?} tNode
+ * @return {?}
+ */
+function validateAgainstUnknownProperties(element, propName, tNode) {
+    // If prop is not a known property of the HTML element...
+    if (!(propName in element) &&
+        // and isn't a synthetic animation property...
+        propName[0] !== ANIMATION_PROP_PREFIX) {
+        // ... it is probably a user error and we should throw.
+        throw new Error(`Template error: Can't bind to '${propName}' since it isn't a known property of '${tNode.tagName}'.`);
     }
 }
 /**
@@ -16961,7 +16977,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.3+43.sha-7660d0d');
+const VERSION = new Version('8.0.0-beta.3+47.sha-b65fe62');
 
 /**
  * @fileoverview added by tsickle
