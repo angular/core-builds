@@ -13,6 +13,7 @@ import { Player, PlayerContext } from '../interfaces/player';
 import { RElement } from '../interfaces/renderer';
 import { InitialStylingValues, StylingContext } from '../interfaces/styling';
 import { LView, RootContext } from '../interfaces/view';
+export declare const ANIMATION_PROP_PREFIX = "@";
 export declare function createEmptyStylingContext(element?: RElement | null, sanitizer?: StyleSanitizeFn | null, initialStyles?: InitialStylingValues | null, initialClasses?: InitialStylingValues | null): StylingContext;
 /**
  * Used clone a copy of a pre-computed template of a styling context.
