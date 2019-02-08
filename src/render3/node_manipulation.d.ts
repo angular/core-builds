@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { LContainer } from './interfaces/container';
-import { TContainerNode, TElementContainerNode, TElementNode, TNode, TViewNode } from './interfaces/node';
+import { TNode, TViewNode } from './interfaces/node';
 import { RComment, RElement, RNode, RText, Renderer3 } from './interfaces/renderer';
 import { LView } from './interfaces/view';
 export declare function getLContainer(tNode: TViewNode, embeddedView: LView): LContainer | null;
@@ -61,18 +61,16 @@ export declare function insertView(lView: LView, lContainer: LContainer, parentV
  *
  * @param lContainer The container from which to detach a view
  * @param removeIndex The index of the view to detach
- * @param detached Whether or not this view is already detached.
  * @returns Detached LView instance.
  */
-export declare function detachView(lContainer: LContainer, removeIndex: number, detached: boolean): LView;
+export declare function detachView(lContainer: LContainer, removeIndex: number): LView;
 /**
  * Removes a view from a container, i.e. detaches it and then destroys the underlying LView.
  *
  * @param lContainer The container from which to remove a view
- * @param tContainer The TContainer node associated with the LContainer
  * @param removeIndex The index of the view to remove
  */
-export declare function removeView(lContainer: LContainer, containerHost: TElementNode | TContainerNode | TElementContainerNode, removeIndex: number): void;
+export declare function removeView(lContainer: LContainer, removeIndex: number): void;
 /** Gets the child of the given LView */
 export declare function getLViewChild(lView: LView): LView | LContainer | null;
 /**

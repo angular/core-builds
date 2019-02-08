@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+50.sha-4b7264f
+ * @license Angular v8.0.0-beta.3+53.sha-94f042b
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6796,19 +6796,16 @@
      *
      * @param lContainer The container from which to detach a view
      * @param removeIndex The index of the view to detach
-     * @param detached Whether or not this view is already detached.
      * @returns Detached LView instance.
      */
-    function detachView(lContainer, removeIndex, detached) {
+    function detachView(lContainer, removeIndex) {
         var views = lContainer[VIEWS];
         var viewToDetach = views[removeIndex];
         if (removeIndex > 0) {
             views[removeIndex - 1][NEXT] = viewToDetach[NEXT];
         }
         views.splice(removeIndex, 1);
-        if (!detached) {
-            addRemoveViewFromContainer(viewToDetach, false);
-        }
+        addRemoveViewFromContainer(viewToDetach, false);
         if (viewToDetach[QUERIES]) {
             viewToDetach[QUERIES].removeView();
         }
@@ -6822,12 +6819,11 @@
      * Removes a view from a container, i.e. detaches it and then destroys the underlying LView.
      *
      * @param lContainer The container from which to remove a view
-     * @param tContainer The TContainer node associated with the LContainer
      * @param removeIndex The index of the view to remove
      */
-    function removeView(lContainer, containerHost, removeIndex) {
+    function removeView(lContainer, removeIndex) {
         var view = lContainer[VIEWS][removeIndex];
-        detachView(lContainer, removeIndex, !!containerHost.detached);
+        detachView(lContainer, removeIndex);
         destroyLView(view);
     }
     /** Gets the child of the given LView */
@@ -9830,7 +9826,6 @@
             next: null,
             child: null,
             parent: tParent,
-            detached: null,
             stylingTemplate: null,
             projection: null
         };
@@ -10650,7 +10645,7 @@
         var nextIndex = lContainer[ACTIVE_INDEX];
         // remove extra views at the end of the container
         while (nextIndex < lContainer[VIEWS].length) {
-            removeView(lContainer, previousOrParentTNode, nextIndex);
+            removeView(lContainer, nextIndex);
         }
     }
     /**
@@ -10678,12 +10673,11 @@
      * Removes views that need to be deleted in the process.
      *
      * @param lContainer to search for views
-     * @param tContainerNode to search for views
      * @param startIdx starting index in the views array to search from
      * @param viewBlockId exact view block id to look for
      * @returns index of a found view or -1 if not found
      */
-    function scanForView(lContainer, tContainerNode, startIdx, viewBlockId) {
+    function scanForView(lContainer, startIdx, viewBlockId) {
         var views = lContainer[VIEWS];
         for (var i = startIdx; i < views.length; i++) {
             var viewAtPositionId = views[i][TVIEW].id;
@@ -10692,7 +10686,7 @@
             }
             else if (viewAtPositionId < viewBlockId) {
                 // found a view that should not be at this position - remove
-                removeView(lContainer, tContainerNode, i);
+                removeView(lContainer, i);
             }
             else {
                 // found a view with id greater than the one we are searching for
@@ -10718,7 +10712,7 @@
             previousOrParentTNode;
         var lContainer = lView[containerTNode.index];
         ngDevMode && assertNodeType(containerTNode, 0 /* Container */);
-        var viewToRender = scanForView(lContainer, containerTNode, lContainer[ACTIVE_INDEX], viewBlockId);
+        var viewToRender = scanForView(lContainer, lContainer[ACTIVE_INDEX], viewBlockId);
         if (viewToRender) {
             setIsParent(true);
             enterView(viewToRender, viewToRender[TVIEW].node);
@@ -13363,12 +13357,12 @@
                 ViewContainerRef_.prototype.indexOf = function (viewRef) { return this._viewRefs.indexOf(viewRef); };
                 ViewContainerRef_.prototype.remove = function (index) {
                     var adjustedIdx = this._adjustIndex(index, -1);
-                    removeView(this._lContainer, this._hostTNode, adjustedIdx);
+                    removeView(this._lContainer, adjustedIdx);
                     this._viewRefs.splice(adjustedIdx, 1);
                 };
                 ViewContainerRef_.prototype.detach = function (index) {
                     var adjustedIdx = this._adjustIndex(index, -1);
-                    var view = detachView(this._lContainer, adjustedIdx, !!this._hostTNode.detached);
+                    var view = detachView(this._lContainer, adjustedIdx);
                     var wasDetached = this._viewRefs.splice(adjustedIdx, 1)[0] != null;
                     return wasDetached ? new ViewRef(view, view[CONTEXT], view[CONTAINER_INDEX]) : null;
                 };
@@ -13631,7 +13625,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.3+50.sha-4b7264f');
+    var VERSION = new Version('8.0.0-beta.3+53.sha-94f042b');
 
     /**
      * @license
@@ -17403,6 +17397,15 @@
         ngDevMode && assertDefined(tView, "tView should be defined");
         i18nEndFirstPass(tView);
     }
+    function findLastNode(node) {
+        while (node.next) {
+            node = node.next;
+        }
+        if (node.child) {
+            return findLastNode(node.child);
+        }
+        return node;
+    }
     /**
      * See `i18nEnd` above.
      */
@@ -17414,11 +17417,15 @@
         ngDevMode && assertDefined(tI18n, "You should call i18nStart before i18nEnd");
         // The last placeholder that was added before `i18nEnd`
         var previousOrParentTNode = getPreviousOrParentTNode();
-        var visitedPlaceholders = readCreateOpCodes(rootIndex, tI18n.create, tI18n.icus, viewData);
-        // Remove deleted placeholders
-        // The last placeholder that was added before `i18nEnd` is `previousOrParentTNode`
-        for (var i = rootIndex + 1; i <= previousOrParentTNode.index - HEADER_OFFSET; i++) {
-            if (visitedPlaceholders.indexOf(i) === -1) {
+        var visitedNodes = readCreateOpCodes(rootIndex, tI18n.create, tI18n.icus, viewData);
+        // Find the last node that was added before `i18nEnd`
+        var lastCreatedNode = previousOrParentTNode;
+        if (lastCreatedNode.child) {
+            lastCreatedNode = findLastNode(lastCreatedNode.child);
+        }
+        // Remove deleted nodes
+        for (var i = rootIndex + 1; i <= lastCreatedNode.index - HEADER_OFFSET; i++) {
+            if (visitedNodes.indexOf(i) === -1) {
                 removeNode(i, viewData);
             }
         }
@@ -17427,7 +17434,7 @@
         var renderer = getLView()[RENDERER];
         var currentTNode = null;
         var previousTNode = null;
-        var visitedPlaceholders = [];
+        var visitedNodes = [];
         for (var i = 0; i < createOpCodes.length; i++) {
             var opCode = createOpCodes[i];
             if (typeof opCode == 'string') {
@@ -17436,6 +17443,7 @@
                 ngDevMode && ngDevMode.rendererCreateTextNode++;
                 previousTNode = currentTNode;
                 currentTNode = createNodeAtIndex(textNodeIndex, 3 /* Element */, textRNode, null, null);
+                visitedNodes.push(textNodeIndex);
                 setIsParent(false);
             }
             else if (typeof opCode == 'number') {
@@ -17458,7 +17466,7 @@
                         break;
                     case 0 /* Select */:
                         var nodeIndex = opCode >>> 3 /* SHIFT_REF */;
-                        visitedPlaceholders.push(nodeIndex);
+                        visitedNodes.push(nodeIndex);
                         previousTNode = currentTNode;
                         currentTNode = getTNode(nodeIndex, viewData);
                         if (currentTNode) {
@@ -17495,6 +17503,7 @@
                         previousTNode = currentTNode;
                         currentTNode =
                             createNodeAtIndex(commentNodeIndex, 5 /* IcuContainer */, commentRNode, null, null);
+                        visitedNodes.push(commentNodeIndex);
                         attachPatchData(commentRNode, viewData);
                         currentTNode.activeCaseIndex = null;
                         // We will add the case nodes later, during the update phase
@@ -17508,6 +17517,7 @@
                         ngDevMode && ngDevMode.rendererCreateElement++;
                         previousTNode = currentTNode;
                         currentTNode = createNodeAtIndex(elementNodeIndex, 3 /* Element */, elementRNode, tagNameValue, null);
+                        visitedNodes.push(elementNodeIndex);
                         break;
                     default:
                         throw new Error("Unable to determine the type of mutate operation for \"" + opCode + "\"");
@@ -17515,7 +17525,7 @@
             }
         }
         setIsParent(false);
-        return visitedPlaceholders;
+        return visitedNodes;
     }
     function readUpdateOpCodes(updateOpCodes, icus, bindingsStartIndex, changeMask, viewData, bypassCheckBit) {
         if (bypassCheckBit === void 0) { bypassCheckBit = false; }
@@ -17603,8 +17613,6 @@
         if (removedPhRNode) {
             nativeRemoveNode(viewData[RENDERER], removedPhRNode);
         }
-        removedPhTNode.detached = true;
-        ngDevMode && ngDevMode.rendererRemoveNode++;
         var slotValue = load(index);
         if (isLContainer(slotValue)) {
             var lContainer = slotValue;
@@ -17612,6 +17620,7 @@
                 nativeRemoveNode(viewData[RENDERER], lContainer[NATIVE]);
             }
         }
+        ngDevMode && ngDevMode.rendererRemoveNode++;
     }
     /**
      *
