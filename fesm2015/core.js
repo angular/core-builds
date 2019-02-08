@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+47.sha-b65fe62
+ * @license Angular v8.0.0-beta.3+48.sha-c3fadad
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16977,7 +16977,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.3+47.sha-b65fe62');
+const VERSION = new Version('8.0.0-beta.3+48.sha-c3fadad');
 
 /**
  * @fileoverview added by tsickle
