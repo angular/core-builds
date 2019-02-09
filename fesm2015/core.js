@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+68.sha-7115e7c
+ * @license Angular v8.0.0-beta.3+71.sha-81329c8
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4567,30 +4567,6 @@ function getIsParent() {
  */
 function setIsParent(value) {
     isParent = value;
-}
-/**
- * Query instructions can ask for "current queries" in 2 different cases:
- * - when creating view queries (at the root of a component view, before any node is created - in
- * this case currentQueries points to view queries)
- * - when creating content queries (i.e. this previousOrParentTNode points to a node on which we
- * create content queries).
- * @param {?} QueryType
- * @return {?}
- */
-function getOrCreateCurrentQueries(QueryType) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    let currentQueries = lView[QUERIES];
-    // If this is the first content query on a node, any existing LQueries needs to be cloned.
-    // In subsequent template passes, the cloning occurs before directive instantiation
-    // in `createDirectivesAndLocals`.
-    if (previousOrParentTNode && previousOrParentTNode !== lView[T_HOST] &&
-        !isContentQueryHost(previousOrParentTNode)) {
-        currentQueries && (currentQueries = lView[QUERIES] = currentQueries.clone());
-        previousOrParentTNode.flags |= 4 /* hasContentQuery */;
-    }
-    return currentQueries || (lView[QUERIES] = new QueryType(null, null, null));
 }
 /**
  * Checks whether a given view is in creation mode
@@ -11298,6 +11274,28 @@ function elementContainerStart(index, attrs, localRefs) {
     const currentQueries = lView[QUERIES];
     if (currentQueries) {
         currentQueries.addNode(tNode);
+        lView[QUERIES] = currentQueries.clone();
+    }
+    executeContentQueries(tView, tNode);
+}
+/**
+ * @param {?} tView
+ * @param {?} tNode
+ * @return {?}
+ */
+function executeContentQueries(tView, tNode) {
+    if (isContentQueryHost(tNode)) {
+        /** @type {?} */
+        const start = tNode.directiveStart;
+        /** @type {?} */
+        const end = tNode.directiveEnd;
+        for (let i = start; i < end; i++) {
+            /** @type {?} */
+            const def = (/** @type {?} */ (tView.data[i]));
+            if (def.contentQueries) {
+                def.contentQueries(i);
+            }
+        }
     }
 }
 /**
@@ -11315,7 +11313,7 @@ function elementContainerEnd() {
         setIsParent(false);
     }
     else {
-        ngDevMode && assertHasParent(getPreviousOrParentTNode());
+        ngDevMode && assertHasParent(previousOrParentTNode);
         previousOrParentTNode = (/** @type {?} */ (previousOrParentTNode.parent));
         setPreviousOrParentTNode(previousOrParentTNode);
     }
@@ -11323,8 +11321,7 @@ function elementContainerEnd() {
     /** @type {?} */
     const currentQueries = lView[QUERIES];
     if (currentQueries) {
-        lView[QUERIES] =
-            isContentQueryHost(previousOrParentTNode) ? currentQueries.parent : currentQueries;
+        lView[QUERIES] = currentQueries.parent;
     }
     registerPostOrderHooks(tView, previousOrParentTNode);
 }
@@ -11394,7 +11391,9 @@ function elementStart(index, name, attrs, localRefs) {
     const currentQueries = lView[QUERIES];
     if (currentQueries) {
         currentQueries.addNode(tNode);
+        lView[QUERIES] = currentQueries.clone();
     }
+    executeContentQueries(tView, tNode);
 }
 /**
  * Creates a native element from a tag name, using a renderer.
@@ -11437,14 +11436,6 @@ function createDirectivesAndLocals(tView, lView, localRefs, localRefExtractor = 
     if (tView.firstTemplatePass) {
         ngDevMode && ngDevMode.firstTemplatePass++;
         resolveDirectives(tView, lView, findDirectiveMatches(tView, lView, previousOrParentTNode), previousOrParentTNode, localRefs || null);
-    }
-    else {
-        // During first template pass, queries are created or cloned when first requested
-        // using `getOrCreateCurrentQueries`. For subsequent template passes, we clone
-        // any current LQueries here up-front if the current node hosts a content query.
-        if (isContentQueryHost(getPreviousOrParentTNode()) && lView[QUERIES]) {
-            lView[QUERIES] = (/** @type {?} */ (lView[QUERIES])).clone();
-        }
     }
     instantiateAllDirectives(tView, lView, previousOrParentTNode);
     invokeDirectivesHostBindings(tView, lView, previousOrParentTNode);
@@ -11881,8 +11872,7 @@ function elementEnd() {
     /** @type {?} */
     const currentQueries = lView[QUERIES];
     if (currentQueries) {
-        lView[QUERIES] =
-            isContentQueryHost(previousOrParentTNode) ? currentQueries.parent : currentQueries;
+        lView[QUERIES] = currentQueries.parent;
     }
     registerPostOrderHooks(getLView()[TVIEW], previousOrParentTNode);
     decreaseElementDepthCount();
@@ -12705,8 +12695,8 @@ function postProcessDirective(viewData, directive, def, directiveDefIdx) {
     if (previousOrParentTNode && previousOrParentTNode.attrs) {
         setInputsFromAttrs(directiveDefIdx, directive, def, previousOrParentTNode);
     }
-    if (def.contentQueries) {
-        def.contentQueries(directiveDefIdx);
+    if (viewData[TVIEW].firstTemplatePass && def.contentQueries) {
+        previousOrParentTNode.flags |= 4 /* hasContentQuery */;
     }
     if (isComponentDef(def)) {
         /** @type {?} */
@@ -13117,7 +13107,7 @@ function addTContainerToQueries(lView, tContainerNode) {
     /** @type {?} */
     const queries = lView[QUERIES];
     if (queries) {
-        lView[QUERIES] = queries.addNode(tContainerNode);
+        queries.addNode(tContainerNode);
         /** @type {?} */
         const lContainer = lView[tContainerNode.index];
         lContainer[QUERIES] = queries.container();
@@ -16894,7 +16884,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.3+68.sha-7115e7c');
+const VERSION = new Version('8.0.0-beta.3+71.sha-81329c8');
 
 /**
  * @fileoverview added by tsickle
@@ -24139,17 +24129,7 @@ class LQueries_ {
      */
     addNode(tNode) {
         add(this.deep, tNode);
-        if (isContentQueryHost(tNode)) {
-            add(this.shallow, tNode);
-            if (tNode.parent && isContentQueryHost(tNode.parent)) {
-                // if node has a content query and parent also has a content query
-                // both queries need to check this node for shallow matches
-                add((/** @type {?} */ (this.parent)).shallow, tNode);
-            }
-            return this.parent;
-        }
-        isRootNodeOfQuery(tNode) && add(this.shallow, tNode);
-        return this;
+        add(this.shallow, tNode);
     }
     /**
      * @return {?}
@@ -24158,13 +24138,6 @@ class LQueries_ {
         removeView$1(this.shallow);
         removeView$1(this.deep);
     }
-}
-/**
- * @param {?} tNode
- * @return {?}
- */
-function isRootNodeOfQuery(tNode) {
-    return tNode.parent === null || isContentQueryHost(tNode.parent);
 }
 /**
  * @param {?} query
@@ -24447,12 +24420,14 @@ function query(
 predicate, descend, read) {
     ngDevMode && assertPreviousIsParent(getIsParent());
     /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
     const queryList = new QueryList();
     /** @type {?} */
-    const queries = getOrCreateCurrentQueries(LQueries_);
+    const queries = lView[QUERIES] || (lView[QUERIES] = new LQueries_(null, null, null));
     ((/** @type {?} */ (queryList)))._valuesTree = [];
     queries.track(queryList, predicate, descend, read);
-    storeCleanupWithContext(getLView(), queryList, queryList.destroy);
+    storeCleanupWithContext(lView, queryList, queryList.destroy);
     return queryList;
 }
 /**
