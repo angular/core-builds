@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+63.sha-f7591f1
+ * @license Angular v8.0.0-beta.3+71.sha-81329c8
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3940,26 +3940,6 @@ function getIsParent() {
 }
 function setIsParent(value) {
     isParent = value;
-}
-/**
- * Query instructions can ask for "current queries" in 2 different cases:
- * - when creating view queries (at the root of a component view, before any node is created - in
- * this case currentQueries points to view queries)
- * - when creating content queries (i.e. this previousOrParentTNode points to a node on which we
- * create content queries).
- */
-function getOrCreateCurrentQueries(QueryType) {
-    var lView = getLView();
-    var currentQueries = lView[QUERIES];
-    // If this is the first content query on a node, any existing LQueries needs to be cloned.
-    // In subsequent template passes, the cloning occurs before directive instantiation
-    // in `createDirectivesAndLocals`.
-    if (previousOrParentTNode && previousOrParentTNode !== lView[T_HOST] &&
-        !isContentQueryHost(previousOrParentTNode)) {
-        currentQueries && (currentQueries = lView[QUERIES] = currentQueries.clone());
-        previousOrParentTNode.flags |= 4 /* hasContentQuery */;
-    }
-    return currentQueries || (lView[QUERIES] = new QueryType(null, null, null));
 }
 /** Checks whether a given view is in creation mode */
 function isCreationMode(view) {
@@ -9182,6 +9162,20 @@ function elementContainerStart(index, attrs, localRefs) {
     var currentQueries = lView[QUERIES];
     if (currentQueries) {
         currentQueries.addNode(tNode);
+        lView[QUERIES] = currentQueries.clone();
+    }
+    executeContentQueries(tView, tNode);
+}
+function executeContentQueries(tView, tNode) {
+    if (isContentQueryHost(tNode)) {
+        var start = tNode.directiveStart;
+        var end = tNode.directiveEnd;
+        for (var i = start; i < end; i++) {
+            var def = tView.data[i];
+            if (def.contentQueries) {
+                def.contentQueries(i);
+            }
+        }
     }
 }
 /** Mark the end of the <ng-container>. */
@@ -9193,15 +9187,14 @@ function elementContainerEnd() {
         setIsParent(false);
     }
     else {
-        ngDevMode && assertHasParent(getPreviousOrParentTNode());
+        ngDevMode && assertHasParent(previousOrParentTNode);
         previousOrParentTNode = previousOrParentTNode.parent;
         setPreviousOrParentTNode(previousOrParentTNode);
     }
     ngDevMode && assertNodeType(previousOrParentTNode, 4 /* ElementContainer */);
     var currentQueries = lView[QUERIES];
     if (currentQueries) {
-        lView[QUERIES] =
-            isContentQueryHost(previousOrParentTNode) ? currentQueries.parent : currentQueries;
+        lView[QUERIES] = currentQueries.parent;
     }
     registerPostOrderHooks(tView, previousOrParentTNode);
 }
@@ -9264,7 +9257,9 @@ function elementStart(index, name, attrs, localRefs) {
     var currentQueries = lView[QUERIES];
     if (currentQueries) {
         currentQueries.addNode(tNode);
+        lView[QUERIES] = currentQueries.clone();
     }
+    executeContentQueries(tView, tNode);
 }
 /**
  * Creates a native element from a tag name, using a renderer.
@@ -9302,14 +9297,6 @@ function createDirectivesAndLocals(tView, lView, localRefs, localRefExtractor) {
     if (tView.firstTemplatePass) {
         ngDevMode && ngDevMode.firstTemplatePass++;
         resolveDirectives(tView, lView, findDirectiveMatches(tView, lView, previousOrParentTNode), previousOrParentTNode, localRefs || null);
-    }
-    else {
-        // During first template pass, queries are created or cloned when first requested
-        // using `getOrCreateCurrentQueries`. For subsequent template passes, we clone
-        // any current LQueries here up-front if the current node hosts a content query.
-        if (isContentQueryHost(getPreviousOrParentTNode()) && lView[QUERIES]) {
-            lView[QUERIES] = lView[QUERIES].clone();
-        }
     }
     instantiateAllDirectives(tView, lView, previousOrParentTNode);
     invokeDirectivesHostBindings(tView, lView, previousOrParentTNode);
@@ -9660,8 +9647,7 @@ function elementEnd() {
     var lView = getLView();
     var currentQueries = lView[QUERIES];
     if (currentQueries) {
-        lView[QUERIES] =
-            isContentQueryHost(previousOrParentTNode) ? currentQueries.parent : currentQueries;
+        lView[QUERIES] = currentQueries.parent;
     }
     registerPostOrderHooks(getLView()[TVIEW], previousOrParentTNode);
     decreaseElementDepthCount();
@@ -9792,6 +9778,8 @@ function elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, 
 function validateAgainstUnknownProperties(element, propName, tNode) {
     // If prop is not a known property of the HTML element...
     if (!(propName in element) &&
+        // and we are in a browser context... (web worker nodes should be skipped)
+        typeof Node === 'function' && element instanceof Node &&
         // and isn't a synthetic animation property...
         propName[0] !== ANIMATION_PROP_PREFIX) {
         // ... it is probably a user error and we should throw.
@@ -10316,8 +10304,8 @@ function postProcessDirective(viewData, directive, def, directiveDefIdx) {
     if (previousOrParentTNode && previousOrParentTNode.attrs) {
         setInputsFromAttrs(directiveDefIdx, directive, def, previousOrParentTNode);
     }
-    if (def.contentQueries) {
-        def.contentQueries(directiveDefIdx);
+    if (viewData[TVIEW].firstTemplatePass && def.contentQueries) {
+        previousOrParentTNode.flags |= 4 /* hasContentQuery */;
     }
     if (isComponentDef(def)) {
         var componentView = getComponentViewByIndex(previousOrParentTNode.index, viewData);
@@ -10629,7 +10617,7 @@ function containerInternal(index, tagName, attrs) {
 function addTContainerToQueries(lView, tContainerNode) {
     var queries = lView[QUERIES];
     if (queries) {
-        lView[QUERIES] = queries.addNode(tContainerNode);
+        queries.addNode(tContainerNode);
         var lContainer = lView[tContainerNode.index];
         lContainer[QUERIES] = queries.container();
     }
@@ -13666,7 +13654,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.3+63.sha-f7591f1');
+var VERSION = new Version('8.0.0-beta.3+71.sha-81329c8');
 
 /**
  * @license
@@ -19211,17 +19199,7 @@ var LQueries_ = /** @class */ (function () {
     };
     LQueries_.prototype.addNode = function (tNode) {
         add(this.deep, tNode);
-        if (isContentQueryHost(tNode)) {
-            add(this.shallow, tNode);
-            if (tNode.parent && isContentQueryHost(tNode.parent)) {
-                // if node has a content query and parent also has a content query
-                // both queries need to check this node for shallow matches
-                add(this.parent.shallow, tNode);
-            }
-            return this.parent;
-        }
-        isRootNodeOfQuery(tNode) && add(this.shallow, tNode);
-        return this;
+        add(this.shallow, tNode);
     };
     LQueries_.prototype.removeView = function () {
         removeView$1(this.shallow);
@@ -19229,9 +19207,6 @@ var LQueries_ = /** @class */ (function () {
     };
     return LQueries_;
 }());
-function isRootNodeOfQuery(tNode) {
-    return tNode.parent === null || isContentQueryHost(tNode.parent);
-}
 function copyQueriesToContainer(query) {
     var result = null;
     while (query) {
@@ -19420,11 +19395,12 @@ function query(
 // TODO: "read" should be an AbstractType (FW-486)
 predicate, descend, read) {
     ngDevMode && assertPreviousIsParent(getIsParent());
+    var lView = getLView();
     var queryList = new QueryList();
-    var queries = getOrCreateCurrentQueries(LQueries_);
+    var queries = lView[QUERIES] || (lView[QUERIES] = new LQueries_(null, null, null));
     queryList._valuesTree = [];
     queries.track(queryList, predicate, descend, read);
-    storeCleanupWithContext(getLView(), queryList, queryList.destroy);
+    storeCleanupWithContext(lView, queryList, queryList.destroy);
     return queryList;
 }
 /**
