@@ -7,7 +7,6 @@
  */
 import { ComponentDef, DirectiveDef } from './interfaces/definition';
 import { TElementNode, TNode, TViewNode } from './interfaces/node';
-import { LQueries } from './interfaces/query';
 import { LView, OpaqueViewState } from './interfaces/view';
 export declare function getElementDepthCount(): number;
 export declare function increaseElementDepthCount(): void;
@@ -67,16 +66,6 @@ export declare function setPreviousOrParentTNode(tNode: TNode): void;
 export declare function setTNodeAndViewData(tNode: TNode, view: LView): void;
 export declare function getIsParent(): boolean;
 export declare function setIsParent(value: boolean): void;
-/**
- * Query instructions can ask for "current queries" in 2 different cases:
- * - when creating view queries (at the root of a component view, before any node is created - in
- * this case currentQueries points to view queries)
- * - when creating content queries (i.e. this previousOrParentTNode points to a node on which we
- * create content queries).
- */
-export declare function getOrCreateCurrentQueries(QueryType: {
-    new (parent: null, shallow: null, deep: null): LQueries;
-}): LQueries;
 /** Checks whether a given view is in creation mode */
 export declare function isCreationMode(view?: LView): boolean;
 export declare function getContextLView(): LView;
