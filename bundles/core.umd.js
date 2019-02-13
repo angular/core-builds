@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+135.sha-644e7a2
+ * @license Angular v8.0.0-beta.3+136.sha-39d0311
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3422,7 +3422,6 @@
             ngContentSelectors: componentDefinition.ngContentSelectors,
             hostBindings: componentDefinition.hostBindings || null,
             contentQueries: componentDefinition.contentQueries || null,
-            contentQueriesRefresh: componentDefinition.contentQueriesRefresh || null,
             declaredInputs: declaredInputs,
             inputs: null,
             outputs: null,
@@ -9245,7 +9244,7 @@
             executeInitHooks(lView, tView, checkNoChangesMode);
             refreshDynamicEmbeddedViews(lView);
             // Content query results must be refreshed before content hooks are called.
-            refreshContentQueries(tView);
+            refreshContentQueries(tView, lView);
             executeHooks(lView, tView.contentHooks, tView.contentCheckHooks, checkNoChangesMode, 1 /* AfterContentInitHooksToBeRun */);
             setHostBindings(tView, lView);
         }
@@ -9290,13 +9289,15 @@
         }
     }
     /** Refreshes content queries for all directives in the given view. */
-    function refreshContentQueries(tView) {
+    function refreshContentQueries(tView, lView) {
         if (tView.contentQueries != null) {
             setCurrentQueryIndex(0);
             for (var i = 0; i < tView.contentQueries.length; i++) {
                 var directiveDefIdx = tView.contentQueries[i];
                 var directiveDef = tView.data[directiveDefIdx];
-                directiveDef.contentQueriesRefresh(directiveDefIdx - HEADER_OFFSET);
+                ngDevMode &&
+                    assertDefined(directiveDef.contentQueries, 'contentQueries function should be defined');
+                directiveDef.contentQueries(2 /* Update */, lView[directiveDefIdx], directiveDefIdx);
             }
         }
     }
@@ -9570,16 +9571,16 @@
             currentQueries.addNode(tNode);
             lView[QUERIES] = currentQueries.clone();
         }
-        executeContentQueries(tView, tNode);
+        executeContentQueries(tView, tNode, lView);
     }
-    function executeContentQueries(tView, tNode) {
+    function executeContentQueries(tView, tNode, lView) {
         if (isContentQueryHost(tNode)) {
             var start = tNode.directiveStart;
             var end = tNode.directiveEnd;
-            for (var i = start; i < end; i++) {
-                var def = tView.data[i];
+            for (var directiveIndex = start; directiveIndex < end; directiveIndex++) {
+                var def = tView.data[directiveIndex];
                 if (def.contentQueries) {
-                    def.contentQueries(i);
+                    def.contentQueries(1 /* Create */, lView[directiveIndex], directiveIndex);
                 }
             }
         }
@@ -9669,7 +9670,7 @@
             currentQueries.addNode(tNode);
             lView[QUERIES] = currentQueries.clone();
         }
-        executeContentQueries(tView, tNode);
+        executeContentQueries(tView, tNode, lView);
     }
     /**
      * Creates a native element from a tag name, using a renderer.
@@ -12464,27 +12465,13 @@
                 var superContentQueries_1 = superDef.contentQueries;
                 if (superContentQueries_1) {
                     if (prevContentQueries_1) {
-                        definition.contentQueries = function (directiveIndex) {
-                            superContentQueries_1(directiveIndex);
-                            prevContentQueries_1(directiveIndex);
+                        definition.contentQueries = function (rf, ctx, directiveIndex) {
+                            superContentQueries_1(rf, ctx, directiveIndex);
+                            prevContentQueries_1(rf, ctx, directiveIndex);
                         };
                     }
                     else {
                         definition.contentQueries = superContentQueries_1;
-                    }
-                }
-                // Merge Content Queries Refresh
-                var prevContentQueriesRefresh_1 = definition.contentQueriesRefresh;
-                var superContentQueriesRefresh_1 = superDef.contentQueriesRefresh;
-                if (superContentQueriesRefresh_1) {
-                    if (prevContentQueriesRefresh_1) {
-                        definition.contentQueriesRefresh = function (directiveIndex) {
-                            superContentQueriesRefresh_1(directiveIndex);
-                            prevContentQueriesRefresh_1(directiveIndex);
-                        };
-                    }
-                    else {
-                        definition.contentQueriesRefresh = superContentQueriesRefresh_1;
                     }
                 }
                 // Merge inputs and outputs
@@ -14104,7 +14091,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.3+135.sha-644e7a2');
+    var VERSION = new Version('8.0.0-beta.3+136.sha-39d0311');
 
     /**
      * @license
