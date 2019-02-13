@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+129.sha-91b7152
+ * @license Angular v8.0.0-beta.3+131.sha-0c7581d
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11685,13 +11685,13 @@ function renderComponentOrTemplate(hostView, context, templateFn) {
             // creation mode pass
             if (templateFn) {
                 namespaceHTML();
-                templateFn(1 /* Create */, (/** @type {?} */ (context)));
+                templateFn(1 /* Create */, context);
             }
             refreshDescendantViews(hostView);
             hostView[FLAGS] &= ~4 /* CreationMode */;
         }
         // update mode pass
-        templateFn && templateFn(2 /* Update */, (/** @type {?} */ (context)));
+        templateFn && templateFn(2 /* Update */, context);
         refreshDescendantViews(hostView);
     }
     finally {
@@ -17464,7 +17464,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.3+129.sha-91b7152');
+const VERSION = new Version('8.0.0-beta.3+131.sha-0c7581d');
 
 /**
  * @fileoverview added by tsickle
