@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+89.sha-872a365
+ * @license Angular v8.0.0-beta.3+124.sha-08de52b
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -722,18 +722,18 @@
      *   selector: 'my-comp',
      *   templateUrl: 'my-comp.html', // This requires asynchronous resolution
      * })
-     * class MyComponnent{
+     * class MyComponent{
      * }
      *
-     * // Calling `renderComponent` will fail because `MyComponent`'s `@Compenent.templateUrl`
-     * // needs to be resolved because `renderComponent` is synchronous process.
-     * // renderComponent(MyComponent);
+     * // Calling `renderComponent` will fail because `renderComponent` is a synchronous process
+     * // and `MyComponent`'s `@Component.templateUrl` needs to be resolved asynchronously.
      *
-     * // Calling `resolveComponentResources` will resolve `@Compenent.templateUrl` into
-     * // `@Compenent.template`, which would allow `renderComponent` to proceed in synchronous manner.
-     * // Use browser's `fetch` function as the default resource resolution strategy.
+     * // Calling `resolveComponentResources()` will resolve `@Component.templateUrl` into
+     * // `@Component.template`, which allows `renderComponent` to proceed in a synchronous manner.
+     *
+     * // Use browser's `fetch()` function as the default resource resolution strategy.
      * resolveComponentResources(fetch).then(() => {
-     *   // After resolution all URLs have been converted into strings.
+     *   // After resolution all URLs have been converted into `template` strings.
      *   renderComponent(MyComponent);
      * });
      *
@@ -742,8 +742,8 @@
      * NOTE: In AOT the resolution happens during compilation, and so there should be no need
      * to call this method outside JIT mode.
      *
-     * @param resourceResolver a function which is responsible to returning a `Promise` of the resolved
-     * URL. Browser's `fetch` method is a good default implementation.
+     * @param resourceResolver a function which is responsible for returning a `Promise` to the
+     * contents of the resolved URL. Browser's `fetch()` method is a good default implementation.
      */
     function resolveComponentResources(resourceResolver) {
         // Store all promises which are fetching the resources.
@@ -763,7 +763,6 @@
             if (component.templateUrl) {
                 cachedResourceResolve(component.templateUrl).then(function (template) {
                     component.template = template;
-                    component.templateUrl = undefined;
                 });
             }
             var styleUrls = component.styleUrls;
@@ -785,7 +784,8 @@
     }
     var componentResourceResolutionQueue = new Set();
     function componentNeedsResolution(component) {
-        return !!(component.templateUrl || component.styleUrls && component.styleUrls.length);
+        return !!((component.templateUrl && !component.template) ||
+            component.styleUrls && component.styleUrls.length);
     }
     function clearResolutionOfComponentResourcesQueue() {
         componentResourceResolutionQueue.clear();

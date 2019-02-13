@@ -15,6 +15,7 @@ import { InitialStylingValues, StylingContext } from '../interfaces/styling';
 import { LView, RootContext } from '../interfaces/view';
 export declare const ANIMATION_PROP_PREFIX = "@";
 export declare function createEmptyStylingContext(element?: RElement | null, sanitizer?: StyleSanitizeFn | null, initialStyles?: InitialStylingValues | null, initialClasses?: InitialStylingValues | null): StylingContext;
+export declare function allocateDirectiveIntoContext(context: StylingContext, directiveRef: any | null): void;
 /**
  * Used clone a copy of a pre-computed template of a styling context.
  *
@@ -36,6 +37,14 @@ export declare function allocStylingContext(element: RElement | null, templateSt
 export declare function getStylingContext(index: number, viewData: LView): StylingContext;
 export declare function isStylingContext(value: any): value is StylingContext;
 export declare function isAnimationProp(name: string): boolean;
+export declare function hasClassInput(tNode: TNode): boolean;
+export declare function hasStyleInput(tNode: TNode): boolean;
+export declare function forceClassesAsString(classes: string | {
+    [key: string]: any;
+} | null | undefined): string;
+export declare function forceStylesAsString(styles: {
+    [key: string]: any;
+} | null | undefined): string;
 export declare function addPlayerInternal(playerContext: PlayerContext, rootContext: RootContext, element: HTMLElement, player: Player | null, playerContextIndex: number, ref?: any): boolean;
 export declare function getPlayersInternal(playerContext: PlayerContext): Player[];
 export declare function getOrCreatePlayerContext(target: {}, context?: LContext | null): PlayerContext | null;
@@ -43,4 +52,3 @@ export declare function getPlayerContext(stylingContext: StylingContext): Player
 export declare function allocPlayerContext(data: StylingContext): PlayerContext;
 export declare function throwInvalidRefError(): void;
 export declare function hasStyling(attrs: TAttributes): boolean;
-export declare function hasClassInput(tNode: TNode): boolean;

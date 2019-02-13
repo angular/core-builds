@@ -384,7 +384,7 @@ components
  *
  * @publicApi
  */
-export declare function elementStyleProp(index: number, styleIndex: number, value: string | number | String | PlayerFactory | null, suffix?: string | null, directive?: {}): void;
+export declare function elementStyleProp(index: number, styleIndex: number, value: string | number | String | PlayerFactory | null, suffix?: string | null, directive?: {}, forceOverride?: boolean): void;
 /**
  * Add or remove a class via a class binding on a DOM element.
  *
@@ -400,18 +400,21 @@ export declare function elementStyleProp(index: number, styleIndex: number, valu
  * @param value A true/false value which will turn the class on or off.
  * @param directive Directive instance that is attempting to change styling. (Defaults to the
  *        component of the current view).
-components
+ * @param forceOverride Whether or not this value will be applied regardless of where it is being
+ *        set within the directive priority structure.
  *
  * @publicApi
  */
-export declare function elementClassProp(index: number, classIndex: number, value: boolean | PlayerFactory, directive?: {}): void;
+export declare function elementClassProp(index: number, classIndex: number, value: boolean | PlayerFactory, directive?: {}, forceOverride?: boolean): void;
 /**
  * Update style and/or class bindings using object literal.
  *
  * This instruction is meant apply styling via the `[style]="exp"` and `[class]="exp"` template
- * bindings. When styles are applied to the Element they will then be placed with respect to
+ * bindings. When styles are applied to the element they will then be placed with respect to
  * any styles set with `elementStyleProp`. If any styles are set to `null` then they will be
- * removed from the element.
+ * removed from the element. This instruction is also called for host bindings that write to
+ * `[style]` and `[class]` (the directive param helps the instruction code determine where the
+ * binding values come from).
  *
  * (Note that the styling instruction will not be applied until `elementStylingApply` is called.)
  *
@@ -643,6 +646,7 @@ export declare function detectChangesInRootView(lView: LView): void;
  * introduce other changes.
  */
 export declare function checkNoChanges<T>(component: T): void;
+export declare function checkNoChangesInternal<T>(view: LView, context: T): void;
 /**
  * Checks the change detector on a root view and its components, and throws if any changes are
  * detected.
