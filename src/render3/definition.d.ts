@@ -10,7 +10,7 @@ import { ChangeDetectionStrategy } from '../change_detection/constants';
 import { Type } from '../interface/type';
 import { NgModuleDef } from '../metadata/ng_module';
 import { ViewEncapsulation } from '../metadata/view';
-import { BaseDef, ComponentDef, ComponentDefFeature, ComponentQuery, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveTypesOrFactory, FactoryFn, HostBindingsFunction, PipeDef, PipeType, PipeTypesOrFactory } from './interfaces/definition';
+import { BaseDef, ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveTypesOrFactory, FactoryFn, HostBindingsFunction, PipeDef, PipeType, PipeTypesOrFactory, ViewQueriesFunction } from './interfaces/definition';
 import { CssSelectorList } from './interfaces/projection';
 /**
  * Create a component definition object.
@@ -118,9 +118,7 @@ export declare function defineComponent<T>(componentDefinition: {
     /**
      * Function to create instances of content queries associated with a given directive.
      */
-    contentQueries?: ((dirIndex: number) => void);
-    /** Refreshes content queries associated with directives in a given view */
-    contentQueriesRefresh?: ((directiveIndex: number) => void);
+    contentQueries?: ContentQueriesFunction<T>;
     /**
      * Defines the name that can be used in the template to assign this directive to a variable.
      *
@@ -169,7 +167,7 @@ export declare function defineComponent<T>(componentDefinition: {
      * execution is different as compared to all other instructions (after change detection hooks but
      * before view hooks).
      */
-    viewQuery?: ComponentQuery<T> | null;
+    viewQuery?: ViewQueriesFunction<T> | null;
     /**
      * A list of optional features to apply.
      *
@@ -385,9 +383,7 @@ export declare const defineDirective: <T>(directiveDefinition: {
     /**
      * Function to create instances of content queries associated with a given directive.
      */
-    contentQueries?: ((directiveIndex: number) => void) | undefined;
-    /** Refreshes content queries associated with directives in a given view */
-    contentQueriesRefresh?: ((directiveIndex: number, queryIndex: number) => void) | undefined;
+    contentQueries?: ContentQueriesFunction<T> | undefined;
     /**
      * Defines the name that can be used in the template to assign this directive to a variable.
      *
