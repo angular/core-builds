@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+108.sha-6050cd0
+ * @license Angular v8.0.0-beta.3+125.sha-d68a98f
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2536,18 +2536,18 @@ var NG_ELEMENT_ID = getClosureSafeProperty({ __NG_ELEMENT_ID__: getClosureSafePr
  *   selector: 'my-comp',
  *   templateUrl: 'my-comp.html', // This requires asynchronous resolution
  * })
- * class MyComponnent{
+ * class MyComponent{
  * }
  *
- * // Calling `renderComponent` will fail because `MyComponent`'s `@Compenent.templateUrl`
- * // needs to be resolved because `renderComponent` is synchronous process.
- * // renderComponent(MyComponent);
+ * // Calling `renderComponent` will fail because `renderComponent` is a synchronous process
+ * // and `MyComponent`'s `@Component.templateUrl` needs to be resolved asynchronously.
  *
- * // Calling `resolveComponentResources` will resolve `@Compenent.templateUrl` into
- * // `@Compenent.template`, which would allow `renderComponent` to proceed in synchronous manner.
- * // Use browser's `fetch` function as the default resource resolution strategy.
+ * // Calling `resolveComponentResources()` will resolve `@Component.templateUrl` into
+ * // `@Component.template`, which allows `renderComponent` to proceed in a synchronous manner.
+ *
+ * // Use browser's `fetch()` function as the default resource resolution strategy.
  * resolveComponentResources(fetch).then(() => {
- *   // After resolution all URLs have been converted into strings.
+ *   // After resolution all URLs have been converted into `template` strings.
  *   renderComponent(MyComponent);
  * });
  *
@@ -2556,8 +2556,8 @@ var NG_ELEMENT_ID = getClosureSafeProperty({ __NG_ELEMENT_ID__: getClosureSafePr
  * NOTE: In AOT the resolution happens during compilation, and so there should be no need
  * to call this method outside JIT mode.
  *
- * @param resourceResolver a function which is responsible to returning a `Promise` of the resolved
- * URL. Browser's `fetch` method is a good default implementation.
+ * @param resourceResolver a function which is responsible for returning a `Promise` to the
+ * contents of the resolved URL. Browser's `fetch()` method is a good default implementation.
  */
 function resolveComponentResources(resourceResolver) {
     // Store all promises which are fetching the resources.
@@ -2577,7 +2577,6 @@ function resolveComponentResources(resourceResolver) {
         if (component.templateUrl) {
             cachedResourceResolve(component.templateUrl).then(function (template) {
                 component.template = template;
-                component.templateUrl = undefined;
             });
         }
         var styleUrls = component.styleUrls;
@@ -2604,7 +2603,8 @@ function maybeQueueResolutionOfComponentResources(metadata) {
     }
 }
 function componentNeedsResolution(component) {
-    return !!(component.templateUrl || component.styleUrls && component.styleUrls.length);
+    return !!((component.templateUrl && !component.template) ||
+        component.styleUrls && component.styleUrls.length);
 }
 function clearResolutionOfComponentResourcesQueue() {
     componentResourceResolutionQueue.clear();
@@ -13987,7 +13987,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.3+108.sha-6050cd0');
+var VERSION = new Version('8.0.0-beta.3+125.sha-d68a98f');
 
 /**
  * @license
@@ -20425,9 +20425,9 @@ function compileComponent(type, metadata) {
                     error.push("Did you run and wait for 'resolveComponentResources()'?");
                     throw new Error(error.join('\n'));
                 }
-                var sourceMapUrl = "ng://" + renderStringify(type) + "/template.html";
-                var meta = __assign({}, directiveMetadata(type, metadata), { typeSourceSpan: compiler.createParseSourceSpan('Component', renderStringify(type), sourceMapUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY$1, animations: metadata.animations, viewQueries: extractQueriesMetadata(type, getReflect().propMetadata(type), isViewQuery), directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
-                ngComponentDef = compiler.compileComponent(angularCoreEnv, sourceMapUrl, meta);
+                var templateUrl = metadata.templateUrl || "ng:///" + renderStringify(type) + "/template.html";
+                var meta = __assign({}, directiveMetadata(type, metadata), { typeSourceSpan: compiler.createParseSourceSpan('Component', renderStringify(type), templateUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY$1, animations: metadata.animations, viewQueries: extractQueriesMetadata(type, getReflect().propMetadata(type), isViewQuery), directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
+                ngComponentDef = compiler.compileComponent(angularCoreEnv, templateUrl, meta);
                 // When NgModule decorator executed, we enqueued the module definition such that
                 // it would only dequeue and add itself as module scope to all of its declarations,
                 // but only if  if all of its declarations had resolved. This call runs the check
