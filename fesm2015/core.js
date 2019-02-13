@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+141.sha-5cafd44
+ * @license Angular v8.0.0-beta.3+143.sha-77eee42
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -402,13 +402,18 @@ function resolveForwardRef(type) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-const __window = typeof window !== 'undefined' && window;
-const __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
-    self instanceof WorkerGlobalScope && self;
-const __global = typeof global !== 'undefined' && global;
-// Check __global first, because in Node tests both __global and __window may be defined and _global
-// should be __global in that case.
-const _global = __global || __window || __self;
+function getGlobal() {
+    const __globalThis = typeof globalThis !== 'undefined' && globalThis;
+    const __window = typeof window !== 'undefined' && window;
+    const __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
+        self instanceof WorkerGlobalScope && self;
+    const __global = typeof global !== 'undefined' && global;
+    // Always use __globalThis if available, which is the spec-defined global variable across all
+    // environments, then fallback to __global first, because in Node tests both __global and
+    // __window may be defined and _global should be __global in that case.
+    return __globalThis || __global || __window || __self;
+}
+const _global = getGlobal();
 
 /**
  * @license
@@ -5137,11 +5142,21 @@ function getOrCreateInjectable(tNode, lView, token, flags = InjectFlags.Default,
     if ((flags & (InjectFlags.Self | InjectFlags.Host)) === 0) {
         /** @type {?} */
         const moduleInjector = lView[INJECTOR$1];
-        if (moduleInjector) {
-            return moduleInjector.get(token, notFoundValue, flags & InjectFlags.Optional);
+        // switch to `injectInjectorOnly` implementation for module injector, since module injector
+        // should not have access to Component/Directive DI scope (that may happen through
+        // `directiveInject` implementation)
+        /** @type {?} */
+        const previousInjectImplementation = setInjectImplementation(undefined);
+        try {
+            if (moduleInjector) {
+                return moduleInjector.get(token, notFoundValue, flags & InjectFlags.Optional);
+            }
+            else {
+                return injectRootLimpMode(token, notFoundValue, flags & InjectFlags.Optional);
+            }
         }
-        else {
-            return injectRootLimpMode(token, notFoundValue, flags & InjectFlags.Optional);
+        finally {
+            setInjectImplementation(previousInjectImplementation);
         }
     }
     if (flags & InjectFlags.Optional) {
@@ -17373,7 +17388,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.3+141.sha-5cafd44');
+const VERSION = new Version('8.0.0-beta.3+143.sha-77eee42');
 
 /**
  * @fileoverview added by tsickle
@@ -21752,9 +21767,9 @@ const SCHEDULER = new InjectionToken('SCHEDULER_TOKEN', {
  */
 function createChainedInjector(rootViewInjector, moduleInjector) {
     return {
-        get: (token, notFoundValue) => {
+        get: (token, notFoundValue, flags) => {
             /** @type {?} */
-            const value = rootViewInjector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR);
+            const value = rootViewInjector.get(token, (/** @type {?} */ (NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)), flags);
             if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR ||
                 notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) {
                 // Return the value from the root element injector when
@@ -21764,7 +21779,7 @@ function createChainedInjector(rootViewInjector, moduleInjector) {
                 //   (notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
                 return value;
             }
-            return moduleInjector.get(token, notFoundValue);
+            return moduleInjector.get(token, notFoundValue, flags);
         }
     };
 }
