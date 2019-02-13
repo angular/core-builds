@@ -10,7 +10,7 @@ import { ChangeDetectionStrategy } from '../change_detection/constants';
 import { Type } from '../interface/type';
 import { NgModuleDef } from '../metadata/ng_module';
 import { ViewEncapsulation } from '../metadata/view';
-import { BaseDef, ComponentDef, ComponentDefFeature, ComponentQuery, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveTypesOrFactory, HostBindingsFunction, PipeDef, PipeType, PipeTypesOrFactory } from './interfaces/definition';
+import { BaseDef, ComponentDef, ComponentDefFeature, ComponentQuery, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveTypesOrFactory, FactoryFn, HostBindingsFunction, PipeDef, PipeType, PipeTypesOrFactory } from './interfaces/definition';
 import { CssSelectorList } from './interfaces/projection';
 /**
  * Create a component definition object.
@@ -37,7 +37,7 @@ export declare function defineComponent<T>(componentDefinition: {
     /**
      * Factory method used to create an instance of directive.
      */
-    factory: (t: Type<T> | null) => T;
+    factory: FactoryFn<T>;
     /**
      * The number of nodes, local refs, and pipes in this component template.
      *
@@ -316,7 +316,7 @@ export declare const defineDirective: <T>(directiveDefinition: {
     /**
      * Factory method used to create an instance of directive.
      */
-    factory: (t: Type<T> | null) => T;
+    factory: FactoryFn<T>;
     /**
      * A map of input names.
      *
@@ -415,7 +415,7 @@ export declare function definePipe<T>(pipeDef: {
     /** Pipe class reference. Needed to extract pipe lifecycle hooks. */
     type: Type<T>;
     /** A factory for creating a pipe instance. */
-    factory: (t: Type<T> | null) => T;
+    factory: FactoryFn<T>;
     /** Whether the pipe is pure. */
     pure?: boolean;
 }): never;

@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+124.sha-08de52b
+ * @license Angular v8.0.0-beta.3+130.sha-06ec95f
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10593,7 +10593,7 @@ function instantiateRootComponent(tView, viewData, def) {
         baseResolveDirective(tView, viewData, def, def.factory);
     }
     var directive = getNodeInjectable(tView.data, viewData, viewData.length - 1, rootTNode);
-    postProcessBaseDirective(viewData, rootTNode, directive, def);
+    postProcessBaseDirective(viewData, rootTNode, directive);
     return directive;
 }
 /**
@@ -10706,7 +10706,7 @@ function prefillHostVars(tView, lView, totalHostVars) {
  */
 function postProcessDirective(viewData, directive, def, directiveDefIdx) {
     var previousOrParentTNode = getPreviousOrParentTNode();
-    postProcessBaseDirective(viewData, previousOrParentTNode, directive, def);
+    postProcessBaseDirective(viewData, previousOrParentTNode, directive);
     ngDevMode && assertDefined(previousOrParentTNode, 'previousOrParentTNode');
     if (previousOrParentTNode && previousOrParentTNode.attrs) {
         setInputsFromAttrs(directiveDefIdx, directive, def, previousOrParentTNode);
@@ -10722,7 +10722,7 @@ function postProcessDirective(viewData, directive, def, directiveDefIdx) {
 /**
  * A lighter version of postProcessDirective() that is used for the root component.
  */
-function postProcessBaseDirective(lView, previousOrParentTNode, directive, def) {
+function postProcessBaseDirective(lView, previousOrParentTNode, directive) {
     var native = getNativeByTNode(previousOrParentTNode, lView);
     ngDevMode && assertEqual(lView[BINDING_INDEX], lView[TVIEW].bindingStartIndex, 'directives should be created before any bindings');
     ngDevMode && assertPreviousIsParent(getIsParent());
@@ -13848,7 +13848,7 @@ function createViewRef(hostTNode, hostView, context) {
         var componentView = getComponentViewByIndex(hostTNode.index, hostView);
         return new ViewRef(componentView, context, componentIndex);
     }
-    else if (hostTNode.type === 3 /* Element */) {
+    else if (hostTNode.type === 3 /* Element */ || hostTNode.type === 0 /* Container */) {
         var hostComponentView = findComponentView(hostView);
         return new ViewRef(hostComponentView, hostComponentView[CONTEXT], -1);
     }
@@ -14058,7 +14058,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.3+124.sha-08de52b');
+var VERSION = new Version('8.0.0-beta.3+130.sha-06ec95f');
 
 /**
  * @license
