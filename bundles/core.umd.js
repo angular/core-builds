@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+126.sha-ac58d01
+ * @license Angular v8.0.0-beta.3+128.sha-fc8f4f8
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10643,7 +10643,7 @@
             baseResolveDirective(tView, viewData, def, def.factory);
         }
         var directive = getNodeInjectable(tView.data, viewData, viewData.length - 1, rootTNode);
-        postProcessBaseDirective(viewData, rootTNode, directive, def);
+        postProcessBaseDirective(viewData, rootTNode, directive);
         return directive;
     }
     /**
@@ -10756,7 +10756,7 @@
      */
     function postProcessDirective(viewData, directive, def, directiveDefIdx) {
         var previousOrParentTNode = getPreviousOrParentTNode();
-        postProcessBaseDirective(viewData, previousOrParentTNode, directive, def);
+        postProcessBaseDirective(viewData, previousOrParentTNode, directive);
         ngDevMode && assertDefined(previousOrParentTNode, 'previousOrParentTNode');
         if (previousOrParentTNode && previousOrParentTNode.attrs) {
             setInputsFromAttrs(directiveDefIdx, directive, def, previousOrParentTNode);
@@ -10772,7 +10772,7 @@
     /**
      * A lighter version of postProcessDirective() that is used for the root component.
      */
-    function postProcessBaseDirective(lView, previousOrParentTNode, directive, def) {
+    function postProcessBaseDirective(lView, previousOrParentTNode, directive) {
         var native = getNativeByTNode(previousOrParentTNode, lView);
         ngDevMode && assertEqual(lView[BINDING_INDEX], lView[TVIEW].bindingStartIndex, 'directives should be created before any bindings');
         ngDevMode && assertPreviousIsParent(getIsParent());
@@ -13898,7 +13898,7 @@
             var componentView = getComponentViewByIndex(hostTNode.index, hostView);
             return new ViewRef(componentView, context, componentIndex);
         }
-        else if (hostTNode.type === 3 /* Element */) {
+        else if (hostTNode.type === 3 /* Element */ || hostTNode.type === 0 /* Container */) {
             var hostComponentView = findComponentView(hostView);
             return new ViewRef(hostComponentView, hostComponentView[CONTEXT], -1);
         }
@@ -14103,7 +14103,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.3+126.sha-ac58d01');
+    var VERSION = new Version('8.0.0-beta.3+128.sha-fc8f4f8');
 
     /**
      * @license

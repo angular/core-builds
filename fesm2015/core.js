@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+126.sha-ac58d01
+ * @license Angular v8.0.0-beta.3+128.sha-fc8f4f8
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13102,7 +13102,7 @@ function instantiateRootComponent(tView, viewData, def) {
     }
     /** @type {?} */
     const directive = getNodeInjectable(tView.data, viewData, viewData.length - 1, (/** @type {?} */ (rootTNode)));
-    postProcessBaseDirective(viewData, rootTNode, directive, (/** @type {?} */ (def)));
+    postProcessBaseDirective(viewData, rootTNode, directive);
     return directive;
 }
 /**
@@ -13264,7 +13264,7 @@ function prefillHostVars(tView, lView, totalHostVars) {
 function postProcessDirective(viewData, directive, def, directiveDefIdx) {
     /** @type {?} */
     const previousOrParentTNode = getPreviousOrParentTNode();
-    postProcessBaseDirective(viewData, previousOrParentTNode, directive, def);
+    postProcessBaseDirective(viewData, previousOrParentTNode, directive);
     ngDevMode && assertDefined(previousOrParentTNode, 'previousOrParentTNode');
     if (previousOrParentTNode && previousOrParentTNode.attrs) {
         setInputsFromAttrs(directiveDefIdx, directive, def, previousOrParentTNode);
@@ -13284,10 +13284,9 @@ function postProcessDirective(viewData, directive, def, directiveDefIdx) {
  * @param {?} lView
  * @param {?} previousOrParentTNode
  * @param {?} directive
- * @param {?} def
  * @return {?}
  */
-function postProcessBaseDirective(lView, previousOrParentTNode, directive, def) {
+function postProcessBaseDirective(lView, previousOrParentTNode, directive) {
     /** @type {?} */
     const native = getNativeByTNode(previousOrParentTNode, lView);
     ngDevMode && assertEqual(lView[BINDING_INDEX], lView[TVIEW].bindingStartIndex, 'directives should be created before any bindings');
@@ -17246,7 +17245,7 @@ function createViewRef(hostTNode, hostView, context) {
         const componentView = getComponentViewByIndex(hostTNode.index, hostView);
         return new ViewRef(componentView, context, componentIndex);
     }
-    else if (hostTNode.type === 3 /* Element */) {
+    else if (hostTNode.type === 3 /* Element */ || hostTNode.type === 0 /* Container */) {
         /** @type {?} */
         const hostComponentView = findComponentView(hostView);
         return new ViewRef(hostComponentView, hostComponentView[CONTEXT], -1);
@@ -17465,7 +17464,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.3+126.sha-ac58d01');
+const VERSION = new Version('8.0.0-beta.3+128.sha-fc8f4f8');
 
 /**
  * @fileoverview added by tsickle
