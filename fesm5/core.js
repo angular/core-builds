@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+141.sha-5cafd44
+ * @license Angular v8.0.0-beta.3+143.sha-77eee42
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -409,13 +409,18 @@ function resolveForwardRef(type) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var __window = typeof window !== 'undefined' && window;
-var __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
-    self instanceof WorkerGlobalScope && self;
-var __global = typeof global !== 'undefined' && global;
-// Check __global first, because in Node tests both __global and __window may be defined and _global
-// should be __global in that case.
-var _global = __global || __window || __self;
+function getGlobal() {
+    var __globalThis = typeof globalThis !== 'undefined' && globalThis;
+    var __window = typeof window !== 'undefined' && window;
+    var __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
+        self instanceof WorkerGlobalScope && self;
+    var __global = typeof global !== 'undefined' && global;
+    // Always use __globalThis if available, which is the spec-defined global variable across all
+    // environments, then fallback to __global first, because in Node tests both __global and
+    // __window may be defined and _global should be __global in that case.
+    return __globalThis || __global || __window || __self;
+}
+var _global = getGlobal();
 
 /**
  * @license
@@ -4408,11 +4413,20 @@ function getOrCreateInjectable(tNode, lView, token, flags, notFoundValue) {
     }
     if ((flags & (InjectFlags.Self | InjectFlags.Host)) === 0) {
         var moduleInjector = lView[INJECTOR$1];
-        if (moduleInjector) {
-            return moduleInjector.get(token, notFoundValue, flags & InjectFlags.Optional);
+        // switch to `injectInjectorOnly` implementation for module injector, since module injector
+        // should not have access to Component/Directive DI scope (that may happen through
+        // `directiveInject` implementation)
+        var previousInjectImplementation = setInjectImplementation(undefined);
+        try {
+            if (moduleInjector) {
+                return moduleInjector.get(token, notFoundValue, flags & InjectFlags.Optional);
+            }
+            else {
+                return injectRootLimpMode(token, notFoundValue, flags & InjectFlags.Optional);
+            }
         }
-        else {
-            return injectRootLimpMode(token, notFoundValue, flags & InjectFlags.Optional);
+        finally {
+            setInjectImplementation(previousInjectImplementation);
         }
     }
     if (flags & InjectFlags.Optional) {
@@ -14046,7 +14060,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.3+141.sha-5cafd44');
+var VERSION = new Version('8.0.0-beta.3+143.sha-77eee42');
 
 /**
  * @license
@@ -17162,8 +17176,8 @@ var SCHEDULER = new InjectionToken('SCHEDULER_TOKEN', {
 });
 function createChainedInjector(rootViewInjector, moduleInjector) {
     return {
-        get: function (token, notFoundValue) {
-            var value = rootViewInjector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR);
+        get: function (token, notFoundValue, flags) {
+            var value = rootViewInjector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, flags);
             if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR ||
                 notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) {
                 // Return the value from the root element injector when
@@ -17173,7 +17187,7 @@ function createChainedInjector(rootViewInjector, moduleInjector) {
                 //   (notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
                 return value;
             }
-            return moduleInjector.get(token, notFoundValue);
+            return moduleInjector.get(token, notFoundValue, flags);
         }
     };
 }
