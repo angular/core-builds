@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+161.sha-36df905
+ * @license Angular v8.0.0-beta.3+168.sha-b0afc4c
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15342,7 +15342,18 @@ function wrapOnChanges() {
         /** @type {?} */
         const current = simpleChangesStore && simpleChangesStore.current;
         if (current) {
-            (/** @type {?} */ (simpleChangesStore)).previous = current;
+            /** @type {?} */
+            const previous = (/** @type {?} */ (simpleChangesStore)).previous;
+            if (previous === EMPTY_OBJ) {
+                (/** @type {?} */ (simpleChangesStore)).previous = current;
+            }
+            else {
+                // New changes are copied to the previous store, so that we don't lose history for inputs
+                // which were not changed this time
+                for (let key in current) {
+                    previous[key] = current[key];
+                }
+            }
             (/** @type {?} */ (simpleChangesStore)).current = null;
             this.ngOnChanges(current);
         }
@@ -16943,16 +16954,14 @@ function createTemplateRef(TemplateRefToken, ElementRefToken, hostTNode, hostVie
              * @param {?} _declarationParentView
              * @param {?} elementRef
              * @param {?} _tView
-             * @param {?} _renderer
              * @param {?} _hostLContainer
              * @param {?} _injectorIndex
              */
-            constructor(_declarationParentView, elementRef, _tView, _renderer, _hostLContainer, _injectorIndex) {
+            constructor(_declarationParentView, elementRef, _tView, _hostLContainer, _injectorIndex) {
                 super();
                 this._declarationParentView = _declarationParentView;
                 this.elementRef = elementRef;
                 this._tView = _tView;
-                this._renderer = _renderer;
                 this._hostLContainer = _hostLContainer;
                 this._injectorIndex = _injectorIndex;
             }
@@ -16982,7 +16991,7 @@ function createTemplateRef(TemplateRefToken, ElementRefToken, hostTNode, hostVie
         /** @type {?} */
         const hostContainer = hostView[hostTNode.index];
         ngDevMode && assertDefined(hostTNode.tViews, 'TView must be allocated');
-        return new R3TemplateRef(hostView, createElementRef(ElementRefToken, hostTNode, hostView), (/** @type {?} */ (hostTNode.tViews)), getLView()[RENDERER], hostContainer, hostTNode.injectorIndex);
+        return new R3TemplateRef(hostView, createElementRef(ElementRefToken, hostTNode, hostView), (/** @type {?} */ (hostTNode.tViews)), hostContainer, hostTNode.injectorIndex);
     }
     else {
         return null;
@@ -17468,7 +17477,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.3+161.sha-36df905');
+const VERSION = new Version('8.0.0-beta.3+168.sha-b0afc4c');
 
 /**
  * @fileoverview added by tsickle
