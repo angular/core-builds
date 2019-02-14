@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+147.sha-28bdeee
+ * @license Angular v8.0.0-beta.3+168.sha-b0afc4c
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1033,7 +1033,7 @@
                         typeArgumentCount: 0,
                         providedIn: meta.providedIn,
                         ctorDeps: reflectDependencies(type),
-                        userDeps: undefined
+                        userDeps: undefined,
                     };
                     if ((isUseClassProvider(meta) || isUseFactoryProvider(meta)) && meta.deps !== undefined) {
                         compilerMeta.userDeps = convertDependencies(meta.deps);
@@ -12367,7 +12367,17 @@
             var simpleChangesStore = getSimpleChangesStore(this);
             var current = simpleChangesStore && simpleChangesStore.current;
             if (current) {
-                simpleChangesStore.previous = current;
+                var previous = simpleChangesStore.previous;
+                if (previous === EMPTY_OBJ) {
+                    simpleChangesStore.previous = current;
+                }
+                else {
+                    // New changes are copied to the previous store, so that we don't lose history for inputs
+                    // which were not changed this time
+                    for (var key in current) {
+                        previous[key] = current[key];
+                    }
+                }
                 simpleChangesStore.current = null;
                 this.ngOnChanges(current);
             }
@@ -13686,12 +13696,11 @@
             // TODO: Fix class name, should be TemplateRef, but there appears to be a rollup bug
             R3TemplateRef = /** @class */ (function (_super) {
                 __extends(TemplateRef_, _super);
-                function TemplateRef_(_declarationParentView, elementRef, _tView, _renderer, _hostLContainer, _injectorIndex) {
+                function TemplateRef_(_declarationParentView, elementRef, _tView, _hostLContainer, _injectorIndex) {
                     var _this = _super.call(this) || this;
                     _this._declarationParentView = _declarationParentView;
                     _this.elementRef = elementRef;
                     _this._tView = _tView;
-                    _this._renderer = _renderer;
                     _this._hostLContainer = _hostLContainer;
                     _this._injectorIndex = _injectorIndex;
                     return _this;
@@ -13712,7 +13721,7 @@
         if (hostTNode.type === 0 /* Container */) {
             var hostContainer = hostView[hostTNode.index];
             ngDevMode && assertDefined(hostTNode.tViews, 'TView must be allocated');
-            return new R3TemplateRef(hostView, createElementRef(ElementRefToken, hostTNode, hostView), hostTNode.tViews, getLView()[RENDERER], hostContainer, hostTNode.injectorIndex);
+            return new R3TemplateRef(hostView, createElementRef(ElementRefToken, hostTNode, hostView), hostTNode.tViews, hostContainer, hostTNode.injectorIndex);
         }
         else {
             return null;
@@ -14106,7 +14115,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.3+147.sha-28bdeee');
+    var VERSION = new Version('8.0.0-beta.3+168.sha-b0afc4c');
 
     /**
      * @license
