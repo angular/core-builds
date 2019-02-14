@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+175.sha-627cecd
+ * @license Angular v8.0.0-beta.3+178.sha-7cbc36f
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17501,7 +17501,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.3+175.sha-627cecd');
+const VERSION = new Version('8.0.0-beta.3+178.sha-7cbc36f');
 
 /**
  * @fileoverview added by tsickle
@@ -28756,16 +28756,14 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
             /** @type {?} */
             const lContext = loadLContextFromNode(element);
             /** @type {?} */
-            const lNode = lContext.lView[lContext.nodeIndex];
-            /** @type {?} */
             const stylingContext = getStylingContext(lContext.nodeIndex, lContext.lView);
             if (stylingContext) {
-                for (let i = 9 /* SingleStylesStartPosition */; i < lNode.length; i += 4 /* Size */) {
-                    if (isClassBasedValue(lNode, i)) {
+                for (let i = 9 /* SingleStylesStartPosition */; i < stylingContext.length; i += 4 /* Size */) {
+                    if (isClassBasedValue(stylingContext, i)) {
                         /** @type {?} */
-                        const className = getProp(lNode, i);
+                        const className = getProp(stylingContext, i);
                         /** @type {?} */
-                        const value = getValue(lNode, i);
+                        const value = getValue(stylingContext, i);
                         if (typeof value == 'boolean') {
                             // we want to ignore `null` since those don't overwrite the values.
                             classes[className] = value;
@@ -28796,16 +28794,14 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
             /** @type {?} */
             const lContext = loadLContextFromNode(element);
             /** @type {?} */
-            const lNode = lContext.lView[lContext.nodeIndex];
-            /** @type {?} */
             const stylingContext = getStylingContext(lContext.nodeIndex, lContext.lView);
             if (stylingContext) {
-                for (let i = 9 /* SingleStylesStartPosition */; i < lNode.length; i += 4 /* Size */) {
-                    if (!isClassBasedValue(lNode, i)) {
+                for (let i = 9 /* SingleStylesStartPosition */; i < stylingContext.length; i += 4 /* Size */) {
+                    if (!isClassBasedValue(stylingContext, i)) {
                         /** @type {?} */
-                        const styleName = getProp(lNode, i);
+                        const styleName = getProp(stylingContext, i);
                         /** @type {?} */
-                        const value = (/** @type {?} */ (getValue(lNode, i)));
+                        const value = (/** @type {?} */ (getValue(stylingContext, i)));
                         if (value !== null) {
                             // we want to ignore `null` since those don't overwrite the values.
                             styles[styleName] = value;
