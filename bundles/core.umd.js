@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+146.sha-6fa4235
+ * @license Angular v8.0.0-beta.3+160.sha-2c6a6f1
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1018,7 +1018,7 @@
                         typeArgumentCount: 0,
                         providedIn: meta.providedIn,
                         ctorDeps: reflectDependencies(type),
-                        userDeps: undefined
+                        userDeps: undefined,
                     };
                     if ((isUseClassProvider(meta) || isUseFactoryProvider(meta)) && meta.deps !== undefined) {
                         compilerMeta.userDeps = convertDependencies(meta.deps);
@@ -14020,7 +14020,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.3+146.sha-6fa4235');
+    var VERSION = new Version('8.0.0-beta.3+160.sha-2c6a6f1');
 
     /**
      * @license
