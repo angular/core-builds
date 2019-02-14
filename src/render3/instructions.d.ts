@@ -10,14 +10,14 @@ import { Type } from '../interface/type';
 import { Sanitizer } from '../sanitization/security';
 import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
 import { LContainer } from './interfaces/container';
-import { ComponentDef, ComponentTemplate, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags, ViewQueriesFunction } from './interfaces/definition';
+import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags, ViewQueriesFunction } from './interfaces/definition';
 import { LocalRefExtractor, TAttributes, TContainerNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from './interfaces/node';
 import { PlayerFactory } from './interfaces/player';
 import { CssSelectorList } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { GlobalTargetResolver, RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 import { SanitizerFn } from './interfaces/sanitization';
-import { LView, LViewFlags, OpaqueViewState, RootContext, RootContextFlags, TView } from './interfaces/view';
+import { ExpandoInstructions, LView, LViewFlags, OpaqueViewState, RootContext, RootContextFlags, TView } from './interfaces/view';
 import { NO_CHANGE } from './tokens';
 /**
  * Refreshes the view, executing the following steps in that order:
@@ -454,6 +454,7 @@ export declare function textBinding<T>(index: number, value: T | NO_CHANGE): voi
  * Instantiate a root component.
  */
 export declare function instantiateRootComponent<T>(tView: TView, viewData: LView, def: ComponentDef<T>): T;
+export declare function invokeHostBindingsInCreationMode(def: DirectiveDef<any>, expando: ExpandoInstructions, directive: any, tNode: TNode, firstTemplatePass: boolean): void;
 /**
 * Generates a new block in TView.expandoInstructions for this node.
 *

@@ -144,3 +144,4 @@ export declare const INTERPOLATION_DELIMITER = "\uFFFD";
  * See storeBindingMetadata().
  */
 export declare function isPropMetadataString(str: string): boolean;
+export declare function applyOnCreateInstructions(tNode: TNode): void;
