@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+177.sha-63e5d27
+ * @license Angular v8.0.0-beta.3+179.sha-80a5934
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3390,6 +3390,7 @@
             styles: componentDefinition.styles || EMPTY_ARRAY$1,
             _: null,
             setInput: null,
+            schemas: componentDefinition.schemas || null,
         };
         def._ = noSideEffects(function () {
             var directiveTypes = componentDefinition.directives;
@@ -3436,6 +3437,7 @@
             imports: def.imports || EMPTY_ARRAY$1,
             exports: def.exports || EMPTY_ARRAY$1,
             transitiveCompileScopes: null,
+            schemas: def.schemas || null,
         };
         return res;
     }
@@ -5305,6 +5307,33 @@
         };
         return ErrorHandler;
     }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Defines a schema that allows an NgModule to contain the following:
+     * - Non-Angular elements named with dash case (`-`).
+     * - Element properties named with dash case (`-`).
+     * Dash case is the naming convention for custom elements.
+     *
+     * @publicApi
+     */
+    var CUSTOM_ELEMENTS_SCHEMA = {
+        name: 'custom-elements'
+    };
+    /**
+     * Defines a schema that allows any property on any element.
+     *
+     * @publicApi
+     */
+    var NO_ERRORS_SCHEMA = {
+        name: 'no-errors-schema'
+    };
 
     /**
      * @license
@@ -9693,9 +9722,11 @@
      * @param vars The number of bindings and pure function bindings in this view
      * @param directives Directive defs that should be saved on TView
      * @param pipes Pipe defs that should be saved on TView
+     * @param viewQuery View query that should be saved on TView
+     * @param schemas Schemas that should be saved on TView
      * @returns TView
      */
-    function getOrCreateTView(templateFn, consts, vars, directives, pipes, viewQuery) {
+    function getOrCreateTView(templateFn, consts, vars, directives, pipes, viewQuery, schemas) {
         // TODO(misko): reading `ngPrivateData` here is problematic for two reasons
         // 1. It is a megamorphic call on each invocation.
         // 2. For nested embedded views (ngFor inside ngFor) the template instance is per
@@ -9703,8 +9734,7 @@
         // Correct solution is to only put `ngPrivateData` on the Component template
         // and not on embedded templates.
         return templateFn.ngPrivateData ||
-            (templateFn.ngPrivateData =
-                createTView(-1, templateFn, consts, vars, directives, pipes, viewQuery));
+            (templateFn.ngPrivateData = createTView(-1, templateFn, consts, vars, directives, pipes, viewQuery, schemas));
     }
     /**
      * Creates a TView instance
@@ -9714,8 +9744,10 @@
      * @param consts The number of nodes, local refs, and pipes in this template
      * @param directives Registry of directives for this view
      * @param pipes Registry of pipes for this view
+     * @param viewQuery View queries for this view
+     * @param schemas Schemas for this view
      */
-    function createTView(viewIndex, templateFn, consts, vars, directives, pipes, viewQuery) {
+    function createTView(viewIndex, templateFn, consts, vars, directives, pipes, viewQuery, schemas) {
         ngDevMode && ngDevMode.tView++;
         var bindingStartIndex = HEADER_OFFSET + consts;
         // This length does not yet contain host bindings from child directives because at this point,
@@ -9749,6 +9781,7 @@
             directiveRegistry: typeof directives === 'function' ? directives() : directives,
             pipeRegistry: typeof pipes === 'function' ? pipes() : pipes,
             firstChild: null,
+            schemas: schemas,
         };
     }
     function createViewBlueprint(bindingStartIndex, initialViewLength) {
@@ -10130,7 +10163,7 @@
         else if (tNode.type === 3 /* Element */) {
             if (ngDevMode) {
                 validateAgainstEventProperties(propName);
-                validateAgainstUnknownProperties(element, propName, tNode);
+                validateAgainstUnknownProperties(lView, element, propName, tNode);
                 ngDevMode.rendererSetProperty++;
             }
             savePropertyDebugData(tNode, lView, propName, lView[TVIEW].data, nativeOnly);
@@ -10147,7 +10180,11 @@
             }
         }
     }
-    function validateAgainstUnknownProperties(element, propName, tNode) {
+    function validateAgainstUnknownProperties(hostView, element, propName, tNode) {
+        // If the tag matches any of the schemas we shouldn't throw.
+        if (matchingSchemas(hostView, tNode.tagName)) {
+            return;
+        }
         // If prop is not a known property of the HTML element...
         if (!(propName in element) &&
             // and we are in a browser context... (web worker nodes should be skipped)
@@ -10157,6 +10194,19 @@
             // ... it is probably a user error and we should throw.
             throw new Error("Template error: Can't bind to '" + propName + "' since it isn't a known property of '" + tNode.tagName + "'.");
         }
+    }
+    function matchingSchemas(hostView, tagName) {
+        var schemas = hostView[TVIEW].schemas;
+        if (schemas !== null) {
+            for (var i = 0; i < schemas.length; i++) {
+                var schema = schemas[i];
+                if (schema === NO_ERRORS_SCHEMA ||
+                    schema === CUSTOM_ELEMENTS_SCHEMA && tagName && tagName.indexOf('-') > -1) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     /**
      * Stores debugging data for this property binding on first template pass.
@@ -10841,7 +10891,7 @@
     }
     function addComponentLogic(lView, previousOrParentTNode, def) {
         var native = getNativeByTNode(previousOrParentTNode, lView);
-        var tView = getOrCreateTView(def.template, def.consts, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery);
+        var tView = getOrCreateTView(def.template, def.consts, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery, def.schemas);
         // Only component views should be added to the view tree directly. Embedded views are
         // accessed through their containers because they may be removed / re-added later.
         var rendererFactory = lView[RENDERER_FACTORY];
@@ -10971,7 +11021,7 @@
         // TODO: consider a separate node type for templates
         var tContainerNode = containerInternal(index, tagName || null, attrs || null);
         if (tView.firstTemplatePass) {
-            tContainerNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null);
+            tContainerNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null, null);
         }
         createDirectivesAndLocals(tView, lView, localRefs, localRefExtractor);
         addTContainerToQueries(lView, tContainerNode);
@@ -11180,7 +11230,7 @@
         ngDevMode && assertDefined(containerTViews, 'TView expected');
         ngDevMode && assertEqual(Array.isArray(containerTViews), true, 'TViews should be in an array');
         if (viewIndex >= containerTViews.length || containerTViews[viewIndex] == null) {
-            containerTViews[viewIndex] = createTView(viewIndex, null, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null);
+            containerTViews[viewIndex] = createTView(viewIndex, null, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null, null);
         }
         return containerTViews[viewIndex];
     }
@@ -12103,7 +12153,7 @@
             16 /* CheckAlways */ | 512 /* IsRoot */;
         var rootContext = createRootContext(opts.scheduler, opts.playerHandler);
         var renderer = rendererFactory.createRenderer(hostRNode, componentDef);
-        var rootView = createLView(null, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags, null, null, rendererFactory, renderer, undefined, opts.injector || null);
+        var rootView = createLView(null, createTView(-1, null, 1, 0, null, null, null, null), rootContext, rootFlags, null, null, rendererFactory, renderer, undefined, opts.injector || null);
         var oldView = enterView(rootView, null);
         var component;
         try {
@@ -12138,7 +12188,7 @@
         resetComponentState();
         var tView = rootView[TVIEW];
         var tNode = createNodeAtIndex(0, 3 /* Element */, rNode, null, null);
-        var componentView = createLView(rootView, getOrCreateTView(def.template, def.consts, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery), null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, rootView[HEADER_OFFSET], tNode, rendererFactory, renderer, sanitizer);
+        var componentView = createLView(rootView, getOrCreateTView(def.template, def.consts, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery, def.schemas), null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, rootView[HEADER_OFFSET], tNode, rendererFactory, renderer, sanitizer);
         if (tView.firstTemplatePass) {
             diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, rootView), rootView, def.type);
             tNode.flags = 1 /* isComponent */;
@@ -14040,7 +14090,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.3+177.sha-63e5d27');
+    var VERSION = new Version('8.0.0-beta.3+179.sha-80a5934');
 
     /**
      * @license
@@ -17207,7 +17257,7 @@
                     hostRNode.setAttribute('ng-version', VERSION.full);
             }
             // Create the root view. Uses empty TView and ContentTemplate.
-            var rootLView = createLView(null, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags, null, null, rendererFactory, renderer, sanitizer, rootViewInjector);
+            var rootLView = createLView(null, createTView(-1, null, 1, 0, null, null, null, null), rootContext, rootFlags, null, null, rendererFactory, renderer, sanitizer, rootViewInjector);
             // rootView is the parent when bootstrapping
             var oldLView = enterView(rootLView, null);
             var component;
@@ -20127,6 +20177,7 @@
                         exports: flatten$2(ngModule.exports || EMPTY_ARRAY$4, resolveForwardRef)
                             .map(expandModuleWithProviders),
                         emitInline: true,
+                        schemas: ngModule.schemas ? flatten$2(ngModule.schemas) : null,
                     });
                 }
                 return ngModuleDef;
@@ -20339,6 +20390,7 @@
         componentDef.pipeDefs = function () {
             return Array.from(transitiveScopes.compilation.pipes).map(function (pipe) { return getPipeDef(pipe); });
         };
+        componentDef.schemas = transitiveScopes.schemas;
     }
     /**
      * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
@@ -20356,6 +20408,7 @@
             return def.transitiveCompileScopes;
         }
         var scopes = {
+            schemas: def.schemas || null,
             compilation: {
                 directives: new Set(),
                 pipes: new Set(),
@@ -20755,25 +20808,6 @@
     var SWITCH_COMPILE_DIRECTIVE = SWITCH_COMPILE_DIRECTIVE__POST_R3__;
     var SWITCH_COMPILE_PIPE = SWITCH_COMPILE_PIPE__POST_R3__;
 
-    /**
-     * Defines a schema that allows an NgModule to contain the following:
-     * - Non-Angular elements named with dash case (`-`).
-     * - Element properties named with dash case (`-`).
-     * Dash case is the naming convention for custom elements.
-     *
-     * @publicApi
-     */
-    var CUSTOM_ELEMENTS_SCHEMA = {
-        name: 'custom-elements'
-    };
-    /**
-     * Defines a schema that allows any property on any element.
-     *
-     * @publicApi
-     */
-    var NO_ERRORS_SCHEMA = {
-        name: 'no-errors-schema'
-    };
     /**
      * @Annotation
      * @publicApi
@@ -25616,9 +25650,9 @@
     exports.Input = Input;
     exports.Output = Output;
     exports.Pipe = Pipe;
+    exports.NgModule = NgModule;
     exports.CUSTOM_ELEMENTS_SCHEMA = CUSTOM_ELEMENTS_SCHEMA;
     exports.NO_ERRORS_SCHEMA = NO_ERRORS_SCHEMA;
-    exports.NgModule = NgModule;
     exports.Version = Version;
     exports.VERSION = VERSION;
     exports.defineInjectable = defineInjectable;

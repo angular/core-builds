@@ -9,6 +9,7 @@ import { InjectionToken } from '../../di/injection_token';
 import { Injector } from '../../di/injector';
 import { Type } from '../../interface/type';
 import { QueryList } from '../../linker';
+import { SchemaMetadata } from '../../metadata';
 import { Sanitizer } from '../../sanitization/security';
 import { LContainer } from './container';
 import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefList, HostBindingsFunction, PipeDef, PipeDefList, ViewQueriesFunction } from './definition';
@@ -466,6 +467,10 @@ export interface TView {
      * A list of indices for child directives that have content queries.
      */
     contentQueries: number[] | null;
+    /**
+     * Set of schemas that declare elements to be allowed inside the view.
+     */
+    schemas: SchemaMetadata[] | null;
 }
 export declare const enum RootContextFlags {
     Empty = 0,
