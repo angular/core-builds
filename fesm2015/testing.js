@@ -1,10 +1,10 @@
 /**
- * @license Angular v8.0.0-beta.3+175.sha-627cecd
+ * @license Angular v8.0.0-beta.3+178.sha-7cbc36f
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, InjectionToken, Injector, ɵresetCompiledComponents, resolveForwardRef, ɵcompileComponent, ɵgetInjectableDef, NgZone, ɵRender3ComponentFactory, ɵRender3NgModuleRef, ApplicationInitStatus, Compiler, COMPILER_OPTIONS, ɵdefineNgModule, defineInjector, ɵsetClassMetadata, ɵNgModuleFactory, ɵNG_MODULE_DEF, ɵNG_INJECTOR_DEF, ɵcompileNgModuleDefs, ɵNG_COMPONENT_DEF, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵflushModuleScopingQueueAsMuchAsPossible, ModuleWithComponentFactories, Injectable, defineInjectable, ɵgetInheritedFactory, ɵivyEnabled, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, Optional, SkipSelf } from '@angular/core';
+import { getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, InjectionToken, Injector, ɵresetCompiledComponents, resolveForwardRef, ɵcompileComponent, ɵgetInjectableDef, NgZone, ɵRender3ComponentFactory, ɵRender3NgModuleRef, ApplicationInitStatus, Compiler, ErrorHandler, COMPILER_OPTIONS, ɵdefineNgModule, defineInjector, ɵsetClassMetadata, ɵNgModuleFactory, ɵNG_MODULE_DEF, ɵNG_INJECTOR_DEF, ɵcompileNgModuleDefs, ɵNG_COMPONENT_DEF, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵflushModuleScopingQueueAsMuchAsPossible, ModuleWithComponentFactories, Injectable, defineInjectable, ɵgetInheritedFactory, ɵivyEnabled, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, Optional, SkipSelf } from '@angular/core';
 import { ResourceLoader } from '@angular/compiler';
 
 /**
@@ -1730,6 +1730,7 @@ class TestBedRender3 {
         const providers = [
             { provide: NgZone, useValue: ngZone },
             { provide: Compiler, useFactory: () => new R3TestCompiler(this) },
+            { provide: ErrorHandler, useClass: R3TestErrorHandler },
             ...this._providers,
             ...this._providerOverrides,
         ];
@@ -2003,6 +2004,16 @@ class R3TestCompiler {
         const meta = this.testBed._getModuleResolver().resolve(moduleType);
         return meta && meta.id || undefined;
     }
+}
+/**
+ * Error handler used for tests. Rethrows errors rather than logging them out.
+ */
+class R3TestErrorHandler extends ErrorHandler {
+    /**
+     * @param {?} error
+     * @return {?}
+     */
+    handleError(error) { throw error; }
 }
 
 /**

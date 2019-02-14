@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+175.sha-627cecd
+ * @license Angular v8.0.0-beta.3+178.sha-7cbc36f
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14010,7 +14010,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.3+175.sha-627cecd');
+var VERSION = new Version('8.0.0-beta.3+178.sha-7cbc36f');
 
 /**
  * @license
@@ -22759,13 +22759,12 @@ var DebugElement__POST_R3__ = /** @class */ (function (_super) {
             var element = this.nativeElement;
             if (element) {
                 var lContext = loadLContextFromNode(element);
-                var lNode = lContext.lView[lContext.nodeIndex];
                 var stylingContext = getStylingContext(lContext.nodeIndex, lContext.lView);
                 if (stylingContext) {
-                    for (var i = 9 /* SingleStylesStartPosition */; i < lNode.length; i += 4 /* Size */) {
-                        if (isClassBasedValue(lNode, i)) {
-                            var className = getProp(lNode, i);
-                            var value = getValue(lNode, i);
+                    for (var i = 9 /* SingleStylesStartPosition */; i < stylingContext.length; i += 4 /* Size */) {
+                        if (isClassBasedValue(stylingContext, i)) {
+                            var className = getProp(stylingContext, i);
+                            var value = getValue(stylingContext, i);
                             if (typeof value == 'boolean') {
                                 // we want to ignore `null` since those don't overwrite the values.
                                 classes[className] = value;
@@ -22792,13 +22791,12 @@ var DebugElement__POST_R3__ = /** @class */ (function (_super) {
             var element = this.nativeElement;
             if (element) {
                 var lContext = loadLContextFromNode(element);
-                var lNode = lContext.lView[lContext.nodeIndex];
                 var stylingContext = getStylingContext(lContext.nodeIndex, lContext.lView);
                 if (stylingContext) {
-                    for (var i = 9 /* SingleStylesStartPosition */; i < lNode.length; i += 4 /* Size */) {
-                        if (!isClassBasedValue(lNode, i)) {
-                            var styleName = getProp(lNode, i);
-                            var value = getValue(lNode, i);
+                    for (var i = 9 /* SingleStylesStartPosition */; i < stylingContext.length; i += 4 /* Size */) {
+                        if (!isClassBasedValue(stylingContext, i)) {
+                            var styleName = getProp(stylingContext, i);
+                            var value = getValue(stylingContext, i);
                             if (value !== null) {
                                 // we want to ignore `null` since those don't overwrite the values.
                                 styles[styleName] = value;
