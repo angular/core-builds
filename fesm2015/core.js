@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+167.sha-1df3aef
+ * @license Angular v8.0.0-beta.3+173.sha-65c2dea
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16954,16 +16954,14 @@ function createTemplateRef(TemplateRefToken, ElementRefToken, hostTNode, hostVie
              * @param {?} _declarationParentView
              * @param {?} elementRef
              * @param {?} _tView
-             * @param {?} _renderer
              * @param {?} _hostLContainer
              * @param {?} _injectorIndex
              */
-            constructor(_declarationParentView, elementRef, _tView, _renderer, _hostLContainer, _injectorIndex) {
+            constructor(_declarationParentView, elementRef, _tView, _hostLContainer, _injectorIndex) {
                 super();
                 this._declarationParentView = _declarationParentView;
                 this.elementRef = elementRef;
                 this._tView = _tView;
-                this._renderer = _renderer;
                 this._hostLContainer = _hostLContainer;
                 this._injectorIndex = _injectorIndex;
             }
@@ -16993,7 +16991,7 @@ function createTemplateRef(TemplateRefToken, ElementRefToken, hostTNode, hostVie
         /** @type {?} */
         const hostContainer = hostView[hostTNode.index];
         ngDevMode && assertDefined(hostTNode.tViews, 'TView must be allocated');
-        return new R3TemplateRef(hostView, createElementRef(ElementRefToken, hostTNode, hostView), (/** @type {?} */ (hostTNode.tViews)), getLView()[RENDERER], hostContainer, hostTNode.injectorIndex);
+        return new R3TemplateRef(hostView, createElementRef(ElementRefToken, hostTNode, hostView), (/** @type {?} */ (hostTNode.tViews)), hostContainer, hostTNode.injectorIndex);
     }
     else {
         return null;
@@ -17479,7 +17477,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.3+167.sha-1df3aef');
+const VERSION = new Version('8.0.0-beta.3+173.sha-65c2dea');
 
 /**
  * @fileoverview added by tsickle
