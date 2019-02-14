@@ -10,7 +10,7 @@ import { Type } from '../interface/type';
 import { Sanitizer } from '../sanitization/security';
 import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
 import { LContainer } from './interfaces/container';
-import { ComponentDef, ComponentQuery, ComponentTemplate, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
+import { ComponentDef, ComponentTemplate, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags, ViewQueriesFunction } from './interfaces/definition';
 import { LocalRefExtractor, TAttributes, TContainerNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from './interfaces/node';
 import { PlayerFactory } from './interfaces/player';
 import { CssSelectorList } from './interfaces/projection';
@@ -151,7 +151,7 @@ export declare function elementCreate(name: string, overriddenRenderer?: Rendere
  * @param pipes Pipe defs that should be saved on TView
  * @returns TView
  */
-export declare function getOrCreateTView(templateFn: ComponentTemplate<any>, consts: number, vars: number, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null, viewQuery: ComponentQuery<any> | null): TView;
+export declare function getOrCreateTView(templateFn: ComponentTemplate<any>, consts: number, vars: number, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null, viewQuery: ViewQueriesFunction<any> | null): TView;
 /**
  * Creates a TView instance
  *
@@ -161,7 +161,7 @@ export declare function getOrCreateTView(templateFn: ComponentTemplate<any>, con
  * @param directives Registry of directives for this view
  * @param pipes Registry of pipes for this view
  */
-export declare function createTView(viewIndex: number, templateFn: ComponentTemplate<any> | null, consts: number, vars: number, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null, viewQuery: ComponentQuery<any> | null): TView;
+export declare function createTView(viewIndex: number, templateFn: ComponentTemplate<any> | null, consts: number, vars: number, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null, viewQuery: ViewQueriesFunction<any> | null): TView;
 export declare function createError(text: string, token: any): Error;
 /**
  * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.

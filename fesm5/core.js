@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+130.sha-06ec95f
+ * @license Angular v8.0.0-beta.3+147.sha-28bdeee
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -409,13 +409,18 @@ function resolveForwardRef(type) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var __window = typeof window !== 'undefined' && window;
-var __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
-    self instanceof WorkerGlobalScope && self;
-var __global = typeof global !== 'undefined' && global;
-// Check __global first, because in Node tests both __global and __window may be defined and _global
-// should be __global in that case.
-var _global = __global || __window || __self;
+function getGlobal() {
+    var __globalThis = typeof globalThis !== 'undefined' && globalThis;
+    var __window = typeof window !== 'undefined' && window;
+    var __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
+        self instanceof WorkerGlobalScope && self;
+    var __global = typeof global !== 'undefined' && global;
+    // Always use __globalThis if available, which is the spec-defined global variable across all
+    // environments, then fallback to __global first, because in Node tests both __global and
+    // __window may be defined and _global should be __global in that case.
+    return __globalThis || __global || __window || __self;
+}
+var _global = getGlobal();
 
 /**
  * @license
@@ -2393,15 +2398,16 @@ function _mapProviders(injector, fn) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * This token can be used to create a virtual provider that will populate the
- * `entryComponents` fields of components and ng modules based on its `useValue`.
+ * A DI token that you can use to create a virtual [provider](guide/glossary#provider)
+ * that will populate the `entryComponents` field of components and NgModules
+ * based on its `useValue` property value.
  * All components that are referenced in the `useValue` value (either directly
- * or in a nested array or map) will be added to the `entryComponents` property.
+ * or in a nested array or map) are added to the `entryComponents` property.
  *
  * @usageNotes
- * ### Example
+ *
  * The following example shows how the router can populate the `entryComponents`
- * field of an NgModule based on the router configuration which refers
+ * field of an NgModule based on a router configuration that refers
  * to components.
  *
  * ```typescript
@@ -3361,7 +3367,6 @@ function defineComponent(componentDefinition) {
         ngContentSelectors: componentDefinition.ngContentSelectors,
         hostBindings: componentDefinition.hostBindings || null,
         contentQueries: componentDefinition.contentQueries || null,
-        contentQueriesRefresh: componentDefinition.contentQueriesRefresh || null,
         declaredInputs: declaredInputs,
         inputs: null,
         outputs: null,
@@ -4408,11 +4413,20 @@ function getOrCreateInjectable(tNode, lView, token, flags, notFoundValue) {
     }
     if ((flags & (InjectFlags.Self | InjectFlags.Host)) === 0) {
         var moduleInjector = lView[INJECTOR$1];
-        if (moduleInjector) {
-            return moduleInjector.get(token, notFoundValue, flags & InjectFlags.Optional);
+        // switch to `injectInjectorOnly` implementation for module injector, since module injector
+        // should not have access to Component/Directive DI scope (that may happen through
+        // `directiveInject` implementation)
+        var previousInjectImplementation = setInjectImplementation(undefined);
+        try {
+            if (moduleInjector) {
+                return moduleInjector.get(token, notFoundValue, flags & InjectFlags.Optional);
+            }
+            else {
+                return injectRootLimpMode(token, notFoundValue, flags & InjectFlags.Optional);
+            }
         }
-        else {
-            return injectRootLimpMode(token, notFoundValue, flags & InjectFlags.Optional);
+        finally {
+            setInjectImplementation(previousInjectImplementation);
         }
     }
     if (flags & InjectFlags.Optional) {
@@ -9194,7 +9208,7 @@ function refreshDescendantViews(lView) {
         executeInitHooks(lView, tView, checkNoChangesMode);
         refreshDynamicEmbeddedViews(lView);
         // Content query results must be refreshed before content hooks are called.
-        refreshContentQueries(tView);
+        refreshContentQueries(tView, lView);
         executeHooks(lView, tView.contentHooks, tView.contentCheckHooks, checkNoChangesMode, 1 /* AfterContentInitHooksToBeRun */);
         setHostBindings(tView, lView);
     }
@@ -9239,13 +9253,15 @@ function setHostBindings(tView, viewData) {
     }
 }
 /** Refreshes content queries for all directives in the given view. */
-function refreshContentQueries(tView) {
+function refreshContentQueries(tView, lView) {
     if (tView.contentQueries != null) {
         setCurrentQueryIndex(0);
         for (var i = 0; i < tView.contentQueries.length; i++) {
             var directiveDefIdx = tView.contentQueries[i];
             var directiveDef = tView.data[directiveDefIdx];
-            directiveDef.contentQueriesRefresh(directiveDefIdx - HEADER_OFFSET);
+            ngDevMode &&
+                assertDefined(directiveDef.contentQueries, 'contentQueries function should be defined');
+            directiveDef.contentQueries(2 /* Update */, lView[directiveDefIdx], directiveDefIdx);
         }
     }
 }
@@ -9519,16 +9535,16 @@ function elementContainerStart(index, attrs, localRefs) {
         currentQueries.addNode(tNode);
         lView[QUERIES] = currentQueries.clone();
     }
-    executeContentQueries(tView, tNode);
+    executeContentQueries(tView, tNode, lView);
 }
-function executeContentQueries(tView, tNode) {
+function executeContentQueries(tView, tNode, lView) {
     if (isContentQueryHost(tNode)) {
         var start = tNode.directiveStart;
         var end = tNode.directiveEnd;
-        for (var i = start; i < end; i++) {
-            var def = tView.data[i];
+        for (var directiveIndex = start; directiveIndex < end; directiveIndex++) {
+            var def = tView.data[directiveIndex];
             if (def.contentQueries) {
-                def.contentQueries(i);
+                def.contentQueries(1 /* Create */, lView[directiveIndex], directiveIndex);
             }
         }
     }
@@ -9618,7 +9634,7 @@ function elementStart(index, name, attrs, localRefs) {
         currentQueries.addNode(tNode);
         lView[QUERIES] = currentQueries.clone();
     }
-    executeContentQueries(tView, tNode);
+    executeContentQueries(tView, tNode, lView);
 }
 /**
  * Creates a native element from a tag name, using a renderer.
@@ -11444,15 +11460,16 @@ function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
  * @returns the root LView
  */
 function markViewDirty(lView) {
-    while (lView && !(lView[FLAGS] & 512 /* IsRoot */)) {
+    while (lView) {
         lView[FLAGS] |= 64 /* Dirty */;
+        // Stop traversing up as soon as you find a root view that wasn't attached to any container
+        if (isRootView(lView) && lView[CONTAINER_INDEX] === -1) {
+            return lView;
+        }
+        // continue otherwise
         lView = lView[PARENT];
     }
-    // Detached views do not have a PARENT and also aren't root views
-    if (lView) {
-        lView[FLAGS] |= 64 /* Dirty */;
-    }
-    return lView;
+    return null;
 }
 /**
  * Used to schedule change detection on the whole application.
@@ -12413,27 +12430,13 @@ function InheritDefinitionFeature(definition) {
             var superContentQueries_1 = superDef.contentQueries;
             if (superContentQueries_1) {
                 if (prevContentQueries_1) {
-                    definition.contentQueries = function (directiveIndex) {
-                        superContentQueries_1(directiveIndex);
-                        prevContentQueries_1(directiveIndex);
+                    definition.contentQueries = function (rf, ctx, directiveIndex) {
+                        superContentQueries_1(rf, ctx, directiveIndex);
+                        prevContentQueries_1(rf, ctx, directiveIndex);
                     };
                 }
                 else {
                     definition.contentQueries = superContentQueries_1;
-                }
-            }
-            // Merge Content Queries Refresh
-            var prevContentQueriesRefresh_1 = definition.contentQueriesRefresh;
-            var superContentQueriesRefresh_1 = superDef.contentQueriesRefresh;
-            if (superContentQueriesRefresh_1) {
-                if (prevContentQueriesRefresh_1) {
-                    definition.contentQueriesRefresh = function (directiveIndex) {
-                        superContentQueriesRefresh_1(directiveIndex);
-                        prevContentQueriesRefresh_1(directiveIndex);
-                    };
-                }
-                else {
-                    definition.contentQueriesRefresh = superContentQueriesRefresh_1;
                 }
             }
             // Merge inputs and outputs
@@ -14058,7 +14061,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.3+130.sha-06ec95f');
+var VERSION = new Version('8.0.0-beta.3+147.sha-28bdeee');
 
 /**
  * @license
@@ -17174,8 +17177,8 @@ var SCHEDULER = new InjectionToken('SCHEDULER_TOKEN', {
 });
 function createChainedInjector(rootViewInjector, moduleInjector) {
     return {
-        get: function (token, notFoundValue) {
-            var value = rootViewInjector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR);
+        get: function (token, notFoundValue, flags) {
+            var value = rootViewInjector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, flags);
             if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR ||
                 notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) {
                 // Return the value from the root element injector when
@@ -17185,7 +17188,7 @@ function createChainedInjector(rootViewInjector, moduleInjector) {
                 //   (notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
                 return value;
             }
-            return moduleInjector.get(token, notFoundValue);
+            return moduleInjector.get(token, notFoundValue, flags);
         }
     };
 }

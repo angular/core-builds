@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+130.sha-06ec95f
+ * @license Angular v8.0.0-beta.3+147.sha-28bdeee
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -402,13 +402,18 @@ function resolveForwardRef(type) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-const __window = typeof window !== 'undefined' && window;
-const __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
-    self instanceof WorkerGlobalScope && self;
-const __global = typeof global !== 'undefined' && global;
-// Check __global first, because in Node tests both __global and __window may be defined and _global
-// should be __global in that case.
-const _global = __global || __window || __self;
+function getGlobal() {
+    const __globalThis = typeof globalThis !== 'undefined' && globalThis;
+    const __window = typeof window !== 'undefined' && window;
+    const __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
+        self instanceof WorkerGlobalScope && self;
+    const __global = typeof global !== 'undefined' && global;
+    // Always use __globalThis if available, which is the spec-defined global variable across all
+    // environments, then fallback to __global first, because in Node tests both __global and
+    // __window may be defined and _global should be __global in that case.
+    return __globalThis || __global || __window || __self;
+}
+const _global = getGlobal();
 
 /**
  * @license
@@ -2779,15 +2784,16 @@ function _mapProviders(injector, fn) {
  * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
- * This token can be used to create a virtual provider that will populate the
- * `entryComponents` fields of components and ng modules based on its `useValue`.
+ * A DI token that you can use to create a virtual [provider](guide/glossary#provider)
+ * that will populate the `entryComponents` field of components and NgModules
+ * based on its `useValue` property value.
  * All components that are referenced in the `useValue` value (either directly
- * or in a nested array or map) will be added to the `entryComponents` property.
+ * or in a nested array or map) are added to the `entryComponents` property.
  *
  * \@usageNotes
- * ### Example
+ *
  * The following example shows how the router can populate the `entryComponents`
- * field of an NgModule based on the router configuration which refers
+ * field of an NgModule based on a router configuration that refers
  * to components.
  *
  * ```typescript
@@ -3917,7 +3923,6 @@ function defineComponent(componentDefinition) {
         ngContentSelectors: componentDefinition.ngContentSelectors,
         hostBindings: componentDefinition.hostBindings || null,
         contentQueries: componentDefinition.contentQueries || null,
-        contentQueriesRefresh: componentDefinition.contentQueriesRefresh || null,
         declaredInputs: declaredInputs,
         inputs: (/** @type {?} */ (null)),
         // assigned in noSideEffects
@@ -5209,11 +5214,21 @@ function getOrCreateInjectable(tNode, lView, token, flags = InjectFlags.Default,
     if ((flags & (InjectFlags.Self | InjectFlags.Host)) === 0) {
         /** @type {?} */
         const moduleInjector = lView[INJECTOR$1];
-        if (moduleInjector) {
-            return moduleInjector.get(token, notFoundValue, flags & InjectFlags.Optional);
+        // switch to `injectInjectorOnly` implementation for module injector, since module injector
+        // should not have access to Component/Directive DI scope (that may happen through
+        // `directiveInject` implementation)
+        /** @type {?} */
+        const previousInjectImplementation = setInjectImplementation(undefined);
+        try {
+            if (moduleInjector) {
+                return moduleInjector.get(token, notFoundValue, flags & InjectFlags.Optional);
+            }
+            else {
+                return injectRootLimpMode(token, notFoundValue, flags & InjectFlags.Optional);
+            }
         }
-        else {
-            return injectRootLimpMode(token, notFoundValue, flags & InjectFlags.Optional);
+        finally {
+            setInjectImplementation(previousInjectImplementation);
         }
     }
     if (flags & InjectFlags.Optional) {
@@ -11350,7 +11365,7 @@ function refreshDescendantViews(lView) {
         executeInitHooks(lView, tView, checkNoChangesMode);
         refreshDynamicEmbeddedViews(lView);
         // Content query results must be refreshed before content hooks are called.
-        refreshContentQueries(tView);
+        refreshContentQueries(tView, lView);
         executeHooks(lView, tView.contentHooks, tView.contentCheckHooks, checkNoChangesMode, 1 /* AfterContentInitHooksToBeRun */);
         setHostBindings(tView, lView);
     }
@@ -11407,9 +11422,10 @@ function setHostBindings(tView, viewData) {
 /**
  * Refreshes content queries for all directives in the given view.
  * @param {?} tView
+ * @param {?} lView
  * @return {?}
  */
-function refreshContentQueries(tView) {
+function refreshContentQueries(tView, lView) {
     if (tView.contentQueries != null) {
         setCurrentQueryIndex(0);
         for (let i = 0; i < tView.contentQueries.length; i++) {
@@ -11417,7 +11433,9 @@ function refreshContentQueries(tView) {
             const directiveDefIdx = tView.contentQueries[i];
             /** @type {?} */
             const directiveDef = (/** @type {?} */ (tView.data[directiveDefIdx]));
-            (/** @type {?} */ (directiveDef.contentQueriesRefresh))(directiveDefIdx - HEADER_OFFSET);
+            ngDevMode &&
+                assertDefined(directiveDef.contentQueries, 'contentQueries function should be defined');
+            (/** @type {?} */ (directiveDef.contentQueries))(2 /* Update */, lView[directiveDefIdx], directiveDefIdx);
         }
     }
 }
@@ -11789,24 +11807,25 @@ function elementContainerStart(index, attrs, localRefs) {
         currentQueries.addNode(tNode);
         lView[QUERIES] = currentQueries.clone();
     }
-    executeContentQueries(tView, tNode);
+    executeContentQueries(tView, tNode, lView);
 }
 /**
  * @param {?} tView
  * @param {?} tNode
+ * @param {?} lView
  * @return {?}
  */
-function executeContentQueries(tView, tNode) {
+function executeContentQueries(tView, tNode, lView) {
     if (isContentQueryHost(tNode)) {
         /** @type {?} */
         const start = tNode.directiveStart;
         /** @type {?} */
         const end = tNode.directiveEnd;
-        for (let i = start; i < end; i++) {
+        for (let directiveIndex = start; directiveIndex < end; directiveIndex++) {
             /** @type {?} */
-            const def = (/** @type {?} */ (tView.data[i]));
+            const def = (/** @type {?} */ (tView.data[directiveIndex]));
             if (def.contentQueries) {
-                def.contentQueries(i);
+                def.contentQueries(1 /* Create */, lView[directiveIndex], directiveIndex);
             }
         }
     }
@@ -11910,7 +11929,7 @@ function elementStart(index, name, attrs, localRefs) {
         currentQueries.addNode(tNode);
         lView[QUERIES] = currentQueries.clone();
     }
-    executeContentQueries(tView, tNode);
+    executeContentQueries(tView, tNode, lView);
 }
 /**
  * Creates a native element from a tag name, using a renderer.
@@ -14169,15 +14188,16 @@ function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
  * @return {?} the root LView
  */
 function markViewDirty(lView) {
-    while (lView && !(lView[FLAGS] & 512 /* IsRoot */)) {
+    while (lView) {
         lView[FLAGS] |= 64 /* Dirty */;
+        // Stop traversing up as soon as you find a root view that wasn't attached to any container
+        if (isRootView(lView) && lView[CONTAINER_INDEX] === -1) {
+            return lView;
+        }
+        // continue otherwise
         lView = (/** @type {?} */ (lView[PARENT]));
     }
-    // Detached views do not have a PARENT and also aren't root views
-    if (lView) {
-        lView[FLAGS] |= 64 /* Dirty */;
-    }
-    return lView;
+    return null;
 }
 /**
  * Used to schedule change detection on the whole application.
@@ -15473,29 +15493,13 @@ function InheritDefinitionFeature(definition) {
             const superContentQueries = superDef.contentQueries;
             if (superContentQueries) {
                 if (prevContentQueries) {
-                    definition.contentQueries = (directiveIndex) => {
-                        superContentQueries(directiveIndex);
-                        prevContentQueries(directiveIndex);
+                    definition.contentQueries = (rf, ctx, directiveIndex) => {
+                        superContentQueries(rf, ctx, directiveIndex);
+                        prevContentQueries(rf, ctx, directiveIndex);
                     };
                 }
                 else {
                     definition.contentQueries = superContentQueries;
-                }
-            }
-            // Merge Content Queries Refresh
-            /** @type {?} */
-            const prevContentQueriesRefresh = definition.contentQueriesRefresh;
-            /** @type {?} */
-            const superContentQueriesRefresh = superDef.contentQueriesRefresh;
-            if (superContentQueriesRefresh) {
-                if (prevContentQueriesRefresh) {
-                    definition.contentQueriesRefresh = (directiveIndex) => {
-                        superContentQueriesRefresh(directiveIndex);
-                        prevContentQueriesRefresh(directiveIndex);
-                    };
-                }
-                else {
-                    definition.contentQueriesRefresh = superContentQueriesRefresh;
                 }
             }
             // Merge inputs and outputs
@@ -17464,7 +17468,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.3+130.sha-06ec95f');
+const VERSION = new Version('8.0.0-beta.3+147.sha-28bdeee');
 
 /**
  * @fileoverview added by tsickle
@@ -21854,9 +21858,9 @@ const SCHEDULER = new InjectionToken('SCHEDULER_TOKEN', {
  */
 function createChainedInjector(rootViewInjector, moduleInjector) {
     return {
-        get: (token, notFoundValue) => {
+        get: (token, notFoundValue, flags) => {
             /** @type {?} */
-            const value = rootViewInjector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR);
+            const value = rootViewInjector.get(token, (/** @type {?} */ (NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)), flags);
             if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR ||
                 notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) {
                 // Return the value from the root element injector when
@@ -21866,7 +21870,7 @@ function createChainedInjector(rootViewInjector, moduleInjector) {
                 //   (notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
                 return value;
             }
-            return moduleInjector.get(token, notFoundValue);
+            return moduleInjector.get(token, notFoundValue, flags);
         }
     };
 }
