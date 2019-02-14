@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+167.sha-1df3aef
+ * @license Angular v8.0.0-beta.3+173.sha-65c2dea
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13584,12 +13584,11 @@ function createTemplateRef(TemplateRefToken, ElementRefToken, hostTNode, hostVie
         // TODO: Fix class name, should be TemplateRef, but there appears to be a rollup bug
         R3TemplateRef = /** @class */ (function (_super) {
             __extends(TemplateRef_, _super);
-            function TemplateRef_(_declarationParentView, elementRef, _tView, _renderer, _hostLContainer, _injectorIndex) {
+            function TemplateRef_(_declarationParentView, elementRef, _tView, _hostLContainer, _injectorIndex) {
                 var _this = _super.call(this) || this;
                 _this._declarationParentView = _declarationParentView;
                 _this.elementRef = elementRef;
                 _this._tView = _tView;
-                _this._renderer = _renderer;
                 _this._hostLContainer = _hostLContainer;
                 _this._injectorIndex = _injectorIndex;
                 return _this;
@@ -13610,7 +13609,7 @@ function createTemplateRef(TemplateRefToken, ElementRefToken, hostTNode, hostVie
     if (hostTNode.type === 0 /* Container */) {
         var hostContainer = hostView[hostTNode.index];
         ngDevMode && assertDefined(hostTNode.tViews, 'TView must be allocated');
-        return new R3TemplateRef(hostView, createElementRef(ElementRefToken, hostTNode, hostView), hostTNode.tViews, getLView()[RENDERER], hostContainer, hostTNode.injectorIndex);
+        return new R3TemplateRef(hostView, createElementRef(ElementRefToken, hostTNode, hostView), hostTNode.tViews, hostContainer, hostTNode.injectorIndex);
     }
     else {
         return null;
@@ -14000,7 +13999,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.3+167.sha-1df3aef');
+var VERSION = new Version('8.0.0-beta.3+173.sha-65c2dea');
 
 /**
  * @license
