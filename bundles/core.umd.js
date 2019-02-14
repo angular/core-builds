@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+174.sha-b41da03
+ * @license Angular v8.0.0-beta.3+175.sha-627cecd
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3291,6 +3291,20 @@
      */
     function isPropMetadataString(str) {
         return str.indexOf(INTERPOLATION_DELIMITER) >= 0;
+    }
+    function applyOnCreateInstructions(tNode) {
+        // there may be some instructions that need to run in a specific
+        // order because the CREATE block in a directive runs before the
+        // CREATE block in a template. To work around this instructions
+        // can get access to the function array below and defer any code
+        // to run after the element is created.
+        var fns;
+        if (fns = tNode.onElementCreationFns) {
+            for (var i = 0; i < fns.length; i++) {
+                fns[i]();
+            }
+            tNode.onElementCreationFns = null;
+        }
     }
 
     /**
@@ -7319,8 +7333,11 @@
     }
     function isStylingContext(value) {
         // Not an LView or an LContainer
-        return Array.isArray(value) && typeof value[0 /* MasterFlagPosition */] === 'number' &&
-            value.length !== LCONTAINER_LENGTH;
+        if (Array.isArray(value) && value.length >= 9 /* SingleStylesStartPosition */) {
+            return typeof value[0 /* MasterFlagPosition */] === 'number' &&
+                value[3 /* InitialClassValuesPosition */][0 /* DefaultNullValuePosition */] === null;
+        }
+        return false;
     }
     function isAnimationProp(name) {
         return name[0] === ANIMATION_PROP_PREFIX;
@@ -9991,18 +10008,9 @@
             previousOrParentTNode = previousOrParentTNode.parent;
             setPreviousOrParentTNode(previousOrParentTNode);
         }
-        // there may be some instructions that need to run in a specific
-        // order because the CREATE block in a directive runs before the
-        // CREATE block in a template. To work around this instructions
-        // can get access to the function array below and defer any code
-        // to run after the element is created.
-        var fns;
-        if (fns = previousOrParentTNode.onElementCreationFns) {
-            for (var i = 0; i < fns.length; i++) {
-                fns[i]();
-            }
-            previousOrParentTNode.onElementCreationFns = null;
-        }
+        // this is required for all host-level styling-related instructions to run
+        // in the correct order
+        previousOrParentTNode.onElementCreationFns && applyOnCreateInstructions(previousOrParentTNode);
         ngDevMode && assertNodeType(previousOrParentTNode, 3 /* Element */);
         var lView = getLView();
         var currentQueries = lView[QUERIES];
@@ -10646,21 +10654,24 @@
             var def = tView.data[i];
             var directive = viewData[i];
             if (def.hostBindings) {
-                var previousExpandoLength = expando.length;
-                setCurrentDirectiveDef(def);
-                def.hostBindings(1 /* Create */, directive, tNode.index - HEADER_OFFSET);
-                setCurrentDirectiveDef(null);
-                // `hostBindings` function may or may not contain `allocHostVars` call
-                // (e.g. it may not if it only contains host listeners), so we need to check whether
-                // `expandoInstructions` has changed and if not - we still push `hostBindings` to
-                // expando block, to make sure we execute it for DI cycle
-                if (previousExpandoLength === expando.length && firstTemplatePass) {
-                    expando.push(def.hostBindings);
-                }
+                invokeHostBindingsInCreationMode(def, expando, directive, tNode, firstTemplatePass);
             }
             else if (firstTemplatePass) {
                 expando.push(null);
             }
+        }
+    }
+    function invokeHostBindingsInCreationMode(def, expando, directive, tNode, firstTemplatePass) {
+        var previousExpandoLength = expando.length;
+        setCurrentDirectiveDef(def);
+        def.hostBindings(1 /* Create */, directive, tNode.index - HEADER_OFFSET);
+        setCurrentDirectiveDef(null);
+        // `hostBindings` function may or may not contain `allocHostVars` call
+        // (e.g. it may not if it only contains host listeners), so we need to check whether
+        // `expandoInstructions` has changed and if not - we still push `hostBindings` to
+        // expando block, to make sure we execute it for DI cycle
+        if (previousExpandoLength === expando.length && firstTemplatePass) {
+            expando.push(def.hostBindings);
         }
     }
     /**
@@ -12150,9 +12161,9 @@
         hostFeatures && hostFeatures.forEach(function (feature) { return feature(component, componentDef); });
         if (tView.firstTemplatePass && componentDef.hostBindings) {
             var rootTNode = getPreviousOrParentTNode();
-            setCurrentDirectiveDef(componentDef);
-            componentDef.hostBindings(1 /* Create */, component, rootTNode.index - HEADER_OFFSET);
-            setCurrentDirectiveDef(null);
+            var expando = tView.expandoInstructions;
+            invokeHostBindingsInCreationMode(componentDef, expando, component, rootTNode, tView.firstTemplatePass);
+            rootTNode.onElementCreationFns && applyOnCreateInstructions(rootTNode);
         }
         return component;
     }
@@ -14029,7 +14040,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.3+174.sha-b41da03');
+    var VERSION = new Version('8.0.0-beta.3+175.sha-627cecd');
 
     /**
      * @license
