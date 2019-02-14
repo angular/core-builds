@@ -9,6 +9,7 @@ import '../util/ng_dev_mode';
 import { ChangeDetectionStrategy } from '../change_detection/constants';
 import { Type } from '../interface/type';
 import { NgModuleDef } from '../metadata/ng_module';
+import { SchemaMetadata } from '../metadata/schema';
 import { ViewEncapsulation } from '../metadata/view';
 import { BaseDef, ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveTypesOrFactory, FactoryFn, HostBindingsFunction, PipeDef, PipeType, PipeTypesOrFactory, ViewQueriesFunction } from './interfaces/definition';
 import { CssSelectorList } from './interfaces/projection';
@@ -210,6 +211,10 @@ export declare function defineComponent<T>(componentDefinition: {
      * `PipeDefs`s. The function is necessary to be able to support forward declarations.
      */
     pipes?: PipeTypesOrFactory | null;
+    /**
+     * The set of schemas that declare elements to be allowed in the component's template.
+     */
+    schemas?: SchemaMetadata[] | null;
 }): never;
 export declare function setComponentScope(type: ComponentType<any>, directives: Type<any>[], pipes: Type<any>[]): void;
 export declare function extractDirectiveDef(type: DirectiveType<any> & ComponentType<any>): DirectiveDef<any> | ComponentDef<any>;

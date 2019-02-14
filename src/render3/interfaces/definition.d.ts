@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { ViewEncapsulation } from '../../core';
+import { SchemaMetadata, ViewEncapsulation } from '../../core';
 import { Type } from '../../interface/type';
 import { CssSelectorList } from './projection';
 /**
@@ -235,7 +235,6 @@ export interface ComponentDef<T> extends DirectiveDef<T> {
     /** Whether or not this component's ChangeDetectionStrategy is OnPush */
     readonly onPush: boolean;
     /**
-  
      * Registry of directives and components that may be found in this view.
      *
      * The property is either an array of `DirectiveDef`s or a function which returns the array of
@@ -249,6 +248,10 @@ export interface ComponentDef<T> extends DirectiveDef<T> {
      * `PipeDefs`s. The function is necessary to be able to support forward declarations.
      */
     pipeDefs: PipeDefListOrFactory | null;
+    /**
+     * The set of schemas that declare elements to be allowed in the component's template.
+     */
+    schemas: SchemaMetadata[] | null;
     /**
      * Used to store the result of `noSideEffects` function so that it is not removed by closure
      * compiler. The property should never be read.
