@@ -35,7 +35,7 @@ export declare function allocStylingContext(element: RElement | null, templateSt
  * @param viewData The view to search for the styling context
  */
 export declare function getStylingContext(index: number, viewData: LView): StylingContext;
-export declare function isStylingContext(value: any): value is StylingContext;
+export declare function isStylingContext(value: any): boolean;
 export declare function isAnimationProp(name: string): boolean;
 export declare function hasClassInput(tNode: TNode): boolean;
 export declare function hasStyleInput(tNode: TNode): boolean;

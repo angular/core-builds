@@ -80,6 +80,9 @@ export interface R3NgModuleMetadataFacade {
     imports: Function[];
     exports: Function[];
     emitInline: boolean;
+    schemas: {
+        name: string;
+    }[] | null;
 }
 export interface R3InjectorMetadataFacade {
     name: string;

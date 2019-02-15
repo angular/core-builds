@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+168.sha-b0afc4c
+ * @license Angular v8.0.0-beta.3+181.sha-8accc98
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1493,7 +1493,8 @@
             var ngZone = new core.NgZone({ enableLongStackTrace: true });
             var providers = __spread([
                 { provide: core.NgZone, useValue: ngZone },
-                { provide: core.Compiler, useFactory: function () { return new R3TestCompiler(_this); } }
+                { provide: core.Compiler, useFactory: function () { return new R3TestCompiler(_this); } },
+                { provide: core.ErrorHandler, useClass: R3TestErrorHandler }
             ], this._providers, this._providerOverrides);
             var declarations = this._declarations;
             var imports = [RootScopeModule, this.ngModule, this._imports];
@@ -1689,6 +1690,15 @@
         };
         return R3TestCompiler;
     }());
+    /** Error handler used for tests. Rethrows errors rather than logging them out. */
+    var R3TestErrorHandler = /** @class */ (function (_super) {
+        __extends(R3TestErrorHandler, _super);
+        function R3TestErrorHandler() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        R3TestErrorHandler.prototype.handleError = function (error) { throw error; };
+        return R3TestErrorHandler;
+    }(core.ErrorHandler));
 
     /**
      * @license

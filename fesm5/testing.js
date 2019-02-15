@@ -1,10 +1,10 @@
 /**
- * @license Angular v8.0.0-beta.3+168.sha-b0afc4c
+ * @license Angular v8.0.0-beta.3+181.sha-8accc98
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { RendererFactory2, getDebugNode, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, InjectionToken, Injector, ɵresetCompiledComponents, resolveForwardRef, ɵcompileComponent, ɵgetInjectableDef, NgZone, ɵRender3ComponentFactory, ɵRender3NgModuleRef, ApplicationInitStatus, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ɵNG_MODULE_DEF, ɵNG_INJECTOR_DEF, ɵcompileNgModuleDefs, ɵNG_COMPONENT_DEF, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵflushModuleScopingQueueAsMuchAsPossible, ModuleWithComponentFactories, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, ɵivyEnabled, Optional, SkipSelf } from '@angular/core';
+import { RendererFactory2, getDebugNode, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, InjectionToken, Injector, ɵresetCompiledComponents, resolveForwardRef, ɵcompileComponent, ɵgetInjectableDef, NgZone, ɵRender3ComponentFactory, ɵRender3NgModuleRef, ApplicationInitStatus, Compiler, ErrorHandler, COMPILER_OPTIONS, ɵNgModuleFactory, ɵNG_MODULE_DEF, ɵNG_INJECTOR_DEF, ɵcompileNgModuleDefs, ɵNG_COMPONENT_DEF, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵflushModuleScopingQueueAsMuchAsPossible, ModuleWithComponentFactories, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, ɵivyEnabled, Optional, SkipSelf } from '@angular/core';
 import { __read, __extends, __spread, __assign, __decorate, __values } from 'tslib';
 import { ResourceLoader } from '@angular/compiler';
 
@@ -1410,7 +1410,8 @@ var TestBedRender3 = /** @class */ (function () {
         var ngZone = new NgZone({ enableLongStackTrace: true });
         var providers = __spread([
             { provide: NgZone, useValue: ngZone },
-            { provide: Compiler, useFactory: function () { return new R3TestCompiler(_this); } }
+            { provide: Compiler, useFactory: function () { return new R3TestCompiler(_this); } },
+            { provide: ErrorHandler, useClass: R3TestErrorHandler }
         ], this._providers, this._providerOverrides);
         var declarations = this._declarations;
         var imports = [RootScopeModule, this.ngModule, this._imports];
@@ -1606,6 +1607,15 @@ var R3TestCompiler = /** @class */ (function () {
     };
     return R3TestCompiler;
 }());
+/** Error handler used for tests. Rethrows errors rather than logging them out. */
+var R3TestErrorHandler = /** @class */ (function (_super) {
+    __extends(R3TestErrorHandler, _super);
+    function R3TestErrorHandler() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    R3TestErrorHandler.prototype.handleError = function (error) { throw error; };
+    return R3TestErrorHandler;
+}(ErrorHandler));
 
 /**
  * @license

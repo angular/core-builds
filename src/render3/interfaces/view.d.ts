@@ -9,6 +9,7 @@ import { InjectionToken } from '../../di/injection_token';
 import { Injector } from '../../di/injector';
 import { Type } from '../../interface/type';
 import { QueryList } from '../../linker';
+import { SchemaMetadata } from '../../metadata';
 import { Sanitizer } from '../../sanitization/security';
 import { LContainer } from './container';
 import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefList, HostBindingsFunction, PipeDef, PipeDefList, ViewQueriesFunction } from './definition';
@@ -248,6 +249,13 @@ export declare const enum InitPhaseState {
     InitPhaseCompleted = 3
 }
 /**
+ * Set of instructions used to process host bindings efficiently.
+ *
+ * See VIEW_DATA.md for more information.
+ */
+export interface ExpandoInstructions extends Array<number | HostBindingsFunction<any> | null> {
+}
+/**
  * The static data for an LView (shared between all templates of a
  * given type).
  *
@@ -344,7 +352,7 @@ export interface TView {
      *
      * See VIEW_DATA.md for more information.
      */
-    expandoInstructions: (number | HostBindingsFunction<any> | null)[] | null;
+    expandoInstructions: ExpandoInstructions | null;
     /**
      * Full registry of directives and components that may be found in this view.
      *
@@ -459,6 +467,10 @@ export interface TView {
      * A list of indices for child directives that have content queries.
      */
     contentQueries: number[] | null;
+    /**
+     * Set of schemas that declare elements to be allowed inside the view.
+     */
+    schemas: SchemaMetadata[] | null;
 }
 export declare const enum RootContextFlags {
     Empty = 0,

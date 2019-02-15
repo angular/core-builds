@@ -7,17 +7,18 @@
  */
 import { InjectFlags, InjectionToken, Injector } from '../di';
 import { Type } from '../interface/type';
+import { SchemaMetadata } from '../metadata/schema';
 import { Sanitizer } from '../sanitization/security';
 import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
 import { LContainer } from './interfaces/container';
-import { ComponentDef, ComponentTemplate, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags, ViewQueriesFunction } from './interfaces/definition';
+import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags, ViewQueriesFunction } from './interfaces/definition';
 import { LocalRefExtractor, TAttributes, TContainerNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from './interfaces/node';
 import { PlayerFactory } from './interfaces/player';
 import { CssSelectorList } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { GlobalTargetResolver, RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 import { SanitizerFn } from './interfaces/sanitization';
-import { LView, LViewFlags, OpaqueViewState, RootContext, RootContextFlags, TView } from './interfaces/view';
+import { ExpandoInstructions, LView, LViewFlags, OpaqueViewState, RootContext, RootContextFlags, TView } from './interfaces/view';
 import { NO_CHANGE } from './tokens';
 /**
  * Refreshes the view, executing the following steps in that order:
@@ -149,9 +150,11 @@ export declare function elementCreate(name: string, overriddenRenderer?: Rendere
  * @param vars The number of bindings and pure function bindings in this view
  * @param directives Directive defs that should be saved on TView
  * @param pipes Pipe defs that should be saved on TView
+ * @param viewQuery View query that should be saved on TView
+ * @param schemas Schemas that should be saved on TView
  * @returns TView
  */
-export declare function getOrCreateTView(templateFn: ComponentTemplate<any>, consts: number, vars: number, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null, viewQuery: ViewQueriesFunction<any> | null): TView;
+export declare function getOrCreateTView(templateFn: ComponentTemplate<any>, consts: number, vars: number, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null, viewQuery: ViewQueriesFunction<any> | null, schemas: SchemaMetadata[] | null): TView;
 /**
  * Creates a TView instance
  *
@@ -160,8 +163,10 @@ export declare function getOrCreateTView(templateFn: ComponentTemplate<any>, con
  * @param consts The number of nodes, local refs, and pipes in this template
  * @param directives Registry of directives for this view
  * @param pipes Registry of pipes for this view
+ * @param viewQuery View queries for this view
+ * @param schemas Schemas for this view
  */
-export declare function createTView(viewIndex: number, templateFn: ComponentTemplate<any> | null, consts: number, vars: number, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null, viewQuery: ViewQueriesFunction<any> | null): TView;
+export declare function createTView(viewIndex: number, templateFn: ComponentTemplate<any> | null, consts: number, vars: number, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null, viewQuery: ViewQueriesFunction<any> | null, schemas: SchemaMetadata[] | null): TView;
 export declare function createError(text: string, token: any): Error;
 /**
  * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.
@@ -454,6 +459,7 @@ export declare function textBinding<T>(index: number, value: T | NO_CHANGE): voi
  * Instantiate a root component.
  */
 export declare function instantiateRootComponent<T>(tView: TView, viewData: LView, def: ComponentDef<T>): T;
+export declare function invokeHostBindingsInCreationMode(def: DirectiveDef<any>, expando: ExpandoInstructions, directive: any, tNode: TNode, firstTemplatePass: boolean): void;
 /**
 * Generates a new block in TView.expandoInstructions for this node.
 *

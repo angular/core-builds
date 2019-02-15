@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.3+168.sha-b0afc4c
+ * @license Angular v8.0.0-beta.3+181.sha-8accc98
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3369,6 +3369,20 @@
     function isPropMetadataString(str) {
         return str.indexOf(INTERPOLATION_DELIMITER) >= 0;
     }
+    function applyOnCreateInstructions(tNode) {
+        // there may be some instructions that need to run in a specific
+        // order because the CREATE block in a directive runs before the
+        // CREATE block in a template. To work around this instructions
+        // can get access to the function array below and defer any code
+        // to run after the element is created.
+        var fns;
+        if (fns = tNode.onElementCreationFns) {
+            for (var i = 0; i < fns.length; i++) {
+                fns[i]();
+            }
+            tNode.onElementCreationFns = null;
+        }
+    }
 
     /**
      * @license
@@ -3453,6 +3467,7 @@
             styles: componentDefinition.styles || EMPTY_ARRAY$1,
             _: null,
             setInput: null,
+            schemas: componentDefinition.schemas || null,
         };
         def._ = noSideEffects(function () {
             var directiveTypes = componentDefinition.directives;
@@ -3499,6 +3514,7 @@
             imports: def.imports || EMPTY_ARRAY$1,
             exports: def.exports || EMPTY_ARRAY$1,
             transitiveCompileScopes: null,
+            schemas: def.schemas || null,
         };
         return res;
     }
@@ -5368,6 +5384,33 @@
         };
         return ErrorHandler;
     }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Defines a schema that allows an NgModule to contain the following:
+     * - Non-Angular elements named with dash case (`-`).
+     * - Element properties named with dash case (`-`).
+     * Dash case is the naming convention for custom elements.
+     *
+     * @publicApi
+     */
+    var CUSTOM_ELEMENTS_SCHEMA = {
+        name: 'custom-elements'
+    };
+    /**
+     * Defines a schema that allows any property on any element.
+     *
+     * @publicApi
+     */
+    var NO_ERRORS_SCHEMA = {
+        name: 'no-errors-schema'
+    };
 
     /**
      * @license
@@ -7396,8 +7439,11 @@
     }
     function isStylingContext(value) {
         // Not an LView or an LContainer
-        return Array.isArray(value) && typeof value[0 /* MasterFlagPosition */] === 'number' &&
-            value.length !== LCONTAINER_LENGTH;
+        if (Array.isArray(value) && value.length >= 9 /* SingleStylesStartPosition */) {
+            return typeof value[0 /* MasterFlagPosition */] === 'number' &&
+                value[3 /* InitialClassValuesPosition */][0 /* DefaultNullValuePosition */] === null;
+        }
+        return false;
     }
     function isAnimationProp(name) {
         return name[0] === ANIMATION_PROP_PREFIX;
@@ -9753,9 +9799,11 @@
      * @param vars The number of bindings and pure function bindings in this view
      * @param directives Directive defs that should be saved on TView
      * @param pipes Pipe defs that should be saved on TView
+     * @param viewQuery View query that should be saved on TView
+     * @param schemas Schemas that should be saved on TView
      * @returns TView
      */
-    function getOrCreateTView(templateFn, consts, vars, directives, pipes, viewQuery) {
+    function getOrCreateTView(templateFn, consts, vars, directives, pipes, viewQuery, schemas) {
         // TODO(misko): reading `ngPrivateData` here is problematic for two reasons
         // 1. It is a megamorphic call on each invocation.
         // 2. For nested embedded views (ngFor inside ngFor) the template instance is per
@@ -9763,8 +9811,7 @@
         // Correct solution is to only put `ngPrivateData` on the Component template
         // and not on embedded templates.
         return templateFn.ngPrivateData ||
-            (templateFn.ngPrivateData =
-                createTView(-1, templateFn, consts, vars, directives, pipes, viewQuery));
+            (templateFn.ngPrivateData = createTView(-1, templateFn, consts, vars, directives, pipes, viewQuery, schemas));
     }
     /**
      * Creates a TView instance
@@ -9774,8 +9821,10 @@
      * @param consts The number of nodes, local refs, and pipes in this template
      * @param directives Registry of directives for this view
      * @param pipes Registry of pipes for this view
+     * @param viewQuery View queries for this view
+     * @param schemas Schemas for this view
      */
-    function createTView(viewIndex, templateFn, consts, vars, directives, pipes, viewQuery) {
+    function createTView(viewIndex, templateFn, consts, vars, directives, pipes, viewQuery, schemas) {
         ngDevMode && ngDevMode.tView++;
         var bindingStartIndex = HEADER_OFFSET + consts;
         // This length does not yet contain host bindings from child directives because at this point,
@@ -9809,6 +9858,7 @@
             directiveRegistry: typeof directives === 'function' ? directives() : directives,
             pipeRegistry: typeof pipes === 'function' ? pipes() : pipes,
             firstChild: null,
+            schemas: schemas,
         };
     }
     function createViewBlueprint(bindingStartIndex, initialViewLength) {
@@ -10068,18 +10118,9 @@
             previousOrParentTNode = previousOrParentTNode.parent;
             setPreviousOrParentTNode(previousOrParentTNode);
         }
-        // there may be some instructions that need to run in a specific
-        // order because the CREATE block in a directive runs before the
-        // CREATE block in a template. To work around this instructions
-        // can get access to the function array below and defer any code
-        // to run after the element is created.
-        var fns;
-        if (fns = previousOrParentTNode.onElementCreationFns) {
-            for (var i = 0; i < fns.length; i++) {
-                fns[i]();
-            }
-            previousOrParentTNode.onElementCreationFns = null;
-        }
+        // this is required for all host-level styling-related instructions to run
+        // in the correct order
+        previousOrParentTNode.onElementCreationFns && applyOnCreateInstructions(previousOrParentTNode);
         ngDevMode && assertNodeType(previousOrParentTNode, 3 /* Element */);
         var lView = getLView();
         var currentQueries = lView[QUERIES];
@@ -10199,7 +10240,7 @@
         else if (tNode.type === 3 /* Element */) {
             if (ngDevMode) {
                 validateAgainstEventProperties(propName);
-                validateAgainstUnknownProperties(element, propName, tNode);
+                validateAgainstUnknownProperties(lView, element, propName, tNode);
                 ngDevMode.rendererSetProperty++;
             }
             savePropertyDebugData(tNode, lView, propName, lView[TVIEW].data, nativeOnly);
@@ -10216,7 +10257,11 @@
             }
         }
     }
-    function validateAgainstUnknownProperties(element, propName, tNode) {
+    function validateAgainstUnknownProperties(hostView, element, propName, tNode) {
+        // If the tag matches any of the schemas we shouldn't throw.
+        if (matchingSchemas(hostView, tNode.tagName)) {
+            return;
+        }
         // If prop is not a known property of the HTML element...
         if (!(propName in element) &&
             // and we are in a browser context... (web worker nodes should be skipped)
@@ -10226,6 +10271,19 @@
             // ... it is probably a user error and we should throw.
             throw new Error("Template error: Can't bind to '" + propName + "' since it isn't a known property of '" + tNode.tagName + "'.");
         }
+    }
+    function matchingSchemas(hostView, tagName) {
+        var schemas = hostView[TVIEW].schemas;
+        if (schemas !== null) {
+            for (var i = 0; i < schemas.length; i++) {
+                var schema = schemas[i];
+                if (schema === NO_ERRORS_SCHEMA ||
+                    schema === CUSTOM_ELEMENTS_SCHEMA && tagName && tagName.indexOf('-') > -1) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     /**
      * Stores debugging data for this property binding on first template pass.
@@ -10723,21 +10781,24 @@
             var def = tView.data[i];
             var directive = viewData[i];
             if (def.hostBindings) {
-                var previousExpandoLength = expando.length;
-                setCurrentDirectiveDef(def);
-                def.hostBindings(1 /* Create */, directive, tNode.index - HEADER_OFFSET);
-                setCurrentDirectiveDef(null);
-                // `hostBindings` function may or may not contain `allocHostVars` call
-                // (e.g. it may not if it only contains host listeners), so we need to check whether
-                // `expandoInstructions` has changed and if not - we still push `hostBindings` to
-                // expando block, to make sure we execute it for DI cycle
-                if (previousExpandoLength === expando.length && firstTemplatePass) {
-                    expando.push(def.hostBindings);
-                }
+                invokeHostBindingsInCreationMode(def, expando, directive, tNode, firstTemplatePass);
             }
             else if (firstTemplatePass) {
                 expando.push(null);
             }
+        }
+    }
+    function invokeHostBindingsInCreationMode(def, expando, directive, tNode, firstTemplatePass) {
+        var previousExpandoLength = expando.length;
+        setCurrentDirectiveDef(def);
+        def.hostBindings(1 /* Create */, directive, tNode.index - HEADER_OFFSET);
+        setCurrentDirectiveDef(null);
+        // `hostBindings` function may or may not contain `allocHostVars` call
+        // (e.g. it may not if it only contains host listeners), so we need to check whether
+        // `expandoInstructions` has changed and if not - we still push `hostBindings` to
+        // expando block, to make sure we execute it for DI cycle
+        if (previousExpandoLength === expando.length && firstTemplatePass) {
+            expando.push(def.hostBindings);
         }
     }
     /**
@@ -10907,7 +10968,7 @@
     }
     function addComponentLogic(lView, previousOrParentTNode, def) {
         var native = getNativeByTNode(previousOrParentTNode, lView);
-        var tView = getOrCreateTView(def.template, def.consts, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery);
+        var tView = getOrCreateTView(def.template, def.consts, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery, def.schemas);
         // Only component views should be added to the view tree directly. Embedded views are
         // accessed through their containers because they may be removed / re-added later.
         var rendererFactory = lView[RENDERER_FACTORY];
@@ -11037,7 +11098,7 @@
         // TODO: consider a separate node type for templates
         var tContainerNode = containerInternal(index, tagName || null, attrs || null);
         if (tView.firstTemplatePass) {
-            tContainerNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null);
+            tContainerNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null, null);
         }
         createDirectivesAndLocals(tView, lView, localRefs, localRefExtractor);
         addTContainerToQueries(lView, tContainerNode);
@@ -11246,7 +11307,7 @@
         ngDevMode && assertDefined(containerTViews, 'TView expected');
         ngDevMode && assertEqual(Array.isArray(containerTViews), true, 'TViews should be in an array');
         if (viewIndex >= containerTViews.length || containerTViews[viewIndex] == null) {
-            containerTViews[viewIndex] = createTView(viewIndex, null, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null);
+            containerTViews[viewIndex] = createTView(viewIndex, null, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null, null);
         }
         return containerTViews[viewIndex];
     }
@@ -12169,7 +12230,7 @@
             16 /* CheckAlways */ | 512 /* IsRoot */;
         var rootContext = createRootContext(opts.scheduler, opts.playerHandler);
         var renderer = rendererFactory.createRenderer(hostRNode, componentDef);
-        var rootView = createLView(null, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags, null, null, rendererFactory, renderer, undefined, opts.injector || null);
+        var rootView = createLView(null, createTView(-1, null, 1, 0, null, null, null, null), rootContext, rootFlags, null, null, rendererFactory, renderer, undefined, opts.injector || null);
         var oldView = enterView(rootView, null);
         var component;
         try {
@@ -12204,7 +12265,7 @@
         resetComponentState();
         var tView = rootView[TVIEW];
         var tNode = createNodeAtIndex(0, 3 /* Element */, rNode, null, null);
-        var componentView = createLView(rootView, getOrCreateTView(def.template, def.consts, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery), null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, rootView[HEADER_OFFSET], tNode, rendererFactory, renderer, sanitizer);
+        var componentView = createLView(rootView, getOrCreateTView(def.template, def.consts, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery, def.schemas), null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, rootView[HEADER_OFFSET], tNode, rendererFactory, renderer, sanitizer);
         if (tView.firstTemplatePass) {
             diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, rootView), rootView, def.type);
             tNode.flags = 1 /* isComponent */;
@@ -12227,9 +12288,9 @@
         hostFeatures && hostFeatures.forEach(function (feature) { return feature(component, componentDef); });
         if (tView.firstTemplatePass && componentDef.hostBindings) {
             var rootTNode = getPreviousOrParentTNode();
-            setCurrentDirectiveDef(componentDef);
-            componentDef.hostBindings(1 /* Create */, component, rootTNode.index - HEADER_OFFSET);
-            setCurrentDirectiveDef(null);
+            var expando = tView.expandoInstructions;
+            invokeHostBindingsInCreationMode(componentDef, expando, component, rootTNode, tView.firstTemplatePass);
+            rootTNode.onElementCreationFns && applyOnCreateInstructions(rootTNode);
         }
         return component;
     }
@@ -14115,7 +14176,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.3+168.sha-b0afc4c');
+    var VERSION = new Version('8.0.0-beta.3+181.sha-8accc98');
 
     /**
      * @license
@@ -17302,7 +17363,7 @@
                     hostRNode.setAttribute('ng-version', VERSION.full);
             }
             // Create the root view. Uses empty TView and ContentTemplate.
-            var rootLView = createLView(null, createTView(-1, null, 1, 0, null, null, null), rootContext, rootFlags, null, null, rendererFactory, renderer, sanitizer, rootViewInjector);
+            var rootLView = createLView(null, createTView(-1, null, 1, 0, null, null, null, null), rootContext, rootFlags, null, null, rendererFactory, renderer, sanitizer, rootViewInjector);
             // rootView is the parent when bootstrapping
             var oldLView = enterView(rootLView, null);
             var component;
@@ -20235,6 +20296,7 @@
                         exports: flatten$2(ngModule.exports || EMPTY_ARRAY$4, resolveForwardRef)
                             .map(expandModuleWithProviders),
                         emitInline: true,
+                        schemas: ngModule.schemas ? flatten$2(ngModule.schemas) : null,
                     });
                 }
                 return ngModuleDef;
@@ -20447,6 +20509,7 @@
         componentDef.pipeDefs = function () {
             return Array.from(transitiveScopes.compilation.pipes).map(function (pipe) { return getPipeDef(pipe); });
         };
+        componentDef.schemas = transitiveScopes.schemas;
     }
     /**
      * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
@@ -20464,6 +20527,7 @@
             return def.transitiveCompileScopes;
         }
         var scopes = {
+            schemas: def.schemas || null,
             compilation: {
                 directives: new Set(),
                 pipes: new Set(),
@@ -20880,25 +20944,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    /**
-     * Defines a schema that allows an NgModule to contain the following:
-     * - Non-Angular elements named with dash case (`-`).
-     * - Element properties named with dash case (`-`).
-     * Dash case is the naming convention for custom elements.
-     *
-     * @publicApi
-     */
-    var CUSTOM_ELEMENTS_SCHEMA = {
-        name: 'custom-elements'
-    };
-    /**
-     * Defines a schema that allows any property on any element.
-     *
-     * @publicApi
-     */
-    var NO_ERRORS_SCHEMA = {
-        name: 'no-errors-schema'
-    };
     /**
      * @Annotation
      * @publicApi
@@ -22928,13 +22973,12 @@
                 var element = this.nativeElement;
                 if (element) {
                     var lContext = loadLContextFromNode(element);
-                    var lNode = lContext.lView[lContext.nodeIndex];
                     var stylingContext = getStylingContext(lContext.nodeIndex, lContext.lView);
                     if (stylingContext) {
-                        for (var i = 9 /* SingleStylesStartPosition */; i < lNode.length; i += 4 /* Size */) {
-                            if (isClassBasedValue(lNode, i)) {
-                                var className = getProp(lNode, i);
-                                var value = getValue(lNode, i);
+                        for (var i = 9 /* SingleStylesStartPosition */; i < stylingContext.length; i += 4 /* Size */) {
+                            if (isClassBasedValue(stylingContext, i)) {
+                                var className = getProp(stylingContext, i);
+                                var value = getValue(stylingContext, i);
                                 if (typeof value == 'boolean') {
                                     // we want to ignore `null` since those don't overwrite the values.
                                     classes[className] = value;
@@ -22961,13 +23005,12 @@
                 var element = this.nativeElement;
                 if (element) {
                     var lContext = loadLContextFromNode(element);
-                    var lNode = lContext.lView[lContext.nodeIndex];
                     var stylingContext = getStylingContext(lContext.nodeIndex, lContext.lView);
                     if (stylingContext) {
-                        for (var i = 9 /* SingleStylesStartPosition */; i < lNode.length; i += 4 /* Size */) {
-                            if (!isClassBasedValue(lNode, i)) {
-                                var styleName = getProp(lNode, i);
-                                var value = getValue(lNode, i);
+                        for (var i = 9 /* SingleStylesStartPosition */; i < stylingContext.length; i += 4 /* Size */) {
+                            if (!isClassBasedValue(stylingContext, i)) {
+                                var styleName = getProp(stylingContext, i);
+                                var value = getValue(stylingContext, i);
                                 if (value !== null) {
                                     // we want to ignore `null` since those don't overwrite the values.
                                     styles[styleName] = value;
@@ -25798,9 +25841,9 @@
     exports.Input = Input;
     exports.Output = Output;
     exports.Pipe = Pipe;
+    exports.NgModule = NgModule;
     exports.CUSTOM_ELEMENTS_SCHEMA = CUSTOM_ELEMENTS_SCHEMA;
     exports.NO_ERRORS_SCHEMA = NO_ERRORS_SCHEMA;
-    exports.NgModule = NgModule;
     exports.Version = Version;
     exports.VERSION = VERSION;
     exports.defineInjectable = defineInjectable;

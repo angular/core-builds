@@ -8,6 +8,7 @@
 import { ApplicationRef } from '../application_ref';
 import { Provider } from '../di/interface/provider';
 import { Type } from '../interface/type';
+import { SchemaMetadata } from '../metadata/schema';
 import { compileNgModule as render3CompileNgModule } from '../render3/jit/module';
 import { TypeDecorator } from '../util/decorators';
 /**
@@ -28,6 +29,7 @@ export interface NgModuleTransitiveScopes {
         directives: Set<any>;
         pipes: Set<any>;
     };
+    schemas: SchemaMetadata[] | null;
 }
 export declare type NgModuleDefWithMeta<T, Declarations, Imports, Exports> = NgModuleDef<T>;
 /**
@@ -60,6 +62,8 @@ export interface NgModuleDef<T> {
      * This should never be read directly, but accessed via `transitiveScopesFor`.
      */
     transitiveCompileScopes: NgModuleTransitiveScopes | null;
+    /** The set of schemas that declare elements to be allowed in the NgModule. */
+    schemas: SchemaMetadata[] | null;
 }
 /**
  * A wrapper around an NgModule that associates it with the providers.
@@ -73,33 +77,6 @@ export interface ModuleWithProviders<T = any /** TODO(alxhub): remove default wh
     ngModule: Type<T>;
     providers?: Provider[];
 }
-/**
- * A schema definition associated with an NgModule.
- *
- * @see `@NgModule`, `CUSTOM_ELEMENTS_SCHEMA`, `NO_ERRORS_SCHEMA`
- *
- * @param name The name of a defined schema.
- *
- * @publicApi
- */
-export interface SchemaMetadata {
-    name: string;
-}
-/**
- * Defines a schema that allows an NgModule to contain the following:
- * - Non-Angular elements named with dash case (`-`).
- * - Element properties named with dash case (`-`).
- * Dash case is the naming convention for custom elements.
- *
- * @publicApi
- */
-export declare const CUSTOM_ELEMENTS_SCHEMA: SchemaMetadata;
-/**
- * Defines a schema that allows any property on any element.
- *
- * @publicApi
- */
-export declare const NO_ERRORS_SCHEMA: SchemaMetadata;
 /**
  * Type of the NgModule decorator / constructor function.
  */
