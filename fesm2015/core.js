@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.4
+ * @license Angular v8.0.0-beta.4+2.sha-c1094cf
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5993,7 +5993,7 @@ function getRootContext$1(target) {
     /** @type {?} */
     const lViewData = Array.isArray(target) ? target : (/** @type {?} */ (loadLContext(target))).lView;
     /** @type {?} */
-    const rootLView = getRootView$1(lViewData);
+    const rootLView = getRootView(lViewData);
     return (/** @type {?} */ (rootLView[CONTEXT]));
 }
 /**
@@ -6091,30 +6091,6 @@ function loadLContext(target, throwOnNotFound = true) {
             'Invalid ng target');
     }
     return context;
-}
-/**
- * Retrieve the root view from any component by walking the parent `LView` until
- * reaching the root `LView`.
- *
- * @param {?} componentOrView any component or view
- *
- * @return {?}
- */
-function getRootView$1(componentOrView) {
-    /** @type {?} */
-    let lView;
-    if (Array.isArray(componentOrView)) {
-        ngDevMode && assertDefined(componentOrView, 'lView');
-        lView = (/** @type {?} */ (componentOrView));
-    }
-    else {
-        ngDevMode && assertDefined(componentOrView, 'component');
-        lView = (/** @type {?} */ (readPatchedLView(componentOrView)));
-    }
-    while (lView && !(lView[FLAGS] & 512 /* IsRoot */)) {
-        lView = (/** @type {?} */ (lView[PARENT]));
-    }
-    return lView;
 }
 /**
  * Retrieve map of local references.
@@ -17556,7 +17532,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.4');
+const VERSION = new Version('8.0.0-beta.4+2.sha-c1094cf');
 
 /**
  * @fileoverview added by tsickle
