@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.4
+ * @license Angular v8.0.0-beta.4+2.sha-c1094cf
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4962,7 +4962,7 @@ function getViewComponent(element) {
  */
 function getRootContext$1(target) {
     var lViewData = Array.isArray(target) ? target : loadLContext(target).lView;
-    var rootLView = getRootView$1(lViewData);
+    var rootLView = getRootView(lViewData);
     return rootLView[CONTEXT];
 }
 /**
@@ -5040,28 +5040,6 @@ function loadLContext(target, throwOnNotFound) {
             'Invalid ng target');
     }
     return context;
-}
-/**
- * Retrieve the root view from any component by walking the parent `LView` until
- * reaching the root `LView`.
- *
- * @param componentOrView any component or view
- *
- */
-function getRootView$1(componentOrView) {
-    var lView;
-    if (Array.isArray(componentOrView)) {
-        ngDevMode && assertDefined(componentOrView, 'lView');
-        lView = componentOrView;
-    }
-    else {
-        ngDevMode && assertDefined(componentOrView, 'component');
-        lView = readPatchedLView(componentOrView);
-    }
-    while (lView && !(lView[FLAGS] & 512 /* IsRoot */)) {
-        lView = lView[PARENT];
-    }
-    return lView;
 }
 /**
  * Retrieve map of local references.
@@ -14060,7 +14038,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.4');
+var VERSION = new Version('8.0.0-beta.4+2.sha-c1094cf');
 
 /**
  * @license
