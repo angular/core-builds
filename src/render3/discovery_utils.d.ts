@@ -118,6 +118,14 @@ export declare function getDirectives(target: {}): Array<{}>;
 export declare function loadLContext(target: {}): LContext;
 export declare function loadLContext(target: {}, throwOnNotFound: false): LContext | null;
 /**
+ * Retrieve the root view from any component by walking the parent `LView` until
+ * reaching the root `LView`.
+ *
+ * @param componentOrView any component or view
+ *
+ */
+export declare function getRootView(componentOrView: LView | {}): LView;
+/**
  * Retrieve map of local references.
  *
  * The references are retrieved as a map of local reference name to element or directive instance.
