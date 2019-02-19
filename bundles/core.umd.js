@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.4+23.sha-692ddfc
+ * @license Angular v8.0.0-beta.4+26.sha-745c9c5
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14154,7 +14154,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.4+23.sha-692ddfc');
+    var VERSION = new Version('8.0.0-beta.4+26.sha-745c9c5');
 
     /**
      * @license
@@ -25733,43 +25733,44 @@
      * Generated bundle index. Do not edit.
      */
 
-    exports.ɵangular_packages_core_core_q = APPLICATION_MODULE_PROVIDERS;
-    exports.ɵangular_packages_core_core_n = _iterableDiffersFactory;
-    exports.ɵangular_packages_core_core_o = _keyValueDiffersFactory;
-    exports.ɵangular_packages_core_core_p = _localeFactory;
-    exports.ɵangular_packages_core_core_r = zoneSchedulerFactory;
-    exports.ɵangular_packages_core_core_e = _appIdRandomProviderFactory;
-    exports.ɵangular_packages_core_core_l = DefaultIterableDifferFactory;
-    exports.ɵangular_packages_core_core_m = DefaultKeyValueDifferFactory;
-    exports.ɵangular_packages_core_core_k = DebugElement__PRE_R3__;
-    exports.ɵangular_packages_core_core_j = DebugNode__PRE_R3__;
-    exports.ɵangular_packages_core_core_a = injectInjectorOnly;
-    exports.ɵangular_packages_core_core_b = ReflectiveInjector_;
-    exports.ɵangular_packages_core_core_c = ReflectiveDependency;
-    exports.ɵangular_packages_core_core_d = resolveReflectiveProviders;
-    exports.ɵangular_packages_core_core_i = getModuleFactory__PRE_R3__;
-    exports.ɵangular_packages_core_core_s = wtfEnabled;
-    exports.ɵangular_packages_core_core_u = createScope;
-    exports.ɵangular_packages_core_core_t = detectWTF;
-    exports.ɵangular_packages_core_core_x = endTimeRange;
-    exports.ɵangular_packages_core_core_v = leave;
-    exports.ɵangular_packages_core_core_w = startTimeRange;
-    exports.ɵangular_packages_core_core_ba = SCHEDULER;
-    exports.ɵangular_packages_core_core_bb = injectAttributeImpl;
-    exports.ɵangular_packages_core_core_bc = getLView;
-    exports.ɵangular_packages_core_core_bd = getPreviousOrParentTNode;
-    exports.ɵangular_packages_core_core_be = nextContextImpl;
-    exports.ɵangular_packages_core_core_bj = BoundPlayerFactory;
-    exports.ɵangular_packages_core_core_bg = loadInternal;
-    exports.ɵangular_packages_core_core_f = createElementRef;
-    exports.ɵangular_packages_core_core_g = createTemplateRef;
-    exports.ɵangular_packages_core_core_h = createViewRef;
-    exports.ɵangular_packages_core_core_bh = getUrlSanitizer;
-    exports.ɵangular_packages_core_core_bk = makeParamDecorator;
-    exports.ɵangular_packages_core_core_bl = makePropDecorator;
-    exports.ɵangular_packages_core_core_bn = getClosureSafeProperty;
-    exports.ɵangular_packages_core_core_y = _def;
-    exports.ɵangular_packages_core_core_z = DebugContext;
+    exports.ɵangular_packages_core_core_r = APPLICATION_MODULE_PROVIDERS;
+    exports.ɵangular_packages_core_core_o = _iterableDiffersFactory;
+    exports.ɵangular_packages_core_core_p = _keyValueDiffersFactory;
+    exports.ɵangular_packages_core_core_q = _localeFactory;
+    exports.ɵangular_packages_core_core_s = zoneSchedulerFactory;
+    exports.ɵangular_packages_core_core_f = _appIdRandomProviderFactory;
+    exports.ɵangular_packages_core_core_m = DefaultIterableDifferFactory;
+    exports.ɵangular_packages_core_core_n = DefaultKeyValueDifferFactory;
+    exports.ɵangular_packages_core_core_l = DebugElement__PRE_R3__;
+    exports.ɵangular_packages_core_core_k = DebugNode__PRE_R3__;
+    exports.ɵangular_packages_core_core_a = NullInjector;
+    exports.ɵangular_packages_core_core_b = injectInjectorOnly;
+    exports.ɵangular_packages_core_core_c = ReflectiveInjector_;
+    exports.ɵangular_packages_core_core_d = ReflectiveDependency;
+    exports.ɵangular_packages_core_core_e = resolveReflectiveProviders;
+    exports.ɵangular_packages_core_core_j = getModuleFactory__PRE_R3__;
+    exports.ɵangular_packages_core_core_t = wtfEnabled;
+    exports.ɵangular_packages_core_core_v = createScope;
+    exports.ɵangular_packages_core_core_u = detectWTF;
+    exports.ɵangular_packages_core_core_y = endTimeRange;
+    exports.ɵangular_packages_core_core_w = leave;
+    exports.ɵangular_packages_core_core_x = startTimeRange;
+    exports.ɵangular_packages_core_core_bb = SCHEDULER;
+    exports.ɵangular_packages_core_core_bc = injectAttributeImpl;
+    exports.ɵangular_packages_core_core_bd = getLView;
+    exports.ɵangular_packages_core_core_be = getPreviousOrParentTNode;
+    exports.ɵangular_packages_core_core_bf = nextContextImpl;
+    exports.ɵangular_packages_core_core_bk = BoundPlayerFactory;
+    exports.ɵangular_packages_core_core_bh = loadInternal;
+    exports.ɵangular_packages_core_core_g = createElementRef;
+    exports.ɵangular_packages_core_core_h = createTemplateRef;
+    exports.ɵangular_packages_core_core_i = createViewRef;
+    exports.ɵangular_packages_core_core_bi = getUrlSanitizer;
+    exports.ɵangular_packages_core_core_bl = makeParamDecorator;
+    exports.ɵangular_packages_core_core_bm = makePropDecorator;
+    exports.ɵangular_packages_core_core_bo = getClosureSafeProperty;
+    exports.ɵangular_packages_core_core_z = _def;
+    exports.ɵangular_packages_core_core_ba = DebugContext;
     exports.createPlatform = createPlatform;
     exports.assertPlatform = assertPlatform;
     exports.destroyPlatform = destroyPlatform;
