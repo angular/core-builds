@@ -95,6 +95,7 @@ export interface Query {
     read: any;
     isViewQuery: boolean;
     selector: any;
+    static?: boolean;
 }
 /**
  * Base class for query metadata.
@@ -190,6 +191,12 @@ export interface ContentChildDecorator {
      *
      * * **selector** - the directive type or the name used for querying.
      * * **read** - read a different token from the queried element.
+     * * **static** - whether or not to resolve query results before change detection runs (i.e.
+     * return static results only). If this option is not provided, the compiler will fall back
+     * to its default behavior, which is to use query results to determine the timing of query
+     * resolution. If any query results are inside a nested view (e.g. *ngIf), the query will be
+     * resolved after change detection runs. Otherwise, it will be resolved before change detection
+     * runs.
      *
      * @usageNotes
      * ### Example
@@ -204,9 +211,11 @@ export interface ContentChildDecorator {
      */
     (selector: Type<any> | Function | string, opts?: {
         read?: any;
+        static?: boolean;
     }): any;
     new (selector: Type<any> | Function | string, opts?: {
         read?: any;
+        static?: boolean;
     }): ContentChild;
 }
 /**
@@ -298,6 +307,12 @@ export interface ViewChildDecorator {
      *
      * * **selector** - the directive type or the name used for querying.
      * * **read** - read a different token from the queried elements.
+     * * **static** - whether or not to resolve query results before change detection runs (i.e.
+     * return static results only). If this option is not provided, the compiler will fall back
+     * to its default behavior, which is to use query results to determine the timing of query
+     * resolution. If any query results are inside a nested view (e.g. *ngIf), the query will be
+     * resolved after change detection runs. Otherwise, it will be resolved before change detection
+     * runs.
      *
      * Supported selectors include:
      *   * any class with the `@Component` or `@Directive` decorator
@@ -326,9 +341,11 @@ export interface ViewChildDecorator {
      */
     (selector: Type<any> | Function | string, opts?: {
         read?: any;
+        static?: boolean;
     }): any;
     new (selector: Type<any> | Function | string, opts?: {
         read?: any;
+        static?: boolean;
     }): ViewChild;
 }
 /**
