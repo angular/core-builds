@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.4+32.sha-ae16378
+ * @license Angular v8.0.0-beta.4+34.sha-3c1a162
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9271,13 +9271,14 @@
      */
     function refreshDescendantViews(lView) {
         var tView = lView[TVIEW];
+        var creationMode = isCreationMode(lView);
         // This needs to be set before children are processed to support recursive components
         tView.firstTemplatePass = false;
         // Resetting the bindingIndex of the current LView as the next steps may trigger change detection.
         lView[BINDING_INDEX] = tView.bindingStartIndex;
         // If this is a creation pass, we should not call lifecycle hooks or evaluate bindings.
         // This will be done in the update pass.
-        if (!isCreationMode(lView)) {
+        if (!creationMode) {
             var checkNoChangesMode = getCheckNoChangesMode();
             executeInitHooks(lView, tView, checkNoChangesMode);
             refreshDynamicEmbeddedViews(lView);
@@ -9285,6 +9286,12 @@
             refreshContentQueries(tView, lView);
             executeHooks(lView, tView.contentHooks, tView.contentCheckHooks, checkNoChangesMode, 1 /* AfterContentInitHooksToBeRun */);
             setHostBindings(tView, lView);
+        }
+        // We resolve content queries specifically marked as `static` in creation mode. Dynamic
+        // content queries are resolved during change detection (i.e. update mode), after embedded
+        // views are refreshed (see block above).
+        if (creationMode && tView.staticContentQueries) {
+            refreshContentQueries(tView, lView);
         }
         refreshChildComponents(tView.components);
     }
@@ -9823,6 +9830,8 @@
             expandoStartIndex: initialViewLength,
             expandoInstructions: null,
             firstTemplatePass: true,
+            staticViewQueries: false,
+            staticContentQueries: false,
             initHooks: null,
             checkHooks: null,
             contentHooks: null,
@@ -11679,20 +11688,23 @@
         var creationMode = isCreationMode(hostView);
         try {
             namespaceHTML();
-            creationMode && executeViewQueryFn(hostView, hostTView, component);
+            creationMode && executeViewQueryFn(1 /* Create */, hostTView, component);
             templateFn(getRenderFlags(hostView), component);
             refreshDescendantViews(hostView);
-            !creationMode && executeViewQueryFn(hostView, hostTView, component);
+            // Only check view queries again in creation mode if there are static view queries
+            if (!creationMode || hostTView.staticViewQueries) {
+                executeViewQueryFn(2 /* Update */, hostTView, component);
+            }
         }
         finally {
             leaveView(oldView);
         }
     }
-    function executeViewQueryFn(lView, tView, component) {
+    function executeViewQueryFn(flags, tView, component) {
         var viewQuery = tView.viewQuery;
         if (viewQuery) {
             setCurrentQueryIndex(tView.viewQueryStartIndex);
-            viewQuery(getRenderFlags(lView), component);
+            viewQuery(flags, component);
         }
     }
     /**
@@ -14154,7 +14166,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.4+32.sha-ae16378');
+    var VERSION = new Version('8.0.0-beta.4+34.sha-3c1a162');
 
     /**
      * @license
@@ -19899,6 +19911,7 @@
         var queryList = new QueryList();
         var queries = lView[QUERIES] || (lView[QUERIES] = new LQueries_(null, null, null));
         queryList._valuesTree = [];
+        queryList._static = false;
         queries.track(queryList, predicate, descend, read);
         storeCleanupWithContext(lView, queryList, queryList.destroy);
         return queryList;
@@ -19910,12 +19923,31 @@
      */
     function queryRefresh(queryList) {
         var queryListImpl = queryList;
-        if (queryList.dirty) {
+        var creationMode = isCreationMode();
+        // if creation mode and static or update mode and not static
+        if (queryList.dirty && creationMode === queryListImpl._static) {
             queryList.reset(queryListImpl._valuesTree || []);
             queryList.notifyOnChanges();
             return true;
         }
         return false;
+    }
+    /**
+     * Creates new QueryList for a static view query.
+     *
+     * @param predicate The type for which the query will search
+     * @param descend Whether or not to descend into children
+     * @param read What to save in the query
+     */
+    function staticViewQuery(
+    // TODO(FW-486): "read" should be an AbstractType
+    predicate, descend, read) {
+        var queryList = viewQuery(predicate, descend, read);
+        var tView = getLView()[TVIEW];
+        queryList._static = true;
+        if (!tView.staticViewQueries) {
+            tView.staticViewQueries = true;
+        }
     }
     /**
      * Creates new QueryList, stores the reference in LView and returns QueryList.
@@ -19926,7 +19958,7 @@
      * @returns QueryList<T>
      */
     function viewQuery(
-    // TODO: "read" should be an AbstractType (FW-486)
+    // TODO(FW-486): "read" should be an AbstractType
     predicate, descend, read) {
         var lView = getLView();
         var tView = lView[TVIEW];
@@ -19958,7 +19990,7 @@
      * @returns QueryList<T>
      */
     function contentQuery(directiveIndex, predicate, descend, 
-    // TODO: "read" should be an AbstractType (FW-486)
+    // TODO(FW-486): "read" should be an AbstractType
     read) {
         var lView = getLView();
         var tView = lView[TVIEW];
@@ -19972,6 +20004,26 @@
             }
         }
         return contentQuery;
+    }
+    /**
+     * Registers a QueryList, associated with a static content query, for later refresh
+     * (part of a view refresh).
+     *
+     * @param directiveIndex Current directive index
+     * @param predicate The type for which the query will search
+     * @param descend Whether or not to descend into children
+     * @param read What to save in the query
+     * @returns QueryList<T>
+     */
+    function staticContentQuery(directiveIndex, predicate, descend, 
+    // TODO(FW-486): "read" should be an AbstractType
+    read) {
+        var queryList = contentQuery(directiveIndex, predicate, descend, read);
+        var tView = getLView()[TVIEW];
+        queryList._static = true;
+        if (!tView.staticContentQueries) {
+            tView.staticContentQueries = true;
+        }
     }
     function loadContentQuery() {
         var lView = getLView();
@@ -20089,6 +20141,8 @@
         'ɵpipe': pipe,
         'ɵqueryRefresh': queryRefresh,
         'ɵviewQuery': viewQuery,
+        'ɵstaticViewQuery': staticViewQuery,
+        'ɵstaticContentQuery': staticContentQuery,
         'ɵloadViewQuery': loadViewQuery,
         'ɵcontentQuery': contentQuery,
         'ɵloadContentQuery': loadContentQuery,
@@ -20718,7 +20772,8 @@
             predicate: convertToR3QueryPredicate(ann.selector),
             descendants: ann.descendants,
             first: ann.first,
-            read: ann.read ? ann.read : null
+            read: ann.read ? ann.read : null,
+            static: !!ann.static
         };
     }
     function extractQueriesMetadata(type, propMetadata, isQueryAnn) {
@@ -25976,6 +26031,8 @@
     exports.ɵcontainerRefreshEnd = containerRefreshEnd;
     exports.ɵqueryRefresh = queryRefresh;
     exports.ɵviewQuery = viewQuery;
+    exports.ɵstaticViewQuery = staticViewQuery;
+    exports.ɵstaticContentQuery = staticContentQuery;
     exports.ɵloadViewQuery = loadViewQuery;
     exports.ɵcontentQuery = contentQuery;
     exports.ɵloadContentQuery = loadContentQuery;
