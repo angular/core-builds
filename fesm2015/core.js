@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.4+21.sha-00a8b07
+ * @license Angular v8.0.0-beta.4+23.sha-692ddfc
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17453,7 +17453,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.4+21.sha-00a8b07');
+const VERSION = new Version('8.0.0-beta.4+23.sha-692ddfc');
 
 /**
  * @fileoverview added by tsickle
@@ -28608,7 +28608,8 @@ class DebugNode__POST_R3__ {
     get componentInstance() {
         /** @type {?} */
         const nativeElement = this.nativeNode;
-        return nativeElement && getComponent((/** @type {?} */ (nativeElement)));
+        return nativeElement &&
+            (getComponent((/** @type {?} */ (nativeElement))) || getViewComponent(nativeElement));
     }
     /**
      * @return {?}

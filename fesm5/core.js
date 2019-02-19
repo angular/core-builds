@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.4+21.sha-00a8b07
+ * @license Angular v8.0.0-beta.4+23.sha-692ddfc
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14038,7 +14038,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.4+21.sha-00a8b07');
+var VERSION = new Version('8.0.0-beta.4+23.sha-692ddfc');
 
 /**
  * @license
@@ -22675,7 +22675,8 @@ var DebugNode__POST_R3__ = /** @class */ (function () {
     Object.defineProperty(DebugNode__POST_R3__.prototype, "componentInstance", {
         get: function () {
             var nativeElement = this.nativeNode;
-            return nativeElement && getComponent(nativeElement);
+            return nativeElement &&
+                (getComponent(nativeElement) || getViewComponent(nativeElement));
         },
         enumerable: true,
         configurable: true
