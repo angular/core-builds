@@ -138,6 +138,7 @@ export interface R3QueryMetadataFacade {
     predicate: any | string[];
     descendants: boolean;
     read: any | null;
+    static: boolean;
 }
 export interface ParseSourceSpan {
     start: any;

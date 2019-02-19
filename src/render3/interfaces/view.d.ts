@@ -323,6 +323,20 @@ export interface TView {
      */
     expandoStartIndex: number;
     /**
+     * Whether or not there are any static view queries tracked on this view.
+     *
+     * We store this so we know whether or not we should do a view query
+     * refresh after creation mode to collect static query results.
+     */
+    staticViewQueries: boolean;
+    /**
+     * Whether or not there are any static content queries tracked on this view.
+     *
+     * We store this so we know whether or not we should do a content query
+     * refresh after creation mode to collect static query results.
+     */
+    staticContentQueries: boolean;
+    /**
      * The index where the viewQueries section of `LView` begins. This section contains
      * view queries defined for a component/directive.
      *
