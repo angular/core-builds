@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.4+54.sha-81c3104
+ * @license Angular v8.0.0-beta.4+56.sha-a7e1c0c
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8774,6 +8774,15 @@ function allocStylingContext(element, templateStyleContext) {
     // each instance gets a copy
     /** @type {?} */
     const context = (/** @type {?} */ ((/** @type {?} */ (templateStyleContext.slice()))));
+    // the HEADER values contain arrays which also need
+    // to be copied over into the new context
+    for (let i = 0; i < 9 /* SingleStylesStartPosition */; i++) {
+        /** @type {?} */
+        const value = templateStyleContext[i];
+        if (Array.isArray(value)) {
+            context[i] = value.slice();
+        }
+    }
     context[5 /* ElementPosition */] = element;
     // this will prevent any other directives from extending the context
     context[0 /* MasterFlagPosition */] |= 16 /* BindingAllocationLocked */;
@@ -9425,13 +9434,7 @@ function updateContextWithBindings(context, directiveRef, classBindingNames, sty
     const directiveMultiStylesStartIndex = multiStylesStartIndex + totalCurrentStyleBindings * 4 /* Size */;
     /** @type {?} */
     const cachedStyleMapIndex = cachedStyleMapValues.length;
-    // this means that ONLY directive style styling (like ngStyle) was used
-    // therefore the root directive will still need to be filled in
-    if (directiveIndex > 0 &&
-        cachedStyleMapValues.length <= 1 /* ValuesStartPosition */) {
-        cachedStyleMapValues.push(0, directiveMultiStylesStartIndex, null, 0);
-    }
-    cachedStyleMapValues.push(0, directiveMultiStylesStartIndex, null, filteredStyleBindingNames.length);
+    registerMultiMapEntry(context, directiveIndex, false, directiveMultiStylesStartIndex, filteredStyleBindingNames.length);
     for (let i = 1 /* ValuesStartPosition */; i < cachedStyleMapIndex; i += 4 /* Size */) {
         // multi values start after all the single values (which is also where classes are) in the
         // context therefore the new class allocation size should be taken into account
@@ -9443,13 +9446,7 @@ function updateContextWithBindings(context, directiveRef, classBindingNames, sty
     const directiveMultiClassesStartIndex = multiClassesStartIndex + totalCurrentClassBindings * 4 /* Size */;
     /** @type {?} */
     const cachedClassMapIndex = cachedClassMapValues.length;
-    // this means that ONLY directive class styling (like ngClass) was used
-    // therefore the root directive will still need to be filled in
-    if (directiveIndex > 0 &&
-        cachedClassMapValues.length <= 1 /* ValuesStartPosition */) {
-        cachedClassMapValues.push(0, directiveMultiClassesStartIndex, null, 0);
-    }
-    cachedClassMapValues.push(0, directiveMultiClassesStartIndex, null, filteredClassBindingNames.length);
+    registerMultiMapEntry(context, directiveIndex, true, directiveMultiClassesStartIndex, filteredClassBindingNames.length);
     for (let i = 1 /* ValuesStartPosition */; i < cachedClassMapIndex; i += 4 /* Size */) {
         // the reason why both the styles + classes space is allocated to the existing offsets is
         // because the styles show up before the classes in the context and any new inserted
@@ -9622,7 +9619,7 @@ function updateStylingMap(context, classesInput, stylesInput, directiveRef) {
     /** @type {?} */
     const multiStylesStartIndex = getMultiStylesStartIndex(context);
     /** @type {?} */
-    let multiClassesStartIndex = getMultiClassStartIndex(context);
+    let multiClassesStartIndex = getMultiClassesStartIndex(context);
     /** @type {?} */
     let multiClassesEndIndex = context.length;
     if (!ignoreAllStyleUpdates) {
@@ -9873,6 +9870,8 @@ function patchStylingMapIntoContext(context, directiveIndex, playerBuilderIndex,
         const ctxValue = getValue(context, ctxIndex);
         /** @type {?} */
         const ctxFlag = getPointers(context, ctxIndex);
+        /** @type {?} */
+        const ctxDirective = getDirectiveIndexFromEntry(context, ctxIndex);
         if (ctxValue != null) {
             valuesEntryShapeChange = true;
         }
@@ -10353,7 +10352,7 @@ function getMultiOrSingleIndex(flag) {
  * @param {?} context
  * @return {?}
  */
-function getMultiClassStartIndex(context) {
+function getMultiClassesStartIndex(context) {
     /** @type {?} */
     const classCache = context[6 /* CachedMultiClasses */];
     return classCache[1 /* ValuesStartPosition */ +
@@ -10769,16 +10768,34 @@ function getDirectiveIndexFromEntry(context, index) {
 }
 /**
  * @param {?} context
- * @param {?} directive
+ * @param {?} directiveRef
  * @return {?}
  */
-function getDirectiveIndexFromRegistry(context, directive) {
+function getDirectiveIndexFromRegistry(context, directiveRef) {
     /** @type {?} */
-    const index = getDirectiveRegistryValuesIndexOf(context[1 /* DirectiveRegistryPosition */], directive);
-    ngDevMode &&
-        assertNotEqual(index, -1, `The provided directive ${directive} has not been allocated to the element\'s style/class bindings`);
-    return index > 0 ? index / 4 /* Size */ : 0;
-    // return index / DirectiveRegistryValuesIndex.Size;
+    let directiveIndex;
+    /** @type {?} */
+    const dirs = context[1 /* DirectiveRegistryPosition */];
+    /** @type {?} */
+    let index = getDirectiveRegistryValuesIndexOf(dirs, directiveRef);
+    if (index === -1) {
+        // if the directive was not allocated then this means that styling is
+        // being applied in a dynamic way AFTER the element was already instantiated
+        index = dirs.length;
+        directiveIndex = index > 0 ? index / 4 /* Size */ : 0;
+        dirs.push(null, null, null, null);
+        dirs[index + 0 /* DirectiveValueOffset */] = directiveRef;
+        dirs[index + 2 /* DirtyFlagOffset */] = false;
+        dirs[index + 1 /* SinglePropValuesIndexOffset */] = -1;
+        /** @type {?} */
+        const classesStartIndex = getMultiClassesStartIndex(context) || 9 /* SingleStylesStartPosition */;
+        registerMultiMapEntry(context, directiveIndex, true, context.length);
+        registerMultiMapEntry(context, directiveIndex, false, classesStartIndex);
+    }
+    else {
+        directiveIndex = index > 0 ? index / 4 /* Size */ : 0;
+    }
+    return directiveIndex;
 }
 /**
  * @param {?} directives
@@ -11099,6 +11116,30 @@ function hyphenateEntries(entries) {
  */
 function hyphenate(value) {
     return value.replace(/[a-z][A-Z]/g, match => `${match.charAt(0)}-${match.charAt(1).toLowerCase()}`);
+}
+/**
+ * @param {?} context
+ * @param {?} directiveIndex
+ * @param {?} entryIsClassBased
+ * @param {?} startPosition
+ * @param {?=} count
+ * @return {?}
+ */
+function registerMultiMapEntry(context, directiveIndex, entryIsClassBased, startPosition, count = 0) {
+    /** @type {?} */
+    const cachedValues = context[entryIsClassBased ? 6 /* CachedMultiClasses */ : 7 /* CachedMultiStyles */];
+    if (directiveIndex > 0) {
+        /** @type {?} */
+        const limit = 1 /* ValuesStartPosition */ +
+            (directiveIndex * 4 /* Size */);
+        while (cachedValues.length < limit) {
+            // this means that ONLY directive class styling (like ngClass) was used
+            // therefore the root directive will still need to be filled in as well
+            // as any other directive spaces incase they only used static values
+            cachedValues.push(0, startPosition, null, 0);
+        }
+    }
+    cachedValues.push(0, startPosition, null, count);
 }
 
 /**
@@ -17545,7 +17586,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.4+54.sha-81c3104');
+const VERSION = new Version('8.0.0-beta.4+56.sha-a7e1c0c');
 
 /**
  * @fileoverview added by tsickle
