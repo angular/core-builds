@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.4+34.sha-3c1a162
+ * @license Angular v8.0.0-beta.4+35.sha-ad6475f
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17466,7 +17466,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.4+34.sha-3c1a162');
+const VERSION = new Version('8.0.0-beta.4+35.sha-ad6475f');
 
 /**
  * @fileoverview added by tsickle
@@ -22505,11 +22505,13 @@ function i18nStartFirstPass(tView, index, message, subTemplateIndex) {
 function appendI18nNode(tNode, parentTNode, previousTNode) {
     ngDevMode && ngDevMode.rendererMoveNode++;
     /** @type {?} */
+    const nextNode = tNode.next;
+    /** @type {?} */
     const viewData = getLView();
     if (!previousTNode) {
         previousTNode = parentTNode;
     }
-    // re-organize node tree to put this node in the correct position.
+    // Re-organize node tree to put this node in the correct position.
     if (previousTNode === parentTNode && tNode !== parentTNode.child) {
         tNode.next = parentTNode.child;
         parentTNode.child = tNode;
@@ -22523,6 +22525,15 @@ function appendI18nNode(tNode, parentTNode, previousTNode) {
     }
     if (parentTNode !== viewData[T_HOST]) {
         tNode.parent = (/** @type {?} */ (parentTNode));
+    }
+    // If tNode was moved around, we might need to fix a broken link.
+    /** @type {?} */
+    let cursor = tNode.next;
+    while (cursor) {
+        if (cursor.next === tNode) {
+            cursor.next = nextNode;
+        }
+        cursor = cursor.next;
     }
     appendChild(getNativeByTNode(tNode, viewData), tNode, viewData);
     /** @type {?} */
@@ -22706,6 +22717,26 @@ function i18nEndFirstPass(tView) {
     }
 }
 /**
+ * Creates and stores the dynamic TNode, and unhooks it from the tree for now.
+ * @param {?} index
+ * @param {?} type
+ * @param {?} native
+ * @param {?} name
+ * @return {?}
+ */
+function createDynamicNodeAtIndex(index, type, native, name) {
+    /** @type {?} */
+    const previousOrParentTNode = getPreviousOrParentTNode();
+    /** @type {?} */
+    const tNode = createNodeAtIndex(index, (/** @type {?} */ (type)), native, name, null);
+    // We are creating a dynamic node, the previous tNode might not be pointing at this node.
+    // We will link ourselves into the tree later with `appendI18nNode`.
+    if (previousOrParentTNode.next === tNode) {
+        previousOrParentTNode.next = null;
+    }
+    return tNode;
+}
+/**
  * @param {?} index
  * @param {?} createOpCodes
  * @param {?} icus
@@ -22731,7 +22762,7 @@ function readCreateOpCodes(index, createOpCodes, icus, viewData) {
             const textNodeIndex = (/** @type {?} */ (createOpCodes[++i]));
             ngDevMode && ngDevMode.rendererCreateTextNode++;
             previousTNode = currentTNode;
-            currentTNode = createNodeAtIndex(textNodeIndex, 3 /* Element */, textRNode, null, null);
+            currentTNode = createDynamicNodeAtIndex(textNodeIndex, 3 /* Element */, textRNode, null);
             visitedNodes.push(textNodeIndex);
             setIsParent(false);
         }
@@ -22800,8 +22831,7 @@ function readCreateOpCodes(index, createOpCodes, icus, viewData) {
                     const commentRNode = renderer.createComment(commentValue);
                     ngDevMode && ngDevMode.rendererCreateComment++;
                     previousTNode = currentTNode;
-                    currentTNode =
-                        createNodeAtIndex(commentNodeIndex, 5 /* IcuContainer */, commentRNode, null, null);
+                    currentTNode = createDynamicNodeAtIndex(commentNodeIndex, 5 /* IcuContainer */, commentRNode, null);
                     visitedNodes.push(commentNodeIndex);
                     attachPatchData(commentRNode, viewData);
                     ((/** @type {?} */ (currentTNode))).activeCaseIndex = null;
@@ -22818,7 +22848,7 @@ function readCreateOpCodes(index, createOpCodes, icus, viewData) {
                     const elementRNode = renderer.createElement(tagNameValue);
                     ngDevMode && ngDevMode.rendererCreateElement++;
                     previousTNode = currentTNode;
-                    currentTNode = createNodeAtIndex(elementNodeIndex, 3 /* Element */, elementRNode, tagNameValue, null);
+                    currentTNode = createDynamicNodeAtIndex(elementNodeIndex, 3 /* Element */, elementRNode, tagNameValue);
                     visitedNodes.push(elementNodeIndex);
                     break;
                 default:
