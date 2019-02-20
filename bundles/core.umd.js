@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.4+28.sha-19afb79
+ * @license Angular v8.0.0-beta.4+56.sha-a7e1c0c
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7377,6 +7377,14 @@
     function allocStylingContext(element, templateStyleContext) {
         // each instance gets a copy
         var context = templateStyleContext.slice();
+        // the HEADER values contain arrays which also need
+        // to be copied over into the new context
+        for (var i = 0; i < 9 /* SingleStylesStartPosition */; i++) {
+            var value = templateStyleContext[i];
+            if (Array.isArray(value)) {
+                context[i] = value.slice();
+            }
+        }
         context[5 /* ElementPosition */] = element;
         // this will prevent any other directives from extending the context
         context[0 /* MasterFlagPosition */] |= 16 /* BindingAllocationLocked */;
@@ -7868,13 +7876,7 @@
         // update the multi styles cache with a reference for the directive that was just inserted
         var directiveMultiStylesStartIndex = multiStylesStartIndex + totalCurrentStyleBindings * 4 /* Size */;
         var cachedStyleMapIndex = cachedStyleMapValues.length;
-        // this means that ONLY directive style styling (like ngStyle) was used
-        // therefore the root directive will still need to be filled in
-        if (directiveIndex > 0 &&
-            cachedStyleMapValues.length <= 1 /* ValuesStartPosition */) {
-            cachedStyleMapValues.push(0, directiveMultiStylesStartIndex, null, 0);
-        }
-        cachedStyleMapValues.push(0, directiveMultiStylesStartIndex, null, filteredStyleBindingNames.length);
+        registerMultiMapEntry(context, directiveIndex, false, directiveMultiStylesStartIndex, filteredStyleBindingNames.length);
         for (var i_7 = 1 /* ValuesStartPosition */; i_7 < cachedStyleMapIndex; i_7 += 4 /* Size */) {
             // multi values start after all the single values (which is also where classes are) in the
             // context therefore the new class allocation size should be taken into account
@@ -7884,13 +7886,7 @@
         // update the multi classes cache with a reference for the directive that was just inserted
         var directiveMultiClassesStartIndex = multiClassesStartIndex + totalCurrentClassBindings * 4 /* Size */;
         var cachedClassMapIndex = cachedClassMapValues.length;
-        // this means that ONLY directive class styling (like ngClass) was used
-        // therefore the root directive will still need to be filled in
-        if (directiveIndex > 0 &&
-            cachedClassMapValues.length <= 1 /* ValuesStartPosition */) {
-            cachedClassMapValues.push(0, directiveMultiClassesStartIndex, null, 0);
-        }
-        cachedClassMapValues.push(0, directiveMultiClassesStartIndex, null, filteredClassBindingNames.length);
+        registerMultiMapEntry(context, directiveIndex, true, directiveMultiClassesStartIndex, filteredClassBindingNames.length);
         for (var i_8 = 1 /* ValuesStartPosition */; i_8 < cachedClassMapIndex; i_8 += 4 /* Size */) {
             // the reason why both the styles + classes space is allocated to the existing offsets is
             // because the styles show up before the classes in the context and any new inserted
@@ -8028,7 +8024,7 @@
             }
         }
         var multiStylesStartIndex = getMultiStylesStartIndex(context);
-        var multiClassesStartIndex = getMultiClassStartIndex(context);
+        var multiClassesStartIndex = getMultiClassesStartIndex(context);
         var multiClassesEndIndex = context.length;
         if (!ignoreAllStyleUpdates) {
             var styleProps = stylesValue ? Object.keys(stylesValue) : EMPTY_ARRAY$1;
@@ -8230,6 +8226,7 @@
             valuesEntryShapeChange = true; // some values are missing
             var ctxValue = getValue(context, ctxIndex);
             var ctxFlag = getPointers(context, ctxIndex);
+            var ctxDirective = getDirectiveIndexFromEntry(context, ctxIndex);
             if (ctxValue != null) {
                 valuesEntryShapeChange = true;
             }
@@ -8590,7 +8587,7 @@
         var index = (flag >> (14 /* BitCountSize */ + 5 /* BitCountSize */)) & 16383 /* BitMask */;
         return index >= 9 /* SingleStylesStartPosition */ ? index : -1;
     }
-    function getMultiClassStartIndex(context) {
+    function getMultiClassesStartIndex(context) {
         var classCache = context[6 /* CachedMultiClasses */];
         return classCache[1 /* ValuesStartPosition */ +
             1 /* PositionStartOffset */];
@@ -8810,12 +8807,27 @@
         var value = context[index + 3 /* PlayerBuilderIndexOffset */];
         return value & 65535 /* BitMask */;
     }
-    function getDirectiveIndexFromRegistry(context, directive) {
-        var index = getDirectiveRegistryValuesIndexOf(context[1 /* DirectiveRegistryPosition */], directive);
-        ngDevMode &&
-            assertNotEqual(index, -1, "The provided directive " + directive + " has not been allocated to the element's style/class bindings");
-        return index > 0 ? index / 4 /* Size */ : 0;
-        // return index / DirectiveRegistryValuesIndex.Size;
+    function getDirectiveIndexFromRegistry(context, directiveRef) {
+        var directiveIndex;
+        var dirs = context[1 /* DirectiveRegistryPosition */];
+        var index = getDirectiveRegistryValuesIndexOf(dirs, directiveRef);
+        if (index === -1) {
+            // if the directive was not allocated then this means that styling is
+            // being applied in a dynamic way AFTER the element was already instantiated
+            index = dirs.length;
+            directiveIndex = index > 0 ? index / 4 /* Size */ : 0;
+            dirs.push(null, null, null, null);
+            dirs[index + 0 /* DirectiveValueOffset */] = directiveRef;
+            dirs[index + 2 /* DirtyFlagOffset */] = false;
+            dirs[index + 1 /* SinglePropValuesIndexOffset */] = -1;
+            var classesStartIndex = getMultiClassesStartIndex(context) || 9 /* SingleStylesStartPosition */;
+            registerMultiMapEntry(context, directiveIndex, true, context.length);
+            registerMultiMapEntry(context, directiveIndex, false, classesStartIndex);
+        }
+        else {
+            directiveIndex = index > 0 ? index / 4 /* Size */ : 0;
+        }
+        return directiveIndex;
     }
     function getDirectiveRegistryValuesIndexOf(directives, directive) {
         for (var i = 0; i < directives.length; i += 4 /* Size */) {
@@ -9042,6 +9054,21 @@
     }
     function hyphenate(value) {
         return value.replace(/[a-z][A-Z]/g, function (match) { return match.charAt(0) + "-" + match.charAt(1).toLowerCase(); });
+    }
+    function registerMultiMapEntry(context, directiveIndex, entryIsClassBased, startPosition, count) {
+        if (count === void 0) { count = 0; }
+        var cachedValues = context[entryIsClassBased ? 6 /* CachedMultiClasses */ : 7 /* CachedMultiStyles */];
+        if (directiveIndex > 0) {
+            var limit = 1 /* ValuesStartPosition */ +
+                (directiveIndex * 4 /* Size */);
+            while (cachedValues.length < limit) {
+                // this means that ONLY directive class styling (like ngClass) was used
+                // therefore the root directive will still need to be filled in as well
+                // as any other directive spaces incase they only used static values
+                cachedValues.push(0, startPosition, null, 0);
+            }
+        }
+        cachedValues.push(0, startPosition, null, count);
     }
 
     /**
@@ -9271,13 +9298,14 @@
      */
     function refreshDescendantViews(lView) {
         var tView = lView[TVIEW];
+        var creationMode = isCreationMode(lView);
         // This needs to be set before children are processed to support recursive components
         tView.firstTemplatePass = false;
         // Resetting the bindingIndex of the current LView as the next steps may trigger change detection.
         lView[BINDING_INDEX] = tView.bindingStartIndex;
         // If this is a creation pass, we should not call lifecycle hooks or evaluate bindings.
         // This will be done in the update pass.
-        if (!isCreationMode(lView)) {
+        if (!creationMode) {
             var checkNoChangesMode = getCheckNoChangesMode();
             executeInitHooks(lView, tView, checkNoChangesMode);
             refreshDynamicEmbeddedViews(lView);
@@ -9285,6 +9313,12 @@
             refreshContentQueries(tView, lView);
             executeHooks(lView, tView.contentHooks, tView.contentCheckHooks, checkNoChangesMode, 1 /* AfterContentInitHooksToBeRun */);
             setHostBindings(tView, lView);
+        }
+        // We resolve content queries specifically marked as `static` in creation mode. Dynamic
+        // content queries are resolved during change detection (i.e. update mode), after embedded
+        // views are refreshed (see block above).
+        if (creationMode && tView.staticContentQueries) {
+            refreshContentQueries(tView, lView);
         }
         refreshChildComponents(tView.components);
     }
@@ -9823,6 +9857,8 @@
             expandoStartIndex: initialViewLength,
             expandoInstructions: null,
             firstTemplatePass: true,
+            staticViewQueries: false,
+            staticContentQueries: false,
             initHooks: null,
             checkHooks: null,
             contentHooks: null,
@@ -11679,20 +11715,23 @@
         var creationMode = isCreationMode(hostView);
         try {
             namespaceHTML();
-            creationMode && executeViewQueryFn(hostView, hostTView, component);
+            creationMode && executeViewQueryFn(1 /* Create */, hostTView, component);
             templateFn(getRenderFlags(hostView), component);
             refreshDescendantViews(hostView);
-            !creationMode && executeViewQueryFn(hostView, hostTView, component);
+            // Only check view queries again in creation mode if there are static view queries
+            if (!creationMode || hostTView.staticViewQueries) {
+                executeViewQueryFn(2 /* Update */, hostTView, component);
+            }
         }
         finally {
             leaveView(oldView);
         }
     }
-    function executeViewQueryFn(lView, tView, component) {
+    function executeViewQueryFn(flags, tView, component) {
         var viewQuery = tView.viewQuery;
         if (viewQuery) {
             setCurrentQueryIndex(tView.viewQueryStartIndex);
-            viewQuery(getRenderFlags(lView), component);
+            viewQuery(flags, component);
         }
     }
     /**
@@ -14154,7 +14193,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.4+28.sha-19afb79');
+    var VERSION = new Version('8.0.0-beta.4+56.sha-a7e1c0c');
 
     /**
      * @license
@@ -17806,11 +17845,12 @@
     }
     function appendI18nNode(tNode, parentTNode, previousTNode) {
         ngDevMode && ngDevMode.rendererMoveNode++;
+        var nextNode = tNode.next;
         var viewData = getLView();
         if (!previousTNode) {
             previousTNode = parentTNode;
         }
-        // re-organize node tree to put this node in the correct position.
+        // Re-organize node tree to put this node in the correct position.
         if (previousTNode === parentTNode && tNode !== parentTNode.child) {
             tNode.next = parentTNode.child;
             parentTNode.child = tNode;
@@ -17824,6 +17864,14 @@
         }
         if (parentTNode !== viewData[T_HOST]) {
             tNode.parent = parentTNode;
+        }
+        // If tNode was moved around, we might need to fix a broken link.
+        var cursor = tNode.next;
+        while (cursor) {
+            if (cursor.next === tNode) {
+                cursor.next = nextNode;
+            }
+            cursor = cursor.next;
         }
         appendChild(getNativeByTNode(tNode, viewData), tNode, viewData);
         var slotValue = viewData[tNode.index];
@@ -17979,6 +18027,19 @@
             }
         }
     }
+    /**
+     * Creates and stores the dynamic TNode, and unhooks it from the tree for now.
+     */
+    function createDynamicNodeAtIndex(index, type, native, name) {
+        var previousOrParentTNode = getPreviousOrParentTNode();
+        var tNode = createNodeAtIndex(index, type, native, name, null);
+        // We are creating a dynamic node, the previous tNode might not be pointing at this node.
+        // We will link ourselves into the tree later with `appendI18nNode`.
+        if (previousOrParentTNode.next === tNode) {
+            previousOrParentTNode.next = null;
+        }
+        return tNode;
+    }
     function readCreateOpCodes(index, createOpCodes, icus, viewData) {
         var renderer = getLView()[RENDERER];
         var currentTNode = null;
@@ -17991,7 +18052,7 @@
                 var textNodeIndex = createOpCodes[++i];
                 ngDevMode && ngDevMode.rendererCreateTextNode++;
                 previousTNode = currentTNode;
-                currentTNode = createNodeAtIndex(textNodeIndex, 3 /* Element */, textRNode, null, null);
+                currentTNode = createDynamicNodeAtIndex(textNodeIndex, 3 /* Element */, textRNode, null);
                 visitedNodes.push(textNodeIndex);
                 setIsParent(false);
             }
@@ -18050,8 +18111,7 @@
                         var commentRNode = renderer.createComment(commentValue);
                         ngDevMode && ngDevMode.rendererCreateComment++;
                         previousTNode = currentTNode;
-                        currentTNode =
-                            createNodeAtIndex(commentNodeIndex, 5 /* IcuContainer */, commentRNode, null, null);
+                        currentTNode = createDynamicNodeAtIndex(commentNodeIndex, 5 /* IcuContainer */, commentRNode, null);
                         visitedNodes.push(commentNodeIndex);
                         attachPatchData(commentRNode, viewData);
                         currentTNode.activeCaseIndex = null;
@@ -18065,7 +18125,7 @@
                         var elementRNode = renderer.createElement(tagNameValue);
                         ngDevMode && ngDevMode.rendererCreateElement++;
                         previousTNode = currentTNode;
-                        currentTNode = createNodeAtIndex(elementNodeIndex, 3 /* Element */, elementRNode, tagNameValue, null);
+                        currentTNode = createDynamicNodeAtIndex(elementNodeIndex, 3 /* Element */, elementRNode, tagNameValue);
                         visitedNodes.push(elementNodeIndex);
                         break;
                     default:
@@ -19899,6 +19959,7 @@
         var queryList = new QueryList();
         var queries = lView[QUERIES] || (lView[QUERIES] = new LQueries_(null, null, null));
         queryList._valuesTree = [];
+        queryList._static = false;
         queries.track(queryList, predicate, descend, read);
         storeCleanupWithContext(lView, queryList, queryList.destroy);
         return queryList;
@@ -19910,12 +19971,31 @@
      */
     function queryRefresh(queryList) {
         var queryListImpl = queryList;
-        if (queryList.dirty) {
+        var creationMode = isCreationMode();
+        // if creation mode and static or update mode and not static
+        if (queryList.dirty && creationMode === queryListImpl._static) {
             queryList.reset(queryListImpl._valuesTree || []);
             queryList.notifyOnChanges();
             return true;
         }
         return false;
+    }
+    /**
+     * Creates new QueryList for a static view query.
+     *
+     * @param predicate The type for which the query will search
+     * @param descend Whether or not to descend into children
+     * @param read What to save in the query
+     */
+    function staticViewQuery(
+    // TODO(FW-486): "read" should be an AbstractType
+    predicate, descend, read) {
+        var queryList = viewQuery(predicate, descend, read);
+        var tView = getLView()[TVIEW];
+        queryList._static = true;
+        if (!tView.staticViewQueries) {
+            tView.staticViewQueries = true;
+        }
     }
     /**
      * Creates new QueryList, stores the reference in LView and returns QueryList.
@@ -19926,7 +20006,7 @@
      * @returns QueryList<T>
      */
     function viewQuery(
-    // TODO: "read" should be an AbstractType (FW-486)
+    // TODO(FW-486): "read" should be an AbstractType
     predicate, descend, read) {
         var lView = getLView();
         var tView = lView[TVIEW];
@@ -19958,7 +20038,7 @@
      * @returns QueryList<T>
      */
     function contentQuery(directiveIndex, predicate, descend, 
-    // TODO: "read" should be an AbstractType (FW-486)
+    // TODO(FW-486): "read" should be an AbstractType
     read) {
         var lView = getLView();
         var tView = lView[TVIEW];
@@ -19972,6 +20052,26 @@
             }
         }
         return contentQuery;
+    }
+    /**
+     * Registers a QueryList, associated with a static content query, for later refresh
+     * (part of a view refresh).
+     *
+     * @param directiveIndex Current directive index
+     * @param predicate The type for which the query will search
+     * @param descend Whether or not to descend into children
+     * @param read What to save in the query
+     * @returns QueryList<T>
+     */
+    function staticContentQuery(directiveIndex, predicate, descend, 
+    // TODO(FW-486): "read" should be an AbstractType
+    read) {
+        var queryList = contentQuery(directiveIndex, predicate, descend, read);
+        var tView = getLView()[TVIEW];
+        queryList._static = true;
+        if (!tView.staticContentQueries) {
+            tView.staticContentQueries = true;
+        }
     }
     function loadContentQuery() {
         var lView = getLView();
@@ -20089,6 +20189,8 @@
         'ɵpipe': pipe,
         'ɵqueryRefresh': queryRefresh,
         'ɵviewQuery': viewQuery,
+        'ɵstaticViewQuery': staticViewQuery,
+        'ɵstaticContentQuery': staticContentQuery,
         'ɵloadViewQuery': loadViewQuery,
         'ɵcontentQuery': contentQuery,
         'ɵloadContentQuery': loadContentQuery,
@@ -20718,7 +20820,8 @@
             predicate: convertToR3QueryPredicate(ann.selector),
             descendants: ann.descendants,
             first: ann.first,
-            read: ann.read ? ann.read : null
+            read: ann.read ? ann.read : null,
+            static: !!ann.static
         };
     }
     function extractQueriesMetadata(type, propMetadata, isQueryAnn) {
@@ -25976,6 +26079,8 @@
     exports.ɵcontainerRefreshEnd = containerRefreshEnd;
     exports.ɵqueryRefresh = queryRefresh;
     exports.ɵviewQuery = viewQuery;
+    exports.ɵstaticViewQuery = staticViewQuery;
+    exports.ɵstaticContentQuery = staticContentQuery;
     exports.ɵloadViewQuery = loadViewQuery;
     exports.ɵcontentQuery = contentQuery;
     exports.ɵloadContentQuery = loadContentQuery;
