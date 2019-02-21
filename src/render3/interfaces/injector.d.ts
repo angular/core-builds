@@ -142,10 +142,6 @@ export declare class NodeInjectorFactory {
      */
     tNode: TElementNode) => any;
     /**
-     * Set to `true` if the token is a provider, and not a directive.
-     */
-    isProvider: boolean;
-    /**
      * The inject implementation to be activated when using the factory.
      */
     injectImpl: null | (<T>(token: Type<T> | InjectionToken<T>, flags: InjectFlags) => T);
@@ -241,11 +237,7 @@ export declare class NodeInjectorFactory {
     /**
      * Set to `true` if the token is declared in `viewProviders` (or if it is component).
      */
-    isViewProvider: boolean, 
-    /**
-     * Set to `true` if the token is a provider, and not a directive.
-     */
-    isProvider: boolean, injectImplementation: null | (<T>(token: Type<T> | InjectionToken<T>, flags: InjectFlags) => T));
+    isViewProvider: boolean, injectImplementation: null | (<T>(token: Type<T> | InjectionToken<T>, flags: InjectFlags) => T));
 }
 export declare function isFactory(obj: any): obj is NodeInjectorFactory;
 export declare const unusedValueExportToPlacateAjd = 1;
