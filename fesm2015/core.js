@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.5+9.sha-58436fd
+ * @license Angular v8.0.0-beta.5+10.sha-be121bb
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17507,7 +17507,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.5+9.sha-58436fd');
+const VERSION = new Version('8.0.0-beta.5+10.sha-be121bb');
 
 /**
  * @fileoverview added by tsickle
@@ -27264,6 +27264,10 @@ class NoopNgZone {
     runTask(fn) { return fn(); }
 }
 
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
 /**
  * The Testability service provides testing hooks that can be accessed from
  * the browser and by services such as Protractor. Each bootstrapped Angular

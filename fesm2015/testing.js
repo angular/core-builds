@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.5+9.sha-58436fd
+ * @license Angular v8.0.0-beta.5+10.sha-be121bb
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1097,7 +1097,6 @@ const ComponentFixtureAutoDetect = new InjectionToken('ComponentFixtureAutoDetec
  */
 const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
 
-// The formatter and CI disagree on how this import statement should be formatted. Both try to keep
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
