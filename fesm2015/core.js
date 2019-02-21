@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.5+15.sha-ebffde7
+ * @license Angular v8.0.0-beta.5+17.sha-e1aaa7e
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3412,16 +3412,14 @@ class NodeInjectorFactory {
     /**
      * @param {?} factory
      * @param {?} isViewProvider
-     * @param {?} isProvider
      * @param {?} injectImplementation
      */
     constructor(factory, 
     /**
      * Set to `true` if the token is declared in `viewProviders` (or if it is component).
      */
-    isViewProvider, isProvider, injectImplementation) {
+    isViewProvider, injectImplementation) {
         this.factory = factory;
-        this.isProvider = isProvider;
         /**
          * Marker set to true during factory invocation to see if we get into recursive loop.
          * Recursive loop causes an error to be displayed.
@@ -5320,11 +5318,6 @@ function getNodeInjectable(tData, lData, index, tNode) {
         setTNodeAndViewData(tNode, lData);
         try {
             value = lData[index] = factory.factory(null, tData, lData, tNode);
-            /** @type {?} */
-            const tView = lData[TVIEW];
-            if (value && factory.isProvider && value.ngOnDestroy) {
-                (tView.destroyHooks || (tView.destroyHooks = [])).push(index, value.ngOnDestroy);
-            }
         }
         finally {
             if (factory.injectImpl)
@@ -8271,7 +8264,14 @@ function executeOnDestroys(view) {
     /** @type {?} */
     let destroyHooks;
     if (tView != null && (destroyHooks = tView.destroyHooks) != null) {
-        callHooks(view, destroyHooks);
+        for (let i = 0; i < destroyHooks.length; i += 2) {
+            /** @type {?} */
+            const context = view[(/** @type {?} */ (destroyHooks[i]))];
+            // Only call the destroy hook if the context has been requested.
+            if (!(context instanceof NodeInjectorFactory)) {
+                ((/** @type {?} */ (destroyHooks[i + 1]))).call(context);
+            }
+        }
     }
 }
 /**
@@ -13495,7 +13495,7 @@ function initNodeFlags(tNode, index, numberOfDirectives) {
 function baseResolveDirective(tView, viewData, def, directiveFactory) {
     tView.data.push(def);
     /** @type {?} */
-    const nodeInjectorFactory = new NodeInjectorFactory(directiveFactory, isComponentDef(def), false, null);
+    const nodeInjectorFactory = new NodeInjectorFactory(directiveFactory, isComponentDef(def), null);
     tView.blueprint.push(nodeInjectorFactory);
     viewData.push(nodeInjectorFactory);
 }
@@ -16127,6 +16127,13 @@ function isTypeProvider(value) {
  * @param {?} value
  * @return {?}
  */
+function isClassProvider(value) {
+    return !!((/** @type {?} */ (value))).useClass;
+}
+/**
+ * @param {?} value
+ * @return {?}
+ */
 function hasDeps(value) {
     return !!((/** @type {?} */ (value))).deps;
 }
@@ -16219,10 +16226,21 @@ function resolveProvider$1(provider, tInjectables, lInjectablesBlueprint, isComp
         const endIndex = tNode.directiveStart;
         /** @type {?} */
         const cptViewProvidersCount = tNode.providerIndexes >> 16 /* CptViewProvidersCountShift */;
+        if (isClassProvider(provider) || isTypeProvider(provider)) {
+            /** @type {?} */
+            const prototype = (((/** @type {?} */ (provider))).useClass || provider).prototype;
+            /** @type {?} */
+            const ngOnDestroy = prototype.ngOnDestroy;
+            if (ngOnDestroy) {
+                /** @type {?} */
+                const tView = lView[TVIEW];
+                (tView.destroyHooks || (tView.destroyHooks = [])).push(tInjectables.length, ngOnDestroy);
+            }
+        }
         if (isTypeProvider(provider) || !provider.multi) {
             // Single provider case: the factory is created and pushed immediately
             /** @type {?} */
-            const factory = new NodeInjectorFactory(providerFactory, isViewProvider, true, directiveInject);
+            const factory = new NodeInjectorFactory(providerFactory, isViewProvider, directiveInject);
             /** @type {?} */
             const existingFactoryIndex = indexOf(token, tInjectables, isViewProvider ? beginIndex : beginIndex + cptViewProvidersCount, endIndex);
             if (existingFactoryIndex == -1) {
@@ -16402,7 +16420,7 @@ function multiResolve(factories, result) {
  */
 function multiFactory(factoryFn, index, isViewProvider, isComponent$$1, f) {
     /** @type {?} */
-    const factory = new NodeInjectorFactory(factoryFn, isViewProvider, true, directiveInject);
+    const factory = new NodeInjectorFactory(factoryFn, isViewProvider, directiveInject);
     factory.multi = [];
     factory.index = index;
     factory.componentProviders = 0;
@@ -17507,7 +17525,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.5+15.sha-ebffde7');
+const VERSION = new Version('8.0.0-beta.5+17.sha-e1aaa7e');
 
 /**
  * @fileoverview added by tsickle

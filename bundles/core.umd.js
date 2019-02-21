@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.5+15.sha-ebffde7
+ * @license Angular v8.0.0-beta.5+17.sha-e1aaa7e
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3023,13 +3023,8 @@
         /**
          * Set to `true` if the token is declared in `viewProviders` (or if it is component).
          */
-        isViewProvider, 
-        /**
-         * Set to `true` if the token is a provider, and not a directive.
-         */
-        isProvider, injectImplementation) {
+        isViewProvider, injectImplementation) {
             this.factory = factory;
-            this.isProvider = isProvider;
             /**
              * Marker set to true during factory invocation to see if we get into recursive loop.
              * Recursive loop causes an error to be displayed.
@@ -4529,10 +4524,6 @@
             setTNodeAndViewData(tNode, lData);
             try {
                 value = lData[index] = factory.factory(null, tData, lData, tNode);
-                var tView = lData[TVIEW];
-                if (value && factory.isProvider && value.ngOnDestroy) {
-                    (tView.destroyHooks || (tView.destroyHooks = [])).push(index, value.ngOnDestroy);
-                }
             }
             finally {
                 if (factory.injectImpl)
@@ -6961,7 +6952,13 @@
         var tView = view[TVIEW];
         var destroyHooks;
         if (tView != null && (destroyHooks = tView.destroyHooks) != null) {
-            callHooks(view, destroyHooks);
+            for (var i = 0; i < destroyHooks.length; i += 2) {
+                var context = view[destroyHooks[i]];
+                // Only call the destroy hook if the context has been requested.
+                if (!(context instanceof NodeInjectorFactory)) {
+                    destroyHooks[i + 1].call(context);
+                }
+            }
         }
     }
     /**
@@ -10899,7 +10896,7 @@
     }
     function baseResolveDirective(tView, viewData, def, directiveFactory) {
         tView.data.push(def);
-        var nodeInjectorFactory = new NodeInjectorFactory(directiveFactory, isComponentDef(def), false, null);
+        var nodeInjectorFactory = new NodeInjectorFactory(directiveFactory, isComponentDef(def), null);
         tView.blueprint.push(nodeInjectorFactory);
         viewData.push(nodeInjectorFactory);
     }
@@ -12977,6 +12974,9 @@
     function isTypeProvider(value) {
         return typeof value === 'function';
     }
+    function isClassProvider(value) {
+        return !!value.useClass;
+    }
     function hasDeps(value) {
         return !!value.deps;
     }
@@ -13046,9 +13046,17 @@
             var beginIndex = tNode.providerIndexes & 65535 /* ProvidersStartIndexMask */;
             var endIndex = tNode.directiveStart;
             var cptViewProvidersCount = tNode.providerIndexes >> 16 /* CptViewProvidersCountShift */;
+            if (isClassProvider(provider) || isTypeProvider(provider)) {
+                var prototype = (provider.useClass || provider).prototype;
+                var ngOnDestroy = prototype.ngOnDestroy;
+                if (ngOnDestroy) {
+                    var tView = lView[TVIEW];
+                    (tView.destroyHooks || (tView.destroyHooks = [])).push(tInjectables.length, ngOnDestroy);
+                }
+            }
             if (isTypeProvider(provider) || !provider.multi) {
                 // Single provider case: the factory is created and pushed immediately
-                var factory = new NodeInjectorFactory(providerFactory, isViewProvider, true, directiveInject);
+                var factory = new NodeInjectorFactory(providerFactory, isViewProvider, directiveInject);
                 var existingFactoryIndex = indexOf(token, tInjectables, isViewProvider ? beginIndex : beginIndex + cptViewProvidersCount, endIndex);
                 if (existingFactoryIndex == -1) {
                     diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, lView), lView, token);
@@ -13186,7 +13194,7 @@
      * Creates a multi factory.
      */
     function multiFactory(factoryFn, index, isViewProvider, isComponent$$1, f) {
-        var factory = new NodeInjectorFactory(factoryFn, isViewProvider, true, directiveInject);
+        var factory = new NodeInjectorFactory(factoryFn, isViewProvider, directiveInject);
         factory.multi = [];
         factory.index = index;
         factory.componentProviders = 0;
@@ -14107,7 +14115,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.5+15.sha-ebffde7');
+    var VERSION = new Version('8.0.0-beta.5+17.sha-e1aaa7e');
 
     /**
      * @license
