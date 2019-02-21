@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.5+11.sha-72d043f
+ * @license Angular v8.0.0-beta.5+16.sha-0ea216b
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17586,7 +17586,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.5+11.sha-72d043f');
+const VERSION = new Version('8.0.0-beta.5+16.sha-0ea216b');
 
 /**
  * @fileoverview added by tsickle
@@ -23027,6 +23027,12 @@ function readUpdateOpCodes(updateOpCodes, icus, bindingsStartIndex, changeMask, 
                     else {
                         /** @type {?} */
                         const nodeIndex = opCode >>> 2 /* SHIFT_REF */;
+                        /** @type {?} */
+                        let tIcuIndex;
+                        /** @type {?} */
+                        let tIcu;
+                        /** @type {?} */
+                        let icuTNode;
                         switch (opCode & 3 /* MASK_OPCODE */) {
                             case 1 /* Attr */:
                                 /** @type {?} */
@@ -23039,12 +23045,9 @@ function readUpdateOpCodes(updateOpCodes, icus, bindingsStartIndex, changeMask, 
                                 textBinding(nodeIndex, value);
                                 break;
                             case 2 /* IcuSwitch */:
-                                /** @type {?} */
-                                let tIcuIndex = (/** @type {?} */ (updateOpCodes[++j]));
-                                /** @type {?} */
-                                let tIcu = (/** @type {?} */ (icus))[tIcuIndex];
-                                /** @type {?} */
-                                let icuTNode = (/** @type {?} */ (getTNode(nodeIndex, viewData)));
+                                tIcuIndex = (/** @type {?} */ (updateOpCodes[++j]));
+                                tIcu = (/** @type {?} */ (icus))[tIcuIndex];
+                                icuTNode = (/** @type {?} */ (getTNode(nodeIndex, viewData)));
                                 // If there is an active case, delete the old nodes
                                 if (icuTNode.activeCaseIndex !== null) {
                                     /** @type {?} */
