@@ -5,9 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Injector } from '../di/injector';
-import { LContext } from './interfaces/context';
-import { LView, RootContext } from './interfaces/view';
+import { Injector } from '../../di/injector';
+import { LContext } from '../interfaces/context';
 /**
  * Returns the component instance associated with a given DOM host element.
  * Elements which don't represent components return `null`.
@@ -71,12 +70,6 @@ export declare function getContext<T = {}>(element: Element): T | null;
  * @publicApi
  */
 export declare function getViewComponent<T = {}>(element: Element | {}): T | null;
-/**
- * Returns the `RootContext` instance that is associated with
- * the application where the target is situated.
- *
- */
-export declare function getRootContext(target: LView | {}): RootContext;
 /**
  * Retrieve all root components.
  *
