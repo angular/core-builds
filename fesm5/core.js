@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.5+40.sha-7c20bf8.with-local-changes
+ * @license Angular v8.0.0-beta.5+41.sha-230a941.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12383,14 +12383,6 @@ function setSimpleChangesStore(instance, store) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * Determines if a definition is a {@link ComponentDef} or a {@link DirectiveDef}
- * @param definition The definition to examine
- */
-function isComponentDef$1(definition) {
-    var def = definition;
-    return typeof def.template === 'function';
-}
 function getSuperType(type) {
     return Object.getPrototypeOf(type.prototype).constructor;
 }
@@ -12403,7 +12395,7 @@ function InheritDefinitionFeature(definition) {
     var _loop_1 = function () {
         var e_1, _a;
         var superDef = undefined;
-        if (isComponentDef$1(definition)) {
+        if (isComponentDef(definition)) {
             // Don't use getComponentDef/getDirectiveDef. This logic relies on inheritance.
             superDef = superType.ngComponentDef || superType.ngDirectiveDef;
         }
@@ -12445,7 +12437,7 @@ function InheritDefinitionFeature(definition) {
                 }
             }
             // Merge View Queries
-            if (isComponentDef$1(definition) && isComponentDef$1(superDef)) {
+            if (isComponentDef(definition) && isComponentDef(superDef)) {
                 var prevViewQuery_1 = definition.viewQuery;
                 var superViewQuery_1 = superDef.viewQuery;
                 if (superViewQuery_1) {
@@ -14097,7 +14089,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.5+40.sha-7c20bf8.with-local-changes');
+var VERSION = new Version('8.0.0-beta.5+41.sha-230a941.with-local-changes');
 
 /**
  * @license
