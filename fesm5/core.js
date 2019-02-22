@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.6+23.sha-d0018e6.with-local-changes
+ * @license Angular v7.2.6+26.sha-b686449.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10743,7 +10743,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.2.6+23.sha-d0018e6.with-local-changes');
+var VERSION = new Version('7.2.6+26.sha-b686449.with-local-changes');
 
 /**
  * @license
@@ -12093,6 +12093,9 @@ function readUpdateOpCodes(updateOpCodes, icus, bindingsStartIndex, changeMask, 
                     }
                     else {
                         var nodeIndex = opCode >>> 2 /* SHIFT_REF */;
+                        var tIcuIndex = void 0;
+                        var tIcu = void 0;
+                        var icuTNode = void 0;
                         switch (opCode & 3 /* MASK_OPCODE */) {
                             case 1 /* Attr */:
                                 var attrName = updateOpCodes[++j];
@@ -12103,9 +12106,9 @@ function readUpdateOpCodes(updateOpCodes, icus, bindingsStartIndex, changeMask, 
                                 textBinding(nodeIndex, value);
                                 break;
                             case 2 /* IcuSwitch */:
-                                var tIcuIndex = updateOpCodes[++j];
-                                var tIcu = icus[tIcuIndex];
-                                var icuTNode = getTNode(nodeIndex, viewData);
+                                tIcuIndex = updateOpCodes[++j];
+                                tIcu = icus[tIcuIndex];
+                                icuTNode = getTNode(nodeIndex, viewData);
                                 // If there is an active case, delete the old nodes
                                 if (icuTNode.activeCaseIndex !== null) {
                                     var removeCodes = tIcu.remove[icuTNode.activeCaseIndex];
