@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.5+27.sha-65d839d.with-local-changes
+ * @license Angular v8.0.0-beta.5+57.sha-c64b13e.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -797,6 +797,12 @@ var ReflectionCapabilities = /** @class */ (function () {
             });
         }
         return propMetadata;
+    };
+    ReflectionCapabilities.prototype.ownPropMetadata = function (typeOrFunc) {
+        if (!isType(typeOrFunc)) {
+            return {};
+        }
+        return this._ownPropMetadata(typeOrFunc, Object) || {};
     };
     ReflectionCapabilities.prototype.hasLifecycleHook = function (type, lcProperty) {
         return type instanceof Type && lcProperty in type.prototype;
@@ -2820,251 +2826,6 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-function assertEqual(actual, expected, msg) {
-    if (actual != expected) {
-        throwError(msg);
-    }
-}
-function assertNotEqual(actual, expected, msg) {
-    if (actual == expected) {
-        throwError(msg);
-    }
-}
-function assertLessThan(actual, expected, msg) {
-    if (actual >= expected) {
-        throwError(msg);
-    }
-}
-function assertGreaterThan(actual, expected, msg) {
-    if (actual <= expected) {
-        throwError(msg);
-    }
-}
-function assertDefined(actual, msg) {
-    if (actual == null) {
-        throwError(msg);
-    }
-}
-function throwError(msg) {
-    // tslint:disable-next-line
-    debugger; // Left intentionally for better debugger experience.
-    throw new Error("ASSERTION ERROR: " + msg);
-}
-function assertDomNode(node) {
-    assertEqual(node instanceof Node, true, 'The provided value must be an instance of a DOM Node');
-}
-function assertDataInRange(arr, index) {
-    assertLessThan(index, arr ? arr.length : 0, 'index expected to be a valid data index');
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-// Below are constants for LView indices to help us look up LView members
-// without having to remember the specific indices.
-// Uglify will inline these when minifying so there shouldn't be a cost.
-var TVIEW = 0;
-var FLAGS = 1;
-var PARENT = 2;
-var NEXT = 3;
-var QUERIES = 4;
-var HOST = 5;
-var T_HOST = 6;
-var BINDING_INDEX = 7;
-var CLEANUP = 8;
-var CONTEXT = 9;
-var INJECTOR$1 = 10;
-var RENDERER_FACTORY = 11;
-var RENDERER = 12;
-var SANITIZER = 13;
-var TAIL = 14;
-var CONTAINER_INDEX = 15;
-var CONTENT_QUERIES = 16;
-var DECLARATION_VIEW = 17;
-/** Size of LView's header. Necessary to adjust for it when setting slots.  */
-var HEADER_OFFSET = 18;
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Below are constants for LContainer indices to help us look up LContainer members
- * without having to remember the specific indices.
- * Uglify will inline these when minifying so there shouldn't be a cost.
- */
-var ACTIVE_INDEX = 0;
-var VIEWS = 1;
-// PARENT, NEXT, QUERIES, and HOST are indices 2, 3, 4, and 5.
-// As we already have these constants in LView, we don't need to re-create them.
-var NATIVE = 6;
-// Because interfaces in TS/JS cannot be instanceof-checked this means that we
-// need to rely on predictable characteristics of data-structures to check if they
-// are what we expect for them to be. The `LContainer` interface code below has a
-// fixed length and the constant value below references that. Using the length value
-// below we can predictably gaurantee that we are dealing with an `LContainer` array.
-// This value MUST be kept up to date with the length of the `LContainer` array
-// interface below so that runtime type checking can work.
-var LCONTAINER_LENGTH = 7;
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * This property will be monkey-patched on elements, components and directives
- */
-var MONKEY_PATCH_KEY_NAME = '__ngContext__';
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-var TNODE = 8;
-var PARENT_INJECTOR = 8;
-var INJECTOR_BLOOM_PARENT_SIZE = 9;
-var NO_PARENT_INJECTOR = -1;
-/**
- * Each injector is saved in 9 contiguous slots in `LView` and 9 contiguous slots in
- * `TView.data`. This allows us to store information about the current node's tokens (which
- * can be shared in `TView`) as well as the tokens of its ancestor nodes (which cannot be
- * shared, so they live in `LView`).
- *
- * Each of these slots (aside from the last slot) contains a bloom filter. This bloom filter
- * determines whether a directive is available on the associated node or not. This prevents us
- * from searching the directives array at this level unless it's probable the directive is in it.
- *
- * See: https://en.wikipedia.org/wiki/Bloom_filter for more about bloom filters.
- *
- * Because all injectors have been flattened into `LView` and `TViewData`, they cannot typed
- * using interfaces as they were previously. The start index of each `LInjector` and `TInjector`
- * will differ based on where it is flattened into the main array, so it's not possible to know
- * the indices ahead of time and save their types here. The interfaces are still included here
- * for documentation purposes.
- *
- * export interface LInjector extends Array<any> {
- *
- *    // Cumulative bloom for directive IDs 0-31  (IDs are % BLOOM_SIZE)
- *    [0]: number;
- *
- *    // Cumulative bloom for directive IDs 32-63
- *    [1]: number;
- *
- *    // Cumulative bloom for directive IDs 64-95
- *    [2]: number;
- *
- *    // Cumulative bloom for directive IDs 96-127
- *    [3]: number;
- *
- *    // Cumulative bloom for directive IDs 128-159
- *    [4]: number;
- *
- *    // Cumulative bloom for directive IDs 160 - 191
- *    [5]: number;
- *
- *    // Cumulative bloom for directive IDs 192 - 223
- *    [6]: number;
- *
- *    // Cumulative bloom for directive IDs 224 - 255
- *    [7]: number;
- *
- *    // We need to store a reference to the injector's parent so DI can keep looking up
- *    // the injector tree until it finds the dependency it's looking for.
- *    [PARENT_INJECTOR]: number;
- * }
- *
- * export interface TInjector extends Array<any> {
- *
- *    // Shared node bloom for directive IDs 0-31  (IDs are % BLOOM_SIZE)
- *    [0]: number;
- *
- *    // Shared node bloom for directive IDs 32-63
- *    [1]: number;
- *
- *    // Shared node bloom for directive IDs 64-95
- *    [2]: number;
- *
- *    // Shared node bloom for directive IDs 96-127
- *    [3]: number;
- *
- *    // Shared node bloom for directive IDs 128-159
- *    [4]: number;
- *
- *    // Shared node bloom for directive IDs 160 - 191
- *    [5]: number;
- *
- *    // Shared node bloom for directive IDs 192 - 223
- *    [6]: number;
- *
- *    // Shared node bloom for directive IDs 224 - 255
- *    [7]: number;
- *
- *    // Necessary to find directive indices for a particular node.
- *    [TNODE]: TElementNode|TElementContainerNode|TContainerNode;
- *  }
- */
-/**
-* Factory for creating instances of injectors in the NodeInjector.
-*
-* This factory is complicated by the fact that it can resolve `multi` factories as well.
-*
-* NOTE: Some of the fields are optional which means that this class has two hidden classes.
-* - One without `multi` support (most common)
-* - One with `multi` values, (rare).
-*
-* Since VMs can cache up to 4 inline hidden classes this is OK.
-*
-* - Single factory: Only `resolving` and `factory` is defined.
-* - `providers` factory: `componentProviders` is a number and `index = -1`.
-* - `viewProviders` factory: `componentProviders` is a number and `index` points to `providers`.
-*/
-var NodeInjectorFactory = /** @class */ (function () {
-    function NodeInjectorFactory(
-    /**
-     * Factory to invoke in order to create a new instance.
-     */
-    factory, 
-    /**
-     * Set to `true` if the token is declared in `viewProviders` (or if it is component).
-     */
-    isViewProvider, injectImplementation) {
-        this.factory = factory;
-        /**
-         * Marker set to true during factory invocation to see if we get into recursive loop.
-         * Recursive loop causes an error to be displayed.
-         */
-        this.resolving = false;
-        this.canSeeViewProviders = isViewProvider;
-        this.injectImpl = injectImplementation;
-    }
-    return NodeInjectorFactory;
-}());
-var FactoryPrototype = NodeInjectorFactory.prototype;
-function isFactory(obj) {
-    // See: https://jsperf.com/instanceof-vs-getprototypeof
-    return obj !== null && typeof obj == 'object' && Object.getPrototypeOf(obj) == FactoryPrototype;
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Returns whether the values are different from a change detection stand point.
  *
@@ -3089,190 +2850,9 @@ function renderStringify(value) {
         return value.type.name || value.type;
     return '' + value;
 }
-/** Retrieves a value from any `LView` or `TData`. */
-function loadInternal(view, index) {
-    ngDevMode && assertDataInRange(view, index + HEADER_OFFSET);
-    return view[index + HEADER_OFFSET];
-}
-/**
- * Takes the value of a slot in `LView` and returns the element node.
- *
- * Normally, element nodes are stored flat, but if the node has styles/classes on it,
- * it might be wrapped in a styling context. Or if that node has a directive that injects
- * ViewContainerRef, it may be wrapped in an LContainer. Or if that node is a component,
- * it will be wrapped in LView. It could even have all three, so we keep looping
- * until we find something that isn't an array.
- *
- * @param value The initial value in `LView`
- */
-function readElementValue(value) {
-    while (Array.isArray(value)) {
-        value = value[HOST];
-    }
-    return value;
-}
-/**
- * Retrieves an element value from the provided `viewData`, by unwrapping
- * from any containers, component views, or style contexts.
- */
-function getNativeByIndex(index, lView) {
-    return readElementValue(lView[index + HEADER_OFFSET]);
-}
-function getNativeByTNode(tNode, hostView) {
-    return readElementValue(hostView[tNode.index]);
-}
-function getTNode(index, view) {
-    ngDevMode && assertGreaterThan(index, -1, 'wrong index for TNode');
-    ngDevMode && assertLessThan(index, view[TVIEW].data.length, 'wrong index for TNode');
-    return view[TVIEW].data[index + HEADER_OFFSET];
-}
-function getComponentViewByIndex(nodeIndex, hostView) {
-    // Could be an LView or an LContainer. If LContainer, unwrap to find LView.
-    var slotValue = hostView[nodeIndex];
-    return slotValue.length >= HEADER_OFFSET ? slotValue : slotValue[HOST];
-}
-function isContentQueryHost(tNode) {
-    return (tNode.flags & 4 /* hasContentQuery */) !== 0;
-}
-function isComponent(tNode) {
-    return (tNode.flags & 1 /* isComponent */) === 1 /* isComponent */;
-}
-function isComponentDef(def) {
-    return def.template !== null;
-}
-function isLContainer(value) {
-    // Styling contexts are also arrays, but their first index contains an element node
-    return Array.isArray(value) && value.length === LCONTAINER_LENGTH;
-}
-function isRootView(target) {
-    return (target[FLAGS] & 512 /* IsRoot */) !== 0;
-}
-/**
- * Retrieve the root view from any component by walking the parent `LView` until
- * reaching the root `LView`.
- *
- * @param component any component
- */
-function getRootView(target) {
-    ngDevMode && assertDefined(target, 'component');
-    var lView = Array.isArray(target) ? target : readPatchedLView(target);
-    while (lView && !(lView[FLAGS] & 512 /* IsRoot */)) {
-        lView = lView[PARENT];
-    }
-    return lView;
-}
-function getRootContext(viewOrComponent) {
-    var rootView = getRootView(viewOrComponent);
-    ngDevMode &&
-        assertDefined(rootView[CONTEXT], 'RootView has no context. Perhaps it is disconnected?');
-    return rootView[CONTEXT];
-}
-/**
- * Returns the monkey-patch value data present on the target (which could be
- * a component, directive or a DOM node).
- */
-function readPatchedData(target) {
-    ngDevMode && assertDefined(target, 'Target expected');
-    return target[MONKEY_PATCH_KEY_NAME];
-}
-function readPatchedLView(target) {
-    var value = readPatchedData(target);
-    if (value) {
-        return Array.isArray(value) ? value : value.lView;
-    }
-    return null;
-}
-function hasParentInjector(parentLocation) {
-    return parentLocation !== NO_PARENT_INJECTOR;
-}
-function getParentInjectorIndex(parentLocation) {
-    return parentLocation & 32767 /* InjectorIndexMask */;
-}
-function getParentInjectorViewOffset(parentLocation) {
-    return parentLocation >> 16 /* ViewOffsetShift */;
-}
-/**
- * Unwraps a parent injector location number to find the view offset from the current injector,
- * then walks up the declaration view tree until the view is found that contains the parent
- * injector.
- *
- * @param location The location of the parent injector, which contains the view offset
- * @param startView The LView instance from which to start walking up the view tree
- * @returns The LView instance that contains the parent injector
- */
-function getParentInjectorView(location, startView) {
-    var viewOffset = getParentInjectorViewOffset(location);
-    var parentView = startView;
-    // For most cases, the parent injector can be found on the host node (e.g. for component
-    // or container), but we must keep the loop here to support the rarer case of deeply nested
-    // <ng-template> tags or inline views, where the parent injector might live many views
-    // above the child injector.
-    while (viewOffset > 0) {
-        parentView = parentView[DECLARATION_VIEW];
-        viewOffset--;
-    }
-    return parentView;
-}
-/**
- * Unwraps a parent injector location number to find the view offset from the current injector,
- * then walks up the declaration view tree until the TNode of the parent injector is found.
- *
- * @param location The location of the parent injector, which contains the view offset
- * @param startView The LView instance from which to start walking up the view tree
- * @param startTNode The TNode instance of the starting element
- * @returns The TNode of the parent injector
- */
-function getParentInjectorTNode(location, startView, startTNode) {
-    if (startTNode.parent && startTNode.parent.injectorIndex !== -1) {
-        // view offset is 0
-        var injectorIndex = startTNode.parent.injectorIndex;
-        var parentTNode_1 = startTNode.parent;
-        while (parentTNode_1.parent != null && injectorIndex == parentTNode_1.injectorIndex) {
-            parentTNode_1 = parentTNode_1.parent;
-        }
-        return parentTNode_1;
-    }
-    var viewOffset = getParentInjectorViewOffset(location);
-    // view offset is 1
-    var parentView = startView;
-    var parentTNode = startView[T_HOST];
-    // view offset is superior to 1
-    while (viewOffset > 1) {
-        parentView = parentView[DECLARATION_VIEW];
-        parentTNode = parentView[T_HOST];
-        viewOffset--;
-    }
-    return parentTNode;
-}
 var defaultScheduler = (typeof requestAnimationFrame !== 'undefined' && requestAnimationFrame || // browser only
     setTimeout // everything else
 ).bind(_global);
-/**
- * Equivalent to ES6 spread, add each item to an array.
- *
- * @param items The items to add
- * @param arr The array to which you want to add the items
- */
-function addAllToArray(items, arr) {
-    for (var i = 0; i < items.length; i++) {
-        arr.push(items[i]);
-    }
-}
-/**
- * Given a current view, finds the nearest component's host (LElement).
- *
- * @param lView LView for which we want a host element node
- * @returns The host node
- */
-function findComponentView(lView) {
-    var rootTNode = lView[T_HOST];
-    while (rootTNode && rootTNode.type === 2 /* View */) {
-        ngDevMode && assertDefined(lView[DECLARATION_VIEW], 'lView[DECLARATION_VIEW]');
-        lView = lView[DECLARATION_VIEW];
-        rootTNode = lView[T_HOST];
-    }
-    return lView;
-}
 function resolveWindow(element) {
     return { name: 'window', target: element.ownerDocument.defaultView };
 }
@@ -3304,19 +2884,51 @@ var INTERPOLATION_DELIMITER = "\uFFFD";
 function isPropMetadataString(str) {
     return str.indexOf(INTERPOLATION_DELIMITER) >= 0;
 }
-function applyOnCreateInstructions(tNode) {
-    // there may be some instructions that need to run in a specific
-    // order because the CREATE block in a directive runs before the
-    // CREATE block in a template. To work around this instructions
-    // can get access to the function array below and defer any code
-    // to run after the element is created.
-    var fns;
-    if (fns = tNode.onElementCreationFns) {
-        for (var i = 0; i < fns.length; i++) {
-            fns[i]();
-        }
-        tNode.onElementCreationFns = null;
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function assertEqual(actual, expected, msg) {
+    if (actual != expected) {
+        throwError(msg);
     }
+}
+function assertNotEqual(actual, expected, msg) {
+    if (actual == expected) {
+        throwError(msg);
+    }
+}
+function assertLessThan(actual, expected, msg) {
+    if (actual >= expected) {
+        throwError(msg);
+    }
+}
+function assertGreaterThan(actual, expected, msg) {
+    if (actual <= expected) {
+        throwError(msg);
+    }
+}
+function assertDefined(actual, msg) {
+    if (actual == null) {
+        throwError(msg);
+    }
+}
+function throwError(msg) {
+    // tslint:disable-next-line
+    debugger; // Left intentionally for better debugger experience.
+    throw new Error("ASSERTION ERROR: " + msg);
+}
+function assertDomNode(node) {
+    // If we're in a worker, `Node` will not be defined.
+    assertEqual((typeof Node !== 'undefined' && node instanceof Node) ||
+        (typeof node === 'object' && node.constructor.name === 'WebWorkerRenderNode'), true, 'The provided value must be an instance of a DOM Node');
+}
+function assertDataInRange(arr, index) {
+    assertLessThan(index, arr ? arr.length : 0, 'index expected to be a valid data index');
 }
 
 /**
@@ -3614,6 +3226,164 @@ function getNgModuleDef(type, throwNotFound) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+// Below are constants for LView indices to help us look up LView members
+// without having to remember the specific indices.
+// Uglify will inline these when minifying so there shouldn't be a cost.
+var TVIEW = 0;
+var FLAGS = 1;
+var PARENT = 2;
+var NEXT = 3;
+var QUERIES = 4;
+var HOST = 5;
+var T_HOST = 6;
+var BINDING_INDEX = 7;
+var CLEANUP = 8;
+var CONTEXT = 9;
+var INJECTOR$1 = 10;
+var RENDERER_FACTORY = 11;
+var RENDERER = 12;
+var SANITIZER = 13;
+var CHILD_HEAD = 14;
+var CHILD_TAIL = 15;
+var CONTENT_QUERIES = 16;
+var DECLARATION_VIEW = 17;
+/** Size of LView's header. Necessary to adjust for it when setting slots.  */
+var HEADER_OFFSET = 19;
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Below are constants for LContainer indices to help us look up LContainer members
+ * without having to remember the specific indices.
+ * Uglify will inline these when minifying so there shouldn't be a cost.
+ */
+var ACTIVE_INDEX = 0;
+var VIEWS = 1;
+// PARENT, NEXT, QUERIES, and HOST are indices 2, 3, 4, and 5.
+// As we already have these constants in LView, we don't need to re-create them.
+var NATIVE = 6;
+// Because interfaces in TS/JS cannot be instanceof-checked this means that we
+// need to rely on predictable characteristics of data-structures to check if they
+// are what we expect for them to be. The `LContainer` interface code below has a
+// fixed length and the constant value below references that. Using the length value
+// below we can predictably gaurantee that we are dealing with an `LContainer` array.
+// This value MUST be kept up to date with the length of the `LContainer` array
+// interface below so that runtime type checking can work.
+var LCONTAINER_LENGTH = 7;
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * This property will be monkey-patched on elements, components and directives
+ */
+var MONKEY_PATCH_KEY_NAME = '__ngContext__';
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Takes the value of a slot in `LView` and returns the element node.
+ *
+ * Normally, element nodes are stored flat, but if the node has styles/classes on it,
+ * it might be wrapped in a styling context. Or if that node has a directive that injects
+ * ViewContainerRef, it may be wrapped in an LContainer. Or if that node is a component,
+ * it will be wrapped in LView. It could even have all three, so we keep looping
+ * until we find something that isn't an array.
+ *
+ * @param value The initial value in `LView`
+ */
+function readElementValue(value) {
+    while (Array.isArray(value)) {
+        value = value[HOST];
+    }
+    return value;
+}
+/**
+ * Retrieves an element value from the provided `viewData`, by unwrapping
+ * from any containers, component views, or style contexts.
+ */
+function getNativeByIndex(index, lView) {
+    return readElementValue(lView[index + HEADER_OFFSET]);
+}
+function getNativeByTNode(tNode, hostView) {
+    return readElementValue(hostView[tNode.index]);
+}
+function getTNode(index, view) {
+    ngDevMode && assertGreaterThan(index, -1, 'wrong index for TNode');
+    ngDevMode && assertLessThan(index, view[TVIEW].data.length, 'wrong index for TNode');
+    return view[TVIEW].data[index + HEADER_OFFSET];
+}
+/**
+ * Returns true if the value is an {@link LView}
+ * @param value the value to check
+ */
+function isLView(value) {
+    return Array.isArray(value) && value.length >= HEADER_OFFSET;
+}
+/** Retrieves a value from any `LView` or `TData`. */
+function loadInternal(view, index) {
+    ngDevMode && assertDataInRange(view, index + HEADER_OFFSET);
+    return view[index + HEADER_OFFSET];
+}
+function getComponentViewByIndex(nodeIndex, hostView) {
+    // Could be an LView or an LContainer. If LContainer, unwrap to find LView.
+    var slotValue = hostView[nodeIndex];
+    var lView = isLView(slotValue) ? slotValue : slotValue[HOST];
+    return lView;
+}
+function isContentQueryHost(tNode) {
+    return (tNode.flags & 4 /* hasContentQuery */) !== 0;
+}
+function isComponent(tNode) {
+    return (tNode.flags & 1 /* isComponent */) === 1 /* isComponent */;
+}
+function isComponentDef(def) {
+    return def.template !== null;
+}
+function isLContainer(value) {
+    // Styling contexts are also arrays, but their first index contains an element node
+    return Array.isArray(value) && value.length === LCONTAINER_LENGTH;
+}
+function isRootView(target) {
+    return (target[FLAGS] & 512 /* IsRoot */) !== 0;
+}
+/**
+ * Returns the monkey-patch value data present on the target (which could be
+ * a component, directive or a DOM node).
+ */
+function readPatchedData(target) {
+    ngDevMode && assertDefined(target, 'Target expected');
+    return target[MONKEY_PATCH_KEY_NAME];
+}
+function readPatchedLView(target) {
+    var value = readPatchedData(target);
+    if (value) {
+        return Array.isArray(value) ? value : value.lView;
+    }
+    return null;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 function assertComponentType(actual, msg) {
     if (msg === void 0) { msg = 'Type passed in is not ComponentType, it does not have \'ngComponentDef\' property.'; }
     if (!getComponentDef(actual)) {
@@ -3631,6 +3401,152 @@ function assertPreviousIsParent(isParent) {
 }
 function assertHasParent(tNode) {
     assertDefined(tNode.parent, 'previousOrParentTNode should have a parent');
+}
+function assertLContainerOrUndefined(value) {
+    value && assertEqual(isLContainer(value), true, 'Expecting LContainer or undefined or null');
+}
+function assertLContainer(value) {
+    assertDefined(value, 'LContainer must be defined');
+    assertEqual(isLContainer(value), true, 'Expecting LContainer');
+}
+function assertLViewOrUndefined(value) {
+    value && assertEqual(isLView(value), true, 'Expecting LView or undefined or null');
+}
+function assertLView(value) {
+    assertDefined(value, 'LView must be defined');
+    assertEqual(isLView(value), true, 'Expecting LView');
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+var TNODE = 8;
+var PARENT_INJECTOR = 8;
+var INJECTOR_BLOOM_PARENT_SIZE = 9;
+var NO_PARENT_INJECTOR = -1;
+/**
+ * Each injector is saved in 9 contiguous slots in `LView` and 9 contiguous slots in
+ * `TView.data`. This allows us to store information about the current node's tokens (which
+ * can be shared in `TView`) as well as the tokens of its ancestor nodes (which cannot be
+ * shared, so they live in `LView`).
+ *
+ * Each of these slots (aside from the last slot) contains a bloom filter. This bloom filter
+ * determines whether a directive is available on the associated node or not. This prevents us
+ * from searching the directives array at this level unless it's probable the directive is in it.
+ *
+ * See: https://en.wikipedia.org/wiki/Bloom_filter for more about bloom filters.
+ *
+ * Because all injectors have been flattened into `LView` and `TViewData`, they cannot typed
+ * using interfaces as they were previously. The start index of each `LInjector` and `TInjector`
+ * will differ based on where it is flattened into the main array, so it's not possible to know
+ * the indices ahead of time and save their types here. The interfaces are still included here
+ * for documentation purposes.
+ *
+ * export interface LInjector extends Array<any> {
+ *
+ *    // Cumulative bloom for directive IDs 0-31  (IDs are % BLOOM_SIZE)
+ *    [0]: number;
+ *
+ *    // Cumulative bloom for directive IDs 32-63
+ *    [1]: number;
+ *
+ *    // Cumulative bloom for directive IDs 64-95
+ *    [2]: number;
+ *
+ *    // Cumulative bloom for directive IDs 96-127
+ *    [3]: number;
+ *
+ *    // Cumulative bloom for directive IDs 128-159
+ *    [4]: number;
+ *
+ *    // Cumulative bloom for directive IDs 160 - 191
+ *    [5]: number;
+ *
+ *    // Cumulative bloom for directive IDs 192 - 223
+ *    [6]: number;
+ *
+ *    // Cumulative bloom for directive IDs 224 - 255
+ *    [7]: number;
+ *
+ *    // We need to store a reference to the injector's parent so DI can keep looking up
+ *    // the injector tree until it finds the dependency it's looking for.
+ *    [PARENT_INJECTOR]: number;
+ * }
+ *
+ * export interface TInjector extends Array<any> {
+ *
+ *    // Shared node bloom for directive IDs 0-31  (IDs are % BLOOM_SIZE)
+ *    [0]: number;
+ *
+ *    // Shared node bloom for directive IDs 32-63
+ *    [1]: number;
+ *
+ *    // Shared node bloom for directive IDs 64-95
+ *    [2]: number;
+ *
+ *    // Shared node bloom for directive IDs 96-127
+ *    [3]: number;
+ *
+ *    // Shared node bloom for directive IDs 128-159
+ *    [4]: number;
+ *
+ *    // Shared node bloom for directive IDs 160 - 191
+ *    [5]: number;
+ *
+ *    // Shared node bloom for directive IDs 192 - 223
+ *    [6]: number;
+ *
+ *    // Shared node bloom for directive IDs 224 - 255
+ *    [7]: number;
+ *
+ *    // Necessary to find directive indices for a particular node.
+ *    [TNODE]: TElementNode|TElementContainerNode|TContainerNode;
+ *  }
+ */
+/**
+* Factory for creating instances of injectors in the NodeInjector.
+*
+* This factory is complicated by the fact that it can resolve `multi` factories as well.
+*
+* NOTE: Some of the fields are optional which means that this class has two hidden classes.
+* - One without `multi` support (most common)
+* - One with `multi` values, (rare).
+*
+* Since VMs can cache up to 4 inline hidden classes this is OK.
+*
+* - Single factory: Only `resolving` and `factory` is defined.
+* - `providers` factory: `componentProviders` is a number and `index = -1`.
+* - `viewProviders` factory: `componentProviders` is a number and `index` points to `providers`.
+*/
+var NodeInjectorFactory = /** @class */ (function () {
+    function NodeInjectorFactory(
+    /**
+     * Factory to invoke in order to create a new instance.
+     */
+    factory, 
+    /**
+     * Set to `true` if the token is declared in `viewProviders` (or if it is component).
+     */
+    isViewProvider, injectImplementation) {
+        this.factory = factory;
+        /**
+         * Marker set to true during factory invocation to see if we get into recursive loop.
+         * Recursive loop causes an error to be displayed.
+         */
+        this.resolving = false;
+        this.canSeeViewProviders = isViewProvider;
+        this.injectImpl = injectImplementation;
+    }
+    return NodeInjectorFactory;
+}());
+var FactoryPrototype = NodeInjectorFactory.prototype;
+function isFactory(obj) {
+    // See: https://jsperf.com/instanceof-vs-getprototypeof
+    return obj !== null && typeof obj == 'object' && Object.getPrototypeOf(obj) == FactoryPrototype;
 }
 
 /**
@@ -3941,6 +3857,7 @@ function setPreviousOrParentTNode(tNode) {
     previousOrParentTNode = tNode;
 }
 function setTNodeAndViewData(tNode, view) {
+    ngDevMode && assertLViewOrUndefined(view);
     previousOrParentTNode = tNode;
     lView = view;
 }
@@ -4031,6 +3948,7 @@ function setCurrentQueryIndex(value) {
  * @returns the previous state;
  */
 function enterView(newView, hostTNode) {
+    ngDevMode && assertLViewOrUndefined(newView);
     var oldView = lView;
     if (newView) {
         var tView = newView[TVIEW];
@@ -4085,6 +4003,108 @@ function leaveView(newView) {
         }
     }
     enterView(newView, null);
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/// Parent Injector Utils ///////////////////////////////////////////////////////////////
+function hasParentInjector(parentLocation) {
+    return parentLocation !== NO_PARENT_INJECTOR;
+}
+function getParentInjectorIndex(parentLocation) {
+    return parentLocation & 32767 /* InjectorIndexMask */;
+}
+function getParentInjectorViewOffset(parentLocation) {
+    return parentLocation >> 16 /* ViewOffsetShift */;
+}
+/**
+ * Unwraps a parent injector location number to find the view offset from the current injector,
+ * then walks up the declaration view tree until the view is found that contains the parent
+ * injector.
+ *
+ * @param location The location of the parent injector, which contains the view offset
+ * @param startView The LView instance from which to start walking up the view tree
+ * @returns The LView instance that contains the parent injector
+ */
+function getParentInjectorView(location, startView) {
+    var viewOffset = getParentInjectorViewOffset(location);
+    var parentView = startView;
+    // For most cases, the parent injector can be found on the host node (e.g. for component
+    // or container), but we must keep the loop here to support the rarer case of deeply nested
+    // <ng-template> tags or inline views, where the parent injector might live many views
+    // above the child injector.
+    while (viewOffset > 0) {
+        parentView = parentView[DECLARATION_VIEW];
+        viewOffset--;
+    }
+    return parentView;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Gets the parent LView of the passed LView, if the PARENT is an LContainer, will get the parent of
+ * that LContainer, which is an LView
+ * @param lView the lView whose parent to get
+ */
+function getLViewParent(lView) {
+    ngDevMode && assertLView(lView);
+    var parent = lView[PARENT];
+    return isLContainer(parent) ? parent[PARENT] : parent;
+}
+/**
+ * Retrieve the root view from any component or `LView` by walking the parent `LView` until
+ * reaching the root `LView`.
+ *
+ * @param componentOrLView any component or `LView`
+ */
+function getRootView(componentOrLView) {
+    ngDevMode && assertDefined(componentOrLView, 'component');
+    var lView = isLView(componentOrLView) ? componentOrLView : readPatchedLView(componentOrLView);
+    while (lView && !(lView[FLAGS] & 512 /* IsRoot */)) {
+        lView = getLViewParent(lView);
+    }
+    ngDevMode && assertLView(lView);
+    return lView;
+}
+/**
+ * Given a current view, finds the nearest component's host (LElement).
+ *
+ * @param lView LView for which we want a host element node
+ * @returns The host node
+ */
+function findComponentView(lView) {
+    var rootTNode = lView[T_HOST];
+    while (rootTNode && rootTNode.type === 2 /* View */) {
+        ngDevMode && assertDefined(lView[DECLARATION_VIEW], 'lView[DECLARATION_VIEW]');
+        lView = lView[DECLARATION_VIEW];
+        rootTNode = lView[T_HOST];
+    }
+    ngDevMode && assertLView(lView);
+    return lView;
+}
+/**
+ * Returns the `RootContext` instance that is associated with
+ * the application where the target is situated. It does this by walking the parent views until it
+ * gets to the root view, then getting the context off of that.
+ *
+ * @param viewOrComponent the `LView` or component to get the root context for.
+ */
+function getRootContext(viewOrComponent) {
+    var rootView = getRootView(viewOrComponent);
+    ngDevMode &&
+        assertDefined(rootView[CONTEXT], 'RootView has no context. Perhaps it is disconnected?');
+    return rootView[CONTEXT];
 }
 
 /**
@@ -4633,569 +4653,6 @@ function getInheritedFactory(type) {
         // latter has to be assumed.
         return function (t) { return new t(); };
     }
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/** Returns the matching `LContext` data for a given DOM node, directive or component instance.
- *
- * This function will examine the provided DOM element, component, or directive instance\'s
- * monkey-patched property to derive the `LContext` data. Once called then the monkey-patched
- * value will be that of the newly created `LContext`.
- *
- * If the monkey-patched value is the `LView` instance then the context value for that
- * target will be created and the monkey-patch reference will be updated. Therefore when this
- * function is called it may mutate the provided element\'s, component\'s or any of the associated
- * directive\'s monkey-patch values.
- *
- * If the monkey-patch value is not detected then the code will walk up the DOM until an element
- * is found which contains a monkey-patch reference. When that occurs then the provided element
- * will be updated with a new context (which is then returned). If the monkey-patch value is not
- * detected for a component/directive instance then it will throw an error (all components and
- * directives should be automatically monkey-patched by ivy).
- *
- * @param target Component, Directive or DOM Node.
- */
-function getLContext(target) {
-    var mpValue = readPatchedData(target);
-    if (mpValue) {
-        // only when it's an array is it considered an LView instance
-        // ... otherwise it's an already constructed LContext instance
-        if (Array.isArray(mpValue)) {
-            var lView = mpValue;
-            var nodeIndex = void 0;
-            var component = undefined;
-            var directives = undefined;
-            if (isComponentInstance(target)) {
-                nodeIndex = findViaComponent(lView, target);
-                if (nodeIndex == -1) {
-                    throw new Error('The provided component was not found in the application');
-                }
-                component = target;
-            }
-            else if (isDirectiveInstance(target)) {
-                nodeIndex = findViaDirective(lView, target);
-                if (nodeIndex == -1) {
-                    throw new Error('The provided directive was not found in the application');
-                }
-                directives = getDirectivesAtNodeIndex(nodeIndex, lView, false);
-            }
-            else {
-                nodeIndex = findViaNativeElement(lView, target);
-                if (nodeIndex == -1) {
-                    return null;
-                }
-            }
-            // the goal is not to fill the entire context full of data because the lookups
-            // are expensive. Instead, only the target data (the element, component, container, ICU
-            // expression or directive details) are filled into the context. If called multiple times
-            // with different target values then the missing target data will be filled in.
-            var native = readElementValue(lView[nodeIndex]);
-            var existingCtx = readPatchedData(native);
-            var context = (existingCtx && !Array.isArray(existingCtx)) ?
-                existingCtx :
-                createLContext(lView, nodeIndex, native);
-            // only when the component has been discovered then update the monkey-patch
-            if (component && context.component === undefined) {
-                context.component = component;
-                attachPatchData(context.component, context);
-            }
-            // only when the directives have been discovered then update the monkey-patch
-            if (directives && context.directives === undefined) {
-                context.directives = directives;
-                for (var i = 0; i < directives.length; i++) {
-                    attachPatchData(directives[i], context);
-                }
-            }
-            attachPatchData(context.native, context);
-            mpValue = context;
-        }
-    }
-    else {
-        var rElement = target;
-        ngDevMode && assertDomNode(rElement);
-        // if the context is not found then we need to traverse upwards up the DOM
-        // to find the nearest element that has already been monkey patched with data
-        var parent_1 = rElement;
-        while (parent_1 = parent_1.parentNode) {
-            var parentContext = readPatchedData(parent_1);
-            if (parentContext) {
-                var lView = void 0;
-                if (Array.isArray(parentContext)) {
-                    lView = parentContext;
-                }
-                else {
-                    lView = parentContext.lView;
-                }
-                // the edge of the app was also reached here through another means
-                // (maybe because the DOM was changed manually).
-                if (!lView) {
-                    return null;
-                }
-                var index = findViaNativeElement(lView, rElement);
-                if (index >= 0) {
-                    var native = readElementValue(lView[index]);
-                    var context = createLContext(lView, index, native);
-                    attachPatchData(native, context);
-                    mpValue = context;
-                    break;
-                }
-            }
-        }
-    }
-    return mpValue || null;
-}
-/**
- * Creates an empty instance of a `LContext` context
- */
-function createLContext(lView, nodeIndex, native) {
-    return {
-        lView: lView,
-        nodeIndex: nodeIndex,
-        native: native,
-        component: undefined,
-        directives: undefined,
-        localRefs: undefined,
-    };
-}
-/**
- * Takes a component instance and returns the view for that component.
- *
- * @param componentInstance
- * @returns The component's view
- */
-function getComponentViewByInstance(componentInstance) {
-    var lView = readPatchedData(componentInstance);
-    var view;
-    if (Array.isArray(lView)) {
-        var nodeIndex = findViaComponent(lView, componentInstance);
-        view = getComponentViewByIndex(nodeIndex, lView);
-        var context = createLContext(lView, nodeIndex, view[HOST]);
-        context.component = componentInstance;
-        attachPatchData(componentInstance, context);
-        attachPatchData(context.native, context);
-    }
-    else {
-        var context = lView;
-        view = getComponentViewByIndex(context.nodeIndex, context.lView);
-    }
-    return view;
-}
-/**
- * Assigns the given data to the given target (which could be a component,
- * directive or DOM node instance) using monkey-patching.
- */
-function attachPatchData(target, data) {
-    target[MONKEY_PATCH_KEY_NAME] = data;
-}
-function isComponentInstance(instance) {
-    return instance && instance.constructor && instance.constructor.ngComponentDef;
-}
-function isDirectiveInstance(instance) {
-    return instance && instance.constructor && instance.constructor.ngDirectiveDef;
-}
-/**
- * Locates the element within the given LView and returns the matching index
- */
-function findViaNativeElement(lView, target) {
-    var tNode = lView[TVIEW].firstChild;
-    while (tNode) {
-        var native = getNativeByTNode(tNode, lView);
-        if (native === target) {
-            return tNode.index;
-        }
-        tNode = traverseNextElement(tNode);
-    }
-    return -1;
-}
-/**
- * Locates the next tNode (child, sibling or parent).
- */
-function traverseNextElement(tNode) {
-    if (tNode.child) {
-        return tNode.child;
-    }
-    else if (tNode.next) {
-        return tNode.next;
-    }
-    else {
-        // Let's take the following template: <div><span>text</span></div><component/>
-        // After checking the text node, we need to find the next parent that has a "next" TNode,
-        // in this case the parent `div`, so that we can find the component.
-        while (tNode.parent && !tNode.parent.next) {
-            tNode = tNode.parent;
-        }
-        return tNode.parent && tNode.parent.next;
-    }
-}
-/**
- * Locates the component within the given LView and returns the matching index
- */
-function findViaComponent(lView, componentInstance) {
-    var componentIndices = lView[TVIEW].components;
-    if (componentIndices) {
-        for (var i = 0; i < componentIndices.length; i++) {
-            var elementComponentIndex = componentIndices[i];
-            var componentView = getComponentViewByIndex(elementComponentIndex, lView);
-            if (componentView[CONTEXT] === componentInstance) {
-                return elementComponentIndex;
-            }
-        }
-    }
-    else {
-        var rootComponentView = getComponentViewByIndex(HEADER_OFFSET, lView);
-        var rootComponent = rootComponentView[CONTEXT];
-        if (rootComponent === componentInstance) {
-            // we are dealing with the root element here therefore we know that the
-            // element is the very first element after the HEADER data in the lView
-            return HEADER_OFFSET;
-        }
-    }
-    return -1;
-}
-/**
- * Locates the directive within the given LView and returns the matching index
- */
-function findViaDirective(lView, directiveInstance) {
-    // if a directive is monkey patched then it will (by default)
-    // have a reference to the LView of the current view. The
-    // element bound to the directive being search lives somewhere
-    // in the view data. We loop through the nodes and check their
-    // list of directives for the instance.
-    var tNode = lView[TVIEW].firstChild;
-    while (tNode) {
-        var directiveIndexStart = tNode.directiveStart;
-        var directiveIndexEnd = tNode.directiveEnd;
-        for (var i = directiveIndexStart; i < directiveIndexEnd; i++) {
-            if (lView[i] === directiveInstance) {
-                return tNode.index;
-            }
-        }
-        tNode = traverseNextElement(tNode);
-    }
-    return -1;
-}
-/**
- * Returns a list of directives extracted from the given view based on the
- * provided list of directive index values.
- *
- * @param nodeIndex The node index
- * @param lView The target view data
- * @param includeComponents Whether or not to include components in returned directives
- */
-function getDirectivesAtNodeIndex(nodeIndex, lView, includeComponents) {
-    var tNode = lView[TVIEW].data[nodeIndex];
-    var directiveStartIndex = tNode.directiveStart;
-    if (directiveStartIndex == 0)
-        return EMPTY_ARRAY$1;
-    var directiveEndIndex = tNode.directiveEnd;
-    if (!includeComponents && tNode.flags & 1 /* isComponent */)
-        directiveStartIndex++;
-    return lView.slice(directiveStartIndex, directiveEndIndex);
-}
-function getComponentAtNodeIndex(nodeIndex, lView) {
-    var tNode = lView[TVIEW].data[nodeIndex];
-    var directiveStartIndex = tNode.directiveStart;
-    return tNode.flags & 1 /* isComponent */ ? lView[directiveStartIndex] : null;
-}
-/**
- * Returns a map of local references (local reference name => element or directive instance) that
- * exist on a given element.
- */
-function discoverLocalRefs(lView, nodeIndex) {
-    var tNode = lView[TVIEW].data[nodeIndex];
-    if (tNode && tNode.localNames) {
-        var result = {};
-        var localIndex = tNode.index + 1;
-        for (var i = 0; i < tNode.localNames.length; i += 2) {
-            result[tNode.localNames[i]] = lView[localIndex];
-            localIndex++;
-        }
-        return result;
-    }
-    return null;
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Returns the component instance associated with a given DOM host element.
- * Elements which don't represent components return `null`.
- *
- * @param element Host DOM element from which the component should be retrieved.
- *
- * ```
- * <my-app>
- *   #VIEW
- *     <div>
- *       <child-comp></child-comp>
- *     </div>
- * </mp-app>
- *
- * expect(getComponent(<child-comp>) instanceof ChildComponent).toBeTruthy();
- * expect(getComponent(<my-app>) instanceof MyApp).toBeTruthy();
- * ```
- *
- * @publicApi
- */
-function getComponent(element) {
-    var context = loadLContextFromNode(element);
-    if (context.component === undefined) {
-        context.component = getComponentAtNodeIndex(context.nodeIndex, context.lView);
-    }
-    return context.component;
-}
-/**
- * Returns the component instance associated with a given DOM host element.
- * Elements which don't represent components return `null`.
- *
- * @param element Host DOM element from which the component should be retrieved.
- *
- * ```
- * <my-app>
- *   #VIEW
- *     <div>
- *       <child-comp></child-comp>
- *     </div>
- * </mp-app>
- *
- * expect(getComponent(<child-comp>) instanceof ChildComponent).toBeTruthy();
- * expect(getComponent(<my-app>) instanceof MyApp).toBeTruthy();
- * ```
- *
- * @publicApi
- */
-function getContext(element) {
-    var context = loadLContextFromNode(element);
-    return context.lView[CONTEXT];
-}
-/**
- * Returns the component instance associated with view which owns the DOM element (`null`
- * otherwise).
- *
- * @param element DOM element which is owned by an existing component's view.
- *
- * ```
- * <my-app>
- *   #VIEW
- *     <div>
- *       <child-comp></child-comp>
- *     </div>
- * </mp-app>
- *
- * expect(getViewComponent(<child-comp>) instanceof MyApp).toBeTruthy();
- * expect(getViewComponent(<my-app>)).toEqual(null);
- * ```
- *
- * @publicApi
- */
-function getViewComponent(element) {
-    var context = loadLContext(element);
-    var lView = context.lView;
-    while (lView[PARENT] && lView[HOST] === null) {
-        // As long as lView[HOST] is null we know we are part of sub-template such as `*ngIf`
-        lView = lView[PARENT];
-    }
-    return lView[FLAGS] & 512 /* IsRoot */ ? null : lView[CONTEXT];
-}
-/**
- * Returns the `RootContext` instance that is associated with
- * the application where the target is situated.
- *
- */
-function getRootContext$1(target) {
-    var lViewData = Array.isArray(target) ? target : loadLContext(target).lView;
-    var rootLView = getRootView(lViewData);
-    return rootLView[CONTEXT];
-}
-/**
- * Retrieve all root components.
- *
- * Root components are those which have been bootstrapped by Angular.
- *
- * @param target A DOM element, component or directive instance.
- *
- * @publicApi
- */
-function getRootComponents(target) {
-    return __spread(getRootContext$1(target).components);
-}
-/**
- * Retrieves an `Injector` associated with the element, component or directive.
- *
- * @param target A DOM element, component or directive instance.
- *
- * @publicApi
- */
-function getInjector(target) {
-    var context = loadLContext(target);
-    var tNode = context.lView[TVIEW].data[context.nodeIndex];
-    return new NodeInjector(tNode, context.lView);
-}
-/**
- * Retrieve a set of injection tokens at a given DOM node.
- *
- * @param element Element for which the injection tokens should be retrieved.
- * @publicApi
- */
-function getInjectionTokens(element) {
-    var context = loadLContext(element, false);
-    if (!context)
-        return [];
-    var lView = context.lView;
-    var tView = lView[TVIEW];
-    var tNode = tView.data[context.nodeIndex];
-    var providerTokens = [];
-    var startIndex = tNode.providerIndexes & 65535 /* ProvidersStartIndexMask */;
-    var endIndex = tNode.directiveEnd;
-    for (var i = startIndex; i < endIndex; i++) {
-        var value = tView.data[i];
-        if (isDirectiveDefHack(value)) {
-            // The fact that we sometimes store Type and sometimes DirectiveDef in this location is a
-            // design flaw.  We should always store same type so that we can be monomorphic. The issue
-            // is that for Components/Directives we store the def instead the type. The correct behavior
-            // is that we should always be storing injectable type in this location.
-            value = value.type;
-        }
-        providerTokens.push(value);
-    }
-    return providerTokens;
-}
-/**
- * Retrieves directives associated with a given DOM host element.
- *
- * @param target A DOM element, component or directive instance.
- *
- * @publicApi
- */
-function getDirectives(target) {
-    var context = loadLContext(target);
-    if (context.directives === undefined) {
-        context.directives = getDirectivesAtNodeIndex(context.nodeIndex, context.lView, false);
-    }
-    return context.directives || [];
-}
-function loadLContext(target, throwOnNotFound) {
-    if (throwOnNotFound === void 0) { throwOnNotFound = true; }
-    var context = getLContext(target);
-    if (!context && throwOnNotFound) {
-        throw new Error(ngDevMode ? "Unable to find context associated with " + renderStringify(target) :
-            'Invalid ng target');
-    }
-    return context;
-}
-/**
- * Retrieve map of local references.
- *
- * The references are retrieved as a map of local reference name to element or directive instance.
- *
- * @param target A DOM element, component or directive instance.
- *
- * @publicApi
- */
-function getLocalRefs(target) {
-    var context = loadLContext(target);
-    if (context.localRefs === undefined) {
-        context.localRefs = discoverLocalRefs(context.lView, context.nodeIndex);
-    }
-    return context.localRefs || {};
-}
-/**
- * Retrieve the host element of the component.
- *
- * Use this function to retrieve the host element of the component. The host
- * element is the element which the component is associated with.
- *
- * @param directive Component or Directive for which the host element should be retrieved.
- *
- * @publicApi
- */
-function getHostElement(directive) {
-    return getLContext(directive).native;
-}
-function loadLContextFromNode(node) {
-    if (!(node instanceof Node))
-        throw new Error('Expecting instance of DOM Node');
-    return loadLContext(node);
-}
-function isBrowserEvents(listener) {
-    // Browser events are those which don't have `useCapture` as boolean.
-    return typeof listener.useCapture === 'boolean';
-}
-/**
- * Retrieves a list of DOM listeners.
- *
- * ```
- * <my-app>
- *   #VIEW
- *     <div (click)="doSomething()">
- *     </div>
- * </mp-app>
- *
- * expect(getListeners(<div>)).toEqual({
- *   name: 'click',
- *   element: <div>,
- *   callback: () => doSomething(),
- *   useCapture: false
- * });
- * ```
- *
- * @param element Element for which the DOM listeners should be retrieved.
- * @publicApi
- */
-function getListeners(element) {
-    var lContext = loadLContextFromNode(element);
-    var lView = lContext.lView;
-    var tView = lView[TVIEW];
-    var lCleanup = lView[CLEANUP];
-    var tCleanup = tView.cleanup;
-    var listeners = [];
-    if (tCleanup && lCleanup) {
-        for (var i = 0; i < tCleanup.length;) {
-            var firstParam = tCleanup[i++];
-            var secondParam = tCleanup[i++];
-            if (typeof firstParam === 'string') {
-                var name_1 = firstParam;
-                var listenerElement = readElementValue(lView[secondParam]);
-                var callback = lCleanup[tCleanup[i++]];
-                var useCaptureOrIndx = tCleanup[i++];
-                // if useCaptureOrIndx is boolean then report it as is.
-                // if useCaptureOrIndx is positive number then it in unsubscribe method
-                // if useCaptureOrIndx is negative number then it is a Subscription
-                var useCapture = typeof useCaptureOrIndx === 'boolean' ?
-                    useCaptureOrIndx :
-                    (useCaptureOrIndx >= 0 ? false : null);
-                if (element == listenerElement) {
-                    listeners.push({ element: element, name: name_1, callback: callback, useCapture: useCapture });
-                }
-            }
-        }
-    }
-    listeners.sort(sortListeners);
-    return listeners;
-}
-function sortListeners(a, b) {
-    if (a.name == b.name)
-        return 0;
-    return a.name < b.name ? -1 : 1;
-}
-/**
- * This function should not exist because it is megamorphic and only mostly correct.
- *
- * See call site for more info.
- */
-function isDirectiveDefHack(obj) {
-    return obj.type !== undefined && obj.template !== undefined && obj.declaredInputs !== undefined;
 }
 
 /**
@@ -6511,6 +5968,292 @@ function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/** Returns the matching `LContext` data for a given DOM node, directive or component instance.
+ *
+ * This function will examine the provided DOM element, component, or directive instance\'s
+ * monkey-patched property to derive the `LContext` data. Once called then the monkey-patched
+ * value will be that of the newly created `LContext`.
+ *
+ * If the monkey-patched value is the `LView` instance then the context value for that
+ * target will be created and the monkey-patch reference will be updated. Therefore when this
+ * function is called it may mutate the provided element\'s, component\'s or any of the associated
+ * directive\'s monkey-patch values.
+ *
+ * If the monkey-patch value is not detected then the code will walk up the DOM until an element
+ * is found which contains a monkey-patch reference. When that occurs then the provided element
+ * will be updated with a new context (which is then returned). If the monkey-patch value is not
+ * detected for a component/directive instance then it will throw an error (all components and
+ * directives should be automatically monkey-patched by ivy).
+ *
+ * @param target Component, Directive or DOM Node.
+ */
+function getLContext(target) {
+    var mpValue = readPatchedData(target);
+    if (mpValue) {
+        // only when it's an array is it considered an LView instance
+        // ... otherwise it's an already constructed LContext instance
+        if (Array.isArray(mpValue)) {
+            var lView = mpValue;
+            var nodeIndex = void 0;
+            var component = undefined;
+            var directives = undefined;
+            if (isComponentInstance(target)) {
+                nodeIndex = findViaComponent(lView, target);
+                if (nodeIndex == -1) {
+                    throw new Error('The provided component was not found in the application');
+                }
+                component = target;
+            }
+            else if (isDirectiveInstance(target)) {
+                nodeIndex = findViaDirective(lView, target);
+                if (nodeIndex == -1) {
+                    throw new Error('The provided directive was not found in the application');
+                }
+                directives = getDirectivesAtNodeIndex(nodeIndex, lView, false);
+            }
+            else {
+                nodeIndex = findViaNativeElement(lView, target);
+                if (nodeIndex == -1) {
+                    return null;
+                }
+            }
+            // the goal is not to fill the entire context full of data because the lookups
+            // are expensive. Instead, only the target data (the element, component, container, ICU
+            // expression or directive details) are filled into the context. If called multiple times
+            // with different target values then the missing target data will be filled in.
+            var native = readElementValue(lView[nodeIndex]);
+            var existingCtx = readPatchedData(native);
+            var context = (existingCtx && !Array.isArray(existingCtx)) ?
+                existingCtx :
+                createLContext(lView, nodeIndex, native);
+            // only when the component has been discovered then update the monkey-patch
+            if (component && context.component === undefined) {
+                context.component = component;
+                attachPatchData(context.component, context);
+            }
+            // only when the directives have been discovered then update the monkey-patch
+            if (directives && context.directives === undefined) {
+                context.directives = directives;
+                for (var i = 0; i < directives.length; i++) {
+                    attachPatchData(directives[i], context);
+                }
+            }
+            attachPatchData(context.native, context);
+            mpValue = context;
+        }
+    }
+    else {
+        var rElement = target;
+        ngDevMode && assertDomNode(rElement);
+        // if the context is not found then we need to traverse upwards up the DOM
+        // to find the nearest element that has already been monkey patched with data
+        var parent_1 = rElement;
+        while (parent_1 = parent_1.parentNode) {
+            var parentContext = readPatchedData(parent_1);
+            if (parentContext) {
+                var lView = void 0;
+                if (Array.isArray(parentContext)) {
+                    lView = parentContext;
+                }
+                else {
+                    lView = parentContext.lView;
+                }
+                // the edge of the app was also reached here through another means
+                // (maybe because the DOM was changed manually).
+                if (!lView) {
+                    return null;
+                }
+                var index = findViaNativeElement(lView, rElement);
+                if (index >= 0) {
+                    var native = readElementValue(lView[index]);
+                    var context = createLContext(lView, index, native);
+                    attachPatchData(native, context);
+                    mpValue = context;
+                    break;
+                }
+            }
+        }
+    }
+    return mpValue || null;
+}
+/**
+ * Creates an empty instance of a `LContext` context
+ */
+function createLContext(lView, nodeIndex, native) {
+    return {
+        lView: lView,
+        nodeIndex: nodeIndex,
+        native: native,
+        component: undefined,
+        directives: undefined,
+        localRefs: undefined,
+    };
+}
+/**
+ * Takes a component instance and returns the view for that component.
+ *
+ * @param componentInstance
+ * @returns The component's view
+ */
+function getComponentViewByInstance(componentInstance) {
+    var lView = readPatchedData(componentInstance);
+    var view;
+    if (Array.isArray(lView)) {
+        var nodeIndex = findViaComponent(lView, componentInstance);
+        view = getComponentViewByIndex(nodeIndex, lView);
+        var context = createLContext(lView, nodeIndex, view[HOST]);
+        context.component = componentInstance;
+        attachPatchData(componentInstance, context);
+        attachPatchData(context.native, context);
+    }
+    else {
+        var context = lView;
+        view = getComponentViewByIndex(context.nodeIndex, context.lView);
+    }
+    return view;
+}
+/**
+ * Assigns the given data to the given target (which could be a component,
+ * directive or DOM node instance) using monkey-patching.
+ */
+function attachPatchData(target, data) {
+    target[MONKEY_PATCH_KEY_NAME] = data;
+}
+function isComponentInstance(instance) {
+    return instance && instance.constructor && instance.constructor.ngComponentDef;
+}
+function isDirectiveInstance(instance) {
+    return instance && instance.constructor && instance.constructor.ngDirectiveDef;
+}
+/**
+ * Locates the element within the given LView and returns the matching index
+ */
+function findViaNativeElement(lView, target) {
+    var tNode = lView[TVIEW].firstChild;
+    while (tNode) {
+        var native = getNativeByTNode(tNode, lView);
+        if (native === target) {
+            return tNode.index;
+        }
+        tNode = traverseNextElement(tNode);
+    }
+    return -1;
+}
+/**
+ * Locates the next tNode (child, sibling or parent).
+ */
+function traverseNextElement(tNode) {
+    if (tNode.child) {
+        return tNode.child;
+    }
+    else if (tNode.next) {
+        return tNode.next;
+    }
+    else {
+        // Let's take the following template: <div><span>text</span></div><component/>
+        // After checking the text node, we need to find the next parent that has a "next" TNode,
+        // in this case the parent `div`, so that we can find the component.
+        while (tNode.parent && !tNode.parent.next) {
+            tNode = tNode.parent;
+        }
+        return tNode.parent && tNode.parent.next;
+    }
+}
+/**
+ * Locates the component within the given LView and returns the matching index
+ */
+function findViaComponent(lView, componentInstance) {
+    var componentIndices = lView[TVIEW].components;
+    if (componentIndices) {
+        for (var i = 0; i < componentIndices.length; i++) {
+            var elementComponentIndex = componentIndices[i];
+            var componentView = getComponentViewByIndex(elementComponentIndex, lView);
+            if (componentView[CONTEXT] === componentInstance) {
+                return elementComponentIndex;
+            }
+        }
+    }
+    else {
+        var rootComponentView = getComponentViewByIndex(HEADER_OFFSET, lView);
+        var rootComponent = rootComponentView[CONTEXT];
+        if (rootComponent === componentInstance) {
+            // we are dealing with the root element here therefore we know that the
+            // element is the very first element after the HEADER data in the lView
+            return HEADER_OFFSET;
+        }
+    }
+    return -1;
+}
+/**
+ * Locates the directive within the given LView and returns the matching index
+ */
+function findViaDirective(lView, directiveInstance) {
+    // if a directive is monkey patched then it will (by default)
+    // have a reference to the LView of the current view. The
+    // element bound to the directive being search lives somewhere
+    // in the view data. We loop through the nodes and check their
+    // list of directives for the instance.
+    var tNode = lView[TVIEW].firstChild;
+    while (tNode) {
+        var directiveIndexStart = tNode.directiveStart;
+        var directiveIndexEnd = tNode.directiveEnd;
+        for (var i = directiveIndexStart; i < directiveIndexEnd; i++) {
+            if (lView[i] === directiveInstance) {
+                return tNode.index;
+            }
+        }
+        tNode = traverseNextElement(tNode);
+    }
+    return -1;
+}
+/**
+ * Returns a list of directives extracted from the given view based on the
+ * provided list of directive index values.
+ *
+ * @param nodeIndex The node index
+ * @param lView The target view data
+ * @param includeComponents Whether or not to include components in returned directives
+ */
+function getDirectivesAtNodeIndex(nodeIndex, lView, includeComponents) {
+    var tNode = lView[TVIEW].data[nodeIndex];
+    var directiveStartIndex = tNode.directiveStart;
+    if (directiveStartIndex == 0)
+        return EMPTY_ARRAY$1;
+    var directiveEndIndex = tNode.directiveEnd;
+    if (!includeComponents && tNode.flags & 1 /* isComponent */)
+        directiveStartIndex++;
+    return lView.slice(directiveStartIndex, directiveEndIndex);
+}
+function getComponentAtNodeIndex(nodeIndex, lView) {
+    var tNode = lView[TVIEW].data[nodeIndex];
+    var directiveStartIndex = tNode.directiveStart;
+    return tNode.flags & 1 /* isComponent */ ? lView[directiveStartIndex] : null;
+}
+/**
+ * Returns a map of local references (local reference name => element or directive instance) that
+ * exist on a given element.
+ */
+function discoverLocalRefs(lView, nodeIndex) {
+    var tNode = lView[TVIEW].data[nodeIndex];
+    if (tNode && tNode.localNames) {
+        var result = {};
+        var localIndex = tNode.index + 1;
+        for (var i = 0; i < tNode.localNames.length; i += 2) {
+            result[tNode.localNames[i]] = lView[localIndex];
+            localIndex++;
+        }
+        return result;
+    }
+    return null;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 var NG_PROJECT_AS_ATTR_NAME = 'ngProjectAs';
 
 /**
@@ -6550,15 +6293,17 @@ var domRendererFactory3 = {
  * found in the LICENSE file at https://angular.io/license
  */
 function getLContainer(tNode, embeddedView) {
+    ngDevMode && assertLView(embeddedView);
+    var container = embeddedView[PARENT];
     if (tNode.index === -1) {
         // This is a dynamically created view inside a dynamic container.
-        // If the host index is -1, the view has not yet been inserted, so it has no parent.
-        var containerHostIndex = embeddedView[CONTAINER_INDEX];
-        return containerHostIndex > -1 ? embeddedView[PARENT][containerHostIndex] : null;
+        // The parent isn't an LContainer if the embedded view hasn't been attached yet.
+        return isLContainer(container) ? container : null;
     }
     else {
+        ngDevMode && assertLContainer(container);
         // This is a inline view node (e.g. embeddedViewStart)
-        return embeddedView[PARENT][tNode.parent.index];
+        return container;
     }
 }
 /**
@@ -6672,7 +6417,7 @@ function walkTNodeTree(viewToWalk, action, renderer, renderParent, beforeNode) {
                     return null;
                 // When exiting a container, the beforeNode must be restored to the previous value
                 if (tNode.type === 0 /* Container */) {
-                    currentView = currentView[PARENT];
+                    currentView = getLViewParent(currentView);
                     beforeNode = currentView[tNode.index][NATIVE];
                 }
                 if (tNode.type === 2 /* View */) {
@@ -6749,35 +6494,34 @@ function addRemoveViewFromContainer(viewToWalk, insertMode, beforeNode) {
  */
 function destroyViewTree(rootView) {
     // If the view has no children, we can clean it up and return early.
-    if (rootView[TVIEW].childIndex === -1) {
+    var lViewOrLContainer = rootView[CHILD_HEAD];
+    if (!lViewOrLContainer) {
         return cleanUpView(rootView);
     }
-    var viewOrContainer = getLViewChild(rootView);
-    while (viewOrContainer) {
+    while (lViewOrLContainer) {
         var next = null;
-        if (viewOrContainer.length >= HEADER_OFFSET) {
+        if (isLView(lViewOrLContainer)) {
             // If LView, traverse down to child.
-            var view = viewOrContainer;
-            if (view[TVIEW].childIndex > -1)
-                next = getLViewChild(view);
+            next = lViewOrLContainer[CHILD_HEAD];
         }
         else {
+            ngDevMode && assertLContainer(lViewOrLContainer);
             // If container, traverse down to its first LView.
-            var container = viewOrContainer;
-            if (container[VIEWS].length)
-                next = container[VIEWS][0];
+            var views = lViewOrLContainer[VIEWS];
+            if (views.length > 0)
+                next = views[0];
         }
-        if (next == null) {
+        if (!next) {
             // Only clean up view when moving to the side or up, as destroy hooks
             // should be called in order from the bottom up.
-            while (viewOrContainer && !viewOrContainer[NEXT] && viewOrContainer !== rootView) {
-                cleanUpView(viewOrContainer);
-                viewOrContainer = getParentState(viewOrContainer, rootView);
+            while (lViewOrLContainer && !lViewOrLContainer[NEXT] && lViewOrLContainer !== rootView) {
+                cleanUpView(lViewOrLContainer);
+                lViewOrLContainer = getParentState(lViewOrLContainer, rootView);
             }
-            cleanUpView(viewOrContainer || rootView);
-            next = viewOrContainer && viewOrContainer[NEXT];
+            cleanUpView(lViewOrLContainer || rootView);
+            next = lViewOrLContainer && lViewOrLContainer[NEXT];
         }
-        viewOrContainer = next;
+        lViewOrLContainer = next;
     }
 }
 /**
@@ -6790,12 +6534,13 @@ function destroyViewTree(rootView) {
  *
  * @param lView The view to insert
  * @param lContainer The container into which the view should be inserted
- * @param parentView The new parent of the inserted view
- * @param index The index at which to insert the view
- * @param containerIndex The index of the container node, if dynamic
+ * @param index Which index in the container to insert the child view into
  */
-function insertView(lView, lContainer, parentView, index, containerIndex) {
+function insertView(lView, lContainer, index) {
+    ngDevMode && assertLView(lView);
+    ngDevMode && assertLContainer(lContainer);
     var views = lContainer[VIEWS];
+    ngDevMode && assertDefined(views, 'Container must have views');
     if (index > 0) {
         // This is a new view, we need to add it to the children.
         views[index - 1][NEXT] = lView;
@@ -6808,12 +6553,7 @@ function insertView(lView, lContainer, parentView, index, containerIndex) {
         views.push(lView);
         lView[NEXT] = null;
     }
-    // Dynamically inserted views need a reference to their parent container's host so it's
-    // possible to jump from a view to its container's next when walking the node tree.
-    if (containerIndex > -1) {
-        lView[CONTAINER_INDEX] = containerIndex;
-        lView[PARENT] = parentView;
-    }
+    lView[PARENT] = lContainer;
     // Notify query that a new view has been added
     if (lView[QUERIES]) {
         lView[QUERIES].insertView(index);
@@ -6842,7 +6582,6 @@ function detachView(lContainer, removeIndex) {
     if (viewToDetach[QUERIES]) {
         viewToDetach[QUERIES].removeView();
     }
-    viewToDetach[CONTAINER_INDEX] = -1;
     viewToDetach[PARENT] = null;
     // Unsets the attached flag
     viewToDetach[FLAGS] &= ~128 /* Attached */;
@@ -6858,11 +6597,6 @@ function removeView(lContainer, removeIndex) {
     var view = lContainer[VIEWS][removeIndex];
     detachView(lContainer, removeIndex);
     destroyLView(view);
-}
-/** Gets the child of the given LView */
-function getLViewChild(lView) {
-    var childIndex = lView[TVIEW].childIndex;
-    return childIndex === -1 ? null : lView[childIndex];
 }
 /**
  * A standalone function which destroys an LView,
@@ -6887,21 +6621,21 @@ function destroyLView(view) {
  * embedded views, the container (which is the view node's parent, but not the
  * LView's parent) needs to be checked for a possible next property.
  *
- * @param state The LViewOrLContainer for which we need a parent state
+ * @param lViewOrLContainer The LViewOrLContainer for which we need a parent state
  * @param rootView The rootView, so we don't propagate too far up the view tree
  * @returns The correct parent LViewOrLContainer
  */
-function getParentState(state, rootView) {
+function getParentState(lViewOrLContainer, rootView) {
     var tNode;
-    if (state.length >= HEADER_OFFSET && (tNode = state[T_HOST]) &&
+    if (isLView(lViewOrLContainer) && (tNode = lViewOrLContainer[T_HOST]) &&
         tNode.type === 2 /* View */) {
         // if it's an embedded view, the state needs to go up to the container, in case the
         // container has a next
-        return getLContainer(tNode, state);
+        return getLContainer(tNode, lViewOrLContainer);
     }
     else {
         // otherwise, use parent view for containers or component views
-        return state[PARENT] === rootView ? null : state[PARENT];
+        return lViewOrLContainer[PARENT] === rootView ? null : lViewOrLContainer[PARENT];
     }
 }
 /**
@@ -7053,9 +6787,10 @@ function getRenderParent(tNode, currentView) {
  * a host element.
  */
 function getHostNative(currentView) {
+    ngDevMode && assertLView(currentView);
     var hostTNode = currentView[T_HOST];
     return hostTNode && hostTNode.type === 3 /* Element */ ?
-        getNativeByTNode(hostTNode, currentView[PARENT]) :
+        getNativeByTNode(hostTNode, getLViewParent(currentView)) :
         null;
 }
 /**
@@ -9232,6 +8967,59 @@ function matchingSelectorIndex(tNode, selectors, textSelectors) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+function applyOnCreateInstructions(tNode) {
+    // there may be some instructions that need to run in a specific
+    // order because the CREATE block in a directive runs before the
+    // CREATE block in a template. To work around this instructions
+    // can get access to the function array below and defer any code
+    // to run after the element is created.
+    var fns;
+    if (fns = tNode.onElementCreationFns) {
+        for (var i = 0; i < fns.length; i++) {
+            fns[i]();
+        }
+        tNode.onElementCreationFns = null;
+    }
+}
+/**
+ * Unwraps a parent injector location number to find the view offset from the current injector,
+ * then walks up the declaration view tree until the TNode of the parent injector is found.
+ *
+ * @param location The location of the parent injector, which contains the view offset
+ * @param startView The LView instance from which to start walking up the view tree
+ * @param startTNode The TNode instance of the starting element
+ * @returns The TNode of the parent injector
+ */
+function getParentInjectorTNode(location, startView, startTNode) {
+    if (startTNode.parent && startTNode.parent.injectorIndex !== -1) {
+        // view offset is 0
+        var injectorIndex = startTNode.parent.injectorIndex;
+        var parentTNode_1 = startTNode.parent;
+        while (parentTNode_1.parent != null && injectorIndex == parentTNode_1.injectorIndex) {
+            parentTNode_1 = parentTNode_1.parent;
+        }
+        return parentTNode_1;
+    }
+    var viewOffset = getParentInjectorViewOffset(location);
+    // view offset is 1
+    var parentView = startView;
+    var parentTNode = startView[T_HOST];
+    // view offset is superior to 1
+    while (viewOffset > 1) {
+        parentView = parentView[DECLARATION_VIEW];
+        parentTNode = parentView[T_HOST];
+        viewOffset--;
+    }
+    return parentTNode;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 /**
  * A permanent marker promise which signifies that the current CD tree is
  * clean.
@@ -9798,7 +9586,6 @@ function createTView(viewIndex, templateFn, consts, vars, directives, pipes, vie
         viewQuery: viewQuery,
         node: null,
         data: blueprint.slice().fill(null, bindingStartIndex),
-        childIndex: -1,
         bindingStartIndex: bindingStartIndex,
         viewQueryStartIndex: initialViewLength,
         expandoStartIndex: initialViewLength,
@@ -9826,7 +9613,6 @@ function createViewBlueprint(bindingStartIndex, initialViewLength) {
     var blueprint = new Array(initialViewLength)
         .fill(null, 0, bindingStartIndex)
         .fill(NO_CHANGE, bindingStartIndex);
-    blueprint[CONTAINER_INDEX] = -1;
     blueprint[BINDING_INDEX] = bindingStartIndex;
     return blueprint;
 }
@@ -10945,7 +10731,7 @@ function addComponentLogic(lView, previousOrParentTNode, def) {
     // Only component views should be added to the view tree directly. Embedded views are
     // accessed through their containers because they may be removed / re-added later.
     var rendererFactory = lView[RENDERER_FACTORY];
-    var componentView = addToViewTree(lView, previousOrParentTNode.index, createLView(lView, tView, null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, lView[previousOrParentTNode.index], previousOrParentTNode, rendererFactory, lView[RENDERER_FACTORY].createRenderer(native, def)));
+    var componentView = addToViewTree(lView, createLView(lView, tView, null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, lView[previousOrParentTNode.index], previousOrParentTNode, rendererFactory, lView[RENDERER_FACTORY].createRenderer(native, def)));
     componentView[T_HOST] = previousOrParentTNode;
     // Component view will always be created before any injected LContainers,
     // so this is a regular element, wrap it with the component view
@@ -11038,6 +10824,8 @@ function generateInitialInputs(directiveIndex, inputs, tNode) {
  * @returns LContainer
  */
 function createLContainer(hostNative, currentView, native, isForViewContainerRef) {
+    ngDevMode && assertDomNode(native);
+    ngDevMode && assertLView(currentView);
     return [
         isForViewContainerRef ? -1 : 0,
         [],
@@ -11108,7 +10896,7 @@ function containerInternal(index, tagName, attrs) {
     appendChild(comment, tNode, lView);
     // Containers are added to the current view tree instead of their embedded views
     // because views can be removed and re-inserted.
-    addToViewTree(lView, index + HEADER_OFFSET, lContainer);
+    addToViewTree(lView, lContainer);
     ngDevMode && assertNodeType(getPreviousOrParentTNode(), 0 /* Container */);
     return tNode;
 }
@@ -11175,7 +10963,7 @@ function containerRefreshEnd() {
  * by executing an associated template function.
  */
 function refreshDynamicEmbeddedViews(lView) {
-    for (var current = getLViewChild(lView); current !== null; current = current[NEXT]) {
+    for (var current = lView[CHILD_HEAD]; current !== null; current = current[NEXT]) {
         // Note: current can be an LView or an LContainer instance, but here we are only interested
         // in LContainer. We can tell it's an LContainer because its length is less than the LView
         // header.
@@ -11253,7 +11041,7 @@ function embeddedViewStart(viewBlockId, consts, vars) {
     if (lContainer) {
         if (isCreationMode(viewToRender)) {
             // it is a new view, insert it into collection of views for a given container
-            insertView(viewToRender, lContainer, lView, lContainer[ACTIVE_INDEX], -1);
+            insertView(viewToRender, lContainer, lContainer[ACTIVE_INDEX]);
         }
         lContainer[ACTIVE_INDEX]++;
     }
@@ -11293,7 +11081,9 @@ function embeddedViewEnd() {
         lView[FLAGS] &= ~4 /* CreationMode */;
     }
     refreshDescendantViews(lView); // update mode pass
-    leaveView(lView[PARENT]);
+    var lContainer = lView[PARENT];
+    ngDevMode && assertLContainerOrUndefined(lContainer);
+    leaveView(lContainer[PARENT]);
     setPreviousOrParentTNode(viewHost);
     setIsParent(false);
 }
@@ -11425,6 +11215,7 @@ function projection(nodeIndex, selectorIndex, attrs) {
     var componentNode = componentView[T_HOST];
     var nodeToProject = componentNode.projection[selectorIndex];
     var projectedView = componentView[PARENT];
+    ngDevMode && assertLView(projectedView);
     var projectionNodeIndex = -1;
     if (Array.isArray(nodeToProject)) {
         appendChild(nodeToProject, tProjectionNode, lView);
@@ -11444,7 +11235,7 @@ function projection(nodeIndex, selectorIndex, attrs) {
                         projectionNodeStack$1[++projectionNodeIndex] = nodeToProject;
                         projectionNodeStack$1[++projectionNodeIndex] = projectedView;
                         nodeToProject = firstProjectedNode;
-                        projectedView = currentComponentView[PARENT];
+                        projectedView = getLViewParent(currentComponentView);
                         continue;
                     }
                 }
@@ -11473,25 +11264,29 @@ function projection(nodeIndex, selectorIndex, attrs) {
  *
  * @param lView The view where LView or LContainer should be added
  * @param adjustedHostIndex Index of the view's host node in LView[], adjusted for header
- * @param state The LView or LContainer to add to the view tree
+ * @param lViewOrLContainer The LView or LContainer to add to the view tree
  * @returns The state passed in
  */
-function addToViewTree(lView, adjustedHostIndex, state) {
-    var tView = lView[TVIEW];
-    if (lView[TAIL]) {
-        lView[TAIL][NEXT] = state;
+function addToViewTree(lView, lViewOrLContainer) {
+    // TODO(benlesh/misko): This implementation is incorrect, because it always adds the LContainer to
+    // the end of the queue, which means if the developer retrieves the LContainers from RNodes out of
+    // order, the change detection will run out of order, as the act of retrieving the the LContainer
+    // from the RNode is what adds it to the queue.
+    if (lView[CHILD_HEAD]) {
+        lView[CHILD_TAIL][NEXT] = lViewOrLContainer;
     }
-    else if (tView.firstTemplatePass) {
-        tView.childIndex = adjustedHostIndex;
+    else {
+        lView[CHILD_HEAD] = lViewOrLContainer;
     }
-    lView[TAIL] = state;
-    return state;
+    lView[CHILD_TAIL] = lViewOrLContainer;
+    return lViewOrLContainer;
 }
 ///////////////////////////////
 //// Change detection
 ///////////////////////////////
 /** If node is an OnPush component, marks its LView dirty. */
 function markDirtyIfOnPush(lView, viewIndex) {
+    ngDevMode && assertLView(lView);
     var childComponentLView = getComponentViewByIndex(viewIndex, lView);
     if (!(childComponentLView[FLAGS] & 16 /* CheckAlways */)) {
         childComponentLView[FLAGS] |= 64 /* Dirty */;
@@ -11546,12 +11341,13 @@ function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
 function markViewDirty(lView) {
     while (lView) {
         lView[FLAGS] |= 64 /* Dirty */;
+        var parent_2 = getLViewParent(lView);
         // Stop traversing up as soon as you find a root view that wasn't attached to any container
-        if (isRootView(lView) && lView[CONTAINER_INDEX] === -1) {
+        if (isRootView(lView) && !parent_2) {
             return lView;
         }
         // continue otherwise
-        lView = lView[PARENT];
+        lView = parent_2;
     }
     return null;
 }
@@ -12076,7 +11872,7 @@ function addPlayer(ref, player) {
     var element$$1 = context.native;
     var lView = context.lView;
     var playerContext = getOrCreatePlayerContext(element$$1, context);
-    var rootContext = getRootContext$1(lView);
+    var rootContext = getRootContext(lView);
     addPlayerInternal(playerContext, rootContext, element$$1, player, 0, ref);
     scheduleTick(rootContext, 2 /* FlushPlayers */);
 }
@@ -12099,6 +11895,275 @@ function getPlayers(ref) {
     var stylingContext = getStylingContext(context.nodeIndex, context.lView);
     var playerContext = stylingContext ? getPlayerContext(stylingContext) : null;
     return playerContext ? getPlayersInternal(playerContext) : [];
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Returns the component instance associated with a given DOM host element.
+ * Elements which don't represent components return `null`.
+ *
+ * @param element Host DOM element from which the component should be retrieved.
+ *
+ * ```
+ * <my-app>
+ *   #VIEW
+ *     <div>
+ *       <child-comp></child-comp>
+ *     </div>
+ * </mp-app>
+ *
+ * expect(getComponent(<child-comp>) instanceof ChildComponent).toBeTruthy();
+ * expect(getComponent(<my-app>) instanceof MyApp).toBeTruthy();
+ * ```
+ *
+ * @publicApi
+ */
+function getComponent(element) {
+    var context = loadLContextFromNode(element);
+    if (context.component === undefined) {
+        context.component = getComponentAtNodeIndex(context.nodeIndex, context.lView);
+    }
+    return context.component;
+}
+/**
+ * Returns the component instance associated with a given DOM host element.
+ * Elements which don't represent components return `null`.
+ *
+ * @param element Host DOM element from which the component should be retrieved.
+ *
+ * ```
+ * <my-app>
+ *   #VIEW
+ *     <div>
+ *       <child-comp></child-comp>
+ *     </div>
+ * </mp-app>
+ *
+ * expect(getComponent(<child-comp>) instanceof ChildComponent).toBeTruthy();
+ * expect(getComponent(<my-app>) instanceof MyApp).toBeTruthy();
+ * ```
+ *
+ * @publicApi
+ */
+function getContext(element) {
+    var context = loadLContextFromNode(element);
+    return context.lView[CONTEXT];
+}
+/**
+ * Returns the component instance associated with view which owns the DOM element (`null`
+ * otherwise).
+ *
+ * @param element DOM element which is owned by an existing component's view.
+ *
+ * ```
+ * <my-app>
+ *   #VIEW
+ *     <div>
+ *       <child-comp></child-comp>
+ *     </div>
+ * </mp-app>
+ *
+ * expect(getViewComponent(<child-comp>) instanceof MyApp).toBeTruthy();
+ * expect(getViewComponent(<my-app>)).toEqual(null);
+ * ```
+ *
+ * @publicApi
+ */
+function getViewComponent(element) {
+    var context = loadLContext(element);
+    var lView = context.lView;
+    var parent;
+    ngDevMode && assertLView(lView);
+    while (lView[HOST] === null && (parent = getLViewParent(lView))) {
+        // As long as lView[HOST] is null we know we are part of sub-template such as `*ngIf`
+        lView = parent;
+    }
+    return lView[FLAGS] & 512 /* IsRoot */ ? null : lView[CONTEXT];
+}
+/**
+ * Retrieve all root components.
+ *
+ * Root components are those which have been bootstrapped by Angular.
+ *
+ * @param target A DOM element, component or directive instance.
+ *
+ * @publicApi
+ */
+function getRootComponents(target) {
+    return __spread(getRootContext(target).components);
+}
+/**
+ * Retrieves an `Injector` associated with the element, component or directive.
+ *
+ * @param target A DOM element, component or directive instance.
+ *
+ * @publicApi
+ */
+function getInjector(target) {
+    var context = loadLContext(target);
+    var tNode = context.lView[TVIEW].data[context.nodeIndex];
+    return new NodeInjector(tNode, context.lView);
+}
+/**
+ * Retrieve a set of injection tokens at a given DOM node.
+ *
+ * @param element Element for which the injection tokens should be retrieved.
+ * @publicApi
+ */
+function getInjectionTokens(element) {
+    var context = loadLContext(element, false);
+    if (!context)
+        return [];
+    var lView = context.lView;
+    var tView = lView[TVIEW];
+    var tNode = tView.data[context.nodeIndex];
+    var providerTokens = [];
+    var startIndex = tNode.providerIndexes & 65535 /* ProvidersStartIndexMask */;
+    var endIndex = tNode.directiveEnd;
+    for (var i = startIndex; i < endIndex; i++) {
+        var value = tView.data[i];
+        if (isDirectiveDefHack(value)) {
+            // The fact that we sometimes store Type and sometimes DirectiveDef in this location is a
+            // design flaw.  We should always store same type so that we can be monomorphic. The issue
+            // is that for Components/Directives we store the def instead the type. The correct behavior
+            // is that we should always be storing injectable type in this location.
+            value = value.type;
+        }
+        providerTokens.push(value);
+    }
+    return providerTokens;
+}
+/**
+ * Retrieves directives associated with a given DOM host element.
+ *
+ * @param target A DOM element, component or directive instance.
+ *
+ * @publicApi
+ */
+function getDirectives(target) {
+    var context = loadLContext(target);
+    if (context.directives === undefined) {
+        context.directives = getDirectivesAtNodeIndex(context.nodeIndex, context.lView, false);
+    }
+    return context.directives || [];
+}
+function loadLContext(target, throwOnNotFound) {
+    if (throwOnNotFound === void 0) { throwOnNotFound = true; }
+    var context = getLContext(target);
+    if (!context && throwOnNotFound) {
+        throw new Error(ngDevMode ? "Unable to find context associated with " + renderStringify(target) :
+            'Invalid ng target');
+    }
+    return context;
+}
+/**
+ * Retrieve map of local references.
+ *
+ * The references are retrieved as a map of local reference name to element or directive instance.
+ *
+ * @param target A DOM element, component or directive instance.
+ *
+ * @publicApi
+ */
+function getLocalRefs(target) {
+    var context = loadLContext(target);
+    if (context.localRefs === undefined) {
+        context.localRefs = discoverLocalRefs(context.lView, context.nodeIndex);
+    }
+    return context.localRefs || {};
+}
+/**
+ * Retrieve the host element of the component.
+ *
+ * Use this function to retrieve the host element of the component. The host
+ * element is the element which the component is associated with.
+ *
+ * @param directive Component or Directive for which the host element should be retrieved.
+ *
+ * @publicApi
+ */
+function getHostElement(directive) {
+    return getLContext(directive).native;
+}
+function loadLContextFromNode(node) {
+    if (!(node instanceof Node))
+        throw new Error('Expecting instance of DOM Node');
+    return loadLContext(node);
+}
+function isBrowserEvents(listener) {
+    // Browser events are those which don't have `useCapture` as boolean.
+    return typeof listener.useCapture === 'boolean';
+}
+/**
+ * Retrieves a list of DOM listeners.
+ *
+ * ```
+ * <my-app>
+ *   #VIEW
+ *     <div (click)="doSomething()">
+ *     </div>
+ * </mp-app>
+ *
+ * expect(getListeners(<div>)).toEqual({
+ *   name: 'click',
+ *   element: <div>,
+ *   callback: () => doSomething(),
+ *   useCapture: false
+ * });
+ * ```
+ *
+ * @param element Element for which the DOM listeners should be retrieved.
+ * @publicApi
+ */
+function getListeners(element) {
+    var lContext = loadLContextFromNode(element);
+    var lView = lContext.lView;
+    var tView = lView[TVIEW];
+    var lCleanup = lView[CLEANUP];
+    var tCleanup = tView.cleanup;
+    var listeners = [];
+    if (tCleanup && lCleanup) {
+        for (var i = 0; i < tCleanup.length;) {
+            var firstParam = tCleanup[i++];
+            var secondParam = tCleanup[i++];
+            if (typeof firstParam === 'string') {
+                var name_1 = firstParam;
+                var listenerElement = readElementValue(lView[secondParam]);
+                var callback = lCleanup[tCleanup[i++]];
+                var useCaptureOrIndx = tCleanup[i++];
+                // if useCaptureOrIndx is boolean then report it as is.
+                // if useCaptureOrIndx is positive number then it in unsubscribe method
+                // if useCaptureOrIndx is negative number then it is a Subscription
+                var useCapture = typeof useCaptureOrIndx === 'boolean' ?
+                    useCaptureOrIndx :
+                    (useCaptureOrIndx >= 0 ? false : null);
+                if (element == listenerElement) {
+                    listeners.push({ element: element, name: name_1, callback: callback, useCapture: useCapture });
+                }
+            }
+        }
+    }
+    listeners.sort(sortListeners);
+    return listeners;
+}
+function sortListeners(a, b) {
+    if (a.name == b.name)
+        return 0;
+    return a.name < b.name ? -1 : 1;
+}
+/**
+ * This function should not exist because it is megamorphic and only mostly correct.
+ *
+ * See call site for more info.
+ */
+function isDirectiveDefHack(obj) {
+    return obj.type !== undefined && obj.template !== undefined && obj.declaredInputs !== undefined;
 }
 
 /**
@@ -12214,7 +12279,7 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
             rendererFactory.begin();
         var componentView = createRootComponentView(hostRNode, componentDef, rootView, rendererFactory, renderer, sanitizer);
         component = createRootComponent(componentView, componentDef, rootView, rootContext, opts.hostFeatures || null);
-        addToViewTree(rootView, HEADER_OFFSET, componentView);
+        addToViewTree(rootView, componentView);
         refreshDescendantViews(rootView); // creation mode pass
         rootView[FLAGS] &= ~4 /* CreationMode */;
         refreshDescendantViews(rootView); // update mode pass
@@ -12301,17 +12366,6 @@ function LifecycleHooksFeature(component, def) {
     registerPostOrderHooks(rootTView, { directiveStart: dirIndex, directiveEnd: dirIndex + 1 });
 }
 /**
- * Retrieve the root context for any component by walking the parent `LView` until
- * reaching the root `LView`.
- *
- * @param component any component
- */
-function getRootContext$2(component) {
-    var rootContext = getRootView(component)[CONTEXT];
-    ngDevMode && assertDefined(rootContext, 'rootContext');
-    return rootContext;
-}
-/**
  * Wait on component until it is rendered.
  *
  * This function returns a `Promise` which is resolved when the component's
@@ -12328,7 +12382,7 @@ function getRootContext$2(component) {
  * @returns Promise which resolves when the component is rendered.
  */
 function whenRendered(component) {
-    return getRootContext$2(component).clean;
+    return getRootContext(component).clean;
 }
 
 /**
@@ -12445,14 +12499,6 @@ function setSimpleChangesStore(instance, store) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * Determines if a definition is a {@link ComponentDef} or a {@link DirectiveDef}
- * @param definition The definition to examine
- */
-function isComponentDef$1(definition) {
-    var def = definition;
-    return typeof def.template === 'function';
-}
 function getSuperType(type) {
     return Object.getPrototypeOf(type.prototype).constructor;
 }
@@ -12465,7 +12511,7 @@ function InheritDefinitionFeature(definition) {
     var _loop_1 = function () {
         var e_1, _a;
         var superDef = undefined;
-        if (isComponentDef$1(definition)) {
+        if (isComponentDef(definition)) {
             // Don't use getComponentDef/getDirectiveDef. This logic relies on inheritance.
             superDef = superType.ngComponentDef || superType.ngDirectiveDef;
         }
@@ -12507,7 +12553,7 @@ function InheritDefinitionFeature(definition) {
                 }
             }
             // Merge View Queries
-            if (isComponentDef$1(definition) && isComponentDef$1(superDef)) {
+            if (isComponentDef(definition) && isComponentDef(superDef)) {
                 var prevViewQuery_1 = definition.viewQuery;
                 var superViewQuery_1 = superDef.viewQuery;
                 if (superViewQuery_1) {
@@ -12569,7 +12615,6 @@ function InheritDefinitionFeature(definition) {
                     finally { if (e_1) throw e_1.error; }
                 }
             }
-            return "break";
         }
         else {
             // Even if we don't have a definition, check the type for the hooks and use those if need be
@@ -12593,9 +12638,7 @@ function InheritDefinitionFeature(definition) {
         superType = Object.getPrototypeOf(superType);
     };
     while (superType) {
-        var state_1 = _loop_1();
-        if (state_1 === "break")
-            break;
+        _loop_1();
     }
 }
 function maybeUnwrapEmpty(value) {
@@ -13651,7 +13694,7 @@ var ViewRef = /** @class */ (function () {
         this._appRef = appRef;
     };
     ViewRef.prototype._lookUpContext = function () {
-        return this._context = this._lView[PARENT][this._componentIndex];
+        return this._context = getLViewParent(this._lView)[this._componentIndex];
     };
     return ViewRef;
 }());
@@ -13753,10 +13796,10 @@ function createTemplateRef(TemplateRefToken, ElementRefToken, hostTNode, hostVie
                 _this._injectorIndex = _injectorIndex;
                 return _this;
             }
-            TemplateRef_.prototype.createEmbeddedView = function (context, container$$1, hostTNode, hostView, index) {
+            TemplateRef_.prototype.createEmbeddedView = function (context, container$$1, index) {
                 var lView = createEmbeddedViewAndNode(this._tView, context, this._declarationParentView, this._hostLContainer[QUERIES], this._injectorIndex);
                 if (container$$1) {
-                    insertView(lView, container$$1, hostView, index, hostTNode.index);
+                    insertView(lView, container$$1, index);
                 }
                 renderEmbeddedTemplate(lView, this._tView, context);
                 var viewRef = new ViewRef(lView, context, -1);
@@ -13847,7 +13890,7 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
             ViewContainerRef_.prototype.createEmbeddedView = function (templateRef, context, index) {
                 var adjustedIdx = this._adjustIndex(index);
                 var viewRef = templateRef
-                    .createEmbeddedView(context || {}, this._lContainer, this._hostTNode, this._hostView, adjustedIdx);
+                    .createEmbeddedView(context || {}, this._lContainer, adjustedIdx);
                 viewRef.attachToViewContainerRef(this);
                 this._viewRefs.splice(adjustedIdx, 0, viewRef);
                 return viewRef;
@@ -13867,7 +13910,7 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 }
                 var lView = viewRef._lView;
                 var adjustedIdx = this._adjustIndex(index);
-                insertView(lView, this._lContainer, this._hostView, adjustedIdx, this._hostTNode.index);
+                insertView(lView, this._lContainer, adjustedIdx);
                 var beforeNode = getBeforeNodeForView(adjustedIdx, this._lContainer[VIEWS], this._lContainer[NATIVE]);
                 addRemoveViewFromContainer(lView, true, beforeNode);
                 viewRef.attachToViewContainerRef(this);
@@ -13893,7 +13936,7 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 var adjustedIdx = this._adjustIndex(index, -1);
                 var view = detachView(this._lContainer, adjustedIdx);
                 var wasDetached = this._viewRefs.splice(adjustedIdx, 1)[0] != null;
-                return wasDetached ? new ViewRef(view, view[CONTEXT], view[CONTAINER_INDEX]) : null;
+                return wasDetached ? new ViewRef(view, view[CONTEXT], -1) : null;
             };
             ViewContainerRef_.prototype._adjustIndex = function (index, shift) {
                 if (shift === void 0) { shift = 0; }
@@ -13936,7 +13979,7 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
         }
         hostView[hostTNode.index] = lContainer =
             createLContainer(slotValue, hostView, commentNode, true);
-        addToViewTree(hostView, hostTNode.index, lContainer);
+        addToViewTree(hostView, lContainer);
     }
     return new R3ViewContainerRef(lContainer, hostTNode, hostView);
 }
@@ -14168,7 +14211,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.5+27.sha-65d839d.with-local-changes');
+var VERSION = new Version('8.0.0-beta.5+57.sha-c64b13e.with-local-changes');
 
 /**
  * @license
@@ -17374,7 +17417,7 @@ var ComponentFactory$1 = /** @class */ (function (_super) {
             // executed here?
             // Angular 5 reference: https://stackblitz.com/edit/lifecycle-hooks-vcref
             component = createRootComponent(componentView, this.componentDef, rootLView, rootContext, [LifecycleHooksFeature]);
-            addToViewTree(rootLView, HEADER_OFFSET, componentView);
+            addToViewTree(rootLView, componentView);
             refreshDescendantViews(rootLView);
         }
         finally {
@@ -17453,6 +17496,25 @@ var ELEMENT_MARKER = {
 var COMMENT_MARKER = {
     marker: 'comment'
 };
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+* Equivalent to ES6 spread, add each item to an array.
+*
+* @param items The items to add
+* @param arr The array to which you want to add the items
+*/
+function addAllToArray(items, arr) {
+    for (var i = 0; i < items.length; i++) {
+        arr.push(items[i]);
+    }
+}
 
 /**
  * @license
@@ -20709,7 +20771,7 @@ function compileComponent(type, metadata) {
                     throw new Error(error.join('\n'));
                 }
                 var templateUrl = metadata.templateUrl || "ng:///" + renderStringify(type) + "/template.html";
-                var meta = __assign({}, directiveMetadata(type, metadata), { typeSourceSpan: compiler.createParseSourceSpan('Component', renderStringify(type), templateUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY$1, animations: metadata.animations, viewQueries: extractQueriesMetadata(type, getReflect().propMetadata(type), isViewQuery), directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
+                var meta = __assign({}, directiveMetadata(type, metadata), { typeSourceSpan: compiler.createParseSourceSpan('Component', renderStringify(type), templateUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY$1, animations: metadata.animations, viewQueries: extractQueriesMetadata(type, getReflect().ownPropMetadata(type), isViewQuery), directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
                 ngComponentDef = compiler.compileComponent(angularCoreEnv, templateUrl, meta);
                 // When NgModule decorator executed, we enqueued the module definition such that
                 // it would only dequeue and add itself as module scope to all of its declarations,
@@ -20770,7 +20832,7 @@ function extendsDirectlyFromObject(type) {
  */
 function directiveMetadata(type, metadata) {
     // Reflect inputs and outputs.
-    var propMetadata = getReflect().propMetadata(type);
+    var propMetadata = getReflect().ownPropMetadata(type);
     return {
         name: type.name,
         type: type,
@@ -20935,7 +20997,7 @@ var updateBaseDefFromIOProp = function (getProp) {
         }
         var baseDef = constructor.ngBaseDef;
         var defProp = getProp(baseDef);
-        defProp[name] = args[0];
+        defProp[name] = args[0] || name;
     };
 };
 /**
@@ -25838,5 +25900,5 @@ var NgModuleFactory_ = /** @class */ (function (_super) {
  * Generated bundle index. Do not edit.
  */
 
-export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_r, _iterableDiffersFactory as ɵangular_packages_core_core_o, _keyValueDiffersFactory as ɵangular_packages_core_core_p, _localeFactory as ɵangular_packages_core_core_q, zoneSchedulerFactory as ɵangular_packages_core_core_s, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, DefaultIterableDifferFactory as ɵangular_packages_core_core_m, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_n, DebugElement__PRE_R3__ as ɵangular_packages_core_core_l, DebugNode__PRE_R3__ as ɵangular_packages_core_core_k, NullInjector as ɵangular_packages_core_core_a, injectInjectorOnly as ɵangular_packages_core_core_b, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, getModuleFactory__PRE_R3__ as ɵangular_packages_core_core_j, wtfEnabled as ɵangular_packages_core_core_t, createScope as ɵangular_packages_core_core_v, detectWTF as ɵangular_packages_core_core_u, endTimeRange as ɵangular_packages_core_core_y, leave as ɵangular_packages_core_core_w, startTimeRange as ɵangular_packages_core_core_x, SCHEDULER as ɵangular_packages_core_core_bb, injectAttributeImpl as ɵangular_packages_core_core_bc, getLView as ɵangular_packages_core_core_bd, getPreviousOrParentTNode as ɵangular_packages_core_core_be, nextContextImpl as ɵangular_packages_core_core_bf, BoundPlayerFactory as ɵangular_packages_core_core_bk, loadInternal as ɵangular_packages_core_core_bh, createElementRef as ɵangular_packages_core_core_g, createTemplateRef as ɵangular_packages_core_core_h, createViewRef as ɵangular_packages_core_core_i, getUrlSanitizer as ɵangular_packages_core_core_bi, makeParamDecorator as ɵangular_packages_core_core_bl, makePropDecorator as ɵangular_packages_core_core_bm, getClosureSafeProperty as ɵangular_packages_core_core_bo, _def as ɵangular_packages_core_core_z, DebugContext as ɵangular_packages_core_core_ba, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, ViewEncapsulation, Version, VERSION, InjectFlags, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, INJECTOR, Injector, inject, inject as ɵinject, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual$1 as ɵdevModeEqual, isListLikeIterable$1 as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineBase as ɵdefineBase, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, directiveInject as ɵdirectiveInject, injectAttribute as ɵinjectAttribute, getFactoryOf$1 as ɵgetFactoryOf, getInheritedFactory as ɵgetInheritedFactory, setComponentScope as ɵsetComponentScope, templateRefExtractor as ɵtemplateRefExtractor, ProvidersFeature as ɵProvidersFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, NgOnChangesFeature as ɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, container as ɵcontainer, nextContext as ɵnextContext, elementStart as ɵelementStart, namespaceHTML as ɵnamespaceHTML, namespaceMathML as ɵnamespaceMathML, namespaceSVG as ɵnamespaceSVG, element as ɵelement, listener as ɵlistener, text as ɵtext, embeddedViewStart as ɵembeddedViewStart, projection as ɵprojection, bind as ɵbind, interpolation1 as ɵinterpolation1, interpolation2 as ɵinterpolation2, interpolation3 as ɵinterpolation3, interpolation4 as ɵinterpolation4, interpolation5 as ɵinterpolation5, interpolation6 as ɵinterpolation6, interpolation7 as ɵinterpolation7, interpolation8 as ɵinterpolation8, interpolationV as ɵinterpolationV, pipeBind1 as ɵpipeBind1, pipeBind2 as ɵpipeBind2, pipeBind3 as ɵpipeBind3, pipeBind4 as ɵpipeBind4, pipeBindV as ɵpipeBindV, pureFunction0 as ɵpureFunction0, pureFunction1 as ɵpureFunction1, pureFunction2 as ɵpureFunction2, pureFunction3 as ɵpureFunction3, pureFunction4 as ɵpureFunction4, pureFunction5 as ɵpureFunction5, pureFunction6 as ɵpureFunction6, pureFunction7 as ɵpureFunction7, pureFunction8 as ɵpureFunction8, pureFunctionV as ɵpureFunctionV, getCurrentView as ɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, restoreView as ɵrestoreView, containerRefreshStart as ɵcontainerRefreshStart, containerRefreshEnd as ɵcontainerRefreshEnd, queryRefresh as ɵqueryRefresh, viewQuery as ɵviewQuery, staticViewQuery as ɵstaticViewQuery, staticContentQuery as ɵstaticContentQuery, loadViewQuery as ɵloadViewQuery, contentQuery as ɵcontentQuery, loadContentQuery as ɵloadContentQuery, elementEnd as ɵelementEnd, elementProperty as ɵelementProperty, componentHostSyntheticProperty as ɵcomponentHostSyntheticProperty, componentHostSyntheticListener as ɵcomponentHostSyntheticListener, projectionDef as ɵprojectionDef, reference as ɵreference, enableBindings as ɵenableBindings, disableBindings as ɵdisableBindings, allocHostVars as ɵallocHostVars, elementAttribute as ɵelementAttribute, elementContainerStart as ɵelementContainerStart, elementContainerEnd as ɵelementContainerEnd, elementStyling as ɵelementStyling, elementHostAttrs as ɵelementHostAttrs, elementStylingMap as ɵelementStylingMap, elementStyleProp as ɵelementStyleProp, elementStylingApply as ɵelementStylingApply, elementClassProp as ɵelementClassProp, textBinding as ɵtextBinding, template as ɵtemplate, embeddedViewEnd as ɵembeddedViewEnd, store as ɵstore, load as ɵload, pipe as ɵpipe, whenRendered as ɵwhenRendered, i18n as ɵi18n, i18nAttributes as ɵi18nAttributes, i18nExp as ɵi18nExp, i18nStart as ɵi18nStart, i18nEnd as ɵi18nEnd, i18nApply as ɵi18nApply, i18nPostprocess as ɵi18nPostprocess, setClassMetadata as ɵsetClassMetadata, resolveWindow as ɵresolveWindow, resolveDocument as ɵresolveDocument, resolveBody as ɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, defaultStyleSanitizer as ɵdefaultStyleSanitizer, sanitizeScript as ɵsanitizeScript, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, sanitizeUrlOrResourceUrl as ɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, createInjector as ɵcreateInjector, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$3 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_r, _iterableDiffersFactory as ɵangular_packages_core_core_o, _keyValueDiffersFactory as ɵangular_packages_core_core_p, _localeFactory as ɵangular_packages_core_core_q, zoneSchedulerFactory as ɵangular_packages_core_core_s, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, DefaultIterableDifferFactory as ɵangular_packages_core_core_m, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_n, DebugElement__PRE_R3__ as ɵangular_packages_core_core_l, DebugNode__PRE_R3__ as ɵangular_packages_core_core_k, NullInjector as ɵangular_packages_core_core_a, injectInjectorOnly as ɵangular_packages_core_core_b, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, getModuleFactory__PRE_R3__ as ɵangular_packages_core_core_j, wtfEnabled as ɵangular_packages_core_core_t, createScope as ɵangular_packages_core_core_v, detectWTF as ɵangular_packages_core_core_u, endTimeRange as ɵangular_packages_core_core_y, leave as ɵangular_packages_core_core_w, startTimeRange as ɵangular_packages_core_core_x, SCHEDULER as ɵangular_packages_core_core_bb, injectAttributeImpl as ɵangular_packages_core_core_bc, getLView as ɵangular_packages_core_core_bd, getPreviousOrParentTNode as ɵangular_packages_core_core_be, nextContextImpl as ɵangular_packages_core_core_bf, BoundPlayerFactory as ɵangular_packages_core_core_bj, getRootContext as ɵangular_packages_core_core_bo, loadInternal as ɵangular_packages_core_core_bn, createElementRef as ɵangular_packages_core_core_g, createTemplateRef as ɵangular_packages_core_core_h, createViewRef as ɵangular_packages_core_core_i, getUrlSanitizer as ɵangular_packages_core_core_bh, makeParamDecorator as ɵangular_packages_core_core_bk, makePropDecorator as ɵangular_packages_core_core_bl, getClosureSafeProperty as ɵangular_packages_core_core_bp, _def as ɵangular_packages_core_core_z, DebugContext as ɵangular_packages_core_core_ba, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, ViewEncapsulation, Version, VERSION, InjectFlags, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, INJECTOR, Injector, inject, inject as ɵinject, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual$1 as ɵdevModeEqual, isListLikeIterable$1 as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineBase as ɵdefineBase, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, directiveInject as ɵdirectiveInject, injectAttribute as ɵinjectAttribute, getFactoryOf$1 as ɵgetFactoryOf, getInheritedFactory as ɵgetInheritedFactory, setComponentScope as ɵsetComponentScope, templateRefExtractor as ɵtemplateRefExtractor, ProvidersFeature as ɵProvidersFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, NgOnChangesFeature as ɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, container as ɵcontainer, nextContext as ɵnextContext, elementStart as ɵelementStart, namespaceHTML as ɵnamespaceHTML, namespaceMathML as ɵnamespaceMathML, namespaceSVG as ɵnamespaceSVG, element as ɵelement, listener as ɵlistener, text as ɵtext, embeddedViewStart as ɵembeddedViewStart, projection as ɵprojection, bind as ɵbind, interpolation1 as ɵinterpolation1, interpolation2 as ɵinterpolation2, interpolation3 as ɵinterpolation3, interpolation4 as ɵinterpolation4, interpolation5 as ɵinterpolation5, interpolation6 as ɵinterpolation6, interpolation7 as ɵinterpolation7, interpolation8 as ɵinterpolation8, interpolationV as ɵinterpolationV, pipeBind1 as ɵpipeBind1, pipeBind2 as ɵpipeBind2, pipeBind3 as ɵpipeBind3, pipeBind4 as ɵpipeBind4, pipeBindV as ɵpipeBindV, pureFunction0 as ɵpureFunction0, pureFunction1 as ɵpureFunction1, pureFunction2 as ɵpureFunction2, pureFunction3 as ɵpureFunction3, pureFunction4 as ɵpureFunction4, pureFunction5 as ɵpureFunction5, pureFunction6 as ɵpureFunction6, pureFunction7 as ɵpureFunction7, pureFunction8 as ɵpureFunction8, pureFunctionV as ɵpureFunctionV, getCurrentView as ɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, restoreView as ɵrestoreView, containerRefreshStart as ɵcontainerRefreshStart, containerRefreshEnd as ɵcontainerRefreshEnd, queryRefresh as ɵqueryRefresh, viewQuery as ɵviewQuery, staticViewQuery as ɵstaticViewQuery, staticContentQuery as ɵstaticContentQuery, loadViewQuery as ɵloadViewQuery, contentQuery as ɵcontentQuery, loadContentQuery as ɵloadContentQuery, elementEnd as ɵelementEnd, elementProperty as ɵelementProperty, componentHostSyntheticProperty as ɵcomponentHostSyntheticProperty, componentHostSyntheticListener as ɵcomponentHostSyntheticListener, projectionDef as ɵprojectionDef, reference as ɵreference, enableBindings as ɵenableBindings, disableBindings as ɵdisableBindings, allocHostVars as ɵallocHostVars, elementAttribute as ɵelementAttribute, elementContainerStart as ɵelementContainerStart, elementContainerEnd as ɵelementContainerEnd, elementStyling as ɵelementStyling, elementHostAttrs as ɵelementHostAttrs, elementStylingMap as ɵelementStylingMap, elementStyleProp as ɵelementStyleProp, elementStylingApply as ɵelementStylingApply, elementClassProp as ɵelementClassProp, textBinding as ɵtextBinding, template as ɵtemplate, embeddedViewEnd as ɵembeddedViewEnd, store as ɵstore, load as ɵload, pipe as ɵpipe, whenRendered as ɵwhenRendered, i18n as ɵi18n, i18nAttributes as ɵi18nAttributes, i18nExp as ɵi18nExp, i18nStart as ɵi18nStart, i18nEnd as ɵi18nEnd, i18nApply as ɵi18nApply, i18nPostprocess as ɵi18nPostprocess, setClassMetadata as ɵsetClassMetadata, resolveWindow as ɵresolveWindow, resolveDocument as ɵresolveDocument, resolveBody as ɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, defaultStyleSanitizer as ɵdefaultStyleSanitizer, sanitizeScript as ɵsanitizeScript, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, sanitizeUrlOrResourceUrl as ɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, createInjector as ɵcreateInjector, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$3 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map

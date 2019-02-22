@@ -48,11 +48,9 @@ export declare function destroyViewTree(rootView: LView): void;
  *
  * @param lView The view to insert
  * @param lContainer The container into which the view should be inserted
- * @param parentView The new parent of the inserted view
- * @param index The index at which to insert the view
- * @param containerIndex The index of the container node, if dynamic
+ * @param index Which index in the container to insert the child view into
  */
-export declare function insertView(lView: LView, lContainer: LContainer, parentView: LView, index: number, containerIndex: number): void;
+export declare function insertView(lView: LView, lContainer: LContainer, index: number): void;
 /**
  * Detaches a view from a container.
  *
@@ -71,8 +69,6 @@ export declare function detachView(lContainer: LContainer, removeIndex: number):
  * @param removeIndex The index of the view to remove
  */
 export declare function removeView(lContainer: LContainer, removeIndex: number): void;
-/** Gets the child of the given LView */
-export declare function getLViewChild(lView: LView): LView | LContainer | null;
 /**
  * A standalone function which destroys an LView,
  * conducting cleanup (e.g. removing listeners, calling onDestroys).
@@ -88,11 +84,11 @@ export declare function destroyLView(view: LView): void;
  * embedded views, the container (which is the view node's parent, but not the
  * LView's parent) needs to be checked for a possible next property.
  *
- * @param state The LViewOrLContainer for which we need a parent state
+ * @param lViewOrLContainer The LViewOrLContainer for which we need a parent state
  * @param rootView The rootView, so we don't propagate too far up the view tree
  * @returns The correct parent LViewOrLContainer
  */
-export declare function getParentState(state: LView | LContainer, rootView: LView): LView | LContainer | null;
+export declare function getParentState(lViewOrLContainer: LView | LContainer, rootView: LView): LView | LContainer | null;
 /**
  * Inserts a native node before another native node for a given parent using {@link Renderer3}.
  * This is a utility function that can be used when native nodes were determined - it abstracts an

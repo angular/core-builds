@@ -18,6 +18,7 @@ import { CssSelectorList } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { GlobalTargetResolver, RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 import { SanitizerFn } from './interfaces/sanitization';
+import { StylingContext } from './interfaces/styling';
 import { ExpandoInstructions, LView, LViewFlags, OpaqueViewState, RootContext, RootContextFlags, TView } from './interfaces/view';
 import { NO_CHANGE } from './tokens';
 /**
@@ -485,7 +486,7 @@ export declare function initNodeFlags(tNode: TNode, index: number, numberOfDirec
  * @param isForViewContainerRef Optional a flag indicating the ViewContainerRef case
  * @returns LContainer
  */
-export declare function createLContainer(hostNative: RElement | RComment, currentView: LView, native: RComment, isForViewContainerRef?: boolean): LContainer;
+export declare function createLContainer(hostNative: RElement | RComment | StylingContext | LView, currentView: LView, native: RComment, isForViewContainerRef?: boolean): LContainer;
 /**
  * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
  *
@@ -583,10 +584,10 @@ export declare function projection(nodeIndex: number, selectorIndex?: number, at
  *
  * @param lView The view where LView or LContainer should be added
  * @param adjustedHostIndex Index of the view's host node in LView[], adjusted for header
- * @param state The LView or LContainer to add to the view tree
+ * @param lViewOrLContainer The LView or LContainer to add to the view tree
  * @returns The state passed in
  */
-export declare function addToViewTree<T extends LView | LContainer>(lView: LView, adjustedHostIndex: number, state: T): T;
+export declare function addToViewTree<T extends LView | LContainer>(lView: LView, lViewOrLContainer: T): T;
 /**
  * Marks current view and all ancestors dirty.
  *
