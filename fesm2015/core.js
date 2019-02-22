@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.5+44.sha-9dac04f.with-local-changes
+ * @license Angular v8.0.0-beta.5+45.sha-43181ea.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -817,6 +817,12 @@ class ReflectionCapabilities {
             });
         }
         return propMetadata;
+    }
+    ownPropMetadata(typeOrFunc) {
+        if (!isType(typeOrFunc)) {
+            return {};
+        }
+        return this._ownPropMetadata(typeOrFunc, Object) || {};
     }
     hasLifecycleHook(type, lcProperty) {
         return type instanceof Type && lcProperty in type.prototype;
@@ -17605,7 +17611,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.5+44.sha-9dac04f.with-local-changes');
+const VERSION = new Version('8.0.0-beta.5+45.sha-43181ea.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -26144,7 +26150,7 @@ function compileComponent(type, metadata) {
                 /** @type {?} */
                 const templateUrl = metadata.templateUrl || `ng:///${renderStringify(type)}/template.html`;
                 /** @type {?} */
-                const meta = Object.assign({}, directiveMetadata(type, metadata), { typeSourceSpan: compiler.createParseSourceSpan('Component', renderStringify(type), templateUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY$1, animations: metadata.animations, viewQueries: extractQueriesMetadata(type, getReflect().propMetadata(type), isViewQuery), directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
+                const meta = Object.assign({}, directiveMetadata(type, metadata), { typeSourceSpan: compiler.createParseSourceSpan('Component', renderStringify(type), templateUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY$1, animations: metadata.animations, viewQueries: extractQueriesMetadata(type, getReflect().ownPropMetadata(type), isViewQuery), directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
                 ngComponentDef = compiler.compileComponent(angularCoreEnv, templateUrl, meta);
                 // When NgModule decorator executed, we enqueued the module definition such that
                 // it would only dequeue and add itself as module scope to all of its declarations,
@@ -26227,7 +26233,7 @@ function extendsDirectlyFromObject(type) {
 function directiveMetadata(type, metadata) {
     // Reflect inputs and outputs.
     /** @type {?} */
-    const propMetadata = getReflect().propMetadata(type);
+    const propMetadata = getReflect().ownPropMetadata(type);
     return {
         name: type.name,
         type: type,
@@ -26432,7 +26438,7 @@ const updateBaseDefFromIOProp = (getProp) => (target, name, ...args) => {
     const baseDef = constructor.ngBaseDef;
     /** @type {?} */
     const defProp = getProp(baseDef);
-    defProp[name] = args[0];
+    defProp[name] = args[0] || name;
 };
 /**
  * \@Annotation
