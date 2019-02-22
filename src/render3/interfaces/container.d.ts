@@ -47,7 +47,7 @@ export interface LContainer extends Array<any> {
      * Access to the parent view is necessary so we can propagate back
      * up from inside a container to parent[NEXT].
      */
-    [PARENT]: LView | null;
+    [PARENT]: LView;
     /**
      * This allows us to jump from a container to a sibling container or component
      * view with the same parent, so we can remove listeners efficiently.
@@ -67,8 +67,8 @@ export interface LContainer extends Array<any> {
      * It could also be a styling context if this is a node with a style/class
      * binding.
      */
-    [HOST]: RElement | RComment | StylingContext | LView;
+    readonly [HOST]: RElement | RComment | StylingContext | LView;
     /** The comment element that serves as an anchor for this LContainer. */
-    [NATIVE]: RComment;
+    readonly [NATIVE]: RComment;
 }
 export declare const unusedValueExportToPlacateAjd = 1;
