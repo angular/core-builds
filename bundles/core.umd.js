@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.5+24.sha-9defc00.with-local-changes
+ * @license Angular v8.0.0-beta.5+26.sha-32ae84d.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10152,6 +10152,17 @@
     function componentHostSyntheticProperty(index, propName, value, sanitizer, nativeOnly) {
         elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadComponentRenderer);
     }
+    /**
+     * Mapping between attributes names that don't correspond to their element property names.
+     */
+    var ATTR_TO_PROP = {
+        'class': 'className',
+        'for': 'htmlFor',
+        'formaction': 'formAction',
+        'innerHtml': 'innerHTML',
+        'readonly': 'readOnly',
+        'tabindex': 'tabIndex',
+    };
     function elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadRendererFn) {
         if (value === NO_CHANGE)
             return;
@@ -10172,6 +10183,7 @@
             }
         }
         else if (tNode.type === 3 /* Element */) {
+            propName = ATTR_TO_PROP[propName] || propName;
             if (ngDevMode) {
                 validateAgainstEventProperties(propName);
                 validateAgainstUnknownProperties(lView, element, propName, tNode);
@@ -14115,7 +14127,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.5+24.sha-9defc00.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.5+26.sha-32ae84d.with-local-changes');
 
     /**
      * @license
