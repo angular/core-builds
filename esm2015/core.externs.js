@@ -47,9 +47,9 @@ angular$packages$core$src$testability$testability.PublicTestability.prototype.wh
  * @return {?}
  */
 angular$packages$core$src$testability$testability.PublicTestability.prototype.findProviders = function(using, provider, exactMatch) {};
-// externs from packages/core/src/render3/util/global_utils.ts:
+// externs from packages/core/src/render3/global_utils.ts:
 /** @const */
-var angular$packages$core$src$render3$util$global_utils = {};
+var angular$packages$core$src$render3$global_utils = {};
 
 /** @typedef {?} */
-angular$packages$core$src$render3$util$global_utils.GlobalDevModeContainer;
+angular$packages$core$src$render3$global_utils.GlobalDevModeContainer;
