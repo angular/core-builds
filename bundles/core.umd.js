@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.5+43.sha-7f3e3a8.with-local-changes
+ * @license Angular v8.0.0-beta.5+44.sha-9dac04f.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12534,7 +12534,6 @@
                         finally { if (e_1) throw e_1.error; }
                     }
                 }
-                return "break";
             }
             else {
                 // Even if we don't have a definition, check the type for the hooks and use those if need be
@@ -12558,9 +12557,7 @@
             superType = Object.getPrototypeOf(superType);
         };
         while (superType) {
-            var state_1 = _loop_1();
-            if (state_1 === "break")
-                break;
+            _loop_1();
         }
     }
     function maybeUnwrapEmpty(value) {
@@ -14119,7 +14116,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.5+43.sha-7f3e3a8.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.5+44.sha-9dac04f.with-local-changes');
 
     /**
      * @license
