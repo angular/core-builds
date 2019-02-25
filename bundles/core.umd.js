@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.5+66.sha-3d48cde.with-local-changes
+ * @license Angular v8.0.0-beta.5+67.sha-22880ea.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6227,6 +6227,274 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    /*
+     * This file contains conditionally attached classes which provide human readable (debug) level
+     * information for `LView`, `LContainer` and other internal data structures. These data structures
+     * are stored internally as array which makes it very difficult during debugging to reason about the
+     * current state of the system.
+     *
+     * Patching the array with extra property does change the array's hidden class' but it does not
+     * change the cost of access, therefore this patching should not have significant if any impact in
+     * `ngDevMode` mode. (see: https://jsperf.com/array-vs-monkey-patch-array)
+     *
+     * So instead of seeing:
+     * ```
+     * Array(30) [Object, 659, null, …]
+     * ```
+     *
+     * You get to see:
+     * ```
+     * LViewDebug {
+     *   views: [...],
+     *   flags: {attached: true, ...}
+     *   nodes: [
+     *     {html: '<div id="123">', ..., nodes: [
+     *       {html: '<span>', ..., nodes: null}
+     *     ]}
+     *   ]
+     * }
+     * ```
+     */
+    function attachLViewDebug(lView) {
+        lView.debug = new LViewDebug(lView);
+    }
+    function attachLContainerDebug(lContainer) {
+        lContainer.debug = new LContainerDebug(lContainer);
+    }
+    function toDebug(obj) {
+        if (obj) {
+            var debug = obj.debug;
+            assertDefined(debug, 'Object does not have a debug representation.');
+            return debug;
+        }
+        else {
+            return obj;
+        }
+    }
+    /**
+     * Use this method to unwrap a native element in `LView` and convert it into HTML for easier
+     * reading.
+     *
+     * @param value possibly wrapped native DOM node.
+     * @param includeChildren If `true` then the serialized HTML form will include child elements (same
+     * as `outerHTML`). If `false` then the serialized HTML form will only contain the element itself
+     * (will not serialize child elements).
+     */
+    function toHtml(value, includeChildren) {
+        if (includeChildren === void 0) { includeChildren = false; }
+        var node = readElementValue(value);
+        if (node) {
+            var isTextNode = node.nodeType === Node.TEXT_NODE;
+            var outerHTML = (isTextNode ? node.textContent : node.outerHTML) || '';
+            if (includeChildren || isTextNode) {
+                return outerHTML;
+            }
+            else {
+                var innerHTML = node.innerHTML;
+                return outerHTML.split(innerHTML)[0] || null;
+            }
+        }
+        else {
+            return null;
+        }
+    }
+    var LViewDebug = /** @class */ (function () {
+        function LViewDebug(_raw_lView) {
+            this._raw_lView = _raw_lView;
+        }
+        Object.defineProperty(LViewDebug.prototype, "flags", {
+            /**
+             * Flags associated with the `LView` unpacked into a more readable state.
+             */
+            get: function () {
+                var flags = this._raw_lView[FLAGS];
+                return {
+                    __raw__flags__: flags,
+                    initPhaseState: flags & 3 /* InitPhaseStateMask */,
+                    creationMode: !!(flags & 4 /* CreationMode */),
+                    firstViewPass: !!(flags & 8 /* FirstLViewPass */),
+                    checkAlways: !!(flags & 16 /* CheckAlways */),
+                    dirty: !!(flags & 64 /* Dirty */),
+                    attached: !!(flags & 128 /* Attached */),
+                    destroyed: !!(flags & 256 /* Destroyed */),
+                    isRoot: !!(flags & 512 /* IsRoot */),
+                    indexWithinInitPhase: flags >> 10 /* IndexWithinInitPhaseShift */,
+                };
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "parent", {
+            get: function () { return toDebug(this._raw_lView[PARENT]); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "host", {
+            get: function () { return toHtml(this._raw_lView[HOST], true); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "context", {
+            get: function () { return this._raw_lView[CONTEXT]; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "nodes", {
+            /**
+             * The tree of nodes associated with the current `LView`. The nodes have been normalized into a
+             * tree structure with relevant details pulled out for readability.
+             */
+            get: function () {
+                var lView = this._raw_lView;
+                var tNode = lView[TVIEW].firstChild;
+                return toDebugNodes(tNode, lView);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "__other__", {
+            /**
+             * Additional information which is hidden behind a property. The extra level of indirection is
+             * done so that the debug view would not be cluttered with properties which are only rarely
+             * relevant to the developer.
+             */
+            get: function () {
+                return {
+                    tView: this._raw_lView[TVIEW],
+                    cleanup: this._raw_lView[CLEANUP],
+                    injector: this._raw_lView[INJECTOR$1],
+                    rendererFactory: this._raw_lView[RENDERER_FACTORY],
+                    renderer: this._raw_lView[RENDERER],
+                    sanitizer: this._raw_lView[SANITIZER],
+                    childHead: toDebug(this._raw_lView[CHILD_HEAD]),
+                    next: toDebug(this._raw_lView[NEXT]),
+                    childTail: toDebug(this._raw_lView[CHILD_TAIL]),
+                    declarationView: toDebug(this._raw_lView[DECLARATION_VIEW]),
+                    contentQueries: this._raw_lView[CONTENT_QUERIES],
+                    queries: this._raw_lView[QUERIES],
+                    tHost: this._raw_lView[T_HOST],
+                    bindingIndex: this._raw_lView[BINDING_INDEX],
+                };
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "childViews", {
+            /**
+             * Normalized view of child views (and containers) attached at this location.
+             */
+            get: function () {
+                var childViews = [];
+                var child = this.__other__.childHead;
+                while (child) {
+                    childViews.push(child);
+                    child = child.__other__.next;
+                }
+                return childViews;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return LViewDebug;
+    }());
+    /**
+     * Turns a flat list of nodes into a tree by walking the associated `TNode` tree.
+     *
+     * @param tNode
+     * @param lView
+     */
+    function toDebugNodes(tNode, lView) {
+        if (tNode) {
+            var debugNodes = [];
+            var tNodeCursor = tNode;
+            while (tNodeCursor) {
+                var rawValue = lView[tNode.index];
+                var native = readElementValue(rawValue);
+                var componentLViewDebug = toDebug(readLViewValue(rawValue));
+                debugNodes.push({
+                    html: toHtml(native),
+                    native: native,
+                    nodes: toDebugNodes(tNode.child, lView),
+                    component: componentLViewDebug
+                });
+                tNodeCursor = tNodeCursor.next;
+            }
+            return debugNodes;
+        }
+        else {
+            return null;
+        }
+    }
+    var LContainerDebug = /** @class */ (function () {
+        function LContainerDebug(_raw_lContainer) {
+            this._raw_lContainer = _raw_lContainer;
+        }
+        Object.defineProperty(LContainerDebug.prototype, "activeIndex", {
+            get: function () { return this._raw_lContainer[ACTIVE_INDEX]; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LContainerDebug.prototype, "views", {
+            get: function () {
+                return this._raw_lContainer[VIEWS].map(toDebug);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LContainerDebug.prototype, "parent", {
+            get: function () { return toDebug(this._raw_lContainer[PARENT]); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LContainerDebug.prototype, "queries", {
+            get: function () { return this._raw_lContainer[QUERIES]; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LContainerDebug.prototype, "host", {
+            get: function () { return this._raw_lContainer[HOST]; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LContainerDebug.prototype, "native", {
+            get: function () { return this._raw_lContainer[NATIVE]; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LContainerDebug.prototype, "__other__", {
+            get: function () {
+                return {
+                    next: toDebug(this._raw_lContainer[NEXT]),
+                };
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return LContainerDebug;
+    }());
+    /**
+     * Return an `LView` value if found.
+     *
+     * @param value `LView` if any
+     */
+    function readLViewValue(value) {
+        while (Array.isArray(value)) {
+            // This check is not quite right, as it does not take into account `StylingContext`
+            // This is why it is in debug, not in util.ts
+            if (value.length >= HEADER_OFFSET - 1)
+                return value;
+            value = value[HOST];
+        }
+        return null;
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     var NG_PROJECT_AS_ATTR_NAME = 'ngProjectAs';
 
     /**
@@ -9102,6 +9370,7 @@
         lView[INJECTOR$1] = injector || parentLView && parentLView[INJECTOR$1] || null;
         lView[HOST] = host;
         lView[T_HOST] = tHostNode;
+        ngDevMode && attachLViewDebug(lView);
         return lView;
     }
     function createNodeAtIndex(index, type, native, name, attrs) {
@@ -10799,7 +11068,7 @@
     function createLContainer(hostNative, currentView, native, isForViewContainerRef) {
         ngDevMode && assertDomNode(native);
         ngDevMode && assertLView(currentView);
-        return [
+        var lContainer = [
             isForViewContainerRef ? -1 : 0,
             [],
             currentView,
@@ -10808,6 +11077,8 @@
             hostNative,
             native,
         ];
+        ngDevMode && attachLContainerDebug(lContainer);
+        return lContainer;
     }
     /**
      * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
@@ -14170,7 +14441,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.5+66.sha-3d48cde.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.5+67.sha-22880ea.with-local-changes');
 
     /**
      * @license
