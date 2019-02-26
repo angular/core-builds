@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.5+82.sha-25a2fef.with-local-changes
+ * @license Angular v8.0.0-beta.5+84.sha-dc9f0af.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15647,13 +15647,19 @@ function createRootComponent(componentView, componentDef, rootView, rootContext,
     rootContext.components.push(component);
     componentView[CONTEXT] = component;
     hostFeatures && hostFeatures.forEach((feature) => feature(component, componentDef));
+    /** @type {?} */
+    const rootTNode = getPreviousOrParentTNode();
     if (tView.firstTemplatePass && componentDef.hostBindings) {
-        /** @type {?} */
-        const rootTNode = getPreviousOrParentTNode();
         /** @type {?} */
         const expando = (/** @type {?} */ (tView.expandoInstructions));
         invokeHostBindingsInCreationMode(componentDef, expando, component, rootTNode, tView.firstTemplatePass);
         rootTNode.onElementCreationFns && applyOnCreateInstructions(rootTNode);
+    }
+    if (rootTNode.stylingTemplate) {
+        /** @type {?} */
+        const native = (/** @type {?} */ ((/** @type {?} */ (componentView[HOST]))));
+        renderInitialClasses(native, rootTNode.stylingTemplate, componentView[RENDERER]);
+        renderInitialStyles(native, rootTNode.stylingTemplate, componentView[RENDERER]);
     }
     return component;
 }
@@ -17953,7 +17959,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.5+82.sha-25a2fef.with-local-changes');
+const VERSION = new Version('8.0.0-beta.5+84.sha-dc9f0af.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
