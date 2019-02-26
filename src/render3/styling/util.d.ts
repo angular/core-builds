@@ -7,6 +7,7 @@
  */
 import '../../util/ng_dev_mode';
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
+import { LContainer } from '../interfaces/container';
 import { LContext } from '../interfaces/context';
 import { TAttributes, TNode } from '../interfaces/node';
 import { Player, PlayerContext } from '../interfaces/player';
@@ -14,7 +15,7 @@ import { RElement } from '../interfaces/renderer';
 import { InitialStylingValues, StylingContext } from '../interfaces/styling';
 import { LView, RootContext } from '../interfaces/view';
 export declare const ANIMATION_PROP_PREFIX = "@";
-export declare function createEmptyStylingContext(element?: RElement | null, sanitizer?: StyleSanitizeFn | null, initialStyles?: InitialStylingValues | null, initialClasses?: InitialStylingValues | null): StylingContext;
+export declare function createEmptyStylingContext(wrappedElement?: LContainer | LView | RElement | null, sanitizer?: StyleSanitizeFn | null, initialStyles?: InitialStylingValues | null, initialClasses?: InitialStylingValues | null): StylingContext;
 export declare function allocateDirectiveIntoContext(context: StylingContext, directiveRef: any | null): void;
 /**
  * Used clone a copy of a pre-computed template of a styling context.
@@ -35,7 +36,6 @@ export declare function allocStylingContext(element: RElement | null, templateSt
  * @param viewData The view to search for the styling context
  */
 export declare function getStylingContext(index: number, viewData: LView): StylingContext;
-export declare function isStylingContext(value: any): boolean;
 export declare function isAnimationProp(name: string): boolean;
 export declare function hasClassInput(tNode: TNode): boolean;
 export declare function hasStyleInput(tNode: TNode): boolean;

@@ -114,7 +114,7 @@ export declare function nativeNextSibling(renderer: Renderer3, node: RNode): RNo
  * @returns Whether or not the child was appended
  */
 export declare function appendChild(childEl: RNode | RNode[], childTNode: TNode, currentView: LView): void;
-export declare function getBeforeNodeForView(index: number, views: LView[], containerNative: RComment): RComment | RElement;
+export declare function getBeforeNodeForView(index: number, views: LView[], containerNative: RComment): RNode;
 /**
  * Removes a native node itself using a given renderer. To remove the node we are looking up its
  * parent from the native tree as not all platforms / browsers support the equivalent of

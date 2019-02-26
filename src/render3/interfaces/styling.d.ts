@@ -7,7 +7,9 @@
  */
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
 import { RElement } from '../interfaces/renderer';
+import { LContainer } from './container';
 import { PlayerContext } from './player';
+import { LView } from './view';
 /**
  * The styling context acts as a styling manifest (shaped as an array) for determining which
  * styling properties have been assigned via the provided `updateStylingMap`, `updateStyleProp`
@@ -261,6 +263,10 @@ export interface StylingContext extends Array<{
     [key: string]: any;
 } | number | string | boolean | RElement | StyleSanitizeFn | PlayerContext | null> {
     /**
+     * Location of element that is used as a target for this context.
+     */
+    [StylingIndex.ElementPosition]: LContainer | LView | RElement | null;
+    /**
      * A numeric value representing the configuration status (whether the context is dirty or not)
      * mixed together (using bit shifting) with a index value which tells the starting index value
      * of where the multi style entries begin.
@@ -284,10 +290,6 @@ export interface StylingContext extends Array<{
      * need to take into account any style values that exist in the context.
      */
     [StylingIndex.SinglePropOffsetPositions]: SinglePropOffsetValues;
-    /**
-     * Location of element that is used as a target for this context.
-     */
-    [StylingIndex.ElementPosition]: RElement | null;
     /**
      * The last class value that was interpreted by elementStylingMap. This is cached
      * So that the algorithm can exit early incase the value has not changed.
@@ -589,12 +591,12 @@ export declare const enum StylingFlags {
 }
 /** Used as numeric pointer values to determine what cells to update in the `StylingContext` */
 export declare const enum StylingIndex {
-    MasterFlagPosition = 0,
-    DirectiveRegistryPosition = 1,
-    InitialStyleValuesPosition = 2,
-    InitialClassValuesPosition = 3,
-    SinglePropOffsetPositions = 4,
-    ElementPosition = 5,
+    ElementPosition = 0,
+    MasterFlagPosition = 1,
+    DirectiveRegistryPosition = 2,
+    InitialStyleValuesPosition = 3,
+    InitialClassValuesPosition = 4,
+    SinglePropOffsetPositions = 5,
     CachedMultiClasses = 6,
     CachedMultiStyles = 7,
     PlayerContext = 8,

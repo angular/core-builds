@@ -60,7 +60,7 @@ export declare class LViewDebug {
         declarationView: LViewDebug | null;
         contentQueries: import("@angular/core").QueryList<any>[] | null;
         queries: LQueries | null;
-        tHost: import("@angular/core/src/render3/interfaces/node").TElementNode | import("@angular/core/src/render3/interfaces/node").TViewNode | null;
+        tHost: import("@angular/core/src/render3/interfaces/node").TViewNode | import("@angular/core/src/render3/interfaces/node").TElementNode | null;
         bindingIndex: number;
     };
     /**
