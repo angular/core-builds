@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.6+39.sha-0e73657.with-local-changes
+ * @license Angular v7.2.6+41.sha-fdcf877.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13813,7 +13813,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.6+39.sha-0e73657.with-local-changes');
+const VERSION = new Version('7.2.6+41.sha-fdcf877.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -14458,6 +14458,13 @@ const HTML_ATTRS = tagSet('abbr,accesskey,align,alt,autoplay,axis,bgcolor,border
 // are left out here.
 /** @type {?} */
 const VALID_ATTRS = merge$1(URI_ATTRS, SRCSET_ATTRS, HTML_ATTRS);
+// Elements whose content should not be traversed/preserved, if the elements themselves are invalid.
+//
+// Typically, `<invalid>Some content</invalid>` would traverse (and in this case preserve)
+// `Some content`, but strip `invalid-element` opening/closing tags. For some elements, though, we
+// don't want to preserve the content, if the elements themselves are going to be removed.
+/** @type {?} */
+const SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS = tagSet('script,style,template');
 /**
  * SanitizingHtmlSerializer serializes a DOM fragment, stripping out any unsafe elements and unsafe
  * attributes.
@@ -14480,10 +14487,10 @@ class SanitizingHtmlSerializer {
         /** @type {?} */
         let current = (/** @type {?} */ (el.firstChild));
         /** @type {?} */
-        let elementValid = true;
+        let traverseContent = true;
         while (current) {
             if (current.nodeType === Node.ELEMENT_NODE) {
-                elementValid = this.startElement((/** @type {?} */ (current)));
+                traverseContent = this.startElement((/** @type {?} */ (current)));
             }
             else if (current.nodeType === Node.TEXT_NODE) {
                 this.chars((/** @type {?} */ (current.nodeValue)));
@@ -14492,7 +14499,7 @@ class SanitizingHtmlSerializer {
                 // Strip non-element, non-text nodes.
                 this.sanitizedSomething = true;
             }
-            if (elementValid && current.firstChild) {
+            if (traverseContent && current.firstChild) {
                 current = (/** @type {?} */ (current.firstChild));
                 continue;
             }
@@ -14513,21 +14520,20 @@ class SanitizingHtmlSerializer {
         return this.buf.join('');
     }
     /**
-     * Outputs only valid Elements.
-     *
-     * Invalid elements are skipped.
+     * Sanitizes an opening element tag (if valid) and returns whether the element's contents should
+     * be traversed. Element content must always be traversed (even if the element itself is not
+     * valid/safe), unless the element is one of `SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS`.
      *
      * @private
-     * @param {?} element element to sanitize
-     * Returns true if the element is valid.
-     * @return {?}
+     * @param {?} element The element to sanitize.
+     * @return {?} True if the element's contents should be traversed.
      */
     startElement(element) {
         /** @type {?} */
         const tagName = element.nodeName.toLowerCase();
         if (!VALID_ELEMENTS.hasOwnProperty(tagName)) {
             this.sanitizedSomething = true;
-            return false;
+            return !SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS.hasOwnProperty(tagName);
         }
         this.buf.push('<');
         this.buf.push(tagName);
