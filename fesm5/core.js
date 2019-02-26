@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.5+82.sha-25a2fef.with-local-changes
+ * @license Angular v8.0.0-beta.5+84.sha-dc9f0af.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12549,11 +12549,16 @@ function createRootComponent(componentView, componentDef, rootView, rootContext,
     rootContext.components.push(component);
     componentView[CONTEXT] = component;
     hostFeatures && hostFeatures.forEach(function (feature) { return feature(component, componentDef); });
+    var rootTNode = getPreviousOrParentTNode();
     if (tView.firstTemplatePass && componentDef.hostBindings) {
-        var rootTNode = getPreviousOrParentTNode();
         var expando = tView.expandoInstructions;
         invokeHostBindingsInCreationMode(componentDef, expando, component, rootTNode, tView.firstTemplatePass);
         rootTNode.onElementCreationFns && applyOnCreateInstructions(rootTNode);
+    }
+    if (rootTNode.stylingTemplate) {
+        var native = componentView[HOST];
+        renderInitialClasses(native, rootTNode.stylingTemplate, componentView[RENDERER]);
+        renderInitialStyles(native, rootTNode.stylingTemplate, componentView[RENDERER]);
     }
     return component;
 }
@@ -14435,7 +14440,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.5+82.sha-25a2fef.with-local-changes');
+var VERSION = new Version('8.0.0-beta.5+84.sha-dc9f0af.with-local-changes');
 
 /**
  * @license
