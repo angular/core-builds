@@ -19,12 +19,12 @@ import { PlayerHandler } from './player';
 import { LQueries } from './query';
 import { RElement, Renderer3, RendererFactory3 } from './renderer';
 import { StylingContext } from './styling';
-export declare const TVIEW = 0;
-export declare const FLAGS = 1;
-export declare const PARENT = 2;
-export declare const NEXT = 3;
-export declare const QUERIES = 4;
-export declare const HOST = 5;
+export declare const HOST = 0;
+export declare const TVIEW = 1;
+export declare const FLAGS = 2;
+export declare const PARENT = 3;
+export declare const NEXT = 4;
+export declare const QUERIES = 5;
 export declare const T_HOST = 6;
 export declare const BINDING_INDEX = 7;
 export declare const CLEANUP = 8;
@@ -53,6 +53,15 @@ export interface OpaqueViewState {
  * don't have to edit the data array based on which views are present.
  */
 export interface LView extends Array<any> {
+    /**
+     * The host node for this LView instance, if this is a component view.
+     *
+     * If this is an embedded view, HOST will be null.
+     *
+     * If the component uses host bindings for styling that the `RElement` will be wrapped with
+     * `StylingContext`.
+     */
+    [HOST]: RElement | StylingContext | null;
     /**
      * The static data for this view. We need a reference to this so we can easily walk up the
      * node tree in DI and get the TView.data array associated with a node (where the
@@ -83,12 +92,6 @@ export interface LView extends Array<any> {
     [NEXT]: LView | LContainer | null;
     /** Queries active for this view - nodes from a view are reported to those queries. */
     [QUERIES]: LQueries | null;
-    /**
-     * The host node for this LView instance, if this is a component view.
-     *
-     * If this is an embedded view, HOST will be null.
-     */
-    [HOST]: RElement | StylingContext | null;
     /**
      * Pointer to the `TViewNode` or `TElementNode` which represents the root of the view.
      *
