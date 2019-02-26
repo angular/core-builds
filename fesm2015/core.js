@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.5+75.sha-1930e8a.with-local-changes
+ * @license Angular v8.0.0-beta.5+77.sha-3cb497c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3657,17 +3657,17 @@ function getNgModuleDef(type, throwNotFound) {
 // without having to remember the specific indices.
 // Uglify will inline these when minifying so there shouldn't be a cost.
 /** @type {?} */
-const TVIEW = 0;
+const HOST = 0;
 /** @type {?} */
-const FLAGS = 1;
+const TVIEW = 1;
 /** @type {?} */
-const PARENT = 2;
+const FLAGS = 2;
 /** @type {?} */
-const NEXT = 3;
+const PARENT = 3;
 /** @type {?} */
-const QUERIES = 4;
+const NEXT = 4;
 /** @type {?} */
-const HOST = 5;
+const QUERIES = 5;
 /** @type {?} */
 const T_HOST = 6;
 /** @type {?} */
@@ -3703,27 +3703,25 @@ const HEADER_OFFSET = 19;
  * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
+ * Special location which allows easy identification of type. If we have an array which was
+ * retrieved from the `LView` and that array has `true` at `TYPE` location, we know it is
+ * `LContainer`.
+ * @type {?}
+ */
+const TYPE = 1;
+/**
  * Below are constants for LContainer indices to help us look up LContainer members
  * without having to remember the specific indices.
  * Uglify will inline these when minifying so there shouldn't be a cost.
  * @type {?}
  */
-const ACTIVE_INDEX = 0;
-/** @type {?} */
-const VIEWS = 1;
-// PARENT, NEXT, QUERIES, and HOST are indices 2, 3, 4, and 5.
+const ACTIVE_INDEX = 2;
+// PARENT, NEXT, and QUERIES are indices 3, 4, and 5.
 // As we already have these constants in LView, we don't need to re-create them.
 /** @type {?} */
-const NATIVE = 6;
-// Because interfaces in TS/JS cannot be instanceof-checked this means that we
-// need to rely on predictable characteristics of data-structures to check if they
-// are what we expect for them to be. The `LContainer` interface code below has a
-// fixed length and the constant value below references that. Using the length value
-// below we can predictably gaurantee that we are dealing with an `LContainer` array.
-// This value MUST be kept up to date with the length of the `LContainer` array
-// interface below so that runtime type checking can work.
+const VIEWS = 6;
 /** @type {?} */
-const LCONTAINER_LENGTH = 7;
+const NATIVE = 7;
 
 /**
  * @fileoverview added by tsickle
@@ -3747,22 +3745,58 @@ const MONKEY_PATCH_KEY_NAME = '__ngContext__';
  * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
- * Takes the value of a slot in `LView` and returns the element node.
+ * For efficiency reasons we often put several different data types (`RNode`, `LView`, `LContainer`,
+ * `StylingContext`) in same location in `LView`. This is because we don't want to pre-allocate
+ * space for it because the storage is sparse. This file contains utilities for dealing with such
+ * data types.
  *
- * Normally, element nodes are stored flat, but if the node has styles/classes on it,
- * it might be wrapped in a styling context. Or if that node has a directive that injects
- * ViewContainerRef, it may be wrapped in an LContainer. Or if that node is a component,
- * it will be wrapped in LView. It could even have all three, so we keep looping
- * until we find something that isn't an array.
+ * How do we know what is stored at a given location in `LView`.
+ * - `Array.isArray(value) === false` => `RNode` (The normal storage value)
+ * - `Array.isArray(value) === true` => then the `value[0]` represents the wrapped value.
+ *   - `typeof value[TYPE] === 'object'` => `LView`
+ *      - This happens when we have a component at a given location
+ *   - `typeof value[TYPE] === 'number'` => `StylingContext`
+ *      - This happens when we have style/class binding at a given location.
+ *   - `typeof value[TYPE] === true` => `LContainer`
+ *      - This happens when we have `LContainer` binding at a given location.
  *
- * @param {?} value The initial value in `LView`
+ *
+ * NOTE: it is assumed that `Array.isArray` and `typeof` operations are very efficient.
+ */
+/**
+ * Returns `RNode`.
+ * @param {?} value wrapped value of `RNode`, `LView`, `LContainer`, `StylingContext`
  * @return {?}
  */
-function readElementValue(value) {
+function unwrapRNode(value) {
     while (Array.isArray(value)) {
         value = (/** @type {?} */ (value[HOST]));
     }
-    return value;
+    return (/** @type {?} */ (value));
+}
+/**
+ * True if `value` is `LView`.
+ * @param {?} value wrapped value of `RNode`, `LView`, `LContainer`, `StylingContext`
+ * @return {?}
+ */
+function isLView(value) {
+    return Array.isArray(value) && typeof value[TYPE] === 'object';
+}
+/**
+ * True if `value` is `LContainer`.
+ * @param {?} value wrapped value of `RNode`, `LView`, `LContainer`, `StylingContext`
+ * @return {?}
+ */
+function isLContainer(value) {
+    return Array.isArray(value) && value[TYPE] === true;
+}
+/**
+ * True if `value` is `StylingContext`.
+ * @param {?} value wrapped value of `RNode`, `LView`, `LContainer`, `StylingContext`
+ * @return {?}
+ */
+function isStylingContext(value) {
+    return Array.isArray(value) && typeof value[TYPE] === 'number';
 }
 /**
  * Retrieves an element value from the provided `viewData`, by unwrapping
@@ -3772,7 +3806,7 @@ function readElementValue(value) {
  * @return {?}
  */
 function getNativeByIndex(index, lView) {
-    return readElementValue(lView[index + HEADER_OFFSET]);
+    return unwrapRNode(lView[index + HEADER_OFFSET]);
 }
 /**
  * @param {?} tNode
@@ -3780,7 +3814,7 @@ function getNativeByIndex(index, lView) {
  * @return {?}
  */
 function getNativeByTNode(tNode, hostView) {
-    return readElementValue(hostView[tNode.index]);
+    return unwrapRNode(hostView[tNode.index]);
 }
 /**
  * @param {?} index
@@ -3791,14 +3825,6 @@ function getTNode(index, view) {
     ngDevMode && assertGreaterThan(index, -1, 'wrong index for TNode');
     ngDevMode && assertLessThan(index, view[TVIEW].data.length, 'wrong index for TNode');
     return (/** @type {?} */ (view[TVIEW].data[index + HEADER_OFFSET]));
-}
-/**
- * Returns true if the value is an {\@link LView}
- * @param {?} value the value to check
- * @return {?}
- */
-function isLView(value) {
-    return Array.isArray(value) && value.length >= HEADER_OFFSET;
 }
 /**
  * Retrieves a value from any `LView` or `TData`.
@@ -3845,14 +3871,6 @@ function isComponent(tNode) {
  */
 function isComponentDef(def) {
     return ((/** @type {?} */ (def))).template !== null;
-}
-/**
- * @param {?} value
- * @return {?}
- */
-function isLContainer(value) {
-    // Styling contexts are also arrays, but their first index contains an element node
-    return Array.isArray(value) && value.length === LCONTAINER_LENGTH;
 }
 /**
  * @param {?} target
@@ -7091,7 +7109,7 @@ function getLContext(target) {
             // expression or directive details) are filled into the context. If called multiple times
             // with different target values then the missing target data will be filled in.
             /** @type {?} */
-            const native = readElementValue(lView[nodeIndex]);
+            const native = unwrapRNode(lView[nodeIndex]);
             /** @type {?} */
             const existingCtx = readPatchedData(native);
             /** @type {?} */
@@ -7143,7 +7161,7 @@ function getLContext(target) {
                 const index = findViaNativeElement(lView, rElement);
                 if (index >= 0) {
                     /** @type {?} */
-                    const native = readElementValue(lView[index]);
+                    const native = unwrapRNode(lView[index]);
                     /** @type {?} */
                     const context = createLContext(lView, index, native);
                     attachPatchData(native, context);
@@ -7457,7 +7475,7 @@ function toDebug(obj) {
  */
 function toHtml(value, includeChildren = false) {
     /** @type {?} */
-    const node = (/** @type {?} */ (readElementValue(value)));
+    const node = (/** @type {?} */ (unwrapRNode(value)));
     if (node) {
         /** @type {?} */
         const isTextNode = node.nodeType === Node.TEXT_NODE;
@@ -7584,7 +7602,7 @@ function toDebugNodes(tNode, lView) {
             /** @type {?} */
             const rawValue = lView[tNode.index];
             /** @type {?} */
-            const native = readElementValue(rawValue);
+            const native = unwrapRNode(rawValue);
             /** @type {?} */
             const componentLViewDebug = toDebug(readLViewValue(rawValue));
             debugNodes.push({
@@ -8153,7 +8171,7 @@ function removeListeners(lView) {
                 /** @type {?} */
                 const target = typeof idxOrTargetGetter === 'function' ?
                     idxOrTargetGetter(lView) :
-                    readElementValue(lView[idxOrTargetGetter]);
+                    unwrapRNode(lView[idxOrTargetGetter]);
                 /** @type {?} */
                 const listener = lCleanup[tCleanup[i + 2]];
                 /** @type {?} */
@@ -8596,21 +8614,21 @@ class CorePlayerHandler {
 /** @type {?} */
 const ANIMATION_PROP_PREFIX = '@';
 /**
- * @param {?=} element
+ * @param {?=} wrappedElement
  * @param {?=} sanitizer
  * @param {?=} initialStyles
  * @param {?=} initialClasses
  * @return {?}
  */
-function createEmptyStylingContext(element, sanitizer, initialStyles, initialClasses) {
+function createEmptyStylingContext(wrappedElement, sanitizer, initialStyles, initialClasses) {
     /** @type {?} */
     const context = [
+        wrappedElement || null,
         0,
         (/** @type {?} */ ([])),
         initialStyles || [null, null],
         initialClasses || [null, null],
         [0, 0],
-        element || null,
         [0],
         [0],
         null,
@@ -8625,7 +8643,7 @@ function createEmptyStylingContext(element, sanitizer, initialStyles, initialCla
  */
 function allocateDirectiveIntoContext(context, directiveRef) {
     // this is a new directive which we have not seen yet.
-    context[1 /* DirectiveRegistryPosition */].push(directiveRef, -1, false, null);
+    context[2 /* DirectiveRegistryPosition */].push(directiveRef, -1, false, null);
 }
 /**
  * Used clone a copy of a pre-computed template of a styling context.
@@ -8649,9 +8667,9 @@ function allocStylingContext(element, templateStyleContext) {
             context[i] = value.slice();
         }
     }
-    context[5 /* ElementPosition */] = element;
+    context[0 /* ElementPosition */] = element;
     // this will prevent any other directives from extending the context
-    context[0 /* MasterFlagPosition */] |= 16 /* BindingAllocationLocked */;
+    context[1 /* MasterFlagPosition */] |= 16 /* BindingAllocationLocked */;
     return context;
 }
 /**
@@ -8678,7 +8696,7 @@ function getStylingContext(index, viewData) {
         slotValue = (/** @type {?} */ (slotValue[HOST]));
     }
     if (isStylingContext(wrapper)) {
-        return (/** @type {?} */ (wrapper));
+        return wrapper;
     }
     else {
         // This is an LView or an LContainer
@@ -8691,18 +8709,6 @@ function getStylingContext(index, viewData) {
             allocStylingContext(slotValue, stylingTemplate) :
             createEmptyStylingContext(slotValue);
     }
-}
-/**
- * @param {?} value
- * @return {?}
- */
-function isStylingContext(value) {
-    // Not an LView or an LContainer
-    if (Array.isArray(value) && value.length >= 9 /* SingleStylesStartPosition */) {
-        return typeof value[0 /* MasterFlagPosition */] === 'number' &&
-            value[3 /* InitialClassValuesPosition */][0 /* DefaultNullValuePosition */] === null;
-    }
-    return false;
 }
 /**
  * @param {?} name
@@ -8899,10 +8905,10 @@ function initializeStaticContext(attrs) {
     /** @type {?} */
     const context = createEmptyStylingContext();
     /** @type {?} */
-    const initialClasses = context[3 /* InitialClassValuesPosition */] =
+    const initialClasses = context[4 /* InitialClassValuesPosition */] =
         [null, null];
     /** @type {?} */
-    const initialStyles = context[2 /* InitialStyleValuesPosition */] =
+    const initialStyles = context[3 /* InitialStyleValuesPosition */] =
         [null, null];
     // The attributes array has marker values (numbers) indicating what the subsequent
     // values represent. When we encounter a number, we set the mode to that type of attribute.
@@ -8943,7 +8949,7 @@ function patchContextWithStaticAttrs(context, attrs, startingIndex, directiveRef
     // styling being patched twice) is because the `stylingBinding` function is called each time
     // an element is created (both within a template function and within directive host bindings).
     /** @type {?} */
-    const directives = context[1 /* DirectiveRegistryPosition */];
+    const directives = context[2 /* DirectiveRegistryPosition */];
     if (getDirectiveRegistryValuesIndexOf(directives, directiveRef) == -1) {
         // this is a new directive which we have not seen yet.
         allocateDirectiveIntoContext(context, directiveRef);
@@ -8960,11 +8966,11 @@ function patchContextWithStaticAttrs(context, attrs, startingIndex, directiveRef
                 mode = attr;
             }
             else if (mode == 1 /* Classes */) {
-                initialClasses = initialClasses || context[3 /* InitialClassValuesPosition */];
+                initialClasses = initialClasses || context[4 /* InitialClassValuesPosition */];
                 patchInitialStylingValue(initialClasses, attr, true);
             }
             else if (mode == 2 /* Styles */) {
-                initialStyles = initialStyles || context[2 /* InitialStyleValuesPosition */];
+                initialStyles = initialStyles || context[3 /* InitialStyleValuesPosition */];
                 patchInitialStylingValue(initialStyles, attr, attrs[++i]);
             }
         }
@@ -9012,7 +9018,7 @@ function patchInitialStylingValue(initialStyling, prop, value) {
  */
 function renderInitialStyles(element, context, renderer) {
     /** @type {?} */
-    const initialStyles = context[2 /* InitialStyleValuesPosition */];
+    const initialStyles = context[3 /* InitialStyleValuesPosition */];
     renderInitialStylingValues(element, renderer, initialStyles, false);
 }
 /**
@@ -9025,7 +9031,7 @@ function renderInitialStyles(element, context, renderer) {
  */
 function renderInitialClasses(element, context, renderer) {
     /** @type {?} */
-    const initialClasses = context[3 /* InitialClassValuesPosition */];
+    const initialClasses = context[4 /* InitialClassValuesPosition */];
     renderInitialStylingValues(element, renderer, initialClasses, true);
 }
 /**
@@ -9067,7 +9073,7 @@ function renderInitialStylingValues(element, renderer, initialStylingValues, isE
  * @return {?}
  */
 function updateContextWithBindings(context, directiveRef, classBindingNames, styleBindingNames, styleSanitizer) {
-    if (context[0 /* MasterFlagPosition */] & 16 /* BindingAllocationLocked */)
+    if (context[1 /* MasterFlagPosition */] & 16 /* BindingAllocationLocked */)
         return;
     // this means the context has already been patched with the directive's bindings
     /** @type {?} */
@@ -9085,7 +9091,7 @@ function updateContextWithBindings(context, directiveRef, classBindingNames, sty
     // need to be computed ahead of time and the context needs to be extended before the values
     // are inserted in.
     /** @type {?} */
-    const singlePropOffsetValues = context[4 /* SinglePropOffsetPositions */];
+    const singlePropOffsetValues = context[5 /* SinglePropOffsetPositions */];
     /** @type {?} */
     const totalCurrentClassBindings = singlePropOffsetValues[1 /* ClassesCountPosition */];
     /** @type {?} */
@@ -9224,9 +9230,9 @@ function updateContextWithBindings(context, directiveRef, classBindingNames, sty
         multiClassesStartIndex++;
     }
     /** @type {?} */
-    const initialClasses = context[3 /* InitialClassValuesPosition */];
+    const initialClasses = context[4 /* InitialClassValuesPosition */];
     /** @type {?} */
-    const initialStyles = context[2 /* InitialStyleValuesPosition */];
+    const initialStyles = context[3 /* InitialStyleValuesPosition */];
     // the code below will insert each new entry into the context and assign the appropriate
     // flags and index values to them. It's important this runs at the end of this function
     // because the context, property offset and index values have all been computed just before.
@@ -9327,7 +9333,7 @@ function updateContextWithBindings(context, directiveRef, classBindingNames, sty
     // reference an initial style value
     /** @type {?} */
     const masterFlag = pointers(0, 0, multiStylesStartIndex);
-    setFlag(context, 0 /* MasterFlagPosition */, masterFlag);
+    setFlag(context, 1 /* MasterFlagPosition */, masterFlag);
 }
 /**
  * Searches through the existing registry of directives
@@ -9338,9 +9344,9 @@ function updateContextWithBindings(context, directiveRef, classBindingNames, sty
  */
 function findOrPatchDirectiveIntoRegistry(context, directiveRef, styleSanitizer) {
     /** @type {?} */
-    const directiveRefs = context[1 /* DirectiveRegistryPosition */];
+    const directiveRefs = context[2 /* DirectiveRegistryPosition */];
     /** @type {?} */
-    const nextOffsetInsertionIndex = context[4 /* SinglePropOffsetPositions */].length;
+    const nextOffsetInsertionIndex = context[5 /* SinglePropOffsetPositions */].length;
     /** @type {?} */
     let directiveIndex;
     /** @type {?} */
@@ -9436,7 +9442,7 @@ function updateStylingMap(context, classesInput, stylesInput, directiveRef) {
     stylesInput =
         stylesInput === NO_CHANGE ? readCachedMapValue(context, false, directiveIndex) : stylesInput;
     /** @type {?} */
-    const element = (/** @type {?} */ ((/** @type {?} */ (context[5 /* ElementPosition */]))));
+    const element = (/** @type {?} */ ((/** @type {?} */ (context[0 /* ElementPosition */]))));
     /** @type {?} */
     const classesPlayerBuilder = classesInput instanceof BoundPlayerFactory ?
         new ClassAndStylePlayerBuilder((/** @type {?} */ (classesInput)), element, 1 /* Class */) :
@@ -9836,7 +9842,7 @@ function updateSingleStylingValue(context, offset, input, isClassBased, directiv
         /** @type {?} */
         const isClassBased = (currFlag & 2 /* Class */) === 2 /* Class */;
         /** @type {?} */
-        const element = (/** @type {?} */ ((/** @type {?} */ (context[5 /* ElementPosition */]))));
+        const element = (/** @type {?} */ ((/** @type {?} */ (context[0 /* ElementPosition */]))));
         /** @type {?} */
         const playerBuilder = input instanceof BoundPlayerFactory ?
             new ClassAndStylePlayerBuilder((/** @type {?} */ (input)), element, isClassBased ? 1 /* Class */ : 2 /* Style */) :
@@ -9922,9 +9928,9 @@ function renderStyling(context, renderer, rootOrView, isFirstRender, classesStor
     const targetDirectiveIndex = getDirectiveIndexFromRegistry(context, directiveRef || null);
     if (isContextDirty(context) && isDirectiveDirty(context, targetDirectiveIndex)) {
         /** @type {?} */
-        const flushPlayerBuilders = context[0 /* MasterFlagPosition */] & 8 /* PlayerBuildersDirty */;
+        const flushPlayerBuilders = context[1 /* MasterFlagPosition */] & 8 /* PlayerBuildersDirty */;
         /** @type {?} */
-        const native = (/** @type {?} */ (context[5 /* ElementPosition */]));
+        const native = (/** @type {?} */ (context[0 /* ElementPosition */]));
         /** @type {?} */
         const multiStartIndex = getMultiStylesStartIndex(context);
         /** @type {?} */
@@ -10194,8 +10200,8 @@ function getInitialValue(context, flag) {
     /** @type {?} */
     const entryIsClassBased = flag & 2 /* Class */;
     /** @type {?} */
-    const initialValues = entryIsClassBased ? context[3 /* InitialClassValuesPosition */] :
-        context[2 /* InitialStyleValuesPosition */];
+    const initialValues = entryIsClassBased ? context[4 /* InitialClassValuesPosition */] :
+        context[3 /* InitialStyleValuesPosition */];
     return initialValues[index];
 }
 /**
@@ -10349,7 +10355,7 @@ function getPlayerBuilder(context, index) {
  */
 function setFlag(context, index, flag) {
     /** @type {?} */
-    const adjustedIndex = index === 0 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
+    const adjustedIndex = index === 1 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
     context[adjustedIndex] = flag;
 }
 /**
@@ -10359,7 +10365,7 @@ function setFlag(context, index, flag) {
  */
 function getPointers(context, index) {
     /** @type {?} */
-    const adjustedIndex = index === 0 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
+    const adjustedIndex = index === 1 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
     return (/** @type {?} */ (context[adjustedIndex]));
 }
 /**
@@ -10383,7 +10389,7 @@ function getProp(context, index) {
  * @return {?}
  */
 function isContextDirty(context) {
-    return isDirty(context, 0 /* MasterFlagPosition */);
+    return isDirty(context, 1 /* MasterFlagPosition */);
 }
 /**
  * @param {?} context
@@ -10391,7 +10397,7 @@ function isContextDirty(context) {
  * @return {?}
  */
 function setContextDirty(context, isDirtyYes) {
-    setDirty(context, 0 /* MasterFlagPosition */, isDirtyYes);
+    setDirty(context, 1 /* MasterFlagPosition */, isDirtyYes);
 }
 /**
  * @param {?} context
@@ -10400,10 +10406,10 @@ function setContextDirty(context, isDirtyYes) {
  */
 function setContextPlayersDirty(context, isDirtyYes) {
     if (isDirtyYes) {
-        ((/** @type {?} */ (context[0 /* MasterFlagPosition */]))) |= 8 /* PlayerBuildersDirty */;
+        ((/** @type {?} */ (context[1 /* MasterFlagPosition */]))) |= 8 /* PlayerBuildersDirty */;
     }
     else {
-        ((/** @type {?} */ (context[0 /* MasterFlagPosition */]))) &= ~8 /* PlayerBuildersDirty */;
+        ((/** @type {?} */ (context[1 /* MasterFlagPosition */]))) &= ~8 /* PlayerBuildersDirty */;
     }
 }
 /**
@@ -10533,11 +10539,11 @@ function prepareInitialFlag(context, prop, entryIsClassBased, sanitizer) {
     if (entryIsClassBased) {
         flag |= 2 /* Class */;
         initialIndex =
-            getInitialStylingValuesIndexOf(context[3 /* InitialClassValuesPosition */], prop);
+            getInitialStylingValuesIndexOf(context[4 /* InitialClassValuesPosition */], prop);
     }
     else {
         initialIndex =
-            getInitialStylingValuesIndexOf(context[2 /* InitialStyleValuesPosition */], prop);
+            getInitialStylingValuesIndexOf(context[3 /* InitialStyleValuesPosition */], prop);
     }
     initialIndex = initialIndex > 0 ? (initialIndex + 1 /* ValueOffset */) : 0;
     return pointers(flag, initialIndex, 0);
@@ -10641,7 +10647,7 @@ function getDirectiveIndexFromRegistry(context, directiveRef) {
     /** @type {?} */
     let directiveIndex;
     /** @type {?} */
-    const dirs = context[1 /* DirectiveRegistryPosition */];
+    const dirs = context[2 /* DirectiveRegistryPosition */];
     /** @type {?} */
     let index = getDirectiveRegistryValuesIndexOf(dirs, directiveRef);
     if (index === -1) {
@@ -10697,10 +10703,10 @@ function getInitialStylingValuesIndexOf(keyValues, key) {
  */
 function getSinglePropIndexValue(context, directiveIndex, offset, isClassBased) {
     /** @type {?} */
-    const singlePropOffsetRegistryIndex = (/** @type {?} */ (context[1 /* DirectiveRegistryPosition */][(directiveIndex * 4 /* Size */) +
+    const singlePropOffsetRegistryIndex = (/** @type {?} */ (context[2 /* DirectiveRegistryPosition */][(directiveIndex * 4 /* Size */) +
         1 /* SinglePropValuesIndexOffset */]));
     /** @type {?} */
-    const offsets = context[4 /* SinglePropOffsetPositions */];
+    const offsets = context[5 /* SinglePropOffsetPositions */];
     /** @type {?} */
     const indexForOffset = singlePropOffsetRegistryIndex +
         2 /* ValueStartPosition */ +
@@ -10717,7 +10723,7 @@ function getSinglePropIndexValue(context, directiveIndex, offset, isClassBased) 
  */
 function getStyleSanitizer(context, directiveIndex) {
     /** @type {?} */
-    const dirs = context[1 /* DirectiveRegistryPosition */];
+    const dirs = context[2 /* DirectiveRegistryPosition */];
     /** @type {?} */
     const value = dirs[directiveIndex * 4 /* Size */ +
         3 /* StyleSanitizerOffset */] ||
@@ -10731,7 +10737,7 @@ function getStyleSanitizer(context, directiveIndex) {
  */
 function isDirectiveDirty(context, directiveIndex) {
     /** @type {?} */
-    const dirs = context[1 /* DirectiveRegistryPosition */];
+    const dirs = context[2 /* DirectiveRegistryPosition */];
     return (/** @type {?} */ (dirs[directiveIndex * 4 /* Size */ +
         2 /* DirtyFlagOffset */]));
 }
@@ -10743,7 +10749,7 @@ function isDirectiveDirty(context, directiveIndex) {
  */
 function setDirectiveDirty(context, directiveIndex, dirtyYes) {
     /** @type {?} */
-    const dirs = context[1 /* DirectiveRegistryPosition */];
+    const dirs = context[2 /* DirectiveRegistryPosition */];
     dirs[directiveIndex * 4 /* Size */ +
         2 /* DirtyFlagOffset */] = dirtyYes;
 }
@@ -10794,7 +10800,7 @@ function allowValueChange(currentValue, newValue, currentDirectiveOwner, newDire
  */
 function getInitialClassNameValue(context) {
     /** @type {?} */
-    const initialClassValues = context[3 /* InitialClassValuesPosition */];
+    const initialClassValues = context[4 /* InitialClassValuesPosition */];
     /** @type {?} */
     let className = initialClassValues[1 /* InitialClassesStringPosition */];
     if (className === null) {
@@ -10824,7 +10830,7 @@ function getInitialClassNameValue(context) {
  */
 function getInitialStyleStringValue(context) {
     /** @type {?} */
-    const initialStyleValues = context[2 /* InitialStyleValuesPosition */];
+    const initialStyleValues = context[3 /* InitialStyleValuesPosition */];
     /** @type {?} */
     let styleString = initialStyleValues[1 /* InitialClassesStringPosition */];
     if (styleString === null) {
@@ -11413,7 +11419,7 @@ function setHostBindings(tView, viewData) {
                 // If it's not a number, it's a host binding function that needs to be executed.
                 if (instruction !== null) {
                     viewData[BINDING_INDEX] = bindingRootIndex;
-                    instruction(2 /* Update */, readElementValue(viewData[currentDirectiveIndex]), currentElementIndex);
+                    instruction(2 /* Update */, unwrapRNode(viewData[currentDirectiveIndex]), currentElementIndex);
                 }
                 currentDirectiveIndex++;
             }
@@ -11469,6 +11475,7 @@ function refreshChildComponents(components) {
 function createLView(parentLView, tView, context, flags, host, tHostNode, rendererFactory, renderer, sanitizer, injector) {
     /** @type {?} */
     const lView = (/** @type {?} */ (tView.blueprint.slice()));
+    lView[HOST] = host;
     lView[FLAGS] = flags | 4 /* CreationMode */ | 128 /* Attached */ | 8 /* FirstLViewPass */;
     lView[PARENT] = lView[DECLARATION_VIEW] = parentLView;
     lView[CONTEXT] = context;
@@ -11478,7 +11485,6 @@ function createLView(parentLView, tView, context, flags, host, tHostNode, render
     ngDevMode && assertDefined(lView[RENDERER], 'Renderer is required');
     lView[SANITIZER] = sanitizer || parentLView && parentLView[SANITIZER] || (/** @type {?} */ (null));
     lView[(/** @type {?} */ (INJECTOR$1))] = injector || parentLView && parentLView[INJECTOR$1] || null;
-    lView[HOST] = host;
     lView[T_HOST] = tHostNode;
     ngDevMode && attachLViewDebug(lView);
     return lView;
@@ -12311,7 +12317,7 @@ function listenerInternal(eventName, listenerFn, useCapture = false, eventTarget
         }
         /** @type {?} */
         const idxOrTargetGetter = eventTargetResolver ?
-            (_lView) => eventTargetResolver(readElementValue(_lView[tNode.index])).target :
+            (_lView) => eventTargetResolver(unwrapRNode(_lView[tNode.index])).target :
             tNode.index;
         tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, useCaptureOrSubIdx);
     }
@@ -12451,7 +12457,7 @@ function elementAttribute(index, name, value, sanitizer, namespace) {
         /** @type {?} */
         const renderer = lView[RENDERER];
         /** @type {?} */
-        const element = getNativeByIndex(index, lView);
+        const element = (/** @type {?} */ (getNativeByIndex(index, lView)));
         if (value == null) {
             ngDevMode && ngDevMode.rendererRemoveAttribute++;
             isProceduralRenderer(renderer) ? renderer.removeAttribute(element, name, namespace) :
@@ -13637,12 +13643,13 @@ function createLContainer(hostNative, currentView, native, isForViewContainerRef
     ngDevMode && assertLView(currentView);
     /** @type {?} */
     const lContainer = [
+        hostNative,
+        true,
         isForViewContainerRef ? -1 : 0,
-        [],
         currentView,
         null,
         null,
-        hostNative,
+        [],
         native,
     ];
     ngDevMode && attachLContainerDebug(lContainer);
@@ -15347,7 +15354,7 @@ function getListeners(element) {
                 /** @type {?} */
                 const name = firstParam;
                 /** @type {?} */
-                const listenerElement = (/** @type {?} */ ((/** @type {?} */ (readElementValue(lView[secondParam])))));
+                const listenerElement = (/** @type {?} */ ((/** @type {?} */ (unwrapRNode(lView[secondParam])))));
                 /** @type {?} */
                 const callback = lCleanup[tCleanup[i++]];
                 /** @type {?} */
@@ -17304,7 +17311,7 @@ function createElementRef(ElementRefToken, tNode, view) {
         R3ElementRef = class ElementRef_ extends ElementRefToken {
         };
     }
-    return new R3ElementRef(getNativeByTNode(tNode, view));
+    return new R3ElementRef((/** @type {?} */ (getNativeByTNode(tNode, view))));
 }
 /** @type {?} */
 let R3TemplateRef;
@@ -17851,7 +17858,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.5+75.sha-1930e8a.with-local-changes');
+const VERSION = new Version('8.0.0-beta.5+77.sha-3cb497c.with-local-changes');
 
 /**
  * @fileoverview added by tsickle

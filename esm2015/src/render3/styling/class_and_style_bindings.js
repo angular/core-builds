@@ -32,10 +32,10 @@ export function initializeStaticContext(attrs) {
     /** @type {?} */
     const context = createEmptyStylingContext();
     /** @type {?} */
-    const initialClasses = context[3 /* InitialClassValuesPosition */] =
+    const initialClasses = context[4 /* InitialClassValuesPosition */] =
         [null, null];
     /** @type {?} */
-    const initialStyles = context[2 /* InitialStyleValuesPosition */] =
+    const initialStyles = context[3 /* InitialStyleValuesPosition */] =
         [null, null];
     // The attributes array has marker values (numbers) indicating what the subsequent
     // values represent. When we encounter a number, we set the mode to that type of attribute.
@@ -76,7 +76,7 @@ export function patchContextWithStaticAttrs(context, attrs, startingIndex, direc
     // styling being patched twice) is because the `stylingBinding` function is called each time
     // an element is created (both within a template function and within directive host bindings).
     /** @type {?} */
-    const directives = context[1 /* DirectiveRegistryPosition */];
+    const directives = context[2 /* DirectiveRegistryPosition */];
     if (getDirectiveRegistryValuesIndexOf(directives, directiveRef) == -1) {
         // this is a new directive which we have not seen yet.
         allocateDirectiveIntoContext(context, directiveRef);
@@ -93,11 +93,11 @@ export function patchContextWithStaticAttrs(context, attrs, startingIndex, direc
                 mode = attr;
             }
             else if (mode == 1 /* Classes */) {
-                initialClasses = initialClasses || context[3 /* InitialClassValuesPosition */];
+                initialClasses = initialClasses || context[4 /* InitialClassValuesPosition */];
                 patchInitialStylingValue(initialClasses, attr, true);
             }
             else if (mode == 2 /* Styles */) {
-                initialStyles = initialStyles || context[2 /* InitialStyleValuesPosition */];
+                initialStyles = initialStyles || context[3 /* InitialStyleValuesPosition */];
                 patchInitialStylingValue(initialStyles, attr, attrs[++i]);
             }
         }
@@ -145,7 +145,7 @@ function patchInitialStylingValue(initialStyling, prop, value) {
  */
 export function renderInitialStyles(element, context, renderer) {
     /** @type {?} */
-    const initialStyles = context[2 /* InitialStyleValuesPosition */];
+    const initialStyles = context[3 /* InitialStyleValuesPosition */];
     renderInitialStylingValues(element, renderer, initialStyles, false);
 }
 /**
@@ -158,7 +158,7 @@ export function renderInitialStyles(element, context, renderer) {
  */
 export function renderInitialClasses(element, context, renderer) {
     /** @type {?} */
-    const initialClasses = context[3 /* InitialClassValuesPosition */];
+    const initialClasses = context[4 /* InitialClassValuesPosition */];
     renderInitialStylingValues(element, renderer, initialClasses, true);
 }
 /**
@@ -189,7 +189,7 @@ function renderInitialStylingValues(element, renderer, initialStylingValues, isE
  * @return {?}
  */
 export function allowNewBindingsForStylingContext(context) {
-    return (context[0 /* MasterFlagPosition */] & 16 /* BindingAllocationLocked */) === 0;
+    return (context[1 /* MasterFlagPosition */] & 16 /* BindingAllocationLocked */) === 0;
 }
 /**
  * Adds in new binding values to a styling context.
@@ -207,7 +207,7 @@ export function allowNewBindingsForStylingContext(context) {
  * @return {?}
  */
 export function updateContextWithBindings(context, directiveRef, classBindingNames, styleBindingNames, styleSanitizer) {
-    if (context[0 /* MasterFlagPosition */] & 16 /* BindingAllocationLocked */)
+    if (context[1 /* MasterFlagPosition */] & 16 /* BindingAllocationLocked */)
         return;
     // this means the context has already been patched with the directive's bindings
     /** @type {?} */
@@ -225,7 +225,7 @@ export function updateContextWithBindings(context, directiveRef, classBindingNam
     // need to be computed ahead of time and the context needs to be extended before the values
     // are inserted in.
     /** @type {?} */
-    const singlePropOffsetValues = context[4 /* SinglePropOffsetPositions */];
+    const singlePropOffsetValues = context[5 /* SinglePropOffsetPositions */];
     /** @type {?} */
     const totalCurrentClassBindings = singlePropOffsetValues[1 /* ClassesCountPosition */];
     /** @type {?} */
@@ -364,9 +364,9 @@ export function updateContextWithBindings(context, directiveRef, classBindingNam
         multiClassesStartIndex++;
     }
     /** @type {?} */
-    const initialClasses = context[3 /* InitialClassValuesPosition */];
+    const initialClasses = context[4 /* InitialClassValuesPosition */];
     /** @type {?} */
-    const initialStyles = context[2 /* InitialStyleValuesPosition */];
+    const initialStyles = context[3 /* InitialStyleValuesPosition */];
     // the code below will insert each new entry into the context and assign the appropriate
     // flags and index values to them. It's important this runs at the end of this function
     // because the context, property offset and index values have all been computed just before.
@@ -467,7 +467,7 @@ export function updateContextWithBindings(context, directiveRef, classBindingNam
     // reference an initial style value
     /** @type {?} */
     const masterFlag = pointers(0, 0, multiStylesStartIndex);
-    setFlag(context, 0 /* MasterFlagPosition */, masterFlag);
+    setFlag(context, 1 /* MasterFlagPosition */, masterFlag);
 }
 /**
  * Searches through the existing registry of directives
@@ -478,9 +478,9 @@ export function updateContextWithBindings(context, directiveRef, classBindingNam
  */
 export function findOrPatchDirectiveIntoRegistry(context, directiveRef, styleSanitizer) {
     /** @type {?} */
-    const directiveRefs = context[1 /* DirectiveRegistryPosition */];
+    const directiveRefs = context[2 /* DirectiveRegistryPosition */];
     /** @type {?} */
-    const nextOffsetInsertionIndex = context[4 /* SinglePropOffsetPositions */].length;
+    const nextOffsetInsertionIndex = context[5 /* SinglePropOffsetPositions */].length;
     /** @type {?} */
     let directiveIndex;
     /** @type {?} */
@@ -576,7 +576,7 @@ export function updateStylingMap(context, classesInput, stylesInput, directiveRe
     stylesInput =
         stylesInput === NO_CHANGE ? readCachedMapValue(context, false, directiveIndex) : stylesInput;
     /** @type {?} */
-    const element = (/** @type {?} */ ((/** @type {?} */ (context[5 /* ElementPosition */]))));
+    const element = (/** @type {?} */ ((/** @type {?} */ (context[0 /* ElementPosition */]))));
     /** @type {?} */
     const classesPlayerBuilder = classesInput instanceof BoundPlayerFactory ?
         new ClassAndStylePlayerBuilder((/** @type {?} */ (classesInput)), element, 1 /* Class */) :
@@ -976,7 +976,7 @@ function updateSingleStylingValue(context, offset, input, isClassBased, directiv
         /** @type {?} */
         const isClassBased = (currFlag & 2 /* Class */) === 2 /* Class */;
         /** @type {?} */
-        const element = (/** @type {?} */ ((/** @type {?} */ (context[5 /* ElementPosition */]))));
+        const element = (/** @type {?} */ ((/** @type {?} */ (context[0 /* ElementPosition */]))));
         /** @type {?} */
         const playerBuilder = input instanceof BoundPlayerFactory ?
             new ClassAndStylePlayerBuilder((/** @type {?} */ (input)), element, isClassBased ? 1 /* Class */ : 2 /* Style */) :
@@ -1062,9 +1062,9 @@ export function renderStyling(context, renderer, rootOrView, isFirstRender, clas
     const targetDirectiveIndex = getDirectiveIndexFromRegistry(context, directiveRef || null);
     if (isContextDirty(context) && isDirectiveDirty(context, targetDirectiveIndex)) {
         /** @type {?} */
-        const flushPlayerBuilders = context[0 /* MasterFlagPosition */] & 8 /* PlayerBuildersDirty */;
+        const flushPlayerBuilders = context[1 /* MasterFlagPosition */] & 8 /* PlayerBuildersDirty */;
         /** @type {?} */
-        const native = (/** @type {?} */ (context[5 /* ElementPosition */]));
+        const native = (/** @type {?} */ (context[0 /* ElementPosition */]));
         /** @type {?} */
         const multiStartIndex = getMultiStylesStartIndex(context);
         /** @type {?} */
@@ -1334,8 +1334,8 @@ function getInitialValue(context, flag) {
     /** @type {?} */
     const entryIsClassBased = flag & 2 /* Class */;
     /** @type {?} */
-    const initialValues = entryIsClassBased ? context[3 /* InitialClassValuesPosition */] :
-        context[2 /* InitialStyleValuesPosition */];
+    const initialValues = entryIsClassBased ? context[4 /* InitialClassValuesPosition */] :
+        context[3 /* InitialStyleValuesPosition */];
     return initialValues[index];
 }
 /**
@@ -1359,7 +1359,7 @@ function getMultiOrSingleIndex(flag) {
  * @return {?}
  */
 function getMultiStartIndex(context) {
-    return (/** @type {?} */ (getMultiOrSingleIndex(context[0 /* MasterFlagPosition */])));
+    return (/** @type {?} */ (getMultiOrSingleIndex(context[1 /* MasterFlagPosition */])));
 }
 /**
  * @param {?} context
@@ -1496,7 +1496,7 @@ function getPlayerBuilder(context, index) {
  */
 function setFlag(context, index, flag) {
     /** @type {?} */
-    const adjustedIndex = index === 0 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
+    const adjustedIndex = index === 1 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
     context[adjustedIndex] = flag;
 }
 /**
@@ -1506,7 +1506,7 @@ function setFlag(context, index, flag) {
  */
 function getPointers(context, index) {
     /** @type {?} */
-    const adjustedIndex = index === 0 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
+    const adjustedIndex = index === 1 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
     return (/** @type {?} */ (context[adjustedIndex]));
 }
 /**
@@ -1530,7 +1530,7 @@ export function getProp(context, index) {
  * @return {?}
  */
 export function isContextDirty(context) {
-    return isDirty(context, 0 /* MasterFlagPosition */);
+    return isDirty(context, 1 /* MasterFlagPosition */);
 }
 /**
  * @param {?} context
@@ -1538,7 +1538,7 @@ export function isContextDirty(context) {
  * @return {?}
  */
 export function setContextDirty(context, isDirtyYes) {
-    setDirty(context, 0 /* MasterFlagPosition */, isDirtyYes);
+    setDirty(context, 1 /* MasterFlagPosition */, isDirtyYes);
 }
 /**
  * @param {?} context
@@ -1547,10 +1547,10 @@ export function setContextDirty(context, isDirtyYes) {
  */
 export function setContextPlayersDirty(context, isDirtyYes) {
     if (isDirtyYes) {
-        ((/** @type {?} */ (context[0 /* MasterFlagPosition */]))) |= 8 /* PlayerBuildersDirty */;
+        ((/** @type {?} */ (context[1 /* MasterFlagPosition */]))) |= 8 /* PlayerBuildersDirty */;
     }
     else {
-        ((/** @type {?} */ (context[0 /* MasterFlagPosition */]))) &= ~8 /* PlayerBuildersDirty */;
+        ((/** @type {?} */ (context[1 /* MasterFlagPosition */]))) &= ~8 /* PlayerBuildersDirty */;
     }
 }
 /**
@@ -1680,11 +1680,11 @@ function prepareInitialFlag(context, prop, entryIsClassBased, sanitizer) {
     if (entryIsClassBased) {
         flag |= 2 /* Class */;
         initialIndex =
-            getInitialStylingValuesIndexOf(context[3 /* InitialClassValuesPosition */], prop);
+            getInitialStylingValuesIndexOf(context[4 /* InitialClassValuesPosition */], prop);
     }
     else {
         initialIndex =
-            getInitialStylingValuesIndexOf(context[2 /* InitialStyleValuesPosition */], prop);
+            getInitialStylingValuesIndexOf(context[3 /* InitialStyleValuesPosition */], prop);
     }
     initialIndex = initialIndex > 0 ? (initialIndex + 1 /* ValueOffset */) : 0;
     return pointers(flag, initialIndex, 0);
@@ -1835,7 +1835,7 @@ export function generateConfigSummary(source, index) {
         else {
             name += 'master config';
         }
-        index = index || 0 /* MasterFlagPosition */;
+        index = index || 1 /* MasterFlagPosition */;
         flag = (/** @type {?} */ (source[index]));
     }
     else {
@@ -1879,7 +1879,7 @@ function getDirectiveIndexFromRegistry(context, directiveRef) {
     /** @type {?} */
     let directiveIndex;
     /** @type {?} */
-    const dirs = context[1 /* DirectiveRegistryPosition */];
+    const dirs = context[2 /* DirectiveRegistryPosition */];
     /** @type {?} */
     let index = getDirectiveRegistryValuesIndexOf(dirs, directiveRef);
     if (index === -1) {
@@ -1978,10 +1978,10 @@ function diffSummaryValues(result, name, prop, a, b) {
  */
 function getSinglePropIndexValue(context, directiveIndex, offset, isClassBased) {
     /** @type {?} */
-    const singlePropOffsetRegistryIndex = (/** @type {?} */ (context[1 /* DirectiveRegistryPosition */][(directiveIndex * 4 /* Size */) +
+    const singlePropOffsetRegistryIndex = (/** @type {?} */ (context[2 /* DirectiveRegistryPosition */][(directiveIndex * 4 /* Size */) +
         1 /* SinglePropValuesIndexOffset */]));
     /** @type {?} */
-    const offsets = context[4 /* SinglePropOffsetPositions */];
+    const offsets = context[5 /* SinglePropOffsetPositions */];
     /** @type {?} */
     const indexForOffset = singlePropOffsetRegistryIndex +
         2 /* ValueStartPosition */ +
@@ -1998,7 +1998,7 @@ function getSinglePropIndexValue(context, directiveIndex, offset, isClassBased) 
  */
 function getStyleSanitizer(context, directiveIndex) {
     /** @type {?} */
-    const dirs = context[1 /* DirectiveRegistryPosition */];
+    const dirs = context[2 /* DirectiveRegistryPosition */];
     /** @type {?} */
     const value = dirs[directiveIndex * 4 /* Size */ +
         3 /* StyleSanitizerOffset */] ||
@@ -2012,7 +2012,7 @@ function getStyleSanitizer(context, directiveIndex) {
  */
 function isDirectiveDirty(context, directiveIndex) {
     /** @type {?} */
-    const dirs = context[1 /* DirectiveRegistryPosition */];
+    const dirs = context[2 /* DirectiveRegistryPosition */];
     return (/** @type {?} */ (dirs[directiveIndex * 4 /* Size */ +
         2 /* DirtyFlagOffset */]));
 }
@@ -2024,7 +2024,7 @@ function isDirectiveDirty(context, directiveIndex) {
  */
 function setDirectiveDirty(context, directiveIndex, dirtyYes) {
     /** @type {?} */
-    const dirs = context[1 /* DirectiveRegistryPosition */];
+    const dirs = context[2 /* DirectiveRegistryPosition */];
     dirs[directiveIndex * 4 /* Size */ +
         2 /* DirtyFlagOffset */] = dirtyYes;
 }
@@ -2075,7 +2075,7 @@ function allowValueChange(currentValue, newValue, currentDirectiveOwner, newDire
  */
 export function getInitialClassNameValue(context) {
     /** @type {?} */
-    const initialClassValues = context[3 /* InitialClassValuesPosition */];
+    const initialClassValues = context[4 /* InitialClassValuesPosition */];
     /** @type {?} */
     let className = initialClassValues[1 /* InitialClassesStringPosition */];
     if (className === null) {
@@ -2105,7 +2105,7 @@ export function getInitialClassNameValue(context) {
  */
 export function getInitialStyleStringValue(context) {
     /** @type {?} */
-    const initialStyleValues = context[2 /* InitialStyleValuesPosition */];
+    const initialStyleValues = context[3 /* InitialStyleValuesPosition */];
     /** @type {?} */
     let styleString = initialStyleValues[1 /* InitialClassesStringPosition */];
     if (styleString === null) {

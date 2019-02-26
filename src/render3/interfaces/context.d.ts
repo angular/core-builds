@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { RElement } from './renderer';
+import { RNode } from './renderer';
 import { LView } from './view';
 /**
  * This property will be monkey-patched on elements, components and directives
@@ -33,7 +33,7 @@ export interface LContext {
     /**
      * The instance of the DOM node that is attached to the lNode.
      */
-    native: RElement;
+    native: RNode;
     /**
      * The instance of the Component node.
      */
