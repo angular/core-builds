@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.5+78.sha-edb6c2d.with-local-changes
+ * @license Angular v8.0.0-beta.5+82.sha-25a2fef.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17345,9 +17345,25 @@ function collectNativeNodes(lView, parentTNode, result) {
     /** @type {?} */
     let tNodeChild = parentTNode.child;
     while (tNodeChild) {
-        result.push(getNativeByTNode(tNodeChild, lView));
+        /** @type {?} */
+        const nativeNode = getNativeByTNode(tNodeChild, lView);
+        nativeNode && result.push(nativeNode);
         if (tNodeChild.type === 4 /* ElementContainer */) {
             collectNativeNodes(lView, tNodeChild, result);
+        }
+        else if (tNodeChild.type === 1 /* Projection */) {
+            /** @type {?} */
+            const componentView = findComponentView(lView);
+            /** @type {?} */
+            const componentHost = (/** @type {?} */ (componentView[T_HOST]));
+            /** @type {?} */
+            const parentView = getLViewParent(componentView);
+            /** @type {?} */
+            let currentProjectedNode = ((/** @type {?} */ (componentHost.projection)))[(/** @type {?} */ (tNodeChild.projection))];
+            while (currentProjectedNode && parentView) {
+                result.push(getNativeByTNode(currentProjectedNode, parentView));
+                currentProjectedNode = currentProjectedNode.next;
+            }
         }
         tNodeChild = tNodeChild.next;
     }
@@ -17937,7 +17953,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.5+78.sha-edb6c2d.with-local-changes');
+const VERSION = new Version('8.0.0-beta.5+82.sha-25a2fef.with-local-changes');
 
 /**
  * @fileoverview added by tsickle

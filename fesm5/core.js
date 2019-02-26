@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.5+78.sha-edb6c2d.with-local-changes
+ * @license Angular v8.0.0-beta.5+82.sha-25a2fef.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14002,9 +14002,20 @@ var RootViewRef = /** @class */ (function (_super) {
 function collectNativeNodes(lView, parentTNode, result) {
     var tNodeChild = parentTNode.child;
     while (tNodeChild) {
-        result.push(getNativeByTNode(tNodeChild, lView));
+        var nativeNode = getNativeByTNode(tNodeChild, lView);
+        nativeNode && result.push(nativeNode);
         if (tNodeChild.type === 4 /* ElementContainer */) {
             collectNativeNodes(lView, tNodeChild, result);
+        }
+        else if (tNodeChild.type === 1 /* Projection */) {
+            var componentView = findComponentView(lView);
+            var componentHost = componentView[T_HOST];
+            var parentView = getLViewParent(componentView);
+            var currentProjectedNode = componentHost.projection[tNodeChild.projection];
+            while (currentProjectedNode && parentView) {
+                result.push(getNativeByTNode(currentProjectedNode, parentView));
+                currentProjectedNode = currentProjectedNode.next;
+            }
         }
         tNodeChild = tNodeChild.next;
     }
@@ -14495,7 +14506,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.5+78.sha-edb6c2d.with-local-changes');
+var VERSION = new Version('8.0.0-beta.5+82.sha-25a2fef.with-local-changes');
 
 /**
  * @license
