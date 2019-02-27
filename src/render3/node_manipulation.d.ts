@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { LContainer } from './interfaces/container';
-import { TNode, TProjectionNode, TViewNode } from './interfaces/node';
+import { TNode, TViewNode } from './interfaces/node';
 import { RComment, RElement, RNode, RText, Renderer3 } from './interfaces/renderer';
 import { LView } from './interfaces/view';
 export declare function getLContainer(tNode: TViewNode, embeddedView: LView): LContainer | null;
@@ -126,12 +126,12 @@ export declare function getBeforeNodeForView(index: number, views: LView[], cont
  */
 export declare function nativeRemoveNode(renderer: Renderer3, rNode: RNode, isHostElement?: boolean): void;
 /**
- * Appends nodes to a target projection place. Nodes to insert were previously re-distribution and
- * stored on a component host level.
- * @param lView A LView where nodes are inserted (target VLview)
- * @param tProjectionNode A projection node where previously re-distribution should be appended
- * (target insertion place)
- * @param selectorIndex A bucket from where nodes to project should be taken
- * @param componentView A where projectable nodes were initially created (source view)
+ * Appends a projected node to the DOM, or in the case of a projected container,
+ * appends the nodes from all of the container's active views to the DOM.
+ *
+ * @param projectedTNode The TNode to be projected
+ * @param tProjectionNode The projection (ng-content) TNode
+ * @param currentView Current LView
+ * @param projectionView Projection view (view above current)
  */
-export declare function appendProjectedNodes(lView: LView, tProjectionNode: TProjectionNode, selectorIndex: number, componentView: LView): void;
+export declare function appendProjectedNode(projectedTNode: TNode, tProjectionNode: TNode, currentView: LView, projectionView: LView): void;

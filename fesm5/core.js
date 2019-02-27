@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.6+18.sha-91a161a.with-local-changes
+ * @license Angular v8.0.0-beta.6+17.sha-efa10e3.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7170,37 +7170,6 @@ function nativeRemoveNode(renderer, rNode, isHostElement) {
     }
 }
 /**
- * Appends nodes to a target projection place. Nodes to insert were previously re-distribution and
- * stored on a component host level.
- * @param lView A LView where nodes are inserted (target VLview)
- * @param tProjectionNode A projection node where previously re-distribution should be appended
- * (target insertion place)
- * @param selectorIndex A bucket from where nodes to project should be taken
- * @param componentView A where projectable nodes were initially created (source view)
- */
-function appendProjectedNodes(lView, tProjectionNode, selectorIndex, componentView) {
-    var projectedView = componentView[PARENT];
-    var componentNode = componentView[T_HOST];
-    var nodeToProject = componentNode.projection[selectorIndex];
-    if (Array.isArray(nodeToProject)) {
-        appendChild(nodeToProject, tProjectionNode, lView);
-    }
-    else {
-        while (nodeToProject) {
-            if (nodeToProject.type === 1 /* Projection */) {
-                appendProjectedNodes(lView, tProjectionNode, nodeToProject.projection, findComponentView(projectedView));
-            }
-            else {
-                // This flag must be set now or we won't know that this node is projected
-                // if the nodes are inserted into a container later.
-                nodeToProject.flags |= 2 /* isProjected */;
-                appendProjectedNode(nodeToProject, tProjectionNode, lView, projectedView);
-            }
-            nodeToProject = nodeToProject.next;
-        }
-    }
-}
-/**
  * Appends a projected node to the DOM, or in the case of a projected container,
  * appends the nodes from all of the container's active views to the DOM.
  *
@@ -11444,6 +11413,14 @@ function projectionDef(selectors, textSelectors) {
     }
 }
 /**
+ * Stack used to keep track of projection nodes in projection() instruction.
+ *
+ * This is deliberately created outside of projection() to avoid allocating
+ * a new array each time the function is called. Instead the array will be
+ * re-used by each invocation. This works because the function is not reentrant.
+ */
+var projectionNodeStack$1 = [];
+/**
  * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
  * to the projectionDef instruction.
  *
@@ -11462,7 +11439,50 @@ function projection(nodeIndex, selectorIndex, attrs) {
     // `<ng-content>` has no content
     setIsParent(false);
     // re-distribution of projectable nodes is stored on a component's view level
-    appendProjectedNodes(lView, tProjectionNode, selectorIndex, findComponentView(lView));
+    var componentView = findComponentView(lView);
+    var componentNode = componentView[T_HOST];
+    var nodeToProject = componentNode.projection[selectorIndex];
+    var projectedView = componentView[PARENT];
+    ngDevMode && assertLView(projectedView);
+    var projectionNodeIndex = -1;
+    if (Array.isArray(nodeToProject)) {
+        appendChild(nodeToProject, tProjectionNode, lView);
+    }
+    else {
+        while (nodeToProject) {
+            if (nodeToProject.type === 1 /* Projection */) {
+                // This node is re-projected, so we must go up the tree to get its projected nodes.
+                var currentComponentView = findComponentView(projectedView);
+                var currentComponentHost = currentComponentView[T_HOST];
+                var firstProjectedNode = currentComponentHost.projection[nodeToProject.projection];
+                if (firstProjectedNode) {
+                    if (Array.isArray(firstProjectedNode)) {
+                        appendChild(firstProjectedNode, tProjectionNode, lView);
+                    }
+                    else {
+                        projectionNodeStack$1[++projectionNodeIndex] = nodeToProject;
+                        projectionNodeStack$1[++projectionNodeIndex] = projectedView;
+                        nodeToProject = firstProjectedNode;
+                        projectedView = getLViewParent(currentComponentView);
+                        continue;
+                    }
+                }
+            }
+            else {
+                // This flag must be set now or we won't know that this node is projected
+                // if the nodes are inserted into a container later.
+                nodeToProject.flags |= 2 /* isProjected */;
+                appendProjectedNode(nodeToProject, tProjectionNode, lView, projectedView);
+            }
+            // If we are finished with a list of re-projected nodes, we need to get
+            // back to the root projection node that was re-projected.
+            if (nodeToProject.next === null && projectedView !== componentView[PARENT]) {
+                projectedView = projectionNodeStack$1[projectionNodeIndex--];
+                nodeToProject = projectionNodeStack$1[projectionNodeIndex--];
+            }
+            nodeToProject = nodeToProject.next;
+        }
+    }
 }
 /**
  * Adds LView or LContainer to the end of the current view tree.
@@ -14426,7 +14446,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.6+18.sha-91a161a.with-local-changes');
+var VERSION = new Version('8.0.0-beta.6+17.sha-efa10e3.with-local-changes');
 
 /**
  * @license
