@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.6+19.sha-772b24c.with-local-changes
+ * @license Angular v8.0.0-beta.6+25.sha-03d2e5c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -436,7 +436,7 @@ var R3ResolvedDependencyType;
  * found in the LICENSE file at https://angular.io/license
  */
 function getCompilerFacade() {
-    const globalNg = _global.ng;
+    const globalNg = _global['ng'];
     if (!globalNg || !globalNg.ɵcompilerFacade) {
         throw new Error(`Angular JIT compilation failed: '@angular/compiler' not loaded!\n` +
             `  - JIT compilation is discouraged for production use-cases! Consider AOT mode instead.\n` +
@@ -9569,7 +9569,7 @@ function updateStylingMap(context, classesInput, stylesInput, directiveRef) {
         (/** @type {?} */ (((/** @type {?} */ (classesInput))))).value :
         classesInput;
     /** @type {?} */
-    const stylesValue = stylesPlayerBuilder ? (/** @type {?} */ (stylesInput)).value : stylesInput;
+    const stylesValue = stylesPlayerBuilder ? (/** @type {?} */ (stylesInput))['value'] : stylesInput;
     /** @type {?} */
     let classNames = EMPTY_ARRAY$1;
     /** @type {?} */
@@ -17940,7 +17940,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.6+19.sha-772b24c.with-local-changes');
+const VERSION = new Version('8.0.0-beta.6+25.sha-03d2e5c.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
