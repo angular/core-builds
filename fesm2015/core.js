@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.7+5.sha-a54a752.with-local-changes
+ * @license Angular v7.2.7+6.sha-b06847f.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2027,7 +2027,7 @@ function findComponentView(lView) {
  */
 function getCompilerFacade() {
     /** @type {?} */
-    const globalNg = _global.ng;
+    const globalNg = _global['ng'];
     if (!globalNg || !globalNg.ɵcompilerFacade) {
         throw new Error(`Angular JIT compilation failed: '@angular/compiler' not loaded!\n` +
             `  - JIT compilation is discouraged for production use-cases! Consider AOT mode instead.\n` +
@@ -6455,7 +6455,7 @@ function updateStylingMap(context, classesInput, stylesInput, directiveRef) {
         (/** @type {?} */ (((/** @type {?} */ (classesInput))))).value :
         classesInput;
     /** @type {?} */
-    const stylesValue = stylesPlayerBuilder ? (/** @type {?} */ (stylesInput)).value : stylesInput;
+    const stylesValue = stylesPlayerBuilder ? (/** @type {?} */ (stylesInput))['value'] : stylesInput;
     // early exit (this is what's done to avoid using ctx.bind() to cache the value)
     /** @type {?} */
     const ignoreAllClassUpdates = limitToSingleClasses(context) || classesValue === NO_CHANGE ||
@@ -13813,7 +13813,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.7+5.sha-a54a752.with-local-changes');
+const VERSION = new Version('7.2.7+6.sha-b06847f.with-local-changes');
 
 /**
  * @fileoverview added by tsickle

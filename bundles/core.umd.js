@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.7+5.sha-a54a752.with-local-changes
+ * @license Angular v7.2.7+6.sha-b06847f.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1716,7 +1716,7 @@
      * found in the LICENSE file at https://angular.io/license
      */
     function getCompilerFacade() {
-        var globalNg = _global.ng;
+        var globalNg = _global['ng'];
         if (!globalNg || !globalNg.ɵcompilerFacade) {
             throw new Error("Angular JIT compilation failed: '@angular/compiler' not loaded!\n" +
                 "  - JIT compilation is discouraged for production use-cases! Consider AOT mode instead.\n" +
@@ -5166,7 +5166,7 @@
         var classesValue = classesPlayerBuilder ?
             classesInput.value :
             classesInput;
-        var stylesValue = stylesPlayerBuilder ? stylesInput.value : stylesInput;
+        var stylesValue = stylesPlayerBuilder ? stylesInput['value'] : stylesInput;
         // early exit (this is what's done to avoid using ctx.bind() to cache the value)
         var ignoreAllClassUpdates = limitToSingleClasses(context) || classesValue === NO_CHANGE ||
             classesValue === context[6 /* CachedClassValueOrInitialClassString */];
@@ -10788,7 +10788,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('7.2.7+5.sha-a54a752.with-local-changes');
+    var VERSION = new Version('7.2.7+6.sha-b06847f.with-local-changes');
 
     /**
      * @license
