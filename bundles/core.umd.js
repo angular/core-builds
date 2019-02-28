@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.6+22.sha-cb20b3b.with-local-changes
+ * @license Angular v8.0.0-beta.6+25.sha-03d2e5c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -513,7 +513,7 @@
      * found in the LICENSE file at https://angular.io/license
      */
     function getCompilerFacade() {
-        var globalNg = _global.ng;
+        var globalNg = _global['ng'];
         if (!globalNg || !globalNg.ɵcompilerFacade) {
             throw new Error("Angular JIT compilation failed: '@angular/compiler' not loaded!\n" +
                 "  - JIT compilation is discouraged for production use-cases! Consider AOT mode instead.\n" +
@@ -7968,7 +7968,7 @@
         var classesValue = classesPlayerBuilder ?
             classesInput.value :
             classesInput;
-        var stylesValue = stylesPlayerBuilder ? stylesInput.value : stylesInput;
+        var stylesValue = stylesPlayerBuilder ? stylesInput['value'] : stylesInput;
         var classNames = EMPTY_ARRAY$1;
         var applyAllClasses = false;
         var playerBuildersAreDirty = false;
@@ -14456,7 +14456,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.6+22.sha-cb20b3b.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.6+25.sha-03d2e5c.with-local-changes');
 
     /**
      * @license
