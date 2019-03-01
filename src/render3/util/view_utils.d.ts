@@ -86,12 +86,3 @@ export declare function isRootView(target: LView): boolean;
  */
 export declare function readPatchedData(target: any): LView | LContext | null;
 export declare function readPatchedLView(target: any): LView | null;
-/**
- * Returns a boolean for whether the view is attached to the change detection tree.
- *
- * Note: This determines whether a view should be checked, not whether it's inserted
- * into a container. For that, you'll want `viewAttachedToContainer` below.
- */
-export declare function viewAttachedToChangeDetector(view: LView): boolean;
-/** Returns a boolean for whether the view is attached to a container. */
-export declare function viewAttachedToContainer(view: LView): boolean;
