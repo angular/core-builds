@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.6+41.sha-f01d1c4.with-local-changes
+ * @license Angular v8.0.0-beta.6+43.sha-7ac58be.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3900,6 +3900,25 @@ function readPatchedLView(target) {
         return Array.isArray(value) ? value : ((/** @type {?} */ (value))).lView;
     }
     return null;
+}
+/**
+ * Returns a boolean for whether the view is attached to the change detection tree.
+ *
+ * Note: This determines whether a view should be checked, not whether it's inserted
+ * into a container. For that, you'll want `viewAttachedToContainer` below.
+ * @param {?} view
+ * @return {?}
+ */
+function viewAttachedToChangeDetector(view) {
+    return (view[FLAGS] & 128 /* Attached */) === 128 /* Attached */;
+}
+/**
+ * Returns a boolean for whether the view is attached to a container.
+ * @param {?} view
+ * @return {?}
+ */
+function viewAttachedToContainer(view) {
+    return isLContainer(view[PARENT]);
 }
 
 /**
@@ -8069,6 +8088,7 @@ function detachView(lContainer, removeIndex) {
         (/** @type {?} */ (viewToDetach[QUERIES])).removeView();
     }
     viewToDetach[PARENT] = null;
+    viewToDetach[NEXT] = null;
     // Unsets the attached flag
     viewToDetach[FLAGS] &= ~128 /* Attached */;
     return viewToDetach;
@@ -14017,7 +14037,8 @@ function componentRefresh(adjustedElementIndex) {
     const hostView = getComponentViewByIndex(adjustedElementIndex, lView);
     ngDevMode && assertNodeType((/** @type {?} */ (lView[TVIEW].data[adjustedElementIndex])), 3 /* Element */);
     // Only attached CheckAlways components or attached, dirty OnPush components should be checked
-    if (viewAttached(hostView) && hostView[FLAGS] & (16 /* CheckAlways */ | 64 /* Dirty */)) {
+    if (viewAttachedToChangeDetector(hostView) &&
+        hostView[FLAGS] & (16 /* CheckAlways */ | 64 /* Dirty */)) {
         syncViewWithBlueprint(hostView);
         checkView(hostView, hostView[CONTEXT]);
     }
@@ -14055,14 +14076,6 @@ function syncViewWithBlueprint(componentView) {
     for (let i = componentView.length; i < componentTView.blueprint.length; i++) {
         componentView[i] = componentTView.blueprint[i];
     }
-}
-/**
- * Returns a boolean for whether the view is attached
- * @param {?} view
- * @return {?}
- */
-function viewAttached(view) {
-    return (view[FLAGS] & 128 /* Attached */) === 128 /* Attached */;
 }
 /**
  * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
@@ -17520,6 +17533,11 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 const lView = (/** @type {?} */ (((/** @type {?} */ (viewRef)))._lView));
                 /** @type {?} */
                 const adjustedIdx = this._adjustIndex(index);
+                if (viewAttachedToContainer(lView)) {
+                    // If view is already attached, fall back to move() so we clean up
+                    // references appropriately.
+                    return this.move(viewRef, adjustedIdx);
+                }
                 insertView(lView, this._lContainer, adjustedIdx);
                 /** @type {?} */
                 const beforeNode = getBeforeNodeForView(adjustedIdx, this._lContainer[VIEWS], this._lContainer[NATIVE]);
@@ -17539,8 +17557,9 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 }
                 /** @type {?} */
                 const index = this.indexOf(viewRef);
-                this.detach(index);
-                this.insert(viewRef, this._adjustIndex(newIndex));
+                if (index !== -1)
+                    this.detach(index);
+                this.insert(viewRef, newIndex);
                 return viewRef;
             }
             /**
@@ -17861,7 +17880,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.6+41.sha-f01d1c4.with-local-changes');
+const VERSION = new Version('8.0.0-beta.6+43.sha-7ac58be.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
