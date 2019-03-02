@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.6+49.sha-a06824a.with-local-changes
+ * @license Angular v8.0.0-beta.6+50.sha-c0757d1.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6929,6 +6929,9 @@
     function cleanUpView(viewOrContainer) {
         if (viewOrContainer.length >= HEADER_OFFSET) {
             var view = viewOrContainer;
+            // Usually the Attached flag is removed when the view is detached from its parent, however
+            // if it's a root view, the flag won't be unset hence why we're also removing on destroy.
+            view[FLAGS] &= ~128 /* Attached */;
             // Mark the LView as destroyed *before* executing the onDestroy hooks. An onDestroy hook
             // runs arbitrary user code, which could include its own `viewRef.destroy()` (or similar). If
             // We don't flag the view as destroyed before the hooks, this could lead to an infinite loop.
@@ -14473,7 +14476,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.6+49.sha-a06824a.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.6+50.sha-c0757d1.with-local-changes');
 
     /**
      * @license
