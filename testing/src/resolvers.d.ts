@@ -34,6 +34,6 @@ export declare class PipeResolver extends OverrideResolver<Pipe> {
     readonly type: import("@angular/core").PipeDecorator;
 }
 export declare class NgModuleResolver extends OverrideResolver<NgModule> {
-    readonly type: import("@angular/core/src/metadata/ng_module").NgModuleDecorator;
+    readonly type: import("@angular/core").NgModuleDecorator;
 }
 export {};

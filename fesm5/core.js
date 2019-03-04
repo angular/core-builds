@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.6+62.sha-c5f1d08.with-local-changes
+ * @license Angular v8.0.0-beta.6+64.sha-48214e2.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14450,7 +14450,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.6+62.sha-c5f1d08.with-local-changes');
+var VERSION = new Version('8.0.0-beta.6+64.sha-48214e2.with-local-changes');
 
 /**
  * @license
@@ -21181,7 +21181,7 @@ var initializeBaseDef = function (target) {
     }
 };
 /**
- * Does the work of creating the `ngBaseDef` property for the @Input and @Output decorators.
+ * Does the work of creating the `ngBaseDef` property for the `Input` and `Output` decorators.
  * @param key "inputs" or "outputs"
  */
 var updateBaseDefFromIOProp = function (getProp) {
