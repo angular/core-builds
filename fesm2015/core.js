@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.6+33.sha-ea09430.with-local-changes
+ * @license Angular v8.0.0-beta.6+63.sha-95989a1.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3972,6 +3972,25 @@ function readPatchedLView(target) {
         return Array.isArray(value) ? value : ((/** @type {?} */ (value))).lView;
     }
     return null;
+}
+/**
+ * Returns a boolean for whether the view is attached to the change detection tree.
+ *
+ * Note: This determines whether a view should be checked, not whether it's inserted
+ * into a container. For that, you'll want `viewAttachedToContainer` below.
+ * @param {?} view
+ * @return {?}
+ */
+function viewAttachedToChangeDetector(view) {
+    return (view[FLAGS] & 128 /* Attached */) === 128 /* Attached */;
+}
+/**
+ * Returns a boolean for whether the view is attached to a container.
+ * @param {?} view
+ * @return {?}
+ */
+function viewAttachedToContainer(view) {
+    return isLContainer(view[PARENT]);
 }
 
 /**
@@ -8137,10 +8156,12 @@ function detachView(lContainer, removeIndex) {
     }
     views.splice(removeIndex, 1);
     addRemoveViewFromContainer(viewToDetach, false);
-    if (viewToDetach[QUERIES]) {
+    if ((viewToDetach[FLAGS] & 128 /* Attached */) &&
+        !(viewToDetach[FLAGS] & 256 /* Destroyed */) && viewToDetach[QUERIES]) {
         (/** @type {?} */ (viewToDetach[QUERIES])).removeView();
     }
     viewToDetach[PARENT] = null;
+    viewToDetach[NEXT] = null;
     // Unsets the attached flag
     viewToDetach[FLAGS] &= ~128 /* Attached */;
     return viewToDetach;
@@ -8206,13 +8227,14 @@ function getParentState(lViewOrLContainer, rootView) {
  * listeners. Listeners are removed as the last step so events delivered in the onDestroys hooks
  * can be propagated to \@Output listeners.
  *
- * @param {?} viewOrContainer
+ * @param {?} view The LView to clean up
  * @return {?}
  */
-function cleanUpView(viewOrContainer) {
-    if (((/** @type {?} */ (viewOrContainer))).length >= HEADER_OFFSET) {
-        /** @type {?} */
-        const view = (/** @type {?} */ (viewOrContainer));
+function cleanUpView(view) {
+    if (isLView(view) && !(view[FLAGS] & 256 /* Destroyed */)) {
+        // Usually the Attached flag is removed when the view is detached from its parent, however
+        // if it's a root view, the flag won't be unset hence why we're also removing on destroy.
+        view[FLAGS] &= ~128 /* Attached */;
         // Mark the LView as destroyed *before* executing the onDestroy hooks. An onDestroy hook
         // runs arbitrary user code, which could include its own `viewRef.destroy()` (or similar). If
         // We don't flag the view as destroyed before the hooks, this could lead to an infinite loop.
@@ -8227,6 +8249,10 @@ function cleanUpView(viewOrContainer) {
         if (hostTNode && hostTNode.type === 3 /* Element */ && isProceduralRenderer(view[RENDERER])) {
             ngDevMode && ngDevMode.rendererDestroy++;
             ((/** @type {?} */ (view[RENDERER]))).destroy();
+        }
+        // For embedded views still attached to a container: remove query result from this view.
+        if (viewAttachedToContainer(view) && view[QUERIES]) {
+            (/** @type {?} */ (view[QUERIES])).removeView();
         }
     }
 }
@@ -14089,7 +14115,8 @@ function componentRefresh(adjustedElementIndex) {
     const hostView = getComponentViewByIndex(adjustedElementIndex, lView);
     ngDevMode && assertNodeType((/** @type {?} */ (lView[TVIEW].data[adjustedElementIndex])), 3 /* Element */);
     // Only attached CheckAlways components or attached, dirty OnPush components should be checked
-    if (viewAttached(hostView) && hostView[FLAGS] & (16 /* CheckAlways */ | 64 /* Dirty */)) {
+    if (viewAttachedToChangeDetector(hostView) &&
+        hostView[FLAGS] & (16 /* CheckAlways */ | 64 /* Dirty */)) {
         syncViewWithBlueprint(hostView);
         checkView(hostView, hostView[CONTEXT]);
     }
@@ -14127,14 +14154,6 @@ function syncViewWithBlueprint(componentView) {
     for (let i = componentView.length; i < componentTView.blueprint.length; i++) {
         componentView[i] = componentTView.blueprint[i];
     }
-}
-/**
- * Returns a boolean for whether the view is attached
- * @param {?} view
- * @return {?}
- */
-function viewAttached(view) {
-    return (view[FLAGS] & 128 /* Attached */) === 128 /* Attached */;
 }
 /**
  * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
@@ -17592,6 +17611,11 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 const lView = (/** @type {?} */ (((/** @type {?} */ (viewRef)))._lView));
                 /** @type {?} */
                 const adjustedIdx = this._adjustIndex(index);
+                if (viewAttachedToContainer(lView)) {
+                    // If view is already attached, fall back to move() so we clean up
+                    // references appropriately.
+                    return this.move(viewRef, adjustedIdx);
+                }
                 insertView(lView, this._lContainer, adjustedIdx);
                 /** @type {?} */
                 const beforeNode = getBeforeNodeForView(adjustedIdx, this._lContainer[VIEWS], this._lContainer[NATIVE]);
@@ -17611,8 +17635,9 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 }
                 /** @type {?} */
                 const index = this.indexOf(viewRef);
-                this.detach(index);
-                this.insert(viewRef, this._adjustIndex(newIndex));
+                if (index !== -1)
+                    this.detach(index);
+                this.insert(viewRef, newIndex);
                 return viewRef;
             }
             /**
@@ -17940,7 +17965,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.6+33.sha-ea09430.with-local-changes');
+const VERSION = new Version('8.0.0-beta.6+63.sha-95989a1.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -26777,7 +26802,7 @@ const initializeBaseDef = (target) => {
     }
 };
 /**
- * Does the work of creating the `ngBaseDef` property for the \@Input and \@Output decorators.
+ * Does the work of creating the `ngBaseDef` property for the `Input` and `Output` decorators.
  * \@param key "inputs" or "outputs"
  * @type {?}
  */

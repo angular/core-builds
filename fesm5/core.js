@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.6+33.sha-ea09430.with-local-changes
+ * @license Angular v8.0.0-beta.6+63.sha-95989a1.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3395,6 +3395,19 @@ function readPatchedLView(target) {
         return Array.isArray(value) ? value : value.lView;
     }
     return null;
+}
+/**
+ * Returns a boolean for whether the view is attached to the change detection tree.
+ *
+ * Note: This determines whether a view should be checked, not whether it's inserted
+ * into a container. For that, you'll want `viewAttachedToContainer` below.
+ */
+function viewAttachedToChangeDetector(view) {
+    return (view[FLAGS] & 128 /* Attached */) === 128 /* Attached */;
+}
+/** Returns a boolean for whether the view is attached to a container. */
+function viewAttachedToContainer(view) {
+    return isLContainer(view[PARENT]);
 }
 
 /**
@@ -6873,10 +6886,12 @@ function detachView(lContainer, removeIndex) {
     }
     views.splice(removeIndex, 1);
     addRemoveViewFromContainer(viewToDetach, false);
-    if (viewToDetach[QUERIES]) {
+    if ((viewToDetach[FLAGS] & 128 /* Attached */) &&
+        !(viewToDetach[FLAGS] & 256 /* Destroyed */) && viewToDetach[QUERIES]) {
         viewToDetach[QUERIES].removeView();
     }
     viewToDetach[PARENT] = null;
+    viewToDetach[NEXT] = null;
     // Unsets the attached flag
     viewToDetach[FLAGS] &= ~128 /* Attached */;
     return viewToDetach;
@@ -6939,9 +6954,11 @@ function getParentState(lViewOrLContainer, rootView) {
  *
  * @param view The LView to clean up
  */
-function cleanUpView(viewOrContainer) {
-    if (viewOrContainer.length >= HEADER_OFFSET) {
-        var view = viewOrContainer;
+function cleanUpView(view) {
+    if (isLView(view) && !(view[FLAGS] & 256 /* Destroyed */)) {
+        // Usually the Attached flag is removed when the view is detached from its parent, however
+        // if it's a root view, the flag won't be unset hence why we're also removing on destroy.
+        view[FLAGS] &= ~128 /* Attached */;
         // Mark the LView as destroyed *before* executing the onDestroy hooks. An onDestroy hook
         // runs arbitrary user code, which could include its own `viewRef.destroy()` (or similar). If
         // We don't flag the view as destroyed before the hooks, this could lead to an infinite loop.
@@ -6955,6 +6972,10 @@ function cleanUpView(viewOrContainer) {
         if (hostTNode && hostTNode.type === 3 /* Element */ && isProceduralRenderer(view[RENDERER])) {
             ngDevMode && ngDevMode.rendererDestroy++;
             view[RENDERER].destroy();
+        }
+        // For embedded views still attached to a container: remove query result from this view.
+        if (viewAttachedToContainer(view) && view[QUERIES]) {
+            view[QUERIES].removeView();
         }
     }
 }
@@ -11420,7 +11441,8 @@ function componentRefresh(adjustedElementIndex) {
     var hostView = getComponentViewByIndex(adjustedElementIndex, lView);
     ngDevMode && assertNodeType(lView[TVIEW].data[adjustedElementIndex], 3 /* Element */);
     // Only attached CheckAlways components or attached, dirty OnPush components should be checked
-    if (viewAttached(hostView) && hostView[FLAGS] & (16 /* CheckAlways */ | 64 /* Dirty */)) {
+    if (viewAttachedToChangeDetector(hostView) &&
+        hostView[FLAGS] & (16 /* CheckAlways */ | 64 /* Dirty */)) {
         syncViewWithBlueprint(hostView);
         checkView(hostView, hostView[CONTEXT]);
     }
@@ -11456,10 +11478,6 @@ function syncViewWithBlueprint(componentView) {
     for (var i = componentView.length; i < componentTView.blueprint.length; i++) {
         componentView[i] = componentTView.blueprint[i];
     }
-}
-/** Returns a boolean for whether the view is attached */
-function viewAttached(view) {
-    return (view[FLAGS] & 128 /* Attached */) === 128 /* Attached */;
 }
 /**
  * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
@@ -14196,6 +14214,11 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 }
                 var lView = viewRef._lView;
                 var adjustedIdx = this._adjustIndex(index);
+                if (viewAttachedToContainer(lView)) {
+                    // If view is already attached, fall back to move() so we clean up
+                    // references appropriately.
+                    return this.move(viewRef, adjustedIdx);
+                }
                 insertView(lView, this._lContainer, adjustedIdx);
                 var beforeNode = getBeforeNodeForView(adjustedIdx, this._lContainer[VIEWS], this._lContainer[NATIVE]);
                 addRemoveViewFromContainer(lView, true, beforeNode);
@@ -14208,8 +14231,9 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                     throw new Error('Cannot move a destroyed View in a ViewContainer!');
                 }
                 var index = this.indexOf(viewRef);
-                this.detach(index);
-                this.insert(viewRef, this._adjustIndex(newIndex));
+                if (index !== -1)
+                    this.detach(index);
+                this.insert(viewRef, newIndex);
                 return viewRef;
             };
             ViewContainerRef_.prototype.indexOf = function (viewRef) { return this._viewRefs.indexOf(viewRef); };
@@ -14497,7 +14521,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.6+33.sha-ea09430.with-local-changes');
+var VERSION = new Version('8.0.0-beta.6+63.sha-95989a1.with-local-changes');
 
 /**
  * @license
@@ -21268,7 +21292,7 @@ var initializeBaseDef = function (target) {
     }
 };
 /**
- * Does the work of creating the `ngBaseDef` property for the @Input and @Output decorators.
+ * Does the work of creating the `ngBaseDef` property for the `Input` and `Output` decorators.
  * @param key "inputs" or "outputs"
  */
 var updateBaseDefFromIOProp = function (getProp) {

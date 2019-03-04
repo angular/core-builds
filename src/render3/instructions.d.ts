@@ -542,8 +542,6 @@ export declare function embeddedViewEnd(): void;
  * @param adjustedElementIndex  Element index in LView[] (adjusted for HEADER_OFFSET)
  */
 export declare function componentRefresh<T>(adjustedElementIndex: number): void;
-/** Returns a boolean for whether the view is attached */
-export declare function viewAttached(view: LView): boolean;
 /**
  * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
  * It takes all the selectors from the entire component's template and decides where
