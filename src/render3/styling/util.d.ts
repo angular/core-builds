@@ -9,14 +9,30 @@ import '../../util/ng_dev_mode';
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
 import { LContainer } from '../interfaces/container';
 import { LContext } from '../interfaces/context';
-import { TAttributes, TNode } from '../interfaces/node';
+import { TNode } from '../interfaces/node';
 import { Player, PlayerContext } from '../interfaces/player';
 import { RElement } from '../interfaces/renderer';
 import { InitialStylingValues, StylingContext } from '../interfaces/styling';
 import { LView, RootContext } from '../interfaces/view';
 export declare const ANIMATION_PROP_PREFIX = "@";
 export declare function createEmptyStylingContext(wrappedElement?: LContainer | LView | RElement | null, sanitizer?: StyleSanitizeFn | null, initialStyles?: InitialStylingValues | null, initialClasses?: InitialStylingValues | null): StylingContext;
-export declare function allocateDirectiveIntoContext(context: StylingContext, directiveRef: any | null): void;
+/**
+ * Allocates (registers) a directive into the directive registry within the provided styling
+ * context.
+ *
+ * For each and every `[style]`, `[style.prop]`, `[class]`, `[class.name]` binding
+ * (as well as static style and class attributes) a directive, component or template
+ * is marked as the owner. When an owner is determined (this happens when the template
+ * is first passed over) the directive owner is allocated into the styling context. When
+ * this happens, each owner gets its own index value. This then ensures that once any
+ * style and/or class binding are assigned into the context then they are marked to
+ * that directive's index value.
+ *
+ * @param context the target StylingContext
+ * @param directiveRef the directive that will be allocated into the context
+ * @returns the index where the directive was inserted into
+ */
+export declare function allocateDirectiveIntoContext(context: StylingContext, directiveRef: any | null): number;
 /**
  * Used clone a copy of a pre-computed template of a styling context.
  *
@@ -51,4 +67,3 @@ export declare function getOrCreatePlayerContext(target: {}, context?: LContext 
 export declare function getPlayerContext(stylingContext: StylingContext): PlayerContext | null;
 export declare function allocPlayerContext(data: StylingContext): PlayerContext;
 export declare function throwInvalidRefError(): void;
-export declare function hasStyling(attrs: TAttributes): boolean;
