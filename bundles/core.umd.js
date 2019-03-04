@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.6+59.sha-d2f015f.with-local-changes
+ * @license Angular v8.0.0-beta.6+61.sha-3403027.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6859,7 +6859,8 @@
         }
         views.splice(removeIndex, 1);
         addRemoveViewFromContainer(viewToDetach, false);
-        if (viewToDetach[QUERIES]) {
+        if ((viewToDetach[FLAGS] & 128 /* Attached */) &&
+            !(viewToDetach[FLAGS] & 256 /* Destroyed */) && viewToDetach[QUERIES]) {
             viewToDetach[QUERIES].removeView();
         }
         viewToDetach[PARENT] = null;
@@ -6926,9 +6927,8 @@
      *
      * @param view The LView to clean up
      */
-    function cleanUpView(viewOrContainer) {
-        if (viewOrContainer.length >= HEADER_OFFSET) {
-            var view = viewOrContainer;
+    function cleanUpView(view) {
+        if (isLView(view) && !(view[FLAGS] & 256 /* Destroyed */)) {
             // Usually the Attached flag is removed when the view is detached from its parent, however
             // if it's a root view, the flag won't be unset hence why we're also removing on destroy.
             view[FLAGS] &= ~128 /* Attached */;
@@ -6945,6 +6945,10 @@
             if (hostTNode && hostTNode.type === 3 /* Element */ && isProceduralRenderer(view[RENDERER])) {
                 ngDevMode && ngDevMode.rendererDestroy++;
                 view[RENDERER].destroy();
+            }
+            // For embedded views still attached to a container: remove query result from this view.
+            if (viewAttachedToContainer(view) && view[QUERIES]) {
+                view[QUERIES].removeView();
             }
         }
     }
@@ -14476,7 +14480,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.6+59.sha-d2f015f.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.6+61.sha-3403027.with-local-changes');
 
     /**
      * @license
