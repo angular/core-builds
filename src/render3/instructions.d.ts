@@ -228,6 +228,12 @@ export declare function storeCleanupFn(view: LView, cleanupFn: Function): void;
 /** Mark the end of the element. */
 export declare function elementEnd(): void;
 /**
+ * Flushes all the lifecycle hooks for directives up until (and excluding) that node index
+ *
+ * @param index The index of the element in the `LView`
+ */
+export declare function flushHooksUpTo(index: number): void;
+/**
  * Updates the value of removes an attribute on an Element.
  *
  * @param number index The index of the element in the data array
