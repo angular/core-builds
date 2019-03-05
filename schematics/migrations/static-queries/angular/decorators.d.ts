@@ -1,0 +1,18 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/// <amd-module name="@angular/core/schematics/migrations/static-queries/angular/decorators" />
+import * as ts from 'typescript';
+export interface NgDecorator {
+    name: string;
+    node: ts.Decorator;
+}
+/**
+ * Gets all decorators which are imported from an Angular package (e.g. "@angular/core")
+ * from a list of decorators.
+ */
+export declare function getAngularDecorators(typeChecker: ts.TypeChecker, decorators: ReadonlyArray<ts.Decorator>): NgDecorator[];
