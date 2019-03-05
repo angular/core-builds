@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.6+63.sha-95989a1.with-local-changes
+ * @license Angular v8.0.0-beta.6+68.sha-866d500.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6611,15 +6611,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var NG_PROJECT_AS_ATTR_NAME = 'ngProjectAs';
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     // TODO: cleanup once the code is merged in angular/angular
     var RendererStyleFlags3;
     (function (RendererStyleFlags3) {
@@ -6641,6 +6632,15 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var NG_PROJECT_AS_ATTR_NAME = 'ngProjectAs';
 
     /**
      * @license
@@ -7439,12 +7439,42 @@
             [0],
             null,
         ];
+        // whenever a context is created there is always a `null` directive
+        // that is registered (which is a placeholder for the "template").
         allocateDirectiveIntoContext(context, null);
         return context;
     }
+    /**
+     * Allocates (registers) a directive into the directive registry within the provided styling
+     * context.
+     *
+     * For each and every `[style]`, `[style.prop]`, `[class]`, `[class.name]` binding
+     * (as well as static style and class attributes) a directive, component or template
+     * is marked as the owner. When an owner is determined (this happens when the template
+     * is first passed over) the directive owner is allocated into the styling context. When
+     * this happens, each owner gets its own index value. This then ensures that once any
+     * style and/or class binding are assigned into the context then they are marked to
+     * that directive's index value.
+     *
+     * @param context the target StylingContext
+     * @param directiveRef the directive that will be allocated into the context
+     * @returns the index where the directive was inserted into
+     */
     function allocateDirectiveIntoContext(context, directiveRef) {
         // this is a new directive which we have not seen yet.
-        context[2 /* DirectiveRegistryPosition */].push(directiveRef, -1, false, null);
+        var dirs = context[2 /* DirectiveRegistryPosition */];
+        var i = dirs.length;
+        // we preemptively make space into the directives array and then
+        // assign values slot-by-slot to ensure that if the directive ordering
+        // changes then it will still function
+        dirs.push(null, null, null, null);
+        dirs[i + 0 /* DirectiveValueOffset */] = directiveRef;
+        dirs[i + 2 /* DirtyFlagOffset */] = false;
+        dirs[i + 3 /* StyleSanitizerOffset */] = null;
+        // -1 is used to signal that the directive has been allocated, but
+        // no actual style or class bindings have been registered yet...
+        dirs[i + 1 /* SinglePropValuesIndexOffset */] = -1;
+        return i;
     }
     /**
      * Used clone a copy of a pre-computed template of a styling context.
@@ -7595,14 +7625,6 @@
     function throwInvalidRefError() {
         throw new Error('Only elements that exist in an Angular application can be used for animations');
     }
-    function hasStyling(attrs) {
-        for (var i = 0; i < attrs.length; i++) {
-            var attr = attrs[i];
-            if (attr == 1 /* Classes */ || attr == 2 /* Styles */)
-                return true;
-        }
-        return false;
-    }
 
     /**
      * This file includes the code to power all styling-binding operations in Angular.
@@ -7622,30 +7644,9 @@
     /**
      * Creates a new StylingContext an fills it with the provided static styling attribute values.
      */
-    function initializeStaticContext(attrs) {
+    function initializeStaticContext(attrs, stylingStartIndex, directiveRef) {
         var context = createEmptyStylingContext();
-        var initialClasses = context[4 /* InitialClassValuesPosition */] =
-            [null, null];
-        var initialStyles = context[3 /* InitialStyleValuesPosition */] =
-            [null, null];
-        // The attributes array has marker values (numbers) indicating what the subsequent
-        // values represent. When we encounter a number, we set the mode to that type of attribute.
-        var mode = -1;
-        for (var i = 0; i < attrs.length; i++) {
-            var attr = attrs[i];
-            if (typeof attr == 'number') {
-                mode = attr;
-            }
-            else if (mode === 2 /* Styles */) {
-                initialStyles.push(attr, attrs[++i]);
-            }
-            else if (mode === 1 /* Classes */) {
-                initialClasses.push(attr, true);
-            }
-            else if (mode === 3 /* SelectOnly */) {
-                break;
-            }
-        }
+        patchContextWithStaticAttrs(context, attrs, stylingStartIndex, directiveRef);
         return context;
     }
     /**
@@ -7655,33 +7656,40 @@
      * @param context the existing styling context
      * @param attrs an array of new static styling attributes that will be
      *              assigned to the context
+     * @param attrsStylingStartIndex what index to start iterating within the
+     *              provided `attrs` array to start reading style and class values
      * @param directiveRef the directive instance with which static data is associated with.
      */
-    function patchContextWithStaticAttrs(context, attrs, startingIndex, directiveRef) {
+    function patchContextWithStaticAttrs(context, attrs, attrsStylingStartIndex, directiveRef) {
+        // this means the context has already been set and instantiated
+        if (context[1 /* MasterFlagPosition */] & 16 /* BindingAllocationLocked */)
+            return;
         // If the styling context has already been patched with the given directive's bindings,
         // then there is no point in doing it again. The reason why this may happen (the directive
         // styling being patched twice) is because the `stylingBinding` function is called each time
         // an element is created (both within a template function and within directive host bindings).
         var directives = context[2 /* DirectiveRegistryPosition */];
-        if (getDirectiveRegistryValuesIndexOf(directives, directiveRef) == -1) {
+        var detectedIndex = getDirectiveRegistryValuesIndexOf(directives, directiveRef || null);
+        if (detectedIndex === -1) {
             // this is a new directive which we have not seen yet.
-            allocateDirectiveIntoContext(context, directiveRef);
-            var initialClasses = null;
-            var initialStyles = null;
-            var mode = -1;
-            for (var i = startingIndex; i < attrs.length; i++) {
-                var attr = attrs[i];
-                if (typeof attr == 'number') {
-                    mode = attr;
-                }
-                else if (mode == 1 /* Classes */) {
-                    initialClasses = initialClasses || context[4 /* InitialClassValuesPosition */];
-                    patchInitialStylingValue(initialClasses, attr, true);
-                }
-                else if (mode == 2 /* Styles */) {
-                    initialStyles = initialStyles || context[3 /* InitialStyleValuesPosition */];
-                    patchInitialStylingValue(initialStyles, attr, attrs[++i]);
-                }
+            detectedIndex = allocateDirectiveIntoContext(context, directiveRef);
+        }
+        var directiveIndex = detectedIndex / 4 /* Size */;
+        var initialClasses = null;
+        var initialStyles = null;
+        var mode = -1;
+        for (var i = attrsStylingStartIndex; i < attrs.length; i++) {
+            var attr = attrs[i];
+            if (typeof attr == 'number') {
+                mode = attr;
+            }
+            else if (mode == 1 /* Classes */) {
+                initialClasses = initialClasses || context[4 /* InitialClassValuesPosition */];
+                patchInitialStylingValue(initialClasses, attr, true, directiveIndex);
+            }
+            else if (mode == 2 /* Styles */) {
+                initialStyles = initialStyles || context[3 /* InitialStyleValuesPosition */];
+                patchInitialStylingValue(initialStyles, attr, attrs[++i], directiveIndex);
             }
         }
     }
@@ -7689,27 +7697,38 @@
      * Designed to add a style or class value into the existing set of initial styles.
      *
      * The function will search and figure out if a style/class value is already present
-     * within the provided initial styling array. If and when a style/class value is not
-     * present (or if it's value is falsy) then it will be inserted/updated in the list
-     * of initial styling values.
+     * within the provided initial styling array. If and when a style/class value is
+     * present (allocated) then the code below will set the new value depending on the
+     * following cases:
+     *
+     *  1) if the existing value is falsy (this happens because a `[class.prop]` or
+     *     `[style.prop]` binding was set, but there wasn't a matching static style
+     *     or class present on the context)
+     *  2) if the value was set already by the template, component or directive, but the
+     *     new value is set on a higher level (i.e. a sub component which extends a parent
+     *     component sets its value after the parent has already set the same one)
+     *  3) if the same directive provides a new set of styling values to set
+     *
+     * @param initialStyling the initial styling array where the new styling entry will be added to
+     * @param prop the property value of the new entry (e.g. `width` (styles) or `foo` (classes))
+     * @param value the styling value of the new entry (e.g. `absolute` (styles) or `true` (classes))
+     * @param directiveOwnerIndex the directive owner index value of the styling source responsible
+     *        for these styles (see `interfaces/styling.ts#directives` for more info)
      */
-    function patchInitialStylingValue(initialStyling, prop, value) {
-        // Even values are keys; Odd numbers are values; Search keys only
-        for (var i = 2 /* KeyValueStartPosition */; i < initialStyling.length;) {
-            var key = initialStyling[i];
+    function patchInitialStylingValue(initialStyling, prop, value, directiveOwnerIndex) {
+        for (var i = 2 /* KeyValueStartPosition */; i < initialStyling.length; i += 3 /* Size */) {
+            var key = initialStyling[i + 0 /* PropOffset */];
             if (key === prop) {
                 var existingValue = initialStyling[i + 1 /* ValueOffset */];
-                // If there is no previous style value (when `null`) or no previous class
-                // applied (when `false`) then we update the the newly given value.
-                if (existingValue == null || existingValue == false) {
-                    initialStyling[i + 1 /* ValueOffset */] = value;
+                var existingOwner = initialStyling[i + 2 /* DirectiveOwnerOffset */];
+                if (allowValueChange(existingValue, value, existingOwner, directiveOwnerIndex)) {
+                    addOrUpdateStaticStyle(i, initialStyling, prop, value, directiveOwnerIndex);
                 }
                 return;
             }
-            i = i + 2 /* Size */;
         }
         // We did not find existing key, add a new one.
-        initialStyling.push(prop, value);
+        addOrUpdateStaticStyle(null, initialStyling, prop, value, directiveOwnerIndex);
     }
     /**
      * Runs through the initial style data present in the context and renders
@@ -7732,7 +7751,7 @@
      * provided list of initialStylingValues.
      */
     function renderInitialStylingValues(element, renderer, initialStylingValues, isEntryClassBased) {
-        for (var i = 2 /* KeyValueStartPosition */; i < initialStylingValues.length; i += 2 /* Size */) {
+        for (var i = 2 /* KeyValueStartPosition */; i < initialStylingValues.length; i += 3 /* Size */) {
             var value = initialStylingValues[i + 1 /* ValueOffset */];
             if (value) {
                 if (isEntryClassBased) {
@@ -7913,8 +7932,8 @@
             var initialValuesToLookup = entryIsClassBased ? initialClasses : initialStyles;
             var indexForInitial = getInitialStylingValuesIndexOf(initialValuesToLookup, propName);
             if (indexForInitial === -1) {
-                indexForInitial = initialValuesToLookup.length + 1 /* ValueOffset */;
-                initialValuesToLookup.push(propName, entryIsClassBased ? false : null);
+                indexForInitial = addOrUpdateStaticStyle(null, initialValuesToLookup, propName, entryIsClassBased ? false : null, directiveIndex) +
+                    1 /* ValueOffset */;
             }
             else {
                 indexForInitial += 1 /* ValueOffset */;
@@ -8908,7 +8927,7 @@
         return -1;
     }
     function getInitialStylingValuesIndexOf(keyValues, key) {
-        for (var i = 2 /* KeyValueStartPosition */; i < keyValues.length; i += 2 /* Size */) {
+        for (var i = 2 /* KeyValueStartPosition */; i < keyValues.length; i += 3 /* Size */) {
             if (keyValues[i] === key)
                 return i;
         }
@@ -8982,16 +9001,16 @@
      */
     function getInitialClassNameValue(context) {
         var initialClassValues = context[4 /* InitialClassValuesPosition */];
-        var className = initialClassValues[1 /* InitialClassesStringPosition */];
+        var className = initialClassValues[1 /* CachedStringValuePosition */];
         if (className === null) {
             className = '';
-            for (var i = 2 /* KeyValueStartPosition */; i < initialClassValues.length; i += 2 /* Size */) {
+            for (var i = 2 /* KeyValueStartPosition */; i < initialClassValues.length; i += 3 /* Size */) {
                 var isPresent = initialClassValues[i + 1];
                 if (isPresent) {
                     className += (className.length ? ' ' : '') + initialClassValues[i];
                 }
             }
-            initialClassValues[1 /* InitialClassesStringPosition */] = className;
+            initialClassValues[1 /* CachedStringValuePosition */] = className;
         }
         return className;
     }
@@ -9008,16 +9027,16 @@
      */
     function getInitialStyleStringValue(context) {
         var initialStyleValues = context[3 /* InitialStyleValuesPosition */];
-        var styleString = initialStyleValues[1 /* InitialClassesStringPosition */];
+        var styleString = initialStyleValues[1 /* CachedStringValuePosition */];
         if (styleString === null) {
             styleString = '';
-            for (var i = 2 /* KeyValueStartPosition */; i < initialStyleValues.length; i += 2 /* Size */) {
+            for (var i = 2 /* KeyValueStartPosition */; i < initialStyleValues.length; i += 3 /* Size */) {
                 var value = initialStyleValues[i + 1];
                 if (value !== null) {
                     styleString += (styleString.length ? ';' : '') + (initialStyleValues[i] + ":" + value);
                 }
             }
-            initialStyleValues[1 /* InitialClassesStringPosition */] = styleString;
+            initialStyleValues[1 /* CachedStringValuePosition */] = styleString;
         }
         return styleString;
     }
@@ -9139,6 +9158,30 @@
             }
         }
         cachedValues.push(0, startPosition, null, count);
+    }
+    /**
+     * Inserts or updates an existing entry in the provided `staticStyles` collection.
+     *
+     * @param index the index representing an existing styling entry in the collection:
+     *  if provided (numeric): then it will update the existing entry at the given position
+     *  if null: then it will insert a new entry within the collection
+     * @param staticStyles a collection of style or class entries where the value will
+     *  be inserted or patched
+     * @param prop the property value of the entry (e.g. `width` (styles) or `foo` (classes))
+     * @param value the styling value of the entry (e.g. `absolute` (styles) or `true` (classes))
+     * @param directiveOwnerIndex the directive owner index value of the styling source responsible
+     *        for these styles (see `interfaces/styling.ts#directives` for more info)
+     * @returns the index of the updated or new entry within the collection
+     */
+    function addOrUpdateStaticStyle(index, staticStyles, prop, value, directiveOwnerIndex) {
+        if (index === null) {
+            index = staticStyles.length;
+            staticStyles.push(null, null, null);
+            staticStyles[index + 0 /* PropOffset */] = prop;
+        }
+        staticStyles[index + 1 /* ValueOffset */] = value;
+        staticStyles[index + 2 /* DirectiveOwnerOffset */] = directiveOwnerIndex;
+        return index;
     }
 
     /**
@@ -9399,6 +9442,94 @@
             viewOffset--;
         }
         return parentTNode;
+    }
+
+    /**
+     * Assigns all attribute values to the provided element via the inferred renderer.
+     *
+     * This function accepts two forms of attribute entries:
+     *
+     * default: (key, value):
+     *  attrs = [key1, value1, key2, value2]
+     *
+     * namespaced: (NAMESPACE_MARKER, uri, name, value)
+     *  attrs = [NAMESPACE_MARKER, uri, name, value, NAMESPACE_MARKER, uri, name, value]
+     *
+     * The `attrs` array can contain a mix of both the default and namespaced entries.
+     * The "default" values are set without a marker, but if the function comes across
+     * a marker value then it will attempt to set a namespaced value. If the marker is
+     * not of a namespaced value then the function will quit and return the index value
+     * where it stopped during the iteration of the attrs array.
+     *
+     * See [AttributeMarker] to understand what the namespace marker value is.
+     *
+     * Note that this instruction does not support assigning style and class values to
+     * an element. See `elementStart` and `elementHostAttrs` to learn how styling values
+     * are applied to an element.
+     *
+     * @param native The element that the attributes will be assigned to
+     * @param attrs The attribute array of values that will be assigned to the element
+     * @returns the index value that was last accessed in the attributes array
+     */
+    function setUpAttributes(native, attrs) {
+        var renderer = getLView()[RENDERER];
+        var isProc = isProceduralRenderer(renderer);
+        var i = 0;
+        while (i < attrs.length) {
+            var value = attrs[i];
+            if (typeof value === 'number') {
+                // only namespaces are supported. Other value types (such as style/class
+                // entries) are not supported in this function.
+                if (value !== 0 /* NamespaceURI */) {
+                    break;
+                }
+                // we just landed on the marker value ... therefore
+                // we should skip to the next entry
+                i++;
+                var namespaceURI = attrs[i++];
+                var attrName = attrs[i++];
+                var attrVal = attrs[i++];
+                ngDevMode && ngDevMode.rendererSetAttribute++;
+                isProc ?
+                    renderer.setAttribute(native, attrName, attrVal, namespaceURI) :
+                    native.setAttributeNS(namespaceURI, attrName, attrVal);
+            }
+            else {
+                /// attrName is string;
+                var attrName = value;
+                var attrVal = attrs[++i];
+                if (attrName !== NG_PROJECT_AS_ATTR_NAME) {
+                    // Standard attributes
+                    ngDevMode && ngDevMode.rendererSetAttribute++;
+                    if (isAnimationProp(attrName)) {
+                        if (isProc) {
+                            renderer.setProperty(native, attrName, attrVal);
+                        }
+                    }
+                    else {
+                        isProc ?
+                            renderer
+                                .setAttribute(native, attrName, attrVal) :
+                            native.setAttribute(attrName, attrVal);
+                    }
+                }
+                i++;
+            }
+        }
+        // another piece of code may iterate over the same attributes array. Therefore
+        // it may be helpful to return the exact spot where the attributes array exited
+        // whether by running into an unsupported marker or if all the static values were
+        // iterated over.
+        return i;
+    }
+    function attrsStylingIndexOf(attrs, startIndex) {
+        for (var i = startIndex; i < attrs.length; i++) {
+            var val = attrs[i];
+            if (val === 1 /* Classes */ || val === 2 /* Styles */) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /**
@@ -9823,15 +9954,20 @@
         ngDevMode && assertDataInRange(lView, index - 1);
         var tNode = createNodeAtIndex(index, 3 /* Element */, native, name, attrs || null);
         if (attrs) {
+            var lastAttrIndex = setUpAttributes(native, attrs);
             // it's important to only prepare styling-related datastructures once for a given
             // tNode and not each time an element is created. Also, the styling code is designed
-            // to be patched and constructed at various points, but only up until the first element
-            // is created. Then the styling context is locked and can only be instantiated for each
-            // successive element that is created.
-            if (tView.firstTemplatePass && !tNode.stylingTemplate && hasStyling(attrs)) {
-                tNode.stylingTemplate = initializeStaticContext(attrs);
+            // to be patched and constructed at various points, but only up until the styling
+            // template is first allocated (which happens when the very first style/class binding
+            // value is evaluated). When the template is allocated (when it turns into a context)
+            // then the styling template is locked and cannot be further extended (it can only be
+            // instantiated into a context per element)
+            if (tView.firstTemplatePass && !tNode.stylingTemplate) {
+                var stylingAttrsStartIndex = attrsStylingIndexOf(attrs, lastAttrIndex);
+                if (stylingAttrsStartIndex >= 0) {
+                    tNode.stylingTemplate = initializeStaticContext(attrs, stylingAttrsStartIndex);
+                }
             }
-            setUpAttributes(native, attrs);
         }
         appendChild(native, tNode, lView);
         createDirectivesAndLocals(tView, lView, localRefs);
@@ -10004,84 +10140,6 @@
             .fill(NO_CHANGE, bindingStartIndex);
         blueprint[BINDING_INDEX] = bindingStartIndex;
         return blueprint;
-    }
-    /**
-     * Assigns all attribute values to the provided element via the inferred renderer.
-     *
-     * This function accepts two forms of attribute entries:
-     *
-     * default: (key, value):
-     *  attrs = [key1, value1, key2, value2]
-     *
-     * namespaced: (NAMESPACE_MARKER, uri, name, value)
-     *  attrs = [NAMESPACE_MARKER, uri, name, value, NAMESPACE_MARKER, uri, name, value]
-     *
-     * The `attrs` array can contain a mix of both the default and namespaced entries.
-     * The "default" values are set without a marker, but if the function comes across
-     * a marker value then it will attempt to set a namespaced value. If the marker is
-     * not of a namespaced value then the function will quit and return the index value
-     * where it stopped during the iteration of the attrs array.
-     *
-     * See [AttributeMarker] to understand what the namespace marker value is.
-     *
-     * Note that this instruction does not support assigning style and class values to
-     * an element. See `elementStart` and `elementHostAttrs` to learn how styling values
-     * are applied to an element.
-     *
-     * @param native The element that the attributes will be assigned to
-     * @param attrs The attribute array of values that will be assigned to the element
-     * @returns the index value that was last accessed in the attributes array
-     */
-    function setUpAttributes(native, attrs) {
-        var renderer = getLView()[RENDERER];
-        var isProc = isProceduralRenderer(renderer);
-        var i = 0;
-        while (i < attrs.length) {
-            var value = attrs[i];
-            if (typeof value === 'number') {
-                // only namespaces are supported. Other value types (such as style/class
-                // entries) are not supported in this function.
-                if (value !== 0 /* NamespaceURI */) {
-                    break;
-                }
-                // we just landed on the marker value ... therefore
-                // we should skip to the next entry
-                i++;
-                var namespaceURI = attrs[i++];
-                var attrName = attrs[i++];
-                var attrVal = attrs[i++];
-                ngDevMode && ngDevMode.rendererSetAttribute++;
-                isProc ?
-                    renderer.setAttribute(native, attrName, attrVal, namespaceURI) :
-                    native.setAttributeNS(namespaceURI, attrName, attrVal);
-            }
-            else {
-                /// attrName is string;
-                var attrName = value;
-                var attrVal = attrs[++i];
-                if (attrName !== NG_PROJECT_AS_ATTR_NAME) {
-                    // Standard attributes
-                    ngDevMode && ngDevMode.rendererSetAttribute++;
-                    if (isAnimationProp(attrName)) {
-                        if (isProc) {
-                            renderer.setProperty(native, attrName, attrVal);
-                        }
-                    }
-                    else {
-                        isProc ?
-                            renderer
-                                .setAttribute(native, attrName, attrVal) :
-                            native.setAttribute(attrName, attrVal);
-                    }
-                }
-                i++;
-            }
-        }
-        // another piece of code may iterate over the same attributes array. Therefore
-        // it may be helpful to return the exact spot where the attributes array exited
-        // whether by running into an unsupported marker or if all the static values were
-        // iterated over.
-        return i;
     }
     function createError(text, token) {
         return new Error("Renderer: " + text + " [" + renderStringify(token) + "]");
@@ -10659,13 +10717,19 @@
      */
     function elementHostAttrs(directive, attrs) {
         var tNode = getPreviousOrParentTNode();
-        if (!tNode.stylingTemplate) {
-            tNode.stylingTemplate = initializeStaticContext(attrs);
-        }
         var lView = getLView();
         var native = getNativeByTNode(tNode, lView);
-        var i = setUpAttributes(native, attrs);
-        patchContextWithStaticAttrs(tNode.stylingTemplate, attrs, i, directive);
+        var lastAttrIndex = setUpAttributes(native, attrs);
+        var stylingAttrsStartIndex = attrsStylingIndexOf(attrs, lastAttrIndex);
+        if (stylingAttrsStartIndex >= 0) {
+            if (tNode.stylingTemplate) {
+                patchContextWithStaticAttrs(tNode.stylingTemplate, attrs, stylingAttrsStartIndex, directive);
+            }
+            else {
+                tNode.stylingTemplate =
+                    initializeStaticContext(attrs, stylingAttrsStartIndex, directive);
+            }
+        }
     }
     /**
      * Apply styling binding to the element.
@@ -14566,7 +14630,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.6+63.sha-95989a1.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.6+68.sha-866d500.with-local-changes');
 
     /**
      * @license

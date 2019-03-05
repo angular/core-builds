@@ -30,7 +30,7 @@ import { BoundPlayerFactory } from './player_factory';
 /**
  * Creates a new StylingContext an fills it with the provided static styling attribute values.
  */
-export declare function initializeStaticContext(attrs: TAttributes): StylingContext;
+export declare function initializeStaticContext(attrs: TAttributes, stylingStartIndex: number, directiveRef?: any | null): StylingContext;
 /**
  * Designed to update an existing styling context with new static styling
  * data (classes and styles).
@@ -38,9 +38,11 @@ export declare function initializeStaticContext(attrs: TAttributes): StylingCont
  * @param context the existing styling context
  * @param attrs an array of new static styling attributes that will be
  *              assigned to the context
+ * @param attrsStylingStartIndex what index to start iterating within the
+ *              provided `attrs` array to start reading style and class values
  * @param directiveRef the directive instance with which static data is associated with.
  */
-export declare function patchContextWithStaticAttrs(context: StylingContext, attrs: TAttributes, startingIndex: number, directiveRef: any): void;
+export declare function patchContextWithStaticAttrs(context: StylingContext, attrs: TAttributes, attrsStylingStartIndex: number, directiveRef?: any | null): void;
 /**
  * Runs through the initial style data present in the context and renders
  * them via the renderer on the element.
