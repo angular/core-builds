@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.7+8.sha-f96efd1.with-local-changes
+ * @license Angular v8.0.0-beta.7+4.sha-7102ea8.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6770,11 +6770,11 @@
             }
             if (nextTNode === null) {
                 // this last node was projected, we need to get back down to its projection node
-                if (tNode.projectionNext === null && (tNode.flags & 2 /* isProjected */)) {
+                if (tNode.next === null && (tNode.flags & 2 /* isProjected */)) {
                     currentView = projectionNodeStack[projectionNodeIndex--];
                     tNode = projectionNodeStack[projectionNodeIndex--];
                 }
-                nextTNode = (tNode.flags & 2 /* isProjected */) ? tNode.projectionNext : tNode.next;
+                nextTNode = tNode.next;
                 /**
                  * Find the next node in the TNode tree, taking into account the place where a node is
                  * projected (in the shadow DOM) rather than where it comes from (in the light DOM).
@@ -6786,7 +6786,7 @@
                     // If parent is null, we're crossing the view boundary, so we should get the host TNode.
                     tNode = tNode.parent || currentView[T_HOST];
                     if (tNode === null || tNode === rootTNode)
-                        return;
+                        return null;
                     // When exiting a container, the beforeNode must be restored to the previous value
                     if (tNode.type === 0 /* Container */) {
                         currentView = getLViewParent(currentView);
@@ -6803,7 +6803,7 @@
                         while (!currentView[NEXT] && currentView[PARENT] &&
                             !(tNode.parent && tNode.parent.next)) {
                             if (tNode === rootTNode)
-                                return;
+                                return null;
                             currentView = currentView[PARENT];
                             tNode = currentView[T_HOST];
                         }
@@ -7344,7 +7344,7 @@
                     nodeToProject.flags |= 2 /* isProjected */;
                     appendProjectedNode(nodeToProject, tProjectionNode, lView, projectedView);
                 }
-                nodeToProject = nodeToProject.projectionNext;
+                nodeToProject = nodeToProject.next;
             }
         }
     }
@@ -10572,7 +10572,6 @@
             outputs: undefined,
             tViews: null,
             next: null,
-            projectionNext: null,
             child: null,
             parent: tParent,
             stylingTemplate: null,
@@ -11651,20 +11650,22 @@
         var componentNode = findComponentView(getLView())[T_HOST];
         if (!componentNode.projection) {
             var noOfNodeBuckets = selectors ? selectors.length + 1 : 1;
-            var projectionHeads = componentNode.projection =
+            var pData = componentNode.projection =
                 new Array(noOfNodeBuckets).fill(null);
-            var tails = projectionHeads.slice();
+            var tails = pData.slice();
             var componentChild = componentNode.child;
             while (componentChild !== null) {
                 var bucketIndex = selectors ? matchingSelectorIndex(componentChild, selectors, textSelectors) : 0;
+                var nextNode = componentChild.next;
                 if (tails[bucketIndex]) {
-                    tails[bucketIndex].projectionNext = componentChild;
+                    tails[bucketIndex].next = componentChild;
                 }
                 else {
-                    projectionHeads[bucketIndex] = componentChild;
+                    pData[bucketIndex] = componentChild;
                 }
+                componentChild.next = null;
                 tails[bucketIndex] = componentChild;
-                componentChild = componentChild.next;
+                componentChild = nextNode;
             }
         }
     }
@@ -14654,7 +14655,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.7+8.sha-f96efd1.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.7+4.sha-7102ea8.with-local-changes');
 
     /**
      * @license
