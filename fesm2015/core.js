@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.6+85.sha-20a9dbe.with-local-changes
+ * @license Angular v8.0.0-beta.6+86.sha-881807d.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18069,7 +18069,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.6+85.sha-20a9dbe.with-local-changes');
+const VERSION = new Version('8.0.0-beta.6+86.sha-881807d.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -27084,15 +27084,12 @@ ApplicationInitStatus.ctorParameters = () => [
 /** @nocollapse */ ApplicationInitStatus.ngInjectableDef = defineInjectable({ token: ApplicationInitStatus, factory: function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(inject(APP_INITIALIZER, 8)); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(ApplicationInitStatus, [{
         type: Injectable
-    }], function () { return [{
-        type: undefined,
-        decorators: [{
+    }], function () { return [{ type: undefined, decorators: [{
                 type: Inject,
                 args: [APP_INITIALIZER]
             }, {
                 type: Optional
-            }]
-    }]; }, null);
+            }] }]; }, null);
 
 /**
  * @fileoverview added by tsickle
@@ -28058,9 +28055,7 @@ Testability.ctorParameters = () => [
 /** @nocollapse */ Testability.ngInjectableDef = defineInjectable({ token: Testability, factory: function Testability_Factory(t) { return new (t || Testability)(inject(NgZone)); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(Testability, [{
         type: Injectable
-    }], function () { return [{
-        type: NgZone
-    }]; }, null);
+    }], function () { return [{ type: NgZone }]; }, null);
 /**
  * A global registry of {\@link Testability} instances for specific elements.
  * \@publicApi
@@ -28466,9 +28461,7 @@ PlatformRef.ctorParameters = () => [
 /** @nocollapse */ PlatformRef.ngInjectableDef = defineInjectable({ token: PlatformRef, factory: function PlatformRef_Factory(t) { return new (t || PlatformRef)(inject(Injector)); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(PlatformRef, [{
         type: Injectable
-    }], function () { return [{
-        type: Injector
-    }]; }, null);
+    }], function () { return [{ type: Injector }]; }, null);
 /**
  * @param {?=} ngZoneOption
  * @return {?}
@@ -28863,19 +28856,7 @@ ApplicationRef.ctorParameters = () => [
 /** @nocollapse */ ApplicationRef.ngInjectableDef = defineInjectable({ token: ApplicationRef, factory: function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(inject(NgZone), inject(Console), inject(Injector), inject(ErrorHandler), inject(ComponentFactoryResolver), inject(ApplicationInitStatus)); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(ApplicationRef, [{
         type: Injectable
-    }], function () { return [{
-        type: NgZone
-    }, {
-        type: Console
-    }, {
-        type: Injector
-    }, {
-        type: ErrorHandler
-    }, {
-        type: ComponentFactoryResolver
-    }, {
-        type: ApplicationInitStatus
-    }]; }, null);
+    }], function () { return [{ type: NgZone }, { type: Console }, { type: Injector }, { type: ErrorHandler }, { type: ComponentFactoryResolver }, { type: ApplicationInitStatus }]; }, null);
 /**
  * @template T
  * @param {?} list
@@ -28995,14 +28976,9 @@ SystemJsNgModuleLoader.ctorParameters = () => [
 /** @nocollapse */ SystemJsNgModuleLoader.ngInjectableDef = defineInjectable({ token: SystemJsNgModuleLoader, factory: function SystemJsNgModuleLoader_Factory(t) { return new (t || SystemJsNgModuleLoader)(inject(Compiler), inject(SystemJsNgModuleLoaderConfig, 8)); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(SystemJsNgModuleLoader, [{
         type: Injectable
-    }], function () { return [{
-        type: Compiler
-    }, {
-        type: SystemJsNgModuleLoaderConfig,
-        decorators: [{
+    }], function () { return [{ type: Compiler }, { type: SystemJsNgModuleLoaderConfig, decorators: [{
                 type: Optional
-            }]
-    }]; }, null);
+            }] }]; }, null);
 /**
  * @param {?} value
  * @param {?} modulePath
@@ -29957,9 +29933,7 @@ ApplicationModule.ctorParameters = () => [
 /*@__PURE__*/ setClassMetadata(ApplicationModule, [{
         type: NgModule,
         args: [{ providers: APPLICATION_MODULE_PROVIDERS }]
-    }], function () { return [{
-        type: ApplicationRef
-    }]; }, null);
+    }], function () { return [{ type: ApplicationRef }]; }, null);
 
 /**
  * @fileoverview added by tsickle

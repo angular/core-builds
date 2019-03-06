@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.6+85.sha-20a9dbe.with-local-changes
+ * @license Angular v8.0.0-beta.6+86.sha-881807d.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14625,7 +14625,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.6+85.sha-20a9dbe.with-local-changes');
+var VERSION = new Version('8.0.0-beta.6+86.sha-881807d.with-local-changes');
 
 /**
  * @license
@@ -21525,15 +21525,12 @@ var ApplicationInitStatus = /** @class */ (function () {
 }());
 /*@__PURE__*/ setClassMetadata(ApplicationInitStatus, [{
         type: Injectable
-    }], function () { return [{
-        type: undefined,
-        decorators: [{
+    }], function () { return [{ type: undefined, decorators: [{
                 type: Inject,
                 args: [APP_INITIALIZER]
             }, {
                 type: Optional
-            }]
-    }]; }, null);
+            }] }]; }, null);
 
 /**
  * @license
@@ -22328,9 +22325,7 @@ var Testability = /** @class */ (function () {
 }());
 /*@__PURE__*/ setClassMetadata(Testability, [{
         type: Injectable
-    }], function () { return [{
-        type: NgZone
-    }]; }, null);
+    }], function () { return [{ type: NgZone }]; }, null);
 /**
  * A global registry of {@link Testability} instances for specific elements.
  * @publicApi
@@ -22643,9 +22638,7 @@ var PlatformRef = /** @class */ (function () {
 }());
 /*@__PURE__*/ setClassMetadata(PlatformRef, [{
         type: Injectable
-    }], function () { return [{
-        type: Injector
-    }]; }, null);
+    }], function () { return [{ type: Injector }]; }, null);
 function getNgZone(ngZoneOption) {
     var ngZone;
     if (ngZoneOption === 'noop') {
@@ -22972,19 +22965,7 @@ var ApplicationRef = /** @class */ (function () {
 }());
 /*@__PURE__*/ setClassMetadata(ApplicationRef, [{
         type: Injectable
-    }], function () { return [{
-        type: NgZone
-    }, {
-        type: Console
-    }, {
-        type: Injector
-    }, {
-        type: ErrorHandler
-    }, {
-        type: ComponentFactoryResolver
-    }, {
-        type: ApplicationInitStatus
-    }]; }, null);
+    }], function () { return [{ type: NgZone }, { type: Console }, { type: Injector }, { type: ErrorHandler }, { type: ComponentFactoryResolver }, { type: ApplicationInitStatus }]; }, null);
 function remove(list, el) {
     var index = list.indexOf(el);
     if (index > -1) {
@@ -23065,14 +23046,9 @@ var SystemJsNgModuleLoader = /** @class */ (function () {
 }());
 /*@__PURE__*/ setClassMetadata(SystemJsNgModuleLoader, [{
         type: Injectable
-    }], function () { return [{
-        type: Compiler
-    }, {
-        type: SystemJsNgModuleLoaderConfig,
-        decorators: [{
+    }], function () { return [{ type: Compiler }, { type: SystemJsNgModuleLoaderConfig, decorators: [{
                 type: Optional
-            }]
-    }]; }, null);
+            }] }]; }, null);
 function checkNotEmpty(value, modulePath, exportName) {
     if (!value) {
         throw new Error("Cannot find '" + exportName + "' in '" + modulePath + "'");
@@ -23890,9 +23866,7 @@ var ApplicationModule = /** @class */ (function () {
 /*@__PURE__*/ setClassMetadata(ApplicationModule, [{
         type: NgModule,
         args: [{ providers: APPLICATION_MODULE_PROVIDERS }]
-    }], function () { return [{
-        type: ApplicationRef
-    }]; }, null);
+    }], function () { return [{ type: ApplicationRef }]; }, null);
 
 /**
  * @license
