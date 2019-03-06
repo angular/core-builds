@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.7+8.sha-f96efd1.with-local-changes
+ * @license Angular v8.0.0-beta.7+4.sha-7102ea8.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8040,11 +8040,11 @@ function walkTNodeTree(viewToWalk, action, renderer, renderParent, beforeNode) {
         }
         if (nextTNode === null) {
             // this last node was projected, we need to get back down to its projection node
-            if (tNode.projectionNext === null && (tNode.flags & 2 /* isProjected */)) {
+            if (tNode.next === null && (tNode.flags & 2 /* isProjected */)) {
                 currentView = (/** @type {?} */ (projectionNodeStack[projectionNodeIndex--]));
                 tNode = (/** @type {?} */ (projectionNodeStack[projectionNodeIndex--]));
             }
-            nextTNode = (tNode.flags & 2 /* isProjected */) ? tNode.projectionNext : tNode.next;
+            nextTNode = tNode.next;
             /**
              * Find the next node in the TNode tree, taking into account the place where a node is
              * projected (in the shadow DOM) rather than where it comes from (in the light DOM).
@@ -8056,7 +8056,7 @@ function walkTNodeTree(viewToWalk, action, renderer, renderParent, beforeNode) {
                 // If parent is null, we're crossing the view boundary, so we should get the host TNode.
                 tNode = tNode.parent || currentView[T_HOST];
                 if (tNode === null || tNode === rootTNode)
-                    return;
+                    return null;
                 // When exiting a container, the beforeNode must be restored to the previous value
                 if (tNode.type === 0 /* Container */) {
                     currentView = (/** @type {?} */ (getLViewParent(currentView)));
@@ -8073,7 +8073,7 @@ function walkTNodeTree(viewToWalk, action, renderer, renderParent, beforeNode) {
                     while (!currentView[NEXT] && currentView[PARENT] &&
                         !(tNode.parent && tNode.parent.next)) {
                         if (tNode === rootTNode)
-                            return;
+                            return null;
                         currentView = (/** @type {?} */ (currentView[PARENT]));
                         tNode = (/** @type {?} */ (currentView[T_HOST]));
                     }
@@ -8721,7 +8721,7 @@ function appendProjectedNodes(lView, tProjectionNode, selectorIndex, componentVi
                 nodeToProject.flags |= 2 /* isProjected */;
                 appendProjectedNode(nodeToProject, tProjectionNode, lView, projectedView);
             }
-            nodeToProject = nodeToProject.projectionNext;
+            nodeToProject = nodeToProject.next;
         }
     }
 }
@@ -13002,7 +13002,6 @@ function createTNode(tParent, type, adjustedIndex, tagName, attrs) {
         outputs: undefined,
         tViews: null,
         next: null,
-        projectionNext: null,
         child: null,
         parent: tParent,
         stylingTemplate: null,
@@ -14366,23 +14365,26 @@ function projectionDef(selectors, textSelectors) {
         /** @type {?} */
         const noOfNodeBuckets = selectors ? selectors.length + 1 : 1;
         /** @type {?} */
-        const projectionHeads = componentNode.projection =
+        const pData = componentNode.projection =
             new Array(noOfNodeBuckets).fill(null);
         /** @type {?} */
-        const tails = projectionHeads.slice();
+        const tails = pData.slice();
         /** @type {?} */
         let componentChild = componentNode.child;
         while (componentChild !== null) {
             /** @type {?} */
             const bucketIndex = selectors ? matchingSelectorIndex(componentChild, selectors, (/** @type {?} */ (textSelectors))) : 0;
+            /** @type {?} */
+            const nextNode = componentChild.next;
             if (tails[bucketIndex]) {
-                (/** @type {?} */ (tails[bucketIndex])).projectionNext = componentChild;
+                (/** @type {?} */ (tails[bucketIndex])).next = componentChild;
             }
             else {
-                projectionHeads[bucketIndex] = componentChild;
+                pData[bucketIndex] = componentChild;
             }
+            componentChild.next = null;
             tails[bucketIndex] = componentChild;
-            componentChild = componentChild.next;
+            componentChild = nextNode;
         }
     }
 }
@@ -18146,7 +18148,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.7+8.sha-f96efd1.with-local-changes');
+const VERSION = new Version('8.0.0-beta.7+4.sha-7102ea8.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
