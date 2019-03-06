@@ -37,8 +37,9 @@ export declare const CHILD_HEAD = 14;
 export declare const CHILD_TAIL = 15;
 export declare const CONTENT_QUERIES = 16;
 export declare const DECLARATION_VIEW = 17;
+export declare const PREORDER_HOOK_FLAGS = 18;
 /** Size of LView's header. Necessary to adjust for it when setting slots.  */
-export declare const HEADER_OFFSET = 19;
+export declare const HEADER_OFFSET = 20;
 export interface OpaqueViewState {
     '__brand__': 'Brand for OpaqueViewState that nothing will match';
 }
@@ -182,6 +183,10 @@ export interface LView extends Array<any> {
      * context.
      */
     [DECLARATION_VIEW]: LView | null;
+    /**
+     * More flags for this view. See PreOrderHookFlags for more info.
+     */
+    [PREORDER_HOOK_FLAGS]: PreOrderHookFlags;
 }
 /** Flags associated with an LView (saved in LView[FLAGS]) */
 export declare const enum LViewFlags {
@@ -250,6 +255,18 @@ export declare const enum InitPhaseState {
     AfterContentInitHooksToBeRun = 1,
     AfterViewInitHooksToBeRun = 2,
     InitPhaseCompleted = 3
+}
+/** More flags associated with an LView (saved in LView[FLAGS_MORE]) */
+export declare const enum PreOrderHookFlags {
+    /** The index of the next pre-order hook to be called in the hooks array, on the first 16
+       bits */
+    IndexOfTheNextPreOrderHookMaskMask = 65535,
+    /**
+     * The number of init hooks that have already been called, on the last 16 bits
+     */
+    NumberOfInitHooksCalledIncrementer = 65536,
+    NumberOfInitHooksCalledShift = 16,
+    NumberOfInitHooksCalledMask = 4294901760
 }
 /**
  * Set of instructions used to process host bindings efficiently.
@@ -377,20 +394,20 @@ export interface TView {
      */
     pipeRegistry: PipeDefList | null;
     /**
-     * Array of ngOnInit and ngDoCheck hooks that should be executed for this view in
+     * Array of ngOnInit, ngOnChanges and ngDoCheck hooks that should be executed for this view in
      * creation mode.
      *
      * Even indices: Directive index
      * Odd indices: Hook function
      */
-    initHooks: HookData | null;
+    preOrderHooks: HookData | null;
     /**
-     * Array of ngDoCheck hooks that should be executed for this view in update mode.
+     * Array of ngOnChanges and ngDoCheck hooks that should be executed for this view in update mode.
      *
      * Even indices: Directive index
      * Odd indices: Hook function
      */
-    checkHooks: HookData | null;
+    preOrderCheckHooks: HookData | null;
     /**
      * Array of ngAfterContentInit and ngAfterContentChecked hooks that should be executed
      * for this view in creation mode.
@@ -516,8 +533,14 @@ export interface RootContext {
 /**
  * Array of hooks that should be executed for a view and their directive indices.
  *
- * Even indices: Directive index
- * Odd indices: Hook function
+ * For each node of the view, the following data is stored:
+ * 1) Node index (optional)
+ * 2) A series of number/function pairs where:
+ *  - even indices are directive indices
+ *  - odd indices are hook functions
+ *
+ * Special cases:
+ *  - a negative directive index flags an init hook (ngOnInit, ngAfterContentInit, ngAfterViewInit)
  */
 export declare type HookData = (number | (() => void))[];
 /**

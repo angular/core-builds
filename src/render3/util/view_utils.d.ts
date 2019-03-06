@@ -95,3 +95,8 @@ export declare function readPatchedLView(target: any): LView | null;
 export declare function viewAttachedToChangeDetector(view: LView): boolean;
 /** Returns a boolean for whether the view is attached to a container. */
 export declare function viewAttachedToContainer(view: LView): boolean;
+/**
+ * Resets the pre-order hook flags of the view.
+ * @param lView the LView on which the flags are reset
+ */
+export declare function resetPreOrderHookFlags(lView: LView): void;
