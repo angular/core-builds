@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.7+16.sha-29f57e3.with-local-changes
+ * @license Angular v8.0.0-beta.7+17.sha-eccbc78.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6850,6 +6850,14 @@
             var renderer = viewToWalk[RENDERER];
             walkTNodeTree(viewToWalk, insertMode ? 0 /* Insert */ : 1 /* Detach */, renderer, renderParent, beforeNode);
         }
+    }
+    /**
+     * Detach a `LView` from the DOM by detaching its nodes.
+     *
+     * @param lView the `LView` to be detached.
+     */
+    function renderDetachView(lView) {
+        walkTNodeTree(lView, 1 /* Detach */, lView[RENDERER], null);
     }
     /**
      * Traverses down and up the tree of views and containers to remove listeners and
@@ -14126,7 +14134,10 @@
             }
             this._viewContainerRef = vcRef;
         };
-        ViewRef.prototype.detachFromAppRef = function () { this._appRef = null; };
+        ViewRef.prototype.detachFromAppRef = function () {
+            this._appRef = null;
+            renderDetachView(this._lView);
+        };
         ViewRef.prototype.attachToAppRef = function (appRef) {
             if (this._viewContainerRef) {
                 throw new Error('This view is already attached to a ViewContainer!');
@@ -14654,7 +14665,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.7+16.sha-29f57e3.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.7+17.sha-eccbc78.with-local-changes');
 
     /**
      * @license
@@ -16656,7 +16667,7 @@
         removeFromArray(embeddedViews, viewIndex);
         // See attachProjectedView for why we don't update projectedViews here.
         Services.dirtyParentQueries(view);
-        renderDetachView(view);
+        renderDetachView$1(view);
         return view;
     }
     function detachProjectedView(view) {
@@ -16683,7 +16694,7 @@
         // Note: Don't need to change projectedViews as the order in there
         // as always invalid...
         Services.dirtyParentQueries(view);
-        renderDetachView(view);
+        renderDetachView$1(view);
         var prevView = newViewIndex > 0 ? embeddedViews[newViewIndex - 1] : null;
         renderAttachEmbeddedView(elementData, prevView, view);
         return view;
@@ -16697,7 +16708,7 @@
         // However, browsers automatically do `appendChild` when there is no `nextSibling`.
         visitRootRenderNodes(view, 2 /* InsertBefore */, parentNode, nextSibling, undefined);
     }
-    function renderDetachView(view) {
+    function renderDetachView$1(view) {
         visitRootRenderNodes(view, 3 /* RemoveChild */, null, null, undefined);
     }
     function addToArray(arr, index, value) {
@@ -16991,7 +17002,7 @@
         };
         ViewRef_.prototype.detachFromAppRef = function () {
             this._appRef = null;
-            renderDetachView(this._view);
+            renderDetachView$1(this._view);
             Services.dirtyParentQueries(this._view);
         };
         ViewRef_.prototype.attachToAppRef = function (appRef) {
