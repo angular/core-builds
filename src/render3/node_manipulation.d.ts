@@ -25,6 +25,12 @@ export declare function createTextNode(value: any, renderer: Renderer3): RText;
 export declare function addRemoveViewFromContainer(viewToWalk: LView, insertMode: true, beforeNode: RNode | null): void;
 export declare function addRemoveViewFromContainer(viewToWalk: LView, insertMode: false): void;
 /**
+ * Detach a `LView` from the DOM by detaching its nodes.
+ *
+ * @param lView the `LView` to be detached.
+ */
+export declare function renderDetachView(lView: LView): void;
+/**
  * Traverses down and up the tree of views and containers to remove listeners and
  * call onDestroy callbacks.
  *

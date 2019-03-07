@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.7+16.sha-29f57e3.with-local-changes
+ * @license Angular v8.0.0-beta.7+17.sha-eccbc78.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8140,6 +8140,15 @@ function addRemoveViewFromContainer(viewToWalk, insertMode, beforeNode) {
         const renderer = viewToWalk[RENDERER];
         walkTNodeTree(viewToWalk, insertMode ? 0 /* Insert */ : 1 /* Detach */, renderer, renderParent, beforeNode);
     }
+}
+/**
+ * Detach a `LView` from the DOM by detaching its nodes.
+ *
+ * @param {?} lView the `LView` to be detached.
+ * @return {?}
+ */
+function renderDetachView(lView) {
+    walkTNodeTree(lView, 1 /* Detach */, lView[RENDERER], null);
 }
 /**
  * Traverses down and up the tree of views and containers to remove listeners and
@@ -17478,7 +17487,10 @@ class ViewRef {
     /**
      * @return {?}
      */
-    detachFromAppRef() { this._appRef = null; }
+    detachFromAppRef() {
+        this._appRef = null;
+        renderDetachView(this._lView);
+    }
     /**
      * @param {?} appRef
      * @return {?}
@@ -18146,7 +18158,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.7+16.sha-29f57e3.with-local-changes');
+const VERSION = new Version('8.0.0-beta.7+17.sha-eccbc78.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -20900,7 +20912,7 @@ function detachEmbeddedView(elementData, viewIndex) {
     removeFromArray(embeddedViews, viewIndex);
     // See attachProjectedView for why we don't update projectedViews here.
     Services.dirtyParentQueries(view);
-    renderDetachView(view);
+    renderDetachView$1(view);
     return view;
 }
 /**
@@ -20941,7 +20953,7 @@ function moveEmbeddedView(elementData, oldViewIndex, newViewIndex) {
     // Note: Don't need to change projectedViews as the order in there
     // as always invalid...
     Services.dirtyParentQueries(view);
-    renderDetachView(view);
+    renderDetachView$1(view);
     /** @type {?} */
     const prevView = newViewIndex > 0 ? embeddedViews[newViewIndex - 1] : null;
     renderAttachEmbeddedView(elementData, prevView, view);
@@ -20969,7 +20981,7 @@ function renderAttachEmbeddedView(elementData, prevView, view) {
  * @param {?} view
  * @return {?}
  */
-function renderDetachView(view) {
+function renderDetachView$1(view) {
     visitRootRenderNodes(view, 3 /* RemoveChild */, null, null, undefined);
 }
 /**
@@ -21402,7 +21414,7 @@ class ViewRef_ {
      */
     detachFromAppRef() {
         this._appRef = null;
-        renderDetachView(this._view);
+        renderDetachView$1(this._view);
         Services.dirtyParentQueries(this._view);
     }
     /**
