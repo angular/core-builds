@@ -11,18 +11,20 @@ import { CssSelector, CssSelectorList } from './interfaces/projection';
 /**
  * A utility function to match an Ivy node static data against a simple CSS selector
  *
- * @param node static data to match
- * @param selector
+ * @param node static data of the node to match
+ * @param selector The selector to try matching against the node.
+ * @param isProjectionMode if `true` we are matching for content projection, otherwise we are doing
+ * directive matching.
  * @returns true if node matches the selector.
  */
 export declare function isNodeMatchingSelector(tNode: TNode, selector: CssSelector, isProjectionMode: boolean): boolean;
 export declare function isNodeMatchingSelectorList(tNode: TNode, selector: CssSelectorList, isProjectionMode?: boolean): boolean;
 export declare function getProjectAsAttrValue(tNode: TNode): string | null;
 /**
- * Checks a given node against matching selectors and returns
+ * Checks a given node against matching projection selectors and returns
  * selector index (or 0 if none matched).
  *
- * This function takes into account the ngProjectAs attribute: if present its value will be compared
- * to the raw (un-parsed) CSS selector instead of using standard selector matching logic.
+ * This function takes into account the ngProjectAs attribute: if present its value will be
+ * compared to the raw (un-parsed) CSS selector instead of using standard selector matching logic.
  */
-export declare function matchingSelectorIndex(tNode: TNode, selectors: CssSelectorList[], textSelectors: string[]): number;
+export declare function matchingProjectionSelectorIndex(tNode: TNode, selectors: CssSelectorList[], textSelectors: string[]): number;
