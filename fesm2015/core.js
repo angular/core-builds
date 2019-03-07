@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.7+22.sha-9a19592.with-local-changes
+ * @license Angular v8.0.0-beta.7+29.sha-5ad2097.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4874,6 +4874,839 @@ function leaveView(newView) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
+/** @type {?} */
+const NG_PROJECT_AS_ATTR_NAME = 'ngProjectAs';
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * The goal here is to make sure that the browser DOM API is the Renderer.
+ * We do this by defining a subset of DOM API to be the renderer and than
+ * use that time for rendering.
+ *
+ * At runtime we can than use the DOM api directly, in server or web-worker
+ * it will be easy to implement such API.
+ */
+/** @enum {number} */
+const RendererStyleFlags3 = {
+    Important: 1,
+    DashCase: 2,
+};
+RendererStyleFlags3[RendererStyleFlags3.Important] = 'Important';
+RendererStyleFlags3[RendererStyleFlags3.DashCase] = 'DashCase';
+/**
+ * Returns whether the `renderer` is a `ProceduralRenderer3`
+ * @param {?} renderer
+ * @return {?}
+ */
+function isProceduralRenderer(renderer) {
+    return !!(((/** @type {?} */ (renderer))).listen);
+}
+/** @type {?} */
+const domRendererFactory3 = {
+    createRenderer: (hostElement, rendererType) => { return document; }
+};
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Returns the matching `LContext` data for a given DOM node, directive or component instance.
+ *
+ * This function will examine the provided DOM element, component, or directive instance\'s
+ * monkey-patched property to derive the `LContext` data. Once called then the monkey-patched
+ * value will be that of the newly created `LContext`.
+ *
+ * If the monkey-patched value is the `LView` instance then the context value for that
+ * target will be created and the monkey-patch reference will be updated. Therefore when this
+ * function is called it may mutate the provided element\'s, component\'s or any of the associated
+ * directive\'s monkey-patch values.
+ *
+ * If the monkey-patch value is not detected then the code will walk up the DOM until an element
+ * is found which contains a monkey-patch reference. When that occurs then the provided element
+ * will be updated with a new context (which is then returned). If the monkey-patch value is not
+ * detected for a component/directive instance then it will throw an error (all components and
+ * directives should be automatically monkey-patched by ivy).
+ *
+ * @param {?} target Component, Directive or DOM Node.
+ * @return {?}
+ */
+function getLContext(target) {
+    /** @type {?} */
+    let mpValue = readPatchedData(target);
+    if (mpValue) {
+        // only when it's an array is it considered an LView instance
+        // ... otherwise it's an already constructed LContext instance
+        if (Array.isArray(mpValue)) {
+            /** @type {?} */
+            const lView = (/** @type {?} */ (mpValue));
+            /** @type {?} */
+            let nodeIndex;
+            /** @type {?} */
+            let component = undefined;
+            /** @type {?} */
+            let directives = undefined;
+            if (isComponentInstance(target)) {
+                nodeIndex = findViaComponent(lView, target);
+                if (nodeIndex == -1) {
+                    throw new Error('The provided component was not found in the application');
+                }
+                component = target;
+            }
+            else if (isDirectiveInstance(target)) {
+                nodeIndex = findViaDirective(lView, target);
+                if (nodeIndex == -1) {
+                    throw new Error('The provided directive was not found in the application');
+                }
+                directives = getDirectivesAtNodeIndex(nodeIndex, lView, false);
+            }
+            else {
+                nodeIndex = findViaNativeElement(lView, (/** @type {?} */ (target)));
+                if (nodeIndex == -1) {
+                    return null;
+                }
+            }
+            // the goal is not to fill the entire context full of data because the lookups
+            // are expensive. Instead, only the target data (the element, component, container, ICU
+            // expression or directive details) are filled into the context. If called multiple times
+            // with different target values then the missing target data will be filled in.
+            /** @type {?} */
+            const native = unwrapRNode(lView[nodeIndex]);
+            /** @type {?} */
+            const existingCtx = readPatchedData(native);
+            /** @type {?} */
+            const context = (existingCtx && !Array.isArray(existingCtx)) ?
+                existingCtx :
+                createLContext(lView, nodeIndex, native);
+            // only when the component has been discovered then update the monkey-patch
+            if (component && context.component === undefined) {
+                context.component = component;
+                attachPatchData(context.component, context);
+            }
+            // only when the directives have been discovered then update the monkey-patch
+            if (directives && context.directives === undefined) {
+                context.directives = directives;
+                for (let i = 0; i < directives.length; i++) {
+                    attachPatchData(directives[i], context);
+                }
+            }
+            attachPatchData(context.native, context);
+            mpValue = context;
+        }
+    }
+    else {
+        /** @type {?} */
+        const rElement = (/** @type {?} */ (target));
+        ngDevMode && assertDomNode(rElement);
+        // if the context is not found then we need to traverse upwards up the DOM
+        // to find the nearest element that has already been monkey patched with data
+        /** @type {?} */
+        let parent = (/** @type {?} */ (rElement));
+        while (parent = parent.parentNode) {
+            /** @type {?} */
+            const parentContext = readPatchedData(parent);
+            if (parentContext) {
+                /** @type {?} */
+                let lView;
+                if (Array.isArray(parentContext)) {
+                    lView = (/** @type {?} */ (parentContext));
+                }
+                else {
+                    lView = parentContext.lView;
+                }
+                // the edge of the app was also reached here through another means
+                // (maybe because the DOM was changed manually).
+                if (!lView) {
+                    return null;
+                }
+                /** @type {?} */
+                const index = findViaNativeElement(lView, rElement);
+                if (index >= 0) {
+                    /** @type {?} */
+                    const native = unwrapRNode(lView[index]);
+                    /** @type {?} */
+                    const context = createLContext(lView, index, native);
+                    attachPatchData(native, context);
+                    mpValue = context;
+                    break;
+                }
+            }
+        }
+    }
+    return ((/** @type {?} */ (mpValue))) || null;
+}
+/**
+ * Creates an empty instance of a `LContext` context
+ * @param {?} lView
+ * @param {?} nodeIndex
+ * @param {?} native
+ * @return {?}
+ */
+function createLContext(lView, nodeIndex, native) {
+    return {
+        lView,
+        nodeIndex,
+        native,
+        component: undefined,
+        directives: undefined,
+        localRefs: undefined,
+    };
+}
+/**
+ * Takes a component instance and returns the view for that component.
+ *
+ * @param {?} componentInstance
+ * @return {?} The component's view
+ */
+function getComponentViewByInstance(componentInstance) {
+    /** @type {?} */
+    let lView = readPatchedData(componentInstance);
+    /** @type {?} */
+    let view;
+    if (Array.isArray(lView)) {
+        /** @type {?} */
+        const nodeIndex = findViaComponent(lView, componentInstance);
+        view = getComponentViewByIndex(nodeIndex, lView);
+        /** @type {?} */
+        const context = createLContext(lView, nodeIndex, (/** @type {?} */ (view[HOST])));
+        context.component = componentInstance;
+        attachPatchData(componentInstance, context);
+        attachPatchData(context.native, context);
+    }
+    else {
+        /** @type {?} */
+        const context = (/** @type {?} */ ((/** @type {?} */ (lView))));
+        view = getComponentViewByIndex(context.nodeIndex, context.lView);
+    }
+    return view;
+}
+/**
+ * Assigns the given data to the given target (which could be a component,
+ * directive or DOM node instance) using monkey-patching.
+ * @param {?} target
+ * @param {?} data
+ * @return {?}
+ */
+function attachPatchData(target, data) {
+    target[MONKEY_PATCH_KEY_NAME] = data;
+}
+/**
+ * @param {?} instance
+ * @return {?}
+ */
+function isComponentInstance(instance) {
+    return instance && instance.constructor && instance.constructor.ngComponentDef;
+}
+/**
+ * @param {?} instance
+ * @return {?}
+ */
+function isDirectiveInstance(instance) {
+    return instance && instance.constructor && instance.constructor.ngDirectiveDef;
+}
+/**
+ * Locates the element within the given LView and returns the matching index
+ * @param {?} lView
+ * @param {?} target
+ * @return {?}
+ */
+function findViaNativeElement(lView, target) {
+    /** @type {?} */
+    let tNode = lView[TVIEW].firstChild;
+    while (tNode) {
+        /** @type {?} */
+        const native = (/** @type {?} */ (getNativeByTNode(tNode, lView)));
+        if (native === target) {
+            return tNode.index;
+        }
+        tNode = traverseNextElement(tNode);
+    }
+    return -1;
+}
+/**
+ * Locates the next tNode (child, sibling or parent).
+ * @param {?} tNode
+ * @return {?}
+ */
+function traverseNextElement(tNode) {
+    if (tNode.child) {
+        return tNode.child;
+    }
+    else if (tNode.next) {
+        return tNode.next;
+    }
+    else {
+        // Let's take the following template: <div><span>text</span></div><component/>
+        // After checking the text node, we need to find the next parent that has a "next" TNode,
+        // in this case the parent `div`, so that we can find the component.
+        while (tNode.parent && !tNode.parent.next) {
+            tNode = tNode.parent;
+        }
+        return tNode.parent && tNode.parent.next;
+    }
+}
+/**
+ * Locates the component within the given LView and returns the matching index
+ * @param {?} lView
+ * @param {?} componentInstance
+ * @return {?}
+ */
+function findViaComponent(lView, componentInstance) {
+    /** @type {?} */
+    const componentIndices = lView[TVIEW].components;
+    if (componentIndices) {
+        for (let i = 0; i < componentIndices.length; i++) {
+            /** @type {?} */
+            const elementComponentIndex = componentIndices[i];
+            /** @type {?} */
+            const componentView = getComponentViewByIndex(elementComponentIndex, lView);
+            if (componentView[CONTEXT] === componentInstance) {
+                return elementComponentIndex;
+            }
+        }
+    }
+    else {
+        /** @type {?} */
+        const rootComponentView = getComponentViewByIndex(HEADER_OFFSET, lView);
+        /** @type {?} */
+        const rootComponent = rootComponentView[CONTEXT];
+        if (rootComponent === componentInstance) {
+            // we are dealing with the root element here therefore we know that the
+            // element is the very first element after the HEADER data in the lView
+            return HEADER_OFFSET;
+        }
+    }
+    return -1;
+}
+/**
+ * Locates the directive within the given LView and returns the matching index
+ * @param {?} lView
+ * @param {?} directiveInstance
+ * @return {?}
+ */
+function findViaDirective(lView, directiveInstance) {
+    // if a directive is monkey patched then it will (by default)
+    // have a reference to the LView of the current view. The
+    // element bound to the directive being search lives somewhere
+    // in the view data. We loop through the nodes and check their
+    // list of directives for the instance.
+    /** @type {?} */
+    let tNode = lView[TVIEW].firstChild;
+    while (tNode) {
+        /** @type {?} */
+        const directiveIndexStart = tNode.directiveStart;
+        /** @type {?} */
+        const directiveIndexEnd = tNode.directiveEnd;
+        for (let i = directiveIndexStart; i < directiveIndexEnd; i++) {
+            if (lView[i] === directiveInstance) {
+                return tNode.index;
+            }
+        }
+        tNode = traverseNextElement(tNode);
+    }
+    return -1;
+}
+/**
+ * Returns a list of directives extracted from the given view based on the
+ * provided list of directive index values.
+ *
+ * @param {?} nodeIndex The node index
+ * @param {?} lView The target view data
+ * @param {?} includeComponents Whether or not to include components in returned directives
+ * @return {?}
+ */
+function getDirectivesAtNodeIndex(nodeIndex, lView, includeComponents) {
+    /** @type {?} */
+    const tNode = (/** @type {?} */ (lView[TVIEW].data[nodeIndex]));
+    /** @type {?} */
+    let directiveStartIndex = tNode.directiveStart;
+    if (directiveStartIndex == 0)
+        return EMPTY_ARRAY$1;
+    /** @type {?} */
+    const directiveEndIndex = tNode.directiveEnd;
+    if (!includeComponents && tNode.flags & 1 /* isComponent */)
+        directiveStartIndex++;
+    return lView.slice(directiveStartIndex, directiveEndIndex);
+}
+/**
+ * @param {?} nodeIndex
+ * @param {?} lView
+ * @return {?}
+ */
+function getComponentAtNodeIndex(nodeIndex, lView) {
+    /** @type {?} */
+    const tNode = (/** @type {?} */ (lView[TVIEW].data[nodeIndex]));
+    /** @type {?} */
+    let directiveStartIndex = tNode.directiveStart;
+    return tNode.flags & 1 /* isComponent */ ? lView[directiveStartIndex] : null;
+}
+/**
+ * Returns a map of local references (local reference name => element or directive instance) that
+ * exist on a given element.
+ * @param {?} lView
+ * @param {?} nodeIndex
+ * @return {?}
+ */
+function discoverLocalRefs(lView, nodeIndex) {
+    /** @type {?} */
+    const tNode = (/** @type {?} */ (lView[TVIEW].data[nodeIndex]));
+    if (tNode && tNode.localNames) {
+        /** @type {?} */
+        const result = {};
+        /** @type {?} */
+        let localIndex = tNode.index + 1;
+        for (let i = 0; i < tNode.localNames.length; i += 2) {
+            result[tNode.localNames[i]] = lView[localIndex];
+            localIndex++;
+        }
+        return result;
+    }
+    return null;
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+class CorePlayerHandler {
+    constructor() {
+        this._players = [];
+    }
+    /**
+     * @return {?}
+     */
+    flushPlayers() {
+        for (let i = 0; i < this._players.length; i++) {
+            /** @type {?} */
+            const player = this._players[i];
+            if (!player.parent && player.state === 0 /* Pending */) {
+                player.play();
+            }
+        }
+        this._players.length = 0;
+    }
+    /**
+     * @param {?} player
+     * @return {?}
+     */
+    queuePlayer(player) { this._players.push(player); }
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/** @type {?} */
+const ANIMATION_PROP_PREFIX = '@';
+/**
+ * @param {?=} wrappedElement
+ * @param {?=} sanitizer
+ * @param {?=} initialStyles
+ * @param {?=} initialClasses
+ * @return {?}
+ */
+function createEmptyStylingContext(wrappedElement, sanitizer, initialStyles, initialClasses) {
+    /** @type {?} */
+    const context = [
+        wrappedElement || null,
+        0,
+        (/** @type {?} */ ([])),
+        initialStyles || [null, null],
+        initialClasses || [null, null],
+        [0, 0],
+        [0],
+        [0],
+        null,
+    ];
+    // whenever a context is created there is always a `null` directive
+    // that is registered (which is a placeholder for the "template").
+    allocateDirectiveIntoContext(context, null);
+    return context;
+}
+/**
+ * Allocates (registers) a directive into the directive registry within the provided styling
+ * context.
+ *
+ * For each and every `[style]`, `[style.prop]`, `[class]`, `[class.name]` binding
+ * (as well as static style and class attributes) a directive, component or template
+ * is marked as the owner. When an owner is determined (this happens when the template
+ * is first passed over) the directive owner is allocated into the styling context. When
+ * this happens, each owner gets its own index value. This then ensures that once any
+ * style and/or class binding are assigned into the context then they are marked to
+ * that directive's index value.
+ *
+ * @param {?} context the target StylingContext
+ * @param {?} directiveRef the directive that will be allocated into the context
+ * @return {?} the index where the directive was inserted into
+ */
+function allocateDirectiveIntoContext(context, directiveRef) {
+    // this is a new directive which we have not seen yet.
+    /** @type {?} */
+    const dirs = context[2 /* DirectiveRegistryPosition */];
+    /** @type {?} */
+    const i = dirs.length;
+    // we preemptively make space into the directives array and then
+    // assign values slot-by-slot to ensure that if the directive ordering
+    // changes then it will still function
+    dirs.push(null, null, null, null);
+    dirs[i + 0 /* DirectiveValueOffset */] = directiveRef;
+    dirs[i + 2 /* DirtyFlagOffset */] = false;
+    dirs[i + 3 /* StyleSanitizerOffset */] = null;
+    // -1 is used to signal that the directive has been allocated, but
+    // no actual style or class bindings have been registered yet...
+    dirs[i + 1 /* SinglePropValuesIndexOffset */] = -1;
+    return i;
+}
+/**
+ * Used clone a copy of a pre-computed template of a styling context.
+ *
+ * A pre-computed template is designed to be computed once for a given element
+ * (instructions.ts has logic for caching this).
+ * @param {?} element
+ * @param {?} templateStyleContext
+ * @return {?}
+ */
+function allocStylingContext(element, templateStyleContext) {
+    // each instance gets a copy
+    /** @type {?} */
+    const context = (/** @type {?} */ ((/** @type {?} */ (templateStyleContext.slice()))));
+    // the HEADER values contain arrays which also need
+    // to be copied over into the new context
+    for (let i = 0; i < 9 /* SingleStylesStartPosition */; i++) {
+        /** @type {?} */
+        const value = templateStyleContext[i];
+        if (Array.isArray(value)) {
+            context[i] = value.slice();
+        }
+    }
+    context[0 /* ElementPosition */] = element;
+    // this will prevent any other directives from extending the context
+    context[1 /* MasterFlagPosition */] |= 16 /* BindingAllocationLocked */;
+    return context;
+}
+/**
+ * Retrieve the `StylingContext` at a given index.
+ *
+ * This method lazily creates the `StylingContext`. This is because in most cases
+ * we have styling without any bindings. Creating `StylingContext` eagerly would mean that
+ * every style declaration such as `<div style="color: red">` would result `StyleContext`
+ * which would create unnecessary memory pressure.
+ *
+ * @param {?} index Index of the style allocation. See: `elementStyling`.
+ * @param {?} viewData The view to search for the styling context
+ * @return {?}
+ */
+function getStylingContext(index, viewData) {
+    /** @type {?} */
+    let storageIndex = index;
+    /** @type {?} */
+    let slotValue = viewData[storageIndex];
+    /** @type {?} */
+    let wrapper = viewData;
+    while (Array.isArray(slotValue)) {
+        wrapper = slotValue;
+        slotValue = (/** @type {?} */ (slotValue[HOST]));
+    }
+    if (isStylingContext(wrapper)) {
+        return wrapper;
+    }
+    else {
+        // This is an LView or an LContainer
+        /** @type {?} */
+        const stylingTemplate = getTNode(index - HEADER_OFFSET, viewData).stylingTemplate;
+        if (wrapper !== viewData) {
+            storageIndex = HOST;
+        }
+        return wrapper[storageIndex] = stylingTemplate ?
+            allocStylingContext(slotValue, stylingTemplate) :
+            createEmptyStylingContext(slotValue);
+    }
+}
+/**
+ * @param {?} name
+ * @return {?}
+ */
+function isAnimationProp(name) {
+    return name[0] === ANIMATION_PROP_PREFIX;
+}
+/**
+ * @param {?} tNode
+ * @return {?}
+ */
+function hasClassInput(tNode) {
+    return (tNode.flags & 8 /* hasClassInput */) !== 0;
+}
+/**
+ * @param {?} tNode
+ * @return {?}
+ */
+function hasStyleInput(tNode) {
+    return (tNode.flags & 16 /* hasStyleInput */) !== 0;
+}
+/**
+ * @param {?} classes
+ * @return {?}
+ */
+function forceClassesAsString(classes) {
+    if (classes && typeof classes !== 'string') {
+        classes = Object.keys(classes).join(' ');
+    }
+    return ((/** @type {?} */ (classes))) || '';
+}
+/**
+ * @param {?} styles
+ * @return {?}
+ */
+function forceStylesAsString(styles) {
+    /** @type {?} */
+    let str = '';
+    if (styles) {
+        /** @type {?} */
+        const props = Object.keys(styles);
+        for (let i = 0; i < props.length; i++) {
+            /** @type {?} */
+            const prop = props[i];
+            str += (i ? ';' : '') + `${prop}:${styles[prop]}`;
+        }
+    }
+    return str;
+}
+/**
+ * @param {?} playerContext
+ * @param {?} rootContext
+ * @param {?} element
+ * @param {?} player
+ * @param {?} playerContextIndex
+ * @param {?=} ref
+ * @return {?}
+ */
+function addPlayerInternal(playerContext, rootContext, element, player, playerContextIndex, ref) {
+    ref = ref || element;
+    if (playerContextIndex) {
+        playerContext[playerContextIndex] = player;
+    }
+    else {
+        playerContext.push(player);
+    }
+    if (player) {
+        player.addEventListener(200 /* Destroyed */, () => {
+            /** @type {?} */
+            const index = playerContext.indexOf(player);
+            /** @type {?} */
+            const nonFactoryPlayerIndex = playerContext[0 /* NonBuilderPlayersStart */];
+            // if the player is being removed from the factory side of the context
+            // (which is where the [style] and [class] bindings do their thing) then
+            // that side of the array cannot be resized since the respective bindings
+            // have pointer index values that point to the associated factory instance
+            if (index) {
+                if (index < nonFactoryPlayerIndex) {
+                    playerContext[index] = null;
+                }
+                else {
+                    playerContext.splice(index, 1);
+                }
+            }
+            player.destroy();
+        });
+        /** @type {?} */
+        const playerHandler = rootContext.playerHandler || (rootContext.playerHandler = new CorePlayerHandler());
+        playerHandler.queuePlayer(player, ref);
+        return true;
+    }
+    return false;
+}
+/**
+ * @param {?} playerContext
+ * @return {?}
+ */
+function getPlayersInternal(playerContext) {
+    /** @type {?} */
+    const players = [];
+    /** @type {?} */
+    const nonFactoryPlayersStart = playerContext[0 /* NonBuilderPlayersStart */];
+    // add all factory-based players (which are apart of [style] and [class] bindings)
+    for (let i = 1 /* PlayerBuildersStartPosition */ + 1 /* PlayerOffsetPosition */; i < nonFactoryPlayersStart; i += 2 /* PlayerAndPlayerBuildersTupleSize */) {
+        /** @type {?} */
+        const player = (/** @type {?} */ (playerContext[i]));
+        if (player) {
+            players.push(player);
+        }
+    }
+    // add all custom players (not apart of [style] and [class] bindings)
+    for (let i = nonFactoryPlayersStart; i < playerContext.length; i++) {
+        players.push((/** @type {?} */ (playerContext[i])));
+    }
+    return players;
+}
+/**
+ * @param {?} target
+ * @param {?=} context
+ * @return {?}
+ */
+function getOrCreatePlayerContext(target, context) {
+    context = context || (/** @type {?} */ (getLContext(target)));
+    if (!context) {
+        ngDevMode && throwInvalidRefError();
+        return null;
+    }
+    const { lView, nodeIndex } = context;
+    /** @type {?} */
+    const stylingContext = getStylingContext(nodeIndex, lView);
+    return getPlayerContext(stylingContext) || allocPlayerContext(stylingContext);
+}
+/**
+ * @param {?} stylingContext
+ * @return {?}
+ */
+function getPlayerContext(stylingContext) {
+    return stylingContext[8 /* PlayerContext */];
+}
+/**
+ * @param {?} data
+ * @return {?}
+ */
+function allocPlayerContext(data) {
+    return data[8 /* PlayerContext */] =
+        [5 /* SinglePlayerBuildersStartPosition */, null, null, null, null];
+}
+/**
+ * @return {?}
+ */
+function throwInvalidRefError() {
+    throw new Error('Only elements that exist in an Angular application can be used for animations');
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Assigns all attribute values to the provided element via the inferred renderer.
+ *
+ * This function accepts two forms of attribute entries:
+ *
+ * default: (key, value):
+ *  attrs = [key1, value1, key2, value2]
+ *
+ * namespaced: (NAMESPACE_MARKER, uri, name, value)
+ *  attrs = [NAMESPACE_MARKER, uri, name, value, NAMESPACE_MARKER, uri, name, value]
+ *
+ * The `attrs` array can contain a mix of both the default and namespaced entries.
+ * The "default" values are set without a marker, but if the function comes across
+ * a marker value then it will attempt to set a namespaced value. If the marker is
+ * not of a namespaced value then the function will quit and return the index value
+ * where it stopped during the iteration of the attrs array.
+ *
+ * See [AttributeMarker] to understand what the namespace marker value is.
+ *
+ * Note that this instruction does not support assigning style and class values to
+ * an element. See `elementStart` and `elementHostAttrs` to learn how styling values
+ * are applied to an element.
+ *
+ * @param {?} native The element that the attributes will be assigned to
+ * @param {?} attrs The attribute array of values that will be assigned to the element
+ * @return {?} the index value that was last accessed in the attributes array
+ */
+function setUpAttributes(native, attrs) {
+    /** @type {?} */
+    const renderer = getLView()[RENDERER];
+    /** @type {?} */
+    const isProc = isProceduralRenderer(renderer);
+    /** @type {?} */
+    let i = 0;
+    while (i < attrs.length) {
+        /** @type {?} */
+        const value = attrs[i];
+        if (typeof value === 'number') {
+            // only namespaces are supported. Other value types (such as style/class
+            // entries) are not supported in this function.
+            if (value !== 0 /* NamespaceURI */) {
+                break;
+            }
+            // we just landed on the marker value ... therefore
+            // we should skip to the next entry
+            i++;
+            /** @type {?} */
+            const namespaceURI = (/** @type {?} */ (attrs[i++]));
+            /** @type {?} */
+            const attrName = (/** @type {?} */ (attrs[i++]));
+            /** @type {?} */
+            const attrVal = (/** @type {?} */ (attrs[i++]));
+            ngDevMode && ngDevMode.rendererSetAttribute++;
+            isProc ?
+                ((/** @type {?} */ (renderer))).setAttribute(native, attrName, attrVal, namespaceURI) :
+                native.setAttributeNS(namespaceURI, attrName, attrVal);
+        }
+        else {
+            /// attrName is string;
+            /** @type {?} */
+            const attrName = (/** @type {?} */ (value));
+            /** @type {?} */
+            const attrVal = attrs[++i];
+            if (attrName !== NG_PROJECT_AS_ATTR_NAME) {
+                // Standard attributes
+                ngDevMode && ngDevMode.rendererSetAttribute++;
+                if (isAnimationProp(attrName)) {
+                    if (isProc) {
+                        ((/** @type {?} */ (renderer))).setProperty(native, attrName, attrVal);
+                    }
+                }
+                else {
+                    isProc ?
+                        ((/** @type {?} */ (renderer)))
+                            .setAttribute(native, (/** @type {?} */ (attrName)), (/** @type {?} */ (attrVal))) :
+                        native.setAttribute((/** @type {?} */ (attrName)), (/** @type {?} */ (attrVal)));
+                }
+            }
+            i++;
+        }
+    }
+    // another piece of code may iterate over the same attributes array. Therefore
+    // it may be helpful to return the exact spot where the attributes array exited
+    // whether by running into an unsupported marker or if all the static values were
+    // iterated over.
+    return i;
+}
+/**
+ * @param {?} attrs
+ * @param {?} startIndex
+ * @return {?}
+ */
+function attrsStylingIndexOf(attrs, startIndex) {
+    for (let i = startIndex; i < attrs.length; i++) {
+        /** @type {?} */
+        const val = attrs[i];
+        if (val === 1 /* Classes */ || val === 2 /* Styles */) {
+            return i;
+        }
+    }
+    return -1;
+}
+/**
+ * Test whether the given value is a marker that indicates that the following
+ * attribute values in a `TAttributes` array are only the names of attributes,
+ * and not name-value pairs.
+ * @param {?} marker The attribute marker to test.
+ * @return {?} true if the marker is a "name-only" marker (e.g. `Bindings` or `Template`).
+ */
+function isNameOnlyAttributeMarker(marker) {
+    return marker === 3 /* Bindings */ || marker === 4 /* Template */;
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
 /// Parent Injector Utils ///////////////////////////////////////////////////////////////
 /**
  * @param {?} parentLocation
@@ -5254,8 +6087,11 @@ function injectAttributeImpl(tNode, attrNameToInject) {
         for (let i = 0; i < attrs.length; i = i + 2) {
             /** @type {?} */
             const attrName = attrs[i];
-            if (attrName === 3 /* SelectOnly */)
+            // If we hit a `Bindings` or `Template` marker then we are done.
+            if (isNameOnlyAttributeMarker(attrName))
                 break;
+            // TODO(FW-1137): Skip namespaced attributes
+            // TODO(FW-1139): supports classes/styles in @Attribute injection
             if (attrName == attrNameToInject) {
                 return (/** @type {?} */ (attrs[i + 1]));
             }
@@ -7238,364 +8074,6 @@ function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
-/**
- * Returns the matching `LContext` data for a given DOM node, directive or component instance.
- *
- * This function will examine the provided DOM element, component, or directive instance\'s
- * monkey-patched property to derive the `LContext` data. Once called then the monkey-patched
- * value will be that of the newly created `LContext`.
- *
- * If the monkey-patched value is the `LView` instance then the context value for that
- * target will be created and the monkey-patch reference will be updated. Therefore when this
- * function is called it may mutate the provided element\'s, component\'s or any of the associated
- * directive\'s monkey-patch values.
- *
- * If the monkey-patch value is not detected then the code will walk up the DOM until an element
- * is found which contains a monkey-patch reference. When that occurs then the provided element
- * will be updated with a new context (which is then returned). If the monkey-patch value is not
- * detected for a component/directive instance then it will throw an error (all components and
- * directives should be automatically monkey-patched by ivy).
- *
- * @param {?} target Component, Directive or DOM Node.
- * @return {?}
- */
-function getLContext(target) {
-    /** @type {?} */
-    let mpValue = readPatchedData(target);
-    if (mpValue) {
-        // only when it's an array is it considered an LView instance
-        // ... otherwise it's an already constructed LContext instance
-        if (Array.isArray(mpValue)) {
-            /** @type {?} */
-            const lView = (/** @type {?} */ (mpValue));
-            /** @type {?} */
-            let nodeIndex;
-            /** @type {?} */
-            let component = undefined;
-            /** @type {?} */
-            let directives = undefined;
-            if (isComponentInstance(target)) {
-                nodeIndex = findViaComponent(lView, target);
-                if (nodeIndex == -1) {
-                    throw new Error('The provided component was not found in the application');
-                }
-                component = target;
-            }
-            else if (isDirectiveInstance(target)) {
-                nodeIndex = findViaDirective(lView, target);
-                if (nodeIndex == -1) {
-                    throw new Error('The provided directive was not found in the application');
-                }
-                directives = getDirectivesAtNodeIndex(nodeIndex, lView, false);
-            }
-            else {
-                nodeIndex = findViaNativeElement(lView, (/** @type {?} */ (target)));
-                if (nodeIndex == -1) {
-                    return null;
-                }
-            }
-            // the goal is not to fill the entire context full of data because the lookups
-            // are expensive. Instead, only the target data (the element, component, container, ICU
-            // expression or directive details) are filled into the context. If called multiple times
-            // with different target values then the missing target data will be filled in.
-            /** @type {?} */
-            const native = unwrapRNode(lView[nodeIndex]);
-            /** @type {?} */
-            const existingCtx = readPatchedData(native);
-            /** @type {?} */
-            const context = (existingCtx && !Array.isArray(existingCtx)) ?
-                existingCtx :
-                createLContext(lView, nodeIndex, native);
-            // only when the component has been discovered then update the monkey-patch
-            if (component && context.component === undefined) {
-                context.component = component;
-                attachPatchData(context.component, context);
-            }
-            // only when the directives have been discovered then update the monkey-patch
-            if (directives && context.directives === undefined) {
-                context.directives = directives;
-                for (let i = 0; i < directives.length; i++) {
-                    attachPatchData(directives[i], context);
-                }
-            }
-            attachPatchData(context.native, context);
-            mpValue = context;
-        }
-    }
-    else {
-        /** @type {?} */
-        const rElement = (/** @type {?} */ (target));
-        ngDevMode && assertDomNode(rElement);
-        // if the context is not found then we need to traverse upwards up the DOM
-        // to find the nearest element that has already been monkey patched with data
-        /** @type {?} */
-        let parent = (/** @type {?} */ (rElement));
-        while (parent = parent.parentNode) {
-            /** @type {?} */
-            const parentContext = readPatchedData(parent);
-            if (parentContext) {
-                /** @type {?} */
-                let lView;
-                if (Array.isArray(parentContext)) {
-                    lView = (/** @type {?} */ (parentContext));
-                }
-                else {
-                    lView = parentContext.lView;
-                }
-                // the edge of the app was also reached here through another means
-                // (maybe because the DOM was changed manually).
-                if (!lView) {
-                    return null;
-                }
-                /** @type {?} */
-                const index = findViaNativeElement(lView, rElement);
-                if (index >= 0) {
-                    /** @type {?} */
-                    const native = unwrapRNode(lView[index]);
-                    /** @type {?} */
-                    const context = createLContext(lView, index, native);
-                    attachPatchData(native, context);
-                    mpValue = context;
-                    break;
-                }
-            }
-        }
-    }
-    return ((/** @type {?} */ (mpValue))) || null;
-}
-/**
- * Creates an empty instance of a `LContext` context
- * @param {?} lView
- * @param {?} nodeIndex
- * @param {?} native
- * @return {?}
- */
-function createLContext(lView, nodeIndex, native) {
-    return {
-        lView,
-        nodeIndex,
-        native,
-        component: undefined,
-        directives: undefined,
-        localRefs: undefined,
-    };
-}
-/**
- * Takes a component instance and returns the view for that component.
- *
- * @param {?} componentInstance
- * @return {?} The component's view
- */
-function getComponentViewByInstance(componentInstance) {
-    /** @type {?} */
-    let lView = readPatchedData(componentInstance);
-    /** @type {?} */
-    let view;
-    if (Array.isArray(lView)) {
-        /** @type {?} */
-        const nodeIndex = findViaComponent(lView, componentInstance);
-        view = getComponentViewByIndex(nodeIndex, lView);
-        /** @type {?} */
-        const context = createLContext(lView, nodeIndex, (/** @type {?} */ (view[HOST])));
-        context.component = componentInstance;
-        attachPatchData(componentInstance, context);
-        attachPatchData(context.native, context);
-    }
-    else {
-        /** @type {?} */
-        const context = (/** @type {?} */ ((/** @type {?} */ (lView))));
-        view = getComponentViewByIndex(context.nodeIndex, context.lView);
-    }
-    return view;
-}
-/**
- * Assigns the given data to the given target (which could be a component,
- * directive or DOM node instance) using monkey-patching.
- * @param {?} target
- * @param {?} data
- * @return {?}
- */
-function attachPatchData(target, data) {
-    target[MONKEY_PATCH_KEY_NAME] = data;
-}
-/**
- * @param {?} instance
- * @return {?}
- */
-function isComponentInstance(instance) {
-    return instance && instance.constructor && instance.constructor.ngComponentDef;
-}
-/**
- * @param {?} instance
- * @return {?}
- */
-function isDirectiveInstance(instance) {
-    return instance && instance.constructor && instance.constructor.ngDirectiveDef;
-}
-/**
- * Locates the element within the given LView and returns the matching index
- * @param {?} lView
- * @param {?} target
- * @return {?}
- */
-function findViaNativeElement(lView, target) {
-    /** @type {?} */
-    let tNode = lView[TVIEW].firstChild;
-    while (tNode) {
-        /** @type {?} */
-        const native = (/** @type {?} */ (getNativeByTNode(tNode, lView)));
-        if (native === target) {
-            return tNode.index;
-        }
-        tNode = traverseNextElement(tNode);
-    }
-    return -1;
-}
-/**
- * Locates the next tNode (child, sibling or parent).
- * @param {?} tNode
- * @return {?}
- */
-function traverseNextElement(tNode) {
-    if (tNode.child) {
-        return tNode.child;
-    }
-    else if (tNode.next) {
-        return tNode.next;
-    }
-    else {
-        // Let's take the following template: <div><span>text</span></div><component/>
-        // After checking the text node, we need to find the next parent that has a "next" TNode,
-        // in this case the parent `div`, so that we can find the component.
-        while (tNode.parent && !tNode.parent.next) {
-            tNode = tNode.parent;
-        }
-        return tNode.parent && tNode.parent.next;
-    }
-}
-/**
- * Locates the component within the given LView and returns the matching index
- * @param {?} lView
- * @param {?} componentInstance
- * @return {?}
- */
-function findViaComponent(lView, componentInstance) {
-    /** @type {?} */
-    const componentIndices = lView[TVIEW].components;
-    if (componentIndices) {
-        for (let i = 0; i < componentIndices.length; i++) {
-            /** @type {?} */
-            const elementComponentIndex = componentIndices[i];
-            /** @type {?} */
-            const componentView = getComponentViewByIndex(elementComponentIndex, lView);
-            if (componentView[CONTEXT] === componentInstance) {
-                return elementComponentIndex;
-            }
-        }
-    }
-    else {
-        /** @type {?} */
-        const rootComponentView = getComponentViewByIndex(HEADER_OFFSET, lView);
-        /** @type {?} */
-        const rootComponent = rootComponentView[CONTEXT];
-        if (rootComponent === componentInstance) {
-            // we are dealing with the root element here therefore we know that the
-            // element is the very first element after the HEADER data in the lView
-            return HEADER_OFFSET;
-        }
-    }
-    return -1;
-}
-/**
- * Locates the directive within the given LView and returns the matching index
- * @param {?} lView
- * @param {?} directiveInstance
- * @return {?}
- */
-function findViaDirective(lView, directiveInstance) {
-    // if a directive is monkey patched then it will (by default)
-    // have a reference to the LView of the current view. The
-    // element bound to the directive being search lives somewhere
-    // in the view data. We loop through the nodes and check their
-    // list of directives for the instance.
-    /** @type {?} */
-    let tNode = lView[TVIEW].firstChild;
-    while (tNode) {
-        /** @type {?} */
-        const directiveIndexStart = tNode.directiveStart;
-        /** @type {?} */
-        const directiveIndexEnd = tNode.directiveEnd;
-        for (let i = directiveIndexStart; i < directiveIndexEnd; i++) {
-            if (lView[i] === directiveInstance) {
-                return tNode.index;
-            }
-        }
-        tNode = traverseNextElement(tNode);
-    }
-    return -1;
-}
-/**
- * Returns a list of directives extracted from the given view based on the
- * provided list of directive index values.
- *
- * @param {?} nodeIndex The node index
- * @param {?} lView The target view data
- * @param {?} includeComponents Whether or not to include components in returned directives
- * @return {?}
- */
-function getDirectivesAtNodeIndex(nodeIndex, lView, includeComponents) {
-    /** @type {?} */
-    const tNode = (/** @type {?} */ (lView[TVIEW].data[nodeIndex]));
-    /** @type {?} */
-    let directiveStartIndex = tNode.directiveStart;
-    if (directiveStartIndex == 0)
-        return EMPTY_ARRAY$1;
-    /** @type {?} */
-    const directiveEndIndex = tNode.directiveEnd;
-    if (!includeComponents && tNode.flags & 1 /* isComponent */)
-        directiveStartIndex++;
-    return lView.slice(directiveStartIndex, directiveEndIndex);
-}
-/**
- * @param {?} nodeIndex
- * @param {?} lView
- * @return {?}
- */
-function getComponentAtNodeIndex(nodeIndex, lView) {
-    /** @type {?} */
-    const tNode = (/** @type {?} */ (lView[TVIEW].data[nodeIndex]));
-    /** @type {?} */
-    let directiveStartIndex = tNode.directiveStart;
-    return tNode.flags & 1 /* isComponent */ ? lView[directiveStartIndex] : null;
-}
-/**
- * Returns a map of local references (local reference name => element or directive instance) that
- * exist on a given element.
- * @param {?} lView
- * @param {?} nodeIndex
- * @return {?}
- */
-function discoverLocalRefs(lView, nodeIndex) {
-    /** @type {?} */
-    const tNode = (/** @type {?} */ (lView[TVIEW].data[nodeIndex]));
-    if (tNode && tNode.localNames) {
-        /** @type {?} */
-        const result = {};
-        /** @type {?} */
-        let localIndex = tNode.index + 1;
-        for (let i = 0; i < tNode.localNames.length; i += 2) {
-            result[tNode.localNames[i]] = lView[localIndex];
-            localIndex++;
-        }
-        return result;
-    }
-    return null;
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
 /*
  * This file contains conditionally attached classes which provide human readable (debug) level
  * information for `LView`, `LContainer` and other internal data structures. These data structures
@@ -7872,52 +8350,6 @@ function readLViewValue(value) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * The goal here is to make sure that the browser DOM API is the Renderer.
- * We do this by defining a subset of DOM API to be the renderer and than
- * use that time for rendering.
- *
- * At runtime we can than use the DOM api directly, in server or web-worker
- * it will be easy to implement such API.
- */
-/** @enum {number} */
-const RendererStyleFlags3 = {
-    Important: 1,
-    DashCase: 2,
-};
-RendererStyleFlags3[RendererStyleFlags3.Important] = 'Important';
-RendererStyleFlags3[RendererStyleFlags3.DashCase] = 'DashCase';
-/**
- * Returns whether the `renderer` is a `ProceduralRenderer3`
- * @param {?} renderer
- * @return {?}
- */
-function isProceduralRenderer(renderer) {
-    return !!(((/** @type {?} */ (renderer))).listen);
-}
-/** @type {?} */
-const domRendererFactory3 = {
-    createRenderer: (hostElement, rendererType) => { return document; }
-};
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/** @type {?} */
-const NG_PROJECT_AS_ATTR_NAME = 'ngProjectAs';
 
 /**
  * @fileoverview added by tsickle
@@ -8818,318 +9250,6 @@ class BoundPlayerFactory {
         this.fn = fn;
         this.value = value;
     }
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-class CorePlayerHandler {
-    constructor() {
-        this._players = [];
-    }
-    /**
-     * @return {?}
-     */
-    flushPlayers() {
-        for (let i = 0; i < this._players.length; i++) {
-            /** @type {?} */
-            const player = this._players[i];
-            if (!player.parent && player.state === 0 /* Pending */) {
-                player.play();
-            }
-        }
-        this._players.length = 0;
-    }
-    /**
-     * @param {?} player
-     * @return {?}
-     */
-    queuePlayer(player) { this._players.push(player); }
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/** @type {?} */
-const ANIMATION_PROP_PREFIX = '@';
-/**
- * @param {?=} wrappedElement
- * @param {?=} sanitizer
- * @param {?=} initialStyles
- * @param {?=} initialClasses
- * @return {?}
- */
-function createEmptyStylingContext(wrappedElement, sanitizer, initialStyles, initialClasses) {
-    /** @type {?} */
-    const context = [
-        wrappedElement || null,
-        0,
-        (/** @type {?} */ ([])),
-        initialStyles || [null, null],
-        initialClasses || [null, null],
-        [0, 0],
-        [0],
-        [0],
-        null,
-    ];
-    // whenever a context is created there is always a `null` directive
-    // that is registered (which is a placeholder for the "template").
-    allocateDirectiveIntoContext(context, null);
-    return context;
-}
-/**
- * Allocates (registers) a directive into the directive registry within the provided styling
- * context.
- *
- * For each and every `[style]`, `[style.prop]`, `[class]`, `[class.name]` binding
- * (as well as static style and class attributes) a directive, component or template
- * is marked as the owner. When an owner is determined (this happens when the template
- * is first passed over) the directive owner is allocated into the styling context. When
- * this happens, each owner gets its own index value. This then ensures that once any
- * style and/or class binding are assigned into the context then they are marked to
- * that directive's index value.
- *
- * @param {?} context the target StylingContext
- * @param {?} directiveRef the directive that will be allocated into the context
- * @return {?} the index where the directive was inserted into
- */
-function allocateDirectiveIntoContext(context, directiveRef) {
-    // this is a new directive which we have not seen yet.
-    /** @type {?} */
-    const dirs = context[2 /* DirectiveRegistryPosition */];
-    /** @type {?} */
-    const i = dirs.length;
-    // we preemptively make space into the directives array and then
-    // assign values slot-by-slot to ensure that if the directive ordering
-    // changes then it will still function
-    dirs.push(null, null, null, null);
-    dirs[i + 0 /* DirectiveValueOffset */] = directiveRef;
-    dirs[i + 2 /* DirtyFlagOffset */] = false;
-    dirs[i + 3 /* StyleSanitizerOffset */] = null;
-    // -1 is used to signal that the directive has been allocated, but
-    // no actual style or class bindings have been registered yet...
-    dirs[i + 1 /* SinglePropValuesIndexOffset */] = -1;
-    return i;
-}
-/**
- * Used clone a copy of a pre-computed template of a styling context.
- *
- * A pre-computed template is designed to be computed once for a given element
- * (instructions.ts has logic for caching this).
- * @param {?} element
- * @param {?} templateStyleContext
- * @return {?}
- */
-function allocStylingContext(element, templateStyleContext) {
-    // each instance gets a copy
-    /** @type {?} */
-    const context = (/** @type {?} */ ((/** @type {?} */ (templateStyleContext.slice()))));
-    // the HEADER values contain arrays which also need
-    // to be copied over into the new context
-    for (let i = 0; i < 9 /* SingleStylesStartPosition */; i++) {
-        /** @type {?} */
-        const value = templateStyleContext[i];
-        if (Array.isArray(value)) {
-            context[i] = value.slice();
-        }
-    }
-    context[0 /* ElementPosition */] = element;
-    // this will prevent any other directives from extending the context
-    context[1 /* MasterFlagPosition */] |= 16 /* BindingAllocationLocked */;
-    return context;
-}
-/**
- * Retrieve the `StylingContext` at a given index.
- *
- * This method lazily creates the `StylingContext`. This is because in most cases
- * we have styling without any bindings. Creating `StylingContext` eagerly would mean that
- * every style declaration such as `<div style="color: red">` would result `StyleContext`
- * which would create unnecessary memory pressure.
- *
- * @param {?} index Index of the style allocation. See: `elementStyling`.
- * @param {?} viewData The view to search for the styling context
- * @return {?}
- */
-function getStylingContext(index, viewData) {
-    /** @type {?} */
-    let storageIndex = index;
-    /** @type {?} */
-    let slotValue = viewData[storageIndex];
-    /** @type {?} */
-    let wrapper = viewData;
-    while (Array.isArray(slotValue)) {
-        wrapper = slotValue;
-        slotValue = (/** @type {?} */ (slotValue[HOST]));
-    }
-    if (isStylingContext(wrapper)) {
-        return wrapper;
-    }
-    else {
-        // This is an LView or an LContainer
-        /** @type {?} */
-        const stylingTemplate = getTNode(index - HEADER_OFFSET, viewData).stylingTemplate;
-        if (wrapper !== viewData) {
-            storageIndex = HOST;
-        }
-        return wrapper[storageIndex] = stylingTemplate ?
-            allocStylingContext(slotValue, stylingTemplate) :
-            createEmptyStylingContext(slotValue);
-    }
-}
-/**
- * @param {?} name
- * @return {?}
- */
-function isAnimationProp(name) {
-    return name[0] === ANIMATION_PROP_PREFIX;
-}
-/**
- * @param {?} tNode
- * @return {?}
- */
-function hasClassInput(tNode) {
-    return (tNode.flags & 8 /* hasClassInput */) !== 0;
-}
-/**
- * @param {?} tNode
- * @return {?}
- */
-function hasStyleInput(tNode) {
-    return (tNode.flags & 16 /* hasStyleInput */) !== 0;
-}
-/**
- * @param {?} classes
- * @return {?}
- */
-function forceClassesAsString(classes) {
-    if (classes && typeof classes !== 'string') {
-        classes = Object.keys(classes).join(' ');
-    }
-    return ((/** @type {?} */ (classes))) || '';
-}
-/**
- * @param {?} styles
- * @return {?}
- */
-function forceStylesAsString(styles) {
-    /** @type {?} */
-    let str = '';
-    if (styles) {
-        /** @type {?} */
-        const props = Object.keys(styles);
-        for (let i = 0; i < props.length; i++) {
-            /** @type {?} */
-            const prop = props[i];
-            str += (i ? ';' : '') + `${prop}:${styles[prop]}`;
-        }
-    }
-    return str;
-}
-/**
- * @param {?} playerContext
- * @param {?} rootContext
- * @param {?} element
- * @param {?} player
- * @param {?} playerContextIndex
- * @param {?=} ref
- * @return {?}
- */
-function addPlayerInternal(playerContext, rootContext, element, player, playerContextIndex, ref) {
-    ref = ref || element;
-    if (playerContextIndex) {
-        playerContext[playerContextIndex] = player;
-    }
-    else {
-        playerContext.push(player);
-    }
-    if (player) {
-        player.addEventListener(200 /* Destroyed */, () => {
-            /** @type {?} */
-            const index = playerContext.indexOf(player);
-            /** @type {?} */
-            const nonFactoryPlayerIndex = playerContext[0 /* NonBuilderPlayersStart */];
-            // if the player is being removed from the factory side of the context
-            // (which is where the [style] and [class] bindings do their thing) then
-            // that side of the array cannot be resized since the respective bindings
-            // have pointer index values that point to the associated factory instance
-            if (index) {
-                if (index < nonFactoryPlayerIndex) {
-                    playerContext[index] = null;
-                }
-                else {
-                    playerContext.splice(index, 1);
-                }
-            }
-            player.destroy();
-        });
-        /** @type {?} */
-        const playerHandler = rootContext.playerHandler || (rootContext.playerHandler = new CorePlayerHandler());
-        playerHandler.queuePlayer(player, ref);
-        return true;
-    }
-    return false;
-}
-/**
- * @param {?} playerContext
- * @return {?}
- */
-function getPlayersInternal(playerContext) {
-    /** @type {?} */
-    const players = [];
-    /** @type {?} */
-    const nonFactoryPlayersStart = playerContext[0 /* NonBuilderPlayersStart */];
-    // add all factory-based players (which are apart of [style] and [class] bindings)
-    for (let i = 1 /* PlayerBuildersStartPosition */ + 1 /* PlayerOffsetPosition */; i < nonFactoryPlayersStart; i += 2 /* PlayerAndPlayerBuildersTupleSize */) {
-        /** @type {?} */
-        const player = (/** @type {?} */ (playerContext[i]));
-        if (player) {
-            players.push(player);
-        }
-    }
-    // add all custom players (not apart of [style] and [class] bindings)
-    for (let i = nonFactoryPlayersStart; i < playerContext.length; i++) {
-        players.push((/** @type {?} */ (playerContext[i])));
-    }
-    return players;
-}
-/**
- * @param {?} target
- * @param {?=} context
- * @return {?}
- */
-function getOrCreatePlayerContext(target, context) {
-    context = context || (/** @type {?} */ (getLContext(target)));
-    if (!context) {
-        ngDevMode && throwInvalidRefError();
-        return null;
-    }
-    const { lView, nodeIndex } = context;
-    /** @type {?} */
-    const stylingContext = getStylingContext(nodeIndex, lView);
-    return getPlayerContext(stylingContext) || allocPlayerContext(stylingContext);
-}
-/**
- * @param {?} stylingContext
- * @return {?}
- */
-function getPlayerContext(stylingContext) {
-    return stylingContext[8 /* PlayerContext */];
-}
-/**
- * @param {?} data
- * @return {?}
- */
-function allocPlayerContext(data) {
-    return data[8 /* PlayerContext */] =
-        [5 /* SinglePlayerBuildersStartPosition */, null, null, null, null];
-}
-/**
- * @return {?}
- */
-function throwInvalidRefError() {
-    throw new Error('Only elements that exist in an Angular application can be used for animations');
 }
 
 /**
@@ -11317,7 +11437,7 @@ function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
 /**
  * Function that checks whether a given tNode matches tag-based selector and has a valid type.
  *
- * Matching can be perfomed in 2 modes: projection mode (when we project nodes) and regular
+ * Matching can be performed in 2 modes: projection mode (when we project nodes) and regular
  * directive matching mode. In "projection" mode, we do not need to check types, so if tag name
  * matches selector, we declare a match. In "directive matching" mode, we also check whether tNode
  * is of expected type:
@@ -11338,8 +11458,9 @@ function hasTagAndTypeMatch(tNode, currentSelector, isProjectionMode) {
  * A utility function to match an Ivy node static data against a simple CSS selector
  *
  * @param {?} tNode
- * @param {?} selector
- * @param {?} isProjectionMode
+ * @param {?} selector The selector to try matching against the node.
+ * @param {?} isProjectionMode if `true` we are matching for content projection, otherwise we are doing
+ * directive matching.
  * @return {?} true if node matches the selector.
  */
 function isNodeMatchingSelector(tNode, selector, isProjectionMode) {
@@ -11347,9 +11468,10 @@ function isNodeMatchingSelector(tNode, selector, isProjectionMode) {
     /** @type {?} */
     let mode = 4 /* ELEMENT */;
     /** @type {?} */
-    const nodeAttrs = (/** @type {?} */ (tNode.attrs));
+    const nodeAttrs = tNode.attrs || [];
+    // Find the index of first attribute that has no value, only a name.
     /** @type {?} */
-    const selectOnlyMarkerIdx = nodeAttrs ? nodeAttrs.indexOf(3 /* SelectOnly */) : -1;
+    const nameOnlyMarkerIdx = getNameOnlyMarkerIndex(nodeAttrs);
     // When processing ":not" selectors, we skip to the next ":not" if the
     // current one doesn't match
     /** @type {?} */
@@ -11395,9 +11517,11 @@ function isNodeMatchingSelector(tNode, selector, isProjectionMode) {
                 continue;
             }
             /** @type {?} */
+            const isInlineTemplate = tNode.type == 0 /* Container */ && tNode.tagName !== NG_TEMPLATE_SELECTOR;
+            /** @type {?} */
             const attrName = (mode & 8 /* CLASS */) ? 'class' : current;
             /** @type {?} */
-            const attrIndexInNode = findAttrIndexInNode(attrName, nodeAttrs);
+            const attrIndexInNode = findAttrIndexInNode(attrName, nodeAttrs, isInlineTemplate, isProjectionMode);
             if (attrIndexInNode === -1) {
                 if (isPositive(mode))
                     return false;
@@ -11407,13 +11531,11 @@ function isNodeMatchingSelector(tNode, selector, isProjectionMode) {
             if (selectorAttrValue !== '') {
                 /** @type {?} */
                 let nodeAttrValue;
-                /** @type {?} */
-                const maybeAttrName = nodeAttrs[attrIndexInNode];
-                if (selectOnlyMarkerIdx > -1 && attrIndexInNode > selectOnlyMarkerIdx) {
+                if (attrIndexInNode > nameOnlyMarkerIdx) {
                     nodeAttrValue = '';
                 }
                 else {
-                    ngDevMode && assertNotEqual(maybeAttrName, 0 /* NamespaceURI */, 'We do not match directives on namespaced attributes');
+                    ngDevMode && assertNotEqual(nodeAttrs[attrIndexInNode], 0 /* NamespaceURI */, 'We do not match directives on namespaced attributes');
                     nodeAttrValue = (/** @type {?} */ (nodeAttrs[attrIndexInNode + 1]));
                 }
                 /** @type {?} */
@@ -11451,40 +11573,69 @@ function readClassValueFromTNode(tNode) {
     return tNode.stylingTemplate ? getInitialClassNameValue(tNode.stylingTemplate) : '';
 }
 /**
- * Examines an attributes definition array from a node to find the index of the
- * attribute with the specified name.
+ * Examines the attribute's definition array for a node to find the index of the
+ * attribute that matches the given `name`.
  *
- * NOTE: Will not find namespaced attributes.
+ * NOTE: This will not match namespaced attributes.
+ *
+ * Attribute matching depends upon `isInlineTemplate` and `isProjectionMode`.
+ * The following table summarizes which types of attributes we attempt to match:
+ *
+ * =========================================================================================
+ * Modes                   | Normal Attributes | Bindings Attributes | Template Attributes
+ * =========================================================================================
+ * Inline + Projection     | YES               | YES                 | NO
+ * -----------------------------------------------------------------------------------------
+ * Inline + Directive      | NO                | NO                  | YES
+ * -----------------------------------------------------------------------------------------
+ * Non-inline + Projection | YES               | YES                 | NO
+ * -----------------------------------------------------------------------------------------
+ * Non-inline + Directive  | YES               | YES                 | NO
+ * =========================================================================================
  *
  * @param {?} name the name of the attribute to find
  * @param {?} attrs the attribute array to examine
+ * @param {?} isInlineTemplate true if the node being matched is an inline template (e.g. `*ngFor`)
+ * rather than a manually expanded template node (e.g `<ng-template>`).
+ * @param {?} isProjectionMode true if we are matching against content projection otherwise we are
+ * matching against directives.
  * @return {?}
  */
-function findAttrIndexInNode(name, attrs) {
+function findAttrIndexInNode(name, attrs, isInlineTemplate, isProjectionMode) {
     if (attrs === null)
         return -1;
     /** @type {?} */
-    let selectOnlyMode = false;
-    /** @type {?} */
     let i = 0;
-    while (i < attrs.length) {
+    if (isProjectionMode || !isInlineTemplate) {
         /** @type {?} */
-        const maybeAttrName = attrs[i];
-        if (maybeAttrName === name) {
-            return i;
-        }
-        else if (maybeAttrName === 0 /* NamespaceURI */) {
-            // NOTE(benlesh): will not find namespaced attributes. This is by design.
-            i += 4;
-        }
-        else {
-            if (maybeAttrName === 3 /* SelectOnly */) {
-                selectOnlyMode = true;
+        let bindingsMode = false;
+        while (i < attrs.length) {
+            /** @type {?} */
+            const maybeAttrName = attrs[i];
+            if (maybeAttrName === name) {
+                return i;
             }
-            i += selectOnlyMode ? 1 : 2;
+            else if (maybeAttrName === 3 /* Bindings */) {
+                bindingsMode = true;
+            }
+            else if (maybeAttrName === 4 /* Template */) {
+                // We do not care about Template attributes in this scenario.
+                break;
+            }
+            else if (maybeAttrName === 0 /* NamespaceURI */) {
+                // Skip the whole namespaced attribute and value. This is by design.
+                i += 4;
+                continue;
+            }
+            // In binding mode there are only names, rather than name-value pairs.
+            i += bindingsMode ? 1 : 2;
         }
+        // We did not match the attribute
+        return -1;
     }
-    return -1;
+    else {
+        return matchTemplateAttribute(attrs, name);
+    }
 }
 /**
  * @param {?} tNode
@@ -11519,17 +11670,17 @@ function getProjectAsAttrValue(tNode) {
     return null;
 }
 /**
- * Checks a given node against matching selectors and returns
+ * Checks a given node against matching projection selectors and returns
  * selector index (or 0 if none matched).
  *
- * This function takes into account the ngProjectAs attribute: if present its value will be compared
- * to the raw (un-parsed) CSS selector instead of using standard selector matching logic.
+ * This function takes into account the ngProjectAs attribute: if present its value will be
+ * compared to the raw (un-parsed) CSS selector instead of using standard selector matching logic.
  * @param {?} tNode
  * @param {?} selectors
  * @param {?} textSelectors
  * @return {?}
  */
-function matchingSelectorIndex(tNode, selectors, textSelectors) {
+function matchingProjectionSelectorIndex(tNode, selectors, textSelectors) {
     /** @type {?} */
     const ngProjectAsAttrVal = getProjectAsAttrValue(tNode);
     for (let i = 0; i < selectors.length; i++) {
@@ -11542,6 +11693,38 @@ function matchingSelectorIndex(tNode, selectors, textSelectors) {
         }
     }
     return 0;
+}
+/**
+ * @param {?} nodeAttrs
+ * @return {?}
+ */
+function getNameOnlyMarkerIndex(nodeAttrs) {
+    for (let i = 0; i < nodeAttrs.length; i++) {
+        /** @type {?} */
+        const nodeAttr = nodeAttrs[i];
+        if (isNameOnlyAttributeMarker(nodeAttr)) {
+            return i;
+        }
+    }
+    return nodeAttrs.length;
+}
+/**
+ * @param {?} attrs
+ * @param {?} name
+ * @return {?}
+ */
+function matchTemplateAttribute(attrs, name) {
+    /** @type {?} */
+    let i = attrs.indexOf(4 /* Template */);
+    if (i > -1) {
+        i++;
+        while (i < attrs.length) {
+            if (attrs[i] === name)
+                return i;
+            i++;
+        }
+    }
+    return -1;
 }
 
 /**
@@ -11602,113 +11785,6 @@ function getParentInjectorTNode(location, startView, startTNode) {
         viewOffset--;
     }
     return parentTNode;
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Assigns all attribute values to the provided element via the inferred renderer.
- *
- * This function accepts two forms of attribute entries:
- *
- * default: (key, value):
- *  attrs = [key1, value1, key2, value2]
- *
- * namespaced: (NAMESPACE_MARKER, uri, name, value)
- *  attrs = [NAMESPACE_MARKER, uri, name, value, NAMESPACE_MARKER, uri, name, value]
- *
- * The `attrs` array can contain a mix of both the default and namespaced entries.
- * The "default" values are set without a marker, but if the function comes across
- * a marker value then it will attempt to set a namespaced value. If the marker is
- * not of a namespaced value then the function will quit and return the index value
- * where it stopped during the iteration of the attrs array.
- *
- * See [AttributeMarker] to understand what the namespace marker value is.
- *
- * Note that this instruction does not support assigning style and class values to
- * an element. See `elementStart` and `elementHostAttrs` to learn how styling values
- * are applied to an element.
- *
- * @param {?} native The element that the attributes will be assigned to
- * @param {?} attrs The attribute array of values that will be assigned to the element
- * @return {?} the index value that was last accessed in the attributes array
- */
-function setUpAttributes(native, attrs) {
-    /** @type {?} */
-    const renderer = getLView()[RENDERER];
-    /** @type {?} */
-    const isProc = isProceduralRenderer(renderer);
-    /** @type {?} */
-    let i = 0;
-    while (i < attrs.length) {
-        /** @type {?} */
-        const value = attrs[i];
-        if (typeof value === 'number') {
-            // only namespaces are supported. Other value types (such as style/class
-            // entries) are not supported in this function.
-            if (value !== 0 /* NamespaceURI */) {
-                break;
-            }
-            // we just landed on the marker value ... therefore
-            // we should skip to the next entry
-            i++;
-            /** @type {?} */
-            const namespaceURI = (/** @type {?} */ (attrs[i++]));
-            /** @type {?} */
-            const attrName = (/** @type {?} */ (attrs[i++]));
-            /** @type {?} */
-            const attrVal = (/** @type {?} */ (attrs[i++]));
-            ngDevMode && ngDevMode.rendererSetAttribute++;
-            isProc ?
-                ((/** @type {?} */ (renderer))).setAttribute(native, attrName, attrVal, namespaceURI) :
-                native.setAttributeNS(namespaceURI, attrName, attrVal);
-        }
-        else {
-            /// attrName is string;
-            /** @type {?} */
-            const attrName = (/** @type {?} */ (value));
-            /** @type {?} */
-            const attrVal = attrs[++i];
-            if (attrName !== NG_PROJECT_AS_ATTR_NAME) {
-                // Standard attributes
-                ngDevMode && ngDevMode.rendererSetAttribute++;
-                if (isAnimationProp(attrName)) {
-                    if (isProc) {
-                        ((/** @type {?} */ (renderer))).setProperty(native, attrName, attrVal);
-                    }
-                }
-                else {
-                    isProc ?
-                        ((/** @type {?} */ (renderer)))
-                            .setAttribute(native, (/** @type {?} */ (attrName)), (/** @type {?} */ (attrVal))) :
-                        native.setAttribute((/** @type {?} */ (attrName)), (/** @type {?} */ (attrVal)));
-                }
-            }
-            i++;
-        }
-    }
-    // another piece of code may iterate over the same attributes array. Therefore
-    // it may be helpful to return the exact spot where the attributes array exited
-    // whether by running into an unsupported marker or if all the static values were
-    // iterated over.
-    return i;
-}
-/**
- * @param {?} attrs
- * @param {?} startIndex
- * @return {?}
- */
-function attrsStylingIndexOf(attrs, startIndex) {
-    for (let i = startIndex; i < attrs.length; i++) {
-        /** @type {?} */
-        const val = attrs[i];
-        if (val === 1 /* Classes */ || val === 2 /* Styles */) {
-            return i;
-        }
-    }
-    return -1;
 }
 
 /**
@@ -13933,15 +14009,14 @@ function generateInitialInputs(directiveIndex, inputs, tNode) {
     while (i < attrs.length) {
         /** @type {?} */
         const attrName = attrs[i];
-        // If we hit Select-Only, Classes or Styles, we're done anyway. None of those are valid inputs.
-        if (attrName === 3 /* SelectOnly */ || attrName === 1 /* Classes */ ||
-            attrName === 2 /* Styles */)
-            break;
         if (attrName === 0 /* NamespaceURI */) {
             // We do not allow inputs on namespaced attributes.
             i += 4;
             continue;
         }
+        // If we hit any other attribute markers, we're done anyway. None of those are valid inputs.
+        if (typeof attrName === 'number')
+            break;
         /** @type {?} */
         const minifiedInputName = inputs[attrName];
         /** @type {?} */
@@ -14383,7 +14458,9 @@ function projectionDef(selectors, textSelectors) {
         let componentChild = componentNode.child;
         while (componentChild !== null) {
             /** @type {?} */
-            const bucketIndex = selectors ? matchingSelectorIndex(componentChild, selectors, (/** @type {?} */ (textSelectors))) : 0;
+            const bucketIndex = selectors ?
+                matchingProjectionSelectorIndex(componentChild, selectors, (/** @type {?} */ (textSelectors))) :
+                0;
             if (tails[bucketIndex]) {
                 (/** @type {?} */ (tails[bucketIndex])).projectionNext = componentChild;
             }
@@ -18158,7 +18235,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.7+22.sha-9a19592.with-local-changes');
+const VERSION = new Version('8.0.0-beta.7+29.sha-5ad2097.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
