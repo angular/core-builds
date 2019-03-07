@@ -94,12 +94,45 @@ export declare const enum AttributeMarker {
      */
     Styles = 2,
     /**
-     * This marker indicates that the following attribute names were extracted from bindings (ex.:
-     * [foo]="exp") and / or event handlers (ex. (bar)="doSth()").
-     * Taking the above bindings and outputs as an example an attributes array could look as follows:
-     * ['class', 'fade in', AttributeMarker.SelectOnly, 'foo', 'bar']
+     * Signals that the following attribute names were extracted from input or output bindings.
+     *
+     * For example, given the following HTML:
+     *
+     * ```
+     * <div moo="car" [foo]="exp" (bar)="doSth()">
+     * ```
+     *
+     * the generated code is:
+     *
+     * ```
+     * var _c1 = ['moo', 'car', AttributeMarker.Bindings, 'foo', 'bar'];
+     * ```
      */
-    SelectOnly = 3
+    Bindings = 3,
+    /**
+     * Signals that the following attribute names were hoisted from an inline-template declaration.
+     *
+     * For example, given the following HTML:
+     *
+     * ```
+     * <div *ngFor="let value of values; trackBy:trackBy" dirA [dirB]="value">
+     * ```
+     *
+     * the generated code for the `template()` instruction would include:
+     *
+     * ```
+     * ['dirA', '', AttributeMarker.Bindings, 'dirB', AttributeMarker.Template, 'ngFor', 'ngForOf',
+     * 'ngForTrackBy', 'let-value']
+     * ```
+     *
+     * while the generated code for the `element()` instruction inside the template function would
+     * include:
+     *
+     * ```
+     * ['dirA', '', AttributeMarker.Bindings, 'dirB']
+     * ```
+     */
+    Template = 4
 }
 /**
  * A combination of:
