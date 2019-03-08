@@ -12,7 +12,7 @@ import { NgModuleDef } from '../metadata/ng_module';
 import { SchemaMetadata } from '../metadata/schema';
 import { ViewEncapsulation } from '../metadata/view';
 import { BaseDef, ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveTypesOrFactory, FactoryFn, HostBindingsFunction, PipeDef, PipeType, PipeTypesOrFactory, ViewQueriesFunction } from './interfaces/definition';
-import { CssSelectorList } from './interfaces/projection';
+import { CssSelectorList, SelectorFlags } from './interfaces/projection';
 /**
  * Create a component definition object.
  *
@@ -315,7 +315,7 @@ export declare const defineDirective: <T>(directiveDefinition: {
      */
     type: Type<T>;
     /** The selectors that will be used to match nodes to this directive. */
-    selectors: (string | import("@angular/core/src/render3/interfaces/projection").SelectorFlags)[][];
+    selectors: (string | SelectorFlags)[][];
     /**
      * Factory method used to create an instance of directive.
      */
