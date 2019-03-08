@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { R3DirectiveMetadataFacade } from '../../compiler/compiler_facade';
 import { R3QueryMetadataFacade } from '../../compiler/compiler_facade_interface';
 import { Type } from '../../interface/type';
 import { Query } from '../../metadata/di';
@@ -28,4 +29,9 @@ export declare function compileComponent(type: Type<any>, metadata: Component): 
  */
 export declare function compileDirective(type: Type<any>, directive: Directive): void;
 export declare function extendsDirectlyFromObject(type: Type<any>): boolean;
+/**
+ * Extract the `R3DirectiveMetadata` for a particular directive (either a `Directive` or a
+ * `Component`).
+ */
+export declare function directiveMetadata(type: Type<any>, metadata: Directive): R3DirectiveMetadataFacade;
 export declare function convertToR3QueryMetadata(propertyName: string, ann: Query): R3QueryMetadataFacade;
