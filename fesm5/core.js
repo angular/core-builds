@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.7+41.sha-a68b1a1.with-local-changes
+ * @license Angular v8.0.0-beta.7+53.sha-49dccf4.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -802,7 +802,7 @@ var ReflectionCapabilities = /** @class */ (function () {
         if (!isType(typeOrFunc)) {
             return {};
         }
-        return this._ownPropMetadata(typeOrFunc, Object) || {};
+        return this._ownPropMetadata(typeOrFunc, getParentCtor(typeOrFunc)) || {};
     };
     ReflectionCapabilities.prototype.hasLifecycleHook = function (type, lcProperty) {
         return type instanceof Type && lcProperty in type.prototype;
@@ -14773,7 +14773,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.7+41.sha-a68b1a1.with-local-changes');
+var VERSION = new Version('8.0.0-beta.7+53.sha-49dccf4.with-local-changes');
 
 /**
  * @license
