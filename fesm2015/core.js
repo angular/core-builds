@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.7+60.sha-1d88c2b.with-local-changes
+ * @license Angular v8.0.0-beta.7+83.sha-c5daaa9.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3093,6 +3093,12 @@ function componentNeedsResolution(component) {
  */
 function clearResolutionOfComponentResourcesQueue() {
     componentResourceResolutionQueue.clear();
+}
+/**
+ * @return {?}
+ */
+function isComponentResourceResolutionQueueEmpty() {
+    return componentResourceResolutionQueue.size === 0;
 }
 /**
  * @param {?} response
@@ -18235,7 +18241,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.7+60.sha-1d88c2b.with-local-changes');
+const VERSION = new Version('8.0.0-beta.7+83.sha-c5daaa9.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -23502,17 +23508,14 @@ function i18nEndFirstPass(tView) {
     /** @type {?} */
     const tI18n = (/** @type {?} */ (tView.data[rootIndex + HEADER_OFFSET]));
     ngDevMode && assertDefined(tI18n, `You should call i18nStart before i18nEnd`);
-    // The last placeholder that was added before `i18nEnd`
-    /** @type {?} */
-    const previousOrParentTNode = getPreviousOrParentTNode();
-    /** @type {?} */
-    const visitedNodes = readCreateOpCodes(rootIndex, tI18n.create, tI18n.icus, viewData);
     // Find the last node that was added before `i18nEnd`
     /** @type {?} */
-    let lastCreatedNode = previousOrParentTNode;
+    let lastCreatedNode = getPreviousOrParentTNode();
     if (lastCreatedNode.child) {
         lastCreatedNode = findLastNode(lastCreatedNode.child);
     }
+    /** @type {?} */
+    const visitedNodes = readCreateOpCodes(rootIndex, tI18n.create, tI18n.icus, viewData);
     // Remove deleted nodes
     for (let i = rootIndex + 1; i <= lastCreatedNode.index - HEADER_OFFSET; i++) {
         if (visitedNodes.indexOf(i) === -1) {
@@ -23588,7 +23591,6 @@ function readCreateOpCodes(index, createOpCodes, icus, viewData) {
                     ngDevMode &&
                         assertDefined((/** @type {?} */ (currentTNode)), `You need to create or select a node before you can insert it into the DOM`);
                     previousTNode = appendI18nNode((/** @type {?} */ (currentTNode)), destinationTNode, previousTNode);
-                    destinationTNode.next = null;
                     break;
                 case 0 /* Select */:
                     /** @type {?} */
@@ -28359,7 +28361,32 @@ function compileNgModuleFactory__PRE_R3__(injector, options, moduleType) {
  */
 function compileNgModuleFactory__POST_R3__(injector, options, moduleType) {
     ngDevMode && assertNgModuleType(moduleType);
-    return Promise.resolve(new NgModuleFactory$1(moduleType));
+    /** @type {?} */
+    const moduleFactory = new NgModuleFactory$1(moduleType);
+    if (isComponentResourceResolutionQueueEmpty()) {
+        return Promise.resolve(moduleFactory);
+    }
+    /** @type {?} */
+    const compilerOptions = injector.get(COMPILER_OPTIONS, []).concat(options);
+    /** @type {?} */
+    const compilerProviders = _mergeArrays(compilerOptions.map(o => (/** @type {?} */ (o.providers))));
+    // In case there are no compiler providers, we just return the module factory as
+    // there won't be any resource loader. This can happen with Ivy, because AOT compiled
+    // modules can be still passed through "bootstrapModule". In that case we shouldn't
+    // unnecessarily require the JIT compiler.
+    if (compilerProviders.length === 0) {
+        return Promise.resolve(moduleFactory);
+    }
+    /** @type {?} */
+    const compiler = getCompilerFacade();
+    /** @type {?} */
+    const compilerInjector = Injector.create({ providers: compilerProviders });
+    /** @type {?} */
+    const resourceLoader = compilerInjector.get(compiler.ResourceLoader);
+    // The resource loader can also return a string while the "resolveComponentResources"
+    // always expects a promise. Therefore we need to wrap the returned value in a promise.
+    return resolveComponentResources(url => Promise.resolve(resourceLoader.get(url)))
+        .then(() => moduleFactory);
 }
 /** @type {?} */
 let isBoundToModule = isBoundToModule__PRE_R3__;
@@ -29052,6 +29079,16 @@ function remove(list, el) {
     if (index > -1) {
         list.splice(index, 1);
     }
+}
+/**
+ * @param {?} parts
+ * @return {?}
+ */
+function _mergeArrays(parts) {
+    /** @type {?} */
+    const result = [];
+    parts.forEach((part) => part && result.push(...part));
+    return result;
 }
 
 /**
