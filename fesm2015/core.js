@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.7+68.sha-4227126.with-local-changes
+ * @license Angular v8.0.0-beta.7+74.sha-7315a68.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18156,7 +18156,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.7+68.sha-4227126.with-local-changes');
+const VERSION = new Version('8.0.0-beta.7+74.sha-7315a68.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -23412,17 +23412,14 @@ function i18nEndFirstPass(tView) {
     /** @type {?} */
     const tI18n = (/** @type {?} */ (tView.data[rootIndex + HEADER_OFFSET]));
     ngDevMode && assertDefined(tI18n, `You should call i18nStart before i18nEnd`);
-    // The last placeholder that was added before `i18nEnd`
-    /** @type {?} */
-    const previousOrParentTNode = getPreviousOrParentTNode();
-    /** @type {?} */
-    const visitedNodes = readCreateOpCodes(rootIndex, tI18n.create, tI18n.icus, viewData);
     // Find the last node that was added before `i18nEnd`
     /** @type {?} */
-    let lastCreatedNode = previousOrParentTNode;
+    let lastCreatedNode = getPreviousOrParentTNode();
     if (lastCreatedNode.child) {
         lastCreatedNode = findLastNode(lastCreatedNode.child);
     }
+    /** @type {?} */
+    const visitedNodes = readCreateOpCodes(rootIndex, tI18n.create, tI18n.icus, viewData);
     // Remove deleted nodes
     for (let i = rootIndex + 1; i <= lastCreatedNode.index - HEADER_OFFSET; i++) {
         if (visitedNodes.indexOf(i) === -1) {
@@ -23498,7 +23495,6 @@ function readCreateOpCodes(index, createOpCodes, icus, viewData) {
                     ngDevMode &&
                         assertDefined((/** @type {?} */ (currentTNode)), `You need to create or select a node before you can insert it into the DOM`);
                     previousTNode = appendI18nNode((/** @type {?} */ (currentTNode)), destinationTNode, previousTNode);
-                    destinationTNode.next = null;
                     break;
                 case 0 /* Select */:
                     /** @type {?} */
