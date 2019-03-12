@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.7+66.sha-76119b8.with-local-changes
+ * @license Angular v8.0.0-beta.7+70.sha-9d1423d.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1831,7 +1831,7 @@ export declare interface Directive {
      * To listen to global events, add the target to the event name.
      * The target can be `window`, `document` or `body`.
      * - The value is the statement to execute when the event occurs. If the
-     * statement evalueates to `false`, then `preventDefault` is applied on the DOM
+     * statement evaluates to `false`, then `preventDefault` is applied on the DOM
      * event. A handler method can refer to the `$event` local variable.
      *
      */
