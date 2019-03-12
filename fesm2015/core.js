@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.7+85.sha-3f32c0e.with-local-changes
+ * @license Angular v8.0.0-beta.7+87.sha-9d4b7d7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11372,21 +11372,23 @@ function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
  * Function that checks whether a given tNode matches tag-based selector and has a valid type.
  *
  * Matching can be performed in 2 modes: projection mode (when we project nodes) and regular
- * directive matching mode. In "projection" mode, we do not need to check types, so if tag name
- * matches selector, we declare a match. In "directive matching" mode, we also check whether tNode
- * is of expected type:
- * - whether tNode has either Element or ElementContainer type
- * - or if we want to match "ng-template" tag, we check for Container type
+ * directive matching mode:
+ * - in the "directive matching" mode we do _not_ take TContainer's tagName into account if it is
+ * different from NG_TEMPLATE_SELECTOR (value different from NG_TEMPLATE_SELECTOR indicates that a
+ * tag name was extracted from * syntax so we would match the same directive twice);
+ * - in the "projection" mode, we use a tag name potentially extracted from the * syntax processing
+ * (applicable to TNodeType.Container only).
  * @param {?} tNode
  * @param {?} currentSelector
  * @param {?} isProjectionMode
  * @return {?}
  */
 function hasTagAndTypeMatch(tNode, currentSelector, isProjectionMode) {
-    return currentSelector === tNode.tagName &&
-        (isProjectionMode ||
-            (tNode.type === 3 /* Element */ || tNode.type === 4 /* ElementContainer */) ||
-            (tNode.type === 0 /* Container */ && currentSelector === NG_TEMPLATE_SELECTOR));
+    /** @type {?} */
+    const tagNameToCompare = tNode.type === 0 /* Container */ && !isProjectionMode ?
+        NG_TEMPLATE_SELECTOR :
+        tNode.tagName;
+    return currentSelector === tagNameToCompare;
 }
 /**
  * A utility function to match an Ivy node static data against a simple CSS selector
@@ -18162,7 +18164,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.7+85.sha-3f32c0e.with-local-changes');
+const VERSION = new Version('8.0.0-beta.7+87.sha-9d4b7d7.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
