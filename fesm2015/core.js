@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.8+10.sha-1c838eb.with-local-changes
+ * @license Angular v7.2.8+12.sha-67444e7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13813,7 +13813,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.8+10.sha-1c838eb.with-local-changes');
+const VERSION = new Version('7.2.8+12.sha-67444e7.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
