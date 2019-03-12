@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.7+74.sha-7315a68.with-local-changes
+ * @license Angular v8.0.0-beta.7+79.sha-c09d0ed.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3021,6 +3021,12 @@ function componentNeedsResolution(component) {
  */
 function clearResolutionOfComponentResourcesQueue() {
     componentResourceResolutionQueue.clear();
+}
+/**
+ * @return {?}
+ */
+function isComponentResourceResolutionQueueEmpty() {
+    return componentResourceResolutionQueue.size === 0;
 }
 /**
  * @param {?} response
@@ -18156,7 +18162,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.7+74.sha-7315a68.with-local-changes');
+const VERSION = new Version('8.0.0-beta.7+79.sha-c09d0ed.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -28259,7 +28265,32 @@ let compileNgModuleFactory = compileNgModuleFactory__POST_R3__;
  */
 function compileNgModuleFactory__POST_R3__(injector, options, moduleType) {
     ngDevMode && assertNgModuleType(moduleType);
-    return Promise.resolve(new NgModuleFactory$1(moduleType));
+    /** @type {?} */
+    const moduleFactory = new NgModuleFactory$1(moduleType);
+    if (isComponentResourceResolutionQueueEmpty()) {
+        return Promise.resolve(moduleFactory);
+    }
+    /** @type {?} */
+    const compilerOptions = injector.get(COMPILER_OPTIONS, []).concat(options);
+    /** @type {?} */
+    const compilerProviders = _mergeArrays(compilerOptions.map(o => (/** @type {?} */ (o.providers))));
+    // In case there are no compiler providers, we just return the module factory as
+    // there won't be any resource loader. This can happen with Ivy, because AOT compiled
+    // modules can be still passed through "bootstrapModule". In that case we shouldn't
+    // unnecessarily require the JIT compiler.
+    if (compilerProviders.length === 0) {
+        return Promise.resolve(moduleFactory);
+    }
+    /** @type {?} */
+    const compiler = getCompilerFacade();
+    /** @type {?} */
+    const compilerInjector = Injector.create({ providers: compilerProviders });
+    /** @type {?} */
+    const resourceLoader = compilerInjector.get(compiler.ResourceLoader);
+    // The resource loader can also return a string while the "resolveComponentResources"
+    // always expects a promise. Therefore we need to wrap the returned value in a promise.
+    return resolveComponentResources(url => Promise.resolve(resourceLoader.get(url)))
+        .then(() => moduleFactory);
 }
 /** @type {?} */
 let isBoundToModule = isBoundToModule__POST_R3__;
@@ -28952,6 +28983,16 @@ function remove(list, el) {
     if (index > -1) {
         list.splice(index, 1);
     }
+}
+/**
+ * @param {?} parts
+ * @return {?}
+ */
+function _mergeArrays(parts) {
+    /** @type {?} */
+    const result = [];
+    parts.forEach((part) => part && result.push(...part));
+    return result;
 }
 
 /**

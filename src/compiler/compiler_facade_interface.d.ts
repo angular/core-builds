@@ -31,10 +31,16 @@ export interface CompilerFacade {
     compileComponent(angularCoreEnv: CoreEnvironment, sourceMapUrl: string, meta: R3ComponentMetadataFacade): any;
     createParseSourceSpan(kind: string, typeName: string, sourceUrl: string): ParseSourceSpan;
     R3ResolvedDependencyType: typeof R3ResolvedDependencyType;
+    ResourceLoader: {
+        new (): ResourceLoader;
+    };
 }
 export interface CoreEnvironment {
     [name: string]: Function;
 }
+export declare type ResourceLoader = {
+    get(url: string): Promise<string> | string;
+};
 export declare type StringMap = {
     [key: string]: string;
 };

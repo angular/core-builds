@@ -44,3 +44,4 @@ export declare function resolveComponentResources(resourceResolver: (url: string
 export declare function maybeQueueResolutionOfComponentResources(metadata: Component): void;
 export declare function componentNeedsResolution(component: Component): boolean;
 export declare function clearResolutionOfComponentResourcesQueue(): void;
+export declare function isComponentResourceResolutionQueueEmpty(): boolean;
