@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8+8.sha-9a7f560.with-local-changes
+ * @license Angular v8.0.0-beta.8+11.sha-7b20cec.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,7 +9,7 @@ import { ResourceLoader } from '@angular/compiler';
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -44,32 +44,55 @@ function asyncFallback(fn) {
     // function when asynchronous activity is finished.
     if (_global.jasmine) {
         // Not using an arrow function to preserve context passed from call site
-        return function (done) {
+        return (/**
+         * @param {?} done
+         * @return {?}
+         */
+        function (done) {
             if (!done) {
                 // if we run beforeEach in @angular/core/testing/testing_internal then we get no done
                 // fake it here and assume sync.
-                done = function () { };
-                done.fail = function (e) { throw e; };
+                done = (/**
+                 * @return {?}
+                 */
+                function () { });
+                done.fail = (/**
+                 * @param {?} e
+                 * @return {?}
+                 */
+                function (e) { throw e; });
             }
-            runInTestZone(fn, this, done, (err) => {
+            runInTestZone(fn, this, done, (/**
+             * @param {?} err
+             * @return {?}
+             */
+            (err) => {
                 if (typeof err === 'string') {
                     return done.fail(new Error((/** @type {?} */ (err))));
                 }
                 else {
                     done.fail(err);
                 }
-            });
-        };
+            }));
+        });
     }
     // Otherwise, return a promise which will resolve when asynchronous activity
     // is finished. This will be correctly consumed by the Mocha framework with
     // it('...', async(myFn)); or can be used in a custom framework.
     // Not using an arrow function to preserve context passed from call site
-    return function () {
-        return new Promise((finishCallback, failCallback) => {
+    return (/**
+     * @return {?}
+     */
+    function () {
+        return new Promise((/**
+         * @param {?} finishCallback
+         * @param {?} failCallback
+         * @return {?}
+         */
+        (finishCallback, failCallback) => {
             runInTestZone(fn, this, finishCallback, failCallback);
-        });
-    };
+        }));
+    });
 }
 /**
  * @param {?} fn
@@ -102,35 +125,51 @@ function runInTestZone(fn, context, finishCallback, failCallback) {
     const proxyZone = Zone.current.getZoneWith('ProxyZoneSpec');
     /** @type {?} */
     const previousDelegate = proxyZoneSpec.getDelegate();
-    proxyZone.parent.run(() => {
+    proxyZone.parent.run((/**
+     * @return {?}
+     */
+    () => {
         /** @type {?} */
-        const testZoneSpec = new AsyncTestZoneSpec(() => {
+        const testZoneSpec = new AsyncTestZoneSpec((/**
+         * @return {?}
+         */
+        () => {
             // Need to restore the original zone.
-            currentZone.run(() => {
+            currentZone.run((/**
+             * @return {?}
+             */
+            () => {
                 if (proxyZoneSpec.getDelegate() == testZoneSpec) {
                     // Only reset the zone spec if it's sill this one. Otherwise, assume it's OK.
                     proxyZoneSpec.setDelegate(previousDelegate);
                 }
                 finishCallback();
-            });
-        }, (error) => {
+            }));
+        }), (/**
+         * @param {?} error
+         * @return {?}
+         */
+        (error) => {
             // Need to restore the original zone.
-            currentZone.run(() => {
+            currentZone.run((/**
+             * @return {?}
+             */
+            () => {
                 if (proxyZoneSpec.getDelegate() == testZoneSpec) {
                     // Only reset the zone spec if it's sill this one. Otherwise, assume it's OK.
                     proxyZoneSpec.setDelegate(previousDelegate);
                 }
                 failCallback(error);
-            });
-        }, 'test');
+            }));
+        }), 'test');
         proxyZoneSpec.setDelegate(testZoneSpec);
-    });
+    }));
     return Zone.current.runGuarded(fn, context);
 }
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Wraps a test function in an asynchronous test zone. The test will automatically
@@ -155,10 +194,13 @@ function async(fn) {
     /** @type {?} */
     const _Zone = typeof Zone !== 'undefined' ? Zone : null;
     if (!_Zone) {
-        return function () {
+        return (/**
+         * @return {?}
+         */
+        function () {
             return Promise.reject('Zone is needed for the async() test helper but could not be found. ' +
                 'Please make sure that your environment includes zone.js/dist/zone.js');
-        };
+        });
     }
     /** @type {?} */
     const asyncTest = _Zone && _Zone[_Zone.__symbol__('asyncTest')];
@@ -173,7 +215,7 @@ function async(fn) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Fixture for debugging and testing a component.
@@ -209,27 +251,42 @@ class ComponentFixture {
         if (ngZone) {
             // Create subscriptions outside the NgZone so that the callbacks run oustide
             // of NgZone.
-            ngZone.runOutsideAngular(() => {
+            ngZone.runOutsideAngular((/**
+             * @return {?}
+             */
+            () => {
                 this._onUnstableSubscription =
-                    ngZone.onUnstable.subscribe({ next: () => { this._isStable = false; } });
+                    ngZone.onUnstable.subscribe({ next: (/**
+                         * @return {?}
+                         */
+                        () => { this._isStable = false; }) });
                 this._onMicrotaskEmptySubscription = ngZone.onMicrotaskEmpty.subscribe({
-                    next: () => {
+                    next: (/**
+                     * @return {?}
+                     */
+                    () => {
                         if (this._autoDetect) {
                             // Do a change detection run with checkNoChanges set to true to check
                             // there are no changes on the second run.
                             this.detectChanges(true);
                         }
-                    }
+                    })
                 });
                 this._onStableSubscription = ngZone.onStable.subscribe({
-                    next: () => {
+                    next: (/**
+                     * @return {?}
+                     */
+                    () => {
                         this._isStable = true;
                         // Check whether there is a pending whenStable() completer to resolve.
                         if (this._promise !== null) {
                             // If so check whether there are no pending macrotasks before resolving.
                             // Do this check in the next tick so that ngZone gets a chance to update the state of
                             // pending macrotasks.
-                            scheduleMicroTask(() => {
+                            scheduleMicroTask((/**
+                             * @return {?}
+                             */
+                            () => {
                                 if (!ngZone.hasPendingMacrotasks) {
                                     if (this._promise !== null) {
                                         (/** @type {?} */ (this._resolve))(true);
@@ -237,13 +294,17 @@ class ComponentFixture {
                                         this._promise = null;
                                     }
                                 }
-                            });
+                            }));
                         }
-                    }
+                    })
                 });
                 this._onErrorSubscription =
-                    ngZone.onError.subscribe({ next: (error) => { throw error; } });
-            });
+                    ngZone.onError.subscribe({ next: (/**
+                         * @param {?} error
+                         * @return {?}
+                         */
+                        (error) => { throw error; }) });
+            }));
         }
     }
     /**
@@ -266,7 +327,10 @@ class ComponentFixture {
         if (this.ngZone != null) {
             // Run the change detection inside the NgZone so that any async tasks as part of the change
             // detection are captured by the zone and can be waited for in isStable.
-            this.ngZone.run(() => { this._tick(checkNoChanges); });
+            this.ngZone.run((/**
+             * @return {?}
+             */
+            () => { this._tick(checkNoChanges); }));
         }
         else {
             // Running without zone. Just do the change detection.
@@ -313,7 +377,11 @@ class ComponentFixture {
             return this._promise;
         }
         else {
-            this._promise = new Promise(res => { this._resolve = res; });
+            this._promise = new Promise((/**
+             * @param {?} res
+             * @return {?}
+             */
+            res => { this._resolve = res; }));
             return this._promise;
         }
     }
@@ -376,7 +444,7 @@ function scheduleMicroTask(fn) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -432,7 +500,11 @@ let _inFakeAsyncCall = false;
  */
 function fakeAsyncFallback(fn) {
     // Not using an arrow function to preserve context passed from call site
-    return function (...args) {
+    return (/**
+     * @param {...?} args
+     * @return {?}
+     */
+    function (...args) {
         /** @type {?} */
         const proxyZoneSpec = ProxyZoneSpec.assertPresent();
         if (_inFakeAsyncCall) {
@@ -471,7 +543,7 @@ function fakeAsyncFallback(fn) {
             _inFakeAsyncCall = false;
             resetFakeAsyncZoneFallback();
         }
-    };
+    });
 }
 /**
  * @return {?}
@@ -536,7 +608,7 @@ function flushMicrotasksFallback() {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const _Zone$1 = typeof Zone !== 'undefined' ? Zone : null;
@@ -656,7 +728,7 @@ function flushMicrotasks() {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -670,10 +742,15 @@ function flushMicrotasks() {
  */
 class AsyncTestCompleter {
     constructor() {
-        this._promise = new Promise((res, rej) => {
+        this._promise = new Promise((/**
+         * @param {?} res
+         * @param {?} rej
+         * @return {?}
+         */
+        (res, rej) => {
             this._resolve = res;
             this._reject = rej;
-        });
+        }));
     }
     /**
      * @param {?=} value
@@ -694,7 +771,7 @@ class AsyncTestCompleter {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -758,11 +835,19 @@ function resolveComponentResources(resourceResolver) {
         }
         return promise;
     }
-    componentResourceResolutionQueue.forEach((component) => {
+    componentResourceResolutionQueue.forEach((/**
+     * @param {?} component
+     * @return {?}
+     */
+    (component) => {
         if (component.templateUrl) {
-            cachedResourceResolve(component.templateUrl).then((template) => {
+            cachedResourceResolve(component.templateUrl).then((/**
+             * @param {?} template
+             * @return {?}
+             */
+            (template) => {
                 component.template = template;
-            });
+            }));
         }
         /** @type {?} */
         const styleUrls = component.styleUrls;
@@ -770,19 +855,31 @@ function resolveComponentResources(resourceResolver) {
         const styles = component.styles || (component.styles = []);
         /** @type {?} */
         const styleOffset = component.styles.length;
-        styleUrls && styleUrls.forEach((styleUrl, index) => {
+        styleUrls && styleUrls.forEach((/**
+         * @param {?} styleUrl
+         * @param {?} index
+         * @return {?}
+         */
+        (styleUrl, index) => {
             styles.push(''); // pre-allocate array.
-            cachedResourceResolve(styleUrl).then((style) => {
+            cachedResourceResolve(styleUrl).then((/**
+             * @param {?} style
+             * @return {?}
+             */
+            (style) => {
                 styles[styleOffset + index] = style;
                 styleUrls.splice(styleUrls.indexOf(styleUrl), 1);
                 if (styleUrls.length == 0) {
                     component.styleUrls = undefined;
                 }
-            });
-        });
-    });
+            }));
+        }));
+    }));
     clearResolutionOfComponentResourcesQueue();
-    return Promise.all(urlFetches).then(() => null);
+    return Promise.all(urlFetches).then((/**
+     * @return {?}
+     */
+    () => null));
 }
 /** @type {?} */
 const componentResourceResolutionQueue = new Set();
@@ -810,7 +907,7 @@ function unwrapResponse(response) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 let _nextReferenceId = 0;
@@ -831,7 +928,11 @@ class MetadataOverrider {
         /** @type {?} */
         const props = {};
         if (oldMetadata) {
-            _valueProps(oldMetadata).forEach((prop) => props[prop] = ((/** @type {?} */ (oldMetadata)))[prop]);
+            _valueProps(oldMetadata).forEach((/**
+             * @param {?} prop
+             * @return {?}
+             */
+            (prop) => props[prop] = ((/** @type {?} */ (oldMetadata)))[prop]));
         }
         if (override.set) {
             if (override.remove || override.add) {
@@ -861,7 +962,11 @@ function removeMetadata(metadata, remove, references) {
         /** @type {?} */
         const removeValue = remove[prop];
         if (removeValue instanceof Array) {
-            removeValue.forEach((value) => { removeObjects.add(_propHashKey(prop, value, references)); });
+            removeValue.forEach((/**
+             * @param {?} value
+             * @return {?}
+             */
+            (value) => { removeObjects.add(_propHashKey(prop, value, references)); }));
         }
         else {
             removeObjects.add(_propHashKey(prop, removeValue, references));
@@ -871,7 +976,11 @@ function removeMetadata(metadata, remove, references) {
         /** @type {?} */
         const propValue = metadata[prop];
         if (propValue instanceof Array) {
-            metadata[prop] = propValue.filter((value) => !removeObjects.has(_propHashKey(prop, value, references)));
+            metadata[prop] = propValue.filter((/**
+             * @param {?} value
+             * @return {?}
+             */
+            (value) => !removeObjects.has(_propHashKey(prop, value, references))));
         }
         else {
             if (removeObjects.has(_propHashKey(prop, propValue, references))) {
@@ -917,12 +1026,17 @@ function setMetadata(metadata, set) {
  */
 function _propHashKey(propName, propValue, references) {
     /** @type {?} */
-    const replacer = (key, value) => {
+    const replacer = (/**
+     * @param {?} key
+     * @param {?} value
+     * @return {?}
+     */
+    (key, value) => {
         if (typeof value === 'function') {
             value = _serializeReference(value, references);
         }
         return value;
-    };
+    });
     return `${propName}:${JSON.stringify(propValue, replacer)}`;
 }
 /**
@@ -947,29 +1061,37 @@ function _valueProps(obj) {
     /** @type {?} */
     const props = [];
     // regular public props
-    Object.keys(obj).forEach((prop) => {
+    Object.keys(obj).forEach((/**
+     * @param {?} prop
+     * @return {?}
+     */
+    (prop) => {
         if (!prop.startsWith('_')) {
             props.push(prop);
         }
-    });
+    }));
     // getters
     /** @type {?} */
     let proto = obj;
     while (proto = Object.getPrototypeOf(proto)) {
-        Object.keys(proto).forEach((protoProp) => {
+        Object.keys(proto).forEach((/**
+         * @param {?} protoProp
+         * @return {?}
+         */
+        (protoProp) => {
             /** @type {?} */
             const desc = Object.getOwnPropertyDescriptor(proto, protoProp);
             if (!protoProp.startsWith('_') && desc && 'get' in desc) {
                 props.push(protoProp);
             }
-        });
+        }));
     }
     return props;
 }
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const reflection = new ɵReflectionCapabilities();
@@ -989,12 +1111,16 @@ class OverrideResolver {
      */
     setOverrides(overrides) {
         this.overrides.clear();
-        overrides.forEach(([type, override]) => {
+        overrides.forEach((/**
+         * @param {?} __0
+         * @return {?}
+         */
+        ([type, override]) => {
             /** @type {?} */
             const overrides = this.overrides.get(type) || [];
             overrides.push(override);
             this.overrides.set(type, overrides);
-        });
+        }));
     }
     /**
      * @param {?} type
@@ -1035,9 +1161,13 @@ class OverrideResolver {
                 if (overrides) {
                     /** @type {?} */
                     const overrider = new MetadataOverrider();
-                    overrides.forEach(override => {
+                    overrides.forEach((/**
+                     * @param {?} override
+                     * @return {?}
+                     */
+                    override => {
                         resolved = overrider.overrideMetadata(this.type, (/** @type {?} */ (resolved)), override);
-                    });
+                    }));
                 }
             }
             this.resolved.set(type, resolved);
@@ -1072,7 +1202,7 @@ class NgModuleResolver extends OverrideResolver {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * An abstract class for inserting the root test component element in a platform independent way.
@@ -1099,7 +1229,7 @@ const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 let _nextRootElementId = 0;
@@ -1376,7 +1506,11 @@ class TestBedRender3 {
         this._testModuleType = (/** @type {?} */ (null));
         this._compilerInjector = (/** @type {?} */ (null));
         this._instantiated = false;
-        this._activeFixtures.forEach((fixture) => {
+        this._activeFixtures.forEach((/**
+         * @param {?} fixture
+         * @return {?}
+         */
+        (fixture) => {
             try {
                 fixture.destroy();
             }
@@ -1386,10 +1520,15 @@ class TestBedRender3 {
                     stacktrace: e,
                 });
             }
-        });
+        }));
         this._activeFixtures = [];
         // restore initial component/directive/pipe defs
-        this._initiaNgDefs.forEach((value, type) => {
+        this._initiaNgDefs.forEach((/**
+         * @param {?} value
+         * @param {?} type
+         * @return {?}
+         */
+        (value, type) => {
             const [prop, descriptor] = value;
             if (!descriptor) {
                 // Delete operations are generally undesirable since they have performance implications on
@@ -1403,7 +1542,7 @@ class TestBedRender3 {
             else {
                 Object.defineProperty(type, prop, descriptor);
             }
-        });
+        }));
         this._initiaNgDefs.clear();
         clearResolutionOfComponentResourcesQueue();
     }
@@ -1452,7 +1591,11 @@ class TestBedRender3 {
         /** @type {?} */
         let hasAsyncResources = false;
         // Compile the components declared by this module
-        declarations.forEach(declaration => {
+        declarations.forEach((/**
+         * @param {?} declaration
+         * @return {?}
+         */
+        declaration => {
             /** @type {?} */
             const component = resolvers.component.resolve(declaration);
             if (component) {
@@ -1463,15 +1606,22 @@ class TestBedRender3 {
                 componentOverrides.push([declaration, metadata]);
                 hasAsyncResources = hasAsyncResources || componentNeedsResolution(component);
             }
-        });
+        }));
         /** @type {?} */
-        const overrideComponents = () => {
-            componentOverrides.forEach((override) => {
+        const overrideComponents = (/**
+         * @return {?}
+         */
+        () => {
+            componentOverrides.forEach((/**
+             * @param {?} override
+             * @return {?}
+             */
+            (override) => {
                 // Override the existing metadata, ensuring that the resolved resources
                 // are only available until the next TestBed reset (when `resetTestingModule` is called)
                 this.overrideComponent(override[0], { set: override[1] });
-            });
-        };
+            }));
+        });
         // If the component has no async resources (templateUrl, styleUrls), we can finish
         // synchronously. This is important so that users who mistakenly treat `compileComponents`
         // as synchronous don't encounter an error, as ViewEngine was tolerant of this.
@@ -1482,12 +1632,16 @@ class TestBedRender3 {
         else {
             /** @type {?} */
             let resourceLoader;
-            return resolveComponentResources(url => {
+            return resolveComponentResources((/**
+             * @param {?} url
+             * @return {?}
+             */
+            url => {
                 if (!resourceLoader) {
                     resourceLoader = this.compilerInjector.get(ResourceLoader);
                 }
                 return Promise.resolve(resourceLoader.get(url));
-            })
+            }))
                 .then(overrideComponents);
         }
     }
@@ -1514,7 +1668,11 @@ class TestBedRender3 {
     execute(tokens, fn, context) {
         this._initIfNeeded();
         /** @type {?} */
-        const params = tokens.map(t => this.get(t));
+        const params = tokens.map((/**
+         * @param {?} t
+         * @return {?}
+         */
+        t => this.get(t)));
         return fn.apply(context, params);
     }
     /**
@@ -1612,11 +1770,14 @@ class TestBedRender3 {
         /** @type {?} */
         const componentFactory = new ɵRender3ComponentFactory(componentDef);
         /** @type {?} */
-        const initComponent = () => {
+        const initComponent = (/**
+         * @return {?}
+         */
+        () => {
             /** @type {?} */
             const componentRef = componentFactory.create(Injector.NULL, [], `#${rootElId}`, this._moduleRef);
             return new ComponentFixture(componentRef, ngZone, autoDetect);
-        };
+        });
         /** @type {?} */
         const fixture = ngZone ? ngZone.run(initComponent) : initComponent();
         this._activeFixtures.push(fixture);
@@ -1721,7 +1882,10 @@ class TestBedRender3 {
         /** @type {?} */
         const providers = [
             { provide: NgZone, useValue: ngZone },
-            { provide: Compiler, useFactory: () => new R3TestCompiler(this) },
+            { provide: Compiler, useFactory: (/**
+                 * @return {?}
+                 */
+                () => new R3TestCompiler(this)) },
             { provide: ErrorHandler, useClass: R3TestErrorHandler },
             ...this._providers,
             ...this._providerOverrides,
@@ -1750,11 +1914,15 @@ class TestBedRender3 {
         const providers = [];
         /** @type {?} */
         const compilerOptions = this.platform.injector.get(COMPILER_OPTIONS);
-        compilerOptions.forEach(opts => {
+        compilerOptions.forEach((/**
+         * @param {?} opts
+         * @return {?}
+         */
+        opts => {
             if (opts.providers) {
                 providers.push(opts.providers);
             }
-        });
+        }));
         providers.push(...this._compilerProviders);
         // TODO(ocombe): make this work with an Injector directly instead of creating a module for it
         class CompilerModule {
@@ -1783,7 +1951,11 @@ class TestBedRender3 {
             // done, the array can contain other empty arrays (e.g. `[[], []]`) which leak into the
             // providers array and contaminate any error messages that might be generated.
             /** @type {?} */
-            const providerOverrides = flatten(flatten(meta.providers, (provider) => this._getProviderOverrides(provider)));
+            const providerOverrides = flatten(flatten(meta.providers, (/**
+             * @param {?} provider
+             * @return {?}
+             */
+            (provider) => this._getProviderOverrides(provider))));
             if (providerOverrides.length) {
                 overrides.providers = [...meta.providers, ...providerOverrides];
             }
@@ -1821,7 +1993,11 @@ class TestBedRender3 {
         /** @type {?} */
         const compiledComponents = [];
         // Compile the components, directives and pipes declared by this module
-        declarations.forEach(declaration => {
+        declarations.forEach((/**
+         * @param {?} declaration
+         * @return {?}
+         */
+        declaration => {
             /** @type {?} */
             const component = this._resolvers.component.resolve(declaration);
             if (component) {
@@ -1848,13 +2024,25 @@ class TestBedRender3 {
                 ɵcompilePipe(declaration, pipe);
                 return;
             }
-        });
+        }));
         // Compile transitive modules, components, directives and pipes
         /** @type {?} */
-        const calcTransitiveScopesFor = (moduleType) => ɵtransitiveScopesFor(moduleType, (ngModule) => this._compileNgModule(ngModule));
+        const calcTransitiveScopesFor = (/**
+         * @param {?} moduleType
+         * @return {?}
+         */
+        (moduleType) => ɵtransitiveScopesFor(moduleType, (/**
+         * @param {?} ngModule
+         * @return {?}
+         */
+        (ngModule) => this._compileNgModule(ngModule))));
         /** @type {?} */
         const transitiveScope = calcTransitiveScopesFor(moduleType);
-        compiledComponents.forEach(cmp => {
+        compiledComponents.forEach((/**
+         * @param {?} cmp
+         * @return {?}
+         */
+        cmp => {
             /** @type {?} */
             const scope = this._templateOverrides.has(cmp) ?
                 // if we have template override via `TestBed.overrideTemplateUsingTestingModule` -
@@ -1863,7 +2051,7 @@ class TestBedRender3 {
                 calcTransitiveScopesFor(this._testModuleType) :
                 transitiveScope;
             ɵpatchComponentDefWithScope(((/** @type {?} */ (cmp))).ngComponentDef, scope);
-        });
+        }));
     }
     /**
      * \@internal
@@ -1871,12 +2059,17 @@ class TestBedRender3 {
      * @return {?}
      */
     _getComponentFactories(moduleType) {
-        return maybeUnwrapFn(moduleType.ngModuleDef.declarations).reduce((factories, declaration) => {
+        return maybeUnwrapFn(moduleType.ngModuleDef.declarations).reduce((/**
+         * @param {?} factories
+         * @param {?} declaration
+         * @return {?}
+         */
+        (factories, declaration) => {
             /** @nocollapse @type {?} */
             const componentDef = ((/** @type {?} */ (declaration))).ngComponentDef;
             componentDef && factories.push(new ɵRender3ComponentFactory(componentDef, this._moduleRef));
             return factories;
-        }, (/** @type {?} */ ([])));
+        }), (/** @type {?} */ ([])));
     }
     /**
      * Check whether the module scoping queue should be flushed, and flush it if needed.
@@ -1918,14 +2111,18 @@ function _getTestBedRender3() {
 function flatten(values, mapFn) {
     /** @type {?} */
     const out = [];
-    values.forEach(value => {
+    values.forEach((/**
+     * @param {?} value
+     * @return {?}
+     */
+    value => {
         if (Array.isArray(value)) {
             out.push(...flatten(value, mapFn));
         }
         else {
             out.push(mapFn ? mapFn(value) : value);
         }
-    });
+    }));
     return out;
 }
 class R3TestCompiler {
@@ -2018,7 +2215,7 @@ function maybeUnwrapFn(value) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @return {?}
@@ -2106,7 +2303,7 @@ class TestingCompilerFactory {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const UNDEFINED$1 = new Object();
@@ -2139,7 +2336,10 @@ class TestBedViewEngine {
         this._imports = [];
         this._schemas = [];
         this._activeFixtures = [];
-        this._testEnvAotSummaries = () => [];
+        this._testEnvAotSummaries = (/**
+         * @return {?}
+         */
+        () => []);
         this._aotSummaries = [];
         this._templateOverrides = [];
         this._isRoot = true;
@@ -2332,7 +2532,10 @@ class TestBedViewEngine {
         this.resetTestingModule();
         this.platform = (/** @type {?} */ (null));
         this.ngModule = (/** @type {?} */ (null));
-        this._testEnvAotSummaries = () => [];
+        this._testEnvAotSummaries = (/**
+         * @return {?}
+         */
+        () => []);
     }
     /**
      * @return {?}
@@ -2356,7 +2559,11 @@ class TestBedViewEngine {
         this._imports = [];
         this._schemas = [];
         this._instantiated = false;
-        this._activeFixtures.forEach((fixture) => {
+        this._activeFixtures.forEach((/**
+         * @param {?} fixture
+         * @return {?}
+         */
+        (fixture) => {
             try {
                 fixture.destroy();
             }
@@ -2366,7 +2573,7 @@ class TestBedViewEngine {
                     stacktrace: e,
                 });
             }
-        });
+        }));
         this._activeFixtures = [];
     }
     /**
@@ -2409,9 +2616,13 @@ class TestBedViewEngine {
         /** @type {?} */
         const moduleType = this._createCompilerAndModule();
         return this._compiler.compileModuleAndAllComponentsAsync(moduleType)
-            .then((moduleAndComponentFactories) => {
+            .then((/**
+         * @param {?} moduleAndComponentFactories
+         * @return {?}
+         */
+        (moduleAndComponentFactories) => {
             this._moduleFactory = moduleAndComponentFactories.ngModuleFactory;
-        });
+        }));
     }
     /**
      * @private
@@ -2469,7 +2680,11 @@ class TestBedViewEngine {
         /** @type {?} */
         const providers = this._providers.concat([{ provide: TestBed, useValue: this }]);
         /** @type {?} */
-        const declarations = [...this._declarations, ...this._templateOverrides.map(entry => entry.templateOf)];
+        const declarations = [...this._declarations, ...this._templateOverrides.map((/**
+             * @param {?} entry
+             * @return {?}
+             */
+            entry => entry.templateOf))];
         /** @type {?} */
         const rootScopeImports = [];
         /** @type {?} */
@@ -2503,10 +2718,26 @@ class TestBedViewEngine {
         for (const summary of [this._testEnvAotSummaries, ...this._aotSummaries]) {
             this._compiler.loadAotSummaries(summary);
         }
-        this._moduleOverrides.forEach((entry) => this._compiler.overrideModule(entry[0], entry[1]));
-        this._componentOverrides.forEach((entry) => this._compiler.overrideComponent(entry[0], entry[1]));
-        this._directiveOverrides.forEach((entry) => this._compiler.overrideDirective(entry[0], entry[1]));
-        this._pipeOverrides.forEach((entry) => this._compiler.overridePipe(entry[0], entry[1]));
+        this._moduleOverrides.forEach((/**
+         * @param {?} entry
+         * @return {?}
+         */
+        (entry) => this._compiler.overrideModule(entry[0], entry[1])));
+        this._componentOverrides.forEach((/**
+         * @param {?} entry
+         * @return {?}
+         */
+        (entry) => this._compiler.overrideComponent(entry[0], entry[1])));
+        this._directiveOverrides.forEach((/**
+         * @param {?} entry
+         * @return {?}
+         */
+        (entry) => this._compiler.overrideDirective(entry[0], entry[1])));
+        this._pipeOverrides.forEach((/**
+         * @param {?} entry
+         * @return {?}
+         */
+        (entry) => this._compiler.overridePipe(entry[0], entry[1])));
         return DynamicTestModule;
     }
     /**
@@ -2546,7 +2777,11 @@ class TestBedViewEngine {
     execute(tokens, fn, context) {
         this._initIfNeeded();
         /** @type {?} */
-        const params = tokens.map(t => this.get(t));
+        const params = tokens.map((/**
+         * @param {?} t
+         * @return {?}
+         */
+        t => this.get(t)));
         return fn.apply(context, params);
     }
     /**
@@ -2632,13 +2867,21 @@ class TestBedViewEngine {
             value = provider.useValue;
         }
         /** @type {?} */
-        const deps = (provider.deps || []).map((dep) => {
+        const deps = (provider.deps || []).map((/**
+         * @param {?} dep
+         * @return {?}
+         */
+        (dep) => {
             /** @type {?} */
             let depFlags = 0 /* None */;
             /** @type {?} */
             let depToken;
             if (Array.isArray(dep)) {
-                dep.forEach((entry) => {
+                dep.forEach((/**
+                 * @param {?} entry
+                 * @return {?}
+                 */
+                (entry) => {
                     if (entry instanceof Optional) {
                         depFlags |= 2 /* Optional */;
                     }
@@ -2648,13 +2891,13 @@ class TestBedViewEngine {
                     else {
                         depToken = entry;
                     }
-                });
+                }));
             }
             else {
                 depToken = dep;
             }
             return [depFlags, depToken];
-        });
+        }));
         ɵoverrideProvider({ token, flags, deps, value, deprecatedBehavior: deprecated });
     }
     /**
@@ -2695,11 +2938,14 @@ class TestBedViewEngine {
         const rootElId = `root${_nextRootElementId$1++}`;
         testComponentRenderer.insertRootElement(rootElId);
         /** @type {?} */
-        const initComponent = () => {
+        const initComponent = (/**
+         * @return {?}
+         */
+        () => {
             /** @type {?} */
             const componentRef = componentFactory.create(Injector.NULL, [], `#${rootElId}`, this._moduleRef);
             return new ComponentFixture(componentRef, ngZone, autoDetect);
-        };
+        });
         /** @type {?} */
         const fixture = !ngZone ? initComponent() : ngZone.run(initComponent);
         this._activeFixtures.push(fixture);
@@ -2769,20 +3015,29 @@ function inject(tokens, fn) {
     const testBed = getTestBed();
     if (tokens.indexOf(AsyncTestCompleter) >= 0) {
         // Not using an arrow function to preserve context passed from call site
-        return function () {
+        return (/**
+         * @return {?}
+         */
+        function () {
             // Return an async test method that returns a Promise if AsyncTestCompleter is one of
             // the injected tokens.
-            return testBed.compileComponents().then(() => {
+            return testBed.compileComponents().then((/**
+             * @return {?}
+             */
+            () => {
                 /** @type {?} */
                 const completer = testBed.get(AsyncTestCompleter);
                 testBed.execute(tokens, fn, this);
                 return completer.promise;
-            });
-        };
+            }));
+        });
     }
     else {
         // Not using an arrow function to preserve context passed from call site
-        return function () { return testBed.execute(tokens, fn, this); };
+        return (/**
+         * @return {?}
+         */
+        function () { return testBed.execute(tokens, fn, this); });
     }
 }
 /**
@@ -2815,10 +3070,13 @@ class InjectSetupWrapper {
         /** @type {?} */
         const self = this;
         // Not using an arrow function to preserve context passed from call site
-        return function () {
+        return (/**
+         * @return {?}
+         */
+        function () {
             self._addModule();
             return inject(tokens, fn).call(this);
-        };
+        });
     }
 }
 /**
@@ -2829,30 +3087,39 @@ class InjectSetupWrapper {
 function withModule(moduleDef, fn) {
     if (fn) {
         // Not using an arrow function to preserve context passed from call site
-        return function () {
+        return (/**
+         * @return {?}
+         */
+        function () {
             /** @type {?} */
             const testBed = getTestBed();
             if (moduleDef) {
                 testBed.configureTestingModule(moduleDef);
             }
             return fn.apply(this);
-        };
+        });
     }
-    return new InjectSetupWrapper(() => moduleDef);
+    return new InjectSetupWrapper((/**
+     * @return {?}
+     */
+    () => moduleDef));
 }
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const _global$1 = (/** @type {?} */ ((typeof window === 'undefined' ? global : window)));
 // Reset the test providers and the fake async zone before each test.
 if (_global$1.beforeEach) {
-    _global$1.beforeEach(() => {
+    _global$1.beforeEach((/**
+     * @return {?}
+     */
+    () => {
         TestBed.resetTestingModule();
         resetFakeAsyncZone();
-    });
+    }));
 }
 // TODO(juliemr): remove this, only used because we need to export something to have compilation
 // work.
@@ -2861,7 +3128,7 @@ const __core_private_testing_placeholder__ = '';
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -2873,22 +3140,22 @@ const __core_private_testing_placeholder__ = '';
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
