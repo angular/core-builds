@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8.with-local-changes
+ * @license Angular v8.0.0-beta.8+1.sha-940fbf7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6018,16 +6018,47 @@ function injectAttributeImpl(tNode, attrNameToInject) {
     /** @type {?} */
     const attrs = tNode.attrs;
     if (attrs) {
-        for (let i = 0; i < attrs.length; i = i + 2) {
+        /** @type {?} */
+        const attrsLength = attrs.length;
+        /** @type {?} */
+        let i = 0;
+        while (i < attrsLength) {
             /** @type {?} */
-            const attrName = attrs[i];
+            const value = attrs[i];
             // If we hit a `Bindings` or `Template` marker then we are done.
-            if (isNameOnlyAttributeMarker(attrName))
+            if (isNameOnlyAttributeMarker(value))
                 break;
-            // TODO(FW-1137): Skip namespaced attributes
-            // TODO(FW-1139): supports classes/styles in @Attribute injection
-            if (attrName == attrNameToInject) {
+            if (typeof value === 'number') {
+                // Skip to the first value of the marked attribute.
+                i++;
+                if (value === 1 /* Classes */ && attrNameToInject === 'class') {
+                    /** @type {?} */
+                    let accumulatedClasses = '';
+                    while (i < attrsLength && typeof attrs[i] === 'string') {
+                        accumulatedClasses += ' ' + attrs[i++];
+                    }
+                    return accumulatedClasses.trim();
+                }
+                else if (value === 2 /* Styles */ && attrNameToInject === 'style') {
+                    /** @type {?} */
+                    let accumulatedStyles = '';
+                    while (i < attrsLength && typeof attrs[i] === 'string') {
+                        accumulatedStyles += `${attrs[i++]}: ${attrs[i++]}; `;
+                    }
+                    return accumulatedStyles.trim();
+                }
+                else {
+                    while (i < attrsLength && typeof attrs[i] === 'string') {
+                        i++;
+                    }
+                }
+            }
+            else if (value === attrNameToInject) {
+                // TODO(FW-1137): Skip namespaced attributes
                 return (/** @type {?} */ (attrs[i + 1]));
+            }
+            else {
+                i = i + 2;
             }
         }
     }
@@ -18164,7 +18195,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.8.with-local-changes');
+const VERSION = new Version('8.0.0-beta.8+1.sha-940fbf7.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
