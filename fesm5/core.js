@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.7+83.sha-c5daaa9.with-local-changes
+ * @license Angular v8.0.0-beta.8+1.sha-940fbf7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5093,15 +5093,42 @@ function injectAttributeImpl(tNode, attrNameToInject) {
     ngDevMode && assertDefined(tNode, 'expecting tNode');
     var attrs = tNode.attrs;
     if (attrs) {
-        for (var i = 0; i < attrs.length; i = i + 2) {
-            var attrName = attrs[i];
+        var attrsLength = attrs.length;
+        var i = 0;
+        while (i < attrsLength) {
+            var value = attrs[i];
             // If we hit a `Bindings` or `Template` marker then we are done.
-            if (isNameOnlyAttributeMarker(attrName))
+            if (isNameOnlyAttributeMarker(value))
                 break;
-            // TODO(FW-1137): Skip namespaced attributes
-            // TODO(FW-1139): supports classes/styles in @Attribute injection
-            if (attrName == attrNameToInject) {
+            if (typeof value === 'number') {
+                // Skip to the first value of the marked attribute.
+                i++;
+                if (value === 1 /* Classes */ && attrNameToInject === 'class') {
+                    var accumulatedClasses = '';
+                    while (i < attrsLength && typeof attrs[i] === 'string') {
+                        accumulatedClasses += ' ' + attrs[i++];
+                    }
+                    return accumulatedClasses.trim();
+                }
+                else if (value === 2 /* Styles */ && attrNameToInject === 'style') {
+                    var accumulatedStyles = '';
+                    while (i < attrsLength && typeof attrs[i] === 'string') {
+                        accumulatedStyles += attrs[i++] + ": " + attrs[i++] + "; ";
+                    }
+                    return accumulatedStyles.trim();
+                }
+                else {
+                    while (i < attrsLength && typeof attrs[i] === 'string') {
+                        i++;
+                    }
+                }
+            }
+            else if (value === attrNameToInject) {
+                // TODO(FW-1137): Skip namespaced attributes
                 return attrs[i + 1];
+            }
+            else {
+                i = i + 2;
             }
         }
     }
@@ -9363,17 +9390,18 @@ function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
  * Function that checks whether a given tNode matches tag-based selector and has a valid type.
  *
  * Matching can be performed in 2 modes: projection mode (when we project nodes) and regular
- * directive matching mode. In "projection" mode, we do not need to check types, so if tag name
- * matches selector, we declare a match. In "directive matching" mode, we also check whether tNode
- * is of expected type:
- * - whether tNode has either Element or ElementContainer type
- * - or if we want to match "ng-template" tag, we check for Container type
+ * directive matching mode:
+ * - in the "directive matching" mode we do _not_ take TContainer's tagName into account if it is
+ * different from NG_TEMPLATE_SELECTOR (value different from NG_TEMPLATE_SELECTOR indicates that a
+ * tag name was extracted from * syntax so we would match the same directive twice);
+ * - in the "projection" mode, we use a tag name potentially extracted from the * syntax processing
+ * (applicable to TNodeType.Container only).
  */
 function hasTagAndTypeMatch(tNode, currentSelector, isProjectionMode) {
-    return currentSelector === tNode.tagName &&
-        (isProjectionMode ||
-            (tNode.type === 3 /* Element */ || tNode.type === 4 /* ElementContainer */) ||
-            (tNode.type === 0 /* Container */ && currentSelector === NG_TEMPLATE_SELECTOR));
+    var tagNameToCompare = tNode.type === 0 /* Container */ && !isProjectionMode ?
+        NG_TEMPLATE_SELECTOR :
+        tNode.tagName;
+    return currentSelector === tagNameToCompare;
 }
 /**
  * A utility function to match an Ivy node static data against a simple CSS selector
@@ -14776,7 +14804,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.7+83.sha-c5daaa9.with-local-changes');
+var VERSION = new Version('8.0.0-beta.8+1.sha-940fbf7.with-local-changes');
 
 /**
  * @license
