@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8+5.sha-1625d86.with-local-changes
+ * @license Angular v8.0.0-beta.8+6.sha-73da279.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3317,6 +3317,20 @@ const INTERPOLATION_DELIMITER = `�`;
  */
 function isPropMetadataString(str) {
     return str.indexOf(INTERPOLATION_DELIMITER) >= 0;
+}
+/**
+ * Unwrap a value which might be behind a closure (for forward declaration reasons).
+ * @template T
+ * @param {?} value
+ * @return {?}
+ */
+function maybeUnwrapFn(value) {
+    if (value instanceof Function) {
+        return value();
+    }
+    else {
+        return value;
+    }
 }
 
 /**
@@ -18274,7 +18288,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.8+5.sha-1625d86.with-local-changes');
+const VERSION = new Version('8.0.0-beta.8+6.sha-73da279.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -24667,7 +24681,7 @@ class NgModuleRef$1 extends NgModuleRef {
         /** @type {?} */
         /** @nocollapse */ const ngModuleDef = getNgModuleDef(ngModuleType);
         ngDevMode && assertDefined(ngModuleDef, `NgModule '${stringify(ngModuleType)}' is not a subtype of 'NgModuleType'.`);
-        this._bootstrapComponents = (/** @type {?} */ (ngModuleDef)).bootstrap;
+        this._bootstrapComponents = maybeUnwrapFn((/** @type {?} */ (ngModuleDef)).bootstrap);
         /** @type {?} */
         const additionalProviders = [
             {
@@ -26411,15 +26425,21 @@ function verifySemanticsOfNgModuleDef(moduleType) {
     /** @nocollapse */ const ngModuleDef = getNgModuleDef(moduleType, true);
     /** @type {?} */
     const errors = [];
-    ngModuleDef.declarations.forEach(verifyDeclarationsHaveDefinitions);
+    /** @type {?} */
+    const declarations = maybeUnwrapFn(ngModuleDef.declarations);
+    /** @type {?} */
+    const imports = maybeUnwrapFn(ngModuleDef.imports);
+    /** @type {?} */
+    const exports = maybeUnwrapFn(ngModuleDef.exports);
+    declarations.forEach(verifyDeclarationsHaveDefinitions);
     /** @type {?} */
     const combinedDeclarations = [
-        ...ngModuleDef.declarations.map(resolveForwardRef),
-        ...flatten$2(ngModuleDef.imports.map(computeCombinedExports), resolveForwardRef),
+        ...declarations.map(resolveForwardRef),
+        ...flatten$2(imports.map(computeCombinedExports), resolveForwardRef),
     ];
-    ngModuleDef.exports.forEach(verifyExportsAreDeclaredOrReExported);
-    ngModuleDef.declarations.forEach(verifyDeclarationIsUnique);
-    ngModuleDef.declarations.forEach(verifyComponentEntryComponentsIsPartOfNgModule);
+    exports.forEach(verifyExportsAreDeclaredOrReExported);
+    declarations.forEach(verifyDeclarationIsUnique);
+    declarations.forEach(verifyComponentEntryComponentsIsPartOfNgModule);
     /** @type {?} */
     const ngModule = getAnnotation(moduleType, 'NgModule');
     if (ngModule) {
@@ -26592,8 +26612,7 @@ function resetCompiledComponents() {
     moduleQueue.length = 0;
 }
 /**
- * Computes the combined declarations of explicit declarations, as well as declarations inherited
- * by
+ * Computes the combined declarations of explicit declarations, as well as declarations inherited by
  * traversing the exports of imported modules.
  * @param {?} type
  * @return {?}
@@ -26602,7 +26621,7 @@ function computeCombinedExports(type) {
     type = resolveForwardRef(type);
     /** @type {?} */
     /** @nocollapse */ const ngModuleDef = getNgModuleDef(type, true);
-    return [...flatten$2(ngModuleDef.exports.map((type) => {
+    return [...flatten$2(maybeUnwrapFn(ngModuleDef.exports).map((type) => {
             /** @type {?} */
             /** @nocollapse */ const ngModuleDef = getNgModuleDef(type);
             if (ngModuleDef) {
@@ -26690,7 +26709,7 @@ function transitiveScopesFor(moduleType, processNgModuleFn) {
             pipes: new Set(),
         },
     };
-    def.declarations.forEach(declared => {
+    maybeUnwrapFn(def.declarations).forEach(declared => {
         /** @type {?} */
         const declaredWithDefs = (/** @type {?} */ (declared));
         if (getPipeDef(declaredWithDefs)) {
@@ -26703,7 +26722,7 @@ function transitiveScopesFor(moduleType, processNgModuleFn) {
             scopes.compilation.directives.add(declared);
         }
     });
-    def.imports.forEach((imported) => {
+    maybeUnwrapFn(def.imports).forEach((imported) => {
         /** @type {?} */
         const importedType = (/** @type {?} */ (imported));
         if (!isNgModule(importedType)) {
@@ -26719,7 +26738,7 @@ function transitiveScopesFor(moduleType, processNgModuleFn) {
         importedScope.exported.directives.forEach(entry => scopes.compilation.directives.add(entry));
         importedScope.exported.pipes.forEach(entry => scopes.compilation.pipes.add(entry));
     });
-    def.exports.forEach((exported) => {
+    maybeUnwrapFn(def.exports).forEach((exported) => {
         /** @type {?} */
         const exportedType = (/** @type {?} */ (exported));
         // Either the type is a module, a pipe, or a component/directive (which may not have an
@@ -27463,7 +27482,8 @@ const Compiler_compileModuleAndAllComponentsSync__POST_R3__ = function (moduleTy
     /** @type {?} */
     const moduleDef = (/** @type {?} */ (getNgModuleDef(moduleType)));
     /** @type {?} */
-    const componentFactories = moduleDef.declarations.reduce((factories, declaration) => {
+    const componentFactories = maybeUnwrapFn(moduleDef.declarations)
+        .reduce((factories, declaration) => {
         /** @type {?} */
         const componentDef = getComponentDef(declaration);
         componentDef && factories.push(new ComponentFactory$1(componentDef));
