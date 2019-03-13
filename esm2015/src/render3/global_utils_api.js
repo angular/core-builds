@@ -14,7 +14,7 @@
  * to generate a d.ts file containing all the published symbols that is then compared to the golden
  * file in the public_api_guard test.
  *
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 export { markDirty } from './instructions';
 export { getPlayers } from './players';

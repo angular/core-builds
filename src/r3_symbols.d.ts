@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8+1.sha-940fbf7.with-local-changes
+ * @license Angular v8.0.0-beta.8+9.sha-75748d6.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -713,16 +713,16 @@ export declare interface NgModuleDef<T> {
     /** Token representing the module. Used by DI. */
     type: T;
     /** List of components to bootstrap. */
-    bootstrap: Type<any>[];
+    bootstrap: Type<any>[] | (() => Type<any>[]);
     /** List of components, directives, and pipes declared by this module. */
-    declarations: Type<any>[];
+    declarations: Type<any>[] | (() => Type<any>[]);
     /** List of modules or `ModuleWithProviders` imported by this module. */
-    imports: Type<any>[];
+    imports: Type<any>[] | (() => Type<any>[]);
     /**
      * List of modules, `ModuleWithProviders`, components, directives, or pipes exported by this
      * module.
      */
-    exports: Type<any>[];
+    exports: Type<any>[] | (() => Type<any>[]);
     /**
      * Cached value of computed `transitiveCompileScopes` for this module.
      *

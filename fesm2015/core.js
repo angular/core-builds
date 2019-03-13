@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8+1.sha-940fbf7.with-local-changes
+ * @license Angular v8.0.0-beta.8+9.sha-75748d6.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -123,7 +123,7 @@ function makePropDecorator(name, props, parentClass, additionalProcessing) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 // WARNING: interface has both a type and a value, skipping emit
 /**
@@ -133,7 +133,11 @@ function makePropDecorator(name, props, parentClass, additionalProcessing) {
  * \@publicApi
  * @type {?}
  */
-const Inject = makeParamDecorator('Inject', (token) => ({ token }));
+const Inject = makeParamDecorator('Inject', (/**
+ * @param {?} token
+ * @return {?}
+ */
+(token) => ({ token })));
 // WARNING: interface has both a type and a value, skipping emit
 /**
  * Optional decorator and metadata.
@@ -178,7 +182,11 @@ const Host = makeParamDecorator('Host');
  * \@publicApi
  * @type {?}
  */
-const Attribute = makeParamDecorator('Attribute', (attributeName) => ({ attributeName }));
+const Attribute = makeParamDecorator('Attribute', (/**
+ * @param {?=} attributeName
+ * @return {?}
+ */
+(attributeName) => ({ attributeName })));
 
 /**
  * @license
@@ -344,7 +352,7 @@ function stringify(token) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const __forward_ref__ = getClosureSafeProperty({ __forward_ref__: getClosureSafeProperty });
@@ -364,7 +372,10 @@ const __forward_ref__ = getClosureSafeProperty({ __forward_ref__: getClosureSafe
  */
 function forwardRef(forwardRefFn) {
     ((/** @type {?} */ (forwardRefFn))).__forward_ref__ = forwardRef;
-    ((/** @type {?} */ (forwardRefFn))).toString = function () { return stringify(this()); };
+    ((/** @type {?} */ (forwardRefFn))).toString = (/**
+     * @return {?}
+     */
+    function () { return stringify(this()); });
     return ((/** @type {?} */ ((/** @type {?} */ (forwardRefFn)))));
 }
 /**
@@ -448,7 +459,7 @@ function getCompilerFacade() {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Current injector value used by `inject`.
@@ -589,7 +600,7 @@ function injectArgs(types) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * A mapping of the \@angular/core API surface used in generated expressions to the actual symbols.
@@ -873,7 +884,7 @@ function getParentCtor(ctor) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 let _reflect = null;
@@ -897,7 +908,11 @@ function reflectDependencies(type) {
 function convertDependencies(deps) {
     /** @type {?} */
     const compiler = getCompilerFacade();
-    return deps.map(dep => reflectDependency(compiler, dep));
+    return deps.map((/**
+     * @param {?} dep
+     * @return {?}
+     */
+    dep => reflectDependency(compiler, dep)));
 }
 /**
  * @param {?} compiler
@@ -968,7 +983,7 @@ function reflectDependency(compiler, dep) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Compile an Angular injectable according to its `Injectable` metadata, and patch the resulting
@@ -984,7 +999,10 @@ function compileInjectable(type, srcMeta) {
     if (type.hasOwnProperty(NG_INJECTABLE_DEF))
         return;
     Object.defineProperty(type, NG_INJECTABLE_DEF, {
-        get: () => {
+        get: (/**
+         * @return {?}
+         */
+        () => {
             if (def === null) {
                 // Allow the compilation of a class with a `@Injectable()` decorator without parameters
                 /** @type {?} */
@@ -1034,7 +1052,7 @@ function compileInjectable(type, srcMeta) {
                 def = getCompilerFacade().compileInjectable(angularCoreDiEnv, `ng://${type.name}/ngInjectableDef.js`, compilerMeta);
             }
             return def;
-        },
+        }),
     });
 }
 const ɵ0 = getClosureSafeProperty;
@@ -1071,7 +1089,7 @@ function isUseExistingProvider(meta) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 const ɵ0$1 = getClosureSafeProperty;
 /** @type {?} */
@@ -1090,22 +1108,34 @@ function convertInjectableProviderToFactory(type, provider) {
         /** @type {?} */
         const deps = reflectionCapabilities.parameters(type);
         // TODO - convert to flags.
-        return () => new type(...injectArgs((/** @type {?} */ (deps))));
+        return (/**
+         * @return {?}
+         */
+        () => new type(...injectArgs((/** @type {?} */ (deps)))));
     }
     if (USE_VALUE$1 in provider) {
         /** @type {?} */
         const valueProvider = ((/** @type {?} */ (provider)));
-        return () => valueProvider.useValue;
+        return (/**
+         * @return {?}
+         */
+        () => valueProvider.useValue);
     }
     else if (((/** @type {?} */ (provider))).useExisting) {
         /** @type {?} */
         const existingProvider = ((/** @type {?} */ (provider)));
-        return () => inject(existingProvider.useExisting);
+        return (/**
+         * @return {?}
+         */
+        () => inject(existingProvider.useExisting));
     }
     else if (((/** @type {?} */ (provider))).useFactory) {
         /** @type {?} */
         const factoryProvider = ((/** @type {?} */ (provider)));
-        return () => factoryProvider.useFactory(...injectArgs(factoryProvider.deps || EMPTY_ARRAY));
+        return (/**
+         * @return {?}
+         */
+        () => factoryProvider.useFactory(...injectArgs(factoryProvider.deps || EMPTY_ARRAY)));
     }
     else if (((/** @type {?} */ (provider))).useClass) {
         /** @type {?} */
@@ -1117,7 +1147,10 @@ function convertInjectableProviderToFactory(type, provider) {
             const reflectionCapabilities = new ReflectionCapabilities();
             deps = reflectionCapabilities.parameters(type);
         }
-        return () => new classProvider.useClass(...injectArgs(deps));
+        return (/**
+         * @return {?}
+         */
+        () => new classProvider.useClass(...injectArgs(deps)));
     }
     else {
         /** @type {?} */
@@ -1127,13 +1160,16 @@ function convertInjectableProviderToFactory(type, provider) {
             const reflectionCapabilities = new ReflectionCapabilities();
             deps = reflectionCapabilities.parameters(type);
         }
-        return () => new type(...injectArgs((/** @type {?} */ (deps))));
+        return (/**
+         * @return {?}
+         */
+        () => new type(...injectArgs((/** @type {?} */ (deps)))));
     }
 }
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 // WARNING: interface has both a type and a value, skipping emit
 /**
@@ -1143,7 +1179,12 @@ function convertInjectableProviderToFactory(type, provider) {
  * \@publicApi
  * @type {?}
  */
-const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, (type, meta) => SWITCH_COMPILE_INJECTABLE((/** @type {?} */ (type)), meta));
+const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, (/**
+ * @param {?} type
+ * @param {?} meta
+ * @return {?}
+ */
+(type, meta) => SWITCH_COMPILE_INJECTABLE((/** @type {?} */ (type)), meta)));
 /**
  * Supports \@Injectable() in JIT mode for Render2.
  * @param {?} injectableType
@@ -1167,7 +1208,7 @@ const SWITCH_COMPILE_INJECTABLE = SWITCH_COMPILE_INJECTABLE__PRE_R3__;
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Creates a token that can be used in a DI Provider.
@@ -1243,7 +1284,7 @@ class InjectionToken {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const SOURCE = '__source';
@@ -1324,7 +1365,10 @@ Injector.NULL = new NullInjector();
 /** @nocollapse */
 /** @nocollapse */ Injector.ngInjectableDef = defineInjectable({
     providedIn: (/** @type {?} */ ('any')),
-    factory: () => inject(INJECTOR),
+    factory: (/**
+     * @return {?}
+     */
+    () => inject(INJECTOR)),
 });
 /**
  * \@internal
@@ -1332,17 +1376,25 @@ Injector.NULL = new NullInjector();
  */
 Injector.__NG_ELEMENT_ID__ = -1;
 /** @type {?} */
-const IDENT = function (value) {
+const IDENT = (/**
+ * @template T
+ * @param {?} value
+ * @return {?}
+ */
+function (value) {
     return value;
-};
+});
 /** @type {?} */
 const EMPTY = (/** @type {?} */ ([]));
 /** @type {?} */
 const CIRCULAR = IDENT;
 /** @type {?} */
-const MULTI_PROVIDER_FN = function () {
+const MULTI_PROVIDER_FN = (/**
+ * @return {?}
+ */
+function () {
     return Array.prototype.slice.call(arguments);
-};
+});
 /** @type {?} */
 const USE_VALUE$2 = getClosureSafeProperty({ provide: String, useValue: getClosureSafeProperty });
 /** @type {?} */
@@ -1394,7 +1446,12 @@ class StaticInjector {
         const tokens = (/** @type {?} */ ([]));
         /** @type {?} */
         const records = this._records;
-        records.forEach((v, token) => tokens.push(stringify(token)));
+        records.forEach((/**
+         * @param {?} v
+         * @param {?} token
+         * @return {?}
+         */
+        (v, token) => tokens.push(stringify(token))));
         return `StaticInjector[${tokens.join(', ')}]`;
     }
 }
@@ -1715,7 +1772,7 @@ function wrappedError(message, originalError) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @param {?} keys
@@ -1742,7 +1799,11 @@ function constructResolvingPath(keys) {
         /** @type {?} */
         const reversed = findFirstClosedCycle(keys.slice().reverse());
         /** @type {?} */
-        const tokenStrs = reversed.map(k => stringify(k.token));
+        const tokenStrs = reversed.map((/**
+         * @param {?} k
+         * @return {?}
+         */
+        k => stringify(k.token)));
         return ' (' + tokenStrs.join(' -> ') + ')';
     }
     return '';
@@ -1799,11 +1860,15 @@ function addKey(injector, key) {
  * @return {?}
  */
 function noProviderError(injector, key) {
-    return injectionError(injector, key, function (keys) {
+    return injectionError(injector, key, (/**
+     * @param {?} keys
+     * @return {?}
+     */
+    function (keys) {
         /** @type {?} */
         const first = stringify(keys[0].token);
         return `No provider for ${first}!${constructResolvingPath(keys)}`;
-    });
+    }));
 }
 /**
  * Thrown when dependencies form a cycle.
@@ -1826,9 +1891,13 @@ function noProviderError(injector, key) {
  * @return {?}
  */
 function cyclicDependencyError(injector, key) {
-    return injectionError(injector, key, function (keys) {
+    return injectionError(injector, key, (/**
+     * @param {?} keys
+     * @return {?}
+     */
+    function (keys) {
         return `Cannot instantiate cyclic dependency!${constructResolvingPath(keys)}`;
-    });
+    }));
 }
 /**
  * Thrown when a constructing type returns with an Error.
@@ -1862,11 +1931,15 @@ function cyclicDependencyError(injector, key) {
  * @return {?}
  */
 function instantiationError(injector, originalException, originalStack, key) {
-    return injectionError(injector, key, function (keys) {
+    return injectionError(injector, key, (/**
+     * @param {?} keys
+     * @return {?}
+     */
+    function (keys) {
         /** @type {?} */
         const first = stringify(keys[0].token);
         return `${originalException.message}: Error during instantiation of ${first}!${constructResolvingPath(keys)}.`;
-    }, originalException);
+    }), originalException);
 }
 /**
  * Thrown when an object other then {\@link Provider} (or `Type`) is passed to {\@link Injector}
@@ -1978,7 +2051,7 @@ function mixingMultiProvidersWithRegularProvidersError(provider1, provider2) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * A unique object used for retrieving items from the {\@link ReflectiveInjector}.
@@ -2109,7 +2182,7 @@ const reflector = new Reflector(new ReflectionCapabilities());
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * `Dependency` is used by the framework to extend DI.
@@ -2180,7 +2253,11 @@ function resolveReflectiveFactory(provider) {
         resolvedDeps = _dependenciesFor(useClass);
     }
     else if (provider.useExisting) {
-        factoryFn = (aliasInstance) => aliasInstance;
+        factoryFn = (/**
+         * @param {?} aliasInstance
+         * @return {?}
+         */
+        (aliasInstance) => aliasInstance);
         resolvedDeps = [ReflectiveDependency.fromKey(ReflectiveKey.get(provider.useExisting))];
     }
     else if (provider.useFactory) {
@@ -2188,7 +2265,10 @@ function resolveReflectiveFactory(provider) {
         resolvedDeps = constructDependencies(provider.useFactory, provider.deps);
     }
     else {
-        factoryFn = () => provider.useValue;
+        factoryFn = (/**
+         * @return {?}
+         */
+        () => provider.useValue);
         resolvedDeps = _EMPTY_LIST;
     }
     return new ResolvedReflectiveFactory(factoryFn, resolvedDeps);
@@ -2264,7 +2344,11 @@ function mergeResolvedReflectiveProviders(providers, normalizedProvidersMap) {
  * @return {?}
  */
 function _normalizeProviders(providers, res) {
-    providers.forEach(b => {
+    providers.forEach((/**
+     * @param {?} b
+     * @return {?}
+     */
+    b => {
         if (b instanceof Type) {
             res.push({ provide: b, useClass: b });
         }
@@ -2277,7 +2361,7 @@ function _normalizeProviders(providers, res) {
         else {
             throw invalidProviderError(b);
         }
-    });
+    }));
     return res;
 }
 /**
@@ -2291,8 +2375,16 @@ function constructDependencies(typeOrFunc, dependencies) {
     }
     else {
         /** @type {?} */
-        const params = dependencies.map(t => [t]);
-        return dependencies.map(t => _extractToken(typeOrFunc, t, params));
+        const params = dependencies.map((/**
+         * @param {?} t
+         * @return {?}
+         */
+        t => [t]));
+        return dependencies.map((/**
+         * @param {?} t
+         * @return {?}
+         */
+        t => _extractToken(typeOrFunc, t, params)));
     }
 }
 /**
@@ -2304,10 +2396,18 @@ function _dependenciesFor(typeOrFunc) {
     const params = reflector.parameters(typeOrFunc);
     if (!params)
         return [];
-    if (params.some(p => p == null)) {
+    if (params.some((/**
+     * @param {?} p
+     * @return {?}
+     */
+    p => p == null))) {
         throw noAnnotationError(typeOrFunc, params);
     }
-    return params.map(p => _extractToken(typeOrFunc, p, params));
+    return params.map((/**
+     * @param {?} p
+     * @return {?}
+     */
+    p => _extractToken(typeOrFunc, p, params)));
 }
 /**
  * @param {?} typeOrFunc
@@ -2369,7 +2469,7 @@ function _createDependency(token, optional, visibility) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 // Threshold for the dynamic version
 /** @type {?} */
@@ -2629,7 +2729,11 @@ class ReflectiveInjector_ {
         let deps;
         try {
             deps =
-                ResolvedReflectiveFactory$$1.dependencies.map(dep => this._getByReflectiveDependency(dep));
+                ResolvedReflectiveFactory$$1.dependencies.map((/**
+                 * @param {?} dep
+                 * @return {?}
+                 */
+                dep => this._getByReflectiveDependency(dep)));
         }
         catch (e) {
             if (e.addKey) {
@@ -2751,7 +2855,11 @@ class ReflectiveInjector_ {
      */
     get displayName() {
         /** @type {?} */
-        const providers = _mapProviders(this, (b) => ' "' + b.key.displayName + '" ')
+        const providers = _mapProviders(this, (/**
+         * @param {?} b
+         * @return {?}
+         */
+        (b) => ' "' + b.key.displayName + '" '))
             .join(', ');
         return `ReflectiveInjector(providers: [${providers}])`;
     }
@@ -2777,17 +2885,17 @@ function _mapProviders(injector, fn) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * A DI token that you can use to create a virtual [provider](guide/glossary#provider)
@@ -2849,7 +2957,12 @@ class Query {
  * \@publicApi
  * @type {?}
  */
-const ContentChildren = makePropDecorator('ContentChildren', (selector, data = {}) => (Object.assign({ selector, first: false, isViewQuery: false, descendants: false }, data)), Query);
+const ContentChildren = makePropDecorator('ContentChildren', (/**
+ * @param {?=} selector
+ * @param {?=} data
+ * @return {?}
+ */
+(selector, data = {}) => (Object.assign({ selector, first: false, isViewQuery: false, descendants: false }, data))), Query);
 /**
  * ContentChild decorator and metadata.
  *
@@ -2859,7 +2972,12 @@ const ContentChildren = makePropDecorator('ContentChildren', (selector, data = {
  * \@publicApi
  * @type {?}
  */
-const ContentChild = makePropDecorator('ContentChild', (selector, data = {}) => (Object.assign({ selector, first: true, isViewQuery: false, descendants: true }, data)), Query);
+const ContentChild = makePropDecorator('ContentChild', (/**
+ * @param {?=} selector
+ * @param {?=} data
+ * @return {?}
+ */
+(selector, data = {}) => (Object.assign({ selector, first: true, isViewQuery: false, descendants: true }, data))), Query);
 /**
  * ViewChildren decorator and metadata.
  *
@@ -2867,7 +2985,12 @@ const ContentChild = makePropDecorator('ContentChild', (selector, data = {}) => 
  * \@publicApi
  * @type {?}
  */
-const ViewChildren = makePropDecorator('ViewChildren', (selector, data = {}) => (Object.assign({ selector, first: false, isViewQuery: true, descendants: true }, data)), Query);
+const ViewChildren = makePropDecorator('ViewChildren', (/**
+ * @param {?=} selector
+ * @param {?=} data
+ * @return {?}
+ */
+(selector, data = {}) => (Object.assign({ selector, first: false, isViewQuery: true, descendants: true }, data))), Query);
 /**
  * ViewChild decorator and metadata.
  *
@@ -2875,11 +2998,16 @@ const ViewChildren = makePropDecorator('ViewChildren', (selector, data = {}) => 
  * \@publicApi
  * @type {?}
  */
-const ViewChild = makePropDecorator('ViewChild', (selector, data) => (Object.assign({ selector, first: true, isViewQuery: true, descendants: true }, data)), Query);
+const ViewChild = makePropDecorator('ViewChild', (/**
+ * @param {?} selector
+ * @param {?} data
+ * @return {?}
+ */
+(selector, data) => (Object.assign({ selector, first: true, isViewQuery: true, descendants: true }, data))), Query);
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -2956,7 +3084,7 @@ function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const NG_COMPONENT_DEF = getClosureSafeProperty({ ngComponentDef: getClosureSafeProperty });
@@ -2979,7 +3107,7 @@ const NG_ELEMENT_ID = getClosureSafeProperty({ __NG_ELEMENT_ID__: getClosureSafe
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -3043,11 +3171,19 @@ function resolveComponentResources(resourceResolver) {
         }
         return promise;
     }
-    componentResourceResolutionQueue.forEach((component) => {
+    componentResourceResolutionQueue.forEach((/**
+     * @param {?} component
+     * @return {?}
+     */
+    (component) => {
         if (component.templateUrl) {
-            cachedResourceResolve(component.templateUrl).then((template) => {
+            cachedResourceResolve(component.templateUrl).then((/**
+             * @param {?} template
+             * @return {?}
+             */
+            (template) => {
                 component.template = template;
-            });
+            }));
         }
         /** @type {?} */
         const styleUrls = component.styleUrls;
@@ -3055,19 +3191,31 @@ function resolveComponentResources(resourceResolver) {
         const styles = component.styles || (component.styles = []);
         /** @type {?} */
         const styleOffset = component.styles.length;
-        styleUrls && styleUrls.forEach((styleUrl, index) => {
+        styleUrls && styleUrls.forEach((/**
+         * @param {?} styleUrl
+         * @param {?} index
+         * @return {?}
+         */
+        (styleUrl, index) => {
             styles.push(''); // pre-allocate array.
-            cachedResourceResolve(styleUrl).then((style) => {
+            cachedResourceResolve(styleUrl).then((/**
+             * @param {?} style
+             * @return {?}
+             */
+            (style) => {
                 styles[styleOffset + index] = style;
                 styleUrls.splice(styleUrls.indexOf(styleUrl), 1);
                 if (styleUrls.length == 0) {
                     component.styleUrls = undefined;
                 }
-            });
-        });
-    });
+            }));
+        }));
+    }));
     clearResolutionOfComponentResourcesQueue();
-    return Promise.all(urlFetches).then(() => null);
+    return Promise.all(urlFetches).then((/**
+     * @return {?}
+     */
+    () => null));
 }
 /** @type {?} */
 const componentResourceResolutionQueue = new Set();
@@ -3110,7 +3258,7 @@ function unwrapResponse(response) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -3217,7 +3365,7 @@ if (typeof ngDevMode === 'undefined' || ngDevMode) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * This file contains reuseable "empty" symbols that can be used as default return values
@@ -3237,7 +3385,7 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Returns whether the values are different from a change detection stand point.
@@ -3318,6 +3466,20 @@ const INTERPOLATION_DELIMITER = `�`;
 function isPropMetadataString(str) {
     return str.indexOf(INTERPOLATION_DELIMITER) >= 0;
 }
+/**
+ * Unwrap a value which might be behind a closure (for forward declaration reasons).
+ * @template T
+ * @param {?} value
+ * @return {?}
+ */
+function maybeUnwrapFn(value) {
+    if (value instanceof Function) {
+        return value();
+    }
+    else {
+        return value;
+    }
+}
 
 /**
  * @license
@@ -3387,7 +3549,7 @@ function noSideEffects(fn) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 let _renderCompCount = 0;
@@ -3459,7 +3621,10 @@ function defineComponent(componentDefinition) {
         setInput: null,
         schemas: componentDefinition.schemas || null,
     };
-    def._ = (/** @type {?} */ (noSideEffects(() => {
+    def._ = (/** @type {?} */ (noSideEffects((/**
+     * @return {?}
+     */
+    () => {
         /** @type {?} */
         const directiveTypes = (/** @type {?} */ (componentDefinition.directives));
         /** @type {?} */
@@ -3469,15 +3634,25 @@ function defineComponent(componentDefinition) {
         def.id += _renderCompCount++;
         def.inputs = invertObject(componentDefinition.inputs, declaredInputs),
             def.outputs = invertObject(componentDefinition.outputs),
-            feature && feature.forEach((fn) => fn(def));
+            feature && feature.forEach((/**
+             * @param {?} fn
+             * @return {?}
+             */
+            (fn) => fn(def)));
         def.directiveDefs = directiveTypes ?
+            (/**
+             * @return {?}
+             */
             () => (typeof directiveTypes === 'function' ? directiveTypes() : directiveTypes)
-                .map(extractDirectiveDef) :
+                .map(extractDirectiveDef)) :
             null;
         def.pipeDefs = pipeTypes ?
-            () => (typeof pipeTypes === 'function' ? pipeTypes() : pipeTypes).map(extractPipeDef) :
+            (/**
+             * @return {?}
+             */
+            () => (typeof pipeTypes === 'function' ? pipeTypes() : pipeTypes).map(extractPipeDef)) :
             null;
-    })));
+    }))));
     return (/** @type {?} */ (def));
 }
 /**
@@ -3489,8 +3664,14 @@ function defineComponent(componentDefinition) {
 function setComponentScope(type, directives, pipes) {
     /** @type {?} */
     const def = ((/** @type {?} */ (type.ngComponentDef)));
-    def.directiveDefs = () => directives.map(extractDirectiveDef);
-    def.pipeDefs = () => pipes.map(extractPipeDef);
+    def.directiveDefs = (/**
+     * @return {?}
+     */
+    () => directives.map(extractDirectiveDef));
+    def.pipeDefs = (/**
+     * @return {?}
+     */
+    () => pipes.map(extractPipeDef));
 }
 /**
  * @param {?} type
@@ -3722,7 +3903,7 @@ function getNgModuleDef(type, throwNotFound) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -3780,7 +3961,7 @@ const HEADER_OFFSET = 20;
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Special location which allows easy identification of type. If we have an array which was
@@ -3805,7 +3986,7 @@ const NATIVE = 7;
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -3822,7 +4003,7 @@ const MONKEY_PATCH_KEY_NAME = '__ngContext__';
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * For efficiency reasons we often put several different data types (`RNode`, `LView`, `LContainer`,
@@ -4011,7 +4192,7 @@ function resetPreOrderHookFlags(lView) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @param {?} actual
@@ -4080,7 +4261,7 @@ function assertLView(value) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -4225,7 +4406,7 @@ function isFactory(obj) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @param {?} tNode
@@ -4244,7 +4425,11 @@ function assertNodeType(tNode, type) {
 function assertNodeOfPossibleTypes(tNode, ...types) {
     assertDefined(tNode, 'should be called with a TNode');
     /** @type {?} */
-    const found = types.some(type => tNode.type === type);
+    const found = types.some((/**
+     * @param {?} type
+     * @return {?}
+     */
+    type => tNode.type === type));
     assertEqual(found, true, `Should be one of ${types.map(typeName).join(', ')} but got ${typeName(tNode.type)}`);
 }
 /**
@@ -4267,7 +4452,7 @@ function typeName(type) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Adds all directive lifecycle hooks from the given `DirectiveDef` to the given `TView`.
@@ -4517,7 +4702,7 @@ function callHook(currentView, initPhase, arr, i) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Store the element depth count. This is used to identify the root elements of the template
@@ -4878,14 +5063,14 @@ function leaveView(newView) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const NG_PROJECT_AS_ATTR_NAME = 'ngProjectAs';
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -4919,12 +5104,17 @@ function isProceduralRenderer(renderer) {
 }
 /** @type {?} */
 const domRendererFactory3 = {
-    createRenderer: (hostElement, rendererType) => { return document; }
+    createRenderer: (/**
+     * @param {?} hostElement
+     * @param {?} rendererType
+     * @return {?}
+     */
+    (hostElement, rendererType) => { return document; })
 };
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Returns the matching `LContext` data for a given DOM node, directive or component instance.
@@ -5282,7 +5472,7 @@ function discoverLocalRefs(lView, nodeIndex) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 class CorePlayerHandler {
     constructor() {
@@ -5310,7 +5500,7 @@ class CorePlayerHandler {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const ANIMATION_PROP_PREFIX = '@';
@@ -5505,7 +5695,10 @@ function addPlayerInternal(playerContext, rootContext, element, player, playerCo
         playerContext.push(player);
     }
     if (player) {
-        player.addEventListener(200 /* Destroyed */, () => {
+        player.addEventListener(200 /* Destroyed */, (/**
+         * @return {?}
+         */
+        () => {
             /** @type {?} */
             const index = playerContext.indexOf(player);
             /** @type {?} */
@@ -5523,7 +5716,7 @@ function addPlayerInternal(playerContext, rootContext, element, player, playerCo
                 }
             }
             player.destroy();
-        });
+        }));
         /** @type {?} */
         const playerHandler = rootContext.playerHandler || (rootContext.playerHandler = new CorePlayerHandler());
         playerHandler.queuePlayer(player, ref);
@@ -5594,7 +5787,7 @@ function throwInvalidRefError() {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Assigns all attribute values to the provided element via the inferred renderer.
@@ -5711,7 +5904,7 @@ function isNameOnlyAttributeMarker(marker) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /// Parent Injector Utils ///////////////////////////////////////////////////////////////
 /**
@@ -5762,7 +5955,7 @@ function getParentInjectorView(location, startView) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Gets the parent LView of the passed LView, if the PARENT is an LContainer, will get the parent of
@@ -5828,7 +6021,7 @@ function getRootContext(viewOrComponent) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Defines if the call to `inject` should include `viewProviders` in its resolution.
@@ -6539,13 +6732,17 @@ function getInheritedFactory(type) {
         // (no Angular decorator on the superclass) or there is no constructor at all
         // in the inheritance chain. Since the two cases cannot be distinguished, the
         // latter has to be assumed.
-        return (t) => new t();
+        return (/**
+         * @param {?} t
+         * @return {?}
+         */
+        (t) => new t());
     }
 }
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @param {?} error
@@ -6579,7 +6776,7 @@ function defaultErrorLogger(console, ...values) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Provides a hook for centralized exception handling.
@@ -6663,7 +6860,7 @@ class ErrorHandler {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Defines a schema that allows an NgModule to contain the following:
@@ -6689,7 +6886,7 @@ const NO_ERRORS_SCHEMA = {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -6826,7 +7023,7 @@ function enableProdMode() {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -7014,7 +7211,7 @@ function isDOMParserAvailable() {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * A pattern that recognizes a commonly useful subset of URLs that are safe.
@@ -7068,12 +7265,16 @@ function _sanitizeUrl(url) {
  */
 function sanitizeSrcset(srcset) {
     srcset = String(srcset);
-    return srcset.split(',').map((srcset) => _sanitizeUrl(srcset.trim())).join(', ');
+    return srcset.split(',').map((/**
+     * @param {?} srcset
+     * @return {?}
+     */
+    (srcset) => _sanitizeUrl(srcset.trim()))).join(', ');
 }
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @param {?} tags
@@ -7301,14 +7502,22 @@ const NON_ALPHANUMERIC_REGEXP = /([^\#-~ |!])/g;
  */
 function encodeEntities(value) {
     return value.replace(/&/g, '&amp;')
-        .replace(SURROGATE_PAIR_REGEXP, function (match) {
+        .replace(SURROGATE_PAIR_REGEXP, (/**
+     * @param {?} match
+     * @return {?}
+     */
+    function (match) {
         /** @type {?} */
         const hi = match.charCodeAt(0);
         /** @type {?} */
         const low = match.charCodeAt(1);
         return '&#' + (((hi - 0xD800) * 0x400) + (low - 0xDC00) + 0x10000) + ';';
-    })
-        .replace(NON_ALPHANUMERIC_REGEXP, function (match) { return '&#' + match.charCodeAt(0) + ';'; })
+    }))
+        .replace(NON_ALPHANUMERIC_REGEXP, (/**
+     * @param {?} match
+     * @return {?}
+     */
+    function (match) { return '&#' + match.charCodeAt(0) + ';'; }))
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
 }
@@ -7384,7 +7593,7 @@ function isTemplateElement(el) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -7419,7 +7628,7 @@ class Sanitizer {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Regular expression for safe style values.
@@ -7524,7 +7733,7 @@ function _sanitizeStyle(value) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
@@ -7679,13 +7888,18 @@ function sanitizeUrlOrResourceUrl(unsafeUrl, tag, prop) {
  * sanitizing any CSS property that can include a `url` value (usually image-based properties)
  * @type {?}
  */
-const defaultStyleSanitizer = ((/** @type {?} */ (function (prop, value) {
+const defaultStyleSanitizer = ((/** @type {?} */ ((/**
+ * @param {?} prop
+ * @param {?=} value
+ * @return {?}
+ */
+function (prop, value) {
     if (value === undefined) {
         return prop === 'background-image' || prop === 'background' || prop === 'border-image' ||
             prop === 'filter' || prop === 'list-style' || prop === 'list-style-image';
     }
     return sanitizeStyle(value);
-})));
+}))));
 /**
  * @param {?} name
  * @return {?}
@@ -7822,7 +8036,7 @@ function looseIdentical(a, b) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @param {?} a
@@ -7962,7 +8176,7 @@ function isJsObject$1(o) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Called when there are multiple component selectors that match a given node
@@ -7993,7 +8207,7 @@ function throwErrorIfNoChangesMode(creationMode, oldValue, currValue) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -8011,7 +8225,7 @@ const NO_CHANGE = (/** @type {?} */ ({}));
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 // TODO(misko): consider inlining
 /**
@@ -8109,7 +8323,7 @@ function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /*
  * This file contains conditionally attached classes which provide human readable (debug) level
@@ -8385,12 +8599,12 @@ function readLViewValue(value) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @param {?} tNode
@@ -9252,7 +9466,7 @@ function appendProjectedNode(projectedTNode, tProjectionNode, currentView, proje
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Combines the binding value and a factory for an animation player.
@@ -9291,7 +9505,7 @@ class BoundPlayerFactory {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * This file includes the code to power all styling-binding operations in Angular.
@@ -11393,7 +11607,11 @@ function hyphenateEntries(entries) {
  * @return {?}
  */
 function hyphenate(value) {
-    return value.replace(/[a-z][A-Z]/g, match => `${match.charAt(0)}-${match.charAt(1).toLowerCase()}`);
+    return value.replace(/[a-z][A-Z]/g, (/**
+     * @param {?} match
+     * @return {?}
+     */
+    match => `${match.charAt(0)}-${match.charAt(1).toLowerCase()}`));
 }
 /**
  * @param {?} context
@@ -11446,7 +11664,7 @@ function addOrUpdateStaticStyle(index, staticStyles, prop, value, directiveOwner
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const NG_TEMPLATE_SELECTOR = 'ng-template';
@@ -11768,7 +11986,7 @@ function matchTemplateAttribute(attrs, name) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @param {?} tNode
@@ -11828,7 +12046,7 @@ function getParentInjectorTNode(location, startView, startTNode) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * A permanent marker promise which signifies that the current CD tree is
@@ -12736,7 +12954,11 @@ function listenerInternal(eventName, listenerFn, useCapture = false, eventTarget
         }
         /** @type {?} */
         const idxOrTargetGetter = eventTargetResolver ?
-            (_lView) => eventTargetResolver(unwrapRNode(_lView[tNode.index])).target :
+            (/**
+             * @param {?} _lView
+             * @return {?}
+             */
+            (_lView) => eventTargetResolver(unwrapRNode(_lView[tNode.index])).target) :
             tNode.index;
         tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, useCaptureOrSubIdx);
     }
@@ -13278,7 +13500,10 @@ function elementStyling(classBindingNames, styleBindingNames, styleSanitizer, di
         allocateDirectiveIntoContext(tNode.stylingTemplate, directive);
         /** @type {?} */
         const fns = tNode.onElementCreationFns = tNode.onElementCreationFns || [];
-        fns.push(() => initElementStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, directive));
+        fns.push((/**
+         * @return {?}
+         */
+        () => initElementStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, directive)));
     }
     else {
         // this will make sure that the root directive (the template) will always be
@@ -14589,7 +14814,11 @@ function markDirtyIfOnPush(lView, viewIndex) {
 function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
     // Note: we are performing most of the work in the listener function itself
     // to optimize listener registration.
-    return function wrapListenerIn_markDirtyAndPreventDefault(e) {
+    return (/**
+     * @param {?} e
+     * @return {?}
+     */
+    function wrapListenerIn_markDirtyAndPreventDefault(e) {
         // In order to be backwards compatible with View Engine, events on component host nodes
         // must also mark the component view itself dirty (i.e. the view that it owns).
         /** @type {?} */
@@ -14611,7 +14840,7 @@ function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
         catch (error) {
             handleError(lView, error);
         }
-    };
+    });
 }
 /**
  * Marks current view and all ancestors dirty.
@@ -14660,8 +14889,15 @@ function scheduleTick(rootContext, flags) {
     if (nothingScheduled && rootContext.clean == _CLEAN_PROMISE) {
         /** @type {?} */
         let res;
-        rootContext.clean = new Promise((r) => res = r);
-        rootContext.scheduler(() => {
+        rootContext.clean = new Promise((/**
+         * @param {?} r
+         * @return {?}
+         */
+        (r) => res = r));
+        rootContext.scheduler((/**
+         * @return {?}
+         */
+        () => {
             if (rootContext.flags & 1 /* DetectChanges */) {
                 rootContext.flags &= ~1 /* DetectChanges */;
                 tickRootContext(rootContext);
@@ -14676,7 +14912,7 @@ function scheduleTick(rootContext, flags) {
             }
             rootContext.clean = _CLEAN_PROMISE;
             (/** @type {?} */ (res))(null);
-        });
+        }));
     }
 }
 /**
@@ -15383,7 +15619,7 @@ function handleError(lView, error) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Adds a player to an element, directive or component instance that will later be
@@ -15445,7 +15681,7 @@ function getPlayers(ref) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Returns the component instance associated with a given DOM host element.
@@ -15783,7 +16019,7 @@ function isDirectiveDefHack(obj) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * This value reflects the property on the window where the dev
@@ -15839,7 +16075,7 @@ function publishGlobalUtil(name, fn) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Bootstraps a Component into an existing host element and returns an instance
@@ -15952,7 +16188,11 @@ function createRootComponent(componentView, componentDef, rootView, rootContext,
     const component = instantiateRootComponent(tView, rootView, componentDef);
     rootContext.components.push(component);
     componentView[CONTEXT] = component;
-    hostFeatures && hostFeatures.forEach((feature) => feature(component, componentDef));
+    hostFeatures && hostFeatures.forEach((/**
+     * @param {?} feature
+     * @return {?}
+     */
+    (feature) => feature(component, componentDef)));
     /** @type {?} */
     const rootTNode = getPreviousOrParentTNode();
     if (tView.firstTemplatePass && componentDef.hostBindings) {
@@ -16059,7 +16299,7 @@ class SimpleChange {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * The NgOnChangesFeature decorates a component with support for the ngOnChanges
@@ -16104,7 +16344,11 @@ function NgOnChangesFeatureImpl(definition) {
  * @return {?}
  */
 function wrapOnChanges() {
-    return function () {
+    return (/**
+     * @this {?}
+     * @return {?}
+     */
+    function () {
         /** @type {?} */
         const simpleChangesStore = getSimpleChangesStore(this);
         /** @type {?} */
@@ -16125,7 +16369,7 @@ function wrapOnChanges() {
             (/** @type {?} */ (simpleChangesStore)).current = null;
             this.ngOnChanges(current);
         }
-    };
+    });
 }
 /**
  * @template T
@@ -16171,7 +16415,7 @@ function setSimpleChangesStore(instance, store) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @param {?} type
@@ -16227,10 +16471,16 @@ function InheritDefinitionFeature(definition) {
             const superHostBindings = superDef.hostBindings;
             if (superHostBindings) {
                 if (prevHostBindings) {
-                    definition.hostBindings = (rf, ctx, elementIndex) => {
+                    definition.hostBindings = (/**
+                     * @param {?} rf
+                     * @param {?} ctx
+                     * @param {?} elementIndex
+                     * @return {?}
+                     */
+                    (rf, ctx, elementIndex) => {
                         superHostBindings(rf, ctx, elementIndex);
                         prevHostBindings(rf, ctx, elementIndex);
-                    };
+                    });
                 }
                 else {
                     definition.hostBindings = superHostBindings;
@@ -16244,10 +16494,16 @@ function InheritDefinitionFeature(definition) {
                 const superViewQuery = superDef.viewQuery;
                 if (superViewQuery) {
                     if (prevViewQuery) {
-                        definition.viewQuery = (rf, ctx) => {
+                        definition.viewQuery = (/**
+                         * @template T
+                         * @param {?} rf
+                         * @param {?} ctx
+                         * @return {?}
+                         */
+                        (rf, ctx) => {
                             superViewQuery(rf, ctx);
                             prevViewQuery(rf, ctx);
-                        };
+                        });
                     }
                     else {
                         definition.viewQuery = superViewQuery;
@@ -16261,10 +16517,17 @@ function InheritDefinitionFeature(definition) {
             const superContentQueries = superDef.contentQueries;
             if (superContentQueries) {
                 if (prevContentQueries) {
-                    definition.contentQueries = (rf, ctx, directiveIndex) => {
+                    definition.contentQueries = (/**
+                     * @template T
+                     * @param {?} rf
+                     * @param {?} ctx
+                     * @param {?} directiveIndex
+                     * @return {?}
+                     */
+                    (rf, ctx, directiveIndex) => {
                         superContentQueries(rf, ctx, directiveIndex);
                         prevContentQueries(rf, ctx, directiveIndex);
-                    };
+                    });
                 }
                 else {
                     definition.contentQueries = superContentQueries;
@@ -16336,7 +16599,7 @@ function maybeUnwrapEmpty(value) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * An internal token whose presence in an injector indicates that the injector should treat itself
@@ -16348,7 +16611,7 @@ const APP_ROOT = new InjectionToken('The presence of this token marks an injecto
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Marker which indicates that a value has not yet been created from the factory function.
@@ -16420,15 +16683,27 @@ class R3Injector {
         // included transitively in `def`.
         /** @type {?} */
         const dedupStack = [];
-        deepForEach([def], injectorDef => this.processInjectorType(injectorDef, [], dedupStack));
-        additionalProviders && deepForEach(additionalProviders, provider => this.processProvider(provider, def, additionalProviders));
+        deepForEach([def], (/**
+         * @param {?} injectorDef
+         * @return {?}
+         */
+        injectorDef => this.processInjectorType(injectorDef, [], dedupStack)));
+        additionalProviders && deepForEach(additionalProviders, (/**
+         * @param {?} provider
+         * @return {?}
+         */
+        provider => this.processProvider(provider, def, additionalProviders)));
         // Make sure the INJECTOR token provides this injector.
         this.records.set(INJECTOR, makeRecord(undefined, this));
         // Detect whether this injector has the APP_ROOT_SCOPE token and thus should provide
         // any injectable scoped to APP_ROOT_SCOPE.
         this.isRootInjector = this.records.has(APP_ROOT);
         // Eagerly instantiate the InjectorType classes themselves.
-        this.injectorDefTypes.forEach(defType => this.get(defType));
+        this.injectorDefTypes.forEach((/**
+         * @param {?} defType
+         * @return {?}
+         */
+        defType => this.get(defType)));
         // Source name, used for debugging
         this.source = source || (def instanceof Array ? null : stringify(def));
     }
@@ -16450,7 +16725,11 @@ class R3Injector {
         this._destroyed = true;
         try {
             // Call all the lifecycle hooks.
-            this.onDestroy.forEach(service => service.ngOnDestroy());
+            this.onDestroy.forEach((/**
+             * @param {?} service
+             * @return {?}
+             */
+            service => service.ngOnDestroy()));
         }
         finally {
             // Release all references.
@@ -16563,7 +16842,11 @@ class R3Injector {
         if (ngDevMode && parents.indexOf(defType) !== -1) {
             /** @type {?} */
             const defName = stringify(defType);
-            throw new Error(`Circular dependency in DI detected for type ${defName}. Dependency path: ${parents.map(defType => stringify(defType)).join(' > ')} > ${defName}.`);
+            throw new Error(`Circular dependency in DI detected for type ${defName}. Dependency path: ${parents.map((/**
+             * @param {?} defType
+             * @return {?}
+             */
+            defType => stringify(defType))).join(' > ')} > ${defName}.`);
         }
         // Check for multiple imports of the same module
         /** @type {?} */
@@ -16594,7 +16877,11 @@ class R3Injector {
             // Add it to the set of dedups. This way we can detect multiple imports of the same module
             dedupStack.push(defType);
             try {
-                deepForEach(def.imports, imported => this.processInjectorType(imported, parents, dedupStack));
+                deepForEach(def.imports, (/**
+                 * @param {?} imported
+                 * @return {?}
+                 */
+                imported => this.processInjectorType(imported, parents, dedupStack)));
             }
             finally {
                 // Remove it from the parents set when finished.
@@ -16607,12 +16894,20 @@ class R3Injector {
         if (defProviders != null && !isDuplicate) {
             /** @type {?} */
             const injectorType = (/** @type {?} */ (defOrWrappedDef));
-            deepForEach(defProviders, provider => this.processProvider(provider, injectorType, defProviders));
+            deepForEach(defProviders, (/**
+             * @param {?} provider
+             * @return {?}
+             */
+            provider => this.processProvider(provider, injectorType, defProviders)));
         }
         // Finally, include providers from an InjectorDefTypeWithProviders if there was one.
         /** @type {?} */
         const ngModuleType = ((/** @type {?} */ (defOrWrappedDef))).ngModule;
-        deepForEach(providers, provider => this.processProvider(provider, ngModuleType, providers));
+        deepForEach(providers, (/**
+         * @param {?} provider
+         * @return {?}
+         */
+        provider => this.processProvider(provider, ngModuleType, providers)));
     }
     /**
      * Process a `SingleProvider` and add it.
@@ -16644,7 +16939,10 @@ class R3Injector {
             }
             else {
                 multiRecord = makeRecord(undefined, NOT_YET, true);
-                multiRecord.factory = () => injectArgs((/** @type {?} */ ((/** @type {?} */ (multiRecord)).multi)));
+                multiRecord.factory = (/**
+                 * @return {?}
+                 */
+                () => injectArgs((/** @type {?} */ ((/** @type {?} */ (multiRecord)).multi))));
                 this.records.set(token, multiRecord);
             }
             token = provider;
@@ -16720,7 +17018,10 @@ function injectableDefOrInjectorDefFactory(token) {
                 const args = new Array(paramLength).fill('?');
                 throw new Error(`Can't resolve all parameters for ${stringify(token)}: (${args.join(', ')}).`);
             }
-            return () => new ((/** @type {?} */ (token)))();
+            return (/**
+             * @return {?}
+             */
+            () => new ((/** @type {?} */ (token)))());
         }
         throw new Error('unreachable');
     }
@@ -16758,13 +17059,22 @@ function providerToFactory(provider, ngModuleType, providers) {
     }
     else {
         if (isValueProvider(provider)) {
-            factory = () => resolveForwardRef(provider.useValue);
+            factory = (/**
+             * @return {?}
+             */
+            () => resolveForwardRef(provider.useValue));
         }
         else if (isExistingProvider(provider)) {
-            factory = () => inject(resolveForwardRef(provider.useExisting));
+            factory = (/**
+             * @return {?}
+             */
+            () => inject(resolveForwardRef(provider.useExisting)));
         }
         else if (isFactoryProvider(provider)) {
-            factory = () => provider.useFactory(...injectArgs(provider.deps || []));
+            factory = (/**
+             * @return {?}
+             */
+            () => provider.useFactory(...injectArgs(provider.deps || [])));
         }
         else {
             /** @type {?} */
@@ -16775,14 +17085,21 @@ function providerToFactory(provider, ngModuleType, providers) {
                 let ngModuleDetail = '';
                 if (ngModuleType && providers) {
                     /** @type {?} */
-                    const providerDetail = providers.map(v => v == provider ? '?' + provider + '?' : '...');
+                    const providerDetail = providers.map((/**
+                     * @param {?} v
+                     * @return {?}
+                     */
+                    v => v == provider ? '?' + provider + '?' : '...'));
                     ngModuleDetail =
                         ` - only instances of Provider and Type are allowed, got: [${providerDetail.join(', ')}]`;
                 }
                 throw new Error(`Invalid provider for the NgModule '${stringify(ngModuleType)}'` + ngModuleDetail);
             }
             if (hasDeps(provider)) {
-                factory = () => new (classRef)(...injectArgs(provider.deps));
+                factory = (/**
+                 * @return {?}
+                 */
+                () => new (classRef)(...injectArgs(provider.deps)));
             }
             else {
                 return injectableDefOrInjectorDefFactory(classRef);
@@ -16812,7 +17129,11 @@ function makeRecord(factory, value, multi = false) {
  * @return {?}
  */
 function deepForEach(input, fn) {
-    input.forEach(value => Array.isArray(value) ? deepForEach(value, fn) : fn(value));
+    input.forEach((/**
+     * @param {?} value
+     * @return {?}
+     */
+    value => Array.isArray(value) ? deepForEach(value, fn) : fn(value)));
 }
 /**
  * @param {?} value
@@ -16875,7 +17196,7 @@ function couldBeInjectableType(value) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Resolves the providers which are defined in the DirectiveDef.
@@ -17149,7 +17470,7 @@ function multiFactory(factoryFn, index, isViewProvider, isComponent$$1, f) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * This feature resolves the providers of a directive (or component),
@@ -17183,14 +17504,22 @@ function multiFactory(factoryFn, index, isViewProvider, isComponent$$1, f) {
  * @return {?}
  */
 function ProvidersFeature(providers, viewProviders = []) {
-    return (definition) => {
-        definition.providersResolver = (def) => providersResolver(def, providers, viewProviders);
-    };
+    return (/**
+     * @param {?} definition
+     * @return {?}
+     */
+    (definition) => {
+        definition.providersResolver = (/**
+         * @param {?} def
+         * @return {?}
+         */
+        (def) => providersResolver(def, providers, viewProviders));
+    });
 }
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -17220,7 +17549,7 @@ class ComponentFactory {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @param {?} component
@@ -17316,7 +17645,7 @@ class ComponentFactoryBoundToModule extends ComponentFactory {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -17347,7 +17676,7 @@ class NgModuleFactory {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @template T
@@ -17687,7 +18016,7 @@ function collectNativeNodes(lView, parentTNode, result) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Creates an ElementRef from the most recent node.
@@ -18097,7 +18426,7 @@ function noop(...args) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * A wrapper around a native element inside of a View.
@@ -18125,7 +18454,10 @@ class ElementRef {
  * \@internal
  * @nocollapse
  */
-ElementRef.__NG_ELEMENT_ID__ = () => SWITCH_ELEMENT_REF_FACTORY(ElementRef);
+ElementRef.__NG_ELEMENT_ID__ = (/**
+ * @return {?}
+ */
+() => SWITCH_ELEMENT_REF_FACTORY(ElementRef));
 /** @type {?} */
 const SWITCH_ELEMENT_REF_FACTORY__POST_R3__ = injectElementRef;
 /** @type {?} */
@@ -18135,7 +18467,7 @@ const SWITCH_ELEMENT_REF_FACTORY = SWITCH_ELEMENT_REF_FACTORY__PRE_R3__;
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @deprecated Use `RendererType2` (and `Renderer2`) instead.
@@ -18235,7 +18567,10 @@ class Renderer2 {
  * \@internal
  * @nocollapse
  */
-Renderer2.__NG_ELEMENT_ID__ = () => SWITCH_RENDERER2_FACTORY();
+Renderer2.__NG_ELEMENT_ID__ = (/**
+ * @return {?}
+ */
+() => SWITCH_RENDERER2_FACTORY());
 /** @type {?} */
 const SWITCH_RENDERER2_FACTORY__POST_R3__ = injectRenderer2;
 /** @type {?} */
@@ -18245,7 +18580,7 @@ const SWITCH_RENDERER2_FACTORY = SWITCH_RENDERER2_FACTORY__PRE_R3__;
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -18274,11 +18609,11 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.8+1.sha-940fbf7.with-local-changes');
+const VERSION = new Version('8.0.0-beta.8+9.sha-75748d6.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 class DefaultIterableDifferFactory {
     constructor() { }
@@ -18297,7 +18632,12 @@ class DefaultIterableDifferFactory {
     }
 }
 /** @type {?} */
-const trackByIdentity = (index, item) => item;
+const trackByIdentity = (/**
+ * @param {?} index
+ * @param {?} item
+ * @return {?}
+ */
+(index, item) => item);
 /**
  * @deprecated v4.0.0 - Should not be part of public API.
  * \@publicApi
@@ -18518,7 +18858,11 @@ class DefaultIterableDiffer {
         }
         else {
             index = 0;
-            iterateListLike$1(collection, (item) => {
+            iterateListLike$1(collection, (/**
+             * @param {?} item
+             * @return {?}
+             */
+            (item) => {
                 itemTrackBy = this._trackByFn(index, item);
                 if (record === null || !looseIdentical(record.trackById, itemTrackBy)) {
                     record = this._mismatch(record, item, itemTrackBy, index);
@@ -18534,7 +18878,7 @@ class DefaultIterableDiffer {
                 }
                 record = record._next;
                 index++;
-            });
+            }));
             ((/** @type {?} */ (this))).length = index;
         }
         this._truncate(record);
@@ -19173,7 +19517,7 @@ function getPreviousIndex(item, addRemoveOffset, moveOffsets) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @template K, V
@@ -19298,7 +19642,12 @@ class DefaultKeyValueDiffer {
         /** @type {?} */
         let insertBefore = this._mapHead;
         this._appendAfter = null;
-        this._forEach(map, (value, key) => {
+        this._forEach(map, (/**
+         * @param {?} value
+         * @param {?} key
+         * @return {?}
+         */
+        (value, key) => {
             if (insertBefore && insertBefore.key === key) {
                 this._maybeAddToChanges(insertBefore, value);
                 this._appendAfter = insertBefore;
@@ -19309,7 +19658,7 @@ class DefaultKeyValueDiffer {
                 const record = this._getOrCreateRecordForKey(key, value);
                 insertBefore = this._insertBeforeOrAppend(insertBefore, record);
             }
-        });
+        }));
         // Items remaining at the end of the list have been deleted
         if (insertBefore) {
             if (insertBefore._prev) {
@@ -19486,7 +19835,11 @@ class DefaultKeyValueDiffer {
             obj.forEach(fn);
         }
         else {
-            Object.keys(obj).forEach(k => fn(obj[k], k));
+            Object.keys(obj).forEach((/**
+             * @param {?} k
+             * @return {?}
+             */
+            k => fn(obj[k], k)));
         }
     }
 }
@@ -19530,7 +19883,7 @@ class KeyValueChangeRecord_ {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
@@ -19580,7 +19933,11 @@ class IterableDiffers {
     static extend(factories) {
         return {
             provide: IterableDiffers,
-            useFactory: (parent) => {
+            useFactory: (/**
+             * @param {?} parent
+             * @return {?}
+             */
+            (parent) => {
                 if (!parent) {
                     // Typically would occur when calling IterableDiffers.extend inside of dependencies passed
                     // to
@@ -19588,7 +19945,7 @@ class IterableDiffers {
                     throw new Error('Cannot extend IterableDiffers without a parent injector');
                 }
                 return IterableDiffers.create(factories, parent);
-            },
+            }),
             // Dependency technically isn't optional, but we can provide a better error message this way.
             deps: [[IterableDiffers, new SkipSelf(), new Optional()]]
         };
@@ -19599,7 +19956,11 @@ class IterableDiffers {
      */
     find(iterable) {
         /** @type {?} */
-        const factory = this.factories.find(f => f.supports(iterable));
+        const factory = this.factories.find((/**
+         * @param {?} f
+         * @return {?}
+         */
+        f => f.supports(iterable)));
         if (factory != null) {
             return factory;
         }
@@ -19611,7 +19972,10 @@ class IterableDiffers {
 /** @nocollapse */
 /** @nocollapse */ IterableDiffers.ngInjectableDef = defineInjectable({
     providedIn: 'root',
-    factory: () => new IterableDiffers([new DefaultIterableDifferFactory()])
+    factory: (/**
+     * @nocollapse @return {?}
+     */
+    () => new IterableDiffers([new DefaultIterableDifferFactory()]))
 });
 /**
  * @param {?} type
@@ -19623,7 +19987,7 @@ function getTypeNameForDebugging(type) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
@@ -19675,14 +20039,18 @@ class KeyValueDiffers {
     static extend(factories) {
         return {
             provide: KeyValueDiffers,
-            useFactory: (parent) => {
+            useFactory: (/**
+             * @param {?} parent
+             * @return {?}
+             */
+            (parent) => {
                 if (!parent) {
                     // Typically would occur when calling KeyValueDiffers.extend inside of dependencies passed
                     // to bootstrap(), which would override default pipes instead of extending them.
                     throw new Error('Cannot extend KeyValueDiffers without a parent injector');
                 }
                 return KeyValueDiffers.create(factories, parent);
-            },
+            }),
             // Dependency technically isn't optional, but we can provide a better error message this way.
             deps: [[KeyValueDiffers, new SkipSelf(), new Optional()]]
         };
@@ -19693,7 +20061,11 @@ class KeyValueDiffers {
      */
     find(kv) {
         /** @type {?} */
-        const factory = this.factories.find(f => f.supports(kv));
+        const factory = this.factories.find((/**
+         * @param {?} f
+         * @return {?}
+         */
+        f => f.supports(kv)));
         if (factory) {
             return factory;
         }
@@ -19703,12 +20075,15 @@ class KeyValueDiffers {
 /** @nocollapse */
 /** @nocollapse */ KeyValueDiffers.ngInjectableDef = defineInjectable({
     providedIn: 'root',
-    factory: () => new KeyValueDiffers([new DefaultKeyValueDifferFactory()])
+    factory: (/**
+     * @nocollapse @return {?}
+     */
+    () => new KeyValueDiffers([new DefaultKeyValueDifferFactory()]))
 });
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Base class for Angular Views, provides change detection functionality.
@@ -19759,17 +20134,24 @@ class ChangeDetectorRef {
  * \@internal
  * @nocollapse
  */
-ChangeDetectorRef.__NG_ELEMENT_ID__ = () => SWITCH_CHANGE_DETECTOR_REF_FACTORY();
+ChangeDetectorRef.__NG_ELEMENT_ID__ = (/**
+ * @return {?}
+ */
+() => SWITCH_CHANGE_DETECTOR_REF_FACTORY());
 /** @type {?} */
 const SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ = injectChangeDetectorRef;
 /** @type {?} */
-const SWITCH_CHANGE_DETECTOR_REF_FACTORY__PRE_R3__ = (...args) => { };
+const SWITCH_CHANGE_DETECTOR_REF_FACTORY__PRE_R3__ = (/**
+ * @param {...?} args
+ * @return {?}
+ */
+(...args) => { });
 /** @type {?} */
 const SWITCH_CHANGE_DETECTOR_REF_FACTORY = SWITCH_CHANGE_DETECTOR_REF_FACTORY__PRE_R3__;
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Structural diffing for `Object`s and `Map`s.
@@ -19788,7 +20170,7 @@ const defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Represents an embedded template that can be used to instantiate embedded views.
@@ -19816,7 +20198,10 @@ class TemplateRef {
  * \@internal
  * @nocollapse
  */
-TemplateRef.__NG_ELEMENT_ID__ = () => SWITCH_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef);
+TemplateRef.__NG_ELEMENT_ID__ = (/**
+ * @return {?}
+ */
+() => SWITCH_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef));
 /** @type {?} */
 const SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ = injectTemplateRef;
 /** @type {?} */
@@ -19826,7 +20211,7 @@ const SWITCH_TEMPLATE_REF_FACTORY = SWITCH_TEMPLATE_REF_FACTORY__PRE_R3__;
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Represents a container where one or more views can be attached to a component.
@@ -19850,7 +20235,10 @@ class ViewContainerRef {
  * \@internal
  * @nocollapse
  */
-ViewContainerRef.__NG_ELEMENT_ID__ = () => SWITCH_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef);
+ViewContainerRef.__NG_ELEMENT_ID__ = (/**
+ * @return {?}
+ */
+() => SWITCH_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef));
 /** @type {?} */
 const SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ = injectViewContainerRef;
 /** @type {?} */
@@ -19860,7 +20248,7 @@ const SWITCH_VIEW_CONTAINER_REF_FACTORY = SWITCH_VIEW_CONTAINER_REF_FACTORY__PRE
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @param {?} context
@@ -19930,7 +20318,7 @@ function viewDestroyedError(action) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 // Called before each cycle of a view's check to detect whether this is in the
 // initState for which we need to call ngOnInit, ngAfterContentInit or ngAfterViewInit
@@ -20056,10 +20444,13 @@ const Services = {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
-const NOOP = () => { };
+const NOOP = (/**
+ * @return {?}
+ */
+() => { });
 /** @type {?} */
 const _tokenKeyCache = new Map();
 /**
@@ -20314,7 +20705,11 @@ function splitMatchedQueriesDsl(matchedQueriesDsl) {
     /** @type {?} */
     const references = {};
     if (matchedQueriesDsl) {
-        matchedQueriesDsl.forEach(([queryId, valueType]) => {
+        matchedQueriesDsl.forEach((/**
+         * @param {?} __0
+         * @return {?}
+         */
+        ([queryId, valueType]) => {
             if (typeof queryId === 'number') {
                 matchedQueries[queryId] = valueType;
                 matchedQueryIds |= filterQueryId(queryId);
@@ -20322,7 +20717,7 @@ function splitMatchedQueriesDsl(matchedQueriesDsl) {
             else {
                 references[queryId] = valueType;
             }
-        });
+        }));
     }
     return { matchedQueries, references, matchedQueryIds };
 }
@@ -20332,7 +20727,11 @@ function splitMatchedQueriesDsl(matchedQueriesDsl) {
  * @return {?}
  */
 function splitDepsDsl(deps, sourceName) {
-    return deps.map(value => {
+    return deps.map((/**
+     * @param {?} value
+     * @return {?}
+     */
+    value => {
         /** @type {?} */
         let token;
         /** @type {?} */
@@ -20348,7 +20747,7 @@ function splitDepsDsl(deps, sourceName) {
             Object.defineProperty(token, SOURCE, { value: sourceName, configurable: true });
         }
         return { flags, token, tokenKey: tokenKey(token) };
-    });
+    }));
 }
 /**
  * @param {?} view
@@ -20385,7 +20784,10 @@ function resolveDefinition(factory) {
     /** @type {?} */
     let value = (/** @type {?} */ ((/** @type {?} */ (DEFINITION_CACHE.get(factory)))));
     if (!value) {
-        value = factory(() => NOOP);
+        value = factory((/**
+         * @return {?}
+         */
+        () => NOOP));
         value.factory = factory;
         DEFINITION_CACHE.set(factory, value);
     }
@@ -20660,7 +21062,7 @@ const EMPTY_MAP = {};
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const UNDEFINED_VALUE = new Object();
@@ -20937,7 +21339,7 @@ function callNgModuleLifecycle(ngModule, lifecycles) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @param {?} parentView
@@ -21132,7 +21534,7 @@ function removeFromArray(arr, index) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const EMPTY_CONTEXT = new Object();
@@ -21905,7 +22307,11 @@ class NgModuleRef_ {
         }
         this._destroyed = true;
         callNgModuleLifecycle(this, 131072 /* OnDestroy */);
-        this._destroyListeners.forEach((listener) => listener());
+        this._destroyListeners.forEach((/**
+         * @param {?} listener
+         * @return {?}
+         */
+        (listener) => listener()));
     }
     /**
      * @param {?} callback
@@ -21916,7 +22322,7 @@ class NgModuleRef_ {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const RendererV1TokenKey = tokenKey(Renderer);
@@ -22102,7 +22508,11 @@ function createDirectiveInstance(view, def) {
  * @return {?}
  */
 function eventHandlerClosure(view, index, eventName) {
-    return (event) => dispatchEvent(view, index, eventName, event);
+    return (/**
+     * @param {?} event
+     * @return {?}
+     */
+    (event) => dispatchEvent(view, index, eventName, event));
 }
 /**
  * @param {?} view
@@ -22605,7 +23015,7 @@ function callProviderLifecycles(view, index, lifecycles, initIndex) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 class ComponentFactoryResolver$1 extends ComponentFactoryResolver {
     /**
@@ -22647,7 +23057,10 @@ function toRefArray(map) {
  * Default {\@link RootContext} for all components rendered with {\@link renderComponent}.
  * @type {?}
  */
-const ROOT_CONTEXT = new InjectionToken('ROOT_CONTEXT_TOKEN', { providedIn: 'root', factory: () => createRootContext(inject(SCHEDULER)) });
+const ROOT_CONTEXT = new InjectionToken('ROOT_CONTEXT_TOKEN', { providedIn: 'root', factory: (/**
+     * @return {?}
+     */
+    () => createRootContext(inject(SCHEDULER))) });
 /**
  * A change detection scheduler token for {\@link RootContext}. This token is the default value used
  * for the default `RootContext` found in the {\@link ROOT_CONTEXT} token.
@@ -22655,7 +23068,10 @@ const ROOT_CONTEXT = new InjectionToken('ROOT_CONTEXT_TOKEN', { providedIn: 'roo
  */
 const SCHEDULER = new InjectionToken('SCHEDULER_TOKEN', {
     providedIn: 'root',
-    factory: () => defaultScheduler,
+    factory: (/**
+     * @return {?}
+     */
+    () => defaultScheduler),
 });
 /**
  * @param {?} rootViewInjector
@@ -22664,7 +23080,14 @@ const SCHEDULER = new InjectionToken('SCHEDULER_TOKEN', {
  */
 function createChainedInjector(rootViewInjector, moduleInjector) {
     return {
-        get: (token, notFoundValue, flags) => {
+        get: (/**
+         * @template T
+         * @param {?} token
+         * @param {?=} notFoundValue
+         * @param {?=} flags
+         * @return {?}
+         */
+        (token, notFoundValue, flags) => {
             /** @type {?} */
             const value = rootViewInjector.get(token, (/** @type {?} */ (NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)), flags);
             if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR ||
@@ -22677,7 +23100,7 @@ function createChainedInjector(rootViewInjector, moduleInjector) {
                 return value;
             }
             return moduleInjector.get(token, notFoundValue, flags);
-        }
+        })
     };
 }
 /**
@@ -22766,7 +23189,11 @@ class ComponentFactory$1 extends ComponentFactory {
                 // case). Here we do normalize passed data structure to be an array of arrays to avoid
                 // complex checks down the line.
                 tElementNode.projection =
-                    projectableNodes.map((nodesforSlot) => { return Array.from(nodesforSlot); });
+                    projectableNodes.map((/**
+                     * @param {?} nodesforSlot
+                     * @return {?}
+                     */
+                    (nodesforSlot) => { return Array.from(nodesforSlot); }));
             }
             // TODO: should LifecycleHooksFeature and other host features be generated by the compiler and
             // executed here?
@@ -22826,7 +23253,11 @@ class ComponentRef$1 extends ComponentRef {
      */
     destroy() {
         ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
-        (/** @type {?} */ (this.destroyCbs)).forEach(fn => fn());
+        (/** @type {?} */ (this.destroyCbs)).forEach((/**
+         * @param {?} fn
+         * @return {?}
+         */
+        fn => fn()));
         this.destroyCbs = null;
         !this.hostView.destroyed && this.hostView.destroy();
     }
@@ -22842,7 +23273,7 @@ class ComponentRef$1 extends ComponentRef {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Marks that the next string is for element.
@@ -22866,7 +23297,7 @@ const COMMENT_MARKER = {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -22890,7 +23321,7 @@ function addAllToArray(items, arr) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const MARKER = `�`;
@@ -22997,7 +23428,13 @@ function parseICUBlock(pattern) {
     let icuType = 1 /* plural */;
     /** @type {?} */
     let mainBinding = 0;
-    pattern = pattern.replace(ICU_BLOCK_REGEXP, function (str, binding, type) {
+    pattern = pattern.replace(ICU_BLOCK_REGEXP, (/**
+     * @param {?} str
+     * @param {?} binding
+     * @param {?} type
+     * @return {?}
+     */
+    function (str, binding, type) {
         if (type === 'select') {
             icuType = 0 /* select */;
         }
@@ -23006,7 +23443,7 @@ function parseICUBlock(pattern) {
         }
         mainBinding = parseInt(binding.substr(1), 10);
         return '';
-    });
+    }));
     /** @type {?} */
     const parts = (/** @type {?} */ (extractParts(pattern)));
     // Looking for (key block)+ sequence. One of the keys has to be "other".
@@ -23424,13 +23861,23 @@ function i18nPostprocess(message, replacements = {}) {
         const matches = {};
         /** @type {?} */
         const templateIdsStack = [ROOT_TEMPLATE_ID];
-        result = result.replace(PP_PLACEHOLDERS_REGEXP, (m, phs, tmpl) => {
+        result = result.replace(PP_PLACEHOLDERS_REGEXP, (/**
+         * @param {?} m
+         * @param {?} phs
+         * @param {?} tmpl
+         * @return {?}
+         */
+        (m, phs, tmpl) => {
             /** @type {?} */
             const content = phs || tmpl;
             if (!matches[content]) {
                 /** @type {?} */
                 const placeholders = [];
-                content.split('|').forEach((placeholder) => {
+                content.split('|').forEach((/**
+                 * @param {?} placeholder
+                 * @return {?}
+                 */
+                (placeholder) => {
                     /** @type {?} */
                     const match = placeholder.match(PP_TEMPLATE_ID_REGEXP);
                     /** @type {?} */
@@ -23438,7 +23885,7 @@ function i18nPostprocess(message, replacements = {}) {
                     /** @type {?} */
                     const isCloseTemplateTag = PP_CLOSE_TEMPLATE_REGEXP.test(placeholder);
                     placeholders.push([templateId, isCloseTemplateTag, placeholder]);
-                });
+                }));
                 matches[content] = placeholders;
             }
             if (!matches[content].length) {
@@ -23468,10 +23915,14 @@ function i18nPostprocess(message, replacements = {}) {
             // remove processed tag from the list
             placeholders.splice(idx, 1);
             return placeholder;
-        });
+        }));
         // verify that we injected all values
         /** @type {?} */
-        const hasUnmatchedValues = Object.keys(matches).some(key => !!matches[key].length);
+        const hasUnmatchedValues = Object.keys(matches).some((/**
+         * @param {?} key
+         * @return {?}
+         */
+        key => !!matches[key].length));
         if (hasUnmatchedValues) {
             throw new Error(`i18n postprocess: unmatched values - ${JSON.stringify(matches)}`);
         }
@@ -23483,14 +23934,28 @@ function i18nPostprocess(message, replacements = {}) {
     /**
      * Step 2: replace all ICU vars (like "VAR_PLURAL")
      */
-    result = result.replace(PP_ICU_VARS_REGEXP, (match, start, key, _type, _idx, end) => {
+    result = result.replace(PP_ICU_VARS_REGEXP, (/**
+     * @param {?} match
+     * @param {?} start
+     * @param {?} key
+     * @param {?} _type
+     * @param {?} _idx
+     * @param {?} end
+     * @return {?}
+     */
+    (match, start, key, _type, _idx, end) => {
         return replacements.hasOwnProperty(key) ? `${start}${replacements[key]}${end}` : match;
-    });
+    }));
     /**
      * Step 3: replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�) in case
      * multiple ICUs have the same placeholder name
      */
-    result = result.replace(PP_ICUS_REGEXP, (match, key) => {
+    result = result.replace(PP_ICUS_REGEXP, (/**
+     * @param {?} match
+     * @param {?} key
+     * @return {?}
+     */
+    (match, key) => {
         if (replacements.hasOwnProperty(key)) {
             /** @type {?} */
             const list = (/** @type {?} */ (replacements[key]));
@@ -23500,7 +23965,7 @@ function i18nPostprocess(message, replacements = {}) {
             return (/** @type {?} */ (list.shift()));
         }
         return match;
-    });
+    }));
     return result;
 }
 /**
@@ -24641,7 +25106,7 @@ function parseNodes(currentNode, icuCase, parentIndex, nestedIcus, tIcus, expand
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const COMPONENT_FACTORY_RESOLVER = {
@@ -24667,7 +25132,7 @@ class NgModuleRef$1 extends NgModuleRef {
         /** @type {?} */
         /** @nocollapse */ const ngModuleDef = getNgModuleDef(ngModuleType);
         ngDevMode && assertDefined(ngModuleDef, `NgModule '${stringify(ngModuleType)}' is not a subtype of 'NgModuleType'.`);
-        this._bootstrapComponents = (/** @type {?} */ (ngModuleDef)).bootstrap;
+        this._bootstrapComponents = maybeUnwrapFn((/** @type {?} */ (ngModuleDef)).bootstrap);
         /** @type {?} */
         const additionalProviders = [
             {
@@ -24705,7 +25170,11 @@ class NgModuleRef$1 extends NgModuleRef {
         /** @type {?} */
         const injector = this._r3Injector;
         !injector.destroyed && injector.destroy();
-        (/** @type {?} */ (this.destroyCbs)).forEach(fn => fn());
+        (/** @type {?} */ (this.destroyCbs)).forEach((/**
+         * @param {?} fn
+         * @return {?}
+         */
+        fn => fn()));
         this.destroyCbs = null;
     }
     /**
@@ -24739,7 +25208,7 @@ class NgModuleFactory$1 extends NgModuleFactory {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Adds decorator, constructor, and property metadata to a given type via static metadata fields
@@ -24788,7 +25257,7 @@ function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Bindings for pure functions are stored after regular bindings.
@@ -25060,7 +25529,7 @@ function pureFunctionV(slotOffset, pureFn, exps, thisArg) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Create a pipe.
@@ -25234,7 +25703,7 @@ function unwrapValue$1(newValue) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Use in directives and components to emit custom events synchronously
@@ -25322,32 +25791,101 @@ class EventEmitter extends Subject {
         /** @type {?} */
         let schedulerFn;
         /** @type {?} */
-        let errorFn = (err) => null;
+        let errorFn = (/**
+         * @param {?} err
+         * @return {?}
+         */
+        (err) => null);
         /** @type {?} */
-        let completeFn = () => null;
+        let completeFn = (/**
+         * @return {?}
+         */
+        () => null);
         if (generatorOrNext && typeof generatorOrNext === 'object') {
-            schedulerFn = this.__isAsync ? (value) => {
-                setTimeout(() => generatorOrNext.next(value));
-            } : (value) => { generatorOrNext.next(value); };
+            schedulerFn = this.__isAsync ? (/**
+             * @param {?} value
+             * @return {?}
+             */
+            (value) => {
+                setTimeout((/**
+                 * @return {?}
+                 */
+                () => generatorOrNext.next(value)));
+            }) : (/**
+             * @param {?} value
+             * @return {?}
+             */
+            (value) => { generatorOrNext.next(value); });
             if (generatorOrNext.error) {
-                errorFn = this.__isAsync ? (err) => { setTimeout(() => generatorOrNext.error(err)); } :
-                    (err) => { generatorOrNext.error(err); };
+                errorFn = this.__isAsync ? (/**
+                 * @param {?} err
+                 * @return {?}
+                 */
+                (err) => { setTimeout((/**
+                 * @return {?}
+                 */
+                () => generatorOrNext.error(err))); }) :
+                    (/**
+                     * @param {?} err
+                     * @return {?}
+                     */
+                    (err) => { generatorOrNext.error(err); });
             }
             if (generatorOrNext.complete) {
-                completeFn = this.__isAsync ? () => { setTimeout(() => generatorOrNext.complete()); } :
-                    () => { generatorOrNext.complete(); };
+                completeFn = this.__isAsync ? (/**
+                 * @return {?}
+                 */
+                () => { setTimeout((/**
+                 * @return {?}
+                 */
+                () => generatorOrNext.complete())); }) :
+                    (/**
+                     * @return {?}
+                     */
+                    () => { generatorOrNext.complete(); });
             }
         }
         else {
-            schedulerFn = this.__isAsync ? (value) => { setTimeout(() => generatorOrNext(value)); } :
-                (value) => { generatorOrNext(value); };
+            schedulerFn = this.__isAsync ? (/**
+             * @param {?} value
+             * @return {?}
+             */
+            (value) => { setTimeout((/**
+             * @return {?}
+             */
+            () => generatorOrNext(value))); }) :
+                (/**
+                 * @param {?} value
+                 * @return {?}
+                 */
+                (value) => { generatorOrNext(value); });
             if (error) {
                 errorFn =
-                    this.__isAsync ? (err) => { setTimeout(() => error(err)); } : (err) => { error(err); };
+                    this.__isAsync ? (/**
+                     * @param {?} err
+                     * @return {?}
+                     */
+                    (err) => { setTimeout((/**
+                     * @return {?}
+                     */
+                    () => error(err))); }) : (/**
+                     * @param {?} err
+                     * @return {?}
+                     */
+                    (err) => { error(err); });
             }
             if (complete) {
                 completeFn =
-                    this.__isAsync ? () => { setTimeout(() => complete()); } : () => { complete(); };
+                    this.__isAsync ? (/**
+                     * @return {?}
+                     */
+                    () => { setTimeout((/**
+                     * @return {?}
+                     */
+                    () => complete())); }) : (/**
+                     * @return {?}
+                     */
+                    () => { complete(); });
             }
         }
         /** @type {?} */
@@ -25361,7 +25899,7 @@ class EventEmitter extends Subject {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * An unmodifiable list of items that Angular keeps up to date when the state
@@ -25497,26 +26035,31 @@ class QueryList {
  * @return {?}
  */
 function flatten$1(list) {
-    return list.reduce((flat, item) => {
+    return list.reduce((/**
+     * @param {?} flat
+     * @param {?} item
+     * @return {?}
+     */
+    (flat, item) => {
         /** @type {?} */
         const flatItem = Array.isArray(item) ? flatten$1(item) : item;
         return ((/** @type {?} */ (flat))).concat(flatItem);
-    }, []);
+    }), []);
 }
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 class LQueries_ {
     /**
@@ -26037,7 +26580,7 @@ function loadContentQuery() {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
@@ -26052,12 +26595,12 @@ function templateRefExtractor(tNode, currentView) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * A mapping of the \@angular/core API surface used in generated expressions to the actual symbols.
@@ -26175,7 +26718,7 @@ const angularCoreEnv = {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Used to load ng module factories.
@@ -26267,7 +26810,7 @@ function noModuleError(id) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const EMPTY_ARRAY$4 = [];
@@ -26353,7 +26896,10 @@ function compileNgModuleDefs(moduleType, ngModule) {
     /** @nocollapse */ let ngModuleDef = null;
     Object.defineProperty(moduleType, NG_MODULE_DEF, {
         configurable: true,
-        get: () => {
+        get: (/**
+         * @return {?}
+         */
+        () => {
             if (ngModuleDef === null) {
                 ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, `ng://${moduleType.name}/ngModuleDef.js`, {
                     type: moduleType,
@@ -26368,7 +26914,7 @@ function compileNgModuleDefs(moduleType, ngModule) {
                 });
             }
             return ngModuleDef;
-        }
+        })
     });
     if (ngModule.id) {
         registerNgModuleType(ngModule.id, moduleType);
@@ -26376,7 +26922,10 @@ function compileNgModuleDefs(moduleType, ngModule) {
     /** @type {?} */
     /** @nocollapse */ let ngInjectorDef = null;
     Object.defineProperty(moduleType, NG_INJECTOR_DEF, {
-        get: () => {
+        get: (/**
+         * @return {?}
+         */
+        () => {
             if (ngInjectorDef === null) {
                 ngDevMode && verifySemanticsOfNgModuleDef((/** @type {?} */ ((/** @type {?} */ (moduleType)))));
                 /** @type {?} */
@@ -26393,7 +26942,7 @@ function compileNgModuleDefs(moduleType, ngModule) {
                 ngInjectorDef = getCompilerFacade().compileInjector(angularCoreEnv, `ng://${moduleType.name}/ngInjectorDef.js`, meta);
             }
             return ngInjectorDef;
-        },
+        }),
         // Make the property configurable in dev mode to allow overriding in tests
         configurable: !!ngDevMode,
     });
@@ -26411,15 +26960,21 @@ function verifySemanticsOfNgModuleDef(moduleType) {
     /** @nocollapse */ const ngModuleDef = getNgModuleDef(moduleType, true);
     /** @type {?} */
     const errors = [];
-    ngModuleDef.declarations.forEach(verifyDeclarationsHaveDefinitions);
+    /** @type {?} */
+    const declarations = maybeUnwrapFn(ngModuleDef.declarations);
+    /** @type {?} */
+    const imports = maybeUnwrapFn(ngModuleDef.imports);
+    /** @type {?} */
+    const exports = maybeUnwrapFn(ngModuleDef.exports);
+    declarations.forEach(verifyDeclarationsHaveDefinitions);
     /** @type {?} */
     const combinedDeclarations = [
-        ...ngModuleDef.declarations.map(resolveForwardRef),
-        ...flatten$2(ngModuleDef.imports.map(computeCombinedExports), resolveForwardRef),
+        ...declarations.map(resolveForwardRef),
+        ...flatten$2(imports.map(computeCombinedExports), resolveForwardRef),
     ];
-    ngModuleDef.exports.forEach(verifyExportsAreDeclaredOrReExported);
-    ngModuleDef.declarations.forEach(verifyDeclarationIsUnique);
-    ngModuleDef.declarations.forEach(verifyComponentEntryComponentsIsPartOfNgModule);
+    exports.forEach(verifyExportsAreDeclaredOrReExported);
+    declarations.forEach(verifyDeclarationIsUnique);
+    declarations.forEach(verifyComponentEntryComponentsIsPartOfNgModule);
     /** @type {?} */
     const ngModule = getAnnotation(moduleType, 'NgModule');
     if (ngModule) {
@@ -26592,8 +27147,7 @@ function resetCompiledComponents() {
     moduleQueue.length = 0;
 }
 /**
- * Computes the combined declarations of explicit declarations, as well as declarations inherited
- * by
+ * Computes the combined declarations of explicit declarations, as well as declarations inherited by
  * traversing the exports of imported modules.
  * @param {?} type
  * @return {?}
@@ -26602,7 +27156,11 @@ function computeCombinedExports(type) {
     type = resolveForwardRef(type);
     /** @type {?} */
     /** @nocollapse */ const ngModuleDef = getNgModuleDef(type, true);
-    return [...flatten$2(ngModuleDef.exports.map((type) => {
+    return [...flatten$2(maybeUnwrapFn(ngModuleDef.exports).map((/**
+         * @param {?} type
+         * @return {?}
+         */
+        (type) => {
             /** @type {?} */
             /** @nocollapse */ const ngModuleDef = getNgModuleDef(type);
             if (ngModuleDef) {
@@ -26612,7 +27170,7 @@ function computeCombinedExports(type) {
             else {
                 return type;
             }
-        }))];
+        })))];
 }
 /**
  * Some declared components may be compiled asynchronously, and thus may not have their
@@ -26627,7 +27185,11 @@ function setScopeOnDeclaredComponents(moduleType, ngModule) {
     const declarations = flatten$2(ngModule.declarations || EMPTY_ARRAY$4);
     /** @type {?} */
     const transitiveScopes = transitiveScopesFor(moduleType);
-    declarations.forEach(declaration => {
+    declarations.forEach((/**
+     * @param {?} declaration
+     * @return {?}
+     */
+    declaration => {
         if (declaration.hasOwnProperty(NG_COMPONENT_DEF)) {
             // An `ngComponentDef` field exists - go ahead and patch the component directly.
             /** @type {?} */
@@ -26640,7 +27202,7 @@ function setScopeOnDeclaredComponents(moduleType, ngModule) {
             // Set `ngSelectorScope` for future reference when the component compilation finishes.
             ((/** @type {?} */ (declaration))).ngSelectorScope = moduleType;
         }
-    });
+    }));
 }
 /**
  * Patch the definition of a component with directives and pipes from the compilation scope of
@@ -26651,11 +27213,29 @@ function setScopeOnDeclaredComponents(moduleType, ngModule) {
  * @return {?}
  */
 function patchComponentDefWithScope(componentDef, transitiveScopes) {
-    componentDef.directiveDefs = () => Array.from(transitiveScopes.compilation.directives)
-        .map(dir => dir.hasOwnProperty(NG_COMPONENT_DEF) ? (/** @type {?} */ (getComponentDef(dir))) :
-        (/** @type {?} */ (getDirectiveDef(dir))))
-        .filter(def => !!def);
-    componentDef.pipeDefs = () => Array.from(transitiveScopes.compilation.pipes).map(pipe => (/** @type {?} */ (getPipeDef(pipe))));
+    componentDef.directiveDefs = (/**
+     * @return {?}
+     */
+    () => Array.from(transitiveScopes.compilation.directives)
+        .map((/**
+     * @param {?} dir
+     * @return {?}
+     */
+    dir => dir.hasOwnProperty(NG_COMPONENT_DEF) ? (/** @type {?} */ (getComponentDef(dir))) :
+        (/** @type {?} */ (getDirectiveDef(dir)))))
+        .filter((/**
+     * @param {?} def
+     * @return {?}
+     */
+    def => !!def)));
+    componentDef.pipeDefs = (/**
+     * @return {?}
+     */
+    () => Array.from(transitiveScopes.compilation.pipes).map((/**
+     * @param {?} pipe
+     * @return {?}
+     */
+    pipe => (/** @type {?} */ (getPipeDef(pipe))))));
     componentDef.schemas = transitiveScopes.schemas;
 }
 /**
@@ -26690,7 +27270,11 @@ function transitiveScopesFor(moduleType, processNgModuleFn) {
             pipes: new Set(),
         },
     };
-    def.declarations.forEach(declared => {
+    maybeUnwrapFn(def.declarations).forEach((/**
+     * @param {?} declared
+     * @return {?}
+     */
+    declared => {
         /** @type {?} */
         const declaredWithDefs = (/** @type {?} */ (declared));
         if (getPipeDef(declaredWithDefs)) {
@@ -26702,8 +27286,13 @@ function transitiveScopesFor(moduleType, processNgModuleFn) {
             // directives.
             scopes.compilation.directives.add(declared);
         }
-    });
-    def.imports.forEach((imported) => {
+    }));
+    maybeUnwrapFn(def.imports).forEach((/**
+     * @template I
+     * @param {?} imported
+     * @return {?}
+     */
+    (imported) => {
         /** @type {?} */
         const importedType = (/** @type {?} */ (imported));
         if (!isNgModule(importedType)) {
@@ -26716,10 +27305,23 @@ function transitiveScopesFor(moduleType, processNgModuleFn) {
         // added to the compilation scope of this module.
         /** @type {?} */
         const importedScope = transitiveScopesFor(importedType, processNgModuleFn);
-        importedScope.exported.directives.forEach(entry => scopes.compilation.directives.add(entry));
-        importedScope.exported.pipes.forEach(entry => scopes.compilation.pipes.add(entry));
-    });
-    def.exports.forEach((exported) => {
+        importedScope.exported.directives.forEach((/**
+         * @param {?} entry
+         * @return {?}
+         */
+        entry => scopes.compilation.directives.add(entry)));
+        importedScope.exported.pipes.forEach((/**
+         * @param {?} entry
+         * @return {?}
+         */
+        entry => scopes.compilation.pipes.add(entry)));
+    }));
+    maybeUnwrapFn(def.exports).forEach((/**
+     * @template E
+     * @param {?} exported
+     * @return {?}
+     */
+    (exported) => {
         /** @type {?} */
         const exportedType = (/** @type {?} */ (exported));
         // Either the type is a module, a pipe, or a component/directive (which may not have an
@@ -26729,14 +27331,22 @@ function transitiveScopesFor(moduleType, processNgModuleFn) {
             // added to both the compilation and exported scopes of this module.
             /** @type {?} */
             const exportedScope = transitiveScopesFor(exportedType, processNgModuleFn);
-            exportedScope.exported.directives.forEach(entry => {
+            exportedScope.exported.directives.forEach((/**
+             * @param {?} entry
+             * @return {?}
+             */
+            entry => {
                 scopes.compilation.directives.add(entry);
                 scopes.exported.directives.add(entry);
-            });
-            exportedScope.exported.pipes.forEach(entry => {
+            }));
+            exportedScope.exported.pipes.forEach((/**
+             * @param {?} entry
+             * @return {?}
+             */
+            entry => {
                 scopes.compilation.pipes.add(entry);
                 scopes.exported.pipes.add(entry);
-            });
+            }));
         }
         else if (getPipeDef(exportedType)) {
             scopes.exported.pipes.add(exportedType);
@@ -26744,7 +27354,7 @@ function transitiveScopesFor(moduleType, processNgModuleFn) {
         else {
             scopes.exported.directives.add(exportedType);
         }
-    });
+    }));
     def.transitiveCompileScopes = scopes;
     return scopes;
 }
@@ -26757,14 +27367,18 @@ function transitiveScopesFor(moduleType, processNgModuleFn) {
 function flatten$2(values, mapFn) {
     /** @type {?} */
     const out = [];
-    values.forEach(value => {
+    values.forEach((/**
+     * @param {?} value
+     * @return {?}
+     */
+    value => {
         if (Array.isArray(value)) {
             out.push(...flatten$2(value, mapFn));
         }
         else {
             out.push(mapFn ? mapFn(value) : value);
         }
-    });
+    }));
     return out;
 }
 /**
@@ -26795,7 +27409,7 @@ function isNgModule(value) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Compile an Angular component according to its decorator metadata, and patch the resulting
@@ -26815,7 +27429,10 @@ function compileComponent(type, metadata) {
     // Metadata may have resources which need to be resolved.
     maybeQueueResolutionOfComponentResources(metadata);
     Object.defineProperty(type, NG_COMPONENT_DEF, {
-        get: () => {
+        get: (/**
+         * @return {?}
+         */
+        () => {
             /** @type {?} */
             const compiler = getCompilerFacade();
             if (ngComponentDef === null) {
@@ -26853,7 +27470,7 @@ function compileComponent(type, metadata) {
                 }
             }
             return ngComponentDef;
-        },
+        }),
         // Make the property configurable in dev mode to allow overriding in tests
         configurable: !!ngDevMode,
     });
@@ -26880,7 +27497,10 @@ function compileDirective(type, directive) {
     /** @type {?} */
     /** @nocollapse */ let ngDirectiveDef = null;
     Object.defineProperty(type, NG_DIRECTIVE_DEF, {
-        get: () => {
+        get: (/**
+         * @return {?}
+         */
+        () => {
             if (ngDirectiveDef === null) {
                 /** @type {?} */
                 const name = type && type.name;
@@ -26895,7 +27515,7 @@ function compileDirective(type, directive) {
                 ngDirectiveDef = compiler.compileDirective(angularCoreEnv, sourceMapUrl, facade);
             }
             return ngDirectiveDef;
-        },
+        }),
         // Make the property configurable in dev mode to allow overriding in tests
         configurable: !!ngDevMode,
     });
@@ -26971,7 +27591,11 @@ function extractQueriesMetadata(type, propMetadata, isQueryAnn) {
         if (propMetadata.hasOwnProperty(field)) {
             /** @type {?} */
             const annotations = propMetadata[field];
-            annotations.forEach(ann => {
+            annotations.forEach((/**
+             * @param {?} ann
+             * @return {?}
+             */
+            ann => {
                 if (isQueryAnn(ann)) {
                     if (!ann.selector) {
                         throw new Error(`Can't construct a query for the property "${field}" of ` +
@@ -26982,7 +27606,7 @@ function extractQueriesMetadata(type, propMetadata, isQueryAnn) {
                     }
                     queriesMeta.push(convertToR3QueryMetadata(field, ann));
                 }
-            });
+            }));
         }
     }
     return queriesMeta;
@@ -26995,7 +27619,11 @@ function extractExportAs(exportAs) {
     if (exportAs === undefined) {
         return null;
     }
-    return exportAs.split(',').map(part => part.trim());
+    return exportAs.split(',').map((/**
+     * @param {?} part
+     * @return {?}
+     */
+    part => part.trim()));
 }
 /**
  * @param {?} value
@@ -27027,12 +27655,16 @@ function isInputAnn(value) {
  * @return {?}
  */
 function splitByComma(value) {
-    return value.split(',').map(piece => piece.trim());
+    return value.split(',').map((/**
+     * @param {?} piece
+     * @return {?}
+     */
+    piece => piece.trim()));
 }
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @param {?} type
@@ -27043,7 +27675,10 @@ function compilePipe(type, meta) {
     /** @type {?} */
     /** @nocollapse */ let ngPipeDef = null;
     Object.defineProperty(type, NG_PIPE_DEF, {
-        get: () => {
+        get: (/**
+         * @return {?}
+         */
+        () => {
             if (ngPipeDef === null) {
                 ngPipeDef = getCompilerFacade().compilePipe(angularCoreEnv, `ng://${renderStringify(type)}/ngPipeDef.js`, {
                     type: type,
@@ -27054,7 +27689,7 @@ function compilePipe(type, meta) {
                 });
             }
             return ngPipeDef;
-        },
+        }),
         // Make the property configurable in dev mode to allow overriding in tests
         configurable: !!ngDevMode,
     });
@@ -27062,7 +27697,7 @@ function compilePipe(type, meta) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 // WARNING: interface has both a type and a value, skipping emit
 /**
@@ -27071,7 +27706,16 @@ function compilePipe(type, meta) {
  * \@publicApi
  * @type {?}
  */
-const Directive = makeDecorator('Directive', (dir = {}) => dir, undefined, undefined, (type, meta) => SWITCH_COMPILE_DIRECTIVE(type, meta));
+const Directive = makeDecorator('Directive', (/**
+ * @param {?=} dir
+ * @return {?}
+ */
+(dir = {}) => dir), undefined, undefined, (/**
+ * @param {?} type
+ * @param {?} meta
+ * @return {?}
+ */
+(type, meta) => SWITCH_COMPILE_DIRECTIVE(type, meta)));
 // WARNING: interface has both a type and a value, skipping emit
 /**
  * Component decorator and metadata.
@@ -27080,17 +27724,39 @@ const Directive = makeDecorator('Directive', (dir = {}) => dir, undefined, undef
  * \@publicApi
  * @type {?}
  */
-const Component = makeDecorator('Component', (c = {}) => (Object.assign({ changeDetection: ChangeDetectionStrategy.Default }, c)), Directive, undefined, (type, meta) => SWITCH_COMPILE_COMPONENT(type, meta));
+const Component = makeDecorator('Component', (/**
+ * @param {?=} c
+ * @return {?}
+ */
+(c = {}) => (Object.assign({ changeDetection: ChangeDetectionStrategy.Default }, c))), Directive, undefined, (/**
+ * @param {?} type
+ * @param {?} meta
+ * @return {?}
+ */
+(type, meta) => SWITCH_COMPILE_COMPONENT(type, meta)));
 // WARNING: interface has both a type and a value, skipping emit
 /**
  * \@Annotation
  * \@publicApi
  * @type {?}
  */
-const Pipe = makeDecorator('Pipe', (p) => (Object.assign({ pure: true }, p)), undefined, undefined, (type, meta) => SWITCH_COMPILE_PIPE(type, meta));
+const Pipe = makeDecorator('Pipe', (/**
+ * @param {?} p
+ * @return {?}
+ */
+(p) => (Object.assign({ pure: true }, p))), undefined, undefined, (/**
+ * @param {?} type
+ * @param {?} meta
+ * @return {?}
+ */
+(type, meta) => SWITCH_COMPILE_PIPE(type, meta)));
 // WARNING: interface has both a type and a value, skipping emit
 /** @type {?} */
-const initializeBaseDef = (target) => {
+const initializeBaseDef = (/**
+ * @param {?} target
+ * @return {?}
+ */
+(target) => {
     /** @type {?} */
     const constructor = target.constructor;
     /** @nocollapse @type {?} */
@@ -27106,13 +27772,23 @@ const initializeBaseDef = (target) => {
         fillProperties(baseDef.outputs, inheritedBaseDef.outputs);
         fillProperties(baseDef.declaredInputs, inheritedBaseDef.declaredInputs);
     }
-};
+});
 /**
  * Does the work of creating the `ngBaseDef` property for the `Input` and `Output` decorators.
  * \@param key "inputs" or "outputs"
  * @type {?}
  */
-const updateBaseDefFromIOProp = (getProp) => (target, name, ...args) => {
+const updateBaseDefFromIOProp = (/**
+ * @param {?} getProp
+ * @return {?}
+ */
+(getProp) => (/**
+ * @param {?} target
+ * @param {?} name
+ * @param {...?} args
+ * @return {?}
+ */
+(target, name, ...args) => {
     /** @type {?} */
     const constructor = target.constructor;
     if (!constructor.hasOwnProperty(NG_BASE_DEF)) {
@@ -27123,27 +27799,47 @@ const updateBaseDefFromIOProp = (getProp) => (target, name, ...args) => {
     /** @type {?} */
     const defProp = getProp(baseDef);
     defProp[name] = args[0] || name;
-};
+}));
 /**
  * \@Annotation
  * \@publicApi
  * @type {?}
  */
-const Input = makePropDecorator('Input', (bindingPropertyName) => ({ bindingPropertyName }), undefined, updateBaseDefFromIOProp(baseDef => baseDef.inputs || {}));
+const Input = makePropDecorator('Input', (/**
+ * @param {?=} bindingPropertyName
+ * @return {?}
+ */
+(bindingPropertyName) => ({ bindingPropertyName })), undefined, updateBaseDefFromIOProp((/**
+ * @param {?} baseDef
+ * @return {?}
+ */
+baseDef => baseDef.inputs || {})));
 // WARNING: interface has both a type and a value, skipping emit
 /**
  * \@Annotation
  * \@publicApi
  * @type {?}
  */
-const Output = makePropDecorator('Output', (bindingPropertyName) => ({ bindingPropertyName }), undefined, updateBaseDefFromIOProp(baseDef => baseDef.outputs || {}));
+const Output = makePropDecorator('Output', (/**
+ * @param {?=} bindingPropertyName
+ * @return {?}
+ */
+(bindingPropertyName) => ({ bindingPropertyName })), undefined, updateBaseDefFromIOProp((/**
+ * @param {?} baseDef
+ * @return {?}
+ */
+baseDef => baseDef.outputs || {})));
 // WARNING: interface has both a type and a value, skipping emit
 /**
  * \@Annotation
  * \@publicApi
  * @type {?}
  */
-const HostBinding = makePropDecorator('HostBinding', (hostPropertyName) => ({ hostPropertyName }));
+const HostBinding = makePropDecorator('HostBinding', (/**
+ * @param {?=} hostPropertyName
+ * @return {?}
+ */
+(hostPropertyName) => ({ hostPropertyName })));
 // WARNING: interface has both a type and a value, skipping emit
 /**
  * Binds a CSS event to a host listener and supplies configuration metadata.
@@ -27178,7 +27874,12 @@ const HostBinding = makePropDecorator('HostBinding', (hostPropertyName) => ({ ho
  * \@publicApi
  * @type {?}
  */
-const HostListener = makePropDecorator('HostListener', (eventName, args) => ({ eventName, args }));
+const HostListener = makePropDecorator('HostListener', (/**
+ * @param {?=} eventName
+ * @param {?=} args
+ * @return {?}
+ */
+(eventName, args) => ({ eventName, args })));
 /** @type {?} */
 const SWITCH_COMPILE_COMPONENT__POST_R3__ = compileComponent;
 /** @type {?} */
@@ -27200,7 +27901,7 @@ const SWITCH_COMPILE_PIPE = SWITCH_COMPILE_PIPE__PRE_R3__;
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 // WARNING: interface has both a type and a value, skipping emit
 /**
@@ -27208,8 +27909,11 @@ const SWITCH_COMPILE_PIPE = SWITCH_COMPILE_PIPE__PRE_R3__;
  * \@publicApi
  * @type {?}
  */
-const NgModule = makeDecorator('NgModule', (ngModule) => ngModule, undefined, undefined, 
-/**
+const NgModule = makeDecorator('NgModule', (/**
+ * @param {?} ngModule
+ * @return {?}
+ */
+(ngModule) => ngModule), undefined, undefined, (/**
  * Decorator that marks the following class as an NgModule, and supplies
  * configuration metadata for it.
  *
@@ -27219,8 +27923,11 @@ const NgModule = makeDecorator('NgModule', (ngModule) => ngModule, undefined, un
  * dependencies the NgModule members.
  * * The `imports` and `exports` options bring in members from other modules, and make
  * this module's members available to others.
+ * @param {?} type
+ * @param {?} meta
+ * @return {?}
  */
-(type, meta) => SWITCH_COMPILE_NGMODULE(type, meta));
+(type, meta) => SWITCH_COMPILE_NGMODULE(type, meta)));
 /**
  * @param {?} moduleType
  * @param {?} metadata
@@ -27247,12 +27954,12 @@ const SWITCH_COMPILE_NGMODULE = SWITCH_COMPILE_NGMODULE__PRE_R3__;
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * A function that will be executed when an application is initialized.
@@ -27274,10 +27981,15 @@ class ApplicationInitStatus {
         this.appInits = appInits;
         this.initialized = false;
         this.done = false;
-        this.donePromise = new Promise((res, rej) => {
+        this.donePromise = new Promise((/**
+         * @param {?} res
+         * @param {?} rej
+         * @return {?}
+         */
+        (res, rej) => {
             this.resolve = res;
             this.reject = rej;
-        });
+        }));
     }
     /**
      * \@internal
@@ -27290,10 +28002,13 @@ class ApplicationInitStatus {
         /** @type {?} */
         const asyncInitPromises = [];
         /** @type {?} */
-        const complete = () => {
+        const complete = (/**
+         * @return {?}
+         */
+        () => {
             ((/** @type {?} */ (this))).done = true;
             this.resolve();
-        };
+        });
         if (this.appInits) {
             for (let i = 0; i < this.appInits.length; i++) {
                 /** @type {?} */
@@ -27303,7 +28018,14 @@ class ApplicationInitStatus {
                 }
             }
         }
-        Promise.all(asyncInitPromises).then(() => { complete(); }).catch(e => { this.reject(e); });
+        Promise.all(asyncInitPromises).then((/**
+         * @return {?}
+         */
+        () => { complete(); })).catch((/**
+         * @param {?} e
+         * @return {?}
+         */
+        e => { this.reject(e); }));
         if (asyncInitPromises.length === 0) {
             complete();
         }
@@ -27320,7 +28042,7 @@ ApplicationInitStatus.ctorParameters = () => [
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * A DI Token representing a unique string id assigned to the application by Angular and used
@@ -27387,7 +28109,7 @@ const PACKAGE_ROOT_URL = new InjectionToken('Application Packages Root URL');
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 class Console {
     /**
@@ -27414,7 +28136,7 @@ Console.decorators = [
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Combination of NgModuleFactory and ComponentFactorys.
@@ -27441,44 +28163,70 @@ function _throwError() {
 /** @type {?} */
 const Compiler_compileModuleSync__PRE_R3__ = (/** @type {?} */ (_throwError));
 /** @type {?} */
-const Compiler_compileModuleSync__POST_R3__ = function (moduleType) {
+const Compiler_compileModuleSync__POST_R3__ = (/**
+ * @template T
+ * @param {?} moduleType
+ * @return {?}
+ */
+function (moduleType) {
     return new NgModuleFactory$1(moduleType);
-};
+});
 /** @type {?} */
 const Compiler_compileModuleSync = Compiler_compileModuleSync__PRE_R3__;
 /** @type {?} */
 const Compiler_compileModuleAsync__PRE_R3__ = (/** @type {?} */ (_throwError));
 /** @type {?} */
-const Compiler_compileModuleAsync__POST_R3__ = function (moduleType) {
+const Compiler_compileModuleAsync__POST_R3__ = (/**
+ * @template T
+ * @param {?} moduleType
+ * @return {?}
+ */
+function (moduleType) {
     return Promise.resolve(Compiler_compileModuleSync__POST_R3__(moduleType));
-};
+});
 /** @type {?} */
 const Compiler_compileModuleAsync = Compiler_compileModuleAsync__PRE_R3__;
 /** @type {?} */
 const Compiler_compileModuleAndAllComponentsSync__PRE_R3__ = (/** @type {?} */ (_throwError));
 /** @type {?} */
-const Compiler_compileModuleAndAllComponentsSync__POST_R3__ = function (moduleType) {
+const Compiler_compileModuleAndAllComponentsSync__POST_R3__ = (/**
+ * @template T
+ * @param {?} moduleType
+ * @return {?}
+ */
+function (moduleType) {
     /** @type {?} */
     const ngModuleFactory = Compiler_compileModuleSync__POST_R3__(moduleType);
     /** @type {?} */
     const moduleDef = (/** @type {?} */ (getNgModuleDef(moduleType)));
     /** @type {?} */
-    const componentFactories = moduleDef.declarations.reduce((factories, declaration) => {
+    const componentFactories = maybeUnwrapFn(moduleDef.declarations)
+        .reduce((/**
+     * @param {?} factories
+     * @param {?} declaration
+     * @return {?}
+     */
+    (factories, declaration) => {
         /** @type {?} */
         const componentDef = getComponentDef(declaration);
         componentDef && factories.push(new ComponentFactory$1(componentDef));
         return factories;
-    }, (/** @type {?} */ ([])));
+    }), (/** @type {?} */ ([])));
     return new ModuleWithComponentFactories(ngModuleFactory, componentFactories);
-};
+});
 /** @type {?} */
 const Compiler_compileModuleAndAllComponentsSync = Compiler_compileModuleAndAllComponentsSync__PRE_R3__;
 /** @type {?} */
 const Compiler_compileModuleAndAllComponentsAsync__PRE_R3__ = (/** @type {?} */ (_throwError));
 /** @type {?} */
-const Compiler_compileModuleAndAllComponentsAsync__POST_R3__ = function (moduleType) {
+const Compiler_compileModuleAndAllComponentsAsync__POST_R3__ = (/**
+ * @template T
+ * @param {?} moduleType
+ * @return {?}
+ */
+function (moduleType) {
     return Promise.resolve(Compiler_compileModuleAndAllComponentsSync__POST_R3__(moduleType));
-};
+});
 /** @type {?} */
 const Compiler_compileModuleAndAllComponentsAsync = Compiler_compileModuleAndAllComponentsAsync__PRE_R3__;
 /**
@@ -27551,7 +28299,7 @@ class CompilerFactory {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 let trace;
@@ -27608,7 +28356,7 @@ function endTimeRange(range) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * True if WTF is enabled.
@@ -27654,7 +28402,12 @@ function noopScope(arg0, arg1) {
  * \@publicApi
  * @type {?}
  */
-const wtfCreateScope = wtfEnabled ? createScope : (signature, flags) => noopScope;
+const wtfCreateScope = wtfEnabled ? createScope : (/**
+ * @param {?} signature
+ * @param {?=} flags
+ * @return {?}
+ */
+(signature, flags) => noopScope);
 /**
  * Used to mark end of Scope.
  *
@@ -27665,7 +28418,12 @@ const wtfCreateScope = wtfEnabled ? createScope : (signature, flags) => noopScop
  * \@publicApi
  * @type {?}
  */
-const wtfLeave = wtfEnabled ? leave : (s, r) => r;
+const wtfLeave = wtfEnabled ? leave : (/**
+ * @param {?} s
+ * @param {?=} r
+ * @return {?}
+ */
+(s, r) => r);
 /**
  * Used to mark Async start. Async are similar to scope but they don't have to be strictly nested.
  * The return value is used in the call to [endAsync]. Async ranges only work if WTF has been
@@ -27680,7 +28438,12 @@ const wtfLeave = wtfEnabled ? leave : (s, r) => r;
  * \@publicApi
  * @type {?}
  */
-const wtfStartTimeRange = wtfEnabled ? startTimeRange : (rangeType, action) => null;
+const wtfStartTimeRange = wtfEnabled ? startTimeRange : (/**
+ * @param {?} rangeType
+ * @param {?} action
+ * @return {?}
+ */
+(rangeType, action) => null);
 /**
  * Ends a async time range operation.
  * [range] is the return value from [wtfStartTimeRange] Async ranges only work if WTF has been
@@ -27688,7 +28451,11 @@ const wtfStartTimeRange = wtfEnabled ? startTimeRange : (rangeType, action) => n
  * \@publicApi
  * @type {?}
  */
-const wtfEndTimeRange = wtfEnabled ? endTimeRange : (r) => null;
+const wtfEndTimeRange = wtfEnabled ? endTimeRange : (/**
+ * @param {?} r
+ * @return {?}
+ */
+(r) => null);
 
 /**
  * @license
@@ -27710,7 +28477,7 @@ function scheduleMicroTask(fn) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * An injectable service for executing work inside or outside of the Angular zone.
@@ -27958,7 +28725,10 @@ function checkStable(zone) {
             zone._nesting--;
             if (!zone.hasPendingMicrotasks) {
                 try {
-                    zone.runOutsideAngular(() => zone.onStable.emit(null));
+                    zone.runOutsideAngular((/**
+                     * @return {?}
+                     */
+                    () => zone.onStable.emit(null)));
                 }
                 finally {
                     zone.isStable = true;
@@ -27975,7 +28745,16 @@ function forkInnerZoneWithAngularBehavior(zone) {
     zone._inner = zone._inner.fork({
         name: 'angular',
         properties: (/** @type {?} */ ({ 'isAngularZone': true })),
-        onInvokeTask: (delegate, current, target, task, applyThis, applyArgs) => {
+        onInvokeTask: (/**
+         * @param {?} delegate
+         * @param {?} current
+         * @param {?} target
+         * @param {?} task
+         * @param {?} applyThis
+         * @param {?} applyArgs
+         * @return {?}
+         */
+        (delegate, current, target, task, applyThis, applyArgs) => {
             try {
                 onEnter(zone);
                 return delegate.invokeTask(target, task, applyThis, applyArgs);
@@ -27983,8 +28762,18 @@ function forkInnerZoneWithAngularBehavior(zone) {
             finally {
                 onLeave(zone);
             }
-        },
-        onInvoke: (delegate, current, target, callback, applyThis, applyArgs, source) => {
+        }),
+        onInvoke: (/**
+         * @param {?} delegate
+         * @param {?} current
+         * @param {?} target
+         * @param {?} callback
+         * @param {?} applyThis
+         * @param {?} applyArgs
+         * @param {?} source
+         * @return {?}
+         */
+        (delegate, current, target, callback, applyThis, applyArgs, source) => {
             try {
                 onEnter(zone);
                 return delegate.invoke(target, callback, applyThis, applyArgs, source);
@@ -27992,8 +28781,15 @@ function forkInnerZoneWithAngularBehavior(zone) {
             finally {
                 onLeave(zone);
             }
-        },
-        onHasTask: (delegate, current, target, hasTaskState) => {
+        }),
+        onHasTask: (/**
+         * @param {?} delegate
+         * @param {?} current
+         * @param {?} target
+         * @param {?} hasTaskState
+         * @return {?}
+         */
+        (delegate, current, target, hasTaskState) => {
             delegate.hasTask(target, hasTaskState);
             if (current === target) {
                 // We are only interested in hasTask events which originate from our zone
@@ -28006,12 +28802,22 @@ function forkInnerZoneWithAngularBehavior(zone) {
                     zone.hasPendingMacrotasks = hasTaskState.macroTask;
                 }
             }
-        },
-        onHandleError: (delegate, current, target, error) => {
+        }),
+        onHandleError: (/**
+         * @param {?} delegate
+         * @param {?} current
+         * @param {?} target
+         * @param {?} error
+         * @return {?}
+         */
+        (delegate, current, target, error) => {
             delegate.handleError(target, error);
-            zone.runOutsideAngular(() => zone.onError.emit(error));
+            zone.runOutsideAngular((/**
+             * @return {?}
+             */
+            () => zone.onError.emit(error)));
             return false;
-        }
+        })
     });
 }
 /**
@@ -28072,7 +28878,7 @@ class NoopNgZone {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * The Testability service provides testing hooks that can be accessed from
@@ -28098,10 +28904,13 @@ class Testability {
         this._callbacks = [];
         this.taskTrackingZone = null;
         this._watchAngularEvents();
-        _ngZone.run(() => {
+        _ngZone.run((/**
+         * @return {?}
+         */
+        () => {
             this.taskTrackingZone =
                 typeof Zone == 'undefined' ? null : Zone.current.get('TaskTrackingZone');
-        });
+        }));
     }
     /**
      * @private
@@ -28109,22 +28918,34 @@ class Testability {
      */
     _watchAngularEvents() {
         this._ngZone.onUnstable.subscribe({
-            next: () => {
+            next: (/**
+             * @return {?}
+             */
+            () => {
                 this._didWork = true;
                 this._isZoneStable = false;
-            }
+            })
         });
-        this._ngZone.runOutsideAngular(() => {
+        this._ngZone.runOutsideAngular((/**
+         * @return {?}
+         */
+        () => {
             this._ngZone.onStable.subscribe({
-                next: () => {
+                next: (/**
+                 * @return {?}
+                 */
+                () => {
                     NgZone.assertNotInAngularZone();
-                    scheduleMicroTask(() => {
+                    scheduleMicroTask((/**
+                     * @return {?}
+                     */
+                    () => {
                         this._isZoneStable = true;
                         this._runCallbacksIfReady();
-                    });
-                }
+                    }));
+                })
             });
-        });
+        }));
     }
     /**
      * Increases the number of pending request
@@ -28163,7 +28984,10 @@ class Testability {
     _runCallbacksIfReady() {
         if (this.isStable()) {
             // Schedules the call backs in a new frame so that it is always async.
-            scheduleMicroTask(() => {
+            scheduleMicroTask((/**
+             * @return {?}
+             */
+            () => {
                 while (this._callbacks.length !== 0) {
                     /** @type {?} */
                     let cb = (/** @type {?} */ (this._callbacks.pop()));
@@ -28171,19 +28995,23 @@ class Testability {
                     cb.doneCb(this._didWork);
                 }
                 this._didWork = false;
-            });
+            }));
         }
         else {
             // Still not stable, send updates.
             /** @type {?} */
             let pending = this.getPendingTasks();
-            this._callbacks = this._callbacks.filter((cb) => {
+            this._callbacks = this._callbacks.filter((/**
+             * @param {?} cb
+             * @return {?}
+             */
+            (cb) => {
                 if (cb.updateCb && cb.updateCb(pending)) {
                     clearTimeout(cb.timeoutId);
                     return false;
                 }
                 return true;
-            });
+            }));
             this._didWork = true;
         }
     }
@@ -28196,7 +29024,11 @@ class Testability {
             return [];
         }
         // Copy the tasks data so that we don't leak tasks.
-        return this.taskTrackingZone.macroTasks.map((t) => {
+        return this.taskTrackingZone.macroTasks.map((/**
+         * @param {?} t
+         * @return {?}
+         */
+        (t) => {
             return {
                 source: t.source,
                 // From TaskTrackingZone:
@@ -28204,7 +29036,7 @@ class Testability {
                 creationLocation: (/** @type {?} */ (((/** @type {?} */ (t))).creationLocation)),
                 data: t.data
             };
-        });
+        }));
     }
     /**
      * @private
@@ -28217,10 +29049,17 @@ class Testability {
         /** @type {?} */
         let timeoutId = -1;
         if (timeout && timeout > 0) {
-            timeoutId = setTimeout(() => {
-                this._callbacks = this._callbacks.filter((cb) => cb.timeoutId !== timeoutId);
+            timeoutId = setTimeout((/**
+             * @return {?}
+             */
+            () => {
+                this._callbacks = this._callbacks.filter((/**
+                 * @param {?} cb
+                 * @return {?}
+                 */
+                (cb) => cb.timeoutId !== timeoutId));
                 cb(this._didWork, this.getPendingTasks());
-            }, timeout);
+            }), timeout);
         }
         this._callbacks.push((/** @type {?} */ ({ doneCb: cb, timeoutId: timeoutId, updateCb: updateCb })));
     }
@@ -28365,7 +29204,7 @@ let _testabilityGetter = new _NoopGetTestability();
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 let _platform;
@@ -28402,7 +29241,11 @@ function compileNgModuleFactory__POST_R3__(injector, options, moduleType) {
     /** @type {?} */
     const compilerOptions = injector.get(COMPILER_OPTIONS, []).concat(options);
     /** @type {?} */
-    const compilerProviders = _mergeArrays(compilerOptions.map(o => (/** @type {?} */ (o.providers))));
+    const compilerProviders = _mergeArrays(compilerOptions.map((/**
+     * @param {?} o
+     * @return {?}
+     */
+    o => (/** @type {?} */ (o.providers)))));
     // In case there are no compiler providers, we just return the module factory as
     // there won't be any resource loader. This can happen with Ivy, because AOT compiled
     // modules can be still passed through "bootstrapModule". In that case we shouldn't
@@ -28418,8 +29261,15 @@ function compileNgModuleFactory__POST_R3__(injector, options, moduleType) {
     const resourceLoader = compilerInjector.get(compiler.ResourceLoader);
     // The resource loader can also return a string while the "resolveComponentResources"
     // always expects a promise. Therefore we need to wrap the returned value in a promise.
-    return resolveComponentResources(url => Promise.resolve(resourceLoader.get(url)))
-        .then(() => moduleFactory);
+    return resolveComponentResources((/**
+     * @param {?} url
+     * @return {?}
+     */
+    url => Promise.resolve(resourceLoader.get(url))))
+        .then((/**
+     * @return {?}
+     */
+    () => moduleFactory));
 }
 /** @type {?} */
 let isBoundToModule = isBoundToModule__PRE_R3__;
@@ -28473,7 +29323,11 @@ function createPlatform(injector) {
     /** @type {?} */
     const inits = injector.get(PLATFORM_INITIALIZER, null);
     if (inits)
-        inits.forEach((init) => init());
+        inits.forEach((/**
+         * @param {?} init
+         * @return {?}
+         */
+        (init) => init()));
     return _platform;
 }
 /**
@@ -28490,7 +29344,11 @@ function createPlatformFactory(parentPlatformFactory, name, providers = []) {
     const desc = `Platform: ${name}`;
     /** @type {?} */
     const marker = new InjectionToken(desc);
-    return (extraProviders = []) => {
+    return (/**
+     * @param {?=} extraProviders
+     * @return {?}
+     */
+    (extraProviders = []) => {
         /** @type {?} */
         let platform = getPlatform();
         if (!platform || platform.injector.get(ALLOW_MULTIPLE_PLATFORMS, false)) {
@@ -28504,7 +29362,7 @@ function createPlatformFactory(parentPlatformFactory, name, providers = []) {
             }
         }
         return assertPlatform(marker);
-    };
+    });
 }
 /**
  * Checks that there currently is a platform which contains the given token as a provider.
@@ -28604,7 +29462,10 @@ class PlatformRef {
         const providers = [{ provide: NgZone, useValue: ngZone }];
         // Attention: Don't use ApplicationRef.run here,
         // as we want to be sure that all possible constructor calls are inside `ngZone.run`!
-        return ngZone.run(() => {
+        return ngZone.run((/**
+         * @return {?}
+         */
+        () => {
             /** @type {?} */
             const ngZoneInjector = Injector.create({ providers: providers, parent: this.injector, name: moduleFactory.moduleType.name });
             /** @type {?} */
@@ -28614,18 +29475,34 @@ class PlatformRef {
             if (!exceptionHandler) {
                 throw new Error('No ErrorHandler. Is platform module (BrowserModule) included?');
             }
-            moduleRef.onDestroy(() => remove(this._modules, moduleRef));
-            (/** @type {?} */ (ngZone)).runOutsideAngular(() => (/** @type {?} */ (ngZone)).onError.subscribe({ next: (error) => { exceptionHandler.handleError(error); } }));
-            return _callAndReportToErrorHandler(exceptionHandler, (/** @type {?} */ (ngZone)), () => {
+            moduleRef.onDestroy((/**
+             * @return {?}
+             */
+            () => remove(this._modules, moduleRef)));
+            (/** @type {?} */ (ngZone)).runOutsideAngular((/**
+             * @return {?}
+             */
+            () => (/** @type {?} */ (ngZone)).onError.subscribe({ next: (/**
+                 * @param {?} error
+                 * @return {?}
+                 */
+                (error) => { exceptionHandler.handleError(error); }) })));
+            return _callAndReportToErrorHandler(exceptionHandler, (/** @type {?} */ (ngZone)), (/**
+             * @return {?}
+             */
+            () => {
                 /** @type {?} */
                 const initStatus = moduleRef.injector.get(ApplicationInitStatus);
                 initStatus.runInitializers();
-                return initStatus.donePromise.then(() => {
+                return initStatus.donePromise.then((/**
+                 * @return {?}
+                 */
+                () => {
                     this._moduleDoBootstrap(moduleRef);
                     return moduleRef;
-                });
-            });
-        });
+                }));
+            }));
+        }));
     }
     /**
      * Creates an instance of an `\@NgModule` for a given platform using the given runtime compiler.
@@ -28651,7 +29528,11 @@ class PlatformRef {
         /** @type {?} */
         const options = optionsReducer({}, compilerOptions);
         return compileNgModuleFactory(this.injector, options, moduleType)
-            .then(moduleFactory => this.bootstrapModuleFactory(moduleFactory, options));
+            .then((/**
+         * @param {?} moduleFactory
+         * @return {?}
+         */
+        moduleFactory => this.bootstrapModuleFactory(moduleFactory, options)));
     }
     /**
      * @private
@@ -28662,7 +29543,11 @@ class PlatformRef {
         /** @type {?} */
         const appRef = (/** @type {?} */ (moduleRef.injector.get(ApplicationRef)));
         if (moduleRef._bootstrapComponents.length > 0) {
-            moduleRef._bootstrapComponents.forEach(f => appRef.bootstrap(f));
+            moduleRef._bootstrapComponents.forEach((/**
+             * @param {?} f
+             * @return {?}
+             */
+            f => appRef.bootstrap(f)));
         }
         else if (moduleRef.instance.ngDoBootstrap) {
             moduleRef.instance.ngDoBootstrap(appRef);
@@ -28693,8 +29578,16 @@ class PlatformRef {
         if (this._destroyed) {
             throw new Error('The platform has already been destroyed!');
         }
-        this._modules.slice().forEach(module => module.destroy());
-        this._destroyListeners.forEach(listener => listener());
+        this._modules.slice().forEach((/**
+         * @param {?} module
+         * @return {?}
+         */
+        module => module.destroy()));
+        this._destroyListeners.forEach((/**
+         * @param {?} listener
+         * @return {?}
+         */
+        listener => listener()));
         this._destroyed = true;
     }
     /**
@@ -28736,16 +29629,26 @@ function _callAndReportToErrorHandler(errorHandler, ngZone, callback) {
         /** @type {?} */
         const result = callback();
         if (isPromise(result)) {
-            return result.catch((e) => {
-                ngZone.runOutsideAngular(() => errorHandler.handleError(e));
+            return result.catch((/**
+             * @param {?} e
+             * @return {?}
+             */
+            (e) => {
+                ngZone.runOutsideAngular((/**
+                 * @return {?}
+                 */
+                () => errorHandler.handleError(e)));
                 // rethrow as the exception handler might not do it
                 throw e;
-            });
+            }));
         }
         return result;
     }
     catch (e) {
-        ngZone.runOutsideAngular(() => errorHandler.handleError(e));
+        ngZone.runOutsideAngular((/**
+         * @return {?}
+         */
+        () => errorHandler.handleError(e)));
         // rethrow as the exception handler might not do it
         throw e;
     }
@@ -28890,49 +29793,84 @@ class ApplicationRef {
          */
         this.components = [];
         this._enforceNoNewChanges = isDevMode();
-        this._zone.onMicrotaskEmpty.subscribe({ next: () => { this._zone.run(() => { this.tick(); }); } });
+        this._zone.onMicrotaskEmpty.subscribe({ next: (/**
+             * @return {?}
+             */
+            () => { this._zone.run((/**
+             * @return {?}
+             */
+            () => { this.tick(); })); }) });
         /** @type {?} */
-        const isCurrentlyStable = new Observable((observer) => {
+        const isCurrentlyStable = new Observable((/**
+         * @param {?} observer
+         * @return {?}
+         */
+        (observer) => {
             this._stable = this._zone.isStable && !this._zone.hasPendingMacrotasks &&
                 !this._zone.hasPendingMicrotasks;
-            this._zone.runOutsideAngular(() => {
+            this._zone.runOutsideAngular((/**
+             * @return {?}
+             */
+            () => {
                 observer.next(this._stable);
                 observer.complete();
-            });
-        });
+            }));
+        }));
         /** @type {?} */
-        const isStable = new Observable((observer) => {
+        const isStable = new Observable((/**
+         * @param {?} observer
+         * @return {?}
+         */
+        (observer) => {
             // Create the subscription to onStable outside the Angular Zone so that
             // the callback is run outside the Angular Zone.
             /** @type {?} */
             let stableSub;
-            this._zone.runOutsideAngular(() => {
-                stableSub = this._zone.onStable.subscribe(() => {
+            this._zone.runOutsideAngular((/**
+             * @return {?}
+             */
+            () => {
+                stableSub = this._zone.onStable.subscribe((/**
+                 * @return {?}
+                 */
+                () => {
                     NgZone.assertNotInAngularZone();
                     // Check whether there are no pending macro/micro tasks in the next tick
                     // to allow for NgZone to update the state.
-                    scheduleMicroTask(() => {
+                    scheduleMicroTask((/**
+                     * @return {?}
+                     */
+                    () => {
                         if (!this._stable && !this._zone.hasPendingMacrotasks &&
                             !this._zone.hasPendingMicrotasks) {
                             this._stable = true;
                             observer.next(true);
                         }
-                    });
-                });
-            });
+                    }));
+                }));
+            }));
             /** @type {?} */
-            const unstableSub = this._zone.onUnstable.subscribe(() => {
+            const unstableSub = this._zone.onUnstable.subscribe((/**
+             * @return {?}
+             */
+            () => {
                 NgZone.assertInAngularZone();
                 if (this._stable) {
                     this._stable = false;
-                    this._zone.runOutsideAngular(() => { observer.next(false); });
+                    this._zone.runOutsideAngular((/**
+                     * @return {?}
+                     */
+                    () => { observer.next(false); }));
                 }
-            });
-            return () => {
+            }));
+            return (/**
+             * @return {?}
+             */
+            () => {
                 stableSub.unsubscribe();
                 unstableSub.unsubscribe();
-            };
-        });
+            });
+        }));
         ((/** @type {?} */ (this))).isStable =
             merge(isCurrentlyStable, isStable.pipe(share()));
     }
@@ -28977,7 +29915,10 @@ class ApplicationRef {
         const selectorOrNode = rootSelectorOrNode || componentFactory.selector;
         /** @type {?} */
         const compRef = componentFactory.create(Injector.NULL, [], selectorOrNode, ngModule);
-        compRef.onDestroy(() => { this._unloadComponent(compRef); });
+        compRef.onDestroy((/**
+         * @return {?}
+         */
+        () => { this._unloadComponent(compRef); }));
         /** @type {?} */
         const testability = compRef.injector.get(Testability, null);
         if (testability) {
@@ -29009,14 +29950,25 @@ class ApplicationRef {
         const scope = ApplicationRef._tickScope();
         try {
             this._runningTick = true;
-            this._views.forEach((view) => view.detectChanges());
+            this._views.forEach((/**
+             * @param {?} view
+             * @return {?}
+             */
+            (view) => view.detectChanges()));
             if (this._enforceNoNewChanges) {
-                this._views.forEach((view) => view.checkNoChanges());
+                this._views.forEach((/**
+                 * @param {?} view
+                 * @return {?}
+                 */
+                (view) => view.checkNoChanges()));
             }
         }
         catch (e) {
             // Attention: Don't rethrow as it could cancel subscriptions to Observables!
-            this._zone.runOutsideAngular(() => this._exceptionHandler.handleError(e));
+            this._zone.runOutsideAngular((/**
+             * @return {?}
+             */
+            () => this._exceptionHandler.handleError(e)));
         }
         finally {
             this._runningTick = false;
@@ -29059,7 +30011,11 @@ class ApplicationRef {
         // Get the listeners lazily to prevent DI cycles.
         /** @type {?} */
         const listeners = this._injector.get(APP_BOOTSTRAP_LISTENER, []).concat(this._bootstrapListeners);
-        listeners.forEach((listener) => listener(componentRef));
+        listeners.forEach((/**
+         * @param {?} listener
+         * @return {?}
+         */
+        (listener) => listener(componentRef)));
     }
     /**
      * @private
@@ -29076,7 +30032,11 @@ class ApplicationRef {
      */
     ngOnDestroy() {
         // TODO(alxhub): Dispose of the NgZone.
-        this._views.slice().forEach((view) => view.destroy());
+        this._views.slice().forEach((/**
+         * @param {?} view
+         * @return {?}
+         */
+        (view) => view.destroy()));
     }
     /**
      * Returns the number of attached views.
@@ -29120,23 +30080,27 @@ function remove(list, el) {
 function _mergeArrays(parts) {
     /** @type {?} */
     const result = [];
-    parts.forEach((part) => part && result.push(...part));
+    parts.forEach((/**
+     * @param {?} part
+     * @return {?}
+     */
+    (part) => part && result.push(...part)));
     return result;
 }
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const _SEPARATOR = '#';
@@ -29189,9 +30153,21 @@ class SystemJsNgModuleLoader {
             exportName = 'default';
         }
         return System.import(module)
-            .then((module) => module[exportName])
-            .then((type) => checkNotEmpty(type, module, exportName))
-            .then((type) => this._compiler.compileModuleAsync(type));
+            .then((/**
+         * @param {?} module
+         * @return {?}
+         */
+        (module) => module[exportName]))
+            .then((/**
+         * @param {?} type
+         * @return {?}
+         */
+        (type) => checkNotEmpty(type, module, exportName)))
+            .then((/**
+         * @param {?} type
+         * @return {?}
+         */
+        (type) => this._compiler.compileModuleAsync(type)));
     }
     /**
      * @private
@@ -29207,8 +30183,16 @@ class SystemJsNgModuleLoader {
             factoryClassSuffix = '';
         }
         return System.import(this._config.factoryPathPrefix + module + this._config.factoryPathSuffix)
-            .then((module) => module[exportName + factoryClassSuffix])
-            .then((factory) => checkNotEmpty(factory, module, exportName));
+            .then((/**
+         * @param {?} module
+         * @return {?}
+         */
+        (module) => module[exportName + factoryClassSuffix]))
+            .then((/**
+         * @param {?} factory
+         * @return {?}
+         */
+        (factory) => checkNotEmpty(factory, module, exportName)));
     }
 }
 SystemJsNgModuleLoader.decorators = [
@@ -29234,7 +30218,7 @@ function checkNotEmpty(value, modulePath, exportName) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Represents an Angular [view](guide/glossary#view),
@@ -29309,12 +30293,12 @@ class EmbeddedViewRef extends ViewRef$1 {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 class EventListener {
     /**
@@ -29411,12 +30395,16 @@ class DebugElement__PRE_R3__ extends DebugNode__PRE_R3__ {
         const siblingIndex = this.childNodes.indexOf(child);
         if (siblingIndex !== -1) {
             this.childNodes.splice(siblingIndex + 1, 0, ...newChildren);
-            newChildren.forEach(c => {
+            newChildren.forEach((/**
+             * @param {?} c
+             * @return {?}
+             */
+            c => {
                 if (c.parent) {
                     ((/** @type {?} */ (c.parent))).removeChild(c);
                 }
                 ((/** @type {?} */ (child))).parent = this;
-            });
+            }));
         }
     }
     /**
@@ -29473,7 +30461,11 @@ class DebugElement__PRE_R3__ extends DebugNode__PRE_R3__ {
     get children() {
         return (/** @type {?} */ (this
             .childNodes //
-            .filter((node) => node instanceof DebugElement__PRE_R3__)));
+            .filter((/**
+         * @param {?} node
+         * @return {?}
+         */
+        (node) => node instanceof DebugElement__PRE_R3__))));
     }
     /**
      * @param {?} eventName
@@ -29481,11 +30473,15 @@ class DebugElement__PRE_R3__ extends DebugNode__PRE_R3__ {
      * @return {?}
      */
     triggerEventHandler(eventName, eventObj) {
-        this.listeners.forEach((listener) => {
+        this.listeners.forEach((/**
+         * @param {?} listener
+         * @return {?}
+         */
+        (listener) => {
             if (listener.name == eventName) {
                 listener.callback(eventObj);
             }
-        });
+        }));
     }
 }
 /**
@@ -29494,7 +30490,11 @@ class DebugElement__PRE_R3__ extends DebugNode__PRE_R3__ {
  * @return {?}
  */
 function asNativeElements(debugEls) {
-    return debugEls.map((el) => el.nativeElement);
+    return debugEls.map((/**
+     * @param {?} el
+     * @return {?}
+     */
+    (el) => el.nativeElement));
 }
 /**
  * @param {?} element
@@ -29503,14 +30503,18 @@ function asNativeElements(debugEls) {
  * @return {?}
  */
 function _queryElementChildren(element, predicate, matches) {
-    element.childNodes.forEach(node => {
+    element.childNodes.forEach((/**
+     * @param {?} node
+     * @return {?}
+     */
+    node => {
         if (node instanceof DebugElement__PRE_R3__) {
             if (predicate(node)) {
                 matches.push(node);
             }
             _queryElementChildren(node, predicate, matches);
         }
-    });
+    }));
 }
 /**
  * @param {?} parentNode
@@ -29520,14 +30524,18 @@ function _queryElementChildren(element, predicate, matches) {
  */
 function _queryNodeChildren(parentNode, predicate, matches) {
     if (parentNode instanceof DebugElement__PRE_R3__) {
-        parentNode.childNodes.forEach(node => {
+        parentNode.childNodes.forEach((/**
+         * @param {?} node
+         * @return {?}
+         */
+        node => {
             if (predicate(node)) {
                 matches.push(node);
             }
             if (node instanceof DebugElement__PRE_R3__) {
                 _queryNodeChildren(node, predicate, matches);
             }
-        });
+        }));
     }
 }
 class DebugNode__POST_R3__ {
@@ -29787,11 +30795,15 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
      * @return {?}
      */
     triggerEventHandler(eventName, eventObj) {
-        this.listeners.forEach((listener) => {
+        this.listeners.forEach((/**
+         * @param {?} listener
+         * @return {?}
+         */
+        (listener) => {
             if (listener.name === eventName) {
                 listener.callback(eventObj);
             }
-        });
+        }));
     }
 }
 /**
@@ -29803,7 +30815,11 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
  */
 function _queryNodeChildrenR3(parentNode, predicate, matches, elementsOnly) {
     if (parentNode instanceof DebugElement__POST_R3__) {
-        parentNode.childNodes.forEach(node => {
+        parentNode.childNodes.forEach((/**
+         * @param {?} node
+         * @return {?}
+         */
+        node => {
             if (predicate(node)) {
                 matches.push(node);
             }
@@ -29812,7 +30828,7 @@ function _queryNodeChildrenR3(parentNode, predicate, matches, elementsOnly) {
                     _queryNodeChildrenR3(node, predicate, matches, elementsOnly);
                 }
             }
-        });
+        }));
     }
 }
 /**
@@ -29964,12 +30980,12 @@ const DebugElement = (/** @type {?} */ (DebugElement__PRE_R3__));
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const _CORE_PLATFORM_PROVIDERS = [
@@ -29989,7 +31005,7 @@ const platformCore = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDER
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * Provide this token to set the locale of your application.
@@ -30076,7 +31092,7 @@ MissingTranslationStrategy[MissingTranslationStrategy.Ignore] = 'Ignore';
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @return {?}
@@ -30137,12 +31153,19 @@ const APPLICATION_MODULE_PROVIDERS = [
 function zoneSchedulerFactory(ngZone) {
     /** @type {?} */
     let queue = [];
-    ngZone.onStable.subscribe(() => {
+    ngZone.onStable.subscribe((/**
+     * @return {?}
+     */
+    () => {
         while (queue.length) {
             (/** @type {?} */ (queue.pop()))();
         }
-    });
-    return function (fn) { queue.push(fn); };
+    }));
+    return (/**
+     * @param {?} fn
+     * @return {?}
+     */
+    function (fn) { queue.push(fn); });
 }
 /**
  * Configures the root injector for an app with
@@ -30171,7 +31194,7 @@ ApplicationModule.ctorParameters = () => [
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -30189,7 +31212,7 @@ const ivyEnabled = SWITCH_IVY_ENABLED__PRE_R3__;
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @param {?} flags
@@ -30300,10 +31323,14 @@ function elementDef(checkIndex, flags, matchedQueriesDsl, ngContentIndex, childC
     }
     fixedAttrs = fixedAttrs || [];
     /** @type {?} */
-    const attrs = (/** @type {?} */ (fixedAttrs.map(([namespaceAndName, value]) => {
+    const attrs = (/** @type {?} */ (fixedAttrs.map((/**
+     * @param {?} __0
+     * @return {?}
+     */
+    ([namespaceAndName, value]) => {
         const [ns, name] = splitNamespace(namespaceAndName);
         return [ns, name, value];
-    })));
+    }))));
     componentRendererType = resolveRendererType2(componentRendererType);
     if (componentView) {
         flags |= 33554432 /* ComponentView */;
@@ -30420,7 +31447,11 @@ function listenToElementOutputs(view, compView, def, el) {
  * @return {?}
  */
 function renderEventHandlerClosure(view, index, eventName) {
-    return (event) => dispatchEvent(view, index, eventName, event);
+    return (/**
+     * @param {?} event
+     * @return {?}
+     */
+    (event) => dispatchEvent(view, index, eventName, event));
 }
 /**
  * @param {?} view
@@ -30609,7 +31640,7 @@ function setElementProperty(view, binding, renderNode$$1, name, value) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @param {?} flags
@@ -30836,7 +31867,7 @@ function getQueryValue(view, nodeDef, queryValueType) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @param {?} ngContentIndex
@@ -30891,7 +31922,7 @@ function appendNgContent(view, renderHost, def) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @param {?} checkIndex
@@ -31170,7 +32201,7 @@ function checkAndUpdatePureExpressionDynamic(view, def, values) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @param {?} checkIndex
@@ -31351,7 +32382,7 @@ function _addInterpolationPart(value, binding) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @param {?} flags
@@ -31481,7 +32512,14 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
         }
     }
     /** @type {?} */
-    const handleEvent = (view, nodeIndex, eventName, event) => (/** @type {?} */ ((/** @type {?} */ (nodes[nodeIndex].element)).handleEvent))(view, eventName, event);
+    const handleEvent = (/**
+     * @param {?} view
+     * @param {?} nodeIndex
+     * @param {?} eventName
+     * @param {?} event
+     * @return {?}
+     */
+    (view, nodeIndex, eventName, event) => (/** @type {?} */ ((/** @type {?} */ (nodes[nodeIndex].element)).handleEvent))(view, eventName, event));
     return {
         // Will be filled later...
         factory: null,
@@ -32198,7 +33236,7 @@ function execQueriesAction(view, queryFlags, staticDynamicQueryFlag, checkType) 
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 let initialized = false;
@@ -32235,7 +33273,10 @@ function initServicesIfNeeded() {
  */
 function createProdServices() {
     return {
-        setCurrentNode: () => { },
+        setCurrentNode: (/**
+         * @return {?}
+         */
+        () => { }),
         createRootView: createProdRootView,
         createEmbeddedView: createEmbeddedView,
         createComponentView: createComponentView,
@@ -32246,12 +33287,34 @@ function createProdServices() {
         checkAndUpdateView: checkAndUpdateView,
         checkNoChangesView: checkNoChangesView,
         destroyView: destroyView,
-        createDebugContext: (view, nodeIndex) => new DebugContext_(view, nodeIndex),
-        handleEvent: (view, nodeIndex, eventName, event) => view.def.handleEvent(view, nodeIndex, eventName, event),
-        updateDirectives: (view, checkType) => view.def.updateDirectives(checkType === 0 /* CheckAndUpdate */ ? prodCheckAndUpdateNode :
-            prodCheckNoChangesNode, view),
-        updateRenderer: (view, checkType) => view.def.updateRenderer(checkType === 0 /* CheckAndUpdate */ ? prodCheckAndUpdateNode :
-            prodCheckNoChangesNode, view),
+        createDebugContext: (/**
+         * @param {?} view
+         * @param {?} nodeIndex
+         * @return {?}
+         */
+        (view, nodeIndex) => new DebugContext_(view, nodeIndex)),
+        handleEvent: (/**
+         * @param {?} view
+         * @param {?} nodeIndex
+         * @param {?} eventName
+         * @param {?} event
+         * @return {?}
+         */
+        (view, nodeIndex, eventName, event) => view.def.handleEvent(view, nodeIndex, eventName, event)),
+        updateDirectives: (/**
+         * @param {?} view
+         * @param {?} checkType
+         * @return {?}
+         */
+        (view, checkType) => view.def.updateDirectives(checkType === 0 /* CheckAndUpdate */ ? prodCheckAndUpdateNode :
+            prodCheckNoChangesNode, view)),
+        updateRenderer: (/**
+         * @param {?} view
+         * @param {?} checkType
+         * @return {?}
+         */
+        (view, checkType) => view.def.updateRenderer(checkType === 0 /* CheckAndUpdate */ ? prodCheckAndUpdateNode :
+            prodCheckNoChangesNode, view)),
     };
 }
 /**
@@ -32270,7 +33333,12 @@ function createDebugServices() {
         checkAndUpdateView: debugCheckAndUpdateView,
         checkNoChangesView: debugCheckNoChangesView,
         destroyView: debugDestroyView,
-        createDebugContext: (view, nodeIndex) => new DebugContext_(view, nodeIndex),
+        createDebugContext: (/**
+         * @param {?} view
+         * @param {?} nodeIndex
+         * @return {?}
+         */
+        (view, nodeIndex) => new DebugContext_(view, nodeIndex)),
         handleEvent: debugHandleEvent,
         updateDirectives: debugUpdateDirectives,
         updateRenderer: debugUpdateRenderer,
@@ -32431,7 +33499,10 @@ function applyProviderOverridesToView(def) {
     }
     // clone the whole view definition,
     // as it maintains references between the nodes that are hard to update.
-    def = (/** @type {?} */ (def.factory))(() => NOOP);
+    def = (/** @type {?} */ (def.factory))((/**
+     * @return {?}
+     */
+    () => NOOP));
     for (let i = 0; i < elementIndicesWithOverwrittenProviders.length; i++) {
         applyProviderOverridesToElement(def, elementIndicesWithOverwrittenProviders[i]);
     }
@@ -32500,7 +33571,10 @@ function applyProviderOverridesToNgModule(def) {
     }
     // clone the whole view definition,
     // as it maintains references between the nodes that are hard to update.
-    def = (/** @type {?} */ (def.factory))(() => NOOP);
+    def = (/** @type {?} */ (def.factory))((/**
+     * @return {?}
+     */
+    () => NOOP));
     applyProviderOverrides(def);
     return def;
     /**
@@ -32515,22 +33589,35 @@ function applyProviderOverridesToNgModule(def) {
         if (providerOverrides.size === 0) {
             return { hasOverrides, hasDeprecatedOverrides };
         }
-        def.providers.forEach(node => {
+        def.providers.forEach((/**
+         * @param {?} node
+         * @return {?}
+         */
+        node => {
             /** @type {?} */
             const override = providerOverrides.get(node.token);
             if ((node.flags & 3840 /* CatProviderNoDirective */) && override) {
                 hasOverrides = true;
                 hasDeprecatedOverrides = hasDeprecatedOverrides || override.deprecatedBehavior;
             }
-        });
-        def.modules.forEach(module => {
-            providerOverridesWithScope.forEach((override, token) => {
+        }));
+        def.modules.forEach((/**
+         * @param {?} module
+         * @return {?}
+         */
+        module => {
+            providerOverridesWithScope.forEach((/**
+             * @param {?} override
+             * @param {?} token
+             * @return {?}
+             */
+            (override, token) => {
                 if ((/** @type {?} */ (getInjectableDef(token))).providedIn === module) {
                     hasOverrides = true;
                     hasDeprecatedOverrides = hasDeprecatedOverrides || override.deprecatedBehavior;
                 }
-            });
-        });
+            }));
+        }));
         return { hasOverrides, hasDeprecatedOverrides };
     }
     /**
@@ -32558,7 +33645,12 @@ function applyProviderOverridesToNgModule(def) {
         if (providerOverridesWithScope.size > 0) {
             /** @type {?} */
             let moduleSet = new Set(def.modules);
-            providerOverridesWithScope.forEach((override, token) => {
+            providerOverridesWithScope.forEach((/**
+             * @param {?} override
+             * @param {?} token
+             * @return {?}
+             */
+            (override, token) => {
                 if (moduleSet.has((/** @type {?} */ (getInjectableDef(token))).providedIn)) {
                     /** @type {?} */
                     let provider = {
@@ -32571,7 +33663,7 @@ function applyProviderOverridesToNgModule(def) {
                     def.providers.push(provider);
                     def.providersByKey[tokenKey(token)] = provider;
                 }
-            });
+            }));
         }
     }
 }
@@ -32968,7 +34060,10 @@ class DebugContext_ {
         /** @type {?} */
         let currRenderNodeIndex = -1;
         /** @type {?} */
-        let nodeLogger = () => {
+        let nodeLogger = (/**
+         * @return {?}
+         */
+        () => {
             currRenderNodeIndex++;
             if (currRenderNodeIndex === renderNodeIndex) {
                 return console.error.bind(console, ...values);
@@ -32976,7 +34071,7 @@ class DebugContext_ {
             else {
                 return NOOP;
             }
-        };
+        });
         (/** @type {?} */ (logViewDef.factory))(nodeLogger);
         if (currRenderNodeIndex < renderNodeIndex) {
             console.error('Illegal state: the ViewDefinitionFactory did not call the logger!');
@@ -33386,7 +34481,7 @@ class DebugRenderer2 {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
  * @param {?} override
@@ -33473,37 +34568,37 @@ class NgModuleFactory_ extends NgModuleFactory {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
