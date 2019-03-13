@@ -55,3 +55,7 @@ export declare const INTERPOLATION_DELIMITER = "\uFFFD";
  * See storeBindingMetadata().
  */
 export declare function isPropMetadataString(str: string): boolean;
+/**
+ * Unwrap a value which might be behind a closure (for forward declaration reasons).
+ */
+export declare function maybeUnwrapFn<T>(value: T | (() => T)): T;

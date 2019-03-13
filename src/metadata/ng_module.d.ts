@@ -46,16 +46,16 @@ export interface NgModuleDef<T> {
     /** Token representing the module. Used by DI. */
     type: T;
     /** List of components to bootstrap. */
-    bootstrap: Type<any>[];
+    bootstrap: Type<any>[] | (() => Type<any>[]);
     /** List of components, directives, and pipes declared by this module. */
-    declarations: Type<any>[];
+    declarations: Type<any>[] | (() => Type<any>[]);
     /** List of modules or `ModuleWithProviders` imported by this module. */
-    imports: Type<any>[];
+    imports: Type<any>[] | (() => Type<any>[]);
     /**
      * List of modules, `ModuleWithProviders`, components, directives, or pipes exported by this
      * module.
      */
-    exports: Type<any>[];
+    exports: Type<any>[] | (() => Type<any>[]);
     /**
      * Cached value of computed `transitiveCompileScopes` for this module.
      *
