@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8+14.sha-019e65a.with-local-changes
+ * @license Angular v8.0.0-beta.8+17.sha-018477e.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5094,7 +5094,15 @@
                 // If we hit a `Bindings` or `Template` marker then we are done.
                 if (isNameOnlyAttributeMarker(value))
                     break;
-                if (typeof value === 'number') {
+                // Skip namespaced attributes
+                if (value === 0 /* NamespaceURI */) {
+                    // we skip the next two values
+                    // as namespaced attributes looks like
+                    // [..., AttributeMarker.NamespaceURI, 'http://someuri.com/test', 'test:exist',
+                    // 'existValue', ...]
+                    i = i + 2;
+                }
+                else if (typeof value === 'number') {
                     // Skip to the first value of the marked attribute.
                     i++;
                     if (value === 1 /* Classes */ && attrNameToInject === 'class') {
@@ -5118,7 +5126,6 @@
                     }
                 }
                 else if (value === attrNameToInject) {
-                    // TODO(FW-1137): Skip namespaced attributes
                     return attrs[i + 1];
                 }
                 else {
@@ -14772,7 +14779,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.8+14.sha-019e65a.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.8+17.sha-018477e.with-local-changes');
 
     /**
      * @license
