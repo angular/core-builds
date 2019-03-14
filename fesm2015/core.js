@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8+32.sha-487d415.with-local-changes
+ * @license Angular v8.0.0-beta.8+33.sha-7c297e0.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18614,7 +18614,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.8+32.sha-487d415.with-local-changes');
+const VERSION = new Version('8.0.0-beta.8+33.sha-7c297e0.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -23985,19 +23985,6 @@ function i18nEnd() {
     i18nEndFirstPass(tView);
 }
 /**
- * @param {?} node
- * @return {?}
- */
-function findLastNode(node) {
-    while (node.next) {
-        node = node.next;
-    }
-    if (node.child) {
-        return findLastNode(node.child);
-    }
-    return node;
-}
-/**
  * See `i18nEnd` above.
  * @param {?} tView
  * @return {?}
@@ -24014,9 +24001,7 @@ function i18nEndFirstPass(tView) {
     // Find the last node that was added before `i18nEnd`
     /** @type {?} */
     let lastCreatedNode = getPreviousOrParentTNode();
-    if (lastCreatedNode.child) {
-        lastCreatedNode = findLastNode(lastCreatedNode.child);
-    }
+    // Read the instructions to insert/move/remove DOM elements
     /** @type {?} */
     const visitedNodes = readCreateOpCodes(rootIndex, tI18n.create, tI18n.icus, viewData);
     // Remove deleted nodes
