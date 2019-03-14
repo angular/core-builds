@@ -454,6 +454,11 @@ export declare const enum InitialStylingValuesIndex {
      */
     DirectiveOwnerOffset = 2,
     /**
+     * The first bit set aside to mark if the initial style was already rendere
+     */
+    AppliedFlagBitPosition = 0,
+    AppliedFlagBitLength = 1,
+    /**
      * The total size for each style/class entry (prop + value + directiveOwner)
      */
     Size = 3

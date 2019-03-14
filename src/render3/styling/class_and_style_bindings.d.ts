@@ -44,15 +44,25 @@ export declare function initializeStaticContext(attrs: TAttributes, stylingStart
  */
 export declare function patchContextWithStaticAttrs(context: StylingContext, attrs: TAttributes, attrsStylingStartIndex: number, directiveRef?: any | null): void;
 /**
- * Runs through the initial style data present in the context and renders
- * them via the renderer on the element.
+ * Runs through the initial class values present in the provided
+ * context and renders them via the provided renderer on the element.
+ *
+ * @param element the element the styling will be applied to
+ * @param context the source styling context which contains the initial class values
+ * @param renderer the renderer instance that will be used to apply the class
+ * @returns the index that the classes were applied up until
  */
-export declare function renderInitialStyles(element: RElement, context: StylingContext, renderer: Renderer3): void;
+export declare function renderInitialClasses(element: RElement, context: StylingContext, renderer: Renderer3, startIndex?: number): number;
 /**
- * Runs through the initial class data present in the context and renders
- * them via the renderer on the element.
+ * Runs through the initial styles values present in the provided
+ * context and renders them via the provided renderer on the element.
+ *
+ * @param element the element the styling will be applied to
+ * @param context the source styling context which contains the initial class values
+ * @param renderer the renderer instance that will be used to apply the class
+ * @returns the index that the styles were applied up until
  */
-export declare function renderInitialClasses(element: RElement, context: StylingContext, renderer: Renderer3): void;
+export declare function renderInitialStyles(element: RElement, context: StylingContext, renderer: Renderer3, startIndex?: number): number;
 export declare function allowNewBindingsForStylingContext(context: StylingContext): boolean;
 /**
  * Adds in new binding values to a styling context.
