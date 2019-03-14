@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.7+14.sha-8210bea.with-local-changes
+ * @license Angular v8.0.0-beta.8+18.sha-4b7ed54.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1619,7 +1619,7 @@
          */
         TestBedRender3.prototype._getComponentFactories = function (moduleType) {
             var _this = this;
-            return moduleType.ngModuleDef.declarations.reduce(function (factories, declaration) {
+            return maybeUnwrapFn(moduleType.ngModuleDef.declarations).reduce(function (factories, declaration) {
                 var componentDef = declaration.ngComponentDef;
                 componentDef && factories.push(new core.ɵRender3ComponentFactory(componentDef, _this._moduleRef));
                 return factories;
@@ -1699,6 +1699,17 @@
         R3TestErrorHandler.prototype.handleError = function (error) { throw error; };
         return R3TestErrorHandler;
     }(core.ErrorHandler));
+    /**
+     * Unwrap a value which might be behind a closure (for forward declaration reasons).
+     */
+    function maybeUnwrapFn(value) {
+        if (value instanceof Function) {
+            return value();
+        }
+        else {
+            return value;
+        }
+    }
 
     /**
      * @license

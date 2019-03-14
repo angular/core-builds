@@ -22,5 +22,5 @@ export declare class DeclarationUsageVisitor {
     private isReferringToSymbol;
     private addJumpExpressionToQueue;
     private addNewExpressionToQueue;
-    isUsedInNode(searchNode: ts.Node): boolean;
+    isSynchronouslyUsedInNode(searchNode: ts.Node): boolean;
 }
