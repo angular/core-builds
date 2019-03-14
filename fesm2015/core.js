@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8+10.sha-eb00a37.with-local-changes
+ * @license Angular v8.0.0-beta.8+13.sha-0ffa2f2.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16487,27 +16487,25 @@ function InheritDefinitionFeature(definition) {
                 }
             }
             // Merge View Queries
-            if (isComponentDef(definition) && isComponentDef(superDef)) {
-                /** @type {?} */
-                const prevViewQuery = definition.viewQuery;
-                /** @type {?} */
-                const superViewQuery = superDef.viewQuery;
-                if (superViewQuery) {
-                    if (prevViewQuery) {
-                        definition.viewQuery = (/**
-                         * @template T
-                         * @param {?} rf
-                         * @param {?} ctx
-                         * @return {?}
-                         */
-                        (rf, ctx) => {
-                            superViewQuery(rf, ctx);
-                            prevViewQuery(rf, ctx);
-                        });
-                    }
-                    else {
-                        definition.viewQuery = superViewQuery;
-                    }
+            /** @type {?} */
+            const prevViewQuery = definition.viewQuery;
+            /** @type {?} */
+            const superViewQuery = superDef.viewQuery;
+            if (superViewQuery) {
+                if (prevViewQuery) {
+                    definition.viewQuery = (/**
+                     * @template T
+                     * @param {?} rf
+                     * @param {?} ctx
+                     * @return {?}
+                     */
+                    (rf, ctx) => {
+                        superViewQuery(rf, ctx);
+                        prevViewQuery(rf, ctx);
+                    });
+                }
+                else {
+                    definition.viewQuery = superViewQuery;
                 }
             }
             // Merge Content Queries
@@ -18609,7 +18607,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.8+10.sha-eb00a37.with-local-changes');
+const VERSION = new Version('8.0.0-beta.8+13.sha-0ffa2f2.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -27451,7 +27449,7 @@ function compileComponent(type, metadata) {
                 /** @type {?} */
                 const templateUrl = metadata.templateUrl || `ng:///${renderStringify(type)}/template.html`;
                 /** @type {?} */
-                const meta = Object.assign({}, directiveMetadata(type, metadata), { typeSourceSpan: compiler.createParseSourceSpan('Component', renderStringify(type), templateUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY$1, animations: metadata.animations, viewQueries: extractQueriesMetadata(type, getReflect().ownPropMetadata(type), isViewQuery), directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
+                const meta = Object.assign({}, directiveMetadata(type, metadata), { typeSourceSpan: compiler.createParseSourceSpan('Component', renderStringify(type), templateUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY$1, animations: metadata.animations, directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
                 ngComponentDef = compiler.compileComponent(angularCoreEnv, templateUrl, meta);
                 // When NgModule decorator executed, we enqueued the module definition such that
                 // it would only dequeue and add itself as module scope to all of its declarations,
@@ -27554,6 +27552,7 @@ function directiveMetadata(type, metadata) {
         usesInheritance: !extendsDirectlyFromObject(type),
         exportAs: extractExportAs(metadata.exportAs),
         providers: metadata.providers || null,
+        viewQueries: extractQueriesMetadata(type, propMetadata, isViewQuery),
     };
 }
 /**

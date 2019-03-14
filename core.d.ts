@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8+10.sha-eb00a37.with-local-changes
+ * @license Angular v8.0.0-beta.8+13.sha-0ffa2f2.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10012,6 +10012,11 @@ export declare const ɵdefineDirective: <T>(directiveDefinition: {
      */
     contentQueries?: ContentQueriesFunction<T> | undefined;
     /**
+     * Additional set of instructions specific to view query processing. This could be seen as a
+     * set of instructions to be inserted into the template function.
+     */
+    viewQuery?: ViewQueriesFunction<T> | null | undefined;
+    /**
      * Defines the name that can be used in the template to assign this directive to a variable.
      *
      * See: {@link Directive.exportAs}
@@ -10116,6 +10121,12 @@ export declare interface ɵDirectiveDef<T> extends ɵBaseDef<T> {
      * Function to create and refresh content queries associated with a given directive.
      */
     contentQueries: ContentQueriesFunction<T> | null;
+    /**
+     * Query-related instructions for a directive. Note that while directives don't have a
+     * view and as such view queries won't necessarily do anything, there might be
+     * components that extend the directive.
+     */
+    viewQuery: ViewQueriesFunction<T> | null;
     /**
      * Refreshes host bindings on the associated directive.
      */
