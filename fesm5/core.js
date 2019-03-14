@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8+10.sha-eb00a37.with-local-changes
+ * @license Angular v8.0.0-beta.8+13.sha-0ffa2f2.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13075,19 +13075,17 @@ function InheritDefinitionFeature(definition) {
                 }
             }
             // Merge View Queries
-            if (isComponentDef(definition) && isComponentDef(superDef)) {
-                var prevViewQuery_1 = definition.viewQuery;
-                var superViewQuery_1 = superDef.viewQuery;
-                if (superViewQuery_1) {
-                    if (prevViewQuery_1) {
-                        definition.viewQuery = function (rf, ctx) {
-                            superViewQuery_1(rf, ctx);
-                            prevViewQuery_1(rf, ctx);
-                        };
-                    }
-                    else {
-                        definition.viewQuery = superViewQuery_1;
-                    }
+            var prevViewQuery_1 = definition.viewQuery;
+            var superViewQuery_1 = superDef.viewQuery;
+            if (superViewQuery_1) {
+                if (prevViewQuery_1) {
+                    definition.viewQuery = function (rf, ctx) {
+                        superViewQuery_1(rf, ctx);
+                        prevViewQuery_1(rf, ctx);
+                    };
+                }
+                else {
+                    definition.viewQuery = superViewQuery_1;
                 }
             }
             // Merge Content Queries
@@ -14744,7 +14742,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.8+10.sha-eb00a37.with-local-changes');
+var VERSION = new Version('8.0.0-beta.8+13.sha-0ffa2f2.with-local-changes');
 
 /**
  * @license
@@ -21271,7 +21269,7 @@ function compileComponent(type, metadata) {
                     throw new Error(error.join('\n'));
                 }
                 var templateUrl = metadata.templateUrl || "ng:///" + renderStringify(type) + "/template.html";
-                var meta = __assign({}, directiveMetadata(type, metadata), { typeSourceSpan: compiler.createParseSourceSpan('Component', renderStringify(type), templateUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY$1, animations: metadata.animations, viewQueries: extractQueriesMetadata(type, getReflect().ownPropMetadata(type), isViewQuery), directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
+                var meta = __assign({}, directiveMetadata(type, metadata), { typeSourceSpan: compiler.createParseSourceSpan('Component', renderStringify(type), templateUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY$1, animations: metadata.animations, directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
                 ngComponentDef = compiler.compileComponent(angularCoreEnv, templateUrl, meta);
                 // When NgModule decorator executed, we enqueued the module definition such that
                 // it would only dequeue and add itself as module scope to all of its declarations,
@@ -21349,6 +21347,7 @@ function directiveMetadata(type, metadata) {
         usesInheritance: !extendsDirectlyFromObject(type),
         exportAs: extractExportAs(metadata.exportAs),
         providers: metadata.providers || null,
+        viewQueries: extractQueriesMetadata(type, propMetadata, isViewQuery),
     };
 }
 function convertToR3QueryPredicate(selector) {
