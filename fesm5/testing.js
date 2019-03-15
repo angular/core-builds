@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8+46.sha-8ef690c.with-local-changes
+ * @license Angular v8.0.0-beta.8+47.sha-7561698.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1100,7 +1100,8 @@ var TestBedRender3 = /** @class */ (function () {
         return TestBedRender3;
     };
     TestBedRender3.deprecatedOverrideProvider = function (token, provider) {
-        throw new Error('Render3TestBed.deprecatedOverrideProvider is not implemented');
+        _getTestBedRender3().deprecatedOverrideProvider(token, provider);
+        return TestBedRender3;
     };
     TestBedRender3.get = function (token, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
@@ -1315,7 +1316,16 @@ var TestBedRender3 = /** @class */ (function () {
         this._providerOverridesByToken.set(token, overridesForToken);
     };
     TestBedRender3.prototype.deprecatedOverrideProvider = function (token, provider) {
-        throw new Error('No implemented in IVY');
+        // HACK: This is NOT the correct implementation for deprecatedOverrideProvider.
+        // To implement it in a backward compatible way, we would need to record some state
+        // so we know to prevent eager instantiation of NgModules. However, we don't plan
+        // to implement this at all since the API is deprecated and scheduled for removal
+        // in V8. This hack is here temporarily for Ivy testing until we transition apps
+        // inside Google to the overrideProvider API. At that point, we will be able to
+        // remove this method entirely. In the meantime, we can use overrideProvider to
+        // test apps with Ivy that don't care about eager instantiation. This fixes 85%
+        // of cases in our blueprint.
+        this.overrideProvider(token, provider);
     };
     TestBedRender3.prototype.createComponent = function (type) {
         var _this = this;
