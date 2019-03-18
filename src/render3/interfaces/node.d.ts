@@ -9,16 +9,32 @@ import { RNode } from './renderer';
 import { StylingContext } from './styling';
 import { LView, TView } from './view';
 /**
- * TNodeType corresponds to the TNode.type property. It contains information
- * on how to map a particular set of bits in TNode.flags to the node type.
+ * TNodeType corresponds to the {@link TNode} `type` property.
  */
 export declare const enum TNodeType {
+    /**
+     * The TNode contains information about an {@link LContainer} for embedded views.
+     */
     Container = 0,
+    /**
+     * The TNode contains information about an `<ng-content>` projection
+     */
     Projection = 1,
+    /**
+     * The TNode contains information about an {@link LView}
+     */
     View = 2,
+    /**
+     * The TNode contains information about a DOM element aka {@link RNode}.
+     */
     Element = 3,
-    ViewOrElement = 2,
+    /**
+     * The TNode contains information about an `<ng-container>` element {@link RNode}.
+     */
     ElementContainer = 4,
+    /**
+     * The TNode contains information about an ICU comment used in `i18n`.
+     */
     IcuContainer = 5
 }
 /**
