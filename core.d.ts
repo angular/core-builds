@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8+55.sha-9d090cb.with-local-changes
+ * @license Angular v8.0.0-beta.8+56.sha-8e70ca3.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2699,7 +2699,7 @@ export declare interface HostListenerDecorator {
  * Array storing OpCode for dynamically creating `i18n` blocks.
  *
  * Example:
- * ```
+ * ```ts
  * <I18nCreateOpCode>[
  *   // For adding text nodes
  *   // ---------------------
@@ -2786,7 +2786,7 @@ declare interface I18nMutateOpCodes extends Array<number | string | ELEMENT_MARK
  * ## Example
  *
  * Assume
- * ```
+ * ```ts
  *   if (rf & RenderFlags.Update) {
  *    i18nExp(bind(ctx.exp1)); // If changed set mask bit 1
  *    i18nExp(bind(ctx.exp2)); // If changed set mask bit 2
@@ -2798,8 +2798,8 @@ declare interface I18nMutateOpCodes extends Array<number | string | ELEMENT_MARK
  * We can assume that each call to `i18nExp` sets an internal `changeMask` bit depending on the
  * index of `i18nExp`.
  *
- * OpCodes
- * ```
+ * ### OpCodes
+ * ```ts
  * <I18nUpdateOpCodes>[
  *   // The following OpCodes represent: `<div i18n-title="pre{{exp1}}in{{exp2}}post">`
  *   // If `changeMask & 0b11`
@@ -7076,7 +7076,7 @@ declare interface TIcu {
      * to know which child ICUs to run clean up for as well.
      *
      * In the above example this would be:
-     * ```
+     * ```ts
      * [
      *   [],   // `=0` has no sub ICUs
      *   [1],  // `other` has one subICU at `1`st index.
