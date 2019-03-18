@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8+48.sha-04b5ea0.with-local-changes
+ * @license Angular v8.0.0-beta.8+56.sha-8e70ca3.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14884,7 +14884,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.8+48.sha-04b5ea0.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.8+56.sha-8e70ca3.with-local-changes');
 
     /**
      * @license
@@ -19741,8 +19741,15 @@
     function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
         var _a;
         var clazz = type;
+        // We determine whether a class has its own metadata by taking the metadata from the parent
+        // constructor and checking whether it's the same as the subclass metadata below. We can't use
+        // `hasOwnProperty` here because it doesn't work correctly in IE10 for static fields that are
+        // defined by TS. See https://github.com/angular/angular/pull/28439#issuecomment-459349218.
+        var parentPrototype = clazz.prototype ? Object.getPrototypeOf(clazz.prototype) : null;
+        var parentConstructor = parentPrototype && parentPrototype.constructor;
         if (decorators !== null) {
-            if (clazz.hasOwnProperty('decorators') && clazz.decorators !== undefined) {
+            if (clazz.decorators !== undefined &&
+                (!parentConstructor || parentConstructor.decorators !== clazz.decorators)) {
                 (_a = clazz.decorators).push.apply(_a, __spread(decorators));
             }
             else {
@@ -19760,7 +19767,8 @@
             // decorator types. Decorators on individual fields are not merged, as it's also incredibly
             // unlikely that a field will be decorated both with an Angular decorator and a non-Angular
             // decorator that's also been downleveled.
-            if (clazz.propDecorators !== undefined) {
+            if (clazz.propDecorators !== undefined &&
+                (!parentConstructor || parentConstructor.propDecorators !== clazz.propDecorators)) {
                 clazz.propDecorators = __assign({}, clazz.propDecorators, propDecorators);
             }
             else {
