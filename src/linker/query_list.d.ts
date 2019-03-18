@@ -69,9 +69,22 @@ export declare class QueryList<T> {
      * [Array.some](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
      */
     some(fn: (value: T, index: number, array: T[]) => boolean): boolean;
+    /**
+     * Returns a copy of the internal results list as an Array.
+     */
     toArray(): T[];
     toString(): string;
-    reset(res: Array<T | any[]>): void;
+    /**
+     * Updates the stored data of the query list, and resets the `dirty` flag to `false`, so that
+     * on change detection, it will not notify of changes to the queries, unless a new change
+     * occurs.
+     *
+     * @param resultsTree The results tree to store
+     */
+    reset(resultsTree: Array<T | any[]>): void;
+    /**
+     * Triggers a change event by emitting on the `changes` {@link EventEmitter}.
+     */
     notifyOnChanges(): void;
     /** internal */
     setDirty(): void;

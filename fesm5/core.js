@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8+61.sha-b759d63.with-local-changes
+ * @license Angular v8.0.0-beta.8+62.sha-d87b035.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14768,7 +14768,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.8+61.sha-b759d63.with-local-changes');
+var VERSION = new Version('8.0.0-beta.8+62.sha-d87b035.with-local-changes');
 
 /**
  * @license
@@ -20249,16 +20249,29 @@ var QueryList = /** @class */ (function () {
     QueryList.prototype.some = function (fn) {
         return this._results.some(fn);
     };
+    /**
+     * Returns a copy of the internal results list as an Array.
+     */
     QueryList.prototype.toArray = function () { return this._results.slice(); };
     QueryList.prototype[getSymbolIterator()] = function () { return this._results[getSymbolIterator()](); };
     QueryList.prototype.toString = function () { return this._results.toString(); };
-    QueryList.prototype.reset = function (res) {
-        this._results = flatten(res);
+    /**
+     * Updates the stored data of the query list, and resets the `dirty` flag to `false`, so that
+     * on change detection, it will not notify of changes to the queries, unless a new change
+     * occurs.
+     *
+     * @param resultsTree The results tree to store
+     */
+    QueryList.prototype.reset = function (resultsTree) {
+        this._results = depthFirstFlatten(resultsTree);
         this.dirty = false;
         this.length = this._results.length;
         this.last = this._results[this.length - 1];
         this.first = this._results[0];
     };
+    /**
+     * Triggers a change event by emitting on the `changes` {@link EventEmitter}.
+     */
     QueryList.prototype.notifyOnChanges = function () { this.changes.emit(this); };
     /** internal */
     QueryList.prototype.setDirty = function () { this.dirty = true; };
@@ -20269,9 +20282,9 @@ var QueryList = /** @class */ (function () {
     };
     return QueryList;
 }());
-function flatten(list) {
+function depthFirstFlatten(list) {
     return list.reduce(function (flat, item) {
-        var flatItem = Array.isArray(item) ? flatten(item) : item;
+        var flatItem = Array.isArray(item) ? depthFirstFlatten(item) : item;
         return flat.concat(flatItem);
     }, []);
 }
@@ -20538,7 +20551,9 @@ predicate, descend, read) {
 /**
  * Refreshes a query by combining matches from all active views and removing matches from deleted
  * views.
- * Returns true if a query got dirty during change detection, false otherwise.
+ *
+ * @returns `true` if a query got dirty during change detection or if this is a static query
+ * resolving in creation mode, `false` otherwise.
  */
 function queryRefresh(queryList) {
     var queryListImpl = queryList;
@@ -20920,7 +20935,7 @@ function compileNgModule(moduleType, ngModule) {
 function compileNgModuleDefs(moduleType, ngModule) {
     ngDevMode && assertDefined(moduleType, 'Required value moduleType');
     ngDevMode && assertDefined(ngModule, 'Required value ngModule');
-    var declarations = flatten$1(ngModule.declarations || EMPTY_ARRAY$3);
+    var declarations = flatten(ngModule.declarations || EMPTY_ARRAY$3);
     var ngModuleDef = null;
     Object.defineProperty(moduleType, NG_MODULE_DEF, {
         configurable: true,
@@ -20928,14 +20943,14 @@ function compileNgModuleDefs(moduleType, ngModule) {
             if (ngModuleDef === null) {
                 ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, "ng://" + moduleType.name + "/ngModuleDef.js", {
                     type: moduleType,
-                    bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$3, resolveForwardRef),
+                    bootstrap: flatten(ngModule.bootstrap || EMPTY_ARRAY$3, resolveForwardRef),
                     declarations: declarations.map(resolveForwardRef),
-                    imports: flatten$1(ngModule.imports || EMPTY_ARRAY$3, resolveForwardRef)
+                    imports: flatten(ngModule.imports || EMPTY_ARRAY$3, resolveForwardRef)
                         .map(expandModuleWithProviders),
-                    exports: flatten$1(ngModule.exports || EMPTY_ARRAY$3, resolveForwardRef)
+                    exports: flatten(ngModule.exports || EMPTY_ARRAY$3, resolveForwardRef)
                         .map(expandModuleWithProviders),
                     emitInline: true,
-                    schemas: ngModule.schemas ? flatten$1(ngModule.schemas) : null,
+                    schemas: ngModule.schemas ? flatten(ngModule.schemas) : null,
                 });
             }
             return ngModuleDef;
@@ -20978,14 +20993,14 @@ function verifySemanticsOfNgModuleDef(moduleType) {
     var imports = maybeUnwrapFn(ngModuleDef.imports);
     var exports = maybeUnwrapFn(ngModuleDef.exports);
     declarations.forEach(verifyDeclarationsHaveDefinitions);
-    var combinedDeclarations = __spread(declarations.map(resolveForwardRef), flatten$1(imports.map(computeCombinedExports), resolveForwardRef));
+    var combinedDeclarations = __spread(declarations.map(resolveForwardRef), flatten(imports.map(computeCombinedExports), resolveForwardRef));
     exports.forEach(verifyExportsAreDeclaredOrReExported);
     declarations.forEach(verifyDeclarationIsUnique);
     declarations.forEach(verifyComponentEntryComponentsIsPartOfNgModule);
     var ngModule = getAnnotation(moduleType, 'NgModule');
     if (ngModule) {
         ngModule.imports &&
-            flatten$1(ngModule.imports, unwrapModuleWithProvidersImports)
+            flatten(ngModule.imports, unwrapModuleWithProvidersImports)
                 .forEach(verifySemanticsOfNgModuleDef);
         ngModule.bootstrap && ngModule.bootstrap.forEach(verifyCorrectBootstrapType);
         ngModule.bootstrap && ngModule.bootstrap.forEach(verifyComponentIsPartOfNgModule);
@@ -21104,7 +21119,7 @@ function resetCompiledComponents() {
 function computeCombinedExports(type) {
     type = resolveForwardRef(type);
     var ngModuleDef = getNgModuleDef(type, true);
-    return __spread(flatten$1(maybeUnwrapFn(ngModuleDef.exports).map(function (type) {
+    return __spread(flatten(maybeUnwrapFn(ngModuleDef.exports).map(function (type) {
         var ngModuleDef = getNgModuleDef(type);
         if (ngModuleDef) {
             verifySemanticsOfNgModuleDef(type);
@@ -21121,7 +21136,7 @@ function computeCombinedExports(type) {
  * the `ngSelectorScope` property of the declared type.
  */
 function setScopeOnDeclaredComponents(moduleType, ngModule) {
-    var declarations = flatten$1(ngModule.declarations || EMPTY_ARRAY$3);
+    var declarations = flatten(ngModule.declarations || EMPTY_ARRAY$3);
     var transitiveScopes = transitiveScopesFor(moduleType);
     declarations.forEach(function (declaration) {
         if (declaration.hasOwnProperty(NG_COMPONENT_DEF)) {
@@ -21231,11 +21246,11 @@ function transitiveScopesFor(moduleType, processNgModuleFn) {
     def.transitiveCompileScopes = scopes;
     return scopes;
 }
-function flatten$1(values, mapFn) {
+function flatten(values, mapFn) {
     var out = [];
     values.forEach(function (value) {
         if (Array.isArray(value)) {
-            out.push.apply(out, __spread(flatten$1(value, mapFn)));
+            out.push.apply(out, __spread(flatten(value, mapFn)));
         }
         else {
             out.push(mapFn ? mapFn(value) : value);
