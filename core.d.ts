@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8+61.sha-b759d63.with-local-changes
+ * @license Angular v8.0.0-beta.8+62.sha-d87b035.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5280,9 +5280,22 @@ export declare class QueryList<T> {
      * [Array.some](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
      */
     some(fn: (value: T, index: number, array: T[]) => boolean): boolean;
+    /**
+     * Returns a copy of the internal results list as an Array.
+     */
     toArray(): T[];
     toString(): string;
-    reset(res: Array<T | any[]>): void;
+    /**
+     * Updates the stored data of the query list, and resets the `dirty` flag to `false`, so that
+     * on change detection, it will not notify of changes to the queries, unless a new change
+     * occurs.
+     *
+     * @param resultsTree The results tree to store
+     */
+    reset(resultsTree: Array<T | any[]>): void;
+    /**
+     * Triggers a change event by emitting on the `changes` {@link EventEmitter}.
+     */
     notifyOnChanges(): void;
     /** internal */
     setDirty(): void;
@@ -11629,7 +11642,9 @@ export declare const enum ɵQueryBindingType {
 /**
  * Refreshes a query by combining matches from all active views and removing matches from deleted
  * views.
- * Returns true if a query got dirty during change detection, false otherwise.
+ *
+ * @returns `true` if a query got dirty during change detection or if this is a static query
+ * resolving in creation mode, `false` otherwise.
  */
 export declare function ɵqueryRefresh(queryList: QueryList<any>): boolean;
 
