@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8+53.sha-e8df000.with-local-changes
+ * @license Angular v8.0.0-beta.8+55.sha-9d090cb.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18628,7 +18628,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.8+53.sha-e8df000.with-local-changes');
+const VERSION = new Version('8.0.0-beta.8+55.sha-9d090cb.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -25231,8 +25231,17 @@ class NgModuleFactory$1 extends NgModuleFactory {
 function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
     /** @type {?} */
     const clazz = (/** @type {?} */ (type));
+    // We determine whether a class has its own metadata by taking the metadata from the parent
+    // constructor and checking whether it's the same as the subclass metadata below. We can't use
+    // `hasOwnProperty` here because it doesn't work correctly in IE10 for static fields that are
+    // defined by TS. See https://github.com/angular/angular/pull/28439#issuecomment-459349218.
+    /** @type {?} */
+    const parentPrototype = clazz.prototype ? Object.getPrototypeOf(clazz.prototype) : null;
+    /** @type {?} */
+    const parentConstructor = parentPrototype && parentPrototype.constructor;
     if (decorators !== null) {
-        if (clazz.hasOwnProperty('decorators') && clazz.decorators !== undefined) {
+        if (clazz.decorators !== undefined &&
+            (!parentConstructor || parentConstructor.decorators !== clazz.decorators)) {
             clazz.decorators.push(...decorators);
         }
         else {
@@ -25250,7 +25259,8 @@ function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
         // decorator types. Decorators on individual fields are not merged, as it's also incredibly
         // unlikely that a field will be decorated both with an Angular decorator and a non-Angular
         // decorator that's also been downleveled.
-        if (clazz.propDecorators !== undefined) {
+        if (clazz.propDecorators !== undefined &&
+            (!parentConstructor || parentConstructor.propDecorators !== clazz.propDecorators)) {
             clazz.propDecorators = Object.assign({}, clazz.propDecorators, propDecorators);
         }
         else {
