@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8+52.sha-604f37b.with-local-changes
+ * @license Angular v8.0.0-beta.8+53.sha-e8df000.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7363,16 +7363,32 @@ declare const enum TNodeProviderIndexes {
 }
 
 /**
- * TNodeType corresponds to the TNode.type property. It contains information
- * on how to map a particular set of bits in TNode.flags to the node type.
+ * TNodeType corresponds to the {@link TNode} `type` property.
  */
 declare const enum TNodeType {
+    /**
+     * The TNode contains information about an {@link LContainer} for embedded views.
+     */
     Container = 0,
+    /**
+     * The TNode contains information about an `<ng-content>` projection
+     */
     Projection = 1,
+    /**
+     * The TNode contains information about an {@link LView}
+     */
     View = 2,
+    /**
+     * The TNode contains information about a DOM element aka {@link RNode}.
+     */
     Element = 3,
-    ViewOrElement = 2,
+    /**
+     * The TNode contains information about an `<ng-container>` element {@link RNode}.
+     */
     ElementContainer = 4,
+    /**
+     * The TNode contains information about an ICU comment used in `i18n`.
+     */
     IcuContainer = 5
 }
 
