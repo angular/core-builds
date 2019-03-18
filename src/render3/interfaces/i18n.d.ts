@@ -17,16 +17,49 @@
  */
 import { SanitizerFn } from './sanitization';
 export declare const enum I18nMutateOpCode {
+    /**
+     * Stores shift amount for bits 17-3 that contain reference index.
+     */
     SHIFT_REF = 3,
+    /**
+     * Stores shift amount for bits 31-17 that contain parent index.
+     */
     SHIFT_PARENT = 17,
+    /**
+     * Mask for OpCode
+     */
     MASK_OPCODE = 7,
+    /**
+     * Mask for reference index
+     */
     MASK_REF = 136,
+    /**
+     * OpCode to select a node. (next OpCode will contain the operation.)
+     */
     Select = 0,
+    /**
+     * OpCode to append the current node to `PARENT`.
+     */
     AppendChild = 1,
+    /**
+     * OpCode to insert the current node to `PARENT` before `REF`.
+     */
     InsertBefore = 2,
+    /**
+     * OpCode to remove the `REF` node from `PARENT`.
+     */
     Remove = 3,
+    /**
+     * OpCode to set the attribute of a node.
+     */
     Attr = 4,
+    /**
+     * OpCode to simulate elementEnd()
+     */
     ElementEnd = 5,
+    /**
+     * OpCode to read the remove OpCodes for the nested ICU
+     */
     RemoveNestedIcu = 6
 }
 /**
@@ -51,7 +84,7 @@ export interface COMMENT_MARKER {
  * Array storing OpCode for dynamically creating `i18n` blocks.
  *
  * Example:
- * ```
+ * ```ts
  * <I18nCreateOpCode>[
  *   // For adding text nodes
  *   // ---------------------
@@ -124,13 +157,37 @@ export interface COMMENT_MARKER {
 export interface I18nMutateOpCodes extends Array<number | string | ELEMENT_MARKER | COMMENT_MARKER | null> {
 }
 export declare const enum I18nUpdateOpCode {
+    /**
+     * Stores shift amount for bits 17-2 that contain reference index.
+     */
     SHIFT_REF = 2,
+    /**
+     * Stores shift amount for bits 31-17 that contain which ICU in i18n block are we referring to.
+     */
     SHIFT_ICU = 17,
+    /**
+     * Mask for OpCode
+     */
     MASK_OPCODE = 3,
+    /**
+     * Mask for reference index.
+     */
     MASK_REF = 68,
+    /**
+     * OpCode to update a text node.
+     */
     Text = 0,
+    /**
+     * OpCode to update a attribute of a node.
+     */
     Attr = 1,
+    /**
+     * OpCode to switch the current ICU case.
+     */
     IcuSwitch = 2,
+    /**
+     * OpCode to update the current ICU case.
+     */
     IcuUpdate = 3
 }
 /**
@@ -147,7 +204,7 @@ export declare const enum I18nUpdateOpCode {
  * ## Example
  *
  * Assume
- * ```
+ * ```ts
  *   if (rf & RenderFlags.Update) {
  *    i18nExp(bind(ctx.exp1)); // If changed set mask bit 1
  *    i18nExp(bind(ctx.exp2)); // If changed set mask bit 2
@@ -159,8 +216,8 @@ export declare const enum I18nUpdateOpCode {
  * We can assume that each call to `i18nExp` sets an internal `changeMask` bit depending on the
  * index of `i18nExp`.
  *
- * OpCodes
- * ```
+ * ### OpCodes
+ * ```ts
  * <I18nUpdateOpCodes>[
  *   // The following OpCodes represent: `<div i18n-title="pre{{exp1}}in{{exp2}}post">`
  *   // If `changeMask & 0b11`
@@ -276,7 +333,7 @@ export interface TIcu {
      * to know which child ICUs to run clean up for as well.
      *
      * In the above example this would be:
-     * ```
+     * ```ts
      * [
      *   [],   // `=0` has no sub ICUs
      *   [1],  // `other` has one subICU at `1`st index.
