@@ -339,3 +339,8 @@ export interface ClassProvider extends ClassSansProvider {
  * @publicApi
  */
 export declare type Provider = TypeProvider | ValueProvider | ClassProvider | ConstructorProvider | ExistingProvider | FactoryProvider | any[];
+/**
+ * Describes a function that is used to process provider list (for example in case of provider
+ * overrides).
+ */
+export declare type ProcessProvidersFunction = (providers: Provider[]) => Provider[];

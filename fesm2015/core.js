@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8+70.sha-86aba1e.with-local-changes
+ * @license Angular v8.0.0-beta.8+71.sha-0244a24.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3062,7 +3062,7 @@ const NG_ELEMENT_ID = getClosureSafeProperty({ __NG_ELEMENT_ID__: getClosureSafe
 function resolveComponentResources(resourceResolver) {
     // Store all promises which are fetching the resources.
     /** @type {?} */
-    const urlFetches = [];
+    const componentResolved = [];
     // Cache so that we don't fetch the same resource more than once.
     /** @type {?} */
     const urlMap = new Map();
@@ -3077,23 +3077,25 @@ function resolveComponentResources(resourceResolver) {
             /** @type {?} */
             const resp = resourceResolver(url);
             urlMap.set(url, promise = resp.then(unwrapResponse));
-            urlFetches.push(promise);
         }
         return promise;
     }
     componentResourceResolutionQueue.forEach((/**
      * @param {?} component
+     * @param {?} type
      * @return {?}
      */
-    (component) => {
+    (component, type) => {
+        /** @type {?} */
+        const promises = [];
         if (component.templateUrl) {
-            cachedResourceResolve(component.templateUrl).then((/**
+            promises.push(cachedResourceResolve(component.templateUrl).then((/**
              * @param {?} template
              * @return {?}
              */
             (template) => {
                 component.template = template;
-            }));
+            })));
         }
         /** @type {?} */
         const styleUrls = component.styleUrls;
@@ -3108,7 +3110,7 @@ function resolveComponentResources(resourceResolver) {
          */
         (styleUrl, index) => {
             styles.push(''); // pre-allocate array.
-            cachedResourceResolve(styleUrl).then((/**
+            promises.push(cachedResourceResolve(styleUrl).then((/**
              * @param {?} style
              * @return {?}
              */
@@ -3118,24 +3120,35 @@ function resolveComponentResources(resourceResolver) {
                 if (styleUrls.length == 0) {
                     component.styleUrls = undefined;
                 }
-            }));
+            })));
         }));
+        /** @type {?} */
+        const fullyResolved = Promise.all(promises).then((/**
+         * @return {?}
+         */
+        () => componentDefResolved(type)));
+        componentResolved.push(fullyResolved);
     }));
     clearResolutionOfComponentResourcesQueue();
-    return Promise.all(urlFetches).then((/**
+    return Promise.all(componentResolved).then((/**
      * @return {?}
      */
-    () => null));
+    () => undefined));
 }
 /** @type {?} */
-const componentResourceResolutionQueue = new Set();
+let componentResourceResolutionQueue = new Map();
+// Track when existing ngComponentDef for a Type is waiting on resources.
+/** @type {?} */
+const componentDefPendingResolution = new Set();
 /**
+ * @param {?} type
  * @param {?} metadata
  * @return {?}
  */
-function maybeQueueResolutionOfComponentResources(metadata) {
+function maybeQueueResolutionOfComponentResources(type, metadata) {
     if (componentNeedsResolution(metadata)) {
-        componentResourceResolutionQueue.add(metadata);
+        componentResourceResolutionQueue.set(type, metadata);
+        componentDefPendingResolution.add(type);
     }
 }
 /**
@@ -3150,7 +3163,10 @@ function componentNeedsResolution(component) {
  * @return {?}
  */
 function clearResolutionOfComponentResourcesQueue() {
-    componentResourceResolutionQueue.clear();
+    /** @type {?} */
+    const old = componentResourceResolutionQueue;
+    componentResourceResolutionQueue = new Map();
+    return old;
 }
 /**
  * @return {?}
@@ -3164,6 +3180,13 @@ function isComponentResourceResolutionQueueEmpty() {
  */
 function unwrapResponse(response) {
     return typeof response == 'string' ? response : response.text();
+}
+/**
+ * @param {?} type
+ * @return {?}
+ */
+function componentDefResolved(type) {
+    componentDefPendingResolution.delete(type);
 }
 
 /**
@@ -17438,11 +17461,17 @@ function ProvidersFeature(providers, viewProviders = []) {
      * @return {?}
      */
     (definition) => {
-        definition.providersResolver = (/**
-         * @param {?} def
-         * @return {?}
-         */
-        (def) => providersResolver(def, providers, viewProviders));
+        definition.providersResolver =
+            (/**
+             * @param {?} def
+             * @param {?=} processProvidersFn
+             * @return {?}
+             */
+            (def, processProvidersFn) => {
+                return providersResolver(def, //
+                processProvidersFn ? processProvidersFn(providers) : providers, //
+                viewProviders);
+            });
     });
 }
 
@@ -18531,7 +18560,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.8+70.sha-86aba1e.with-local-changes');
+const VERSION = new Version('8.0.0-beta.8+71.sha-0244a24.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -27135,6 +27164,11 @@ function patchComponentDefWithScope(componentDef, transitiveScopes) {
      */
     pipe => (/** @type {?} */ (getPipeDef(pipe))))));
     componentDef.schemas = transitiveScopes.schemas;
+    // Since we avoid Components/Directives/Pipes recompiling in case there are no overrides, we
+    // may face a problem where previously compiled defs available to a given Component/Directive
+    // are cached in TView and may become stale (in case any of these defs gets recompiled). In
+    // order to avoid this problem, we force fresh TView to be created.
+    componentDef.template.ngPrivateData = undefined;
 }
 /**
  * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
@@ -27325,7 +27359,7 @@ function compileComponent(type, metadata) {
     /** @type {?} */
     /** @nocollapse */ let ngComponentDef = null;
     // Metadata may have resources which need to be resolved.
-    maybeQueueResolutionOfComponentResources(metadata);
+    maybeQueueResolutionOfComponentResources(type, metadata);
     Object.defineProperty(type, NG_COMPONENT_DEF, {
         get: (/**
          * @return {?}

@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { Type } from '../interface/type';
 import { Component } from './directives';
 /**
  * Used to resolve resource URLs on `@Component` when used with JIT compilation.
@@ -40,8 +41,10 @@ import { Component } from './directives';
  */
 export declare function resolveComponentResources(resourceResolver: (url: string) => (Promise<string | {
     text(): Promise<string>;
-}>)): Promise<null>;
-export declare function maybeQueueResolutionOfComponentResources(metadata: Component): void;
+}>)): Promise<void>;
+export declare function maybeQueueResolutionOfComponentResources(type: Type<any>, metadata: Component): void;
+export declare function isComponentDefPendingResolution(type: Type<any>): boolean;
 export declare function componentNeedsResolution(component: Component): boolean;
-export declare function clearResolutionOfComponentResourcesQueue(): void;
+export declare function clearResolutionOfComponentResourcesQueue(): Map<Type<any>, Component>;
+export declare function restoreComponentResolutionQueue(queue: Map<Type<any>, Component>): void;
 export declare function isComponentResourceResolutionQueueEmpty(): boolean;
