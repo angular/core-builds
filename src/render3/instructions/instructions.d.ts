@@ -5,22 +5,20 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { InjectFlags, InjectionToken, Injector } from '../di';
-import { Type } from '../interface/type';
-import { SchemaMetadata } from '../metadata/schema';
-import { Sanitizer } from '../sanitization/security';
-import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
-import { LContainer } from './interfaces/container';
-import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags, ViewQueriesFunction } from './interfaces/definition';
-import { LocalRefExtractor, TAttributes, TContainerNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from './interfaces/node';
-import { PlayerFactory } from './interfaces/player';
-import { CssSelectorList } from './interfaces/projection';
-import { LQueries } from './interfaces/query';
-import { GlobalTargetResolver, RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
-import { SanitizerFn } from './interfaces/sanitization';
-import { StylingContext } from './interfaces/styling';
-import { ExpandoInstructions, LView, LViewFlags, OpaqueViewState, RootContext, RootContextFlags, TView } from './interfaces/view';
-import { NO_CHANGE } from './tokens';
+import { InjectFlags, InjectionToken, Injector } from '../../di';
+import { Type } from '../../interface/type';
+import { SchemaMetadata } from '../../metadata/schema';
+import { Sanitizer } from '../../sanitization/security';
+import { LContainer } from '../interfaces/container';
+import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags, ViewQueriesFunction } from '../interfaces/definition';
+import { LocalRefExtractor, TAttributes, TContainerNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from '../interfaces/node';
+import { CssSelectorList } from '../interfaces/projection';
+import { LQueries } from '../interfaces/query';
+import { GlobalTargetResolver, RComment, RElement, RText, Renderer3, RendererFactory3 } from '../interfaces/renderer';
+import { SanitizerFn } from '../interfaces/sanitization';
+import { StylingContext } from '../interfaces/styling';
+import { ExpandoInstructions, LView, LViewFlags, OpaqueViewState, RootContext, RootContextFlags, TView } from '../interfaces/view';
+import { NO_CHANGE } from '../tokens';
 /**
  * Refreshes the view, executing the following steps in that order:
  * triggers init hooks, refreshes dynamic embedded views, triggers content hooks, sets host
@@ -294,28 +292,6 @@ export declare function componentHostSyntheticProperty<T>(index: number, propNam
  */
 export declare function createTNode(tParent: TElementNode | TContainerNode | null, type: TNodeType, adjustedIndex: number, tagName: string | null, attrs: TAttributes | null): TNode;
 /**
- * Assign any inline style values to the element during creation mode.
- *
- * This instruction is meant to be called during creation mode to register all
- * dynamic style and class bindings on the element. Note for static values (no binding)
- * see `elementStart` and `elementHostAttrs`.
- *
- * @param classBindingNames An array containing bindable class names.
- *        The `elementClassProp` refers to the class name by index in this array.
- *        (i.e. `['foo', 'bar']` means `foo=0` and `bar=1`).
- * @param styleBindingNames An array containing bindable style properties.
- *        The `elementStyleProp` refers to the class name by index in this array.
- *        (i.e. `['width', 'height']` means `width=0` and `height=1`).
- * @param styleSanitizer An optional sanitizer function that will be used to sanitize any CSS
- *        property values that are applied to the element (during rendering).
- *        Note that the sanitizer instance itself is tied to the `directive` (if  provided).
- * @param directive A directive instance the styling is associated with. If not provided
- *        current view's controller instance is assumed.
- *
- * @publicApi
- */
-export declare function elementStyling(classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null, directive?: {}): void;
-/**
  * Assign static attribute values to a host element.
  *
  * This instruction will assign static attribute values as well as class and style
@@ -354,99 +330,7 @@ export declare function elementStyling(classBindingNames?: string[] | null, styl
  *
  * @publicApi
  */
-export declare function elementHostAttrs(directive: any, attrs: TAttributes): void;
-/**
- * Apply styling binding to the element.
- *
- * This instruction is meant to be run after `elementStyle` and/or `elementStyleProp`.
- * if any styling bindings have changed then the changes are flushed to the element.
- *
- *
- * @param index Index of the element's with which styling is associated.
- * @param directive Directive instance that is attempting to change styling. (Defaults to the
- *        component of the current view).
-components
- *
- * @publicApi
- */
-export declare function elementStylingApply(index: number, directive?: any): void;
-/**
- * Update a style bindings value on an element.
- *
- * If the style value is `null` then it will be removed from the element
- * (or assigned a different value depending if there are any styles placed
- * on the element with `elementStyle` or any styles that are present
- * from when the element was created (with `elementStyling`).
- *
- * (Note that the styling element is updated as part of `elementStylingApply`.)
- *
- * @param index Index of the element's with which styling is associated.
- * @param styleIndex Index of style to update. This index value refers to the
- *        index of the style in the style bindings array that was passed into
- *        `elementStlyingBindings`.
- * @param value New value to write (null to remove). Note that if a directive also
- *        attempts to write to the same binding value then it will only be able to
- *        do so if the template binding value is `null` (or doesn't exist at all).
- * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
- *        Note that when a suffix is provided then the underlying sanitizer will
- *        be ignored.
- * @param directive Directive instance that is attempting to change styling. (Defaults to the
- *        component of the current view).
-components
- *
- * @publicApi
- */
-export declare function elementStyleProp(index: number, styleIndex: number, value: string | number | String | PlayerFactory | null, suffix?: string | null, directive?: {}, forceOverride?: boolean): void;
-/**
- * Add or remove a class via a class binding on a DOM element.
- *
- * This instruction is meant to handle the [class.foo]="exp" case and, therefore,
- * the class itself must already be applied using `elementStyling` within
- * the creation block.
- *
- * @param index Index of the element's with which styling is associated.
- * @param classIndex Index of class to toggle. This index value refers to the
- *        index of the class in the class bindings array that was passed into
- *        `elementStlyingBindings` (which is meant to be called before this
- *        function is).
- * @param value A true/false value which will turn the class on or off.
- * @param directive Directive instance that is attempting to change styling. (Defaults to the
- *        component of the current view).
- * @param forceOverride Whether or not this value will be applied regardless of where it is being
- *        set within the directive priority structure.
- *
- * @publicApi
- */
-export declare function elementClassProp(index: number, classIndex: number, value: boolean | PlayerFactory, directive?: {}, forceOverride?: boolean): void;
-/**
- * Update style and/or class bindings using object literal.
- *
- * This instruction is meant apply styling via the `[style]="exp"` and `[class]="exp"` template
- * bindings. When styles are applied to the element they will then be placed with respect to
- * any styles set with `elementStyleProp`. If any styles are set to `null` then they will be
- * removed from the element. This instruction is also called for host bindings that write to
- * `[style]` and `[class]` (the directive param helps the instruction code determine where the
- * binding values come from).
- *
- * (Note that the styling instruction will not be applied until `elementStylingApply` is called.)
- *
- * @param index Index of the element's with which styling is associated.
- * @param classes A key/value style map of CSS classes that will be added to the given element.
- *        Any missing classes (that have already been applied to the element beforehand) will be
- *        removed (unset) from the element's list of CSS classes.
- * @param styles A key/value style map of the styles that will be applied to the given element.
- *        Any missing styles (that have already been applied to the element beforehand) will be
- *        removed (unset) from the element's styling.
- * @param directive Directive instance that is attempting to change styling. (Defaults to the
- *        component of the current view).
- *
- * @publicApi
- */
-export declare function elementStylingMap<T>(index: number, classes: {
-    [key: string]: any;
-} | string | NO_CHANGE | null, styles?: {
-    [styleName: string]: any;
-} | NO_CHANGE | null, directive?: {}): void;
+export declare function elementHostAttrs(attrs: TAttributes): void;
 /**
  * Create static text node
  *
@@ -605,18 +489,6 @@ export declare function addToViewTree<T extends LView | LContainer>(lView: LView
  */
 export declare function markViewDirty(lView: LView): LView | null;
 /**
- * Used to schedule change detection on the whole application.
- *
- * Unlike `tick`, `scheduleTick` coalesces multiple calls into one change detection run.
- * It is usually called indirectly by calling `markDirty` when the view needs to be
- * re-rendered.
- *
- * Typically `scheduleTick` uses `requestAnimationFrame` to coalesce multiple
- * `scheduleTick` requests. The scheduling function can be overridden in
- * `renderComponent`'s `scheduler` option.
- */
-export declare function scheduleTick<T>(rootContext: RootContext, flags: RootContextFlags): void;
-/**
  * Used to perform change detection on the whole application.
  *
  * This is equivalent to `detectChanges`, but invoked on root component. Additionally, `tick`
@@ -629,6 +501,18 @@ export declare function scheduleTick<T>(rootContext: RootContext, flags: RootCon
  * be changed when calling `renderComponent` and providing the `scheduler` option.
  */
 export declare function tick<T>(component: T): void;
+/**
+ * Used to schedule change detection on the whole application.
+ *
+ * Unlike `tick`, `scheduleTick` coalesces multiple calls into one change detection run.
+ * It is usually called indirectly by calling `markDirty` when the view needs to be
+ * re-rendered.
+ *
+ * Typically `scheduleTick` uses `requestAnimationFrame` to coalesce multiple
+ * `scheduleTick` requests. The scheduling function can be overridden in
+ * `renderComponent`'s `scheduler` option.
+ */
+export declare function scheduleTick<T>(rootContext: RootContext, flags: RootContextFlags): void;
 /**
  * Synchronously perform change detection on a component (and possibly its sub-components).
  *

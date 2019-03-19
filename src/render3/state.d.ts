@@ -52,6 +52,16 @@ export declare function enableBindings(): void;
 export declare function disableBindings(): void;
 export declare function getLView(): LView;
 /**
+ * Sets the active host context (the directive/component instance) and its host element index.
+ *
+ * @param host the directive/component instance
+ * @param index the element index value for the host element where the directive/component instance
+ * lives
+ */
+export declare function setActiveHost(host: {} | null, index?: number | null): void;
+export declare function getActiveHostContext(): {} | null;
+export declare function getActiveHostElementIndex(): number | null;
+/**
  * Restores `contextViewData` to the given OpaqueViewState instance.
  *
  * Used in conjunction with the getCurrentView() instruction to save a snapshot

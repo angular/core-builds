@@ -13,6 +13,6 @@
  * to generate a d.ts file containing all the published symbols that is then compared to the golden
  * file in the public_api_guard test.
  */
-export { markDirty } from './instructions';
+export { markDirty } from './instructions/all';
 export { getPlayers } from './players';
 export { getComponent, getContext, getDirectives, getHostElement, getInjector, getListeners, getRootComponents, getViewComponent } from './util/discovery_utils';
