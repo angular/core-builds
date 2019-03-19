@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8+69.sha-ae4a86e.with-local-changes
+ * @license Angular v8.0.0-beta.8+71.sha-0244a24.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5114,6 +5114,12 @@ declare interface ProceduralRenderer3 {
 }
 
 /**
+ * Describes a function that is used to process provider list (for example in case of provider
+ * overrides).
+ */
+declare type ProcessProvidersFunction = (providers: Provider[]) => Provider[];
+
+/**
  * This mapping is necessary so we can set input properties and output listeners
  * properly at runtime when property names are minified or aliased.
  *
@@ -9387,7 +9393,7 @@ export declare enum ɵChangeDetectorStatus {
 
 export declare function ɵclearOverrides(): void;
 
-export declare function ɵclearResolutionOfComponentResourcesQueue(): void;
+export declare function ɵclearResolutionOfComponentResourcesQueue(): Map<Type<any>, Component>;
 
 export declare function ɵcmf(ngModuleType: Type<any>, bootstrapComponents: Type<any>[], defFactory: NgModuleDefinitionFactory): NgModuleFactory<any>;
 
@@ -10140,7 +10146,7 @@ export declare interface ɵDirectiveDef<T> extends ɵBaseDef<T> {
     /** Token representing the directive. Used by DI. */
     type: Type<T>;
     /** Function that resolves providers and publishes them into the DI system. */
-    providersResolver: (<U extends T>(def: ɵDirectiveDef<U>) => void) | null;
+    providersResolver: (<U extends T>(def: ɵDirectiveDef<U>, processProvidersFn?: ProcessProvidersFunction) => void) | null;
     /** The selectors that will be used to match nodes to this directive. */
     readonly selectors: ɵCssSelectorList;
     /**
@@ -11849,7 +11855,7 @@ export declare function ɵresolveBody(element: RElement & {
  */
 export declare function ɵresolveComponentResources(resourceResolver: (url: string) => (Promise<string | {
     text(): Promise<string>;
-}>)): Promise<null>;
+}>)): Promise<void>;
 
 export declare function ɵresolveDocument(element: RElement & {
     ownerDocument: Document;
