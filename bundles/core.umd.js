@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8+56.sha-8e70ca3.with-local-changes
+ * @license Angular v8.0.0-beta.8+79.sha-a3ec058.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2708,7 +2708,7 @@
      */
     function resolveComponentResources(resourceResolver) {
         // Store all promises which are fetching the resources.
-        var urlFetches = [];
+        var componentResolved = [];
         // Cache so that we don't fetch the same resource more than once.
         var urlMap = new Map();
         function cachedResourceResolve(url) {
@@ -2716,37 +2716,42 @@
             if (!promise) {
                 var resp = resourceResolver(url);
                 urlMap.set(url, promise = resp.then(unwrapResponse));
-                urlFetches.push(promise);
             }
             return promise;
         }
-        componentResourceResolutionQueue.forEach(function (component) {
+        componentResourceResolutionQueue.forEach(function (component, type) {
+            var promises = [];
             if (component.templateUrl) {
-                cachedResourceResolve(component.templateUrl).then(function (template) {
+                promises.push(cachedResourceResolve(component.templateUrl).then(function (template) {
                     component.template = template;
-                });
+                }));
             }
             var styleUrls = component.styleUrls;
             var styles = component.styles || (component.styles = []);
             var styleOffset = component.styles.length;
             styleUrls && styleUrls.forEach(function (styleUrl, index) {
                 styles.push(''); // pre-allocate array.
-                cachedResourceResolve(styleUrl).then(function (style) {
+                promises.push(cachedResourceResolve(styleUrl).then(function (style) {
                     styles[styleOffset + index] = style;
                     styleUrls.splice(styleUrls.indexOf(styleUrl), 1);
                     if (styleUrls.length == 0) {
                         component.styleUrls = undefined;
                     }
-                });
+                }));
             });
+            var fullyResolved = Promise.all(promises).then(function () { return componentDefResolved(type); });
+            componentResolved.push(fullyResolved);
         });
         clearResolutionOfComponentResourcesQueue();
-        return Promise.all(urlFetches).then(function () { return null; });
+        return Promise.all(componentResolved).then(function () { return undefined; });
     }
-    var componentResourceResolutionQueue = new Set();
-    function maybeQueueResolutionOfComponentResources(metadata) {
+    var componentResourceResolutionQueue = new Map();
+    // Track when existing ngComponentDef for a Type is waiting on resources.
+    var componentDefPendingResolution = new Set();
+    function maybeQueueResolutionOfComponentResources(type, metadata) {
         if (componentNeedsResolution(metadata)) {
-            componentResourceResolutionQueue.add(metadata);
+            componentResourceResolutionQueue.set(type, metadata);
+            componentDefPendingResolution.add(type);
         }
     }
     function componentNeedsResolution(component) {
@@ -2754,13 +2759,18 @@
             component.styleUrls && component.styleUrls.length);
     }
     function clearResolutionOfComponentResourcesQueue() {
-        componentResourceResolutionQueue.clear();
+        var old = componentResourceResolutionQueue;
+        componentResourceResolutionQueue = new Map();
+        return old;
     }
     function isComponentResourceResolutionQueueEmpty() {
         return componentResourceResolutionQueue.size === 0;
     }
     function unwrapResponse(response) {
         return typeof response == 'string' ? response : response.text();
+    }
+    function componentDefResolved(type) {
+        componentDefPendingResolution.delete(type);
     }
 
     /**
@@ -13973,9 +13983,12 @@
     function ProvidersFeature(providers, viewProviders) {
         if (viewProviders === void 0) { viewProviders = []; }
         return function (definition) {
-            definition.providersResolver = function (def) {
-                return providersResolver(def, providers, viewProviders);
-            };
+            definition.providersResolver =
+                function (def, processProvidersFn) {
+                    return providersResolver(def, //
+                    processProvidersFn ? processProvidersFn(providers) : providers, //
+                    viewProviders);
+                };
         };
     }
 
@@ -14884,7 +14897,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.8+56.sha-8e70ca3.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.8+79.sha-a3ec058.with-local-changes');
 
     /**
      * @license
@@ -20385,16 +20398,29 @@
         QueryList.prototype.some = function (fn) {
             return this._results.some(fn);
         };
+        /**
+         * Returns a copy of the internal results list as an Array.
+         */
         QueryList.prototype.toArray = function () { return this._results.slice(); };
         QueryList.prototype[getSymbolIterator()] = function () { return this._results[getSymbolIterator()](); };
         QueryList.prototype.toString = function () { return this._results.toString(); };
-        QueryList.prototype.reset = function (res) {
-            this._results = flatten(res);
+        /**
+         * Updates the stored data of the query list, and resets the `dirty` flag to `false`, so that
+         * on change detection, it will not notify of changes to the queries, unless a new change
+         * occurs.
+         *
+         * @param resultsTree The results tree to store
+         */
+        QueryList.prototype.reset = function (resultsTree) {
+            this._results = depthFirstFlatten(resultsTree);
             this.dirty = false;
             this.length = this._results.length;
             this.last = this._results[this.length - 1];
             this.first = this._results[0];
         };
+        /**
+         * Triggers a change event by emitting on the `changes` {@link EventEmitter}.
+         */
         QueryList.prototype.notifyOnChanges = function () { this.changes.emit(this); };
         /** internal */
         QueryList.prototype.setDirty = function () { this.dirty = true; };
@@ -20405,9 +20431,9 @@
         };
         return QueryList;
     }());
-    function flatten(list) {
+    function depthFirstFlatten(list) {
         return list.reduce(function (flat, item) {
-            var flatItem = Array.isArray(item) ? flatten(item) : item;
+            var flatItem = Array.isArray(item) ? depthFirstFlatten(item) : item;
             return flat.concat(flatItem);
         }, []);
     }
@@ -20674,7 +20700,9 @@
     /**
      * Refreshes a query by combining matches from all active views and removing matches from deleted
      * views.
-     * Returns true if a query got dirty during change detection, false otherwise.
+     *
+     * @returns `true` if a query got dirty during change detection or if this is a static query
+     * resolving in creation mode, `false` otherwise.
      */
     function queryRefresh(queryList) {
         var queryListImpl = queryList;
@@ -21069,7 +21097,7 @@
     function compileNgModuleDefs(moduleType, ngModule) {
         ngDevMode && assertDefined(moduleType, 'Required value moduleType');
         ngDevMode && assertDefined(ngModule, 'Required value ngModule');
-        var declarations = flatten$1(ngModule.declarations || EMPTY_ARRAY$4);
+        var declarations = flatten(ngModule.declarations || EMPTY_ARRAY$4);
         var ngModuleDef = null;
         Object.defineProperty(moduleType, NG_MODULE_DEF, {
             configurable: true,
@@ -21077,14 +21105,14 @@
                 if (ngModuleDef === null) {
                     ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, "ng://" + moduleType.name + "/ngModuleDef.js", {
                         type: moduleType,
-                        bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$4, resolveForwardRef),
+                        bootstrap: flatten(ngModule.bootstrap || EMPTY_ARRAY$4, resolveForwardRef),
                         declarations: declarations.map(resolveForwardRef),
-                        imports: flatten$1(ngModule.imports || EMPTY_ARRAY$4, resolveForwardRef)
+                        imports: flatten(ngModule.imports || EMPTY_ARRAY$4, resolveForwardRef)
                             .map(expandModuleWithProviders),
-                        exports: flatten$1(ngModule.exports || EMPTY_ARRAY$4, resolveForwardRef)
+                        exports: flatten(ngModule.exports || EMPTY_ARRAY$4, resolveForwardRef)
                             .map(expandModuleWithProviders),
                         emitInline: true,
-                        schemas: ngModule.schemas ? flatten$1(ngModule.schemas) : null,
+                        schemas: ngModule.schemas ? flatten(ngModule.schemas) : null,
                     });
                 }
                 return ngModuleDef;
@@ -21127,14 +21155,14 @@
         var imports = maybeUnwrapFn(ngModuleDef.imports);
         var exports = maybeUnwrapFn(ngModuleDef.exports);
         declarations.forEach(verifyDeclarationsHaveDefinitions);
-        var combinedDeclarations = __spread(declarations.map(resolveForwardRef), flatten$1(imports.map(computeCombinedExports), resolveForwardRef));
+        var combinedDeclarations = __spread(declarations.map(resolveForwardRef), flatten(imports.map(computeCombinedExports), resolveForwardRef));
         exports.forEach(verifyExportsAreDeclaredOrReExported);
         declarations.forEach(verifyDeclarationIsUnique);
         declarations.forEach(verifyComponentEntryComponentsIsPartOfNgModule);
         var ngModule = getAnnotation(moduleType, 'NgModule');
         if (ngModule) {
             ngModule.imports &&
-                flatten$1(ngModule.imports, unwrapModuleWithProvidersImports)
+                flatten(ngModule.imports, unwrapModuleWithProvidersImports)
                     .forEach(verifySemanticsOfNgModuleDef);
             ngModule.bootstrap && ngModule.bootstrap.forEach(verifyCorrectBootstrapType);
             ngModule.bootstrap && ngModule.bootstrap.forEach(verifyComponentIsPartOfNgModule);
@@ -21253,7 +21281,7 @@
     function computeCombinedExports(type) {
         type = resolveForwardRef(type);
         var ngModuleDef = getNgModuleDef(type, true);
-        return __spread(flatten$1(maybeUnwrapFn(ngModuleDef.exports).map(function (type) {
+        return __spread(flatten(maybeUnwrapFn(ngModuleDef.exports).map(function (type) {
             var ngModuleDef = getNgModuleDef(type);
             if (ngModuleDef) {
                 verifySemanticsOfNgModuleDef(type);
@@ -21270,7 +21298,7 @@
      * the `ngSelectorScope` property of the declared type.
      */
     function setScopeOnDeclaredComponents(moduleType, ngModule) {
-        var declarations = flatten$1(ngModule.declarations || EMPTY_ARRAY$4);
+        var declarations = flatten(ngModule.declarations || EMPTY_ARRAY$4);
         var transitiveScopes = transitiveScopesFor(moduleType);
         declarations.forEach(function (declaration) {
             if (declaration.hasOwnProperty(NG_COMPONENT_DEF)) {
@@ -21300,6 +21328,11 @@
             return Array.from(transitiveScopes.compilation.pipes).map(function (pipe) { return getPipeDef(pipe); });
         };
         componentDef.schemas = transitiveScopes.schemas;
+        // Since we avoid Components/Directives/Pipes recompiling in case there are no overrides, we
+        // may face a problem where previously compiled defs available to a given Component/Directive
+        // are cached in TView and may become stale (in case any of these defs gets recompiled). In
+        // order to avoid this problem, we force fresh TView to be created.
+        componentDef.template.ngPrivateData = undefined;
     }
     /**
      * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
@@ -21380,11 +21413,11 @@
         def.transitiveCompileScopes = scopes;
         return scopes;
     }
-    function flatten$1(values, mapFn) {
+    function flatten(values, mapFn) {
         var out = [];
         values.forEach(function (value) {
             if (Array.isArray(value)) {
-                out.push.apply(out, __spread(flatten$1(value, mapFn)));
+                out.push.apply(out, __spread(flatten(value, mapFn)));
             }
             else {
                 out.push(mapFn ? mapFn(value) : value);
@@ -21424,7 +21457,7 @@
     function compileComponent(type, metadata) {
         var ngComponentDef = null;
         // Metadata may have resources which need to be resolved.
-        maybeQueueResolutionOfComponentResources(metadata);
+        maybeQueueResolutionOfComponentResources(type, metadata);
         Object.defineProperty(type, NG_COMPONENT_DEF, {
             get: function () {
                 var compiler = getCompilerFacade();

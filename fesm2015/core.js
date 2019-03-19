@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8+56.sha-8e70ca3.with-local-changes
+ * @license Angular v8.0.0-beta.8+79.sha-a3ec058.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3152,7 +3152,7 @@ const NG_ELEMENT_ID = getClosureSafeProperty({ __NG_ELEMENT_ID__: getClosureSafe
 function resolveComponentResources(resourceResolver) {
     // Store all promises which are fetching the resources.
     /** @type {?} */
-    const urlFetches = [];
+    const componentResolved = [];
     // Cache so that we don't fetch the same resource more than once.
     /** @type {?} */
     const urlMap = new Map();
@@ -3167,23 +3167,25 @@ function resolveComponentResources(resourceResolver) {
             /** @type {?} */
             const resp = resourceResolver(url);
             urlMap.set(url, promise = resp.then(unwrapResponse));
-            urlFetches.push(promise);
         }
         return promise;
     }
     componentResourceResolutionQueue.forEach((/**
      * @param {?} component
+     * @param {?} type
      * @return {?}
      */
-    (component) => {
+    (component, type) => {
+        /** @type {?} */
+        const promises = [];
         if (component.templateUrl) {
-            cachedResourceResolve(component.templateUrl).then((/**
+            promises.push(cachedResourceResolve(component.templateUrl).then((/**
              * @param {?} template
              * @return {?}
              */
             (template) => {
                 component.template = template;
-            }));
+            })));
         }
         /** @type {?} */
         const styleUrls = component.styleUrls;
@@ -3198,7 +3200,7 @@ function resolveComponentResources(resourceResolver) {
          */
         (styleUrl, index) => {
             styles.push(''); // pre-allocate array.
-            cachedResourceResolve(styleUrl).then((/**
+            promises.push(cachedResourceResolve(styleUrl).then((/**
              * @param {?} style
              * @return {?}
              */
@@ -3208,24 +3210,35 @@ function resolveComponentResources(resourceResolver) {
                 if (styleUrls.length == 0) {
                     component.styleUrls = undefined;
                 }
-            }));
+            })));
         }));
+        /** @type {?} */
+        const fullyResolved = Promise.all(promises).then((/**
+         * @return {?}
+         */
+        () => componentDefResolved(type)));
+        componentResolved.push(fullyResolved);
     }));
     clearResolutionOfComponentResourcesQueue();
-    return Promise.all(urlFetches).then((/**
+    return Promise.all(componentResolved).then((/**
      * @return {?}
      */
-    () => null));
+    () => undefined));
 }
 /** @type {?} */
-const componentResourceResolutionQueue = new Set();
+let componentResourceResolutionQueue = new Map();
+// Track when existing ngComponentDef for a Type is waiting on resources.
+/** @type {?} */
+const componentDefPendingResolution = new Set();
 /**
+ * @param {?} type
  * @param {?} metadata
  * @return {?}
  */
-function maybeQueueResolutionOfComponentResources(metadata) {
+function maybeQueueResolutionOfComponentResources(type, metadata) {
     if (componentNeedsResolution(metadata)) {
-        componentResourceResolutionQueue.add(metadata);
+        componentResourceResolutionQueue.set(type, metadata);
+        componentDefPendingResolution.add(type);
     }
 }
 /**
@@ -3240,7 +3253,10 @@ function componentNeedsResolution(component) {
  * @return {?}
  */
 function clearResolutionOfComponentResourcesQueue() {
-    componentResourceResolutionQueue.clear();
+    /** @type {?} */
+    const old = componentResourceResolutionQueue;
+    componentResourceResolutionQueue = new Map();
+    return old;
 }
 /**
  * @return {?}
@@ -3254,6 +3270,13 @@ function isComponentResourceResolutionQueueEmpty() {
  */
 function unwrapResponse(response) {
     return typeof response == 'string' ? response : response.text();
+}
+/**
+ * @param {?} type
+ * @return {?}
+ */
+function componentDefResolved(type) {
+    componentDefPendingResolution.delete(type);
 }
 
 /**
@@ -17528,11 +17551,17 @@ function ProvidersFeature(providers, viewProviders = []) {
      * @return {?}
      */
     (definition) => {
-        definition.providersResolver = (/**
-         * @param {?} def
-         * @return {?}
-         */
-        (def) => providersResolver(def, providers, viewProviders));
+        definition.providersResolver =
+            (/**
+             * @param {?} def
+             * @param {?=} processProvidersFn
+             * @return {?}
+             */
+            (def, processProvidersFn) => {
+                return providersResolver(def, //
+                processProvidersFn ? processProvidersFn(providers) : providers, //
+                viewProviders);
+            });
     });
 }
 
@@ -18628,7 +18657,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.8+56.sha-8e70ca3.with-local-changes');
+const VERSION = new Version('8.0.0-beta.8+79.sha-a3ec058.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -26003,6 +26032,7 @@ class QueryList {
         return this._results.some(fn);
     }
     /**
+     * Returns a copy of the internal results list as an Array.
      * @return {?}
      */
     toArray() { return this._results.slice(); }
@@ -26015,17 +26045,22 @@ class QueryList {
      */
     toString() { return this._results.toString(); }
     /**
-     * @param {?} res
+     * Updates the stored data of the query list, and resets the `dirty` flag to `false`, so that
+     * on change detection, it will not notify of changes to the queries, unless a new change
+     * occurs.
+     *
+     * @param {?} resultsTree The results tree to store
      * @return {?}
      */
-    reset(res) {
-        this._results = flatten(res);
+    reset(resultsTree) {
+        this._results = depthFirstFlatten(resultsTree);
         ((/** @type {?} */ (this))).dirty = false;
         ((/** @type {?} */ (this))).length = this._results.length;
         ((/** @type {?} */ (this))).last = this._results[this.length - 1];
         ((/** @type {?} */ (this))).first = this._results[0];
     }
     /**
+     * Triggers a change event by emitting on the `changes` {\@link EventEmitter}.
      * @return {?}
      */
     notifyOnChanges() { ((/** @type {?} */ (this.changes))).emit(this); }
@@ -26048,7 +26083,7 @@ class QueryList {
  * @param {?} list
  * @return {?}
  */
-function flatten(list) {
+function depthFirstFlatten(list) {
     return list.reduce((/**
      * @param {?} flat
      * @param {?} item
@@ -26056,7 +26091,7 @@ function flatten(list) {
      */
     (flat, item) => {
         /** @type {?} */
-        const flatItem = Array.isArray(item) ? flatten(item) : item;
+        const flatItem = Array.isArray(item) ? depthFirstFlatten(item) : item;
         return ((/** @type {?} */ (flat))).concat(flatItem);
     }), []);
 }
@@ -26445,9 +26480,10 @@ predicate, descend, read) {
 /**
  * Refreshes a query by combining matches from all active views and removing matches from deleted
  * views.
- * Returns true if a query got dirty during change detection, false otherwise.
+ *
  * @param {?} queryList
- * @return {?}
+ * @return {?} `true` if a query got dirty during change detection or if this is a static query
+ * resolving in creation mode, `false` otherwise.
  */
 function queryRefresh(queryList) {
     /** @type {?} */
@@ -26905,7 +26941,7 @@ function compileNgModuleDefs(moduleType, ngModule) {
     ngDevMode && assertDefined(moduleType, 'Required value moduleType');
     ngDevMode && assertDefined(ngModule, 'Required value ngModule');
     /** @type {?} */
-    const declarations = flatten$1(ngModule.declarations || EMPTY_ARRAY$4);
+    const declarations = flatten(ngModule.declarations || EMPTY_ARRAY$4);
     /** @type {?} */
     /** @nocollapse */ let ngModuleDef = null;
     Object.defineProperty(moduleType, NG_MODULE_DEF, {
@@ -26917,14 +26953,14 @@ function compileNgModuleDefs(moduleType, ngModule) {
             if (ngModuleDef === null) {
                 ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, `ng://${moduleType.name}/ngModuleDef.js`, {
                     type: moduleType,
-                    bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$4, resolveForwardRef),
+                    bootstrap: flatten(ngModule.bootstrap || EMPTY_ARRAY$4, resolveForwardRef),
                     declarations: declarations.map(resolveForwardRef),
-                    imports: flatten$1(ngModule.imports || EMPTY_ARRAY$4, resolveForwardRef)
+                    imports: flatten(ngModule.imports || EMPTY_ARRAY$4, resolveForwardRef)
                         .map(expandModuleWithProviders),
-                    exports: flatten$1(ngModule.exports || EMPTY_ARRAY$4, resolveForwardRef)
+                    exports: flatten(ngModule.exports || EMPTY_ARRAY$4, resolveForwardRef)
                         .map(expandModuleWithProviders),
                     emitInline: true,
-                    schemas: ngModule.schemas ? flatten$1(ngModule.schemas) : null,
+                    schemas: ngModule.schemas ? flatten(ngModule.schemas) : null,
                 });
             }
             return ngModuleDef;
@@ -26984,7 +27020,7 @@ function verifySemanticsOfNgModuleDef(moduleType) {
     /** @type {?} */
     const combinedDeclarations = [
         ...declarations.map(resolveForwardRef),
-        ...flatten$1(imports.map(computeCombinedExports), resolveForwardRef),
+        ...flatten(imports.map(computeCombinedExports), resolveForwardRef),
     ];
     exports.forEach(verifyExportsAreDeclaredOrReExported);
     declarations.forEach(verifyDeclarationIsUnique);
@@ -26993,7 +27029,7 @@ function verifySemanticsOfNgModuleDef(moduleType) {
     const ngModule = getAnnotation(moduleType, 'NgModule');
     if (ngModule) {
         ngModule.imports &&
-            flatten$1(ngModule.imports, unwrapModuleWithProvidersImports)
+            flatten(ngModule.imports, unwrapModuleWithProvidersImports)
                 .forEach(verifySemanticsOfNgModuleDef);
         ngModule.bootstrap && ngModule.bootstrap.forEach(verifyCorrectBootstrapType);
         ngModule.bootstrap && ngModule.bootstrap.forEach(verifyComponentIsPartOfNgModule);
@@ -27170,7 +27206,7 @@ function computeCombinedExports(type) {
     type = resolveForwardRef(type);
     /** @type {?} */
     /** @nocollapse */ const ngModuleDef = getNgModuleDef(type, true);
-    return [...flatten$1(maybeUnwrapFn(ngModuleDef.exports).map((/**
+    return [...flatten(maybeUnwrapFn(ngModuleDef.exports).map((/**
          * @param {?} type
          * @return {?}
          */
@@ -27196,7 +27232,7 @@ function computeCombinedExports(type) {
  */
 function setScopeOnDeclaredComponents(moduleType, ngModule) {
     /** @type {?} */
-    const declarations = flatten$1(ngModule.declarations || EMPTY_ARRAY$4);
+    const declarations = flatten(ngModule.declarations || EMPTY_ARRAY$4);
     /** @type {?} */
     const transitiveScopes = transitiveScopesFor(moduleType);
     declarations.forEach((/**
@@ -27251,6 +27287,11 @@ function patchComponentDefWithScope(componentDef, transitiveScopes) {
      */
     pipe => (/** @type {?} */ (getPipeDef(pipe))))));
     componentDef.schemas = transitiveScopes.schemas;
+    // Since we avoid Components/Directives/Pipes recompiling in case there are no overrides, we
+    // may face a problem where previously compiled defs available to a given Component/Directive
+    // are cached in TView and may become stale (in case any of these defs gets recompiled). In
+    // order to avoid this problem, we force fresh TView to be created.
+    componentDef.template.ngPrivateData = undefined;
 }
 /**
  * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
@@ -27378,7 +27419,7 @@ function transitiveScopesFor(moduleType, processNgModuleFn) {
  * @param {?=} mapFn
  * @return {?}
  */
-function flatten$1(values, mapFn) {
+function flatten(values, mapFn) {
     /** @type {?} */
     const out = [];
     values.forEach((/**
@@ -27387,7 +27428,7 @@ function flatten$1(values, mapFn) {
      */
     value => {
         if (Array.isArray(value)) {
-            out.push(...flatten$1(value, mapFn));
+            out.push(...flatten(value, mapFn));
         }
         else {
             out.push(mapFn ? mapFn(value) : value);
@@ -27441,7 +27482,7 @@ function compileComponent(type, metadata) {
     /** @type {?} */
     /** @nocollapse */ let ngComponentDef = null;
     // Metadata may have resources which need to be resolved.
-    maybeQueueResolutionOfComponentResources(metadata);
+    maybeQueueResolutionOfComponentResources(type, metadata);
     Object.defineProperty(type, NG_COMPONENT_DEF, {
         get: (/**
          * @return {?}

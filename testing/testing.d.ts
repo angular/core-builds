@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8+56.sha-8e70ca3.with-local-changes
+ * @license Angular v8.0.0-beta.8+79.sha-a3ec058.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -722,7 +722,8 @@ export declare class ɵangular_packages_core_testing_testing_b implements Inject
     private _testModuleType;
     private _instantiated;
     private _globalCompilationChecked;
-    private _initiaNgDefs;
+    private _originalComponentResolutionQueue;
+    private _initialNgDefs;
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
      * angular module. These are common to every test in the suite.
@@ -784,7 +785,24 @@ export declare class ɵangular_packages_core_testing_testing_b implements Inject
     private _assertNotInstantiated;
     private _createTestModule;
     readonly compilerInjector: Injector;
+    /**
+     * Clears current components resolution queue, but stores the state of the queue, so we can
+     * restore it later. Clearing the queue is required before we try to compile components (via
+     * `TestBed.compileComponents`), so that component defs are in sync with the resolution queue.
+     */
+    private _clearComponentResolutionQueue;
+    /**
+     * Restores component resolution queue to the previously saved state. This operation is performed
+     * as a part of restoring the state after completion of the current set of tests (that might
+     * potentially mutate the state).
+     */
+    private _restoreComponentResolutionQueue;
+    private _getProvidersOverrides;
+    private _hasProviderOverrides;
+    private _hasTypeOverrides;
+    private _hasTemplateOverrides;
     private _getMetaWithOverrides;
+    private _patchDefWithProviderOverrides;
     /**
      * Check whether the module scoping queue should be flushed, and flush it if needed.
      *

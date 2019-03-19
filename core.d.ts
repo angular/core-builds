@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8+56.sha-8e70ca3.with-local-changes
+ * @license Angular v8.0.0-beta.8+79.sha-a3ec058.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4167,7 +4167,7 @@ export declare interface NgModule {
      *
      * ### Example
      *
-     * The following example allows MainModule to use anthing exported by
+     * The following example allows MainModule to use anything exported by
      * `CommonModule`:
      *
      * ```javascript
@@ -5114,6 +5114,12 @@ declare interface ProceduralRenderer3 {
 }
 
 /**
+ * Describes a function that is used to process provider list (for example in case of provider
+ * overrides).
+ */
+declare type ProcessProvidersFunction = (providers: Provider[]) => Provider[];
+
+/**
  * This mapping is necessary so we can set input properties and output listeners
  * properly at runtime when property names are minified or aliased.
  *
@@ -5280,9 +5286,22 @@ export declare class QueryList<T> {
      * [Array.some](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
      */
     some(fn: (value: T, index: number, array: T[]) => boolean): boolean;
+    /**
+     * Returns a copy of the internal results list as an Array.
+     */
     toArray(): T[];
     toString(): string;
-    reset(res: Array<T | any[]>): void;
+    /**
+     * Updates the stored data of the query list, and resets the `dirty` flag to `false`, so that
+     * on change detection, it will not notify of changes to the queries, unless a new change
+     * occurs.
+     *
+     * @param resultsTree The results tree to store
+     */
+    reset(resultsTree: Array<T | any[]>): void;
+    /**
+     * Triggers a change event by emitting on the `changes` {@link EventEmitter}.
+     */
     notifyOnChanges(): void;
     /** internal */
     setDirty(): void;
@@ -9374,7 +9393,7 @@ export declare enum ɵChangeDetectorStatus {
 
 export declare function ɵclearOverrides(): void;
 
-export declare function ɵclearResolutionOfComponentResourcesQueue(): void;
+export declare function ɵclearResolutionOfComponentResourcesQueue(): Map<Type<any>, Component>;
 
 export declare function ɵcmf(ngModuleType: Type<any>, bootstrapComponents: Type<any>[], defFactory: NgModuleDefinitionFactory): NgModuleFactory<any>;
 
@@ -10127,7 +10146,7 @@ export declare interface ɵDirectiveDef<T> extends ɵBaseDef<T> {
     /** Token representing the directive. Used by DI. */
     type: Type<T>;
     /** Function that resolves providers and publishes them into the DI system. */
-    providersResolver: (<U extends T>(def: ɵDirectiveDef<U>) => void) | null;
+    providersResolver: (<U extends T>(def: ɵDirectiveDef<U>, processProvidersFn?: ProcessProvidersFunction) => void) | null;
     /** The selectors that will be used to match nodes to this directive. */
     readonly selectors: ɵCssSelectorList;
     /**
@@ -11629,7 +11648,9 @@ export declare const enum ɵQueryBindingType {
 /**
  * Refreshes a query by combining matches from all active views and removing matches from deleted
  * views.
- * Returns true if a query got dirty during change detection, false otherwise.
+ *
+ * @returns `true` if a query got dirty during change detection or if this is a static query
+ * resolving in creation mode, `false` otherwise.
  */
 export declare function ɵqueryRefresh(queryList: QueryList<any>): boolean;
 
@@ -11834,7 +11855,7 @@ export declare function ɵresolveBody(element: RElement & {
  */
 export declare function ɵresolveComponentResources(resourceResolver: (url: string) => (Promise<string | {
     text(): Promise<string>;
-}>)): Promise<null>;
+}>)): Promise<void>;
 
 export declare function ɵresolveDocument(element: RElement & {
     ownerDocument: Document;
