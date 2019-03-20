@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.9+40.sha-64e5628.with-local-changes
+ * @license Angular v8.0.0-beta.9+42.sha-10734ac.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12624,6 +12624,11 @@ function elementContainerStart(index, attrs, localRefs) {
     ngDevMode && assertDataInRange(lView, index - 1);
     /** @type {?} */
     const tNode = createNodeAtIndex(index, 4 /* ElementContainer */, native, tagName, attrs || null);
+    if (attrs) {
+        // While ng-container doesn't necessarily support styling, we use the style context to identify
+        // and execute directives on the ng-container.
+        setNodeStylingTemplate(tView, tNode, attrs, 0);
+    }
     appendChild(native, tNode, lView);
     createDirectivesAndLocals(tView, lView, localRefs);
     attachPatchData(native, lView);
@@ -12634,6 +12639,26 @@ function elementContainerStart(index, attrs, localRefs) {
         lView[QUERIES] = currentQueries.clone();
     }
     executeContentQueries(tView, tNode, lView);
+}
+/**
+ * Appropriately sets `stylingTemplate` on a TNode
+ *
+ * Does not apply styles to DOM nodes
+ *
+ * @param {?} tView
+ * @param {?} tNode The node whose `stylingTemplate` to set
+ * @param {?} attrs The attribute array source to set the attributes from
+ * @param {?} attrsStartIndex Optional start index to start processing the `attrs` from
+ * @return {?}
+ */
+function setNodeStylingTemplate(tView, tNode, attrs, attrsStartIndex) {
+    if (tView.firstTemplatePass && !tNode.stylingTemplate) {
+        /** @type {?} */
+        const stylingAttrsStartIndex = attrsStylingIndexOf(attrs, attrsStartIndex);
+        if (stylingAttrsStartIndex >= 0) {
+            tNode.stylingTemplate = initializeStaticContext(attrs, stylingAttrsStartIndex);
+        }
+    }
 }
 /**
  * @param {?} tView
@@ -12725,13 +12750,7 @@ function elementStart(index, name, attrs, localRefs) {
         // value is evaluated). When the template is allocated (when it turns into a context)
         // then the styling template is locked and cannot be further extended (it can only be
         // instantiated into a context per element)
-        if (tView.firstTemplatePass && !tNode.stylingTemplate) {
-            /** @type {?} */
-            const stylingAttrsStartIndex = attrsStylingIndexOf(attrs, lastAttrIndex);
-            if (stylingAttrsStartIndex >= 0) {
-                tNode.stylingTemplate = initializeStaticContext(attrs, stylingAttrsStartIndex);
-            }
-        }
+        setNodeStylingTemplate(tView, tNode, attrs, lastAttrIndex);
         if (tNode.stylingTemplate) {
             // the initial style/class values are rendered immediately after having been
             // initialized into the context so the element styling is ready when directives
@@ -18880,7 +18899,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.9+40.sha-64e5628.with-local-changes');
+const VERSION = new Version('8.0.0-beta.9+42.sha-10734ac.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
