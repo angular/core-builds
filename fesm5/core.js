@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.9+43.sha-17b3f11.with-local-changes
+ * @license Angular v8.0.0-beta.9+44.sha-9eb8274.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14980,7 +14980,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.9+43.sha-17b3f11.with-local-changes');
+var VERSION = new Version('8.0.0-beta.9+44.sha-9eb8274.with-local-changes');
 
 /**
  * @license
@@ -21682,6 +21682,7 @@ function compilePipe(type, meta) {
             if (ngPipeDef === null) {
                 ngPipeDef = getCompilerFacade().compilePipe(angularCoreEnv, "ng://" + renderStringify(type) + "/ngPipeDef.js", {
                     type: type,
+                    typeArgumentCount: 0,
                     name: type.name,
                     deps: reflectDependencies(type),
                     pipeName: meta.name,
