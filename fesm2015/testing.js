@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8+79.sha-a3ec058.with-local-changes
+ * @license Angular v8.0.0-beta.8+83.sha-067657c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2243,7 +2243,8 @@ class TestBedRender3 {
                 // if we have template override via `TestBed.overrideTemplateUsingTestingModule` -
                 // define Component scope as TestingModule scope, instead of the scope of NgModule
                 // where this Component was declared
-                calcTransitiveScopesFor(this._testModuleType) :
+                // TODO: This is only a partial fix. Should be fixed completely with FW-1178 refactor.
+                ɵtransitiveScopesFor(this._testModuleType) :
                 transitiveScope;
             ɵpatchComponentDefWithScope(((/** @type {?} */ (cmp))).ngComponentDef, scope);
         }));

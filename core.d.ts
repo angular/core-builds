@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.8+79.sha-a3ec058.with-local-changes
+ * @license Angular v8.0.0-beta.8+83.sha-067657c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10281,26 +10281,24 @@ export declare function ɵelement(index: number, name: string, attrs?: TAttribut
 export declare function ɵelementAttribute(index: number, name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): void;
 
 /**
- * Add or remove a class via a class binding on a DOM element.
+ * Update a class binding on an element with the provided value.
  *
- * This instruction is meant to handle the [class.foo]="exp" case and, therefore,
- * the class itself must already be applied using `elementStyling` within
- * the creation block.
+ * This instruction is meant to handle the `[class.foo]="exp"` case and,
+ * therefore, the class binding itself must already be allocated using
+ * `elementStyling` within the creation block.
  *
  * @param index Index of the element's with which styling is associated.
  * @param classIndex Index of class to toggle. This index value refers to the
  *        index of the class in the class bindings array that was passed into
- *        `elementStlyingBindings` (which is meant to be called before this
+ *        `elementStyling` (which is meant to be called before this
  *        function is).
  * @param value A true/false value which will turn the class on or off.
- * @param directive Directive instance that is attempting to change styling. (Defaults to the
- *        component of the current view).
- * @param forceOverride Whether or not this value will be applied regardless of where it is being
- *        set within the directive priority structure.
+ * @param forceOverride Whether or not this value will be applied regardless
+ *        of where it is being set within the styling priority structure.
  *
  * @publicApi
  */
-export declare function ɵelementClassProp(index: number, classIndex: number, value: boolean | ɵPlayerFactory, directive?: {}, forceOverride?: boolean): void;
+export declare function ɵelementClassProp(index: number, classIndex: number, value: boolean | ɵPlayerFactory, forceOverride?: boolean): void;
 
 /** Mark the end of the <ng-container>. */
 export declare function ɵelementContainerEnd(): void;
@@ -10363,7 +10361,120 @@ export declare function ɵelementEventFullName(target: string | null, name: stri
  *
  * @publicApi
  */
-export declare function ɵelementHostAttrs(directive: any, attrs: TAttributes): void;
+export declare function ɵelementHostAttrs(attrs: TAttributes): void;
+
+/**
+ * Update a class host binding for a directive's/component's host element within
+ * the host bindings function.
+ *
+ * This instruction is meant to handle the `@HostBinding('class.foo')` case and,
+ * therefore, the class binding itself must already be allocated using
+ * `elementHostStyling` within the creation block.
+ *
+ * @param classIndex Index of class to toggle. This index value refers to the
+ *        index of the class in the class bindings array that was passed into
+ *        `elementHostStlying` (which is meant to be called before this
+ *        function is).
+ * @param value A true/false value which will turn the class on or off.
+ * @param forceOverride Whether or not this value will be applied regardless
+ *        of where it is being set within the stylings priority structure.
+ *
+ * @publicApi
+ */
+export declare function ɵelementHostClassProp(classIndex: number, value: boolean | ɵPlayerFactory, forceOverride?: boolean): void;
+
+/**
+ * Update a host style binding value on the host element within a component/directive.
+ *
+ * If the style value is falsy then it will be removed from the host element
+ * (or assigned a different value depending if there are any styles placed
+ * on the same element with `elementHostStylingMap` or any static styles that
+ * are present from when the element was patched with `elementHostStyling`).
+ *
+ * Note that the styling applied to the host element once
+ * `elementHostStylingApply` is called.
+ *
+ * @param styleIndex Index of style to update. This index value refers to the
+ *        index of the style in the style bindings array that was passed into
+ *        `elementHostStyling`.
+ * @param value New value to write (falsy to remove). The value may or may not
+ *        be applied to the element depending on the template/component/directive
+ *        prioritization (see `interfaces/styling.ts`)
+ * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
+ *        Note that when a suffix is provided then the underlying sanitizer will
+ *        be ignored.
+ * @param forceOverride Whether or not to update the styling value immediately
+ *        (despite the other bindings possibly having priority)
+ *
+ * @publicApi
+ */
+export declare function ɵelementHostStyleProp(styleIndex: number, value: string | number | String | ɵPlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
+
+/**
+ * Allocates style and class binding properties on the host element during creation mode
+ * within the host bindings function of a directive or component.
+ *
+ * This instruction is meant to be called during creation mode to register all
+ * dynamic style and class host bindings on the host element of a directive or
+ * component. Note that this is only used for binding values (see `elementHostAttrs`
+ * to learn how to assign static styling values to the host element).
+ *
+ * @param classBindingNames An array containing bindable class names.
+ *        The `elementHostClassProp` instruction refers to the class name by index in
+ *        this array (i.e. `['foo', 'bar']` means `foo=0` and `bar=1`).
+ * @param styleBindingNames An array containing bindable style properties.
+ *        The `elementHostStyleProp` instruction refers to the class name by index in
+ *        this array (i.e. `['width', 'height']` means `width=0` and `height=1`).
+ * @param styleSanitizer An optional sanitizer function that will be used to sanitize any CSS
+ *        style values that are applied to the element (during rendering).
+ *        Note that the sanitizer instance itself is tied to the provided `directive` and
+ *        will not be used if the same property is assigned in another directive or
+ *        on the element directly.
+ *
+ * @publicApi
+ */
+export declare function ɵelementHostStyling(classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
+
+/**
+ * Apply all style and class host binding values to the element.
+ *
+ * This instruction is meant to be run after `elementHostStylingMap`,
+ * `elementHostStyleProp` or `elementHostClassProp` instructions have
+ * been run and will only apply styling to the host element if any
+ * styling bindings have been updated.
+ *
+ * @publicApi
+ */
+export declare function ɵelementHostStylingApply(): void;
+
+/**
+ * Update style and/or class host bindings using object literals on an element within the host
+ * bindings function for a directive/component.
+ *
+ * This instruction is meant to apply styling via the `@HostBinding('style')` and
+ * `@HostBinding('class')` bindings for a component's or directive's host element.
+ * When styles/classes are applied to the host element they will then be updated
+ * with respect to any styles/classes set with `elementHostStyleProp` or
+ * `elementHostClassProp`. If any styles or classes are set to falsy then they
+ * will be removed from the element.
+ *
+ * Note that the styling instruction will not be applied until
+ * `elementHostStylingApply` is called.
+ *
+ * @param classes A key/value map or string of CSS classes that will be added to the
+ *        given element. Any missing classes (that have already been applied to the element
+ *        beforehand) will be removed (unset) from the element's list of CSS classes.
+ * @param styles A key/value style map of the styles that will be applied to the given element.
+ *        Any missing styles (that have already been applied to the element beforehand) will be
+ *        removed (unset) from the element's styling.
+ *
+ * @publicApi
+ */
+export declare function ɵelementHostStylingMap(classes: {
+    [key: string]: any;
+} | string | ɵNO_CHANGE | null, styles?: {
+    [styleName: string]: any;
+} | ɵNO_CHANGE | null): void;
 
 /**
  * Update a property on an element.
@@ -10398,101 +10509,92 @@ export declare function ɵelementProperty<T>(index: number, propName: string, va
 export declare function ɵelementStart(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
 
 /**
- * Update a style bindings value on an element.
+ * Update a style binding on an element with the provided value.
  *
- * If the style value is `null` then it will be removed from the element
+ * If the style value is falsy then it will be removed from the element
  * (or assigned a different value depending if there are any styles placed
- * on the element with `elementStyle` or any styles that are present
- * from when the element was created (with `elementStyling`).
+ * on the element with `elementStylingMap` or any static styles that are
+ * present from when the element was created with `elementStyling`).
  *
- * (Note that the styling element is updated as part of `elementStylingApply`.)
+ * Note that the styling element is updated as part of `elementStylingApply`.
  *
  * @param index Index of the element's with which styling is associated.
  * @param styleIndex Index of style to update. This index value refers to the
  *        index of the style in the style bindings array that was passed into
- *        `elementStlyingBindings`.
- * @param value New value to write (null to remove). Note that if a directive also
- *        attempts to write to the same binding value then it will only be able to
- *        do so if the template binding value is `null` (or doesn't exist at all).
+ *        `elementStyling`.
+ * @param value New value to write (falsy to remove). Note that if a directive also
+ *        attempts to write to the same binding value (via `elementHostStyleProp`)
+ *        then it will only be able to do so if the binding value assigned via
+ *        `elementStyleProp` is falsy (or doesn't exist at all).
  * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
  *        Note that when a suffix is provided then the underlying sanitizer will
  *        be ignored.
- * @param directive Directive instance that is attempting to change styling. (Defaults to the
- *        component of the current view).
-components
+ * @param forceOverride Whether or not to update the styling value immediately
+ *        (despite the other bindings possibly having priority)
  *
  * @publicApi
  */
-export declare function ɵelementStyleProp(index: number, styleIndex: number, value: string | number | String | ɵPlayerFactory | null, suffix?: string | null, directive?: {}, forceOverride?: boolean): void;
+export declare function ɵelementStyleProp(index: number, styleIndex: number, value: string | number | String | ɵPlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
 
 /**
- * Assign any inline style values to the element during creation mode.
+ * Allocates style and class binding properties on the element during creation mode.
  *
  * This instruction is meant to be called during creation mode to register all
- * dynamic style and class bindings on the element. Note for static values (no binding)
- * see `elementStart` and `elementHostAttrs`.
+ * dynamic style and class bindings on the element. Note that this is only used
+ * for binding values (see `elementStart` to learn how to assign static styling
+ * values to an element).
  *
  * @param classBindingNames An array containing bindable class names.
- *        The `elementClassProp` refers to the class name by index in this array.
- *        (i.e. `['foo', 'bar']` means `foo=0` and `bar=1`).
+ *        The `elementClassProp` instruction refers to the class name by index in
+ *        this array (i.e. `['foo', 'bar']` means `foo=0` and `bar=1`).
  * @param styleBindingNames An array containing bindable style properties.
- *        The `elementStyleProp` refers to the class name by index in this array.
- *        (i.e. `['width', 'height']` means `width=0` and `height=1`).
+ *        The `elementStyleProp` instruction refers to the class name by index in
+ *        this array (i.e. `['width', 'height']` means `width=0` and `height=1`).
  * @param styleSanitizer An optional sanitizer function that will be used to sanitize any CSS
- *        property values that are applied to the element (during rendering).
- *        Note that the sanitizer instance itself is tied to the `directive` (if  provided).
- * @param directive A directive instance the styling is associated with. If not provided
- *        current view's controller instance is assumed.
+ *        style values that are applied to the element (during rendering).
  *
  * @publicApi
  */
-export declare function ɵelementStyling(classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null, directive?: {}): void;
+export declare function ɵelementStyling(classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
 
 /**
- * Apply styling binding to the element.
+ * Apply all style and class binding values to the element.
  *
- * This instruction is meant to be run after `elementStyle` and/or `elementStyleProp`.
- * if any styling bindings have changed then the changes are flushed to the element.
- *
+ * This instruction is meant to be run after `elementStylingMap`, `elementStyleProp`
+ * or `elementClassProp` instructions have been run and will only apply styling to
+ * the element if any styling bindings have been updated.
  *
  * @param index Index of the element's with which styling is associated.
- * @param directive Directive instance that is attempting to change styling. (Defaults to the
- *        component of the current view).
-components
  *
  * @publicApi
  */
-export declare function ɵelementStylingApply(index: number, directive?: any): void;
+export declare function ɵelementStylingApply(index: number): void;
 
 /**
- * Update style and/or class bindings using object literal.
+ * Update style and/or class bindings using object literals on an element.
  *
- * This instruction is meant apply styling via the `[style]="exp"` and `[class]="exp"` template
- * bindings. When styles are applied to the element they will then be placed with respect to
- * any styles set with `elementStyleProp`. If any styles are set to `null` then they will be
- * removed from the element. This instruction is also called for host bindings that write to
- * `[style]` and `[class]` (the directive param helps the instruction code determine where the
- * binding values come from).
+ * This instruction is meant to apply styling via the `[style]="exp"` and `[class]="exp"` template
+ * bindings. When styles/classes are applied to the element they will then be updated with
+ * respect to any styles/classes set with `elementStyleProp` or `elementClassProp`. If any
+ * styles or classes are set to falsy then they will be removed from the element.
  *
- * (Note that the styling instruction will not be applied until `elementStylingApply` is called.)
+ * Note that the styling instruction will not be applied until `elementStylingApply` is called.
  *
  * @param index Index of the element's with which styling is associated.
- * @param classes A key/value style map of CSS classes that will be added to the given element.
- *        Any missing classes (that have already been applied to the element beforehand) will be
- *        removed (unset) from the element's list of CSS classes.
+ * @param classes A key/value map or string of CSS classes that will be added to the
+ *        given element. Any missing classes (that have already been applied to the element
+ *        beforehand) will be removed (unset) from the element's list of CSS classes.
  * @param styles A key/value style map of the styles that will be applied to the given element.
  *        Any missing styles (that have already been applied to the element beforehand) will be
  *        removed (unset) from the element's styling.
- * @param directive Directive instance that is attempting to change styling. (Defaults to the
- *        component of the current view).
  *
  * @publicApi
  */
-export declare function ɵelementStylingMap<T>(index: number, classes: {
+export declare function ɵelementStylingMap(index: number, classes: {
     [key: string]: any;
 } | string | ɵNO_CHANGE | null, styles?: {
     [styleName: string]: any;
-} | ɵNO_CHANGE | null, directive?: {}): void;
+} | ɵNO_CHANGE | null): void;
 
 /** Marks the end of an embedded view. */
 export declare function ɵembeddedViewEnd(): void;
