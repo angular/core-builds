@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.10+7.sha-c75e16a.with-local-changes
+ * @license Angular v7.2.10+10.sha-a677d8b.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -455,6 +455,7 @@ var ChangeDetectionStrategy;
      * Use the `CheckOnce` strategy, meaning that automatic change detection is deactivated
      * until reactivated by setting the strategy to `Default` (`CheckAlways`).
      * Change detection can still be explicitly invoked.
+     * This strategy applies to all child directives and cannot be overridden.
      */
     ChangeDetectionStrategy[ChangeDetectionStrategy["OnPush"] = 0] = "OnPush";
     /**
@@ -10743,7 +10744,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.2.10+7.sha-c75e16a.with-local-changes');
+var VERSION = new Version('7.2.10+10.sha-a677d8b.with-local-changes');
 
 /**
  * @license
