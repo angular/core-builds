@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.9+73.sha-f3e0cc8.with-local-changes
+ * @license Angular v8.0.0-beta.9+77.sha-66b72bf.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3778,15 +3778,19 @@ declare interface LContainer extends Array<any> {
      */
     [QUERIES]: LQueries | null;
     /**
-     * A list of the container's currently active child views. Views will be inserted
-     * here as they are added and spliced from here when they are removed. We need
-     * to keep a record of current views so we know which views are already in the DOM
-     * (and don't need to be re-added) and so we can remove views from the DOM when they
-     * are no longer required.
+     * Pointer to the `TNode` which represents the host of the container.
      */
-    [VIEWS]: ɵangular_packages_core_core_bm[];
+    [T_HOST]: TNode;
     /** The comment element that serves as an anchor for this LContainer. */
     readonly [NATIVE]: RComment;
+    /**
+  *A list of the container's currently active child views. Views will be inserted
+  *here as they are added and spliced from here when they are removed. We need
+  *to keep a record of current views so we know which views are already in the DOM
+  *(and don't need to be re-added) and so we can remove views from the DOM when they
+  *are no longer required.
+  */
+    [VIEWS]: ɵangular_packages_core_core_bm[];
 }
 
 /**
@@ -8476,7 +8480,7 @@ declare class ViewRef_2<T> implements EmbeddedViewRef<T>, InternalViewRef, viewE
     private _lookUpContext;
 }
 
-declare const VIEWS = 6;
+declare const VIEWS = 8;
 
 /**
  * Bitmask of states
