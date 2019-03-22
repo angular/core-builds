@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.9+66.sha-2790352.with-local-changes
+ * @license Angular v8.0.0-beta.9+81.sha-769d960.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -665,6 +665,7 @@ function isType(v) {
 const DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*arguments\)/;
 const INHERITED_CLASS = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{/;
 const INHERITED_CLASS_WITH_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{[\s\S]*constructor\s*\(/;
+const INHERITED_CLASS_WITH_DELEGATE_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{[\s\S]*constructor\s*\(\)\s*{\s+super\(\.\.\.arguments\)/;
 class ReflectionCapabilities {
     constructor(reflect) { this._reflect = reflect || _global['Reflect']; }
     isReflectionEnabled() { return true; }
@@ -706,7 +707,7 @@ class ReflectionCapabilities {
         // This also helps to work around for https://github.com/Microsoft/TypeScript/issues/12439
         // that sets 'design:paramtypes' to []
         // if a class inherits from another class but has no ctor declared itself.
-        if (DELEGATE_CTOR.exec(typeStr) ||
+        if (DELEGATE_CTOR.exec(typeStr) || INHERITED_CLASS_WITH_DELEGATE_CTOR.exec(typeStr) ||
             (INHERITED_CLASS.exec(typeStr) && !INHERITED_CLASS_WITH_CTOR.exec(typeStr))) {
             return null;
         }
@@ -3022,6 +3023,7 @@ const ChangeDetectionStrategy = {
      * Use the `CheckOnce` strategy, meaning that automatic change detection is deactivated
      * until reactivated by setting the strategy to `Default` (`CheckAlways`).
      * Change detection can still be explicitly invoked.
+     * This strategy applies to all child directives and cannot be overridden.
      */
     OnPush: 0,
     /**
@@ -4000,12 +4002,12 @@ const TYPE = 1;
  * @type {?}
  */
 const ACTIVE_INDEX = 2;
-// PARENT, NEXT, and QUERIES are indices 3, 4, and 5.
+// PARENT, NEXT, QUERIES and T_HOST are indices 3, 4, 5 and 6.
 // As we already have these constants in LView, we don't need to re-create them.
 /** @type {?} */
-const VIEWS = 6;
-/** @type {?} */
 const NATIVE = 7;
+/** @type {?} */
+const VIEWS = 8;
 
 /**
  * @fileoverview added by tsickle
@@ -8303,7 +8305,7 @@ function updateBinding(lView, bindingIndex, value) {
  * @return {?}
  */
 function getBinding(lView, bindingIndex) {
-    ngDevMode && assertDataInRange(lView, lView[bindingIndex]);
+    ngDevMode && assertDataInRange(lView, bindingIndex);
     ngDevMode &&
         assertNotEqual(lView[bindingIndex], NO_CHANGE, 'Stored value should never be NO_CHANGE.');
     return lView[bindingIndex];
@@ -8730,13 +8732,20 @@ function walkTNodeTree(viewToWalk, action, renderer, renderParent, beforeNode) {
     while (tNode) {
         /** @type {?} */
         let nextTNode = null;
-        if (tNode.type === 3 /* Element */) {
+        if (tNode.type === 3 /* Element */ || tNode.type === 4 /* ElementContainer */) {
             executeNodeAction(action, renderer, renderParent, getNativeByTNode(tNode, currentView), tNode, beforeNode);
             /** @type {?} */
             const nodeOrContainer = currentView[tNode.index];
             if (isLContainer(nodeOrContainer)) {
                 // This element has an LContainer, and its comment needs to be handled
                 executeNodeAction(action, renderer, renderParent, nodeOrContainer[NATIVE], tNode, beforeNode);
+                if (nodeOrContainer[VIEWS].length) {
+                    currentView = nodeOrContainer[VIEWS][0];
+                    nextTNode = currentView[TVIEW].node;
+                    // When the walker enters a container, then the beforeNode has to become the local native
+                    // comment node.
+                    beforeNode = nodeOrContainer[NATIVE];
+                }
             }
         }
         else if (tNode.type === 0 /* Container */) {
@@ -8776,7 +8785,7 @@ function walkTNodeTree(viewToWalk, action, renderer, renderParent, beforeNode) {
             }
         }
         else {
-            // Otherwise, this is a View or an ElementContainer
+            // Otherwise, this is a View
             nextTNode = tNode.child;
         }
         if (nextTNode === null) {
@@ -8785,7 +8794,15 @@ function walkTNodeTree(viewToWalk, action, renderer, renderParent, beforeNode) {
                 currentView = (/** @type {?} */ (projectionNodeStack[projectionNodeIndex--]));
                 tNode = (/** @type {?} */ (projectionNodeStack[projectionNodeIndex--]));
             }
-            nextTNode = (tNode.flags & 2 /* isProjected */) ? tNode.projectionNext : tNode.next;
+            if (tNode.flags & 2 /* isProjected */) {
+                nextTNode = tNode.projectionNext;
+            }
+            else if (tNode.type === 4 /* ElementContainer */) {
+                nextTNode = tNode.child || tNode.next;
+            }
+            else {
+                nextTNode = tNode.next;
+            }
             /**
              * Find the next node in the TNode tree, taking into account the place where a node is
              * projected (in the shadow DOM) rather than where it comes from (in the light DOM).
@@ -8809,6 +8826,7 @@ function walkTNodeTree(viewToWalk, action, renderer, renderParent, beforeNode) {
                      * chain until:
                      * - we find an lView with a next pointer
                      * - or find a tNode with a parent that has a next pointer
+                     * - or find a lContainer
                      * - or reach root TNode (in which case we exit, since we traversed all nodes)
                      */
                     while (!currentView[NEXT] && currentView[PARENT] &&
@@ -8816,6 +8834,12 @@ function walkTNodeTree(viewToWalk, action, renderer, renderParent, beforeNode) {
                         if (tNode === rootTNode)
                             return;
                         currentView = (/** @type {?} */ (currentView[PARENT]));
+                        if (isLContainer(currentView)) {
+                            tNode = (/** @type {?} */ (currentView[T_HOST]));
+                            currentView = currentView[PARENT];
+                            beforeNode = currentView[tNode.index][NATIVE];
+                            break;
+                        }
                         tNode = (/** @type {?} */ (currentView[T_HOST]));
                     }
                     if (currentView[NEXT]) {
@@ -8823,7 +8847,7 @@ function walkTNodeTree(viewToWalk, action, renderer, renderParent, beforeNode) {
                         nextTNode = currentView[T_HOST];
                     }
                     else {
-                        nextTNode = tNode.next;
+                        nextTNode = tNode.type === 4 /* ElementContainer */ && tNode.child || tNode.next;
                     }
                 }
                 else {
@@ -14180,10 +14204,11 @@ function generateInitialInputs(directiveIndex, inputs, tNode) {
  * @param {?} hostNative The host element for the LContainer
  * @param {?} currentView The parent view of the LContainer
  * @param {?} native The native comment element
+ * @param {?} tNode
  * @param {?=} isForViewContainerRef Optional a flag indicating the ViewContainerRef case
  * @return {?} LContainer
  */
-function createLContainer(hostNative, currentView, native, isForViewContainerRef) {
+function createLContainer(hostNative, currentView, native, tNode, isForViewContainerRef) {
     ngDevMode && assertDomNode(native);
     ngDevMode && assertLView(currentView);
     /** @type {?} */
@@ -14194,8 +14219,9 @@ function createLContainer(hostNative, currentView, native, isForViewContainerRef
         currentView,
         null,
         null,
-        [],
+        tNode,
         native,
+        [],
     ];
     ngDevMode && attachLContainerDebug(lContainer);
     return lContainer;
@@ -14274,7 +14300,8 @@ function containerInternal(index, tagName, attrs) {
     /** @type {?} */
     const tNode = createNodeAtIndex(index, 0 /* Container */, comment, tagName, attrs);
     /** @type {?} */
-    const lContainer = lView[adjustedIndex] = createLContainer(lView[adjustedIndex], lView, comment);
+    const lContainer = lView[adjustedIndex] =
+        createLContainer(lView[adjustedIndex], lView, comment, tNode);
     appendChild(comment, tNode, lView);
     // Containers are added to the current view tree instead of their embedded views
     // because views can be removed and re-inserted.
@@ -18646,7 +18673,7 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
             appendChild(commentNode, hostTNode, hostView);
         }
         hostView[hostTNode.index] = lContainer =
-            createLContainer(slotValue, hostView, commentNode, true);
+            createLContainer(slotValue, hostView, commentNode, hostTNode, true);
         addToViewTree(hostView, lContainer);
     }
     return new R3ViewContainerRef(lContainer, hostTNode, hostView);
@@ -18900,7 +18927,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.9+66.sha-2790352.with-local-changes');
+const VERSION = new Version('8.0.0-beta.9+81.sha-769d960.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
