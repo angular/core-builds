@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.9+70.sha-ed8d60d.with-local-changes
+ * @license Angular v8.0.0-beta.9+73.sha-f3e0cc8.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8304,7 +8304,7 @@ function updateBinding(lView, bindingIndex, value) {
  * @return {?}
  */
 function getBinding(lView, bindingIndex) {
-    ngDevMode && assertDataInRange(lView, lView[bindingIndex]);
+    ngDevMode && assertDataInRange(lView, bindingIndex);
     ngDevMode &&
         assertNotEqual(lView[bindingIndex], NO_CHANGE, 'Stored value should never be NO_CHANGE.');
     return lView[bindingIndex];
@@ -18901,7 +18901,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.9+70.sha-ed8d60d.with-local-changes');
+const VERSION = new Version('8.0.0-beta.9+73.sha-f3e0cc8.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
