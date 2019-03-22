@@ -376,7 +376,7 @@ export declare function initNodeFlags(tNode: TNode, index: number, numberOfDirec
  * @param isForViewContainerRef Optional a flag indicating the ViewContainerRef case
  * @returns LContainer
  */
-export declare function createLContainer(hostNative: RElement | RComment | StylingContext | LView, currentView: LView, native: RComment, isForViewContainerRef?: boolean): LContainer;
+export declare function createLContainer(hostNative: RElement | RComment | StylingContext | LView, currentView: LView, native: RComment, tNode: TNode, isForViewContainerRef?: boolean): LContainer;
 /**
  * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
  *

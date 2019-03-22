@@ -14,6 +14,7 @@ import { GetterFn, MethodFn, SetterFn } from './types';
 export declare const DELEGATE_CTOR: RegExp;
 export declare const INHERITED_CLASS: RegExp;
 export declare const INHERITED_CLASS_WITH_CTOR: RegExp;
+export declare const INHERITED_CLASS_WITH_DELEGATE_CTOR: RegExp;
 export declare class ReflectionCapabilities implements PlatformReflectionCapabilities {
     private _reflect;
     constructor(reflect?: any);

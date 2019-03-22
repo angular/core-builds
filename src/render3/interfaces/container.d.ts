@@ -5,10 +5,11 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { TNode } from './node';
 import { LQueries } from './query';
 import { RComment, RElement } from './renderer';
 import { StylingContext } from './styling';
-import { HOST, LView, NEXT, PARENT, QUERIES } from './view';
+import { HOST, LView, NEXT, PARENT, QUERIES, T_HOST } from './view';
 /**
  * Special location which allows easy identification of type. If we have an array which was
  * retrieved from the `LView` and that array has `true` at `TYPE` location, we know it is
@@ -21,8 +22,8 @@ export declare const TYPE = 1;
  * Uglify will inline these when minifying so there shouldn't be a cost.
  */
 export declare const ACTIVE_INDEX = 2;
-export declare const VIEWS = 6;
 export declare const NATIVE = 7;
+export declare const VIEWS = 8;
 /**
  * The state associated with a container.
  *
@@ -71,14 +72,18 @@ export interface LContainer extends Array<any> {
      */
     [QUERIES]: LQueries | null;
     /**
-     * A list of the container's currently active child views. Views will be inserted
-     * here as they are added and spliced from here when they are removed. We need
-     * to keep a record of current views so we know which views are already in the DOM
-     * (and don't need to be re-added) and so we can remove views from the DOM when they
-     * are no longer required.
+     * Pointer to the `TNode` which represents the host of the container.
      */
-    [VIEWS]: LView[];
+    [T_HOST]: TNode;
     /** The comment element that serves as an anchor for this LContainer. */
     readonly [NATIVE]: RComment;
+    /**
+  *A list of the container's currently active child views. Views will be inserted
+  *here as they are added and spliced from here when they are removed. We need
+  *to keep a record of current views so we know which views are already in the DOM
+  *(and don't need to be re-added) and so we can remove views from the DOM when they
+  *are no longer required.
+  */
+    [VIEWS]: LView[];
 }
 export declare const unusedValueExportToPlacateAjd = 1;
