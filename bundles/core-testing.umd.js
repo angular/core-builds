@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.9+82.sha-b5295ad.with-local-changes
+ * @license Angular v8.0.0-beta.9+83.sha-bef5043.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1530,14 +1530,26 @@
                 ], RootScopeModule);
                 return RootScopeModule;
             }());
+            var R3ErrorHandlerModule = /** @class */ (function () {
+                function R3ErrorHandlerModule() {
+                }
+                R3ErrorHandlerModule.ngModuleDef = i0.ɵdefineNgModule({ type: R3ErrorHandlerModule });
+                R3ErrorHandlerModule.ngInjectorDef = i0.defineInjector({ factory: function R3ErrorHandlerModule_Factory(t) { return new (t || R3ErrorHandlerModule)(); }, providers: [{ provide: i0.ErrorHandler, useClass: R3TestErrorHandler }], imports: [] });
+                return R3ErrorHandlerModule;
+            }());
+            /*@__PURE__*/ i0.ɵsetClassMetadata(R3ErrorHandlerModule, [{
+                    type: i0.NgModule,
+                    args: [{ providers: [{ provide: i0.ErrorHandler, useClass: R3TestErrorHandler }] }]
+                }], null, null);
             var ngZone = new i0.NgZone({ enableLongStackTrace: true });
             var providers = __spread([
                 { provide: i0.NgZone, useValue: ngZone },
-                { provide: i0.Compiler, useFactory: function () { return new R3TestCompiler(_this); } },
-                { provide: i0.ErrorHandler, useClass: R3TestErrorHandler }
+                { provide: i0.Compiler, useFactory: function () { return new R3TestCompiler(_this); } }
             ], this._providers, this._providerOverrides);
+            // We need to provide the `R3ErrorHandlerModule` after the consumer's NgModule so that we can
+            // override the default ErrorHandler, if the consumer didn't pass in a custom one.
+            var imports = [RootScopeModule, this.ngModule, R3ErrorHandlerModule, this._imports];
             var declarations = this._declarations;
-            var imports = [RootScopeModule, this.ngModule, this._imports];
             var schemas = this._schemas;
             var DynamicTestModule = /** @class */ (function () {
                 function DynamicTestModule() {

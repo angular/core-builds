@@ -1,10 +1,10 @@
 /**
- * @license Angular v8.0.0-beta.9+82.sha-b5295ad.with-local-changes
+ * @license Angular v8.0.0-beta.9+83.sha-bef5043.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, InjectionToken, Injector, ɵresetCompiledComponents, resolveForwardRef, ɵNG_COMPONENT_DEF, ɵcompileComponent, ɵgetInjectableDef, NgZone, ɵRender3ComponentFactory, ɵRender3NgModuleRef, ApplicationInitStatus, Compiler, ErrorHandler, COMPILER_OPTIONS, ɵdefineNgModule, defineInjector, ɵsetClassMetadata, ɵNgModuleFactory, ɵNG_MODULE_DEF, ɵNG_INJECTOR_DEF, ɵcompileNgModuleDefs, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵflushModuleScopingQueueAsMuchAsPossible, ModuleWithComponentFactories, Injectable, defineInjectable, ɵgetInheritedFactory, ɵivyEnabled, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, Optional, SkipSelf } from '@angular/core';
+import { getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, InjectionToken, Injector, ɵresetCompiledComponents, resolveForwardRef, ɵNG_COMPONENT_DEF, ɵcompileComponent, ɵgetInjectableDef, NgZone, ɵRender3ComponentFactory, ɵRender3NgModuleRef, ApplicationInitStatus, ɵdefineNgModule, defineInjector, ErrorHandler, ɵsetClassMetadata, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ɵNG_MODULE_DEF, ɵNG_INJECTOR_DEF, ɵcompileNgModuleDefs, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵflushModuleScopingQueueAsMuchAsPossible, ModuleWithComponentFactories, Injectable, defineInjectable, ɵgetInheritedFactory, ɵivyEnabled, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, Optional, SkipSelf } from '@angular/core';
 import { ResourceLoader } from '@angular/compiler';
 
 /**
@@ -1964,6 +1964,17 @@ class TestBedRender3 {
                         jit: true,
                     },] },
         ];
+        class R3ErrorHandlerModule {
+        }
+        R3ErrorHandlerModule.decorators = [
+            { type: NgModule, args: [{ providers: [{ provide: ErrorHandler, useClass: R3TestErrorHandler }] },] },
+        ];
+        /** @nocollapse */ R3ErrorHandlerModule.ngModuleDef = ɵdefineNgModule({ type: R3ErrorHandlerModule });
+        /** @nocollapse */ R3ErrorHandlerModule.ngInjectorDef = defineInjector({ factory: function R3ErrorHandlerModule_Factory(t) { return new (t || R3ErrorHandlerModule)(); }, providers: [{ provide: ErrorHandler, useClass: R3TestErrorHandler }], imports: [] });
+        /*@__PURE__*/ ɵsetClassMetadata(R3ErrorHandlerModule, [{
+                type: NgModule,
+                args: [{ providers: [{ provide: ErrorHandler, useClass: R3TestErrorHandler }] }]
+            }], null, null);
         /** @type {?} */
         const ngZone = new NgZone({ enableLongStackTrace: true });
         /** @type {?} */
@@ -1973,14 +1984,15 @@ class TestBedRender3 {
                  * @return {?}
                  */
                 () => new R3TestCompiler(this)) },
-            { provide: ErrorHandler, useClass: R3TestErrorHandler },
             ...this._providers,
             ...this._providerOverrides,
         ];
+        // We need to provide the `R3ErrorHandlerModule` after the consumer's NgModule so that we can
+        // override the default ErrorHandler, if the consumer didn't pass in a custom one.
+        /** @type {?} */
+        const imports = [RootScopeModule, this.ngModule, R3ErrorHandlerModule, this._imports];
         /** @type {?} */
         const declarations = this._declarations;
-        /** @type {?} */
-        const imports = [RootScopeModule, this.ngModule, this._imports];
         /** @type {?} */
         const schemas = this._schemas;
         class DynamicTestModule {
