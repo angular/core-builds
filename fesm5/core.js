@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.9+83.sha-bef5043.with-local-changes
+ * @license Angular v8.0.0-beta.9+90.sha-c34c223.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2925,6 +2925,11 @@ function assertEqual(actual, expected, msg) {
 }
 function assertNotEqual(actual, expected, msg) {
     if (actual == expected) {
+        throwError(msg);
+    }
+}
+function assertNotSame(actual, expected, msg) {
+    if (actual === expected) {
         throwError(msg);
     }
 }
@@ -6774,12 +6779,12 @@ function updateBinding(lView, bindingIndex, value) {
 function getBinding(lView, bindingIndex) {
     ngDevMode && assertDataInRange(lView, bindingIndex);
     ngDevMode &&
-        assertNotEqual(lView[bindingIndex], NO_CHANGE, 'Stored value should never be NO_CHANGE.');
+        assertNotSame(lView[bindingIndex], NO_CHANGE, 'Stored value should never be NO_CHANGE.');
     return lView[bindingIndex];
 }
 /** Updates binding if changed, then returns whether it was updated. */
 function bindingUpdated(lView, bindingIndex, value) {
-    ngDevMode && assertNotEqual(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
+    ngDevMode && assertNotSame(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
     ngDevMode &&
         assertLessThan(bindingIndex, lView.length, "Slot should have been initialized to NO_CHANGE");
     var oldValue = lView[bindingIndex];
@@ -15077,7 +15082,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.9+83.sha-bef5043.with-local-changes');
+var VERSION = new Version('8.0.0-beta.9+90.sha-c34c223.with-local-changes');
 
 /**
  * @license
