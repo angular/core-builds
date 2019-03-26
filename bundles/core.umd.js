@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.9+94.sha-7951c4f.with-local-changes
+ * @license Angular v8.0.0-beta.9+96.sha-9724247.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13232,6 +13232,11 @@
             renderInitialClasses(native, rootTNode.stylingTemplate, componentView[RENDERER]);
             renderInitialStyles(native, rootTNode.stylingTemplate, componentView[RENDERER]);
         }
+        // We want to generate an empty QueryList for root content queries for backwards
+        // compatibility with ViewEngine.
+        if (componentDef.contentQueries) {
+            componentDef.contentQueries(1 /* Create */, component, rootView.length - 1);
+        }
         return component;
     }
     function createRootContext(scheduler, playerHandler) {
@@ -15127,7 +15132,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.9+94.sha-7951c4f.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.9+96.sha-9724247.with-local-changes');
 
     /**
      * @license
@@ -24033,7 +24038,12 @@
                 var tNode = tData[context.nodeIndex];
                 var properties = collectPropertyBindings(tNode, lView, tData);
                 var hostProperties = collectHostPropertyBindings(tNode, lView, tData);
-                return __assign({}, properties, hostProperties);
+                var className = collectClassNames(this);
+                var output = __assign({}, properties, hostProperties);
+                if (className) {
+                    output['className'] = output['className'] ? output['className'] + (" " + className) : className;
+                }
+                return output;
             },
             enumerable: true,
             configurable: true
@@ -24257,6 +24267,27 @@
             propMetadata = tData[++hostPropIndex];
         }
         return properties;
+    }
+    function collectClassNames(debugElement) {
+        var e_1, _a;
+        var classes = debugElement.classes;
+        var output = '';
+        try {
+            for (var _b = __values(Object.keys(classes)), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var className = _c.value;
+                if (classes[className]) {
+                    output = output ? output + (" " + className) : className;
+                }
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+        return output;
     }
     // Need to keep the nodes in a global Map so that multiple angular apps are supported.
     var _nativeNodeToDebugNode = new Map();

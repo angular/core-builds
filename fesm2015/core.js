@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.9+94.sha-7951c4f.with-local-changes
+ * @license Angular v8.0.0-beta.9+96.sha-9724247.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16525,6 +16525,11 @@ function createRootComponent(componentView, componentDef, rootView, rootContext,
         renderInitialClasses(native, rootTNode.stylingTemplate, componentView[RENDERER]);
         renderInitialStyles(native, rootTNode.stylingTemplate, componentView[RENDERER]);
     }
+    // We want to generate an empty QueryList for root content queries for backwards
+    // compatibility with ViewEngine.
+    if (componentDef.contentQueries) {
+        componentDef.contentQueries(1 /* Create */, component, rootView.length - 1);
+    }
     return component;
 }
 /**
@@ -18932,7 +18937,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.9+94.sha-7951c4f.with-local-changes');
+const VERSION = new Version('8.0.0-beta.9+96.sha-9724247.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -30964,7 +30969,14 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
         const properties = collectPropertyBindings(tNode, lView, tData);
         /** @type {?} */
         const hostProperties = collectHostPropertyBindings(tNode, lView, tData);
-        return Object.assign({}, properties, hostProperties);
+        /** @type {?} */
+        const className = collectClassNames(this);
+        /** @type {?} */
+        const output = Object.assign({}, properties, hostProperties);
+        if (className) {
+            output['className'] = output['className'] ? output['className'] + ` ${className}` : className;
+        }
+        return output;
     }
     /**
      * @return {?}
@@ -31262,6 +31274,22 @@ function collectHostPropertyBindings(tNode, lView, tData) {
         propMetadata = tData[++hostPropIndex];
     }
     return properties;
+}
+/**
+ * @param {?} debugElement
+ * @return {?}
+ */
+function collectClassNames(debugElement) {
+    /** @type {?} */
+    const classes = debugElement.classes;
+    /** @type {?} */
+    let output = '';
+    for (const className of Object.keys(classes)) {
+        if (classes[className]) {
+            output = output ? output + ` ${className}` : className;
+        }
+    }
+    return output;
 }
 // Need to keep the nodes in a global Map so that multiple angular apps are supported.
 /** @type {?} */
