@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.9+96.sha-9724247.with-local-changes
+ * @license Angular v8.0.0-beta.9+97.sha-c412374.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15087,7 +15087,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.9+96.sha-9724247.with-local-changes');
+var VERSION = new Version('8.0.0-beta.9+97.sha-c412374.with-local-changes');
 
 /**
  * @license
@@ -24119,12 +24119,12 @@ var DebugElement__POST_R3__ = /** @class */ (function (_super) {
     };
     DebugElement__POST_R3__.prototype.queryAll = function (predicate) {
         var matches = [];
-        _queryNodeChildrenR3(this, predicate, matches, true);
+        _queryAllR3(this, predicate, matches, true);
         return matches;
     };
     DebugElement__POST_R3__.prototype.queryAllNodes = function (predicate) {
         var matches = [];
-        _queryNodeChildrenR3(this, predicate, matches, false);
+        _queryAllR3(this, predicate, matches, false);
         return matches;
     };
     DebugElement__POST_R3__.prototype.triggerEventHandler = function (eventName, eventObj) {
@@ -24136,18 +24136,134 @@ var DebugElement__POST_R3__ = /** @class */ (function (_super) {
     };
     return DebugElement__POST_R3__;
 }(DebugNode__POST_R3__));
-function _queryNodeChildrenR3(parentNode, predicate, matches, elementsOnly) {
-    if (parentNode instanceof DebugElement__POST_R3__) {
-        parentNode.childNodes.forEach(function (node) {
-            if (predicate(node)) {
-                matches.push(node);
-            }
-            if (node instanceof DebugElement__POST_R3__) {
-                if (elementsOnly ? node.nativeElement : true) {
-                    _queryNodeChildrenR3(node, predicate, matches, elementsOnly);
+/**
+ * Walk the TNode tree to find matches for the predicate, skipping the parent element.
+ *
+ * @param parentElement the element from which the walk is started
+ * @param predicate the predicate to match
+ * @param matches the list of positive matches
+ * @param elementsOnly whether only elements should be searched
+ */
+function _queryAllR3(parentElement, predicate, matches, elementsOnly) {
+    var context = loadLContext(parentElement.nativeNode);
+    var parentTNode = context.lView[TVIEW].data[context.nodeIndex];
+    // This the fixture's debug element, so this is always a component view.
+    var lView = context.lView[parentTNode.index];
+    var tNode = lView[TVIEW].firstChild;
+    _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly);
+}
+/**
+ * Recursively match the current TNode against the predicate, and goes on with the next ones.
+ *
+ * @param tNode the current TNode
+ * @param lView the LView of this TNode
+ * @param predicate the predicate to match
+ * @param matches the list of positive matches
+ * @param elementsOnly whether only elements should be searched
+ */
+function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly) {
+    var e_1, _a;
+    // For each type of TNode, specific logic is executed.
+    if (tNode.type === 3 /* Element */ || tNode.type === 4 /* ElementContainer */) {
+        // Case 1: the TNode is an element
+        // The native node has to be checked.
+        _addQueryMatchR3(getNativeByTNode(tNode, lView), predicate, matches, elementsOnly);
+        if (isComponent(tNode)) {
+            // If the element is the host of a component, then all nodes in its view have to be processed.
+            // Note: the component's content (tNode.child) will be processed from the insertion points.
+            var componentView = getComponentViewByIndex(tNode.index, lView);
+            if (componentView && componentView[TVIEW].firstChild)
+                _queryNodeChildrenR3(componentView[TVIEW].firstChild, componentView, predicate, matches, elementsOnly);
+        }
+        else {
+            // Otherwise, its children have to be processed.
+            if (tNode.child)
+                _queryNodeChildrenR3(tNode.child, lView, predicate, matches, elementsOnly);
+        }
+        // In all cases, if a dynamic container exists for this node, each view inside it has to be
+        // processed.
+        var nodeOrContainer = lView[tNode.index];
+        if (isLContainer(nodeOrContainer)) {
+            _queryNodeChildrenInContainerR3(nodeOrContainer, predicate, matches, elementsOnly);
+        }
+    }
+    else if (tNode.type === 0 /* Container */) {
+        // Case 2: the TNode is a container
+        // The native node has to be checked.
+        var lContainer = lView[tNode.index];
+        _addQueryMatchR3(lContainer[NATIVE], predicate, matches, elementsOnly);
+        // Each view inside the container has to be processed.
+        _queryNodeChildrenInContainerR3(lContainer, predicate, matches, elementsOnly);
+    }
+    else if (tNode.type === 1 /* Projection */) {
+        // Case 3: the TNode is a projection insertion point (i.e. a <ng-content>).
+        // The nodes projected at this location all need to be processed.
+        var componentView = findComponentView(lView);
+        var componentHost = componentView[T_HOST];
+        var head = componentHost.projection[tNode.projection];
+        if (Array.isArray(head)) {
+            try {
+                for (var head_1 = __values(head), head_1_1 = head_1.next(); !head_1_1.done; head_1_1 = head_1.next()) {
+                    var nativeNode = head_1_1.value;
+                    _addQueryMatchR3(nativeNode, predicate, matches, elementsOnly);
                 }
             }
-        });
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (head_1_1 && !head_1_1.done && (_a = head_1.return)) _a.call(head_1);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+        }
+        else {
+            if (head) {
+                var nextLView = componentView[PARENT];
+                var nextTNode_1 = nextLView[TVIEW].data[head.index];
+                _queryNodeChildrenR3(nextTNode_1, nextLView, predicate, matches, elementsOnly);
+            }
+        }
+    }
+    else {
+        // Case 4: the TNode is a view.
+        if (tNode.child) {
+            _queryNodeChildrenR3(tNode.child, lView, predicate, matches, elementsOnly);
+        }
+    }
+    // To determine the next node to be processed, we need to use the next or the projectionNext link,
+    // depending on whether the current node has been projected.
+    var nextTNode = (tNode.flags & 2 /* isProjected */) ? tNode.projectionNext : tNode.next;
+    if (nextTNode) {
+        _queryNodeChildrenR3(nextTNode, lView, predicate, matches, elementsOnly);
+    }
+}
+/**
+ * Process all TNodes in a given container.
+ *
+ * @param lContainer the container to be processed
+ * @param predicate the predicate to match
+ * @param matches the list of positive matches
+ * @param elementsOnly whether only elements should be searched
+ */
+function _queryNodeChildrenInContainerR3(lContainer, predicate, matches, elementsOnly) {
+    for (var i = 0; i < lContainer[VIEWS].length; i++) {
+        var childView = lContainer[VIEWS][i];
+        _queryNodeChildrenR3(childView[TVIEW].node, childView, predicate, matches, elementsOnly);
+    }
+}
+/**
+ * Match the current native node against the predicate.
+ *
+ * @param nativeNode the current native node
+ * @param predicate the predicate to match
+ * @param matches the list of positive matches
+ * @param elementsOnly whether only elements should be searched
+ */
+function _addQueryMatchR3(nativeNode, predicate, matches, elementsOnly) {
+    var debugNode = getDebugNode(nativeNode);
+    if (debugNode && (elementsOnly ? debugNode instanceof DebugElement__POST_R3__ : true) &&
+        predicate(debugNode)) {
+        matches.push(debugNode);
     }
 }
 /**
@@ -24224,7 +24340,7 @@ function collectHostPropertyBindings(tNode, lView, tData) {
     return properties;
 }
 function collectClassNames(debugElement) {
-    var e_1, _a;
+    var e_2, _a;
     var classes = debugElement.classes;
     var output = '';
     try {
@@ -24235,12 +24351,12 @@ function collectClassNames(debugElement) {
             }
         }
     }
-    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    catch (e_2_1) { e_2 = { error: e_2_1 }; }
     finally {
         try {
             if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
         }
-        finally { if (e_1) throw e_1.error; }
+        finally { if (e_2) throw e_2.error; }
     }
     return output;
 }
