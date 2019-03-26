@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.9+90.sha-c34c223.with-local-changes
+ * @license Angular v8.0.0-beta.9+99.sha-17f7bdb.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16525,6 +16525,11 @@ function createRootComponent(componentView, componentDef, rootView, rootContext,
         renderInitialClasses(native, rootTNode.stylingTemplate, componentView[RENDERER]);
         renderInitialStyles(native, rootTNode.stylingTemplate, componentView[RENDERER]);
     }
+    // We want to generate an empty QueryList for root content queries for backwards
+    // compatibility with ViewEngine.
+    if (componentDef.contentQueries) {
+        componentDef.contentQueries(1 /* Create */, component, rootView.length - 1);
+    }
     return component;
 }
 /**
@@ -18932,7 +18937,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.9+90.sha-c34c223.with-local-changes');
+const VERSION = new Version('8.0.0-beta.9+99.sha-17f7bdb.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -30964,7 +30969,14 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
         const properties = collectPropertyBindings(tNode, lView, tData);
         /** @type {?} */
         const hostProperties = collectHostPropertyBindings(tNode, lView, tData);
-        return Object.assign({}, properties, hostProperties);
+        /** @type {?} */
+        const className = collectClassNames(this);
+        /** @type {?} */
+        const output = Object.assign({}, properties, hostProperties);
+        if (className) {
+            output['className'] = output['className'] ? output['className'] + ` ${className}` : className;
+        }
+        return output;
     }
     /**
      * @return {?}
@@ -31113,7 +31125,7 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
     queryAll(predicate) {
         /** @type {?} */
         const matches = [];
-        _queryNodeChildrenR3(this, predicate, matches, true);
+        _queryAllR3(this, predicate, matches, true);
         return matches;
     }
     /**
@@ -31123,7 +31135,7 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
     queryAllNodes(predicate) {
         /** @type {?} */
         const matches = [];
-        _queryNodeChildrenR3(this, predicate, matches, false);
+        _queryAllR3(this, predicate, matches, false);
         return matches;
     }
     /**
@@ -31144,28 +31156,141 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
     }
 }
 /**
- * @param {?} parentNode
- * @param {?} predicate
- * @param {?} matches
- * @param {?} elementsOnly
+ * Walk the TNode tree to find matches for the predicate, skipping the parent element.
+ *
+ * @param {?} parentElement the element from which the walk is started
+ * @param {?} predicate the predicate to match
+ * @param {?} matches the list of positive matches
+ * @param {?} elementsOnly whether only elements should be searched
  * @return {?}
  */
-function _queryNodeChildrenR3(parentNode, predicate, matches, elementsOnly) {
-    if (parentNode instanceof DebugElement__POST_R3__) {
-        parentNode.childNodes.forEach((/**
-         * @param {?} node
-         * @return {?}
-         */
-        node => {
-            if (predicate(node)) {
-                matches.push(node);
+function _queryAllR3(parentElement, predicate, matches, elementsOnly) {
+    /** @type {?} */
+    const context = (/** @type {?} */ (loadLContext(parentElement.nativeNode)));
+    /** @type {?} */
+    const parentTNode = (/** @type {?} */ (context.lView[TVIEW].data[context.nodeIndex]));
+    // This the fixture's debug element, so this is always a component view.
+    /** @type {?} */
+    const lView = context.lView[parentTNode.index];
+    /** @type {?} */
+    const tNode = lView[TVIEW].firstChild;
+    _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly);
+}
+/**
+ * Recursively match the current TNode against the predicate, and goes on with the next ones.
+ *
+ * @param {?} tNode the current TNode
+ * @param {?} lView the LView of this TNode
+ * @param {?} predicate the predicate to match
+ * @param {?} matches the list of positive matches
+ * @param {?} elementsOnly whether only elements should be searched
+ * @return {?}
+ */
+function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly) {
+    // For each type of TNode, specific logic is executed.
+    if (tNode.type === 3 /* Element */ || tNode.type === 4 /* ElementContainer */) {
+        // Case 1: the TNode is an element
+        // The native node has to be checked.
+        _addQueryMatchR3(getNativeByTNode(tNode, lView), predicate, matches, elementsOnly);
+        if (isComponent(tNode)) {
+            // If the element is the host of a component, then all nodes in its view have to be processed.
+            // Note: the component's content (tNode.child) will be processed from the insertion points.
+            /** @type {?} */
+            const componentView = getComponentViewByIndex(tNode.index, lView);
+            if (componentView && componentView[TVIEW].firstChild)
+                _queryNodeChildrenR3((/** @type {?} */ (componentView[TVIEW].firstChild)), componentView, predicate, matches, elementsOnly);
+        }
+        else {
+            // Otherwise, its children have to be processed.
+            if (tNode.child)
+                _queryNodeChildrenR3(tNode.child, lView, predicate, matches, elementsOnly);
+        }
+        // In all cases, if a dynamic container exists for this node, each view inside it has to be
+        // processed.
+        /** @type {?} */
+        const nodeOrContainer = lView[tNode.index];
+        if (isLContainer(nodeOrContainer)) {
+            _queryNodeChildrenInContainerR3(nodeOrContainer, predicate, matches, elementsOnly);
+        }
+    }
+    else if (tNode.type === 0 /* Container */) {
+        // Case 2: the TNode is a container
+        // The native node has to be checked.
+        /** @type {?} */
+        const lContainer = lView[tNode.index];
+        _addQueryMatchR3(lContainer[NATIVE], predicate, matches, elementsOnly);
+        // Each view inside the container has to be processed.
+        _queryNodeChildrenInContainerR3(lContainer, predicate, matches, elementsOnly);
+    }
+    else if (tNode.type === 1 /* Projection */) {
+        // Case 3: the TNode is a projection insertion point (i.e. a <ng-content>).
+        // The nodes projected at this location all need to be processed.
+        /** @type {?} */
+        const componentView = findComponentView((/** @type {?} */ (lView)));
+        /** @type {?} */
+        const componentHost = (/** @type {?} */ (componentView[T_HOST]));
+        /** @type {?} */
+        const head = ((/** @type {?} */ (componentHost.projection)))[(/** @type {?} */ (tNode.projection))];
+        if (Array.isArray(head)) {
+            for (let nativeNode of head) {
+                _addQueryMatchR3(nativeNode, predicate, matches, elementsOnly);
             }
-            if (node instanceof DebugElement__POST_R3__) {
-                if (elementsOnly ? node.nativeElement : true) {
-                    _queryNodeChildrenR3(node, predicate, matches, elementsOnly);
-                }
+        }
+        else {
+            if (head) {
+                /** @type {?} */
+                const nextLView = (/** @type {?} */ ((/** @type {?} */ (componentView[PARENT]))));
+                /** @type {?} */
+                const nextTNode = (/** @type {?} */ (nextLView[TVIEW].data[head.index]));
+                _queryNodeChildrenR3(nextTNode, nextLView, predicate, matches, elementsOnly);
             }
-        }));
+        }
+    }
+    else {
+        // Case 4: the TNode is a view.
+        if (tNode.child) {
+            _queryNodeChildrenR3(tNode.child, lView, predicate, matches, elementsOnly);
+        }
+    }
+    // To determine the next node to be processed, we need to use the next or the projectionNext link,
+    // depending on whether the current node has been projected.
+    /** @type {?} */
+    const nextTNode = (tNode.flags & 2 /* isProjected */) ? tNode.projectionNext : tNode.next;
+    if (nextTNode) {
+        _queryNodeChildrenR3(nextTNode, lView, predicate, matches, elementsOnly);
+    }
+}
+/**
+ * Process all TNodes in a given container.
+ *
+ * @param {?} lContainer the container to be processed
+ * @param {?} predicate the predicate to match
+ * @param {?} matches the list of positive matches
+ * @param {?} elementsOnly whether only elements should be searched
+ * @return {?}
+ */
+function _queryNodeChildrenInContainerR3(lContainer, predicate, matches, elementsOnly) {
+    for (let i = 0; i < lContainer[VIEWS].length; i++) {
+        /** @type {?} */
+        const childView = lContainer[VIEWS][i];
+        _queryNodeChildrenR3((/** @type {?} */ (childView[TVIEW].node)), childView, predicate, matches, elementsOnly);
+    }
+}
+/**
+ * Match the current native node against the predicate.
+ *
+ * @param {?} nativeNode the current native node
+ * @param {?} predicate the predicate to match
+ * @param {?} matches the list of positive matches
+ * @param {?} elementsOnly whether only elements should be searched
+ * @return {?}
+ */
+function _addQueryMatchR3(nativeNode, predicate, matches, elementsOnly) {
+    /** @type {?} */
+    const debugNode = getDebugNode(nativeNode);
+    if (debugNode && (elementsOnly ? debugNode instanceof DebugElement__POST_R3__ : true) &&
+        predicate(debugNode)) {
+        matches.push(debugNode);
     }
 }
 /**
@@ -31262,6 +31387,22 @@ function collectHostPropertyBindings(tNode, lView, tData) {
         propMetadata = tData[++hostPropIndex];
     }
     return properties;
+}
+/**
+ * @param {?} debugElement
+ * @return {?}
+ */
+function collectClassNames(debugElement) {
+    /** @type {?} */
+    const classes = debugElement.classes;
+    /** @type {?} */
+    let output = '';
+    for (const className of Object.keys(classes)) {
+        if (classes[className]) {
+            output = output ? output + ` ${className}` : className;
+        }
+    }
+    return output;
 }
 // Need to keep the nodes in a global Map so that multiple angular apps are supported.
 /** @type {?} */
