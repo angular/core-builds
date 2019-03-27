@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.10+1.sha-a28b3e3.with-local-changes
+ * @license Angular v8.0.0-beta.10+2.sha-a2f8f55.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10638,13 +10638,6 @@ export declare const ɵEMPTY_MAP: {
 export declare function ɵenableBindings(): void;
 
 /**
- * Flushes all the lifecycle hooks for directives up until (and excluding) that node index
- *
- * @param index The index of the element in the `LView`
- */
-export declare function ɵflushHooksUpTo(index: number): void;
-
-/**
  * Loops over queued module definitions, if a given module definition has all of its
  * declarations resolved, it dequeues that module definition and sets the scope on
  * its declarations.
@@ -12072,6 +12065,13 @@ export declare function ɵsanitizeUrl(unsafeUrl: any): string;
  * @returns `url` string which is safe to bind.
  */
 export declare function ɵsanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string, prop: string): any;
+
+/**
+ * Flushes all the lifecycle hooks for directives up until (and excluding) that node index
+ *
+ * @param index The index of the element in the `LView`
+ */
+export declare function ɵselect(index: number): void;
 
 /**
  * Adds decorator, constructor, and property metadata to a given type via static metadata fields

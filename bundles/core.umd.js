@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.10+1.sha-a28b3e3.with-local-changes
+ * @license Angular v8.0.0-beta.10+2.sha-a2f8f55.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3823,7 +3823,7 @@
      * [[onInit1, onInit2], [afterContentInit1], [afterViewInit1, afterViewInit2, afterViewInit3]]
      * They are are stored as flags in LView[FLAGS].
      *
-     * 2. Pre-order hooks can be executed in batches, because of the flushHooksUpTo instruction.
+     * 2. Pre-order hooks can be executed in batches, because of the select instruction.
      * To be able to pause and resume their execution, we also need some state about the hook's array
      * that is being processed:
      * - the index of the next hook to be executed
@@ -3843,7 +3843,7 @@
      * - undefined: execute hooks only from the saved index until the end of the array (pre-order case,
      * when flushing the remaining hooks)
      * - number: execute hooks only from the saved index until that node index exclusive (pre-order
-     * case, when executing flushHooksUpTo(number))
+     * case, when executing select(number))
      */
     function executePreOrderHooks(currentView, tView, checkNoChangesMode, currentNodeIndex) {
         if (!checkNoChangesMode) {
@@ -3864,7 +3864,7 @@
      * - null: execute hooks only from the saved index until the end of the array (pre-order case, when
      * flushing the remaining hooks)
      * - number: execute hooks only from the saved index until that node index exclusive (pre-order
-     * case, when executing flushHooksUpTo(number))
+     * case, when executing select(number))
      */
     function executeHooks(currentView, firstPassHooks, checkHooks, checkNoChangesMode, initPhaseState, currentNodeIndex) {
         if (checkNoChangesMode)
@@ -3895,7 +3895,7 @@
      * - null: execute hooks only from the saved index until the end of the array (pre-order case, when
      * flushing the remaining hooks)
      * - number: execute hooks only from the saved index until that node index exclusive (pre-order
-     * case, when executing flushHooksUpTo(number))
+     * case, when executing select(number))
      */
     function callHooks(currentView, arr, initPhase, currentNodeIndex) {
         var startIndex = currentNodeIndex !== undefined ?
@@ -10691,7 +10691,7 @@
      *
      * @param index The index of the element in the `LView`
      */
-    function flushHooksUpTo(index) {
+    function select(index) {
         var lView = getLView();
         executePreOrderHooks(lView, lView[TVIEW], getCheckNoChangesMode(), index);
     }
@@ -15132,7 +15132,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.10+1.sha-a28b3e3.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.10+2.sha-a2f8f55.with-local-changes');
 
     /**
      * @license
@@ -21175,7 +21175,7 @@
         'ɵelementHostStyleProp': elementHostStyleProp,
         'ɵelementHostStylingApply': elementHostStylingApply,
         'ɵelementHostClassProp': elementHostClassProp,
-        'ɵflushHooksUpTo': flushHooksUpTo,
+        'ɵselect': select,
         'ɵtemplate': template,
         'ɵtext': text,
         'ɵtextBinding': textBinding,
@@ -27260,7 +27260,7 @@
     exports.ɵelementHostStyleProp = elementHostStyleProp;
     exports.ɵelementHostClassProp = elementHostClassProp;
     exports.ɵelementHostStylingApply = elementHostStylingApply;
-    exports.ɵflushHooksUpTo = flushHooksUpTo;
+    exports.ɵselect = select;
     exports.ɵtextBinding = textBinding;
     exports.ɵtemplate = template;
     exports.ɵembeddedViewEnd = embeddedViewEnd;
