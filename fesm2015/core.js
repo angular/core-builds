@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.10+17.sha-f8c7c3c.with-local-changes
+ * @license Angular v8.0.0-beta.10+23.sha-1727fe2.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16671,7 +16671,7 @@ function wrapOnChanges() {
      * @this {?}
      * @return {?}
      */
-    function () {
+    function wrapOnChangesHook_inPreviousChangesStorage() {
         /** @type {?} */
         const simpleChangesStore = getSimpleChangesStore(this);
         /** @type {?} */
@@ -18937,7 +18937,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.10+17.sha-f8c7c3c.with-local-changes');
+const VERSION = new Version('8.0.0-beta.10+23.sha-1727fe2.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -23600,6 +23600,49 @@ class ComponentRef$1 extends ComponentRef {
 }
 
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+* Equivalent to ES6 spread, add each item to an array.
+*
+* @param items The items to add
+* @param arr The array to which you want to add the items
+*/
+function addAllToArray(items, arr) {
+    for (let i = 0; i < items.length; i++) {
+        arr.push(items[i]);
+    }
+}
+/**
+ * Flattens an array in non-recursive way. Input arrays are not modified.
+ */
+function flatten(list) {
+    const result = [];
+    let i = 0;
+    while (i < list.length) {
+        const item = list[i];
+        if (Array.isArray(item)) {
+            if (item.length > 0) {
+                list = item.concat(list.slice(i + 1));
+                i = 0;
+            }
+            else {
+                i++;
+            }
+        }
+        else {
+            result.push(item);
+            i++;
+        }
+    }
+    return result;
+}
+
+/**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
@@ -23622,30 +23665,6 @@ const ELEMENT_MARKER = {
 const COMMENT_MARKER = {
     marker: 'comment'
 };
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Equivalent to ES6 spread, add each item to an array.
- *
- * @param {?} items The items to add
- * @param {?} arr The array to which you want to add the items
- * @return {?}
- */
-function addAllToArray(items, arr) {
-    for (let i = 0; i < items.length; i++) {
-        arr.push(items[i]);
-    }
-}
 
 /**
  * @fileoverview added by tsickle
@@ -26333,7 +26352,7 @@ class QueryList {
      * @return {?}
      */
     reset(resultsTree) {
-        this._results = depthFirstFlatten(resultsTree);
+        this._results = flatten(resultsTree);
         ((/** @type {?} */ (this))).dirty = false;
         ((/** @type {?} */ (this))).length = this._results.length;
         ((/** @type {?} */ (this))).last = this._results[this.length - 1];
@@ -26357,23 +26376,6 @@ class QueryList {
         ((/** @type {?} */ (this.changes))).complete();
         ((/** @type {?} */ (this.changes))).unsubscribe();
     }
-}
-/**
- * @template T
- * @param {?} list
- * @return {?}
- */
-function depthFirstFlatten(list) {
-    return list.reduce((/**
-     * @param {?} flat
-     * @param {?} item
-     * @return {?}
-     */
-    (flat, item) => {
-        /** @type {?} */
-        const flatItem = Array.isArray(item) ? depthFirstFlatten(item) : item;
-        return ((/** @type {?} */ (flat))).concat(flatItem);
-    }), []);
 }
 
 /**
@@ -27226,7 +27228,7 @@ function compileNgModuleDefs(moduleType, ngModule) {
     ngDevMode && assertDefined(moduleType, 'Required value moduleType');
     ngDevMode && assertDefined(ngModule, 'Required value ngModule');
     /** @type {?} */
-    const declarations = flatten(ngModule.declarations || EMPTY_ARRAY$4);
+    const declarations = flatten$1(ngModule.declarations || EMPTY_ARRAY$4);
     /** @type {?} */
     /** @nocollapse */ let ngModuleDef = null;
     Object.defineProperty(moduleType, NG_MODULE_DEF, {
@@ -27238,14 +27240,14 @@ function compileNgModuleDefs(moduleType, ngModule) {
             if (ngModuleDef === null) {
                 ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, `ng://${moduleType.name}/ngModuleDef.js`, {
                     type: moduleType,
-                    bootstrap: flatten(ngModule.bootstrap || EMPTY_ARRAY$4, resolveForwardRef),
+                    bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$4, resolveForwardRef),
                     declarations: declarations.map(resolveForwardRef),
-                    imports: flatten(ngModule.imports || EMPTY_ARRAY$4, resolveForwardRef)
+                    imports: flatten$1(ngModule.imports || EMPTY_ARRAY$4, resolveForwardRef)
                         .map(expandModuleWithProviders),
-                    exports: flatten(ngModule.exports || EMPTY_ARRAY$4, resolveForwardRef)
+                    exports: flatten$1(ngModule.exports || EMPTY_ARRAY$4, resolveForwardRef)
                         .map(expandModuleWithProviders),
                     emitInline: true,
-                    schemas: ngModule.schemas ? flatten(ngModule.schemas) : null,
+                    schemas: ngModule.schemas ? flatten$1(ngModule.schemas) : null,
                 });
             }
             return ngModuleDef;
@@ -27305,7 +27307,7 @@ function verifySemanticsOfNgModuleDef(moduleType) {
     /** @type {?} */
     const combinedDeclarations = [
         ...declarations.map(resolveForwardRef),
-        ...flatten(imports.map(computeCombinedExports), resolveForwardRef),
+        ...flatten$1(imports.map(computeCombinedExports), resolveForwardRef),
     ];
     exports.forEach(verifyExportsAreDeclaredOrReExported);
     declarations.forEach(verifyDeclarationIsUnique);
@@ -27314,7 +27316,7 @@ function verifySemanticsOfNgModuleDef(moduleType) {
     const ngModule = getAnnotation(moduleType, 'NgModule');
     if (ngModule) {
         ngModule.imports &&
-            flatten(ngModule.imports, unwrapModuleWithProvidersImports)
+            flatten$1(ngModule.imports, unwrapModuleWithProvidersImports)
                 .forEach(verifySemanticsOfNgModuleDef);
         ngModule.bootstrap && ngModule.bootstrap.forEach(verifyCorrectBootstrapType);
         ngModule.bootstrap && ngModule.bootstrap.forEach(verifyComponentIsPartOfNgModule);
@@ -27491,7 +27493,7 @@ function computeCombinedExports(type) {
     type = resolveForwardRef(type);
     /** @type {?} */
     /** @nocollapse */ const ngModuleDef = getNgModuleDef(type, true);
-    return [...flatten(maybeUnwrapFn(ngModuleDef.exports).map((/**
+    return [...flatten$1(maybeUnwrapFn(ngModuleDef.exports).map((/**
          * @param {?} type
          * @return {?}
          */
@@ -27517,7 +27519,7 @@ function computeCombinedExports(type) {
  */
 function setScopeOnDeclaredComponents(moduleType, ngModule) {
     /** @type {?} */
-    const declarations = flatten(ngModule.declarations || EMPTY_ARRAY$4);
+    const declarations = flatten$1(ngModule.declarations || EMPTY_ARRAY$4);
     /** @type {?} */
     const transitiveScopes = transitiveScopesFor(moduleType);
     declarations.forEach((/**
@@ -27704,7 +27706,7 @@ function transitiveScopesFor(moduleType, processNgModuleFn) {
  * @param {?=} mapFn
  * @return {?}
  */
-function flatten(values, mapFn) {
+function flatten$1(values, mapFn) {
     /** @type {?} */
     const out = [];
     values.forEach((/**
@@ -27713,7 +27715,7 @@ function flatten(values, mapFn) {
      */
     value => {
         if (Array.isArray(value)) {
-            out.push(...flatten(value, mapFn));
+            out.push(...flatten$1(value, mapFn));
         }
         else {
             out.push(mapFn ? mapFn(value) : value);
@@ -30292,17 +30294,13 @@ class ApplicationRef {
         const scope = ApplicationRef._tickScope();
         try {
             this._runningTick = true;
-            this._views.forEach((/**
-             * @param {?} view
-             * @return {?}
-             */
-            (view) => view.detectChanges()));
+            for (let view of this._views) {
+                view.detectChanges();
+            }
             if (this._enforceNoNewChanges) {
-                this._views.forEach((/**
-                 * @param {?} view
-                 * @return {?}
-                 */
-                (view) => view.checkNoChanges()));
+                for (let view of this._views) {
+                    view.checkNoChanges();
+                }
             }
         }
         catch (e) {
