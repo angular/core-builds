@@ -57,7 +57,7 @@ export declare function registerPostOrderHooks(tView: TView, tNode: TNode): void
  * [[onInit1, onInit2], [afterContentInit1], [afterViewInit1, afterViewInit2, afterViewInit3]]
  * They are are stored as flags in LView[FLAGS].
  *
- * 2. Pre-order hooks can be executed in batches, because of the flushHooksUpTo instruction.
+ * 2. Pre-order hooks can be executed in batches, because of the select instruction.
  * To be able to pause and resume their execution, we also need some state about the hook's array
  * that is being processed:
  * - the index of the next hook to be executed
@@ -77,7 +77,7 @@ export declare function registerPostOrderHooks(tView: TView, tNode: TNode): void
  * - undefined: execute hooks only from the saved index until the end of the array (pre-order case,
  * when flushing the remaining hooks)
  * - number: execute hooks only from the saved index until that node index exclusive (pre-order
- * case, when executing flushHooksUpTo(number))
+ * case, when executing select(number))
  */
 export declare function executePreOrderHooks(currentView: LView, tView: TView, checkNoChangesMode: boolean, currentNodeIndex: number | undefined): void;
 /**
@@ -94,6 +94,6 @@ export declare function executePreOrderHooks(currentView: LView, tView: TView, c
  * - null: execute hooks only from the saved index until the end of the array (pre-order case, when
  * flushing the remaining hooks)
  * - number: execute hooks only from the saved index until that node index exclusive (pre-order
- * case, when executing flushHooksUpTo(number))
+ * case, when executing select(number))
  */
 export declare function executeHooks(currentView: LView, firstPassHooks: HookData | null, checkHooks: HookData | null, checkNoChangesMode: boolean, initPhaseState: InitPhaseState, currentNodeIndex: number | null | undefined): void;

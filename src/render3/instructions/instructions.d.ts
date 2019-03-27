@@ -230,7 +230,7 @@ export declare function elementEnd(): void;
  *
  * @param index The index of the element in the `LView`
  */
-export declare function flushHooksUpTo(index: number): void;
+export declare function select(index: number): void;
 /**
  * Updates the value of removes an attribute on an Element.
  *
