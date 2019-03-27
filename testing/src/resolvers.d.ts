@@ -11,8 +11,6 @@ import { MetadataOverride } from './metadata_override';
  * Base interface to resolve `@Component`, `@Directive`, `@Pipe` and `@NgModule`.
  */
 export interface Resolver<T> {
-    addOverride(type: Type<any>, override: MetadataOverride<T>): void;
-    setOverrides(overrides: Array<[Type<any>, MetadataOverride<T>]>): void;
     resolve(type: Type<any>): T | null;
 }
 /**
@@ -22,7 +20,6 @@ declare abstract class OverrideResolver<T> implements Resolver<T> {
     private overrides;
     private resolved;
     abstract readonly type: any;
-    addOverride(type: Type<any>, override: MetadataOverride<T>): void;
     setOverrides(overrides: Array<[Type<any>, MetadataOverride<T>]>): void;
     getAnnotation(type: Type<any>): T | null;
     resolve(type: Type<any>): T | null;
