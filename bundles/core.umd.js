@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.10+17.sha-f8c7c3c.with-local-changes
+ * @license Angular v8.0.0-beta.10+23.sha-1727fe2.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13281,7 +13281,7 @@
         }
     }
     function wrapOnChanges() {
-        return function () {
+        return function wrapOnChangesHook_inPreviousChangesStorage() {
             var simpleChangesStore = getSimpleChangesStore(this);
             var current = simpleChangesStore && simpleChangesStore.current;
             if (current) {
@@ -15046,7 +15046,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.10+17.sha-f8c7c3c.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.10+23.sha-1727fe2.with-local-changes');
 
     /**
      * @license
@@ -18296,6 +18296,49 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
+    * Equivalent to ES6 spread, add each item to an array.
+    *
+    * @param items The items to add
+    * @param arr The array to which you want to add the items
+    */
+    function addAllToArray(items, arr) {
+        for (var i = 0; i < items.length; i++) {
+            arr.push(items[i]);
+        }
+    }
+    /**
+     * Flattens an array in non-recursive way. Input arrays are not modified.
+     */
+    function flatten(list) {
+        var result = [];
+        var i = 0;
+        while (i < list.length) {
+            var item = list[i];
+            if (Array.isArray(item)) {
+                if (item.length > 0) {
+                    list = item.concat(list.slice(i + 1));
+                    i = 0;
+                }
+                else {
+                    i++;
+                }
+            }
+            else {
+                result.push(item);
+                i++;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
      * Marks that the next string is for element.
      *
      * See `I18nMutateOpCodes` documentation.
@@ -18311,25 +18354,6 @@
     var COMMENT_MARKER = {
         marker: 'comment'
     };
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-    * Equivalent to ES6 spread, add each item to an array.
-    *
-    * @param items The items to add
-    * @param arr The array to which you want to add the items
-    */
-    function addAllToArray(items, arr) {
-        for (var i = 0; i < items.length; i++) {
-            arr.push(items[i]);
-        }
-    }
 
     /**
      * @license
@@ -20541,7 +20565,7 @@
          * @param resultsTree The results tree to store
          */
         QueryList.prototype.reset = function (resultsTree) {
-            this._results = depthFirstFlatten(resultsTree);
+            this._results = flatten(resultsTree);
             this.dirty = false;
             this.length = this._results.length;
             this.last = this._results[this.length - 1];
@@ -20560,12 +20584,6 @@
         };
         return QueryList;
     }());
-    function depthFirstFlatten(list) {
-        return list.reduce(function (flat, item) {
-            var flatItem = Array.isArray(item) ? depthFirstFlatten(item) : item;
-            return flat.concat(flatItem);
-        }, []);
-    }
 
     /**
      * @license
@@ -21218,7 +21236,7 @@
     function compileNgModuleDefs(moduleType, ngModule) {
         ngDevMode && assertDefined(moduleType, 'Required value moduleType');
         ngDevMode && assertDefined(ngModule, 'Required value ngModule');
-        var declarations = flatten(ngModule.declarations || EMPTY_ARRAY$3);
+        var declarations = flatten$1(ngModule.declarations || EMPTY_ARRAY$3);
         var ngModuleDef = null;
         Object.defineProperty(moduleType, NG_MODULE_DEF, {
             configurable: true,
@@ -21226,14 +21244,14 @@
                 if (ngModuleDef === null) {
                     ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, "ng://" + moduleType.name + "/ngModuleDef.js", {
                         type: moduleType,
-                        bootstrap: flatten(ngModule.bootstrap || EMPTY_ARRAY$3, resolveForwardRef),
+                        bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$3, resolveForwardRef),
                         declarations: declarations.map(resolveForwardRef),
-                        imports: flatten(ngModule.imports || EMPTY_ARRAY$3, resolveForwardRef)
+                        imports: flatten$1(ngModule.imports || EMPTY_ARRAY$3, resolveForwardRef)
                             .map(expandModuleWithProviders),
-                        exports: flatten(ngModule.exports || EMPTY_ARRAY$3, resolveForwardRef)
+                        exports: flatten$1(ngModule.exports || EMPTY_ARRAY$3, resolveForwardRef)
                             .map(expandModuleWithProviders),
                         emitInline: true,
-                        schemas: ngModule.schemas ? flatten(ngModule.schemas) : null,
+                        schemas: ngModule.schemas ? flatten$1(ngModule.schemas) : null,
                     });
                 }
                 return ngModuleDef;
@@ -21276,14 +21294,14 @@
         var imports = maybeUnwrapFn(ngModuleDef.imports);
         var exports = maybeUnwrapFn(ngModuleDef.exports);
         declarations.forEach(verifyDeclarationsHaveDefinitions);
-        var combinedDeclarations = __spread(declarations.map(resolveForwardRef), flatten(imports.map(computeCombinedExports), resolveForwardRef));
+        var combinedDeclarations = __spread(declarations.map(resolveForwardRef), flatten$1(imports.map(computeCombinedExports), resolveForwardRef));
         exports.forEach(verifyExportsAreDeclaredOrReExported);
         declarations.forEach(verifyDeclarationIsUnique);
         declarations.forEach(verifyComponentEntryComponentsIsPartOfNgModule);
         var ngModule = getAnnotation(moduleType, 'NgModule');
         if (ngModule) {
             ngModule.imports &&
-                flatten(ngModule.imports, unwrapModuleWithProvidersImports)
+                flatten$1(ngModule.imports, unwrapModuleWithProvidersImports)
                     .forEach(verifySemanticsOfNgModuleDef);
             ngModule.bootstrap && ngModule.bootstrap.forEach(verifyCorrectBootstrapType);
             ngModule.bootstrap && ngModule.bootstrap.forEach(verifyComponentIsPartOfNgModule);
@@ -21402,7 +21420,7 @@
     function computeCombinedExports(type) {
         type = resolveForwardRef(type);
         var ngModuleDef = getNgModuleDef(type, true);
-        return __spread(flatten(maybeUnwrapFn(ngModuleDef.exports).map(function (type) {
+        return __spread(flatten$1(maybeUnwrapFn(ngModuleDef.exports).map(function (type) {
             var ngModuleDef = getNgModuleDef(type);
             if (ngModuleDef) {
                 verifySemanticsOfNgModuleDef(type);
@@ -21419,7 +21437,7 @@
      * the `ngSelectorScope` property of the declared type.
      */
     function setScopeOnDeclaredComponents(moduleType, ngModule) {
-        var declarations = flatten(ngModule.declarations || EMPTY_ARRAY$3);
+        var declarations = flatten$1(ngModule.declarations || EMPTY_ARRAY$3);
         var transitiveScopes = transitiveScopesFor(moduleType);
         declarations.forEach(function (declaration) {
             if (declaration.hasOwnProperty(NG_COMPONENT_DEF)) {
@@ -21534,11 +21552,11 @@
         def.transitiveCompileScopes = scopes;
         return scopes;
     }
-    function flatten(values, mapFn) {
+    function flatten$1(values, mapFn) {
         var out = [];
         values.forEach(function (value) {
             if (Array.isArray(value)) {
-                out.push.apply(out, __spread(flatten(value, mapFn)));
+                out.push.apply(out, __spread(flatten$1(value, mapFn)));
             }
             else {
                 out.push(mapFn ? mapFn(value) : value);
@@ -23359,15 +23377,40 @@
          */
         ApplicationRef.prototype.tick = function () {
             var _this = this;
+            var e_1, _a, e_2, _b;
             if (this._runningTick) {
                 throw new Error('ApplicationRef.tick is called recursively');
             }
             var scope = ApplicationRef._tickScope();
             try {
                 this._runningTick = true;
-                this._views.forEach(function (view) { return view.detectChanges(); });
+                try {
+                    for (var _c = __values(this._views), _d = _c.next(); !_d.done; _d = _c.next()) {
+                        var view = _d.value;
+                        view.detectChanges();
+                    }
+                }
+                catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                finally {
+                    try {
+                        if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+                    }
+                    finally { if (e_1) throw e_1.error; }
+                }
                 if (this._enforceNoNewChanges) {
-                    this._views.forEach(function (view) { return view.checkNoChanges(); });
+                    try {
+                        for (var _e = __values(this._views), _f = _e.next(); !_f.done; _f = _e.next()) {
+                            var view = _f.value;
+                            view.checkNoChanges();
+                        }
+                    }
+                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                    finally {
+                        try {
+                            if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
+                        }
+                        finally { if (e_2) throw e_2.error; }
+                    }
                 }
             }
             catch (e) {
