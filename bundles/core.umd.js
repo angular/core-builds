@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.10+31.sha-e4c1c88.with-local-changes
+ * @license Angular v8.0.0-beta.10+32.sha-931d356.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10687,28 +10687,11 @@
         }
     }
     /**
-     * Selects an index of an item to act on and flushes lifecycle hooks up to this point
+     * Flushes all the lifecycle hooks for directives up until (and excluding) that node index
      *
-     * Used in conjunction with instructions like {@link property} to act on elements with specified
-     * indices, for example those created with {@link element} or {@link elementStart}.
-     *
-     * ```ts
-     * (rf: RenderFlags, ctx: any) => {
-      *  if (rf & 1) {
-      *    element(0, 'div');
-      *  }
-      *  if (rf & 2) {
-      *    select(0); // Select the <div/> created above.
-      *    property('title', 'test');
-      *  }
-      * }
-      * ```
-      * @param index the index of the item to act on with the following instructions
-      */
+     * @param index The index of the element in the `LView`
+     */
     function select(index) {
-        ngDevMode && assertGreaterThan(index, -1, 'Invalid index');
-        ngDevMode &&
-            assertLessThan(index, getLView().length - HEADER_OFFSET, 'Should be within range for the view data');
         var lView = getLView();
         executePreOrderHooks(lView, lView[TVIEW], getCheckNoChangesMode(), index);
     }
@@ -10748,7 +10731,6 @@
         }
     }
     /**
-     * **TODO: Remove this function after `property` is in use**
      * Update a property on an element.
      *
      * If the property name also exists as an input property on one of the element's directives,
@@ -15150,7 +15132,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.10+31.sha-e4c1c88.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.10+32.sha-931d356.with-local-changes');
 
     /**
      * @license
