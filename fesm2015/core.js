@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.10+21.sha-96b800c.with-local-changes
+ * @license Angular v8.0.0-beta.10+25.sha-9745f55.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16671,7 +16671,7 @@ function wrapOnChanges() {
      * @this {?}
      * @return {?}
      */
-    function () {
+    function wrapOnChangesHook_inPreviousChangesStorage() {
         /** @type {?} */
         const simpleChangesStore = getSimpleChangesStore(this);
         /** @type {?} */
@@ -18937,7 +18937,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.10+21.sha-96b800c.with-local-changes');
+const VERSION = new Version('8.0.0-beta.10+25.sha-9745f55.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -30294,17 +30294,13 @@ class ApplicationRef {
         const scope = ApplicationRef._tickScope();
         try {
             this._runningTick = true;
-            this._views.forEach((/**
-             * @param {?} view
-             * @return {?}
-             */
-            (view) => view.detectChanges()));
+            for (let view of this._views) {
+                view.detectChanges();
+            }
             if (this._enforceNoNewChanges) {
-                this._views.forEach((/**
-                 * @param {?} view
-                 * @return {?}
-                 */
-                (view) => view.checkNoChanges()));
+                for (let view of this._views) {
+                    view.checkNoChanges();
+                }
             }
         }
         catch (e) {
