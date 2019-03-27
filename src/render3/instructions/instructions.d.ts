@@ -226,10 +226,24 @@ export declare function storeCleanupFn(view: LView, cleanupFn: Function): void;
 /** Mark the end of the element. */
 export declare function elementEnd(): void;
 /**
- * Flushes all the lifecycle hooks for directives up until (and excluding) that node index
+ * Selects an index of an item to act on and flushes lifecycle hooks up to this point
  *
- * @param index The index of the element in the `LView`
- */
+ * Used in conjunction with instructions like {@link property} to act on elements with specified
+ * indices, for example those created with {@link element} or {@link elementStart}.
+ *
+ * ```ts
+ * (rf: RenderFlags, ctx: any) => {
+  *  if (rf & 1) {
+  *    element(0, 'div');
+  *  }
+  *  if (rf & 2) {
+  *    select(0); // Select the <div/> created above.
+  *    property('title', 'test');
+  *  }
+  * }
+  * ```
+  * @param index the index of the item to act on with the following instructions
+  */
 export declare function select(index: number): void;
 /**
  * Updates the value of removes an attribute on an Element.
@@ -243,6 +257,26 @@ export declare function select(index: number): void;
  */
 export declare function elementAttribute(index: number, name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): void;
 /**
+ * Update a property on a selected element.
+ *
+ * Operates on the element selected by index via the {@link select} instruction.
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled
+ *
+ * @param propName Name of property. Because it is going to DOM, this is not subject to
+ *        renaming as part of minification.
+ * @param value New value to write.
+ * @param sanitizer An optional function used to sanitize the value.
+ * @param nativeOnly Whether or not we should only set native properties and skip input check
+ * (this is necessary for host property bindings)
+ * @returns This function returns itself so that it may be chained
+ * (e.g. `property('name', ctx.name)('title', ctx.title)`)
+ */
+export declare function property<T>(propName: string, value: T, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): typeof property;
+/**
+ * **TODO: Remove this function after `property` is in use**
  * Update a property on an element.
  *
  * If the property name also exists as an input property on one of the element's directives,
