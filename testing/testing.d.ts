@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.9+99.sha-17f7bdb.with-local-changes
+ * @license Angular v8.0.0-beta.10+9.sha-309ffe7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -676,7 +676,6 @@ export declare class ɵangular_packages_core_testing_testing_b implements Inject
      * Note: This works for JIT and AOTed components as well.
      */
     static overrideTemplateUsingTestingModule(component: Type<any>, template: string): TestBedStatic;
-    overrideTemplateUsingTestingModule(component: Type<any>, template: string): void;
     static overrideProvider(token: any, provider: {
         useFactory: Function;
         deps: any[];
@@ -701,29 +700,10 @@ export declare class ɵangular_packages_core_testing_testing_b implements Inject
     static resetTestingModule(): TestBedStatic;
     platform: PlatformRef;
     ngModule: Type<any> | Type<any>[];
-    private _moduleOverrides;
-    private _componentOverrides;
-    private _directiveOverrides;
-    private _pipeOverrides;
-    private _providerOverrides;
-    private _compilerProviders;
-    private _rootProviderOverrides;
-    private _providerOverridesByToken;
-    private _templateOverrides;
-    private _resolvers;
-    private _providers;
-    private _compilerOptions;
-    private _declarations;
-    private _imports;
-    private _schemas;
+    private _compiler;
+    private _testModuleRef;
     private _activeFixtures;
-    private _compilerInjector;
-    private _moduleRef;
-    private _testModuleType;
-    private _instantiated;
     private _globalCompilationChecked;
-    private _originalComponentResolutionQueue;
-    private _initialNgDefs;
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
      * angular module. These are common to every test in the suite.
@@ -755,6 +735,7 @@ export declare class ɵangular_packages_core_testing_testing_b implements Inject
     execute(tokens: any[], fn: Function, context?: any): any;
     overrideModule(ngModule: Type<any>, override: MetadataOverride<NgModule>): void;
     overrideComponent(component: Type<any>, override: MetadataOverride<Component>): void;
+    overrideTemplateUsingTestingModule(component: Type<any>, template: string): void;
     overrideDirective(directive: Type<any>, override: MetadataOverride<Directive>): void;
     overridePipe(pipe: Type<any>, override: MetadataOverride<Pipe>): void;
     /**
@@ -778,31 +759,9 @@ export declare class ɵangular_packages_core_testing_testing_b implements Inject
         useValue: any;
     }): void;
     createComponent<T>(type: Type<T>): ComponentFixture<T>;
-    private _initIfNeeded;
-    private _storeNgDef;
-    private _getProviderOverrides;
-    private _getResolvers;
-    private _assertNotInstantiated;
-    private _createTestModule;
-    readonly compilerInjector: Injector;
-    /**
-     * Clears current components resolution queue, but stores the state of the queue, so we can
-     * restore it later. Clearing the queue is required before we try to compile components (via
-     * `TestBed.compileComponents`), so that component defs are in sync with the resolution queue.
-     */
-    private _clearComponentResolutionQueue;
-    /**
-     * Restores component resolution queue to the previously saved state. This operation is performed
-     * as a part of restoring the state after completion of the current set of tests (that might
-     * potentially mutate the state).
-     */
-    private _restoreComponentResolutionQueue;
-    private _getProvidersOverrides;
-    private _hasProviderOverrides;
-    private _hasTypeOverrides;
-    private _hasTemplateOverrides;
-    private _getMetaWithOverrides;
-    private _patchDefWithProviderOverrides;
+    private readonly compiler;
+    private readonly testModuleRef;
+    private assertNotInstantiated;
     /**
      * Check whether the module scoping queue should be flushed, and flush it if needed.
      *
@@ -815,7 +774,8 @@ export declare class ɵangular_packages_core_testing_testing_b implements Inject
      * is called whenever TestBed is initialized or reset. The _first_ time that this happens, prior
      * to any other operations, the scoping queue is flushed.
      */
-    private _checkGlobalCompilationFinished;
+    private checkGlobalCompilationFinished;
+    private destroyActiveFixtures;
 }
 
 export declare function ɵangular_packages_core_testing_testing_c(): ɵangular_packages_core_testing_testing_b;
