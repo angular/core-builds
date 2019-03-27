@@ -110,17 +110,3 @@ export declare function resetComponentState(): void;
  * @param newView New state to become active
  */
 export declare function leaveView(newView: LView): void;
-/**
- * Gets the most recent index passed to {@link select}
- *
- * Used with {@link property} instruction (and more in the future) to identify the index in the
- * current `LView` to act on.
- */
-export declare function getSelectedIndex(): number;
-/**
- * Sets the most recent index passed to {@link select}
- *
- * Used with {@link property} instruction (and more in the future) to identify the index in the
- * current `LView` to act on.
- */
-export declare function setSelectedIndex(index: number): void;
