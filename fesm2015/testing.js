@@ -1,10 +1,10 @@
 /**
- * @license Angular v8.0.0-beta.10+32.sha-931d356.with-local-changes
+ * @license Angular v8.0.0-beta.10+34.sha-71ec998.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode, RendererFactory2, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, ɵRender3NgModuleRef, ApplicationInitStatus, ɵRender3ComponentFactory, ɵNG_COMPONENT_DEF, ɵcompileComponent, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵpatchComponentDefWithScope, ɵNG_INJECTOR_DEF, ɵNG_MODULE_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, ɵtransitiveScopesFor, ErrorHandler, Injector, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, ɵivyEnabled, Optional, SkipSelf } from '@angular/core';
+import { getDebugNode, RendererFactory2, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, ɵNG_COMPONENT_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵpatchComponentDefWithScope, ɵNG_INJECTOR_DEF, ɵNG_MODULE_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, ɵtransitiveScopesFor, ErrorHandler, Injector, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, ɵivyEnabled, Optional, SkipSelf } from '@angular/core';
 import { __awaiter } from 'tslib';
 import { ResourceLoader } from '@angular/compiler';
 
@@ -1296,6 +1296,9 @@ class R3TestBedCompiler {
         // Keep track of all components and directives, so we can patch Providers onto defs later.
         this.seenComponents = new Set();
         this.seenDirectives = new Set();
+        // Store resolved styles for Components that have template overrides present and `styleUrls`
+        // defined at the same time.
+        this.existingComponentStyles = new Map();
         this.resolvers = initResolvers();
         this.componentToModuleScope = new Map();
         // Map that keeps initial version of component/directive/pipe defs in case
@@ -1422,9 +1425,32 @@ class R3TestBedCompiler {
      * @return {?}
      */
     overrideTemplateUsingTestingModule(type, template) {
-        // In Ivy, compiling a component does not require knowing the module providing the component's
-        // scope, so overrideTemplateUsingTestingModule can be implemented purely via overrideComponent.
-        this.overrideComponent(type, { set: { template } });
+        /** @type {?} */
+        const def = ((/** @type {?} */ (type)))[ɵNG_COMPONENT_DEF];
+        /** @type {?} */
+        const hasStyleUrls = (/**
+         * @return {?}
+         */
+        () => {
+            /** @type {?} */
+            const metadata = (/** @type {?} */ ((/** @type {?} */ (this.resolvers.component.resolve(type)))));
+            return !!metadata.styleUrls && metadata.styleUrls.length > 0;
+        });
+        /** @type {?} */
+        const overrideStyleUrls = !!def && !isComponentDefPendingResolution(type) && hasStyleUrls();
+        // In Ivy, compiling a component does not require knowing the module providing the
+        // component's scope, so overrideTemplateUsingTestingModule can be implemented purely via
+        // overrideComponent. Important: overriding template requires full Component re-compilation,
+        // which may fail in case styleUrls are also present (thus Component is considered as required
+        // resolution). In order to avoid this, we preemptively set styleUrls to an empty array,
+        // preserve current styles available on Component def and restore styles back once compilation
+        // is complete.
+        /** @type {?} */
+        const override = overrideStyleUrls ? { template, styles: [], styleUrls: [] } : { template };
+        this.overrideComponent(type, { set: override });
+        if (overrideStyleUrls && def.styles && def.styles.length > 0) {
+            this.existingComponentStyles.set(type, def.styles);
+        }
         // Set the component's scope to be the testing module.
         this.componentToModuleScope.set(type, TESTING_MODULE);
     }
@@ -1466,6 +1492,9 @@ class R3TestBedCompiler {
         this.compileTestModule();
         this.applyTransitiveScopes();
         this.applyProviderOverrides();
+        // Patch previously stored `styles` Component values (taken from ngComponentDef), in case these
+        // Components have `styleUrls` fields defined and template override was requested.
+        this.patchComponentsWithExistingStyles();
         // Clear the componentToModuleScope map, so that future compilations don't reset the scope of
         // every component.
         this.componentToModuleScope.clear();
@@ -1632,7 +1661,6 @@ class R3TestBedCompiler {
         this.seenComponents.clear();
         this.seenDirectives.clear();
     }
-    // ...
     /**
      * @private
      * @param {?} moduleType
@@ -1657,6 +1685,19 @@ class R3TestBedCompiler {
                 this.applyProviderOverridesToModule(importType);
             }
         }
+    }
+    /**
+     * @private
+     * @return {?}
+     */
+    patchComponentsWithExistingStyles() {
+        this.existingComponentStyles.forEach((/**
+         * @param {?} styles
+         * @param {?} type
+         * @return {?}
+         */
+        (styles, type) => ((/** @type {?} */ (type)))[ɵNG_COMPONENT_DEF].styles = styles));
+        this.existingComponentStyles.clear();
     }
     /**
      * @private
