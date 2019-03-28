@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.10+34.sha-71ec998.with-local-changes
+ * @license Angular v8.0.0-beta.10+36.sha-7b27009.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1133,6 +1133,7 @@
             this.providerOverrides = [];
             this.rootProviderOverrides = [];
             this.providerOverridesByToken = new Map();
+            this.moduleProvidersOverridden = new Set();
             this.testModuleRef = null;
             var DynamicTestModule = /** @class */ (function () {
                 function DynamicTestModule() {
@@ -1375,6 +1376,10 @@
         };
         R3TestBedCompiler.prototype.applyProviderOverridesToModule = function (moduleType) {
             var e_1, _a;
+            if (this.moduleProvidersOverridden.has(moduleType)) {
+                return;
+            }
+            this.moduleProvidersOverridden.add(moduleType);
             var injectorDef = moduleType[i0.ɵNG_INJECTOR_DEF];
             if (this.providerOverridesByToken.size > 0) {
                 if (this.hasProviderOverrides(injectorDef.providers)) {
@@ -1557,6 +1562,7 @@
                 }
             });
             this.initialNgDefs.clear();
+            this.moduleProvidersOverridden.clear();
             this.restoreComponentResolutionQueue();
         };
         R3TestBedCompiler.prototype.compileTestModule = function () {

@@ -31,6 +31,7 @@ export declare class R3TestBedCompiler {
     private providerOverrides;
     private rootProviderOverrides;
     private providerOverridesByToken;
+    private moduleProvidersOverridden;
     private testModuleType;
     private testModuleRef;
     constructor(platform: PlatformRef, additionalModuleTypes: Type<any> | Type<any>[]);
