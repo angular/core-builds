@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.10+33.sha-e958447.with-local-changes
+ * @license Angular v8.0.0-beta.10+35.sha-d46a7c8.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1115,6 +1115,9 @@
             // Keep track of all components and directives, so we can patch Providers onto defs later.
             this.seenComponents = new Set();
             this.seenDirectives = new Set();
+            // Store resolved styles for Components that have template overrides present and `styleUrls`
+            // defined at the same time.
+            this.existingComponentStyles = new Map();
             this.resolvers = initResolvers();
             this.componentToModuleScope = new Map();
             // Map that keeps initial version of component/directive/pipe defs in case
@@ -1201,9 +1204,25 @@
             this.providerOverridesByToken.set(token, overridesForToken);
         };
         R3TestBedCompiler.prototype.overrideTemplateUsingTestingModule = function (type, template) {
-            // In Ivy, compiling a component does not require knowing the module providing the component's
-            // scope, so overrideTemplateUsingTestingModule can be implemented purely via overrideComponent.
-            this.overrideComponent(type, { set: { template: template } });
+            var _this = this;
+            var def = type[i0.ɵNG_COMPONENT_DEF];
+            var hasStyleUrls = function () {
+                var metadata = _this.resolvers.component.resolve(type);
+                return !!metadata.styleUrls && metadata.styleUrls.length > 0;
+            };
+            var overrideStyleUrls = !!def && !isComponentDefPendingResolution(type) && hasStyleUrls();
+            // In Ivy, compiling a component does not require knowing the module providing the
+            // component's scope, so overrideTemplateUsingTestingModule can be implemented purely via
+            // overrideComponent. Important: overriding template requires full Component re-compilation,
+            // which may fail in case styleUrls are also present (thus Component is considered as required
+            // resolution). In order to avoid this, we preemptively set styleUrls to an empty array,
+            // preserve current styles available on Component def and restore styles back once compilation
+            // is complete.
+            var override = overrideStyleUrls ? { template: template, styles: [], styleUrls: [] } : { template: template };
+            this.overrideComponent(type, { set: override });
+            if (overrideStyleUrls && def.styles && def.styles.length > 0) {
+                this.existingComponentStyles.set(type, def.styles);
+            }
             // Set the component's scope to be the testing module.
             this.componentToModuleScope.set(type, TESTING_MODULE);
         };
@@ -1239,6 +1258,9 @@
             this.compileTestModule();
             this.applyTransitiveScopes();
             this.applyProviderOverrides();
+            // Patch previously stored `styles` Component values (taken from ngComponentDef), in case these
+            // Components have `styleUrls` fields defined and template override was requested.
+            this.patchComponentsWithExistingStyles();
             // Clear the componentToModuleScope map, so that future compilations don't reset the scope of
             // every component.
             this.componentToModuleScope.clear();
@@ -1351,7 +1373,6 @@
             this.seenComponents.clear();
             this.seenDirectives.clear();
         };
-        // ...
         R3TestBedCompiler.prototype.applyProviderOverridesToModule = function (moduleType) {
             var e_1, _a;
             var injectorDef = moduleType[i0.ɵNG_INJECTOR_DEF];
@@ -1377,6 +1398,10 @@
                     finally { if (e_1) throw e_1.error; }
                 }
             }
+        };
+        R3TestBedCompiler.prototype.patchComponentsWithExistingStyles = function () {
+            this.existingComponentStyles.forEach(function (styles, type) { return type[i0.ɵNG_COMPONENT_DEF].styles = styles; });
+            this.existingComponentStyles.clear();
         };
         R3TestBedCompiler.prototype.queueTypeArray = function (arr, moduleType) {
             var e_2, _a;

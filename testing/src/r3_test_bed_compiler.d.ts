@@ -21,6 +21,7 @@ export declare class R3TestBedCompiler {
     private pendingPipes;
     private seenComponents;
     private seenDirectives;
+    private existingComponentStyles;
     private resolvers;
     private componentToModuleScope;
     private initialNgDefs;
@@ -51,6 +52,7 @@ export declare class R3TestBedCompiler {
     private applyTransitiveScopes;
     private applyProviderOverrides;
     private applyProviderOverridesToModule;
+    private patchComponentsWithExistingStyles;
     private queueTypeArray;
     private recompileNgModule;
     private queueType;
