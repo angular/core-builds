@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.10+36.sha-7b27009.with-local-changes
+ * @license Angular v8.0.0-beta.10+57.sha-c67f6a7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10687,11 +10687,28 @@
         }
     }
     /**
-     * Flushes all the lifecycle hooks for directives up until (and excluding) that node index
+     * Selects an index of an item to act on and flushes lifecycle hooks up to this point
      *
-     * @param index The index of the element in the `LView`
-     */
+     * Used in conjunction with instructions like {@link property} to act on elements with specified
+     * indices, for example those created with {@link element} or {@link elementStart}.
+     *
+     * ```ts
+     * (rf: RenderFlags, ctx: any) => {
+      *  if (rf & 1) {
+      *    element(0, 'div');
+      *  }
+      *  if (rf & 2) {
+      *    select(0); // Select the <div/> created above.
+      *    property('title', 'test');
+      *  }
+      * }
+      * ```
+      * @param index the index of the item to act on with the following instructions
+      */
     function select(index) {
+        ngDevMode && assertGreaterThan(index, -1, 'Invalid index');
+        ngDevMode &&
+            assertLessThan(index, getLView().length - HEADER_OFFSET, 'Should be within range for the view data');
         var lView = getLView();
         executePreOrderHooks(lView, lView[TVIEW], getCheckNoChangesMode(), index);
     }
@@ -10731,6 +10748,7 @@
         }
     }
     /**
+     * **TODO: Remove this function after `property` is in use**
      * Update a property on an element.
      *
      * If the property name also exists as an input property on one of the element's directives,
@@ -13221,6 +13239,11 @@
         rootContext.components.push(component);
         componentView[CONTEXT] = component;
         hostFeatures && hostFeatures.forEach(function (feature) { return feature(component, componentDef); });
+        // We want to generate an empty QueryList for root content queries for backwards
+        // compatibility with ViewEngine.
+        if (componentDef.contentQueries) {
+            componentDef.contentQueries(1 /* Create */, component, rootView.length - 1);
+        }
         var rootTNode = getPreviousOrParentTNode();
         if (tView.firstTemplatePass && componentDef.hostBindings) {
             var expando = tView.expandoInstructions;
@@ -13231,11 +13254,6 @@
             var native = componentView[HOST];
             renderInitialClasses(native, rootTNode.stylingTemplate, componentView[RENDERER]);
             renderInitialStyles(native, rootTNode.stylingTemplate, componentView[RENDERER]);
-        }
-        // We want to generate an empty QueryList for root content queries for backwards
-        // compatibility with ViewEngine.
-        if (componentDef.contentQueries) {
-            componentDef.contentQueries(1 /* Create */, component, rootView.length - 1);
         }
         return component;
     }
@@ -15132,7 +15150,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.10+36.sha-7b27009.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.10+57.sha-c67f6a7.with-local-changes');
 
     /**
      * @license
@@ -24225,7 +24243,7 @@
         return DebugElement__POST_R3__;
     }(DebugNode__POST_R3__));
     /**
-     * Walk the TNode tree to find matches for the predicate, skipping the parent element.
+     * Walk the TNode tree to find matches for the predicate.
      *
      * @param parentElement the element from which the walk is started
      * @param predicate the predicate to match
@@ -24235,10 +24253,7 @@
     function _queryAllR3(parentElement, predicate, matches, elementsOnly) {
         var context = loadLContext(parentElement.nativeNode);
         var parentTNode = context.lView[TVIEW].data[context.nodeIndex];
-        // This the fixture's debug element, so this is always a component view.
-        var lView = context.lView[parentTNode.index];
-        var tNode = lView[TVIEW].firstChild;
-        _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly);
+        _queryNodeChildrenR3(parentTNode, context.lView, predicate, matches, elementsOnly, parentElement.nativeNode);
     }
     /**
      * Recursively match the current TNode against the predicate, and goes on with the next ones.
@@ -24248,40 +24263,41 @@
      * @param predicate the predicate to match
      * @param matches the list of positive matches
      * @param elementsOnly whether only elements should be searched
+     * @param rootNativeNode the root native node on which prediccate shouold not be matched
      */
-    function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly) {
+    function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly, rootNativeNode) {
         var e_1, _a;
         // For each type of TNode, specific logic is executed.
         if (tNode.type === 3 /* Element */ || tNode.type === 4 /* ElementContainer */) {
             // Case 1: the TNode is an element
             // The native node has to be checked.
-            _addQueryMatchR3(getNativeByTNode(tNode, lView), predicate, matches, elementsOnly);
+            _addQueryMatchR3(getNativeByTNode(tNode, lView), predicate, matches, elementsOnly, rootNativeNode);
             if (isComponent(tNode)) {
                 // If the element is the host of a component, then all nodes in its view have to be processed.
                 // Note: the component's content (tNode.child) will be processed from the insertion points.
                 var componentView = getComponentViewByIndex(tNode.index, lView);
                 if (componentView && componentView[TVIEW].firstChild)
-                    _queryNodeChildrenR3(componentView[TVIEW].firstChild, componentView, predicate, matches, elementsOnly);
+                    _queryNodeChildrenR3(componentView[TVIEW].firstChild, componentView, predicate, matches, elementsOnly, rootNativeNode);
             }
             else {
                 // Otherwise, its children have to be processed.
                 if (tNode.child)
-                    _queryNodeChildrenR3(tNode.child, lView, predicate, matches, elementsOnly);
+                    _queryNodeChildrenR3(tNode.child, lView, predicate, matches, elementsOnly, rootNativeNode);
             }
             // In all cases, if a dynamic container exists for this node, each view inside it has to be
             // processed.
             var nodeOrContainer = lView[tNode.index];
             if (isLContainer(nodeOrContainer)) {
-                _queryNodeChildrenInContainerR3(nodeOrContainer, predicate, matches, elementsOnly);
+                _queryNodeChildrenInContainerR3(nodeOrContainer, predicate, matches, elementsOnly, rootNativeNode);
             }
         }
         else if (tNode.type === 0 /* Container */) {
             // Case 2: the TNode is a container
             // The native node has to be checked.
             var lContainer = lView[tNode.index];
-            _addQueryMatchR3(lContainer[NATIVE], predicate, matches, elementsOnly);
+            _addQueryMatchR3(lContainer[NATIVE], predicate, matches, elementsOnly, rootNativeNode);
             // Each view inside the container has to be processed.
-            _queryNodeChildrenInContainerR3(lContainer, predicate, matches, elementsOnly);
+            _queryNodeChildrenInContainerR3(lContainer, predicate, matches, elementsOnly, rootNativeNode);
         }
         else if (tNode.type === 1 /* Projection */) {
             // Case 3: the TNode is a projection insertion point (i.e. a <ng-content>).
@@ -24293,7 +24309,7 @@
                 try {
                     for (var head_1 = __values(head), head_1_1 = head_1.next(); !head_1_1.done; head_1_1 = head_1.next()) {
                         var nativeNode = head_1_1.value;
-                        _addQueryMatchR3(nativeNode, predicate, matches, elementsOnly);
+                        _addQueryMatchR3(nativeNode, predicate, matches, elementsOnly, rootNativeNode);
                     }
                 }
                 catch (e_1_1) { e_1 = { error: e_1_1 }; }
@@ -24308,21 +24324,21 @@
                 if (head) {
                     var nextLView = componentView[PARENT];
                     var nextTNode_1 = nextLView[TVIEW].data[head.index];
-                    _queryNodeChildrenR3(nextTNode_1, nextLView, predicate, matches, elementsOnly);
+                    _queryNodeChildrenR3(nextTNode_1, nextLView, predicate, matches, elementsOnly, rootNativeNode);
                 }
             }
         }
         else {
             // Case 4: the TNode is a view.
             if (tNode.child) {
-                _queryNodeChildrenR3(tNode.child, lView, predicate, matches, elementsOnly);
+                _queryNodeChildrenR3(tNode.child, lView, predicate, matches, elementsOnly, rootNativeNode);
             }
         }
         // To determine the next node to be processed, we need to use the next or the projectionNext link,
         // depending on whether the current node has been projected.
         var nextTNode = (tNode.flags & 2 /* isProjected */) ? tNode.projectionNext : tNode.next;
         if (nextTNode) {
-            _queryNodeChildrenR3(nextTNode, lView, predicate, matches, elementsOnly);
+            _queryNodeChildrenR3(nextTNode, lView, predicate, matches, elementsOnly, rootNativeNode);
         }
     }
     /**
@@ -24332,11 +24348,12 @@
      * @param predicate the predicate to match
      * @param matches the list of positive matches
      * @param elementsOnly whether only elements should be searched
+     * @param rootNativeNode the root native node on which prediccate shouold not be matched
      */
-    function _queryNodeChildrenInContainerR3(lContainer, predicate, matches, elementsOnly) {
+    function _queryNodeChildrenInContainerR3(lContainer, predicate, matches, elementsOnly, rootNativeNode) {
         for (var i = 0; i < lContainer[VIEWS].length; i++) {
             var childView = lContainer[VIEWS][i];
-            _queryNodeChildrenR3(childView[TVIEW].node, childView, predicate, matches, elementsOnly);
+            _queryNodeChildrenR3(childView[TVIEW].node, childView, predicate, matches, elementsOnly, rootNativeNode);
         }
     }
     /**
@@ -24346,12 +24363,15 @@
      * @param predicate the predicate to match
      * @param matches the list of positive matches
      * @param elementsOnly whether only elements should be searched
+     * @param rootNativeNode the root native node on which prediccate shouold not be matched
      */
-    function _addQueryMatchR3(nativeNode, predicate, matches, elementsOnly) {
-        var debugNode = getDebugNode(nativeNode);
-        if (debugNode && (elementsOnly ? debugNode instanceof DebugElement__POST_R3__ : true) &&
-            predicate(debugNode)) {
-            matches.push(debugNode);
+    function _addQueryMatchR3(nativeNode, predicate, matches, elementsOnly, rootNativeNode) {
+        if (rootNativeNode !== nativeNode) {
+            var debugNode = getDebugNode(nativeNode);
+            if (debugNode && (elementsOnly ? debugNode instanceof DebugElement__POST_R3__ : true) &&
+                predicate(debugNode)) {
+                matches.push(debugNode);
+            }
         }
     }
     /**

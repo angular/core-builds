@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.10+36.sha-7b27009.with-local-changes
+ * @license Angular v8.0.0-beta.10+57.sha-c67f6a7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -484,18 +484,24 @@ declare interface FactorySansProvider {
 
 /**
  * Injects a token from the currently active injector.
+ * Must be used in the context of a factory function such as one defined for an
+ * `InjectionToken`. Throws an error if not called from such a context.
  *
- * This function must be used in the context of a factory function such as one defined for an
- * `InjectionToken`, and will throw an error if not called from such a context.
+ * Within such a factory function, using this function to request injection of a dependency
+ * is faster and more type-safe than providing an additional array of dependencies
+ * (as has been common with `useFactory` providers).
+ *
+ * @param token The injection token for the dependency to be injected.
+ * @param flags Optional flags that control how injection is executed.
+ * The flags correspond to injection strategies that can be specified with
+ * parameter decorators `@Host`, `@Self`, `@SkipSef`, and `@Optional`.
+ * @returns True if injection is successful, null otherwise.
  *
  * @usageNotes
+ *
  * ### Example
  *
- * {@example core/di/ts/injector_spec.ts region='ShakeableInjectionToken'}
- *
- * Within such a factory function `inject` is utilized to request injection of a dependency, instead
- * of providing an additional array of dependencies as was common to do with `useFactory` providers.
- * `inject` is faster and more type-safe.
+ * {@example core/di/ts/injector_spec.ts region='ShakableInjectionToken'}
  *
  * @publicApi
  */
