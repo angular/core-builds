@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.10+55.sha-12c9bd2.with-local-changes
+ * @license Angular v8.0.0-beta.10+57.sha-c67f6a7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5052,7 +5052,7 @@ const NG_PROJECT_AS_ATTR_NAME = 'ngProjectAs';
  * We do this by defining a subset of DOM API to be the renderer and than
  * use that time for rendering.
  *
- * At runtime we can than use the DOM api directly, in server or web-worker
+ * At runtime we can then use the DOM api directly, in server or web-worker
  * it will be easy to implement such API.
  */
 /** @enum {number} */
@@ -16439,6 +16439,11 @@ function createRootComponent(componentView, componentDef, rootView, rootContext,
      * @return {?}
      */
     (feature) => feature(component, componentDef)));
+    // We want to generate an empty QueryList for root content queries for backwards
+    // compatibility with ViewEngine.
+    if (componentDef.contentQueries) {
+        componentDef.contentQueries(1 /* Create */, component, rootView.length - 1);
+    }
     /** @type {?} */
     const rootTNode = getPreviousOrParentTNode();
     if (tView.firstTemplatePass && componentDef.hostBindings) {
@@ -16452,11 +16457,6 @@ function createRootComponent(componentView, componentDef, rootView, rootContext,
         const native = (/** @type {?} */ ((/** @type {?} */ (componentView[HOST]))));
         renderInitialClasses(native, rootTNode.stylingTemplate, componentView[RENDERER]);
         renderInitialStyles(native, rootTNode.stylingTemplate, componentView[RENDERER]);
-    }
-    // We want to generate an empty QueryList for root content queries for backwards
-    // compatibility with ViewEngine.
-    if (componentDef.contentQueries) {
-        componentDef.contentQueries(1 /* Create */, component, rootView.length - 1);
     }
     return component;
 }
@@ -18858,7 +18858,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.10+55.sha-12c9bd2.with-local-changes');
+const VERSION = new Version('8.0.0-beta.10+57.sha-c67f6a7.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
