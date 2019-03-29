@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.10+55.sha-12c9bd2.with-local-changes
+ * @license Angular v8.0.0-beta.10+57.sha-c67f6a7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13239,6 +13239,11 @@
         rootContext.components.push(component);
         componentView[CONTEXT] = component;
         hostFeatures && hostFeatures.forEach(function (feature) { return feature(component, componentDef); });
+        // We want to generate an empty QueryList for root content queries for backwards
+        // compatibility with ViewEngine.
+        if (componentDef.contentQueries) {
+            componentDef.contentQueries(1 /* Create */, component, rootView.length - 1);
+        }
         var rootTNode = getPreviousOrParentTNode();
         if (tView.firstTemplatePass && componentDef.hostBindings) {
             var expando = tView.expandoInstructions;
@@ -13249,11 +13254,6 @@
             var native = componentView[HOST];
             renderInitialClasses(native, rootTNode.stylingTemplate, componentView[RENDERER]);
             renderInitialStyles(native, rootTNode.stylingTemplate, componentView[RENDERER]);
-        }
-        // We want to generate an empty QueryList for root content queries for backwards
-        // compatibility with ViewEngine.
-        if (componentDef.contentQueries) {
-            componentDef.contentQueries(1 /* Create */, component, rootView.length - 1);
         }
         return component;
     }
@@ -15150,7 +15150,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.10+55.sha-12c9bd2.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.10+57.sha-c67f6a7.with-local-changes');
 
     /**
      * @license
