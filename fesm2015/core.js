@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.11+24.sha-7671c73.with-local-changes
+ * @license Angular v7.2.11+25.sha-60b5bf7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4580,7 +4580,7 @@ const NG_PROJECT_AS_ATTR_NAME = 'ngProjectAs';
  * We do this by defining a subset of DOM API to be the renderer and than
  * use that time for rendering.
  *
- * At runtime we can than use the DOM api directly, in server or web-worker
+ * At runtime we can then use the DOM api directly, in server or web-worker
  * it will be easy to implement such API.
  */
 /** @enum {number} */
@@ -13814,7 +13814,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('7.2.11+24.sha-7671c73.with-local-changes');
+const VERSION = new Version('7.2.11+25.sha-60b5bf7.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
