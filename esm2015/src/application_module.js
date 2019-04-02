@@ -123,7 +123,7 @@ ApplicationModule.ctorParameters = () => [
     { type: ApplicationRef }
 ];
 /** @nocollapse */ ApplicationModule.ngModuleDef = i0.defineNgModule({ type: ApplicationModule });
-/** @nocollapse */ ApplicationModule.ngInjectorDef = i0.defineInjector({ factory: function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(i0.inject(i1.ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS, imports: [] });
+/** @nocollapse */ ApplicationModule.ngInjectorDef = i0.defineInjector({ factory: function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(i0.inject(i1.ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS });
 /*@__PURE__*/ i0.setClassMetadata(ApplicationModule, [{
         type: NgModule,
         args: [{ providers: APPLICATION_MODULE_PROVIDERS }]

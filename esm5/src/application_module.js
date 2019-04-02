@@ -89,7 +89,7 @@ var ApplicationModule = /** @class */ (function () {
     function ApplicationModule(appRef) {
     }
     ApplicationModule.ngModuleDef = i0.defineNgModule({ type: ApplicationModule });
-    ApplicationModule.ngInjectorDef = i0.defineInjector({ factory: function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(i0.inject(i1.ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS, imports: [] });
+    ApplicationModule.ngInjectorDef = i0.defineInjector({ factory: function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(i0.inject(i1.ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS });
     return ApplicationModule;
 }());
 export { ApplicationModule };

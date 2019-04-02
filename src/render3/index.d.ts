@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { LifecycleHooksFeature, renderComponent, whenRendered } from './component';
-import { defineBase, defineComponent, defineDirective, defineNgModule, definePipe, setComponentScope } from './definition';
+import { defineBase, defineComponent, defineDirective, defineNgModule, definePipe, setComponentScope, setNgModuleScope } from './definition';
 import { InheritDefinitionFeature } from './features/inherit_definition_feature';
 import { NgOnChangesFeature } from './features/ng_onchanges_feature';
 import { ProvidersFeature } from './features/providers_feature';
@@ -27,5 +27,5 @@ export { queryRefresh, viewQuery, staticViewQuery, loadViewQuery, contentQuery, 
 export { pureFunction0, pureFunction1, pureFunction2, pureFunction3, pureFunction4, pureFunction5, pureFunction6, pureFunction7, pureFunction8, pureFunctionV, } from './pure_function';
 export { templateRefExtractor } from './view_engine_compatibility_prebound';
 export { resolveWindow, resolveDocument, resolveBody } from './util/misc_utils';
-export { BaseDef, ComponentDef, ComponentDefWithMeta, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFlags, DirectiveDefWithMeta, DirectiveType, NgOnChangesFeature, InheritDefinitionFeature, ProvidersFeature, PipeDef, PipeDefWithMeta, LifecycleHooksFeature, defineComponent, defineDirective, defineNgModule, defineBase, definePipe, getHostElement, getComponent, getDirectives, getRenderedText, renderComponent, setComponentScope, whenRendered, };
+export { BaseDef, ComponentDef, ComponentDefWithMeta, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFlags, DirectiveDefWithMeta, DirectiveType, NgOnChangesFeature, InheritDefinitionFeature, ProvidersFeature, PipeDef, PipeDefWithMeta, LifecycleHooksFeature, defineComponent, defineDirective, defineNgModule, defineBase, definePipe, getHostElement, getComponent, getDirectives, getRenderedText, renderComponent, setComponentScope, setNgModuleScope, whenRendered, };
 export { NO_CHANGE } from './tokens';

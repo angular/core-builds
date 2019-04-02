@@ -666,7 +666,7 @@ export class R3TestBedCompiler {
             { type: NgModule, args: [{ providers: [{ provide: ErrorHandler, useClass: R3TestErrorHandler }] },] },
         ];
         /** @nocollapse */ R3ErrorHandlerModule.ngModuleDef = i0.ɵdefineNgModule({ type: R3ErrorHandlerModule });
-        /** @nocollapse */ R3ErrorHandlerModule.ngInjectorDef = i0.defineInjector({ factory: function R3ErrorHandlerModule_Factory(t) { return new (t || R3ErrorHandlerModule)(); }, providers: [{ provide: ErrorHandler, useClass: R3TestErrorHandler }], imports: [] });
+        /** @nocollapse */ R3ErrorHandlerModule.ngInjectorDef = i0.defineInjector({ factory: function R3ErrorHandlerModule_Factory(t) { return new (t || R3ErrorHandlerModule)(); }, providers: [{ provide: ErrorHandler, useClass: R3TestErrorHandler }] });
         /*@__PURE__*/ i0.ɵsetClassMetadata(R3ErrorHandlerModule, [{
                 type: NgModule,
                 args: [{ providers: [{ provide: ErrorHandler, useClass: R3TestErrorHandler }] }]
@@ -725,7 +725,7 @@ export class R3TestBedCompiler {
             { type: NgModule, args: [{ providers },] },
         ];
         /** @nocollapse */ CompilerModule.ngModuleDef = i0.ɵdefineNgModule({ type: CompilerModule });
-        /** @nocollapse */ CompilerModule.ngInjectorDef = i0.defineInjector({ factory: function CompilerModule_Factory(t) { return new (t || CompilerModule)(); }, providers: providers, imports: [] });
+        /** @nocollapse */ CompilerModule.ngInjectorDef = i0.defineInjector({ factory: function CompilerModule_Factory(t) { return new (t || CompilerModule)(); }, providers: providers });
         /*@__PURE__*/ i0.ɵsetClassMetadata(CompilerModule, [{
                 type: NgModule,
                 args: [{ providers }]

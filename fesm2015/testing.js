@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.10+117.sha-6b39c9c.with-local-changes
+ * @license Angular v8.0.0-beta.10+120.sha-60afe88.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1913,7 +1913,7 @@ class R3TestBedCompiler {
             { type: NgModule, args: [{ providers: [{ provide: ErrorHandler, useClass: R3TestErrorHandler }] },] },
         ];
         /** @nocollapse */ R3ErrorHandlerModule.ngModuleDef = ɵdefineNgModule({ type: R3ErrorHandlerModule });
-        /** @nocollapse */ R3ErrorHandlerModule.ngInjectorDef = defineInjector({ factory: function R3ErrorHandlerModule_Factory(t) { return new (t || R3ErrorHandlerModule)(); }, providers: [{ provide: ErrorHandler, useClass: R3TestErrorHandler }], imports: [] });
+        /** @nocollapse */ R3ErrorHandlerModule.ngInjectorDef = defineInjector({ factory: function R3ErrorHandlerModule_Factory(t) { return new (t || R3ErrorHandlerModule)(); }, providers: [{ provide: ErrorHandler, useClass: R3TestErrorHandler }] });
         /*@__PURE__*/ ɵsetClassMetadata(R3ErrorHandlerModule, [{
                 type: NgModule,
                 args: [{ providers: [{ provide: ErrorHandler, useClass: R3TestErrorHandler }] }]
@@ -1972,7 +1972,7 @@ class R3TestBedCompiler {
             { type: NgModule, args: [{ providers },] },
         ];
         /** @nocollapse */ CompilerModule.ngModuleDef = ɵdefineNgModule({ type: CompilerModule });
-        /** @nocollapse */ CompilerModule.ngInjectorDef = defineInjector({ factory: function CompilerModule_Factory(t) { return new (t || CompilerModule)(); }, providers: providers, imports: [] });
+        /** @nocollapse */ CompilerModule.ngInjectorDef = defineInjector({ factory: function CompilerModule_Factory(t) { return new (t || CompilerModule)(); }, providers: providers });
         /*@__PURE__*/ ɵsetClassMetadata(CompilerModule, [{
                 type: NgModule,
                 args: [{ providers }]

@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.10+117.sha-6b39c9c.with-local-changes
+ * @license Angular v8.0.0-beta.10+120.sha-60afe88.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3078,6 +3078,20 @@
             schemas: def.schemas || null,
         };
         return res;
+    }
+    /**
+     * Adds the module metadata that is necessary to compute the module's transitive scope to an
+     * existing module definition.
+     *
+     * Scope metadata of modules is not used in production builds, so calls to this function can be
+     * marked pure to tree-shake it from the bundle, allowing for all referenced declarations
+     * to become eligible for tree-shaking as well.
+     */
+    function setNgModuleScope(type, scope) {
+        var ngModuleDef = getNgModuleDef(type, true);
+        ngModuleDef.declarations = scope.declarations || EMPTY_ARRAY;
+        ngModuleDef.imports = scope.imports || EMPTY_ARRAY;
+        ngModuleDef.exports = scope.exports || EMPTY_ARRAY;
     }
     /**
      * Inverts an inputs or outputs lookup such that the keys, which were the
@@ -15181,7 +15195,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.10+117.sha-6b39c9c.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.10+120.sha-60afe88.with-local-changes');
 
     /**
      * @license
@@ -21239,6 +21253,7 @@
         'ɵresolveDocument': resolveDocument,
         'ɵresolveBody': resolveBody,
         'ɵsetComponentScope': setComponentScope,
+        'ɵsetNgModuleScope': setNgModuleScope,
         'ɵsanitizeHtml': sanitizeHtml,
         'ɵsanitizeStyle': sanitizeStyle,
         'ɵdefaultStyleSanitizer': defaultStyleSanitizer,
@@ -24627,7 +24642,7 @@
         function ApplicationModule(appRef) {
         }
         ApplicationModule.ngModuleDef = defineNgModule({ type: ApplicationModule });
-        ApplicationModule.ngInjectorDef = defineInjector({ factory: function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(inject(ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS, imports: [] });
+        ApplicationModule.ngInjectorDef = defineInjector({ factory: function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(inject(ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS });
         return ApplicationModule;
     }());
     /*@__PURE__*/ setClassMetadata(ApplicationModule, [{
@@ -27140,6 +27155,7 @@
     exports.ɵgetFactoryOf = getFactoryOf$1;
     exports.ɵgetInheritedFactory = getInheritedFactory;
     exports.ɵsetComponentScope = setComponentScope;
+    exports.ɵsetNgModuleScope = setNgModuleScope;
     exports.ɵtemplateRefExtractor = templateRefExtractor;
     exports.ɵProvidersFeature = ProvidersFeature;
     exports.ɵInheritDefinitionFeature = InheritDefinitionFeature;
