@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.10+117.sha-6b39c9c.with-local-changes
+ * @license Angular v8.0.0-beta.10+120.sha-60afe88.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10077,8 +10077,22 @@ export declare const ɵdefineDirective: <T>(directiveDefinition: {
 }) => never;
 
 export declare function ɵdefineNgModule<T>(def: {
+    /** Token representing the module. Used by DI. */
     type: T;
-} & Partial<ɵNgModuleDef<T>>): never;
+    /** List of components to bootstrap. */
+    bootstrap?: Type<any>[] | (() => Type<any>[]);
+    /** List of components, directives, and pipes declared by this module. */
+    declarations?: Type<any>[] | (() => Type<any>[]);
+    /** List of modules or `ModuleWithProviders` imported by this module. */
+    imports?: Type<any>[] | (() => Type<any>[]);
+    /**
+     * List of modules, `ModuleWithProviders`, components, directives, or pipes exported by this
+     * module.
+     */
+    exports?: Type<any>[] | (() => Type<any>[]);
+    /** The set of schemas that declare elements to be allowed in the NgModule. */
+    schemas?: SchemaMetadata[] | null;
+}): never;
 
 /**
  * Create a pipe definition object.
@@ -12122,6 +12136,26 @@ export declare function ɵsetClassMetadata(type: Type<any>, decorators: any[] | 
 export declare function ɵsetComponentScope(type: ɵComponentType<any>, directives: Type<any>[], pipes: Type<any>[]): void;
 
 export declare function ɵsetCurrentInjector(injector: Injector | null | undefined): Injector | undefined | null;
+
+/**
+ * Adds the module metadata that is necessary to compute the module's transitive scope to an
+ * existing module definition.
+ *
+ * Scope metadata of modules is not used in production builds, so calls to this function can be
+ * marked pure to tree-shake it from the bundle, allowing for all referenced declarations
+ * to become eligible for tree-shaking as well.
+ */
+export declare function ɵsetNgModuleScope(type: any, scope: {
+    /** List of components, directives, and pipes declared by this module. */
+    declarations?: Type<any>[] | (() => Type<any>[]);
+    /** List of modules or `ModuleWithProviders` imported by this module. */
+    imports?: Type<any>[] | (() => Type<any>[]);
+    /**
+     * List of modules, `ModuleWithProviders`, components, directives, or pipes exported by this
+     * module.
+     */
+    exports?: Type<any>[] | (() => Type<any>[]);
+}): void;
 
 
 export declare type ɵSetterFn = (obj: any, value: any) => void;
