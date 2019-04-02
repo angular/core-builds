@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.10+99.sha-7c1f73a.with-local-changes
+ * @license Angular v8.0.0-beta.10+102.sha-1c07061.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7195,7 +7195,7 @@ function isDOMParserAvailable() {
  * execution if used in URL context within a HTML document. Specifically, this
  * regular expression matches if (comment from here on and regex copied from
  * Soy's EscapingConventions):
- * (1) Either a protocol in a whitelist (http, https, mailto or ftp).
+ * (1) Either an allowed protocol (http, https, mailto or ftp).
  * (2) or no protocol.  A protocol must be followed by a colon. The below
  *     allows that by allowing colons only after one of the characters [/?#].
  *     A colon after a hash (#) must be in the fragment.
@@ -18858,7 +18858,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.10+99.sha-7c1f73a.with-local-changes');
+const VERSION = new Version('8.0.0-beta.10+102.sha-1c07061.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
