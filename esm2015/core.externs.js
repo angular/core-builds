@@ -13,6 +13,12 @@ angular$packages$core$src$render3$interfaces$player.ComponentInstance;
 
 /** @typedef {?} */
 angular$packages$core$src$render3$interfaces$player.DirectiveInstance;
+// externs from packages/core/src/render3/util/global_utils.ts:
+/** @const */
+var angular$packages$core$src$render3$util$global_utils = {};
+
+/** @typedef {?} */
+angular$packages$core$src$render3$util$global_utils.GlobalDevModeContainer;
 // externs from packages/core/src/linker/system_js_ng_module_factory_loader.ts:
 /** @const */
 var angular$packages$core$src$linker$system_js_ng_module_factory_loader = {};
@@ -47,9 +53,3 @@ angular$packages$core$src$testability$testability.PublicTestability.prototype.wh
  * @return {?}
  */
 angular$packages$core$src$testability$testability.PublicTestability.prototype.findProviders = function(using, provider, exactMatch) {};
-// externs from packages/core/src/render3/util/global_utils.ts:
-/** @const */
-var angular$packages$core$src$render3$util$global_utils = {};
-
-/** @typedef {?} */
-angular$packages$core$src$render3$util$global_utils.GlobalDevModeContainer;

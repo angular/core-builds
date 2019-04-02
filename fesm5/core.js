@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.10+109.sha-03d914a.with-local-changes
+ * @license Angular v8.0.0-beta.10+113.sha-7c8f4e3.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4180,6 +4180,29 @@ function leaveView(newView) {
     }
     enterView(newView, null);
 }
+var _currentNamespace = null;
+/**
+ * Sets the namespace used to create elements to `'http://www.w3.org/2000/svg'` in global state.
+ */
+function namespaceSVG() {
+    _currentNamespace = 'http://www.w3.org/2000/svg';
+}
+/**
+ * Sets the namespace used to create elements to `'http://www.w3.org/1998/MathML/'` in global state.
+ */
+function namespaceMathML() {
+    _currentNamespace = 'http://www.w3.org/1998/MathML/';
+}
+/**
+ * Sets the namespace used to create elements no `null`, which forces element creation to use
+ * `createElement` rather than `createElementNS`.
+ */
+function namespaceHTML() {
+    _currentNamespace = null;
+}
+function getNamespace() {
+    return _currentNamespace;
+}
 
 /**
  * @license
@@ -5609,1222 +5632,6 @@ var ErrorHandler = /** @class */ (function () {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * Defines a schema that allows an NgModule to contain the following:
- * - Non-Angular elements named with dash case (`-`).
- * - Element properties named with dash case (`-`).
- * Dash case is the naming convention for custom elements.
- *
- * @publicApi
- */
-var CUSTOM_ELEMENTS_SCHEMA = {
-    name: 'custom-elements'
-};
-/**
- * Defines a schema that allows any property on any element.
- *
- * @publicApi
- */
-var NO_ERRORS_SCHEMA = {
-    name: 'no-errors-schema'
-};
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-var BRAND = '__SANITIZER_TRUSTED_BRAND__';
-function allowSanitizationBypass(value, type) {
-    return (value instanceof String && value[BRAND] === type);
-}
-/**
- * Mark `html` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {@link htmlSanitizer} to be trusted implicitly.
- *
- * @param trustedHtml `html` string which needs to be implicitly trusted.
- * @returns a `html` `String` which has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustHtml(trustedHtml) {
-    return bypassSanitizationTrustString(trustedHtml, "Html" /* Html */);
-}
-/**
- * Mark `style` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {@link styleSanitizer} to be trusted implicitly.
- *
- * @param trustedStyle `style` string which needs to be implicitly trusted.
- * @returns a `style` `String` which has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustStyle(trustedStyle) {
-    return bypassSanitizationTrustString(trustedStyle, "Style" /* Style */);
-}
-/**
- * Mark `script` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {@link scriptSanitizer} to be trusted implicitly.
- *
- * @param trustedScript `script` string which needs to be implicitly trusted.
- * @returns a `script` `String` which has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustScript(trustedScript) {
-    return bypassSanitizationTrustString(trustedScript, "Script" /* Script */);
-}
-/**
- * Mark `url` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {@link urlSanitizer} to be trusted implicitly.
- *
- * @param trustedUrl `url` string which needs to be implicitly trusted.
- * @returns a `url` `String` which has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustUrl(trustedUrl) {
-    return bypassSanitizationTrustString(trustedUrl, "Url" /* Url */);
-}
-/**
- * Mark `url` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {@link resourceUrlSanitizer} to be trusted implicitly.
- *
- * @param trustedResourceUrl `url` string which needs to be implicitly trusted.
- * @returns a `url` `String` which has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
-    return bypassSanitizationTrustString(trustedResourceUrl, "ResourceUrl" /* ResourceUrl */);
-}
-function bypassSanitizationTrustString(trustedString, mode) {
-    var trusted = new String(trustedString);
-    trusted[BRAND] = mode;
-    return trusted;
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * This file is used to control if the default rendering pipeline should be `ViewEngine` or `Ivy`.
- *
- * For more information on how to run and debug tests with either Ivy or View Engine (legacy),
- * please see [BAZEL.md](./docs/BAZEL.md).
- */
-var _devMode = true;
-var _runModeLocked = false;
-/**
- * Returns whether Angular is in development mode. After called once,
- * the value is locked and won't change any more.
- *
- * By default, this is true, unless a user calls `enableProdMode` before calling this.
- *
- * @publicApi
- */
-function isDevMode() {
-    _runModeLocked = true;
-    return _devMode;
-}
-/**
- * Disable Angular's development mode, which turns off assertions and other
- * checks within the framework.
- *
- * One important assertion this disables verifies that a change detection pass
- * does not result in additional changes to any bindings (also known as
- * unidirectional data flow).
- *
- * @publicApi
- */
-function enableProdMode() {
-    if (_runModeLocked) {
-        throw new Error('Cannot enable prod mode after platform setup.');
-    }
-    _devMode = false;
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * This helper class is used to get hold of an inert tree of DOM elements containing dirty HTML
- * that needs sanitizing.
- * Depending upon browser support we must use one of three strategies for doing this.
- * Support: Safari 10.x -> XHR strategy
- * Support: Firefox -> DomParser strategy
- * Default: InertDocument strategy
- */
-var InertBodyHelper = /** @class */ (function () {
-    function InertBodyHelper(defaultDoc) {
-        this.defaultDoc = defaultDoc;
-        this.inertDocument = this.defaultDoc.implementation.createHTMLDocument('sanitization-inert');
-        this.inertBodyElement = this.inertDocument.body;
-        if (this.inertBodyElement == null) {
-            // usually there should be only one body element in the document, but IE doesn't have any, so
-            // we need to create one.
-            var inertHtml = this.inertDocument.createElement('html');
-            this.inertDocument.appendChild(inertHtml);
-            this.inertBodyElement = this.inertDocument.createElement('body');
-            inertHtml.appendChild(this.inertBodyElement);
-        }
-        this.inertBodyElement.innerHTML = '<svg><g onload="this.parentNode.remove()"></g></svg>';
-        if (this.inertBodyElement.querySelector && !this.inertBodyElement.querySelector('svg')) {
-            // We just hit the Safari 10.1 bug - which allows JS to run inside the SVG G element
-            // so use the XHR strategy.
-            this.getInertBodyElement = this.getInertBodyElement_XHR;
-            return;
-        }
-        this.inertBodyElement.innerHTML =
-            '<svg><p><style><img src="</style><img src=x onerror=alert(1)//">';
-        if (this.inertBodyElement.querySelector && this.inertBodyElement.querySelector('svg img')) {
-            // We just hit the Firefox bug - which prevents the inner img JS from being sanitized
-            // so use the DOMParser strategy, if it is available.
-            // If the DOMParser is not available then we are not in Firefox (Server/WebWorker?) so we
-            // fall through to the default strategy below.
-            if (isDOMParserAvailable()) {
-                this.getInertBodyElement = this.getInertBodyElement_DOMParser;
-                return;
-            }
-        }
-        // None of the bugs were hit so it is safe for us to use the default InertDocument strategy
-        this.getInertBodyElement = this.getInertBodyElement_InertDocument;
-    }
-    /**
-     * Use XHR to create and fill an inert body element (on Safari 10.1)
-     * See
-     * https://github.com/cure53/DOMPurify/blob/a992d3a75031cb8bb032e5ea8399ba972bdf9a65/src/purify.js#L439-L449
-     */
-    InertBodyHelper.prototype.getInertBodyElement_XHR = function (html) {
-        // We add these extra elements to ensure that the rest of the content is parsed as expected
-        // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
-        // `<head>` tag.
-        html = '<body><remove></remove>' + html + '</body>';
-        try {
-            html = encodeURI(html);
-        }
-        catch (_a) {
-            return null;
-        }
-        var xhr = new XMLHttpRequest();
-        xhr.responseType = 'document';
-        xhr.open('GET', 'data:text/html;charset=utf-8,' + html, false);
-        xhr.send(undefined);
-        var body = xhr.response.body;
-        body.removeChild(body.firstChild);
-        return body;
-    };
-    /**
-     * Use DOMParser to create and fill an inert body element (on Firefox)
-     * See https://github.com/cure53/DOMPurify/releases/tag/0.6.7
-     *
-     */
-    InertBodyHelper.prototype.getInertBodyElement_DOMParser = function (html) {
-        // We add these extra elements to ensure that the rest of the content is parsed as expected
-        // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
-        // `<head>` tag.
-        html = '<body><remove></remove>' + html + '</body>';
-        try {
-            var body = new window
-                .DOMParser()
-                .parseFromString(html, 'text/html')
-                .body;
-            body.removeChild(body.firstChild);
-            return body;
-        }
-        catch (_a) {
-            return null;
-        }
-    };
-    /**
-     * Use an HTML5 `template` element, if supported, or an inert body element created via
-     * `createHtmlDocument` to create and fill an inert DOM element.
-     * This is the default sane strategy to use if the browser does not require one of the specialised
-     * strategies above.
-     */
-    InertBodyHelper.prototype.getInertBodyElement_InertDocument = function (html) {
-        // Prefer using <template> element if supported.
-        var templateEl = this.inertDocument.createElement('template');
-        if ('content' in templateEl) {
-            templateEl.innerHTML = html;
-            return templateEl;
-        }
-        this.inertBodyElement.innerHTML = html;
-        // Support: IE 9-11 only
-        // strip custom-namespaced attributes on IE<=11
-        if (this.defaultDoc.documentMode) {
-            this.stripCustomNsAttrs(this.inertBodyElement);
-        }
-        return this.inertBodyElement;
-    };
-    /**
-     * When IE9-11 comes across an unknown namespaced attribute e.g. 'xlink:foo' it adds 'xmlns:ns1'
-     * attribute to declare ns1 namespace and prefixes the attribute with 'ns1' (e.g.
-     * 'ns1:xlink:foo').
-     *
-     * This is undesirable since we don't want to allow any of these custom attributes. This method
-     * strips them all.
-     */
-    InertBodyHelper.prototype.stripCustomNsAttrs = function (el) {
-        var elAttrs = el.attributes;
-        // loop backwards so that we can support removals.
-        for (var i = elAttrs.length - 1; 0 < i; i--) {
-            var attrib = elAttrs.item(i);
-            var attrName = attrib.name;
-            if (attrName === 'xmlns:ns1' || attrName.indexOf('ns1:') === 0) {
-                el.removeAttribute(attrName);
-            }
-        }
-        var childNode = el.firstChild;
-        while (childNode) {
-            if (childNode.nodeType === Node.ELEMENT_NODE)
-                this.stripCustomNsAttrs(childNode);
-            childNode = childNode.nextSibling;
-        }
-    };
-    return InertBodyHelper;
-}());
-/**
- * We need to determine whether the DOMParser exists in the global context.
- * The try-catch is because, on some browsers, trying to access this property
- * on window can actually throw an error.
- *
- * @suppress {uselessCode}
- */
-function isDOMParserAvailable() {
-    try {
-        return !!window.DOMParser;
-    }
-    catch (_a) {
-        return false;
-    }
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * A pattern that recognizes a commonly useful subset of URLs that are safe.
- *
- * This regular expression matches a subset of URLs that will not cause script
- * execution if used in URL context within a HTML document. Specifically, this
- * regular expression matches if (comment from here on and regex copied from
- * Soy's EscapingConventions):
- * (1) Either an allowed protocol (http, https, mailto or ftp).
- * (2) or no protocol.  A protocol must be followed by a colon. The below
- *     allows that by allowing colons only after one of the characters [/?#].
- *     A colon after a hash (#) must be in the fragment.
- *     Otherwise, a colon after a (?) must be in a query.
- *     Otherwise, a colon after a single solidus (/) must be in a path.
- *     Otherwise, a colon after a double solidus (//) must be in the authority
- *     (before port).
- *
- * The pattern disallows &, used in HTML entity declarations before
- * one of the characters in [/?#]. This disallows HTML entities used in the
- * protocol name, which should never happen, e.g. "h&#116;tp" for "http".
- * It also disallows HTML entities in the first path part of a relative path,
- * e.g. "foo&lt;bar/baz".  Our existing escaping functions should not produce
- * that. More importantly, it disallows masking of a colon,
- * e.g. "javascript&#58;...".
- *
- * This regular expression was taken from the Closure sanitization library.
- */
-var SAFE_URL_PATTERN = /^(?:(?:https?|mailto|ftp|tel|file):|[^&:/?#]*(?:[/?#]|$))/gi;
-/** A pattern that matches safe data URLs. Only matches image, video and audio types. */
-var DATA_URL_PATTERN = /^data:(?:image\/(?:bmp|gif|jpeg|jpg|png|tiff|webp)|video\/(?:mpeg|mp4|ogg|webm)|audio\/(?:mp3|oga|ogg|opus));base64,[a-z0-9+\/]+=*$/i;
-function _sanitizeUrl(url) {
-    url = String(url);
-    if (url.match(SAFE_URL_PATTERN) || url.match(DATA_URL_PATTERN))
-        return url;
-    if (isDevMode()) {
-        console.warn("WARNING: sanitizing unsafe URL value " + url + " (see http://g.co/ng/security#xss)");
-    }
-    return 'unsafe:' + url;
-}
-function sanitizeSrcset(srcset) {
-    srcset = String(srcset);
-    return srcset.split(',').map(function (srcset) { return _sanitizeUrl(srcset.trim()); }).join(', ');
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-function tagSet(tags) {
-    var e_1, _a;
-    var res = {};
-    try {
-        for (var _b = __values(tags.split(',')), _c = _b.next(); !_c.done; _c = _b.next()) {
-            var t = _c.value;
-            res[t] = true;
-        }
-    }
-    catch (e_1_1) { e_1 = { error: e_1_1 }; }
-    finally {
-        try {
-            if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
-        }
-        finally { if (e_1) throw e_1.error; }
-    }
-    return res;
-}
-function merge() {
-    var sets = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        sets[_i] = arguments[_i];
-    }
-    var e_2, _a;
-    var res = {};
-    try {
-        for (var sets_1 = __values(sets), sets_1_1 = sets_1.next(); !sets_1_1.done; sets_1_1 = sets_1.next()) {
-            var s = sets_1_1.value;
-            for (var v in s) {
-                if (s.hasOwnProperty(v))
-                    res[v] = true;
-            }
-        }
-    }
-    catch (e_2_1) { e_2 = { error: e_2_1 }; }
-    finally {
-        try {
-            if (sets_1_1 && !sets_1_1.done && (_a = sets_1.return)) _a.call(sets_1);
-        }
-        finally { if (e_2) throw e_2.error; }
-    }
-    return res;
-}
-// Good source of info about elements and attributes
-// http://dev.w3.org/html5/spec/Overview.html#semantics
-// http://simon.html5.org/html-elements
-// Safe Void Elements - HTML5
-// http://dev.w3.org/html5/spec/Overview.html#void-elements
-var VOID_ELEMENTS = tagSet('area,br,col,hr,img,wbr');
-// Elements that you can, intentionally, leave open (and which close themselves)
-// http://dev.w3.org/html5/spec/Overview.html#optional-tags
-var OPTIONAL_END_TAG_BLOCK_ELEMENTS = tagSet('colgroup,dd,dt,li,p,tbody,td,tfoot,th,thead,tr');
-var OPTIONAL_END_TAG_INLINE_ELEMENTS = tagSet('rp,rt');
-var OPTIONAL_END_TAG_ELEMENTS = merge(OPTIONAL_END_TAG_INLINE_ELEMENTS, OPTIONAL_END_TAG_BLOCK_ELEMENTS);
-// Safe Block Elements - HTML5
-var BLOCK_ELEMENTS = merge(OPTIONAL_END_TAG_BLOCK_ELEMENTS, tagSet('address,article,' +
-    'aside,blockquote,caption,center,del,details,dialog,dir,div,dl,figure,figcaption,footer,h1,h2,h3,h4,h5,' +
-    'h6,header,hgroup,hr,ins,main,map,menu,nav,ol,pre,section,summary,table,ul'));
-// Inline Elements - HTML5
-var INLINE_ELEMENTS = merge(OPTIONAL_END_TAG_INLINE_ELEMENTS, tagSet('a,abbr,acronym,audio,b,' +
-    'bdi,bdo,big,br,cite,code,del,dfn,em,font,i,img,ins,kbd,label,map,mark,picture,q,ruby,rp,rt,s,' +
-    'samp,small,source,span,strike,strong,sub,sup,time,track,tt,u,var,video'));
-var VALID_ELEMENTS = merge(VOID_ELEMENTS, BLOCK_ELEMENTS, INLINE_ELEMENTS, OPTIONAL_END_TAG_ELEMENTS);
-// Attributes that have href and hence need to be sanitized
-var URI_ATTRS = tagSet('background,cite,href,itemtype,longdesc,poster,src,xlink:href');
-// Attributes that have special href set hence need to be sanitized
-var SRCSET_ATTRS = tagSet('srcset');
-var HTML_ATTRS = tagSet('abbr,accesskey,align,alt,autoplay,axis,bgcolor,border,cellpadding,cellspacing,class,clear,color,cols,colspan,' +
-    'compact,controls,coords,datetime,default,dir,download,face,headers,height,hidden,hreflang,hspace,' +
-    'ismap,itemscope,itemprop,kind,label,lang,language,loop,media,muted,nohref,nowrap,open,preload,rel,rev,role,rows,rowspan,rules,' +
-    'scope,scrolling,shape,size,sizes,span,srclang,start,summary,tabindex,target,title,translate,type,usemap,' +
-    'valign,value,vspace,width');
-// NB: This currently consciously doesn't support SVG. SVG sanitization has had several security
-// issues in the past, so it seems safer to leave it out if possible. If support for binding SVG via
-// innerHTML is required, SVG attributes should be added here.
-// NB: Sanitization does not allow <form> elements or other active elements (<button> etc). Those
-// can be sanitized, but they increase security surface area without a legitimate use case, so they
-// are left out here.
-var VALID_ATTRS = merge(URI_ATTRS, SRCSET_ATTRS, HTML_ATTRS);
-// Elements whose content should not be traversed/preserved, if the elements themselves are invalid.
-//
-// Typically, `<invalid>Some content</invalid>` would traverse (and in this case preserve)
-// `Some content`, but strip `invalid-element` opening/closing tags. For some elements, though, we
-// don't want to preserve the content, if the elements themselves are going to be removed.
-var SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS = tagSet('script,style,template');
-/**
- * SanitizingHtmlSerializer serializes a DOM fragment, stripping out any unsafe elements and unsafe
- * attributes.
- */
-var SanitizingHtmlSerializer = /** @class */ (function () {
-    function SanitizingHtmlSerializer() {
-        // Explicitly track if something was stripped, to avoid accidentally warning of sanitization just
-        // because characters were re-encoded.
-        this.sanitizedSomething = false;
-        this.buf = [];
-    }
-    SanitizingHtmlSerializer.prototype.sanitizeChildren = function (el) {
-        // This cannot use a TreeWalker, as it has to run on Angular's various DOM adapters.
-        // However this code never accesses properties off of `document` before deleting its contents
-        // again, so it shouldn't be vulnerable to DOM clobbering.
-        var current = el.firstChild;
-        var traverseContent = true;
-        while (current) {
-            if (current.nodeType === Node.ELEMENT_NODE) {
-                traverseContent = this.startElement(current);
-            }
-            else if (current.nodeType === Node.TEXT_NODE) {
-                this.chars(current.nodeValue);
-            }
-            else {
-                // Strip non-element, non-text nodes.
-                this.sanitizedSomething = true;
-            }
-            if (traverseContent && current.firstChild) {
-                current = current.firstChild;
-                continue;
-            }
-            while (current) {
-                // Leaving the element. Walk up and to the right, closing tags as we go.
-                if (current.nodeType === Node.ELEMENT_NODE) {
-                    this.endElement(current);
-                }
-                var next = this.checkClobberedElement(current, current.nextSibling);
-                if (next) {
-                    current = next;
-                    break;
-                }
-                current = this.checkClobberedElement(current, current.parentNode);
-            }
-        }
-        return this.buf.join('');
-    };
-    /**
-     * Sanitizes an opening element tag (if valid) and returns whether the element's contents should
-     * be traversed. Element content must always be traversed (even if the element itself is not
-     * valid/safe), unless the element is one of `SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS`.
-     *
-     * @param element The element to sanitize.
-     * @return True if the element's contents should be traversed.
-     */
-    SanitizingHtmlSerializer.prototype.startElement = function (element) {
-        var tagName = element.nodeName.toLowerCase();
-        if (!VALID_ELEMENTS.hasOwnProperty(tagName)) {
-            this.sanitizedSomething = true;
-            return !SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS.hasOwnProperty(tagName);
-        }
-        this.buf.push('<');
-        this.buf.push(tagName);
-        var elAttrs = element.attributes;
-        for (var i = 0; i < elAttrs.length; i++) {
-            var elAttr = elAttrs.item(i);
-            var attrName = elAttr.name;
-            var lower = attrName.toLowerCase();
-            if (!VALID_ATTRS.hasOwnProperty(lower)) {
-                this.sanitizedSomething = true;
-                continue;
-            }
-            var value = elAttr.value;
-            // TODO(martinprobst): Special case image URIs for data:image/...
-            if (URI_ATTRS[lower])
-                value = _sanitizeUrl(value);
-            if (SRCSET_ATTRS[lower])
-                value = sanitizeSrcset(value);
-            this.buf.push(' ', attrName, '="', encodeEntities(value), '"');
-        }
-        this.buf.push('>');
-        return true;
-    };
-    SanitizingHtmlSerializer.prototype.endElement = function (current) {
-        var tagName = current.nodeName.toLowerCase();
-        if (VALID_ELEMENTS.hasOwnProperty(tagName) && !VOID_ELEMENTS.hasOwnProperty(tagName)) {
-            this.buf.push('</');
-            this.buf.push(tagName);
-            this.buf.push('>');
-        }
-    };
-    SanitizingHtmlSerializer.prototype.chars = function (chars) { this.buf.push(encodeEntities(chars)); };
-    SanitizingHtmlSerializer.prototype.checkClobberedElement = function (node, nextNode) {
-        if (nextNode &&
-            (node.compareDocumentPosition(nextNode) &
-                Node.DOCUMENT_POSITION_CONTAINED_BY) === Node.DOCUMENT_POSITION_CONTAINED_BY) {
-            throw new Error("Failed to sanitize html because the element is clobbered: " + node.outerHTML);
-        }
-        return nextNode;
-    };
-    return SanitizingHtmlSerializer;
-}());
-// Regular Expressions for parsing tags and attributes
-var SURROGATE_PAIR_REGEXP = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
-// ! to ~ is the ASCII range.
-var NON_ALPHANUMERIC_REGEXP = /([^\#-~ |!])/g;
-/**
- * Escapes all potentially dangerous characters, so that the
- * resulting string can be safely inserted into attribute or
- * element text.
- * @param value
- */
-function encodeEntities(value) {
-    return value.replace(/&/g, '&amp;')
-        .replace(SURROGATE_PAIR_REGEXP, function (match) {
-        var hi = match.charCodeAt(0);
-        var low = match.charCodeAt(1);
-        return '&#' + (((hi - 0xD800) * 0x400) + (low - 0xDC00) + 0x10000) + ';';
-    })
-        .replace(NON_ALPHANUMERIC_REGEXP, function (match) { return '&#' + match.charCodeAt(0) + ';'; })
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-}
-var inertBodyHelper;
-/**
- * Sanitizes the given unsafe, untrusted HTML fragment, and returns HTML text that is safe to add to
- * the DOM in a browser environment.
- */
-function _sanitizeHtml(defaultDoc, unsafeHtmlInput) {
-    var inertBodyElement = null;
-    try {
-        inertBodyHelper = inertBodyHelper || new InertBodyHelper(defaultDoc);
-        // Make sure unsafeHtml is actually a string (TypeScript types are not enforced at runtime).
-        var unsafeHtml = unsafeHtmlInput ? String(unsafeHtmlInput) : '';
-        inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
-        // mXSS protection. Repeatedly parse the document to make sure it stabilizes, so that a browser
-        // trying to auto-correct incorrect HTML cannot cause formerly inert HTML to become dangerous.
-        var mXSSAttempts = 5;
-        var parsedHtml = unsafeHtml;
-        do {
-            if (mXSSAttempts === 0) {
-                throw new Error('Failed to sanitize html because the input is unstable');
-            }
-            mXSSAttempts--;
-            unsafeHtml = parsedHtml;
-            parsedHtml = inertBodyElement.innerHTML;
-            inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
-        } while (unsafeHtml !== parsedHtml);
-        var sanitizer = new SanitizingHtmlSerializer();
-        var safeHtml = sanitizer.sanitizeChildren(getTemplateContent(inertBodyElement) || inertBodyElement);
-        if (isDevMode() && sanitizer.sanitizedSomething) {
-            console.warn('WARNING: sanitizing HTML stripped some content, see http://g.co/ng/security#xss');
-        }
-        return safeHtml;
-    }
-    finally {
-        // In case anything goes wrong, clear out inertElement to reset the entire DOM structure.
-        if (inertBodyElement) {
-            var parent_1 = getTemplateContent(inertBodyElement) || inertBodyElement;
-            while (parent_1.firstChild) {
-                parent_1.removeChild(parent_1.firstChild);
-            }
-        }
-    }
-}
-function getTemplateContent(el) {
-    return 'content' in el /** Microsoft/TypeScript#21517 */ && isTemplateElement(el) ?
-        el.content :
-        null;
-}
-function isTemplateElement(el) {
-    return el.nodeType === Node.ELEMENT_NODE && el.nodeName === 'TEMPLATE';
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * A SecurityContext marks a location that has dangerous security implications, e.g. a DOM property
- * like `innerHTML` that could cause Cross Site Scripting (XSS) security bugs when improperly
- * handled.
- *
- * See DomSanitizer for more details on security in Angular applications.
- *
- * @publicApi
- */
-var SecurityContext;
-(function (SecurityContext) {
-    SecurityContext[SecurityContext["NONE"] = 0] = "NONE";
-    SecurityContext[SecurityContext["HTML"] = 1] = "HTML";
-    SecurityContext[SecurityContext["STYLE"] = 2] = "STYLE";
-    SecurityContext[SecurityContext["SCRIPT"] = 3] = "SCRIPT";
-    SecurityContext[SecurityContext["URL"] = 4] = "URL";
-    SecurityContext[SecurityContext["RESOURCE_URL"] = 5] = "RESOURCE_URL";
-})(SecurityContext || (SecurityContext = {}));
-/**
- * Sanitizer is used by the views to sanitize potentially dangerous values.
- *
- * @publicApi
- */
-var Sanitizer = /** @class */ (function () {
-    function Sanitizer() {
-    }
-    return Sanitizer;
-}());
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Regular expression for safe style values.
- *
- * Quotes (" and ') are allowed, but a check must be done elsewhere to ensure they're balanced.
- *
- * ',' allows multiple values to be assigned to the same property (e.g. background-attachment or
- * font-family) and hence could allow multiple values to get injected, but that should pose no risk
- * of XSS.
- *
- * The function expression checks only for XSS safety, not for CSS validity.
- *
- * This regular expression was taken from the Closure sanitization library, and augmented for
- * transformation values.
- */
-var VALUES = '[-,."\'%_!# a-zA-Z0-9]+';
-var TRANSFORMATION_FNS = '(?:matrix|translate|scale|rotate|skew|perspective)(?:X|Y|3d)?';
-var COLOR_FNS = '(?:rgb|hsl)a?';
-var GRADIENTS = '(?:repeating-)?(?:linear|radial)-gradient';
-var CSS3_FNS = '(?:calc|attr)';
-var FN_ARGS = '\\([-0-9.%, #a-zA-Z]+\\)';
-var SAFE_STYLE_VALUE = new RegExp("^(" + VALUES + "|" +
-    ("(?:" + TRANSFORMATION_FNS + "|" + COLOR_FNS + "|" + GRADIENTS + "|" + CSS3_FNS + ")") +
-    (FN_ARGS + ")$"), 'g');
-/**
- * Matches a `url(...)` value with an arbitrary argument as long as it does
- * not contain parentheses.
- *
- * The URL value still needs to be sanitized separately.
- *
- * `url(...)` values are a very common use case, e.g. for `background-image`. With carefully crafted
- * CSS style rules, it is possible to construct an information leak with `url` values in CSS, e.g.
- * by observing whether scroll bars are displayed, or character ranges used by a font face
- * definition.
- *
- * Angular only allows binding CSS values (as opposed to entire CSS rules), so it is unlikely that
- * binding a URL value without further cooperation from the page will cause an information leak, and
- * if so, it is just a leak, not a full blown XSS vulnerability.
- *
- * Given the common use case, low likelihood of attack vector, and low impact of an attack, this
- * code is permissive and allows URLs that sanitize otherwise.
- */
-var URL_RE = /^url\(([^)]+)\)$/;
-/**
- * Checks that quotes (" and ') are properly balanced inside a string. Assumes
- * that neither escape (\) nor any other character that could result in
- * breaking out of a string parsing context are allowed;
- * see http://www.w3.org/TR/css3-syntax/#string-token-diagram.
- *
- * This code was taken from the Closure sanitization library.
- */
-function hasBalancedQuotes(value) {
-    var outsideSingle = true;
-    var outsideDouble = true;
-    for (var i = 0; i < value.length; i++) {
-        var c = value.charAt(i);
-        if (c === '\'' && outsideDouble) {
-            outsideSingle = !outsideSingle;
-        }
-        else if (c === '"' && outsideSingle) {
-            outsideDouble = !outsideDouble;
-        }
-    }
-    return outsideSingle && outsideDouble;
-}
-/**
- * Sanitizes the given untrusted CSS style property value (i.e. not an entire object, just a single
- * value) and returns a value that is safe to use in a browser environment.
- */
-function _sanitizeStyle(value) {
-    value = String(value).trim(); // Make sure it's actually a string.
-    if (!value)
-        return '';
-    // Single url(...) values are supported, but only for URLs that sanitize cleanly. See above for
-    // reasoning behind this.
-    var urlMatch = value.match(URL_RE);
-    if ((urlMatch && _sanitizeUrl(urlMatch[1]) === urlMatch[1]) ||
-        value.match(SAFE_STYLE_VALUE) && hasBalancedQuotes(value)) {
-        return value; // Safe style values.
-    }
-    if (isDevMode()) {
-        console.warn("WARNING: sanitizing unsafe style value " + value + " (see http://g.co/ng/security#xss).");
-    }
-    return 'unsafe';
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
- * dangerous content.
- *
- * This method parses the `html` and locates potentially dangerous content (such as urls and
- * javascript) and removes it.
- *
- * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustHtml}.
- *
- * @param unsafeHtml untrusted `html`, typically from the user.
- * @returns `html` string which is safe to display to user, because all of the dangerous javascript
- * and urls have been removed.
- */
-function sanitizeHtml(unsafeHtml) {
-    var sanitizer = getSanitizer();
-    if (sanitizer) {
-        return sanitizer.sanitize(SecurityContext.HTML, unsafeHtml) || '';
-    }
-    if (allowSanitizationBypass(unsafeHtml, "Html" /* Html */)) {
-        return unsafeHtml.toString();
-    }
-    return _sanitizeHtml(document, renderStringify(unsafeHtml));
-}
-/**
- * A `style` sanitizer which converts untrusted `style` **string** into trusted string by removing
- * dangerous content.
- *
- * This method parses the `style` and locates potentially dangerous content (such as urls and
- * javascript) and removes it.
- *
- * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustStyle}.
- *
- * @param unsafeStyle untrusted `style`, typically from the user.
- * @returns `style` string which is safe to bind to the `style` properties, because all of the
- * dangerous javascript and urls have been removed.
- */
-function sanitizeStyle(unsafeStyle) {
-    var sanitizer = getSanitizer();
-    if (sanitizer) {
-        return sanitizer.sanitize(SecurityContext.STYLE, unsafeStyle) || '';
-    }
-    if (allowSanitizationBypass(unsafeStyle, "Style" /* Style */)) {
-        return unsafeStyle.toString();
-    }
-    return _sanitizeStyle(renderStringify(unsafeStyle));
-}
-/**
- * A `url` sanitizer which converts untrusted `url` **string** into trusted string by removing
- * dangerous
- * content.
- *
- * This method parses the `url` and locates potentially dangerous content (such as javascript) and
- * removes it.
- *
- * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustUrl}.
- *
- * @param unsafeUrl untrusted `url`, typically from the user.
- * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
- * all of the dangerous javascript has been removed.
- */
-function sanitizeUrl(unsafeUrl) {
-    var sanitizer = getSanitizer();
-    if (sanitizer) {
-        return sanitizer.sanitize(SecurityContext.URL, unsafeUrl) || '';
-    }
-    if (allowSanitizationBypass(unsafeUrl, "Url" /* Url */)) {
-        return unsafeUrl.toString();
-    }
-    return _sanitizeUrl(renderStringify(unsafeUrl));
-}
-/**
- * A `url` sanitizer which only lets trusted `url`s through.
- *
- * This passes only `url`s marked trusted by calling {@link bypassSanitizationTrustResourceUrl}.
- *
- * @param unsafeResourceUrl untrusted `url`, typically from the user.
- * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
- * only trusted `url`s have been allowed to pass.
- */
-function sanitizeResourceUrl(unsafeResourceUrl) {
-    var sanitizer = getSanitizer();
-    if (sanitizer) {
-        return sanitizer.sanitize(SecurityContext.RESOURCE_URL, unsafeResourceUrl) || '';
-    }
-    if (allowSanitizationBypass(unsafeResourceUrl, "ResourceUrl" /* ResourceUrl */)) {
-        return unsafeResourceUrl.toString();
-    }
-    throw new Error('unsafe value used in a resource URL context (see http://g.co/ng/security#xss)');
-}
-/**
- * A `script` sanitizer which only lets trusted javascript through.
- *
- * This passes only `script`s marked trusted by calling {@link
- * bypassSanitizationTrustScript}.
- *
- * @param unsafeScript untrusted `script`, typically from the user.
- * @returns `url` string which is safe to bind to the `<script>` element such as `<img src>`,
- * because only trusted `scripts` have been allowed to pass.
- */
-function sanitizeScript(unsafeScript) {
-    var sanitizer = getSanitizer();
-    if (sanitizer) {
-        return sanitizer.sanitize(SecurityContext.SCRIPT, unsafeScript) || '';
-    }
-    if (allowSanitizationBypass(unsafeScript, "Script" /* Script */)) {
-        return unsafeScript.toString();
-    }
-    throw new Error('unsafe value used in a script context');
-}
-/**
- * Detects which sanitizer to use for URL property, based on tag name and prop name.
- *
- * The rules are based on the RESOURCE_URL context config from
- * `packages/compiler/src/schema/dom_security_schema.ts`.
- * If tag and prop names don't match Resource URL schema, use URL sanitizer.
- */
-function getUrlSanitizer(tag, prop) {
-    if ((prop === 'src' && (tag === 'embed' || tag === 'frame' || tag === 'iframe' ||
-        tag === 'media' || tag === 'script')) ||
-        (prop === 'href' && (tag === 'base' || tag === 'link'))) {
-        return sanitizeResourceUrl;
-    }
-    return sanitizeUrl;
-}
-/**
- * Sanitizes URL, selecting sanitizer function based on tag and property names.
- *
- * This function is used in case we can't define security context at compile time, when only prop
- * name is available. This happens when we generate host bindings for Directives/Components. The
- * host element is unknown at compile time, so we defer calculation of specific sanitizer to
- * runtime.
- *
- * @param unsafeUrl untrusted `url`, typically from the user.
- * @param tag target element tag name.
- * @param prop name of the property that contains the value.
- * @returns `url` string which is safe to bind.
- */
-function sanitizeUrlOrResourceUrl(unsafeUrl, tag, prop) {
-    return getUrlSanitizer(tag, prop)(unsafeUrl);
-}
-/**
- * The default style sanitizer will handle sanitization for style properties by
- * sanitizing any CSS property that can include a `url` value (usually image-based properties)
- */
-var defaultStyleSanitizer = function (prop, value) {
-    if (value === undefined) {
-        return prop === 'background-image' || prop === 'background' || prop === 'border-image' ||
-            prop === 'filter' || prop === 'list-style' || prop === 'list-style-image';
-    }
-    return sanitizeStyle(value);
-};
-function validateAgainstEventProperties(name) {
-    if (name.toLowerCase().startsWith('on')) {
-        var msg = "Binding to event property '" + name + "' is disallowed for security reasons, " +
-            ("please use (" + name.slice(2) + ")=...") +
-            ("\nIf '" + name + "' is a directive input, make sure the directive is imported by the") +
-            " current module.";
-        throw new Error(msg);
-    }
-}
-function validateAgainstEventAttributes(name) {
-    if (name.toLowerCase().startsWith('on')) {
-        var msg = "Binding to event attribute '" + name + "' is disallowed for security reasons, " +
-            ("please use (" + name.slice(2) + ")=...");
-        throw new Error(msg);
-    }
-}
-function getSanitizer() {
-    var lView = getLView();
-    return lView && lView[SANITIZER];
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Determine if the argument is shaped like a Promise
- */
-function isPromise(obj) {
-    // allow any Promise/A+ compliant thenable.
-    // It's up to the caller to ensure that obj.then conforms to the spec
-    return !!obj && typeof obj.then === 'function';
-}
-/**
- * Determine if the argument is an Observable
- */
-function isObservable(obj) {
-    // TODO: use isObservable once we update pass rxjs 6.1
-    // https://github.com/ReactiveX/rxjs/blob/master/CHANGELOG.md#610-2018-05-03
-    return !!obj && typeof obj.subscribe === 'function';
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-function normalizeDebugBindingName(name) {
-    // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
-    name = camelCaseToDashCase(name.replace(/[$@]/g, '_'));
-    return "ng-reflect-" + name;
-}
-var CAMEL_CASE_REGEXP = /([A-Z])/g;
-function camelCaseToDashCase(input) {
-    return input.replace(CAMEL_CASE_REGEXP, function () {
-        var m = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            m[_i] = arguments[_i];
-        }
-        return '-' + m[1].toLowerCase();
-    });
-}
-function normalizeDebugBindingValue(value) {
-    try {
-        // Limit the size of the value as otherwise the DOM just gets polluted.
-        return value != null ? value.toString().slice(0, 30) : value;
-    }
-    catch (e) {
-        return '[ERROR] Exception while trying to serialize the value';
-    }
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-var _symbolIterator = null;
-function getSymbolIterator() {
-    if (!_symbolIterator) {
-        var Symbol_1 = _global['Symbol'];
-        if (Symbol_1 && Symbol_1.iterator) {
-            _symbolIterator = Symbol_1.iterator;
-        }
-        else {
-            // es6-shim specific logic
-            var keys = Object.getOwnPropertyNames(Map.prototype);
-            for (var i = 0; i < keys.length; ++i) {
-                var key = keys[i];
-                if (key !== 'entries' && key !== 'size' &&
-                    Map.prototype[key] === Map.prototype['entries']) {
-                    _symbolIterator = key;
-                }
-            }
-        }
-    }
-    return _symbolIterator;
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-// JS has NaN !== NaN
-function looseIdentical(a, b) {
-    return a === b || typeof a === 'number' && typeof b === 'number' && isNaN(a) && isNaN(b);
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-function devModeEqual(a, b) {
-    var isListLikeIterableA = isListLikeIterable(a);
-    var isListLikeIterableB = isListLikeIterable(b);
-    if (isListLikeIterableA && isListLikeIterableB) {
-        return areIterablesEqual(a, b, devModeEqual);
-    }
-    else {
-        var isAObject = a && (typeof a === 'object' || typeof a === 'function');
-        var isBObject = b && (typeof b === 'object' || typeof b === 'function');
-        if (!isListLikeIterableA && isAObject && !isListLikeIterableB && isBObject) {
-            return true;
-        }
-        else {
-            return looseIdentical(a, b);
-        }
-    }
-}
-/**
- * Indicates that the result of a {@link Pipe} transformation has changed even though the
- * reference has not changed.
- *
- * Wrapped values are unwrapped automatically during the change detection, and the unwrapped value
- * is stored.
- *
- * Example:
- *
- * ```
- * if (this._latestValue === this._latestReturnedValue) {
- *    return this._latestReturnedValue;
- *  } else {
- *    this._latestReturnedValue = this._latestValue;
- *    return WrappedValue.wrap(this._latestValue); // this will force update
- *  }
- * ```
- *
- * @publicApi
- */
-var WrappedValue = /** @class */ (function () {
-    function WrappedValue(value) {
-        this.wrapped = value;
-    }
-    /** Creates a wrapped value. */
-    WrappedValue.wrap = function (value) { return new WrappedValue(value); };
-    /**
-     * Returns the underlying value of a wrapped value.
-     * Returns the given `value` when it is not wrapped.
-     **/
-    WrappedValue.unwrap = function (value) { return WrappedValue.isWrapped(value) ? value.wrapped : value; };
-    /** Returns true if `value` is a wrapped value. */
-    WrappedValue.isWrapped = function (value) { return value instanceof WrappedValue; };
-    return WrappedValue;
-}());
-function isListLikeIterable(obj) {
-    if (!isJsObject(obj))
-        return false;
-    return Array.isArray(obj) ||
-        (!(obj instanceof Map) && // JS Map are iterables but return entries as [k, v]
-            getSymbolIterator() in obj); // JS Iterable have a Symbol.iterator prop
-}
-function areIterablesEqual(a, b, comparator) {
-    var iterator1 = a[getSymbolIterator()]();
-    var iterator2 = b[getSymbolIterator()]();
-    while (true) {
-        var item1 = iterator1.next();
-        var item2 = iterator2.next();
-        if (item1.done && item2.done)
-            return true;
-        if (item1.done || item2.done)
-            return false;
-        if (!comparator(item1.value, item2.value))
-            return false;
-    }
-}
-function iterateListLike(obj, fn) {
-    if (Array.isArray(obj)) {
-        for (var i = 0; i < obj.length; i++) {
-            fn(obj[i]);
-        }
-    }
-    else {
-        var iterator = obj[getSymbolIterator()]();
-        var item = void 0;
-        while (!((item = iterator.next()).done)) {
-            fn(item.value);
-        }
-    }
-}
-function isJsObject(o) {
-    return o !== null && (typeof o === 'function' || typeof o === 'object');
-}
-
-/** Called when directives inject each other (creating a circular dependency) */
-/** Called when there are multiple component selectors that match a given node */
-function throwMultipleComponentError(tNode) {
-    throw new Error("Multiple components match node with tagname " + tNode.tagName);
-}
-/** Throws an ExpressionChangedAfterChecked error if checkNoChanges mode is on. */
-function throwErrorIfNoChangesMode(creationMode, oldValue, currValue) {
-    var msg = "ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value: '" + oldValue + "'. Current value: '" + currValue + "'.";
-    if (creationMode) {
-        msg +=
-            " It seems like the view has been created after its parent and its children have been dirty checked." +
-                " Has it been created in a change detection hook ?";
-    }
-    // TODO: include debug context
-    throw new Error(msg);
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/** A special value which designates that a value has not changed. */
-var NO_CHANGE = {};
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-// TODO(misko): consider inlining
-/** Updates binding and returns the value. */
-function updateBinding(lView, bindingIndex, value) {
-    return lView[bindingIndex] = value;
-}
-/** Gets the current binding value. */
-function getBinding(lView, bindingIndex) {
-    ngDevMode && assertDataInRange(lView, bindingIndex);
-    ngDevMode &&
-        assertNotSame(lView[bindingIndex], NO_CHANGE, 'Stored value should never be NO_CHANGE.');
-    return lView[bindingIndex];
-}
-/** Updates binding if changed, then returns whether it was updated. */
-function bindingUpdated(lView, bindingIndex, value) {
-    ngDevMode && assertNotSame(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
-    ngDevMode &&
-        assertLessThan(bindingIndex, lView.length, "Slot should have been initialized to NO_CHANGE");
-    var oldValue = lView[bindingIndex];
-    if (isDifferent(oldValue, value)) {
-        if (ngDevMode && getCheckNoChangesMode()) {
-            // View engine didn't report undefined values as changed on the first checkNoChanges pass
-            // (before the change detection was run).
-            var oldValueToCompare = oldValue !== NO_CHANGE ? oldValue : undefined;
-            if (!devModeEqual(oldValueToCompare, value)) {
-                throwErrorIfNoChangesMode(oldValue === NO_CHANGE, oldValueToCompare, value);
-            }
-        }
-        lView[bindingIndex] = value;
-        return true;
-    }
-    return false;
-}
-/** Updates 2 bindings if changed, then returns whether either was updated. */
-function bindingUpdated2(lView, bindingIndex, exp1, exp2) {
-    var different = bindingUpdated(lView, bindingIndex, exp1);
-    return bindingUpdated(lView, bindingIndex + 1, exp2) || different;
-}
-/** Updates 3 bindings if changed, then returns whether any was updated. */
-function bindingUpdated3(lView, bindingIndex, exp1, exp2, exp3) {
-    var different = bindingUpdated2(lView, bindingIndex, exp1, exp2);
-    return bindingUpdated(lView, bindingIndex + 2, exp3) || different;
-}
-/** Updates 4 bindings if changed, then returns whether any was updated. */
-function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
-    var different = bindingUpdated2(lView, bindingIndex, exp1, exp2);
-    return bindingUpdated2(lView, bindingIndex + 2, exp3, exp4) || different;
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /*
  * This file contains conditionally attached classes which provide human readable (debug) level
  * information for `LView`, `LContainer` and other internal data structures. These data structures
@@ -7086,6 +5893,23 @@ function readLViewValue(value) {
     return null;
 }
 
+/** Called when directives inject each other (creating a circular dependency) */
+/** Called when there are multiple component selectors that match a given node */
+function throwMultipleComponentError(tNode) {
+    throw new Error("Multiple components match node with tagname " + tNode.tagName);
+}
+/** Throws an ExpressionChangedAfterChecked error if checkNoChanges mode is on. */
+function throwErrorIfNoChangesMode(creationMode, oldValue, currValue) {
+    var msg = "ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value: '" + oldValue + "'. Current value: '" + currValue + "'.";
+    if (creationMode) {
+        msg +=
+            " It seems like the view has been created after its parent and its children have been dirty checked." +
+                " Has it been created in a change detection hook ?";
+    }
+    // TODO: include debug context
+    throw new Error(msg);
+}
+
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -7101,761 +5925,8 @@ function readLViewValue(value) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-function getLContainer(tNode, embeddedView) {
-    ngDevMode && assertLView(embeddedView);
-    var container = embeddedView[PARENT];
-    if (tNode.index === -1) {
-        // This is a dynamically created view inside a dynamic container.
-        // The parent isn't an LContainer if the embedded view hasn't been attached yet.
-        return isLContainer(container) ? container : null;
-    }
-    else {
-        ngDevMode && assertLContainer(container);
-        // This is a inline view node (e.g. embeddedViewStart)
-        return container;
-    }
-}
-/**
- * Retrieves render parent for a given view.
- * Might be null if a view is not yet attached to any container.
- */
-function getContainerRenderParent(tViewNode, view) {
-    var container = getLContainer(tViewNode, view);
-    return container ? nativeParentNode(view[RENDERER], container[NATIVE]) : null;
-}
-/**
- * Stack used to keep track of projection nodes in walkTNodeTree.
- *
- * This is deliberately created outside of walkTNodeTree to avoid allocating
- * a new array each time the function is called. Instead the array will be
- * re-used by each invocation. This works because the function is not reentrant.
- */
-var projectionNodeStack = [];
-/**
- * Walks a tree of TNodes, applying a transformation on the element nodes, either only on the first
- * one found, or on all of them.
- *
- * @param viewToWalk the view to walk
- * @param action identifies the action to be performed on the elements
- * @param renderer the current renderer.
- * @param renderParent Optional the render parent node to be set in all LContainers found,
- * required for action modes Insert and Destroy.
- * @param beforeNode Optional the node before which elements should be added, required for action
- * Insert.
- */
-function walkTNodeTree(viewToWalk, action, renderer, renderParent, beforeNode) {
-    var e_1, _a;
-    var rootTNode = viewToWalk[TVIEW].node;
-    var projectionNodeIndex = -1;
-    var currentView = viewToWalk;
-    var tNode = rootTNode.child;
-    while (tNode) {
-        var nextTNode = null;
-        if (tNode.type === 3 /* Element */ || tNode.type === 4 /* ElementContainer */) {
-            executeNodeAction(action, renderer, renderParent, getNativeByTNode(tNode, currentView), tNode, beforeNode);
-            var nodeOrContainer = currentView[tNode.index];
-            if (isLContainer(nodeOrContainer)) {
-                // This element has an LContainer, and its comment needs to be handled
-                executeNodeAction(action, renderer, renderParent, nodeOrContainer[NATIVE], tNode, beforeNode);
-                if (nodeOrContainer[VIEWS].length) {
-                    currentView = nodeOrContainer[VIEWS][0];
-                    nextTNode = currentView[TVIEW].node;
-                    // When the walker enters a container, then the beforeNode has to become the local native
-                    // comment node.
-                    beforeNode = nodeOrContainer[NATIVE];
-                }
-            }
-        }
-        else if (tNode.type === 0 /* Container */) {
-            var lContainer = currentView[tNode.index];
-            executeNodeAction(action, renderer, renderParent, lContainer[NATIVE], tNode, beforeNode);
-            if (lContainer[VIEWS].length) {
-                currentView = lContainer[VIEWS][0];
-                nextTNode = currentView[TVIEW].node;
-                // When the walker enters a container, then the beforeNode has to become the local native
-                // comment node.
-                beforeNode = lContainer[NATIVE];
-            }
-        }
-        else if (tNode.type === 1 /* Projection */) {
-            var componentView = findComponentView(currentView);
-            var componentHost = componentView[T_HOST];
-            var head = componentHost.projection[tNode.projection];
-            if (Array.isArray(head)) {
-                try {
-                    for (var head_1 = __values(head), head_1_1 = head_1.next(); !head_1_1.done; head_1_1 = head_1.next()) {
-                        var nativeNode = head_1_1.value;
-                        executeNodeAction(action, renderer, renderParent, nativeNode, tNode, beforeNode);
-                    }
-                }
-                catch (e_1_1) { e_1 = { error: e_1_1 }; }
-                finally {
-                    try {
-                        if (head_1_1 && !head_1_1.done && (_a = head_1.return)) _a.call(head_1);
-                    }
-                    finally { if (e_1) throw e_1.error; }
-                }
-            }
-            else {
-                // Must store both the TNode and the view because this projection node could be nested
-                // deeply inside embedded views, and we need to get back down to this particular nested
-                // view.
-                projectionNodeStack[++projectionNodeIndex] = tNode;
-                projectionNodeStack[++projectionNodeIndex] = currentView;
-                if (head) {
-                    currentView = componentView[PARENT];
-                    nextTNode = currentView[TVIEW].data[head.index];
-                }
-            }
-        }
-        else {
-            // Otherwise, this is a View
-            nextTNode = tNode.child;
-        }
-        if (nextTNode === null) {
-            // this last node was projected, we need to get back down to its projection node
-            if (tNode.projectionNext === null && (tNode.flags & 2 /* isProjected */)) {
-                currentView = projectionNodeStack[projectionNodeIndex--];
-                tNode = projectionNodeStack[projectionNodeIndex--];
-            }
-            if (tNode.flags & 2 /* isProjected */) {
-                nextTNode = tNode.projectionNext;
-            }
-            else if (tNode.type === 4 /* ElementContainer */) {
-                nextTNode = tNode.child || tNode.next;
-            }
-            else {
-                nextTNode = tNode.next;
-            }
-            /**
-             * Find the next node in the TNode tree, taking into account the place where a node is
-             * projected (in the shadow DOM) rather than where it comes from (in the light DOM).
-             *
-             * If there is no sibling node, then it goes to the next sibling of the parent node...
-             * until it reaches rootNode (at which point null is returned).
-             */
-            while (!nextTNode) {
-                // If parent is null, we're crossing the view boundary, so we should get the host TNode.
-                tNode = tNode.parent || currentView[T_HOST];
-                if (tNode === null || tNode === rootTNode)
-                    return;
-                // When exiting a container, the beforeNode must be restored to the previous value
-                if (tNode.type === 0 /* Container */) {
-                    currentView = getLViewParent(currentView);
-                    beforeNode = currentView[tNode.index][NATIVE];
-                }
-                if (tNode.type === 2 /* View */) {
-                    /**
-                     * If current lView doesn't have next pointer, we try to find it by going up parents
-                     * chain until:
-                     * - we find an lView with a next pointer
-                     * - or find a tNode with a parent that has a next pointer
-                     * - or find a lContainer
-                     * - or reach root TNode (in which case we exit, since we traversed all nodes)
-                     */
-                    while (!currentView[NEXT] && currentView[PARENT] &&
-                        !(tNode.parent && tNode.parent.next)) {
-                        if (tNode === rootTNode)
-                            return;
-                        currentView = currentView[PARENT];
-                        if (isLContainer(currentView)) {
-                            tNode = currentView[T_HOST];
-                            currentView = currentView[PARENT];
-                            beforeNode = currentView[tNode.index][NATIVE];
-                            break;
-                        }
-                        tNode = currentView[T_HOST];
-                    }
-                    if (currentView[NEXT]) {
-                        currentView = currentView[NEXT];
-                        nextTNode = currentView[T_HOST];
-                    }
-                    else {
-                        nextTNode = tNode.type === 4 /* ElementContainer */ && tNode.child || tNode.next;
-                    }
-                }
-                else {
-                    nextTNode = tNode.next;
-                }
-            }
-        }
-        tNode = nextTNode;
-    }
-}
-/**
- * NOTE: for performance reasons, the possible actions are inlined within the function instead of
- * being passed as an argument.
- */
-function executeNodeAction(action, renderer, parent, node, tNode, beforeNode) {
-    if (action === 0 /* Insert */) {
-        nativeInsertBefore(renderer, parent, node, beforeNode || null);
-    }
-    else if (action === 1 /* Detach */) {
-        nativeRemoveNode(renderer, node, isComponent(tNode));
-    }
-    else if (action === 2 /* Destroy */) {
-        ngDevMode && ngDevMode.rendererDestroyNode++;
-        renderer.destroyNode(node);
-    }
-}
-function createTextNode(value, renderer) {
-    return isProceduralRenderer(renderer) ? renderer.createText(renderStringify(value)) :
-        renderer.createTextNode(renderStringify(value));
-}
-function addRemoveViewFromContainer(viewToWalk, insertMode, beforeNode) {
-    var renderParent = getContainerRenderParent(viewToWalk[TVIEW].node, viewToWalk);
-    ngDevMode && assertNodeType(viewToWalk[TVIEW].node, 2 /* View */);
-    if (renderParent) {
-        var renderer = viewToWalk[RENDERER];
-        walkTNodeTree(viewToWalk, insertMode ? 0 /* Insert */ : 1 /* Detach */, renderer, renderParent, beforeNode);
-    }
-}
-/**
- * Detach a `LView` from the DOM by detaching its nodes.
- *
- * @param lView the `LView` to be detached.
- */
-function renderDetachView(lView) {
-    walkTNodeTree(lView, 1 /* Detach */, lView[RENDERER], null);
-}
-/**
- * Traverses down and up the tree of views and containers to remove listeners and
- * call onDestroy callbacks.
- *
- * Notes:
- *  - Because it's used for onDestroy calls, it needs to be bottom-up.
- *  - Must process containers instead of their views to avoid splicing
- *  when views are destroyed and re-added.
- *  - Using a while loop because it's faster than recursion
- *  - Destroy only called on movement to sibling or movement to parent (laterally or up)
- *
- *  @param rootView The view to destroy
- */
-function destroyViewTree(rootView) {
-    // If the view has no children, we can clean it up and return early.
-    var lViewOrLContainer = rootView[CHILD_HEAD];
-    if (!lViewOrLContainer) {
-        return cleanUpView(rootView);
-    }
-    while (lViewOrLContainer) {
-        var next = null;
-        if (isLView(lViewOrLContainer)) {
-            // If LView, traverse down to child.
-            next = lViewOrLContainer[CHILD_HEAD];
-        }
-        else {
-            ngDevMode && assertLContainer(lViewOrLContainer);
-            // If container, traverse down to its first LView.
-            var views = lViewOrLContainer[VIEWS];
-            if (views.length > 0)
-                next = views[0];
-        }
-        if (!next) {
-            // Only clean up view when moving to the side or up, as destroy hooks
-            // should be called in order from the bottom up.
-            while (lViewOrLContainer && !lViewOrLContainer[NEXT] && lViewOrLContainer !== rootView) {
-                cleanUpView(lViewOrLContainer);
-                lViewOrLContainer = getParentState(lViewOrLContainer, rootView);
-            }
-            cleanUpView(lViewOrLContainer || rootView);
-            next = lViewOrLContainer && lViewOrLContainer[NEXT];
-        }
-        lViewOrLContainer = next;
-    }
-}
-/**
- * Inserts a view into a container.
- *
- * This adds the view to the container's array of active views in the correct
- * position. It also adds the view's elements to the DOM if the container isn't a
- * root node of another view (in that case, the view's elements will be added when
- * the container's parent view is added later).
- *
- * @param lView The view to insert
- * @param lContainer The container into which the view should be inserted
- * @param index Which index in the container to insert the child view into
- */
-function insertView(lView, lContainer, index) {
-    ngDevMode && assertLView(lView);
-    ngDevMode && assertLContainer(lContainer);
-    var views = lContainer[VIEWS];
-    ngDevMode && assertDefined(views, 'Container must have views');
-    if (index > 0) {
-        // This is a new view, we need to add it to the children.
-        views[index - 1][NEXT] = lView;
-    }
-    if (index < views.length) {
-        lView[NEXT] = views[index];
-        views.splice(index, 0, lView);
-    }
-    else {
-        views.push(lView);
-        lView[NEXT] = null;
-    }
-    lView[PARENT] = lContainer;
-    // Notify query that a new view has been added
-    if (lView[QUERIES]) {
-        lView[QUERIES].insertView(index);
-    }
-    // Sets the attached flag
-    lView[FLAGS] |= 128 /* Attached */;
-}
-/**
- * Detaches a view from a container.
- *
- * This method splices the view from the container's array of active views. It also
- * removes the view's elements from the DOM.
- *
- * @param lContainer The container from which to detach a view
- * @param removeIndex The index of the view to detach
- * @returns Detached LView instance.
- */
-function detachView(lContainer, removeIndex) {
-    var views = lContainer[VIEWS];
-    var viewToDetach = views[removeIndex];
-    if (removeIndex > 0) {
-        views[removeIndex - 1][NEXT] = viewToDetach[NEXT];
-    }
-    views.splice(removeIndex, 1);
-    addRemoveViewFromContainer(viewToDetach, false);
-    if ((viewToDetach[FLAGS] & 128 /* Attached */) &&
-        !(viewToDetach[FLAGS] & 256 /* Destroyed */) && viewToDetach[QUERIES]) {
-        viewToDetach[QUERIES].removeView();
-    }
-    viewToDetach[PARENT] = null;
-    viewToDetach[NEXT] = null;
-    // Unsets the attached flag
-    viewToDetach[FLAGS] &= ~128 /* Attached */;
-    return viewToDetach;
-}
-/**
- * Removes a view from a container, i.e. detaches it and then destroys the underlying LView.
- *
- * @param lContainer The container from which to remove a view
- * @param removeIndex The index of the view to remove
- */
-function removeView(lContainer, removeIndex) {
-    var view = lContainer[VIEWS][removeIndex];
-    detachView(lContainer, removeIndex);
-    destroyLView(view);
-}
-/**
- * A standalone function which destroys an LView,
- * conducting cleanup (e.g. removing listeners, calling onDestroys).
- *
- * @param view The view to be destroyed.
- */
-function destroyLView(view) {
-    if (!(view[FLAGS] & 256 /* Destroyed */)) {
-        var renderer = view[RENDERER];
-        if (isProceduralRenderer(renderer) && renderer.destroyNode) {
-            walkTNodeTree(view, 2 /* Destroy */, renderer, null);
-        }
-        destroyViewTree(view);
-    }
-}
-/**
- * Determines which LViewOrLContainer to jump to when traversing back up the
- * tree in destroyViewTree.
- *
- * Normally, the view's parent LView should be checked, but in the case of
- * embedded views, the container (which is the view node's parent, but not the
- * LView's parent) needs to be checked for a possible next property.
- *
- * @param lViewOrLContainer The LViewOrLContainer for which we need a parent state
- * @param rootView The rootView, so we don't propagate too far up the view tree
- * @returns The correct parent LViewOrLContainer
- */
-function getParentState(lViewOrLContainer, rootView) {
-    var tNode;
-    if (isLView(lViewOrLContainer) && (tNode = lViewOrLContainer[T_HOST]) &&
-        tNode.type === 2 /* View */) {
-        // if it's an embedded view, the state needs to go up to the container, in case the
-        // container has a next
-        return getLContainer(tNode, lViewOrLContainer);
-    }
-    else {
-        // otherwise, use parent view for containers or component views
-        return lViewOrLContainer[PARENT] === rootView ? null : lViewOrLContainer[PARENT];
-    }
-}
-/**
- * Calls onDestroys hooks for all directives and pipes in a given view and then removes all
- * listeners. Listeners are removed as the last step so events delivered in the onDestroys hooks
- * can be propagated to @Output listeners.
- *
- * @param view The LView to clean up
- */
-function cleanUpView(view) {
-    if (isLView(view) && !(view[FLAGS] & 256 /* Destroyed */)) {
-        // Usually the Attached flag is removed when the view is detached from its parent, however
-        // if it's a root view, the flag won't be unset hence why we're also removing on destroy.
-        view[FLAGS] &= ~128 /* Attached */;
-        // Mark the LView as destroyed *before* executing the onDestroy hooks. An onDestroy hook
-        // runs arbitrary user code, which could include its own `viewRef.destroy()` (or similar). If
-        // We don't flag the view as destroyed before the hooks, this could lead to an infinite loop.
-        // This also aligns with the ViewEngine behavior. It also means that the onDestroy hook is
-        // really more of an "afterDestroy" hook if you think about it.
-        view[FLAGS] |= 256 /* Destroyed */;
-        executeOnDestroys(view);
-        removeListeners(view);
-        var hostTNode = view[T_HOST];
-        // For component views only, the local renderer is destroyed as clean up time.
-        if (hostTNode && hostTNode.type === 3 /* Element */ && isProceduralRenderer(view[RENDERER])) {
-            ngDevMode && ngDevMode.rendererDestroy++;
-            view[RENDERER].destroy();
-        }
-        // For embedded views still attached to a container: remove query result from this view.
-        if (viewAttachedToContainer(view) && view[QUERIES]) {
-            view[QUERIES].removeView();
-        }
-    }
-}
-/** Removes listeners and unsubscribes from output subscriptions */
-function removeListeners(lView) {
-    var tCleanup = lView[TVIEW].cleanup;
-    if (tCleanup != null) {
-        var lCleanup = lView[CLEANUP];
-        for (var i = 0; i < tCleanup.length - 1; i += 2) {
-            if (typeof tCleanup[i] === 'string') {
-                // This is a listener with the native renderer
-                var idxOrTargetGetter = tCleanup[i + 1];
-                var target = typeof idxOrTargetGetter === 'function' ?
-                    idxOrTargetGetter(lView) :
-                    unwrapRNode(lView[idxOrTargetGetter]);
-                var listener = lCleanup[tCleanup[i + 2]];
-                var useCaptureOrSubIdx = tCleanup[i + 3];
-                if (typeof useCaptureOrSubIdx === 'boolean') {
-                    // DOM listener
-                    target.removeEventListener(tCleanup[i], listener, useCaptureOrSubIdx);
-                }
-                else {
-                    if (useCaptureOrSubIdx >= 0) {
-                        // unregister
-                        lCleanup[useCaptureOrSubIdx]();
-                    }
-                    else {
-                        // Subscription
-                        lCleanup[-useCaptureOrSubIdx].unsubscribe();
-                    }
-                }
-                i += 2;
-            }
-            else if (typeof tCleanup[i] === 'number') {
-                // This is a listener with renderer2 (cleanup fn can be found by index)
-                var cleanupFn = lCleanup[tCleanup[i]];
-                cleanupFn();
-            }
-            else {
-                // This is a cleanup function that is grouped with the index of its context
-                var context = lCleanup[tCleanup[i + 1]];
-                tCleanup[i].call(context);
-            }
-        }
-        lView[CLEANUP] = null;
-    }
-}
-/** Calls onDestroy hooks for this view */
-function executeOnDestroys(view) {
-    var tView = view[TVIEW];
-    var destroyHooks;
-    if (tView != null && (destroyHooks = tView.destroyHooks) != null) {
-        for (var i = 0; i < destroyHooks.length; i += 2) {
-            var context = view[destroyHooks[i]];
-            // Only call the destroy hook if the context has been requested.
-            if (!(context instanceof NodeInjectorFactory)) {
-                destroyHooks[i + 1].call(context);
-            }
-        }
-    }
-}
-/**
- * Returns a native element if a node can be inserted into the given parent.
- *
- * There are two reasons why we may not be able to insert a element immediately.
- * - Projection: When creating a child content element of a component, we have to skip the
- *   insertion because the content of a component will be projected.
- *   `<component><content>delayed due to projection</content></component>`
- * - Parent container is disconnected: This can happen when we are inserting a view into
- *   parent container, which itself is disconnected. For example the parent container is part
- *   of a View which has not be inserted or is made for projection but has not been inserted
- *   into destination.
- */
-function getRenderParent(tNode, currentView) {
-    // Nodes of the top-most view can be inserted eagerly.
-    if (isRootView(currentView)) {
-        return nativeParentNode(currentView[RENDERER], getNativeByTNode(tNode, currentView));
-    }
-    // Skip over element and ICU containers as those are represented by a comment node and
-    // can't be used as a render parent.
-    var parent = getHighestElementOrICUContainer(tNode).parent;
-    // If the parent is null, then we are inserting across views: either into an embedded view or a
-    // component view.
-    if (parent == null) {
-        var hostTNode = currentView[T_HOST];
-        if (hostTNode.type === 2 /* View */) {
-            // We are inserting a root element of an embedded view We might delay insertion of children
-            // for a given view if it is disconnected. This might happen for 2 main reasons:
-            // - view is not inserted into any container(view was created but not inserted yet)
-            // - view is inserted into a container but the container itself is not inserted into the DOM
-            // (container might be part of projection or child of a view that is not inserted yet).
-            // In other words we can insert children of a given view if this view was inserted into a
-            // container and the container itself has its render parent determined.
-            return getContainerRenderParent(hostTNode, currentView);
-        }
-        else {
-            // We are inserting a root element of the component view into the component host element and
-            // it should always be eager.
-            return getHostNative(currentView);
-        }
-    }
-    else {
-        ngDevMode && assertNodeType(parent, 3 /* Element */);
-        if (parent.flags & 1 /* isComponent */) {
-            var tData = currentView[TVIEW].data;
-            var tNode_1 = tData[parent.index];
-            var encapsulation = tData[tNode_1.directiveStart].encapsulation;
-            // We've got a parent which is an element in the current view. We just need to verify if the
-            // parent element is not a component. Component's content nodes are not inserted immediately
-            // because they will be projected, and so doing insert at this point would be wasteful.
-            // Since the projection would then move it to its final destination. Note that we can't
-            // make this assumption when using the Shadow DOM, because the native projection placeholders
-            // (<content> or <slot>) have to be in place as elements are being inserted.
-            if (encapsulation !== ViewEncapsulation.ShadowDom &&
-                encapsulation !== ViewEncapsulation.Native) {
-                return null;
-            }
-        }
-        return getNativeByTNode(parent, currentView);
-    }
-}
-/**
- * Gets the native host element for a given view. Will return null if the current view does not have
- * a host element.
- */
-function getHostNative(currentView) {
-    ngDevMode && assertLView(currentView);
-    var hostTNode = currentView[T_HOST];
-    return hostTNode && hostTNode.type === 3 /* Element */ ?
-        getNativeByTNode(hostTNode, getLViewParent(currentView)) :
-        null;
-}
-/**
- * Inserts a native node before another native node for a given parent using {@link Renderer3}.
- * This is a utility function that can be used when native nodes were determined - it abstracts an
- * actual renderer being used.
- */
-function nativeInsertBefore(renderer, parent, child, beforeNode) {
-    if (isProceduralRenderer(renderer)) {
-        renderer.insertBefore(parent, child, beforeNode);
-    }
-    else {
-        parent.insertBefore(child, beforeNode, true);
-    }
-}
-function nativeAppendChild(renderer, parent, child) {
-    if (isProceduralRenderer(renderer)) {
-        renderer.appendChild(parent, child);
-    }
-    else {
-        parent.appendChild(child);
-    }
-}
-function nativeAppendOrInsertBefore(renderer, parent, child, beforeNode) {
-    if (beforeNode) {
-        nativeInsertBefore(renderer, parent, child, beforeNode);
-    }
-    else {
-        nativeAppendChild(renderer, parent, child);
-    }
-}
-/** Removes a node from the DOM given its native parent. */
-function nativeRemoveChild(renderer, parent, child, isHostElement) {
-    if (isProceduralRenderer(renderer)) {
-        renderer.removeChild(parent, child, isHostElement);
-    }
-    else {
-        parent.removeChild(child);
-    }
-}
-/**
- * Returns a native parent of a given native node.
- */
-function nativeParentNode(renderer, node) {
-    return (isProceduralRenderer(renderer) ? renderer.parentNode(node) : node.parentNode);
-}
-/**
- * Returns a native sibling of a given native node.
- */
-function nativeNextSibling(renderer, node) {
-    return isProceduralRenderer(renderer) ? renderer.nextSibling(node) : node.nextSibling;
-}
-/**
- * Finds a native "anchor" node for cases where we can't append a native child directly
- * (`appendChild`) and need to use a reference (anchor) node for the `insertBefore` operation.
- * @param parentTNode
- * @param lView
- */
-function getNativeAnchorNode(parentTNode, lView) {
-    if (parentTNode.type === 2 /* View */) {
-        var lContainer = getLContainer(parentTNode, lView);
-        var views = lContainer[VIEWS];
-        var index = views.indexOf(lView);
-        return getBeforeNodeForView(index, views, lContainer[NATIVE]);
-    }
-    else if (parentTNode.type === 4 /* ElementContainer */ ||
-        parentTNode.type === 5 /* IcuContainer */) {
-        return getNativeByTNode(parentTNode, lView);
-    }
-    return null;
-}
-/**
- * Appends the `child` native node (or a collection of nodes) to the `parent`.
- *
- * The element insertion might be delayed {@link canInsertNativeNode}.
- *
- * @param childEl The native child (or children) that should be appended
- * @param childTNode The TNode of the child element
- * @param currentView The current LView
- * @returns Whether or not the child was appended
- */
-function appendChild(childEl, childTNode, currentView) {
-    var e_2, _a;
-    var renderParent = getRenderParent(childTNode, currentView);
-    if (renderParent != null) {
-        var renderer = currentView[RENDERER];
-        var parentTNode = childTNode.parent || currentView[T_HOST];
-        var anchorNode = getNativeAnchorNode(parentTNode, currentView);
-        if (Array.isArray(childEl)) {
-            try {
-                for (var childEl_1 = __values(childEl), childEl_1_1 = childEl_1.next(); !childEl_1_1.done; childEl_1_1 = childEl_1.next()) {
-                    var nativeNode = childEl_1_1.value;
-                    nativeAppendOrInsertBefore(renderer, renderParent, nativeNode, anchorNode);
-                }
-            }
-            catch (e_2_1) { e_2 = { error: e_2_1 }; }
-            finally {
-                try {
-                    if (childEl_1_1 && !childEl_1_1.done && (_a = childEl_1.return)) _a.call(childEl_1);
-                }
-                finally { if (e_2) throw e_2.error; }
-            }
-        }
-        else {
-            nativeAppendOrInsertBefore(renderer, renderParent, childEl, anchorNode);
-        }
-    }
-}
-/**
- * Gets the top-level element or an ICU container if those containers are nested.
- *
- * @param tNode The starting TNode for which we should skip element and ICU containers
- * @returns The TNode of the highest level ICU container or element container
- */
-function getHighestElementOrICUContainer(tNode) {
-    while (tNode.parent != null && (tNode.parent.type === 4 /* ElementContainer */ ||
-        tNode.parent.type === 5 /* IcuContainer */)) {
-        tNode = tNode.parent;
-    }
-    return tNode;
-}
-function getBeforeNodeForView(index, views, containerNative) {
-    if (index + 1 < views.length) {
-        var view = views[index + 1];
-        var viewTNode = view[T_HOST];
-        return viewTNode.child ? getNativeByTNode(viewTNode.child, view) : containerNative;
-    }
-    else {
-        return containerNative;
-    }
-}
-/**
- * Removes a native node itself using a given renderer. To remove the node we are looking up its
- * parent from the native tree as not all platforms / browsers support the equivalent of
- * node.remove().
- *
- * @param renderer A renderer to be used
- * @param rNode The native node that should be removed
- * @param isHostElement A flag indicating if a node to be removed is a host of a component.
- */
-function nativeRemoveNode(renderer, rNode, isHostElement) {
-    var nativeParent = nativeParentNode(renderer, rNode);
-    if (nativeParent) {
-        nativeRemoveChild(renderer, nativeParent, rNode, isHostElement);
-    }
-}
-/**
- * Appends nodes to a target projection place. Nodes to insert were previously re-distribution and
- * stored on a component host level.
- * @param lView A LView where nodes are inserted (target VLview)
- * @param tProjectionNode A projection node where previously re-distribution should be appended
- * (target insertion place)
- * @param selectorIndex A bucket from where nodes to project should be taken
- * @param componentView A where projectable nodes were initially created (source view)
- */
-function appendProjectedNodes(lView, tProjectionNode, selectorIndex, componentView) {
-    var projectedView = componentView[PARENT];
-    var componentNode = componentView[T_HOST];
-    var nodeToProject = componentNode.projection[selectorIndex];
-    if (Array.isArray(nodeToProject)) {
-        appendChild(nodeToProject, tProjectionNode, lView);
-    }
-    else {
-        while (nodeToProject) {
-            if (nodeToProject.type === 1 /* Projection */) {
-                appendProjectedNodes(lView, tProjectionNode, nodeToProject.projection, findComponentView(projectedView));
-            }
-            else {
-                // This flag must be set now or we won't know that this node is projected
-                // if the nodes are inserted into a container later.
-                nodeToProject.flags |= 2 /* isProjected */;
-                appendProjectedNode(nodeToProject, tProjectionNode, lView, projectedView);
-            }
-            nodeToProject = nodeToProject.projectionNext;
-        }
-    }
-}
-/**
- * Appends a projected node to the DOM, or in the case of a projected container,
- * appends the nodes from all of the container's active views to the DOM.
- *
- * @param projectedTNode The TNode to be projected
- * @param tProjectionNode The projection (ng-content) TNode
- * @param currentView Current LView
- * @param projectionView Projection view (view above current)
- */
-function appendProjectedNode(projectedTNode, tProjectionNode, currentView, projectionView) {
-    var native = getNativeByTNode(projectedTNode, projectionView);
-    appendChild(native, tProjectionNode, currentView);
-    // the projected contents are processed while in the shadow view (which is the currentView)
-    // therefore we need to extract the view where the host element lives since it's the
-    // logical container of the content projected views
-    attachPatchData(native, projectionView);
-    var nodeOrContainer = projectionView[projectedTNode.index];
-    if (projectedTNode.type === 0 /* Container */) {
-        // The node we are adding is a container and we are adding it to an element which
-        // is not a component (no more re-projection).
-        // Alternatively a container is projected at the root of a component's template
-        // and can't be re-projected (as not content of any component).
-        // Assign the final projection location in those cases.
-        var views = nodeOrContainer[VIEWS];
-        for (var i = 0; i < views.length; i++) {
-            addRemoveViewFromContainer(views[i], true, nodeOrContainer[NATIVE]);
-        }
-    }
-    else {
-        if (projectedTNode.type === 4 /* ElementContainer */) {
-            var ngContainerChildTNode = projectedTNode.child;
-            while (ngContainerChildTNode) {
-                appendProjectedNode(ngContainerChildTNode, tProjectionNode, currentView, projectionView);
-                ngContainerChildTNode = ngContainerChildTNode.next;
-            }
-        }
-        if (isLContainer(nodeOrContainer)) {
-            appendChild(nodeOrContainer[NATIVE], tProjectionNode, currentView);
-        }
-    }
-}
+/** A special value which designates that a value has not changed. */
+var NO_CHANGE = {};
 
 /**
  * Combines the binding value and a factory for an animation player.
@@ -9713,100 +7784,6 @@ function matchTemplateAttribute(attrs, name) {
 }
 
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-function applyOnCreateInstructions(tNode) {
-    // there may be some instructions that need to run in a specific
-    // order because the CREATE block in a directive runs before the
-    // CREATE block in a template. To work around this instructions
-    // can get access to the function array below and defer any code
-    // to run after the element is created.
-    var fns;
-    if (fns = tNode.onElementCreationFns) {
-        for (var i = 0; i < fns.length; i++) {
-            fns[i]();
-        }
-        tNode.onElementCreationFns = null;
-    }
-}
-/**
- * Unwraps a parent injector location number to find the view offset from the current injector,
- * then walks up the declaration view tree until the TNode of the parent injector is found.
- *
- * @param location The location of the parent injector, which contains the view offset
- * @param startView The LView instance from which to start walking up the view tree
- * @param startTNode The TNode instance of the starting element
- * @returns The TNode of the parent injector
- */
-function getParentInjectorTNode(location, startView, startTNode) {
-    if (startTNode.parent && startTNode.parent.injectorIndex !== -1) {
-        // view offset is 0
-        var injectorIndex = startTNode.parent.injectorIndex;
-        var parentTNode_1 = startTNode.parent;
-        while (parentTNode_1.parent != null && injectorIndex == parentTNode_1.injectorIndex) {
-            parentTNode_1 = parentTNode_1.parent;
-        }
-        return parentTNode_1;
-    }
-    var viewOffset = getParentInjectorViewOffset(location);
-    // view offset is 1
-    var parentView = startView;
-    var parentTNode = startView[T_HOST];
-    // view offset is superior to 1
-    while (viewOffset > 1) {
-        parentView = parentView[DECLARATION_VIEW];
-        parentTNode = parentView[T_HOST];
-        viewOffset--;
-    }
-    return parentTNode;
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Set the inputs of directives at the current node to corresponding value.
- *
- * @param lView the `LView` which contains the directives.
- * @param inputAliases mapping between the public "input" name and privately-known,
- * possibly minified, property names to write to.
- * @param value Value to set.
- */
-function setInputsForProperty(lView, inputs, value) {
-    var tView = lView[TVIEW];
-    for (var i = 0; i < inputs.length;) {
-        var index = inputs[i++];
-        var publicName = inputs[i++];
-        var privateName = inputs[i++];
-        var instance = lView[index];
-        ngDevMode && assertDataInRange(lView, index);
-        var def = tView.data[index];
-        var setInput = def.setInput;
-        if (setInput) {
-            def.setInput(instance, value, publicName, privateName);
-        }
-        else {
-            instance[privateName] = value;
-        }
-    }
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * A permanent marker promise which signifies that the current CD tree is
  * clean.
  */
@@ -9905,6 +7882,29 @@ function refreshChildComponents(components) {
             componentRefresh(components[i]);
         }
     }
+}
+/**
+ * Creates a native element from a tag name, using a renderer.
+ * @param name the tag name
+ * @param overriddenRenderer Optional A renderer to override the default one
+ * @returns the element created
+ */
+function elementCreate(name, overriddenRenderer) {
+    var native;
+    var rendererToUse = overriddenRenderer || getLView()[RENDERER];
+    var namespace = getNamespace();
+    if (isProceduralRenderer(rendererToUse)) {
+        native = rendererToUse.createElement(name, namespace);
+    }
+    else {
+        if (namespace === null) {
+            native = rendererToUse.createElement(name);
+        }
+        else {
+            native = rendererToUse.createElementNS(namespace, name);
+        }
+    }
+    return native;
 }
 function createLView(parentLView, tView, context, flags, host, tHostNode, rendererFactory, renderer, sanitizer, injector) {
     var lView = tView.blueprint.slice();
@@ -10061,20 +8061,6 @@ function renderEmbeddedTemplate(viewToRender, tView, context) {
         }
     }
 }
-/**
- * Retrieves a context at the level specified and saves it as the global, contextViewData.
- * Will get the next level up if level is not specified.
- *
- * This is used to save contexts of parent views so they can be bound in embedded views, or
- * in conjunction with reference() to bind a ref from a parent view.
- *
- * @param level The relative level of the view from which to grab context compared to contextVewData
- * @returns context
- */
-function nextContext(level) {
-    if (level === void 0) { level = 1; }
-    return nextContextImpl(level);
-}
 function renderComponentOrTemplate(hostView, context, templateFn) {
     var rendererFactory = hostView[RENDERER_FACTORY];
     var oldView = enterView(hostView, hostView[T_HOST]);
@@ -10114,71 +8100,8 @@ function getRenderFlags(view) {
     return isCreationMode(view) ? 1 /* Create */ : 2 /* Update */;
 }
 //////////////////////////
-//// Namespace
-//////////////////////////
-var _currentNamespace = null;
-function namespaceSVG() {
-    _currentNamespace = 'http://www.w3.org/2000/svg';
-}
-function namespaceMathML() {
-    _currentNamespace = 'http://www.w3.org/1998/MathML/';
-}
-function namespaceHTML() {
-    _currentNamespace = null;
-}
-//////////////////////////
 //// Element
 //////////////////////////
-/**
- * Creates an empty element using {@link elementStart} and {@link elementEnd}
- *
- * @param index Index of the element in the data array
- * @param name Name of the DOM Node
- * @param attrs Statically bound set of attributes, classes, and styles to be written into the DOM
- *              element on creation. Use [AttributeMarker] to denote the meaning of this array.
- * @param localRefs A set of local reference bindings on the element.
- */
-function element(index, name, attrs, localRefs) {
-    elementStart(index, name, attrs, localRefs);
-    elementEnd();
-}
-/**
- * Creates a logical container for other nodes (<ng-container>) backed by a comment node in the DOM.
- * The instruction must later be followed by `elementContainerEnd()` call.
- *
- * @param index Index of the element in the LView array
- * @param attrs Set of attributes to be used when matching directives.
- * @param localRefs A set of local reference bindings on the element.
- *
- * Even if this instruction accepts a set of attributes no actual attribute values are propagated to
- * the DOM (as a comment node can't have attributes). Attributes are here only for directive
- * matching purposes and setting initial inputs of directives.
- */
-function elementContainerStart(index, attrs, localRefs) {
-    var lView = getLView();
-    var tView = lView[TVIEW];
-    var renderer = lView[RENDERER];
-    var tagName = 'ng-container';
-    ngDevMode && assertEqual(lView[BINDING_INDEX], tView.bindingStartIndex, 'element containers should be created before any bindings');
-    ngDevMode && ngDevMode.rendererCreateComment++;
-    var native = renderer.createComment(ngDevMode ? tagName : '');
-    ngDevMode && assertDataInRange(lView, index - 1);
-    var tNode = createNodeAtIndex(index, 4 /* ElementContainer */, native, tagName, attrs || null);
-    if (attrs) {
-        // While ng-container doesn't necessarily support styling, we use the style context to identify
-        // and execute directives on the ng-container.
-        setNodeStylingTemplate(tView, tNode, attrs, 0);
-    }
-    appendChild(native, tNode, lView);
-    createDirectivesAndLocals(tView, lView, localRefs);
-    attachPatchData(native, lView);
-    var currentQueries = lView[QUERIES];
-    if (currentQueries) {
-        currentQueries.addNode(tNode);
-        lView[QUERIES] = currentQueries.clone();
-    }
-    executeContentQueries(tView, tNode, lView);
-}
 /**
  * Appropriately sets `stylingTemplate` on a TNode
  *
@@ -10207,125 +8130,6 @@ function executeContentQueries(tView, tNode, lView) {
             }
         }
     }
-}
-/** Mark the end of the <ng-container>. */
-function elementContainerEnd() {
-    var previousOrParentTNode = getPreviousOrParentTNode();
-    var lView = getLView();
-    var tView = lView[TVIEW];
-    if (getIsParent()) {
-        setIsParent(false);
-    }
-    else {
-        ngDevMode && assertHasParent(previousOrParentTNode);
-        previousOrParentTNode = previousOrParentTNode.parent;
-        setPreviousOrParentTNode(previousOrParentTNode);
-    }
-    ngDevMode && assertNodeType(previousOrParentTNode, 4 /* ElementContainer */);
-    var currentQueries = lView[QUERIES];
-    if (currentQueries) {
-        lView[QUERIES] = currentQueries.parent;
-    }
-    registerPostOrderHooks(tView, previousOrParentTNode);
-}
-/**
- * Create DOM element. The instruction must later be followed by `elementEnd()` call.
- *
- * @param index Index of the element in the LView array
- * @param name Name of the DOM Node
- * @param attrs Statically bound set of attributes, classes, and styles to be written into the DOM
- *              element on creation. Use [AttributeMarker] to denote the meaning of this array.
- * @param localRefs A set of local reference bindings on the element.
- *
- * Attributes and localRefs are passed as an array of strings where elements with an even index
- * hold an attribute name and elements with an odd index hold an attribute value, ex.:
- * ['id', 'warning5', 'class', 'alert']
- */
-function elementStart(index, name, attrs, localRefs) {
-    var lView = getLView();
-    var tView = lView[TVIEW];
-    ngDevMode && assertEqual(lView[BINDING_INDEX], tView.bindingStartIndex, 'elements should be created before any bindings ');
-    ngDevMode && ngDevMode.rendererCreateElement++;
-    var native = elementCreate(name);
-    var renderer = lView[RENDERER];
-    ngDevMode && assertDataInRange(lView, index - 1);
-    var tNode = createNodeAtIndex(index, 3 /* Element */, native, name, attrs || null);
-    var initialStylesIndex = 0;
-    var initialClassesIndex = 0;
-    if (attrs) {
-        var lastAttrIndex = setUpAttributes(native, attrs);
-        // it's important to only prepare styling-related datastructures once for a given
-        // tNode and not each time an element is created. Also, the styling code is designed
-        // to be patched and constructed at various points, but only up until the styling
-        // template is first allocated (which happens when the very first style/class binding
-        // value is evaluated). When the template is allocated (when it turns into a context)
-        // then the styling template is locked and cannot be further extended (it can only be
-        // instantiated into a context per element)
-        setNodeStylingTemplate(tView, tNode, attrs, lastAttrIndex);
-        if (tNode.stylingTemplate) {
-            // the initial style/class values are rendered immediately after having been
-            // initialized into the context so the element styling is ready when directives
-            // are initialized (since they may read style/class values in their constructor)
-            initialStylesIndex = renderInitialStyles(native, tNode.stylingTemplate, renderer);
-            initialClassesIndex = renderInitialClasses(native, tNode.stylingTemplate, renderer);
-        }
-    }
-    appendChild(native, tNode, lView);
-    createDirectivesAndLocals(tView, lView, localRefs);
-    // any immediate children of a component or template container must be pre-emptively
-    // monkey-patched with the component view data so that the element can be inspected
-    // later on using any element discovery utility methods (see `element_discovery.ts`)
-    if (getElementDepthCount() === 0) {
-        attachPatchData(native, lView);
-    }
-    increaseElementDepthCount();
-    // if a directive contains a host binding for "class" then all class-based data will
-    // flow through that (except for `[class.prop]` bindings). This also includes initial
-    // static class values as well. (Note that this will be fixed once map-based `[style]`
-    // and `[class]` bindings work for multiple directives.)
-    if (tView.firstTemplatePass) {
-        var inputData = initializeTNodeInputs(tNode);
-        if (inputData && inputData.hasOwnProperty('class')) {
-            tNode.flags |= 8 /* hasClassInput */;
-        }
-        if (inputData && inputData.hasOwnProperty('style')) {
-            tNode.flags |= 16 /* hasStyleInput */;
-        }
-    }
-    // we render the styling again below in case any directives have set any `style` and/or
-    // `class` host attribute values...
-    if (tNode.stylingTemplate) {
-        renderInitialClasses(native, tNode.stylingTemplate, renderer, initialClassesIndex);
-        renderInitialStyles(native, tNode.stylingTemplate, renderer, initialStylesIndex);
-    }
-    var currentQueries = lView[QUERIES];
-    if (currentQueries) {
-        currentQueries.addNode(tNode);
-        lView[QUERIES] = currentQueries.clone();
-    }
-    executeContentQueries(tView, tNode, lView);
-}
-/**
- * Creates a native element from a tag name, using a renderer.
- * @param name the tag name
- * @param overriddenRenderer Optional A renderer to override the default one
- * @returns the element created
- */
-function elementCreate(name, overriddenRenderer) {
-    var native;
-    var rendererToUse = overriddenRenderer || getLView()[RENDERER];
-    if (isProceduralRenderer(rendererToUse)) {
-        native = rendererToUse.createElement(name, _currentNamespace);
-    }
-    else {
-        if (_currentNamespace === null) {
-            native = rendererToUse.createElement(name);
-        }
-        else {
-            native = rendererToUse.createElementNS(_currentNamespace, name);
-        }
-    }
-    return native;
 }
 /**
  * Creates directive instances and populates local refs.
@@ -10468,113 +8272,6 @@ function locateHostElement(factory, elementOrSelector) {
     return rNode;
 }
 /**
- * Adds an event listener to the current node.
- *
- * If an output exists on one of the node's directives, it also subscribes to the output
- * and saves the subscription for later cleanup.
- *
- * @param eventName Name of the event
- * @param listenerFn The function to be called when event emits
- * @param useCapture Whether or not to use capture in event listener
- * @param eventTargetResolver Function that returns global target information in case this listener
- * should be attached to a global object like window, document or body
- */
-function listener(eventName, listenerFn, useCapture, eventTargetResolver) {
-    if (useCapture === void 0) { useCapture = false; }
-    listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver);
-}
-/**
- * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component.
- *
- * This instruction is for compatibility purposes and is designed to ensure that a
- * synthetic host listener (e.g. `@HostListener('@foo.start')`) properly gets rendered
- * in the component's renderer. Normally all host listeners are evaluated with the
- * parent component's renderer, but, in the case of animation @triggers, they need
- * to be evaluated with the sub component's renderer (because that's where the
- * animation triggers are defined).
- *
- * Do not use this instruction as a replacement for `listener`. This instruction
- * only exists to ensure compatibility with the ViewEngine's host binding behavior.
- *
- * @param eventName Name of the event
- * @param listenerFn The function to be called when event emits
- * @param useCapture Whether or not to use capture in event listener
- * @param eventTargetResolver Function that returns global target information in case this listener
- * should be attached to a global object like window, document or body
- */
-function componentHostSyntheticListener(eventName, listenerFn, useCapture, eventTargetResolver) {
-    if (useCapture === void 0) { useCapture = false; }
-    listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver, loadComponentRenderer);
-}
-function listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver, loadRendererFn) {
-    if (useCapture === void 0) { useCapture = false; }
-    var lView = getLView();
-    var tNode = getPreviousOrParentTNode();
-    var tView = lView[TVIEW];
-    var firstTemplatePass = tView.firstTemplatePass;
-    var tCleanup = firstTemplatePass && (tView.cleanup || (tView.cleanup = []));
-    ngDevMode && assertNodeOfPossibleTypes(tNode, 3 /* Element */, 0 /* Container */, 4 /* ElementContainer */);
-    // add native event listener - applicable to elements only
-    if (tNode.type === 3 /* Element */) {
-        var native = getNativeByTNode(tNode, lView);
-        var resolved = eventTargetResolver ? eventTargetResolver(native) : {};
-        var target = resolved.target || native;
-        ngDevMode && ngDevMode.rendererAddEventListener++;
-        var renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
-        var lCleanup = getCleanup(lView);
-        var lCleanupIndex = lCleanup.length;
-        var useCaptureOrSubIdx = useCapture;
-        // In order to match current behavior, native DOM event listeners must be added for all
-        // events (including outputs).
-        if (isProceduralRenderer(renderer)) {
-            // The first argument of `listen` function in Procedural Renderer is:
-            // - either a target name (as a string) in case of global target (window, document, body)
-            // - or element reference (in all other cases)
-            listenerFn = wrapListener(tNode, lView, listenerFn, false /** preventDefault */);
-            var cleanupFn = renderer.listen(resolved.name || target, eventName, listenerFn);
-            lCleanup.push(listenerFn, cleanupFn);
-            useCaptureOrSubIdx = lCleanupIndex + 1;
-        }
-        else {
-            listenerFn = wrapListener(tNode, lView, listenerFn, true /** preventDefault */);
-            target.addEventListener(eventName, listenerFn, useCapture);
-            lCleanup.push(listenerFn);
-        }
-        var idxOrTargetGetter = eventTargetResolver ?
-            function (_lView) { return eventTargetResolver(unwrapRNode(_lView[tNode.index])).target; } :
-            tNode.index;
-        tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, useCaptureOrSubIdx);
-    }
-    // subscribe to directive outputs
-    if (tNode.outputs === undefined) {
-        // if we create TNode here, inputs must be undefined so we know they still need to be
-        // checked
-        tNode.outputs = generatePropertyAliases(tNode, 1 /* Output */);
-    }
-    var outputs = tNode.outputs;
-    var props;
-    if (outputs && (props = outputs[eventName])) {
-        var propsLength = props.length;
-        if (propsLength) {
-            var lCleanup = getCleanup(lView);
-            for (var i = 0; i < propsLength; i += 3) {
-                var index = props[i];
-                ngDevMode && assertDataInRange(lView, index);
-                var minifiedName = props[i + 2];
-                var directiveInstance = lView[index];
-                var output = directiveInstance[minifiedName];
-                if (ngDevMode && !isObservable(output)) {
-                    throw new Error("@Output " + minifiedName + " not initialized in '" + directiveInstance.constructor.name + "'.");
-                }
-                var subscription = output.subscribe(listenerFn);
-                var idx = lCleanup.length;
-                lCleanup.push(listenerFn, subscription);
-                tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
-            }
-        }
-    }
-}
-/**
  * Saves context for this cleanup function in LView.cleanupInstances.
  *
  * On the first template pass, saves in TView:
@@ -10600,246 +8297,6 @@ function storeCleanupFn(view, cleanupFn) {
     getCleanup(view).push(cleanupFn);
     if (view[TVIEW].firstTemplatePass) {
         getTViewCleanup(view).push(view[CLEANUP].length - 1, null);
-    }
-}
-/** Mark the end of the element. */
-function elementEnd() {
-    var previousOrParentTNode = getPreviousOrParentTNode();
-    if (getIsParent()) {
-        setIsParent(false);
-    }
-    else {
-        ngDevMode && assertHasParent(getPreviousOrParentTNode());
-        previousOrParentTNode = previousOrParentTNode.parent;
-        setPreviousOrParentTNode(previousOrParentTNode);
-    }
-    // this is required for all host-level styling-related instructions to run
-    // in the correct order
-    previousOrParentTNode.onElementCreationFns && applyOnCreateInstructions(previousOrParentTNode);
-    ngDevMode && assertNodeType(previousOrParentTNode, 3 /* Element */);
-    var lView = getLView();
-    var currentQueries = lView[QUERIES];
-    if (currentQueries) {
-        lView[QUERIES] = currentQueries.parent;
-    }
-    registerPostOrderHooks(getLView()[TVIEW], previousOrParentTNode);
-    decreaseElementDepthCount();
-    // this is fired at the end of elementEnd because ALL of the stylingBindings code
-    // (for directives and the template) have now executed which means the styling
-    // context can be instantiated properly.
-    if (hasClassInput(previousOrParentTNode)) {
-        var stylingContext = getStylingContext(previousOrParentTNode.index, lView);
-        setInputsForProperty(lView, previousOrParentTNode.inputs['class'], getInitialClassNameValue(stylingContext));
-    }
-    if (hasStyleInput(previousOrParentTNode)) {
-        var stylingContext = getStylingContext(previousOrParentTNode.index, lView);
-        setInputsForProperty(lView, previousOrParentTNode.inputs['style'], getInitialStyleStringValue(stylingContext));
-    }
-}
-/**
- * Selects an index of an item to act on and flushes lifecycle hooks up to this point
- *
- * Used in conjunction with instructions like {@link property} to act on elements with specified
- * indices, for example those created with {@link element} or {@link elementStart}.
- *
- * ```ts
- * (rf: RenderFlags, ctx: any) => {
-  *  if (rf & 1) {
-  *    element(0, 'div');
-  *  }
-  *  if (rf & 2) {
-  *    select(0); // Select the <div/> created above.
-  *    property('title', 'test');
-  *  }
-  * }
-  * ```
-  * @param index the index of the item to act on with the following instructions
-  */
-function select(index) {
-    ngDevMode && assertGreaterThan(index, -1, 'Invalid index');
-    ngDevMode &&
-        assertLessThan(index, getLView().length - HEADER_OFFSET, 'Should be within range for the view data');
-    var lView = getLView();
-    executePreOrderHooks(lView, lView[TVIEW], getCheckNoChangesMode(), index);
-}
-/**
- * Updates the value of removes an attribute on an Element.
- *
- * @param number index The index of the element in the data array
- * @param name name The name of the attribute.
- * @param value value The attribute is removed when value is `null` or `undefined`.
- *                  Otherwise the attribute value is set to the stringified value.
- * @param sanitizer An optional function used to sanitize the value.
- * @param namespace Optional namespace to use when setting the attribute.
- */
-function elementAttribute(index, name, value, sanitizer, namespace) {
-    if (value !== NO_CHANGE) {
-        ngDevMode && validateAgainstEventAttributes(name);
-        var lView = getLView();
-        var renderer = lView[RENDERER];
-        var element_1 = getNativeByIndex(index, lView);
-        if (value == null) {
-            ngDevMode && ngDevMode.rendererRemoveAttribute++;
-            isProceduralRenderer(renderer) ? renderer.removeAttribute(element_1, name, namespace) :
-                element_1.removeAttribute(name);
-        }
-        else {
-            ngDevMode && ngDevMode.rendererSetAttribute++;
-            var tNode = getTNode(index, lView);
-            var strValue = sanitizer == null ? renderStringify(value) : sanitizer(value, tNode.tagName || '', name);
-            if (isProceduralRenderer(renderer)) {
-                renderer.setAttribute(element_1, name, strValue, namespace);
-            }
-            else {
-                namespace ? element_1.setAttributeNS(namespace, name, strValue) :
-                    element_1.setAttribute(name, strValue);
-            }
-        }
-    }
-}
-/**
- * **TODO: Remove this function after `property` is in use**
- * Update a property on an element.
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new @Inputs don't have to be re-compiled.
- *
- * @param index The index of the element to update in the data array
- * @param propName Name of property. Because it is going to DOM, this is not subject to
- *        renaming as part of minification.
- * @param value New value to write.
- * @param sanitizer An optional function used to sanitize the value.
- * @param nativeOnly Whether or not we should only set native properties and skip input check
- * (this is necessary for host property bindings)
- */
-function elementProperty(index, propName, value, sanitizer, nativeOnly) {
-    elementPropertyInternal(index, propName, value, sanitizer, nativeOnly);
-}
-/**
- * Updates a synthetic host binding (e.g. `[@foo]`) on a component.
- *
- * This instruction is for compatibility purposes and is designed to ensure that a
- * synthetic host binding (e.g. `@HostBinding('@foo')`) properly gets rendered in
- * the component's renderer. Normally all host bindings are evaluated with the parent
- * component's renderer, but, in the case of animation @triggers, they need to be
- * evaluated with the sub component's renderer (because that's where the animation
- * triggers are defined).
- *
- * Do not use this instruction as a replacement for `elementProperty`. This instruction
- * only exists to ensure compatibility with the ViewEngine's host binding behavior.
- *
- * @param index The index of the element to update in the data array
- * @param propName Name of property. Because it is going to DOM, this is not subject to
- *        renaming as part of minification.
- * @param value New value to write.
- * @param sanitizer An optional function used to sanitize the value.
- * @param nativeOnly Whether or not we should only set native properties and skip input check
- * (this is necessary for host property bindings)
- */
-function componentHostSyntheticProperty(index, propName, value, sanitizer, nativeOnly) {
-    elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadComponentRenderer);
-}
-/**
- * Mapping between attributes names that don't correspond to their element property names.
- */
-var ATTR_TO_PROP = {
-    'class': 'className',
-    'for': 'htmlFor',
-    'formaction': 'formAction',
-    'innerHtml': 'innerHTML',
-    'readonly': 'readOnly',
-    'tabindex': 'tabIndex',
-};
-function elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadRendererFn) {
-    if (value === NO_CHANGE)
-        return;
-    var lView = getLView();
-    var element = getNativeByIndex(index, lView);
-    var tNode = getTNode(index, lView);
-    var inputData;
-    var dataValue;
-    if (!nativeOnly && (inputData = initializeTNodeInputs(tNode)) &&
-        (dataValue = inputData[propName])) {
-        setInputsForProperty(lView, dataValue, value);
-        if (isComponent(tNode))
-            markDirtyIfOnPush(lView, index + HEADER_OFFSET);
-        if (ngDevMode) {
-            if (tNode.type === 3 /* Element */ || tNode.type === 0 /* Container */) {
-                setNgReflectProperties(lView, element, tNode.type, dataValue, value);
-            }
-        }
-    }
-    else if (tNode.type === 3 /* Element */) {
-        propName = ATTR_TO_PROP[propName] || propName;
-        if (ngDevMode) {
-            validateAgainstEventProperties(propName);
-            validateAgainstUnknownProperties(lView, element, propName, tNode);
-            ngDevMode.rendererSetProperty++;
-        }
-        savePropertyDebugData(tNode, lView, propName, lView[TVIEW].data, nativeOnly);
-        var renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
-        // It is assumed that the sanitizer is only added when the compiler determines that the property
-        // is risky, so sanitization can be done without further checks.
-        value = sanitizer != null ? sanitizer(value, tNode.tagName || '', propName) : value;
-        if (isProceduralRenderer(renderer)) {
-            renderer.setProperty(element, propName, value);
-        }
-        else if (!isAnimationProp(propName)) {
-            element.setProperty ? element.setProperty(propName, value) :
-                element[propName] = value;
-        }
-    }
-}
-function validateAgainstUnknownProperties(hostView, element, propName, tNode) {
-    // If the tag matches any of the schemas we shouldn't throw.
-    if (matchingSchemas(hostView, tNode.tagName)) {
-        return;
-    }
-    // If prop is not a known property of the HTML element...
-    if (!(propName in element) &&
-        // and we are in a browser context... (web worker nodes should be skipped)
-        typeof Node === 'function' && element instanceof Node &&
-        // and isn't a synthetic animation property...
-        propName[0] !== ANIMATION_PROP_PREFIX) {
-        // ... it is probably a user error and we should throw.
-        throw new Error("Template error: Can't bind to '" + propName + "' since it isn't a known property of '" + tNode.tagName + "'.");
-    }
-}
-function matchingSchemas(hostView, tagName) {
-    var schemas = hostView[TVIEW].schemas;
-    if (schemas !== null) {
-        for (var i = 0; i < schemas.length; i++) {
-            var schema = schemas[i];
-            if (schema === NO_ERRORS_SCHEMA ||
-                schema === CUSTOM_ELEMENTS_SCHEMA && tagName && tagName.indexOf('-') > -1) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-/**
- * Stores debugging data for this property binding on first template pass.
- * This enables features like DebugElement.properties.
- */
-function savePropertyDebugData(tNode, lView, propName, tData, nativeOnly) {
-    var lastBindingIndex = lView[BINDING_INDEX] - 1;
-    // Bind/interpolation functions save binding metadata in the last binding index,
-    // but leave the property name blank. If the interpolation delimiter is at the 0
-    // index, we know that this is our first pass and the property name still needs to
-    // be set.
-    var bindingMetadata = tData[lastBindingIndex];
-    if (bindingMetadata[0] == INTERPOLATION_DELIMITER) {
-        tData[lastBindingIndex] = propName + bindingMetadata;
-        // We don't want to store indices for host bindings because they are stored in a
-        // different part of LView (the expando section).
-        if (!nativeOnly) {
-            if (tNode.propertyMetadataStartIndex == -1) {
-                tNode.propertyMetadataStartIndex = lastBindingIndex;
-            }
-            tNode.propertyMetadataEndIndex = lastBindingIndex + 1;
-        }
     }
 }
 /**
@@ -10880,28 +8337,6 @@ function createTNode(tParent, type, adjustedIndex, tagName, attrs) {
         onElementCreationFns: null,
     };
 }
-function setNgReflectProperties(lView, element, type, inputs, value) {
-    var _a;
-    for (var i = 0; i < inputs.length; i += 3) {
-        var renderer = lView[RENDERER];
-        var attrName = normalizeDebugBindingName(inputs[i + 2]);
-        var debugValue = normalizeDebugBindingValue(value);
-        if (type === 3 /* Element */) {
-            isProceduralRenderer(renderer) ?
-                renderer.setAttribute(element, attrName, debugValue) :
-                element.setAttribute(attrName, debugValue);
-        }
-        else if (value !== undefined) {
-            var value_1 = "bindings=" + JSON.stringify((_a = {}, _a[attrName] = debugValue, _a), null, 2);
-            if (isProceduralRenderer(renderer)) {
-                renderer.setValue(element, value_1);
-            }
-            else {
-                element.textContent = value_1;
-            }
-        }
-    }
-}
 /**
  * Consolidates all inputs or outputs of all directives on this logical node.
  *
@@ -10933,100 +8368,9 @@ function generatePropertyAliases(tNode, direction) {
     }
     return propStore;
 }
-/**
- * Assign static attribute values to a host element.
- *
- * This instruction will assign static attribute values as well as class and style
- * values to an element within the host bindings function. Since attribute values
- * can consist of different types of values, the `attrs` array must include the values in
- * the following format:
- *
- * attrs = [
- *   // static attributes (like `title`, `name`, `id`...)
- *   attr1, value1, attr2, value,
- *
- *   // a single namespace value (like `x:id`)
- *   NAMESPACE_MARKER, namespaceUri1, name1, value1,
- *
- *   // another single namespace value (like `x:name`)
- *   NAMESPACE_MARKER, namespaceUri2, name2, value2,
- *
- *   // a series of CSS classes that will be applied to the element (no spaces)
- *   CLASSES_MARKER, class1, class2, class3,
- *
- *   // a series of CSS styles (property + value) that will be applied to the element
- *   STYLES_MARKER, prop1, value1, prop2, value2
- * ]
- *
- * All non-class and non-style attributes must be defined at the start of the list
- * first before all class and style values are set. When there is a change in value
- * type (like when classes and styles are introduced) a marker must be used to separate
- * the entries. The marker values themselves are set via entries found in the
- * [AttributeMarker] enum.
- *
- * NOTE: This instruction is meant to used from `hostBindings` function only.
- *
- * @param directive A directive instance the styling is associated with.
- * @param attrs An array of static values (attributes, classes and styles) with the correct marker
- * values.
- *
- * @publicApi
- */
-function elementHostAttrs(attrs) {
-    var tNode = getPreviousOrParentTNode();
-    var lView = getLView();
-    var native = getNativeByTNode(tNode, lView);
-    var lastAttrIndex = setUpAttributes(native, attrs);
-    var stylingAttrsStartIndex = attrsStylingIndexOf(attrs, lastAttrIndex);
-    if (stylingAttrsStartIndex >= 0) {
-        var directive = getActiveHostContext();
-        if (tNode.stylingTemplate) {
-            patchContextWithStaticAttrs(tNode.stylingTemplate, attrs, stylingAttrsStartIndex, directive);
-        }
-        else {
-            tNode.stylingTemplate =
-                initializeStaticContext(attrs, stylingAttrsStartIndex, directive);
-        }
-    }
-}
 //////////////////////////
 //// Text
 //////////////////////////
-/**
- * Create static text node
- *
- * @param index Index of the node in the data array
- * @param value Value to write. This value will be stringified.
- */
-function text(index, value) {
-    var lView = getLView();
-    ngDevMode && assertEqual(lView[BINDING_INDEX], lView[TVIEW].bindingStartIndex, 'text nodes should be created before any bindings');
-    ngDevMode && ngDevMode.rendererCreateTextNode++;
-    var textNative = createTextNode(value, lView[RENDERER]);
-    var tNode = createNodeAtIndex(index, 3 /* Element */, textNative, null, null);
-    // Text nodes are self closing.
-    setIsParent(false);
-    appendChild(textNative, tNode, lView);
-}
-/**
- * Create text node with binding
- * Bindings should be handled externally with the proper interpolation(1-8) method
- *
- * @param index Index of the node in the data array.
- * @param value Stringified value to write.
- */
-function textBinding(index, value) {
-    if (value !== NO_CHANGE) {
-        var lView = getLView();
-        ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
-        var element_2 = getNativeByIndex(index, lView);
-        ngDevMode && assertDefined(element_2, 'native element should exist');
-        ngDevMode && ngDevMode.rendererSetText++;
-        var renderer = lView[RENDERER];
-        isProceduralRenderer(renderer) ? renderer.setValue(element_2, renderStringify(value)) :
-            element_2.textContent = renderStringify(value);
-    }
-}
 //////////////////////////
 //// Directive
 //////////////////////////
@@ -11146,20 +8490,6 @@ function generateExpandoInstructionBlock(tView, tNode, directiveCount) {
     (tView.expandoInstructions || (tView.expandoInstructions = [])).push(elementIndex, providerCount, directiveCount);
 }
 /**
-* On the first template pass, we need to reserve space for host binding values
-* after directives are matched (so all directives are saved, then bindings).
-* Because we are updating the blueprint, we only need to do this once.
-*/
-function prefillHostVars(tView, lView, totalHostVars) {
-    ngDevMode &&
-        assertEqual(tView.firstTemplatePass, true, 'Should only be called in first template pass.');
-    for (var i = 0; i < totalHostVars; i++) {
-        lView.push(NO_CHANGE);
-        tView.blueprint.push(NO_CHANGE);
-        tView.data.push(null);
-    }
-}
-/**
  * Process a directive on the current node after its creation.
  */
 function postProcessDirective(viewData, directive, def, directiveDefIdx) {
@@ -11224,27 +8554,6 @@ function queueComponentIndexForCheck(previousOrParentTNode) {
     ngDevMode &&
         assertEqual(tView.firstTemplatePass, true, 'Should only be called in first template pass.');
     (tView.components || (tView.components = [])).push(previousOrParentTNode.index);
-}
-/**
- * Stores host binding fn and number of host vars so it will be queued for binding refresh during
- * CD.
-*/
-function queueHostBindingForCheck(tView, def, hostVars) {
-    ngDevMode &&
-        assertEqual(tView.firstTemplatePass, true, 'Should only be called in first template pass.');
-    var expando = tView.expandoInstructions;
-    var length = expando.length;
-    // Check whether a given `hostBindings` function already exists in expandoInstructions,
-    // which can happen in case directive definition was extended from base definition (as a part of
-    // the `InheritDefinitionFeature` logic). If we found the same `hostBindings` function in the
-    // list, we just increase the number of host vars associated with that function, but do not add it
-    // into the list again.
-    if (length >= 2 && expando[length - 2] === def.hostBindings) {
-        expando[length - 1] = expando[length - 1] + hostVars;
-    }
-    else {
-        expando.push(def.hostBindings, hostVars);
-    }
 }
 /** Caches local names and their matching directive indices for query and template lookups. */
 function cacheMatchingLocalNames(tNode, localRefs, exportsMap) {
@@ -11412,129 +8721,6 @@ function createLContainer(hostNative, currentView, native, tNode, isForViewConta
     return lContainer;
 }
 /**
- * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
- *
- * <ng-template #foo>
- *    <div></div>
- * </ng-template>
- *
- * @param index The index of the container in the data array
- * @param templateFn Inline template
- * @param consts The number of nodes, local refs, and pipes for this template
- * @param vars The number of bindings for this template
- * @param tagName The name of the container element, if applicable
- * @param attrs The attrs attached to the container, if applicable
- * @param localRefs A set of local reference bindings on the element.
- * @param localRefExtractor A function which extracts local-refs values from the template.
- *        Defaults to the current element associated with the local-ref.
- */
-function template(index, templateFn, consts, vars, tagName, attrs, localRefs, localRefExtractor) {
-    var lView = getLView();
-    var tView = lView[TVIEW];
-    // TODO: consider a separate node type for templates
-    var tContainerNode = containerInternal(index, tagName || null, attrs || null);
-    if (tView.firstTemplatePass) {
-        tContainerNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null, null);
-    }
-    createDirectivesAndLocals(tView, lView, localRefs, localRefExtractor);
-    addTContainerToQueries(lView, tContainerNode);
-    attachPatchData(getNativeByTNode(tContainerNode, lView), lView);
-    registerPostOrderHooks(tView, tContainerNode);
-    setIsParent(false);
-}
-/**
- * Creates an LContainer for inline views, e.g.
- *
- * % if (showing) {
- *   <div></div>
- * % }
- *
- * @param index The index of the container in the data array
- */
-function container(index) {
-    var tNode = containerInternal(index, null, null);
-    var lView = getLView();
-    if (lView[TVIEW].firstTemplatePass) {
-        tNode.tViews = [];
-    }
-    addTContainerToQueries(lView, tNode);
-    setIsParent(false);
-}
-function containerInternal(index, tagName, attrs) {
-    var lView = getLView();
-    ngDevMode && assertEqual(lView[BINDING_INDEX], lView[TVIEW].bindingStartIndex, 'container nodes should be created before any bindings');
-    var adjustedIndex = index + HEADER_OFFSET;
-    var comment = lView[RENDERER].createComment(ngDevMode ? 'container' : '');
-    ngDevMode && ngDevMode.rendererCreateComment++;
-    var tNode = createNodeAtIndex(index, 0 /* Container */, comment, tagName, attrs);
-    var lContainer = lView[adjustedIndex] =
-        createLContainer(lView[adjustedIndex], lView, comment, tNode);
-    appendChild(comment, tNode, lView);
-    // Containers are added to the current view tree instead of their embedded views
-    // because views can be removed and re-inserted.
-    addToViewTree(lView, lContainer);
-    ngDevMode && assertNodeType(getPreviousOrParentTNode(), 0 /* Container */);
-    return tNode;
-}
-/**
- * Reporting a TContainer node queries is a 2-step process as we need to:
- * - check if the container node itself is matching (query might match a <ng-template> node);
- * - prepare room for nodes from views that might be created based on the TemplateRef linked to this
- * container.
- *
- * Those 2 operations need to happen in the specific order (match the container node itself, then
- * prepare space for nodes from views).
- */
-function addTContainerToQueries(lView, tContainerNode) {
-    var queries = lView[QUERIES];
-    if (queries) {
-        queries.addNode(tContainerNode);
-        var lContainer = lView[tContainerNode.index];
-        lContainer[QUERIES] = queries.container();
-    }
-}
-/**
- * Sets a container up to receive views.
- *
- * @param index The index of the container in the data array
- */
-function containerRefreshStart(index) {
-    var lView = getLView();
-    var tView = lView[TVIEW];
-    var previousOrParentTNode = loadInternal(tView.data, index);
-    setPreviousOrParentTNode(previousOrParentTNode);
-    ngDevMode && assertNodeType(previousOrParentTNode, 0 /* Container */);
-    setIsParent(true);
-    lView[index + HEADER_OFFSET][ACTIVE_INDEX] = 0;
-    // We need to execute init hooks here so ngOnInit hooks are called in top level views
-    // before they are called in embedded views (for backwards compatibility).
-    executePreOrderHooks(lView, tView, getCheckNoChangesMode(), undefined);
-}
-/**
- * Marks the end of the LContainer.
- *
- * Marking the end of LContainer is the time when to child views get inserted or removed.
- */
-function containerRefreshEnd() {
-    var previousOrParentTNode = getPreviousOrParentTNode();
-    if (getIsParent()) {
-        setIsParent(false);
-    }
-    else {
-        ngDevMode && assertNodeType(previousOrParentTNode, 2 /* View */);
-        ngDevMode && assertHasParent(previousOrParentTNode);
-        previousOrParentTNode = previousOrParentTNode.parent;
-        setPreviousOrParentTNode(previousOrParentTNode);
-    }
-    ngDevMode && assertNodeType(previousOrParentTNode, 0 /* Container */);
-    var lContainer = getLView()[previousOrParentTNode.index];
-    var nextIndex = lContainer[ACTIVE_INDEX];
-    // remove extra views at the end of the container
-    while (nextIndex < lContainer[VIEWS].length) {
-        removeView(lContainer, nextIndex);
-    }
-}
-/**
  * Goes over dynamic embedded views (ones created through ViewContainerRef APIs) and refreshes them
  * by executing an associated template function.
  */
@@ -11544,125 +8730,15 @@ function refreshDynamicEmbeddedViews(lView) {
         // in LContainer. We can tell it's an LContainer because its length is less than the LView
         // header.
         if (current.length < HEADER_OFFSET && current[ACTIVE_INDEX] === -1) {
-            var container_1 = current;
-            for (var i = 0; i < container_1[VIEWS].length; i++) {
-                var dynamicViewData = container_1[VIEWS][i];
+            var container = current;
+            for (var i = 0; i < container[VIEWS].length; i++) {
+                var dynamicViewData = container[VIEWS][i];
                 // The directives and pipes are not needed here as an existing view is only being refreshed.
                 ngDevMode && assertDefined(dynamicViewData[TVIEW], 'TView must be allocated');
                 renderEmbeddedTemplate(dynamicViewData, dynamicViewData[TVIEW], dynamicViewData[CONTEXT]);
             }
         }
     }
-}
-/**
- * Looks for a view with a given view block id inside a provided LContainer.
- * Removes views that need to be deleted in the process.
- *
- * @param lContainer to search for views
- * @param startIdx starting index in the views array to search from
- * @param viewBlockId exact view block id to look for
- * @returns index of a found view or -1 if not found
- */
-function scanForView(lContainer, startIdx, viewBlockId) {
-    var views = lContainer[VIEWS];
-    for (var i = startIdx; i < views.length; i++) {
-        var viewAtPositionId = views[i][TVIEW].id;
-        if (viewAtPositionId === viewBlockId) {
-            return views[i];
-        }
-        else if (viewAtPositionId < viewBlockId) {
-            // found a view that should not be at this position - remove
-            removeView(lContainer, i);
-        }
-        else {
-            // found a view with id greater than the one we are searching for
-            // which means that required view doesn't exist and can't be found at
-            // later positions in the views array - stop the searchdef.cont here
-            break;
-        }
-    }
-    return null;
-}
-/**
- * Marks the start of an embedded view.
- *
- * @param viewBlockId The ID of this view
- * @return boolean Whether or not this view is in creation mode
- */
-function embeddedViewStart(viewBlockId, consts, vars) {
-    var lView = getLView();
-    var previousOrParentTNode = getPreviousOrParentTNode();
-    // The previous node can be a view node if we are processing an inline for loop
-    var containerTNode = previousOrParentTNode.type === 2 /* View */ ?
-        previousOrParentTNode.parent :
-        previousOrParentTNode;
-    var lContainer = lView[containerTNode.index];
-    ngDevMode && assertNodeType(containerTNode, 0 /* Container */);
-    var viewToRender = scanForView(lContainer, lContainer[ACTIVE_INDEX], viewBlockId);
-    if (viewToRender) {
-        setIsParent(true);
-        enterView(viewToRender, viewToRender[TVIEW].node);
-    }
-    else {
-        // When we create a new LView, we always reset the state of the instructions.
-        viewToRender = createLView(lView, getOrCreateEmbeddedTView(viewBlockId, consts, vars, containerTNode), null, 16 /* CheckAlways */, null, null);
-        if (lContainer[QUERIES]) {
-            viewToRender[QUERIES] = lContainer[QUERIES].createView();
-        }
-        var tParentNode = getIsParent() ? previousOrParentTNode :
-            previousOrParentTNode && previousOrParentTNode.parent;
-        assignTViewNodeToLView(viewToRender[TVIEW], tParentNode, viewBlockId, viewToRender);
-        enterView(viewToRender, viewToRender[TVIEW].node);
-    }
-    if (lContainer) {
-        if (isCreationMode(viewToRender)) {
-            // it is a new view, insert it into collection of views for a given container
-            insertView(viewToRender, lContainer, lContainer[ACTIVE_INDEX]);
-        }
-        lContainer[ACTIVE_INDEX]++;
-    }
-    return isCreationMode(viewToRender) ? 1 /* Create */ | 2 /* Update */ :
-        2 /* Update */;
-}
-/**
- * Initialize the TView (e.g. static data) for the active embedded view.
- *
- * Each embedded view block must create or retrieve its own TView. Otherwise, the embedded view's
- * static data for a particular node would overwrite the static data for a node in the view above
- * it with the same index (since it's in the same template).
- *
- * @param viewIndex The index of the TView in TNode.tViews
- * @param consts The number of nodes, local refs, and pipes in this template
- * @param vars The number of bindings and pure function bindings in this template
- * @param container The parent container in which to look for the view's static data
- * @returns TView
- */
-function getOrCreateEmbeddedTView(viewIndex, consts, vars, parent) {
-    var tView = getLView()[TVIEW];
-    ngDevMode && assertNodeType(parent, 0 /* Container */);
-    var containerTViews = parent.tViews;
-    ngDevMode && assertDefined(containerTViews, 'TView expected');
-    ngDevMode && assertEqual(Array.isArray(containerTViews), true, 'TViews should be in an array');
-    if (viewIndex >= containerTViews.length || containerTViews[viewIndex] == null) {
-        containerTViews[viewIndex] = createTView(viewIndex, null, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null, null);
-    }
-    return containerTViews[viewIndex];
-}
-/** Marks the end of an embedded view. */
-function embeddedViewEnd() {
-    var lView = getLView();
-    var viewHost = lView[T_HOST];
-    if (isCreationMode(lView)) {
-        refreshDescendantViews(lView); // creation mode pass
-        lView[FLAGS] &= ~4 /* CreationMode */;
-    }
-    resetPreOrderHookFlags(lView);
-    refreshDescendantViews(lView); // update mode pass
-    var lContainer = lView[PARENT];
-    ngDevMode && assertLContainerOrUndefined(lContainer);
-    leaveView(lContainer[PARENT]);
-    setPreviousOrParentTNode(viewHost);
-    setIsParent(false);
 }
 /////////////
 /**
@@ -11715,71 +8791,6 @@ function syncViewWithBlueprint(componentView) {
     }
 }
 /**
- * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
- * It takes all the selectors from the entire component's template and decides where
- * each projected node belongs (it re-distributes nodes among "buckets" where each "bucket" is
- * backed by a selector).
- *
- * This function requires CSS selectors to be provided in 2 forms: parsed (by a compiler) and text,
- * un-parsed form.
- *
- * The parsed form is needed for efficient matching of a node against a given CSS selector.
- * The un-parsed, textual form is needed for support of the ngProjectAs attribute.
- *
- * Having a CSS selector in 2 different formats is not ideal, but alternatives have even more
- * drawbacks:
- * - having only a textual form would require runtime parsing of CSS selectors;
- * - we can't have only a parsed as we can't re-construct textual form from it (as entered by a
- * template author).
- *
- * @param selectors A collection of parsed CSS selectors
- * @param rawSelectors A collection of CSS selectors in the raw, un-parsed form
- */
-function projectionDef(selectors, textSelectors) {
-    var componentNode = findComponentView(getLView())[T_HOST];
-    if (!componentNode.projection) {
-        var noOfNodeBuckets = selectors ? selectors.length + 1 : 1;
-        var projectionHeads = componentNode.projection =
-            new Array(noOfNodeBuckets).fill(null);
-        var tails = projectionHeads.slice();
-        var componentChild = componentNode.child;
-        while (componentChild !== null) {
-            var bucketIndex = selectors ?
-                matchingProjectionSelectorIndex(componentChild, selectors, textSelectors) :
-                0;
-            if (tails[bucketIndex]) {
-                tails[bucketIndex].projectionNext = componentChild;
-            }
-            else {
-                projectionHeads[bucketIndex] = componentChild;
-            }
-            tails[bucketIndex] = componentChild;
-            componentChild = componentChild.next;
-        }
-    }
-}
-/**
- * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
- * to the projectionDef instruction.
- *
- * @param nodeIndex
- * @param selectorIndex:
- *        - 0 when the selector is `*` (or unspecified as this is the default value),
- *        - 1 based index of the selector from the {@link projectionDef}
- */
-function projection(nodeIndex, selectorIndex, attrs) {
-    if (selectorIndex === void 0) { selectorIndex = 0; }
-    var lView = getLView();
-    var tProjectionNode = createNodeAtIndex(nodeIndex, 1 /* Projection */, null, null, attrs || null);
-    // We can't use viewData[HOST_NODE] because projection nodes can be nested in embedded views.
-    if (tProjectionNode.projection === null)
-        tProjectionNode.projection = selectorIndex;
-    // `<ng-content>` has no content
-    setIsParent(false);
-    // re-distribution of projectable nodes is stored on a component's view level
-    appendProjectedNodes(lView, tProjectionNode, selectorIndex, findComponentView(lView));
-}
-/**
  * Adds LView or LContainer to the end of the current view tree.
  *
  * This structure will be used to traverse through nested views to remove listeners
@@ -11807,49 +8818,6 @@ function addToViewTree(lView, lViewOrLContainer) {
 ///////////////////////////////
 //// Change detection
 ///////////////////////////////
-/** If node is an OnPush component, marks its LView dirty. */
-function markDirtyIfOnPush(lView, viewIndex) {
-    ngDevMode && assertLView(lView);
-    var childComponentLView = getComponentViewByIndex(viewIndex, lView);
-    if (!(childComponentLView[FLAGS] & 16 /* CheckAlways */)) {
-        childComponentLView[FLAGS] |= 64 /* Dirty */;
-    }
-}
-/**
- * Wraps an event listener with a function that marks ancestors dirty and prevents default behavior,
- * if applicable.
- *
- * @param tNode The TNode associated with this listener
- * @param lView The LView that contains this listener
- * @param listenerFn The listener function to call
- * @param wrapWithPreventDefault Whether or not to prevent default behavior
- * (the procedural renderer does this already, so in those cases, we should skip)
- */
-function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
-    // Note: we are performing most of the work in the listener function itself
-    // to optimize listener registration.
-    return function wrapListenerIn_markDirtyAndPreventDefault(e) {
-        // In order to be backwards compatible with View Engine, events on component host nodes
-        // must also mark the component view itself dirty (i.e. the view that it owns).
-        var startView = tNode.flags & 1 /* isComponent */ ? getComponentViewByIndex(tNode.index, lView) : lView;
-        // See interfaces/view.ts for more on LViewFlags.ManualOnPush
-        if ((lView[FLAGS] & 32 /* ManualOnPush */) === 0) {
-            markViewDirty(startView);
-        }
-        try {
-            var result = listenerFn(e);
-            if (wrapWithPreventDefault && result === false) {
-                e.preventDefault();
-                // Necessary for legacy browsers that don't support preventDefault (e.g. IE)
-                e.returnValue = false;
-            }
-            return result;
-        }
-        catch (error) {
-            handleError(lView, error);
-        }
-    };
-}
 /**
  * Marks current view and all ancestors dirty.
  *
@@ -11913,23 +8881,6 @@ function tickRootContext(rootContext) {
         var rootComponent = rootContext.components[i];
         renderComponentOrTemplate(readPatchedLView(rootComponent), rootComponent);
     }
-}
-/**
- * Synchronously perform change detection on a component (and possibly its sub-components).
- *
- * This function triggers change detection in a synchronous way on a component. There should
- * be very little reason to call this function directly since a preferred way to do change
- * detection is to {@link markDirty} the component and wait for the scheduler to call this method
- * at some future point in time. This is because a single user action often results in many
- * components being invalidated and calling change detection on each component synchronously
- * would be inefficient. It is better to wait until all components are marked as dirty and
- * then perform single change detection across all of the components
- *
- * @param component The component which the change detection should be performed on.
- */
-function detectChanges(component) {
-    var view = getComponentViewByInstance(component);
-    detectChangesInternal(view, component);
 }
 function detectChangesInternal(view, context) {
     var rendererFactory = view[RENDERER_FACTORY];
@@ -12013,6 +8964,227 @@ function executeViewQueryFn(flags, tView, component) {
         viewQuery(flags, component);
     }
 }
+///////////////////////////////
+//// Bindings & interpolations
+///////////////////////////////
+/**
+ * Creates binding metadata for a particular binding and stores it in
+ * TView.data. These are generated in order to support DebugElement.properties.
+ *
+ * Each binding / interpolation will have one (including attribute bindings)
+ * because at the time of binding, we don't know to which instruction the binding
+ * belongs. It is always stored in TView.data at the index of the last binding
+ * value in LView (e.g. for interpolation8, it would be stored at the index of
+ * the 8th value).
+ *
+ * @param lView The LView that contains the current binding index.
+ * @param prefix The static prefix string
+ * @param suffix The static suffix string
+ *
+ * @returns Newly created binding metadata string for this binding or null
+ */
+function storeBindingMetadata(lView, prefix, suffix) {
+    if (prefix === void 0) { prefix = ''; }
+    if (suffix === void 0) { suffix = ''; }
+    var tData = lView[TVIEW].data;
+    var lastBindingIndex = lView[BINDING_INDEX] - 1;
+    var value = INTERPOLATION_DELIMITER + prefix + INTERPOLATION_DELIMITER + suffix;
+    return tData[lastBindingIndex] == null ? (tData[lastBindingIndex] = value) : null;
+}
+var CLEAN_PROMISE = _CLEAN_PROMISE;
+function initializeTNodeInputs(tNode) {
+    // If tNode.inputs is undefined, a listener has created outputs, but inputs haven't
+    // yet been checked.
+    if (tNode) {
+        if (tNode.inputs === undefined) {
+            // mark inputs as checked
+            tNode.inputs = generatePropertyAliases(tNode, 0 /* Input */);
+        }
+        return tNode.inputs;
+    }
+    return null;
+}
+function getCleanup(view) {
+    // top level variables should not be exported for performance reasons (PERF_NOTES.md)
+    return view[CLEANUP] || (view[CLEANUP] = []);
+}
+function getTViewCleanup(view) {
+    return view[TVIEW].cleanup || (view[TVIEW].cleanup = []);
+}
+/**
+ * There are cases where the sub component's renderer needs to be included
+ * instead of the current renderer (see the componentSyntheticHost* instructions).
+ */
+function loadComponentRenderer(tNode, lView) {
+    var componentLView = lView[tNode.index];
+    return componentLView[RENDERER];
+}
+/** Handles an error thrown in an LView. */
+function handleError(lView, error) {
+    var injector = lView[INJECTOR$1];
+    var errorHandler = injector ? injector.get(ErrorHandler, null) : null;
+    errorHandler && errorHandler.handleError(error);
+}
+/**
+ * Set the inputs of directives at the current node to corresponding value.
+ *
+ * @param lView the `LView` which contains the directives.
+ * @param inputAliases mapping between the public "input" name and privately-known,
+ * possibly minified, property names to write to.
+ * @param value Value to set.
+ */
+function setInputsForProperty(lView, inputs, value) {
+    var tView = lView[TVIEW];
+    for (var i = 0; i < inputs.length;) {
+        var index = inputs[i++];
+        var publicName = inputs[i++];
+        var privateName = inputs[i++];
+        var instance = lView[index];
+        ngDevMode && assertDataInRange(lView, index);
+        var def = tView.data[index];
+        var setInput = def.setInput;
+        if (setInput) {
+            def.setInput(instance, value, publicName, privateName);
+        }
+        else {
+            instance[privateName] = value;
+        }
+    }
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function applyOnCreateInstructions(tNode) {
+    // there may be some instructions that need to run in a specific
+    // order because the CREATE block in a directive runs before the
+    // CREATE block in a template. To work around this instructions
+    // can get access to the function array below and defer any code
+    // to run after the element is created.
+    var fns;
+    if (fns = tNode.onElementCreationFns) {
+        for (var i = 0; i < fns.length; i++) {
+            fns[i]();
+        }
+        tNode.onElementCreationFns = null;
+    }
+}
+/**
+ * Unwraps a parent injector location number to find the view offset from the current injector,
+ * then walks up the declaration view tree until the TNode of the parent injector is found.
+ *
+ * @param location The location of the parent injector, which contains the view offset
+ * @param startView The LView instance from which to start walking up the view tree
+ * @param startTNode The TNode instance of the starting element
+ * @returns The TNode of the parent injector
+ */
+function getParentInjectorTNode(location, startView, startTNode) {
+    if (startTNode.parent && startTNode.parent.injectorIndex !== -1) {
+        // view offset is 0
+        var injectorIndex = startTNode.parent.injectorIndex;
+        var parentTNode_1 = startTNode.parent;
+        while (parentTNode_1.parent != null && injectorIndex == parentTNode_1.injectorIndex) {
+            parentTNode_1 = parentTNode_1.parent;
+        }
+        return parentTNode_1;
+    }
+    var viewOffset = getParentInjectorViewOffset(location);
+    // view offset is 1
+    var parentView = startView;
+    var parentTNode = startView[T_HOST];
+    // view offset is superior to 1
+    while (viewOffset > 1) {
+        parentView = parentView[DECLARATION_VIEW];
+        parentTNode = parentView[T_HOST];
+        viewOffset--;
+    }
+    return parentTNode;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Allocates the necessary amount of slots for host vars.
+ *
+ * @param count Amount of vars to be allocated
+ */
+function allocHostVars(count) {
+    var lView = getLView();
+    var tView = lView[TVIEW];
+    if (!tView.firstTemplatePass)
+        return;
+    queueHostBindingForCheck(tView, getCurrentDirectiveDef(), count);
+    prefillHostVars(tView, lView, count);
+}
+/**
+ * Stores host binding fn and number of host vars so it will be queued for binding refresh during
+ * CD.
+ */
+function queueHostBindingForCheck(tView, def, hostVars) {
+    ngDevMode &&
+        assertEqual(tView.firstTemplatePass, true, 'Should only be called in first template pass.');
+    var expando = tView.expandoInstructions;
+    var length = expando.length;
+    // Check whether a given `hostBindings` function already exists in expandoInstructions,
+    // which can happen in case directive definition was extended from base definition (as a part of
+    // the `InheritDefinitionFeature` logic). If we found the same `hostBindings` function in the
+    // list, we just increase the number of host vars associated with that function, but do not add it
+    // into the list again.
+    if (length >= 2 && expando[length - 2] === def.hostBindings) {
+        expando[length - 1] = expando[length - 1] + hostVars;
+    }
+    else {
+        expando.push(def.hostBindings, hostVars);
+    }
+}
+/**
+ * On the first template pass, we need to reserve space for host binding values
+ * after directives are matched (so all directives are saved, then bindings).
+ * Because we are updating the blueprint, we only need to do this once.
+ */
+function prefillHostVars(tView, lView, totalHostVars) {
+    ngDevMode &&
+        assertEqual(tView.firstTemplatePass, true, 'Should only be called in first template pass.');
+    for (var i = 0; i < totalHostVars; i++) {
+        lView.push(NO_CHANGE);
+        tView.blueprint.push(NO_CHANGE);
+        tView.data.push(null);
+    }
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Synchronously perform change detection on a component (and possibly its sub-components).
+ *
+ * This function triggers change detection in a synchronous way on a component. There should
+ * be very little reason to call this function directly since a preferred way to do change
+ * detection is to {@link markDirty} the component and wait for the scheduler to call this method
+ * at some future point in time. This is because a single user action often results in many
+ * components being invalidated and calling change detection on each component synchronously
+ * would be inefficient. It is better to wait until all components are marked as dirty and
+ * then perform single change detection across all of the components
+ *
+ * @param component The component which the change detection should be performed on.
+ */
+function detectChanges(component) {
+    var view = getComponentViewByInstance(component);
+    detectChangesInternal(view, component);
+}
 /**
  * Mark the component as dirty (needing change detection).
  *
@@ -12035,9 +9207,2815 @@ function markDirty(component) {
     ngDevMode && assertDefined(rootView[CONTEXT], 'rootContext should be defined');
     scheduleTick(rootView[CONTEXT], 1 /* DetectChanges */);
 }
-///////////////////////////////
-//// Bindings & interpolations
-///////////////////////////////
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function getLContainer(tNode, embeddedView) {
+    ngDevMode && assertLView(embeddedView);
+    var container = embeddedView[PARENT];
+    if (tNode.index === -1) {
+        // This is a dynamically created view inside a dynamic container.
+        // The parent isn't an LContainer if the embedded view hasn't been attached yet.
+        return isLContainer(container) ? container : null;
+    }
+    else {
+        ngDevMode && assertLContainer(container);
+        // This is a inline view node (e.g. embeddedViewStart)
+        return container;
+    }
+}
+/**
+ * Retrieves render parent for a given view.
+ * Might be null if a view is not yet attached to any container.
+ */
+function getContainerRenderParent(tViewNode, view) {
+    var container = getLContainer(tViewNode, view);
+    return container ? nativeParentNode(view[RENDERER], container[NATIVE]) : null;
+}
+/**
+ * Stack used to keep track of projection nodes in walkTNodeTree.
+ *
+ * This is deliberately created outside of walkTNodeTree to avoid allocating
+ * a new array each time the function is called. Instead the array will be
+ * re-used by each invocation. This works because the function is not reentrant.
+ */
+var projectionNodeStack = [];
+/**
+ * Walks a tree of TNodes, applying a transformation on the element nodes, either only on the first
+ * one found, or on all of them.
+ *
+ * @param viewToWalk the view to walk
+ * @param action identifies the action to be performed on the elements
+ * @param renderer the current renderer.
+ * @param renderParent Optional the render parent node to be set in all LContainers found,
+ * required for action modes Insert and Destroy.
+ * @param beforeNode Optional the node before which elements should be added, required for action
+ * Insert.
+ */
+function walkTNodeTree(viewToWalk, action, renderer, renderParent, beforeNode) {
+    var e_1, _a;
+    var rootTNode = viewToWalk[TVIEW].node;
+    var projectionNodeIndex = -1;
+    var currentView = viewToWalk;
+    var tNode = rootTNode.child;
+    while (tNode) {
+        var nextTNode = null;
+        if (tNode.type === 3 /* Element */ || tNode.type === 4 /* ElementContainer */) {
+            executeNodeAction(action, renderer, renderParent, getNativeByTNode(tNode, currentView), tNode, beforeNode);
+            var nodeOrContainer = currentView[tNode.index];
+            if (isLContainer(nodeOrContainer)) {
+                // This element has an LContainer, and its comment needs to be handled
+                executeNodeAction(action, renderer, renderParent, nodeOrContainer[NATIVE], tNode, beforeNode);
+                if (nodeOrContainer[VIEWS].length) {
+                    currentView = nodeOrContainer[VIEWS][0];
+                    nextTNode = currentView[TVIEW].node;
+                    // When the walker enters a container, then the beforeNode has to become the local native
+                    // comment node.
+                    beforeNode = nodeOrContainer[NATIVE];
+                }
+            }
+        }
+        else if (tNode.type === 0 /* Container */) {
+            var lContainer = currentView[tNode.index];
+            executeNodeAction(action, renderer, renderParent, lContainer[NATIVE], tNode, beforeNode);
+            if (lContainer[VIEWS].length) {
+                currentView = lContainer[VIEWS][0];
+                nextTNode = currentView[TVIEW].node;
+                // When the walker enters a container, then the beforeNode has to become the local native
+                // comment node.
+                beforeNode = lContainer[NATIVE];
+            }
+        }
+        else if (tNode.type === 1 /* Projection */) {
+            var componentView = findComponentView(currentView);
+            var componentHost = componentView[T_HOST];
+            var head = componentHost.projection[tNode.projection];
+            if (Array.isArray(head)) {
+                try {
+                    for (var head_1 = __values(head), head_1_1 = head_1.next(); !head_1_1.done; head_1_1 = head_1.next()) {
+                        var nativeNode = head_1_1.value;
+                        executeNodeAction(action, renderer, renderParent, nativeNode, tNode, beforeNode);
+                    }
+                }
+                catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                finally {
+                    try {
+                        if (head_1_1 && !head_1_1.done && (_a = head_1.return)) _a.call(head_1);
+                    }
+                    finally { if (e_1) throw e_1.error; }
+                }
+            }
+            else {
+                // Must store both the TNode and the view because this projection node could be nested
+                // deeply inside embedded views, and we need to get back down to this particular nested
+                // view.
+                projectionNodeStack[++projectionNodeIndex] = tNode;
+                projectionNodeStack[++projectionNodeIndex] = currentView;
+                if (head) {
+                    currentView = componentView[PARENT];
+                    nextTNode = currentView[TVIEW].data[head.index];
+                }
+            }
+        }
+        else {
+            // Otherwise, this is a View
+            nextTNode = tNode.child;
+        }
+        if (nextTNode === null) {
+            // this last node was projected, we need to get back down to its projection node
+            if (tNode.projectionNext === null && (tNode.flags & 2 /* isProjected */)) {
+                currentView = projectionNodeStack[projectionNodeIndex--];
+                tNode = projectionNodeStack[projectionNodeIndex--];
+            }
+            if (tNode.flags & 2 /* isProjected */) {
+                nextTNode = tNode.projectionNext;
+            }
+            else if (tNode.type === 4 /* ElementContainer */) {
+                nextTNode = tNode.child || tNode.next;
+            }
+            else {
+                nextTNode = tNode.next;
+            }
+            /**
+             * Find the next node in the TNode tree, taking into account the place where a node is
+             * projected (in the shadow DOM) rather than where it comes from (in the light DOM).
+             *
+             * If there is no sibling node, then it goes to the next sibling of the parent node...
+             * until it reaches rootNode (at which point null is returned).
+             */
+            while (!nextTNode) {
+                // If parent is null, we're crossing the view boundary, so we should get the host TNode.
+                tNode = tNode.parent || currentView[T_HOST];
+                if (tNode === null || tNode === rootTNode)
+                    return;
+                // When exiting a container, the beforeNode must be restored to the previous value
+                if (tNode.type === 0 /* Container */) {
+                    currentView = getLViewParent(currentView);
+                    beforeNode = currentView[tNode.index][NATIVE];
+                }
+                if (tNode.type === 2 /* View */) {
+                    /**
+                     * If current lView doesn't have next pointer, we try to find it by going up parents
+                     * chain until:
+                     * - we find an lView with a next pointer
+                     * - or find a tNode with a parent that has a next pointer
+                     * - or find a lContainer
+                     * - or reach root TNode (in which case we exit, since we traversed all nodes)
+                     */
+                    while (!currentView[NEXT] && currentView[PARENT] &&
+                        !(tNode.parent && tNode.parent.next)) {
+                        if (tNode === rootTNode)
+                            return;
+                        currentView = currentView[PARENT];
+                        if (isLContainer(currentView)) {
+                            tNode = currentView[T_HOST];
+                            currentView = currentView[PARENT];
+                            beforeNode = currentView[tNode.index][NATIVE];
+                            break;
+                        }
+                        tNode = currentView[T_HOST];
+                    }
+                    if (currentView[NEXT]) {
+                        currentView = currentView[NEXT];
+                        nextTNode = currentView[T_HOST];
+                    }
+                    else {
+                        nextTNode = tNode.type === 4 /* ElementContainer */ && tNode.child || tNode.next;
+                    }
+                }
+                else {
+                    nextTNode = tNode.next;
+                }
+            }
+        }
+        tNode = nextTNode;
+    }
+}
+/**
+ * NOTE: for performance reasons, the possible actions are inlined within the function instead of
+ * being passed as an argument.
+ */
+function executeNodeAction(action, renderer, parent, node, tNode, beforeNode) {
+    if (action === 0 /* Insert */) {
+        nativeInsertBefore(renderer, parent, node, beforeNode || null);
+    }
+    else if (action === 1 /* Detach */) {
+        nativeRemoveNode(renderer, node, isComponent(tNode));
+    }
+    else if (action === 2 /* Destroy */) {
+        ngDevMode && ngDevMode.rendererDestroyNode++;
+        renderer.destroyNode(node);
+    }
+}
+function createTextNode(value, renderer) {
+    return isProceduralRenderer(renderer) ? renderer.createText(renderStringify(value)) :
+        renderer.createTextNode(renderStringify(value));
+}
+function addRemoveViewFromContainer(viewToWalk, insertMode, beforeNode) {
+    var renderParent = getContainerRenderParent(viewToWalk[TVIEW].node, viewToWalk);
+    ngDevMode && assertNodeType(viewToWalk[TVIEW].node, 2 /* View */);
+    if (renderParent) {
+        var renderer = viewToWalk[RENDERER];
+        walkTNodeTree(viewToWalk, insertMode ? 0 /* Insert */ : 1 /* Detach */, renderer, renderParent, beforeNode);
+    }
+}
+/**
+ * Detach a `LView` from the DOM by detaching its nodes.
+ *
+ * @param lView the `LView` to be detached.
+ */
+function renderDetachView(lView) {
+    walkTNodeTree(lView, 1 /* Detach */, lView[RENDERER], null);
+}
+/**
+ * Traverses down and up the tree of views and containers to remove listeners and
+ * call onDestroy callbacks.
+ *
+ * Notes:
+ *  - Because it's used for onDestroy calls, it needs to be bottom-up.
+ *  - Must process containers instead of their views to avoid splicing
+ *  when views are destroyed and re-added.
+ *  - Using a while loop because it's faster than recursion
+ *  - Destroy only called on movement to sibling or movement to parent (laterally or up)
+ *
+ *  @param rootView The view to destroy
+ */
+function destroyViewTree(rootView) {
+    // If the view has no children, we can clean it up and return early.
+    var lViewOrLContainer = rootView[CHILD_HEAD];
+    if (!lViewOrLContainer) {
+        return cleanUpView(rootView);
+    }
+    while (lViewOrLContainer) {
+        var next = null;
+        if (isLView(lViewOrLContainer)) {
+            // If LView, traverse down to child.
+            next = lViewOrLContainer[CHILD_HEAD];
+        }
+        else {
+            ngDevMode && assertLContainer(lViewOrLContainer);
+            // If container, traverse down to its first LView.
+            var views = lViewOrLContainer[VIEWS];
+            if (views.length > 0)
+                next = views[0];
+        }
+        if (!next) {
+            // Only clean up view when moving to the side or up, as destroy hooks
+            // should be called in order from the bottom up.
+            while (lViewOrLContainer && !lViewOrLContainer[NEXT] && lViewOrLContainer !== rootView) {
+                cleanUpView(lViewOrLContainer);
+                lViewOrLContainer = getParentState(lViewOrLContainer, rootView);
+            }
+            cleanUpView(lViewOrLContainer || rootView);
+            next = lViewOrLContainer && lViewOrLContainer[NEXT];
+        }
+        lViewOrLContainer = next;
+    }
+}
+/**
+ * Inserts a view into a container.
+ *
+ * This adds the view to the container's array of active views in the correct
+ * position. It also adds the view's elements to the DOM if the container isn't a
+ * root node of another view (in that case, the view's elements will be added when
+ * the container's parent view is added later).
+ *
+ * @param lView The view to insert
+ * @param lContainer The container into which the view should be inserted
+ * @param index Which index in the container to insert the child view into
+ */
+function insertView(lView, lContainer, index) {
+    ngDevMode && assertLView(lView);
+    ngDevMode && assertLContainer(lContainer);
+    var views = lContainer[VIEWS];
+    ngDevMode && assertDefined(views, 'Container must have views');
+    if (index > 0) {
+        // This is a new view, we need to add it to the children.
+        views[index - 1][NEXT] = lView;
+    }
+    if (index < views.length) {
+        lView[NEXT] = views[index];
+        views.splice(index, 0, lView);
+    }
+    else {
+        views.push(lView);
+        lView[NEXT] = null;
+    }
+    lView[PARENT] = lContainer;
+    // Notify query that a new view has been added
+    if (lView[QUERIES]) {
+        lView[QUERIES].insertView(index);
+    }
+    // Sets the attached flag
+    lView[FLAGS] |= 128 /* Attached */;
+}
+/**
+ * Detaches a view from a container.
+ *
+ * This method splices the view from the container's array of active views. It also
+ * removes the view's elements from the DOM.
+ *
+ * @param lContainer The container from which to detach a view
+ * @param removeIndex The index of the view to detach
+ * @returns Detached LView instance.
+ */
+function detachView(lContainer, removeIndex) {
+    var views = lContainer[VIEWS];
+    var viewToDetach = views[removeIndex];
+    if (removeIndex > 0) {
+        views[removeIndex - 1][NEXT] = viewToDetach[NEXT];
+    }
+    views.splice(removeIndex, 1);
+    addRemoveViewFromContainer(viewToDetach, false);
+    if ((viewToDetach[FLAGS] & 128 /* Attached */) &&
+        !(viewToDetach[FLAGS] & 256 /* Destroyed */) && viewToDetach[QUERIES]) {
+        viewToDetach[QUERIES].removeView();
+    }
+    viewToDetach[PARENT] = null;
+    viewToDetach[NEXT] = null;
+    // Unsets the attached flag
+    viewToDetach[FLAGS] &= ~128 /* Attached */;
+    return viewToDetach;
+}
+/**
+ * Removes a view from a container, i.e. detaches it and then destroys the underlying LView.
+ *
+ * @param lContainer The container from which to remove a view
+ * @param removeIndex The index of the view to remove
+ */
+function removeView(lContainer, removeIndex) {
+    var view = lContainer[VIEWS][removeIndex];
+    detachView(lContainer, removeIndex);
+    destroyLView(view);
+}
+/**
+ * A standalone function which destroys an LView,
+ * conducting cleanup (e.g. removing listeners, calling onDestroys).
+ *
+ * @param view The view to be destroyed.
+ */
+function destroyLView(view) {
+    if (!(view[FLAGS] & 256 /* Destroyed */)) {
+        var renderer = view[RENDERER];
+        if (isProceduralRenderer(renderer) && renderer.destroyNode) {
+            walkTNodeTree(view, 2 /* Destroy */, renderer, null);
+        }
+        destroyViewTree(view);
+    }
+}
+/**
+ * Determines which LViewOrLContainer to jump to when traversing back up the
+ * tree in destroyViewTree.
+ *
+ * Normally, the view's parent LView should be checked, but in the case of
+ * embedded views, the container (which is the view node's parent, but not the
+ * LView's parent) needs to be checked for a possible next property.
+ *
+ * @param lViewOrLContainer The LViewOrLContainer for which we need a parent state
+ * @param rootView The rootView, so we don't propagate too far up the view tree
+ * @returns The correct parent LViewOrLContainer
+ */
+function getParentState(lViewOrLContainer, rootView) {
+    var tNode;
+    if (isLView(lViewOrLContainer) && (tNode = lViewOrLContainer[T_HOST]) &&
+        tNode.type === 2 /* View */) {
+        // if it's an embedded view, the state needs to go up to the container, in case the
+        // container has a next
+        return getLContainer(tNode, lViewOrLContainer);
+    }
+    else {
+        // otherwise, use parent view for containers or component views
+        return lViewOrLContainer[PARENT] === rootView ? null : lViewOrLContainer[PARENT];
+    }
+}
+/**
+ * Calls onDestroys hooks for all directives and pipes in a given view and then removes all
+ * listeners. Listeners are removed as the last step so events delivered in the onDestroys hooks
+ * can be propagated to @Output listeners.
+ *
+ * @param view The LView to clean up
+ */
+function cleanUpView(view) {
+    if (isLView(view) && !(view[FLAGS] & 256 /* Destroyed */)) {
+        // Usually the Attached flag is removed when the view is detached from its parent, however
+        // if it's a root view, the flag won't be unset hence why we're also removing on destroy.
+        view[FLAGS] &= ~128 /* Attached */;
+        // Mark the LView as destroyed *before* executing the onDestroy hooks. An onDestroy hook
+        // runs arbitrary user code, which could include its own `viewRef.destroy()` (or similar). If
+        // We don't flag the view as destroyed before the hooks, this could lead to an infinite loop.
+        // This also aligns with the ViewEngine behavior. It also means that the onDestroy hook is
+        // really more of an "afterDestroy" hook if you think about it.
+        view[FLAGS] |= 256 /* Destroyed */;
+        executeOnDestroys(view);
+        removeListeners(view);
+        var hostTNode = view[T_HOST];
+        // For component views only, the local renderer is destroyed as clean up time.
+        if (hostTNode && hostTNode.type === 3 /* Element */ && isProceduralRenderer(view[RENDERER])) {
+            ngDevMode && ngDevMode.rendererDestroy++;
+            view[RENDERER].destroy();
+        }
+        // For embedded views still attached to a container: remove query result from this view.
+        if (viewAttachedToContainer(view) && view[QUERIES]) {
+            view[QUERIES].removeView();
+        }
+    }
+}
+/** Removes listeners and unsubscribes from output subscriptions */
+function removeListeners(lView) {
+    var tCleanup = lView[TVIEW].cleanup;
+    if (tCleanup != null) {
+        var lCleanup = lView[CLEANUP];
+        for (var i = 0; i < tCleanup.length - 1; i += 2) {
+            if (typeof tCleanup[i] === 'string') {
+                // This is a listener with the native renderer
+                var idxOrTargetGetter = tCleanup[i + 1];
+                var target = typeof idxOrTargetGetter === 'function' ?
+                    idxOrTargetGetter(lView) :
+                    unwrapRNode(lView[idxOrTargetGetter]);
+                var listener = lCleanup[tCleanup[i + 2]];
+                var useCaptureOrSubIdx = tCleanup[i + 3];
+                if (typeof useCaptureOrSubIdx === 'boolean') {
+                    // DOM listener
+                    target.removeEventListener(tCleanup[i], listener, useCaptureOrSubIdx);
+                }
+                else {
+                    if (useCaptureOrSubIdx >= 0) {
+                        // unregister
+                        lCleanup[useCaptureOrSubIdx]();
+                    }
+                    else {
+                        // Subscription
+                        lCleanup[-useCaptureOrSubIdx].unsubscribe();
+                    }
+                }
+                i += 2;
+            }
+            else if (typeof tCleanup[i] === 'number') {
+                // This is a listener with renderer2 (cleanup fn can be found by index)
+                var cleanupFn = lCleanup[tCleanup[i]];
+                cleanupFn();
+            }
+            else {
+                // This is a cleanup function that is grouped with the index of its context
+                var context = lCleanup[tCleanup[i + 1]];
+                tCleanup[i].call(context);
+            }
+        }
+        lView[CLEANUP] = null;
+    }
+}
+/** Calls onDestroy hooks for this view */
+function executeOnDestroys(view) {
+    var tView = view[TVIEW];
+    var destroyHooks;
+    if (tView != null && (destroyHooks = tView.destroyHooks) != null) {
+        for (var i = 0; i < destroyHooks.length; i += 2) {
+            var context = view[destroyHooks[i]];
+            // Only call the destroy hook if the context has been requested.
+            if (!(context instanceof NodeInjectorFactory)) {
+                destroyHooks[i + 1].call(context);
+            }
+        }
+    }
+}
+/**
+ * Returns a native element if a node can be inserted into the given parent.
+ *
+ * There are two reasons why we may not be able to insert a element immediately.
+ * - Projection: When creating a child content element of a component, we have to skip the
+ *   insertion because the content of a component will be projected.
+ *   `<component><content>delayed due to projection</content></component>`
+ * - Parent container is disconnected: This can happen when we are inserting a view into
+ *   parent container, which itself is disconnected. For example the parent container is part
+ *   of a View which has not be inserted or is made for projection but has not been inserted
+ *   into destination.
+ */
+function getRenderParent(tNode, currentView) {
+    // Nodes of the top-most view can be inserted eagerly.
+    if (isRootView(currentView)) {
+        return nativeParentNode(currentView[RENDERER], getNativeByTNode(tNode, currentView));
+    }
+    // Skip over element and ICU containers as those are represented by a comment node and
+    // can't be used as a render parent.
+    var parent = getHighestElementOrICUContainer(tNode).parent;
+    // If the parent is null, then we are inserting across views: either into an embedded view or a
+    // component view.
+    if (parent == null) {
+        var hostTNode = currentView[T_HOST];
+        if (hostTNode.type === 2 /* View */) {
+            // We are inserting a root element of an embedded view We might delay insertion of children
+            // for a given view if it is disconnected. This might happen for 2 main reasons:
+            // - view is not inserted into any container(view was created but not inserted yet)
+            // - view is inserted into a container but the container itself is not inserted into the DOM
+            // (container might be part of projection or child of a view that is not inserted yet).
+            // In other words we can insert children of a given view if this view was inserted into a
+            // container and the container itself has its render parent determined.
+            return getContainerRenderParent(hostTNode, currentView);
+        }
+        else {
+            // We are inserting a root element of the component view into the component host element and
+            // it should always be eager.
+            return getHostNative(currentView);
+        }
+    }
+    else {
+        ngDevMode && assertNodeType(parent, 3 /* Element */);
+        if (parent.flags & 1 /* isComponent */) {
+            var tData = currentView[TVIEW].data;
+            var tNode_1 = tData[parent.index];
+            var encapsulation = tData[tNode_1.directiveStart].encapsulation;
+            // We've got a parent which is an element in the current view. We just need to verify if the
+            // parent element is not a component. Component's content nodes are not inserted immediately
+            // because they will be projected, and so doing insert at this point would be wasteful.
+            // Since the projection would then move it to its final destination. Note that we can't
+            // make this assumption when using the Shadow DOM, because the native projection placeholders
+            // (<content> or <slot>) have to be in place as elements are being inserted.
+            if (encapsulation !== ViewEncapsulation.ShadowDom &&
+                encapsulation !== ViewEncapsulation.Native) {
+                return null;
+            }
+        }
+        return getNativeByTNode(parent, currentView);
+    }
+}
+/**
+ * Gets the native host element for a given view. Will return null if the current view does not have
+ * a host element.
+ */
+function getHostNative(currentView) {
+    ngDevMode && assertLView(currentView);
+    var hostTNode = currentView[T_HOST];
+    return hostTNode && hostTNode.type === 3 /* Element */ ?
+        getNativeByTNode(hostTNode, getLViewParent(currentView)) :
+        null;
+}
+/**
+ * Inserts a native node before another native node for a given parent using {@link Renderer3}.
+ * This is a utility function that can be used when native nodes were determined - it abstracts an
+ * actual renderer being used.
+ */
+function nativeInsertBefore(renderer, parent, child, beforeNode) {
+    if (isProceduralRenderer(renderer)) {
+        renderer.insertBefore(parent, child, beforeNode);
+    }
+    else {
+        parent.insertBefore(child, beforeNode, true);
+    }
+}
+function nativeAppendChild(renderer, parent, child) {
+    if (isProceduralRenderer(renderer)) {
+        renderer.appendChild(parent, child);
+    }
+    else {
+        parent.appendChild(child);
+    }
+}
+function nativeAppendOrInsertBefore(renderer, parent, child, beforeNode) {
+    if (beforeNode) {
+        nativeInsertBefore(renderer, parent, child, beforeNode);
+    }
+    else {
+        nativeAppendChild(renderer, parent, child);
+    }
+}
+/** Removes a node from the DOM given its native parent. */
+function nativeRemoveChild(renderer, parent, child, isHostElement) {
+    if (isProceduralRenderer(renderer)) {
+        renderer.removeChild(parent, child, isHostElement);
+    }
+    else {
+        parent.removeChild(child);
+    }
+}
+/**
+ * Returns a native parent of a given native node.
+ */
+function nativeParentNode(renderer, node) {
+    return (isProceduralRenderer(renderer) ? renderer.parentNode(node) : node.parentNode);
+}
+/**
+ * Returns a native sibling of a given native node.
+ */
+function nativeNextSibling(renderer, node) {
+    return isProceduralRenderer(renderer) ? renderer.nextSibling(node) : node.nextSibling;
+}
+/**
+ * Finds a native "anchor" node for cases where we can't append a native child directly
+ * (`appendChild`) and need to use a reference (anchor) node for the `insertBefore` operation.
+ * @param parentTNode
+ * @param lView
+ */
+function getNativeAnchorNode(parentTNode, lView) {
+    if (parentTNode.type === 2 /* View */) {
+        var lContainer = getLContainer(parentTNode, lView);
+        var views = lContainer[VIEWS];
+        var index = views.indexOf(lView);
+        return getBeforeNodeForView(index, views, lContainer[NATIVE]);
+    }
+    else if (parentTNode.type === 4 /* ElementContainer */ ||
+        parentTNode.type === 5 /* IcuContainer */) {
+        return getNativeByTNode(parentTNode, lView);
+    }
+    return null;
+}
+/**
+ * Appends the `child` native node (or a collection of nodes) to the `parent`.
+ *
+ * The element insertion might be delayed {@link canInsertNativeNode}.
+ *
+ * @param childEl The native child (or children) that should be appended
+ * @param childTNode The TNode of the child element
+ * @param currentView The current LView
+ * @returns Whether or not the child was appended
+ */
+function appendChild(childEl, childTNode, currentView) {
+    var e_2, _a;
+    var renderParent = getRenderParent(childTNode, currentView);
+    if (renderParent != null) {
+        var renderer = currentView[RENDERER];
+        var parentTNode = childTNode.parent || currentView[T_HOST];
+        var anchorNode = getNativeAnchorNode(parentTNode, currentView);
+        if (Array.isArray(childEl)) {
+            try {
+                for (var childEl_1 = __values(childEl), childEl_1_1 = childEl_1.next(); !childEl_1_1.done; childEl_1_1 = childEl_1.next()) {
+                    var nativeNode = childEl_1_1.value;
+                    nativeAppendOrInsertBefore(renderer, renderParent, nativeNode, anchorNode);
+                }
+            }
+            catch (e_2_1) { e_2 = { error: e_2_1 }; }
+            finally {
+                try {
+                    if (childEl_1_1 && !childEl_1_1.done && (_a = childEl_1.return)) _a.call(childEl_1);
+                }
+                finally { if (e_2) throw e_2.error; }
+            }
+        }
+        else {
+            nativeAppendOrInsertBefore(renderer, renderParent, childEl, anchorNode);
+        }
+    }
+}
+/**
+ * Gets the top-level element or an ICU container if those containers are nested.
+ *
+ * @param tNode The starting TNode for which we should skip element and ICU containers
+ * @returns The TNode of the highest level ICU container or element container
+ */
+function getHighestElementOrICUContainer(tNode) {
+    while (tNode.parent != null && (tNode.parent.type === 4 /* ElementContainer */ ||
+        tNode.parent.type === 5 /* IcuContainer */)) {
+        tNode = tNode.parent;
+    }
+    return tNode;
+}
+function getBeforeNodeForView(index, views, containerNative) {
+    if (index + 1 < views.length) {
+        var view = views[index + 1];
+        var viewTNode = view[T_HOST];
+        return viewTNode.child ? getNativeByTNode(viewTNode.child, view) : containerNative;
+    }
+    else {
+        return containerNative;
+    }
+}
+/**
+ * Removes a native node itself using a given renderer. To remove the node we are looking up its
+ * parent from the native tree as not all platforms / browsers support the equivalent of
+ * node.remove().
+ *
+ * @param renderer A renderer to be used
+ * @param rNode The native node that should be removed
+ * @param isHostElement A flag indicating if a node to be removed is a host of a component.
+ */
+function nativeRemoveNode(renderer, rNode, isHostElement) {
+    var nativeParent = nativeParentNode(renderer, rNode);
+    if (nativeParent) {
+        nativeRemoveChild(renderer, nativeParent, rNode, isHostElement);
+    }
+}
+/**
+ * Appends nodes to a target projection place. Nodes to insert were previously re-distribution and
+ * stored on a component host level.
+ * @param lView A LView where nodes are inserted (target VLview)
+ * @param tProjectionNode A projection node where previously re-distribution should be appended
+ * (target insertion place)
+ * @param selectorIndex A bucket from where nodes to project should be taken
+ * @param componentView A where projectable nodes were initially created (source view)
+ */
+function appendProjectedNodes(lView, tProjectionNode, selectorIndex, componentView) {
+    var projectedView = componentView[PARENT];
+    var componentNode = componentView[T_HOST];
+    var nodeToProject = componentNode.projection[selectorIndex];
+    if (Array.isArray(nodeToProject)) {
+        appendChild(nodeToProject, tProjectionNode, lView);
+    }
+    else {
+        while (nodeToProject) {
+            if (nodeToProject.type === 1 /* Projection */) {
+                appendProjectedNodes(lView, tProjectionNode, nodeToProject.projection, findComponentView(projectedView));
+            }
+            else {
+                // This flag must be set now or we won't know that this node is projected
+                // if the nodes are inserted into a container later.
+                nodeToProject.flags |= 2 /* isProjected */;
+                appendProjectedNode(nodeToProject, tProjectionNode, lView, projectedView);
+            }
+            nodeToProject = nodeToProject.projectionNext;
+        }
+    }
+}
+/**
+ * Appends a projected node to the DOM, or in the case of a projected container,
+ * appends the nodes from all of the container's active views to the DOM.
+ *
+ * @param projectedTNode The TNode to be projected
+ * @param tProjectionNode The projection (ng-content) TNode
+ * @param currentView Current LView
+ * @param projectionView Projection view (view above current)
+ */
+function appendProjectedNode(projectedTNode, tProjectionNode, currentView, projectionView) {
+    var native = getNativeByTNode(projectedTNode, projectionView);
+    appendChild(native, tProjectionNode, currentView);
+    // the projected contents are processed while in the shadow view (which is the currentView)
+    // therefore we need to extract the view where the host element lives since it's the
+    // logical container of the content projected views
+    attachPatchData(native, projectionView);
+    var nodeOrContainer = projectionView[projectedTNode.index];
+    if (projectedTNode.type === 0 /* Container */) {
+        // The node we are adding is a container and we are adding it to an element which
+        // is not a component (no more re-projection).
+        // Alternatively a container is projected at the root of a component's template
+        // and can't be re-projected (as not content of any component).
+        // Assign the final projection location in those cases.
+        var views = nodeOrContainer[VIEWS];
+        for (var i = 0; i < views.length; i++) {
+            addRemoveViewFromContainer(views[i], true, nodeOrContainer[NATIVE]);
+        }
+    }
+    else {
+        if (projectedTNode.type === 4 /* ElementContainer */) {
+            var ngContainerChildTNode = projectedTNode.child;
+            while (ngContainerChildTNode) {
+                appendProjectedNode(ngContainerChildTNode, tProjectionNode, currentView, projectionView);
+                ngContainerChildTNode = ngContainerChildTNode.next;
+            }
+        }
+        if (isLContainer(nodeOrContainer)) {
+            appendChild(nodeOrContainer[NATIVE], tProjectionNode, currentView);
+        }
+    }
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Creates an LContainer for inline views, e.g.
+ *
+ * % if (showing) {
+ *   <div></div>
+ * % }
+ *
+ * @param index The index of the container in the data array
+ */
+function container(index) {
+    var tNode = containerInternal(index, null, null);
+    var lView = getLView();
+    if (lView[TVIEW].firstTemplatePass) {
+        tNode.tViews = [];
+    }
+    addTContainerToQueries(lView, tNode);
+    setIsParent(false);
+}
+/**
+ * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
+ *
+ * <ng-template #foo>
+ *    <div></div>
+ * </ng-template>
+ *
+ * @param index The index of the container in the data array
+ * @param templateFn Inline template
+ * @param consts The number of nodes, local refs, and pipes for this template
+ * @param vars The number of bindings for this template
+ * @param tagName The name of the container element, if applicable
+ * @param attrs The attrs attached to the container, if applicable
+ * @param localRefs A set of local reference bindings on the element.
+ * @param localRefExtractor A function which extracts local-refs values from the template.
+ *        Defaults to the current element associated with the local-ref.
+ */
+function template(index, templateFn, consts, vars, tagName, attrs, localRefs, localRefExtractor) {
+    var lView = getLView();
+    var tView = lView[TVIEW];
+    // TODO: consider a separate node type for templates
+    var tContainerNode = containerInternal(index, tagName || null, attrs || null);
+    if (tView.firstTemplatePass) {
+        tContainerNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null, null);
+    }
+    createDirectivesAndLocals(tView, lView, localRefs, localRefExtractor);
+    addTContainerToQueries(lView, tContainerNode);
+    attachPatchData(getNativeByTNode(tContainerNode, lView), lView);
+    registerPostOrderHooks(tView, tContainerNode);
+    setIsParent(false);
+}
+/**
+ * Sets a container up to receive views.
+ *
+ * @param index The index of the container in the data array
+ */
+function containerRefreshStart(index) {
+    var lView = getLView();
+    var tView = lView[TVIEW];
+    var previousOrParentTNode = loadInternal(tView.data, index);
+    setPreviousOrParentTNode(previousOrParentTNode);
+    ngDevMode && assertNodeType(previousOrParentTNode, 0 /* Container */);
+    setIsParent(true);
+    lView[index + HEADER_OFFSET][ACTIVE_INDEX] = 0;
+    // We need to execute init hooks here so ngOnInit hooks are called in top level views
+    // before they are called in embedded views (for backwards compatibility).
+    executePreOrderHooks(lView, tView, getCheckNoChangesMode(), undefined);
+}
+/**
+ * Marks the end of the LContainer.
+ *
+ * Marking the end of LContainer is the time when to child views get inserted or removed.
+ */
+function containerRefreshEnd() {
+    var previousOrParentTNode = getPreviousOrParentTNode();
+    if (getIsParent()) {
+        setIsParent(false);
+    }
+    else {
+        ngDevMode && assertNodeType(previousOrParentTNode, 2 /* View */);
+        ngDevMode && assertHasParent(previousOrParentTNode);
+        previousOrParentTNode = previousOrParentTNode.parent;
+        setPreviousOrParentTNode(previousOrParentTNode);
+    }
+    ngDevMode && assertNodeType(previousOrParentTNode, 0 /* Container */);
+    var lContainer = getLView()[previousOrParentTNode.index];
+    var nextIndex = lContainer[ACTIVE_INDEX];
+    // remove extra views at the end of the container
+    while (nextIndex < lContainer[VIEWS].length) {
+        removeView(lContainer, nextIndex);
+    }
+}
+/**
+* Reporting a TContainer node queries is a 2-step process as we need to:
+* - check if the container node itself is matching (query might match a <ng-template> node);
+* - prepare room for nodes from views that might be created based on the TemplateRef linked to this
+* container.
+*
+* Those 2 operations need to happen in the specific order (match the container node itself, then
+* prepare space for nodes from views).
+*/
+function addTContainerToQueries(lView, tContainerNode) {
+    var queries = lView[QUERIES];
+    if (queries) {
+        queries.addNode(tContainerNode);
+        var lContainer = lView[tContainerNode.index];
+        lContainer[QUERIES] = queries.container();
+    }
+}
+function containerInternal(index, tagName, attrs) {
+    var lView = getLView();
+    ngDevMode && assertEqual(lView[BINDING_INDEX], lView[TVIEW].bindingStartIndex, 'container nodes should be created before any bindings');
+    var adjustedIndex = index + HEADER_OFFSET;
+    var comment = lView[RENDERER].createComment(ngDevMode ? 'container' : '');
+    ngDevMode && ngDevMode.rendererCreateComment++;
+    var tNode = createNodeAtIndex(index, 0 /* Container */, comment, tagName, attrs);
+    var lContainer = lView[adjustedIndex] =
+        createLContainer(lView[adjustedIndex], lView, comment, tNode);
+    appendChild(comment, tNode, lView);
+    // Containers are added to the current view tree instead of their embedded views
+    // because views can be removed and re-inserted.
+    addToViewTree(lView, lContainer);
+    ngDevMode && assertNodeType(getPreviousOrParentTNode(), 0 /* Container */);
+    return tNode;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/** Store a value in the `data` at a given `index`. */
+function store(index, value) {
+    var lView = getLView();
+    var tView = lView[TVIEW];
+    // We don't store any static data for local variables, so the first time
+    // we see the template, we should store as null to avoid a sparse array
+    var adjustedIndex = index + HEADER_OFFSET;
+    if (adjustedIndex >= tView.data.length) {
+        tView.data[adjustedIndex] = null;
+        tView.blueprint[adjustedIndex] = null;
+    }
+    lView[adjustedIndex] = value;
+}
+/**
+ * Retrieves a local reference from the current contextViewData.
+ *
+ * If the reference to retrieve is in a parent view, this instruction is used in conjunction
+ * with a nextContext() call, which walks up the tree and updates the contextViewData instance.
+ *
+ * @param index The index of the local ref in contextViewData.
+ */
+function reference(index) {
+    var contextLView = getContextLView();
+    return loadInternal(contextLView, index);
+}
+/** Retrieves a value from current `viewData`. */
+function load(index) {
+    return loadInternal(getLView(), index);
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function directiveInject(token, flags) {
+    if (flags === void 0) { flags = InjectFlags.Default; }
+    token = resolveForwardRef(token);
+    return getOrCreateInjectable(getPreviousOrParentTNode(), getLView(), token, flags);
+}
+/**
+ * Facade for the attribute injection from DI.
+ */
+function injectAttribute(attrNameToInject) {
+    return injectAttributeImpl(getPreviousOrParentTNode(), attrNameToInject);
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+var BRAND = '__SANITIZER_TRUSTED_BRAND__';
+function allowSanitizationBypass(value, type) {
+    return (value instanceof String && value[BRAND] === type);
+}
+/**
+ * Mark `html` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {@link htmlSanitizer} to be trusted implicitly.
+ *
+ * @param trustedHtml `html` string which needs to be implicitly trusted.
+ * @returns a `html` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustHtml(trustedHtml) {
+    return bypassSanitizationTrustString(trustedHtml, "Html" /* Html */);
+}
+/**
+ * Mark `style` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {@link styleSanitizer} to be trusted implicitly.
+ *
+ * @param trustedStyle `style` string which needs to be implicitly trusted.
+ * @returns a `style` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustStyle(trustedStyle) {
+    return bypassSanitizationTrustString(trustedStyle, "Style" /* Style */);
+}
+/**
+ * Mark `script` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {@link scriptSanitizer} to be trusted implicitly.
+ *
+ * @param trustedScript `script` string which needs to be implicitly trusted.
+ * @returns a `script` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustScript(trustedScript) {
+    return bypassSanitizationTrustString(trustedScript, "Script" /* Script */);
+}
+/**
+ * Mark `url` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {@link urlSanitizer} to be trusted implicitly.
+ *
+ * @param trustedUrl `url` string which needs to be implicitly trusted.
+ * @returns a `url` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustUrl(trustedUrl) {
+    return bypassSanitizationTrustString(trustedUrl, "Url" /* Url */);
+}
+/**
+ * Mark `url` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {@link resourceUrlSanitizer} to be trusted implicitly.
+ *
+ * @param trustedResourceUrl `url` string which needs to be implicitly trusted.
+ * @returns a `url` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
+    return bypassSanitizationTrustString(trustedResourceUrl, "ResourceUrl" /* ResourceUrl */);
+}
+function bypassSanitizationTrustString(trustedString, mode) {
+    var trusted = new String(trustedString);
+    trusted[BRAND] = mode;
+    return trusted;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * This file is used to control if the default rendering pipeline should be `ViewEngine` or `Ivy`.
+ *
+ * For more information on how to run and debug tests with either Ivy or View Engine (legacy),
+ * please see [BAZEL.md](./docs/BAZEL.md).
+ */
+var _devMode = true;
+var _runModeLocked = false;
+/**
+ * Returns whether Angular is in development mode. After called once,
+ * the value is locked and won't change any more.
+ *
+ * By default, this is true, unless a user calls `enableProdMode` before calling this.
+ *
+ * @publicApi
+ */
+function isDevMode() {
+    _runModeLocked = true;
+    return _devMode;
+}
+/**
+ * Disable Angular's development mode, which turns off assertions and other
+ * checks within the framework.
+ *
+ * One important assertion this disables verifies that a change detection pass
+ * does not result in additional changes to any bindings (also known as
+ * unidirectional data flow).
+ *
+ * @publicApi
+ */
+function enableProdMode() {
+    if (_runModeLocked) {
+        throw new Error('Cannot enable prod mode after platform setup.');
+    }
+    _devMode = false;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * This helper class is used to get hold of an inert tree of DOM elements containing dirty HTML
+ * that needs sanitizing.
+ * Depending upon browser support we must use one of three strategies for doing this.
+ * Support: Safari 10.x -> XHR strategy
+ * Support: Firefox -> DomParser strategy
+ * Default: InertDocument strategy
+ */
+var InertBodyHelper = /** @class */ (function () {
+    function InertBodyHelper(defaultDoc) {
+        this.defaultDoc = defaultDoc;
+        this.inertDocument = this.defaultDoc.implementation.createHTMLDocument('sanitization-inert');
+        this.inertBodyElement = this.inertDocument.body;
+        if (this.inertBodyElement == null) {
+            // usually there should be only one body element in the document, but IE doesn't have any, so
+            // we need to create one.
+            var inertHtml = this.inertDocument.createElement('html');
+            this.inertDocument.appendChild(inertHtml);
+            this.inertBodyElement = this.inertDocument.createElement('body');
+            inertHtml.appendChild(this.inertBodyElement);
+        }
+        this.inertBodyElement.innerHTML = '<svg><g onload="this.parentNode.remove()"></g></svg>';
+        if (this.inertBodyElement.querySelector && !this.inertBodyElement.querySelector('svg')) {
+            // We just hit the Safari 10.1 bug - which allows JS to run inside the SVG G element
+            // so use the XHR strategy.
+            this.getInertBodyElement = this.getInertBodyElement_XHR;
+            return;
+        }
+        this.inertBodyElement.innerHTML =
+            '<svg><p><style><img src="</style><img src=x onerror=alert(1)//">';
+        if (this.inertBodyElement.querySelector && this.inertBodyElement.querySelector('svg img')) {
+            // We just hit the Firefox bug - which prevents the inner img JS from being sanitized
+            // so use the DOMParser strategy, if it is available.
+            // If the DOMParser is not available then we are not in Firefox (Server/WebWorker?) so we
+            // fall through to the default strategy below.
+            if (isDOMParserAvailable()) {
+                this.getInertBodyElement = this.getInertBodyElement_DOMParser;
+                return;
+            }
+        }
+        // None of the bugs were hit so it is safe for us to use the default InertDocument strategy
+        this.getInertBodyElement = this.getInertBodyElement_InertDocument;
+    }
+    /**
+     * Use XHR to create and fill an inert body element (on Safari 10.1)
+     * See
+     * https://github.com/cure53/DOMPurify/blob/a992d3a75031cb8bb032e5ea8399ba972bdf9a65/src/purify.js#L439-L449
+     */
+    InertBodyHelper.prototype.getInertBodyElement_XHR = function (html) {
+        // We add these extra elements to ensure that the rest of the content is parsed as expected
+        // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
+        // `<head>` tag.
+        html = '<body><remove></remove>' + html + '</body>';
+        try {
+            html = encodeURI(html);
+        }
+        catch (_a) {
+            return null;
+        }
+        var xhr = new XMLHttpRequest();
+        xhr.responseType = 'document';
+        xhr.open('GET', 'data:text/html;charset=utf-8,' + html, false);
+        xhr.send(undefined);
+        var body = xhr.response.body;
+        body.removeChild(body.firstChild);
+        return body;
+    };
+    /**
+     * Use DOMParser to create and fill an inert body element (on Firefox)
+     * See https://github.com/cure53/DOMPurify/releases/tag/0.6.7
+     *
+     */
+    InertBodyHelper.prototype.getInertBodyElement_DOMParser = function (html) {
+        // We add these extra elements to ensure that the rest of the content is parsed as expected
+        // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
+        // `<head>` tag.
+        html = '<body><remove></remove>' + html + '</body>';
+        try {
+            var body = new window
+                .DOMParser()
+                .parseFromString(html, 'text/html')
+                .body;
+            body.removeChild(body.firstChild);
+            return body;
+        }
+        catch (_a) {
+            return null;
+        }
+    };
+    /**
+     * Use an HTML5 `template` element, if supported, or an inert body element created via
+     * `createHtmlDocument` to create and fill an inert DOM element.
+     * This is the default sane strategy to use if the browser does not require one of the specialised
+     * strategies above.
+     */
+    InertBodyHelper.prototype.getInertBodyElement_InertDocument = function (html) {
+        // Prefer using <template> element if supported.
+        var templateEl = this.inertDocument.createElement('template');
+        if ('content' in templateEl) {
+            templateEl.innerHTML = html;
+            return templateEl;
+        }
+        this.inertBodyElement.innerHTML = html;
+        // Support: IE 9-11 only
+        // strip custom-namespaced attributes on IE<=11
+        if (this.defaultDoc.documentMode) {
+            this.stripCustomNsAttrs(this.inertBodyElement);
+        }
+        return this.inertBodyElement;
+    };
+    /**
+     * When IE9-11 comes across an unknown namespaced attribute e.g. 'xlink:foo' it adds 'xmlns:ns1'
+     * attribute to declare ns1 namespace and prefixes the attribute with 'ns1' (e.g.
+     * 'ns1:xlink:foo').
+     *
+     * This is undesirable since we don't want to allow any of these custom attributes. This method
+     * strips them all.
+     */
+    InertBodyHelper.prototype.stripCustomNsAttrs = function (el) {
+        var elAttrs = el.attributes;
+        // loop backwards so that we can support removals.
+        for (var i = elAttrs.length - 1; 0 < i; i--) {
+            var attrib = elAttrs.item(i);
+            var attrName = attrib.name;
+            if (attrName === 'xmlns:ns1' || attrName.indexOf('ns1:') === 0) {
+                el.removeAttribute(attrName);
+            }
+        }
+        var childNode = el.firstChild;
+        while (childNode) {
+            if (childNode.nodeType === Node.ELEMENT_NODE)
+                this.stripCustomNsAttrs(childNode);
+            childNode = childNode.nextSibling;
+        }
+    };
+    return InertBodyHelper;
+}());
+/**
+ * We need to determine whether the DOMParser exists in the global context.
+ * The try-catch is because, on some browsers, trying to access this property
+ * on window can actually throw an error.
+ *
+ * @suppress {uselessCode}
+ */
+function isDOMParserAvailable() {
+    try {
+        return !!window.DOMParser;
+    }
+    catch (_a) {
+        return false;
+    }
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * A pattern that recognizes a commonly useful subset of URLs that are safe.
+ *
+ * This regular expression matches a subset of URLs that will not cause script
+ * execution if used in URL context within a HTML document. Specifically, this
+ * regular expression matches if (comment from here on and regex copied from
+ * Soy's EscapingConventions):
+ * (1) Either an allowed protocol (http, https, mailto or ftp).
+ * (2) or no protocol.  A protocol must be followed by a colon. The below
+ *     allows that by allowing colons only after one of the characters [/?#].
+ *     A colon after a hash (#) must be in the fragment.
+ *     Otherwise, a colon after a (?) must be in a query.
+ *     Otherwise, a colon after a single solidus (/) must be in a path.
+ *     Otherwise, a colon after a double solidus (//) must be in the authority
+ *     (before port).
+ *
+ * The pattern disallows &, used in HTML entity declarations before
+ * one of the characters in [/?#]. This disallows HTML entities used in the
+ * protocol name, which should never happen, e.g. "h&#116;tp" for "http".
+ * It also disallows HTML entities in the first path part of a relative path,
+ * e.g. "foo&lt;bar/baz".  Our existing escaping functions should not produce
+ * that. More importantly, it disallows masking of a colon,
+ * e.g. "javascript&#58;...".
+ *
+ * This regular expression was taken from the Closure sanitization library.
+ */
+var SAFE_URL_PATTERN = /^(?:(?:https?|mailto|ftp|tel|file):|[^&:/?#]*(?:[/?#]|$))/gi;
+/** A pattern that matches safe data URLs. Only matches image, video and audio types. */
+var DATA_URL_PATTERN = /^data:(?:image\/(?:bmp|gif|jpeg|jpg|png|tiff|webp)|video\/(?:mpeg|mp4|ogg|webm)|audio\/(?:mp3|oga|ogg|opus));base64,[a-z0-9+\/]+=*$/i;
+function _sanitizeUrl(url) {
+    url = String(url);
+    if (url.match(SAFE_URL_PATTERN) || url.match(DATA_URL_PATTERN))
+        return url;
+    if (isDevMode()) {
+        console.warn("WARNING: sanitizing unsafe URL value " + url + " (see http://g.co/ng/security#xss)");
+    }
+    return 'unsafe:' + url;
+}
+function sanitizeSrcset(srcset) {
+    srcset = String(srcset);
+    return srcset.split(',').map(function (srcset) { return _sanitizeUrl(srcset.trim()); }).join(', ');
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function tagSet(tags) {
+    var e_1, _a;
+    var res = {};
+    try {
+        for (var _b = __values(tags.split(',')), _c = _b.next(); !_c.done; _c = _b.next()) {
+            var t = _c.value;
+            res[t] = true;
+        }
+    }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+        }
+        finally { if (e_1) throw e_1.error; }
+    }
+    return res;
+}
+function merge() {
+    var sets = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        sets[_i] = arguments[_i];
+    }
+    var e_2, _a;
+    var res = {};
+    try {
+        for (var sets_1 = __values(sets), sets_1_1 = sets_1.next(); !sets_1_1.done; sets_1_1 = sets_1.next()) {
+            var s = sets_1_1.value;
+            for (var v in s) {
+                if (s.hasOwnProperty(v))
+                    res[v] = true;
+            }
+        }
+    }
+    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+    finally {
+        try {
+            if (sets_1_1 && !sets_1_1.done && (_a = sets_1.return)) _a.call(sets_1);
+        }
+        finally { if (e_2) throw e_2.error; }
+    }
+    return res;
+}
+// Good source of info about elements and attributes
+// http://dev.w3.org/html5/spec/Overview.html#semantics
+// http://simon.html5.org/html-elements
+// Safe Void Elements - HTML5
+// http://dev.w3.org/html5/spec/Overview.html#void-elements
+var VOID_ELEMENTS = tagSet('area,br,col,hr,img,wbr');
+// Elements that you can, intentionally, leave open (and which close themselves)
+// http://dev.w3.org/html5/spec/Overview.html#optional-tags
+var OPTIONAL_END_TAG_BLOCK_ELEMENTS = tagSet('colgroup,dd,dt,li,p,tbody,td,tfoot,th,thead,tr');
+var OPTIONAL_END_TAG_INLINE_ELEMENTS = tagSet('rp,rt');
+var OPTIONAL_END_TAG_ELEMENTS = merge(OPTIONAL_END_TAG_INLINE_ELEMENTS, OPTIONAL_END_TAG_BLOCK_ELEMENTS);
+// Safe Block Elements - HTML5
+var BLOCK_ELEMENTS = merge(OPTIONAL_END_TAG_BLOCK_ELEMENTS, tagSet('address,article,' +
+    'aside,blockquote,caption,center,del,details,dialog,dir,div,dl,figure,figcaption,footer,h1,h2,h3,h4,h5,' +
+    'h6,header,hgroup,hr,ins,main,map,menu,nav,ol,pre,section,summary,table,ul'));
+// Inline Elements - HTML5
+var INLINE_ELEMENTS = merge(OPTIONAL_END_TAG_INLINE_ELEMENTS, tagSet('a,abbr,acronym,audio,b,' +
+    'bdi,bdo,big,br,cite,code,del,dfn,em,font,i,img,ins,kbd,label,map,mark,picture,q,ruby,rp,rt,s,' +
+    'samp,small,source,span,strike,strong,sub,sup,time,track,tt,u,var,video'));
+var VALID_ELEMENTS = merge(VOID_ELEMENTS, BLOCK_ELEMENTS, INLINE_ELEMENTS, OPTIONAL_END_TAG_ELEMENTS);
+// Attributes that have href and hence need to be sanitized
+var URI_ATTRS = tagSet('background,cite,href,itemtype,longdesc,poster,src,xlink:href');
+// Attributes that have special href set hence need to be sanitized
+var SRCSET_ATTRS = tagSet('srcset');
+var HTML_ATTRS = tagSet('abbr,accesskey,align,alt,autoplay,axis,bgcolor,border,cellpadding,cellspacing,class,clear,color,cols,colspan,' +
+    'compact,controls,coords,datetime,default,dir,download,face,headers,height,hidden,hreflang,hspace,' +
+    'ismap,itemscope,itemprop,kind,label,lang,language,loop,media,muted,nohref,nowrap,open,preload,rel,rev,role,rows,rowspan,rules,' +
+    'scope,scrolling,shape,size,sizes,span,srclang,start,summary,tabindex,target,title,translate,type,usemap,' +
+    'valign,value,vspace,width');
+// NB: This currently consciously doesn't support SVG. SVG sanitization has had several security
+// issues in the past, so it seems safer to leave it out if possible. If support for binding SVG via
+// innerHTML is required, SVG attributes should be added here.
+// NB: Sanitization does not allow <form> elements or other active elements (<button> etc). Those
+// can be sanitized, but they increase security surface area without a legitimate use case, so they
+// are left out here.
+var VALID_ATTRS = merge(URI_ATTRS, SRCSET_ATTRS, HTML_ATTRS);
+// Elements whose content should not be traversed/preserved, if the elements themselves are invalid.
+//
+// Typically, `<invalid>Some content</invalid>` would traverse (and in this case preserve)
+// `Some content`, but strip `invalid-element` opening/closing tags. For some elements, though, we
+// don't want to preserve the content, if the elements themselves are going to be removed.
+var SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS = tagSet('script,style,template');
+/**
+ * SanitizingHtmlSerializer serializes a DOM fragment, stripping out any unsafe elements and unsafe
+ * attributes.
+ */
+var SanitizingHtmlSerializer = /** @class */ (function () {
+    function SanitizingHtmlSerializer() {
+        // Explicitly track if something was stripped, to avoid accidentally warning of sanitization just
+        // because characters were re-encoded.
+        this.sanitizedSomething = false;
+        this.buf = [];
+    }
+    SanitizingHtmlSerializer.prototype.sanitizeChildren = function (el) {
+        // This cannot use a TreeWalker, as it has to run on Angular's various DOM adapters.
+        // However this code never accesses properties off of `document` before deleting its contents
+        // again, so it shouldn't be vulnerable to DOM clobbering.
+        var current = el.firstChild;
+        var traverseContent = true;
+        while (current) {
+            if (current.nodeType === Node.ELEMENT_NODE) {
+                traverseContent = this.startElement(current);
+            }
+            else if (current.nodeType === Node.TEXT_NODE) {
+                this.chars(current.nodeValue);
+            }
+            else {
+                // Strip non-element, non-text nodes.
+                this.sanitizedSomething = true;
+            }
+            if (traverseContent && current.firstChild) {
+                current = current.firstChild;
+                continue;
+            }
+            while (current) {
+                // Leaving the element. Walk up and to the right, closing tags as we go.
+                if (current.nodeType === Node.ELEMENT_NODE) {
+                    this.endElement(current);
+                }
+                var next = this.checkClobberedElement(current, current.nextSibling);
+                if (next) {
+                    current = next;
+                    break;
+                }
+                current = this.checkClobberedElement(current, current.parentNode);
+            }
+        }
+        return this.buf.join('');
+    };
+    /**
+     * Sanitizes an opening element tag (if valid) and returns whether the element's contents should
+     * be traversed. Element content must always be traversed (even if the element itself is not
+     * valid/safe), unless the element is one of `SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS`.
+     *
+     * @param element The element to sanitize.
+     * @return True if the element's contents should be traversed.
+     */
+    SanitizingHtmlSerializer.prototype.startElement = function (element) {
+        var tagName = element.nodeName.toLowerCase();
+        if (!VALID_ELEMENTS.hasOwnProperty(tagName)) {
+            this.sanitizedSomething = true;
+            return !SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS.hasOwnProperty(tagName);
+        }
+        this.buf.push('<');
+        this.buf.push(tagName);
+        var elAttrs = element.attributes;
+        for (var i = 0; i < elAttrs.length; i++) {
+            var elAttr = elAttrs.item(i);
+            var attrName = elAttr.name;
+            var lower = attrName.toLowerCase();
+            if (!VALID_ATTRS.hasOwnProperty(lower)) {
+                this.sanitizedSomething = true;
+                continue;
+            }
+            var value = elAttr.value;
+            // TODO(martinprobst): Special case image URIs for data:image/...
+            if (URI_ATTRS[lower])
+                value = _sanitizeUrl(value);
+            if (SRCSET_ATTRS[lower])
+                value = sanitizeSrcset(value);
+            this.buf.push(' ', attrName, '="', encodeEntities(value), '"');
+        }
+        this.buf.push('>');
+        return true;
+    };
+    SanitizingHtmlSerializer.prototype.endElement = function (current) {
+        var tagName = current.nodeName.toLowerCase();
+        if (VALID_ELEMENTS.hasOwnProperty(tagName) && !VOID_ELEMENTS.hasOwnProperty(tagName)) {
+            this.buf.push('</');
+            this.buf.push(tagName);
+            this.buf.push('>');
+        }
+    };
+    SanitizingHtmlSerializer.prototype.chars = function (chars) { this.buf.push(encodeEntities(chars)); };
+    SanitizingHtmlSerializer.prototype.checkClobberedElement = function (node, nextNode) {
+        if (nextNode &&
+            (node.compareDocumentPosition(nextNode) &
+                Node.DOCUMENT_POSITION_CONTAINED_BY) === Node.DOCUMENT_POSITION_CONTAINED_BY) {
+            throw new Error("Failed to sanitize html because the element is clobbered: " + node.outerHTML);
+        }
+        return nextNode;
+    };
+    return SanitizingHtmlSerializer;
+}());
+// Regular Expressions for parsing tags and attributes
+var SURROGATE_PAIR_REGEXP = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
+// ! to ~ is the ASCII range.
+var NON_ALPHANUMERIC_REGEXP = /([^\#-~ |!])/g;
+/**
+ * Escapes all potentially dangerous characters, so that the
+ * resulting string can be safely inserted into attribute or
+ * element text.
+ * @param value
+ */
+function encodeEntities(value) {
+    return value.replace(/&/g, '&amp;')
+        .replace(SURROGATE_PAIR_REGEXP, function (match) {
+        var hi = match.charCodeAt(0);
+        var low = match.charCodeAt(1);
+        return '&#' + (((hi - 0xD800) * 0x400) + (low - 0xDC00) + 0x10000) + ';';
+    })
+        .replace(NON_ALPHANUMERIC_REGEXP, function (match) { return '&#' + match.charCodeAt(0) + ';'; })
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+var inertBodyHelper;
+/**
+ * Sanitizes the given unsafe, untrusted HTML fragment, and returns HTML text that is safe to add to
+ * the DOM in a browser environment.
+ */
+function _sanitizeHtml(defaultDoc, unsafeHtmlInput) {
+    var inertBodyElement = null;
+    try {
+        inertBodyHelper = inertBodyHelper || new InertBodyHelper(defaultDoc);
+        // Make sure unsafeHtml is actually a string (TypeScript types are not enforced at runtime).
+        var unsafeHtml = unsafeHtmlInput ? String(unsafeHtmlInput) : '';
+        inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
+        // mXSS protection. Repeatedly parse the document to make sure it stabilizes, so that a browser
+        // trying to auto-correct incorrect HTML cannot cause formerly inert HTML to become dangerous.
+        var mXSSAttempts = 5;
+        var parsedHtml = unsafeHtml;
+        do {
+            if (mXSSAttempts === 0) {
+                throw new Error('Failed to sanitize html because the input is unstable');
+            }
+            mXSSAttempts--;
+            unsafeHtml = parsedHtml;
+            parsedHtml = inertBodyElement.innerHTML;
+            inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
+        } while (unsafeHtml !== parsedHtml);
+        var sanitizer = new SanitizingHtmlSerializer();
+        var safeHtml = sanitizer.sanitizeChildren(getTemplateContent(inertBodyElement) || inertBodyElement);
+        if (isDevMode() && sanitizer.sanitizedSomething) {
+            console.warn('WARNING: sanitizing HTML stripped some content, see http://g.co/ng/security#xss');
+        }
+        return safeHtml;
+    }
+    finally {
+        // In case anything goes wrong, clear out inertElement to reset the entire DOM structure.
+        if (inertBodyElement) {
+            var parent_1 = getTemplateContent(inertBodyElement) || inertBodyElement;
+            while (parent_1.firstChild) {
+                parent_1.removeChild(parent_1.firstChild);
+            }
+        }
+    }
+}
+function getTemplateContent(el) {
+    return 'content' in el /** Microsoft/TypeScript#21517 */ && isTemplateElement(el) ?
+        el.content :
+        null;
+}
+function isTemplateElement(el) {
+    return el.nodeType === Node.ELEMENT_NODE && el.nodeName === 'TEMPLATE';
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * A SecurityContext marks a location that has dangerous security implications, e.g. a DOM property
+ * like `innerHTML` that could cause Cross Site Scripting (XSS) security bugs when improperly
+ * handled.
+ *
+ * See DomSanitizer for more details on security in Angular applications.
+ *
+ * @publicApi
+ */
+var SecurityContext;
+(function (SecurityContext) {
+    SecurityContext[SecurityContext["NONE"] = 0] = "NONE";
+    SecurityContext[SecurityContext["HTML"] = 1] = "HTML";
+    SecurityContext[SecurityContext["STYLE"] = 2] = "STYLE";
+    SecurityContext[SecurityContext["SCRIPT"] = 3] = "SCRIPT";
+    SecurityContext[SecurityContext["URL"] = 4] = "URL";
+    SecurityContext[SecurityContext["RESOURCE_URL"] = 5] = "RESOURCE_URL";
+})(SecurityContext || (SecurityContext = {}));
+/**
+ * Sanitizer is used by the views to sanitize potentially dangerous values.
+ *
+ * @publicApi
+ */
+var Sanitizer = /** @class */ (function () {
+    function Sanitizer() {
+    }
+    return Sanitizer;
+}());
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Regular expression for safe style values.
+ *
+ * Quotes (" and ') are allowed, but a check must be done elsewhere to ensure they're balanced.
+ *
+ * ',' allows multiple values to be assigned to the same property (e.g. background-attachment or
+ * font-family) and hence could allow multiple values to get injected, but that should pose no risk
+ * of XSS.
+ *
+ * The function expression checks only for XSS safety, not for CSS validity.
+ *
+ * This regular expression was taken from the Closure sanitization library, and augmented for
+ * transformation values.
+ */
+var VALUES = '[-,."\'%_!# a-zA-Z0-9]+';
+var TRANSFORMATION_FNS = '(?:matrix|translate|scale|rotate|skew|perspective)(?:X|Y|3d)?';
+var COLOR_FNS = '(?:rgb|hsl)a?';
+var GRADIENTS = '(?:repeating-)?(?:linear|radial)-gradient';
+var CSS3_FNS = '(?:calc|attr)';
+var FN_ARGS = '\\([-0-9.%, #a-zA-Z]+\\)';
+var SAFE_STYLE_VALUE = new RegExp("^(" + VALUES + "|" +
+    ("(?:" + TRANSFORMATION_FNS + "|" + COLOR_FNS + "|" + GRADIENTS + "|" + CSS3_FNS + ")") +
+    (FN_ARGS + ")$"), 'g');
+/**
+ * Matches a `url(...)` value with an arbitrary argument as long as it does
+ * not contain parentheses.
+ *
+ * The URL value still needs to be sanitized separately.
+ *
+ * `url(...)` values are a very common use case, e.g. for `background-image`. With carefully crafted
+ * CSS style rules, it is possible to construct an information leak with `url` values in CSS, e.g.
+ * by observing whether scroll bars are displayed, or character ranges used by a font face
+ * definition.
+ *
+ * Angular only allows binding CSS values (as opposed to entire CSS rules), so it is unlikely that
+ * binding a URL value without further cooperation from the page will cause an information leak, and
+ * if so, it is just a leak, not a full blown XSS vulnerability.
+ *
+ * Given the common use case, low likelihood of attack vector, and low impact of an attack, this
+ * code is permissive and allows URLs that sanitize otherwise.
+ */
+var URL_RE = /^url\(([^)]+)\)$/;
+/**
+ * Checks that quotes (" and ') are properly balanced inside a string. Assumes
+ * that neither escape (\) nor any other character that could result in
+ * breaking out of a string parsing context are allowed;
+ * see http://www.w3.org/TR/css3-syntax/#string-token-diagram.
+ *
+ * This code was taken from the Closure sanitization library.
+ */
+function hasBalancedQuotes(value) {
+    var outsideSingle = true;
+    var outsideDouble = true;
+    for (var i = 0; i < value.length; i++) {
+        var c = value.charAt(i);
+        if (c === '\'' && outsideDouble) {
+            outsideSingle = !outsideSingle;
+        }
+        else if (c === '"' && outsideSingle) {
+            outsideDouble = !outsideDouble;
+        }
+    }
+    return outsideSingle && outsideDouble;
+}
+/**
+ * Sanitizes the given untrusted CSS style property value (i.e. not an entire object, just a single
+ * value) and returns a value that is safe to use in a browser environment.
+ */
+function _sanitizeStyle(value) {
+    value = String(value).trim(); // Make sure it's actually a string.
+    if (!value)
+        return '';
+    // Single url(...) values are supported, but only for URLs that sanitize cleanly. See above for
+    // reasoning behind this.
+    var urlMatch = value.match(URL_RE);
+    if ((urlMatch && _sanitizeUrl(urlMatch[1]) === urlMatch[1]) ||
+        value.match(SAFE_STYLE_VALUE) && hasBalancedQuotes(value)) {
+        return value; // Safe style values.
+    }
+    if (isDevMode()) {
+        console.warn("WARNING: sanitizing unsafe style value " + value + " (see http://g.co/ng/security#xss).");
+    }
+    return 'unsafe';
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
+ * dangerous content.
+ *
+ * This method parses the `html` and locates potentially dangerous content (such as urls and
+ * javascript) and removes it.
+ *
+ * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustHtml}.
+ *
+ * @param unsafeHtml untrusted `html`, typically from the user.
+ * @returns `html` string which is safe to display to user, because all of the dangerous javascript
+ * and urls have been removed.
+ */
+function sanitizeHtml(unsafeHtml) {
+    var sanitizer = getSanitizer();
+    if (sanitizer) {
+        return sanitizer.sanitize(SecurityContext.HTML, unsafeHtml) || '';
+    }
+    if (allowSanitizationBypass(unsafeHtml, "Html" /* Html */)) {
+        return unsafeHtml.toString();
+    }
+    return _sanitizeHtml(document, renderStringify(unsafeHtml));
+}
+/**
+ * A `style` sanitizer which converts untrusted `style` **string** into trusted string by removing
+ * dangerous content.
+ *
+ * This method parses the `style` and locates potentially dangerous content (such as urls and
+ * javascript) and removes it.
+ *
+ * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustStyle}.
+ *
+ * @param unsafeStyle untrusted `style`, typically from the user.
+ * @returns `style` string which is safe to bind to the `style` properties, because all of the
+ * dangerous javascript and urls have been removed.
+ */
+function sanitizeStyle(unsafeStyle) {
+    var sanitizer = getSanitizer();
+    if (sanitizer) {
+        return sanitizer.sanitize(SecurityContext.STYLE, unsafeStyle) || '';
+    }
+    if (allowSanitizationBypass(unsafeStyle, "Style" /* Style */)) {
+        return unsafeStyle.toString();
+    }
+    return _sanitizeStyle(renderStringify(unsafeStyle));
+}
+/**
+ * A `url` sanitizer which converts untrusted `url` **string** into trusted string by removing
+ * dangerous
+ * content.
+ *
+ * This method parses the `url` and locates potentially dangerous content (such as javascript) and
+ * removes it.
+ *
+ * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustUrl}.
+ *
+ * @param unsafeUrl untrusted `url`, typically from the user.
+ * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
+ * all of the dangerous javascript has been removed.
+ */
+function sanitizeUrl(unsafeUrl) {
+    var sanitizer = getSanitizer();
+    if (sanitizer) {
+        return sanitizer.sanitize(SecurityContext.URL, unsafeUrl) || '';
+    }
+    if (allowSanitizationBypass(unsafeUrl, "Url" /* Url */)) {
+        return unsafeUrl.toString();
+    }
+    return _sanitizeUrl(renderStringify(unsafeUrl));
+}
+/**
+ * A `url` sanitizer which only lets trusted `url`s through.
+ *
+ * This passes only `url`s marked trusted by calling {@link bypassSanitizationTrustResourceUrl}.
+ *
+ * @param unsafeResourceUrl untrusted `url`, typically from the user.
+ * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
+ * only trusted `url`s have been allowed to pass.
+ */
+function sanitizeResourceUrl(unsafeResourceUrl) {
+    var sanitizer = getSanitizer();
+    if (sanitizer) {
+        return sanitizer.sanitize(SecurityContext.RESOURCE_URL, unsafeResourceUrl) || '';
+    }
+    if (allowSanitizationBypass(unsafeResourceUrl, "ResourceUrl" /* ResourceUrl */)) {
+        return unsafeResourceUrl.toString();
+    }
+    throw new Error('unsafe value used in a resource URL context (see http://g.co/ng/security#xss)');
+}
+/**
+ * A `script` sanitizer which only lets trusted javascript through.
+ *
+ * This passes only `script`s marked trusted by calling {@link
+ * bypassSanitizationTrustScript}.
+ *
+ * @param unsafeScript untrusted `script`, typically from the user.
+ * @returns `url` string which is safe to bind to the `<script>` element such as `<img src>`,
+ * because only trusted `scripts` have been allowed to pass.
+ */
+function sanitizeScript(unsafeScript) {
+    var sanitizer = getSanitizer();
+    if (sanitizer) {
+        return sanitizer.sanitize(SecurityContext.SCRIPT, unsafeScript) || '';
+    }
+    if (allowSanitizationBypass(unsafeScript, "Script" /* Script */)) {
+        return unsafeScript.toString();
+    }
+    throw new Error('unsafe value used in a script context');
+}
+/**
+ * Detects which sanitizer to use for URL property, based on tag name and prop name.
+ *
+ * The rules are based on the RESOURCE_URL context config from
+ * `packages/compiler/src/schema/dom_security_schema.ts`.
+ * If tag and prop names don't match Resource URL schema, use URL sanitizer.
+ */
+function getUrlSanitizer(tag, prop) {
+    if ((prop === 'src' && (tag === 'embed' || tag === 'frame' || tag === 'iframe' ||
+        tag === 'media' || tag === 'script')) ||
+        (prop === 'href' && (tag === 'base' || tag === 'link'))) {
+        return sanitizeResourceUrl;
+    }
+    return sanitizeUrl;
+}
+/**
+ * Sanitizes URL, selecting sanitizer function based on tag and property names.
+ *
+ * This function is used in case we can't define security context at compile time, when only prop
+ * name is available. This happens when we generate host bindings for Directives/Components. The
+ * host element is unknown at compile time, so we defer calculation of specific sanitizer to
+ * runtime.
+ *
+ * @param unsafeUrl untrusted `url`, typically from the user.
+ * @param tag target element tag name.
+ * @param prop name of the property that contains the value.
+ * @returns `url` string which is safe to bind.
+ */
+function sanitizeUrlOrResourceUrl(unsafeUrl, tag, prop) {
+    return getUrlSanitizer(tag, prop)(unsafeUrl);
+}
+/**
+ * The default style sanitizer will handle sanitization for style properties by
+ * sanitizing any CSS property that can include a `url` value (usually image-based properties)
+ */
+var defaultStyleSanitizer = function (prop, value) {
+    if (value === undefined) {
+        return prop === 'background-image' || prop === 'background' || prop === 'border-image' ||
+            prop === 'filter' || prop === 'list-style' || prop === 'list-style-image';
+    }
+    return sanitizeStyle(value);
+};
+function validateAgainstEventProperties(name) {
+    if (name.toLowerCase().startsWith('on')) {
+        var msg = "Binding to event property '" + name + "' is disallowed for security reasons, " +
+            ("please use (" + name.slice(2) + ")=...") +
+            ("\nIf '" + name + "' is a directive input, make sure the directive is imported by the") +
+            " current module.";
+        throw new Error(msg);
+    }
+}
+function validateAgainstEventAttributes(name) {
+    if (name.toLowerCase().startsWith('on')) {
+        var msg = "Binding to event attribute '" + name + "' is disallowed for security reasons, " +
+            ("please use (" + name.slice(2) + ")=...");
+        throw new Error(msg);
+    }
+}
+function getSanitizer() {
+    var lView = getLView();
+    return lView && lView[SANITIZER];
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Create DOM element. The instruction must later be followed by `elementEnd()` call.
+ *
+ * @param index Index of the element in the LView array
+ * @param name Name of the DOM Node
+ * @param attrs Statically bound set of attributes, classes, and styles to be written into the DOM
+ *              element on creation. Use [AttributeMarker] to denote the meaning of this array.
+ * @param localRefs A set of local reference bindings on the element.
+ *
+ * Attributes and localRefs are passed as an array of strings where elements with an even index
+ * hold an attribute name and elements with an odd index hold an attribute value, ex.:
+ * ['id', 'warning5', 'class', 'alert']
+ */
+function elementStart(index, name, attrs, localRefs) {
+    var lView = getLView();
+    var tView = lView[TVIEW];
+    ngDevMode && assertEqual(lView[BINDING_INDEX], tView.bindingStartIndex, 'elements should be created before any bindings ');
+    ngDevMode && ngDevMode.rendererCreateElement++;
+    var native = elementCreate(name);
+    var renderer = lView[RENDERER];
+    ngDevMode && assertDataInRange(lView, index - 1);
+    var tNode = createNodeAtIndex(index, 3 /* Element */, native, name, attrs || null);
+    var initialStylesIndex = 0;
+    var initialClassesIndex = 0;
+    if (attrs) {
+        var lastAttrIndex = setUpAttributes(native, attrs);
+        // it's important to only prepare styling-related datastructures once for a given
+        // tNode and not each time an element is created. Also, the styling code is designed
+        // to be patched and constructed at various points, but only up until the styling
+        // template is first allocated (which happens when the very first style/class binding
+        // value is evaluated). When the template is allocated (when it turns into a context)
+        // then the styling template is locked and cannot be further extended (it can only be
+        // instantiated into a context per element)
+        setNodeStylingTemplate(tView, tNode, attrs, lastAttrIndex);
+        if (tNode.stylingTemplate) {
+            // the initial style/class values are rendered immediately after having been
+            // initialized into the context so the element styling is ready when directives
+            // are initialized (since they may read style/class values in their constructor)
+            initialStylesIndex = renderInitialStyles(native, tNode.stylingTemplate, renderer);
+            initialClassesIndex = renderInitialClasses(native, tNode.stylingTemplate, renderer);
+        }
+    }
+    appendChild(native, tNode, lView);
+    createDirectivesAndLocals(tView, lView, localRefs);
+    // any immediate children of a component or template container must be pre-emptively
+    // monkey-patched with the component view data so that the element can be inspected
+    // later on using any element discovery utility methods (see `element_discovery.ts`)
+    if (getElementDepthCount() === 0) {
+        attachPatchData(native, lView);
+    }
+    increaseElementDepthCount();
+    // if a directive contains a host binding for "class" then all class-based data will
+    // flow through that (except for `[class.prop]` bindings). This also includes initial
+    // static class values as well. (Note that this will be fixed once map-based `[style]`
+    // and `[class]` bindings work for multiple directives.)
+    if (tView.firstTemplatePass) {
+        var inputData = initializeTNodeInputs(tNode);
+        if (inputData && inputData.hasOwnProperty('class')) {
+            tNode.flags |= 8 /* hasClassInput */;
+        }
+        if (inputData && inputData.hasOwnProperty('style')) {
+            tNode.flags |= 16 /* hasStyleInput */;
+        }
+    }
+    // we render the styling again below in case any directives have set any `style` and/or
+    // `class` host attribute values...
+    if (tNode.stylingTemplate) {
+        renderInitialClasses(native, tNode.stylingTemplate, renderer, initialClassesIndex);
+        renderInitialStyles(native, tNode.stylingTemplate, renderer, initialStylesIndex);
+    }
+    var currentQueries = lView[QUERIES];
+    if (currentQueries) {
+        currentQueries.addNode(tNode);
+        lView[QUERIES] = currentQueries.clone();
+    }
+    executeContentQueries(tView, tNode, lView);
+}
+/** Mark the end of the element. */
+function elementEnd() {
+    var previousOrParentTNode = getPreviousOrParentTNode();
+    if (getIsParent()) {
+        setIsParent(false);
+    }
+    else {
+        ngDevMode && assertHasParent(getPreviousOrParentTNode());
+        previousOrParentTNode = previousOrParentTNode.parent;
+        setPreviousOrParentTNode(previousOrParentTNode);
+    }
+    // this is required for all host-level styling-related instructions to run
+    // in the correct order
+    previousOrParentTNode.onElementCreationFns && applyOnCreateInstructions(previousOrParentTNode);
+    ngDevMode && assertNodeType(previousOrParentTNode, 3 /* Element */);
+    var lView = getLView();
+    var currentQueries = lView[QUERIES];
+    if (currentQueries) {
+        lView[QUERIES] = currentQueries.parent;
+    }
+    registerPostOrderHooks(getLView()[TVIEW], previousOrParentTNode);
+    decreaseElementDepthCount();
+    // this is fired at the end of elementEnd because ALL of the stylingBindings code
+    // (for directives and the template) have now executed which means the styling
+    // context can be instantiated properly.
+    if (hasClassInput(previousOrParentTNode)) {
+        var stylingContext = getStylingContext(previousOrParentTNode.index, lView);
+        setInputsForProperty(lView, previousOrParentTNode.inputs['class'], getInitialClassNameValue(stylingContext));
+    }
+    if (hasStyleInput(previousOrParentTNode)) {
+        var stylingContext = getStylingContext(previousOrParentTNode.index, lView);
+        setInputsForProperty(lView, previousOrParentTNode.inputs['style'], getInitialStyleStringValue(stylingContext));
+    }
+}
+/**
+ * Creates an empty element using {@link elementStart} and {@link elementEnd}
+ *
+ * @param index Index of the element in the data array
+ * @param name Name of the DOM Node
+ * @param attrs Statically bound set of attributes, classes, and styles to be written into the DOM
+ *              element on creation. Use [AttributeMarker] to denote the meaning of this array.
+ * @param localRefs A set of local reference bindings on the element.
+ */
+function element(index, name, attrs, localRefs) {
+    elementStart(index, name, attrs, localRefs);
+    elementEnd();
+}
+/**
+ * Updates the value of removes an attribute on an Element.
+ *
+ * @param number index The index of the element in the data array
+ * @param name name The name of the attribute.
+ * @param value value The attribute is removed when value is `null` or `undefined`.
+ *                  Otherwise the attribute value is set to the stringified value.
+ * @param sanitizer An optional function used to sanitize the value.
+ * @param namespace Optional namespace to use when setting the attribute.
+ */
+function elementAttribute(index, name, value, sanitizer, namespace) {
+    if (value !== NO_CHANGE) {
+        ngDevMode && validateAgainstEventAttributes(name);
+        var lView = getLView();
+        var renderer = lView[RENDERER];
+        var element_1 = getNativeByIndex(index, lView);
+        if (value == null) {
+            ngDevMode && ngDevMode.rendererRemoveAttribute++;
+            isProceduralRenderer(renderer) ? renderer.removeAttribute(element_1, name, namespace) :
+                element_1.removeAttribute(name);
+        }
+        else {
+            ngDevMode && ngDevMode.rendererSetAttribute++;
+            var tNode = getTNode(index, lView);
+            var strValue = sanitizer == null ? renderStringify(value) : sanitizer(value, tNode.tagName || '', name);
+            if (isProceduralRenderer(renderer)) {
+                renderer.setAttribute(element_1, name, strValue, namespace);
+            }
+            else {
+                namespace ? element_1.setAttributeNS(namespace, name, strValue) :
+                    element_1.setAttribute(name, strValue);
+            }
+        }
+    }
+}
+/**
+ * Assign static attribute values to a host element.
+ *
+ * This instruction will assign static attribute values as well as class and style
+ * values to an element within the host bindings function. Since attribute values
+ * can consist of different types of values, the `attrs` array must include the values in
+ * the following format:
+ *
+ * attrs = [
+ *   // static attributes (like `title`, `name`, `id`...)
+ *   attr1, value1, attr2, value,
+ *
+ *   // a single namespace value (like `x:id`)
+ *   NAMESPACE_MARKER, namespaceUri1, name1, value1,
+ *
+ *   // another single namespace value (like `x:name`)
+ *   NAMESPACE_MARKER, namespaceUri2, name2, value2,
+ *
+ *   // a series of CSS classes that will be applied to the element (no spaces)
+ *   CLASSES_MARKER, class1, class2, class3,
+ *
+ *   // a series of CSS styles (property + value) that will be applied to the element
+ *   STYLES_MARKER, prop1, value1, prop2, value2
+ * ]
+ *
+ * All non-class and non-style attributes must be defined at the start of the list
+ * first before all class and style values are set. When there is a change in value
+ * type (like when classes and styles are introduced) a marker must be used to separate
+ * the entries. The marker values themselves are set via entries found in the
+ * [AttributeMarker] enum.
+ *
+ * NOTE: This instruction is meant to used from `hostBindings` function only.
+ *
+ * @param directive A directive instance the styling is associated with.
+ * @param attrs An array of static values (attributes, classes and styles) with the correct marker
+ * values.
+ *
+ * @publicApi
+ */
+function elementHostAttrs(attrs) {
+    var tNode = getPreviousOrParentTNode();
+    var lView = getLView();
+    var native = getNativeByTNode(tNode, lView);
+    var lastAttrIndex = setUpAttributes(native, attrs);
+    var stylingAttrsStartIndex = attrsStylingIndexOf(attrs, lastAttrIndex);
+    if (stylingAttrsStartIndex >= 0) {
+        var directive = getActiveHostContext();
+        if (tNode.stylingTemplate) {
+            patchContextWithStaticAttrs(tNode.stylingTemplate, attrs, stylingAttrsStartIndex, directive);
+        }
+        else {
+            tNode.stylingTemplate = initializeStaticContext(attrs, stylingAttrsStartIndex, directive);
+        }
+    }
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Creates a logical container for other nodes (<ng-container>) backed by a comment node in the DOM.
+ * The instruction must later be followed by `elementContainerEnd()` call.
+ *
+ * @param index Index of the element in the LView array
+ * @param attrs Set of attributes to be used when matching directives.
+ * @param localRefs A set of local reference bindings on the element.
+ *
+ * Even if this instruction accepts a set of attributes no actual attribute values are propagated to
+ * the DOM (as a comment node can't have attributes). Attributes are here only for directive
+ * matching purposes and setting initial inputs of directives.
+ */
+function elementContainerStart(index, attrs, localRefs) {
+    var lView = getLView();
+    var tView = lView[TVIEW];
+    var renderer = lView[RENDERER];
+    var tagName = 'ng-container';
+    ngDevMode && assertEqual(lView[BINDING_INDEX], tView.bindingStartIndex, 'element containers should be created before any bindings');
+    ngDevMode && ngDevMode.rendererCreateComment++;
+    var native = renderer.createComment(ngDevMode ? tagName : '');
+    ngDevMode && assertDataInRange(lView, index - 1);
+    var tNode = createNodeAtIndex(index, 4 /* ElementContainer */, native, tagName, attrs || null);
+    if (attrs) {
+        // While ng-container doesn't necessarily support styling, we use the style context to identify
+        // and execute directives on the ng-container.
+        setNodeStylingTemplate(tView, tNode, attrs, 0);
+    }
+    appendChild(native, tNode, lView);
+    createDirectivesAndLocals(tView, lView, localRefs);
+    attachPatchData(native, lView);
+    var currentQueries = lView[QUERIES];
+    if (currentQueries) {
+        currentQueries.addNode(tNode);
+        lView[QUERIES] = currentQueries.clone();
+    }
+    executeContentQueries(tView, tNode, lView);
+}
+/** Mark the end of the <ng-container>. */
+function elementContainerEnd() {
+    var previousOrParentTNode = getPreviousOrParentTNode();
+    var lView = getLView();
+    var tView = lView[TVIEW];
+    if (getIsParent()) {
+        setIsParent(false);
+    }
+    else {
+        ngDevMode && assertHasParent(previousOrParentTNode);
+        previousOrParentTNode = previousOrParentTNode.parent;
+        setPreviousOrParentTNode(previousOrParentTNode);
+    }
+    ngDevMode && assertNodeType(previousOrParentTNode, 4 /* ElementContainer */);
+    var currentQueries = lView[QUERIES];
+    if (currentQueries) {
+        lView[QUERIES] = currentQueries.parent;
+    }
+    registerPostOrderHooks(tView, previousOrParentTNode);
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Marks the start of an embedded view.
+ *
+ * @param viewBlockId The ID of this view
+ * @return boolean Whether or not this view is in creation mode
+ */
+function embeddedViewStart(viewBlockId, consts, vars) {
+    var lView = getLView();
+    var previousOrParentTNode = getPreviousOrParentTNode();
+    // The previous node can be a view node if we are processing an inline for loop
+    var containerTNode = previousOrParentTNode.type === 2 /* View */ ?
+        previousOrParentTNode.parent :
+        previousOrParentTNode;
+    var lContainer = lView[containerTNode.index];
+    ngDevMode && assertNodeType(containerTNode, 0 /* Container */);
+    var viewToRender = scanForView(lContainer, lContainer[ACTIVE_INDEX], viewBlockId);
+    if (viewToRender) {
+        setIsParent(true);
+        enterView(viewToRender, viewToRender[TVIEW].node);
+    }
+    else {
+        // When we create a new LView, we always reset the state of the instructions.
+        viewToRender = createLView(lView, getOrCreateEmbeddedTView(viewBlockId, consts, vars, containerTNode), null, 16 /* CheckAlways */, null, null);
+        if (lContainer[QUERIES]) {
+            viewToRender[QUERIES] = lContainer[QUERIES].createView();
+        }
+        var tParentNode = getIsParent() ? previousOrParentTNode :
+            previousOrParentTNode && previousOrParentTNode.parent;
+        assignTViewNodeToLView(viewToRender[TVIEW], tParentNode, viewBlockId, viewToRender);
+        enterView(viewToRender, viewToRender[TVIEW].node);
+    }
+    if (lContainer) {
+        if (isCreationMode(viewToRender)) {
+            // it is a new view, insert it into collection of views for a given container
+            insertView(viewToRender, lContainer, lContainer[ACTIVE_INDEX]);
+        }
+        lContainer[ACTIVE_INDEX]++;
+    }
+    return isCreationMode(viewToRender) ? 1 /* Create */ | 2 /* Update */ :
+        2 /* Update */;
+}
+/**
+ * Initialize the TView (e.g. static data) for the active embedded view.
+ *
+ * Each embedded view block must create or retrieve its own TView. Otherwise, the embedded view's
+ * static data for a particular node would overwrite the static data for a node in the view above
+ * it with the same index (since it's in the same template).
+ *
+ * @param viewIndex The index of the TView in TNode.tViews
+ * @param consts The number of nodes, local refs, and pipes in this template
+ * @param vars The number of bindings and pure function bindings in this template
+ * @param container The parent container in which to look for the view's static data
+ * @returns TView
+ */
+function getOrCreateEmbeddedTView(viewIndex, consts, vars, parent) {
+    var tView = getLView()[TVIEW];
+    ngDevMode && assertNodeType(parent, 0 /* Container */);
+    var containerTViews = parent.tViews;
+    ngDevMode && assertDefined(containerTViews, 'TView expected');
+    ngDevMode && assertEqual(Array.isArray(containerTViews), true, 'TViews should be in an array');
+    if (viewIndex >= containerTViews.length || containerTViews[viewIndex] == null) {
+        containerTViews[viewIndex] = createTView(viewIndex, null, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null, null);
+    }
+    return containerTViews[viewIndex];
+}
+/**
+ * Looks for a view with a given view block id inside a provided LContainer.
+ * Removes views that need to be deleted in the process.
+ *
+ * @param lContainer to search for views
+ * @param startIdx starting index in the views array to search from
+ * @param viewBlockId exact view block id to look for
+ * @returns index of a found view or -1 if not found
+ */
+function scanForView(lContainer, startIdx, viewBlockId) {
+    var views = lContainer[VIEWS];
+    for (var i = startIdx; i < views.length; i++) {
+        var viewAtPositionId = views[i][TVIEW].id;
+        if (viewAtPositionId === viewBlockId) {
+            return views[i];
+        }
+        else if (viewAtPositionId < viewBlockId) {
+            // found a view that should not be at this position - remove
+            removeView(lContainer, i);
+        }
+        else {
+            // found a view with id greater than the one we are searching for
+            // which means that required view doesn't exist and can't be found at
+            // later positions in the views array - stop the searchdef.cont here
+            break;
+        }
+    }
+    return null;
+}
+/** Marks the end of an embedded view. */
+function embeddedViewEnd() {
+    var lView = getLView();
+    var viewHost = lView[T_HOST];
+    if (isCreationMode(lView)) {
+        refreshDescendantViews(lView); // creation mode pass
+        lView[FLAGS] &= ~4 /* CreationMode */;
+    }
+    resetPreOrderHookFlags(lView);
+    refreshDescendantViews(lView); // update mode pass
+    var lContainer = lView[PARENT];
+    ngDevMode && assertLContainerOrUndefined(lContainer);
+    leaveView(lContainer[PARENT]);
+    setPreviousOrParentTNode(viewHost);
+    setIsParent(false);
+}
+
+/**
+ * Returns the current OpaqueViewState instance.
+ *
+ * Used in conjunction with the restoreView() instruction to save a snapshot
+ * of the current view and restore it when listeners are invoked. This allows
+ * walking the declaration view tree in listeners to get vars from parent views.
+ */
+function getCurrentView() {
+    return getLView();
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Determine if the argument is shaped like a Promise
+ */
+function isPromise(obj) {
+    // allow any Promise/A+ compliant thenable.
+    // It's up to the caller to ensure that obj.then conforms to the spec
+    return !!obj && typeof obj.then === 'function';
+}
+/**
+ * Determine if the argument is an Observable
+ */
+function isObservable(obj) {
+    // TODO: use isObservable once we update pass rxjs 6.1
+    // https://github.com/ReactiveX/rxjs/blob/master/CHANGELOG.md#610-2018-05-03
+    return !!obj && typeof obj.subscribe === 'function';
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Adds an event listener to the current node.
+ *
+ * If an output exists on one of the node's directives, it also subscribes to the output
+ * and saves the subscription for later cleanup.
+ *
+ * @param eventName Name of the event
+ * @param listenerFn The function to be called when event emits
+ * @param useCapture Whether or not to use capture in event listener
+ * @param eventTargetResolver Function that returns global target information in case this listener
+ * should be attached to a global object like window, document or body
+ */
+function listener(eventName, listenerFn, useCapture, eventTargetResolver) {
+    if (useCapture === void 0) { useCapture = false; }
+    listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver);
+}
+/**
+* Registers a synthetic host listener (e.g. `(@foo.start)`) on a component.
+*
+* This instruction is for compatibility purposes and is designed to ensure that a
+* synthetic host listener (e.g. `@HostListener('@foo.start')`) properly gets rendered
+* in the component's renderer. Normally all host listeners are evaluated with the
+* parent component's renderer, but, in the case of animation @triggers, they need
+* to be evaluated with the sub component's renderer (because that's where the
+* animation triggers are defined).
+*
+* Do not use this instruction as a replacement for `listener`. This instruction
+* only exists to ensure compatibility with the ViewEngine's host binding behavior.
+*
+* @param eventName Name of the event
+* @param listenerFn The function to be called when event emits
+* @param useCapture Whether or not to use capture in event listener
+* @param eventTargetResolver Function that returns global target information in case this listener
+* should be attached to a global object like window, document or body
+*/
+function componentHostSyntheticListener(eventName, listenerFn, useCapture, eventTargetResolver) {
+    if (useCapture === void 0) { useCapture = false; }
+    listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver, loadComponentRenderer);
+}
+function listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver, loadRendererFn) {
+    if (useCapture === void 0) { useCapture = false; }
+    var lView = getLView();
+    var tNode = getPreviousOrParentTNode();
+    var tView = lView[TVIEW];
+    var firstTemplatePass = tView.firstTemplatePass;
+    var tCleanup = firstTemplatePass && (tView.cleanup || (tView.cleanup = []));
+    ngDevMode && assertNodeOfPossibleTypes(tNode, 3 /* Element */, 0 /* Container */, 4 /* ElementContainer */);
+    // add native event listener - applicable to elements only
+    if (tNode.type === 3 /* Element */) {
+        var native = getNativeByTNode(tNode, lView);
+        var resolved = eventTargetResolver ? eventTargetResolver(native) : {};
+        var target = resolved.target || native;
+        ngDevMode && ngDevMode.rendererAddEventListener++;
+        var renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
+        var lCleanup = getCleanup(lView);
+        var lCleanupIndex = lCleanup.length;
+        var useCaptureOrSubIdx = useCapture;
+        // In order to match current behavior, native DOM event listeners must be added for all
+        // events (including outputs).
+        if (isProceduralRenderer(renderer)) {
+            // The first argument of `listen` function in Procedural Renderer is:
+            // - either a target name (as a string) in case of global target (window, document, body)
+            // - or element reference (in all other cases)
+            listenerFn = wrapListener(tNode, lView, listenerFn, false /** preventDefault */);
+            var cleanupFn = renderer.listen(resolved.name || target, eventName, listenerFn);
+            lCleanup.push(listenerFn, cleanupFn);
+            useCaptureOrSubIdx = lCleanupIndex + 1;
+        }
+        else {
+            listenerFn = wrapListener(tNode, lView, listenerFn, true /** preventDefault */);
+            target.addEventListener(eventName, listenerFn, useCapture);
+            lCleanup.push(listenerFn);
+        }
+        var idxOrTargetGetter = eventTargetResolver ?
+            function (_lView) { return eventTargetResolver(unwrapRNode(_lView[tNode.index])).target; } :
+            tNode.index;
+        tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, useCaptureOrSubIdx);
+    }
+    // subscribe to directive outputs
+    if (tNode.outputs === undefined) {
+        // if we create TNode here, inputs must be undefined so we know they still need to be
+        // checked
+        tNode.outputs = generatePropertyAliases(tNode, 1 /* Output */);
+    }
+    var outputs = tNode.outputs;
+    var props;
+    if (outputs && (props = outputs[eventName])) {
+        var propsLength = props.length;
+        if (propsLength) {
+            var lCleanup = getCleanup(lView);
+            for (var i = 0; i < propsLength; i += 3) {
+                var index = props[i];
+                ngDevMode && assertDataInRange(lView, index);
+                var minifiedName = props[i + 2];
+                var directiveInstance = lView[index];
+                var output = directiveInstance[minifiedName];
+                if (ngDevMode && !isObservable(output)) {
+                    throw new Error("@Output " + minifiedName + " not initialized in '" + directiveInstance.constructor.name + "'.");
+                }
+                var subscription = output.subscribe(listenerFn);
+                var idx = lCleanup.length;
+                lCleanup.push(listenerFn, subscription);
+                tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
+            }
+        }
+    }
+}
+/**
+ * Wraps an event listener with a function that marks ancestors dirty and prevents default behavior,
+ * if applicable.
+ *
+ * @param tNode The TNode associated with this listener
+ * @param lView The LView that contains this listener
+ * @param listenerFn The listener function to call
+ * @param wrapWithPreventDefault Whether or not to prevent default behavior
+ * (the procedural renderer does this already, so in those cases, we should skip)
+ */
+function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
+    // Note: we are performing most of the work in the listener function itself
+    // to optimize listener registration.
+    return function wrapListenerIn_markDirtyAndPreventDefault(e) {
+        // In order to be backwards compatible with View Engine, events on component host nodes
+        // must also mark the component view itself dirty (i.e. the view that it owns).
+        var startView = tNode.flags & 1 /* isComponent */ ? getComponentViewByIndex(tNode.index, lView) : lView;
+        // See interfaces/view.ts for more on LViewFlags.ManualOnPush
+        if ((lView[FLAGS] & 32 /* ManualOnPush */) === 0) {
+            markViewDirty(startView);
+        }
+        try {
+            var result = listenerFn(e);
+            if (wrapWithPreventDefault && result === false) {
+                e.preventDefault();
+                // Necessary for legacy browsers that don't support preventDefault (e.g. IE)
+                e.returnValue = false;
+            }
+            return result;
+        }
+        catch (error) {
+            handleError(lView, error);
+        }
+    };
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Retrieves a context at the level specified and saves it as the global, contextViewData.
+ * Will get the next level up if level is not specified.
+ *
+ * This is used to save contexts of parent views so they can be bound in embedded views, or
+ * in conjunction with reference() to bind a ref from a parent view.
+ *
+ * @param level The relative level of the view from which to grab context compared to contextVewData
+ * @returns context
+ */
+function nextContext(level) {
+    if (level === void 0) { level = 1; }
+    return nextContextImpl(level);
+}
+
+/**
+ * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
+ * It takes all the selectors from the entire component's template and decides where
+ * each projected node belongs (it re-distributes nodes among "buckets" where each "bucket" is
+ * backed by a selector).
+ *
+ * This function requires CSS selectors to be provided in 2 forms: parsed (by a compiler) and text,
+ * un-parsed form.
+ *
+ * The parsed form is needed for efficient matching of a node against a given CSS selector.
+ * The un-parsed, textual form is needed for support of the ngProjectAs attribute.
+ *
+ * Having a CSS selector in 2 different formats is not ideal, but alternatives have even more
+ * drawbacks:
+ * - having only a textual form would require runtime parsing of CSS selectors;
+ * - we can't have only a parsed as we can't re-construct textual form from it (as entered by a
+ * template author).
+ *
+ * @param selectors A collection of parsed CSS selectors
+ * @param rawSelectors A collection of CSS selectors in the raw, un-parsed form
+ */
+function projectionDef(selectors, textSelectors) {
+    var componentNode = findComponentView(getLView())[T_HOST];
+    if (!componentNode.projection) {
+        var noOfNodeBuckets = selectors ? selectors.length + 1 : 1;
+        var projectionHeads = componentNode.projection =
+            new Array(noOfNodeBuckets).fill(null);
+        var tails = projectionHeads.slice();
+        var componentChild = componentNode.child;
+        while (componentChild !== null) {
+            var bucketIndex = selectors ?
+                matchingProjectionSelectorIndex(componentChild, selectors, textSelectors) :
+                0;
+            if (tails[bucketIndex]) {
+                tails[bucketIndex].projectionNext = componentChild;
+            }
+            else {
+                projectionHeads[bucketIndex] = componentChild;
+            }
+            tails[bucketIndex] = componentChild;
+            componentChild = componentChild.next;
+        }
+    }
+}
+/**
+ * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
+ * to the projectionDef instruction.
+ *
+ * @param nodeIndex
+ * @param selectorIndex:
+ *        - 0 when the selector is `*` (or unspecified as this is the default value),
+ *        - 1 based index of the selector from the {@link projectionDef}
+ */
+function projection(nodeIndex, selectorIndex, attrs) {
+    if (selectorIndex === void 0) { selectorIndex = 0; }
+    var lView = getLView();
+    var tProjectionNode = createNodeAtIndex(nodeIndex, 1 /* Projection */, null, null, attrs || null);
+    // We can't use viewData[HOST_NODE] because projection nodes can be nested in embedded views.
+    if (tProjectionNode.projection === null)
+        tProjectionNode.projection = selectorIndex;
+    // `<ng-content>` has no content
+    setIsParent(false);
+    // re-distribution of projectable nodes is stored on a component's view level
+    appendProjectedNodes(lView, tProjectionNode, selectorIndex, findComponentView(lView));
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Defines a schema that allows an NgModule to contain the following:
+ * - Non-Angular elements named with dash case (`-`).
+ * - Element properties named with dash case (`-`).
+ * Dash case is the naming convention for custom elements.
+ *
+ * @publicApi
+ */
+var CUSTOM_ELEMENTS_SCHEMA = {
+    name: 'custom-elements'
+};
+/**
+ * Defines a schema that allows any property on any element.
+ *
+ * @publicApi
+ */
+var NO_ERRORS_SCHEMA = {
+    name: 'no-errors-schema'
+};
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function normalizeDebugBindingName(name) {
+    // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
+    name = camelCaseToDashCase(name.replace(/[$@]/g, '_'));
+    return "ng-reflect-" + name;
+}
+var CAMEL_CASE_REGEXP = /([A-Z])/g;
+function camelCaseToDashCase(input) {
+    return input.replace(CAMEL_CASE_REGEXP, function () {
+        var m = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            m[_i] = arguments[_i];
+        }
+        return '-' + m[1].toLowerCase();
+    });
+}
+function normalizeDebugBindingValue(value) {
+    try {
+        // Limit the size of the value as otherwise the DOM just gets polluted.
+        return value != null ? value.toString().slice(0, 30) : value;
+    }
+    catch (e) {
+        return '[ERROR] Exception while trying to serialize the value';
+    }
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+var _symbolIterator = null;
+function getSymbolIterator() {
+    if (!_symbolIterator) {
+        var Symbol_1 = _global['Symbol'];
+        if (Symbol_1 && Symbol_1.iterator) {
+            _symbolIterator = Symbol_1.iterator;
+        }
+        else {
+            // es6-shim specific logic
+            var keys = Object.getOwnPropertyNames(Map.prototype);
+            for (var i = 0; i < keys.length; ++i) {
+                var key = keys[i];
+                if (key !== 'entries' && key !== 'size' &&
+                    Map.prototype[key] === Map.prototype['entries']) {
+                    _symbolIterator = key;
+                }
+            }
+        }
+    }
+    return _symbolIterator;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+// JS has NaN !== NaN
+function looseIdentical(a, b) {
+    return a === b || typeof a === 'number' && typeof b === 'number' && isNaN(a) && isNaN(b);
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function devModeEqual(a, b) {
+    var isListLikeIterableA = isListLikeIterable(a);
+    var isListLikeIterableB = isListLikeIterable(b);
+    if (isListLikeIterableA && isListLikeIterableB) {
+        return areIterablesEqual(a, b, devModeEqual);
+    }
+    else {
+        var isAObject = a && (typeof a === 'object' || typeof a === 'function');
+        var isBObject = b && (typeof b === 'object' || typeof b === 'function');
+        if (!isListLikeIterableA && isAObject && !isListLikeIterableB && isBObject) {
+            return true;
+        }
+        else {
+            return looseIdentical(a, b);
+        }
+    }
+}
+/**
+ * Indicates that the result of a {@link Pipe} transformation has changed even though the
+ * reference has not changed.
+ *
+ * Wrapped values are unwrapped automatically during the change detection, and the unwrapped value
+ * is stored.
+ *
+ * Example:
+ *
+ * ```
+ * if (this._latestValue === this._latestReturnedValue) {
+ *    return this._latestReturnedValue;
+ *  } else {
+ *    this._latestReturnedValue = this._latestValue;
+ *    return WrappedValue.wrap(this._latestValue); // this will force update
+ *  }
+ * ```
+ *
+ * @publicApi
+ */
+var WrappedValue = /** @class */ (function () {
+    function WrappedValue(value) {
+        this.wrapped = value;
+    }
+    /** Creates a wrapped value. */
+    WrappedValue.wrap = function (value) { return new WrappedValue(value); };
+    /**
+     * Returns the underlying value of a wrapped value.
+     * Returns the given `value` when it is not wrapped.
+     **/
+    WrappedValue.unwrap = function (value) { return WrappedValue.isWrapped(value) ? value.wrapped : value; };
+    /** Returns true if `value` is a wrapped value. */
+    WrappedValue.isWrapped = function (value) { return value instanceof WrappedValue; };
+    return WrappedValue;
+}());
+function isListLikeIterable(obj) {
+    if (!isJsObject(obj))
+        return false;
+    return Array.isArray(obj) ||
+        (!(obj instanceof Map) && // JS Map are iterables but return entries as [k, v]
+            getSymbolIterator() in obj); // JS Iterable have a Symbol.iterator prop
+}
+function areIterablesEqual(a, b, comparator) {
+    var iterator1 = a[getSymbolIterator()]();
+    var iterator2 = b[getSymbolIterator()]();
+    while (true) {
+        var item1 = iterator1.next();
+        var item2 = iterator2.next();
+        if (item1.done && item2.done)
+            return true;
+        if (item1.done || item2.done)
+            return false;
+        if (!comparator(item1.value, item2.value))
+            return false;
+    }
+}
+function iterateListLike(obj, fn) {
+    if (Array.isArray(obj)) {
+        for (var i = 0; i < obj.length; i++) {
+            fn(obj[i]);
+        }
+    }
+    else {
+        var iterator = obj[getSymbolIterator()]();
+        var item = void 0;
+        while (!((item = iterator.next()).done)) {
+            fn(item.value);
+        }
+    }
+}
+function isJsObject(o) {
+    return o !== null && (typeof o === 'function' || typeof o === 'object');
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+// TODO(misko): consider inlining
+/** Updates binding and returns the value. */
+function updateBinding(lView, bindingIndex, value) {
+    return lView[bindingIndex] = value;
+}
+/** Gets the current binding value. */
+function getBinding(lView, bindingIndex) {
+    ngDevMode && assertDataInRange(lView, bindingIndex);
+    ngDevMode &&
+        assertNotSame(lView[bindingIndex], NO_CHANGE, 'Stored value should never be NO_CHANGE.');
+    return lView[bindingIndex];
+}
+/** Updates binding if changed, then returns whether it was updated. */
+function bindingUpdated(lView, bindingIndex, value) {
+    ngDevMode && assertNotSame(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
+    ngDevMode &&
+        assertLessThan(bindingIndex, lView.length, "Slot should have been initialized to NO_CHANGE");
+    var oldValue = lView[bindingIndex];
+    if (isDifferent(oldValue, value)) {
+        if (ngDevMode && getCheckNoChangesMode()) {
+            // View engine didn't report undefined values as changed on the first checkNoChanges pass
+            // (before the change detection was run).
+            var oldValueToCompare = oldValue !== NO_CHANGE ? oldValue : undefined;
+            if (!devModeEqual(oldValueToCompare, value)) {
+                throwErrorIfNoChangesMode(oldValue === NO_CHANGE, oldValueToCompare, value);
+            }
+        }
+        lView[bindingIndex] = value;
+        return true;
+    }
+    return false;
+}
+/** Updates 2 bindings if changed, then returns whether either was updated. */
+function bindingUpdated2(lView, bindingIndex, exp1, exp2) {
+    var different = bindingUpdated(lView, bindingIndex, exp1);
+    return bindingUpdated(lView, bindingIndex + 1, exp2) || different;
+}
+/** Updates 3 bindings if changed, then returns whether any was updated. */
+function bindingUpdated3(lView, bindingIndex, exp1, exp2, exp3) {
+    var different = bindingUpdated2(lView, bindingIndex, exp1, exp2);
+    return bindingUpdated(lView, bindingIndex + 2, exp3) || different;
+}
+/** Updates 4 bindings if changed, then returns whether any was updated. */
+function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
+    var different = bindingUpdated2(lView, bindingIndex, exp1, exp2);
+    return bindingUpdated2(lView, bindingIndex + 2, exp3, exp4) || different;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 /**
  * Creates a single value binding.
  *
@@ -12050,18 +12028,188 @@ function bind(value) {
     return bindingUpdated(lView, bindingIndex, value) ? value : NO_CHANGE;
 }
 /**
- * Allocates the necessary amount of slots for host vars.
- *
- * @param count Amount of vars to be allocated
- */
-function allocHostVars(count) {
-    var lView = getLView();
-    var tView = lView[TVIEW];
-    if (!tView.firstTemplatePass)
-        return;
-    queueHostBindingForCheck(tView, getCurrentDirectiveDef(), count);
-    prefillHostVars(tView, lView, count);
+* **TODO: Remove this function after `property` is in use**
+* Update a property on an element.
+*
+* If the property name also exists as an input property on one of the element's directives,
+* the component property will be set instead of the element property. This check must
+* be conducted at runtime so child components that add new @Inputs don't have to be re-compiled.
+*
+* @param index The index of the element to update in the data array
+* @param propName Name of property. Because it is going to DOM, this is not subject to
+*        renaming as part of minification.
+* @param value New value to write.
+* @param sanitizer An optional function used to sanitize the value.
+* @param nativeOnly Whether or not we should only set native properties and skip input check
+* (this is necessary for host property bindings)
+*/
+function elementProperty(index, propName, value, sanitizer, nativeOnly) {
+    elementPropertyInternal(index, propName, value, sanitizer, nativeOnly);
 }
+/**
+ * Updates a synthetic host binding (e.g. `[@foo]`) on a component.
+ *
+ * This instruction is for compatibility purposes and is designed to ensure that a
+ * synthetic host binding (e.g. `@HostBinding('@foo')`) properly gets rendered in
+ * the component's renderer. Normally all host bindings are evaluated with the parent
+ * component's renderer, but, in the case of animation @triggers, they need to be
+ * evaluated with the sub component's renderer (because that's where the animation
+ * triggers are defined).
+ *
+ * Do not use this instruction as a replacement for `elementProperty`. This instruction
+ * only exists to ensure compatibility with the ViewEngine's host binding behavior.
+ *
+ * @param index The index of the element to update in the data array
+ * @param propName Name of property. Because it is going to DOM, this is not subject to
+ *        renaming as part of minification.
+ * @param value New value to write.
+ * @param sanitizer An optional function used to sanitize the value.
+ * @param nativeOnly Whether or not we should only set native properties and skip input check
+ * (this is necessary for host property bindings)
+ */
+function componentHostSyntheticProperty(index, propName, value, sanitizer, nativeOnly) {
+    elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadComponentRenderer);
+}
+/**
+* Mapping between attributes names that don't correspond to their element property names.
+*/
+var ATTR_TO_PROP = {
+    'class': 'className',
+    'for': 'htmlFor',
+    'formaction': 'formAction',
+    'innerHtml': 'innerHTML',
+    'readonly': 'readOnly',
+    'tabindex': 'tabIndex',
+};
+function elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadRendererFn) {
+    if (value === NO_CHANGE)
+        return;
+    var lView = getLView();
+    var element = getNativeByIndex(index, lView);
+    var tNode = getTNode(index, lView);
+    var inputData;
+    var dataValue;
+    if (!nativeOnly && (inputData = initializeTNodeInputs(tNode)) &&
+        (dataValue = inputData[propName])) {
+        setInputsForProperty(lView, dataValue, value);
+        if (isComponent(tNode))
+            markDirtyIfOnPush(lView, index + HEADER_OFFSET);
+        if (ngDevMode) {
+            if (tNode.type === 3 /* Element */ || tNode.type === 0 /* Container */) {
+                setNgReflectProperties(lView, element, tNode.type, dataValue, value);
+            }
+        }
+    }
+    else if (tNode.type === 3 /* Element */) {
+        propName = ATTR_TO_PROP[propName] || propName;
+        if (ngDevMode) {
+            validateAgainstEventProperties(propName);
+            validateAgainstUnknownProperties(lView, element, propName, tNode);
+            ngDevMode.rendererSetProperty++;
+        }
+        savePropertyDebugData(tNode, lView, propName, lView[TVIEW].data, nativeOnly);
+        var renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
+        // It is assumed that the sanitizer is only added when the compiler determines that the property
+        // is risky, so sanitization can be done without further checks.
+        value = sanitizer != null ? sanitizer(value, tNode.tagName || '', propName) : value;
+        if (isProceduralRenderer(renderer)) {
+            renderer.setProperty(element, propName, value);
+        }
+        else if (!isAnimationProp(propName)) {
+            element.setProperty ? element.setProperty(propName, value) :
+                element[propName] = value;
+        }
+    }
+}
+/** If node is an OnPush component, marks its LView dirty. */
+function markDirtyIfOnPush(lView, viewIndex) {
+    ngDevMode && assertLView(lView);
+    var childComponentLView = getComponentViewByIndex(viewIndex, lView);
+    if (!(childComponentLView[FLAGS] & 16 /* CheckAlways */)) {
+        childComponentLView[FLAGS] |= 64 /* Dirty */;
+    }
+}
+function setNgReflectProperties(lView, element, type, inputs, value) {
+    var _a;
+    for (var i = 0; i < inputs.length; i += 3) {
+        var renderer = lView[RENDERER];
+        var attrName = normalizeDebugBindingName(inputs[i + 2]);
+        var debugValue = normalizeDebugBindingValue(value);
+        if (type === 3 /* Element */) {
+            isProceduralRenderer(renderer) ?
+                renderer.setAttribute(element, attrName, debugValue) :
+                element.setAttribute(attrName, debugValue);
+        }
+        else if (value !== undefined) {
+            var value_1 = "bindings=" + JSON.stringify((_a = {}, _a[attrName] = debugValue, _a), null, 2);
+            if (isProceduralRenderer(renderer)) {
+                renderer.setValue(element, value_1);
+            }
+            else {
+                element.textContent = value_1;
+            }
+        }
+    }
+}
+function validateAgainstUnknownProperties(hostView, element, propName, tNode) {
+    // If the tag matches any of the schemas we shouldn't throw.
+    if (matchingSchemas(hostView, tNode.tagName)) {
+        return;
+    }
+    // If prop is not a known property of the HTML element...
+    if (!(propName in element) &&
+        // and we are in a browser context... (web worker nodes should be skipped)
+        typeof Node === 'function' && element instanceof Node &&
+        // and isn't a synthetic animation property...
+        propName[0] !== ANIMATION_PROP_PREFIX) {
+        // ... it is probably a user error and we should throw.
+        throw new Error("Template error: Can't bind to '" + propName + "' since it isn't a known property of '" + tNode.tagName + "'.");
+    }
+}
+function matchingSchemas(hostView, tagName) {
+    var schemas = hostView[TVIEW].schemas;
+    if (schemas !== null) {
+        for (var i = 0; i < schemas.length; i++) {
+            var schema = schemas[i];
+            if (schema === NO_ERRORS_SCHEMA ||
+                schema === CUSTOM_ELEMENTS_SCHEMA && tagName && tagName.indexOf('-') > -1) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+/**
+ * Stores debugging data for this property binding on first template pass.
+ * This enables features like DebugElement.properties.
+ */
+function savePropertyDebugData(tNode, lView, propName, tData, nativeOnly) {
+    var lastBindingIndex = lView[BINDING_INDEX] - 1;
+    // Bind/interpolation functions save binding metadata in the last binding index,
+    // but leave the property name blank. If the interpolation delimiter is at the 0
+    // index, we know that this is our first pass and the property name still needs to
+    // be set.
+    var bindingMetadata = tData[lastBindingIndex];
+    if (bindingMetadata[0] == INTERPOLATION_DELIMITER) {
+        tData[lastBindingIndex] = propName + bindingMetadata;
+        // We don't want to store indices for host bindings because they are stored in a
+        // different part of LView (the expando section).
+        if (!nativeOnly) {
+            if (tNode.propertyMetadataStartIndex == -1) {
+                tNode.propertyMetadataStartIndex = lastBindingIndex;
+            }
+            tNode.propertyMetadataEndIndex = lastBindingIndex + 1;
+        }
+    }
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 /**
  * Create interpolation bindings with a variable number of expressions.
  *
@@ -12258,113 +12406,39 @@ function interpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, 
             renderStringify(v6) + i6 + renderStringify(v7) + suffix :
         NO_CHANGE;
 }
+
 /**
- * Creates binding metadata for a particular binding and stores it in
- * TView.data. These are generated in order to support DebugElement.properties.
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
  *
- * Each binding / interpolation will have one (including attribute bindings)
- * because at the time of binding, we don't know to which instruction the binding
- * belongs. It is always stored in TView.data at the index of the last binding
- * value in LView (e.g. for interpolation8, it would be stored at the index of
- * the 8th value).
- *
- * @param lView The LView that contains the current binding index.
- * @param prefix The static prefix string
- * @param suffix The static suffix string
- *
- * @returns Newly created binding metadata string for this binding or null
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
  */
-function storeBindingMetadata(lView, prefix, suffix) {
-    if (prefix === void 0) { prefix = ''; }
-    if (suffix === void 0) { suffix = ''; }
-    var tData = lView[TVIEW].data;
-    var lastBindingIndex = lView[BINDING_INDEX] - 1;
-    var value = INTERPOLATION_DELIMITER + prefix + INTERPOLATION_DELIMITER + suffix;
-    return tData[lastBindingIndex] == null ? (tData[lastBindingIndex] = value) : null;
-}
-/** Store a value in the `data` at a given `index`. */
-function store(index, value) {
+/**
+ * Selects an index of an item to act on and flushes lifecycle hooks up to this point
+ *
+ * Used in conjunction with instructions like {@link property} to act on elements with specified
+ * indices, for example those created with {@link element} or {@link elementStart}.
+ *
+ * ```ts
+ * (rf: RenderFlags, ctx: any) => {
+  *  if (rf & 1) {
+  *    element(0, 'div');
+  *  }
+  *  if (rf & 2) {
+  *    select(0); // Select the <div/> created above.
+  *    property('title', 'test');
+  *  }
+  * }
+  * ```
+  * @param index the index of the item to act on with the following instructions
+  */
+function select(index) {
+    ngDevMode && assertGreaterThan(index, -1, 'Invalid index');
+    ngDevMode &&
+        assertLessThan(index, getLView().length - HEADER_OFFSET, 'Should be within range for the view data');
     var lView = getLView();
-    var tView = lView[TVIEW];
-    // We don't store any static data for local variables, so the first time
-    // we see the template, we should store as null to avoid a sparse array
-    var adjustedIndex = index + HEADER_OFFSET;
-    if (adjustedIndex >= tView.data.length) {
-        tView.data[adjustedIndex] = null;
-        tView.blueprint[adjustedIndex] = null;
-    }
-    lView[adjustedIndex] = value;
-}
-/**
- * Retrieves a local reference from the current contextViewData.
- *
- * If the reference to retrieve is in a parent view, this instruction is used in conjunction
- * with a nextContext() call, which walks up the tree and updates the contextViewData instance.
- *
- * @param index The index of the local ref in contextViewData.
- */
-function reference(index) {
-    var contextLView = getContextLView();
-    return loadInternal(contextLView, index);
-}
-/** Retrieves a value from current `viewData`. */
-function load(index) {
-    return loadInternal(getLView(), index);
-}
-function directiveInject(token, flags) {
-    if (flags === void 0) { flags = InjectFlags.Default; }
-    token = resolveForwardRef(token);
-    return getOrCreateInjectable(getPreviousOrParentTNode(), getLView(), token, flags);
-}
-/**
- * Facade for the attribute injection from DI.
- */
-function injectAttribute(attrNameToInject) {
-    return injectAttributeImpl(getPreviousOrParentTNode(), attrNameToInject);
-}
-var CLEAN_PROMISE = _CLEAN_PROMISE;
-function initializeTNodeInputs(tNode) {
-    // If tNode.inputs is undefined, a listener has created outputs, but inputs haven't
-    // yet been checked.
-    if (tNode) {
-        if (tNode.inputs === undefined) {
-            // mark inputs as checked
-            tNode.inputs = generatePropertyAliases(tNode, 0 /* Input */);
-        }
-        return tNode.inputs;
-    }
-    return null;
-}
-/**
- * Returns the current OpaqueViewState instance.
- *
- * Used in conjunction with the restoreView() instruction to save a snapshot
- * of the current view and restore it when listeners are invoked. This allows
- * walking the declaration view tree in listeners to get vars from parent views.
- */
-function getCurrentView() {
-    return getLView();
-}
-function getCleanup(view) {
-    // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-    return view[CLEANUP] || (view[CLEANUP] = []);
-}
-function getTViewCleanup(view) {
-    return view[TVIEW].cleanup || (view[TVIEW].cleanup = []);
-}
-/**
- * There are cases where the sub component's renderer needs to be included
- * instead of the current renderer (see the componentSyntheticHost* instructions).
- */
-function loadComponentRenderer(tNode, lView) {
-    var componentLView = lView[tNode.index];
-    return componentLView[RENDERER];
-}
-/** Handles an error thrown in an LView. */
-function handleError(lView, error) {
-    var injector = lView[INJECTOR$1];
-    var errorHandler = injector ? injector.get(ErrorHandler, null) : null;
-    errorHandler && errorHandler.handleError(error);
+    executePreOrderHooks(lView, lView[TVIEW], getCheckNoChangesMode(), index);
 }
 
 /*
@@ -12693,6 +12767,49 @@ function elementStylingApplyInternal(directive, index) {
     if (totalPlayersQueued > 0) {
         var rootContext = getRootContext(lView);
         scheduleTick(rootContext, 2 /* FlushPlayers */);
+    }
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Create static text node
+ *
+ * @param index Index of the node in the data array
+ * @param value Value to write. This value will be stringified.
+ */
+function text(index, value) {
+    var lView = getLView();
+    ngDevMode && assertEqual(lView[BINDING_INDEX], lView[TVIEW].bindingStartIndex, 'text nodes should be created before any bindings');
+    ngDevMode && ngDevMode.rendererCreateTextNode++;
+    var textNative = createTextNode(value, lView[RENDERER]);
+    var tNode = createNodeAtIndex(index, 3 /* Element */, textNative, null, null);
+    // Text nodes are self closing.
+    setIsParent(false);
+    appendChild(textNative, tNode, lView);
+}
+/**
+ * Create text node with binding
+ * Bindings should be handled externally with the proper interpolation(1-8) method
+ *
+ * @param index Index of the node in the data array.
+ * @param value Stringified value to write.
+ */
+function textBinding(index, value) {
+    if (value !== NO_CHANGE) {
+        var lView = getLView();
+        ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
+        var element = getNativeByIndex(index, lView);
+        ngDevMode && assertDefined(element, 'native element should exist');
+        ngDevMode && ngDevMode.rendererSetText++;
+        var renderer = lView[RENDERER];
+        isProceduralRenderer(renderer) ? renderer.setValue(element, renderStringify(value)) :
+            element.textContent = renderStringify(value);
     }
 }
 
@@ -15105,7 +15222,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.10+109.sha-03d914a.with-local-changes');
+var VERSION = new Version('8.0.0-beta.10+113.sha-7c8f4e3.with-local-changes');
 
 /**
  * @license
