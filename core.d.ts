@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.10+120.sha-60afe88.with-local-changes
+ * @license Angular v8.0.0-beta.10+121.sha-afd4a4e.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7,6 +7,18 @@
 import { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import { Subscription } from 'rxjs';
+
+/**
+ * @description
+ *
+ * Represents an abstract class `T`, if applied to a concrete class it would stop being
+ * instantiatable.
+ *
+ * @publicApi
+ */
+export declare interface AbstractType<T> extends Function {
+    prototype: T;
+}
 
 /**
  * Below are constants for LContainer indices to help us look up LContainer members
