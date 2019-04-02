@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Provider } from '../di/interface/provider';
-import { DirectiveDef } from '.';
+import { DirectiveDef } from './interfaces/definition';
 /**
  * Resolves the providers which are defined in the DirectiveDef.
  *

@@ -1,0 +1,60 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+import { assertEqual } from '../../util/assert';
+import { TVIEW } from '../interfaces/view';
+import { getCurrentDirectiveDef, getLView } from '../state';
+import { NO_CHANGE } from '../tokens';
+/**
+ * Allocates the necessary amount of slots for host vars.
+ *
+ * @param count Amount of vars to be allocated
+ */
+export function allocHostVars(count) {
+    var lView = getLView();
+    var tView = lView[TVIEW];
+    if (!tView.firstTemplatePass)
+        return;
+    queueHostBindingForCheck(tView, getCurrentDirectiveDef(), count);
+    prefillHostVars(tView, lView, count);
+}
+/**
+ * Stores host binding fn and number of host vars so it will be queued for binding refresh during
+ * CD.
+ */
+function queueHostBindingForCheck(tView, def, hostVars) {
+    ngDevMode &&
+        assertEqual(tView.firstTemplatePass, true, 'Should only be called in first template pass.');
+    var expando = tView.expandoInstructions;
+    var length = expando.length;
+    // Check whether a given `hostBindings` function already exists in expandoInstructions,
+    // which can happen in case directive definition was extended from base definition (as a part of
+    // the `InheritDefinitionFeature` logic). If we found the same `hostBindings` function in the
+    // list, we just increase the number of host vars associated with that function, but do not add it
+    // into the list again.
+    if (length >= 2 && expando[length - 2] === def.hostBindings) {
+        expando[length - 1] = expando[length - 1] + hostVars;
+    }
+    else {
+        expando.push(def.hostBindings, hostVars);
+    }
+}
+/**
+ * On the first template pass, we need to reserve space for host binding values
+ * after directives are matched (so all directives are saved, then bindings).
+ * Because we are updating the blueprint, we only need to do this once.
+ */
+function prefillHostVars(tView, lView, totalHostVars) {
+    ngDevMode &&
+        assertEqual(tView.firstTemplatePass, true, 'Should only be called in first template pass.');
+    for (var i = 0; i < totalHostVars; i++) {
+        lView.push(NO_CHANGE);
+        tView.blueprint.push(NO_CHANGE);
+        tView.data.push(null);
+    }
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYWxsb2NfaG9zdF92YXJzLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vLi4vLi4vLi4vLi4vLi4vLi4vLi4vcGFja2FnZXMvY29yZS9zcmMvcmVuZGVyMy9pbnN0cnVjdGlvbnMvYWxsb2NfaG9zdF92YXJzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBOzs7Ozs7R0FNRztBQUVILE9BQU8sRUFBQyxXQUFXLEVBQUMsTUFBTSxtQkFBbUIsQ0FBQztBQUU5QyxPQUFPLEVBQVEsS0FBSyxFQUFRLE1BQU0sb0JBQW9CLENBQUM7QUFDdkQsT0FBTyxFQUFDLHNCQUFzQixFQUFFLFFBQVEsRUFBQyxNQUFNLFVBQVUsQ0FBQztBQUMxRCxPQUFPLEVBQUMsU0FBUyxFQUFDLE1BQU0sV0FBVyxDQUFDO0FBRXBDOzs7O0dBSUc7QUFDSCxNQUFNLFVBQVUsYUFBYSxDQUFDLEtBQWE7SUFDekMsSUFBTSxLQUFLLEdBQUcsUUFBUSxFQUFFLENBQUM7SUFDekIsSUFBTSxLQUFLLEdBQUcsS0FBSyxDQUFDLEtBQUssQ0FBQyxDQUFDO0lBQzNCLElBQUksQ0FBQyxLQUFLLENBQUMsaUJBQWlCO1FBQUUsT0FBTztJQUNyQyx3QkFBd0IsQ0FBQyxLQUFLLEVBQUUsc0JBQXNCLEVBQUksRUFBRSxLQUFLLENBQUMsQ0FBQztJQUNuRSxlQUFlLENBQUMsS0FBSyxFQUFFLEtBQUssRUFBRSxLQUFLLENBQUMsQ0FBQztBQUN2QyxDQUFDO0FBRUQ7OztHQUdHO0FBQ0gsU0FBUyx3QkFBd0IsQ0FDN0IsS0FBWSxFQUFFLEdBQXlDLEVBQUUsUUFBZ0I7SUFDM0UsU0FBUztRQUNMLFdBQVcsQ0FBQyxLQUFLLENBQUMsaUJBQWlCLEVBQUUsSUFBSSxFQUFFLCtDQUErQyxDQUFDLENBQUM7SUFDaEcsSUFBTSxPQUFPLEdBQUcsS0FBSyxDQUFDLG1CQUFxQixDQUFDO0lBQzVDLElBQU0sTUFBTSxHQUFHLE9BQU8sQ0FBQyxNQUFNLENBQUM7SUFDOUIsdUZBQXVGO0lBQ3ZGLGdHQUFnRztJQUNoRyw2RkFBNkY7SUFDN0Ysa0dBQWtHO0lBQ2xHLHVCQUF1QjtJQUN2QixJQUFJLE1BQU0sSUFBSSxDQUFDLElBQUksT0FBTyxDQUFDLE1BQU0sR0FBRyxDQUFDLENBQUMsS0FBSyxHQUFHLENBQUMsWUFBWSxFQUFFO1FBQzNELE9BQU8sQ0FBQyxNQUFNLEdBQUcsQ0FBQyxDQUFDLEdBQUksT0FBTyxDQUFDLE1BQU0sR0FBRyxDQUFDLENBQVksR0FBRyxRQUFRLENBQUM7S0FDbEU7U0FBTTtRQUNMLE9BQU8sQ0FBQyxJQUFJLENBQUMsR0FBRyxDQUFDLFlBQWMsRUFBRSxRQUFRLENBQUMsQ0FBQztLQUM1QztBQUNILENBQUM7QUFFRDs7OztHQUlHO0FBQ0gsU0FBUyxlQUFlLENBQUMsS0FBWSxFQUFFLEtBQVksRUFBRSxhQUFxQjtJQUN4RSxTQUFTO1FBQ0wsV0FBVyxDQUFDLEtBQUssQ0FBQyxpQkFBaUIsRUFBRSxJQUFJLEVBQUUsK0NBQStDLENBQUMsQ0FBQztJQUNoRyxLQUFLLElBQUksQ0FBQyxHQUFHLENBQUMsRUFBRSxDQUFDLEdBQUcsYUFBYSxFQUFFLENBQUMsRUFBRSxFQUFFO1FBQ3RDLEtBQUssQ0FBQyxJQUFJLENBQUMsU0FBUyxDQUFDLENBQUM7UUFDdEIsS0FBSyxDQUFDLFNBQVMsQ0FBQyxJQUFJLENBQUMsU0FBUyxDQUFDLENBQUM7UUFDaEMsS0FBSyxDQUFDLElBQUksQ0FBQyxJQUFJLENBQUMsSUFBSSxDQUFDLENBQUM7S0FDdkI7QUFDSCxDQUFDIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBAbGljZW5zZVxuICogQ29weXJpZ2h0IEdvb2dsZSBJbmMuIEFsbCBSaWdodHMgUmVzZXJ2ZWQuXG4gKlxuICogVXNlIG9mIHRoaXMgc291cmNlIGNvZGUgaXMgZ292ZXJuZWQgYnkgYW4gTUlULXN0eWxlIGxpY2Vuc2UgdGhhdCBjYW4gYmVcbiAqIGZvdW5kIGluIHRoZSBMSUNFTlNFIGZpbGUgYXQgaHR0cHM6Ly9hbmd1bGFyLmlvL2xpY2Vuc2VcbiAqL1xuXG5pbXBvcnQge2Fzc2VydEVxdWFsfSBmcm9tICcuLi8uLi91dGlsL2Fzc2VydCc7XG5pbXBvcnQge0NvbXBvbmVudERlZiwgRGlyZWN0aXZlRGVmfSBmcm9tICcuLi9pbnRlcmZhY2VzL2RlZmluaXRpb24nO1xuaW1wb3J0IHtMVmlldywgVFZJRVcsIFRWaWV3fSBmcm9tICcuLi9pbnRlcmZhY2VzL3ZpZXcnO1xuaW1wb3J0IHtnZXRDdXJyZW50RGlyZWN0aXZlRGVmLCBnZXRMVmlld30gZnJvbSAnLi4vc3RhdGUnO1xuaW1wb3J0IHtOT19DSEFOR0V9IGZyb20gJy4uL3Rva2Vucyc7XG5cbi8qKlxuICogQWxsb2NhdGVzIHRoZSBuZWNlc3NhcnkgYW1vdW50IG9mIHNsb3RzIGZvciBob3N0IHZhcnMuXG4gKlxuICogQHBhcmFtIGNvdW50IEFtb3VudCBvZiB2YXJzIHRvIGJlIGFsbG9jYXRlZFxuICovXG5leHBvcnQgZnVuY3Rpb24gYWxsb2NIb3N0VmFycyhjb3VudDogbnVtYmVyKTogdm9pZCB7XG4gIGNvbnN0IGxWaWV3ID0gZ2V0TFZpZXcoKTtcbiAgY29uc3QgdFZpZXcgPSBsVmlld1tUVklFV107XG4gIGlmICghdFZpZXcuZmlyc3RUZW1wbGF0ZVBhc3MpIHJldHVybjtcbiAgcXVldWVIb3N0QmluZGluZ0ZvckNoZWNrKHRWaWV3LCBnZXRDdXJyZW50RGlyZWN0aXZlRGVmKCkgISwgY291bnQpO1xuICBwcmVmaWxsSG9zdFZhcnModFZpZXcsIGxWaWV3LCBjb3VudCk7XG59XG5cbi8qKlxuICogU3RvcmVzIGhvc3QgYmluZGluZyBmbiBhbmQgbnVtYmVyIG9mIGhvc3QgdmFycyBzbyBpdCB3aWxsIGJlIHF1ZXVlZCBmb3IgYmluZGluZyByZWZyZXNoIGR1cmluZ1xuICogQ0QuXG4gKi9cbmZ1bmN0aW9uIHF1ZXVlSG9zdEJpbmRpbmdGb3JDaGVjayhcbiAgICB0VmlldzogVFZpZXcsIGRlZjogRGlyZWN0aXZlRGVmPGFueT58IENvbXBvbmVudERlZjxhbnk+LCBob3N0VmFyczogbnVtYmVyKTogdm9pZCB7XG4gIG5nRGV2TW9kZSAmJlxuICAgICAgYXNzZXJ0RXF1YWwodFZpZXcuZmlyc3RUZW1wbGF0ZVBhc3MsIHRydWUsICdTaG91bGQgb25seSBiZSBjYWxsZWQgaW4gZmlyc3QgdGVtcGxhdGUgcGFzcy4nKTtcbiAgY29uc3QgZXhwYW5kbyA9IHRWaWV3LmV4cGFuZG9JbnN0cnVjdGlvbnMgITtcbiAgY29uc3QgbGVuZ3RoID0gZXhwYW5kby5sZW5ndGg7XG4gIC8vIENoZWNrIHdoZXRoZXIgYSBnaXZlbiBgaG9zdEJpbmRpbmdzYCBmdW5jdGlvbiBhbHJlYWR5IGV4aXN0cyBpbiBleHBhbmRvSW5zdHJ1Y3Rpb25zLFxuICAvLyB3aGljaCBjYW4gaGFwcGVuIGluIGNhc2UgZGlyZWN0aXZlIGRlZmluaXRpb24gd2FzIGV4dGVuZGVkIGZyb20gYmFzZSBkZWZpbml0aW9uIChhcyBhIHBhcnQgb2ZcbiAgLy8gdGhlIGBJbmhlcml0RGVmaW5pdGlvbkZlYXR1cmVgIGxvZ2ljKS4gSWYgd2UgZm91bmQgdGhlIHNhbWUgYGhvc3RCaW5kaW5nc2AgZnVuY3Rpb24gaW4gdGhlXG4gIC8vIGxpc3QsIHdlIGp1c3QgaW5jcmVhc2UgdGhlIG51bWJlciBvZiBob3N0IHZhcnMgYXNzb2NpYXRlZCB3aXRoIHRoYXQgZnVuY3Rpb24sIGJ1dCBkbyBub3QgYWRkIGl0XG4gIC8vIGludG8gdGhlIGxpc3QgYWdhaW4uXG4gIGlmIChsZW5ndGggPj0gMiAmJiBleHBhbmRvW2xlbmd0aCAtIDJdID09PSBkZWYuaG9zdEJpbmRpbmdzKSB7XG4gICAgZXhwYW5kb1tsZW5ndGggLSAxXSA9IChleHBhbmRvW2xlbmd0aCAtIDFdIGFzIG51bWJlcikgKyBob3N0VmFycztcbiAgfSBlbHNlIHtcbiAgICBleHBhbmRvLnB1c2goZGVmLmhvc3RCaW5kaW5ncyAhLCBob3N0VmFycyk7XG4gIH1cbn1cblxuLyoqXG4gKiBPbiB0aGUgZmlyc3QgdGVtcGxhdGUgcGFzcywgd2UgbmVlZCB0byByZXNlcnZlIHNwYWNlIGZvciBob3N0IGJpbmRpbmcgdmFsdWVzXG4gKiBhZnRlciBkaXJlY3RpdmVzIGFyZSBtYXRjaGVkIChzbyBhbGwgZGlyZWN0aXZlcyBhcmUgc2F2ZWQsIHRoZW4gYmluZGluZ3MpLlxuICogQmVjYXVzZSB3ZSBhcmUgdXBkYXRpbmcgdGhlIGJsdWVwcmludCwgd2Ugb25seSBuZWVkIHRvIGRvIHRoaXMgb25jZS5cbiAqL1xuZnVuY3Rpb24gcHJlZmlsbEhvc3RWYXJzKHRWaWV3OiBUVmlldywgbFZpZXc6IExWaWV3LCB0b3RhbEhvc3RWYXJzOiBudW1iZXIpOiB2b2lkIHtcbiAgbmdEZXZNb2RlICYmXG4gICAgICBhc3NlcnRFcXVhbCh0Vmlldy5maXJzdFRlbXBsYXRlUGFzcywgdHJ1ZSwgJ1Nob3VsZCBvbmx5IGJlIGNhbGxlZCBpbiBmaXJzdCB0ZW1wbGF0ZSBwYXNzLicpO1xuICBmb3IgKGxldCBpID0gMDsgaSA8IHRvdGFsSG9zdFZhcnM7IGkrKykge1xuICAgIGxWaWV3LnB1c2goTk9fQ0hBTkdFKTtcbiAgICB0Vmlldy5ibHVlcHJpbnQucHVzaChOT19DSEFOR0UpO1xuICAgIHRWaWV3LmRhdGEucHVzaChudWxsKTtcbiAgfVxufVxuIl19

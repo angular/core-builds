@@ -7,7 +7,7 @@
  */
 /// <amd-module name="@angular/core/schematics/migrations/static-queries/angular/query-definition" />
 import * as ts from 'typescript';
-import { NgDecorator } from './decorators';
+import { NgDecorator } from '../../../utils/ng_decorators';
 /** Timing of a given query. Either static or dynamic. */
 export declare enum QueryTiming {
     STATIC = 0,

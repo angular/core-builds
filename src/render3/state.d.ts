@@ -124,3 +124,17 @@ export declare function getSelectedIndex(): number;
  * current `LView` to act on.
  */
 export declare function setSelectedIndex(index: number): void;
+/**
+ * Sets the namespace used to create elements to `'http://www.w3.org/2000/svg'` in global state.
+ */
+export declare function namespaceSVG(): void;
+/**
+ * Sets the namespace used to create elements to `'http://www.w3.org/1998/MathML/'` in global state.
+ */
+export declare function namespaceMathML(): void;
+/**
+ * Sets the namespace used to create elements no `null`, which forces element creation to use
+ * `createElement` rather than `createElementNS`.
+ */
+export declare function namespaceHTML(): void;
+export declare function getNamespace(): string | null;

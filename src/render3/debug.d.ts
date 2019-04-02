@@ -52,7 +52,7 @@ export declare class LViewDebug {
         cleanup: any[] | null;
         injector: import("@angular/core").Injector | null;
         rendererFactory: import("@angular/core/src/render3/interfaces/renderer").RendererFactory3;
-        renderer: import("@angular/core/src/render3/interfaces/renderer").ObjectOrientedRenderer3 | import("@angular/core/src/render3/interfaces/renderer").ProceduralRenderer3;
+        renderer: import("@angular/core/src/render3/interfaces/renderer").Renderer3;
         sanitizer: import("@angular/core").Sanitizer | null;
         childHead: LViewDebug | LContainerDebug | null;
         next: LViewDebug | LContainerDebug | null;
@@ -60,7 +60,7 @@ export declare class LViewDebug {
         declarationView: LViewDebug | null;
         contentQueries: import("@angular/core").QueryList<any>[] | null;
         queries: LQueries | null;
-        tHost: import("@angular/core/src/render3/interfaces/node").TViewNode | import("@angular/core/src/render3/interfaces/node").TElementNode | null;
+        tHost: import("@angular/core/src/render3/interfaces/node").TElementNode | import("@angular/core/src/render3/interfaces/node").TViewNode | null;
         bindingIndex: number;
     };
     /**
