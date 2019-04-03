@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.10+123.sha-a6809e0.with-local-changes
+ * @license Angular v8.0.0-beta.11+9.sha-699ecac.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6975,6 +6975,38 @@ class ErrorHandler {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
+/**
+ * Marks that the next string is for element.
+ *
+ * See `I18nMutateOpCodes` documentation.
+ * @type {?}
+ */
+const ELEMENT_MARKER = {
+    marker: 'element'
+};
+// WARNING: interface has both a type and a value, skipping emit
+/**
+ * Marks that the next string is for comment.
+ *
+ * See `I18nMutateOpCodes` documentation.
+ * @type {?}
+ */
+const COMMENT_MARKER = {
+    marker: 'comment'
+};
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * @param {?} obj
+ * @param {?} debug
+ * @return {?}
+ */
+function attachDebugObject(obj, debug) {
+    Object.defineProperty(obj, 'debug', { value: debug, enumerable: false });
+}
 /*
  * This file contains conditionally attached classes which provide human readable (debug) level
  * information for `LView`, `LContainer` and other internal data structures. These data structures
@@ -7008,14 +7040,14 @@ class ErrorHandler {
  * @return {?}
  */
 function attachLViewDebug(lView) {
-    ((/** @type {?} */ (lView))).debug = new LViewDebug(lView);
+    attachDebugObject(lView, new LViewDebug(lView));
 }
 /**
  * @param {?} lContainer
  * @return {?}
  */
 function attachLContainerDebug(lContainer) {
-    ((/** @type {?} */ (lContainer))).debug = new LContainerDebug(lContainer);
+    attachDebugObject(lContainer, new LContainerDebug(lContainer));
 }
 /**
  * @param {?} obj
@@ -7245,6 +7277,239 @@ function readLViewValue(value) {
         value = value[HOST];
     }
     return null;
+}
+class I18NDebugItem {
+    /**
+     * @param {?} __raw_opCode
+     * @param {?} _lView
+     * @param {?} nodeIndex
+     * @param {?} type
+     */
+    constructor(__raw_opCode, _lView, nodeIndex, type) {
+        this.__raw_opCode = __raw_opCode;
+        this._lView = _lView;
+        this.nodeIndex = nodeIndex;
+        this.type = type;
+    }
+    /**
+     * @return {?}
+     */
+    get tNode() { return getTNode(this.nodeIndex, this._lView); }
+}
+/**
+ * Turns a list of "Create" & "Update" OpCodes into a human-readable list of operations for
+ * debugging purposes.
+ * @param {?} mutateOpCodes mutation opCodes to read
+ * @param {?} updateOpCodes update opCodes to read
+ * @param {?} icus list of ICU expressions
+ * @param {?} lView The view the opCodes are acting on
+ * @return {?}
+ */
+function attachI18nOpCodesDebug(mutateOpCodes, updateOpCodes, icus, lView) {
+    attachDebugObject(mutateOpCodes, new I18nMutateOpCodesDebug(mutateOpCodes, lView));
+    attachDebugObject(updateOpCodes, new I18nUpdateOpCodesDebug(updateOpCodes, icus, lView));
+    if (icus) {
+        icus.forEach((/**
+         * @param {?} icu
+         * @return {?}
+         */
+        icu => {
+            icu.create.forEach((/**
+             * @param {?} icuCase
+             * @return {?}
+             */
+            icuCase => { attachDebugObject(icuCase, new I18nMutateOpCodesDebug(icuCase, lView)); }));
+            icu.update.forEach((/**
+             * @param {?} icuCase
+             * @return {?}
+             */
+            icuCase => {
+                attachDebugObject(icuCase, new I18nUpdateOpCodesDebug(icuCase, icus, lView));
+            }));
+        }));
+    }
+}
+class I18nMutateOpCodesDebug {
+    /**
+     * @param {?} __raw_opCodes
+     * @param {?} __lView
+     */
+    constructor(__raw_opCodes, __lView) {
+        this.__raw_opCodes = __raw_opCodes;
+        this.__lView = __lView;
+    }
+    /**
+     * A list of operation information about how the OpCodes will act on the view.
+     * @return {?}
+     */
+    get operations() {
+        const { __lView, __raw_opCodes } = this;
+        /** @type {?} */
+        const results = [];
+        for (let i = 0; i < __raw_opCodes.length; i++) {
+            /** @type {?} */
+            const opCode = __raw_opCodes[i];
+            /** @type {?} */
+            let result;
+            if (typeof opCode === 'string') {
+                result = {
+                    __raw_opCode: opCode,
+                    type: 'Create Text Node',
+                    nodeIndex: __raw_opCodes[++i],
+                    text: opCode,
+                };
+            }
+            if (typeof opCode === 'number') {
+                switch (opCode & 7 /* MASK_OPCODE */) {
+                    case 1 /* AppendChild */:
+                        /** @type {?} */
+                        const destinationNodeIndex = opCode >>> 17 /* SHIFT_PARENT */;
+                        result = new I18NDebugItem(opCode, __lView, destinationNodeIndex, 'AppendChild');
+                        break;
+                    case 0 /* Select */:
+                        /** @type {?} */
+                        const nodeIndex = opCode >>> 3 /* SHIFT_REF */;
+                        result = new I18NDebugItem(opCode, __lView, nodeIndex, 'Select');
+                        break;
+                    case 5 /* ElementEnd */:
+                        /** @type {?} */
+                        let elementIndex = opCode >>> 3 /* SHIFT_REF */;
+                        result = new I18NDebugItem(opCode, __lView, elementIndex, 'ElementEnd');
+                        break;
+                    case 4 /* Attr */:
+                        elementIndex = opCode >>> 3 /* SHIFT_REF */;
+                        result = new I18NDebugItem(opCode, __lView, elementIndex, 'Attr');
+                        result['attrName'] = __raw_opCodes[++i];
+                        result['attrValue'] = __raw_opCodes[++i];
+                        break;
+                }
+            }
+            if (!result) {
+                switch (opCode) {
+                    case COMMENT_MARKER:
+                        result = {
+                            __raw_opCode: opCode,
+                            type: 'COMMENT_MARKER',
+                            commentValue: __raw_opCodes[++i],
+                            nodeIndex: __raw_opCodes[++i],
+                        };
+                        break;
+                    case ELEMENT_MARKER:
+                        result = {
+                            __raw_opCode: opCode,
+                            type: 'ELEMENT_MARKER',
+                        };
+                        break;
+                }
+            }
+            if (!result) {
+                result = {
+                    __raw_opCode: opCode,
+                    type: 'Unknown Op Code',
+                    code: opCode,
+                };
+            }
+            results.push(result);
+        }
+        return results;
+    }
+}
+class I18nUpdateOpCodesDebug {
+    /**
+     * @param {?} __raw_opCodes
+     * @param {?} icus
+     * @param {?} __lView
+     */
+    constructor(__raw_opCodes, icus, __lView) {
+        this.__raw_opCodes = __raw_opCodes;
+        this.icus = icus;
+        this.__lView = __lView;
+    }
+    /**
+     * A list of operation information about how the OpCodes will act on the view.
+     * @return {?}
+     */
+    get operations() {
+        const { __lView, __raw_opCodes, icus } = this;
+        /** @type {?} */
+        const results = [];
+        for (let i = 0; i < __raw_opCodes.length; i++) {
+            // bit code to check if we should apply the next update
+            /** @type {?} */
+            const checkBit = (/** @type {?} */ (__raw_opCodes[i]));
+            // Number of opCodes to skip until next set of update codes
+            /** @type {?} */
+            const skipCodes = (/** @type {?} */ (__raw_opCodes[++i]));
+            /** @type {?} */
+            let value = '';
+            for (let j = i + 1; j <= (i + skipCodes); j++) {
+                /** @type {?} */
+                const opCode = __raw_opCodes[j];
+                if (typeof opCode === 'string') {
+                    value += opCode;
+                }
+                else if (typeof opCode == 'number') {
+                    if (opCode < 0) {
+                        // It's a binding index whose value is negative
+                        // We cannot know the value of the binding so we only show the index
+                        value += `�${-opCode - 1}�`;
+                    }
+                    else {
+                        /** @type {?} */
+                        const nodeIndex = opCode >>> 2 /* SHIFT_REF */;
+                        /** @type {?} */
+                        let tIcuIndex;
+                        /** @type {?} */
+                        let tIcu;
+                        switch (opCode & 3 /* MASK_OPCODE */) {
+                            case 1 /* Attr */:
+                                /** @type {?} */
+                                const attrName = (/** @type {?} */ (__raw_opCodes[++j]));
+                                /** @type {?} */
+                                const sanitizeFn = __raw_opCodes[++j];
+                                results.push({
+                                    __raw_opCode: opCode,
+                                    checkBit,
+                                    type: 'Attr',
+                                    attrValue: value, attrName, sanitizeFn,
+                                });
+                                break;
+                            case 0 /* Text */:
+                                results.push({
+                                    __raw_opCode: opCode,
+                                    checkBit,
+                                    type: 'Text', nodeIndex,
+                                    text: value,
+                                });
+                                break;
+                            case 2 /* IcuSwitch */:
+                                tIcuIndex = (/** @type {?} */ (__raw_opCodes[++j]));
+                                tIcu = (/** @type {?} */ (icus))[tIcuIndex];
+                                /** @type {?} */
+                                let result = new I18NDebugItem(opCode, __lView, nodeIndex, 'IcuSwitch');
+                                result['tIcuIndex'] = tIcuIndex;
+                                result['checkBit'] = checkBit;
+                                result['mainBinding'] = value;
+                                result['tIcu'] = tIcu;
+                                results.push(result);
+                                break;
+                            case 3 /* IcuUpdate */:
+                                tIcuIndex = (/** @type {?} */ (__raw_opCodes[++j]));
+                                tIcu = (/** @type {?} */ (icus))[tIcuIndex];
+                                result = new I18NDebugItem(opCode, __lView, nodeIndex, 'IcuUpdate');
+                                result['tIcuIndex'] = tIcuIndex;
+                                result['checkBit'] = checkBit;
+                                result['tIcu'] = tIcu;
+                                results.push(result);
+                                break;
+                        }
+                    }
+                }
+            }
+            i += skipCodes;
+        }
+        return results;
+    }
 }
 
 /**
@@ -19059,7 +19324,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.10+123.sha-a6809e0.with-local-changes');
+const VERSION = new Version('8.0.0-beta.11+9.sha-699ecac.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -23768,30 +24033,6 @@ function flatten(list) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
-/**
- * Marks that the next string is for element.
- *
- * See `I18nMutateOpCodes` documentation.
- * @type {?}
- */
-const ELEMENT_MARKER = {
-    marker: 'element'
-};
-// WARNING: interface has both a type and a value, skipping emit
-/**
- * Marks that the next string is for comment.
- *
- * See `I18nMutateOpCodes` documentation.
- * @type {?}
- */
-const COMMENT_MARKER = {
-    marker: 'comment'
-};
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
 /** @type {?} */
 const MARKER = `�`;
 /** @type {?} */
@@ -24235,6 +24476,8 @@ function i18nStartFirstPass(tView, index, message, subTemplateIndex) {
         }
     }
     allocExpando(viewData, i18nVarsCount);
+    ngDevMode &&
+        attachI18nOpCodesDebug(createOpCodes, updateOpCodes, icuExpressions.length ? icuExpressions : null, viewData);
     // NOTE: local var needed to properly assert the type of `TI18n`.
     /** @type {?} */
     const tI18n = {
