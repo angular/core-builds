@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.10+108.sha-98f8b0f.with-local-changes
+ * @license Angular v8.0.0-beta.10+123.sha-a6809e0.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7,6 +7,18 @@
 import { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import { Subscription } from 'rxjs';
+
+/**
+ * @description
+ *
+ * Represents an abstract class `T`, if applied to a concrete class it would stop being
+ * instantiatable.
+ *
+ * @publicApi
+ */
+export declare interface AbstractType<T> extends Function {
+    prototype: T;
+}
 
 /**
  * Below are constants for LContainer indices to help us look up LContainer members
@@ -8656,6 +8668,7 @@ export declare function ɵ_sanitizeUrl(url: string): string;
  */
 export declare function ɵaddPlayer(ref: ComponentInstance | DirectiveInstance | HTMLElement, player: ɵPlayer): void;
 
+
 /**
  * Allocates the necessary amount of slots for host vars.
  *
@@ -9560,24 +9573,24 @@ export declare type ɵComponentDefWithMeta<T, Selector extends String, ExportAs 
 }, QueryFields extends string[]> = ɵComponentDef<T>;
 
 /**
- * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component.
- *
- * This instruction is for compatibility purposes and is designed to ensure that a
- * synthetic host listener (e.g. `@HostListener('@foo.start')`) properly gets rendered
- * in the component's renderer. Normally all host listeners are evaluated with the
- * parent component's renderer, but, in the case of animation @triggers, they need
- * to be evaluated with the sub component's renderer (because that's where the
- * animation triggers are defined).
- *
- * Do not use this instruction as a replacement for `listener`. This instruction
- * only exists to ensure compatibility with the ViewEngine's host binding behavior.
- *
- * @param eventName Name of the event
- * @param listenerFn The function to be called when event emits
- * @param useCapture Whether or not to use capture in event listener
- * @param eventTargetResolver Function that returns global target information in case this listener
- * should be attached to a global object like window, document or body
- */
+* Registers a synthetic host listener (e.g. `(@foo.start)`) on a component.
+*
+* This instruction is for compatibility purposes and is designed to ensure that a
+* synthetic host listener (e.g. `@HostListener('@foo.start')`) properly gets rendered
+* in the component's renderer. Normally all host listeners are evaluated with the
+* parent component's renderer, but, in the case of animation @triggers, they need
+* to be evaluated with the sub component's renderer (because that's where the
+* animation triggers are defined).
+*
+* Do not use this instruction as a replacement for `listener`. This instruction
+* only exists to ensure compatibility with the ViewEngine's host binding behavior.
+*
+* @param eventName Name of the event
+* @param listenerFn The function to be called when event emits
+* @param useCapture Whether or not to use capture in event listener
+* @param eventTargetResolver Function that returns global target information in case this listener
+* should be attached to a global object like window, document or body
+*/
 export declare function ɵcomponentHostSyntheticListener<T>(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
 
 /**
@@ -10076,8 +10089,22 @@ export declare const ɵdefineDirective: <T>(directiveDefinition: {
 }) => never;
 
 export declare function ɵdefineNgModule<T>(def: {
+    /** Token representing the module. Used by DI. */
     type: T;
-} & Partial<ɵNgModuleDef<T>>): never;
+    /** List of components to bootstrap. */
+    bootstrap?: Type<any>[] | (() => Type<any>[]);
+    /** List of components, directives, and pipes declared by this module. */
+    declarations?: Type<any>[] | (() => Type<any>[]);
+    /** List of modules or `ModuleWithProviders` imported by this module. */
+    imports?: Type<any>[] | (() => Type<any>[]);
+    /**
+     * List of modules, `ModuleWithProviders`, components, directives, or pipes exported by this
+     * module.
+     */
+    exports?: Type<any>[] | (() => Type<any>[]);
+    /** The set of schemas that declare elements to be allowed in the NgModule. */
+    schemas?: SchemaMetadata[] | null;
+}): never;
 
 /**
  * Create a pipe definition object.
@@ -10114,6 +10141,7 @@ export declare const enum ɵDepFlags {
     Self = 4,
     Value = 8
 }
+
 
 /**
  * Synchronously perform change detection on a component (and possibly its sub-components).
@@ -10488,21 +10516,21 @@ export declare function ɵelementHostStylingMap(classes: {
 } | ɵNO_CHANGE | null): void;
 
 /**
- * **TODO: Remove this function after `property` is in use**
- * Update a property on an element.
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new @Inputs don't have to be re-compiled.
- *
- * @param index The index of the element to update in the data array
- * @param propName Name of property. Because it is going to DOM, this is not subject to
- *        renaming as part of minification.
- * @param value New value to write.
- * @param sanitizer An optional function used to sanitize the value.
- * @param nativeOnly Whether or not we should only set native properties and skip input check
- * (this is necessary for host property bindings)
- */
+* **TODO: Remove this function after `property` is in use**
+* Update a property on an element.
+*
+* If the property name also exists as an input property on one of the element's directives,
+* the component property will be set instead of the element property. This check must
+* be conducted at runtime so child components that add new @Inputs don't have to be re-compiled.
+*
+* @param index The index of the element to update in the data array
+* @param propName Name of property. Because it is going to DOM, this is not subject to
+*        renaming as part of minification.
+* @param value New value to write.
+* @param sanitizer An optional function used to sanitize the value.
+* @param nativeOnly Whether or not we should only set native properties and skip input check
+* (this is necessary for host property bindings)
+*/
 export declare function ɵelementProperty<T>(index: number, propName: string, value: T | ɵNO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): void;
 
 /**
@@ -11093,10 +11121,20 @@ export declare function ɵmod(providers: NgModuleProviderDef[]): NgModuleDefinit
 
 export declare function ɵmpd(flags: ɵNodeFlags, token: any, value: any, deps: ([ɵDepFlags, any] | any)[]): NgModuleProviderDef;
 
+/**
+ * Sets the namespace used to create elements no `null`, which forces element creation to use
+ * `createElement` rather than `createElementNS`.
+ */
 export declare function ɵnamespaceHTML(): void;
 
+/**
+ * Sets the namespace used to create elements to `'http://www.w3.org/1998/MathML/'` in global state.
+ */
 export declare function ɵnamespaceMathML(): void;
 
+/**
+ * Sets the namespace used to create elements to `'http://www.w3.org/2000/svg'` in global state.
+ */
 export declare function ɵnamespaceSVG(): void;
 
 export declare function ɵncd(ngContentIndex: null | number, index: number): NodeDef;
@@ -12110,6 +12148,26 @@ export declare function ɵsetClassMetadata(type: Type<any>, decorators: any[] | 
 export declare function ɵsetComponentScope(type: ɵComponentType<any>, directives: Type<any>[], pipes: Type<any>[]): void;
 
 export declare function ɵsetCurrentInjector(injector: Injector | null | undefined): Injector | undefined | null;
+
+/**
+ * Adds the module metadata that is necessary to compute the module's transitive scope to an
+ * existing module definition.
+ *
+ * Scope metadata of modules is not used in production builds, so calls to this function can be
+ * marked pure to tree-shake it from the bundle, allowing for all referenced declarations
+ * to become eligible for tree-shaking as well.
+ */
+export declare function ɵsetNgModuleScope(type: any, scope: {
+    /** List of components, directives, and pipes declared by this module. */
+    declarations?: Type<any>[] | (() => Type<any>[]);
+    /** List of modules or `ModuleWithProviders` imported by this module. */
+    imports?: Type<any>[] | (() => Type<any>[]);
+    /**
+     * List of modules, `ModuleWithProviders`, components, directives, or pipes exported by this
+     * module.
+     */
+    exports?: Type<any>[] | (() => Type<any>[]);
+}): void;
 
 
 export declare type ɵSetterFn = (obj: any, value: any) => void;

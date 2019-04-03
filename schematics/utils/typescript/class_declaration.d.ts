@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/// <amd-module name="@angular/core/schematics/migrations/static-queries/typescript/class_declaration" />
+/// <amd-module name="@angular/core/schematics/utils/typescript/class_declaration" />
 import * as ts from 'typescript';
 /** Determines the base type identifiers of a specified class declaration. */
 export declare function getBaseTypeIdentifiers(node: ts.ClassDeclaration): ts.Identifier[] | null;

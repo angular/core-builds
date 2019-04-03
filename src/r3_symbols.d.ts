@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.10+108.sha-98f8b0f.with-local-changes
+ * @license Angular v8.0.0-beta.10+123.sha-a6809e0.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -339,8 +339,22 @@ export declare function defineInjector(options: {
 }): never;
 
 export declare function defineNgModule<T>(def: {
+    /** Token representing the module. Used by DI. */
     type: T;
-} & Partial<NgModuleDef<T>>): never;
+    /** List of components to bootstrap. */
+    bootstrap?: Type<any>[] | (() => Type<any>[]);
+    /** List of components, directives, and pipes declared by this module. */
+    declarations?: Type<any>[] | (() => Type<any>[]);
+    /** List of modules or `ModuleWithProviders` imported by this module. */
+    imports?: Type<any>[] | (() => Type<any>[]);
+    /**
+     * List of modules, `ModuleWithProviders`, components, directives, or pipes exported by this
+     * module.
+     */
+    exports?: Type<any>[] | (() => Type<any>[]);
+    /** The set of schemas that declare elements to be allowed in the NgModule. */
+    schemas?: SchemaMetadata[] | null;
+}): never;
 
 /**
  * A wrapper around a native element inside of a View.
