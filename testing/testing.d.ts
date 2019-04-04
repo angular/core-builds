@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+23.sha-9c056b9.with-local-changes
+ * @license Angular v8.0.0-beta.11+24.sha-609024f.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13,6 +13,7 @@ import { ComponentRef } from '@angular/core';
 import { DebugElement } from '@angular/core';
 import { Directive } from '@angular/core';
 import { ElementRef } from '@angular/core';
+import { InjectFlags } from '@angular/core';
 import { InjectionToken } from '@angular/core';
 import { Injector } from '@angular/core';
 import { NgModule } from '@angular/core';
@@ -273,6 +274,10 @@ export declare interface TestBed {
     }): void;
     configureTestingModule(moduleDef: TestModuleMetadata): void;
     compileComponents(): Promise<any>;
+    get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
+    /**
+     * @deprecated from v8.0.0 use Type<T> or InjectionToken<T>
+     */
     get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function, context?: any): any;
     overrideModule(ngModule: Type<any>, override: MetadataOverride<NgModule>): void;
@@ -407,6 +412,10 @@ export declare interface TestBedStatic {
         useValue?: any;
         deps?: any[];
     }): TestBedStatic;
+    get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
+    /**
+     * @deprecated from v8.0.0 use Type<T> or InjectionToken<T>
+     */
     get(token: any, notFoundValue?: any): any;
     createComponent<T>(component: Type<T>): ComponentFixture<T>;
 }
@@ -536,6 +545,11 @@ export declare class ɵangular_packages_core_testing_testing_a implements Inject
     static deprecatedOverrideProvider(token: any, provider: {
         useValue: any;
     }): void;
+    static get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
+    /**
+     * @deprecated from v8.0.0 use Type<T> or InjectionToken<T>
+     * @suppress {duplicate}
+     */
     static get(token: any, notFoundValue?: any): any;
     static createComponent<T>(component: Type<T>): ComponentFixture<T>;
     private _instantiated;
@@ -585,6 +599,10 @@ export declare class ɵangular_packages_core_testing_testing_a implements Inject
     private _initIfNeeded;
     private _createCompilerAndModule;
     private _assertNotInstantiated;
+    get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
+    /**
+     * @deprecated from v8.0.0 use Type<T> or InjectionToken<T>
+     */
     get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function, context?: any): any;
     overrideModule(ngModule: Type<any>, override: MetadataOverride<NgModule>): void;
@@ -695,6 +713,10 @@ export declare class ɵangular_packages_core_testing_testing_b implements Inject
     static deprecatedOverrideProvider(token: any, provider: {
         useValue: any;
     }): void;
+    static get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
+    /**
+     * @deprecated from v8.0.0 use Type<T> or InjectionToken<T>
+     */
     static get(token: any, notFoundValue?: any): any;
     static createComponent<T>(component: Type<T>): ComponentFixture<T>;
     static resetTestingModule(): TestBedStatic;
@@ -731,6 +753,10 @@ export declare class ɵangular_packages_core_testing_testing_b implements Inject
     }): void;
     configureTestingModule(moduleDef: TestModuleMetadata): void;
     compileComponents(): Promise<any>;
+    get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
+    /**
+     * @deprecated from v8.0.0 use Type<T> or InjectionToken<T>
+     */
     get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function, context?: any): any;
     overrideModule(ngModule: Type<any>, override: MetadataOverride<NgModule>): void;
