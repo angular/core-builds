@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Component, Directive, Injector, NgModule, Pipe, PlatformRef, Type } from '@angular/core';
+import { Component, Directive, InjectFlags, InjectionToken, Injector, NgModule, Pipe, PlatformRef, Type } from '@angular/core';
 import { ComponentFixture } from './component_fixture';
 import { MetadataOverride } from './metadata_override';
 import { TestBedStatic, TestModuleMetadata } from './test_bed_common';
@@ -38,6 +38,10 @@ export interface TestBed {
     }): void;
     configureTestingModule(moduleDef: TestModuleMetadata): void;
     compileComponents(): Promise<any>;
+    get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
+    /**
+     * @deprecated from v8.0.0 use Type<T> or InjectionToken<T>
+     */
     get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function, context?: any): any;
     overrideModule(ngModule: Type<any>, override: MetadataOverride<NgModule>): void;
@@ -162,6 +166,11 @@ export declare class TestBedViewEngine implements Injector, TestBed {
     static deprecatedOverrideProvider(token: any, provider: {
         useValue: any;
     }): void;
+    static get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
+    /**
+     * @deprecated from v8.0.0 use Type<T> or InjectionToken<T>
+     * @suppress {duplicate}
+     */
     static get(token: any, notFoundValue?: any): any;
     static createComponent<T>(component: Type<T>): ComponentFixture<T>;
     private _instantiated;
@@ -211,6 +220,10 @@ export declare class TestBedViewEngine implements Injector, TestBed {
     private _initIfNeeded;
     private _createCompilerAndModule;
     private _assertNotInstantiated;
+    get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
+    /**
+     * @deprecated from v8.0.0 use Type<T> or InjectionToken<T>
+     */
     get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function, context?: any): any;
     overrideModule(ngModule: Type<any>, override: MetadataOverride<NgModule>): void;

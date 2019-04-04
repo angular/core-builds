@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+23.sha-9c056b9.with-local-changes
+ * @license Angular v8.0.0-beta.11+24.sha-609024f.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1869,8 +1869,9 @@
             _getTestBedRender3().deprecatedOverrideProvider(token, provider);
             return TestBedRender3;
         };
-        TestBedRender3.get = function (token, notFoundValue) {
+        TestBedRender3.get = function (token, notFoundValue, flags) {
             if (notFoundValue === void 0) { notFoundValue = i0.Injector.THROW_IF_NOT_FOUND; }
+            if (flags === void 0) { flags = i0.InjectFlags.Default; }
             return _getTestBedRender3().get(token, notFoundValue);
         };
         TestBedRender3.createComponent = function (component) {
@@ -1935,13 +1936,14 @@
             this.compiler.configureTestingModule(moduleDef);
         };
         TestBedRender3.prototype.compileComponents = function () { return this.compiler.compileComponents(); };
-        TestBedRender3.prototype.get = function (token, notFoundValue) {
+        TestBedRender3.prototype.get = function (token, notFoundValue, flags) {
             if (notFoundValue === void 0) { notFoundValue = i0.Injector.THROW_IF_NOT_FOUND; }
+            if (flags === void 0) { flags = i0.InjectFlags.Default; }
             if (token === TestBedRender3) {
                 return this;
             }
-            var result = this.testModuleRef.injector.get(token, UNDEFINED);
-            return result === UNDEFINED ? this.compiler.injector.get(token, notFoundValue) : result;
+            var result = this.testModuleRef.injector.get(token, UNDEFINED, flags);
+            return result === UNDEFINED ? this.compiler.injector.get(token, notFoundValue, flags) : result;
         };
         TestBedRender3.prototype.execute = function (tokens, fn, context) {
             var _this = this;
@@ -1995,7 +1997,9 @@
             if (!componentDef) {
                 throw new Error("It looks like '" + i0.ɵstringify(type) + "' has not been IVY compiled - it has no 'ngComponentDef' field");
             }
+            // TODO: Don't cast as `any`, proper type is boolean[]
             var noNgZone = this.get(ComponentFixtureNoNgZone, false);
+            // TODO: Don't cast as `any`, proper type is boolean[]
             var autoDetect = this.get(ComponentFixtureAutoDetect, false);
             var ngZone = noNgZone ? null : this.get(i0.NgZone, null);
             var componentFactory = new i0.ɵRender3ComponentFactory(componentDef);
@@ -2265,9 +2269,10 @@
             _getTestBedViewEngine().deprecatedOverrideProvider(token, provider);
             return TestBedViewEngine;
         };
-        TestBedViewEngine.get = function (token, notFoundValue) {
+        TestBedViewEngine.get = function (token, notFoundValue, flags) {
             if (notFoundValue === void 0) { notFoundValue = i0.Injector.THROW_IF_NOT_FOUND; }
-            return _getTestBedViewEngine().get(token, notFoundValue);
+            if (flags === void 0) { flags = i0.InjectFlags.Default; }
+            return _getTestBedViewEngine().get(token, notFoundValue, flags);
         };
         TestBedViewEngine.createComponent = function (component) {
             return _getTestBedViewEngine().createComponent(component);
@@ -2476,16 +2481,17 @@
                     ("Make sure you are not using `inject` before `" + methodName + "`."));
             }
         };
-        TestBedViewEngine.prototype.get = function (token, notFoundValue) {
+        TestBedViewEngine.prototype.get = function (token, notFoundValue, flags) {
             if (notFoundValue === void 0) { notFoundValue = i0.Injector.THROW_IF_NOT_FOUND; }
+            if (flags === void 0) { flags = i0.InjectFlags.Default; }
             this._initIfNeeded();
             if (token === TestBed) {
                 return this;
             }
             // Tests can inject things from the ng module and from the compiler,
             // but the ng module can't inject things from the compiler and vice versa.
-            var result = this._moduleRef.injector.get(token, UNDEFINED$1);
-            return result === UNDEFINED$1 ? this._compiler.injector.get(token, notFoundValue) : result;
+            var result = this._moduleRef.injector.get(token, UNDEFINED$1, flags);
+            return result === UNDEFINED$1 ? this._compiler.injector.get(token, notFoundValue, flags) : result;
         };
         TestBedViewEngine.prototype.execute = function (tokens, fn, context) {
             var _this = this;
@@ -2578,7 +2584,9 @@
             if (!componentFactory) {
                 throw new Error("Cannot create the component " + i0.ɵstringify(component) + " as it was not imported into the testing module!");
             }
+            // TODO: Don't cast as `any`, proper type is boolean[]
             var noNgZone = this.get(ComponentFixtureNoNgZone, false);
+            // TODO: Don't cast as `any`, proper type is boolean[]
             var autoDetect = this.get(ComponentFixtureAutoDetect, false);
             var ngZone = noNgZone ? null : this.get(i0.NgZone, null);
             var testComponentRenderer = this.get(TestComponentRenderer);
