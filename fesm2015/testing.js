@@ -1,10 +1,10 @@
 /**
- * @license Angular v8.0.0-beta.11+9.sha-699ecac.with-local-changes
+ * @license Angular v8.0.0-beta.11+24.sha-609024f.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode, RendererFactory2, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, ɵNG_COMPONENT_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵpatchComponentDefWithScope, ɵNG_INJECTOR_DEF, ɵNG_MODULE_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, ɵtransitiveScopesFor, ErrorHandler, Injector, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, ɵivyEnabled, Optional, SkipSelf } from '@angular/core';
+import { getDebugNode, RendererFactory2, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, ɵNG_COMPONENT_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵpatchComponentDefWithScope, ɵNG_INJECTOR_DEF, ɵNG_MODULE_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, ɵtransitiveScopesFor, ErrorHandler, Injector, InjectFlags, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, ɵivyEnabled, Optional, SkipSelf } from '@angular/core';
 import { __awaiter } from 'tslib';
 import { ResourceLoader } from '@angular/compiler';
 
@@ -2334,9 +2334,10 @@ class TestBedRender3 {
     /**
      * @param {?} token
      * @param {?=} notFoundValue
+     * @param {?=} flags
      * @return {?}
      */
-    static get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND) {
+    static get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND, flags = InjectFlags.Default) {
         return _getTestBedRender3().get(token, notFoundValue);
     }
     /**
@@ -2431,15 +2432,16 @@ class TestBedRender3 {
     /**
      * @param {?} token
      * @param {?=} notFoundValue
+     * @param {?=} flags
      * @return {?}
      */
-    get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND) {
+    get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND, flags = InjectFlags.Default) {
         if (token === TestBedRender3) {
             return this;
         }
         /** @type {?} */
-        const result = this.testModuleRef.injector.get(token, UNDEFINED);
-        return result === UNDEFINED ? this.compiler.injector.get(token, notFoundValue) : result;
+        const result = this.testModuleRef.injector.get(token, UNDEFINED, flags);
+        return result === UNDEFINED ? this.compiler.injector.get(token, notFoundValue, flags) : result;
     }
     /**
      * @param {?} tokens
@@ -2543,12 +2545,14 @@ class TestBedRender3 {
         if (!componentDef) {
             throw new Error(`It looks like '${ɵstringify(type)}' has not been IVY compiled - it has no 'ngComponentDef' field`);
         }
+        // TODO: Don't cast as `any`, proper type is boolean[]
         /** @type {?} */
-        const noNgZone = this.get(ComponentFixtureNoNgZone, false);
+        const noNgZone = this.get((/** @type {?} */ (ComponentFixtureNoNgZone)), false);
+        // TODO: Don't cast as `any`, proper type is boolean[]
         /** @type {?} */
-        const autoDetect = this.get(ComponentFixtureAutoDetect, false);
+        const autoDetect = this.get((/** @type {?} */ (ComponentFixtureAutoDetect)), false);
         /** @type {?} */
-        const ngZone = noNgZone ? null : this.get(NgZone, null);
+        const ngZone = noNgZone ? null : this.get((/** @type {?} */ (NgZone)), null);
         /** @type {?} */
         const componentFactory = new ɵRender3ComponentFactory(componentDef);
         /** @type {?} */
@@ -2924,10 +2928,11 @@ class TestBedViewEngine {
     /**
      * @param {?} token
      * @param {?=} notFoundValue
+     * @param {?=} flags
      * @return {?}
      */
-    static get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND) {
-        return _getTestBedViewEngine().get(token, notFoundValue);
+    static get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND, flags = InjectFlags.Default) {
+        return _getTestBedViewEngine().get(token, notFoundValue, flags);
     }
     /**
      * @template T
@@ -3193,9 +3198,10 @@ class TestBedViewEngine {
     /**
      * @param {?} token
      * @param {?=} notFoundValue
+     * @param {?=} flags
      * @return {?}
      */
-    get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND) {
+    get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND, flags = InjectFlags.Default) {
         this._initIfNeeded();
         if (token === TestBed) {
             return this;
@@ -3203,8 +3209,8 @@ class TestBedViewEngine {
         // Tests can inject things from the ng module and from the compiler,
         // but the ng module can't inject things from the compiler and vice versa.
         /** @type {?} */
-        const result = this._moduleRef.injector.get(token, UNDEFINED$1);
-        return result === UNDEFINED$1 ? this._compiler.injector.get(token, notFoundValue) : result;
+        const result = this._moduleRef.injector.get(token, UNDEFINED$1, flags);
+        return result === UNDEFINED$1 ? this._compiler.injector.get(token, notFoundValue, flags) : result;
     }
     /**
      * @param {?} tokens
@@ -3364,12 +3370,14 @@ class TestBedViewEngine {
         if (!componentFactory) {
             throw new Error(`Cannot create the component ${ɵstringify(component)} as it was not imported into the testing module!`);
         }
+        // TODO: Don't cast as `any`, proper type is boolean[]
         /** @type {?} */
-        const noNgZone = this.get(ComponentFixtureNoNgZone, false);
+        const noNgZone = this.get((/** @type {?} */ (ComponentFixtureNoNgZone)), false);
+        // TODO: Don't cast as `any`, proper type is boolean[]
         /** @type {?} */
-        const autoDetect = this.get(ComponentFixtureAutoDetect, false);
+        const autoDetect = this.get((/** @type {?} */ (ComponentFixtureAutoDetect)), false);
         /** @type {?} */
-        const ngZone = noNgZone ? null : this.get(NgZone, null);
+        const ngZone = noNgZone ? null : this.get((/** @type {?} */ (NgZone)), null);
         /** @type {?} */
         const testComponentRenderer = this.get(TestComponentRenderer);
         /** @type {?} */
