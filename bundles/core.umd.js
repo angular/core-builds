@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+26.sha-f8cdda6.with-local-changes
+ * @license Angular v8.0.0-beta.11+28.sha-5c13fee.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15506,7 +15506,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.11+26.sha-f8cdda6.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.11+28.sha-5c13fee.with-local-changes');
 
     /**
      * @license
@@ -17353,7 +17353,7 @@
             }
             else if ((injectableDef = getInjectableDef(depDef.token)) && targetsModule(data, injectableDef)) {
                 var index = data._providers.length;
-                data._def.providersByKey[depDef.tokenKey] = {
+                data._def.providers[index] = data._def.providersByKey[depDef.tokenKey] = {
                     flags: 1024 /* TypeFactoryProvider */ | 4096 /* LazyProvider */,
                     value: injectableDef.factory,
                     deps: [], index: index,
