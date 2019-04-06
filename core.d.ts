@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+24.sha-609024f.with-local-changes
+ * @license Angular v8.0.0-beta.11+29.sha-ec56354.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1976,9 +1976,7 @@ declare type DirectiveInstance = {};
  * index value by the size of the array entries (so if DirA is at spot 8 then its index will be 2).
  */
 declare interface DirectiveRegistryValues extends Array<null | {} | boolean | number | StyleSanitizeFn> {
-    [DirectiveRegistryValuesIndex.DirectiveValueOffset]: null;
     [DirectiveRegistryValuesIndex.SinglePropValuesIndexOffset]: number;
-    [DirectiveRegistryValuesIndex.DirtyFlagOffset]: boolean;
     [DirectiveRegistryValuesIndex.StyleSanitizerOffset]: StyleSanitizeFn | null;
 }
 
@@ -1987,11 +1985,9 @@ declare interface DirectiveRegistryValues extends Array<null | {} | boolean | nu
  * that are housed inside of [DirectiveRegistryValues].
  */
 declare const enum DirectiveRegistryValuesIndex {
-    DirectiveValueOffset = 0,
-    SinglePropValuesIndexOffset = 1,
-    DirtyFlagOffset = 2,
-    StyleSanitizerOffset = 3,
-    Size = 4
+    SinglePropValuesIndexOffset = 0,
+    StyleSanitizerOffset = 1,
+    Size = 2
 }
 
 declare type DirectiveTypeList = (ɵDirectiveDef<any> | ɵComponentDef<any> | Type<any>)[];
@@ -2643,6 +2639,56 @@ export declare interface HostDecorator {
 
 /** See CreateComponentOptions.hostFeatures */
 declare type HostFeature = (<T>(component: T, componentDef: ɵComponentDef<T>) => void);
+
+/**
+ * A queue of all host-related styling instructions (these are buffered and evaluated just before
+ * the styling is applied).
+ *
+ * This queue is used when any `hostStyling` instructions are executed from the `hostBindings`
+ * function. Template-level styling functions (e.g. `elementStylingMap` and `elementClassProp`)
+ * do not make use of this queue (they are applied to the styling context immediately).
+ *
+ * Due to the nature of how components/directives are evaluated, directives (both parent and
+ * subclass directives) may not apply their styling at the right time for the styling
+ * algorithm code to prioritize them. Therefore, all host-styling instructions are queued up
+ * (buffered) into the array below and are automatically sorted in terms of priority. The
+ * priority for host-styling is as follows:
+ *
+ * 1. The template (this doesn't get queued, but gets evaluated immediately)
+ * 2. Any directives present on the host
+ *   2a) first child directive styling bindings are updated
+ *   2b) then any parent directives
+ * 3. Component host bindings
+ *
+ * Angular runs change detection for each of these cases in a different order. Because of this
+ * the array below is populated with each of the host styling functions + their arguments.
+ *
+ * context[HostInstructionsQueue] = [
+ *   directiveIndex,
+ *   hostStylingFn,
+ *   [argumentsForFn],
+ *   ...
+ *   anotherDirectiveIndex, <-- this has a lower priority (a higher directive index)
+ *   anotherHostStylingFn,
+ *   [argumentsForFn],
+ * ]
+ *
+ * When `renderStyling` is called (within `class_and_host_bindings.ts`) then the queue is
+ * drained and each of the instructions are executed. Once complete the queue is empty then
+ * the style/class binding code is rendered on the element (which is what happens normally
+ * inside of `renderStyling`).
+ *
+ * Right now each directive's hostBindings function, as well the template function, both
+ * call `elementStylingApply()` and `hostStylingApply()`. The fact that this is called
+ * multiple times for the same element (b/c of change detection) causes some issues. To avoid
+ * having styling code be rendered on an element multiple times, the `HostInstructionsQueue`
+ * reserves a slot for a reference pointing to the very last directive that was registered and
+ * only allows for styling to be applied once that directive is encountered (which will happen
+ * as the last update for that element).
+ */
+declare interface HostInstructionsQueue extends Array<number | Function | any[]> {
+    [0]: number;
+}
 
 /**
  * Type of the HostListener metadata.
@@ -6779,6 +6825,20 @@ declare interface StylingContext extends Array<{
      */
     [StylingIndex.CachedMultiStyles]: any | MapBasedOffsetValues;
     /**
+     * A queue of all hostStyling instructions.
+     *
+     * This array (queue) is populated only when host-level styling instructions
+     * (e.g. `hostStylingMap` and `hostClassProp`) are used to apply style and
+     * class values via host bindings to the host element. Despite these being
+     * standard angular instructions, they are not designed to immediately apply
+     * their values to the styling context when executed. What happens instead is
+     * a queue is constructed and each instruction is populated into the queue.
+     * Then, once the style/class values are set to flush (via `elementStylingApply` or
+     * `hostStylingApply`), the queue is flushed and the values are rendered onto
+     * the host element.
+     */
+    [StylingIndex.HostInstructionsQueue]: HostInstructionsQueue | null;
+    /**
      * Location of animation context (which contains the active players) for this element styling
      * context.
      */
@@ -6795,8 +6855,9 @@ declare const enum StylingIndex {
     SinglePropOffsetPositions = 5,
     CachedMultiClasses = 6,
     CachedMultiStyles = 7,
-    PlayerContext = 8,
-    SingleStylesStartPosition = 9,
+    HostInstructionsQueue = 8,
+    PlayerContext = 9,
+    SingleStylesStartPosition = 10,
     FlagsOffset = 0,
     PropertyOffset = 1,
     ValueOffset = 2,
