@@ -301,10 +301,84 @@ export interface StylingContext extends Array<{
      */
     [StylingIndex.CachedMultiStyles]: any | MapBasedOffsetValues;
     /**
+     * A queue of all hostStyling instructions.
+     *
+     * This array (queue) is populated only when host-level styling instructions
+     * (e.g. `hostStylingMap` and `hostClassProp`) are used to apply style and
+     * class values via host bindings to the host element. Despite these being
+     * standard angular instructions, they are not designed to immediately apply
+     * their values to the styling context when executed. What happens instead is
+     * a queue is constructed and each instruction is populated into the queue.
+     * Then, once the style/class values are set to flush (via `elementStylingApply` or
+     * `hostStylingApply`), the queue is flushed and the values are rendered onto
+     * the host element.
+     */
+    [StylingIndex.HostInstructionsQueue]: HostInstructionsQueue | null;
+    /**
      * Location of animation context (which contains the active players) for this element styling
      * context.
      */
     [StylingIndex.PlayerContext]: PlayerContext | null;
+}
+/**
+ * A queue of all host-related styling instructions (these are buffered and evaluated just before
+ * the styling is applied).
+ *
+ * This queue is used when any `hostStyling` instructions are executed from the `hostBindings`
+ * function. Template-level styling functions (e.g. `elementStylingMap` and `elementClassProp`)
+ * do not make use of this queue (they are applied to the styling context immediately).
+ *
+ * Due to the nature of how components/directives are evaluated, directives (both parent and
+ * subclass directives) may not apply their styling at the right time for the styling
+ * algorithm code to prioritize them. Therefore, all host-styling instructions are queued up
+ * (buffered) into the array below and are automatically sorted in terms of priority. The
+ * priority for host-styling is as follows:
+ *
+ * 1. The template (this doesn't get queued, but gets evaluated immediately)
+ * 2. Any directives present on the host
+ *   2a) first child directive styling bindings are updated
+ *   2b) then any parent directives
+ * 3. Component host bindings
+ *
+ * Angular runs change detection for each of these cases in a different order. Because of this
+ * the array below is populated with each of the host styling functions + their arguments.
+ *
+ * context[HostInstructionsQueue] = [
+ *   directiveIndex,
+ *   hostStylingFn,
+ *   [argumentsForFn],
+ *   ...
+ *   anotherDirectiveIndex, <-- this has a lower priority (a higher directive index)
+ *   anotherHostStylingFn,
+ *   [argumentsForFn],
+ * ]
+ *
+ * When `renderStyling` is called (within `class_and_host_bindings.ts`) then the queue is
+ * drained and each of the instructions are executed. Once complete the queue is empty then
+ * the style/class binding code is rendered on the element (which is what happens normally
+ * inside of `renderStyling`).
+ *
+ * Right now each directive's hostBindings function, as well the template function, both
+ * call `elementStylingApply()` and `hostStylingApply()`. The fact that this is called
+ * multiple times for the same element (b/c of change detection) causes some issues. To avoid
+ * having styling code be rendered on an element multiple times, the `HostInstructionsQueue`
+ * reserves a slot for a reference pointing to the very last directive that was registered and
+ * only allows for styling to be applied once that directive is encountered (which will happen
+ * as the last update for that element).
+ */
+export interface HostInstructionsQueue extends Array<number | Function | any[]> {
+    [0]: number;
+}
+/**
+ * Used as a reference for any values contained within `HostInstructionsQueue`.
+ */
+export declare const enum HostInstructionsQueueIndex {
+    LastRegisteredDirectiveIndexPosition = 0,
+    ValuesStartPosition = 1,
+    DirectiveIndexOffset = 0,
+    InstructionFnOffset = 1,
+    ParamsOffset = 2,
+    Size = 3
 }
 /**
  * Used as a styling array to house static class and style values that were extracted
@@ -492,9 +566,7 @@ export declare const enum InitialStylingValuesIndex {
  * index value by the size of the array entries (so if DirA is at spot 8 then its index will be 2).
  */
 export interface DirectiveRegistryValues extends Array<null | {} | boolean | number | StyleSanitizeFn> {
-    [DirectiveRegistryValuesIndex.DirectiveValueOffset]: null;
     [DirectiveRegistryValuesIndex.SinglePropValuesIndexOffset]: number;
-    [DirectiveRegistryValuesIndex.DirtyFlagOffset]: boolean;
     [DirectiveRegistryValuesIndex.StyleSanitizerOffset]: StyleSanitizeFn | null;
 }
 /**
@@ -502,11 +574,9 @@ export interface DirectiveRegistryValues extends Array<null | {} | boolean | num
  * that are housed inside of [DirectiveRegistryValues].
  */
 export declare const enum DirectiveRegistryValuesIndex {
-    DirectiveValueOffset = 0,
-    SinglePropValuesIndexOffset = 1,
-    DirtyFlagOffset = 2,
-    StyleSanitizerOffset = 3,
-    Size = 4
+    SinglePropValuesIndexOffset = 0,
+    StyleSanitizerOffset = 1,
+    Size = 2
 }
 /**
  * An array that contains the index pointer values for every single styling property
@@ -634,8 +704,9 @@ export declare const enum StylingIndex {
     SinglePropOffsetPositions = 5,
     CachedMultiClasses = 6,
     CachedMultiStyles = 7,
-    PlayerContext = 8,
-    SingleStylesStartPosition = 9,
+    HostInstructionsQueue = 8,
+    PlayerContext = 9,
+    SingleStylesStartPosition = 10,
     FlagsOffset = 0,
     PropertyOffset = 1,
     ValueOffset = 2,
@@ -656,3 +727,12 @@ export declare const enum DirectiveOwnerAndPlayerBuilderIndex {
     BitCountSize = 16,
     BitMask = 65535
 }
+/**
+ * The default directive styling index value for template-based bindings.
+ *
+ * All host-level bindings (e.g. `hostStyleProp` and `hostStylingMap`) are
+ * assigned a directive styling index value based on the current directive
+ * uniqueId and the directive super-class inheritance depth. But for template
+ * bindings they always have the same directive styling index value.
+ */
+export declare const DEFAULT_TEMPLATE_DIRECTIVE_INDEX = 0;

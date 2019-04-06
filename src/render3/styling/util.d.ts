@@ -32,7 +32,7 @@ export declare function createEmptyStylingContext(wrappedElement?: LContainer | 
  * @param directiveRef the directive that will be allocated into the context
  * @returns the index where the directive was inserted into
  */
-export declare function allocateDirectiveIntoContext(context: StylingContext, directiveRef: any | null): number;
+export declare function allocateOrUpdateDirectiveIntoContext(context: StylingContext, directiveIndex: number, singlePropValuesIndex?: number, styleSanitizer?: StyleSanitizeFn | null | undefined): void;
 /**
  * Used clone a copy of a pre-computed template of a styling context.
  *

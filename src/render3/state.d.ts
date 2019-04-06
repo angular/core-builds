@@ -52,15 +52,76 @@ export declare function enableBindings(): void;
 export declare function disableBindings(): void;
 export declare function getLView(): LView;
 /**
- * Sets the active host context (the directive/component instance) and its host element index.
+ * Sets the active directive host element and resets the directive id value
+ * (when the provided elementIndex value has changed).
  *
- * @param host the directive/component instance
- * @param index the element index value for the host element where the directive/component instance
- * lives
+ * @param elementIndex the element index value for the host element where
+ *                     the directive/component instance lives
  */
-export declare function setActiveHost(host: {} | null, index?: number | null): void;
-export declare function getActiveHostContext(): {} | null;
-export declare function getActiveHostElementIndex(): number | null;
+export declare function setActiveHostElement(elementIndex?: number | null): void;
+/**
+ * Returns the current id value of the current directive.
+ *
+ * For example we have an element that has two directives on it:
+ * <div dir-one dir-two></div>
+ *
+ * dirOne->hostBindings() (id == 1)
+ * dirTwo->hostBindings() (id == 2)
+ *
+ * Note that this is only active when `hostBinding` functions are being processed.
+ *
+ * Note that directive id values are specific to an element (this means that
+ * the same id value could be present on another element with a completely
+ * different set of directives).
+ */
+export declare function getActiveDirectiveId(): number;
+/**
+ * Increments the current directive id value.
+ *
+ * For example we have an element that has two directives on it:
+ * <div dir-one dir-two></div>
+ *
+ * dirOne->hostBindings() (index = 1)
+ * // increment
+ * dirTwo->hostBindings() (index = 2)
+ *
+ * Depending on whether or not a previous directive had any inherited
+ * directives present, that value will be incremented in addition
+ * to the id jumping up by one.
+ *
+ * Note that this is only active when `hostBinding` functions are being processed.
+ *
+ * Note that directive id values are specific to an element (this means that
+ * the same id value could be present on another element with a completely
+ * different set of directives).
+ */
+export declare function incrementActiveDirectiveId(): void;
+/**
+ * Set the current super class (reverse inheritance) position depth for a directive.
+ *
+ * For example we have two directives: Child and Other (but Child is a sub-class of Parent)
+ * <div child-dir other-dir></div>
+ *
+ * // increment
+ * parentInstance->hostBindings() (depth = 1)
+ * // decrement
+ * childInstance->hostBindings() (depth = 0)
+ * otherInstance->hostBindings() (depth = 0 b/c it's a different directive)
+ *
+ * Note that this is only active when `hostBinding` functions are being processed.
+ */
+export declare function adjustActiveDirectiveSuperClassDepthPosition(delta: number): void;
+/**
+ * Returns the current super class (reverse inheritance) depth for a directive.
+ *
+ * This is designed to help instruction code distinguish different hostBindings
+ * calls from each other when a directive has extended from another directive.
+ * Normally using the directive id value is enough, but with the case
+ * of parent/sub-class directive inheritance more information is required.
+ *
+ * Note that this is only active when `hostBinding` functions are being processed.
+ */
+export declare function getActiveDirectiveSuperClassDepth(): number;
 /**
  * Restores `contextViewData` to the given OpaqueViewState instance.
  *

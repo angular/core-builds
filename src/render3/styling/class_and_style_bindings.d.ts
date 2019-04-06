@@ -30,7 +30,7 @@ import { BoundPlayerFactory } from './player_factory';
 /**
  * Creates a new StylingContext an fills it with the provided static styling attribute values.
  */
-export declare function initializeStaticContext(attrs: TAttributes, stylingStartIndex: number, directiveRef?: any | null): StylingContext;
+export declare function initializeStaticContext(attrs: TAttributes, stylingStartIndex: number, directiveIndex?: number): StylingContext;
 /**
  * Designed to update an existing styling context with new static styling
  * data (classes and styles).
@@ -40,9 +40,8 @@ export declare function initializeStaticContext(attrs: TAttributes, stylingStart
  *              assigned to the context
  * @param attrsStylingStartIndex what index to start iterating within the
  *              provided `attrs` array to start reading style and class values
- * @param directiveRef the directive instance with which static data is associated with.
  */
-export declare function patchContextWithStaticAttrs(context: StylingContext, attrs: TAttributes, attrsStylingStartIndex: number, directiveRef?: any | null): void;
+export declare function patchContextWithStaticAttrs(context: StylingContext, attrs: TAttributes, attrsStylingStartIndex: number, directiveIndex: number): void;
 /**
  * Runs through the initial class values present in the provided
  * context and renders them via the provided renderer on the element.
@@ -71,18 +70,17 @@ export declare function allowNewBindingsForStylingContext(context: StylingContex
  * reference the provided directive.
  *
  * @param context the existing styling context
- * @param directiveRef the directive that the new bindings will reference
  * @param classBindingNames an array of class binding names that will be added to the context
  * @param styleBindingNames an array of style binding names that will be added to the context
  * @param styleSanitizer an optional sanitizer that handle all sanitization on for each of
  *    the bindings added to the context. Note that if a directive is provided then the sanitizer
  *    instance will only be active if and when the directive updates the bindings that it owns.
  */
-export declare function updateContextWithBindings(context: StylingContext, directiveRef: any | null, classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
+export declare function updateContextWithBindings(context: StylingContext, directiveIndex: number, classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
 /**
  * Searches through the existing registry of directives
  */
-export declare function findOrPatchDirectiveIntoRegistry(context: StylingContext, directiveRef: any, styleSanitizer?: StyleSanitizeFn | null): number;
+export declare function findOrPatchDirectiveIntoRegistry(context: StylingContext, directiveIndex: number, staticModeOnly: boolean, styleSanitizer?: StyleSanitizeFn | null): boolean;
 /**
  * Registers the provided multi styling (`[style]` and `[class]`) values to the context.
  *
@@ -106,10 +104,6 @@ export declare function findOrPatchDirectiveIntoRegistry(context: StylingContext
  *    newly provided style values.
  * @param classesInput The key/value map of CSS class names that will be used for the update.
  * @param stylesInput The key/value map of CSS styles that will be used for the update.
- * @param directiveRef an optional reference to the directive responsible
- *    for this binding change. If present then style binding will only
- *    actualize if the directive has ownership over this binding
- *    (see styling.ts#directives for more information about the algorithm).
  */
 export declare function updateStylingMap(context: StylingContext, classesInput: {
     [key: string]: any;
@@ -119,7 +113,7 @@ export declare function updateStylingMap(context: StylingContext, classesInput: 
     [key: string]: any;
 } | BoundPlayerFactory<null | {
     [key: string]: any;
-}> | null, directiveRef?: any): void;
+}> | null, directiveIndex?: number): void;
 /**
  * Sets and resolves a single class value on the provided `StylingContext` so
  * that they can be applied to the element once `renderStyling` is called.
@@ -128,14 +122,10 @@ export declare function updateStylingMap(context: StylingContext, classesInput: 
  *    newly provided class value.
  * @param offset The index of the CSS class which is being updated.
  * @param addOrRemove Whether or not to add or remove the CSS class
- * @param directiveRef an optional reference to the directive responsible
- *    for this binding change. If present then style binding will only
- *    actualize if the directive has ownership over this binding
- *    (see styling.ts#directives for more information about the algorithm).
  * @param forceOverride whether or not to skip all directive prioritization
  *    and just apply the value regardless.
  */
-export declare function updateClassProp(context: StylingContext, offset: number, input: boolean | BoundPlayerFactory<boolean | null> | null, directiveRef?: any, forceOverride?: boolean): void;
+export declare function updateClassProp(context: StylingContext, offset: number, input: boolean | BoundPlayerFactory<boolean | null> | null, directiveIndex?: number, forceOverride?: boolean): void;
 /**
  * Sets and resolves a single style value on the provided `StylingContext` so
  * that they can be applied to the element once `renderStyling` is called.
@@ -149,14 +139,10 @@ export declare function updateClassProp(context: StylingContext, offset: number,
  *    newly provided style value.
  * @param offset The index of the property which is being updated.
  * @param value The CSS style value that will be assigned
- * @param directiveRef an optional reference to the directive responsible
- *    for this binding change. If present then style binding will only
- *    actualize if the directive has ownership over this binding
- *    (see styling.ts#directives for more information about the algorithm).
  * @param forceOverride whether or not to skip all directive prioritization
  *    and just apply the value regardless.
  */
-export declare function updateStyleProp(context: StylingContext, offset: number, input: string | boolean | null | BoundPlayerFactory<string | boolean | null>, directiveRef?: any, forceOverride?: boolean): void;
+export declare function updateStyleProp(context: StylingContext, offset: number, input: string | boolean | null | BoundPlayerFactory<string | boolean | null>, directiveIndex?: number, forceOverride?: boolean): void;
 /**
  * Renders all queued styling using a renderer onto the given element.
  *
@@ -174,12 +160,9 @@ export declare function updateStyleProp(context: StylingContext, offset: number,
  *    to this key/value map instead of being renderered via the renderer.
  * @param stylesStore if provided, the updated style values will be applied
  *    to this key/value map instead of being renderered via the renderer.
- * @param directiveRef an optional directive that will be used to target which
- *    styling values are rendered. If left empty, only the bindings that are
- *    registered on the template will be rendered.
  * @returns number the total amount of players that got queued for animation (if any)
  */
-export declare function renderStyling(context: StylingContext, renderer: Renderer3, rootOrView: RootContext | LView, isFirstRender: boolean, classesStore?: BindingStore | null, stylesStore?: BindingStore | null, directiveRef?: any): number;
+export declare function renderStyling(context: StylingContext, renderer: Renderer3 | null, rootOrView: RootContext | LView, isFirstRender: boolean, classesStore?: BindingStore | null, stylesStore?: BindingStore | null, directiveIndex?: number): number;
 /**
  * Assigns a style value to a style property for the given element.
  *

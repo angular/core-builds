@@ -219,4 +219,5 @@ export declare function elementStylingApply(index: number): void;
  * @publicApi
  */
 export declare function elementHostStylingApply(): void;
-export declare function elementStylingApplyInternal(directive: {} | null, index: number): void;
+export declare function elementStylingApplyInternal(directiveStylingIndex: number, index: number): void;
+export declare function getActiveDirectiveStylingIndex(): number;
