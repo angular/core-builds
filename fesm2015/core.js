@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+28.sha-5c13fee.with-local-changes
+ * @license Angular v8.0.0-beta.11+29.sha-ec56354.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4868,33 +4868,139 @@ function disableBindings() {
 function getLView() {
     return lView;
 }
-/** @type {?} */
-let activeHostContext = null;
-/** @type {?} */
-let activeHostElementIndex = null;
 /**
- * Sets the active host context (the directive/component instance) and its host element index.
+ * Used as the starting directive id value.
  *
- * @param {?} host the directive/component instance
- * @param {?=} index the element index value for the host element where the directive/component instance
- * lives
+ * All subsequent directives are incremented from this value onwards.
+ * The reason why this value is `1` instead of `0` is because the `0`
+ * value is reserved for the template.
+ * @type {?}
+ */
+const MIN_DIRECTIVE_ID = 1;
+/** @type {?} */
+let activeDirectiveId = MIN_DIRECTIVE_ID;
+/**
+ * Position depth (with respect from leaf to root) in a directive sub-class inheritance chain.
+ * @type {?}
+ */
+let activeDirectiveSuperClassDepthPosition = 0;
+/**
+ * Total count of how many directives are a part of an inheritance chain.
+ *
+ * When directives are sub-classed (extended) from one to another, Angular
+ * needs to keep track of exactly how many were encountered so it can accurately
+ * generate the next directive id (once the next directive id is visited).
+ * Normally the next directive id just a single incremented value from the
+ * previous one, however, if the previous directive is a part of an inheritance
+ * chain (a series of sub-classed directives) then the incremented value must
+ * also take into account the total amount of sub-classed values.
+ *
+ * Note that this value resets back to zero once the next directive is
+ * visited (when `incrementActiveDirectiveId` or `setActiveHostElement`
+ * is called).
+ * @type {?}
+ */
+let activeDirectiveSuperClassHeight = 0;
+/**
+ * Sets the active directive host element and resets the directive id value
+ * (when the provided elementIndex value has changed).
+ *
+ * @param {?=} elementIndex the element index value for the host element where
+ *                     the directive/component instance lives
  * @return {?}
  */
-function setActiveHost(host, index = null) {
-    activeHostContext = host;
-    activeHostElementIndex = index;
+function setActiveHostElement(elementIndex = null) {
+    if (_selectedIndex !== elementIndex) {
+        setSelectedIndex(elementIndex == null ? -1 : elementIndex);
+        activeDirectiveId = MIN_DIRECTIVE_ID;
+        activeDirectiveSuperClassDepthPosition = 0;
+        activeDirectiveSuperClassHeight = 0;
+    }
 }
 /**
+ * Returns the current id value of the current directive.
+ *
+ * For example we have an element that has two directives on it:
+ * <div dir-one dir-two></div>
+ *
+ * dirOne->hostBindings() (id == 1)
+ * dirTwo->hostBindings() (id == 2)
+ *
+ * Note that this is only active when `hostBinding` functions are being processed.
+ *
+ * Note that directive id values are specific to an element (this means that
+ * the same id value could be present on another element with a completely
+ * different set of directives).
  * @return {?}
  */
-function getActiveHostContext() {
-    return activeHostContext;
+function getActiveDirectiveId() {
+    return activeDirectiveId;
 }
 /**
+ * Increments the current directive id value.
+ *
+ * For example we have an element that has two directives on it:
+ * <div dir-one dir-two></div>
+ *
+ * dirOne->hostBindings() (index = 1)
+ * // increment
+ * dirTwo->hostBindings() (index = 2)
+ *
+ * Depending on whether or not a previous directive had any inherited
+ * directives present, that value will be incremented in addition
+ * to the id jumping up by one.
+ *
+ * Note that this is only active when `hostBinding` functions are being processed.
+ *
+ * Note that directive id values are specific to an element (this means that
+ * the same id value could be present on another element with a completely
+ * different set of directives).
  * @return {?}
  */
-function getActiveHostElementIndex() {
-    return activeHostElementIndex;
+function incrementActiveDirectiveId() {
+    activeDirectiveId += 1 + activeDirectiveSuperClassHeight;
+    // because we are dealing with a new directive this
+    // means we have exited out of the inheritance chain
+    activeDirectiveSuperClassDepthPosition = 0;
+    activeDirectiveSuperClassHeight = 0;
+}
+/**
+ * Set the current super class (reverse inheritance) position depth for a directive.
+ *
+ * For example we have two directives: Child and Other (but Child is a sub-class of Parent)
+ * <div child-dir other-dir></div>
+ *
+ * // increment
+ * parentInstance->hostBindings() (depth = 1)
+ * // decrement
+ * childInstance->hostBindings() (depth = 0)
+ * otherInstance->hostBindings() (depth = 0 b/c it's a different directive)
+ *
+ * Note that this is only active when `hostBinding` functions are being processed.
+ * @param {?} delta
+ * @return {?}
+ */
+function adjustActiveDirectiveSuperClassDepthPosition(delta) {
+    activeDirectiveSuperClassDepthPosition += delta;
+    // we keep track of the height value so that when the next directive is visited
+    // then Angular knows to generate a new directive id value which has taken into
+    // account how many sub-class directives were a part of the previous directive.
+    activeDirectiveSuperClassHeight =
+        Math.max(activeDirectiveSuperClassHeight, activeDirectiveSuperClassDepthPosition);
+}
+/**
+ * Returns the current super class (reverse inheritance) depth for a directive.
+ *
+ * This is designed to help instruction code distinguish different hostBindings
+ * calls from each other when a directive has extended from another directive.
+ * Normally using the directive id value is enough, but with the case
+ * of parent/sub-class directive inheritance more information is required.
+ *
+ * Note that this is only active when `hostBinding` functions are being processed.
+ * @return {?}
+ */
+function getActiveDirectiveSuperClassDepth() {
+    return activeDirectiveSuperClassDepthPosition;
 }
 /**
  * Restores `contextViewData` to the given OpaqueViewState instance.
@@ -5135,6 +5241,31 @@ function leaveView(newView) {
         }
     }
     enterView(newView, null);
+}
+/** @type {?} */
+let _selectedIndex = -1;
+/**
+ * Gets the most recent index passed to {\@link select}
+ *
+ * Used with {\@link property} instruction (and more in the future) to identify the index in the
+ * current `LView` to act on.
+ * @return {?}
+ */
+function getSelectedIndex() {
+    ngDevMode &&
+        assertGreaterThan(_selectedIndex, -1, 'select() should be called prior to retrieving the selected index');
+    return _selectedIndex;
+}
+/**
+ * Sets the most recent index passed to {\@link select}
+ *
+ * Used with {\@link property} instruction (and more in the future) to identify the index in the
+ * current `LView` to act on.
+ * @param {?} index
+ * @return {?}
+ */
+function setSelectedIndex(index) {
+    _selectedIndex = index;
 }
 /** @type {?} */
 let _currentNamespace = null;
@@ -5608,6 +5739,28 @@ class CorePlayerHandler {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * The default directive styling index value for template-based bindings.
+ *
+ * All host-level bindings (e.g. `hostStyleProp` and `hostStylingMap`) are
+ * assigned a directive styling index value based on the current directive
+ * uniqueId and the directive super-class inheritance depth. But for template
+ * bindings they always have the same directive styling index value.
+ * @type {?}
+ */
+const DEFAULT_TEMPLATE_DIRECTIVE_INDEX = 0;
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
 /** @type {?} */
 const ANIMATION_PROP_PREFIX = '@';
 /**
@@ -5629,10 +5782,11 @@ function createEmptyStylingContext(wrappedElement, sanitizer, initialStyles, ini
         [0],
         [0],
         null,
+        null,
     ];
     // whenever a context is created there is always a `null` directive
     // that is registered (which is a placeholder for the "template").
-    allocateDirectiveIntoContext(context, null);
+    allocateOrUpdateDirectiveIntoContext(context, DEFAULT_TEMPLATE_DIRECTIVE_INDEX);
     return context;
 }
 /**
@@ -5648,26 +5802,33 @@ function createEmptyStylingContext(wrappedElement, sanitizer, initialStyles, ini
  * that directive's index value.
  *
  * @param {?} context the target StylingContext
- * @param {?} directiveRef the directive that will be allocated into the context
+ * @param {?} directiveIndex
+ * @param {?=} singlePropValuesIndex
+ * @param {?=} styleSanitizer
  * @return {?} the index where the directive was inserted into
  */
-function allocateDirectiveIntoContext(context, directiveRef) {
-    // this is a new directive which we have not seen yet.
+function allocateOrUpdateDirectiveIntoContext(context, directiveIndex, singlePropValuesIndex = -1, styleSanitizer) {
     /** @type {?} */
-    const dirs = context[2 /* DirectiveRegistryPosition */];
+    const directiveRegistry = context[2 /* DirectiveRegistryPosition */];
     /** @type {?} */
-    const i = dirs.length;
+    const index = directiveIndex * 2 /* Size */;
     // we preemptively make space into the directives array and then
     // assign values slot-by-slot to ensure that if the directive ordering
     // changes then it will still function
-    dirs.push(null, null, null, null);
-    dirs[i + 0 /* DirectiveValueOffset */] = directiveRef;
-    dirs[i + 2 /* DirtyFlagOffset */] = false;
-    dirs[i + 3 /* StyleSanitizerOffset */] = null;
-    // -1 is used to signal that the directive has been allocated, but
-    // no actual style or class bindings have been registered yet...
-    dirs[i + 1 /* SinglePropValuesIndexOffset */] = -1;
-    return i;
+    /** @type {?} */
+    const limit = index + 2 /* Size */;
+    for (let i = directiveRegistry.length; i < limit; i += 2 /* Size */) {
+        // -1 is used to signal that the directive has been allocated, but
+        // no actual style or class bindings have been registered yet...
+        directiveRegistry.push(-1, null);
+    }
+    /** @type {?} */
+    const propValuesStartPosition = index + 0 /* SinglePropValuesIndexOffset */;
+    if (singlePropValuesIndex >= 0 && directiveRegistry[propValuesStartPosition] === -1) {
+        directiveRegistry[propValuesStartPosition] = singlePropValuesIndex;
+        directiveRegistry[index + 1 /* StyleSanitizerOffset */] =
+            styleSanitizer || null;
+    }
 }
 /**
  * Used clone a copy of a pre-computed template of a styling context.
@@ -5684,7 +5845,7 @@ function allocStylingContext(element, templateStyleContext) {
     const context = (/** @type {?} */ ((/** @type {?} */ (templateStyleContext.slice()))));
     // the HEADER values contain arrays which also need
     // to be copied over into the new context
-    for (let i = 0; i < 9 /* SingleStylesStartPosition */; i++) {
+    for (let i = 0; i < 10 /* SingleStylesStartPosition */; i++) {
         /** @type {?} */
         const value = templateStyleContext[i];
         if (Array.isArray(value)) {
@@ -5874,14 +6035,14 @@ function getOrCreatePlayerContext(target, context) {
  * @return {?}
  */
 function getPlayerContext(stylingContext) {
-    return stylingContext[8 /* PlayerContext */];
+    return stylingContext[9 /* PlayerContext */];
 }
 /**
  * @param {?} data
  * @return {?}
  */
 function allocPlayerContext(data) {
-    return data[8 /* PlayerContext */] =
+    return data[9 /* PlayerContext */] =
         [5 /* SinglePlayerBuildersStartPosition */, null, null, null, null];
 }
 /**
@@ -7570,6 +7731,110 @@ const NO_CHANGE = (/** @type {?} */ ({}));
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
+/*
+ * This file contains the logic to defer all hostBindings-related styling code to run
+ * at a later point, instead of immediately (as is the case with how template-level
+ * styling instructions are run).
+ *
+ * Certain styling instructions, present within directives, components and sub-classed
+ * directives, are evaluated at different points (depending on priority) and will therefore
+ * not be applied to the styling context of an element immediately. They are instead
+ * designed to be applied just before styling is applied to an element.
+ *
+ * (The priority for when certain host-related styling operations are executed is discussed
+ * more within `interfaces/styling.ts`.)
+ */
+/**
+ * @param {?} context
+ * @param {?} directiveIndex
+ * @return {?}
+ */
+function registerHostDirective(context, directiveIndex) {
+    /** @type {?} */
+    let buffer = context[8 /* HostInstructionsQueue */];
+    if (!buffer) {
+        buffer = context[8 /* HostInstructionsQueue */] = [DEFAULT_TEMPLATE_DIRECTIVE_INDEX];
+    }
+    buffer[0 /* LastRegisteredDirectiveIndexPosition */] = directiveIndex;
+}
+/**
+ * Queues a styling instruction to be run just before `renderStyling()` is executed.
+ * @template T
+ * @param {?} context
+ * @param {?} priority
+ * @param {?} instructionFn
+ * @param {?} instructionFnArgs
+ * @return {?}
+ */
+function enqueueHostInstruction(context, priority, instructionFn, instructionFnArgs) {
+    /** @type {?} */
+    const buffer = (/** @type {?} */ (context[8 /* HostInstructionsQueue */]));
+    /** @type {?} */
+    const index = findNextInsertionIndex(buffer, priority);
+    buffer.splice(index, 0, priority, instructionFn, instructionFnArgs);
+}
+/**
+ * Figures out where exactly to to insert the next host instruction queue entry.
+ * @param {?} buffer
+ * @param {?} priority
+ * @return {?}
+ */
+function findNextInsertionIndex(buffer, priority) {
+    for (let i = 1 /* ValuesStartPosition */; i < buffer.length; i += 3 /* Size */) {
+        /** @type {?} */
+        const p = (/** @type {?} */ (buffer[i + 0 /* DirectiveIndexOffset */]));
+        if (p > priority) {
+            return i;
+        }
+    }
+    return buffer.length;
+}
+/**
+ * Iterates through the host instructions queue (if present within the provided
+ * context) and executes each queued instruction entry.
+ * @param {?} context
+ * @return {?}
+ */
+function flushQueue(context) {
+    /** @type {?} */
+    const buffer = context[8 /* HostInstructionsQueue */];
+    if (buffer) {
+        for (let i = 1 /* ValuesStartPosition */; i < buffer.length; i += 3 /* Size */) {
+            /** @type {?} */
+            const fn = (/** @type {?} */ (buffer[i + 1 /* InstructionFnOffset */]));
+            /** @type {?} */
+            const args = (/** @type {?} */ (buffer[i + 2 /* ParamsOffset */]));
+            fn(...args);
+        }
+        buffer.length = 1 /* ValuesStartPosition */;
+    }
+}
+/**
+ * Determines whether or not to allow the host instructions queue to be flushed or not.
+ *
+ * Because the hostBindings function code is unaware of the presence of other host bindings
+ * (as well as the template function) then styling is evaluated multiple times per element.
+ * To prevent style and class values from being applied to the element multiple times, a
+ * flush is only allowed when the last directive (the directive that was registered into
+ * the styling context) attempts to render its styling.
+ * @param {?} context
+ * @param {?} directiveIndex
+ * @return {?}
+ */
+function allowFlush(context, directiveIndex) {
+    /** @type {?} */
+    const buffer = context[8 /* HostInstructionsQueue */];
+    if (buffer) {
+        return buffer[0 /* LastRegisteredDirectiveIndexPosition */] ===
+            directiveIndex;
+    }
+    return true;
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
 /**
  * Combines the binding value and a factory for an animation player.
  *
@@ -7628,13 +7893,13 @@ class BoundPlayerFactory {
  * Creates a new StylingContext an fills it with the provided static styling attribute values.
  * @param {?} attrs
  * @param {?} stylingStartIndex
- * @param {?=} directiveRef
+ * @param {?=} directiveIndex
  * @return {?}
  */
-function initializeStaticContext(attrs, stylingStartIndex, directiveRef) {
+function initializeStaticContext(attrs, stylingStartIndex, directiveIndex = 0) {
     /** @type {?} */
     const context = createEmptyStylingContext();
-    patchContextWithStaticAttrs(context, attrs, stylingStartIndex, directiveRef);
+    patchContextWithStaticAttrs(context, attrs, stylingStartIndex, directiveIndex);
     return context;
 }
 /**
@@ -7646,27 +7911,14 @@ function initializeStaticContext(attrs, stylingStartIndex, directiveRef) {
  *              assigned to the context
  * @param {?} attrsStylingStartIndex what index to start iterating within the
  *              provided `attrs` array to start reading style and class values
- * @param {?=} directiveRef the directive instance with which static data is associated with.
+ * @param {?} directiveIndex
  * @return {?}
  */
-function patchContextWithStaticAttrs(context, attrs, attrsStylingStartIndex, directiveRef) {
+function patchContextWithStaticAttrs(context, attrs, attrsStylingStartIndex, directiveIndex) {
     // this means the context has already been set and instantiated
     if (context[1 /* MasterFlagPosition */] & 16 /* BindingAllocationLocked */)
         return;
-    // If the styling context has already been patched with the given directive's bindings,
-    // then there is no point in doing it again. The reason why this may happen (the directive
-    // styling being patched twice) is because the `stylingBinding` function is called each time
-    // an element is created (both within a template function and within directive host bindings).
-    /** @type {?} */
-    const directives = context[2 /* DirectiveRegistryPosition */];
-    /** @type {?} */
-    let detectedIndex = getDirectiveRegistryValuesIndexOf(directives, directiveRef || null);
-    if (detectedIndex === -1) {
-        // this is a new directive which we have not seen yet.
-        detectedIndex = allocateDirectiveIntoContext(context, directiveRef);
-    }
-    /** @type {?} */
-    const directiveIndex = detectedIndex / 4 /* Size */;
+    allocateOrUpdateDirectiveIntoContext(context, directiveIndex);
     /** @type {?} */
     let initialClasses = null;
     /** @type {?} */
@@ -7787,7 +8039,7 @@ function renderInitialStyles(element, context, renderer, startIndex) {
  * reference the provided directive.
  *
  * @param {?} context the existing styling context
- * @param {?} directiveRef the directive that the new bindings will reference
+ * @param {?} directiveIndex
  * @param {?=} classBindingNames an array of class binding names that will be added to the context
  * @param {?=} styleBindingNames an array of style binding names that will be added to the context
  * @param {?=} styleSanitizer an optional sanitizer that handle all sanitization on for each of
@@ -7795,13 +8047,13 @@ function renderInitialStyles(element, context, renderer, startIndex) {
  *    instance will only be active if and when the directive updates the bindings that it owns.
  * @return {?}
  */
-function updateContextWithBindings(context, directiveRef, classBindingNames, styleBindingNames, styleSanitizer) {
+function updateContextWithBindings(context, directiveIndex, classBindingNames, styleBindingNames, styleSanitizer) {
     if (context[1 /* MasterFlagPosition */] & 16 /* BindingAllocationLocked */)
         return;
     // this means the context has already been patched with the directive's bindings
     /** @type {?} */
-    const directiveIndex = findOrPatchDirectiveIntoRegistry(context, directiveRef, styleSanitizer);
-    if (directiveIndex === -1) {
+    const isNewDirective = findOrPatchDirectiveIntoRegistry(context, directiveIndex, false, styleSanitizer);
+    if (!isNewDirective) {
         // this means the directive has already been patched in ... No point in doing anything
         return;
     }
@@ -7828,7 +8080,7 @@ function updateContextWithBindings(context, directiveRef, classBindingNames, sty
     /** @type {?} */
     const stylesOffset = totalCurrentStyleBindings * 4 /* Size */;
     /** @type {?} */
-    const singleStylesStartIndex = 9 /* SingleStylesStartPosition */;
+    const singleStylesStartIndex = 10 /* SingleStylesStartPosition */;
     /** @type {?} */
     let singleClassesStartIndex = singleStylesStartIndex + stylesOffset;
     /** @type {?} */
@@ -8061,49 +8313,26 @@ function updateContextWithBindings(context, directiveRef, classBindingNames, sty
 /**
  * Searches through the existing registry of directives
  * @param {?} context
- * @param {?} directiveRef
+ * @param {?} directiveIndex
+ * @param {?} staticModeOnly
  * @param {?=} styleSanitizer
  * @return {?}
  */
-function findOrPatchDirectiveIntoRegistry(context, directiveRef, styleSanitizer) {
+function findOrPatchDirectiveIntoRegistry(context, directiveIndex, staticModeOnly, styleSanitizer) {
     /** @type {?} */
-    const directiveRefs = context[2 /* DirectiveRegistryPosition */];
+    const directiveRegistry = context[2 /* DirectiveRegistryPosition */];
     /** @type {?} */
-    const nextOffsetInsertionIndex = context[5 /* SinglePropOffsetPositions */].length;
+    const index = directiveIndex * 2 /* Size */;
     /** @type {?} */
-    let directiveIndex;
+    const singlePropStartPosition = index + 0 /* SinglePropValuesIndexOffset */;
+    // this means that the directive has already been registered into the registry
+    if (index < directiveRegistry.length &&
+        ((/** @type {?} */ (directiveRegistry[singlePropStartPosition]))) >= 0)
+        return false;
     /** @type {?} */
-    let detectedIndex = getDirectiveRegistryValuesIndexOf(directiveRefs, directiveRef);
-    if (detectedIndex === -1) {
-        detectedIndex = directiveRefs.length;
-        directiveIndex = directiveRefs.length / 4 /* Size */;
-        allocateDirectiveIntoContext(context, directiveRef);
-        directiveRefs[detectedIndex + 1 /* SinglePropValuesIndexOffset */] =
-            nextOffsetInsertionIndex;
-        directiveRefs[detectedIndex + 3 /* StyleSanitizerOffset */] =
-            styleSanitizer || null;
-    }
-    else {
-        /** @type {?} */
-        const singlePropStartPosition = detectedIndex + 1 /* SinglePropValuesIndexOffset */;
-        if ((/** @type {?} */ (directiveRefs[singlePropStartPosition])) >= 0) {
-            // the directive has already been patched into the context
-            return -1;
-        }
-        directiveIndex = detectedIndex / 4 /* Size */;
-        // because the directive already existed this means that it was set during elementHostAttrs or
-        // elementStart which means that the binding values were not here. Therefore, the values below
-        // need to be applied so that single class and style properties can be assigned later.
-        /** @type {?} */
-        const singlePropPositionIndex = detectedIndex + 1 /* SinglePropValuesIndexOffset */;
-        directiveRefs[singlePropPositionIndex] = nextOffsetInsertionIndex;
-        // the sanitizer is also apart of the binding process and will be used when bindings are
-        // applied.
-        /** @type {?} */
-        const styleSanitizerIndex = detectedIndex + 3 /* StyleSanitizerOffset */;
-        directiveRefs[styleSanitizerIndex] = styleSanitizer || null;
-    }
-    return directiveIndex;
+    const singlePropsStartIndex = staticModeOnly ? -1 : context[5 /* SinglePropOffsetPositions */].length;
+    allocateOrUpdateDirectiveIntoContext(context, directiveIndex, singlePropsStartIndex, styleSanitizer);
+    return true;
 }
 /**
  * @param {?} context
@@ -8142,15 +8371,11 @@ function getMatchingBindingIndex(context, bindingName, start, end) {
  *    newly provided style values.
  * @param {?} classesInput The key/value map of CSS class names that will be used for the update.
  * @param {?=} stylesInput The key/value map of CSS styles that will be used for the update.
- * @param {?=} directiveRef an optional reference to the directive responsible
- *    for this binding change. If present then style binding will only
- *    actualize if the directive has ownership over this binding
- *    (see styling.ts#directives for more information about the algorithm).
+ * @param {?=} directiveIndex
  * @return {?}
  */
-function updateStylingMap(context, classesInput, stylesInput, directiveRef) {
-    /** @type {?} */
-    const directiveIndex = getDirectiveIndexFromRegistry(context, directiveRef || null);
+function updateStylingMap(context, classesInput, stylesInput, directiveIndex = 0) {
+    ngDevMode && assertValidDirectiveIndex(context, directiveIndex);
     classesInput = classesInput || null;
     stylesInput = stylesInput || null;
     /** @type {?} */
@@ -8491,7 +8716,6 @@ function patchStylingMapIntoContext(context, directiveIndex, playerBuilderIndex,
     updateCachedMapValue(context, directiveIndex, entryIsClassBased, cacheValue, ownershipValuesStartIndex, ctxEnd, totalUniqueValues, valuesEntryShapeChange);
     if (dirty) {
         setContextDirty(context, true);
-        setDirectiveDirty(context, directiveIndex, true);
     }
     return totalNewAllocatedSlots;
 }
@@ -8503,16 +8727,13 @@ function patchStylingMapIntoContext(context, directiveIndex, playerBuilderIndex,
  *    newly provided class value.
  * @param {?} offset The index of the CSS class which is being updated.
  * @param {?} input
- * @param {?=} directiveRef an optional reference to the directive responsible
- *    for this binding change. If present then style binding will only
- *    actualize if the directive has ownership over this binding
- *    (see styling.ts#directives for more information about the algorithm).
+ * @param {?=} directiveIndex
  * @param {?=} forceOverride whether or not to skip all directive prioritization
  *    and just apply the value regardless.
  * @return {?}
  */
-function updateClassProp(context, offset, input, directiveRef, forceOverride) {
-    updateSingleStylingValue(context, offset, input, true, directiveRef, forceOverride);
+function updateClassProp(context, offset, input, directiveIndex = 0, forceOverride) {
+    updateSingleStylingValue(context, offset, input, true, directiveIndex, forceOverride);
 }
 /**
  * Sets and resolves a single style value on the provided `StylingContext` so
@@ -8527,29 +8748,25 @@ function updateClassProp(context, offset, input, directiveRef, forceOverride) {
  *    newly provided style value.
  * @param {?} offset The index of the property which is being updated.
  * @param {?} input
- * @param {?=} directiveRef an optional reference to the directive responsible
- *    for this binding change. If present then style binding will only
- *    actualize if the directive has ownership over this binding
- *    (see styling.ts#directives for more information about the algorithm).
+ * @param {?=} directiveIndex
  * @param {?=} forceOverride whether or not to skip all directive prioritization
  *    and just apply the value regardless.
  * @return {?}
  */
-function updateStyleProp(context, offset, input, directiveRef, forceOverride) {
-    updateSingleStylingValue(context, offset, input, false, directiveRef, forceOverride);
+function updateStyleProp(context, offset, input, directiveIndex = 0, forceOverride) {
+    updateSingleStylingValue(context, offset, input, false, directiveIndex, forceOverride);
 }
 /**
  * @param {?} context
  * @param {?} offset
  * @param {?} input
  * @param {?} isClassBased
- * @param {?} directiveRef
+ * @param {?} directiveIndex
  * @param {?=} forceOverride
  * @return {?}
  */
-function updateSingleStylingValue(context, offset, input, isClassBased, directiveRef, forceOverride) {
-    /** @type {?} */
-    const directiveIndex = getDirectiveIndexFromRegistry(context, directiveRef || null);
+function updateSingleStylingValue(context, offset, input, isClassBased, directiveIndex, forceOverride) {
+    ngDevMode && assertValidDirectiveIndex(context, directiveIndex);
     /** @type {?} */
     const singleIndex = getSinglePropIndexValue(context, directiveIndex, offset, isClassBased);
     /** @type {?} */
@@ -8613,7 +8830,6 @@ function updateSingleStylingValue(context, offset, input, isClassBased, directiv
             }
             setDirty(context, indexForMulti, multiDirty);
             setDirty(context, singleIndex, singleDirty);
-            setDirectiveDirty(context, directiveIndex, true);
             setContextDirty(context, true);
         }
         if (playerBuildersAreDirty) {
@@ -8639,125 +8855,129 @@ function updateSingleStylingValue(context, offset, input, isClassBased, directiv
  *    to this key/value map instead of being renderered via the renderer.
  * @param {?=} stylesStore if provided, the updated style values will be applied
  *    to this key/value map instead of being renderered via the renderer.
- * @param {?=} directiveRef an optional directive that will be used to target which
- *    styling values are rendered. If left empty, only the bindings that are
- *    registered on the template will be rendered.
+ * @param {?=} directiveIndex
  * @return {?} number the total amount of players that got queued for animation (if any)
  */
-function renderStyling(context, renderer, rootOrView, isFirstRender, classesStore, stylesStore, directiveRef) {
+function renderStyling(context, renderer, rootOrView, isFirstRender, classesStore, stylesStore, directiveIndex = 0) {
     /** @type {?} */
     let totalPlayersQueued = 0;
-    /** @type {?} */
-    const targetDirectiveIndex = getDirectiveIndexFromRegistry(context, directiveRef || null);
-    if (isContextDirty(context) && isDirectiveDirty(context, targetDirectiveIndex)) {
-        /** @type {?} */
-        const flushPlayerBuilders = context[1 /* MasterFlagPosition */] & 8 /* PlayerBuildersDirty */;
-        /** @type {?} */
-        const native = (/** @type {?} */ (context[0 /* ElementPosition */]));
-        /** @type {?} */
-        const multiStartIndex = getMultiStylesStartIndex(context);
-        /** @type {?} */
-        let stillDirty = false;
-        for (let i = 9 /* SingleStylesStartPosition */; i < context.length; i += 4 /* Size */) {
-            // there is no point in rendering styles that have not changed on screen
-            if (isDirty(context, i)) {
-                /** @type {?} */
-                const flag = getPointers(context, i);
-                /** @type {?} */
-                const directiveIndex = getDirectiveIndexFromEntry(context, i);
-                if (targetDirectiveIndex !== directiveIndex) {
-                    stillDirty = true;
-                    continue;
-                }
-                /** @type {?} */
-                const prop = getProp(context, i);
-                /** @type {?} */
-                const value = getValue(context, i);
-                /** @type {?} */
-                const styleSanitizer = (flag & 4 /* Sanitize */) ? getStyleSanitizer(context, directiveIndex) : null;
-                /** @type {?} */
-                const playerBuilder = getPlayerBuilder(context, i);
-                /** @type {?} */
-                const isClassBased = flag & 2 /* Class */ ? true : false;
-                /** @type {?} */
-                const isInSingleRegion = i < multiStartIndex;
-                /** @type {?} */
-                let valueToApply = value;
-                // VALUE DEFER CASE 1: Use a multi value instead of a null single value
-                // this check implies that a single value was removed and we
-                // should now defer to a multi value and use that (if set).
-                if (isInSingleRegion && !valueExists(valueToApply, isClassBased)) {
-                    // single values ALWAYS have a reference to a multi index
+    // this prevents multiple attempts to render style/class values on
+    // the same element...
+    if (allowFlush(context, directiveIndex)) {
+        // all styling instructions present within any hostBindings functions
+        // do not update the context immediately when called. They are instead
+        // queued up and applied to the context right at this point. Why? This
+        // is because Angular evaluates component/directive and directive
+        // sub-class code at different points and it's important that the
+        // styling values are applied to the context in the right order
+        // (see `interfaces/styling.ts` for more information).
+        flushQueue(context);
+        if (isContextDirty(context)) {
+            // this is here to prevent things like <ng-container [style] [class]>...</ng-container>
+            // or if there are any host style or class bindings present in a directive set on
+            // a container node
+            /** @type {?} */
+            const native = (/** @type {?} */ ((/** @type {?} */ (context[0 /* ElementPosition */]))));
+            /** @type {?} */
+            const flushPlayerBuilders = context[1 /* MasterFlagPosition */] & 8 /* PlayerBuildersDirty */;
+            /** @type {?} */
+            const multiStartIndex = getMultiStylesStartIndex(context);
+            for (let i = 10 /* SingleStylesStartPosition */; i < context.length; i += 4 /* Size */) {
+                // there is no point in rendering styles that have not changed on screen
+                if (isDirty(context, i)) {
                     /** @type {?} */
-                    const multiIndex = getMultiOrSingleIndex(flag);
-                    valueToApply = getValue(context, multiIndex);
-                }
-                // VALUE DEFER CASE 2: Use the initial value if all else fails (is falsy)
-                // the initial value will always be a string or null,
-                // therefore we can safely adopt it in case there's nothing else
-                // note that this should always be a falsy check since `false` is used
-                // for both class and style comparisons (styles can't be false and false
-                // classes are turned off and should therefore defer to their initial values)
-                // Note that we ignore class-based deferals because otherwise a class can never
-                // be removed in the case that it exists as true in the initial classes list...
-                if (!valueExists(valueToApply, isClassBased)) {
-                    valueToApply = getInitialValue(context, flag);
-                }
-                // if the first render is true then we do not want to start applying falsy
-                // values to the DOM element's styling. Otherwise then we know there has
-                // been a change and even if it's falsy then it's removing something that
-                // was truthy before.
-                /** @type {?} */
-                const doApplyValue = isFirstRender ? valueToApply : true;
-                if (doApplyValue) {
-                    if (isClassBased) {
-                        setClass(native, prop, valueToApply ? true : false, renderer, classesStore, playerBuilder);
-                    }
-                    else {
-                        setStyle(native, prop, (/** @type {?} */ (valueToApply)), renderer, styleSanitizer, stylesStore, playerBuilder);
-                    }
-                }
-                setDirty(context, i, false);
-            }
-        }
-        if (flushPlayerBuilders) {
-            /** @type {?} */
-            const rootContext = Array.isArray(rootOrView) ? getRootContext(rootOrView) : (/** @type {?} */ (rootOrView));
-            /** @type {?} */
-            const playerContext = (/** @type {?} */ (getPlayerContext(context)));
-            /** @type {?} */
-            const playersStartIndex = playerContext[0 /* NonBuilderPlayersStart */];
-            for (let i = 1 /* PlayerBuildersStartPosition */; i < playersStartIndex; i += 2 /* PlayerAndPlayerBuildersTupleSize */) {
-                /** @type {?} */
-                const builder = (/** @type {?} */ (playerContext[i]));
-                /** @type {?} */
-                const playerInsertionIndex = i + 1 /* PlayerOffsetPosition */;
-                /** @type {?} */
-                const oldPlayer = (/** @type {?} */ (playerContext[playerInsertionIndex]));
-                if (builder) {
+                    const flag = getPointers(context, i);
                     /** @type {?} */
-                    const player = builder.buildPlayer(oldPlayer, isFirstRender);
-                    if (player !== undefined) {
-                        if (player != null) {
-                            /** @type {?} */
-                            const wasQueued = addPlayerInternal(playerContext, rootContext, (/** @type {?} */ (native)), player, playerInsertionIndex);
-                            wasQueued && totalPlayersQueued++;
+                    const directiveIndex = getDirectiveIndexFromEntry(context, i);
+                    /** @type {?} */
+                    const prop = getProp(context, i);
+                    /** @type {?} */
+                    const value = getValue(context, i);
+                    /** @type {?} */
+                    const styleSanitizer = (flag & 4 /* Sanitize */) ? getStyleSanitizer(context, directiveIndex) : null;
+                    /** @type {?} */
+                    const playerBuilder = getPlayerBuilder(context, i);
+                    /** @type {?} */
+                    const isClassBased = flag & 2 /* Class */ ? true : false;
+                    /** @type {?} */
+                    const isInSingleRegion = i < multiStartIndex;
+                    /** @type {?} */
+                    let valueToApply = value;
+                    // VALUE DEFER CASE 1: Use a multi value instead of a null single value
+                    // this check implies that a single value was removed and we
+                    // should now defer to a multi value and use that (if set).
+                    if (isInSingleRegion && !valueExists(valueToApply, isClassBased)) {
+                        // single values ALWAYS have a reference to a multi index
+                        /** @type {?} */
+                        const multiIndex = getMultiOrSingleIndex(flag);
+                        valueToApply = getValue(context, multiIndex);
+                    }
+                    // VALUE DEFER CASE 2: Use the initial value if all else fails (is falsy)
+                    // the initial value will always be a string or null,
+                    // therefore we can safely adopt it in case there's nothing else
+                    // note that this should always be a falsy check since `false` is used
+                    // for both class and style comparisons (styles can't be false and false
+                    // classes are turned off and should therefore defer to their initial values)
+                    // Note that we ignore class-based deferals because otherwise a class can never
+                    // be removed in the case that it exists as true in the initial classes list...
+                    if (!valueExists(valueToApply, isClassBased)) {
+                        valueToApply = getInitialValue(context, flag);
+                    }
+                    // if the first render is true then we do not want to start applying falsy
+                    // values to the DOM element's styling. Otherwise then we know there has
+                    // been a change and even if it's falsy then it's removing something that
+                    // was truthy before.
+                    /** @type {?} */
+                    const doApplyValue = renderer && (isFirstRender ? valueToApply : true);
+                    if (doApplyValue) {
+                        if (isClassBased) {
+                            setClass(native, prop, valueToApply ? true : false, (/** @type {?} */ (renderer)), classesStore, playerBuilder);
                         }
-                        if (oldPlayer) {
-                            oldPlayer.destroy();
+                        else {
+                            setStyle(native, prop, (/** @type {?} */ (valueToApply)), (/** @type {?} */ (renderer)), styleSanitizer, stylesStore, playerBuilder);
                         }
                     }
-                }
-                else if (oldPlayer) {
-                    // the player builder has been removed ... therefore we should delete the associated
-                    // player
-                    oldPlayer.destroy();
+                    setDirty(context, i, false);
                 }
             }
-            setContextPlayersDirty(context, false);
+            if (flushPlayerBuilders) {
+                /** @type {?} */
+                const rootContext = Array.isArray(rootOrView) ? getRootContext(rootOrView) : (/** @type {?} */ (rootOrView));
+                /** @type {?} */
+                const playerContext = (/** @type {?} */ (getPlayerContext(context)));
+                /** @type {?} */
+                const playersStartIndex = playerContext[0 /* NonBuilderPlayersStart */];
+                for (let i = 1 /* PlayerBuildersStartPosition */; i < playersStartIndex; i += 2 /* PlayerAndPlayerBuildersTupleSize */) {
+                    /** @type {?} */
+                    const builder = (/** @type {?} */ (playerContext[i]));
+                    /** @type {?} */
+                    const playerInsertionIndex = i + 1 /* PlayerOffsetPosition */;
+                    /** @type {?} */
+                    const oldPlayer = (/** @type {?} */ (playerContext[playerInsertionIndex]));
+                    if (builder) {
+                        /** @type {?} */
+                        const player = builder.buildPlayer(oldPlayer, isFirstRender);
+                        if (player !== undefined) {
+                            if (player != null) {
+                                /** @type {?} */
+                                const wasQueued = addPlayerInternal(playerContext, rootContext, (/** @type {?} */ (native)), player, playerInsertionIndex);
+                                wasQueued && totalPlayersQueued++;
+                            }
+                            if (oldPlayer) {
+                                oldPlayer.destroy();
+                            }
+                        }
+                    }
+                    else if (oldPlayer) {
+                        // the player builder has been removed ... therefore we should delete the associated
+                        // player
+                        oldPlayer.destroy();
+                    }
+                }
+                setContextPlayersDirty(context, false);
+            }
+            setContextDirty(context, false);
         }
-        setDirectiveDirty(context, targetDirectiveIndex, false);
-        setContextDirty(context, stillDirty);
     }
     return totalPlayersQueued;
 }
@@ -8864,7 +9084,7 @@ function setSanitizeFlag(context, index, sanitizeYes) {
  */
 function setDirty(context, index, isDirtyYes) {
     /** @type {?} */
-    const adjustedIndex = index >= 9 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
+    const adjustedIndex = index >= 10 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
     if (isDirtyYes) {
         ((/** @type {?} */ (context[adjustedIndex]))) |= 1 /* Dirty */;
     }
@@ -8879,7 +9099,7 @@ function setDirty(context, index, isDirtyYes) {
  */
 function isDirty(context, index) {
     /** @type {?} */
-    const adjustedIndex = index >= 9 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
+    const adjustedIndex = index >= 10 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
     return (((/** @type {?} */ (context[adjustedIndex]))) & 1 /* Dirty */) == 1 /* Dirty */;
 }
 /**
@@ -8889,7 +9109,7 @@ function isDirty(context, index) {
  */
 function isClassBasedValue(context, index) {
     /** @type {?} */
-    const adjustedIndex = index >= 9 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
+    const adjustedIndex = index >= 10 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
     return (((/** @type {?} */ (context[adjustedIndex]))) & 2 /* Class */) == 2 /* Class */;
 }
 /**
@@ -8899,7 +9119,7 @@ function isClassBasedValue(context, index) {
  */
 function isSanitizable(context, index) {
     /** @type {?} */
-    const adjustedIndex = index >= 9 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
+    const adjustedIndex = index >= 10 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
     return (((/** @type {?} */ (context[adjustedIndex]))) & 4 /* Sanitize */) == 4 /* Sanitize */;
 }
 /**
@@ -8941,7 +9161,7 @@ function getInitialIndex(flag) {
 function getMultiOrSingleIndex(flag) {
     /** @type {?} */
     const index = (flag >> (14 /* BitCountSize */ + 5 /* BitCountSize */)) & 16383 /* BitMask */;
-    return index >= 9 /* SingleStylesStartPosition */ ? index : -1;
+    return index >= 10 /* SingleStylesStartPosition */ ? index : -1;
 }
 /**
  * @param {?} context
@@ -8989,7 +9209,7 @@ function setValue(context, index, value) {
  */
 function hasPlayerBuilderChanged(context, builder, index) {
     /** @type {?} */
-    const playerContext = (/** @type {?} */ (context[8 /* PlayerContext */]));
+    const playerContext = (/** @type {?} */ (context[9 /* PlayerContext */]));
     if (builder) {
         if (!playerContext || index === 0) {
             return true;
@@ -9008,7 +9228,7 @@ function hasPlayerBuilderChanged(context, builder, index) {
  */
 function setPlayerBuilder(context, builder, insertionIndex) {
     /** @type {?} */
-    let playerContext = context[8 /* PlayerContext */] || allocPlayerContext(context);
+    let playerContext = context[9 /* PlayerContext */] || allocPlayerContext(context);
     if (insertionIndex > 0) {
         playerContext[insertionIndex] = builder;
     }
@@ -9063,7 +9283,7 @@ function getPlayerBuilder(context, index) {
     const playerBuilderIndex = getPlayerBuilderIndex(context, index);
     if (playerBuilderIndex) {
         /** @type {?} */
-        const playerContext = context[8 /* PlayerContext */];
+        const playerContext = context[9 /* PlayerContext */];
         if (playerContext) {
             return (/** @type {?} */ (playerContext[playerBuilderIndex]));
         }
@@ -9362,50 +9582,6 @@ function getDirectiveIndexFromEntry(context, index) {
     return value & 65535 /* BitMask */;
 }
 /**
- * @param {?} context
- * @param {?} directiveRef
- * @return {?}
- */
-function getDirectiveIndexFromRegistry(context, directiveRef) {
-    /** @type {?} */
-    let directiveIndex;
-    /** @type {?} */
-    const dirs = context[2 /* DirectiveRegistryPosition */];
-    /** @type {?} */
-    let index = getDirectiveRegistryValuesIndexOf(dirs, directiveRef);
-    if (index === -1) {
-        // if the directive was not allocated then this means that styling is
-        // being applied in a dynamic way AFTER the element was already instantiated
-        index = dirs.length;
-        directiveIndex = index > 0 ? index / 4 /* Size */ : 0;
-        dirs.push(null, null, null, null);
-        dirs[index + 0 /* DirectiveValueOffset */] = directiveRef;
-        dirs[index + 2 /* DirtyFlagOffset */] = false;
-        dirs[index + 1 /* SinglePropValuesIndexOffset */] = -1;
-        /** @type {?} */
-        const classesStartIndex = getMultiClassesStartIndex(context) || 9 /* SingleStylesStartPosition */;
-        registerMultiMapEntry(context, directiveIndex, true, context.length);
-        registerMultiMapEntry(context, directiveIndex, false, classesStartIndex);
-    }
-    else {
-        directiveIndex = index > 0 ? index / 4 /* Size */ : 0;
-    }
-    return directiveIndex;
-}
-/**
- * @param {?} directives
- * @param {?} directive
- * @return {?}
- */
-function getDirectiveRegistryValuesIndexOf(directives, directive) {
-    for (let i = 0; i < directives.length; i += 4 /* Size */) {
-        if (directives[i] === directive) {
-            return i;
-        }
-    }
-    return -1;
-}
-/**
  * @param {?} keyValues
  * @param {?} key
  * @return {?}
@@ -9426,8 +9602,8 @@ function getInitialStylingValuesIndexOf(keyValues, key) {
  */
 function getSinglePropIndexValue(context, directiveIndex, offset, isClassBased) {
     /** @type {?} */
-    const singlePropOffsetRegistryIndex = (/** @type {?} */ (context[2 /* DirectiveRegistryPosition */][(directiveIndex * 4 /* Size */) +
-        1 /* SinglePropValuesIndexOffset */]));
+    const singlePropOffsetRegistryIndex = (/** @type {?} */ (context[2 /* DirectiveRegistryPosition */][(directiveIndex * 2 /* Size */) +
+        0 /* SinglePropValuesIndexOffset */]));
     /** @type {?} */
     const offsets = context[5 /* SinglePropOffsetPositions */];
     /** @type {?} */
@@ -9448,33 +9624,10 @@ function getStyleSanitizer(context, directiveIndex) {
     /** @type {?} */
     const dirs = context[2 /* DirectiveRegistryPosition */];
     /** @type {?} */
-    const value = dirs[directiveIndex * 4 /* Size */ +
-        3 /* StyleSanitizerOffset */] ||
-        dirs[3 /* StyleSanitizerOffset */] || null;
+    const value = dirs[directiveIndex * 2 /* Size */ +
+        1 /* StyleSanitizerOffset */] ||
+        dirs[1 /* StyleSanitizerOffset */] || null;
     return (/** @type {?} */ (value));
-}
-/**
- * @param {?} context
- * @param {?} directiveIndex
- * @return {?}
- */
-function isDirectiveDirty(context, directiveIndex) {
-    /** @type {?} */
-    const dirs = context[2 /* DirectiveRegistryPosition */];
-    return (/** @type {?} */ (dirs[directiveIndex * 4 /* Size */ +
-        2 /* DirtyFlagOffset */]));
-}
-/**
- * @param {?} context
- * @param {?} directiveIndex
- * @param {?} dirtyYes
- * @return {?}
- */
-function setDirectiveDirty(context, directiveIndex, dirtyYes) {
-    /** @type {?} */
-    const dirs = context[2 /* DirectiveRegistryPosition */];
-    dirs[directiveIndex * 4 /* Size */ +
-        2 /* DirtyFlagOffset */] = dirtyYes;
 }
 /**
  * @param {?} currentValue
@@ -9763,6 +9916,21 @@ function addOrUpdateStaticStyle(index, staticStyles, prop, value, directiveOwner
     staticStyles[index + 1 /* ValueOffset */] = value;
     staticStyles[index + 2 /* DirectiveOwnerOffset */] = directiveOwnerIndex;
     return index;
+}
+/**
+ * @param {?} context
+ * @param {?} directiveIndex
+ * @return {?}
+ */
+function assertValidDirectiveIndex(context, directiveIndex) {
+    /** @type {?} */
+    const dirs = context[2 /* DirectiveRegistryPosition */];
+    /** @type {?} */
+    const index = directiveIndex * 2 /* Size */;
+    if (index >= dirs.length ||
+        dirs[index + 0 /* SinglePropValuesIndexOffset */] === -1) {
+        throw new Error('The provided directive is not registered with the styling context');
+    }
 }
 
 /**
@@ -10158,6 +10326,7 @@ function setHostBindings(tView, viewData) {
                     // Negative numbers mean that we are starting new EXPANDO block and need to update
                     // the current element and directive index.
                     currentElementIndex = -instruction;
+                    setActiveHostElement(currentElementIndex);
                     // Injector block and providers are taken into account.
                     /** @type {?} */
                     const providerCount = ((/** @type {?} */ (tView.expandoInstructions[++i])));
@@ -10178,14 +10347,19 @@ function setHostBindings(tView, viewData) {
                     viewData[BINDING_INDEX] = bindingRootIndex;
                     /** @type {?} */
                     const hostCtx = unwrapRNode(viewData[currentDirectiveIndex]);
-                    setActiveHost(hostCtx, currentElementIndex);
                     instruction(2 /* Update */, hostCtx, currentElementIndex);
-                    setActiveHost(null);
+                    // Each directive gets a uniqueId value that is the same for both
+                    // create and update calls when the hostBindings function is called. The
+                    // directive uniqueId is not set anywhere--it is just incremented between
+                    // each hostBindings call and is useful for helping instruction code
+                    // uniquely determine which directive is currently active when executed.
+                    incrementActiveDirectiveId();
                 }
                 currentDirectiveIndex++;
             }
         }
     }
+    setActiveHostElement(null);
 }
 /**
  * Refreshes content queries for all directives in the given view.
@@ -10447,6 +10621,8 @@ function renderEmbeddedTemplate(viewToRender, tView, context) {
             oldView = enterView(viewToRender, viewToRender[T_HOST]);
             resetPreOrderHookFlags(viewToRender);
             namespaceHTML();
+            // Reset the selected index so we can assert that `select` was called later
+            ngDevMode && setSelectedIndex(-1);
             (/** @type {?} */ (tView.template))(getRenderFlags(viewToRender), context);
             // This must be set to false immediately after the first creation run because in an
             // ngFor loop, all the views will be created together before update mode runs and turns
@@ -10486,6 +10662,8 @@ function renderComponentOrTemplate(hostView, context, templateFn) {
             // creation mode pass
             if (templateFn) {
                 namespaceHTML();
+                // Reset the selected index so we can assert that `select` was called later
+                ngDevMode && setSelectedIndex(-1);
                 templateFn(1 /* Create */, context);
             }
             refreshDescendantViews(hostView);
@@ -10962,6 +11140,9 @@ function invokeDirectivesHostBindings(tView, viewData, tNode) {
     const expando = (/** @type {?} */ (tView.expandoInstructions));
     /** @type {?} */
     const firstTemplatePass = tView.firstTemplatePass;
+    /** @type {?} */
+    const elementIndex = tNode.index - HEADER_OFFSET;
+    setActiveHostElement(elementIndex);
     for (let i = start; i < end; i++) {
         /** @type {?} */
         const def = (/** @type {?} */ (tView.data[i]));
@@ -10969,11 +11150,18 @@ function invokeDirectivesHostBindings(tView, viewData, tNode) {
         const directive = viewData[i];
         if (def.hostBindings) {
             invokeHostBindingsInCreationMode(def, expando, directive, tNode, firstTemplatePass);
+            // Each directive gets a uniqueId value that is the same for both
+            // create and update calls when the hostBindings function is called. The
+            // directive uniqueId is not set anywhere--it is just incremented between
+            // each hostBindings call and is useful for helping instruction code
+            // uniquely determine which directive is currently active when executed.
+            incrementActiveDirectiveId();
         }
         else if (firstTemplatePass) {
             expando.push(null);
         }
     }
+    setActiveHostElement(null);
 }
 /**
  * @param {?} def
@@ -10989,9 +11177,7 @@ function invokeHostBindingsInCreationMode(def, expando, directive, tNode, firstT
     setCurrentDirectiveDef(def);
     /** @type {?} */
     const elementIndex = tNode.index - HEADER_OFFSET;
-    setActiveHost(directive, elementIndex);
     (/** @type {?} */ (def.hostBindings))(1 /* Create */, directive, elementIndex);
-    setActiveHost(null);
     setCurrentDirectiveDef(null);
     // `hostBindings` function may or may not contain `allocHostVars` call
     // (e.g. it may not if it only contains host listeners), so we need to check whether
@@ -11610,6 +11796,8 @@ function checkView(hostView, component) {
         resetPreOrderHookFlags(hostView);
         namespaceHTML();
         creationMode && executeViewQueryFn(1 /* Create */, hostTView, component);
+        // Reset the selected index so we can assert that `select` was called later
+        ngDevMode && setSelectedIndex(-1);
         templateFn(getRenderFlags(hostView), component);
         refreshDescendantViews(hostView);
         // Only check view queries again in creation mode if there are static view queries
@@ -14104,6 +14292,445 @@ function getSanitizer() {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
+/*
+ * The contents of this file include the instructions for all styling-related
+ * operations in Angular.
+ *
+ * The instructions present in this file are:
+ *
+ * Template level styling instructions:
+ * - elementStyling
+ * - elementStylingMap
+ * - elementStyleProp
+ * - elementClassProp
+ * - elementStylingApply
+ *
+ * Host bindings level styling instructions:
+ * - elementHostStyling
+ * - elementHostStylingMap
+ * - elementHostStyleProp
+ * - elementHostClassProp
+ * - elementHostStylingApply
+ */
+/**
+ * Allocates style and class binding properties on the element during creation mode.
+ *
+ * This instruction is meant to be called during creation mode to register all
+ * dynamic style and class bindings on the element. Note that this is only used
+ * for binding values (see `elementStart` to learn how to assign static styling
+ * values to an element).
+ *
+ * \@publicApi
+ * @param {?=} classBindingNames An array containing bindable class names.
+ *        The `elementClassProp` instruction refers to the class name by index in
+ *        this array (i.e. `['foo', 'bar']` means `foo=0` and `bar=1`).
+ * @param {?=} styleBindingNames An array containing bindable style properties.
+ *        The `elementStyleProp` instruction refers to the class name by index in
+ *        this array (i.e. `['width', 'height']` means `width=0` and `height=1`).
+ * @param {?=} styleSanitizer An optional sanitizer function that will be used to sanitize any CSS
+ *        style values that are applied to the element (during rendering).
+ *
+ * @return {?}
+ */
+function elementStyling(classBindingNames, styleBindingNames, styleSanitizer) {
+    /** @type {?} */
+    const tNode = getPreviousOrParentTNode();
+    if (!tNode.stylingTemplate) {
+        tNode.stylingTemplate = createEmptyStylingContext();
+    }
+    // calling the function below ensures that the template's binding values
+    // are applied as the first set of bindings into the context. If any other
+    // styling bindings are set on the same element (by directives and/or
+    // components) then they will be applied at the end of the `elementEnd`
+    // instruction (because directives are created first before styling is
+    // executed for a new element).
+    initElementStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, DEFAULT_TEMPLATE_DIRECTIVE_INDEX);
+}
+/**
+ * Allocates style and class binding properties on the host element during creation mode
+ * within the host bindings function of a directive or component.
+ *
+ * This instruction is meant to be called during creation mode to register all
+ * dynamic style and class host bindings on the host element of a directive or
+ * component. Note that this is only used for binding values (see `elementHostAttrs`
+ * to learn how to assign static styling values to the host element).
+ *
+ * \@publicApi
+ * @param {?=} classBindingNames An array containing bindable class names.
+ *        The `elementHostClassProp` instruction refers to the class name by index in
+ *        this array (i.e. `['foo', 'bar']` means `foo=0` and `bar=1`).
+ * @param {?=} styleBindingNames An array containing bindable style properties.
+ *        The `elementHostStyleProp` instruction refers to the class name by index in
+ *        this array (i.e. `['width', 'height']` means `width=0` and `height=1`).
+ * @param {?=} styleSanitizer An optional sanitizer function that will be used to sanitize any CSS
+ *        style values that are applied to the element (during rendering).
+ *        Note that the sanitizer instance itself is tied to the provided `directive` and
+ *        will not be used if the same property is assigned in another directive or
+ *        on the element directly.
+ *
+ * @return {?}
+ */
+function elementHostStyling(classBindingNames, styleBindingNames, styleSanitizer) {
+    /** @type {?} */
+    const tNode = getPreviousOrParentTNode();
+    if (!tNode.stylingTemplate) {
+        tNode.stylingTemplate = createEmptyStylingContext();
+    }
+    /** @type {?} */
+    const directiveStylingIndex = getActiveDirectiveStylingIndex();
+    // despite the binding being applied in a queue (below), the allocation
+    // of the directive into the context happens right away. The reason for
+    // this is to retain the ordering of the directives (which is important
+    // for the prioritization of bindings).
+    allocateOrUpdateDirectiveIntoContext(tNode.stylingTemplate, directiveStylingIndex);
+    /** @type {?} */
+    const fns = tNode.onElementCreationFns = tNode.onElementCreationFns || [];
+    fns.push((/**
+     * @return {?}
+     */
+    () => {
+        initElementStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, directiveStylingIndex);
+        registerHostDirective((/** @type {?} */ (tNode.stylingTemplate)), directiveStylingIndex);
+    }));
+}
+/**
+ * @param {?} tNode
+ * @param {?} classBindingNames
+ * @param {?} styleBindingNames
+ * @param {?} styleSanitizer
+ * @param {?} directiveStylingIndex
+ * @return {?}
+ */
+function initElementStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, directiveStylingIndex) {
+    updateContextWithBindings((/** @type {?} */ (tNode.stylingTemplate)), directiveStylingIndex, classBindingNames, styleBindingNames, styleSanitizer);
+}
+/**
+ * Update a style binding on an element with the provided value.
+ *
+ * If the style value is falsy then it will be removed from the element
+ * (or assigned a different value depending if there are any styles placed
+ * on the element with `elementStylingMap` or any static styles that are
+ * present from when the element was created with `elementStyling`).
+ *
+ * Note that the styling element is updated as part of `elementStylingApply`.
+ *
+ * \@publicApi
+ * @param {?} index Index of the element's with which styling is associated.
+ * @param {?} styleIndex Index of style to update. This index value refers to the
+ *        index of the style in the style bindings array that was passed into
+ *        `elementStyling`.
+ * @param {?} value New value to write (falsy to remove). Note that if a directive also
+ *        attempts to write to the same binding value (via `elementHostStyleProp`)
+ *        then it will only be able to do so if the binding value assigned via
+ *        `elementStyleProp` is falsy (or doesn't exist at all).
+ * @param {?=} suffix Optional suffix. Used with scalar values to add unit such as `px`.
+ *        Note that when a suffix is provided then the underlying sanitizer will
+ *        be ignored.
+ * @param {?=} forceOverride Whether or not to update the styling value immediately
+ *        (despite the other bindings possibly having priority)
+ *
+ * @return {?}
+ */
+function elementStyleProp(index, styleIndex, value, suffix, forceOverride) {
+    /** @type {?} */
+    const valueToAdd = resolveStylePropValue(value, suffix);
+    updateStyleProp(getStylingContext(index + HEADER_OFFSET, getLView()), styleIndex, valueToAdd, DEFAULT_TEMPLATE_DIRECTIVE_INDEX, forceOverride);
+}
+/**
+ * Update a host style binding value on the host element within a component/directive.
+ *
+ * If the style value is falsy then it will be removed from the host element
+ * (or assigned a different value depending if there are any styles placed
+ * on the same element with `elementHostStylingMap` or any static styles that
+ * are present from when the element was patched with `elementHostStyling`).
+ *
+ * Note that the styling applied to the host element once
+ * `elementHostStylingApply` is called.
+ *
+ * \@publicApi
+ * @param {?} styleIndex Index of style to update. This index value refers to the
+ *        index of the style in the style bindings array that was passed into
+ *        `elementHostStyling`.
+ * @param {?} value New value to write (falsy to remove). The value may or may not
+ *        be applied to the element depending on the template/component/directive
+ *        prioritization (see `interfaces/styling.ts`)
+ * @param {?=} suffix Optional suffix. Used with scalar values to add unit such as `px`.
+ *        Note that when a suffix is provided then the underlying sanitizer will
+ *        be ignored.
+ * @param {?=} forceOverride Whether or not to update the styling value immediately
+ *        (despite the other bindings possibly having priority)
+ *
+ * @return {?}
+ */
+function elementHostStyleProp(styleIndex, value, suffix, forceOverride) {
+    /** @type {?} */
+    const directiveStylingIndex = getActiveDirectiveStylingIndex();
+    /** @type {?} */
+    const hostElementIndex = getSelectedIndex();
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const stylingContext = getStylingContext(hostElementIndex + HEADER_OFFSET, lView);
+    /** @type {?} */
+    const valueToAdd = resolveStylePropValue(value, suffix);
+    /** @type {?} */
+    const args = [stylingContext, styleIndex, valueToAdd, directiveStylingIndex, forceOverride];
+    enqueueHostInstruction(stylingContext, directiveStylingIndex, updateStyleProp, args);
+}
+/**
+ * @param {?} value
+ * @param {?} suffix
+ * @return {?}
+ */
+function resolveStylePropValue(value, suffix) {
+    /** @type {?} */
+    let valueToAdd = null;
+    if (value !== null) {
+        if (suffix) {
+            // when a suffix is applied then it will bypass
+            // sanitization entirely (b/c a new string is created)
+            valueToAdd = renderStringify(value) + suffix;
+        }
+        else {
+            // sanitization happens by dealing with a String value
+            // this means that the string value will be passed through
+            // into the style rendering later (which is where the value
+            // will be sanitized before it is applied)
+            valueToAdd = (/** @type {?} */ ((/** @type {?} */ (value))));
+        }
+    }
+    return valueToAdd;
+}
+/**
+ * Update a class binding on an element with the provided value.
+ *
+ * This instruction is meant to handle the `[class.foo]="exp"` case and,
+ * therefore, the class binding itself must already be allocated using
+ * `elementStyling` within the creation block.
+ *
+ * \@publicApi
+ * @param {?} index Index of the element's with which styling is associated.
+ * @param {?} classIndex Index of class to toggle. This index value refers to the
+ *        index of the class in the class bindings array that was passed into
+ *        `elementStyling` (which is meant to be called before this
+ *        function is).
+ * @param {?} value A true/false value which will turn the class on or off.
+ * @param {?=} forceOverride Whether or not this value will be applied regardless
+ *        of where it is being set within the styling priority structure.
+ *
+ * @return {?}
+ */
+function elementClassProp(index, classIndex, value, forceOverride) {
+    /** @type {?} */
+    const input = (value instanceof BoundPlayerFactory) ?
+        ((/** @type {?} */ (value))) :
+        booleanOrNull(value);
+    updateClassProp(getStylingContext(index + HEADER_OFFSET, getLView()), classIndex, input, DEFAULT_TEMPLATE_DIRECTIVE_INDEX, forceOverride);
+}
+/**
+ * Update a class host binding for a directive's/component's host element within
+ * the host bindings function.
+ *
+ * This instruction is meant to handle the `\@HostBinding('class.foo')` case and,
+ * therefore, the class binding itself must already be allocated using
+ * `elementHostStyling` within the creation block.
+ *
+ * \@publicApi
+ * @param {?} classIndex Index of class to toggle. This index value refers to the
+ *        index of the class in the class bindings array that was passed into
+ *        `elementHostStlying` (which is meant to be called before this
+ *        function is).
+ * @param {?} value A true/false value which will turn the class on or off.
+ * @param {?=} forceOverride Whether or not this value will be applied regardless
+ *        of where it is being set within the stylings priority structure.
+ *
+ * @return {?}
+ */
+function elementHostClassProp(classIndex, value, forceOverride) {
+    /** @type {?} */
+    const directiveStylingIndex = getActiveDirectiveStylingIndex();
+    /** @type {?} */
+    const hostElementIndex = getSelectedIndex();
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const stylingContext = getStylingContext(hostElementIndex + HEADER_OFFSET, lView);
+    /** @type {?} */
+    const input = (value instanceof BoundPlayerFactory) ?
+        ((/** @type {?} */ (value))) :
+        booleanOrNull(value);
+    /** @type {?} */
+    const args = [stylingContext, classIndex, input, directiveStylingIndex, forceOverride];
+    enqueueHostInstruction(stylingContext, directiveStylingIndex, updateClassProp, args);
+}
+/**
+ * @param {?} value
+ * @return {?}
+ */
+function booleanOrNull(value) {
+    if (typeof value === 'boolean')
+        return value;
+    return value ? true : null;
+}
+/**
+ * Update style and/or class bindings using object literals on an element.
+ *
+ * This instruction is meant to apply styling via the `[style]="exp"` and `[class]="exp"` template
+ * bindings. When styles/classes are applied to the element they will then be updated with
+ * respect to any styles/classes set with `elementStyleProp` or `elementClassProp`. If any
+ * styles or classes are set to falsy then they will be removed from the element.
+ *
+ * Note that the styling instruction will not be applied until `elementStylingApply` is called.
+ *
+ * \@publicApi
+ * @param {?} index Index of the element's with which styling is associated.
+ * @param {?} classes A key/value map or string of CSS classes that will be added to the
+ *        given element. Any missing classes (that have already been applied to the element
+ *        beforehand) will be removed (unset) from the element's list of CSS classes.
+ * @param {?=} styles A key/value style map of the styles that will be applied to the given element.
+ *        Any missing styles (that have already been applied to the element beforehand) will be
+ *        removed (unset) from the element's styling.
+ *
+ * @return {?}
+ */
+function elementStylingMap(index, classes, styles) {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const tNode = getTNode(index, lView);
+    /** @type {?} */
+    const stylingContext = getStylingContext(index + HEADER_OFFSET, lView);
+    // inputs are only evaluated from a template binding into a directive, therefore,
+    // there should not be a situation where a directive host bindings function
+    // evaluates the inputs (this should only happen in the template function)
+    if (hasClassInput(tNode) && classes !== NO_CHANGE) {
+        /** @type {?} */
+        const initialClasses = getInitialClassNameValue(stylingContext);
+        /** @type {?} */
+        const classInputVal = (initialClasses.length ? (initialClasses + ' ') : '') + forceClassesAsString(classes);
+        setInputsForProperty(lView, (/** @type {?} */ ((/** @type {?} */ (tNode.inputs))['class'])), classInputVal);
+        classes = NO_CHANGE;
+    }
+    if (hasStyleInput(tNode) && styles !== NO_CHANGE) {
+        /** @type {?} */
+        const initialStyles = getInitialClassNameValue(stylingContext);
+        /** @type {?} */
+        const styleInputVal = (initialStyles.length ? (initialStyles + ' ') : '') + forceStylesAsString(styles);
+        setInputsForProperty(lView, (/** @type {?} */ ((/** @type {?} */ (tNode.inputs))['style'])), styleInputVal);
+        styles = NO_CHANGE;
+    }
+    updateStylingMap(stylingContext, classes, styles);
+}
+/**
+ * Update style and/or class host bindings using object literals on an element within the host
+ * bindings function for a directive/component.
+ *
+ * This instruction is meant to apply styling via the `\@HostBinding('style')` and
+ * `\@HostBinding('class')` bindings for a component's or directive's host element.
+ * When styles/classes are applied to the host element they will then be updated
+ * with respect to any styles/classes set with `elementHostStyleProp` or
+ * `elementHostClassProp`. If any styles or classes are set to falsy then they
+ * will be removed from the element.
+ *
+ * Note that the styling instruction will not be applied until
+ * `elementHostStylingApply` is called.
+ *
+ * \@publicApi
+ * @param {?} classes A key/value map or string of CSS classes that will be added to the
+ *        given element. Any missing classes (that have already been applied to the element
+ *        beforehand) will be removed (unset) from the element's list of CSS classes.
+ * @param {?=} styles A key/value style map of the styles that will be applied to the given element.
+ *        Any missing styles (that have already been applied to the element beforehand) will be
+ *        removed (unset) from the element's styling.
+ *
+ * @return {?}
+ */
+function elementHostStylingMap(classes, styles) {
+    /** @type {?} */
+    const directiveStylingIndex = getActiveDirectiveStylingIndex();
+    /** @type {?} */
+    const hostElementIndex = getSelectedIndex();
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const stylingContext = getStylingContext(hostElementIndex + HEADER_OFFSET, lView);
+    /** @type {?} */
+    const args = [stylingContext, classes, styles, directiveStylingIndex];
+    enqueueHostInstruction(stylingContext, directiveStylingIndex, updateStylingMap, args);
+}
+/**
+ * Apply all style and class binding values to the element.
+ *
+ * This instruction is meant to be run after `elementStylingMap`, `elementStyleProp`
+ * or `elementClassProp` instructions have been run and will only apply styling to
+ * the element if any styling bindings have been updated.
+ *
+ * \@publicApi
+ * @param {?} index Index of the element's with which styling is associated.
+ *
+ * @return {?}
+ */
+function elementStylingApply(index) {
+    elementStylingApplyInternal(DEFAULT_TEMPLATE_DIRECTIVE_INDEX, index);
+}
+/**
+ * Apply all style and class host binding values to the element.
+ *
+ * This instruction is meant to be run after `elementHostStylingMap`,
+ * `elementHostStyleProp` or `elementHostClassProp` instructions have
+ * been run and will only apply styling to the host element if any
+ * styling bindings have been updated.
+ *
+ * \@publicApi
+ * @return {?}
+ */
+function elementHostStylingApply() {
+    elementStylingApplyInternal(getActiveDirectiveStylingIndex(), getSelectedIndex());
+}
+/**
+ * @param {?} directiveStylingIndex
+ * @param {?} index
+ * @return {?}
+ */
+function elementStylingApplyInternal(directiveStylingIndex, index) {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const tNode = getTNode(index, lView);
+    // if a non-element value is being processed then we can't render values
+    // on the element at all therefore by setting the renderer to null then
+    // the styling apply code knows not to actually apply the values...
+    /** @type {?} */
+    const renderer = tNode.type === 3 /* Element */ ? lView[RENDERER] : null;
+    /** @type {?} */
+    const isFirstRender = (lView[FLAGS] & 8 /* FirstLViewPass */) !== 0;
+    /** @type {?} */
+    const stylingContext = getStylingContext(index + HEADER_OFFSET, lView);
+    /** @type {?} */
+    const totalPlayersQueued = renderStyling(stylingContext, renderer, lView, isFirstRender, null, null, directiveStylingIndex);
+    if (totalPlayersQueued > 0) {
+        /** @type {?} */
+        const rootContext = getRootContext(lView);
+        scheduleTick(rootContext, 2 /* FlushPlayers */);
+    }
+}
+/**
+ * @return {?}
+ */
+function getActiveDirectiveStylingIndex() {
+    // whenever a directive's hostBindings function is called a uniqueId value
+    // is assigned. Normally this is enough to help distinguish one directive
+    // from another for the styling context, but there are situations where a
+    // sub-class directive could inherit and assign styling in concert with a
+    // parent directive. To help the styling code distinguish between a parent
+    // sub-classed directive the inheritance depth is taken into account as well.
+    return getActiveDirectiveId() + getActiveDirectiveSuperClassDepth();
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
  *
@@ -14330,23 +14957,31 @@ function elementAttribute(index, name, value, sanitizer, namespace) {
  */
 function elementHostAttrs(attrs) {
     /** @type {?} */
-    const tNode = getPreviousOrParentTNode();
+    const hostElementIndex = getSelectedIndex();
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
-    const native = (/** @type {?} */ (getNativeByTNode(tNode, lView)));
-    /** @type {?} */
-    const lastAttrIndex = setUpAttributes(native, attrs);
-    /** @type {?} */
-    const stylingAttrsStartIndex = attrsStylingIndexOf(attrs, lastAttrIndex);
-    if (stylingAttrsStartIndex >= 0) {
+    const tNode = getTNode(hostElementIndex, lView);
+    // non-element nodes (e.g. `<ng-container>`) are not rendered as actual
+    // element nodes and adding styles/classes on to them will cause runtime
+    // errors...
+    if (tNode.type === 3 /* Element */) {
         /** @type {?} */
-        const directive = getActiveHostContext();
-        if (tNode.stylingTemplate) {
-            patchContextWithStaticAttrs(tNode.stylingTemplate, attrs, stylingAttrsStartIndex, directive);
-        }
-        else {
-            tNode.stylingTemplate = initializeStaticContext(attrs, stylingAttrsStartIndex, directive);
+        const native = (/** @type {?} */ (getNativeByTNode(tNode, lView)));
+        /** @type {?} */
+        const lastAttrIndex = setUpAttributes(native, attrs);
+        /** @type {?} */
+        const stylingAttrsStartIndex = attrsStylingIndexOf(attrs, lastAttrIndex);
+        if (stylingAttrsStartIndex >= 0) {
+            /** @type {?} */
+            const directiveStylingIndex = getActiveDirectiveStylingIndex();
+            if (tNode.stylingTemplate) {
+                patchContextWithStaticAttrs(tNode.stylingTemplate, attrs, stylingAttrsStartIndex, directiveStylingIndex);
+            }
+            else {
+                tNode.stylingTemplate =
+                    initializeStaticContext(attrs, stylingAttrsStartIndex, directiveStylingIndex);
+            }
         }
     }
 }
@@ -14425,6 +15060,9 @@ function elementContainerEnd() {
     if (currentQueries) {
         lView[QUERIES] = currentQueries.parent;
     }
+    // this is required for all host-level styling-related instructions to run
+    // in the correct order
+    previousOrParentTNode.onElementCreationFns && applyOnCreateInstructions(previousOrParentTNode);
     registerPostOrderHooks(tView, previousOrParentTNode);
 }
 
@@ -15859,413 +16497,10 @@ function select(index) {
     ngDevMode && assertGreaterThan(index, -1, 'Invalid index');
     ngDevMode &&
         assertLessThan(index, getLView().length - HEADER_OFFSET, 'Should be within range for the view data');
+    setSelectedIndex(index);
     /** @type {?} */
     const lView = getLView();
     executePreOrderHooks(lView, lView[TVIEW], getCheckNoChangesMode(), index);
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/*
- * The contents of this file include the instructions for all styling-related
- * operations in Angular.
- *
- * The instructions present in this file are:
- *
- * Template level styling instructions:
- * - elementStyling
- * - elementStylingMap
- * - elementStyleProp
- * - elementClassProp
- * - elementStylingApply
- *
- * Host bindings level styling instructions:
- * - elementHostStyling
- * - elementHostStylingMap
- * - elementHostStyleProp
- * - elementHostClassProp
- * - elementHostStylingApply
- */
-/**
- * Allocates style and class binding properties on the element during creation mode.
- *
- * This instruction is meant to be called during creation mode to register all
- * dynamic style and class bindings on the element. Note that this is only used
- * for binding values (see `elementStart` to learn how to assign static styling
- * values to an element).
- *
- * \@publicApi
- * @param {?=} classBindingNames An array containing bindable class names.
- *        The `elementClassProp` instruction refers to the class name by index in
- *        this array (i.e. `['foo', 'bar']` means `foo=0` and `bar=1`).
- * @param {?=} styleBindingNames An array containing bindable style properties.
- *        The `elementStyleProp` instruction refers to the class name by index in
- *        this array (i.e. `['width', 'height']` means `width=0` and `height=1`).
- * @param {?=} styleSanitizer An optional sanitizer function that will be used to sanitize any CSS
- *        style values that are applied to the element (during rendering).
- *
- * @return {?}
- */
-function elementStyling(classBindingNames, styleBindingNames, styleSanitizer) {
-    /** @type {?} */
-    const tNode = getPreviousOrParentTNode();
-    if (!tNode.stylingTemplate) {
-        tNode.stylingTemplate = createEmptyStylingContext();
-    }
-    // calling the function below ensures that the template's binding values
-    // are applied as the first set of bindings into the context. If any other
-    // styling bindings are set on the same element (by directives and/or
-    // components) then they will be applied at the end of the `elementEnd`
-    // instruction (because directives are created first before styling is
-    // executed for a new element).
-    initElementStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, null);
-}
-/**
- * Allocates style and class binding properties on the host element during creation mode
- * within the host bindings function of a directive or component.
- *
- * This instruction is meant to be called during creation mode to register all
- * dynamic style and class host bindings on the host element of a directive or
- * component. Note that this is only used for binding values (see `elementHostAttrs`
- * to learn how to assign static styling values to the host element).
- *
- * \@publicApi
- * @param {?=} classBindingNames An array containing bindable class names.
- *        The `elementHostClassProp` instruction refers to the class name by index in
- *        this array (i.e. `['foo', 'bar']` means `foo=0` and `bar=1`).
- * @param {?=} styleBindingNames An array containing bindable style properties.
- *        The `elementHostStyleProp` instruction refers to the class name by index in
- *        this array (i.e. `['width', 'height']` means `width=0` and `height=1`).
- * @param {?=} styleSanitizer An optional sanitizer function that will be used to sanitize any CSS
- *        style values that are applied to the element (during rendering).
- *        Note that the sanitizer instance itself is tied to the provided `directive` and
- *        will not be used if the same property is assigned in another directive or
- *        on the element directly.
- *
- * @return {?}
- */
-function elementHostStyling(classBindingNames, styleBindingNames, styleSanitizer) {
-    /** @type {?} */
-    const tNode = getPreviousOrParentTNode();
-    if (!tNode.stylingTemplate) {
-        tNode.stylingTemplate = createEmptyStylingContext();
-    }
-    /** @type {?} */
-    const directive = getActiveHostContext();
-    // despite the binding being applied in a queue (below), the allocation
-    // of the directive into the context happens right away. The reason for
-    // this is to retain the ordering of the directives (which is important
-    // for the prioritization of bindings).
-    allocateDirectiveIntoContext(tNode.stylingTemplate, directive);
-    /** @type {?} */
-    const fns = tNode.onElementCreationFns = tNode.onElementCreationFns || [];
-    fns.push((/**
-     * @return {?}
-     */
-    () => initElementStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, directive)));
-}
-/**
- * @param {?} tNode
- * @param {?=} classBindingNames
- * @param {?=} styleBindingNames
- * @param {?=} styleSanitizer
- * @param {?=} directive
- * @return {?}
- */
-function initElementStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, directive) {
-    updateContextWithBindings((/** @type {?} */ (tNode.stylingTemplate)), directive || null, classBindingNames, styleBindingNames, styleSanitizer);
-}
-/**
- * Update a style binding on an element with the provided value.
- *
- * If the style value is falsy then it will be removed from the element
- * (or assigned a different value depending if there are any styles placed
- * on the element with `elementStylingMap` or any static styles that are
- * present from when the element was created with `elementStyling`).
- *
- * Note that the styling element is updated as part of `elementStylingApply`.
- *
- * \@publicApi
- * @param {?} index Index of the element's with which styling is associated.
- * @param {?} styleIndex Index of style to update. This index value refers to the
- *        index of the style in the style bindings array that was passed into
- *        `elementStyling`.
- * @param {?} value New value to write (falsy to remove). Note that if a directive also
- *        attempts to write to the same binding value (via `elementHostStyleProp`)
- *        then it will only be able to do so if the binding value assigned via
- *        `elementStyleProp` is falsy (or doesn't exist at all).
- * @param {?=} suffix Optional suffix. Used with scalar values to add unit such as `px`.
- *        Note that when a suffix is provided then the underlying sanitizer will
- *        be ignored.
- * @param {?=} forceOverride Whether or not to update the styling value immediately
- *        (despite the other bindings possibly having priority)
- *
- * @return {?}
- */
-function elementStyleProp(index, styleIndex, value, suffix, forceOverride) {
-    elementStylePropInternal(null, index, styleIndex, value, suffix, forceOverride);
-}
-/**
- * Update a host style binding value on the host element within a component/directive.
- *
- * If the style value is falsy then it will be removed from the host element
- * (or assigned a different value depending if there are any styles placed
- * on the same element with `elementHostStylingMap` or any static styles that
- * are present from when the element was patched with `elementHostStyling`).
- *
- * Note that the styling applied to the host element once
- * `elementHostStylingApply` is called.
- *
- * \@publicApi
- * @param {?} styleIndex Index of style to update. This index value refers to the
- *        index of the style in the style bindings array that was passed into
- *        `elementHostStyling`.
- * @param {?} value New value to write (falsy to remove). The value may or may not
- *        be applied to the element depending on the template/component/directive
- *        prioritization (see `interfaces/styling.ts`)
- * @param {?=} suffix Optional suffix. Used with scalar values to add unit such as `px`.
- *        Note that when a suffix is provided then the underlying sanitizer will
- *        be ignored.
- * @param {?=} forceOverride Whether or not to update the styling value immediately
- *        (despite the other bindings possibly having priority)
- *
- * @return {?}
- */
-function elementHostStyleProp(styleIndex, value, suffix, forceOverride) {
-    elementStylePropInternal((/** @type {?} */ (getActiveHostContext())), (/** @type {?} */ (getActiveHostElementIndex())), styleIndex, value, suffix, forceOverride);
-}
-/**
- * @param {?} directive
- * @param {?} index
- * @param {?} styleIndex
- * @param {?} value
- * @param {?=} suffix
- * @param {?=} forceOverride
- * @return {?}
- */
-function elementStylePropInternal(directive, index, styleIndex, value, suffix, forceOverride) {
-    /** @type {?} */
-    let valueToAdd = null;
-    if (value !== null) {
-        if (suffix) {
-            // when a suffix is applied then it will bypass
-            // sanitization entirely (b/c a new string is created)
-            valueToAdd = renderStringify(value) + suffix;
-        }
-        else {
-            // sanitization happens by dealing with a String value
-            // this means that the string value will be passed through
-            // into the style rendering later (which is where the value
-            // will be sanitized before it is applied)
-            valueToAdd = (/** @type {?} */ ((/** @type {?} */ (value))));
-        }
-    }
-    updateStyleProp(getStylingContext(index + HEADER_OFFSET, getLView()), styleIndex, valueToAdd, directive, forceOverride);
-}
-/**
- * Update a class binding on an element with the provided value.
- *
- * This instruction is meant to handle the `[class.foo]="exp"` case and,
- * therefore, the class binding itself must already be allocated using
- * `elementStyling` within the creation block.
- *
- * \@publicApi
- * @param {?} index Index of the element's with which styling is associated.
- * @param {?} classIndex Index of class to toggle. This index value refers to the
- *        index of the class in the class bindings array that was passed into
- *        `elementStyling` (which is meant to be called before this
- *        function is).
- * @param {?} value A true/false value which will turn the class on or off.
- * @param {?=} forceOverride Whether or not this value will be applied regardless
- *        of where it is being set within the styling priority structure.
- *
- * @return {?}
- */
-function elementClassProp(index, classIndex, value, forceOverride) {
-    elementClassPropInternal(null, index, classIndex, value, forceOverride);
-}
-/**
- * Update a class host binding for a directive's/component's host element within
- * the host bindings function.
- *
- * This instruction is meant to handle the `\@HostBinding('class.foo')` case and,
- * therefore, the class binding itself must already be allocated using
- * `elementHostStyling` within the creation block.
- *
- * \@publicApi
- * @param {?} classIndex Index of class to toggle. This index value refers to the
- *        index of the class in the class bindings array that was passed into
- *        `elementHostStlying` (which is meant to be called before this
- *        function is).
- * @param {?} value A true/false value which will turn the class on or off.
- * @param {?=} forceOverride Whether or not this value will be applied regardless
- *        of where it is being set within the stylings priority structure.
- *
- * @return {?}
- */
-function elementHostClassProp(classIndex, value, forceOverride) {
-    elementClassPropInternal((/** @type {?} */ (getActiveHostContext())), (/** @type {?} */ (getActiveHostElementIndex())), classIndex, value, forceOverride);
-}
-/**
- * @param {?} directive
- * @param {?} index
- * @param {?} classIndex
- * @param {?} value
- * @param {?=} forceOverride
- * @return {?}
- */
-function elementClassPropInternal(directive, index, classIndex, value, forceOverride) {
-    /** @type {?} */
-    const input = (value instanceof BoundPlayerFactory) ?
-        ((/** @type {?} */ (value))) :
-        booleanOrNull(value);
-    updateClassProp(getStylingContext(index + HEADER_OFFSET, getLView()), classIndex, input, directive, forceOverride);
-}
-/**
- * @param {?} value
- * @return {?}
- */
-function booleanOrNull(value) {
-    if (typeof value === 'boolean')
-        return value;
-    return value ? true : null;
-}
-/**
- * Update style and/or class bindings using object literals on an element.
- *
- * This instruction is meant to apply styling via the `[style]="exp"` and `[class]="exp"` template
- * bindings. When styles/classes are applied to the element they will then be updated with
- * respect to any styles/classes set with `elementStyleProp` or `elementClassProp`. If any
- * styles or classes are set to falsy then they will be removed from the element.
- *
- * Note that the styling instruction will not be applied until `elementStylingApply` is called.
- *
- * \@publicApi
- * @param {?} index Index of the element's with which styling is associated.
- * @param {?} classes A key/value map or string of CSS classes that will be added to the
- *        given element. Any missing classes (that have already been applied to the element
- *        beforehand) will be removed (unset) from the element's list of CSS classes.
- * @param {?=} styles A key/value style map of the styles that will be applied to the given element.
- *        Any missing styles (that have already been applied to the element beforehand) will be
- *        removed (unset) from the element's styling.
- *
- * @return {?}
- */
-function elementStylingMap(index, classes, styles) {
-    elementStylingMapInternal(null, index, classes, styles);
-}
-/**
- * Update style and/or class host bindings using object literals on an element within the host
- * bindings function for a directive/component.
- *
- * This instruction is meant to apply styling via the `\@HostBinding('style')` and
- * `\@HostBinding('class')` bindings for a component's or directive's host element.
- * When styles/classes are applied to the host element they will then be updated
- * with respect to any styles/classes set with `elementHostStyleProp` or
- * `elementHostClassProp`. If any styles or classes are set to falsy then they
- * will be removed from the element.
- *
- * Note that the styling instruction will not be applied until
- * `elementHostStylingApply` is called.
- *
- * \@publicApi
- * @param {?} classes A key/value map or string of CSS classes that will be added to the
- *        given element. Any missing classes (that have already been applied to the element
- *        beforehand) will be removed (unset) from the element's list of CSS classes.
- * @param {?=} styles A key/value style map of the styles that will be applied to the given element.
- *        Any missing styles (that have already been applied to the element beforehand) will be
- *        removed (unset) from the element's styling.
- *
- * @return {?}
- */
-function elementHostStylingMap(classes, styles) {
-    elementStylingMapInternal((/** @type {?} */ (getActiveHostContext())), (/** @type {?} */ (getActiveHostElementIndex())), classes, styles);
-}
-/**
- * @param {?} directive
- * @param {?} index
- * @param {?} classes
- * @param {?=} styles
- * @return {?}
- */
-function elementStylingMapInternal(directive, index, classes, styles) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const tNode = getTNode(index, lView);
-    /** @type {?} */
-    const stylingContext = getStylingContext(index + HEADER_OFFSET, lView);
-    // inputs are only evaluated from a template binding into a directive, therefore,
-    // there should not be a situation where a directive host bindings function
-    // evaluates the inputs (this should only happen in the template function)
-    if (!directive) {
-        if (hasClassInput(tNode) && classes !== NO_CHANGE) {
-            /** @type {?} */
-            const initialClasses = getInitialClassNameValue(stylingContext);
-            /** @type {?} */
-            const classInputVal = (initialClasses.length ? (initialClasses + ' ') : '') + forceClassesAsString(classes);
-            setInputsForProperty(lView, (/** @type {?} */ ((/** @type {?} */ (tNode.inputs))['class'])), classInputVal);
-            classes = NO_CHANGE;
-        }
-        if (hasStyleInput(tNode) && styles !== NO_CHANGE) {
-            /** @type {?} */
-            const initialStyles = getInitialClassNameValue(stylingContext);
-            /** @type {?} */
-            const styleInputVal = (initialStyles.length ? (initialStyles + ' ') : '') + forceStylesAsString(styles);
-            setInputsForProperty(lView, (/** @type {?} */ ((/** @type {?} */ (tNode.inputs))['style'])), styleInputVal);
-            styles = NO_CHANGE;
-        }
-    }
-    updateStylingMap(stylingContext, classes, styles, directive);
-}
-/**
- * Apply all style and class binding values to the element.
- *
- * This instruction is meant to be run after `elementStylingMap`, `elementStyleProp`
- * or `elementClassProp` instructions have been run and will only apply styling to
- * the element if any styling bindings have been updated.
- *
- * \@publicApi
- * @param {?} index Index of the element's with which styling is associated.
- *
- * @return {?}
- */
-function elementStylingApply(index) {
-    elementStylingApplyInternal(null, index);
-}
-/**
- * Apply all style and class host binding values to the element.
- *
- * This instruction is meant to be run after `elementHostStylingMap`,
- * `elementHostStyleProp` or `elementHostClassProp` instructions have
- * been run and will only apply styling to the host element if any
- * styling bindings have been updated.
- *
- * \@publicApi
- * @return {?}
- */
-function elementHostStylingApply() {
-    elementStylingApplyInternal((/** @type {?} */ (getActiveHostContext())), (/** @type {?} */ (getActiveHostElementIndex())));
-}
-/**
- * @param {?} directive
- * @param {?} index
- * @return {?}
- */
-function elementStylingApplyInternal(directive, index) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const isFirstRender = (lView[FLAGS] & 8 /* FirstLViewPass */) !== 0;
-    /** @type {?} */
-    const totalPlayersQueued = renderStyling(getStylingContext(index + HEADER_OFFSET, lView), lView[RENDERER], lView, isFirstRender, null, null, directive);
-    if (totalPlayersQueued > 0) {
-        /** @type {?} */
-        const rootContext = getRootContext(lView);
-        scheduleTick(rootContext, 2 /* FlushPlayers */);
-    }
 }
 
 /**
@@ -16907,9 +17142,13 @@ function createRootComponent(componentView, componentDef, rootView, rootContext,
     const rootTNode = getPreviousOrParentTNode();
     if (tView.firstTemplatePass && componentDef.hostBindings) {
         /** @type {?} */
+        const elementIndex = rootTNode.index - HEADER_OFFSET;
+        setActiveHostElement(elementIndex);
+        /** @type {?} */
         const expando = (/** @type {?} */ (tView.expandoInstructions));
         invokeHostBindingsInCreationMode(componentDef, expando, component, rootTNode, tView.firstTemplatePass);
         rootTNode.onElementCreationFns && applyOnCreateInstructions(rootTNode);
+        setActiveHostElement(null);
     }
     if (rootTNode.stylingTemplate) {
         /** @type {?} */
@@ -17181,6 +17420,14 @@ function InheritDefinitionFeature(definition) {
             const superHostBindings = superDef.hostBindings;
             if (superHostBindings) {
                 if (prevHostBindings) {
+                    // because inheritance is unknown during compile time, the runtime code
+                    // needs to be informed of the super-class depth so that instruction code
+                    // can distinguish one host bindings function from another. The reason why
+                    // relying on the directive uniqueId exclusively is not enough is because the
+                    // uniqueId value and the directive instance stay the same between hostBindings
+                    // calls throughout the directive inheritance chain. This means that without
+                    // a super-class depth value, there is no way to know whether a parent or
+                    // sub-class host bindings function is currently being executed.
                     definition.hostBindings = (/**
                      * @param {?} rf
                      * @param {?} ctx
@@ -17188,7 +17435,16 @@ function InheritDefinitionFeature(definition) {
                      * @return {?}
                      */
                     (rf, ctx, elementIndex) => {
-                        superHostBindings(rf, ctx, elementIndex);
+                        // The reason why we increment first and then decrement is so that parent
+                        // hostBindings calls have a higher id value compared to sub-class hostBindings
+                        // calls (this way the leaf directive is always at a super-class depth of 0).
+                        adjustActiveDirectiveSuperClassDepthPosition(1);
+                        try {
+                            superHostBindings(rf, ctx, elementIndex);
+                        }
+                        finally {
+                            adjustActiveDirectiveSuperClassDepthPosition(-1);
+                        }
                         prevHostBindings(rf, ctx, elementIndex);
                     });
                 }
@@ -19324,7 +19580,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.11+28.sha-5c13fee.with-local-changes');
+const VERSION = new Version('8.0.0-beta.11+29.sha-ec56354.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -31375,7 +31631,7 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
             /** @type {?} */
             const stylingContext = getStylingContext(lContext.nodeIndex, lContext.lView);
             if (stylingContext) {
-                for (let i = 9 /* SingleStylesStartPosition */; i < stylingContext.length; i += 4 /* Size */) {
+                for (let i = 10 /* SingleStylesStartPosition */; i < stylingContext.length; i += 4 /* Size */) {
                     if (isClassBasedValue(stylingContext, i)) {
                         /** @type {?} */
                         const className = getProp(stylingContext, i);
@@ -31413,7 +31669,7 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
             /** @type {?} */
             const stylingContext = getStylingContext(lContext.nodeIndex, lContext.lView);
             if (stylingContext) {
-                for (let i = 9 /* SingleStylesStartPosition */; i < stylingContext.length; i += 4 /* Size */) {
+                for (let i = 10 /* SingleStylesStartPosition */; i < stylingContext.length; i += 4 /* Size */) {
                     if (!isClassBasedValue(stylingContext, i)) {
                         /** @type {?} */
                         const styleName = getProp(stylingContext, i);
