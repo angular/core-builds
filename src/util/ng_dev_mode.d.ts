@@ -28,6 +28,12 @@ declare global {
         rendererMoveNode: number;
         rendererRemoveNode: number;
         rendererCreateComment: number;
+        stylingMap: number;
+        stylingMapCacheMiss: number;
+        stylingProp: number;
+        stylingPropCacheMiss: number;
+        stylingApply: number;
+        stylingApplyCacheMiss: number;
     }
 }
 export declare function ngDevModeResetPerfCounters(): NgDevModePerfCounters;
