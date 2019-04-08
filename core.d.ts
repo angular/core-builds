@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+36.sha-902a53a.with-local-changes
+ * @license Angular v8.0.0-beta.11+40.sha-c65ac7f.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7840,11 +7840,6 @@ declare interface TView {
      *    `typeof useCaptureOrIndx == 'number':
      *         `useCaptureOrIndx >= 0` `removeListener = LView[CLEANUP][useCaptureOrIndx]`
      *         `useCaptureOrIndx <  0` `subscription = LView[CLEANUP][-useCaptureOrIndx]`
-     *
-     * If it's a renderer2 style listener or ViewRef destroy hook being stored:
-     * 1st index is: index of the cleanup function in LView.cleanupInstances[]
-     * 2nd index is: `null`
-     *               `lView[CLEANUP][tView.cleanup[i+0]]()`
      *
      * If it's an output subscription or query list destroy hook:
      * 1st index is: output unsubscribe function / query list destroy function
