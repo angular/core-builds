@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+41.sha-66b87ce.with-local-changes
+ * @license Angular v8.0.0-beta.11+45.sha-84be7c5.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11567,8 +11567,9 @@ function componentRefresh(adjustedElementIndex) {
     /** @type {?} */
     const hostView = getComponentViewByIndex(adjustedElementIndex, lView);
     ngDevMode && assertNodeType((/** @type {?} */ (lView[TVIEW].data[adjustedElementIndex])), 3 /* Element */);
-    // Only attached CheckAlways components or attached, dirty OnPush components should be checked
-    if (viewAttachedToChangeDetector(hostView) &&
+    // Only components in creation mode, attached CheckAlways
+    // components or attached, dirty OnPush components should be checked
+    if ((viewAttachedToChangeDetector(hostView) || isCreationMode(lView)) &&
         hostView[FLAGS] & (16 /* CheckAlways */ | 64 /* Dirty */)) {
         syncViewWithBlueprint(hostView);
         checkView(hostView, hostView[CONTEXT]);
@@ -16010,6 +16011,13 @@ function elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, 
                 ((/** @type {?} */ (element)))[propName] = value;
         }
     }
+    else if (tNode.type === 0 /* Container */) {
+        // If the node is a container and the property didn't
+        // match any of the inputs or schemas we should throw.
+        if (ngDevMode && !matchingSchemas(lView, tNode.tagName)) {
+            throw createUnknownPropertyError(propName, tNode);
+        }
+    }
 }
 /**
  * If node is an OnPush component, marks its LView dirty.
@@ -16077,7 +16085,7 @@ function validateAgainstUnknownProperties(hostView, element, propName, tNode) {
         // and isn't a synthetic animation property...
         propName[0] !== ANIMATION_PROP_PREFIX) {
         // ... it is probably a user error and we should throw.
-        throw new Error(`Template error: Can't bind to '${propName}' since it isn't a known property of '${tNode.tagName}'.`);
+        throw createUnknownPropertyError(propName, tNode);
     }
 }
 /**
@@ -16130,6 +16138,15 @@ function savePropertyDebugData(tNode, lView, propName, tData, nativeOnly) {
             tNode.propertyMetadataEndIndex = lastBindingIndex + 1;
         }
     }
+}
+/**
+ * Creates an error that should be thrown when encountering an unknown property on an element.
+ * @param {?} propName Name of the invalid property.
+ * @param {?} tNode Node on which we encountered the error.
+ * @return {?}
+ */
+function createUnknownPropertyError(propName, tNode) {
+    return new Error(`Template error: Can't bind to '${propName}' since it isn't a known property of '${tNode.tagName}'.`);
 }
 
 /**
@@ -19586,7 +19603,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.11+41.sha-66b87ce.with-local-changes');
+const VERSION = new Version('8.0.0-beta.11+45.sha-84be7c5.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
