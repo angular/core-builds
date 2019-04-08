@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+29.sha-ec56354.with-local-changes
+ * @license Angular v8.0.0-beta.11+37.sha-38a3a5a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10102,7 +10102,7 @@
             var lCleanup = lView[CLEANUP];
             for (var i = 0; i < tCleanup.length - 1; i += 2) {
                 if (typeof tCleanup[i] === 'string') {
-                    // This is a listener with the native renderer
+                    // This is a native DOM listener
                     var idxOrTargetGetter = tCleanup[i + 1];
                     var target = typeof idxOrTargetGetter === 'function' ?
                         idxOrTargetGetter(lView) :
@@ -10110,7 +10110,7 @@
                     var listener = lCleanup[tCleanup[i + 2]];
                     var useCaptureOrSubIdx = tCleanup[i + 3];
                     if (typeof useCaptureOrSubIdx === 'boolean') {
-                        // DOM listener
+                        // native DOM listener registered with Renderer3
                         target.removeEventListener(tCleanup[i], listener, useCaptureOrSubIdx);
                     }
                     else {
@@ -10124,11 +10124,6 @@
                         }
                     }
                     i += 2;
-                }
-                else if (typeof tCleanup[i] === 'number') {
-                    // This is a listener with renderer2 (cleanup fn can be found by index)
-                    var cleanupFn = lCleanup[tCleanup[i]];
-                    cleanupFn();
                 }
                 else {
                     // This is a cleanup function that is grouped with the index of its context
@@ -15738,7 +15733,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.11+29.sha-ec56354.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.11+37.sha-38a3a5a.with-local-changes');
 
     /**
      * @license
