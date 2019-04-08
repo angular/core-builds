@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+37.sha-38a3a5a.with-local-changes
+ * @license Angular v8.0.0-beta.11+45.sha-84be7c5.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2784,6 +2784,12 @@ function ngDevModeResetPerfCounters() {
         rendererMoveNode: 0,
         rendererRemoveNode: 0,
         rendererCreateComment: 0,
+        stylingMap: 0,
+        stylingMapCacheMiss: 0,
+        stylingProp: 0,
+        stylingPropCacheMiss: 0,
+        stylingApply: 0,
+        stylingApplyCacheMiss: 0,
     };
     // NOTE: Under Ivy we may have both window & global defined in the Node
     //    environment since ensureDocument() in render3.ts sets global.window.
@@ -6826,6 +6832,7 @@ function getMatchingBindingIndex(context, bindingName, start, end) {
  */
 function updateStylingMap(context, classesInput, stylesInput, directiveIndex) {
     if (directiveIndex === void 0) { directiveIndex = 0; }
+    ngDevMode && ngDevMode.stylingMap++;
     ngDevMode && assertValidDirectiveIndex(context, directiveIndex);
     classesInput = classesInput || null;
     stylesInput = stylesInput || null;
@@ -6894,6 +6901,7 @@ function updateStylingMap(context, classesInput, stylesInput, directiveIndex) {
     if (playerBuildersAreDirty) {
         setContextPlayersDirty(context, true);
     }
+    ngDevMode && ngDevMode.stylingMapCacheMiss++;
 }
 /**
  * Applies the given multi styling (styles or classes) values to the context.
@@ -7148,6 +7156,7 @@ function updateSingleStylingValue(context, offset, input, isClassBased, directiv
     var currFlag = getPointers(context, singleIndex);
     var currDirective = getDirectiveIndexFromEntry(context, singleIndex);
     var value = (input instanceof BoundPlayerFactory) ? input.value : input;
+    ngDevMode && ngDevMode.stylingProp++;
     if (hasValueChanged(currFlag, currValue, value) &&
         (forceOverride || allowValueChange(currValue, value, currDirective, directiveIndex))) {
         var isClassBased_1 = (currFlag & 2 /* Class */) === 2 /* Class */;
@@ -7192,6 +7201,7 @@ function updateSingleStylingValue(context, offset, input, isClassBased, directiv
         if (playerBuildersAreDirty) {
             setContextPlayersDirty(context, true);
         }
+        ngDevMode && ngDevMode.stylingPropCacheMiss++;
     }
 }
 /**
@@ -7216,6 +7226,7 @@ function updateSingleStylingValue(context, offset, input, isClassBased, directiv
 function renderStyling(context, renderer, rootOrView, isFirstRender, classesStore, stylesStore, directiveIndex) {
     if (directiveIndex === void 0) { directiveIndex = 0; }
     var totalPlayersQueued = 0;
+    ngDevMode && ngDevMode.stylingApply++;
     // this prevents multiple attempts to render style/class values on
     // the same element...
     if (allowFlush(context, directiveIndex)) {
@@ -7228,6 +7239,7 @@ function renderStyling(context, renderer, rootOrView, isFirstRender, classesStor
         // (see `interfaces/styling.ts` for more information).
         flushQueue(context);
         if (isContextDirty(context)) {
+            ngDevMode && ngDevMode.stylingApplyCacheMiss++;
             // this is here to prevent things like <ng-container [style] [class]>...</ng-container>
             // or if there are any host style or class bindings present in a directive set on
             // a container node
@@ -9159,8 +9171,9 @@ function componentRefresh(adjustedElementIndex) {
     ngDevMode && assertDataInRange(lView, adjustedElementIndex);
     var hostView = getComponentViewByIndex(adjustedElementIndex, lView);
     ngDevMode && assertNodeType(lView[TVIEW].data[adjustedElementIndex], 3 /* Element */);
-    // Only attached CheckAlways components or attached, dirty OnPush components should be checked
-    if (viewAttachedToChangeDetector(hostView) &&
+    // Only components in creation mode, attached CheckAlways
+    // components or attached, dirty OnPush components should be checked
+    if ((viewAttachedToChangeDetector(hostView) || isCreationMode(lView)) &&
         hostView[FLAGS] & (16 /* CheckAlways */ | 64 /* Dirty */)) {
         syncViewWithBlueprint(hostView);
         checkView(hostView, hostView[CONTEXT]);
@@ -12894,6 +12907,13 @@ function elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, 
                 element[propName] = value;
         }
     }
+    else if (tNode.type === 0 /* Container */) {
+        // If the node is a container and the property didn't
+        // match any of the inputs or schemas we should throw.
+        if (ngDevMode && !matchingSchemas(lView, tNode.tagName)) {
+            throw createUnknownPropertyError(propName, tNode);
+        }
+    }
 }
 /** If node is an OnPush component, marks its LView dirty. */
 function markDirtyIfOnPush(lView, viewIndex) {
@@ -12937,7 +12957,7 @@ function validateAgainstUnknownProperties(hostView, element, propName, tNode) {
         // and isn't a synthetic animation property...
         propName[0] !== ANIMATION_PROP_PREFIX) {
         // ... it is probably a user error and we should throw.
-        throw new Error("Template error: Can't bind to '" + propName + "' since it isn't a known property of '" + tNode.tagName + "'.");
+        throw createUnknownPropertyError(propName, tNode);
     }
 }
 function matchingSchemas(hostView, tagName) {
@@ -12975,6 +12995,14 @@ function savePropertyDebugData(tNode, lView, propName, tData, nativeOnly) {
             tNode.propertyMetadataEndIndex = lastBindingIndex + 1;
         }
     }
+}
+/**
+ * Creates an error that should be thrown when encountering an unknown property on an element.
+ * @param propName Name of the invalid property.
+ * @param tNode Node on which we encountered the error.
+ */
+function createUnknownPropertyError(propName, tNode) {
+    return new Error("Template error: Can't bind to '" + propName + "' since it isn't a known property of '" + tNode.tagName + "'.");
 }
 
 /**
@@ -15688,7 +15716,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.11+37.sha-38a3a5a.with-local-changes');
+var VERSION = new Version('8.0.0-beta.11+45.sha-84be7c5.with-local-changes');
 
 /**
  * @license
