@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+44.sha-98cf3e8.with-local-changes
+ * @license Angular v8.0.0-beta.11+43.sha-cb9ee34.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9109,9 +9109,8 @@ function componentRefresh(adjustedElementIndex) {
     ngDevMode && assertDataInRange(lView, adjustedElementIndex);
     var hostView = getComponentViewByIndex(adjustedElementIndex, lView);
     ngDevMode && assertNodeType(lView[TVIEW].data[adjustedElementIndex], 3 /* Element */);
-    // Only components in creation mode, attached CheckAlways
-    // components or attached, dirty OnPush components should be checked
-    if ((viewAttachedToChangeDetector(hostView) || isCreationMode(lView)) &&
+    // Only attached CheckAlways components or attached, dirty OnPush components should be checked
+    if (viewAttachedToChangeDetector(hostView) &&
         hostView[FLAGS] & (16 /* CheckAlways */ | 64 /* Dirty */)) {
         syncViewWithBlueprint(hostView);
         checkView(hostView, hostView[CONTEXT]);
@@ -15645,7 +15644,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.11+44.sha-98cf3e8.with-local-changes');
+var VERSION = new Version('8.0.0-beta.11+43.sha-cb9ee34.with-local-changes');
 
 /**
  * @license
