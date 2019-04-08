@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+38.sha-cf40105.with-local-changes
+ * @license Angular v8.0.0-beta.11+41.sha-66b87ce.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3359,6 +3359,12 @@ function ngDevModeResetPerfCounters() {
         rendererMoveNode: 0,
         rendererRemoveNode: 0,
         rendererCreateComment: 0,
+        stylingMap: 0,
+        stylingMapCacheMiss: 0,
+        stylingProp: 0,
+        stylingPropCacheMiss: 0,
+        stylingApply: 0,
+        stylingApplyCacheMiss: 0,
     };
     // NOTE: Under Ivy we may have both window & global defined in the Node
     //    environment since ensureDocument() in render3.ts sets global.window.
@@ -8375,6 +8381,7 @@ function getMatchingBindingIndex(context, bindingName, start, end) {
  * @return {?}
  */
 function updateStylingMap(context, classesInput, stylesInput, directiveIndex = 0) {
+    ngDevMode && ngDevMode.stylingMap++;
     ngDevMode && assertValidDirectiveIndex(context, directiveIndex);
     classesInput = classesInput || null;
     stylesInput = stylesInput || null;
@@ -8462,6 +8469,7 @@ function updateStylingMap(context, classesInput, stylesInput, directiveIndex = 0
     if (playerBuildersAreDirty) {
         setContextPlayersDirty(context, true);
     }
+    ngDevMode && ngDevMode.stylingMapCacheMiss++;
 }
 /**
  * Applies the given multi styling (styles or classes) values to the context.
@@ -8777,6 +8785,7 @@ function updateSingleStylingValue(context, offset, input, isClassBased, directiv
     const currDirective = getDirectiveIndexFromEntry(context, singleIndex);
     /** @type {?} */
     const value = (input instanceof BoundPlayerFactory) ? input.value : input;
+    ngDevMode && ngDevMode.stylingProp++;
     if (hasValueChanged(currFlag, currValue, value) &&
         (forceOverride || allowValueChange(currValue, value, currDirective, directiveIndex))) {
         /** @type {?} */
@@ -8835,6 +8844,7 @@ function updateSingleStylingValue(context, offset, input, isClassBased, directiv
         if (playerBuildersAreDirty) {
             setContextPlayersDirty(context, true);
         }
+        ngDevMode && ngDevMode.stylingPropCacheMiss++;
     }
 }
 /**
@@ -8861,6 +8871,7 @@ function updateSingleStylingValue(context, offset, input, isClassBased, directiv
 function renderStyling(context, renderer, rootOrView, isFirstRender, classesStore, stylesStore, directiveIndex = 0) {
     /** @type {?} */
     let totalPlayersQueued = 0;
+    ngDevMode && ngDevMode.stylingApply++;
     // this prevents multiple attempts to render style/class values on
     // the same element...
     if (allowFlush(context, directiveIndex)) {
@@ -8873,6 +8884,7 @@ function renderStyling(context, renderer, rootOrView, isFirstRender, classesStor
         // (see `interfaces/styling.ts` for more information).
         flushQueue(context);
         if (isContextDirty(context)) {
+            ngDevMode && ngDevMode.stylingApplyCacheMiss++;
             // this is here to prevent things like <ng-container [style] [class]>...</ng-container>
             // or if there are any host style or class bindings present in a directive set on
             // a container node
@@ -19574,7 +19586,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.11+38.sha-cf40105.with-local-changes');
+const VERSION = new Version('8.0.0-beta.11+41.sha-66b87ce.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
