@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+47.sha-632847d.with-local-changes
+ * @license Angular v8.0.0-beta.11+50.sha-1102b02.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2631,7 +2631,7 @@ export declare interface HostDecorator {
      *
      * The following shows use with the `@Optional` decorator, and allows for a null result.
      *
-     * {@example core/di/ts/metadata_spec.ts region='Host'}
+     * <code-example path="core/di/ts/metadata_spec.ts" region="Host"></code-example>
      */
     (): any;
     new (): Host;
@@ -3189,13 +3189,8 @@ export declare interface InjectableDecorator {
      *
      * The following example shows how service classes are properly marked as
      * injectable.
-     *
-     * {@example core/di/ts/metadata_spec.ts region='Injectable'}
-     *
-     * `Injector` throws an error if it tries to instantiate a class that
-     * is not decorated with `@Injectable`, as shown in the following example.
-     *
-     * {@example core/di/ts/metadata_spec.ts region='InjectableThrows'}
+     *Z
+     * <code-example path="core/di/ts/metadata_spec.ts" region="Injectable"></code-example>
      *
      */
     (): TypeDecorator;
@@ -3250,12 +3245,11 @@ export declare interface InjectDecorator {
      * The following example shows a class constructor that specifies a
      * custom provider of a dependency using the parameter decorator.
      *
-     * {@example core/di/ts/metadata_spec.ts region='Inject'}
-     *
      * When `@Inject()` is not present, the injector uses the type annotation of the
      * parameter as the provider.
      *
-     * {@example core/di/ts/metadata_spec.ts region='InjectWithoutDecorator'}
+     * <code-example path="core/di/ts/metadata_spec.ts"
+     * region="InjectWithoutDecorator"></code-example>
      */
     (token: any): any;
     new (token: any): Inject;
@@ -4801,7 +4795,7 @@ export declare interface OptionalDecorator {
      *
      * The following code allows the possibility of a null result:
      *
-     * {@example core/di/ts/metadata_spec.ts region='Optional'}
+     * <code-example path="core/di/ts/metadata_spec.ts" region="Optional"></code-example>
      *
      */
     (): any;
@@ -6317,7 +6311,8 @@ export declare interface SelfDecorator {
      * by the local injector when instantiating the class itself, but not
      * when instantiating a child.
      *
-     * {@example core/di/ts/metadata_spec.ts region='Self'}
+     * <code-example path="core/di/ts/metadata_spec.ts" region="Self"></code-example>
+     *
      *
      * @see `SkipSelf`
      * @see `Optional`
@@ -6438,7 +6433,7 @@ export declare interface SkipSelfDecorator {
      * In the following example, the dependency can be resolved when
      * instantiating a child, but not when instantiating the class itself.
      *
-     * {@example core/di/ts/metadata_spec.ts region='SkipSelf'}
+     * <code-example path="core/di/ts/metadata_spec.ts" region="SkipSelf"></code-example>
      *
      * Learn more in the
      * [Dependency Injection guide](guide/dependency-injection-in-action#skip).
