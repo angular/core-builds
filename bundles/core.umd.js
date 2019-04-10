@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+63.sha-3e46985.with-local-changes
+ * @license Angular v8.0.0-beta.11+66.sha-1eb7e9b.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6413,7 +6413,7 @@
             for (var i = 1 /* ValuesStartPosition */; i < buffer.length; i += 3 /* Size */) {
                 var fn = buffer[i + 1 /* InstructionFnOffset */];
                 var args = buffer[i + 2 /* ParamsOffset */];
-                fn.apply(void 0, __spread(args));
+                fn.apply(this, args);
             }
             buffer.length = 1 /* ValuesStartPosition */;
         }
@@ -15850,7 +15850,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.11+63.sha-3e46985.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.11+66.sha-1eb7e9b.with-local-changes');
 
     /**
      * @license
