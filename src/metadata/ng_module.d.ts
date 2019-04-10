@@ -31,14 +31,17 @@ export interface NgModuleTransitiveScopes {
     };
     schemas: SchemaMetadata[] | null;
 }
-export declare type NgModuleDefWithMeta<T, Declarations, Imports, Exports> = NgModuleDef<T>;
+/**
+ * @publicApi
+ */
+export declare type ΔNgModuleDefWithMeta<T, Declarations, Imports, Exports> = NgModuleDef<T>;
 /**
  * Runtime link information for NgModules.
  *
  * This is the internal data structure used by the runtime to assemble components, directives,
  * pipes, and injectors.
  *
- * NOTE: Always use `defineNgModule` function to create this object,
+ * NOTE: Always use `ΔdefineNgModule` function to create this object,
  * never create the object directly since the shape of this object
  * can change between versions.
  */

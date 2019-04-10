@@ -9,5 +9,7 @@
  * Allocates the necessary amount of slots for host vars.
  *
  * @param count Amount of vars to be allocated
+ *
+ * @publicApi
  */
-export declare function allocHostVars(count: number): void;
+export declare function ΔallocHostVars(count: number): void;

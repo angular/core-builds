@@ -144,7 +144,7 @@ export declare class PlatformRef {
      */
     destroy(): void;
     readonly destroyed: boolean;
-    static ngInjectableDef: i0.InjectableDef<PlatformRef>;
+    static ngInjectableDef: i0.ΔInjectableDef<PlatformRef>;
 }
 /**
  * A reference to an Angular application running on a page.
@@ -310,5 +310,5 @@ export declare class ApplicationRef {
      * Returns the number of attached views.
      */
     readonly viewCount: number;
-    static ngInjectableDef: i0.InjectableDef<ApplicationRef>;
+    static ngInjectableDef: i0.ΔInjectableDef<ApplicationRef>;
 }

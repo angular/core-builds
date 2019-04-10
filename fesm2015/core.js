@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+55.sha-db62ccf.with-local-changes
+ * @license Angular v8.0.0-beta.11+57.sha-ef85336.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -270,11 +270,17 @@ function fillProperties(target, source) {
  *
  * @publicApi
  */
-function defineInjectable(opts) {
+function ΔdefineInjectable(opts) {
     return {
         providedIn: opts.providedIn || null, factory: opts.factory, value: undefined,
     };
 }
+/**
+ * @deprecated in v8, delete after v10. This API should be used only be generated code, and that
+ * code should now use ΔdefineInjectable instead.
+ * @publicApi
+ */
+const defineInjectable = ΔdefineInjectable;
 /**
  * Construct an `InjectorDef` which configures an injector.
  *
@@ -295,7 +301,7 @@ function defineInjectable(opts) {
  *
  * @publicApi
  */
-function defineInjector(options) {
+function ΔdefineInjector(options) {
     return {
         factory: options.factory, providers: options.providers || [], imports: options.imports || [],
     };
@@ -524,9 +530,16 @@ function injectInjectorOnly(token, flags = InjectFlags.Default) {
  * @param {?=} flags
  * @return {?}
  */
-function inject(token, flags = InjectFlags.Default) {
+function Δinject(token, flags = InjectFlags.Default) {
     return (_injectImplementation || injectInjectorOnly)(token, flags);
 }
+/**
+ * @deprecated in v8, delete after v10. This API should be used only be generated code, and that
+ * code should now use Δinject instead.
+ * \@publicApi
+ * @type {?}
+ */
+const inject = Δinject;
 /**
  * Injects `root` tokens in limp mode.
  *
@@ -589,10 +602,10 @@ function injectArgs(types) {
                     type = meta;
                 }
             }
-            args.push(inject((/** @type {?} */ (type)), flags));
+            args.push(Δinject((/** @type {?} */ (type)), flags));
         }
         else {
-            args.push(inject(arg));
+            args.push(Δinject(arg));
         }
     }
     return args;
@@ -609,10 +622,10 @@ function injectArgs(types) {
  * @type {?}
  */
 const angularCoreDiEnv = {
-    'defineInjectable': defineInjectable,
-    'defineInjector': defineInjector,
-    'inject': inject,
-    'ɵgetFactoryOf': getFactoryOf,
+    'ΔdefineInjectable': ΔdefineInjectable,
+    'ΔdefineInjector': ΔdefineInjector,
+    'Δinject': Δinject,
+    'ΔgetFactoryOf': getFactoryOf,
 };
 /**
  * @template T
@@ -1181,7 +1194,7 @@ class InjectionToken {
             ((/** @type {?} */ (this))).__NG_ELEMENT_ID__ = options;
         }
         else if (options !== undefined) {
-            /** @nocollapse */ this.ngInjectableDef = defineInjectable({
+            /** @nocollapse */ this.ngInjectableDef = ΔdefineInjectable({
                 providedIn: options.providedIn || 'root',
                 factory: options.factory,
             });
@@ -1274,12 +1287,12 @@ class Injector {
 Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
 Injector.NULL = new NullInjector();
 /** @nocollapse */
-/** @nocollapse */ Injector.ngInjectableDef = defineInjectable({
+/** @nocollapse */ Injector.ngInjectableDef = ΔdefineInjectable({
     providedIn: (/** @type {?} */ ('any')),
     factory: (/**
      * @return {?}
      */
-    () => inject(INJECTOR)),
+    () => Δinject(INJECTOR)),
 });
 /**
  * \@internal
@@ -3362,24 +3375,30 @@ const defaultScheduler = (typeof requestAnimationFrame !== 'undefined' && reques
     setTimeout // everything else
 ).bind(_global);
 /**
+ *
+ * \@publicApi
  * @param {?} element
  * @return {?}
  */
-function resolveWindow(element) {
+function ΔresolveWindow(element) {
     return { name: 'window', target: element.ownerDocument.defaultView };
 }
 /**
+ *
+ * \@publicApi
  * @param {?} element
  * @return {?}
  */
-function resolveDocument(element) {
+function ΔresolveDocument(element) {
     return { name: 'document', target: element.ownerDocument };
 }
 /**
+ *
+ * \@publicApi
  * @param {?} element
  * @return {?}
  */
-function resolveBody(element) {
+function ΔresolveBody(element) {
     return { name: 'body', target: element.ownerDocument.body };
 }
 /**
@@ -3513,11 +3532,12 @@ let _renderCompCount = 0;
  *   });
  * }
  * ```
+ * \@publicApi
  * @template T
  * @param {?} componentDefinition
  * @return {?}
  */
-function defineComponent(componentDefinition) {
+function ΔdefineComponent(componentDefinition) {
     /** @type {?} */
     const type = componentDefinition.type;
     /** @type {?} */
@@ -3602,12 +3622,13 @@ function defineComponent(componentDefinition) {
     return (/** @type {?} */ (def));
 }
 /**
+ * \@publicApi
  * @param {?} type
  * @param {?} directives
  * @param {?} pipes
  * @return {?}
  */
-function setComponentScope(type, directives, pipes) {
+function ΔsetComponentScope(type, directives, pipes) {
     /** @type {?} */
     const def = ((/** @type {?} */ (type.ngComponentDef)));
     def.directiveDefs = (/**
@@ -3644,11 +3665,12 @@ function extractPipeDef(type) {
     return (/** @type {?} */ (def));
 }
 /**
+ * \@publicApi
  * @template T
  * @param {?} def
  * @return {?}
  */
-function defineNgModule(def) {
+function ΔdefineNgModule(def) {
     /** @type {?} */
     const res = {
         type: def.type,
@@ -3668,11 +3690,13 @@ function defineNgModule(def) {
  * Scope metadata of modules is not used in production builds, so calls to this function can be
  * marked pure to tree-shake it from the bundle, allowing for all referenced declarations
  * to become eligible for tree-shaking as well.
+ *
+ * \@publicApi
  * @param {?} type
  * @param {?} scope
  * @return {?}
  */
-function setNgModuleScope(type, scope) {
+function ΔsetNgModuleScope(type, scope) {
     /** @type {?} */
     /** @nocollapse */ const ngModuleDef = getNgModuleDef(type, true);
     ngModuleDef.declarations = scope.declarations || EMPTY_ARRAY;
@@ -3764,17 +3788,21 @@ function invertObject(obj, secondary) {
  * Create a base definition
  *
  * # Example
- * ```
+ * ```ts
  * class ShouldBeInherited {
- *   static ngBaseDef = defineBase({
+ *   static ngBaseDef = ΔdefineBase({
  *      ...
  *   })
  * }
+ * ```
+ *
+ * \@publicApi
  * @template T
  * @param {?} baseDefinition The base definition parameters
+ *
  * @return {?}
  */
-function defineBase(baseDefinition) {
+function ΔdefineBase(baseDefinition) {
     /** @type {?} */
     const declaredInputs = (/** @type {?} */ ({}));
     return {
@@ -3787,18 +3815,20 @@ function defineBase(baseDefinition) {
  * Create a directive definition object.
  *
  * # Example
- * ```
+ * ```ts
  * class MyDirective {
  *   // Generated by Angular Template Compiler
  *   // [Symbol] syntax will not be supported by TypeScript until v2.7
- *   static ngDirectiveDef = defineDirective({
+ *   static ngDirectiveDef = ΔdefineDirective({
  *     ...
  *   });
  * }
  * ```
+ *
+ * \@publicApi
  * @type {?}
  */
-const defineDirective = (/** @type {?} */ ((/** @type {?} */ (defineComponent))));
+const ΔdefineDirective = (/** @type {?} */ ((/** @type {?} */ (ΔdefineComponent))));
 /**
  * Create a pipe definition object.
  *
@@ -3811,11 +3841,13 @@ const defineDirective = (/** @type {?} */ ((/** @type {?} */ (defineComponent)))
  *   });
  * }
  * ```
+ * \@publicApi
  * @template T
  * @param {?} pipeDef Pipe definition generated by the compiler
+ *
  * @return {?}
  */
-function definePipe(pipeDef) {
+function ΔdefinePipe(pipeDef) {
     return (/** @type {?} */ (((/** @type {?} */ ({
         name: pipeDef.name,
         factory: pipeDef.factory,
@@ -4745,16 +4777,18 @@ function getBindingsEnabled() {
  *   Should match component / directive.
  * </my-comp>
  * <div ngNonBindable>
- *   <!-- disabledBindings() -->
+ *   <!-- ΔdisableBindings() -->
  *   <my-comp my-directive>
  *     Should not match component / directive because we are in ngNonBindable.
  *   </my-comp>
- *   <!-- enableBindings() -->
+ *   <!-- ΔenableBindings() -->
  * </div>
  * ```
+ *
+ * \@publicApi
  * @return {?}
  */
-function enableBindings() {
+function ΔenableBindings() {
     bindingsEnabled = true;
 }
 /**
@@ -4766,16 +4800,18 @@ function enableBindings() {
  *   Should match component / directive.
  * </my-comp>
  * <div ngNonBindable>
- *   <!-- disabledBindings() -->
+ *   <!-- ΔdisableBindings() -->
  *   <my-comp my-directive>
  *     Should not match component / directive because we are in ngNonBindable.
  *   </my-comp>
- *   <!-- enableBindings() -->
+ *   <!-- ΔenableBindings() -->
  * </div>
  * ```
+ *
+ * \@publicApi
  * @return {?}
  */
-function disableBindings() {
+function ΔdisableBindings() {
     bindingsEnabled = false;
 }
 /**
@@ -4925,10 +4961,12 @@ function getActiveDirectiveSuperClassDepth() {
  * of the current view and restore it when listeners are invoked. This allows
  * walking the declaration view tree in listeners to get vars from parent views.
  *
+ * \@publicApi
  * @param {?} viewToRestore The OpaqueViewState instance to restore.
+ *
  * @return {?}
  */
-function restoreView(viewToRestore) {
+function ΔrestoreView(viewToRestore) {
     contextLView = (/** @type {?} */ ((/** @type {?} */ (viewToRestore))));
 }
 /**
@@ -5187,24 +5225,30 @@ function setSelectedIndex(index) {
 let _currentNamespace = null;
 /**
  * Sets the namespace used to create elements to `'http://www.w3.org/2000/svg'` in global state.
+ *
+ * \@publicApi
  * @return {?}
  */
-function namespaceSVG() {
+function ΔnamespaceSVG() {
     _currentNamespace = 'http://www.w3.org/2000/svg';
 }
 /**
  * Sets the namespace used to create elements to `'http://www.w3.org/1998/MathML/'` in global state.
+ *
+ * \@publicApi
  * @return {?}
  */
-function namespaceMathML() {
+function ΔnamespaceMathML() {
     _currentNamespace = 'http://www.w3.org/1998/MathML/';
 }
 /**
  * Sets the namespace used to create elements no `null`, which forces element creation to use
  * `createElement` rather than `createElementNS`.
+ *
+ * \@publicApi
  * @return {?}
  */
-function namespaceHTML() {
+function ΔnamespaceHTML() {
     _currentNamespace = null;
 }
 /**
@@ -6889,11 +6933,12 @@ class NodeInjector {
     }
 }
 /**
+ * \@publicApi
  * @template T
  * @param {?} type
  * @return {?}
  */
-function getFactoryOf$1(type) {
+function ΔgetFactoryOf(type) {
     /** @type {?} */
     const typeAny = (/** @type {?} */ (type));
     /** @type {?} */
@@ -6905,15 +6950,16 @@ function getFactoryOf$1(type) {
     return def.factory;
 }
 /**
+ * \@publicApi
  * @template T
  * @param {?} type
  * @return {?}
  */
-function getInheritedFactory(type) {
+function ΔgetInheritedFactory(type) {
     /** @type {?} */
     const proto = (/** @type {?} */ (Object.getPrototypeOf(type.prototype).constructor));
     /** @type {?} */
-    const factory = getFactoryOf$1(proto);
+    const factory = ΔgetFactoryOf(proto);
     if (factory !== null) {
         return factory;
     }
@@ -10542,7 +10588,7 @@ function renderEmbeddedTemplate(viewToRender, tView, context) {
             setPreviousOrParentTNode((/** @type {?} */ (null)));
             oldView = enterView(viewToRender, viewToRender[T_HOST]);
             resetPreOrderHookFlags(viewToRender);
-            namespaceHTML();
+            ΔnamespaceHTML();
             // Reset the selected index so we can assert that `select` was called later
             ngDevMode && setSelectedIndex(-1);
             (/** @type {?} */ (tView.template))(getRenderFlags(viewToRender), context);
@@ -10583,7 +10629,7 @@ function renderComponentOrTemplate(hostView, context, templateFn) {
         if (creationModeIsActive) {
             // creation mode pass
             if (templateFn) {
-                namespaceHTML();
+                ΔnamespaceHTML();
                 // Reset the selected index so we can assert that `select` was called later
                 ngDevMode && setSelectedIndex(-1);
                 templateFn(1 /* Create */, context);
@@ -11717,7 +11763,7 @@ function checkView(hostView, component) {
     const creationMode = isCreationMode(hostView);
     try {
         resetPreOrderHookFlags(hostView);
-        namespaceHTML();
+        ΔnamespaceHTML();
         creationMode && executeViewQueryFn(1 /* Create */, hostTView, component);
         // Reset the selected index so we can assert that `select` was called later
         ngDevMode && setSelectedIndex(-1);
@@ -11934,10 +11980,12 @@ function getParentInjectorTNode(location, startView, startTNode) {
 /**
  * Allocates the necessary amount of slots for host vars.
  *
+ * \@publicApi
  * @param {?} count Amount of vars to be allocated
+ *
  * @return {?}
  */
-function allocHostVars(count) {
+function ΔallocHostVars(count) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -12932,10 +12980,12 @@ function appendProjectedNode(projectedTNode, tProjectionNode, currentView, proje
  *   <div></div>
  * % }
  *
+ * \@publicApi
  * @param {?} index The index of the container in the data array
+ *
  * @return {?}
  */
-function container(index) {
+function Δcontainer(index) {
     /** @type {?} */
     const tNode = containerInternal(index, null, null);
     /** @type {?} */
@@ -12953,6 +13003,7 @@ function container(index) {
  *    <div></div>
  * </ng-template>
  *
+ * \@publicApi
  * @param {?} index The index of the container in the data array
  * @param {?} templateFn Inline template
  * @param {?} consts The number of nodes, local refs, and pipes for this template
@@ -12962,9 +13013,10 @@ function container(index) {
  * @param {?=} localRefs A set of local reference bindings on the element.
  * @param {?=} localRefExtractor A function which extracts local-refs values from the template.
  *        Defaults to the current element associated with the local-ref.
+ *
  * @return {?}
  */
-function template(index, templateFn, consts, vars, tagName, attrs, localRefs, localRefExtractor) {
+function Δtemplate(index, templateFn, consts, vars, tagName, attrs, localRefs, localRefExtractor) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -12984,10 +13036,12 @@ function template(index, templateFn, consts, vars, tagName, attrs, localRefs, lo
 /**
  * Sets a container up to receive views.
  *
+ * \@publicApi
  * @param {?} index The index of the container in the data array
+ *
  * @return {?}
  */
-function containerRefreshStart(index) {
+function ΔcontainerRefreshStart(index) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -13006,9 +13060,11 @@ function containerRefreshStart(index) {
  * Marks the end of the LContainer.
  *
  * Marking the end of LContainer is the time when to child views get inserted or removed.
+ *
+ * \@publicApi
  * @return {?}
  */
-function containerRefreshEnd() {
+function ΔcontainerRefreshEnd() {
     /** @type {?} */
     let previousOrParentTNode = getPreviousOrParentTNode();
     if (getIsParent()) {
@@ -13112,22 +13168,26 @@ function store(index, value) {
  * If the reference to retrieve is in a parent view, this instruction is used in conjunction
  * with a nextContext() call, which walks up the tree and updates the contextViewData instance.
  *
+ * \@publicApi
  * @template T
  * @param {?} index The index of the local ref in contextViewData.
+ *
  * @return {?}
  */
-function reference(index) {
+function Δreference(index) {
     /** @type {?} */
     const contextLView = getContextLView();
     return loadInternal(contextLView, index);
 }
 /**
  * Retrieves a value from current `viewData`.
+ *
+ * \@publicApi
  * @template T
  * @param {?} index
  * @return {?}
  */
-function load(index) {
+function Δload(index) {
     return loadInternal(getLView(), index);
 }
 
@@ -13141,16 +13201,18 @@ function load(index) {
  * @param {?=} flags
  * @return {?}
  */
-function directiveInject(token, flags = InjectFlags.Default) {
+function ΔdirectiveInject(token, flags = InjectFlags.Default) {
     token = resolveForwardRef(token);
     return getOrCreateInjectable((/** @type {?} */ (getPreviousOrParentTNode())), getLView(), token, flags);
 }
 /**
  * Facade for the attribute injection from DI.
+ *
+ * \@publicApi
  * @param {?} attrNameToInject
  * @return {?}
  */
-function injectAttribute(attrNameToInject) {
+function ΔinjectAttribute(attrNameToInject) {
     return injectAttributeImpl(getPreviousOrParentTNode(), attrNameToInject);
 }
 
@@ -14014,11 +14076,13 @@ function _sanitizeStyle(value) {
  *
  * It is possible to mark a string as trusted by calling {\@link bypassSanitizationTrustHtml}.
  *
+ * \@publicApi
  * @param {?} unsafeHtml untrusted `html`, typically from the user.
  * @return {?} `html` string which is safe to display to user, because all of the dangerous javascript
  * and urls have been removed.
+ *
  */
-function sanitizeHtml(unsafeHtml) {
+function ΔsanitizeHtml(unsafeHtml) {
     /** @type {?} */
     const sanitizer = getSanitizer();
     if (sanitizer) {
@@ -14038,11 +14102,13 @@ function sanitizeHtml(unsafeHtml) {
  *
  * It is possible to mark a string as trusted by calling {\@link bypassSanitizationTrustStyle}.
  *
+ * \@publicApi
  * @param {?} unsafeStyle untrusted `style`, typically from the user.
  * @return {?} `style` string which is safe to bind to the `style` properties, because all of the
  * dangerous javascript and urls have been removed.
+ *
  */
-function sanitizeStyle(unsafeStyle) {
+function ΔsanitizeStyle(unsafeStyle) {
     /** @type {?} */
     const sanitizer = getSanitizer();
     if (sanitizer) {
@@ -14063,11 +14129,13 @@ function sanitizeStyle(unsafeStyle) {
  *
  * It is possible to mark a string as trusted by calling {\@link bypassSanitizationTrustUrl}.
  *
+ * \@publicApi
  * @param {?} unsafeUrl untrusted `url`, typically from the user.
  * @return {?} `url` string which is safe to bind to the `src` properties such as `<img src>`, because
  * all of the dangerous javascript has been removed.
+ *
  */
-function sanitizeUrl(unsafeUrl) {
+function ΔsanitizeUrl(unsafeUrl) {
     /** @type {?} */
     const sanitizer = getSanitizer();
     if (sanitizer) {
@@ -14083,11 +14151,13 @@ function sanitizeUrl(unsafeUrl) {
  *
  * This passes only `url`s marked trusted by calling {\@link bypassSanitizationTrustResourceUrl}.
  *
+ * \@publicApi
  * @param {?} unsafeResourceUrl untrusted `url`, typically from the user.
  * @return {?} `url` string which is safe to bind to the `src` properties such as `<img src>`, because
  * only trusted `url`s have been allowed to pass.
+ *
  */
-function sanitizeResourceUrl(unsafeResourceUrl) {
+function ΔsanitizeResourceUrl(unsafeResourceUrl) {
     /** @type {?} */
     const sanitizer = getSanitizer();
     if (sanitizer) {
@@ -14104,11 +14174,13 @@ function sanitizeResourceUrl(unsafeResourceUrl) {
  * This passes only `script`s marked trusted by calling {\@link
  * bypassSanitizationTrustScript}.
  *
+ * \@publicApi
  * @param {?} unsafeScript untrusted `script`, typically from the user.
  * @return {?} `url` string which is safe to bind to the `<script>` element such as `<img src>`,
  * because only trusted `scripts` have been allowed to pass.
+ *
  */
-function sanitizeScript(unsafeScript) {
+function ΔsanitizeScript(unsafeScript) {
     /** @type {?} */
     const sanitizer = getSanitizer();
     if (sanitizer) {
@@ -14133,9 +14205,9 @@ function getUrlSanitizer(tag, prop) {
     if ((prop === 'src' && (tag === 'embed' || tag === 'frame' || tag === 'iframe' ||
         tag === 'media' || tag === 'script')) ||
         (prop === 'href' && (tag === 'base' || tag === 'link'))) {
-        return sanitizeResourceUrl;
+        return ΔsanitizeResourceUrl;
     }
-    return sanitizeUrl;
+    return ΔsanitizeUrl;
 }
 /**
  * Sanitizes URL, selecting sanitizer function based on tag and property names.
@@ -14145,20 +14217,24 @@ function getUrlSanitizer(tag, prop) {
  * host element is unknown at compile time, so we defer calculation of specific sanitizer to
  * runtime.
  *
+ * \@publicApi
  * @param {?} unsafeUrl untrusted `url`, typically from the user.
  * @param {?} tag target element tag name.
  * @param {?} prop name of the property that contains the value.
  * @return {?} `url` string which is safe to bind.
+ *
  */
-function sanitizeUrlOrResourceUrl(unsafeUrl, tag, prop) {
+function ΔsanitizeUrlOrResourceUrl(unsafeUrl, tag, prop) {
     return getUrlSanitizer(tag, prop)(unsafeUrl);
 }
 /**
  * The default style sanitizer will handle sanitization for style properties by
  * sanitizing any CSS property that can include a `url` value (usually image-based properties)
+ *
+ * \@publicApi
  * @type {?}
  */
-const defaultStyleSanitizer = ((/** @type {?} */ ((/**
+const ΔdefaultStyleSanitizer = ((/** @type {?} */ ((/**
  * @param {?} prop
  * @param {?=} value
  * @return {?}
@@ -14168,7 +14244,7 @@ function (prop, value) {
         return prop === 'background-image' || prop === 'background' || prop === 'border-image' ||
             prop === 'filter' || prop === 'list-style' || prop === 'list-style-image';
     }
-    return sanitizeStyle(value);
+    return ΔsanitizeStyle(value);
 }))));
 /**
  * @param {?} name
@@ -14249,7 +14325,7 @@ function getSanitizer() {
  *
  * @return {?}
  */
-function elementStyling(classBindingNames, styleBindingNames, styleSanitizer) {
+function ΔelementStyling(classBindingNames, styleBindingNames, styleSanitizer) {
     /** @type {?} */
     const tNode = getPreviousOrParentTNode();
     if (!tNode.stylingTemplate) {
@@ -14287,7 +14363,7 @@ function elementStyling(classBindingNames, styleBindingNames, styleSanitizer) {
  *
  * @return {?}
  */
-function elementHostStyling(classBindingNames, styleBindingNames, styleSanitizer) {
+function ΔelementHostStyling(classBindingNames, styleBindingNames, styleSanitizer) {
     /** @type {?} */
     const tNode = getPreviousOrParentTNode();
     if (!tNode.stylingTemplate) {
@@ -14348,7 +14424,7 @@ function initElementStyling(tNode, classBindingNames, styleBindingNames, styleSa
  *
  * @return {?}
  */
-function elementStyleProp(index, styleIndex, value, suffix, forceOverride) {
+function ΔelementStyleProp(index, styleIndex, value, suffix, forceOverride) {
     /** @type {?} */
     const valueToAdd = resolveStylePropValue(value, suffix);
     updateStyleProp(getStylingContext(index + HEADER_OFFSET, getLView()), styleIndex, valueToAdd, DEFAULT_TEMPLATE_DIRECTIVE_INDEX, forceOverride);
@@ -14379,7 +14455,7 @@ function elementStyleProp(index, styleIndex, value, suffix, forceOverride) {
  *
  * @return {?}
  */
-function elementHostStyleProp(styleIndex, value, suffix, forceOverride) {
+function ΔelementHostStyleProp(styleIndex, value, suffix, forceOverride) {
     /** @type {?} */
     const directiveStylingIndex = getActiveDirectiveStylingIndex();
     /** @type {?} */
@@ -14437,7 +14513,7 @@ function resolveStylePropValue(value, suffix) {
  *
  * @return {?}
  */
-function elementClassProp(index, classIndex, value, forceOverride) {
+function ΔelementClassProp(index, classIndex, value, forceOverride) {
     /** @type {?} */
     const input = (value instanceof BoundPlayerFactory) ?
         ((/** @type {?} */ (value))) :
@@ -14463,7 +14539,7 @@ function elementClassProp(index, classIndex, value, forceOverride) {
  *
  * @return {?}
  */
-function elementHostClassProp(classIndex, value, forceOverride) {
+function ΔelementHostClassProp(classIndex, value, forceOverride) {
     /** @type {?} */
     const directiveStylingIndex = getActiveDirectiveStylingIndex();
     /** @type {?} */
@@ -14510,7 +14586,7 @@ function booleanOrNull(value) {
  *
  * @return {?}
  */
-function elementStylingMap(index, classes, styles) {
+function ΔelementStylingMap(index, classes, styles) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -14562,7 +14638,7 @@ function elementStylingMap(index, classes, styles) {
  *
  * @return {?}
  */
-function elementHostStylingMap(classes, styles) {
+function ΔelementHostStylingMap(classes, styles) {
     /** @type {?} */
     const directiveStylingIndex = getActiveDirectiveStylingIndex();
     /** @type {?} */
@@ -14587,7 +14663,7 @@ function elementHostStylingMap(classes, styles) {
  *
  * @return {?}
  */
-function elementStylingApply(index) {
+function ΔelementStylingApply(index) {
     elementStylingApplyInternal(DEFAULT_TEMPLATE_DIRECTIVE_INDEX, index);
 }
 /**
@@ -14601,7 +14677,7 @@ function elementStylingApply(index) {
  * \@publicApi
  * @return {?}
  */
-function elementHostStylingApply() {
+function ΔelementHostStylingApply() {
     elementStylingApplyInternal(getActiveDirectiveStylingIndex(), getSelectedIndex());
 }
 /**
@@ -14651,6 +14727,7 @@ function getActiveDirectiveStylingIndex() {
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
  *
+ * \@publicApi
  * @param {?} index Index of the element in the LView array
  * @param {?} name Name of the DOM Node
  * @param {?=} attrs Statically bound set of attributes, classes, and styles to be written into the DOM
@@ -14660,9 +14737,10 @@ function getActiveDirectiveStylingIndex() {
  * Attributes and localRefs are passed as an array of strings where elements with an even index
  * hold an attribute name and elements with an odd index hold an attribute value, ex.:
  * ['id', 'warning5', 'class', 'alert']
+ *
  * @return {?}
  */
-function elementStart(index, name, attrs, localRefs) {
+function ΔelementStart(index, name, attrs, localRefs) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -14738,9 +14816,11 @@ function elementStart(index, name, attrs, localRefs) {
 }
 /**
  * Mark the end of the element.
+ *
+ * \@publicApi
  * @return {?}
  */
-function elementEnd() {
+function ΔelementEnd() {
     /** @type {?} */
     let previousOrParentTNode = getPreviousOrParentTNode();
     if (getIsParent()) {
@@ -14781,29 +14861,33 @@ function elementEnd() {
 /**
  * Creates an empty element using {\@link elementStart} and {\@link elementEnd}
  *
+ * \@publicApi
  * @param {?} index Index of the element in the data array
  * @param {?} name Name of the DOM Node
  * @param {?=} attrs Statically bound set of attributes, classes, and styles to be written into the DOM
  *              element on creation. Use [AttributeMarker] to denote the meaning of this array.
  * @param {?=} localRefs A set of local reference bindings on the element.
+ *
  * @return {?}
  */
-function element(index, name, attrs, localRefs) {
-    elementStart(index, name, attrs, localRefs);
-    elementEnd();
+function Δelement(index, name, attrs, localRefs) {
+    ΔelementStart(index, name, attrs, localRefs);
+    ΔelementEnd();
 }
 /**
  * Updates the value of removes an attribute on an Element.
  *
+ * \@publicApi
  * @param {?} index
  * @param {?} name name The name of the attribute.
  * @param {?} value value The attribute is removed when value is `null` or `undefined`.
  *                  Otherwise the attribute value is set to the stringified value.
  * @param {?=} sanitizer An optional function used to sanitize the value.
  * @param {?=} namespace Optional namespace to use when setting the attribute.
+ *
  * @return {?}
  */
-function elementAttribute(index, name, value, sanitizer, namespace) {
+function ΔelementAttribute(index, name, value, sanitizer, namespace) {
     if (value !== NO_CHANGE) {
         ngDevMode && validateAgainstEventAttributes(name);
         /** @type {?} */
@@ -14872,7 +14956,7 @@ function elementAttribute(index, name, value, sanitizer, namespace) {
  *
  * @return {?}
  */
-function elementHostAttrs(attrs) {
+function ΔelementHostAttrs(attrs) {
     /** @type {?} */
     const hostElementIndex = getSelectedIndex();
     /** @type {?} */
@@ -14911,6 +14995,7 @@ function elementHostAttrs(attrs) {
  * Creates a logical container for other nodes (<ng-container>) backed by a comment node in the DOM.
  * The instruction must later be followed by `elementContainerEnd()` call.
  *
+ * \@publicApi
  * @param {?} index Index of the element in the LView array
  * @param {?=} attrs Set of attributes to be used when matching directives.
  * @param {?=} localRefs A set of local reference bindings on the element.
@@ -14918,9 +15003,10 @@ function elementHostAttrs(attrs) {
  * Even if this instruction accepts a set of attributes no actual attribute values are propagated to
  * the DOM (as a comment node can't have attributes). Attributes are here only for directive
  * matching purposes and setting initial inputs of directives.
+ *
  * @return {?}
  */
-function elementContainerStart(index, attrs, localRefs) {
+function ΔelementContainerStart(index, attrs, localRefs) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -14954,9 +15040,11 @@ function elementContainerStart(index, attrs, localRefs) {
 }
 /**
  * Mark the end of the <ng-container>.
+ *
+ * \@publicApi
  * @return {?}
  */
-function elementContainerEnd() {
+function ΔelementContainerEnd() {
     /** @type {?} */
     let previousOrParentTNode = getPreviousOrParentTNode();
     /** @type {?} */
@@ -14990,12 +15078,14 @@ function elementContainerEnd() {
 /**
  * Marks the start of an embedded view.
  *
+ * \@publicApi
  * @param {?} viewBlockId The ID of this view
  * @param {?} consts
  * @param {?} vars
  * @return {?} boolean Whether or not this view is in creation mode
+ *
  */
-function embeddedViewStart(viewBlockId, consts, vars) {
+function ΔembeddedViewStart(viewBlockId, consts, vars) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -15095,9 +15185,11 @@ function scanForView(lContainer, startIdx, viewBlockId) {
 }
 /**
  * Marks the end of an embedded view.
+ *
+ * \@publicApi
  * @return {?}
  */
-function embeddedViewEnd() {
+function ΔembeddedViewEnd() {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -15127,9 +15219,11 @@ function embeddedViewEnd() {
  * Used in conjunction with the restoreView() instruction to save a snapshot
  * of the current view and restore it when listeners are invoked. This allows
  * walking the declaration view tree in listeners to get vars from parent views.
+ *
+ * \@publicApi
  * @return {?}
  */
-function getCurrentView() {
+function ΔgetCurrentView() {
     return (/** @type {?} */ ((/** @type {?} */ (getLView()))));
 }
 
@@ -15167,14 +15261,16 @@ function isObservable(obj) {
  * If an output exists on one of the node's directives, it also subscribes to the output
  * and saves the subscription for later cleanup.
  *
+ * \@publicApi
  * @param {?} eventName Name of the event
  * @param {?} listenerFn The function to be called when event emits
  * @param {?=} useCapture Whether or not to use capture in event listener
  * @param {?=} eventTargetResolver Function that returns global target information in case this listener
  * should be attached to a global object like window, document or body
+ *
  * @return {?}
  */
-function listener(eventName, listenerFn, useCapture = false, eventTargetResolver) {
+function Δlistener(eventName, listenerFn, useCapture = false, eventTargetResolver) {
     listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver);
 }
 /**
@@ -15190,15 +15286,17 @@ function listener(eventName, listenerFn, useCapture = false, eventTargetResolver
  * Do not use this instruction as a replacement for `listener`. This instruction
  * only exists to ensure compatibility with the ViewEngine's host binding behavior.
  *
+ * \@publicApi
  * @template T
  * @param {?} eventName Name of the event
  * @param {?} listenerFn The function to be called when event emits
  * @param {?=} useCapture Whether or not to use capture in event listener
  * @param {?=} eventTargetResolver Function that returns global target information in case this listener
  * should be attached to a global object like window, document or body
+ *
  * @return {?}
  */
-function componentHostSyntheticListener(eventName, listenerFn, useCapture = false, eventTargetResolver) {
+function ΔcomponentHostSyntheticListener(eventName, listenerFn, useCapture = false, eventTargetResolver) {
     listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver, loadComponentRenderer);
 }
 /**
@@ -15363,11 +15461,13 @@ function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
  * This is used to save contexts of parent views so they can be bound in embedded views, or
  * in conjunction with reference() to bind a ref from a parent view.
  *
+ * \@publicApi
  * @template T
  * @param {?=} level The relative level of the view from which to grab context compared to contextVewData
  * @return {?} context
+ *
  */
-function nextContext(level = 1) {
+function ΔnextContext(level = 1) {
     return nextContextImpl(level);
 }
 
@@ -15393,11 +15493,12 @@ function nextContext(level = 1) {
  * - we can't have only a parsed as we can't re-construct textual form from it (as entered by a
  * template author).
  *
+ * \@publicApi
  * @param {?=} selectors A collection of parsed CSS selectors
  * @param {?=} textSelectors
  * @return {?}
  */
-function projectionDef(selectors, textSelectors) {
+function ΔprojectionDef(selectors, textSelectors) {
     /** @type {?} */
     const componentNode = (/** @type {?} */ (findComponentView(getLView())[T_HOST]));
     if (!componentNode.projection) {
@@ -15430,12 +15531,13 @@ function projectionDef(selectors, textSelectors) {
  * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
  * to the projectionDef instruction.
  *
+ * \@publicApi
  * @param {?} nodeIndex
  * @param {?=} selectorIndex
  * @param {?=} attrs
  * @return {?}
  */
-function projection(nodeIndex, selectorIndex = 0, attrs) {
+function Δprojection(nodeIndex, selectorIndex = 0, attrs) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -15795,11 +15897,13 @@ function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
 /**
  * Creates a single value binding.
  *
+ * \@publicApi
  * @template T
  * @param {?} value Value to diff
+ *
  * @return {?}
  */
-function bind(value) {
+function Δbind(value) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -15815,6 +15919,7 @@ function bind(value) {
  * the component property will be set instead of the element property. This check must
  * be conducted at runtime so child components that add new \@Inputs don't have to be re-compiled.
  *
+ * \@publicApi
  * @template T
  * @param {?} index The index of the element to update in the data array
  * @param {?} propName Name of property. Because it is going to DOM, this is not subject to
@@ -15823,9 +15928,10 @@ function bind(value) {
  * @param {?=} sanitizer An optional function used to sanitize the value.
  * @param {?=} nativeOnly Whether or not we should only set native properties and skip input check
  * (this is necessary for host property bindings)
+ *
  * @return {?}
  */
-function elementProperty(index, propName, value, sanitizer, nativeOnly) {
+function ΔelementProperty(index, propName, value, sanitizer, nativeOnly) {
     elementPropertyInternal(index, propName, value, sanitizer, nativeOnly);
 }
 /**
@@ -15841,6 +15947,7 @@ function elementProperty(index, propName, value, sanitizer, nativeOnly) {
  * Do not use this instruction as a replacement for `elementProperty`. This instruction
  * only exists to ensure compatibility with the ViewEngine's host binding behavior.
  *
+ * \@publicApi
  * @template T
  * @param {?} index The index of the element to update in the data array
  * @param {?} propName Name of property. Because it is going to DOM, this is not subject to
@@ -15849,9 +15956,10 @@ function elementProperty(index, propName, value, sanitizer, nativeOnly) {
  * @param {?=} sanitizer An optional function used to sanitize the value.
  * @param {?=} nativeOnly Whether or not we should only set native properties and skip input check
  * (this is necessary for host property bindings)
+ *
  * @return {?}
  */
-function componentHostSyntheticProperty(index, propName, value, sanitizer, nativeOnly) {
+function ΔcomponentHostSyntheticProperty(index, propName, value, sanitizer, nativeOnly) {
     elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadComponentRenderer);
 }
 /**
@@ -16074,10 +16182,12 @@ function createUnknownPropertyError(propName, tNode) {
  * - has evaluated expressions at odd indexes.
  *
  * Returns the concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ *
+ * \@publicApi
  * @param {?} values
  * @return {?}
  */
-function interpolationV(values) {
+function ΔinterpolationV(values) {
     ngDevMode && assertLessThan(2, values.length, 'should have at least 3 values');
     ngDevMode && assertEqual(values.length % 2, 1, 'should have an odd number of values');
     /** @type {?} */
@@ -16115,12 +16225,14 @@ function interpolationV(values) {
 /**
  * Creates an interpolation binding with 1 expression.
  *
+ * \@publicApi
  * @param {?} prefix static value used for concatenation only.
  * @param {?} v0 value checked for change.
  * @param {?} suffix static value used for concatenation only.
+ *
  * @return {?}
  */
-function interpolation1(prefix, v0, suffix) {
+function Δinterpolation1(prefix, v0, suffix) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -16130,6 +16242,8 @@ function interpolation1(prefix, v0, suffix) {
 }
 /**
  * Creates an interpolation binding with 2 expressions.
+ *
+ * \@publicApi
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -16137,7 +16251,7 @@ function interpolation1(prefix, v0, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function interpolation2(prefix, v0, i0, v1, suffix) {
+function Δinterpolation2(prefix, v0, i0, v1, suffix) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -16155,6 +16269,8 @@ function interpolation2(prefix, v0, i0, v1, suffix) {
 }
 /**
  * Creates an interpolation binding with 3 expressions.
+ *
+ * \@publicApi
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -16164,7 +16280,7 @@ function interpolation2(prefix, v0, i0, v1, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function interpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
+function Δinterpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -16187,6 +16303,8 @@ function interpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
 }
 /**
  * Create an interpolation binding with 4 expressions.
+ *
+ * \@publicApi
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -16198,7 +16316,7 @@ function interpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function interpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
+function Δinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -16223,6 +16341,8 @@ function interpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
 }
 /**
  * Creates an interpolation binding with 5 expressions.
+ *
+ * \@publicApi
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -16236,7 +16356,7 @@ function interpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function interpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
+function Δinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -16263,6 +16383,8 @@ function interpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
 }
 /**
  * Creates an interpolation binding with 6 expressions.
+ *
+ * \@publicApi
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -16278,7 +16400,7 @@ function interpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function interpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
+function Δinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -16306,6 +16428,8 @@ function interpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suff
 }
 /**
  * Creates an interpolation binding with 7 expressions.
+ *
+ * \@publicApi
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -16323,7 +16447,7 @@ function interpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suff
  * @param {?} suffix
  * @return {?}
  */
-function interpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
+function Δinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -16353,6 +16477,8 @@ function interpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, 
 }
 /**
  * Creates an interpolation binding with 8 expressions.
+ *
+ * \@publicApi
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -16372,7 +16498,7 @@ function interpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, 
  * @param {?} suffix
  * @return {?}
  */
-function interpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
+function Δinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -16414,19 +16540,21 @@ function interpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, 
  *
  * ```ts
  * (rf: RenderFlags, ctx: any) => {
- *  if (rf & 1) {
- *    element(0, 'div');
+ *   if (rf & 1) {
+ *     element(0, 'div');
+ *   }
+ *   if (rf & 2) {
+ *     select(0); // Select the <div/> created above.
+ *     property('title', 'test');
+ *   }
  *  }
- *  if (rf & 2) {
- *    select(0); // Select the <div/> created above.
- *    property('title', 'test');
- *  }
- * }
  * ```
+ * \@publicApi
  * @param {?} index the index of the item to act on with the following instructions
+ *
  * @return {?}
  */
-function select(index) {
+function Δselect(index) {
     ngDevMode && assertGreaterThan(index, -1, 'Invalid index');
     ngDevMode &&
         assertLessThan(index, getLView().length - HEADER_OFFSET, 'Should be within range for the view data');
@@ -16443,11 +16571,13 @@ function select(index) {
 /**
  * Create static text node
  *
+ * \@publicApi
  * @param {?} index Index of the node in the data array
  * @param {?=} value Value to write. This value will be stringified.
+ *
  * @return {?}
  */
-function text(index, value) {
+function Δtext(index, value) {
     /** @type {?} */
     const lView = getLView();
     ngDevMode && assertEqual(lView[BINDING_INDEX], lView[TVIEW].bindingStartIndex, 'text nodes should be created before any bindings');
@@ -16464,12 +16594,14 @@ function text(index, value) {
  * Create text node with binding
  * Bindings should be handled externally with the proper interpolation(1-8) method
  *
+ * \@publicApi
  * @template T
  * @param {?} index Index of the node in the data array.
  * @param {?} value Stringified value to write.
+ *
  * @return {?}
  */
-function textBinding(index, value) {
+function ΔtextBinding(index, value) {
     if (value !== NO_CHANGE) {
         /** @type {?} */
         const lView = getLView();
@@ -17202,10 +17334,12 @@ class SimpleChange {
  *   features: [NgOnChangesFeature()]
  * });
  * ```
+ *
+ * \@publicApi
  * @template T
  * @return {?}
  */
-function NgOnChangesFeature() {
+function ΔNgOnChangesFeature() {
     // This option ensures that the ngOnChanges lifecycle hook will be inherited
     // from superclasses (in InheritDefinitionFeature).
     ((/** @type {?} */ (NgOnChangesFeatureImpl))).ngInherit = true;
@@ -17308,10 +17442,12 @@ function getSuperType(type) {
 }
 /**
  * Merges the definition from a super class to a sub class.
+ * \@publicApi
  * @param {?} definition The definition that is a SubClass of another directive of component
+ *
  * @return {?}
  */
-function InheritDefinitionFeature(definition) {
+function ΔInheritDefinitionFeature(definition) {
     /** @type {?} */
     let superType = getSuperType(definition.type);
     while (superType) {
@@ -17471,7 +17607,7 @@ function InheritDefinitionFeature(definition) {
                 definition.onDestroy = definition.onDestroy || superPrototype.ngOnDestroy;
                 definition.onInit = definition.onInit || superPrototype.ngOnInit;
                 if (superPrototype.ngOnChanges) {
-                    NgOnChangesFeature()(definition);
+                    ΔNgOnChangesFeature()(definition);
                 }
             }
         }
@@ -17965,7 +18101,7 @@ function providerToFactory(provider, ngModuleType, providers) {
             factory = (/**
              * @return {?}
              */
-            () => inject(resolveForwardRef(provider.useExisting)));
+            () => Δinject(resolveForwardRef(provider.useExisting)));
         }
         else if (isFactoryProvider(provider)) {
             factory = (/**
@@ -18177,7 +18313,7 @@ function resolveProvider$1(provider, tInjectables, lInjectablesBlueprint, isComp
         if (isTypeProvider(provider) || !provider.multi) {
             // Single provider case: the factory is created and pushed immediately
             /** @type {?} */
-            const factory = new NodeInjectorFactory(providerFactory, isViewProvider, directiveInject);
+            const factory = new NodeInjectorFactory(providerFactory, isViewProvider, ΔdirectiveInject);
             /** @type {?} */
             const existingFactoryIndex = indexOf(token, tInjectables, isViewProvider ? beginIndex : beginIndex + cptViewProvidersCount, endIndex);
             if (existingFactoryIndex == -1) {
@@ -18357,7 +18493,7 @@ function multiResolve(factories, result) {
  */
 function multiFactory(factoryFn, index, isViewProvider, isComponent, f) {
     /** @type {?} */
-    const factory = new NodeInjectorFactory(factoryFn, isViewProvider, directiveInject);
+    const factory = new NodeInjectorFactory(factoryFn, isViewProvider, ΔdirectiveInject);
     factory.multi = [];
     factory.index = index;
     factory.componentProviders = 0;
@@ -18395,12 +18531,13 @@ function multiFactory(factoryFn, index, isViewProvider, isComponent, f) {
  *  });
  * }
  *
+ * \@publicApi
  * @template T
  * @param {?} providers
  * @param {?=} viewProviders
  * @return {?}
  */
-function ProvidersFeature(providers, viewProviders = []) {
+function ΔProvidersFeature(providers, viewProviders = []) {
     return (/**
      * @param {?} definition
      * @return {?}
@@ -19506,7 +19643,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.11+55.sha-db62ccf.with-local-changes');
+const VERSION = new Version('8.0.0-beta.11+57.sha-ef85336.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -20867,7 +21004,7 @@ class IterableDiffers {
     }
 }
 /** @nocollapse */
-/** @nocollapse */ IterableDiffers.ngInjectableDef = defineInjectable({
+/** @nocollapse */ IterableDiffers.ngInjectableDef = ΔdefineInjectable({
     providedIn: 'root',
     factory: (/**
      * @nocollapse @return {?}
@@ -20970,7 +21107,7 @@ class KeyValueDiffers {
     }
 }
 /** @nocollapse */
-/** @nocollapse */ KeyValueDiffers.ngInjectableDef = defineInjectable({
+/** @nocollapse */ KeyValueDiffers.ngInjectableDef = ΔdefineInjectable({
     providedIn: 'root',
     factory: (/**
      * @nocollapse @return {?}
@@ -23942,7 +24079,7 @@ function toRefArray(map) {
 const ROOT_CONTEXT = new InjectionToken('ROOT_CONTEXT_TOKEN', { providedIn: 'root', factory: (/**
      * @return {?}
      */
-    () => createRootContext(inject(SCHEDULER))) });
+    () => createRootContext(Δinject(SCHEDULER))) });
 /**
  * A change detection scheduler token for {\@link RootContext}. This token is the default value used
  * for the default `RootContext` found in the {\@link ROOT_CONTEXT} token.
@@ -24514,12 +24651,14 @@ const parentIndexStack = [];
  *   split up and translated separately in each angular template function. The `index` points to the
  *   `template` instruction index. A `block` that matches the sub-template in which it was declared.
  *
+ * \@publicApi
  * @param {?} index A unique index of the translation in the static block.
  * @param {?} message The translation message.
  * @param {?=} subTemplateIndex Optional sub-template index in the `message`.
+ *
  * @return {?}
  */
-function i18nStart(index, message, subTemplateIndex) {
+function Δi18nStart(index, message, subTemplateIndex) {
     /** @type {?} */
     const tView = getLView()[TVIEW];
     ngDevMode && assertDefined(tView, `tView should be defined`);
@@ -24715,14 +24854,14 @@ function appendI18nNode(tNode, parentTNode, previousTNode) {
  * 3. Replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�)
  *    in case multiple ICUs have the same placeholder name
  *
- * \@publicAPI
+ * \@publicApi
  * @param {?} message Raw translation string for post processing
  * @param {?=} replacements Set of replacements that should be applied
  *
  * @return {?} Transformed string that can be consumed by i18nStart instruction
  *
  */
-function i18nPostprocess(message, replacements = {}) {
+function Δi18nPostprocess(message, replacements = {}) {
     /**
      * Step 1: resolve all multi-value placeholders like [�#5�|�*1:1��#2:1�|�#4:1�]
      *
@@ -24850,9 +24989,11 @@ function i18nPostprocess(message, replacements = {}) {
 /**
  * Translates a translation block marked by `i18nStart` and `i18nEnd`. It inserts the text/ICU nodes
  * into the render tree, moves the placeholder nodes and removes the deleted nodes.
+ *
+ * \@publicApi
  * @return {?}
  */
-function i18nEnd() {
+function Δi18nEnd() {
     /** @type {?} */
     const tView = getLView()[TVIEW];
     ngDevMode && assertDefined(tView, `tView should be defined`);
@@ -24981,7 +25122,7 @@ function readCreateOpCodes(index, createOpCodes, icus, viewData) {
                     const attrName = (/** @type {?} */ (createOpCodes[++i]));
                     /** @type {?} */
                     const attrValue = (/** @type {?} */ (createOpCodes[++i]));
-                    elementAttribute(elementNodeIndex, attrName, attrValue);
+                    ΔelementAttribute(elementNodeIndex, attrName, attrValue);
                     break;
                 default:
                     throw new Error(`Unable to determine the type of mutate operation for "${opCode}"`);
@@ -25076,10 +25217,10 @@ function readUpdateOpCodes(updateOpCodes, icus, bindingsStartIndex, changeMask, 
                                 const attrName = (/** @type {?} */ (updateOpCodes[++j]));
                                 /** @type {?} */
                                 const sanitizeFn = (/** @type {?} */ (updateOpCodes[++j]));
-                                elementAttribute(nodeIndex, attrName, value, sanitizeFn);
+                                ΔelementAttribute(nodeIndex, attrName, value, sanitizeFn);
                                 break;
                             case 0 /* Text */:
-                                textBinding(nodeIndex, value);
+                                ΔtextBinding(nodeIndex, value);
                                 break;
                             case 2 /* IcuSwitch */:
                                 tIcuIndex = (/** @type {?} */ (updateOpCodes[++j]));
@@ -25152,7 +25293,7 @@ function removeNode(index, viewData) {
         nativeRemoveNode(viewData[RENDERER], removedPhRNode);
     }
     /** @type {?} */
-    const slotValue = (/** @type {?} */ (load(index)));
+    const slotValue = (/** @type {?} */ (Δload(index)));
     if (isLContainer(slotValue)) {
         /** @type {?} */
         const lContainer = (/** @type {?} */ (slotValue));
@@ -25182,23 +25323,27 @@ function removeNode(index, viewData) {
  *   split up and translated separately in each angular template function. The `index` points to the
  *   `template` instruction index. A `block` that matches the sub-template in which it was declared.
  *
+ * \@publicApi
  * @param {?} index A unique index of the translation in the static block.
  * @param {?} message The translation message.
  * @param {?=} subTemplateIndex Optional sub-template index in the `message`.
+ *
  * @return {?}
  */
-function i18n(index, message, subTemplateIndex) {
-    i18nStart(index, message, subTemplateIndex);
-    i18nEnd();
+function Δi18n(index, message, subTemplateIndex) {
+    Δi18nStart(index, message, subTemplateIndex);
+    Δi18nEnd();
 }
 /**
  * Marks a list of attributes as translatable.
  *
+ * \@publicApi
  * @param {?} index A unique index in the static block
  * @param {?} values
+ *
  * @return {?}
  */
-function i18nAttributes(index, values) {
+function Δi18nAttributes(index, values) {
     /** @type {?} */
     const tView = getLView()[TVIEW];
     ngDevMode && assertDefined(tView, `tView should be defined`);
@@ -25239,7 +25384,7 @@ function i18nAttributesFirstPass(tView, index, values) {
                     addAllToArray(generateBindingUpdateOpCodes(value, previousElementIndex, attrName), updateOpCodes);
                 }
                 else {
-                    elementAttribute(previousElementIndex, attrName, value);
+                    ΔelementAttribute(previousElementIndex, attrName, value);
                 }
             }
         }
@@ -25254,11 +25399,13 @@ let shiftsCounter = 0;
  * Stores the values of the bindings during each update cycle in order to determine if we need to
  * update the translated nodes.
  *
+ * \@publicApi
  * @template T
  * @param {?} expression The binding's new value or NO_CHANGE
+ *
  * @return {?}
  */
-function i18nExp(expression) {
+function Δi18nExp(expression) {
     if (expression !== NO_CHANGE) {
         changeMask = changeMask | (1 << shiftsCounter);
     }
@@ -25267,11 +25414,13 @@ function i18nExp(expression) {
 /**
  * Updates a translation block or an i18n attribute when the bindings have changed.
  *
+ * \@publicApi
  * @param {?} index Index of either {\@link i18nStart} (translation block) or {\@link i18nAttributes}
  * (i18n attribute) on which it should update the content.
+ *
  * @return {?}
  */
-function i18nApply(index) {
+function Δi18nApply(index) {
     if (shiftsCounter) {
         /** @type {?} */
         const lView = getLView();
@@ -26154,13 +26303,15 @@ function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
  * If the value hasn't been saved, calls the pure function to store and return the
  * value. If it has been saved, returns the saved value.
  *
+ * \@publicApi
  * @template T
  * @param {?} slotOffset the offset from binding root to the reserved slot
  * @param {?} pureFn Function that returns a value
  * @param {?=} thisArg Optional calling context of pureFn
  * @return {?} value
+ *
  */
-function pureFunction0(slotOffset, pureFn, thisArg) {
+function ΔpureFunction0(slotOffset, pureFn, thisArg) {
     // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
     /** @type {?} */
     const bindingIndex = getBindingRoot() + slotOffset;
@@ -26174,13 +26325,15 @@ function pureFunction0(slotOffset, pureFn, thisArg) {
  * If the value of the provided exp has changed, calls the pure function to return
  * an updated value. Or if the value has not changed, returns cached value.
  *
+ * \@publicApi
  * @param {?} slotOffset the offset from binding root to the reserved slot
  * @param {?} pureFn Function that returns an updated value
  * @param {?} exp Updated expression value
  * @param {?=} thisArg Optional calling context of pureFn
  * @return {?} Updated or cached value
+ *
  */
-function pureFunction1(slotOffset, pureFn, exp, thisArg) {
+function ΔpureFunction1(slotOffset, pureFn, exp, thisArg) {
     // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
     /** @type {?} */
     const lView = getLView();
@@ -26194,14 +26347,16 @@ function pureFunction1(slotOffset, pureFn, exp, thisArg) {
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
+ * \@publicApi
  * @param {?} slotOffset the offset from binding root to the reserved slot
  * @param {?} pureFn
  * @param {?} exp1
  * @param {?} exp2
  * @param {?=} thisArg Optional calling context of pureFn
  * @return {?} Updated or cached value
+ *
  */
-function pureFunction2(slotOffset, pureFn, exp1, exp2, thisArg) {
+function ΔpureFunction2(slotOffset, pureFn, exp1, exp2, thisArg) {
     // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
     /** @type {?} */
     const bindingIndex = getBindingRoot() + slotOffset;
@@ -26215,6 +26370,7 @@ function pureFunction2(slotOffset, pureFn, exp1, exp2, thisArg) {
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
+ * \@publicApi
  * @param {?} slotOffset the offset from binding root to the reserved slot
  * @param {?} pureFn
  * @param {?} exp1
@@ -26222,8 +26378,9 @@ function pureFunction2(slotOffset, pureFn, exp1, exp2, thisArg) {
  * @param {?} exp3
  * @param {?=} thisArg Optional calling context of pureFn
  * @return {?} Updated or cached value
+ *
  */
-function pureFunction3(slotOffset, pureFn, exp1, exp2, exp3, thisArg) {
+function ΔpureFunction3(slotOffset, pureFn, exp1, exp2, exp3, thisArg) {
     // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
     /** @type {?} */
     const bindingIndex = getBindingRoot() + slotOffset;
@@ -26237,6 +26394,7 @@ function pureFunction3(slotOffset, pureFn, exp1, exp2, exp3, thisArg) {
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
+ * \@publicApi
  * @param {?} slotOffset the offset from binding root to the reserved slot
  * @param {?} pureFn
  * @param {?} exp1
@@ -26245,8 +26403,9 @@ function pureFunction3(slotOffset, pureFn, exp1, exp2, exp3, thisArg) {
  * @param {?} exp4
  * @param {?=} thisArg Optional calling context of pureFn
  * @return {?} Updated or cached value
+ *
  */
-function pureFunction4(slotOffset, pureFn, exp1, exp2, exp3, exp4, thisArg) {
+function ΔpureFunction4(slotOffset, pureFn, exp1, exp2, exp3, exp4, thisArg) {
     // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
     /** @type {?} */
     const bindingIndex = getBindingRoot() + slotOffset;
@@ -26260,6 +26419,7 @@ function pureFunction4(slotOffset, pureFn, exp1, exp2, exp3, exp4, thisArg) {
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
+ * \@publicApi
  * @param {?} slotOffset the offset from binding root to the reserved slot
  * @param {?} pureFn
  * @param {?} exp1
@@ -26269,8 +26429,9 @@ function pureFunction4(slotOffset, pureFn, exp1, exp2, exp3, exp4, thisArg) {
  * @param {?} exp5
  * @param {?=} thisArg Optional calling context of pureFn
  * @return {?} Updated or cached value
+ *
  */
-function pureFunction5(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, thisArg) {
+function ΔpureFunction5(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, thisArg) {
     // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
     /** @type {?} */
     const bindingIndex = getBindingRoot() + slotOffset;
@@ -26287,6 +26448,7 @@ function pureFunction5(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, thisArg
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
+ * \@publicApi
  * @param {?} slotOffset the offset from binding root to the reserved slot
  * @param {?} pureFn
  * @param {?} exp1
@@ -26297,8 +26459,9 @@ function pureFunction5(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, thisArg
  * @param {?} exp6
  * @param {?=} thisArg Optional calling context of pureFn
  * @return {?} Updated or cached value
+ *
  */
-function pureFunction6(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, thisArg) {
+function ΔpureFunction6(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, thisArg) {
     // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
     /** @type {?} */
     const bindingIndex = getBindingRoot() + slotOffset;
@@ -26316,6 +26479,7 @@ function pureFunction6(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, t
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
+ * \@publicApi
  * @param {?} slotOffset the offset from binding root to the reserved slot
  * @param {?} pureFn
  * @param {?} exp1
@@ -26327,8 +26491,9 @@ function pureFunction6(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, t
  * @param {?} exp7
  * @param {?=} thisArg Optional calling context of pureFn
  * @return {?} Updated or cached value
+ *
  */
-function pureFunction7(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, thisArg) {
+function ΔpureFunction7(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, thisArg) {
     // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
     /** @type {?} */
     const bindingIndex = getBindingRoot() + slotOffset;
@@ -26346,6 +26511,7 @@ function pureFunction7(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, e
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
+ * \@publicApi
  * @param {?} slotOffset the offset from binding root to the reserved slot
  * @param {?} pureFn
  * @param {?} exp1
@@ -26358,8 +26524,9 @@ function pureFunction7(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, e
  * @param {?} exp8
  * @param {?=} thisArg Optional calling context of pureFn
  * @return {?} Updated or cached value
+ *
  */
-function pureFunction8(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, thisArg) {
+function ΔpureFunction8(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, thisArg) {
     // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
     /** @type {?} */
     const bindingIndex = getBindingRoot() + slotOffset;
@@ -26379,14 +26546,16 @@ function pureFunction8(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, e
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
+ * \@publicApi
  * @param {?} slotOffset the offset from binding root to the reserved slot
  * @param {?} pureFn A pure function that takes binding values and builds an object or array
  * containing those values.
  * @param {?} exps An array of binding values
  * @param {?=} thisArg Optional calling context of pureFn
  * @return {?} Updated or cached value
+ *
  */
-function pureFunctionV(slotOffset, pureFn, exps, thisArg) {
+function ΔpureFunctionV(slotOffset, pureFn, exps, thisArg) {
     // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
     /** @type {?} */
     let bindingIndex = getBindingRoot() + slotOffset;
@@ -26408,11 +26577,13 @@ function pureFunctionV(slotOffset, pureFn, exps, thisArg) {
 /**
  * Create a pipe.
  *
+ * \@publicApi
  * @param {?} index Pipe index where the pipe will be stored.
  * @param {?} pipeName The name of the pipe
  * @return {?} T the instance of the pipe.
+ *
  */
-function pipe(index, pipeName) {
+function Δpipe(index, pipeName) {
     /** @type {?} */
     const tView = getLView()[TVIEW];
     /** @type {?} */
@@ -26438,9 +26609,11 @@ function pipe(index, pipeName) {
  * Searches the pipe registry for a pipe with the given name. If one is found,
  * returns the pipe. Otherwise, an error is thrown because the pipe cannot be resolved.
  *
+ * \@publicApi
  * @param {?} name Name of pipe to resolve
  * @param {?} registry Full list of available pipes
  * @return {?} Matching PipeDef
+ *
  */
 function getPipeDef$1(name, registry) {
     if (registry) {
@@ -26460,15 +26633,17 @@ function getPipeDef$1(name, registry) {
  * This instruction acts as a guard to {\@link PipeTransform#transform} invoking
  * the pipe only when an input to the pipe changes.
  *
+ * \@publicApi
  * @param {?} index Pipe index where the pipe was stored on creation.
  * @param {?} slotOffset the offset in the reserved slot space
  * @param {?} v1 1st argument to {\@link PipeTransform#transform}.
+ *
  * @return {?}
  */
-function pipeBind1(index, slotOffset, v1) {
+function ΔpipeBind1(index, slotOffset, v1) {
     /** @type {?} */
-    const pipeInstance = load(index);
-    return unwrapValue$1(isPure(index) ? pureFunction1(slotOffset, pipeInstance.transform, v1, pipeInstance) :
+    const pipeInstance = Δload(index);
+    return unwrapValue$1(isPure(index) ? ΔpureFunction1(slotOffset, pipeInstance.transform, v1, pipeInstance) :
         pipeInstance.transform(v1));
 }
 /**
@@ -26477,16 +26652,18 @@ function pipeBind1(index, slotOffset, v1) {
  * This instruction acts as a guard to {\@link PipeTransform#transform} invoking
  * the pipe only when an input to the pipe changes.
  *
+ * \@publicApi
  * @param {?} index Pipe index where the pipe was stored on creation.
  * @param {?} slotOffset the offset in the reserved slot space
  * @param {?} v1 1st argument to {\@link PipeTransform#transform}.
  * @param {?} v2 2nd argument to {\@link PipeTransform#transform}.
+ *
  * @return {?}
  */
-function pipeBind2(index, slotOffset, v1, v2) {
+function ΔpipeBind2(index, slotOffset, v1, v2) {
     /** @type {?} */
-    const pipeInstance = load(index);
-    return unwrapValue$1(isPure(index) ? pureFunction2(slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
+    const pipeInstance = Δload(index);
+    return unwrapValue$1(isPure(index) ? ΔpureFunction2(slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
         pipeInstance.transform(v1, v2));
 }
 /**
@@ -26495,17 +26672,19 @@ function pipeBind2(index, slotOffset, v1, v2) {
  * This instruction acts as a guard to {\@link PipeTransform#transform} invoking
  * the pipe only when an input to the pipe changes.
  *
+ * \@publicApi
  * @param {?} index Pipe index where the pipe was stored on creation.
  * @param {?} slotOffset the offset in the reserved slot space
  * @param {?} v1 1st argument to {\@link PipeTransform#transform}.
  * @param {?} v2 2nd argument to {\@link PipeTransform#transform}.
  * @param {?} v3 4rd argument to {\@link PipeTransform#transform}.
+ *
  * @return {?}
  */
-function pipeBind3(index, slotOffset, v1, v2, v3) {
+function ΔpipeBind3(index, slotOffset, v1, v2, v3) {
     /** @type {?} */
-    const pipeInstance = load(index);
-    return unwrapValue$1(isPure(index) ? pureFunction3(slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
+    const pipeInstance = Δload(index);
+    return unwrapValue$1(isPure(index) ? ΔpureFunction3(slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
         pipeInstance.transform(v1, v2, v3));
 }
 /**
@@ -26514,19 +26693,21 @@ function pipeBind3(index, slotOffset, v1, v2, v3) {
  * This instruction acts as a guard to {\@link PipeTransform#transform} invoking
  * the pipe only when an input to the pipe changes.
  *
+ * \@publicApi
  * @param {?} index Pipe index where the pipe was stored on creation.
  * @param {?} slotOffset the offset in the reserved slot space
  * @param {?} v1 1st argument to {\@link PipeTransform#transform}.
  * @param {?} v2 2nd argument to {\@link PipeTransform#transform}.
  * @param {?} v3 3rd argument to {\@link PipeTransform#transform}.
  * @param {?} v4 4th argument to {\@link PipeTransform#transform}.
+ *
  * @return {?}
  */
-function pipeBind4(index, slotOffset, v1, v2, v3, v4) {
+function ΔpipeBind4(index, slotOffset, v1, v2, v3, v4) {
     /** @type {?} */
-    const pipeInstance = load(index);
+    const pipeInstance = Δload(index);
     return unwrapValue$1(isPure(index) ?
-        pureFunction4(slotOffset, pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
+        ΔpureFunction4(slotOffset, pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
         pipeInstance.transform(v1, v2, v3, v4));
 }
 /**
@@ -26535,15 +26716,17 @@ function pipeBind4(index, slotOffset, v1, v2, v3, v4) {
  * This instruction acts as a guard to {\@link PipeTransform#transform} invoking
  * the pipe only when an input to the pipe changes.
  *
+ * \@publicApi
  * @param {?} index Pipe index where the pipe was stored on creation.
  * @param {?} slotOffset the offset in the reserved slot space
  * @param {?} values Array of arguments to pass to {\@link PipeTransform#transform} method.
+ *
  * @return {?}
  */
-function pipeBindV(index, slotOffset, values) {
+function ΔpipeBindV(index, slotOffset, values) {
     /** @type {?} */
-    const pipeInstance = load(index);
-    return unwrapValue$1(isPure(index) ? pureFunctionV(slotOffset, pipeInstance.transform, values, pipeInstance) :
+    const pipeInstance = Δload(index);
+    return unwrapValue$1(isPure(index) ? ΔpureFunctionV(slotOffset, pipeInstance.transform, values, pipeInstance) :
         pipeInstance.transform.apply(pipeInstance, values));
 }
 /**
@@ -27295,11 +27478,13 @@ predicate, descend, read) {
  * Refreshes a query by combining matches from all active views and removing matches from deleted
  * views.
  *
+ * \@publicApi
  * @param {?} queryList
  * @return {?} `true` if a query got dirty during change detection or if this is a static query
  * resolving in creation mode, `false` otherwise.
+ *
  */
-function queryRefresh(queryList) {
+function ΔqueryRefresh(queryList) {
     /** @type {?} */
     const queryListImpl = ((/** @type {?} */ ((/** @type {?} */ (queryList)))));
     /** @type {?} */
@@ -27315,17 +27500,19 @@ function queryRefresh(queryList) {
 /**
  * Creates new QueryList for a static view query.
  *
+ * \@publicApi
  * @template T
  * @param {?} predicate The type for which the query will search
  * @param {?} descend Whether or not to descend into children
  * @param {?} read What to save in the query
+ *
  * @return {?}
  */
-function staticViewQuery(
+function ΔstaticViewQuery(
 // TODO(FW-486): "read" should be an AbstractType
 predicate, descend, read) {
     /** @type {?} */
-    const queryList = (/** @type {?} */ (viewQuery(predicate, descend, read)));
+    const queryList = (/** @type {?} */ (ΔviewQuery(predicate, descend, read)));
     /** @type {?} */
     const tView = getLView()[TVIEW];
     queryList._static = true;
@@ -27336,13 +27523,15 @@ predicate, descend, read) {
 /**
  * Creates new QueryList, stores the reference in LView and returns QueryList.
  *
+ * \@publicApi
  * @template T
  * @param {?} predicate The type for which the query will search
  * @param {?} descend Whether or not to descend into children
  * @param {?} read What to save in the query
  * @return {?} QueryList<T>
+ *
  */
-function viewQuery(
+function ΔviewQuery(
 // TODO(FW-486): "read" should be an AbstractType
 predicate, descend, read) {
     /** @type {?} */
@@ -27362,27 +27551,31 @@ predicate, descend, read) {
 }
 /**
  * Loads current View Query and moves the pointer/index to the next View Query in LView.
+ *
+ * \@publicApi
  * @template T
  * @return {?}
  */
-function loadViewQuery() {
+function ΔloadViewQuery() {
     /** @type {?} */
     const index = getCurrentQueryIndex();
     setCurrentQueryIndex(index + 1);
-    return load(index - HEADER_OFFSET);
+    return Δload(index - HEADER_OFFSET);
 }
 /**
  * Registers a QueryList, associated with a content query, for later refresh (part of a view
  * refresh).
  *
+ * \@publicApi
  * @template T
  * @param {?} directiveIndex Current directive index
  * @param {?} predicate The type for which the query will search
  * @param {?} descend Whether or not to descend into children
  * @param {?} read What to save in the query
  * @return {?} QueryList<T>
+ *
  */
-function contentQuery(directiveIndex, predicate, descend, 
+function ΔcontentQuery(directiveIndex, predicate, descend, 
 // TODO(FW-486): "read" should be an AbstractType
 read) {
     /** @type {?} */
@@ -27407,18 +27600,20 @@ read) {
  * Registers a QueryList, associated with a static content query, for later refresh
  * (part of a view refresh).
  *
+ * \@publicApi
  * @template T
  * @param {?} directiveIndex Current directive index
  * @param {?} predicate The type for which the query will search
  * @param {?} descend Whether or not to descend into children
  * @param {?} read What to save in the query
  * @return {?} QueryList<T>
+ *
  */
-function staticContentQuery(directiveIndex, predicate, descend, 
+function ΔstaticContentQuery(directiveIndex, predicate, descend, 
 // TODO(FW-486): "read" should be an AbstractType
 read) {
     /** @type {?} */
-    const queryList = (/** @type {?} */ (contentQuery(directiveIndex, predicate, descend, read)));
+    const queryList = (/** @type {?} */ (ΔcontentQuery(directiveIndex, predicate, descend, read)));
     /** @type {?} */
     const tView = getLView()[TVIEW];
     queryList._static = true;
@@ -27427,10 +27622,12 @@ read) {
     }
 }
 /**
+ *
+ * \@publicApi
  * @template T
  * @return {?}
  */
-function loadContentQuery() {
+function ΔloadContentQuery() {
     /** @type {?} */
     const lView = getLView();
     ngDevMode &&
@@ -27449,11 +27646,13 @@ function loadContentQuery() {
 /**
  * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
  * `<ng-template>` element.
+ *
+ * \@publicApi
  * @param {?} tNode
  * @param {?} currentView
  * @return {?}
  */
-function templateRefExtractor(tNode, currentView) {
+function ΔtemplateRefExtractor(tNode, currentView) {
     return createTemplateRef(TemplateRef, ElementRef, tNode, currentView);
 }
 
@@ -27473,117 +27672,117 @@ function templateRefExtractor(tNode, currentView) {
  * @type {?}
  */
 const angularCoreEnv = {
-    'ɵdefineBase': defineBase,
-    'ɵdefineComponent': defineComponent,
-    'ɵdefineDirective': defineDirective,
-    'defineInjectable': defineInjectable,
-    'defineInjector': defineInjector,
-    'ɵdefineNgModule': defineNgModule,
-    'ɵdefinePipe': definePipe,
-    'ɵdirectiveInject': directiveInject,
-    'ɵgetFactoryOf': getFactoryOf$1,
-    'ɵgetInheritedFactory': getInheritedFactory,
-    'inject': inject,
-    'ɵinjectAttribute': injectAttribute,
-    'ɵtemplateRefExtractor': templateRefExtractor,
-    'ɵNgOnChangesFeature': NgOnChangesFeature,
-    'ɵProvidersFeature': ProvidersFeature,
-    'ɵInheritDefinitionFeature': InheritDefinitionFeature,
-    'ɵelementAttribute': elementAttribute,
-    'ɵbind': bind,
-    'ɵcontainer': container,
-    'ɵnextContext': nextContext,
-    'ɵcontainerRefreshStart': containerRefreshStart,
-    'ɵcontainerRefreshEnd': containerRefreshEnd,
-    'ɵnamespaceHTML': namespaceHTML,
-    'ɵnamespaceMathML': namespaceMathML,
-    'ɵnamespaceSVG': namespaceSVG,
-    'ɵenableBindings': enableBindings,
-    'ɵdisableBindings': disableBindings,
-    'ɵallocHostVars': allocHostVars,
-    'ɵelementStart': elementStart,
-    'ɵelementEnd': elementEnd,
-    'ɵelement': element,
-    'ɵelementContainerStart': elementContainerStart,
-    'ɵelementContainerEnd': elementContainerEnd,
-    'ɵpureFunction0': pureFunction0,
-    'ɵpureFunction1': pureFunction1,
-    'ɵpureFunction2': pureFunction2,
-    'ɵpureFunction3': pureFunction3,
-    'ɵpureFunction4': pureFunction4,
-    'ɵpureFunction5': pureFunction5,
-    'ɵpureFunction6': pureFunction6,
-    'ɵpureFunction7': pureFunction7,
-    'ɵpureFunction8': pureFunction8,
-    'ɵpureFunctionV': pureFunctionV,
-    'ɵgetCurrentView': getCurrentView,
-    'ɵrestoreView': restoreView,
-    'ɵinterpolation1': interpolation1,
-    'ɵinterpolation2': interpolation2,
-    'ɵinterpolation3': interpolation3,
-    'ɵinterpolation4': interpolation4,
-    'ɵinterpolation5': interpolation5,
-    'ɵinterpolation6': interpolation6,
-    'ɵinterpolation7': interpolation7,
-    'ɵinterpolation8': interpolation8,
-    'ɵinterpolationV': interpolationV,
-    'ɵlistener': listener,
-    'ɵload': load,
-    'ɵprojection': projection,
-    'ɵelementProperty': elementProperty,
-    'ɵcomponentHostSyntheticProperty': componentHostSyntheticProperty,
-    'ɵcomponentHostSyntheticListener': componentHostSyntheticListener,
-    'ɵpipeBind1': pipeBind1,
-    'ɵpipeBind2': pipeBind2,
-    'ɵpipeBind3': pipeBind3,
-    'ɵpipeBind4': pipeBind4,
-    'ɵpipeBindV': pipeBindV,
-    'ɵprojectionDef': projectionDef,
-    'ɵpipe': pipe,
-    'ɵqueryRefresh': queryRefresh,
-    'ɵviewQuery': viewQuery,
-    'ɵstaticViewQuery': staticViewQuery,
-    'ɵstaticContentQuery': staticContentQuery,
-    'ɵloadViewQuery': loadViewQuery,
-    'ɵcontentQuery': contentQuery,
-    'ɵloadContentQuery': loadContentQuery,
-    'ɵreference': reference,
-    'ɵelementHostAttrs': elementHostAttrs,
-    'ɵelementStyling': elementStyling,
-    'ɵelementStylingMap': elementStylingMap,
-    'ɵelementStyleProp': elementStyleProp,
-    'ɵelementStylingApply': elementStylingApply,
-    'ɵelementClassProp': elementClassProp,
-    'ɵelementHostStyling': elementHostStyling,
-    'ɵelementHostStylingMap': elementHostStylingMap,
-    'ɵelementHostStyleProp': elementHostStyleProp,
-    'ɵelementHostStylingApply': elementHostStylingApply,
-    'ɵelementHostClassProp': elementHostClassProp,
-    'ɵselect': select,
-    'ɵtemplate': template,
-    'ɵtext': text,
-    'ɵtextBinding': textBinding,
-    'ɵembeddedViewStart': embeddedViewStart,
-    'ɵembeddedViewEnd': embeddedViewEnd,
-    'ɵi18n': i18n,
-    'ɵi18nAttributes': i18nAttributes,
-    'ɵi18nExp': i18nExp,
-    'ɵi18nStart': i18nStart,
-    'ɵi18nEnd': i18nEnd,
-    'ɵi18nApply': i18nApply,
-    'ɵi18nPostprocess': i18nPostprocess,
-    'ɵresolveWindow': resolveWindow,
-    'ɵresolveDocument': resolveDocument,
-    'ɵresolveBody': resolveBody,
-    'ɵsetComponentScope': setComponentScope,
-    'ɵsetNgModuleScope': setNgModuleScope,
-    'ɵsanitizeHtml': sanitizeHtml,
-    'ɵsanitizeStyle': sanitizeStyle,
-    'ɵdefaultStyleSanitizer': defaultStyleSanitizer,
-    'ɵsanitizeResourceUrl': sanitizeResourceUrl,
-    'ɵsanitizeScript': sanitizeScript,
-    'ɵsanitizeUrl': sanitizeUrl,
-    'ɵsanitizeUrlOrResourceUrl': sanitizeUrlOrResourceUrl
+    'ΔdefineBase': ΔdefineBase,
+    'ΔdefineComponent': ΔdefineComponent,
+    'ΔdefineDirective': ΔdefineDirective,
+    'ΔdefineInjectable': ΔdefineInjectable,
+    'ΔdefineInjector': ΔdefineInjector,
+    'ΔdefineNgModule': ΔdefineNgModule,
+    'ΔdefinePipe': ΔdefinePipe,
+    'ΔdirectiveInject': ΔdirectiveInject,
+    'ΔgetFactoryOf': ΔgetFactoryOf,
+    'ΔgetInheritedFactory': ΔgetInheritedFactory,
+    'Δinject': Δinject,
+    'ΔinjectAttribute': ΔinjectAttribute,
+    'ΔtemplateRefExtractor': ΔtemplateRefExtractor,
+    'ΔNgOnChangesFeature': ΔNgOnChangesFeature,
+    'ΔProvidersFeature': ΔProvidersFeature,
+    'ΔInheritDefinitionFeature': ΔInheritDefinitionFeature,
+    'ΔelementAttribute': ΔelementAttribute,
+    'Δbind': Δbind,
+    'Δcontainer': Δcontainer,
+    'ΔnextContext': ΔnextContext,
+    'ΔcontainerRefreshStart': ΔcontainerRefreshStart,
+    'ΔcontainerRefreshEnd': ΔcontainerRefreshEnd,
+    'ΔnamespaceHTML': ΔnamespaceHTML,
+    'ΔnamespaceMathML': ΔnamespaceMathML,
+    'ΔnamespaceSVG': ΔnamespaceSVG,
+    'ΔenableBindings': ΔenableBindings,
+    'ΔdisableBindings': ΔdisableBindings,
+    'ΔallocHostVars': ΔallocHostVars,
+    'ΔelementStart': ΔelementStart,
+    'ΔelementEnd': ΔelementEnd,
+    'Δelement': Δelement,
+    'ΔelementContainerStart': ΔelementContainerStart,
+    'ΔelementContainerEnd': ΔelementContainerEnd,
+    'ΔpureFunction0': ΔpureFunction0,
+    'ΔpureFunction1': ΔpureFunction1,
+    'ΔpureFunction2': ΔpureFunction2,
+    'ΔpureFunction3': ΔpureFunction3,
+    'ΔpureFunction4': ΔpureFunction4,
+    'ΔpureFunction5': ΔpureFunction5,
+    'ΔpureFunction6': ΔpureFunction6,
+    'ΔpureFunction7': ΔpureFunction7,
+    'ΔpureFunction8': ΔpureFunction8,
+    'ΔpureFunctionV': ΔpureFunctionV,
+    'ΔgetCurrentView': ΔgetCurrentView,
+    'ΔrestoreView': ΔrestoreView,
+    'Δinterpolation1': Δinterpolation1,
+    'Δinterpolation2': Δinterpolation2,
+    'Δinterpolation3': Δinterpolation3,
+    'Δinterpolation4': Δinterpolation4,
+    'Δinterpolation5': Δinterpolation5,
+    'Δinterpolation6': Δinterpolation6,
+    'Δinterpolation7': Δinterpolation7,
+    'Δinterpolation8': Δinterpolation8,
+    'ΔinterpolationV': ΔinterpolationV,
+    'Δlistener': Δlistener,
+    'Δload': Δload,
+    'Δprojection': Δprojection,
+    'ΔelementProperty': ΔelementProperty,
+    'ΔcomponentHostSyntheticProperty': ΔcomponentHostSyntheticProperty,
+    'ΔcomponentHostSyntheticListener': ΔcomponentHostSyntheticListener,
+    'ΔpipeBind1': ΔpipeBind1,
+    'ΔpipeBind2': ΔpipeBind2,
+    'ΔpipeBind3': ΔpipeBind3,
+    'ΔpipeBind4': ΔpipeBind4,
+    'ΔpipeBindV': ΔpipeBindV,
+    'ΔprojectionDef': ΔprojectionDef,
+    'Δpipe': Δpipe,
+    'ΔqueryRefresh': ΔqueryRefresh,
+    'ΔviewQuery': ΔviewQuery,
+    'ΔstaticViewQuery': ΔstaticViewQuery,
+    'ΔstaticContentQuery': ΔstaticContentQuery,
+    'ΔloadViewQuery': ΔloadViewQuery,
+    'ΔcontentQuery': ΔcontentQuery,
+    'ΔloadContentQuery': ΔloadContentQuery,
+    'Δreference': Δreference,
+    'ΔelementHostAttrs': ΔelementHostAttrs,
+    'ΔelementStyling': ΔelementStyling,
+    'ΔelementStylingMap': ΔelementStylingMap,
+    'ΔelementStyleProp': ΔelementStyleProp,
+    'ΔelementStylingApply': ΔelementStylingApply,
+    'ΔelementClassProp': ΔelementClassProp,
+    'ΔelementHostStyling': ΔelementHostStyling,
+    'ΔelementHostStylingMap': ΔelementHostStylingMap,
+    'ΔelementHostStyleProp': ΔelementHostStyleProp,
+    'ΔelementHostStylingApply': ΔelementHostStylingApply,
+    'ΔelementHostClassProp': ΔelementHostClassProp,
+    'Δselect': Δselect,
+    'Δtemplate': Δtemplate,
+    'Δtext': Δtext,
+    'ΔtextBinding': ΔtextBinding,
+    'ΔembeddedViewStart': ΔembeddedViewStart,
+    'ΔembeddedViewEnd': ΔembeddedViewEnd,
+    'Δi18n': Δi18n,
+    'Δi18nAttributes': Δi18nAttributes,
+    'Δi18nExp': Δi18nExp,
+    'Δi18nStart': Δi18nStart,
+    'Δi18nEnd': Δi18nEnd,
+    'Δi18nApply': Δi18nApply,
+    'Δi18nPostprocess': Δi18nPostprocess,
+    'ΔresolveWindow': ΔresolveWindow,
+    'ΔresolveDocument': ΔresolveDocument,
+    'ΔresolveBody': ΔresolveBody,
+    'ΔsetComponentScope': ΔsetComponentScope,
+    'ΔsetNgModuleScope': ΔsetNgModuleScope,
+    'ΔsanitizeHtml': ΔsanitizeHtml,
+    'ΔsanitizeStyle': ΔsanitizeStyle,
+    'ΔdefaultStyleSanitizer': ΔdefaultStyleSanitizer,
+    'ΔsanitizeResourceUrl': ΔsanitizeResourceUrl,
+    'ΔsanitizeScript': ΔsanitizeScript,
+    'ΔsanitizeUrl': ΔsanitizeUrl,
+    'ΔsanitizeUrlOrResourceUrl': ΔsanitizeUrlOrResourceUrl
 };
 
 /**
@@ -28892,7 +29091,7 @@ ApplicationInitStatus.decorators = [
 ApplicationInitStatus.ctorParameters = () => [
     { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional }] }
 ];
-/** @nocollapse */ ApplicationInitStatus.ngInjectableDef = defineInjectable({ token: ApplicationInitStatus, factory: function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(inject(APP_INITIALIZER, 8)); }, providedIn: null });
+/** @nocollapse */ ApplicationInitStatus.ngInjectableDef = ΔdefineInjectable({ token: ApplicationInitStatus, factory: function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(Δinject(APP_INITIALIZER, 8)); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(ApplicationInitStatus, [{
         type: Injectable
     }], function () { return [{ type: undefined, decorators: [{
@@ -29002,7 +29201,7 @@ class Console {
 Console.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */ Console.ngInjectableDef = defineInjectable({ token: Console, factory: function Console_Factory(t) { return new (t || Console)(); }, providedIn: null });
+/** @nocollapse */ Console.ngInjectableDef = ΔdefineInjectable({ token: Console, factory: function Console_Factory(t) { return new (t || Console)(); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(Console, [{
         type: Injectable
     }], null, null);
@@ -29147,7 +29346,7 @@ class Compiler {
 Compiler.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */ Compiler.ngInjectableDef = defineInjectable({ token: Compiler, factory: function Compiler_Factory(t) { return new (t || Compiler)(); }, providedIn: null });
+/** @nocollapse */ Compiler.ngInjectableDef = ΔdefineInjectable({ token: Compiler, factory: function Compiler_Factory(t) { return new (t || Compiler)(); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(Compiler, [{
         type: Injectable
     }], null, null);
@@ -29980,7 +30179,7 @@ Testability.decorators = [
 Testability.ctorParameters = () => [
     { type: NgZone }
 ];
-/** @nocollapse */ Testability.ngInjectableDef = defineInjectable({ token: Testability, factory: function Testability_Factory(t) { return new (t || Testability)(inject(NgZone)); }, providedIn: null });
+/** @nocollapse */ Testability.ngInjectableDef = ΔdefineInjectable({ token: Testability, factory: function Testability_Factory(t) { return new (t || Testability)(Δinject(NgZone)); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(Testability, [{
         type: Injectable
     }], function () { return [{ type: NgZone }]; }, null);
@@ -30048,7 +30247,7 @@ TestabilityRegistry.decorators = [
 ];
 /** @nocollapse */
 TestabilityRegistry.ctorParameters = () => [];
-/** @nocollapse */ TestabilityRegistry.ngInjectableDef = defineInjectable({ token: TestabilityRegistry, factory: function TestabilityRegistry_Factory(t) { return new (t || TestabilityRegistry)(); }, providedIn: null });
+/** @nocollapse */ TestabilityRegistry.ngInjectableDef = ΔdefineInjectable({ token: TestabilityRegistry, factory: function TestabilityRegistry_Factory(t) { return new (t || TestabilityRegistry)(); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(TestabilityRegistry, [{
         type: Injectable
     }], function () { return []; }, null);
@@ -30465,7 +30664,7 @@ PlatformRef.decorators = [
 PlatformRef.ctorParameters = () => [
     { type: Injector }
 ];
-/** @nocollapse */ PlatformRef.ngInjectableDef = defineInjectable({ token: PlatformRef, factory: function PlatformRef_Factory(t) { return new (t || PlatformRef)(inject(Injector)); }, providedIn: null });
+/** @nocollapse */ PlatformRef.ngInjectableDef = ΔdefineInjectable({ token: PlatformRef, factory: function PlatformRef_Factory(t) { return new (t || PlatformRef)(Δinject(Injector)); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(PlatformRef, [{
         type: Injectable
     }], function () { return [{ type: Injector }]; }, null);
@@ -30923,7 +31122,7 @@ ApplicationRef.ctorParameters = () => [
     { type: ComponentFactoryResolver },
     { type: ApplicationInitStatus }
 ];
-/** @nocollapse */ ApplicationRef.ngInjectableDef = defineInjectable({ token: ApplicationRef, factory: function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(inject(NgZone), inject(Console), inject(Injector), inject(ErrorHandler), inject(ComponentFactoryResolver), inject(ApplicationInitStatus)); }, providedIn: null });
+/** @nocollapse */ ApplicationRef.ngInjectableDef = ΔdefineInjectable({ token: ApplicationRef, factory: function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(Δinject(NgZone), Δinject(Console), Δinject(Injector), Δinject(ErrorHandler), Δinject(ComponentFactoryResolver), Δinject(ApplicationInitStatus)); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(ApplicationRef, [{
         type: Injectable
     }], function () { return [{ type: NgZone }, { type: Console }, { type: Injector }, { type: ErrorHandler }, { type: ComponentFactoryResolver }, { type: ApplicationInitStatus }]; }, null);
@@ -31077,7 +31276,7 @@ SystemJsNgModuleLoader.ctorParameters = () => [
     { type: Compiler },
     { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional }] }
 ];
-/** @nocollapse */ SystemJsNgModuleLoader.ngInjectableDef = defineInjectable({ token: SystemJsNgModuleLoader, factory: function SystemJsNgModuleLoader_Factory(t) { return new (t || SystemJsNgModuleLoader)(inject(Compiler), inject(SystemJsNgModuleLoaderConfig, 8)); }, providedIn: null });
+/** @nocollapse */ SystemJsNgModuleLoader.ngInjectableDef = ΔdefineInjectable({ token: SystemJsNgModuleLoader, factory: function SystemJsNgModuleLoader_Factory(t) { return new (t || SystemJsNgModuleLoader)(Δinject(Compiler), Δinject(SystemJsNgModuleLoaderConfig, 8)); }, providedIn: null });
 /*@__PURE__*/ setClassMetadata(SystemJsNgModuleLoader, [{
         type: Injectable
     }], function () { return [{ type: Compiler }, { type: SystemJsNgModuleLoaderConfig, decorators: [{
@@ -32207,8 +32406,8 @@ ApplicationModule.decorators = [
 ApplicationModule.ctorParameters = () => [
     { type: ApplicationRef }
 ];
-/** @nocollapse */ ApplicationModule.ngModuleDef = defineNgModule({ type: ApplicationModule });
-/** @nocollapse */ ApplicationModule.ngInjectorDef = defineInjector({ factory: function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(inject(ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS });
+/** @nocollapse */ ApplicationModule.ngModuleDef = ΔdefineNgModule({ type: ApplicationModule });
+/** @nocollapse */ ApplicationModule.ngInjectorDef = ΔdefineInjector({ factory: function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(Δinject(ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS });
 /*@__PURE__*/ setClassMetadata(ApplicationModule, [{
         type: NgModule,
         args: [{ providers: APPLICATION_MODULE_PROVIDERS }]
@@ -35621,5 +35820,5 @@ class NgModuleFactory_ extends NgModuleFactory {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, ViewEncapsulation, Version, VERSION, InjectFlags, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, INJECTOR, Injector, inject, inject as ɵinject, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineBase as ɵdefineBase, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, directiveInject as ɵdirectiveInject, injectAttribute as ɵinjectAttribute, getFactoryOf$1 as ɵgetFactoryOf, getInheritedFactory as ɵgetInheritedFactory, setComponentScope as ɵsetComponentScope, setNgModuleScope as ɵsetNgModuleScope, templateRefExtractor as ɵtemplateRefExtractor, ProvidersFeature as ɵProvidersFeature, InheritDefinitionFeature as ɵInheritDefinitionFeature, NgOnChangesFeature as ɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, container as ɵcontainer, nextContext as ɵnextContext, elementStart as ɵelementStart, namespaceHTML as ɵnamespaceHTML, namespaceMathML as ɵnamespaceMathML, namespaceSVG as ɵnamespaceSVG, element as ɵelement, listener as ɵlistener, text as ɵtext, embeddedViewStart as ɵembeddedViewStart, projection as ɵprojection, bind as ɵbind, interpolation1 as ɵinterpolation1, interpolation2 as ɵinterpolation2, interpolation3 as ɵinterpolation3, interpolation4 as ɵinterpolation4, interpolation5 as ɵinterpolation5, interpolation6 as ɵinterpolation6, interpolation7 as ɵinterpolation7, interpolation8 as ɵinterpolation8, interpolationV as ɵinterpolationV, pipeBind1 as ɵpipeBind1, pipeBind2 as ɵpipeBind2, pipeBind3 as ɵpipeBind3, pipeBind4 as ɵpipeBind4, pipeBindV as ɵpipeBindV, pureFunction0 as ɵpureFunction0, pureFunction1 as ɵpureFunction1, pureFunction2 as ɵpureFunction2, pureFunction3 as ɵpureFunction3, pureFunction4 as ɵpureFunction4, pureFunction5 as ɵpureFunction5, pureFunction6 as ɵpureFunction6, pureFunction7 as ɵpureFunction7, pureFunction8 as ɵpureFunction8, pureFunctionV as ɵpureFunctionV, getCurrentView as ɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, restoreView as ɵrestoreView, containerRefreshStart as ɵcontainerRefreshStart, containerRefreshEnd as ɵcontainerRefreshEnd, queryRefresh as ɵqueryRefresh, viewQuery as ɵviewQuery, staticViewQuery as ɵstaticViewQuery, staticContentQuery as ɵstaticContentQuery, loadViewQuery as ɵloadViewQuery, contentQuery as ɵcontentQuery, loadContentQuery as ɵloadContentQuery, elementEnd as ɵelementEnd, elementProperty as ɵelementProperty, componentHostSyntheticProperty as ɵcomponentHostSyntheticProperty, componentHostSyntheticListener as ɵcomponentHostSyntheticListener, projectionDef as ɵprojectionDef, reference as ɵreference, enableBindings as ɵenableBindings, disableBindings as ɵdisableBindings, allocHostVars as ɵallocHostVars, elementAttribute as ɵelementAttribute, elementContainerStart as ɵelementContainerStart, elementContainerEnd as ɵelementContainerEnd, elementStyling as ɵelementStyling, elementStylingMap as ɵelementStylingMap, elementStyleProp as ɵelementStyleProp, elementStylingApply as ɵelementStylingApply, elementClassProp as ɵelementClassProp, elementHostAttrs as ɵelementHostAttrs, elementHostStyling as ɵelementHostStyling, elementHostStylingMap as ɵelementHostStylingMap, elementHostStyleProp as ɵelementHostStyleProp, elementHostClassProp as ɵelementHostClassProp, elementHostStylingApply as ɵelementHostStylingApply, select as ɵselect, textBinding as ɵtextBinding, template as ɵtemplate, embeddedViewEnd as ɵembeddedViewEnd, store as ɵstore, load as ɵload, pipe as ɵpipe, whenRendered as ɵwhenRendered, i18n as ɵi18n, i18nAttributes as ɵi18nAttributes, i18nExp as ɵi18nExp, i18nStart as ɵi18nStart, i18nEnd as ɵi18nEnd, i18nApply as ɵi18nApply, i18nPostprocess as ɵi18nPostprocess, setClassMetadata as ɵsetClassMetadata, resolveWindow as ɵresolveWindow, resolveDocument as ɵresolveDocument, resolveBody as ɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, defaultStyleSanitizer as ɵdefaultStyleSanitizer, sanitizeScript as ɵsanitizeScript, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, sanitizeUrlOrResourceUrl as ɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, createInjector as ɵcreateInjector, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$2 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, ViewEncapsulation, Version, VERSION, InjectFlags, ΔdefineInjectable, defineInjectable, ΔdefineInjector, forwardRef, resolveForwardRef, Injectable, INJECTOR, Injector, Δinject, inject, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, ΔdefineBase, ΔdefineComponent, ΔdefineDirective, ΔdefinePipe, ΔdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, ΔdirectiveInject, ΔinjectAttribute, ΔgetFactoryOf, ΔgetInheritedFactory, ΔsetComponentScope, ΔsetNgModuleScope, ΔtemplateRefExtractor, ΔProvidersFeature, ΔInheritDefinitionFeature, ΔNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, Δcontainer, ΔnextContext, ΔelementStart, ΔnamespaceHTML, ΔnamespaceMathML, ΔnamespaceSVG, Δelement, Δlistener, Δtext, ΔembeddedViewStart, Δprojection, Δbind, Δinterpolation1, Δinterpolation2, Δinterpolation3, Δinterpolation4, Δinterpolation5, Δinterpolation6, Δinterpolation7, Δinterpolation8, ΔinterpolationV, ΔpipeBind1, ΔpipeBind2, ΔpipeBind3, ΔpipeBind4, ΔpipeBindV, ΔpureFunction0, ΔpureFunction1, ΔpureFunction2, ΔpureFunction3, ΔpureFunction4, ΔpureFunction5, ΔpureFunction6, ΔpureFunction7, ΔpureFunction8, ΔpureFunctionV, ΔgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, ΔrestoreView, ΔcontainerRefreshStart, ΔcontainerRefreshEnd, ΔqueryRefresh, ΔviewQuery, ΔstaticViewQuery, ΔstaticContentQuery, ΔloadViewQuery, ΔcontentQuery, ΔloadContentQuery, ΔelementEnd, ΔelementProperty, ΔcomponentHostSyntheticProperty, ΔcomponentHostSyntheticListener, ΔprojectionDef, Δreference, ΔenableBindings, ΔdisableBindings, ΔallocHostVars, ΔelementAttribute, ΔelementContainerStart, ΔelementContainerEnd, ΔelementStyling, ΔelementStylingMap, ΔelementStyleProp, ΔelementStylingApply, ΔelementClassProp, ΔelementHostAttrs, ΔelementHostStyling, ΔelementHostStylingMap, ΔelementHostStyleProp, ΔelementHostClassProp, ΔelementHostStylingApply, Δselect, ΔtextBinding, Δtemplate, ΔembeddedViewEnd, store as ɵstore, Δload, Δpipe, whenRendered as ɵwhenRendered, Δi18n, Δi18nAttributes, Δi18nExp, Δi18nStart, Δi18nEnd, Δi18nApply, Δi18nPostprocess, setClassMetadata as ɵsetClassMetadata, ΔresolveWindow, ΔresolveDocument, ΔresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, ΔsanitizeHtml, ΔsanitizeStyle, ΔdefaultStyleSanitizer, ΔsanitizeScript, ΔsanitizeUrl, ΔsanitizeResourceUrl, ΔsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, createInjector as ɵcreateInjector, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$2 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map

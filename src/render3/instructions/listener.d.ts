@@ -17,8 +17,10 @@ import { GlobalTargetResolver } from '../interfaces/renderer';
  * @param useCapture Whether or not to use capture in event listener
  * @param eventTargetResolver Function that returns global target information in case this listener
  * should be attached to a global object like window, document or body
+ *
+ * @publicApi
  */
-export declare function listener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
+export declare function Δlistener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
 /**
 * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component.
 *
@@ -37,5 +39,7 @@ export declare function listener(eventName: string, listenerFn: (e?: any) => any
 * @param useCapture Whether or not to use capture in event listener
 * @param eventTargetResolver Function that returns global target information in case this listener
 * should be attached to a global object like window, document or body
+ *
+ * @publicApi
 */
-export declare function componentHostSyntheticListener<T>(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
+export declare function ΔcomponentHostSyntheticListener<T>(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;

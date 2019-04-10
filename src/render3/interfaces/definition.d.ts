@@ -74,7 +74,10 @@ export declare const enum DirectiveDefFlags {
 export interface PipeType<T> extends Type<T> {
     ngPipeDef: never;
 }
-export declare type DirectiveDefWithMeta<T, Selector extends string, ExportAs extends string[], InputMap extends {
+/**
+ * @publicApi
+ */
+export declare type ΔDirectiveDefWithMeta<T, Selector extends string, ExportAs extends string[], InputMap extends {
     [key: string]: string;
 }, OutputMap extends {
     [key: string]: string;
@@ -87,8 +90,10 @@ export declare type DirectiveDefWithMeta<T, Selector extends string, ExportAs ex
  * and outputs should be inherited.
  *
  * See: {@link defineBase}
+ *
+ * @publicApi
  */
-export interface BaseDef<T> {
+export interface ΔBaseDef<T> {
     /**
      * A dictionary mapping the inputs' minified property names to their public API names, which
      * are their aliases if any, or their original unminified property names
@@ -127,7 +132,7 @@ export interface BaseDef<T> {
  *
  * See: {@link defineDirective}
  */
-export interface DirectiveDef<T> extends BaseDef<T> {
+export interface DirectiveDef<T> extends ΔBaseDef<T> {
     /** Token representing the directive. Used by DI. */
     type: Type<T>;
     /** Function that resolves providers and publishes them into the DI system. */
@@ -170,7 +175,10 @@ export interface DirectiveDef<T> extends BaseDef<T> {
     readonly features: DirectiveDefFeature[] | null;
     setInput: (<U extends T>(this: DirectiveDef<U>, instance: U, value: any, publicName: string, privateName: string) => void) | null;
 }
-export declare type ComponentDefWithMeta<T, Selector extends String, ExportAs extends string[], InputMap extends {
+/**
+ * @publicApi
+ */
+export declare type ΔComponentDefWithMeta<T, Selector extends String, ExportAs extends string[], InputMap extends {
     [key: string]: string;
 }, OutputMap extends {
     [key: string]: string;
@@ -297,7 +305,10 @@ export interface PipeDef<T> {
     readonly pure: boolean;
     onDestroy: (() => void) | null;
 }
-export declare type PipeDefWithMeta<T, Name extends string> = PipeDef<T>;
+/**
+ * @publicApi
+ */
+export declare type ΔPipeDefWithMeta<T, Name extends string> = PipeDef<T>;
 export interface DirectiveDefFeature {
     <T>(directiveDef: DirectiveDef<T>): void;
     /**

@@ -17,19 +17,31 @@ export declare function isDifferent(a: any, b: any): boolean;
  */
 export declare function renderStringify(value: any): string;
 export declare const defaultScheduler: any;
-export declare function resolveWindow(element: RElement & {
+/**
+ *
+ * @publicApi
+ */
+export declare function ΔresolveWindow(element: RElement & {
     ownerDocument: Document;
 }): {
     name: string;
     target: Window | null;
 };
-export declare function resolveDocument(element: RElement & {
+/**
+ *
+ * @publicApi
+ */
+export declare function ΔresolveDocument(element: RElement & {
     ownerDocument: Document;
 }): {
     name: string;
     target: Document;
 };
-export declare function resolveBody(element: RElement & {
+/**
+ *
+ * @publicApi
+ */
+export declare function ΔresolveBody(element: RElement & {
     ownerDocument: Document;
 }): {
     name: string;

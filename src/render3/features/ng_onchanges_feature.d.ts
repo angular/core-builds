@@ -25,5 +25,7 @@ import { DirectiveDefFeature } from '../interfaces/definition';
  *   features: [NgOnChangesFeature()]
  * });
  * ```
+ *
+ * @publicApi
  */
-export declare function NgOnChangesFeature<T>(): DirectiveDefFeature;
+export declare function ΔNgOnChangesFeature<T>(): DirectiveDefFeature;

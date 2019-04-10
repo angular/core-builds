@@ -10,7 +10,13 @@ import { TAttributes } from '../interfaces/node';
  * Even if this instruction accepts a set of attributes no actual attribute values are propagated to
  * the DOM (as a comment node can't have attributes). Attributes are here only for directive
  * matching purposes and setting initial inputs of directives.
+ *
+ * @publicApi
  */
-export declare function elementContainerStart(index: number, attrs?: TAttributes | null, localRefs?: string[] | null): void;
-/** Mark the end of the <ng-container>. */
-export declare function elementContainerEnd(): void;
+export declare function ΔelementContainerStart(index: number, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+/**
+ * Mark the end of the <ng-container>.
+ *
+ * @publicApi
+ */
+export declare function ΔelementContainerEnd(): void;

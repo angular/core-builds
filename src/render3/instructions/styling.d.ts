@@ -27,7 +27,7 @@ import { NO_CHANGE } from '../tokens';
  *
  * @publicApi
  */
-export declare function elementStyling(classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
+export declare function ΔelementStyling(classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
 /**
  * Allocates style and class binding properties on the host element during creation mode
  * within the host bindings function of a directive or component.
@@ -51,7 +51,7 @@ export declare function elementStyling(classBindingNames?: string[] | null, styl
  *
  * @publicApi
  */
-export declare function elementHostStyling(classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
+export declare function ΔelementHostStyling(classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
 /**
  * Update a style binding on an element with the provided value.
  *
@@ -78,7 +78,7 @@ export declare function elementHostStyling(classBindingNames?: string[] | null, 
  *
  * @publicApi
  */
-export declare function elementStyleProp(index: number, styleIndex: number, value: string | number | String | PlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
+export declare function ΔelementStyleProp(index: number, styleIndex: number, value: string | number | String | PlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
 /**
  * Update a host style binding value on the host element within a component/directive.
  *
@@ -104,7 +104,7 @@ export declare function elementStyleProp(index: number, styleIndex: number, valu
  *
  * @publicApi
  */
-export declare function elementHostStyleProp(styleIndex: number, value: string | number | String | PlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
+export declare function ΔelementHostStyleProp(styleIndex: number, value: string | number | String | PlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
 /**
  * Update a class binding on an element with the provided value.
  *
@@ -123,7 +123,7 @@ export declare function elementHostStyleProp(styleIndex: number, value: string |
  *
  * @publicApi
  */
-export declare function elementClassProp(index: number, classIndex: number, value: boolean | PlayerFactory, forceOverride?: boolean): void;
+export declare function ΔelementClassProp(index: number, classIndex: number, value: boolean | PlayerFactory, forceOverride?: boolean): void;
 /**
  * Update a class host binding for a directive's/component's host element within
  * the host bindings function.
@@ -142,7 +142,7 @@ export declare function elementClassProp(index: number, classIndex: number, valu
  *
  * @publicApi
  */
-export declare function elementHostClassProp(classIndex: number, value: boolean | PlayerFactory, forceOverride?: boolean): void;
+export declare function ΔelementHostClassProp(classIndex: number, value: boolean | PlayerFactory, forceOverride?: boolean): void;
 /**
  * Update style and/or class bindings using object literals on an element.
  *
@@ -163,7 +163,7 @@ export declare function elementHostClassProp(classIndex: number, value: boolean 
  *
  * @publicApi
  */
-export declare function elementStylingMap(index: number, classes: {
+export declare function ΔelementStylingMap(index: number, classes: {
     [key: string]: any;
 } | string | NO_CHANGE | null, styles?: {
     [styleName: string]: any;
@@ -191,7 +191,7 @@ export declare function elementStylingMap(index: number, classes: {
  *
  * @publicApi
  */
-export declare function elementHostStylingMap(classes: {
+export declare function ΔelementHostStylingMap(classes: {
     [key: string]: any;
 } | string | NO_CHANGE | null, styles?: {
     [styleName: string]: any;
@@ -207,7 +207,7 @@ export declare function elementHostStylingMap(classes: {
  *
  * @publicApi
  */
-export declare function elementStylingApply(index: number): void;
+export declare function ΔelementStylingApply(index: number): void;
 /**
  * Apply all style and class host binding values to the element.
  *
@@ -218,6 +218,6 @@ export declare function elementStylingApply(index: number): void;
  *
  * @publicApi
  */
-export declare function elementHostStylingApply(): void;
+export declare function ΔelementHostStylingApply(): void;
 export declare function elementStylingApplyInternal(directiveStylingIndex: number, index: number): void;
 export declare function getActiveDirectiveStylingIndex(): number;

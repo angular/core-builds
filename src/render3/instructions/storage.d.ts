@@ -7,7 +7,13 @@ export declare function store<T>(index: number, value: T): void;
  * with a nextContext() call, which walks up the tree and updates the contextViewData instance.
  *
  * @param index The index of the local ref in contextViewData.
+ *
+ * @publicApi
  */
-export declare function reference<T>(index: number): T;
-/** Retrieves a value from current `viewData`. */
-export declare function load<T>(index: number): T;
+export declare function Δreference<T>(index: number): T;
+/**
+ * Retrieves a value from current `viewData`.
+ *
+ * @publicApi
+ */
+export declare function Δload<T>(index: number): T;

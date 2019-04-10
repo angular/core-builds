@@ -12,8 +12,8 @@ export { devModeEqual as ɵdevModeEqual } from './change_detection/change_detect
 export { isListLikeIterable as ɵisListLikeIterable } from './change_detection/change_detection_util';
 export { ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy } from './change_detection/constants';
 export { Console as ɵConsole } from './console';
-export { inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector } from './di/injector_compatibility';
-export { InjectableDef as ɵInjectableDef, InjectorDef as ɵInjectorDef, getInjectableDef as ɵgetInjectableDef } from './di/interface/defs';
+export { inject, setCurrentInjector as ɵsetCurrentInjector, Δinject } from './di/injector_compatibility';
+export { getInjectableDef as ɵgetInjectableDef, ΔInjectableDef as ΔInjectableDef, ΔInjectorDef } from './di/interface/defs';
 export { APP_ROOT as ɵAPP_ROOT } from './di/scope';
 export { ivyEnabled as ɵivyEnabled } from './ivy_switch';
 export { ComponentFactory as ɵComponentFactory } from './linker/component_factory';

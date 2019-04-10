@@ -133,5 +133,11 @@ export declare class NodeInjector implements Injector {
     constructor(_tNode: TElementNode | TContainerNode | TElementContainerNode | null, _lView: LView);
     get(token: any, notFoundValue?: any): any;
 }
-export declare function getFactoryOf<T>(type: Type<any>): ((type: Type<T> | null) => T) | null;
-export declare function getInheritedFactory<T>(type: Type<any>): (type: Type<T>) => T;
+/**
+ * @publicApi
+ */
+export declare function ΔgetFactoryOf<T>(type: Type<any>): ((type: Type<T> | null) => T) | null;
+/**
+ * @publicApi
+ */
+export declare function ΔgetInheritedFactory<T>(type: Type<any>): (type: Type<T>) => T;

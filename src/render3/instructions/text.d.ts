@@ -4,13 +4,17 @@ import { NO_CHANGE } from '../tokens';
  *
  * @param index Index of the node in the data array
  * @param value Value to write. This value will be stringified.
+ *
+ * @publicApi
  */
-export declare function text(index: number, value?: any): void;
+export declare function Δtext(index: number, value?: any): void;
 /**
  * Create text node with binding
  * Bindings should be handled externally with the proper interpolation(1-8) method
  *
  * @param index Index of the node in the data array.
  * @param value Stringified value to write.
+ *
+ * @publicApi
  */
-export declare function textBinding<T>(index: number, value: T | NO_CHANGE): void;
+export declare function ΔtextBinding<T>(index: number, value: T | NO_CHANGE): void;

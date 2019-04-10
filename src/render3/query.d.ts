@@ -87,16 +87,20 @@ export declare function query<T>(predicate: Type<any> | string[], descend: boole
  *
  * @returns `true` if a query got dirty during change detection or if this is a static query
  * resolving in creation mode, `false` otherwise.
+ *
+ * @publicApi
  */
-export declare function queryRefresh(queryList: QueryList<any>): boolean;
+export declare function ΔqueryRefresh(queryList: QueryList<any>): boolean;
 /**
  * Creates new QueryList for a static view query.
  *
  * @param predicate The type for which the query will search
  * @param descend Whether or not to descend into children
  * @param read What to save in the query
+ *
+ * @publicApi
  */
-export declare function staticViewQuery<T>(predicate: Type<any> | string[], descend: boolean, read: any): void;
+export declare function ΔstaticViewQuery<T>(predicate: Type<any> | string[], descend: boolean, read: any): void;
 /**
  * Creates new QueryList, stores the reference in LView and returns QueryList.
  *
@@ -104,12 +108,16 @@ export declare function staticViewQuery<T>(predicate: Type<any> | string[], desc
  * @param descend Whether or not to descend into children
  * @param read What to save in the query
  * @returns QueryList<T>
+ *
+ * @publicApi
  */
-export declare function viewQuery<T>(predicate: Type<any> | string[], descend: boolean, read: any): QueryList<T>;
+export declare function ΔviewQuery<T>(predicate: Type<any> | string[], descend: boolean, read: any): QueryList<T>;
 /**
-* Loads current View Query and moves the pointer/index to the next View Query in LView.
-*/
-export declare function loadViewQuery<T>(): T;
+ * Loads current View Query and moves the pointer/index to the next View Query in LView.
+ *
+ * @publicApi
+ */
+export declare function ΔloadViewQuery<T>(): T;
 /**
  * Registers a QueryList, associated with a content query, for later refresh (part of a view
  * refresh).
@@ -119,8 +127,10 @@ export declare function loadViewQuery<T>(): T;
  * @param descend Whether or not to descend into children
  * @param read What to save in the query
  * @returns QueryList<T>
+ *
+ * @publicApi
  */
-export declare function contentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read: any): QueryList<T>;
+export declare function ΔcontentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read: any): QueryList<T>;
 /**
  * Registers a QueryList, associated with a static content query, for later refresh
  * (part of a view refresh).
@@ -130,6 +140,12 @@ export declare function contentQuery<T>(directiveIndex: number, predicate: Type<
  * @param descend Whether or not to descend into children
  * @param read What to save in the query
  * @returns QueryList<T>
+ *
+ * @publicApi
  */
-export declare function staticContentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read: any): void;
-export declare function loadContentQuery<T>(): QueryList<T>;
+export declare function ΔstaticContentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read: any): void;
+/**
+ *
+ * @publicApi
+ */
+export declare function ΔloadContentQuery<T>(): QueryList<T>;

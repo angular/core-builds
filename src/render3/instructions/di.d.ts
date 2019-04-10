@@ -15,22 +15,27 @@ import { Type } from '../../interface/type';
  *
  * Usage example (in factory function):
  *
+ * ```ts
  * class SomeDirective {
  *   constructor(directive: DirectiveA) {}
  *
- *   static ngDirectiveDef = defineDirective({
+ *   static ngDirectiveDef = ΔdefineDirective({
  *     type: SomeDirective,
- *     factory: () => new SomeDirective(directiveInject(DirectiveA))
+ *     factory: () => new SomeDirective(ΔdirectiveInject(DirectiveA))
  *   });
  * }
- *
+ * ```
  * @param token the type or token to inject
  * @param flags Injection flags
  * @returns the value from the injector or `null` when not found
+ *
+ * @publicApi
  */
-export declare function directiveInject<T>(token: Type<T> | InjectionToken<T>): T;
-export declare function directiveInject<T>(token: Type<T> | InjectionToken<T>, flags: InjectFlags): T;
+export declare function ΔdirectiveInject<T>(token: Type<T> | InjectionToken<T>): T;
+export declare function ΔdirectiveInject<T>(token: Type<T> | InjectionToken<T>, flags: InjectFlags): T;
 /**
  * Facade for the attribute injection from DI.
+ *
+ * @publicApi
  */
-export declare function injectAttribute(attrNameToInject: string): string | null;
+export declare function ΔinjectAttribute(attrNameToInject: string): string | null;

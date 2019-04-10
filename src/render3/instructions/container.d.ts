@@ -8,8 +8,10 @@ import { LocalRefExtractor, TAttributes } from '../interfaces/node';
  * % }
  *
  * @param index The index of the container in the data array
+ *
+ * @publicApi
  */
-export declare function container(index: number): void;
+export declare function Δcontainer(index: number): void;
 /**
  * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
  *
@@ -26,17 +28,23 @@ export declare function container(index: number): void;
  * @param localRefs A set of local reference bindings on the element.
  * @param localRefExtractor A function which extracts local-refs values from the template.
  *        Defaults to the current element associated with the local-ref.
+ *
+ * @publicApi
  */
-export declare function template(index: number, templateFn: ComponentTemplate<any> | null, consts: number, vars: number, tagName?: string | null, attrs?: TAttributes | null, localRefs?: string[] | null, localRefExtractor?: LocalRefExtractor): void;
+export declare function Δtemplate(index: number, templateFn: ComponentTemplate<any> | null, consts: number, vars: number, tagName?: string | null, attrs?: TAttributes | null, localRefs?: string[] | null, localRefExtractor?: LocalRefExtractor): void;
 /**
  * Sets a container up to receive views.
  *
  * @param index The index of the container in the data array
+ *
+ * @publicApi
  */
-export declare function containerRefreshStart(index: number): void;
+export declare function ΔcontainerRefreshStart(index: number): void;
 /**
  * Marks the end of the LContainer.
  *
  * Marking the end of LContainer is the time when to child views get inserted or removed.
+ *
+ * @publicApi
  */
-export declare function containerRefreshEnd(): void;
+export declare function ΔcontainerRefreshEnd(): void;

@@ -44,8 +44,10 @@ export declare function getTranslationForTemplate(message: string, subTemplateIn
  * @param index A unique index of the translation in the static block.
  * @param message The translation message.
  * @param subTemplateIndex Optional sub-template index in the `message`.
+ *
+ * @publicApi
  */
-export declare function i18nStart(index: number, message: string, subTemplateIndex?: number): void;
+export declare function Δi18nStart(index: number, message: string, subTemplateIndex?: number): void;
 /**
  * Handles message string post-processing for internationalization.
  *
@@ -63,16 +65,18 @@ export declare function i18nStart(index: number, message: string, subTemplateInd
  *
  * @returns Transformed string that can be consumed by i18nStart instruction
  *
- * @publicAPI
+ * @publicApi
  */
-export declare function i18nPostprocess(message: string, replacements?: {
+export declare function Δi18nPostprocess(message: string, replacements?: {
     [key: string]: (string | string[]);
 }): string;
 /**
  * Translates a translation block marked by `i18nStart` and `i18nEnd`. It inserts the text/ICU nodes
  * into the render tree, moves the placeholder nodes and removes the deleted nodes.
+ *
+ * @publicApi
  */
-export declare function i18nEnd(): void;
+export declare function Δi18nEnd(): void;
 /**
  *
  * Use this instruction to create a translation block that doesn't contain any placeholder.
@@ -96,26 +100,34 @@ export declare function i18nEnd(): void;
  * @param index A unique index of the translation in the static block.
  * @param message The translation message.
  * @param subTemplateIndex Optional sub-template index in the `message`.
+ *
+ * @publicApi
  */
-export declare function i18n(index: number, message: string, subTemplateIndex?: number): void;
+export declare function Δi18n(index: number, message: string, subTemplateIndex?: number): void;
 /**
  * Marks a list of attributes as translatable.
  *
  * @param index A unique index in the static block
  * @param values
+ *
+ * @publicApi
  */
-export declare function i18nAttributes(index: number, values: string[]): void;
+export declare function Δi18nAttributes(index: number, values: string[]): void;
 /**
  * Stores the values of the bindings during each update cycle in order to determine if we need to
  * update the translated nodes.
  *
  * @param expression The binding's new value or NO_CHANGE
+ *
+ * @publicApi
  */
-export declare function i18nExp<T>(expression: T | NO_CHANGE): void;
+export declare function Δi18nExp<T>(expression: T | NO_CHANGE): void;
 /**
  * Updates a translation block or an i18n attribute when the bindings have changed.
  *
  * @param index Index of either {@link i18nStart} (translation block) or {@link i18nAttributes}
  * (i18n attribute) on which it should update the content.
+ *
+ * @publicApi
  */
-export declare function i18nApply(index: number): void;
+export declare function Δi18nApply(index: number): void;

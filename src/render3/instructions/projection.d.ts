@@ -19,8 +19,10 @@ import { CssSelectorList } from '../interfaces/projection';
  *
  * @param selectors A collection of parsed CSS selectors
  * @param rawSelectors A collection of CSS selectors in the raw, un-parsed form
+ *
+ * @publicApi
  */
-export declare function projectionDef(selectors?: CssSelectorList[], textSelectors?: string[]): void;
+export declare function ΔprojectionDef(selectors?: CssSelectorList[], textSelectors?: string[]): void;
 /**
  * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
  * to the projectionDef instruction.
@@ -29,5 +31,7 @@ export declare function projectionDef(selectors?: CssSelectorList[], textSelecto
  * @param selectorIndex:
  *        - 0 when the selector is `*` (or unspecified as this is the default value),
  *        - 1 based index of the selector from the {@link projectionDef}
- */
-export declare function projection(nodeIndex: number, selectorIndex?: number, attrs?: string[]): void;
+  *
+ * @publicApi
+*/
+export declare function Δprojection(nodeIndex: number, selectorIndex?: number, attrs?: string[]): void;

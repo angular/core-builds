@@ -12,10 +12,16 @@ import { SanitizerFn } from '../interfaces/sanitization';
  * Attributes and localRefs are passed as an array of strings where elements with an even index
  * hold an attribute name and elements with an odd index hold an attribute value, ex.:
  * ['id', 'warning5', 'class', 'alert']
+ *
+ * @publicApi
  */
-export declare function elementStart(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
-/** Mark the end of the element. */
-export declare function elementEnd(): void;
+export declare function ΔelementStart(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+/**
+ * Mark the end of the element.
+ *
+ * @publicApi
+ */
+export declare function ΔelementEnd(): void;
 /**
  * Creates an empty element using {@link elementStart} and {@link elementEnd}
  *
@@ -24,8 +30,10 @@ export declare function elementEnd(): void;
  * @param attrs Statically bound set of attributes, classes, and styles to be written into the DOM
  *              element on creation. Use [AttributeMarker] to denote the meaning of this array.
  * @param localRefs A set of local reference bindings on the element.
+ *
+ * @publicApi
  */
-export declare function element(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+export declare function Δelement(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
 /**
  * Updates the value of removes an attribute on an Element.
  *
@@ -35,8 +43,10 @@ export declare function element(index: number, name: string, attrs?: TAttributes
  *                  Otherwise the attribute value is set to the stringified value.
  * @param sanitizer An optional function used to sanitize the value.
  * @param namespace Optional namespace to use when setting the attribute.
+ *
+ * @publicApi
  */
-export declare function elementAttribute(index: number, name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): void;
+export declare function ΔelementAttribute(index: number, name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): void;
 /**
  * Assign static attribute values to a host element.
  *
@@ -76,4 +86,4 @@ export declare function elementAttribute(index: number, name: string, value: any
  *
  * @publicApi
  */
-export declare function elementHostAttrs(attrs: TAttributes): void;
+export declare function ΔelementHostAttrs(attrs: TAttributes): void;
