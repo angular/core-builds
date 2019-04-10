@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+56.sha-138ca5a.with-local-changes
+ * @license Angular v8.0.0-beta.11+59.sha-39bfd1a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -24,11 +24,11 @@ var PROP_METADATA = '__prop__metadata__';
 function makeDecorator(name, props, parentClass, additionalProcessing, typeFn) {
     var metaCtor = makeMetadataCtor(props);
     function DecoratorFactory() {
+        var _a;
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
         }
-        var _a;
         if (this instanceof DecoratorFactory) {
             metaCtor.call.apply(metaCtor, __spread([this], args));
             return this;
@@ -72,11 +72,11 @@ function makeMetadataCtor(props) {
 function makeParamDecorator(name, props, parentClass) {
     var metaCtor = makeMetadataCtor(props);
     function ParamDecoratorFactory() {
+        var _a;
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
         }
-        var _a;
         if (this instanceof ParamDecoratorFactory) {
             metaCtor.apply(this, args);
             return this;
@@ -109,11 +109,11 @@ function makeParamDecorator(name, props, parentClass) {
 function makePropDecorator(name, props, parentClass, additionalProcessing) {
     var metaCtor = makeMetadataCtor(props);
     function PropDecoratorFactory() {
+        var _a;
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
         }
-        var _a;
         if (this instanceof PropDecoratorFactory) {
             metaCtor.apply(this, args);
             return this;
@@ -10948,11 +10948,11 @@ function tagSet(tags) {
     return res;
 }
 function merge() {
+    var e_2, _a;
     var sets = [];
     for (var _i = 0; _i < arguments.length; _i++) {
         sets[_i] = arguments[_i];
     }
-    var e_2, _a;
     var res = {};
     try {
         for (var sets_1 = __values(sets), sets_1_1 = sets_1.next(); !sets_1_1.done; sets_1_1 = sets_1.next()) {
@@ -14302,8 +14302,8 @@ function createInjector(defType, parent, additionalProviders, name) {
 }
 var R3Injector = /** @class */ (function () {
     function R3Injector(def, additionalProviders, parent, source) {
-        if (source === void 0) { source = null; }
         var _this = this;
+        if (source === void 0) { source = null; }
         this.parent = parent;
         /**
          * Map of tokens to records which contain the instances of those tokens.
@@ -15820,7 +15820,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.11+56.sha-138ca5a.with-local-changes');
+var VERSION = new Version('8.0.0-beta.11+59.sha-39bfd1a.with-local-changes');
 
 /**
  * @license
@@ -25396,8 +25396,8 @@ function anchorDef(flags, matchedQueriesDsl, ngContentIndex, childCount, handleE
     };
 }
 function elementDef(checkIndex, flags, matchedQueriesDsl, ngContentIndex, childCount, namespaceAndName, fixedAttrs, bindings, outputs, handleEvent, componentView, componentRendererType) {
-    if (fixedAttrs === void 0) { fixedAttrs = []; }
     var _a;
+    if (fixedAttrs === void 0) { fixedAttrs = []; }
     if (!handleEvent) {
         handleEvent = NOOP;
     }
