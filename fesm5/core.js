@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+60.sha-0997512.with-local-changes
+ * @license Angular v8.0.0-beta.11+65.sha-17c4ed9.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6430,7 +6430,7 @@ function flushQueue(context) {
         for (var i = 1 /* ValuesStartPosition */; i < buffer.length; i += 3 /* Size */) {
             var fn = buffer[i + 1 /* InstructionFnOffset */];
             var args = buffer[i + 2 /* ParamsOffset */];
-            fn.apply(void 0, __spread(args));
+            fn.apply(this, args);
         }
         buffer.length = 1 /* ValuesStartPosition */;
     }
@@ -15891,7 +15891,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.11+60.sha-0997512.with-local-changes');
+var VERSION = new Version('8.0.0-beta.11+65.sha-17c4ed9.with-local-changes');
 
 /**
  * @license

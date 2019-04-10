@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+60.sha-0997512.with-local-changes
+ * @license Angular v8.0.0-beta.11+65.sha-17c4ed9.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7856,7 +7856,7 @@ function flushQueue(context) {
             const fn = (/** @type {?} */ (buffer[i + 1 /* InstructionFnOffset */]));
             /** @type {?} */
             const args = (/** @type {?} */ (buffer[i + 2 /* ParamsOffset */]));
-            fn(...args);
+            fn.apply(this, args);
         }
         buffer.length = 1 /* ValuesStartPosition */;
     }
@@ -19740,7 +19740,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.11+60.sha-0997512.with-local-changes');
+const VERSION = new Version('8.0.0-beta.11+65.sha-17c4ed9.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
