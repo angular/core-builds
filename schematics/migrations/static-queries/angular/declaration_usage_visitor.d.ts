@@ -7,6 +7,7 @@
  */
 /// <amd-module name="@angular/core/schematics/migrations/static-queries/angular/declaration_usage_visitor" />
 import * as ts from 'typescript';
+export declare type FunctionContext = Map<ts.Node, ts.Node>;
 /**
  * Class that can be used to determine if a given TypeScript node is used within
  * other given TypeScript nodes. This is achieved by walking through all children
@@ -16,6 +17,7 @@ import * as ts from 'typescript';
 export declare class DeclarationUsageVisitor {
     private declaration;
     private typeChecker;
+    private baseContext;
     /** Set of visited symbols that caused a jump in control flow. */
     private visitedJumpExprNodes;
     /** Queue of nodes that need to be checked for declaration usage. */
@@ -25,7 +27,7 @@ export declare class DeclarationUsageVisitor {
      * of the currently analyzed function block.
      */
     private context;
-    constructor(declaration: ts.Node, typeChecker: ts.TypeChecker);
+    constructor(declaration: ts.Node, typeChecker: ts.TypeChecker, baseContext?: FunctionContext);
     private isReferringToSymbol;
     private addJumpExpressionToQueue;
     private addNewExpressionToQueue;
@@ -52,4 +54,6 @@ export declare class DeclarationUsageVisitor {
      * symbols to the symbol containing the value declaration.
      */
     private _getDeclarationSymbolOfNode;
+    /** Gets the symbol of the given property access expression. */
+    private _getPropertyAccessSymbol;
 }

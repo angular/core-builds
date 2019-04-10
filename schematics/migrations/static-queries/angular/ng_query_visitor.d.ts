@@ -12,6 +12,8 @@ import { NgQueryDefinition } from './query-definition';
 export interface ClassMetadata {
     /** List of class declarations that derive from the given class. */
     derivedClasses: ts.ClassDeclaration[];
+    /** Super class of the given class. */
+    superClass: ts.ClassDeclaration | null;
     /** List of property names that declare an Angular input within the given class. */
     ngInputNames: string[];
 }
