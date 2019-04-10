@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+45.sha-84be7c5.with-local-changes
+ * @license Angular v8.0.0-beta.11+64.sha-675f390.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -292,71 +292,6 @@ declare interface ConstructorSansProvider {
 }
 
 /**
- * Construct an `InjectableDef` which defines how a token will be constructed by the DI system, and
- * in which injectors (if any) it will be available.
- *
- * This should be assigned to a static `ngInjectableDef` field on a type, which will then be an
- * `InjectableType`.
- *
- * Options:
- * * `providedIn` determines which injectors will include the injectable, by either associating it
- *   with an `@NgModule` or other `InjectorType`, or by specifying that this injectable should be
- *   provided in the `'root'` injector, which will be the application-level injector in most apps.
- * * `factory` gives the zero argument function which will create an instance of the injectable.
- *   The factory can call `inject` to access the `Injector` and request injection of dependencies.
- *
- * @publicApi
- */
-export declare function defineInjectable<T>(opts: {
-    providedIn?: Type<any> | 'root' | 'any' | null;
-    factory: () => T;
-}): never;
-
-/**
- * Construct an `InjectorDef` which configures an injector.
- *
- * This should be assigned to a static `ngInjectorDef` field on a type, which will then be an
- * `InjectorType`.
- *
- * Options:
- *
- * * `factory`: an `InjectorType` is an instantiable type, so a zero argument `factory` function to
- *   create the type must be provided. If that factory function needs to inject arguments, it can
- *   use the `inject` function.
- * * `providers`: an optional array of providers to add to the injector. Each provider must
- *   either have a factory or point to a type which has an `ngInjectableDef` static property (the
- *   type must be an `InjectableType`).
- * * `imports`: an optional array of imports of other `InjectorType`s or `InjectorTypeWithModule`s
- *   whose providers will also be added to the injector. Locally provided types will override
- *   providers from imports.
- *
- * @publicApi
- */
-export declare function defineInjector(options: {
-    factory: () => any;
-    providers?: any[];
-    imports?: any[];
-}): never;
-
-export declare function defineNgModule<T>(def: {
-    /** Token representing the module. Used by DI. */
-    type: T;
-    /** List of components to bootstrap. */
-    bootstrap?: Type<any>[] | (() => Type<any>[]);
-    /** List of components, directives, and pipes declared by this module. */
-    declarations?: Type<any>[] | (() => Type<any>[]);
-    /** List of modules or `ModuleWithProviders` imported by this module. */
-    imports?: Type<any>[] | (() => Type<any>[]);
-    /**
-     * List of modules, `ModuleWithProviders`, components, directives, or pipes exported by this
-     * module.
-     */
-    exports?: Type<any>[] | (() => Type<any>[]);
-    /** The set of schemas that declare elements to be allowed in the NgModule. */
-    schemas?: SchemaMetadata[] | null;
-}): never;
-
-/**
  * A wrapper around a native element inside of a View.
  *
  * An `ElementRef` is backed by a render-specific element. In the browser, this is usually a DOM
@@ -496,65 +431,6 @@ declare interface FactorySansProvider {
     deps?: any[];
 }
 
-/**
- * Injects a token from the currently active injector.
- * Must be used in the context of a factory function such as one defined for an
- * `InjectionToken`. Throws an error if not called from such a context.
- *
- * Within such a factory function, using this function to request injection of a dependency
- * is faster and more type-safe than providing an additional array of dependencies
- * (as has been common with `useFactory` providers).
- *
- * @param token The injection token for the dependency to be injected.
- * @param flags Optional flags that control how injection is executed.
- * The flags correspond to injection strategies that can be specified with
- * parameter decorators `@Host`, `@Self`, `@SkipSef`, and `@Optional`.
- * @returns True if injection is successful, null otherwise.
- *
- * @usageNotes
- *
- * ### Example
- *
- * {@example core/di/ts/injector_spec.ts region='ShakableInjectionToken'}
- *
- * @publicApi
- */
-export declare function inject<T>(token: Type<T> | InjectionToken<T>): T;
-
-export declare function inject<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
-
-/**
- * Information about how a type or `InjectionToken` interfaces with the DI system.
- *
- * At a minimum, this includes a `factory` which defines how to create the given type `T`, possibly
- * requesting injection of other types if necessary.
- *
- * Optionally, a `providedIn` parameter specifies that the given type belongs to a particular
- * `InjectorDef`, `NgModule`, or a special scope (e.g. `'root'`). A value of `null` indicates
- * that the injectable does not belong to any scope.
- *
- * NOTE: This is a private type and should not be exported
- */
-export declare interface InjectableDef<T> {
-    /**
-     * Specifies that the given type belongs to a particular injector:
-     * - `InjectorType` such as `NgModule`,
-     * - `'root'` the root injector
-     * - `'any'` all injectors.
-     * - `null`, does not belong to any injector. Must be explicitly listed in the injector
-     *   `providers`.
-     */
-    providedIn: InjectorType<any> | 'root' | 'any' | null;
-    /**
-     * Factory method to execute to create an instance of the injectable.
-     */
-    factory: () => T;
-    /**
-     * In a case of no explicit injector, a location where the instance of the injectable is stored.
-     */
-    value: T | undefined;
-}
-
 
 /**
  * Injection flags for DI.
@@ -671,22 +547,6 @@ declare abstract class Injector {
 }
 
 /**
- * Information about the providers to be included in an `Injector` as well as how the given type
- * which carries the information should be created by the DI system.
- *
- * An `InjectorDef` can import other types which have `InjectorDefs`, forming a deep nested
- * structure of providers with a defined priority (identically to how `NgModule`s also have
- * an import/dependency structure).
- *
- * NOTE: This is a private type and should not be exported
- */
-export declare interface InjectorDef<T> {
-    factory: () => T;
-    providers: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | any[])[];
-    imports: (InjectorType<any> | InjectorTypeWithProviders<any>)[];
-}
-
-/**
  * A type which has an `InjectorDef` static field.
  *
  * `InjectorDefTypes` can be used to configure a `StaticInjector`.
@@ -725,7 +585,7 @@ export declare const ITS_JUST_ANGULAR = true;
  * This is the internal data structure used by the runtime to assemble components, directives,
  * pipes, and injectors.
  *
- * NOTE: Always use `defineNgModule` function to create this object,
+ * NOTE: Always use `ΔdefineNgModule` function to create this object,
  * never create the object directly since the shape of this object
  * can change between versions.
  */
@@ -752,8 +612,6 @@ export declare interface NgModuleDef<T> {
     /** The set of schemas that declare elements to be allowed in the NgModule. */
     schemas: SchemaMetadata[] | null;
 }
-
-export declare type NgModuleDefWithMeta<T, Declarations, Imports, Exports> = NgModuleDef<T>;
 
 export declare class NgModuleFactory<T> extends NgModuleFactory_2<T> {
     moduleType: Type<T>;
@@ -1008,5 +866,163 @@ declare abstract class ViewRef extends ChangeDetectorRef {
      */
     abstract onDestroy(callback: Function): any /** TODO #9100 */;
 }
+
+/**
+ * Construct an `InjectableDef` which defines how a token will be constructed by the DI system, and
+ * in which injectors (if any) it will be available.
+ *
+ * This should be assigned to a static `ngInjectableDef` field on a type, which will then be an
+ * `InjectableType`.
+ *
+ * Options:
+ * * `providedIn` determines which injectors will include the injectable, by either associating it
+ *   with an `@NgModule` or other `InjectorType`, or by specifying that this injectable should be
+ *   provided in the `'root'` injector, which will be the application-level injector in most apps.
+ * * `factory` gives the zero argument function which will create an instance of the injectable.
+ *   The factory can call `inject` to access the `Injector` and request injection of dependencies.
+ *
+ * @publicApi
+ */
+export declare function ΔdefineInjectable<T>(opts: {
+    providedIn?: Type<any> | 'root' | 'any' | null;
+    factory: () => T;
+}): never;
+
+/**
+ * Construct an `InjectorDef` which configures an injector.
+ *
+ * This should be assigned to a static `ngInjectorDef` field on a type, which will then be an
+ * `InjectorType`.
+ *
+ * Options:
+ *
+ * * `factory`: an `InjectorType` is an instantiable type, so a zero argument `factory` function to
+ *   create the type must be provided. If that factory function needs to inject arguments, it can
+ *   use the `inject` function.
+ * * `providers`: an optional array of providers to add to the injector. Each provider must
+ *   either have a factory or point to a type which has an `ngInjectableDef` static property (the
+ *   type must be an `InjectableType`).
+ * * `imports`: an optional array of imports of other `InjectorType`s or `InjectorTypeWithModule`s
+ *   whose providers will also be added to the injector. Locally provided types will override
+ *   providers from imports.
+ *
+ * @publicApi
+ */
+export declare function ΔdefineInjector(options: {
+    factory: () => any;
+    providers?: any[];
+    imports?: any[];
+}): never;
+
+/**
+ * @publicApi
+ */
+export declare function ΔdefineNgModule<T>(def: {
+    /** Token representing the module. Used by DI. */
+    type: T;
+    /** List of components to bootstrap. */
+    bootstrap?: Type<any>[] | (() => Type<any>[]);
+    /** List of components, directives, and pipes declared by this module. */
+    declarations?: Type<any>[] | (() => Type<any>[]);
+    /** List of modules or `ModuleWithProviders` imported by this module. */
+    imports?: Type<any>[] | (() => Type<any>[]);
+    /**
+     * List of modules, `ModuleWithProviders`, components, directives, or pipes exported by this
+     * module.
+     */
+    exports?: Type<any>[] | (() => Type<any>[]);
+    /** The set of schemas that declare elements to be allowed in the NgModule. */
+    schemas?: SchemaMetadata[] | null;
+}): never;
+
+/**
+ * Generated instruction: Injects a token from the currently active injector.
+ *
+ * WARNING: This function is meant to be generated by the Ivy compiler, and is not meant for
+ * developer consumption!
+ *
+ * https://github.com/angular/angular/blob/master/packages/core/src/render3/DELTA_INSTRUCTIONS.md
+ *
+ * Must be used in the context of a factory function such as one defined for an
+ * `InjectionToken`. Throws an error if not called from such a context.
+ *
+ * Within such a factory function, using this function to request injection of a dependency
+ * is faster and more type-safe than providing an additional array of dependencies
+ * (as has been common with `useFactory` providers).
+ *
+ * @param token The injection token for the dependency to be injected.
+ * @param flags Optional flags that control how injection is executed.
+ * The flags correspond to injection strategies that can be specified with
+ * parameter decorators `@Host`, `@Self`, `@SkipSef`, and `@Optional`.
+ * @returns True if injection is successful, null otherwise.
+ *
+ * @usageNotes
+ *
+ * ### Example
+ *
+ * {@example core/di/ts/injector_spec.ts region='ShakableInjectionToken'}
+ *
+ * @publicApi
+ */
+export declare function Δinject<T>(token: Type<T> | InjectionToken<T>): T;
+
+export declare function Δinject<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
+
+/**
+ * Information about how a type or `InjectionToken` interfaces with the DI system.
+ *
+ * At a minimum, this includes a `factory` which defines how to create the given type `T`, possibly
+ * requesting injection of other types if necessary.
+ *
+ * Optionally, a `providedIn` parameter specifies that the given type belongs to a particular
+ * `InjectorDef`, `NgModule`, or a special scope (e.g. `'root'`). A value of `null` indicates
+ * that the injectable does not belong to any scope.
+ *
+ * NOTE: This is a private type and should not be exported
+ *
+ * @publicApi
+ */
+export declare interface ΔInjectableDef<T> {
+    /**
+     * Specifies that the given type belongs to a particular injector:
+     * - `InjectorType` such as `NgModule`,
+     * - `'root'` the root injector
+     * - `'any'` all injectors.
+     * - `null`, does not belong to any injector. Must be explicitly listed in the injector
+     *   `providers`.
+     */
+    providedIn: InjectorType<any> | 'root' | 'any' | null;
+    /**
+     * Factory method to execute to create an instance of the injectable.
+     */
+    factory: () => T;
+    /**
+     * In a case of no explicit injector, a location where the instance of the injectable is stored.
+     */
+    value: T | undefined;
+}
+
+/**
+ * Information about the providers to be included in an `Injector` as well as how the given type
+ * which carries the information should be created by the DI system.
+ *
+ * An `InjectorDef` can import other types which have `InjectorDefs`, forming a deep nested
+ * structure of providers with a defined priority (identically to how `NgModule`s also have
+ * an import/dependency structure).
+ *
+ * NOTE: This is a private type and should not be exported
+ *
+ * @publicApi
+ */
+export declare interface ΔInjectorDef<T> {
+    factory: () => T;
+    providers: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | any[])[];
+    imports: (InjectorType<any> | InjectorTypeWithProviders<any>)[];
+}
+
+/**
+ * @publicApi
+ */
+export declare type ΔNgModuleDefWithMeta<T, Declarations, Imports, Exports> = NgModuleDef<T>;
 
 export { }

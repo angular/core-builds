@@ -7,6 +7,7 @@
  */
 /// <amd-module name="@angular/core/schematics/migrations/static-queries/angular/declaration_usage_visitor" />
 import * as ts from 'typescript';
+export declare type FunctionContext = Map<ts.Node, ts.Node>;
 /**
  * Class that can be used to determine if a given TypeScript node is used within
  * other given TypeScript nodes. This is achieved by walking through all children
@@ -16,12 +17,43 @@ import * as ts from 'typescript';
 export declare class DeclarationUsageVisitor {
     private declaration;
     private typeChecker;
+    private baseContext;
     /** Set of visited symbols that caused a jump in control flow. */
-    private visitedJumpExprSymbols;
-    constructor(declaration: ts.Node, typeChecker: ts.TypeChecker);
+    private visitedJumpExprNodes;
+    /** Queue of nodes that need to be checked for declaration usage. */
+    private nodeQueue;
+    /**
+     * Function context that holds the TypeScript node values for all parameters
+     * of the currently analyzed function block.
+     */
+    private context;
+    constructor(declaration: ts.Node, typeChecker: ts.TypeChecker, baseContext?: FunctionContext);
     private isReferringToSymbol;
     private addJumpExpressionToQueue;
     private addNewExpressionToQueue;
-    private visitPropertyAccessExpression;
+    private visitPropertyAccessors;
+    private visitBinaryExpression;
     isSynchronouslyUsedInNode(searchNode: ts.Node): boolean;
+    /**
+     * Resolves a given node from the context. In case the node is not mapped in
+     * the context, the original node is returned.
+     */
+    private _resolveNodeFromContext;
+    /**
+     * Updates the context to reflect the newly set parameter values. This allows future
+     * references to function parameters to be resolved to the actual node through the context.
+     */
+    private _updateContext;
+    /**
+     * Resolves a TypeScript identifier node. For example an identifier can refer to a
+     * function parameter which can be resolved through the function context.
+     */
+    private _resolveIdentifier;
+    /**
+     * Gets the declaration symbol of a given TypeScript node. Resolves aliased
+     * symbols to the symbol containing the value declaration.
+     */
+    private _getDeclarationSymbolOfNode;
+    /** Gets the symbol of the given property access expression. */
+    private _getPropertyAccessSymbol;
 }

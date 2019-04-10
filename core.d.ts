@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+45.sha-84be7c5.with-local-changes
+ * @license Angular v8.0.0-beta.11+64.sha-675f390.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1578,51 +1578,11 @@ export declare class DefaultIterableDiffer<V> implements IterableDiffer<V>, Iter
 }
 
 /**
- * Construct an `InjectableDef` which defines how a token will be constructed by the DI system, and
- * in which injectors (if any) it will be available.
- *
- * This should be assigned to a static `ngInjectableDef` field on a type, which will then be an
- * `InjectableType`.
- *
- * Options:
- * * `providedIn` determines which injectors will include the injectable, by either associating it
- *   with an `@NgModule` or other `InjectorType`, or by specifying that this injectable should be
- *   provided in the `'root'` injector, which will be the application-level injector in most apps.
- * * `factory` gives the zero argument function which will create an instance of the injectable.
- *   The factory can call `inject` to access the `Injector` and request injection of dependencies.
- *
+ * @deprecated in v8, delete after v10. This API should be used only be generated code, and that
+ * code should now use ΔdefineInjectable instead.
  * @publicApi
  */
-export declare function defineInjectable<T>(opts: {
-    providedIn?: Type<any> | 'root' | 'any' | null;
-    factory: () => T;
-}): never;
-
-/**
- * Construct an `InjectorDef` which configures an injector.
- *
- * This should be assigned to a static `ngInjectorDef` field on a type, which will then be an
- * `InjectorType`.
- *
- * Options:
- *
- * * `factory`: an `InjectorType` is an instantiable type, so a zero argument `factory` function to
- *   create the type must be provided. If that factory function needs to inject arguments, it can
- *   use the `inject` function.
- * * `providers`: an optional array of providers to add to the injector. Each provider must
- *   either have a factory or point to a type which has an `ngInjectableDef` static property (the
- *   type must be an `InjectableType`).
- * * `imports`: an optional array of imports of other `InjectorType`s or `InjectorTypeWithModule`s
- *   whose providers will also be added to the injector. Locally provided types will override
- *   providers from imports.
- *
- * @publicApi
- */
-export declare function defineInjector(options: {
-    factory: () => any;
-    providers?: any[];
-    imports?: any[];
-}): never;
+export declare const defineInjectable: typeof ΔdefineInjectable;
 
 declare interface Definition<DF extends DefinitionFactory<any>> {
     factory: DF | null;
@@ -2631,7 +2591,7 @@ export declare interface HostDecorator {
      *
      * The following shows use with the `@Optional` decorator, and allows for a null result.
      *
-     * {@example core/di/ts/metadata_spec.ts region='Host'}
+     * <code-example path="core/di/ts/metadata_spec.ts" region="Host"></code-example>
      */
     (): any;
     new (): Host;
@@ -3122,33 +3082,11 @@ export declare interface Inject {
 export declare const Inject: InjectDecorator;
 
 /**
- * Injects a token from the currently active injector.
- * Must be used in the context of a factory function such as one defined for an
- * `InjectionToken`. Throws an error if not called from such a context.
- *
- * Within such a factory function, using this function to request injection of a dependency
- * is faster and more type-safe than providing an additional array of dependencies
- * (as has been common with `useFactory` providers).
- *
- * @param token The injection token for the dependency to be injected.
- * @param flags Optional flags that control how injection is executed.
- * The flags correspond to injection strategies that can be specified with
- * parameter decorators `@Host`, `@Self`, `@SkipSef`, and `@Optional`.
- * @returns True if injection is successful, null otherwise.
- *
- * @usageNotes
- *
- * ### Example
- *
- * {@example core/di/ts/injector_spec.ts region='ShakableInjectionToken'}
- *
+ * @deprecated in v8, delete after v10. This API should be used only be generated code, and that
+ * code should now use Δinject instead.
  * @publicApi
  */
-declare function inject<T>(token: Type<T> | InjectionToken<T>): T;
-
-declare function inject<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
-export { inject }
-export { inject as ɵinject }
+export declare const inject: typeof Δinject;
 
 /**
  * Type of the Injectable metadata.
@@ -3189,13 +3127,8 @@ export declare interface InjectableDecorator {
      *
      * The following example shows how service classes are properly marked as
      * injectable.
-     *
-     * {@example core/di/ts/metadata_spec.ts region='Injectable'}
-     *
-     * `Injector` throws an error if it tries to instantiate a class that
-     * is not decorated with `@Injectable`, as shown in the following example.
-     *
-     * {@example core/di/ts/metadata_spec.ts region='InjectableThrows'}
+     *Z
+     * <code-example path="core/di/ts/metadata_spec.ts" region="Injectable"></code-example>
      *
      */
     (): TypeDecorator;
@@ -3250,12 +3183,11 @@ export declare interface InjectDecorator {
      * The following example shows a class constructor that specifies a
      * custom provider of a dependency using the parameter decorator.
      *
-     * {@example core/di/ts/metadata_spec.ts region='Inject'}
-     *
      * When `@Inject()` is not present, the injector uses the type annotation of the
      * parameter as the provider.
      *
-     * {@example core/di/ts/metadata_spec.ts region='InjectWithoutDecorator'}
+     * <code-example path="core/di/ts/metadata_spec.ts"
+     * region="InjectWithoutDecorator"></code-example>
      */
     (token: any): any;
     new (token: any): Inject;
@@ -4801,7 +4733,7 @@ export declare interface OptionalDecorator {
      *
      * The following code allows the possibility of a null result:
      *
-     * {@example core/di/ts/metadata_spec.ts region='Optional'}
+     * <code-example path="core/di/ts/metadata_spec.ts" region="Optional"></code-example>
      *
      */
     (): any;
@@ -6317,7 +6249,8 @@ export declare interface SelfDecorator {
      * by the local injector when instantiating the class itself, but not
      * when instantiating a child.
      *
-     * {@example core/di/ts/metadata_spec.ts region='Self'}
+     * <code-example path="core/di/ts/metadata_spec.ts" region="Self"></code-example>
+     *
      *
      * @see `SkipSelf`
      * @see `Optional`
@@ -6438,7 +6371,7 @@ export declare interface SkipSelfDecorator {
      * In the following example, the dependency can be resolved when
      * instantiating a child, but not when instantiating the class itself.
      *
-     * {@example core/di/ts/metadata_spec.ts region='SkipSelf'}
+     * <code-example path="core/di/ts/metadata_spec.ts" region="SkipSelf"></code-example>
      *
      * Learn more in the
      * [Dependency Injection guide](guide/dependency-injection-in-action#skip).
@@ -8724,14 +8657,6 @@ export declare function ɵ_sanitizeUrl(url: string): string;
  */
 export declare function ɵaddPlayer(ref: ComponentInstance | DirectiveInstance | HTMLElement, player: ɵPlayer): void;
 
-
-/**
- * Allocates the necessary amount of slots for host vars.
- *
- * @param count Amount of vars to be allocated
- */
-export declare function ɵallocHostVars(count: number): void;
-
 export declare const ɵALLOW_MULTIPLE_PLATFORMS: InjectionToken<boolean>;
 
 export declare function ɵand(flags: ɵNodeFlags, matchedQueriesDsl: null | [string | number, ɵQueryValueType][], ngContentIndex: null | number, childCount: number, handleEvent?: null | ElementHandleEventFn, templateFactory?: ViewDefinitionFactory): NodeDef;
@@ -8831,7 +8756,7 @@ export declare interface ɵangular_packages_core_core_bg extends TNode {
  * `packages/compiler/src/schema/dom_security_schema.ts`.
  * If tag and prop names don't match Resource URL schema, use URL sanitizer.
  */
-export declare function ɵangular_packages_core_core_bh(tag: string, prop: string): typeof ɵsanitizeResourceUrl;
+export declare function ɵangular_packages_core_core_bh(tag: string, prop: string): typeof ΔsanitizeResourceUrl;
 
 /**
  * Defines the shape which produces the Player.
@@ -9302,48 +9227,6 @@ export declare const enum ɵAttributeMarker {
     Template = 4
 }
 
-/**
- * Runtime information for classes that are inherited by components or directives
- * that aren't defined as components or directives.
- *
- * This is an internal data structure used by the render to determine what inputs
- * and outputs should be inherited.
- *
- * See: {@link defineBase}
- */
-export declare interface ɵBaseDef<T> {
-    /**
-     * A dictionary mapping the inputs' minified property names to their public API names, which
-     * are their aliases if any, or their original unminified property names
-     * (as in `@Input('alias') propertyName: any;`).
-     */
-    readonly inputs: {
-        [P in keyof T]: string;
-    };
-    /**
-     * @deprecated This is only here because `NgOnChanges` incorrectly uses declared name instead of
-     * public or minified name.
-     */
-    readonly declaredInputs: {
-        [P in keyof T]: string;
-    };
-    /**
-     * A dictionary mapping the outputs' minified property names to their public API names, which
-     * are their aliases if any, or their original unminified property names
-     * (as in `@Output('alias') propertyName: any;`).
-     */
-    readonly outputs: {
-        [P in keyof T]: string;
-    };
-}
-
-/**
- * Creates a single value binding.
- *
- * @param value Value to diff
- */
-export declare function ɵbind<T>(value: T): T | ɵNO_CHANGE;
-
 export declare const enum ɵBindingFlags {
     TypeElementAttribute = 1,
     TypeElementClass = 2,
@@ -9622,56 +9505,6 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
     readonly _?: never;
 }
 
-export declare type ɵComponentDefWithMeta<T, Selector extends String, ExportAs extends string[], InputMap extends {
-    [key: string]: string;
-}, OutputMap extends {
-    [key: string]: string;
-}, QueryFields extends string[]> = ɵComponentDef<T>;
-
-/**
-* Registers a synthetic host listener (e.g. `(@foo.start)`) on a component.
-*
-* This instruction is for compatibility purposes and is designed to ensure that a
-* synthetic host listener (e.g. `@HostListener('@foo.start')`) properly gets rendered
-* in the component's renderer. Normally all host listeners are evaluated with the
-* parent component's renderer, but, in the case of animation @triggers, they need
-* to be evaluated with the sub component's renderer (because that's where the
-* animation triggers are defined).
-*
-* Do not use this instruction as a replacement for `listener`. This instruction
-* only exists to ensure compatibility with the ViewEngine's host binding behavior.
-*
-* @param eventName Name of the event
-* @param listenerFn The function to be called when event emits
-* @param useCapture Whether or not to use capture in event listener
-* @param eventTargetResolver Function that returns global target information in case this listener
-* should be attached to a global object like window, document or body
-*/
-export declare function ɵcomponentHostSyntheticListener<T>(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
-
-/**
- * Updates a synthetic host binding (e.g. `[@foo]`) on a component.
- *
- * This instruction is for compatibility purposes and is designed to ensure that a
- * synthetic host binding (e.g. `@HostBinding('@foo')`) properly gets rendered in
- * the component's renderer. Normally all host bindings are evaluated with the parent
- * component's renderer, but, in the case of animation @triggers, they need to be
- * evaluated with the sub component's renderer (because that's where the animation
- * triggers are defined).
- *
- * Do not use this instruction as a replacement for `elementProperty`. This instruction
- * only exists to ensure compatibility with the ViewEngine's host binding behavior.
- *
- * @param index The index of the element to update in the data array
- * @param propName Name of property. Because it is going to DOM, this is not subject to
- *        renaming as part of minification.
- * @param value New value to write.
- * @param sanitizer An optional function used to sanitize the value.
- * @param nativeOnly Whether or not we should only set native properties and skip input check
- * (this is necessary for host property bindings)
- */
-export declare function ɵcomponentHostSyntheticProperty<T>(index: number, propName: string, value: T | ɵNO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): void;
-
 /**
  * A subclass of `Type` which has a static `ngComponentDef`:`ComponentDef` field making it
  * consumable for rendering.
@@ -9685,43 +9518,6 @@ export declare class ɵConsole {
     log(message: string): void;
     warn(message: string): void;
 }
-
-/**
- * Creates an LContainer for inline views, e.g.
- *
- * % if (showing) {
- *   <div></div>
- * % }
- *
- * @param index The index of the container in the data array
- */
-export declare function ɵcontainer(index: number): void;
-
-/**
- * Marks the end of the LContainer.
- *
- * Marking the end of LContainer is the time when to child views get inserted or removed.
- */
-export declare function ɵcontainerRefreshEnd(): void;
-
-/**
- * Sets a container up to receive views.
- *
- * @param index The index of the container in the data array
- */
-export declare function ɵcontainerRefreshStart(index: number): void;
-
-/**
- * Registers a QueryList, associated with a content query, for later refresh (part of a view
- * refresh).
- *
- * @param directiveIndex Current directive index
- * @param predicate The type for which the query will search
- * @param descend Whether or not to descend into children
- * @param read What to save in the query
- * @returns QueryList<T>
- */
-export declare function ɵcontentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read: any): QueryList<T>;
 
 /**
  * Create a new `Injector` which is configured using a `defType` of `InjectorType<any>`s.
@@ -9754,24 +9550,1119 @@ export declare const ɵdefaultIterableDiffers: IterableDiffers;
 export declare const ɵdefaultKeyValueDiffers: KeyValueDiffers;
 
 /**
+ * Bitmask for DI flags
+ */
+export declare const enum ɵDepFlags {
+    None = 0,
+    SkipSelf = 1,
+    Optional = 2,
+    Self = 4,
+    Value = 8
+}
+
+
+/**
+ * Synchronously perform change detection on a component (and possibly its sub-components).
+ *
+ * This function triggers change detection in a synchronous way on a component. There should
+ * be very little reason to call this function directly since a preferred way to do change
+ * detection is to {@link markDirty} the component and wait for the scheduler to call this method
+ * at some future point in time. This is because a single user action often results in many
+ * components being invalidated and calling change detection on each component synchronously
+ * would be inefficient. It is better to wait until all components are marked as dirty and
+ * then perform single change detection across all of the components
+ *
+ * @param component The component which the change detection should be performed on.
+ */
+export declare function ɵdetectChanges<T>(component: T): void;
+
+
+export declare function ɵdevModeEqual(a: any, b: any): boolean;
+
+export declare function ɵdid(checkIndex: number, flags: ɵNodeFlags, matchedQueries: null | [string | number, ɵQueryValueType][], childCount: number, ctor: any, deps: ([ɵDepFlags, any] | any)[], props?: null | {
+    [name: string]: [number, string];
+}, outputs?: null | {
+    [name: string]: string;
+}): NodeDef;
+
+/**
+ * Runtime link information for Directives.
+ *
+ * This is internal data structure used by the render to link
+ * directives into templates.
+ *
+ * NOTE: Always use `defineDirective` function to create this object,
+ * never create the object directly since the shape of this object
+ * can change between versions.
+ *
+ * @param Selector type metadata specifying the selector of the directive or component
+ *
+ * See: {@link defineDirective}
+ */
+export declare interface ɵDirectiveDef<T> extends ΔBaseDef<T> {
+    /** Token representing the directive. Used by DI. */
+    type: Type<T>;
+    /** Function that resolves providers and publishes them into the DI system. */
+    providersResolver: (<U extends T>(def: ɵDirectiveDef<U>, processProvidersFn?: ProcessProvidersFunction) => void) | null;
+    /** The selectors that will be used to match nodes to this directive. */
+    readonly selectors: ɵCssSelectorList;
+    /**
+     * Name under which the directive is exported (for use with local references in template)
+     */
+    readonly exportAs: string[] | null;
+    /**
+     * Factory function used to create a new directive instance.
+     */
+    factory: FactoryFn<T>;
+    /**
+     * Function to create and refresh content queries associated with a given directive.
+     */
+    contentQueries: ContentQueriesFunction<T> | null;
+    /**
+     * Query-related instructions for a directive. Note that while directives don't have a
+     * view and as such view queries won't necessarily do anything, there might be
+     * components that extend the directive.
+     */
+    viewQuery: ViewQueriesFunction<T> | null;
+    /**
+     * Refreshes host bindings on the associated directive.
+     */
+    hostBindings: HostBindingsFunction<T> | null;
+    onChanges: (() => void) | null;
+    onInit: (() => void) | null;
+    doCheck: (() => void) | null;
+    afterContentInit: (() => void) | null;
+    afterContentChecked: (() => void) | null;
+    afterViewInit: (() => void) | null;
+    afterViewChecked: (() => void) | null;
+    onDestroy: (() => void) | null;
+    /**
+     * The features applied to this directive
+     */
+    readonly features: DirectiveDefFeature[] | null;
+    setInput: (<U extends T>(this: ɵDirectiveDef<U>, instance: U, value: any, publicName: string, privateName: string) => void) | null;
+}
+
+/**
+ * A subclass of `Type` which has a static `ngDirectiveDef`:`DirectiveDef` field making it
+ * consumable for rendering.
+ */
+export declare interface ɵDirectiveType<T> extends Type<T> {
+    ngDirectiveDef: never;
+}
+
+/**
+ * @deprecated Use the `Renderer2` instead.
+ */
+export declare interface ɵDirectRenderer {
+    remove(node: any): void;
+    appendChild(node: any, parent: any): void;
+    insertBefore(node: any, refNode: any): void;
+    nextSibling(node: any): any;
+    parentElement(node: any): any;
+}
+
+export declare function ɵeld(checkIndex: number, flags: ɵNodeFlags, matchedQueriesDsl: null | [string | number, ɵQueryValueType][], ngContentIndex: null | number, childCount: number, namespaceAndName: string | null, fixedAttrs?: null | [string, string][], bindings?: null | [ɵBindingFlags, string, string | SecurityContext | null][], outputs?: null | ([string, string])[], handleEvent?: null | ElementHandleEventFn, componentView?: null | ViewDefinitionFactory, componentRendererType?: RendererType2 | null): NodeDef;
+
+export declare const ɵEMPTY_ARRAY: any[];
+
+export declare const ɵEMPTY_MAP: {
+    [key: string]: any;
+};
+
+/**
+ * Loops over queued module definitions, if a given module definition has all of its
+ * declarations resolved, it dequeues that module definition and sets the scope on
+ * its declarations.
+ */
+export declare function ɵflushModuleScopingQueueAsMuchAsPossible(): void;
+
+export declare function ɵgetComponentViewDefinitionFactory(componentFactory: ComponentFactory<any>): ViewDefinitionFactory;
+
+export declare function ɵgetDebugNode__POST_R3__(nativeNode: Element): DebugElement__POST_R3__;
+
+export declare function ɵgetDebugNode__POST_R3__(nativeNode: Node): DebugNode__POST_R3__;
+
+export declare function ɵgetDebugNode__POST_R3__(nativeNode: null): null;
+
+/**
+ * Retrieves directives associated with a given DOM host element.
+ *
+ * @param target A DOM element, component or directive instance.
+ *
+ * @publicApi
+ */
+export declare function ɵgetDirectives(target: {}): Array<{}>;
+
+/**
+ * Retrieve the host element of the component.
+ *
+ * Use this function to retrieve the host element of the component. The host
+ * element is the element which the component is associated with.
+ *
+ * @param directive Component or Directive for which the host element should be retrieved.
+ *
+ * @publicApi
+ */
+export declare function ɵgetHostElement<T>(directive: T): Element;
+
+/**
+ * Read the `ngInjectableDef` type in a way which is immune to accidentally reading inherited value.
+ *
+ * @param type type which may have `ngInjectableDef`
+ */
+export declare function ɵgetInjectableDef<T>(type: any): ΔInjectableDef<T> | null;
+
+/** Returns the matching `LContext` data for a given DOM node, directive or component instance.
+ *
+ * This function will examine the provided DOM element, component, or directive instance\'s
+ * monkey-patched property to derive the `LContext` data. Once called then the monkey-patched
+ * value will be that of the newly created `LContext`.
+ *
+ * If the monkey-patched value is the `LView` instance then the context value for that
+ * target will be created and the monkey-patch reference will be updated. Therefore when this
+ * function is called it may mutate the provided element\'s, component\'s or any of the associated
+ * directive\'s monkey-patch values.
+ *
+ * If the monkey-patch value is not detected then the code will walk up the DOM until an element
+ * is found which contains a monkey-patch reference. When that occurs then the provided element
+ * will be updated with a new context (which is then returned). If the monkey-patch value is not
+ * detected for a component/directive instance then it will throw an error (all components and
+ * directives should be automatically monkey-patched by ivy).
+ *
+ * @param target Component, Directive or DOM Node.
+ */
+export declare function ɵgetLContext(target: any): ɵLContext | null;
+
+export declare function ɵgetModuleFactory__POST_R3__(id: string): NgModuleFactory<any>;
+
+/**
+ * Returns a list of all the active players present on the provided ref instance (which can
+ * be an instance of a directive, component or element).
+ *
+ * This function will only return players that have been added to the ref instance using
+ * `addPlayer` or any players that are active through any template styling bindings
+ * (`[style]`, `[style.prop]`, `[class]` and `[class.name]`).
+ *
+ * @publicApi
+ */
+export declare function ɵgetPlayers(ref: ComponentInstance | DirectiveInstance | HTMLElement): ɵPlayer[];
+
+export declare type ɵGetterFn = (obj: any) => any;
+
+
+export declare const ɵglobal: any;
+
+export declare function ɵinitServicesIfNeeded(): void;
+
+export declare function ɵinlineInterpolate(valueCount: number, c0: string, a1: any, c1: string, a2?: any, c2?: string, a3?: any, c3?: string, a4?: any, c4?: string, a5?: any, c5?: string, a6?: any, c6?: string, a7?: any, c7?: string, a8?: any, c8?: string, a9?: any, c9?: string): string;
+
+export declare function ɵinterpolate(valueCount: number, constAndInterp: string[]): string;
+
+export declare function ɵisBoundToModule__POST_R3__<C>(cf: ComponentFactory<C>): boolean;
+
+/**
+ * Reports whether a given strategy is currently the default for change detection.
+ * @param changeDetectionStrategy The strategy to check.
+ * @returns True if the given strategy is the current default, false otherwise.
+ * @see `ChangeDetectorStatus`
+ * @see `ChangeDetectorRef`
+ */
+export declare function ɵisDefaultChangeDetectionStrategy(changeDetectionStrategy: ChangeDetectionStrategy): boolean;
+
+export declare function ɵisListLikeIterable(obj: any): boolean;
+
+/**
+ * Determine if the argument is an Observable
+ */
+export declare function ɵisObservable(obj: any | Observable<any>): obj is Observable<any>;
+
+/**
+ * Determine if the argument is shaped like a Promise
+ */
+export declare function ɵisPromise(obj: any): obj is Promise<any>;
+
+export declare const ɵivyEnabled = false;
+
+/**
+ * The internal view context which is specific to a given DOM element, directive or
+ * component instance. Each value in here (besides the LView and element node details)
+ * can be present, null or undefined. If undefined then it implies the value has not been
+ * looked up yet, otherwise, if null, then a lookup was executed and nothing was found.
+ *
+ * Each value will get filled when the respective value is examined within the getContext
+ * function. The component, element and each directive instance will share the same instance
+ * of the context.
+ */
+export declare interface ɵLContext {
+    /**
+     * The component's parent view data.
+     */
+    lView: ɵangular_packages_core_core_bm;
+    /**
+     * The index instance of the node.
+     */
+    nodeIndex: number;
+    /**
+     * The instance of the DOM node that is attached to the lNode.
+     */
+    native: RNode;
+    /**
+     * The instance of the Component node.
+     */
+    component: {} | null | undefined;
+    /**
+     * The list of active directives that exist on this element.
+     */
+    directives: any[] | null | undefined;
+    /**
+     * The map of local references (local reference name => element or directive instance) that exist
+     * on this element.
+     */
+    localRefs: {
+        [key: string]: any;
+    } | null | undefined;
+}
+
+/**
+ * Used to enable lifecycle hooks on the root component.
+ *
+ * Include this feature when calling `renderComponent` if the root component
+ * you are rendering has lifecycle hooks defined. Otherwise, the hooks won't
+ * be called properly.
+ *
+ * Example:
+ *
+ * ```
+ * renderComponent(AppComponent, {features: [RootLifecycleHooks]});
+ * ```
+ */
+export declare function ɵLifecycleHooksFeature(component: any, def: ɵComponentDef<any>): void;
+
+
+export declare function ɵlooseIdentical(a: any, b: any): boolean;
+
+/**
+ * @suppress {globalThis}
+ */
+export declare function ɵmakeDecorator<T>(name: string, props?: (...args: any[]) => any, parentClass?: any, additionalProcessing?: (type: Type<T>) => void, typeFn?: (type: Type<T>, ...args: any[]) => void): {
+    new (...args: any[]): any;
+    (...args: any[]): any;
+    (...args: any[]): (cls: any) => any;
+};
+
+/**
+ * Mark the component as dirty (needing change detection).
+ *
+ * Marking a component dirty will schedule a change detection on this
+ * component at some point in the future. Marking an already dirty
+ * component as dirty is a noop. Only one outstanding change detection
+ * can be scheduled per component tree. (Two components bootstrapped with
+ * separate `renderComponent` will have separate schedulers)
+ *
+ * When the root component is bootstrapped with `renderComponent`, a scheduler
+ * can be provided.
+ *
+ * @param component Component to mark as dirty.
+ *
+ * @publicApi
+ */
+export declare function ɵmarkDirty<T>(component: T): void;
+
+export declare type ɵMethodFn = (obj: any, args: any[]) => any;
+
+export declare function ɵmod(providers: NgModuleProviderDef[]): NgModuleDefinition;
+
+export declare function ɵmpd(flags: ɵNodeFlags, token: any, value: any, deps: ([ɵDepFlags, any] | any)[]): NgModuleProviderDef;
+
+export declare function ɵncd(ngContentIndex: null | number, index: number): NodeDef;
+
+export declare const ɵNG_BASE_DEF: string;
+
+
+export declare const ɵNG_COMPONENT_DEF: string;
+
+export declare const ɵNG_DIRECTIVE_DEF: string;
+
+/**
+ * If a directive is diPublic, bloomAdd sets a property on the type with this constant as
+ * the key and the directive's unique ID as the value. This allows us to map directives to their
+ * bloom filter bit for DI.
+ */
+export declare const ɵNG_ELEMENT_ID: string;
+
+export declare const ɵNG_INJECTABLE_DEF: string;
+
+export declare const ɵNG_INJECTOR_DEF: string;
+
+export declare const ɵNG_MODULE_DEF: string;
+
+export declare const ɵNG_PIPE_DEF: string;
+
+/**
+ * Runtime link information for NgModules.
+ *
+ * This is the internal data structure used by the runtime to assemble components, directives,
+ * pipes, and injectors.
+ *
+ * NOTE: Always use `ΔdefineNgModule` function to create this object,
+ * never create the object directly since the shape of this object
+ * can change between versions.
+ */
+export declare interface ɵNgModuleDef<T> {
+    /** Token representing the module. Used by DI. */
+    type: T;
+    /** List of components to bootstrap. */
+    bootstrap: Type<any>[] | (() => Type<any>[]);
+    /** List of components, directives, and pipes declared by this module. */
+    declarations: Type<any>[] | (() => Type<any>[]);
+    /** List of modules or `ModuleWithProviders` imported by this module. */
+    imports: Type<any>[] | (() => Type<any>[]);
+    /**
+     * List of modules, `ModuleWithProviders`, components, directives, or pipes exported by this
+     * module.
+     */
+    exports: Type<any>[] | (() => Type<any>[]);
+    /**
+     * Cached value of computed `transitiveCompileScopes` for this module.
+     *
+     * This should never be read directly, but accessed via `transitiveScopesFor`.
+     */
+    transitiveCompileScopes: ɵNgModuleTransitiveScopes | null;
+    /** The set of schemas that declare elements to be allowed in the NgModule. */
+    schemas: SchemaMetadata[] | null;
+}
+
+export declare class ɵNgModuleFactory<T> extends NgModuleFactory<T> {
+    moduleType: Type<T>;
+    constructor(moduleType: Type<T>);
+    create(parentInjector: Injector | null): NgModuleRef<T>;
+}
+
+/**
+ * Represents the expansion of an `NgModule` into its scopes.
+ *
+ * A scope is a set of directives and pipes that are visible in a particular context. Each
+ * `NgModule` has two scopes. The `compilation` scope is the set of directives and pipes that will
+ * be recognized in the templates of components declared by the module. The `exported` scope is the
+ * set of directives and pipes exported by a module (that is, module B's exported scope gets added
+ * to module A's compilation scope when module A imports B).
+ */
+export declare interface ɵNgModuleTransitiveScopes {
+    compilation: {
+        directives: Set<any>;
+        pipes: Set<any>;
+    };
+    exported: {
+        directives: Set<any>;
+        pipes: Set<any>;
+    };
+    schemas: SchemaMetadata[] | null;
+}
+
+export declare interface ɵNgModuleType<T = any> extends Type<T> {
+    ngModuleDef: ɵNgModuleDef<T>;
+}
+
+
+export declare interface ɵNO_CHANGE {
+    brand: 'NO_CHANGE';
+}
+
+/** A special value which designates that a value has not changed. */
+export declare const ɵNO_CHANGE: ɵNO_CHANGE;
+
+/**
+ * Bitmask for NodeDef.flags.
+ * Naming convention:
+ * - `Type...`: flags that are mutually exclusive
+ * - `Cat...`: union of multiple `Type...` (short for category).
+ */
+export declare const enum ɵNodeFlags {
+    None = 0,
+    TypeElement = 1,
+    TypeText = 2,
+    ProjectedTemplate = 4,
+    CatRenderNode = 3,
+    TypeNgContent = 8,
+    TypePipe = 16,
+    TypePureArray = 32,
+    TypePureObject = 64,
+    TypePurePipe = 128,
+    CatPureExpression = 224,
+    TypeValueProvider = 256,
+    TypeClassProvider = 512,
+    TypeFactoryProvider = 1024,
+    TypeUseExistingProvider = 2048,
+    LazyProvider = 4096,
+    PrivateProvider = 8192,
+    TypeDirective = 16384,
+    Component = 32768,
+    CatProviderNoDirective = 3840,
+    CatProvider = 20224,
+    OnInit = 65536,
+    OnDestroy = 131072,
+    DoCheck = 262144,
+    OnChanges = 524288,
+    AfterContentInit = 1048576,
+    AfterContentChecked = 2097152,
+    AfterViewInit = 4194304,
+    AfterViewChecked = 8388608,
+    EmbeddedViews = 16777216,
+    ComponentView = 33554432,
+    TypeContentQuery = 67108864,
+    TypeViewQuery = 134217728,
+    StaticQuery = 268435456,
+    DynamicQuery = 536870912,
+    TypeNgModule = 1073741824,
+    CatQuery = 201326592,
+    Types = 201347067
+}
+
+/**
+ * Provides a noop implementation of `NgZone` which does nothing. This zone requires explicit calls
+ * to framework to perform rendering.
+ */
+export declare class ɵNoopNgZone implements NgZone {
+    readonly hasPendingMicrotasks: boolean;
+    readonly hasPendingMacrotasks: boolean;
+    readonly isStable: boolean;
+    readonly onUnstable: EventEmitter<any>;
+    readonly onMicrotaskEmpty: EventEmitter<any>;
+    readonly onStable: EventEmitter<any>;
+    readonly onError: EventEmitter<any>;
+    run(fn: () => any): any;
+    runGuarded(fn: () => any): any;
+    runOutsideAngular(fn: () => any): any;
+    runTask<T>(fn: () => any): any;
+}
+
+export declare const ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR: {};
+
+export declare function ɵnov(view: ViewData, index: number): any;
+
+export declare function ɵoverrideComponentView(comp: Type<any>, componentFactory: ComponentFactory<any>): void;
+
+export declare function ɵoverrideProvider(override: ProviderOverride): void;
+
+export declare function ɵpad(checkIndex: number, argCount: number): NodeDef;
+
+/**
+ * Patch the definition of a component with directives and pipes from the compilation scope of
+ * a given module.
+ */
+export declare function ɵpatchComponentDefWithScope<C>(componentDef: ɵComponentDef<C>, transitiveScopes: ɵNgModuleTransitiveScopes): void;
+
+export declare function ɵpid(flags: ɵNodeFlags, ctor: any, deps: ([ɵDepFlags, any] | any)[]): NodeDef;
+
+/**
+ * Runtime link information for Pipes.
+ *
+ * This is internal data structure used by the renderer to link
+ * pipes into templates.
+ *
+ * NOTE: Always use `definePipe` function to create this object,
+ * never create the object directly since the shape of this object
+ * can change between versions.
+ *
+ * See: {@link definePipe}
+ */
+export declare interface ɵPipeDef<T> {
+    /**
+     * Pipe name.
+     *
+     * Used to resolve pipe in templates.
+     */
+    readonly name: string;
+    /**
+     * Factory function used to create a new pipe instance.
+     */
+    factory: FactoryFn<T>;
+    /**
+     * Whether or not the pipe is pure.
+     *
+     * Pure pipes result only depends on the pipe input and not on internal
+     * state of the pipe.
+     */
+    readonly pure: boolean;
+    onDestroy: (() => void) | null;
+}
+
+
+/**
+ * A shared interface which contains an animation player
+ */
+export declare interface ɵPlayer {
+    parent?: ɵPlayer | null;
+    state: ɵPlayState;
+    play(): void;
+    pause(): void;
+    finish(): void;
+    destroy(): void;
+    addEventListener(state: ɵPlayState | string, cb: (data?: any) => any): void;
+}
+
+/**
+ * Used as a reference to build a player from a styling template binding
+ * (`[style]` and `[class]`).
+ *
+ * The `fn` function will be called once any styling-related changes are
+ * evaluated on an element and is expected to return a player that will
+ * be then run on the element.
+ *
+ * `[style]`, `[style.prop]`, `[class]` and `[class.name]` template bindings
+ * all accept a `PlayerFactory` as input and this player factories.
+ */
+export declare interface ɵPlayerFactory {
+    '__brand__': 'Brand for PlayerFactory that nothing will match';
+}
+
+/**
+ * Designed to be used as an injection service to capture all animation players.
+ *
+ * When present all animation players will be passed into the flush method below.
+ * This feature is designed to service application-wide animation testing, live
+ * debugging as well as custom animation choreographing tools.
+ */
+export declare interface ɵPlayerHandler {
+    /**
+     * Designed to kick off the player at the end of change detection
+     */
+    flushPlayers(): void;
+    /**
+     * @param player The player that has been scheduled to run within the application.
+     * @param context The context as to where the player was bound to
+     */
+    queuePlayer(player: ɵPlayer, context: ComponentInstance | DirectiveInstance | HTMLElement): void;
+}
+
+/**
+ * The state of a given player
+ *
+ * Do not change the increasing nature of the numbers since the player
+ * code may compare state by checking if a number is higher or lower than
+ * a certain numeric value.
+ */
+export declare const enum ɵPlayState {
+    Pending = 0,
+    Running = 1,
+    Paused = 2,
+    Finished = 100,
+    Destroyed = 200
+}
+
+export declare function ɵpod(checkIndex: number, propToIndex: {
+    [p: string]: number;
+}): NodeDef;
+
+export declare function ɵppd(checkIndex: number, argCount: number): NodeDef;
+
+export declare function ɵprd(flags: ɵNodeFlags, matchedQueries: null | [string | number, ɵQueryValueType][], token: any, value: any, deps: ([ɵDepFlags, any] | any)[]): NodeDef;
+
+/**
+ * Publishes a collection of default debug tools onto`window.ng`.
+ *
+ * These functions are available globally when Angular is in development
+ * mode and are automatically stripped away from prod mode is on.
+ */
+export declare function ɵpublishDefaultGlobalUtils(): void;
+
+/**
+ * Publishes the given function to `window.ng` so that it can be
+ * used from the browser console when an application is not in production.
+ */
+export declare function ɵpublishGlobalUtil(name: string, fn: Function): void;
+
+export declare function ɵqud(flags: ɵNodeFlags, id: number, bindings: {
+    [propName: string]: ɵQueryBindingType;
+}): NodeDef;
+
+export declare const enum ɵQueryBindingType {
+    First = 0,
+    All = 1
+}
+
+export declare const enum ɵQueryValueType {
+    ElementRef = 0,
+    RenderElement = 1,
+    TemplateRef = 2,
+    ViewContainerRef = 3,
+    Provider = 4
+}
+
+export declare class ɵReflectionCapabilities implements PlatformReflectionCapabilities {
+    private _reflect;
+    constructor(reflect?: any);
+    isReflectionEnabled(): boolean;
+    factory<T>(t: Type<T>): (args: any[]) => T;
+    private _ownParameters;
+    parameters(type: Type<any>): any[][];
+    private _ownAnnotations;
+    annotations(typeOrFunc: Type<any>): any[];
+    private _ownPropMetadata;
+    propMetadata(typeOrFunc: any): {
+        [key: string]: any[];
+    };
+    ownPropMetadata(typeOrFunc: any): {
+        [key: string]: any[];
+    };
+    hasLifecycleHook(type: any, lcProperty: string): boolean;
+    guards(type: any): {
+        [key: string]: any;
+    };
+    getter(name: string): ɵGetterFn;
+    setter(name: string): ɵSetterFn;
+    method(name: string): ɵMethodFn;
+    importUri(type: any): string;
+    resourceUri(type: any): string;
+    resolveIdentifier(name: string, moduleUrl: string, members: string[], runtime: any): any;
+    resolveEnum(enumIdentifier: any, name: string): any;
+}
+
+/**
+ * Registers a loaded module. Should only be called from generated NgModuleFactory code.
+ * @publicApi
+ */
+export declare function ɵregisterModuleFactory(id: string, factory: NgModuleFactory<any>): void;
+
+/**
+ * Render3 implementation of {@link viewEngine_ComponentFactory}.
+ */
+export declare class ɵRender3ComponentFactory<T> extends ComponentFactory<T> {
+    private componentDef;
+    private ngModule?;
+    selector: string;
+    componentType: Type<any>;
+    ngContentSelectors: string[];
+    isBoundToModule: boolean;
+    readonly inputs: {
+        propName: string;
+        templateName: string;
+    }[];
+    readonly outputs: {
+        propName: string;
+        templateName: string;
+    }[];
+    /**
+     * @param componentDef The component definition.
+     * @param ngModule The NgModuleRef to which the factory is bound.
+     */
+    constructor(componentDef: ɵComponentDef<any>, ngModule?: NgModuleRef<any> | undefined);
+    create(injector: Injector, projectableNodes?: any[][] | undefined, rootSelectorOrNode?: any, ngModule?: NgModuleRef<any> | undefined): ComponentRef<T>;
+}
+
+/**
+ * Represents an instance of a Component created via a {@link ComponentFactory}.
+ *
+ * `ComponentRef` provides access to the Component Instance as well other objects related to this
+ * Component Instance and allows you to destroy the Component Instance via the {@link #destroy}
+ * method.
+ *
+ */
+export declare class ɵRender3ComponentRef<T> extends ComponentRef<T> {
+    location: ElementRef;
+    private _rootLView;
+    private _tNode;
+    destroyCbs: (() => void)[] | null;
+    instance: T;
+    hostView: ViewRef_2<T>;
+    changeDetectorRef: ChangeDetectorRef;
+    componentType: Type<T>;
+    constructor(componentType: Type<T>, instance: T, location: ElementRef, _rootLView: ɵangular_packages_core_core_bm, _tNode: ɵangular_packages_core_core_bg | TContainerNode | TElementContainerNode);
+    readonly injector: Injector;
+    destroy(): void;
+    onDestroy(callback: () => void): void;
+}
+
+export declare class ɵRender3NgModuleRef<T> extends NgModuleRef<T> implements InternalNgModuleRef<T> {
+    _parent: Injector | null;
+    _bootstrapComponents: Type<any>[];
+    _r3Injector: R3Injector;
+    injector: Injector;
+    instance: T;
+    destroyCbs: (() => void)[] | null;
+    constructor(ngModuleType: Type<T>, _parent: Injector | null);
+    get(token: any, notFoundValue?: any, injectFlags?: InjectFlags): any;
+    readonly componentFactoryResolver: ComponentFactoryResolver;
+    destroy(): void;
+    onDestroy(callback: () => void): void;
+}
+
+/**
+ * Bootstraps a Component into an existing host element and returns an instance
+ * of the component.
+ *
+ * Use this function to bootstrap a component into the DOM tree. Each invocation
+ * of this function will create a separate tree of components, injectors and
+ * change detection cycles and lifetimes. To dynamically insert a new component
+ * into an existing tree such that it shares the same injection, change detection
+ * and object lifetime, use {@link ViewContainer#createComponent}.
+ *
+ * @param componentType Component to bootstrap
+ * @param options Optional parameters which control bootstrapping
+ */
+export declare function ɵrenderComponent<T>(componentType: ɵComponentType<T> | Type<T>, opts?: CreateComponentOptions): T;
+
+/**
+ * @deprecated Debug info is handled internally in the view engine now.
+ */
+export declare abstract class ɵRenderDebugInfo {
+    abstract readonly injector: Injector;
+    abstract readonly component: any;
+    abstract readonly providerTokens: any[];
+    abstract readonly references: {
+        [key: string]: any;
+    };
+    abstract readonly context: any;
+    abstract readonly source: string;
+}
+
+/**
+ * Flags passed into template functions to determine which blocks (i.e. creation, update)
+ * should be executed.
+ *
+ * Typically, a template runs both the creation block and the update block on initialization and
+ * subsequent runs only execute the update block. However, dynamically created views require that
+ * the creation block be executed separately from the update block (for backwards compat).
+ */
+export declare const enum ɵRenderFlags {
+    Create = 1,
+    Update = 2
+}
+
+export declare function ɵresetCompiledComponents(): void;
+
+/**
+ * Used to resolve resource URLs on `@Component` when used with JIT compilation.
+ *
+ * Example:
+ * ```
+ * @Component({
+ *   selector: 'my-comp',
+ *   templateUrl: 'my-comp.html', // This requires asynchronous resolution
+ * })
+ * class MyComponent{
+ * }
+ *
+ * // Calling `renderComponent` will fail because `renderComponent` is a synchronous process
+ * // and `MyComponent`'s `@Component.templateUrl` needs to be resolved asynchronously.
+ *
+ * // Calling `resolveComponentResources()` will resolve `@Component.templateUrl` into
+ * // `@Component.template`, which allows `renderComponent` to proceed in a synchronous manner.
+ *
+ * // Use browser's `fetch()` function as the default resource resolution strategy.
+ * resolveComponentResources(fetch).then(() => {
+ *   // After resolution all URLs have been converted into `template` strings.
+ *   renderComponent(MyComponent);
+ * });
+ *
+ * ```
+ *
+ * NOTE: In AOT the resolution happens during compilation, and so there should be no need
+ * to call this method outside JIT mode.
+ *
+ * @param resourceResolver a function which is responsible for returning a `Promise` to the
+ * contents of the resolved URL. Browser's `fetch()` method is a good default implementation.
+ */
+export declare function ɵresolveComponentResources(resourceResolver: (url: string) => (Promise<string | {
+    text(): Promise<string>;
+}>)): Promise<void>;
+
+/**
+ * Adds decorator, constructor, and property metadata to a given type via static metadata fields
+ * on the type.
+ *
+ * These metadata fields can later be read with Angular's `ReflectionCapabilities` API.
+ *
+ * Calls to `setClassMetadata` can be marked as pure, resulting in the metadata assignments being
+ * tree-shaken away during production builds.
+ */
+export declare function ɵsetClassMetadata(type: Type<any>, decorators: any[] | null, ctorParameters: (() => any[]) | null, propDecorators: {
+    [field: string]: any;
+} | null): void;
+
+export declare function ɵsetCurrentInjector(injector: Injector | null | undefined): Injector | undefined | null;
+
+
+export declare type ɵSetterFn = (obj: any, value: any) => void;
+
+/** Store a value in the `data` at a given `index`. */
+export declare function ɵstore<T>(index: number, value: T): void;
+
+
+export declare function ɵstringify(token: any): string;
+
+export declare const ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__: typeof injectChangeDetectorRef;
+
+export declare const ɵSWITCH_COMPILE_COMPONENT__POST_R3__: typeof ɵcompileComponent;
+
+export declare const ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__: typeof ɵcompileDirective;
+
+export declare const ɵSWITCH_COMPILE_INJECTABLE__POST_R3__: typeof compileInjectable;
+
+export declare const ɵSWITCH_COMPILE_NGMODULE__POST_R3__: typeof ɵcompileNgModule;
+
+export declare const ɵSWITCH_COMPILE_PIPE__POST_R3__: typeof ɵcompilePipe;
+
+export declare const ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__: typeof injectElementRef;
+
+
+export declare const ɵSWITCH_IVY_ENABLED__POST_R3__ = true;
+
+export declare const ɵSWITCH_RENDERER2_FACTORY__POST_R3__: typeof injectRenderer2;
+
+export declare const ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__: typeof injectTemplateRef;
+
+export declare const ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__: typeof injectViewContainerRef;
+
+export declare function ɵted(checkIndex: number, ngContentIndex: number | null, staticText: string[]): NodeDef;
+
+/**
+ * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
+ *
+ * This operation is memoized and the result is cached on the module's definition. It can be called
+ * on modules with components that have not fully compiled yet, but the result should not be used
+ * until they have.
+ */
+export declare function ɵtransitiveScopesFor<T>(moduleType: Type<T>, processNgModuleFn?: (ngModule: ɵNgModuleType) => void): ɵNgModuleTransitiveScopes;
+
+export declare function ɵunv(view: ViewData, nodeIdx: number, bindingIdx: number, value: any): any;
+
+export declare function ɵvid(flags: ɵViewFlags, nodes: NodeDef[], updateDirectives?: null | ViewUpdateFn, updateRenderer?: null | ViewUpdateFn): ɵViewDefinition;
+
+export declare interface ɵViewDefinition extends Definition<ViewDefinitionFactory> {
+    flags: ɵViewFlags;
+    updateDirectives: ViewUpdateFn;
+    updateRenderer: ViewUpdateFn;
+    handleEvent: ViewHandleEventFn;
+    /**
+     * Order: Depth first.
+     * Especially providers are before elements / anchors.
+     */
+    nodes: NodeDef[];
+    /** aggregated NodeFlags for all nodes **/
+    nodeFlags: ɵNodeFlags;
+    rootNodeFlags: ɵNodeFlags;
+    lastRenderRootNode: NodeDef | null;
+    bindingCount: number;
+    outputCount: number;
+    /**
+     * Binary or of all query ids that are matched by one of the nodes.
+     * This includes query ids from templates as well.
+     * Used as a bloom filter.
+     */
+    nodeMatchedQueries: number;
+}
+
+/**
+ * Bitmask for ViewDefinition.flags.
+ */
+export declare const enum ɵViewFlags {
+    None = 0,
+    OnPush = 2
+}
+
+/**
+ * Wait on component until it is rendered.
+ *
+ * This function returns a `Promise` which is resolved when the component's
+ * change detection is executed. This is determined by finding the scheduler
+ * associated with the `component`'s render tree and waiting until the scheduler
+ * flushes. If nothing is scheduled, the function returns a resolved promise.
+ *
+ * Example:
+ * ```
+ * await whenRendered(myComponent);
+ * ```
+ *
+ * @param component Component to wait upon
+ * @returns Promise which resolves when the component is rendered.
+ */
+export declare function ɵwhenRendered(component: any): Promise<null>;
+
+
+/**
+ * Allocates the necessary amount of slots for host vars.
+ *
+ * @param count Amount of vars to be allocated
+ *
+ * @publicApi
+ */
+export declare function ΔallocHostVars(count: number): void;
+
+/**
+ * Runtime information for classes that are inherited by components or directives
+ * that aren't defined as components or directives.
+ *
+ * This is an internal data structure used by the render to determine what inputs
+ * and outputs should be inherited.
+ *
+ * See: {@link defineBase}
+ *
+ * @publicApi
+ */
+export declare interface ΔBaseDef<T> {
+    /**
+     * A dictionary mapping the inputs' minified property names to their public API names, which
+     * are their aliases if any, or their original unminified property names
+     * (as in `@Input('alias') propertyName: any;`).
+     */
+    readonly inputs: {
+        [P in keyof T]: string;
+    };
+    /**
+     * @deprecated This is only here because `NgOnChanges` incorrectly uses declared name instead of
+     * public or minified name.
+     */
+    readonly declaredInputs: {
+        [P in keyof T]: string;
+    };
+    /**
+     * A dictionary mapping the outputs' minified property names to their public API names, which
+     * are their aliases if any, or their original unminified property names
+     * (as in `@Output('alias') propertyName: any;`).
+     */
+    readonly outputs: {
+        [P in keyof T]: string;
+    };
+}
+
+/**
+ * Creates a single value binding.
+ *
+ * @param value Value to diff
+ *
+ * @publicApi
+ */
+export declare function Δbind<T>(value: T): T | ɵNO_CHANGE;
+
+/**
+ * @publicApi
+ */
+export declare type ΔComponentDefWithMeta<T, Selector extends String, ExportAs extends string[], InputMap extends {
+    [key: string]: string;
+}, OutputMap extends {
+    [key: string]: string;
+}, QueryFields extends string[]> = ɵComponentDef<T>;
+
+/**
+* Registers a synthetic host listener (e.g. `(@foo.start)`) on a component.
+*
+* This instruction is for compatibility purposes and is designed to ensure that a
+* synthetic host listener (e.g. `@HostListener('@foo.start')`) properly gets rendered
+* in the component's renderer. Normally all host listeners are evaluated with the
+* parent component's renderer, but, in the case of animation @triggers, they need
+* to be evaluated with the sub component's renderer (because that's where the
+* animation triggers are defined).
+*
+* Do not use this instruction as a replacement for `listener`. This instruction
+* only exists to ensure compatibility with the ViewEngine's host binding behavior.
+*
+* @param eventName Name of the event
+* @param listenerFn The function to be called when event emits
+* @param useCapture Whether or not to use capture in event listener
+* @param eventTargetResolver Function that returns global target information in case this listener
+* should be attached to a global object like window, document or body
+ *
+ * @publicApi
+*/
+export declare function ΔcomponentHostSyntheticListener<T>(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
+
+/**
+ * Updates a synthetic host binding (e.g. `[@foo]`) on a component.
+ *
+ * This instruction is for compatibility purposes and is designed to ensure that a
+ * synthetic host binding (e.g. `@HostBinding('@foo')`) properly gets rendered in
+ * the component's renderer. Normally all host bindings are evaluated with the parent
+ * component's renderer, but, in the case of animation @triggers, they need to be
+ * evaluated with the sub component's renderer (because that's where the animation
+ * triggers are defined).
+ *
+ * Do not use this instruction as a replacement for `elementProperty`. This instruction
+ * only exists to ensure compatibility with the ViewEngine's host binding behavior.
+ *
+ * @param index The index of the element to update in the data array
+ * @param propName Name of property. Because it is going to DOM, this is not subject to
+ *        renaming as part of minification.
+ * @param value New value to write.
+ * @param sanitizer An optional function used to sanitize the value.
+ * @param nativeOnly Whether or not we should only set native properties and skip input check
+ * (this is necessary for host property bindings)
+ *
+ * @publicApi
+ */
+export declare function ΔcomponentHostSyntheticProperty<T>(index: number, propName: string, value: T | ɵNO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): void;
+
+/**
+ * Creates an LContainer for inline views, e.g.
+ *
+ * % if (showing) {
+ *   <div></div>
+ * % }
+ *
+ * @param index The index of the container in the data array
+ *
+ * @publicApi
+ */
+export declare function Δcontainer(index: number): void;
+
+/**
+ * Marks the end of the LContainer.
+ *
+ * Marking the end of LContainer is the time when to child views get inserted or removed.
+ *
+ * @publicApi
+ */
+export declare function ΔcontainerRefreshEnd(): void;
+
+/**
+ * Sets a container up to receive views.
+ *
+ * @param index The index of the container in the data array
+ *
+ * @publicApi
+ */
+export declare function ΔcontainerRefreshStart(index: number): void;
+
+/**
+ * Registers a QueryList, associated with a content query, for later refresh (part of a view
+ * refresh).
+ *
+ * @param directiveIndex Current directive index
+ * @param predicate The type for which the query will search
+ * @param descend Whether or not to descend into children
+ * @param read What to save in the query
+ * @returns QueryList<T>
+ *
+ * @publicApi
+ */
+export declare function ΔcontentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read: any): QueryList<T>;
+
+/**
  * The default style sanitizer will handle sanitization for style properties by
  * sanitizing any CSS property that can include a `url` value (usually image-based properties)
+ *
+ * @publicApi
  */
-export declare const ɵdefaultStyleSanitizer: StyleSanitizeFn;
+export declare const ΔdefaultStyleSanitizer: StyleSanitizeFn;
 
 /**
  * Create a base definition
  *
  * # Example
- * ```
+ * ```ts
  * class ShouldBeInherited {
- *   static ngBaseDef = defineBase({
+ *   static ngBaseDef = ΔdefineBase({
  *      ...
  *   })
  * }
+ * ```
+ *
  * @param baseDefinition The base definition parameters
+ *
+ * @publicApi
  */
-export declare function ɵdefineBase<T>(baseDefinition: {
+export declare function ΔdefineBase<T>(baseDefinition: {
     /**
      * A map of input names.
      *
@@ -9831,7 +10722,7 @@ export declare function ɵdefineBase<T>(baseDefinition: {
     outputs?: {
         [P in keyof T]?: string;
     };
-}): ɵBaseDef<T>;
+}): ΔBaseDef<T>;
 
 /**
  * Create a component definition object.
@@ -9847,8 +10738,9 @@ export declare function ɵdefineBase<T>(baseDefinition: {
  *   });
  * }
  * ```
+ * @publicApi
  */
-export declare function ɵdefineComponent<T>(componentDefinition: {
+export declare function ΔdefineComponent<T>(componentDefinition: {
     /**
      * Directive type, needed to configure the injector.
      */
@@ -10041,17 +10933,19 @@ export declare function ɵdefineComponent<T>(componentDefinition: {
  * Create a directive definition object.
  *
  * # Example
- * ```
+ * ```ts
  * class MyDirective {
  *   // Generated by Angular Template Compiler
  *   // [Symbol] syntax will not be supported by TypeScript until v2.7
- *   static ngDirectiveDef = defineDirective({
+ *   static ngDirectiveDef = ΔdefineDirective({
  *     ...
  *   });
  * }
  * ```
+ *
+ * @publicApi
  */
-export declare const ɵdefineDirective: <T>(directiveDefinition: {
+export declare const ΔdefineDirective: <T>(directiveDefinition: {
     /**
      * Directive type, needed to configure the injector.
      */
@@ -10144,7 +11038,57 @@ export declare const ɵdefineDirective: <T>(directiveDefinition: {
     exportAs?: string[] | undefined;
 }) => never;
 
-export declare function ɵdefineNgModule<T>(def: {
+/**
+ * Construct an `InjectableDef` which defines how a token will be constructed by the DI system, and
+ * in which injectors (if any) it will be available.
+ *
+ * This should be assigned to a static `ngInjectableDef` field on a type, which will then be an
+ * `InjectableType`.
+ *
+ * Options:
+ * * `providedIn` determines which injectors will include the injectable, by either associating it
+ *   with an `@NgModule` or other `InjectorType`, or by specifying that this injectable should be
+ *   provided in the `'root'` injector, which will be the application-level injector in most apps.
+ * * `factory` gives the zero argument function which will create an instance of the injectable.
+ *   The factory can call `inject` to access the `Injector` and request injection of dependencies.
+ *
+ * @publicApi
+ */
+export declare function ΔdefineInjectable<T>(opts: {
+    providedIn?: Type<any> | 'root' | 'any' | null;
+    factory: () => T;
+}): never;
+
+/**
+ * Construct an `InjectorDef` which configures an injector.
+ *
+ * This should be assigned to a static `ngInjectorDef` field on a type, which will then be an
+ * `InjectorType`.
+ *
+ * Options:
+ *
+ * * `factory`: an `InjectorType` is an instantiable type, so a zero argument `factory` function to
+ *   create the type must be provided. If that factory function needs to inject arguments, it can
+ *   use the `inject` function.
+ * * `providers`: an optional array of providers to add to the injector. Each provider must
+ *   either have a factory or point to a type which has an `ngInjectableDef` static property (the
+ *   type must be an `InjectableType`).
+ * * `imports`: an optional array of imports of other `InjectorType`s or `InjectorTypeWithModule`s
+ *   whose providers will also be added to the injector. Locally provided types will override
+ *   providers from imports.
+ *
+ * @publicApi
+ */
+export declare function ΔdefineInjector(options: {
+    factory: () => any;
+    providers?: any[];
+    imports?: any[];
+}): never;
+
+/**
+ * @publicApi
+ */
+export declare function ΔdefineNgModule<T>(def: {
     /** Token representing the module. Used by DI. */
     type: T;
     /** List of components to bootstrap. */
@@ -10175,8 +11119,10 @@ export declare function ɵdefineNgModule<T>(def: {
  * }
  * ```
  * @param pipeDef Pipe definition generated by the compiler
+ *
+ * @publicApi
  */
-export declare function ɵdefinePipe<T>(pipeDef: {
+export declare function ΔdefinePipe<T>(pipeDef: {
     /** Name of the pipe. Used for matching pipes in template to pipe defs. */
     name: string;
     /** Pipe class reference. Needed to extract pipe lifecycle hooks. */
@@ -10188,100 +11134,9 @@ export declare function ɵdefinePipe<T>(pipeDef: {
 }): never;
 
 /**
- * Bitmask for DI flags
+ * @publicApi
  */
-export declare const enum ɵDepFlags {
-    None = 0,
-    SkipSelf = 1,
-    Optional = 2,
-    Self = 4,
-    Value = 8
-}
-
-
-/**
- * Synchronously perform change detection on a component (and possibly its sub-components).
- *
- * This function triggers change detection in a synchronous way on a component. There should
- * be very little reason to call this function directly since a preferred way to do change
- * detection is to {@link markDirty} the component and wait for the scheduler to call this method
- * at some future point in time. This is because a single user action often results in many
- * components being invalidated and calling change detection on each component synchronously
- * would be inefficient. It is better to wait until all components are marked as dirty and
- * then perform single change detection across all of the components
- *
- * @param component The component which the change detection should be performed on.
- */
-export declare function ɵdetectChanges<T>(component: T): void;
-
-
-export declare function ɵdevModeEqual(a: any, b: any): boolean;
-
-export declare function ɵdid(checkIndex: number, flags: ɵNodeFlags, matchedQueries: null | [string | number, ɵQueryValueType][], childCount: number, ctor: any, deps: ([ɵDepFlags, any] | any)[], props?: null | {
-    [name: string]: [number, string];
-}, outputs?: null | {
-    [name: string]: string;
-}): NodeDef;
-
-/**
- * Runtime link information for Directives.
- *
- * This is internal data structure used by the render to link
- * directives into templates.
- *
- * NOTE: Always use `defineDirective` function to create this object,
- * never create the object directly since the shape of this object
- * can change between versions.
- *
- * @param Selector type metadata specifying the selector of the directive or component
- *
- * See: {@link defineDirective}
- */
-export declare interface ɵDirectiveDef<T> extends ɵBaseDef<T> {
-    /** Token representing the directive. Used by DI. */
-    type: Type<T>;
-    /** Function that resolves providers and publishes them into the DI system. */
-    providersResolver: (<U extends T>(def: ɵDirectiveDef<U>, processProvidersFn?: ProcessProvidersFunction) => void) | null;
-    /** The selectors that will be used to match nodes to this directive. */
-    readonly selectors: ɵCssSelectorList;
-    /**
-     * Name under which the directive is exported (for use with local references in template)
-     */
-    readonly exportAs: string[] | null;
-    /**
-     * Factory function used to create a new directive instance.
-     */
-    factory: FactoryFn<T>;
-    /**
-     * Function to create and refresh content queries associated with a given directive.
-     */
-    contentQueries: ContentQueriesFunction<T> | null;
-    /**
-     * Query-related instructions for a directive. Note that while directives don't have a
-     * view and as such view queries won't necessarily do anything, there might be
-     * components that extend the directive.
-     */
-    viewQuery: ViewQueriesFunction<T> | null;
-    /**
-     * Refreshes host bindings on the associated directive.
-     */
-    hostBindings: HostBindingsFunction<T> | null;
-    onChanges: (() => void) | null;
-    onInit: (() => void) | null;
-    doCheck: (() => void) | null;
-    afterContentInit: (() => void) | null;
-    afterContentChecked: (() => void) | null;
-    afterViewInit: (() => void) | null;
-    afterViewChecked: (() => void) | null;
-    onDestroy: (() => void) | null;
-    /**
-     * The features applied to this directive
-     */
-    readonly features: DirectiveDefFeature[] | null;
-    setInput: (<U extends T>(this: ɵDirectiveDef<U>, instance: U, value: any, publicName: string, privateName: string) => void) | null;
-}
-
-export declare type ɵDirectiveDefWithMeta<T, Selector extends string, ExportAs extends string[], InputMap extends {
+export declare type ΔDirectiveDefWithMeta<T, Selector extends string, ExportAs extends string[], InputMap extends {
     [key: string]: string;
 }, OutputMap extends {
     [key: string]: string;
@@ -10295,41 +11150,25 @@ export declare type ɵDirectiveDefWithMeta<T, Selector extends string, ExportAs 
  *
  * Usage example (in factory function):
  *
+ * ```ts
  * class SomeDirective {
  *   constructor(directive: DirectiveA) {}
  *
- *   static ngDirectiveDef = defineDirective({
+ *   static ngDirectiveDef = ΔdefineDirective({
  *     type: SomeDirective,
- *     factory: () => new SomeDirective(directiveInject(DirectiveA))
+ *     factory: () => new SomeDirective(ΔdirectiveInject(DirectiveA))
  *   });
  * }
- *
+ * ```
  * @param token the type or token to inject
  * @param flags Injection flags
  * @returns the value from the injector or `null` when not found
+ *
+ * @publicApi
  */
-export declare function ɵdirectiveInject<T>(token: Type<T> | InjectionToken<T>): T;
+export declare function ΔdirectiveInject<T>(token: Type<T> | InjectionToken<T>): T;
 
-export declare function ɵdirectiveInject<T>(token: Type<T> | InjectionToken<T>, flags: InjectFlags): T;
-
-/**
- * A subclass of `Type` which has a static `ngDirectiveDef`:`DirectiveDef` field making it
- * consumable for rendering.
- */
-export declare interface ɵDirectiveType<T> extends Type<T> {
-    ngDirectiveDef: never;
-}
-
-/**
- * @deprecated Use the `Renderer2` instead.
- */
-export declare interface ɵDirectRenderer {
-    remove(node: any): void;
-    appendChild(node: any, parent: any): void;
-    insertBefore(node: any, refNode: any): void;
-    nextSibling(node: any): any;
-    parentElement(node: any): any;
-}
+export declare function ΔdirectiveInject<T>(token: Type<T> | InjectionToken<T>, flags: InjectFlags): T;
 
 /**
  * Disables directive matching on element.
@@ -10340,17 +11179,17 @@ export declare interface ɵDirectRenderer {
  *   Should match component / directive.
  * </my-comp>
  * <div ngNonBindable>
- *   <!-- disabledBindings() -->
+ *   <!-- ΔdisableBindings() -->
  *   <my-comp my-directive>
  *     Should not match component / directive because we are in ngNonBindable.
  *   </my-comp>
- *   <!-- enableBindings() -->
+ *   <!-- ΔenableBindings() -->
  * </div>
  * ```
+ *
+ * @publicApi
  */
-export declare function ɵdisableBindings(): void;
-
-export declare function ɵeld(checkIndex: number, flags: ɵNodeFlags, matchedQueriesDsl: null | [string | number, ɵQueryValueType][], ngContentIndex: null | number, childCount: number, namespaceAndName: string | null, fixedAttrs?: null | [string, string][], bindings?: null | [ɵBindingFlags, string, string | SecurityContext | null][], outputs?: null | ([string, string])[], handleEvent?: null | ElementHandleEventFn, componentView?: null | ViewDefinitionFactory, componentRendererType?: RendererType2 | null): NodeDef;
+export declare function ΔdisableBindings(): void;
 
 /**
  * Creates an empty element using {@link elementStart} and {@link elementEnd}
@@ -10360,8 +11199,10 @@ export declare function ɵeld(checkIndex: number, flags: ɵNodeFlags, matchedQue
  * @param attrs Statically bound set of attributes, classes, and styles to be written into the DOM
  *              element on creation. Use [AttributeMarker] to denote the meaning of this array.
  * @param localRefs A set of local reference bindings on the element.
+ *
+ * @publicApi
  */
-export declare function ɵelement(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+export declare function Δelement(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
 
 /**
  * Updates the value of removes an attribute on an Element.
@@ -10372,8 +11213,10 @@ export declare function ɵelement(index: number, name: string, attrs?: TAttribut
  *                  Otherwise the attribute value is set to the stringified value.
  * @param sanitizer An optional function used to sanitize the value.
  * @param namespace Optional namespace to use when setting the attribute.
+ *
+ * @publicApi
  */
-export declare function ɵelementAttribute(index: number, name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): void;
+export declare function ΔelementAttribute(index: number, name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): void;
 
 /**
  * Update a class binding on an element with the provided value.
@@ -10393,10 +11236,14 @@ export declare function ɵelementAttribute(index: number, name: string, value: a
  *
  * @publicApi
  */
-export declare function ɵelementClassProp(index: number, classIndex: number, value: boolean | ɵPlayerFactory, forceOverride?: boolean): void;
+export declare function ΔelementClassProp(index: number, classIndex: number, value: boolean | ɵPlayerFactory, forceOverride?: boolean): void;
 
-/** Mark the end of the <ng-container>. */
-export declare function ɵelementContainerEnd(): void;
+/**
+ * Mark the end of the <ng-container>.
+ *
+ * @publicApi
+ */
+export declare function ΔelementContainerEnd(): void;
 
 /**
  * Creates a logical container for other nodes (<ng-container>) backed by a comment node in the DOM.
@@ -10409,13 +11256,17 @@ export declare function ɵelementContainerEnd(): void;
  * Even if this instruction accepts a set of attributes no actual attribute values are propagated to
  * the DOM (as a comment node can't have attributes). Attributes are here only for directive
  * matching purposes and setting initial inputs of directives.
+ *
+ * @publicApi
  */
-export declare function ɵelementContainerStart(index: number, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+export declare function ΔelementContainerStart(index: number, attrs?: TAttributes | null, localRefs?: string[] | null): void;
 
-/** Mark the end of the element. */
-export declare function ɵelementEnd(): void;
-
-export declare function ɵelementEventFullName(target: string | null, name: string): string;
+/**
+ * Mark the end of the element.
+ *
+ * @publicApi
+ */
+export declare function ΔelementEnd(): void;
 
 /**
  * Assign static attribute values to a host element.
@@ -10456,7 +11307,7 @@ export declare function ɵelementEventFullName(target: string | null, name: stri
  *
  * @publicApi
  */
-export declare function ɵelementHostAttrs(attrs: TAttributes): void;
+export declare function ΔelementHostAttrs(attrs: TAttributes): void;
 
 /**
  * Update a class host binding for a directive's/component's host element within
@@ -10476,7 +11327,7 @@ export declare function ɵelementHostAttrs(attrs: TAttributes): void;
  *
  * @publicApi
  */
-export declare function ɵelementHostClassProp(classIndex: number, value: boolean | ɵPlayerFactory, forceOverride?: boolean): void;
+export declare function ΔelementHostClassProp(classIndex: number, value: boolean | ɵPlayerFactory, forceOverride?: boolean): void;
 
 /**
  * Update a host style binding value on the host element within a component/directive.
@@ -10503,7 +11354,7 @@ export declare function ɵelementHostClassProp(classIndex: number, value: boolea
  *
  * @publicApi
  */
-export declare function ɵelementHostStyleProp(styleIndex: number, value: string | number | String | ɵPlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
+export declare function ΔelementHostStyleProp(styleIndex: number, value: string | number | String | ɵPlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
 
 /**
  * Allocates style and class binding properties on the host element during creation mode
@@ -10528,7 +11379,7 @@ export declare function ɵelementHostStyleProp(styleIndex: number, value: string
  *
  * @publicApi
  */
-export declare function ɵelementHostStyling(classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
+export declare function ΔelementHostStyling(classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
 
 /**
  * Apply all style and class host binding values to the element.
@@ -10540,7 +11391,7 @@ export declare function ɵelementHostStyling(classBindingNames?: string[] | null
  *
  * @publicApi
  */
-export declare function ɵelementHostStylingApply(): void;
+export declare function ΔelementHostStylingApply(): void;
 
 /**
  * Update style and/or class host bindings using object literals on an element within the host
@@ -10565,7 +11416,7 @@ export declare function ɵelementHostStylingApply(): void;
  *
  * @publicApi
  */
-export declare function ɵelementHostStylingMap(classes: {
+export declare function ΔelementHostStylingMap(classes: {
     [key: string]: any;
 } | string | ɵNO_CHANGE | null, styles?: {
     [styleName: string]: any;
@@ -10586,8 +11437,10 @@ export declare function ɵelementHostStylingMap(classes: {
 * @param sanitizer An optional function used to sanitize the value.
 * @param nativeOnly Whether or not we should only set native properties and skip input check
 * (this is necessary for host property bindings)
+ *
+ * @publicApi
 */
-export declare function ɵelementProperty<T>(index: number, propName: string, value: T | ɵNO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): void;
+export declare function ΔelementProperty<T>(index: number, propName: string, value: T | ɵNO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): void;
 
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
@@ -10601,8 +11454,10 @@ export declare function ɵelementProperty<T>(index: number, propName: string, va
  * Attributes and localRefs are passed as an array of strings where elements with an even index
  * hold an attribute name and elements with an odd index hold an attribute value, ex.:
  * ['id', 'warning5', 'class', 'alert']
+ *
+ * @publicApi
  */
-export declare function ɵelementStart(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+export declare function ΔelementStart(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
 
 /**
  * Update a style binding on an element with the provided value.
@@ -10630,7 +11485,7 @@ export declare function ɵelementStart(index: number, name: string, attrs?: TAtt
  *
  * @publicApi
  */
-export declare function ɵelementStyleProp(index: number, styleIndex: number, value: string | number | String | ɵPlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
+export declare function ΔelementStyleProp(index: number, styleIndex: number, value: string | number | String | ɵPlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
 
 /**
  * Allocates style and class binding properties on the element during creation mode.
@@ -10651,7 +11506,7 @@ export declare function ɵelementStyleProp(index: number, styleIndex: number, va
  *
  * @publicApi
  */
-export declare function ɵelementStyling(classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
+export declare function ΔelementStyling(classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
 
 /**
  * Apply all style and class binding values to the element.
@@ -10664,7 +11519,7 @@ export declare function ɵelementStyling(classBindingNames?: string[] | null, st
  *
  * @publicApi
  */
-export declare function ɵelementStylingApply(index: number): void;
+export declare function ΔelementStylingApply(index: number): void;
 
 /**
  * Update style and/or class bindings using object literals on an element.
@@ -10686,28 +11541,28 @@ export declare function ɵelementStylingApply(index: number): void;
  *
  * @publicApi
  */
-export declare function ɵelementStylingMap(index: number, classes: {
+export declare function ΔelementStylingMap(index: number, classes: {
     [key: string]: any;
 } | string | ɵNO_CHANGE | null, styles?: {
     [styleName: string]: any;
 } | ɵNO_CHANGE | null): void;
 
-/** Marks the end of an embedded view. */
-export declare function ɵembeddedViewEnd(): void;
+/**
+ * Marks the end of an embedded view.
+ *
+ * @publicApi
+ */
+export declare function ΔembeddedViewEnd(): void;
 
 /**
  * Marks the start of an embedded view.
  *
  * @param viewBlockId The ID of this view
  * @return boolean Whether or not this view is in creation mode
+ *
+ * @publicApi
  */
-export declare function ɵembeddedViewStart(viewBlockId: number, consts: number, vars: number): ɵRenderFlags;
-
-export declare const ɵEMPTY_ARRAY: any[];
-
-export declare const ɵEMPTY_MAP: {
-    [key: string]: any;
-};
+export declare function ΔembeddedViewStart(viewBlockId: number, consts: number, vars: number): ɵRenderFlags;
 
 /**
  * Enables directive matching on elements.
@@ -10718,24 +11573,17 @@ export declare const ɵEMPTY_MAP: {
  *   Should match component / directive.
  * </my-comp>
  * <div ngNonBindable>
- *   <!-- disabledBindings() -->
+ *   <!-- ΔdisableBindings() -->
  *   <my-comp my-directive>
  *     Should not match component / directive because we are in ngNonBindable.
  *   </my-comp>
- *   <!-- enableBindings() -->
+ *   <!-- ΔenableBindings() -->
  * </div>
  * ```
+ *
+ * @publicApi
  */
-export declare function ɵenableBindings(): void;
-
-/**
- * Loops over queued module definitions, if a given module definition has all of its
- * declarations resolved, it dequeues that module definition and sets the scope on
- * its declarations.
- */
-export declare function ɵflushModuleScopingQueueAsMuchAsPossible(): void;
-
-export declare function ɵgetComponentViewDefinitionFactory(componentFactory: ComponentFactory<any>): ViewDefinitionFactory;
+export declare function ΔenableBindings(): void;
 
 /**
  * Returns the current OpaqueViewState instance.
@@ -10743,86 +11591,20 @@ export declare function ɵgetComponentViewDefinitionFactory(componentFactory: Co
  * Used in conjunction with the restoreView() instruction to save a snapshot
  * of the current view and restore it when listeners are invoked. This allows
  * walking the declaration view tree in listeners to get vars from parent views.
- */
-export declare function ɵgetCurrentView(): OpaqueViewState;
-
-export declare function ɵgetDebugNode__POST_R3__(nativeNode: Element): DebugElement__POST_R3__;
-
-export declare function ɵgetDebugNode__POST_R3__(nativeNode: Node): DebugNode__POST_R3__;
-
-export declare function ɵgetDebugNode__POST_R3__(nativeNode: null): null;
-
-/**
- * Retrieves directives associated with a given DOM host element.
- *
- * @param target A DOM element, component or directive instance.
  *
  * @publicApi
  */
-export declare function ɵgetDirectives(target: {}): Array<{}>;
-
-export declare function ɵgetFactoryOf<T>(type: Type<any>): ((type: Type<T> | null) => T) | null;
+export declare function ΔgetCurrentView(): OpaqueViewState;
 
 /**
- * Retrieve the host element of the component.
- *
- * Use this function to retrieve the host element of the component. The host
- * element is the element which the component is associated with.
- *
- * @param directive Component or Directive for which the host element should be retrieved.
- *
  * @publicApi
  */
-export declare function ɵgetHostElement<T>(directive: T): Element;
-
-export declare function ɵgetInheritedFactory<T>(type: Type<any>): (type: Type<T>) => T;
+export declare function ΔgetFactoryOf<T>(type: Type<any>): ((type: Type<T> | null) => T) | null;
 
 /**
- * Read the `ngInjectableDef` type in a way which is immune to accidentally reading inherited value.
- *
- * @param type type which may have `ngInjectableDef`
- */
-export declare function ɵgetInjectableDef<T>(type: any): ɵInjectableDef<T> | null;
-
-/** Returns the matching `LContext` data for a given DOM node, directive or component instance.
- *
- * This function will examine the provided DOM element, component, or directive instance\'s
- * monkey-patched property to derive the `LContext` data. Once called then the monkey-patched
- * value will be that of the newly created `LContext`.
- *
- * If the monkey-patched value is the `LView` instance then the context value for that
- * target will be created and the monkey-patch reference will be updated. Therefore when this
- * function is called it may mutate the provided element\'s, component\'s or any of the associated
- * directive\'s monkey-patch values.
- *
- * If the monkey-patch value is not detected then the code will walk up the DOM until an element
- * is found which contains a monkey-patch reference. When that occurs then the provided element
- * will be updated with a new context (which is then returned). If the monkey-patch value is not
- * detected for a component/directive instance then it will throw an error (all components and
- * directives should be automatically monkey-patched by ivy).
- *
- * @param target Component, Directive or DOM Node.
- */
-export declare function ɵgetLContext(target: any): ɵLContext | null;
-
-export declare function ɵgetModuleFactory__POST_R3__(id: string): NgModuleFactory<any>;
-
-/**
- * Returns a list of all the active players present on the provided ref instance (which can
- * be an instance of a directive, component or element).
- *
- * This function will only return players that have been added to the ref instance using
- * `addPlayer` or any players that are active through any template styling bindings
- * (`[style]`, `[style.prop]`, `[class]` and `[class.name]`).
- *
  * @publicApi
  */
-export declare function ɵgetPlayers(ref: ComponentInstance | DirectiveInstance | HTMLElement): ɵPlayer[];
-
-export declare type ɵGetterFn = (obj: any) => any;
-
-
-export declare const ɵglobal: any;
+export declare function ΔgetInheritedFactory<T>(type: Type<any>): (type: Type<T>) => T;
 
 /**
  *
@@ -10847,38 +11629,48 @@ export declare const ɵglobal: any;
  * @param index A unique index of the translation in the static block.
  * @param message The translation message.
  * @param subTemplateIndex Optional sub-template index in the `message`.
+ *
+ * @publicApi
  */
-export declare function ɵi18n(index: number, message: string, subTemplateIndex?: number): void;
+export declare function Δi18n(index: number, message: string, subTemplateIndex?: number): void;
 
 /**
  * Updates a translation block or an i18n attribute when the bindings have changed.
  *
  * @param index Index of either {@link i18nStart} (translation block) or {@link i18nAttributes}
  * (i18n attribute) on which it should update the content.
+ *
+ * @publicApi
  */
-export declare function ɵi18nApply(index: number): void;
+export declare function Δi18nApply(index: number): void;
 
 /**
  * Marks a list of attributes as translatable.
  *
  * @param index A unique index in the static block
  * @param values
+ *
+ * @publicApi
  */
-export declare function ɵi18nAttributes(index: number, values: string[]): void;
+export declare function Δi18nAttributes(index: number, values: string[]): void;
 
 /**
  * Translates a translation block marked by `i18nStart` and `i18nEnd`. It inserts the text/ICU nodes
  * into the render tree, moves the placeholder nodes and removes the deleted nodes.
+ *
+ * @publicApi
  */
-export declare function ɵi18nEnd(): void;
+export declare function Δi18nEnd(): void;
 
 /**
  * Stores the values of the bindings during each update cycle in order to determine if we need to
  * update the translated nodes.
  *
  * @param expression The binding's new value or NO_CHANGE
+ *
+ * @publicApi
  */
-export declare function ɵi18nExp<T>(expression: T | ɵNO_CHANGE): void;
+export declare function Δi18nExp<T>(expression: T | ɵNO_CHANGE): void;
 
 /**
  * Handles message string post-processing for internationalization.
@@ -10897,9 +11689,9 @@ export declare function ɵi18nExp<T>(expression: T | ɵNO_CHANGE): void;
  *
  * @returns Transformed string that can be consumed by i18nStart instruction
  *
- * @publicAPI
+ * @publicApi
  */
-export declare function ɵi18nPostprocess(message: string, replacements?: {
+export declare function Δi18nPostprocess(message: string, replacements?: {
     [key: string]: (string | string[]);
 }): string;
 
@@ -10925,16 +11717,51 @@ export declare function ɵi18nPostprocess(message: string, replacements?: {
  * @param index A unique index of the translation in the static block.
  * @param message The translation message.
  * @param subTemplateIndex Optional sub-template index in the `message`.
+ *
+ * @publicApi
  */
-export declare function ɵi18nStart(index: number, message: string, subTemplateIndex?: number): void;
+export declare function Δi18nStart(index: number, message: string, subTemplateIndex?: number): void;
 
 /**
  * Merges the definition from a super class to a sub class.
  * @param definition The definition that is a SubClass of another directive of component
+ *
+ * @publicApi
  */
-export declare function ɵInheritDefinitionFeature(definition: ɵDirectiveDef<any> | ɵComponentDef<any>): void;
+export declare function ΔInheritDefinitionFeature(definition: ɵDirectiveDef<any> | ɵComponentDef<any>): void;
 
-export declare function ɵinitServicesIfNeeded(): void;
+/**
+ * Generated instruction: Injects a token from the currently active injector.
+ *
+ * WARNING: This function is meant to be generated by the Ivy compiler, and is not meant for
+ * developer consumption!
+ *
+ * https://github.com/angular/angular/blob/master/packages/core/src/render3/DELTA_INSTRUCTIONS.md
+ *
+ * Must be used in the context of a factory function such as one defined for an
+ * `InjectionToken`. Throws an error if not called from such a context.
+ *
+ * Within such a factory function, using this function to request injection of a dependency
+ * is faster and more type-safe than providing an additional array of dependencies
+ * (as has been common with `useFactory` providers).
+ *
+ * @param token The injection token for the dependency to be injected.
+ * @param flags Optional flags that control how injection is executed.
+ * The flags correspond to injection strategies that can be specified with
+ * parameter decorators `@Host`, `@Self`, `@SkipSef`, and `@Optional`.
+ * @returns True if injection is successful, null otherwise.
+ *
+ * @usageNotes
+ *
+ * ### Example
+ *
+ * {@example core/di/ts/injector_spec.ts region='ShakableInjectionToken'}
+ *
+ * @publicApi
+ */
+export declare function Δinject<T>(token: Type<T> | InjectionToken<T>): T;
+
+export declare function Δinject<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
 
 /**
  * Information about how a type or `InjectionToken` interfaces with the DI system.
@@ -10947,8 +11774,10 @@ export declare function ɵinitServicesIfNeeded(): void;
  * that the injectable does not belong to any scope.
  *
  * NOTE: This is a private type and should not be exported
+ *
+ * @publicApi
  */
-export declare interface ɵInjectableDef<T> {
+export declare interface ΔInjectableDef<T> {
     /**
      * Specifies that the given type belongs to a particular injector:
      * - `InjectorType` such as `NgModule`,
@@ -10970,8 +11799,10 @@ export declare interface ɵInjectableDef<T> {
 
 /**
  * Facade for the attribute injection from DI.
+ *
+ * @publicApi
  */
-export declare function ɵinjectAttribute(attrNameToInject: string): string | null;
+export declare function ΔinjectAttribute(attrNameToInject: string): string | null;
 
 /**
  * Information about the providers to be included in an `Injector` as well as how the given type
@@ -10982,16 +11813,14 @@ export declare function ɵinjectAttribute(attrNameToInject: string): string | nu
  * an import/dependency structure).
  *
  * NOTE: This is a private type and should not be exported
+ *
+ * @publicApi
  */
-export declare interface ɵInjectorDef<T> {
+export declare interface ΔInjectorDef<T> {
     factory: () => T;
     providers: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | any[])[];
     imports: (InjectorType<any> | InjectorTypeWithProviders<any>)[];
 }
-
-export declare function ɵinlineInterpolate(valueCount: number, c0: string, a1: any, c1: string, a2?: any, c2?: string, a3?: any, c3?: string, a4?: any, c4?: string, a5?: any, c5?: string, a6?: any, c6?: string, a7?: any, c7?: string, a8?: any, c8?: string, a9?: any, c9?: string): string;
-
-export declare function ɵinterpolate(valueCount: number, constAndInterp: string[]): string;
 
 /**
  * Creates an interpolation binding with 1 expression.
@@ -10999,29 +11828,59 @@ export declare function ɵinterpolate(valueCount: number, constAndInterp: string
  * @param prefix static value used for concatenation only.
  * @param v0 value checked for change.
  * @param suffix static value used for concatenation only.
+ *
+ * @publicApi
  */
-export declare function ɵinterpolation1(prefix: string, v0: any, suffix: string): string | ɵNO_CHANGE;
+export declare function Δinterpolation1(prefix: string, v0: any, suffix: string): string | ɵNO_CHANGE;
 
-/** Creates an interpolation binding with 2 expressions. */
-export declare function ɵinterpolation2(prefix: string, v0: any, i0: string, v1: any, suffix: string): string | ɵNO_CHANGE;
+/**
+ * Creates an interpolation binding with 2 expressions.
+ *
+ * @publicApi
+ */
+export declare function Δinterpolation2(prefix: string, v0: any, i0: string, v1: any, suffix: string): string | ɵNO_CHANGE;
 
-/** Creates an interpolation binding with 3 expressions. */
-export declare function ɵinterpolation3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): string | ɵNO_CHANGE;
+/**
+ * Creates an interpolation binding with 3 expressions.
+ *
+ * @publicApi
+ */
+export declare function Δinterpolation3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): string | ɵNO_CHANGE;
 
-/** Create an interpolation binding with 4 expressions. */
-export declare function ɵinterpolation4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): string | ɵNO_CHANGE;
+/**
+ * Create an interpolation binding with 4 expressions.
+ *
+ * @publicApi
+ */
+export declare function Δinterpolation4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): string | ɵNO_CHANGE;
 
-/** Creates an interpolation binding with 5 expressions. */
-export declare function ɵinterpolation5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string): string | ɵNO_CHANGE;
+/**
+ * Creates an interpolation binding with 5 expressions.
+ *
+ * @publicApi
+ */
+export declare function Δinterpolation5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string): string | ɵNO_CHANGE;
 
-/** Creates an interpolation binding with 6 expressions. */
-export declare function ɵinterpolation6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string): string | ɵNO_CHANGE;
+/**
+ * Creates an interpolation binding with 6 expressions.
+ *
+ * @publicApi
+ */
+export declare function Δinterpolation6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string): string | ɵNO_CHANGE;
 
-/** Creates an interpolation binding with 7 expressions. */
-export declare function ɵinterpolation7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): string | ɵNO_CHANGE;
+/**
+ * Creates an interpolation binding with 7 expressions.
+ *
+ * @publicApi
+ */
+export declare function Δinterpolation7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): string | ɵNO_CHANGE;
 
-/** Creates an interpolation binding with 8 expressions. */
-export declare function ɵinterpolation8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): string | ɵNO_CHANGE;
+/**
+ * Creates an interpolation binding with 8 expressions.
+ *
+ * @publicApi
+ */
+export declare function Δinterpolation8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): string | ɵNO_CHANGE;
 
 /**
  * Create interpolation bindings with a variable number of expressions.
@@ -11034,88 +11893,10 @@ export declare function ɵinterpolation8(prefix: string, v0: any, i0: string, v1
  * - has evaluated expressions at odd indexes.
  *
  * Returns the concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
- */
-export declare function ɵinterpolationV(values: any[]): string | ɵNO_CHANGE;
-
-export declare function ɵisBoundToModule__POST_R3__<C>(cf: ComponentFactory<C>): boolean;
-
-/**
- * Reports whether a given strategy is currently the default for change detection.
- * @param changeDetectionStrategy The strategy to check.
- * @returns True if the given strategy is the current default, false otherwise.
- * @see `ChangeDetectorStatus`
- * @see `ChangeDetectorRef`
- */
-export declare function ɵisDefaultChangeDetectionStrategy(changeDetectionStrategy: ChangeDetectionStrategy): boolean;
-
-export declare function ɵisListLikeIterable(obj: any): boolean;
-
-/**
- * Determine if the argument is an Observable
- */
-export declare function ɵisObservable(obj: any | Observable<any>): obj is Observable<any>;
-
-/**
- * Determine if the argument is shaped like a Promise
- */
-export declare function ɵisPromise(obj: any): obj is Promise<any>;
-
-export declare const ɵivyEnabled = false;
-
-/**
- * The internal view context which is specific to a given DOM element, directive or
- * component instance. Each value in here (besides the LView and element node details)
- * can be present, null or undefined. If undefined then it implies the value has not been
- * looked up yet, otherwise, if null, then a lookup was executed and nothing was found.
  *
- * Each value will get filled when the respective value is examined within the getContext
- * function. The component, element and each directive instance will share the same instance
- * of the context.
+ * @publicApi
  */
-export declare interface ɵLContext {
-    /**
-     * The component's parent view data.
-     */
-    lView: ɵangular_packages_core_core_bm;
-    /**
-     * The index instance of the node.
-     */
-    nodeIndex: number;
-    /**
-     * The instance of the DOM node that is attached to the lNode.
-     */
-    native: RNode;
-    /**
-     * The instance of the Component node.
-     */
-    component: {} | null | undefined;
-    /**
-     * The list of active directives that exist on this element.
-     */
-    directives: any[] | null | undefined;
-    /**
-     * The map of local references (local reference name => element or directive instance) that exist
-     * on this element.
-     */
-    localRefs: {
-        [key: string]: any;
-    } | null | undefined;
-}
-
-/**
- * Used to enable lifecycle hooks on the root component.
- *
- * Include this feature when calling `renderComponent` if the root component
- * you are rendering has lifecycle hooks defined. Otherwise, the hooks won't
- * be called properly.
- *
- * Example:
- *
- * ```
- * renderComponent(AppComponent, {features: [RootLifecycleHooks]});
- * ```
- */
-export declare function ɵLifecycleHooksFeature(component: any, def: ɵComponentDef<any>): void;
+export declare function ΔinterpolationV(values: any[]): string | ɵNO_CHANGE;
 
 /**
  * Adds an event listener to the current node.
@@ -11128,72 +11909,52 @@ export declare function ɵLifecycleHooksFeature(component: any, def: ɵComponent
  * @param useCapture Whether or not to use capture in event listener
  * @param eventTargetResolver Function that returns global target information in case this listener
  * should be attached to a global object like window, document or body
- */
-export declare function ɵlistener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
-
-/** Retrieves a value from current `viewData`. */
-export declare function ɵload<T>(index: number): T;
-
-export declare function ɵloadContentQuery<T>(): QueryList<T>;
-
-/**
-* Loads current View Query and moves the pointer/index to the next View Query in LView.
-*/
-export declare function ɵloadViewQuery<T>(): T;
-
-
-export declare function ɵlooseIdentical(a: any, b: any): boolean;
-
-/**
- * @suppress {globalThis}
- */
-export declare function ɵmakeDecorator<T>(name: string, props?: (...args: any[]) => any, parentClass?: any, additionalProcessing?: (type: Type<T>) => void, typeFn?: (type: Type<T>, ...args: any[]) => void): {
-    new (...args: any[]): any;
-    (...args: any[]): any;
-    (...args: any[]): (cls: any) => any;
-};
-
-/**
- * Mark the component as dirty (needing change detection).
- *
- * Marking a component dirty will schedule a change detection on this
- * component at some point in the future. Marking an already dirty
- * component as dirty is a noop. Only one outstanding change detection
- * can be scheduled per component tree. (Two components bootstrapped with
- * separate `renderComponent` will have separate schedulers)
- *
- * When the root component is bootstrapped with `renderComponent`, a scheduler
- * can be provided.
- *
- * @param component Component to mark as dirty.
  *
  * @publicApi
  */
-export declare function ɵmarkDirty<T>(component: T): void;
+export declare function Δlistener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
 
-export declare type ɵMethodFn = (obj: any, args: any[]) => any;
+/**
+ * Retrieves a value from current `viewData`.
+ *
+ * @publicApi
+ */
+export declare function Δload<T>(index: number): T;
 
-export declare function ɵmod(providers: NgModuleProviderDef[]): NgModuleDefinition;
+/**
+ *
+ * @publicApi
+ */
+export declare function ΔloadContentQuery<T>(): QueryList<T>;
 
-export declare function ɵmpd(flags: ɵNodeFlags, token: any, value: any, deps: ([ɵDepFlags, any] | any)[]): NgModuleProviderDef;
+/**
+ * Loads current View Query and moves the pointer/index to the next View Query in LView.
+ *
+ * @publicApi
+ */
+export declare function ΔloadViewQuery<T>(): T;
 
 /**
  * Sets the namespace used to create elements no `null`, which forces element creation to use
  * `createElement` rather than `createElementNS`.
+ *
+ * @publicApi
  */
-export declare function ɵnamespaceHTML(): void;
+export declare function ΔnamespaceHTML(): void;
 
 /**
  * Sets the namespace used to create elements to `'http://www.w3.org/1998/MathML/'` in global state.
+ *
+ * @publicApi
  */
-export declare function ɵnamespaceMathML(): void;
+export declare function ΔnamespaceMathML(): void;
 
 /**
  * Sets the namespace used to create elements to `'http://www.w3.org/2000/svg'` in global state.
+ *
+ * @publicApi
  */
-export declare function ɵnamespaceSVG(): void;
-
-export declare function ɵncd(ngContentIndex: null | number, index: number): NodeDef;
+export declare function ΔnamespaceSVG(): void;
 
 /**
  * Retrieves a context at the level specified and saves it as the global, contextViewData.
@@ -11204,97 +11965,15 @@ export declare function ɵncd(ngContentIndex: null | number, index: number): Nod
  *
  * @param level The relative level of the view from which to grab context compared to contextVewData
  * @returns context
+ *
+ * @publicApi
  */
-export declare function ɵnextContext<T = any>(level?: number): T;
-
-export declare const ɵNG_BASE_DEF: string;
-
-
-export declare const ɵNG_COMPONENT_DEF: string;
-
-export declare const ɵNG_DIRECTIVE_DEF: string;
+export declare function ΔnextContext<T = any>(level?: number): T;
 
 /**
- * If a directive is diPublic, bloomAdd sets a property on the type with this constant as
- * the key and the directive's unique ID as the value. This allows us to map directives to their
- * bloom filter bit for DI.
+ * @publicApi
  */
-export declare const ɵNG_ELEMENT_ID: string;
-
-export declare const ɵNG_INJECTABLE_DEF: string;
-
-export declare const ɵNG_INJECTOR_DEF: string;
-
-export declare const ɵNG_MODULE_DEF: string;
-
-export declare const ɵNG_PIPE_DEF: string;
-
-/**
- * Runtime link information for NgModules.
- *
- * This is the internal data structure used by the runtime to assemble components, directives,
- * pipes, and injectors.
- *
- * NOTE: Always use `defineNgModule` function to create this object,
- * never create the object directly since the shape of this object
- * can change between versions.
- */
-export declare interface ɵNgModuleDef<T> {
-    /** Token representing the module. Used by DI. */
-    type: T;
-    /** List of components to bootstrap. */
-    bootstrap: Type<any>[] | (() => Type<any>[]);
-    /** List of components, directives, and pipes declared by this module. */
-    declarations: Type<any>[] | (() => Type<any>[]);
-    /** List of modules or `ModuleWithProviders` imported by this module. */
-    imports: Type<any>[] | (() => Type<any>[]);
-    /**
-     * List of modules, `ModuleWithProviders`, components, directives, or pipes exported by this
-     * module.
-     */
-    exports: Type<any>[] | (() => Type<any>[]);
-    /**
-     * Cached value of computed `transitiveCompileScopes` for this module.
-     *
-     * This should never be read directly, but accessed via `transitiveScopesFor`.
-     */
-    transitiveCompileScopes: ɵNgModuleTransitiveScopes | null;
-    /** The set of schemas that declare elements to be allowed in the NgModule. */
-    schemas: SchemaMetadata[] | null;
-}
-
-export declare type ɵNgModuleDefWithMeta<T, Declarations, Imports, Exports> = ɵNgModuleDef<T>;
-
-export declare class ɵNgModuleFactory<T> extends NgModuleFactory<T> {
-    moduleType: Type<T>;
-    constructor(moduleType: Type<T>);
-    create(parentInjector: Injector | null): NgModuleRef<T>;
-}
-
-/**
- * Represents the expansion of an `NgModule` into its scopes.
- *
- * A scope is a set of directives and pipes that are visible in a particular context. Each
- * `NgModule` has two scopes. The `compilation` scope is the set of directives and pipes that will
- * be recognized in the templates of components declared by the module. The `exported` scope is the
- * set of directives and pipes exported by a module (that is, module B's exported scope gets added
- * to module A's compilation scope when module A imports B).
- */
-export declare interface ɵNgModuleTransitiveScopes {
-    compilation: {
-        directives: Set<any>;
-        pipes: Set<any>;
-    };
-    exported: {
-        directives: Set<any>;
-        pipes: Set<any>;
-    };
-    schemas: SchemaMetadata[] | null;
-}
-
-export declare interface ɵNgModuleType<T = any> extends Type<T> {
-    ngModuleDef: ɵNgModuleDef<T>;
-}
+export declare type ΔNgModuleDefWithMeta<T, Declarations, Imports, Exports> = ɵNgModuleDef<T>;
 
 /**
  * The NgOnChangesFeature decorates a component with support for the ngOnChanges
@@ -11315,99 +11994,10 @@ export declare interface ɵNgModuleType<T = any> extends Type<T> {
  *   features: [NgOnChangesFeature()]
  * });
  * ```
+ *
+ * @publicApi
  */
-export declare function ɵNgOnChangesFeature<T>(): DirectiveDefFeature;
-
-
-export declare interface ɵNO_CHANGE {
-    brand: 'NO_CHANGE';
-}
-
-/** A special value which designates that a value has not changed. */
-export declare const ɵNO_CHANGE: ɵNO_CHANGE;
-
-/**
- * Bitmask for NodeDef.flags.
- * Naming convention:
- * - `Type...`: flags that are mutually exclusive
- * - `Cat...`: union of multiple `Type...` (short for category).
- */
-export declare const enum ɵNodeFlags {
-    None = 0,
-    TypeElement = 1,
-    TypeText = 2,
-    ProjectedTemplate = 4,
-    CatRenderNode = 3,
-    TypeNgContent = 8,
-    TypePipe = 16,
-    TypePureArray = 32,
-    TypePureObject = 64,
-    TypePurePipe = 128,
-    CatPureExpression = 224,
-    TypeValueProvider = 256,
-    TypeClassProvider = 512,
-    TypeFactoryProvider = 1024,
-    TypeUseExistingProvider = 2048,
-    LazyProvider = 4096,
-    PrivateProvider = 8192,
-    TypeDirective = 16384,
-    Component = 32768,
-    CatProviderNoDirective = 3840,
-    CatProvider = 20224,
-    OnInit = 65536,
-    OnDestroy = 131072,
-    DoCheck = 262144,
-    OnChanges = 524288,
-    AfterContentInit = 1048576,
-    AfterContentChecked = 2097152,
-    AfterViewInit = 4194304,
-    AfterViewChecked = 8388608,
-    EmbeddedViews = 16777216,
-    ComponentView = 33554432,
-    TypeContentQuery = 67108864,
-    TypeViewQuery = 134217728,
-    StaticQuery = 268435456,
-    DynamicQuery = 536870912,
-    TypeNgModule = 1073741824,
-    CatQuery = 201326592,
-    Types = 201347067
-}
-
-/**
- * Provides a noop implementation of `NgZone` which does nothing. This zone requires explicit calls
- * to framework to perform rendering.
- */
-export declare class ɵNoopNgZone implements NgZone {
-    readonly hasPendingMicrotasks: boolean;
-    readonly hasPendingMacrotasks: boolean;
-    readonly isStable: boolean;
-    readonly onUnstable: EventEmitter<any>;
-    readonly onMicrotaskEmpty: EventEmitter<any>;
-    readonly onStable: EventEmitter<any>;
-    readonly onError: EventEmitter<any>;
-    run(fn: () => any): any;
-    runGuarded(fn: () => any): any;
-    runOutsideAngular(fn: () => any): any;
-    runTask<T>(fn: () => any): any;
-}
-
-export declare const ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR: {};
-
-export declare function ɵnov(view: ViewData, index: number): any;
-
-export declare function ɵoverrideComponentView(comp: Type<any>, componentFactory: ComponentFactory<any>): void;
-
-export declare function ɵoverrideProvider(override: ProviderOverride): void;
-
-export declare function ɵpad(checkIndex: number, argCount: number): NodeDef;
-
-/**
- * Patch the definition of a component with directives and pipes from the compilation scope of
- * a given module.
- */
-export declare function ɵpatchComponentDefWithScope<C>(componentDef: ɵComponentDef<C>, transitiveScopes: ɵNgModuleTransitiveScopes): void;
-
-export declare function ɵpid(flags: ɵNodeFlags, ctor: any, deps: ([ɵDepFlags, any] | any)[]): NodeDef;
+export declare function ΔNgOnChangesFeature<T>(): DirectiveDefFeature;
 
 
 /**
@@ -11416,8 +12006,10 @@ export declare function ɵpid(flags: ɵNodeFlags, ctor: any, deps: ([ɵDepFlags,
  * @param index Pipe index where the pipe will be stored.
  * @param pipeName The name of the pipe
  * @returns T the instance of the pipe.
+ *
+ * @publicApi
  */
-export declare function ɵpipe(index: number, pipeName: string): any;
+export declare function Δpipe(index: number, pipeName: string): any;
 
 /**
  * Invokes a pipe with 1 arguments.
@@ -11428,8 +12020,10 @@ export declare function ɵpipe(index: number, pipeName: string): any;
  * @param index Pipe index where the pipe was stored on creation.
  * @param slotOffset the offset in the reserved slot space
  * @param v1 1st argument to {@link PipeTransform#transform}.
+ *
+ * @publicApi
  */
-export declare function ɵpipeBind1(index: number, slotOffset: number, v1: any): any;
+export declare function ΔpipeBind1(index: number, slotOffset: number, v1: any): any;
 
 /**
  * Invokes a pipe with 2 arguments.
@@ -11441,8 +12035,10 @@ export declare function ɵpipeBind1(index: number, slotOffset: number, v1: any):
  * @param slotOffset the offset in the reserved slot space
  * @param v1 1st argument to {@link PipeTransform#transform}.
  * @param v2 2nd argument to {@link PipeTransform#transform}.
+ *
+ * @publicApi
  */
-export declare function ɵpipeBind2(index: number, slotOffset: number, v1: any, v2: any): any;
+export declare function ΔpipeBind2(index: number, slotOffset: number, v1: any, v2: any): any;
 
 /**
  * Invokes a pipe with 3 arguments.
@@ -11455,8 +12051,10 @@ export declare function ɵpipeBind2(index: number, slotOffset: number, v1: any, 
  * @param v1 1st argument to {@link PipeTransform#transform}.
  * @param v2 2nd argument to {@link PipeTransform#transform}.
  * @param v3 4rd argument to {@link PipeTransform#transform}.
+ *
+ * @publicApi
  */
-export declare function ɵpipeBind3(index: number, slotOffset: number, v1: any, v2: any, v3: any): any;
+export declare function ΔpipeBind3(index: number, slotOffset: number, v1: any, v2: any, v3: any): any;
 
 /**
  * Invokes a pipe with 4 arguments.
@@ -11470,8 +12068,10 @@ export declare function ɵpipeBind3(index: number, slotOffset: number, v1: any, 
  * @param v2 2nd argument to {@link PipeTransform#transform}.
  * @param v3 3rd argument to {@link PipeTransform#transform}.
  * @param v4 4th argument to {@link PipeTransform#transform}.
+ *
+ * @publicApi
  */
-export declare function ɵpipeBind4(index: number, slotOffset: number, v1: any, v2: any, v3: any, v4: any): any;
+export declare function ΔpipeBind4(index: number, slotOffset: number, v1: any, v2: any, v3: any, v4: any): any;
 
 /**
  * Invokes a pipe with variable number of arguments.
@@ -11482,114 +12082,15 @@ export declare function ɵpipeBind4(index: number, slotOffset: number, v1: any, 
  * @param index Pipe index where the pipe was stored on creation.
  * @param slotOffset the offset in the reserved slot space
  * @param values Array of arguments to pass to {@link PipeTransform#transform} method.
+ *
+ * @publicApi
  */
-export declare function ɵpipeBindV(index: number, slotOffset: number, values: any[]): any;
+export declare function ΔpipeBindV(index: number, slotOffset: number, values: any[]): any;
 
 /**
- * Runtime link information for Pipes.
- *
- * This is internal data structure used by the renderer to link
- * pipes into templates.
- *
- * NOTE: Always use `definePipe` function to create this object,
- * never create the object directly since the shape of this object
- * can change between versions.
- *
- * See: {@link definePipe}
+ * @publicApi
  */
-export declare interface ɵPipeDef<T> {
-    /**
-     * Pipe name.
-     *
-     * Used to resolve pipe in templates.
-     */
-    readonly name: string;
-    /**
-     * Factory function used to create a new pipe instance.
-     */
-    factory: FactoryFn<T>;
-    /**
-     * Whether or not the pipe is pure.
-     *
-     * Pure pipes result only depends on the pipe input and not on internal
-     * state of the pipe.
-     */
-    readonly pure: boolean;
-    onDestroy: (() => void) | null;
-}
-
-export declare type ɵPipeDefWithMeta<T, Name extends string> = ɵPipeDef<T>;
-
-
-/**
- * A shared interface which contains an animation player
- */
-export declare interface ɵPlayer {
-    parent?: ɵPlayer | null;
-    state: ɵPlayState;
-    play(): void;
-    pause(): void;
-    finish(): void;
-    destroy(): void;
-    addEventListener(state: ɵPlayState | string, cb: (data?: any) => any): void;
-}
-
-/**
- * Used as a reference to build a player from a styling template binding
- * (`[style]` and `[class]`).
- *
- * The `fn` function will be called once any styling-related changes are
- * evaluated on an element and is expected to return a player that will
- * be then run on the element.
- *
- * `[style]`, `[style.prop]`, `[class]` and `[class.name]` template bindings
- * all accept a `PlayerFactory` as input and this player factories.
- */
-export declare interface ɵPlayerFactory {
-    '__brand__': 'Brand for PlayerFactory that nothing will match';
-}
-
-/**
- * Designed to be used as an injection service to capture all animation players.
- *
- * When present all animation players will be passed into the flush method below.
- * This feature is designed to service application-wide animation testing, live
- * debugging as well as custom animation choreographing tools.
- */
-export declare interface ɵPlayerHandler {
-    /**
-     * Designed to kick off the player at the end of change detection
-     */
-    flushPlayers(): void;
-    /**
-     * @param player The player that has been scheduled to run within the application.
-     * @param context The context as to where the player was bound to
-     */
-    queuePlayer(player: ɵPlayer, context: ComponentInstance | DirectiveInstance | HTMLElement): void;
-}
-
-/**
- * The state of a given player
- *
- * Do not change the increasing nature of the numbers since the player
- * code may compare state by checking if a number is higher or lower than
- * a certain numeric value.
- */
-export declare const enum ɵPlayState {
-    Pending = 0,
-    Running = 1,
-    Paused = 2,
-    Finished = 100,
-    Destroyed = 200
-}
-
-export declare function ɵpod(checkIndex: number, propToIndex: {
-    [p: string]: number;
-}): NodeDef;
-
-export declare function ɵppd(checkIndex: number, argCount: number): NodeDef;
-
-export declare function ɵprd(flags: ɵNodeFlags, matchedQueries: null | [string | number, ɵQueryValueType][], token: any, value: any, deps: ([ɵDepFlags, any] | any)[]): NodeDef;
+export declare type ΔPipeDefWithMeta<T, Name extends string> = ɵPipeDef<T>;
 
 /**
  * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
@@ -11599,8 +12100,10 @@ export declare function ɵprd(flags: ɵNodeFlags, matchedQueries: null | [string
  * @param selectorIndex:
  *        - 0 when the selector is `*` (or unspecified as this is the default value),
  *        - 1 based index of the selector from the {@link projectionDef}
- */
-export declare function ɵprojection(nodeIndex: number, selectorIndex?: number, attrs?: string[]): void;
+  *
+ * @publicApi
+*/
+export declare function Δprojection(nodeIndex: number, selectorIndex?: number, attrs?: string[]): void;
 
 /**
  * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
@@ -11622,8 +12125,10 @@ export declare function ɵprojection(nodeIndex: number, selectorIndex?: number, 
  *
  * @param selectors A collection of parsed CSS selectors
  * @param rawSelectors A collection of CSS selectors in the raw, un-parsed form
+ *
+ * @publicApi
  */
-export declare function ɵprojectionDef(selectors?: ɵCssSelectorList[], textSelectors?: string[]): void;
+export declare function ΔprojectionDef(selectors?: ɵCssSelectorList[], textSelectors?: string[]): void;
 
 /**
  * This feature resolves the providers of a directive (or component),
@@ -11652,22 +12157,10 @@ export declare function ɵprojectionDef(selectors?: ɵCssSelectorList[], textSel
  * }
  *
  * @param definition
- */
-export declare function ɵProvidersFeature<T>(providers: Provider[], viewProviders?: Provider[]): (definition: ɵDirectiveDef<T>) => void;
-
-/**
- * Publishes a collection of default debug tools onto`window.ng`.
  *
- * These functions are available globally when Angular is in development
- * mode and are automatically stripped away from prod mode is on.
+ * @publicApi
  */
-export declare function ɵpublishDefaultGlobalUtils(): void;
-
-/**
- * Publishes the given function to `window.ng` so that it can be
- * used from the browser console when an application is not in production.
- */
-export declare function ɵpublishGlobalUtil(name: string, fn: Function): void;
+export declare function ΔProvidersFeature<T>(providers: Provider[], viewProviders?: Provider[]): (definition: ɵDirectiveDef<T>) => void;
 
 
 /**
@@ -11695,8 +12188,10 @@ export declare function ɵpublishGlobalUtil(name: string, fn: Function): void;
  * @param pureFn Function that returns a value
  * @param thisArg Optional calling context of pureFn
  * @returns value
+ *
+ * @publicApi
  */
-export declare function ɵpureFunction0<T>(slotOffset: number, pureFn: () => T, thisArg?: any): T;
+export declare function ΔpureFunction0<T>(slotOffset: number, pureFn: () => T, thisArg?: any): T;
 
 /**
  * If the value of the provided exp has changed, calls the pure function to return
@@ -11707,8 +12202,10 @@ export declare function ɵpureFunction0<T>(slotOffset: number, pureFn: () => T, 
  * @param exp Updated expression value
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
+ *
+ * @publicApi
  */
-export declare function ɵpureFunction1(slotOffset: number, pureFn: (v: any) => any, exp: any, thisArg?: any): any;
+export declare function ΔpureFunction1(slotOffset: number, pureFn: (v: any) => any, exp: any, thisArg?: any): any;
 
 /**
  * If the value of any provided exp has changed, calls the pure function to return
@@ -11720,8 +12217,10 @@ export declare function ɵpureFunction1(slotOffset: number, pureFn: (v: any) => 
  * @param exp2
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
+ *
+ * @publicApi
  */
-export declare function ɵpureFunction2(slotOffset: number, pureFn: (v1: any, v2: any) => any, exp1: any, exp2: any, thisArg?: any): any;
+export declare function ΔpureFunction2(slotOffset: number, pureFn: (v1: any, v2: any) => any, exp1: any, exp2: any, thisArg?: any): any;
 
 /**
  * If the value of any provided exp has changed, calls the pure function to return
@@ -11734,8 +12233,10 @@ export declare function ɵpureFunction2(slotOffset: number, pureFn: (v1: any, v2
  * @param exp3
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
+ *
+ * @publicApi
  */
-export declare function ɵpureFunction3(slotOffset: number, pureFn: (v1: any, v2: any, v3: any) => any, exp1: any, exp2: any, exp3: any, thisArg?: any): any;
+export declare function ΔpureFunction3(slotOffset: number, pureFn: (v1: any, v2: any, v3: any) => any, exp1: any, exp2: any, exp3: any, thisArg?: any): any;
 
 /**
  * If the value of any provided exp has changed, calls the pure function to return
@@ -11749,8 +12250,10 @@ export declare function ɵpureFunction3(slotOffset: number, pureFn: (v1: any, v2
  * @param exp4
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
+ *
+ * @publicApi
  */
-export declare function ɵpureFunction4(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, thisArg?: any): any;
+export declare function ΔpureFunction4(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, thisArg?: any): any;
 
 /**
  * If the value of any provided exp has changed, calls the pure function to return
@@ -11765,8 +12268,10 @@ export declare function ɵpureFunction4(slotOffset: number, pureFn: (v1: any, v2
  * @param exp5
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
+ *
+ * @publicApi
  */
-export declare function ɵpureFunction5(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, thisArg?: any): any;
+export declare function ΔpureFunction5(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, thisArg?: any): any;
 
 /**
  * If the value of any provided exp has changed, calls the pure function to return
@@ -11782,8 +12287,10 @@ export declare function ɵpureFunction5(slotOffset: number, pureFn: (v1: any, v2
  * @param exp6
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
+ *
+ * @publicApi
  */
-export declare function ɵpureFunction6(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any, v6: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, exp6: any, thisArg?: any): any;
+export declare function ΔpureFunction6(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any, v6: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, exp6: any, thisArg?: any): any;
 
 /**
  * If the value of any provided exp has changed, calls the pure function to return
@@ -11800,8 +12307,10 @@ export declare function ɵpureFunction6(slotOffset: number, pureFn: (v1: any, v2
  * @param exp7
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
+ *
+ * @publicApi
  */
-export declare function ɵpureFunction7(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any, v6: any, v7: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, exp6: any, exp7: any, thisArg?: any): any;
+export declare function ΔpureFunction7(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any, v6: any, v7: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, exp6: any, exp7: any, thisArg?: any): any;
 
 /**
  * If the value of any provided exp has changed, calls the pure function to return
@@ -11819,8 +12328,10 @@ export declare function ɵpureFunction7(slotOffset: number, pureFn: (v1: any, v2
  * @param exp8
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
+ *
+ * @publicApi
  */
-export declare function ɵpureFunction8(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any, v6: any, v7: any, v8: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, exp6: any, exp7: any, exp8: any, thisArg?: any): any;
+export declare function ΔpureFunction8(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any, v6: any, v7: any, v8: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, exp6: any, exp7: any, exp8: any, thisArg?: any): any;
 
 /**
  * pureFunction instruction that can support any number of bindings.
@@ -11834,17 +12345,10 @@ export declare function ɵpureFunction8(slotOffset: number, pureFn: (v1: any, v2
  * @param exps An array of binding values
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
+ *
+ * @publicApi
  */
-export declare function ɵpureFunctionV(slotOffset: number, pureFn: (...v: any[]) => any, exps: any[], thisArg?: any): any;
-
-export declare function ɵqud(flags: ɵNodeFlags, id: number, bindings: {
-    [propName: string]: ɵQueryBindingType;
-}): NodeDef;
-
-export declare const enum ɵQueryBindingType {
-    First = 0,
-    All = 1
-}
+export declare function ΔpureFunctionV(slotOffset: number, pureFn: (...v: any[]) => any, exps: any[], thisArg?: any): any;
 
 /**
  * Refreshes a query by combining matches from all active views and removing matches from deleted
@@ -11852,16 +12356,10 @@ export declare const enum ɵQueryBindingType {
  *
  * @returns `true` if a query got dirty during change detection or if this is a static query
  * resolving in creation mode, `false` otherwise.
+ *
+ * @publicApi
  */
-export declare function ɵqueryRefresh(queryList: QueryList<any>): boolean;
-
-export declare const enum ɵQueryValueType {
-    ElementRef = 0,
-    RenderElement = 1,
-    TemplateRef = 2,
-    ViewContainerRef = 3,
-    Provider = 4
-}
+export declare function ΔqueryRefresh(queryList: QueryList<any>): boolean;
 
 /**
  * Retrieves a local reference from the current contextViewData.
@@ -11870,152 +12368,16 @@ export declare const enum ɵQueryValueType {
  * with a nextContext() call, which walks up the tree and updates the contextViewData instance.
  *
  * @param index The index of the local ref in contextViewData.
- */
-export declare function ɵreference<T>(index: number): T;
-
-export declare class ɵReflectionCapabilities implements PlatformReflectionCapabilities {
-    private _reflect;
-    constructor(reflect?: any);
-    isReflectionEnabled(): boolean;
-    factory<T>(t: Type<T>): (args: any[]) => T;
-    private _ownParameters;
-    parameters(type: Type<any>): any[][];
-    private _ownAnnotations;
-    annotations(typeOrFunc: Type<any>): any[];
-    private _ownPropMetadata;
-    propMetadata(typeOrFunc: any): {
-        [key: string]: any[];
-    };
-    ownPropMetadata(typeOrFunc: any): {
-        [key: string]: any[];
-    };
-    hasLifecycleHook(type: any, lcProperty: string): boolean;
-    guards(type: any): {
-        [key: string]: any;
-    };
-    getter(name: string): ɵGetterFn;
-    setter(name: string): ɵSetterFn;
-    method(name: string): ɵMethodFn;
-    importUri(type: any): string;
-    resourceUri(type: any): string;
-    resolveIdentifier(name: string, moduleUrl: string, members: string[], runtime: any): any;
-    resolveEnum(enumIdentifier: any, name: string): any;
-}
-
-/**
- * Registers a loaded module. Should only be called from generated NgModuleFactory code.
+ *
  * @publicApi
  */
-export declare function ɵregisterModuleFactory(id: string, factory: NgModuleFactory<any>): void;
+export declare function Δreference<T>(index: number): T;
 
 /**
- * Render3 implementation of {@link viewEngine_ComponentFactory}.
- */
-export declare class ɵRender3ComponentFactory<T> extends ComponentFactory<T> {
-    private componentDef;
-    private ngModule?;
-    selector: string;
-    componentType: Type<any>;
-    ngContentSelectors: string[];
-    isBoundToModule: boolean;
-    readonly inputs: {
-        propName: string;
-        templateName: string;
-    }[];
-    readonly outputs: {
-        propName: string;
-        templateName: string;
-    }[];
-    /**
-     * @param componentDef The component definition.
-     * @param ngModule The NgModuleRef to which the factory is bound.
-     */
-    constructor(componentDef: ɵComponentDef<any>, ngModule?: NgModuleRef<any> | undefined);
-    create(injector: Injector, projectableNodes?: any[][] | undefined, rootSelectorOrNode?: any, ngModule?: NgModuleRef<any> | undefined): ComponentRef<T>;
-}
-
-/**
- * Represents an instance of a Component created via a {@link ComponentFactory}.
  *
- * `ComponentRef` provides access to the Component Instance as well other objects related to this
- * Component Instance and allows you to destroy the Component Instance via the {@link #destroy}
- * method.
- *
+ * @publicApi
  */
-export declare class ɵRender3ComponentRef<T> extends ComponentRef<T> {
-    location: ElementRef;
-    private _rootLView;
-    private _tNode;
-    destroyCbs: (() => void)[] | null;
-    instance: T;
-    hostView: ViewRef_2<T>;
-    changeDetectorRef: ChangeDetectorRef;
-    componentType: Type<T>;
-    constructor(componentType: Type<T>, instance: T, location: ElementRef, _rootLView: ɵangular_packages_core_core_bm, _tNode: ɵangular_packages_core_core_bg | TContainerNode | TElementContainerNode);
-    readonly injector: Injector;
-    destroy(): void;
-    onDestroy(callback: () => void): void;
-}
-
-export declare class ɵRender3NgModuleRef<T> extends NgModuleRef<T> implements InternalNgModuleRef<T> {
-    _parent: Injector | null;
-    _bootstrapComponents: Type<any>[];
-    _r3Injector: R3Injector;
-    injector: Injector;
-    instance: T;
-    destroyCbs: (() => void)[] | null;
-    constructor(ngModuleType: Type<T>, _parent: Injector | null);
-    get(token: any, notFoundValue?: any, injectFlags?: InjectFlags): any;
-    readonly componentFactoryResolver: ComponentFactoryResolver;
-    destroy(): void;
-    onDestroy(callback: () => void): void;
-}
-
-/**
- * Bootstraps a Component into an existing host element and returns an instance
- * of the component.
- *
- * Use this function to bootstrap a component into the DOM tree. Each invocation
- * of this function will create a separate tree of components, injectors and
- * change detection cycles and lifetimes. To dynamically insert a new component
- * into an existing tree such that it shares the same injection, change detection
- * and object lifetime, use {@link ViewContainer#createComponent}.
- *
- * @param componentType Component to bootstrap
- * @param options Optional parameters which control bootstrapping
- */
-export declare function ɵrenderComponent<T>(componentType: ɵComponentType<T> | Type<T>, opts?: CreateComponentOptions): T;
-
-/**
- * @deprecated Debug info is handled internally in the view engine now.
- */
-export declare abstract class ɵRenderDebugInfo {
-    abstract readonly injector: Injector;
-    abstract readonly component: any;
-    abstract readonly providerTokens: any[];
-    abstract readonly references: {
-        [key: string]: any;
-    };
-    abstract readonly context: any;
-    abstract readonly source: string;
-}
-
-/**
- * Flags passed into template functions to determine which blocks (i.e. creation, update)
- * should be executed.
- *
- * Typically, a template runs both the creation block and the update block on initialization and
- * subsequent runs only execute the update block. However, dynamically created views require that
- * the creation block be executed separately from the update block (for backwards compat).
- */
-export declare const enum ɵRenderFlags {
-    Create = 1,
-    Update = 2
-}
-
-export declare function ɵresetCompiledComponents(): void;
-
-export declare function ɵresolveBody(element: RElement & {
+export declare function ΔresolveBody(element: RElement & {
     ownerDocument: Document;
 }): {
     name: string;
@@ -12023,49 +12385,21 @@ export declare function ɵresolveBody(element: RElement & {
 };
 
 /**
- * Used to resolve resource URLs on `@Component` when used with JIT compilation.
  *
- * Example:
- * ```
- * @Component({
- *   selector: 'my-comp',
- *   templateUrl: 'my-comp.html', // This requires asynchronous resolution
- * })
- * class MyComponent{
- * }
- *
- * // Calling `renderComponent` will fail because `renderComponent` is a synchronous process
- * // and `MyComponent`'s `@Component.templateUrl` needs to be resolved asynchronously.
- *
- * // Calling `resolveComponentResources()` will resolve `@Component.templateUrl` into
- * // `@Component.template`, which allows `renderComponent` to proceed in a synchronous manner.
- *
- * // Use browser's `fetch()` function as the default resource resolution strategy.
- * resolveComponentResources(fetch).then(() => {
- *   // After resolution all URLs have been converted into `template` strings.
- *   renderComponent(MyComponent);
- * });
- *
- * ```
- *
- * NOTE: In AOT the resolution happens during compilation, and so there should be no need
- * to call this method outside JIT mode.
- *
- * @param resourceResolver a function which is responsible for returning a `Promise` to the
- * contents of the resolved URL. Browser's `fetch()` method is a good default implementation.
+ * @publicApi
  */
-export declare function ɵresolveComponentResources(resourceResolver: (url: string) => (Promise<string | {
-    text(): Promise<string>;
-}>)): Promise<void>;
-
-export declare function ɵresolveDocument(element: RElement & {
+export declare function ΔresolveDocument(element: RElement & {
     ownerDocument: Document;
 }): {
     name: string;
     target: Document;
 };
 
-export declare function ɵresolveWindow(element: RElement & {
+/**
+ *
+ * @publicApi
+ */
+export declare function ΔresolveWindow(element: RElement & {
     ownerDocument: Document;
 }): {
     name: string;
@@ -12080,8 +12414,10 @@ export declare function ɵresolveWindow(element: RElement & {
  * walking the declaration view tree in listeners to get vars from parent views.
  *
  * @param viewToRestore The OpaqueViewState instance to restore.
+ *
+ * @publicApi
  */
-export declare function ɵrestoreView(viewToRestore: OpaqueViewState): void;
+export declare function ΔrestoreView(viewToRestore: OpaqueViewState): void;
 
 /**
  * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
@@ -12095,8 +12431,10 @@ export declare function ɵrestoreView(viewToRestore: OpaqueViewState): void;
  * @param unsafeHtml untrusted `html`, typically from the user.
  * @returns `html` string which is safe to display to user, because all of the dangerous javascript
  * and urls have been removed.
+ *
+ * @publicApi
  */
-export declare function ɵsanitizeHtml(unsafeHtml: any): string;
+export declare function ΔsanitizeHtml(unsafeHtml: any): string;
 
 /**
  * A `url` sanitizer which only lets trusted `url`s through.
@@ -12106,8 +12444,10 @@ export declare function ɵsanitizeHtml(unsafeHtml: any): string;
  * @param unsafeResourceUrl untrusted `url`, typically from the user.
  * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
  * only trusted `url`s have been allowed to pass.
+ *
+ * @publicApi
  */
-export declare function ɵsanitizeResourceUrl(unsafeResourceUrl: any): string;
+export declare function ΔsanitizeResourceUrl(unsafeResourceUrl: any): string;
 
 /**
  * A `script` sanitizer which only lets trusted javascript through.
@@ -12118,8 +12458,10 @@ export declare function ɵsanitizeResourceUrl(unsafeResourceUrl: any): string;
  * @param unsafeScript untrusted `script`, typically from the user.
  * @returns `url` string which is safe to bind to the `<script>` element such as `<img src>`,
  * because only trusted `scripts` have been allowed to pass.
+ *
+ * @publicApi
  */
-export declare function ɵsanitizeScript(unsafeScript: any): string;
+export declare function ΔsanitizeScript(unsafeScript: any): string;
 
 /**
  * A `style` sanitizer which converts untrusted `style` **string** into trusted string by removing
@@ -12133,8 +12475,10 @@ export declare function ɵsanitizeScript(unsafeScript: any): string;
  * @param unsafeStyle untrusted `style`, typically from the user.
  * @returns `style` string which is safe to bind to the `style` properties, because all of the
  * dangerous javascript and urls have been removed.
+ *
+ * @publicApi
  */
-export declare function ɵsanitizeStyle(unsafeStyle: any): string;
+export declare function ΔsanitizeStyle(unsafeStyle: any): string;
 
 /**
  * A `url` sanitizer which converts untrusted `url` **string** into trusted string by removing
@@ -12149,8 +12493,10 @@ export declare function ɵsanitizeStyle(unsafeStyle: any): string;
  * @param unsafeUrl untrusted `url`, typically from the user.
  * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
  * all of the dangerous javascript has been removed.
+ *
+ * @publicApi
  */
-export declare function ɵsanitizeUrl(unsafeUrl: any): string;
+export declare function ΔsanitizeUrl(unsafeUrl: any): string;
 
 /**
  * Sanitizes URL, selecting sanitizer function based on tag and property names.
@@ -12164,8 +12510,10 @@ export declare function ɵsanitizeUrl(unsafeUrl: any): string;
  * @param tag target element tag name.
  * @param prop name of the property that contains the value.
  * @returns `url` string which is safe to bind.
+ *
+ * @publicApi
  */
-export declare function ɵsanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string, prop: string): any;
+export declare function ΔsanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string, prop: string): any;
 
 /**
  * Selects an index of an item to act on and flushes lifecycle hooks up to this point
@@ -12175,35 +12523,25 @@ export declare function ɵsanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string, 
  *
  * ```ts
  * (rf: RenderFlags, ctx: any) => {
-  *  if (rf & 1) {
-  *    element(0, 'div');
-  *  }
-  *  if (rf & 2) {
-  *    select(0); // Select the <div/> created above.
-  *    property('title', 'test');
-  *  }
-  * }
-  * ```
-  * @param index the index of the item to act on with the following instructions
-  */
-export declare function ɵselect(index: number): void;
+ *   if (rf & 1) {
+ *     element(0, 'div');
+ *   }
+ *   if (rf & 2) {
+ *     select(0); // Select the <div/> created above.
+ *     property('title', 'test');
+ *   }
+ *  }
+ * ```
+ * @param index the index of the item to act on with the following instructions
+ *
+ * @publicApi
+ */
+export declare function Δselect(index: number): void;
 
 /**
- * Adds decorator, constructor, and property metadata to a given type via static metadata fields
- * on the type.
- *
- * These metadata fields can later be read with Angular's `ReflectionCapabilities` API.
- *
- * Calls to `setClassMetadata` can be marked as pure, resulting in the metadata assignments being
- * tree-shaken away during production builds.
+ * @publicApi
  */
-export declare function ɵsetClassMetadata(type: Type<any>, decorators: any[] | null, ctorParameters: (() => any[]) | null, propDecorators: {
-    [field: string]: any;
-} | null): void;
-
-export declare function ɵsetComponentScope(type: ɵComponentType<any>, directives: Type<any>[], pipes: Type<any>[]): void;
-
-export declare function ɵsetCurrentInjector(injector: Injector | null | undefined): Injector | undefined | null;
+export declare function ΔsetComponentScope(type: ɵComponentType<any>, directives: Type<any>[], pipes: Type<any>[]): void;
 
 /**
  * Adds the module metadata that is necessary to compute the module's transitive scope to an
@@ -12212,8 +12550,10 @@ export declare function ɵsetCurrentInjector(injector: Injector | null | undefin
  * Scope metadata of modules is not used in production builds, so calls to this function can be
  * marked pure to tree-shake it from the bundle, allowing for all referenced declarations
  * to become eligible for tree-shaking as well.
+ *
+ * @publicApi
  */
-export declare function ɵsetNgModuleScope(type: any, scope: {
+export declare function ΔsetNgModuleScope(type: any, scope: {
     /** List of components, directives, and pipes declared by this module. */
     declarations?: Type<any>[] | (() => Type<any>[]);
     /** List of modules or `ModuleWithProviders` imported by this module. */
@@ -12225,9 +12565,6 @@ export declare function ɵsetNgModuleScope(type: any, scope: {
     exports?: Type<any>[] | (() => Type<any>[]);
 }): void;
 
-
-export declare type ɵSetterFn = (obj: any, value: any) => void;
-
 /**
  * Registers a QueryList, associated with a static content query, for later refresh
  * (part of a view refresh).
@@ -12237,8 +12574,10 @@ export declare type ɵSetterFn = (obj: any, value: any) => void;
  * @param descend Whether or not to descend into children
  * @param read What to save in the query
  * @returns QueryList<T>
+ *
+ * @publicApi
  */
-export declare function ɵstaticContentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read: any): void;
+export declare function ΔstaticContentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read: any): void;
 
 /**
  * Creates new QueryList for a static view query.
@@ -12246,39 +12585,10 @@ export declare function ɵstaticContentQuery<T>(directiveIndex: number, predicat
  * @param predicate The type for which the query will search
  * @param descend Whether or not to descend into children
  * @param read What to save in the query
+ *
+ * @publicApi
  */
-export declare function ɵstaticViewQuery<T>(predicate: Type<any> | string[], descend: boolean, read: any): void;
-
-/** Store a value in the `data` at a given `index`. */
-export declare function ɵstore<T>(index: number, value: T): void;
-
-
-export declare function ɵstringify(token: any): string;
-
-export declare const ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__: typeof injectChangeDetectorRef;
-
-export declare const ɵSWITCH_COMPILE_COMPONENT__POST_R3__: typeof ɵcompileComponent;
-
-export declare const ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__: typeof ɵcompileDirective;
-
-export declare const ɵSWITCH_COMPILE_INJECTABLE__POST_R3__: typeof compileInjectable;
-
-export declare const ɵSWITCH_COMPILE_NGMODULE__POST_R3__: typeof ɵcompileNgModule;
-
-export declare const ɵSWITCH_COMPILE_PIPE__POST_R3__: typeof ɵcompilePipe;
-
-export declare const ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__: typeof injectElementRef;
-
-
-export declare const ɵSWITCH_IVY_ENABLED__POST_R3__ = true;
-
-export declare const ɵSWITCH_RENDERER2_FACTORY__POST_R3__: typeof injectRenderer2;
-
-export declare const ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__: typeof injectTemplateRef;
-
-export declare const ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__: typeof injectViewContainerRef;
-
-export declare function ɵted(checkIndex: number, ngContentIndex: number | null, staticText: string[]): NodeDef;
+export declare function ΔstaticViewQuery<T>(predicate: Type<any> | string[], descend: boolean, read: any): void;
 
 /**
  * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
@@ -12296,22 +12606,28 @@ export declare function ɵted(checkIndex: number, ngContentIndex: number | null,
  * @param localRefs A set of local reference bindings on the element.
  * @param localRefExtractor A function which extracts local-refs values from the template.
  *        Defaults to the current element associated with the local-ref.
+ *
+ * @publicApi
  */
-export declare function ɵtemplate(index: number, templateFn: ComponentTemplate<any> | null, consts: number, vars: number, tagName?: string | null, attrs?: TAttributes | null, localRefs?: string[] | null, localRefExtractor?: LocalRefExtractor): void;
+export declare function Δtemplate(index: number, templateFn: ComponentTemplate<any> | null, consts: number, vars: number, tagName?: string | null, attrs?: TAttributes | null, localRefs?: string[] | null, localRefExtractor?: LocalRefExtractor): void;
 
 /**
  * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
  * `<ng-template>` element.
+ *
+ * @publicApi
  */
-export declare function ɵtemplateRefExtractor(tNode: TNode, currentView: ɵangular_packages_core_core_bm): TemplateRef<{}> | null;
+export declare function ΔtemplateRefExtractor(tNode: TNode, currentView: ɵangular_packages_core_core_bm): TemplateRef<{}> | null;
 
 /**
  * Create static text node
  *
  * @param index Index of the node in the data array
  * @param value Value to write. This value will be stringified.
+ *
+ * @publicApi
  */
-export declare function ɵtext(index: number, value?: any): void;
+export declare function Δtext(index: number, value?: any): void;
 
 /**
  * Create text node with binding
@@ -12319,53 +12635,10 @@ export declare function ɵtext(index: number, value?: any): void;
  *
  * @param index Index of the node in the data array.
  * @param value Stringified value to write.
- */
-export declare function ɵtextBinding<T>(index: number, value: T | ɵNO_CHANGE): void;
-
-/**
- * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
  *
- * This operation is memoized and the result is cached on the module's definition. It can be called
- * on modules with components that have not fully compiled yet, but the result should not be used
- * until they have.
+ * @publicApi
  */
-export declare function ɵtransitiveScopesFor<T>(moduleType: Type<T>, processNgModuleFn?: (ngModule: ɵNgModuleType) => void): ɵNgModuleTransitiveScopes;
-
-export declare function ɵunv(view: ViewData, nodeIdx: number, bindingIdx: number, value: any): any;
-
-export declare function ɵvid(flags: ɵViewFlags, nodes: NodeDef[], updateDirectives?: null | ViewUpdateFn, updateRenderer?: null | ViewUpdateFn): ɵViewDefinition;
-
-export declare interface ɵViewDefinition extends Definition<ViewDefinitionFactory> {
-    flags: ɵViewFlags;
-    updateDirectives: ViewUpdateFn;
-    updateRenderer: ViewUpdateFn;
-    handleEvent: ViewHandleEventFn;
-    /**
-     * Order: Depth first.
-     * Especially providers are before elements / anchors.
-     */
-    nodes: NodeDef[];
-    /** aggregated NodeFlags for all nodes **/
-    nodeFlags: ɵNodeFlags;
-    rootNodeFlags: ɵNodeFlags;
-    lastRenderRootNode: NodeDef | null;
-    bindingCount: number;
-    outputCount: number;
-    /**
-     * Binary or of all query ids that are matched by one of the nodes.
-     * This includes query ids from templates as well.
-     * Used as a bloom filter.
-     */
-    nodeMatchedQueries: number;
-}
-
-/**
- * Bitmask for ViewDefinition.flags.
- */
-export declare const enum ɵViewFlags {
-    None = 0,
-    OnPush = 2
-}
+export declare function ΔtextBinding<T>(index: number, value: T | ɵNO_CHANGE): void;
 
 /**
  * Creates new QueryList, stores the reference in LView and returns QueryList.
@@ -12374,25 +12647,9 @@ export declare const enum ɵViewFlags {
  * @param descend Whether or not to descend into children
  * @param read What to save in the query
  * @returns QueryList<T>
+ *
+ * @publicApi
  */
-export declare function ɵviewQuery<T>(predicate: Type<any> | string[], descend: boolean, read: any): QueryList<T>;
-
-/**
- * Wait on component until it is rendered.
- *
- * This function returns a `Promise` which is resolved when the component's
- * change detection is executed. This is determined by finding the scheduler
- * associated with the `component`'s render tree and waiting until the scheduler
- * flushes. If nothing is scheduled, the function returns a resolved promise.
- *
- * Example:
- * ```
- * await whenRendered(myComponent);
- * ```
- *
- * @param component Component to wait upon
- * @returns Promise which resolves when the component is rendered.
- */
-export declare function ɵwhenRendered(component: any): Promise<null>;
+export declare function ΔviewQuery<T>(predicate: Type<any> | string[], descend: boolean, read: any): QueryList<T>;
 
 export { }
