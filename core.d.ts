@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+66.sha-1eb7e9b.with-local-changes
+ * @license Angular v8.0.0-beta.11+69.sha-a80637e.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12516,7 +12516,7 @@ export declare function ΔsanitizeUrl(unsafeUrl: any): string;
 export declare function ΔsanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string, prop: string): any;
 
 /**
- * Selects an index of an item to act on and flushes lifecycle hooks up to this point
+ * Selects an element for later binding instructions.
  *
  * Used in conjunction with instructions like {@link property} to act on elements with specified
  * indices, for example those created with {@link element} or {@link elementStart}.
