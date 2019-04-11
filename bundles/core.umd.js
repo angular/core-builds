@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+82.sha-387fbb8.with-local-changes
+ * @license Angular v8.0.0-beta.11+83.sha-91c7b45.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2863,31 +2863,19 @@
             stylingApply: 0,
             stylingApplyCacheMiss: 0,
         };
-        // NOTE: Under Ivy we may have both window & global defined in the Node
-        //    environment since ensureDocument() in render3.ts sets global.window.
-        if (typeof window != 'undefined') {
-            // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
-            window['ngDevMode'] = newCounters;
-        }
-        if (typeof global != 'undefined') {
-            // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
-            global['ngDevMode'] = newCounters;
-        }
-        if (typeof self != 'undefined') {
-            // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
-            self['ngDevMode'] = newCounters;
-        }
+        // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
+        _global['ngDevMode'] = newCounters;
         return newCounters;
     }
     /**
      * This checks to see if the `ngDevMode` has been set. If yes,
-     * than we honor it, otherwise we default to dev mode with additional checks.
+     * then we honor it, otherwise we default to dev mode with additional checks.
      *
      * The idea is that unless we are doing production build where we explicitly
      * set `ngDevMode == false` we should be helping the developer by providing
      * as much early warning and errors as possible.
      */
-    if (typeof ngDevMode === 'undefined' || ngDevMode) {
+    if (typeof _global['ngDevMode'] === 'undefined' || _global['ngDevMode']) {
         ngDevModeResetPerfCounters();
     }
 
@@ -16012,7 +16000,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.11+82.sha-387fbb8.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.11+83.sha-91c7b45.with-local-changes');
 
     /**
      * @license
@@ -19281,6 +19269,19 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    if (typeof _global['ngI18nClosureMode'] === 'undefined') {
+        // Make sure to refer to ngI18nClosureMode as ['ngI18nClosureMode'] for closure.
+        _global['ngI18nClosureMode'] =
+            typeof _global['goog'] !== 'undefined' && typeof _global['goog'].getMsg === 'function';
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     /**
     * Equivalent to ES6 spread, add each item to an array.
     *
@@ -20787,6 +20788,38 @@
             }
         }
     }
+    var TRANSLATIONS = {};
+    /**
+     * Set the configuration for `i18nLocalize`.
+     *
+     * @deprecated this method is temporary & should not be used as it will be removed soon
+     */
+    function i18nConfigureLocalize(options) {
+        if (options === void 0) { options = {
+            translations: {}
+        }; }
+        TRANSLATIONS = options.translations;
+    }
+    var LOCALIZE_PH_REGEXP = /\{\$(.*?)\}/g;
+    /**
+     * A goog.getMsg-like function for users that do not use Closure.
+     *
+     * This method is required as a *temporary* measure to prevent i18n tests from being blocked while
+     * running outside of Closure Compiler. This method will not be needed once runtime translation
+     * service support is introduced.
+     *
+     * @publicApi
+     * @deprecated this method is temporary & should not be used as it will be removed soon
+     */
+    function Δi18nLocalize(input, placeholders) {
+        if (placeholders === void 0) { placeholders = {}; }
+        if (typeof TRANSLATIONS[input] !== 'undefined') { // to account for empty string
+            input = TRANSLATIONS[input];
+        }
+        return Object.keys(placeholders).length ?
+            input.replace(LOCALIZE_PH_REGEXP, function (match, key) { return placeholders[key] || ''; }) :
+            input;
+    }
 
     /**
      * @license
@@ -22128,6 +22161,7 @@
         'Δi18nEnd': Δi18nEnd,
         'Δi18nApply': Δi18nApply,
         'Δi18nPostprocess': Δi18nPostprocess,
+        'Δi18nLocalize': Δi18nLocalize,
         'ΔresolveWindow': ΔresolveWindow,
         'ΔresolveDocument': ΔresolveDocument,
         'ΔresolveBody': ΔresolveBody,
@@ -25488,7 +25522,7 @@
      *
      * @publicApi
      */
-    var TRANSLATIONS = new InjectionToken('Translations');
+    var TRANSLATIONS$1 = new InjectionToken('Translations');
     /**
      * Provide this token at bootstrap to set the format of your {@link TRANSLATIONS}: `xtb`,
      * `xlf` or `xlf2`.
@@ -28019,7 +28053,7 @@
     exports.Testability = Testability;
     exports.TestabilityRegistry = TestabilityRegistry;
     exports.setTestabilityGetter = setTestabilityGetter;
-    exports.TRANSLATIONS = TRANSLATIONS;
+    exports.TRANSLATIONS = TRANSLATIONS$1;
     exports.TRANSLATIONS_FORMAT = TRANSLATIONS_FORMAT;
     exports.LOCALE_ID = LOCALE_ID;
     exports.ApplicationModule = ApplicationModule;
@@ -28245,6 +28279,8 @@
     exports.Δi18nEnd = Δi18nEnd;
     exports.Δi18nApply = Δi18nApply;
     exports.Δi18nPostprocess = Δi18nPostprocess;
+    exports.ɵi18nConfigureLocalize = i18nConfigureLocalize;
+    exports.Δi18nLocalize = Δi18nLocalize;
     exports.ɵsetClassMetadata = setClassMetadata;
     exports.ΔresolveWindow = ΔresolveWindow;
     exports.ΔresolveDocument = ΔresolveDocument;

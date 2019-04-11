@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+82.sha-387fbb8.with-local-changes
+ * @license Angular v8.0.0-beta.11+83.sha-91c7b45.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2712,6 +2712,12 @@ export declare interface HostListenerDecorator {
      */
     (eventName: string, args?: string[]): any;
     new (eventName: string, args?: string[]): any;
+}
+
+declare interface I18nLocalizeOptions {
+    translations: {
+        [key: string]: string;
+    };
 }
 
 /**
@@ -9770,6 +9776,13 @@ export declare type ɵGetterFn = (obj: any) => any;
 
 export declare const ɵglobal: any;
 
+/**
+ * Set the configuration for `i18nLocalize`.
+ *
+ * @deprecated this method is temporary & should not be used as it will be removed soon
+ */
+export declare function ɵi18nConfigureLocalize(options?: I18nLocalizeOptions): void;
+
 export declare function ɵinitServicesIfNeeded(): void;
 
 export declare function ɵinlineInterpolate(valueCount: number, c0: string, a1: any, c1: string, a2?: any, c2?: string, a3?: any, c3?: string, a4?: any, c4?: string, a5?: any, c5?: string, a6?: any, c6?: string, a7?: any, c7?: string, a8?: any, c8?: string, a9?: any, c9?: string): string;
@@ -11688,6 +11701,20 @@ export declare function Δi18nEnd(): void;
  * @codeGenApi
  */
 export declare function Δi18nExp<T>(expression: T | ɵNO_CHANGE): void;
+
+/**
+ * A goog.getMsg-like function for users that do not use Closure.
+ *
+ * This method is required as a *temporary* measure to prevent i18n tests from being blocked while
+ * running outside of Closure Compiler. This method will not be needed once runtime translation
+ * service support is introduced.
+ *
+ * @publicApi
+ * @deprecated this method is temporary & should not be used as it will be removed soon
+ */
+export declare function Δi18nLocalize(input: string, placeholders?: {
+    [key: string]: string;
+}): string;
 
 /**
  * Handles message string post-processing for internationalization.
