@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+84.sha-54058ba.with-local-changes
+ * @license Angular v8.0.0-beta.11+85.sha-b057806.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1579,10 +1579,10 @@ export declare class DefaultIterableDiffer<V> implements IterableDiffer<V>, Iter
 
 /**
  * @deprecated in v8, delete after v10. This API should be used only be generated code, and that
- * code should now use ΔdefineInjectable instead.
+ * code should now use ɵɵdefineInjectable instead.
  * @publicApi
  */
-export declare const defineInjectable: typeof ΔdefineInjectable;
+export declare const defineInjectable: typeof ɵɵdefineInjectable;
 
 declare interface Definition<DF extends DefinitionFactory<any>> {
     factory: DF | null;
@@ -3089,10 +3089,10 @@ export declare const Inject: InjectDecorator;
 
 /**
  * @deprecated in v8, delete after v10. This API should be used only be generated code, and that
- * code should now use Δinject instead.
+ * code should now use ɵɵinject instead.
  * @publicApi
  */
-export declare const inject: typeof Δinject;
+export declare const inject: typeof ɵɵinject;
 
 /**
  * Type of the Injectable metadata.
@@ -8763,7 +8763,7 @@ export declare interface ɵangular_packages_core_core_bg extends TNode {
  * `packages/compiler/src/schema/dom_security_schema.ts`.
  * If tag and prop names don't match Resource URL schema, use URL sanitizer.
  */
-export declare function ɵangular_packages_core_core_bh(tag: string, prop: string): typeof ΔsanitizeResourceUrl;
+export declare function ɵangular_packages_core_core_bh(tag: string, prop: string): typeof ɵɵsanitizeResourceUrl;
 
 /**
  * Defines the shape which produces the Player.
@@ -9622,7 +9622,7 @@ export declare function ɵdid(checkIndex: number, flags: ɵNodeFlags, matchedQue
  *
  * See: {@link defineDirective}
  */
-export declare interface ɵDirectiveDef<T> extends ΔBaseDef<T> {
+export declare interface ɵDirectiveDef<T> extends ɵɵBaseDef<T> {
     /** Token representing the directive. Used by DI. */
     type: Type<T>;
     /** Function that resolves providers and publishes them into the DI system. */
@@ -9734,7 +9734,7 @@ export declare function ɵgetHostElement<T>(directive: T): Element;
  *
  * @param type type which may have `ngInjectableDef`
  */
-export declare function ɵgetInjectableDef<T>(type: any): ΔInjectableDef<T> | null;
+export declare function ɵgetInjectableDef<T>(type: any): ɵɵInjectableDef<T> | null;
 
 /** Returns the matching `LContext` data for a given DOM node, directive or component instance.
  *
@@ -9935,7 +9935,7 @@ export declare const ɵNG_PIPE_DEF: string;
  * This is the internal data structure used by the runtime to assemble components, directives,
  * pipes, and injectors.
  *
- * NOTE: Always use `ΔdefineNgModule` function to create this object,
+ * NOTE: Always use `ɵɵdefineNgModule` function to create this object,
  * never create the object directly since the shape of this object
  * can change between versions.
  */
@@ -10518,7 +10518,7 @@ export declare function ɵwhenRendered(component: any): Promise<null>;
  *
  * @codeGenApi
  */
-export declare function ΔallocHostVars(count: number): void;
+export declare function ɵɵallocHostVars(count: number): void;
 
 /**
  * Runtime information for classes that are inherited by components or directives
@@ -10531,7 +10531,7 @@ export declare function ΔallocHostVars(count: number): void;
  *
  * @codeGenApi
  */
-export declare interface ΔBaseDef<T> {
+export declare interface ɵɵBaseDef<T> {
     /**
      * A dictionary mapping the inputs' minified property names to their public API names, which
      * are their aliases if any, or their original unminified property names
@@ -10564,12 +10564,12 @@ export declare interface ΔBaseDef<T> {
  *
  * @codeGenApi
  */
-export declare function Δbind<T>(value: T): T | ɵNO_CHANGE;
+export declare function ɵɵbind<T>(value: T): T | ɵNO_CHANGE;
 
 /**
  * @codeGenApi
  */
-export declare type ΔComponentDefWithMeta<T, Selector extends String, ExportAs extends string[], InputMap extends {
+export declare type ɵɵComponentDefWithMeta<T, Selector extends String, ExportAs extends string[], InputMap extends {
     [key: string]: string;
 }, OutputMap extends {
     [key: string]: string;
@@ -10596,7 +10596,7 @@ export declare type ΔComponentDefWithMeta<T, Selector extends String, ExportAs 
  *
  * @codeGenApi
 */
-export declare function ΔcomponentHostSyntheticListener<T>(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
+export declare function ɵɵcomponentHostSyntheticListener<T>(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
 
 /**
  * Updates a synthetic host binding (e.g. `[@foo]`) on a component.
@@ -10621,7 +10621,7 @@ export declare function ΔcomponentHostSyntheticListener<T>(eventName: string, l
  *
  * @codeGenApi
  */
-export declare function ΔcomponentHostSyntheticProperty<T>(index: number, propName: string, value: T | ɵNO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): void;
+export declare function ɵɵcomponentHostSyntheticProperty<T>(index: number, propName: string, value: T | ɵNO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): void;
 
 /**
  * Creates an LContainer for inline views, e.g.
@@ -10634,7 +10634,7 @@ export declare function ΔcomponentHostSyntheticProperty<T>(index: number, propN
  *
  * @codeGenApi
  */
-export declare function Δcontainer(index: number): void;
+export declare function ɵɵcontainer(index: number): void;
 
 /**
  * Marks the end of the LContainer.
@@ -10643,7 +10643,7 @@ export declare function Δcontainer(index: number): void;
  *
  * @codeGenApi
  */
-export declare function ΔcontainerRefreshEnd(): void;
+export declare function ɵɵcontainerRefreshEnd(): void;
 
 /**
  * Sets a container up to receive views.
@@ -10652,7 +10652,7 @@ export declare function ΔcontainerRefreshEnd(): void;
  *
  * @codeGenApi
  */
-export declare function ΔcontainerRefreshStart(index: number): void;
+export declare function ɵɵcontainerRefreshStart(index: number): void;
 
 /**
  * Registers a QueryList, associated with a content query, for later refresh (part of a view
@@ -10666,7 +10666,7 @@ export declare function ΔcontainerRefreshStart(index: number): void;
  *
  * @codeGenApi
  */
-export declare function ΔcontentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read: any): QueryList<T>;
+export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read: any): QueryList<T>;
 
 /**
  * The default style sanitizer will handle sanitization for style properties by
@@ -10674,7 +10674,7 @@ export declare function ΔcontentQuery<T>(directiveIndex: number, predicate: Typ
  *
  * @publicApi
  */
-export declare const ΔdefaultStyleSanitizer: StyleSanitizeFn;
+export declare const ɵɵdefaultStyleSanitizer: StyleSanitizeFn;
 
 /**
  * Create a base definition
@@ -10682,7 +10682,7 @@ export declare const ΔdefaultStyleSanitizer: StyleSanitizeFn;
  * # Example
  * ```ts
  * class ShouldBeInherited {
- *   static ngBaseDef = ΔdefineBase({
+ *   static ngBaseDef = ɵɵdefineBase({
  *      ...
  *   })
  * }
@@ -10692,7 +10692,7 @@ export declare const ΔdefaultStyleSanitizer: StyleSanitizeFn;
  *
  * @codeGenApi
  */
-export declare function ΔdefineBase<T>(baseDefinition: {
+export declare function ɵɵdefineBase<T>(baseDefinition: {
     /**
      * A map of input names.
      *
@@ -10752,7 +10752,7 @@ export declare function ΔdefineBase<T>(baseDefinition: {
     outputs?: {
         [P in keyof T]?: string;
     };
-}): ΔBaseDef<T>;
+}): ɵɵBaseDef<T>;
 
 /**
  * Create a component definition object.
@@ -10770,7 +10770,7 @@ export declare function ΔdefineBase<T>(baseDefinition: {
  * ```
  * @codeGenApi
  */
-export declare function ΔdefineComponent<T>(componentDefinition: {
+export declare function ɵɵdefineComponent<T>(componentDefinition: {
     /**
      * Directive type, needed to configure the injector.
      */
@@ -10967,7 +10967,7 @@ export declare function ΔdefineComponent<T>(componentDefinition: {
  * class MyDirective {
  *   // Generated by Angular Template Compiler
  *   // [Symbol] syntax will not be supported by TypeScript until v2.7
- *   static ngDirectiveDef = ΔdefineDirective({
+ *   static ngDirectiveDef = ɵɵdefineDirective({
  *     ...
  *   });
  * }
@@ -10975,7 +10975,7 @@ export declare function ΔdefineComponent<T>(componentDefinition: {
  *
  * @codeGenApi
  */
-export declare const ΔdefineDirective: <T>(directiveDefinition: {
+export declare const ɵɵdefineDirective: <T>(directiveDefinition: {
     /**
      * Directive type, needed to configure the injector.
      */
@@ -11084,7 +11084,7 @@ export declare const ΔdefineDirective: <T>(directiveDefinition: {
  *
  * @publicApi
  */
-export declare function ΔdefineInjectable<T>(opts: {
+export declare function ɵɵdefineInjectable<T>(opts: {
     providedIn?: Type<any> | 'root' | 'any' | null;
     factory: () => T;
 }): never;
@@ -11109,7 +11109,7 @@ export declare function ΔdefineInjectable<T>(opts: {
  *
  * @publicApi
  */
-export declare function ΔdefineInjector(options: {
+export declare function ɵɵdefineInjector(options: {
     factory: () => any;
     providers?: any[];
     imports?: any[];
@@ -11118,7 +11118,7 @@ export declare function ΔdefineInjector(options: {
 /**
  * @codeGenApi
  */
-export declare function ΔdefineNgModule<T>(def: {
+export declare function ɵɵdefineNgModule<T>(def: {
     /** Token representing the module. Used by DI. */
     type: T;
     /** List of components to bootstrap. */
@@ -11152,7 +11152,7 @@ export declare function ΔdefineNgModule<T>(def: {
  *
  * @codeGenApi
  */
-export declare function ΔdefinePipe<T>(pipeDef: {
+export declare function ɵɵdefinePipe<T>(pipeDef: {
     /** Name of the pipe. Used for matching pipes in template to pipe defs. */
     name: string;
     /** Pipe class reference. Needed to extract pipe lifecycle hooks. */
@@ -11166,7 +11166,7 @@ export declare function ΔdefinePipe<T>(pipeDef: {
 /**
  * @codeGenApi
  */
-export declare type ΔDirectiveDefWithMeta<T, Selector extends string, ExportAs extends string[], InputMap extends {
+export declare type ɵɵDirectiveDefWithMeta<T, Selector extends string, ExportAs extends string[], InputMap extends {
     [key: string]: string;
 }, OutputMap extends {
     [key: string]: string;
@@ -11184,9 +11184,9 @@ export declare type ΔDirectiveDefWithMeta<T, Selector extends string, ExportAs 
  * class SomeDirective {
  *   constructor(directive: DirectiveA) {}
  *
- *   static ngDirectiveDef = ΔdefineDirective({
+ *   static ngDirectiveDef = ɵɵdefineDirective({
  *     type: SomeDirective,
- *     factory: () => new SomeDirective(ΔdirectiveInject(DirectiveA))
+ *     factory: () => new SomeDirective(ɵɵdirectiveInject(DirectiveA))
  *   });
  * }
  * ```
@@ -11196,9 +11196,9 @@ export declare type ΔDirectiveDefWithMeta<T, Selector extends string, ExportAs 
  *
  * @codeGenApi
  */
-export declare function ΔdirectiveInject<T>(token: Type<T> | InjectionToken<T>): T;
+export declare function ɵɵdirectiveInject<T>(token: Type<T> | InjectionToken<T>): T;
 
-export declare function ΔdirectiveInject<T>(token: Type<T> | InjectionToken<T>, flags: InjectFlags): T;
+export declare function ɵɵdirectiveInject<T>(token: Type<T> | InjectionToken<T>, flags: InjectFlags): T;
 
 /**
  * Disables directive matching on element.
@@ -11209,17 +11209,17 @@ export declare function ΔdirectiveInject<T>(token: Type<T> | InjectionToken<T>,
  *   Should match component / directive.
  * </my-comp>
  * <div ngNonBindable>
- *   <!-- ΔdisableBindings() -->
+ *   <!-- ɵɵdisableBindings() -->
  *   <my-comp my-directive>
  *     Should not match component / directive because we are in ngNonBindable.
  *   </my-comp>
- *   <!-- ΔenableBindings() -->
+ *   <!-- ɵɵenableBindings() -->
  * </div>
  * ```
  *
  * @codeGenApi
  */
-export declare function ΔdisableBindings(): void;
+export declare function ɵɵdisableBindings(): void;
 
 /**
  * Creates an empty element using {@link elementStart} and {@link elementEnd}
@@ -11232,7 +11232,7 @@ export declare function ΔdisableBindings(): void;
  *
  * @codeGenApi
  */
-export declare function Δelement(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+export declare function ɵɵelement(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
 
 /**
  * Updates the value of removes an attribute on an Element.
@@ -11246,7 +11246,7 @@ export declare function Δelement(index: number, name: string, attrs?: TAttribut
  *
  * @codeGenApi
  */
-export declare function ΔelementAttribute(index: number, name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): void;
+export declare function ɵɵelementAttribute(index: number, name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): void;
 
 /**
  * Update a class binding on an element with the provided value.
@@ -11266,14 +11266,14 @@ export declare function ΔelementAttribute(index: number, name: string, value: a
  *
  * @codeGenApi
  */
-export declare function ΔelementClassProp(index: number, classIndex: number, value: boolean | ɵPlayerFactory, forceOverride?: boolean): void;
+export declare function ɵɵelementClassProp(index: number, classIndex: number, value: boolean | ɵPlayerFactory, forceOverride?: boolean): void;
 
 /**
  * Mark the end of the <ng-container>.
  *
  * @codeGenApi
  */
-export declare function ΔelementContainerEnd(): void;
+export declare function ɵɵelementContainerEnd(): void;
 
 /**
  * Creates a logical container for other nodes (<ng-container>) backed by a comment node in the DOM.
@@ -11289,14 +11289,14 @@ export declare function ΔelementContainerEnd(): void;
  *
  * @codeGenApi
  */
-export declare function ΔelementContainerStart(index: number, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+export declare function ɵɵelementContainerStart(index: number, attrs?: TAttributes | null, localRefs?: string[] | null): void;
 
 /**
  * Mark the end of the element.
  *
  * @codeGenApi
  */
-export declare function ΔelementEnd(): void;
+export declare function ɵɵelementEnd(): void;
 
 /**
  * Assign static attribute values to a host element.
@@ -11337,7 +11337,7 @@ export declare function ΔelementEnd(): void;
  *
  * @codeGenApi
  */
-export declare function ΔelementHostAttrs(attrs: TAttributes): void;
+export declare function ɵɵelementHostAttrs(attrs: TAttributes): void;
 
 /**
  * Update a class host binding for a directive's/component's host element within
@@ -11357,7 +11357,7 @@ export declare function ΔelementHostAttrs(attrs: TAttributes): void;
  *
  * @codeGenApi
  */
-export declare function ΔelementHostClassProp(classIndex: number, value: boolean | ɵPlayerFactory, forceOverride?: boolean): void;
+export declare function ɵɵelementHostClassProp(classIndex: number, value: boolean | ɵPlayerFactory, forceOverride?: boolean): void;
 
 /**
  * Update a host style binding value on the host element within a component/directive.
@@ -11384,7 +11384,7 @@ export declare function ΔelementHostClassProp(classIndex: number, value: boolea
  *
  * @codeGenApi
  */
-export declare function ΔelementHostStyleProp(styleIndex: number, value: string | number | String | ɵPlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
+export declare function ɵɵelementHostStyleProp(styleIndex: number, value: string | number | String | ɵPlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
 
 /**
  * Allocates style and class binding properties on the host element during creation mode
@@ -11409,7 +11409,7 @@ export declare function ΔelementHostStyleProp(styleIndex: number, value: string
  *
  * @codeGenApi
  */
-export declare function ΔelementHostStyling(classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
+export declare function ɵɵelementHostStyling(classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
 
 /**
  * Apply all style and class host binding values to the element.
@@ -11421,7 +11421,7 @@ export declare function ΔelementHostStyling(classBindingNames?: string[] | null
  *
  * @codeGenApi
  */
-export declare function ΔelementHostStylingApply(): void;
+export declare function ɵɵelementHostStylingApply(): void;
 
 /**
  * Update style and/or class host bindings using object literals on an element within the host
@@ -11446,7 +11446,7 @@ export declare function ΔelementHostStylingApply(): void;
  *
  * @codeGenApi
  */
-export declare function ΔelementHostStylingMap(classes: {
+export declare function ɵɵelementHostStylingMap(classes: {
     [key: string]: any;
 } | string | ɵNO_CHANGE | null, styles?: {
     [styleName: string]: any;
@@ -11470,7 +11470,7 @@ export declare function ΔelementHostStylingMap(classes: {
  *
  * @codeGenApi
 */
-export declare function ΔelementProperty<T>(index: number, propName: string, value: T | ɵNO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): void;
+export declare function ɵɵelementProperty<T>(index: number, propName: string, value: T | ɵNO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): void;
 
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
@@ -11487,7 +11487,7 @@ export declare function ΔelementProperty<T>(index: number, propName: string, va
  *
  * @codeGenApi
  */
-export declare function ΔelementStart(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+export declare function ɵɵelementStart(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
 
 /**
  * Update a style binding on an element with the provided value.
@@ -11515,7 +11515,7 @@ export declare function ΔelementStart(index: number, name: string, attrs?: TAtt
  *
  * @codeGenApi
  */
-export declare function ΔelementStyleProp(index: number, styleIndex: number, value: string | number | String | ɵPlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
+export declare function ɵɵelementStyleProp(index: number, styleIndex: number, value: string | number | String | ɵPlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
 
 /**
  * Allocates style and class binding properties on the element during creation mode.
@@ -11536,7 +11536,7 @@ export declare function ΔelementStyleProp(index: number, styleIndex: number, va
  *
  * @codeGenApi
  */
-export declare function ΔelementStyling(classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
+export declare function ɵɵelementStyling(classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
 
 /**
  * Apply all style and class binding values to the element.
@@ -11549,7 +11549,7 @@ export declare function ΔelementStyling(classBindingNames?: string[] | null, st
  *
  * @codeGenApi
  */
-export declare function ΔelementStylingApply(index: number): void;
+export declare function ɵɵelementStylingApply(index: number): void;
 
 /**
  * Update style and/or class bindings using object literals on an element.
@@ -11571,7 +11571,7 @@ export declare function ΔelementStylingApply(index: number): void;
  *
  * @codeGenApi
  */
-export declare function ΔelementStylingMap(index: number, classes: {
+export declare function ɵɵelementStylingMap(index: number, classes: {
     [key: string]: any;
 } | string | ɵNO_CHANGE | null, styles?: {
     [styleName: string]: any;
@@ -11582,7 +11582,7 @@ export declare function ΔelementStylingMap(index: number, classes: {
  *
  * @codeGenApi
  */
-export declare function ΔembeddedViewEnd(): void;
+export declare function ɵɵembeddedViewEnd(): void;
 
 /**
  * Marks the start of an embedded view.
@@ -11592,7 +11592,7 @@ export declare function ΔembeddedViewEnd(): void;
  *
  * @codeGenApi
  */
-export declare function ΔembeddedViewStart(viewBlockId: number, consts: number, vars: number): ɵRenderFlags;
+export declare function ɵɵembeddedViewStart(viewBlockId: number, consts: number, vars: number): ɵRenderFlags;
 
 /**
  * Enables directive matching on elements.
@@ -11603,17 +11603,17 @@ export declare function ΔembeddedViewStart(viewBlockId: number, consts: number,
  *   Should match component / directive.
  * </my-comp>
  * <div ngNonBindable>
- *   <!-- ΔdisableBindings() -->
+ *   <!-- ɵɵdisableBindings() -->
  *   <my-comp my-directive>
  *     Should not match component / directive because we are in ngNonBindable.
  *   </my-comp>
- *   <!-- ΔenableBindings() -->
+ *   <!-- ɵɵenableBindings() -->
  * </div>
  * ```
  *
  * @codeGenApi
  */
-export declare function ΔenableBindings(): void;
+export declare function ɵɵenableBindings(): void;
 
 /**
  * Returns the current OpaqueViewState instance.
@@ -11624,17 +11624,17 @@ export declare function ΔenableBindings(): void;
  *
  * @codeGenApi
  */
-export declare function ΔgetCurrentView(): OpaqueViewState;
+export declare function ɵɵgetCurrentView(): OpaqueViewState;
 
 /**
  * @codeGenApi
  */
-export declare function ΔgetFactoryOf<T>(type: Type<any>): ((type: Type<T> | null) => T) | null;
+export declare function ɵɵgetFactoryOf<T>(type: Type<any>): ((type: Type<T> | null) => T) | null;
 
 /**
  * @codeGenApi
  */
-export declare function ΔgetInheritedFactory<T>(type: Type<any>): (type: Type<T>) => T;
+export declare function ɵɵgetInheritedFactory<T>(type: Type<any>): (type: Type<T>) => T;
 
 /**
  *
@@ -11662,7 +11662,7 @@ export declare function ΔgetInheritedFactory<T>(type: Type<any>): (type: Type<T
  *
  * @codeGenApi
  */
-export declare function Δi18n(index: number, message: string, subTemplateIndex?: number): void;
+export declare function ɵɵi18n(index: number, message: string, subTemplateIndex?: number): void;
 
 /**
  * Updates a translation block or an i18n attribute when the bindings have changed.
@@ -11672,7 +11672,7 @@ export declare function Δi18n(index: number, message: string, subTemplateIndex?
  *
  * @codeGenApi
  */
-export declare function Δi18nApply(index: number): void;
+export declare function ɵɵi18nApply(index: number): void;
 
 /**
  * Marks a list of attributes as translatable.
@@ -11682,7 +11682,7 @@ export declare function Δi18nApply(index: number): void;
  *
  * @codeGenApi
  */
-export declare function Δi18nAttributes(index: number, values: string[]): void;
+export declare function ɵɵi18nAttributes(index: number, values: string[]): void;
 
 /**
  * Translates a translation block marked by `i18nStart` and `i18nEnd`. It inserts the text/ICU nodes
@@ -11690,7 +11690,7 @@ export declare function Δi18nAttributes(index: number, values: string[]): void;
  *
  * @codeGenApi
  */
-export declare function Δi18nEnd(): void;
+export declare function ɵɵi18nEnd(): void;
 
 /**
  * Stores the values of the bindings during each update cycle in order to determine if we need to
@@ -11700,7 +11700,7 @@ export declare function Δi18nEnd(): void;
  *
  * @codeGenApi
  */
-export declare function Δi18nExp<T>(expression: T | ɵNO_CHANGE): void;
+export declare function ɵɵi18nExp<T>(expression: T | ɵNO_CHANGE): void;
 
 /**
  * A goog.getMsg-like function for users that do not use Closure.
@@ -11712,7 +11712,7 @@ export declare function Δi18nExp<T>(expression: T | ɵNO_CHANGE): void;
  * @publicApi
  * @deprecated this method is temporary & should not be used as it will be removed soon
  */
-export declare function Δi18nLocalize(input: string, placeholders?: {
+export declare function ɵɵi18nLocalize(input: string, placeholders?: {
     [key: string]: string;
 }): string;
 
@@ -11735,7 +11735,7 @@ export declare function Δi18nLocalize(input: string, placeholders?: {
  *
  * @codeGenApi
  */
-export declare function Δi18nPostprocess(message: string, replacements?: {
+export declare function ɵɵi18nPostprocess(message: string, replacements?: {
     [key: string]: (string | string[]);
 }): string;
 
@@ -11764,7 +11764,7 @@ export declare function Δi18nPostprocess(message: string, replacements?: {
  *
  * @codeGenApi
  */
-export declare function Δi18nStart(index: number, message: string, subTemplateIndex?: number): void;
+export declare function ɵɵi18nStart(index: number, message: string, subTemplateIndex?: number): void;
 
 /**
  * Merges the definition from a super class to a sub class.
@@ -11772,7 +11772,7 @@ export declare function Δi18nStart(index: number, message: string, subTemplateI
  *
  * @codeGenApi
  */
-export declare function ΔInheritDefinitionFeature(definition: ɵDirectiveDef<any> | ɵComponentDef<any>): void;
+export declare function ɵɵInheritDefinitionFeature(definition: ɵDirectiveDef<any> | ɵComponentDef<any>): void;
 
 /**
  * Generated instruction: Injects a token from the currently active injector.
@@ -11803,9 +11803,9 @@ export declare function ΔInheritDefinitionFeature(definition: ɵDirectiveDef<an
  *
  * @publicApi
  */
-export declare function Δinject<T>(token: Type<T> | InjectionToken<T>): T;
+export declare function ɵɵinject<T>(token: Type<T> | InjectionToken<T>): T;
 
-export declare function Δinject<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
+export declare function ɵɵinject<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
 
 /**
  * Information about how a type or `InjectionToken` interfaces with the DI system.
@@ -11821,7 +11821,7 @@ export declare function Δinject<T>(token: Type<T> | InjectionToken<T>, flags?: 
  *
  * @publicApi
  */
-export declare interface ΔInjectableDef<T> {
+export declare interface ɵɵInjectableDef<T> {
     /**
      * Specifies that the given type belongs to a particular injector:
      * - `InjectorType` such as `NgModule`,
@@ -11846,7 +11846,7 @@ export declare interface ΔInjectableDef<T> {
  *
  * @codeGenApi
  */
-export declare function ΔinjectAttribute(attrNameToInject: string): string | null;
+export declare function ɵɵinjectAttribute(attrNameToInject: string): string | null;
 
 /**
  * Information about the providers to be included in an `Injector` as well as how the given type
@@ -11860,7 +11860,7 @@ export declare function ΔinjectAttribute(attrNameToInject: string): string | nu
  *
  * @publicApi
  */
-export declare interface ΔInjectorDef<T> {
+export declare interface ɵɵInjectorDef<T> {
     factory: () => T;
     providers: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | any[])[];
     imports: (InjectorType<any> | InjectorTypeWithProviders<any>)[];
@@ -11875,56 +11875,56 @@ export declare interface ΔInjectorDef<T> {
  *
  * @codeGenApi
  */
-export declare function Δinterpolation1(prefix: string, v0: any, suffix: string): string | ɵNO_CHANGE;
+export declare function ɵɵinterpolation1(prefix: string, v0: any, suffix: string): string | ɵNO_CHANGE;
 
 /**
  * Creates an interpolation binding with 2 expressions.
  *
  * @codeGenApi
  */
-export declare function Δinterpolation2(prefix: string, v0: any, i0: string, v1: any, suffix: string): string | ɵNO_CHANGE;
+export declare function ɵɵinterpolation2(prefix: string, v0: any, i0: string, v1: any, suffix: string): string | ɵNO_CHANGE;
 
 /**
  * Creates an interpolation binding with 3 expressions.
  *
  * @codeGenApi
  */
-export declare function Δinterpolation3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): string | ɵNO_CHANGE;
+export declare function ɵɵinterpolation3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): string | ɵNO_CHANGE;
 
 /**
  * Create an interpolation binding with 4 expressions.
  *
  * @codeGenApi
  */
-export declare function Δinterpolation4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): string | ɵNO_CHANGE;
+export declare function ɵɵinterpolation4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): string | ɵNO_CHANGE;
 
 /**
  * Creates an interpolation binding with 5 expressions.
  *
  * @codeGenApi
  */
-export declare function Δinterpolation5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string): string | ɵNO_CHANGE;
+export declare function ɵɵinterpolation5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string): string | ɵNO_CHANGE;
 
 /**
  * Creates an interpolation binding with 6 expressions.
  *
  * @codeGenApi
  */
-export declare function Δinterpolation6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string): string | ɵNO_CHANGE;
+export declare function ɵɵinterpolation6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string): string | ɵNO_CHANGE;
 
 /**
  * Creates an interpolation binding with 7 expressions.
  *
  * @codeGenApi
  */
-export declare function Δinterpolation7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): string | ɵNO_CHANGE;
+export declare function ɵɵinterpolation7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): string | ɵNO_CHANGE;
 
 /**
  * Creates an interpolation binding with 8 expressions.
  *
  * @codeGenApi
  */
-export declare function Δinterpolation8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): string | ɵNO_CHANGE;
+export declare function ɵɵinterpolation8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): string | ɵNO_CHANGE;
 
 /**
  * Create interpolation bindings with a variable number of expressions.
@@ -11940,7 +11940,7 @@ export declare function Δinterpolation8(prefix: string, v0: any, i0: string, v1
  *
  * @codeGenApi
  */
-export declare function ΔinterpolationV(values: any[]): string | ɵNO_CHANGE;
+export declare function ɵɵinterpolationV(values: any[]): string | ɵNO_CHANGE;
 
 /**
  * Adds an event listener to the current node.
@@ -11956,27 +11956,27 @@ export declare function ΔinterpolationV(values: any[]): string | ɵNO_CHANGE;
  *
  * @codeGenApi
  */
-export declare function Δlistener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
+export declare function ɵɵlistener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
 
 /**
  * Retrieves a value from current `viewData`.
  *
  * @codeGenApi
  */
-export declare function Δload<T>(index: number): T;
+export declare function ɵɵload<T>(index: number): T;
 
 /**
  *
  * @codeGenApi
  */
-export declare function ΔloadContentQuery<T>(): QueryList<T>;
+export declare function ɵɵloadContentQuery<T>(): QueryList<T>;
 
 /**
  * Loads current View Query and moves the pointer/index to the next View Query in LView.
  *
  * @codeGenApi
  */
-export declare function ΔloadViewQuery<T>(): T;
+export declare function ɵɵloadViewQuery<T>(): T;
 
 /**
  * Sets the namespace used to create elements no `null`, which forces element creation to use
@@ -11984,21 +11984,21 @@ export declare function ΔloadViewQuery<T>(): T;
  *
  * @codeGenApi
  */
-export declare function ΔnamespaceHTML(): void;
+export declare function ɵɵnamespaceHTML(): void;
 
 /**
  * Sets the namespace used to create elements to `'http://www.w3.org/1998/MathML/'` in global state.
  *
  * @codeGenApi
  */
-export declare function ΔnamespaceMathML(): void;
+export declare function ɵɵnamespaceMathML(): void;
 
 /**
  * Sets the namespace used to create elements to `'http://www.w3.org/2000/svg'` in global state.
  *
  * @codeGenApi
  */
-export declare function ΔnamespaceSVG(): void;
+export declare function ɵɵnamespaceSVG(): void;
 
 /**
  * Retrieves a context at the level specified and saves it as the global, contextViewData.
@@ -12012,12 +12012,12 @@ export declare function ΔnamespaceSVG(): void;
  *
  * @codeGenApi
  */
-export declare function ΔnextContext<T = any>(level?: number): T;
+export declare function ɵɵnextContext<T = any>(level?: number): T;
 
 /**
  * @publicApi
  */
-export declare type ΔNgModuleDefWithMeta<T, Declarations, Imports, Exports> = ɵNgModuleDef<T>;
+export declare type ɵɵNgModuleDefWithMeta<T, Declarations, Imports, Exports> = ɵNgModuleDef<T>;
 
 /**
  * The NgOnChangesFeature decorates a component with support for the ngOnChanges
@@ -12041,7 +12041,7 @@ export declare type ΔNgModuleDefWithMeta<T, Declarations, Imports, Exports> = �
  *
  * @codeGenApi
  */
-export declare function ΔNgOnChangesFeature<T>(): DirectiveDefFeature;
+export declare function ɵɵNgOnChangesFeature<T>(): DirectiveDefFeature;
 
 
 /**
@@ -12053,7 +12053,7 @@ export declare function ΔNgOnChangesFeature<T>(): DirectiveDefFeature;
  *
  * @codeGenApi
  */
-export declare function Δpipe(index: number, pipeName: string): any;
+export declare function ɵɵpipe(index: number, pipeName: string): any;
 
 /**
  * Invokes a pipe with 1 arguments.
@@ -12067,7 +12067,7 @@ export declare function Δpipe(index: number, pipeName: string): any;
  *
  * @codeGenApi
  */
-export declare function ΔpipeBind1(index: number, slotOffset: number, v1: any): any;
+export declare function ɵɵpipeBind1(index: number, slotOffset: number, v1: any): any;
 
 /**
  * Invokes a pipe with 2 arguments.
@@ -12082,7 +12082,7 @@ export declare function ΔpipeBind1(index: number, slotOffset: number, v1: any):
  *
  * @codeGenApi
  */
-export declare function ΔpipeBind2(index: number, slotOffset: number, v1: any, v2: any): any;
+export declare function ɵɵpipeBind2(index: number, slotOffset: number, v1: any, v2: any): any;
 
 /**
  * Invokes a pipe with 3 arguments.
@@ -12098,7 +12098,7 @@ export declare function ΔpipeBind2(index: number, slotOffset: number, v1: any, 
  *
  * @codeGenApi
  */
-export declare function ΔpipeBind3(index: number, slotOffset: number, v1: any, v2: any, v3: any): any;
+export declare function ɵɵpipeBind3(index: number, slotOffset: number, v1: any, v2: any, v3: any): any;
 
 /**
  * Invokes a pipe with 4 arguments.
@@ -12115,7 +12115,7 @@ export declare function ΔpipeBind3(index: number, slotOffset: number, v1: any, 
  *
  * @codeGenApi
  */
-export declare function ΔpipeBind4(index: number, slotOffset: number, v1: any, v2: any, v3: any, v4: any): any;
+export declare function ɵɵpipeBind4(index: number, slotOffset: number, v1: any, v2: any, v3: any, v4: any): any;
 
 /**
  * Invokes a pipe with variable number of arguments.
@@ -12129,12 +12129,12 @@ export declare function ΔpipeBind4(index: number, slotOffset: number, v1: any, 
  *
  * @codeGenApi
  */
-export declare function ΔpipeBindV(index: number, slotOffset: number, values: any[]): any;
+export declare function ɵɵpipeBindV(index: number, slotOffset: number, values: any[]): any;
 
 /**
  * @codeGenApi
  */
-export declare type ΔPipeDefWithMeta<T, Name extends string> = ɵPipeDef<T>;
+export declare type ɵɵPipeDefWithMeta<T, Name extends string> = ɵPipeDef<T>;
 
 /**
  * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
@@ -12147,7 +12147,7 @@ export declare type ΔPipeDefWithMeta<T, Name extends string> = ɵPipeDef<T>;
   *
  * @codeGenApi
 */
-export declare function Δprojection(nodeIndex: number, selectorIndex?: number, attrs?: TAttributes): void;
+export declare function ɵɵprojection(nodeIndex: number, selectorIndex?: number, attrs?: TAttributes): void;
 
 /**
  * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
@@ -12172,7 +12172,7 @@ export declare function Δprojection(nodeIndex: number, selectorIndex?: number, 
  *
  * @codeGenApi
  */
-export declare function ΔprojectionDef(selectors?: ɵCssSelectorList[]): void;
+export declare function ɵɵprojectionDef(selectors?: ɵCssSelectorList[]): void;
 
 /**
  * This feature resolves the providers of a directive (or component),
@@ -12204,7 +12204,7 @@ export declare function ΔprojectionDef(selectors?: ɵCssSelectorList[]): void;
  *
  * @codeGenApi
  */
-export declare function ΔProvidersFeature<T>(providers: Provider[], viewProviders?: Provider[]): (definition: ɵDirectiveDef<T>) => void;
+export declare function ɵɵProvidersFeature<T>(providers: Provider[], viewProviders?: Provider[]): (definition: ɵDirectiveDef<T>) => void;
 
 
 /**
@@ -12235,7 +12235,7 @@ export declare function ΔProvidersFeature<T>(providers: Provider[], viewProvide
  *
  * @codeGenApi
  */
-export declare function ΔpureFunction0<T>(slotOffset: number, pureFn: () => T, thisArg?: any): T;
+export declare function ɵɵpureFunction0<T>(slotOffset: number, pureFn: () => T, thisArg?: any): T;
 
 /**
  * If the value of the provided exp has changed, calls the pure function to return
@@ -12249,7 +12249,7 @@ export declare function ΔpureFunction0<T>(slotOffset: number, pureFn: () => T, 
  *
  * @codeGenApi
  */
-export declare function ΔpureFunction1(slotOffset: number, pureFn: (v: any) => any, exp: any, thisArg?: any): any;
+export declare function ɵɵpureFunction1(slotOffset: number, pureFn: (v: any) => any, exp: any, thisArg?: any): any;
 
 /**
  * If the value of any provided exp has changed, calls the pure function to return
@@ -12264,7 +12264,7 @@ export declare function ΔpureFunction1(slotOffset: number, pureFn: (v: any) => 
  *
  * @codeGenApi
  */
-export declare function ΔpureFunction2(slotOffset: number, pureFn: (v1: any, v2: any) => any, exp1: any, exp2: any, thisArg?: any): any;
+export declare function ɵɵpureFunction2(slotOffset: number, pureFn: (v1: any, v2: any) => any, exp1: any, exp2: any, thisArg?: any): any;
 
 /**
  * If the value of any provided exp has changed, calls the pure function to return
@@ -12280,7 +12280,7 @@ export declare function ΔpureFunction2(slotOffset: number, pureFn: (v1: any, v2
  *
  * @codeGenApi
  */
-export declare function ΔpureFunction3(slotOffset: number, pureFn: (v1: any, v2: any, v3: any) => any, exp1: any, exp2: any, exp3: any, thisArg?: any): any;
+export declare function ɵɵpureFunction3(slotOffset: number, pureFn: (v1: any, v2: any, v3: any) => any, exp1: any, exp2: any, exp3: any, thisArg?: any): any;
 
 /**
  * If the value of any provided exp has changed, calls the pure function to return
@@ -12297,7 +12297,7 @@ export declare function ΔpureFunction3(slotOffset: number, pureFn: (v1: any, v2
  *
  * @codeGenApi
  */
-export declare function ΔpureFunction4(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, thisArg?: any): any;
+export declare function ɵɵpureFunction4(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, thisArg?: any): any;
 
 /**
  * If the value of any provided exp has changed, calls the pure function to return
@@ -12315,7 +12315,7 @@ export declare function ΔpureFunction4(slotOffset: number, pureFn: (v1: any, v2
  *
  * @codeGenApi
  */
-export declare function ΔpureFunction5(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, thisArg?: any): any;
+export declare function ɵɵpureFunction5(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, thisArg?: any): any;
 
 /**
  * If the value of any provided exp has changed, calls the pure function to return
@@ -12334,7 +12334,7 @@ export declare function ΔpureFunction5(slotOffset: number, pureFn: (v1: any, v2
  *
  * @codeGenApi
  */
-export declare function ΔpureFunction6(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any, v6: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, exp6: any, thisArg?: any): any;
+export declare function ɵɵpureFunction6(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any, v6: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, exp6: any, thisArg?: any): any;
 
 /**
  * If the value of any provided exp has changed, calls the pure function to return
@@ -12354,7 +12354,7 @@ export declare function ΔpureFunction6(slotOffset: number, pureFn: (v1: any, v2
  *
  * @codeGenApi
  */
-export declare function ΔpureFunction7(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any, v6: any, v7: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, exp6: any, exp7: any, thisArg?: any): any;
+export declare function ɵɵpureFunction7(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any, v6: any, v7: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, exp6: any, exp7: any, thisArg?: any): any;
 
 /**
  * If the value of any provided exp has changed, calls the pure function to return
@@ -12375,7 +12375,7 @@ export declare function ΔpureFunction7(slotOffset: number, pureFn: (v1: any, v2
  *
  * @codeGenApi
  */
-export declare function ΔpureFunction8(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any, v6: any, v7: any, v8: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, exp6: any, exp7: any, exp8: any, thisArg?: any): any;
+export declare function ɵɵpureFunction8(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any, v6: any, v7: any, v8: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, exp6: any, exp7: any, exp8: any, thisArg?: any): any;
 
 /**
  * pureFunction instruction that can support any number of bindings.
@@ -12392,7 +12392,7 @@ export declare function ΔpureFunction8(slotOffset: number, pureFn: (v1: any, v2
  *
  * @codeGenApi
  */
-export declare function ΔpureFunctionV(slotOffset: number, pureFn: (...v: any[]) => any, exps: any[], thisArg?: any): any;
+export declare function ɵɵpureFunctionV(slotOffset: number, pureFn: (...v: any[]) => any, exps: any[], thisArg?: any): any;
 
 /**
  * Refreshes a query by combining matches from all active views and removing matches from deleted
@@ -12403,7 +12403,7 @@ export declare function ΔpureFunctionV(slotOffset: number, pureFn: (...v: any[]
  *
  * @codeGenApi
  */
-export declare function ΔqueryRefresh(queryList: QueryList<any>): boolean;
+export declare function ɵɵqueryRefresh(queryList: QueryList<any>): boolean;
 
 /**
  * Retrieves a local reference from the current contextViewData.
@@ -12415,13 +12415,13 @@ export declare function ΔqueryRefresh(queryList: QueryList<any>): boolean;
  *
  * @codeGenApi
  */
-export declare function Δreference<T>(index: number): T;
+export declare function ɵɵreference<T>(index: number): T;
 
 /**
  *
  * @codeGenApi
  */
-export declare function ΔresolveBody(element: RElement & {
+export declare function ɵɵresolveBody(element: RElement & {
     ownerDocument: Document;
 }): {
     name: string;
@@ -12432,7 +12432,7 @@ export declare function ΔresolveBody(element: RElement & {
  *
  * @codeGenApi
  */
-export declare function ΔresolveDocument(element: RElement & {
+export declare function ɵɵresolveDocument(element: RElement & {
     ownerDocument: Document;
 }): {
     name: string;
@@ -12443,7 +12443,7 @@ export declare function ΔresolveDocument(element: RElement & {
  *
  * @codeGenApi
  */
-export declare function ΔresolveWindow(element: RElement & {
+export declare function ɵɵresolveWindow(element: RElement & {
     ownerDocument: Document;
 }): {
     name: string;
@@ -12461,7 +12461,7 @@ export declare function ΔresolveWindow(element: RElement & {
  *
  * @codeGenApi
  */
-export declare function ΔrestoreView(viewToRestore: OpaqueViewState): void;
+export declare function ɵɵrestoreView(viewToRestore: OpaqueViewState): void;
 
 /**
  * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
@@ -12478,7 +12478,7 @@ export declare function ΔrestoreView(viewToRestore: OpaqueViewState): void;
  *
  * @publicApi
  */
-export declare function ΔsanitizeHtml(unsafeHtml: any): string;
+export declare function ɵɵsanitizeHtml(unsafeHtml: any): string;
 
 /**
  * A `url` sanitizer which only lets trusted `url`s through.
@@ -12491,7 +12491,7 @@ export declare function ΔsanitizeHtml(unsafeHtml: any): string;
  *
  * @publicApi
  */
-export declare function ΔsanitizeResourceUrl(unsafeResourceUrl: any): string;
+export declare function ɵɵsanitizeResourceUrl(unsafeResourceUrl: any): string;
 
 /**
  * A `script` sanitizer which only lets trusted javascript through.
@@ -12505,7 +12505,7 @@ export declare function ΔsanitizeResourceUrl(unsafeResourceUrl: any): string;
  *
  * @publicApi
  */
-export declare function ΔsanitizeScript(unsafeScript: any): string;
+export declare function ɵɵsanitizeScript(unsafeScript: any): string;
 
 /**
  * A `style` sanitizer which converts untrusted `style` **string** into trusted string by removing
@@ -12522,7 +12522,7 @@ export declare function ΔsanitizeScript(unsafeScript: any): string;
  *
  * @publicApi
  */
-export declare function ΔsanitizeStyle(unsafeStyle: any): string;
+export declare function ɵɵsanitizeStyle(unsafeStyle: any): string;
 
 /**
  * A `url` sanitizer which converts untrusted `url` **string** into trusted string by removing
@@ -12540,7 +12540,7 @@ export declare function ΔsanitizeStyle(unsafeStyle: any): string;
  *
  * @publicApi
  */
-export declare function ΔsanitizeUrl(unsafeUrl: any): string;
+export declare function ɵɵsanitizeUrl(unsafeUrl: any): string;
 
 /**
  * Sanitizes URL, selecting sanitizer function based on tag and property names.
@@ -12557,7 +12557,7 @@ export declare function ΔsanitizeUrl(unsafeUrl: any): string;
  *
  * @publicApi
  */
-export declare function ΔsanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string, prop: string): any;
+export declare function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string, prop: string): any;
 
 /**
  * Selects an element for later binding instructions.
@@ -12580,12 +12580,12 @@ export declare function ΔsanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string, 
  *
  * @codeGenApi
  */
-export declare function Δselect(index: number): void;
+export declare function ɵɵselect(index: number): void;
 
 /**
  * @codeGenApi
  */
-export declare function ΔsetComponentScope(type: ɵComponentType<any>, directives: Type<any>[], pipes: Type<any>[]): void;
+export declare function ɵɵsetComponentScope(type: ɵComponentType<any>, directives: Type<any>[], pipes: Type<any>[]): void;
 
 /**
  * Adds the module metadata that is necessary to compute the module's transitive scope to an
@@ -12597,7 +12597,7 @@ export declare function ΔsetComponentScope(type: ɵComponentType<any>, directiv
  *
  * @codeGenApi
  */
-export declare function ΔsetNgModuleScope(type: any, scope: {
+export declare function ɵɵsetNgModuleScope(type: any, scope: {
     /** List of components, directives, and pipes declared by this module. */
     declarations?: Type<any>[] | (() => Type<any>[]);
     /** List of modules or `ModuleWithProviders` imported by this module. */
@@ -12621,7 +12621,7 @@ export declare function ΔsetNgModuleScope(type: any, scope: {
  *
  * @codeGenApi
  */
-export declare function ΔstaticContentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read: any): void;
+export declare function ɵɵstaticContentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read: any): void;
 
 /**
  * Creates new QueryList for a static view query.
@@ -12632,7 +12632,7 @@ export declare function ΔstaticContentQuery<T>(directiveIndex: number, predicat
  *
  * @codeGenApi
  */
-export declare function ΔstaticViewQuery<T>(predicate: Type<any> | string[], descend: boolean, read: any): void;
+export declare function ɵɵstaticViewQuery<T>(predicate: Type<any> | string[], descend: boolean, read: any): void;
 
 /**
  * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
@@ -12653,7 +12653,7 @@ export declare function ΔstaticViewQuery<T>(predicate: Type<any> | string[], de
  *
  * @codeGenApi
  */
-export declare function Δtemplate(index: number, templateFn: ComponentTemplate<any> | null, consts: number, vars: number, tagName?: string | null, attrs?: TAttributes | null, localRefs?: string[] | null, localRefExtractor?: LocalRefExtractor): void;
+export declare function ɵɵtemplate(index: number, templateFn: ComponentTemplate<any> | null, consts: number, vars: number, tagName?: string | null, attrs?: TAttributes | null, localRefs?: string[] | null, localRefExtractor?: LocalRefExtractor): void;
 
 /**
  * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
@@ -12661,7 +12661,7 @@ export declare function Δtemplate(index: number, templateFn: ComponentTemplate<
  *
  * @codeGenApi
  */
-export declare function ΔtemplateRefExtractor(tNode: TNode, currentView: ɵangular_packages_core_core_bm): TemplateRef<{}> | null;
+export declare function ɵɵtemplateRefExtractor(tNode: TNode, currentView: ɵangular_packages_core_core_bm): TemplateRef<{}> | null;
 
 /**
  * Create static text node
@@ -12671,7 +12671,7 @@ export declare function ΔtemplateRefExtractor(tNode: TNode, currentView: ɵangu
  *
  * @codeGenApi
  */
-export declare function Δtext(index: number, value?: any): void;
+export declare function ɵɵtext(index: number, value?: any): void;
 
 /**
  * Create text node with binding
@@ -12682,7 +12682,7 @@ export declare function Δtext(index: number, value?: any): void;
  *
  * @codeGenApi
  */
-export declare function ΔtextBinding<T>(index: number, value: T | ɵNO_CHANGE): void;
+export declare function ɵɵtextBinding<T>(index: number, value: T | ɵNO_CHANGE): void;
 
 /**
  * Creates new QueryList, stores the reference in LView and returns QueryList.
@@ -12694,6 +12694,6 @@ export declare function ΔtextBinding<T>(index: number, value: T | ɵNO_CHANGE):
  *
  * @codeGenApi
  */
-export declare function ΔviewQuery<T>(predicate: Type<any> | string[], descend: boolean, read: any): QueryList<T>;
+export declare function ɵɵviewQuery<T>(predicate: Type<any> | string[], descend: boolean, read: any): QueryList<T>;
 
 export { }

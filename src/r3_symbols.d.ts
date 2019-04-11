@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+84.sha-54058ba.with-local-changes
+ * @license Angular v8.0.0-beta.11+85.sha-b057806.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -585,7 +585,7 @@ export declare const ITS_JUST_ANGULAR = true;
  * This is the internal data structure used by the runtime to assemble components, directives,
  * pipes, and injectors.
  *
- * NOTE: Always use `ΔdefineNgModule` function to create this object,
+ * NOTE: Always use `ɵɵdefineNgModule` function to create this object,
  * never create the object directly since the shape of this object
  * can change between versions.
  */
@@ -883,7 +883,7 @@ declare abstract class ViewRef extends ChangeDetectorRef {
  *
  * @publicApi
  */
-export declare function ΔdefineInjectable<T>(opts: {
+export declare function ɵɵdefineInjectable<T>(opts: {
     providedIn?: Type<any> | 'root' | 'any' | null;
     factory: () => T;
 }): never;
@@ -908,7 +908,7 @@ export declare function ΔdefineInjectable<T>(opts: {
  *
  * @publicApi
  */
-export declare function ΔdefineInjector(options: {
+export declare function ɵɵdefineInjector(options: {
     factory: () => any;
     providers?: any[];
     imports?: any[];
@@ -917,7 +917,7 @@ export declare function ΔdefineInjector(options: {
 /**
  * @codeGenApi
  */
-export declare function ΔdefineNgModule<T>(def: {
+export declare function ɵɵdefineNgModule<T>(def: {
     /** Token representing the module. Used by DI. */
     type: T;
     /** List of components to bootstrap. */
@@ -964,9 +964,9 @@ export declare function ΔdefineNgModule<T>(def: {
  *
  * @publicApi
  */
-export declare function Δinject<T>(token: Type<T> | InjectionToken<T>): T;
+export declare function ɵɵinject<T>(token: Type<T> | InjectionToken<T>): T;
 
-export declare function Δinject<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
+export declare function ɵɵinject<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
 
 /**
  * Information about how a type or `InjectionToken` interfaces with the DI system.
@@ -982,7 +982,7 @@ export declare function Δinject<T>(token: Type<T> | InjectionToken<T>, flags?: 
  *
  * @publicApi
  */
-export declare interface ΔInjectableDef<T> {
+export declare interface ɵɵInjectableDef<T> {
     /**
      * Specifies that the given type belongs to a particular injector:
      * - `InjectorType` such as `NgModule`,
@@ -1014,7 +1014,7 @@ export declare interface ΔInjectableDef<T> {
  *
  * @publicApi
  */
-export declare interface ΔInjectorDef<T> {
+export declare interface ɵɵInjectorDef<T> {
     factory: () => T;
     providers: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | any[])[];
     imports: (InjectorType<any> | InjectorTypeWithProviders<any>)[];
@@ -1023,6 +1023,6 @@ export declare interface ΔInjectorDef<T> {
 /**
  * @publicApi
  */
-export declare type ΔNgModuleDefWithMeta<T, Declarations, Imports, Exports> = NgModuleDef<T>;
+export declare type ɵɵNgModuleDefWithMeta<T, Declarations, Imports, Exports> = NgModuleDef<T>;
 
 export { }
