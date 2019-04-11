@@ -19,4 +19,4 @@
  *
  * @codeGenApi
  */
-export declare function Δselect(index: number): void;
+export declare function ɵɵselect(index: number): void;

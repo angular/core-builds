@@ -21,7 +21,7 @@ export declare const defaultScheduler: any;
  *
  * @codeGenApi
  */
-export declare function ΔresolveWindow(element: RElement & {
+export declare function ɵɵresolveWindow(element: RElement & {
     ownerDocument: Document;
 }): {
     name: string;
@@ -31,7 +31,7 @@ export declare function ΔresolveWindow(element: RElement & {
  *
  * @codeGenApi
  */
-export declare function ΔresolveDocument(element: RElement & {
+export declare function ɵɵresolveDocument(element: RElement & {
     ownerDocument: Document;
 }): {
     name: string;
@@ -41,7 +41,7 @@ export declare function ΔresolveDocument(element: RElement & {
  *
  * @codeGenApi
  */
-export declare function ΔresolveBody(element: RElement & {
+export declare function ɵɵresolveBody(element: RElement & {
     ownerDocument: Document;
 }): {
     name: string;

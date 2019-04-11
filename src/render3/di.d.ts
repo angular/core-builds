@@ -136,8 +136,8 @@ export declare class NodeInjector implements Injector {
 /**
  * @codeGenApi
  */
-export declare function ΔgetFactoryOf<T>(type: Type<any>): ((type: Type<T> | null) => T) | null;
+export declare function ɵɵgetFactoryOf<T>(type: Type<any>): ((type: Type<T> | null) => T) | null;
 /**
  * @codeGenApi
  */
-export declare function ΔgetInheritedFactory<T>(type: Type<any>): (type: Type<T>) => T;
+export declare function ɵɵgetInheritedFactory<T>(type: Type<any>): (type: Type<T>) => T;

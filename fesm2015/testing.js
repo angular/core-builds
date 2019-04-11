@@ -1,10 +1,10 @@
 /**
- * @license Angular v8.0.0-beta.11+84.sha-54058ba.with-local-changes
+ * @license Angular v8.0.0-beta.11+85.sha-b057806.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode, RendererFactory2, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, ɵNG_COMPONENT_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵpatchComponentDefWithScope, ɵNG_INJECTOR_DEF, ɵNG_MODULE_DEF, ɵcompileNgModuleDefs, ΔdefineNgModule, ΔdefineInjector, ErrorHandler, ɵsetClassMetadata, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, ɵtransitiveScopesFor, Injector, InjectFlags, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, Injectable, ΔdefineInjectable, ΔgetInheritedFactory, ɵivyEnabled, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, Optional, SkipSelf } from '@angular/core';
+import { getDebugNode, RendererFactory2, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, ɵNG_COMPONENT_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵpatchComponentDefWithScope, ɵNG_INJECTOR_DEF, ɵNG_MODULE_DEF, ɵcompileNgModuleDefs, ɵɵdefineNgModule, ɵɵdefineInjector, ErrorHandler, ɵsetClassMetadata, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, ɵtransitiveScopesFor, Injector, InjectFlags, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, Injectable, ɵɵdefineInjectable, ɵɵgetInheritedFactory, ɵivyEnabled, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, Optional, SkipSelf } from '@angular/core';
 import { __awaiter } from 'tslib';
 import { ResourceLoader } from '@angular/compiler';
 
@@ -1912,8 +1912,8 @@ class R3TestBedCompiler {
         R3ErrorHandlerModule.decorators = [
             { type: NgModule, args: [{ providers: [{ provide: ErrorHandler, useClass: R3TestErrorHandler }] },] },
         ];
-        /** @nocollapse */ R3ErrorHandlerModule.ngModuleDef = ΔdefineNgModule({ type: R3ErrorHandlerModule });
-        /** @nocollapse */ R3ErrorHandlerModule.ngInjectorDef = ΔdefineInjector({ factory: function R3ErrorHandlerModule_Factory(t) { return new (t || R3ErrorHandlerModule)(); }, providers: [{ provide: ErrorHandler, useClass: R3TestErrorHandler }] });
+        /** @nocollapse */ R3ErrorHandlerModule.ngModuleDef = ɵɵdefineNgModule({ type: R3ErrorHandlerModule });
+        /** @nocollapse */ R3ErrorHandlerModule.ngInjectorDef = ɵɵdefineInjector({ factory: function R3ErrorHandlerModule_Factory(t) { return new (t || R3ErrorHandlerModule)(); }, providers: [{ provide: ErrorHandler, useClass: R3TestErrorHandler }] });
         /*@__PURE__*/ ɵsetClassMetadata(R3ErrorHandlerModule, [{
                 type: NgModule,
                 args: [{ providers: [{ provide: ErrorHandler, useClass: R3TestErrorHandler }] }]
@@ -1971,8 +1971,8 @@ class R3TestBedCompiler {
         CompilerModule.decorators = [
             { type: NgModule, args: [{ providers },] },
         ];
-        /** @nocollapse */ CompilerModule.ngModuleDef = ΔdefineNgModule({ type: CompilerModule });
-        /** @nocollapse */ CompilerModule.ngInjectorDef = ΔdefineInjector({ factory: function CompilerModule_Factory(t) { return new (t || CompilerModule)(); }, providers: providers });
+        /** @nocollapse */ CompilerModule.ngModuleDef = ɵɵdefineNgModule({ type: CompilerModule });
+        /** @nocollapse */ CompilerModule.ngInjectorDef = ɵɵdefineInjector({ factory: function CompilerModule_Factory(t) { return new (t || CompilerModule)(); }, providers: providers });
         /*@__PURE__*/ ɵsetClassMetadata(CompilerModule, [{
                 type: NgModule,
                 args: [{ providers }]
@@ -2756,8 +2756,8 @@ class TestingCompiler extends Compiler {
 TestingCompiler.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */ TestingCompiler.ngInjectableDef = ΔdefineInjectable({ token: TestingCompiler, factory: function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory((t || TestingCompiler)); }, providedIn: null });
-const ɵTestingCompiler_BaseFactory = ΔgetInheritedFactory(TestingCompiler);
+/** @nocollapse */ TestingCompiler.ngInjectableDef = ɵɵdefineInjectable({ token: TestingCompiler, factory: function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory((t || TestingCompiler)); }, providedIn: null });
+const ɵTestingCompiler_BaseFactory = ɵɵgetInheritedFactory(TestingCompiler);
 /*@__PURE__*/ ɵsetClassMetadata(TestingCompiler, [{
         type: Injectable
     }], null, null);

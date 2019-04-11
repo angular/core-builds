@@ -30,7 +30,7 @@ import { CssSelectorList } from '../interfaces/projection';
  *
  * @codeGenApi
  */
-export declare function ΔprojectionDef(selectors?: CssSelectorList[]): void;
+export declare function ɵɵprojectionDef(selectors?: CssSelectorList[]): void;
 /**
  * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
  * to the projectionDef instruction.
@@ -42,4 +42,4 @@ export declare function ΔprojectionDef(selectors?: CssSelectorList[]): void;
   *
  * @codeGenApi
 */
-export declare function Δprojection(nodeIndex: number, selectorIndex?: number, attrs?: TAttributes): void;
+export declare function ɵɵprojection(nodeIndex: number, selectorIndex?: number, attrs?: TAttributes): void;

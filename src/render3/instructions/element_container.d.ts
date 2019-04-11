@@ -13,10 +13,10 @@ import { TAttributes } from '../interfaces/node';
  *
  * @codeGenApi
  */
-export declare function ΔelementContainerStart(index: number, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+export declare function ɵɵelementContainerStart(index: number, attrs?: TAttributes | null, localRefs?: string[] | null): void;
 /**
  * Mark the end of the <ng-container>.
  *
  * @codeGenApi
  */
-export declare function ΔelementContainerEnd(): void;
+export declare function ɵɵelementContainerEnd(): void;

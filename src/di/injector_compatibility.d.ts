@@ -45,14 +45,14 @@ export declare function injectInjectorOnly<T>(token: Type<T> | InjectionToken<T>
  *
  * @publicApi
  */
-export declare function Δinject<T>(token: Type<T> | InjectionToken<T>): T;
-export declare function Δinject<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
+export declare function ɵɵinject<T>(token: Type<T> | InjectionToken<T>): T;
+export declare function ɵɵinject<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
 /**
  * @deprecated in v8, delete after v10. This API should be used only be generated code, and that
- * code should now use Δinject instead.
+ * code should now use ɵɵinject instead.
  * @publicApi
  */
-export declare const inject: typeof Δinject;
+export declare const inject: typeof ɵɵinject;
 /**
  * Injects `root` tokens in limp mode.
  *

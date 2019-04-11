@@ -14,10 +14,10 @@ import { RenderFlags } from '../interfaces/definition';
  *
  * @codeGenApi
  */
-export declare function ΔembeddedViewStart(viewBlockId: number, consts: number, vars: number): RenderFlags;
+export declare function ɵɵembeddedViewStart(viewBlockId: number, consts: number, vars: number): RenderFlags;
 /**
  * Marks the end of an embedded view.
  *
  * @codeGenApi
  */
-export declare function ΔembeddedViewEnd(): void;
+export declare function ɵɵembeddedViewEnd(): void;

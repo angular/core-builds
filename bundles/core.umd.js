@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+84.sha-54058ba.with-local-changes
+ * @license Angular v8.0.0-beta.11+85.sha-b057806.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -343,17 +343,17 @@
      *
      * @publicApi
      */
-    function ΔdefineInjectable(opts) {
+    function ɵɵdefineInjectable(opts) {
         return {
             providedIn: opts.providedIn || null, factory: opts.factory, value: undefined,
         };
     }
     /**
      * @deprecated in v8, delete after v10. This API should be used only be generated code, and that
-     * code should now use ΔdefineInjectable instead.
+     * code should now use ɵɵdefineInjectable instead.
      * @publicApi
      */
-    var defineInjectable = ΔdefineInjectable;
+    var defineInjectable = ɵɵdefineInjectable;
     /**
      * Construct an `InjectorDef` which configures an injector.
      *
@@ -374,7 +374,7 @@
      *
      * @publicApi
      */
-    function ΔdefineInjector(options) {
+    function ɵɵdefineInjector(options) {
         return {
             factory: options.factory, providers: options.providers || [], imports: options.imports || [],
         };
@@ -578,16 +578,16 @@
             return _currentInjector.get(token, flags & exports.InjectFlags.Optional ? null : undefined, flags);
         }
     }
-    function Δinject(token, flags) {
+    function ɵɵinject(token, flags) {
         if (flags === void 0) { flags = exports.InjectFlags.Default; }
         return (_injectImplementation || injectInjectorOnly)(token, flags);
     }
     /**
      * @deprecated in v8, delete after v10. This API should be used only be generated code, and that
-     * code should now use Δinject instead.
+     * code should now use ɵɵinject instead.
      * @publicApi
      */
-    var inject = Δinject;
+    var inject = ɵɵinject;
     /**
      * Injects `root` tokens in limp mode.
      *
@@ -635,10 +635,10 @@
                         type = meta;
                     }
                 }
-                args.push(Δinject(type, flags));
+                args.push(ɵɵinject(type, flags));
             }
             else {
-                args.push(Δinject(arg));
+                args.push(ɵɵinject(arg));
             }
         }
         return args;
@@ -657,10 +657,10 @@
      * This should be kept up to date with the public exports of @angular/core.
      */
     var angularCoreDiEnv = {
-        'ΔdefineInjectable': ΔdefineInjectable,
-        'ΔdefineInjector': ΔdefineInjector,
-        'Δinject': Δinject,
-        'ΔgetFactoryOf': getFactoryOf,
+        'ɵɵdefineInjectable': ɵɵdefineInjectable,
+        'ɵɵdefineInjector': ɵɵdefineInjector,
+        'ɵɵinject': ɵɵinject,
+        'ɵɵgetFactoryOf': getFactoryOf,
     };
     function getFactoryOf(type) {
         var typeAny = type;
@@ -1168,7 +1168,7 @@
                 this.__NG_ELEMENT_ID__ = options;
             }
             else if (options !== undefined) {
-                this.ngInjectableDef = ΔdefineInjectable({
+                this.ngInjectableDef = ɵɵdefineInjectable({
                     providedIn: options.providedIn || 'root',
                     factory: options.factory,
                 });
@@ -1254,9 +1254,9 @@
         Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
         Injector.NULL = new NullInjector();
         /** @nocollapse */
-        Injector.ngInjectableDef = ΔdefineInjectable({
+        Injector.ngInjectableDef = ɵɵdefineInjectable({
             providedIn: 'any',
-            factory: function () { return Δinject(INJECTOR); },
+            factory: function () { return ɵɵinject(INJECTOR); },
         });
         /**
          * @internal
@@ -2861,21 +2861,21 @@
      *
      * @codeGenApi
      */
-    function ΔresolveWindow(element) {
+    function ɵɵresolveWindow(element) {
         return { name: 'window', target: element.ownerDocument.defaultView };
     }
     /**
      *
      * @codeGenApi
      */
-    function ΔresolveDocument(element) {
+    function ɵɵresolveDocument(element) {
         return { name: 'document', target: element.ownerDocument };
     }
     /**
      *
      * @codeGenApi
      */
-    function ΔresolveBody(element) {
+    function ɵɵresolveBody(element) {
         return { name: 'body', target: element.ownerDocument.body };
     }
     /**
@@ -3007,7 +3007,7 @@
      * ```
      * @codeGenApi
      */
-    function ΔdefineComponent(componentDefinition) {
+    function ɵɵdefineComponent(componentDefinition) {
         var type = componentDefinition.type;
         var typePrototype = type.prototype;
         var declaredInputs = {};
@@ -3070,7 +3070,7 @@
     /**
      * @codeGenApi
      */
-    function ΔsetComponentScope(type, directives, pipes) {
+    function ɵɵsetComponentScope(type, directives, pipes) {
         var def = type.ngComponentDef;
         def.directiveDefs = function () { return directives.map(extractDirectiveDef); };
         def.pipeDefs = function () { return pipes.map(extractPipeDef); };
@@ -3092,7 +3092,7 @@
     /**
      * @codeGenApi
      */
-    function ΔdefineNgModule(def) {
+    function ɵɵdefineNgModule(def) {
         var res = {
             type: def.type,
             bootstrap: def.bootstrap || EMPTY_ARRAY,
@@ -3114,7 +3114,7 @@
      *
      * @codeGenApi
      */
-    function ΔsetNgModuleScope(type, scope) {
+    function ɵɵsetNgModuleScope(type, scope) {
         var ngModuleDef = getNgModuleDef(type, true);
         ngModuleDef.declarations = scope.declarations || EMPTY_ARRAY;
         ngModuleDef.imports = scope.imports || EMPTY_ARRAY;
@@ -3201,7 +3201,7 @@
      * # Example
      * ```ts
      * class ShouldBeInherited {
-     *   static ngBaseDef = ΔdefineBase({
+     *   static ngBaseDef = ɵɵdefineBase({
      *      ...
      *   })
      * }
@@ -3211,7 +3211,7 @@
      *
      * @codeGenApi
      */
-    function ΔdefineBase(baseDefinition) {
+    function ɵɵdefineBase(baseDefinition) {
         var declaredInputs = {};
         return {
             inputs: invertObject(baseDefinition.inputs, declaredInputs),
@@ -3227,7 +3227,7 @@
      * class MyDirective {
      *   // Generated by Angular Template Compiler
      *   // [Symbol] syntax will not be supported by TypeScript until v2.7
-     *   static ngDirectiveDef = ΔdefineDirective({
+     *   static ngDirectiveDef = ɵɵdefineDirective({
      *     ...
      *   });
      * }
@@ -3235,7 +3235,7 @@
      *
      * @codeGenApi
      */
-    var ΔdefineDirective = ΔdefineComponent;
+    var ɵɵdefineDirective = ɵɵdefineComponent;
     /**
      * Create a pipe definition object.
      *
@@ -3252,7 +3252,7 @@
      *
      * @codeGenApi
      */
-    function ΔdefinePipe(pipeDef) {
+    function ɵɵdefinePipe(pipeDef) {
         return {
             name: pipeDef.name,
             factory: pipeDef.factory,
@@ -3988,17 +3988,17 @@
      *   Should match component / directive.
      * </my-comp>
      * <div ngNonBindable>
-     *   <!-- ΔdisableBindings() -->
+     *   <!-- ɵɵdisableBindings() -->
      *   <my-comp my-directive>
      *     Should not match component / directive because we are in ngNonBindable.
      *   </my-comp>
-     *   <!-- ΔenableBindings() -->
+     *   <!-- ɵɵenableBindings() -->
      * </div>
      * ```
      *
      * @codeGenApi
      */
-    function ΔenableBindings() {
+    function ɵɵenableBindings() {
         bindingsEnabled = true;
     }
     /**
@@ -4010,17 +4010,17 @@
      *   Should match component / directive.
      * </my-comp>
      * <div ngNonBindable>
-     *   <!-- ΔdisableBindings() -->
+     *   <!-- ɵɵdisableBindings() -->
      *   <my-comp my-directive>
      *     Should not match component / directive because we are in ngNonBindable.
      *   </my-comp>
-     *   <!-- ΔenableBindings() -->
+     *   <!-- ɵɵenableBindings() -->
      * </div>
      * ```
      *
      * @codeGenApi
      */
-    function ΔdisableBindings() {
+    function ɵɵdisableBindings() {
         bindingsEnabled = false;
     }
     function getLView() {
@@ -4162,7 +4162,7 @@
      *
      * @codeGenApi
      */
-    function ΔrestoreView(viewToRestore) {
+    function ɵɵrestoreView(viewToRestore) {
         contextLView = viewToRestore;
     }
     /** Used to set the parent property when nodes are created and track query results. */
@@ -4350,7 +4350,7 @@
      *
      * @codeGenApi
      */
-    function ΔnamespaceSVG() {
+    function ɵɵnamespaceSVG() {
         _currentNamespace = 'http://www.w3.org/2000/svg';
     }
     /**
@@ -4358,7 +4358,7 @@
      *
      * @codeGenApi
      */
-    function ΔnamespaceMathML() {
+    function ɵɵnamespaceMathML() {
         _currentNamespace = 'http://www.w3.org/1998/MathML/';
     }
     /**
@@ -4367,7 +4367,7 @@
      *
      * @codeGenApi
      */
-    function ΔnamespaceHTML() {
+    function ɵɵnamespaceHTML() {
         _currentNamespace = null;
     }
     function getNamespace() {
@@ -5689,7 +5689,7 @@
     /**
      * @codeGenApi
      */
-    function ΔgetFactoryOf(type) {
+    function ɵɵgetFactoryOf(type) {
         var typeAny = type;
         var def = getComponentDef(typeAny) || getDirectiveDef(typeAny) ||
             getPipeDef(typeAny) || getInjectableDef(typeAny) || getInjectorDef(typeAny);
@@ -5701,9 +5701,9 @@
     /**
      * @codeGenApi
      */
-    function ΔgetInheritedFactory(type) {
+    function ɵɵgetInheritedFactory(type) {
         var proto = Object.getPrototypeOf(type.prototype).constructor;
-        var factory = ΔgetFactoryOf(proto);
+        var factory = ɵɵgetFactoryOf(proto);
         if (factory !== null) {
             return factory;
         }
@@ -6576,7 +6576,7 @@
      *
      * @publicApi
      */
-    function ΔsanitizeHtml(unsafeHtml) {
+    function ɵɵsanitizeHtml(unsafeHtml) {
         var sanitizer = getSanitizer();
         if (sanitizer) {
             return sanitizer.sanitize(exports.SecurityContext.HTML, unsafeHtml) || '';
@@ -6601,7 +6601,7 @@
      *
      * @publicApi
      */
-    function ΔsanitizeStyle(unsafeStyle) {
+    function ɵɵsanitizeStyle(unsafeStyle) {
         var sanitizer = getSanitizer();
         if (sanitizer) {
             return sanitizer.sanitize(exports.SecurityContext.STYLE, unsafeStyle) || '';
@@ -6627,7 +6627,7 @@
      *
      * @publicApi
      */
-    function ΔsanitizeUrl(unsafeUrl) {
+    function ɵɵsanitizeUrl(unsafeUrl) {
         var sanitizer = getSanitizer();
         if (sanitizer) {
             return sanitizer.sanitize(exports.SecurityContext.URL, unsafeUrl) || '';
@@ -6648,7 +6648,7 @@
      *
      * @publicApi
      */
-    function ΔsanitizeResourceUrl(unsafeResourceUrl) {
+    function ɵɵsanitizeResourceUrl(unsafeResourceUrl) {
         var sanitizer = getSanitizer();
         if (sanitizer) {
             return sanitizer.sanitize(exports.SecurityContext.RESOURCE_URL, unsafeResourceUrl) || '';
@@ -6670,7 +6670,7 @@
      *
      * @publicApi
      */
-    function ΔsanitizeScript(unsafeScript) {
+    function ɵɵsanitizeScript(unsafeScript) {
         var sanitizer = getSanitizer();
         if (sanitizer) {
             return sanitizer.sanitize(exports.SecurityContext.SCRIPT, unsafeScript) || '';
@@ -6691,9 +6691,9 @@
         if ((prop === 'src' && (tag === 'embed' || tag === 'frame' || tag === 'iframe' ||
             tag === 'media' || tag === 'script')) ||
             (prop === 'href' && (tag === 'base' || tag === 'link'))) {
-            return ΔsanitizeResourceUrl;
+            return ɵɵsanitizeResourceUrl;
         }
-        return ΔsanitizeUrl;
+        return ɵɵsanitizeUrl;
     }
     /**
      * Sanitizes URL, selecting sanitizer function based on tag and property names.
@@ -6710,7 +6710,7 @@
      *
      * @publicApi
      */
-    function ΔsanitizeUrlOrResourceUrl(unsafeUrl, tag, prop) {
+    function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl, tag, prop) {
         return getUrlSanitizer(tag, prop)(unsafeUrl);
     }
     /**
@@ -6719,12 +6719,12 @@
      *
      * @publicApi
      */
-    var ΔdefaultStyleSanitizer = function (prop, value) {
+    var ɵɵdefaultStyleSanitizer = function (prop, value) {
         if (value === undefined) {
             return prop === 'background-image' || prop === 'background' || prop === 'border-image' ||
                 prop === 'filter' || prop === 'list-style' || prop === 'list-style-image';
         }
-        return ΔsanitizeStyle(value);
+        return ɵɵsanitizeStyle(value);
     };
     function validateAgainstEventProperties(name) {
         if (name.toLowerCase().startsWith('on')) {
@@ -9469,7 +9469,7 @@
                 setPreviousOrParentTNode(null);
                 oldView = enterView(viewToRender, viewToRender[T_HOST]);
                 resetPreOrderHookFlags(viewToRender);
-                ΔnamespaceHTML();
+                ɵɵnamespaceHTML();
                 // Reset the selected index so we can assert that `select` was called later
                 setSelectedIndex(-1);
                 tView.template(getRenderFlags(viewToRender), context);
@@ -9499,7 +9499,7 @@
             if (creationModeIsActive) {
                 // creation mode pass
                 if (templateFn) {
-                    ΔnamespaceHTML();
+                    ɵɵnamespaceHTML();
                     // Reset the selected index so we can assert that `select` was called later
                     setSelectedIndex(-1);
                     templateFn(1 /* Create */, context);
@@ -10526,7 +10526,7 @@
         var creationMode = isCreationMode(hostView);
         try {
             resetPreOrderHookFlags(hostView);
-            ΔnamespaceHTML();
+            ɵɵnamespaceHTML();
             creationMode && executeViewQueryFn(1 /* Create */, hostTView, component);
             // Reset the selected index so we can assert that `select` was called later
             setSelectedIndex(-1);
@@ -10703,7 +10703,7 @@
      *
      * @codeGenApi
      */
-    function ΔallocHostVars(count) {
+    function ɵɵallocHostVars(count) {
         var lView = getLView();
         var tView = lView[TVIEW];
         if (!tView.firstTemplatePass)
@@ -11570,7 +11570,7 @@
      *
      * @codeGenApi
      */
-    function Δcontainer(index) {
+    function ɵɵcontainer(index) {
         var tNode = containerInternal(index, null, null);
         var lView = getLView();
         if (lView[TVIEW].firstTemplatePass) {
@@ -11598,7 +11598,7 @@
      *
      * @codeGenApi
      */
-    function Δtemplate(index, templateFn, consts, vars, tagName, attrs, localRefs, localRefExtractor) {
+    function ɵɵtemplate(index, templateFn, consts, vars, tagName, attrs, localRefs, localRefExtractor) {
         var lView = getLView();
         var tView = lView[TVIEW];
         // TODO: consider a separate node type for templates
@@ -11619,7 +11619,7 @@
      *
      * @codeGenApi
      */
-    function ΔcontainerRefreshStart(index) {
+    function ɵɵcontainerRefreshStart(index) {
         var lView = getLView();
         var tView = lView[TVIEW];
         var previousOrParentTNode = loadInternal(tView.data, index);
@@ -11638,7 +11638,7 @@
      *
      * @codeGenApi
      */
-    function ΔcontainerRefreshEnd() {
+    function ɵɵcontainerRefreshEnd() {
         var previousOrParentTNode = getPreviousOrParentTNode();
         if (getIsParent()) {
             setIsParent(false);
@@ -11721,7 +11721,7 @@
      *
      * @codeGenApi
      */
-    function Δreference(index) {
+    function ɵɵreference(index) {
         var contextLView = getContextLView();
         return loadInternal(contextLView, index);
     }
@@ -11730,7 +11730,7 @@
      *
      * @codeGenApi
      */
-    function Δload(index) {
+    function ɵɵload(index) {
         return loadInternal(getLView(), index);
     }
 
@@ -11741,7 +11741,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    function ΔdirectiveInject(token, flags) {
+    function ɵɵdirectiveInject(token, flags) {
         if (flags === void 0) { flags = exports.InjectFlags.Default; }
         token = resolveForwardRef(token);
         return getOrCreateInjectable(getPreviousOrParentTNode(), getLView(), token, flags);
@@ -11751,7 +11751,7 @@
      *
      * @codeGenApi
      */
-    function ΔinjectAttribute(attrNameToInject) {
+    function ɵɵinjectAttribute(attrNameToInject) {
         return injectAttributeImpl(getPreviousOrParentTNode(), attrNameToInject);
     }
 
@@ -11794,7 +11794,7 @@
      *
      * @codeGenApi
      */
-    function ΔelementStyling(classBindingNames, styleBindingNames, styleSanitizer) {
+    function ɵɵelementStyling(classBindingNames, styleBindingNames, styleSanitizer) {
         var tNode = getPreviousOrParentTNode();
         if (!tNode.stylingTemplate) {
             tNode.stylingTemplate = createEmptyStylingContext();
@@ -11830,7 +11830,7 @@
      *
      * @codeGenApi
      */
-    function ΔelementHostStyling(classBindingNames, styleBindingNames, styleSanitizer) {
+    function ɵɵelementHostStyling(classBindingNames, styleBindingNames, styleSanitizer) {
         var tNode = getPreviousOrParentTNode();
         if (!tNode.stylingTemplate) {
             tNode.stylingTemplate = createEmptyStylingContext();
@@ -11876,7 +11876,7 @@
      *
      * @codeGenApi
      */
-    function ΔelementStyleProp(index, styleIndex, value, suffix, forceOverride) {
+    function ɵɵelementStyleProp(index, styleIndex, value, suffix, forceOverride) {
         var valueToAdd = resolveStylePropValue(value, suffix);
         updateStyleProp(getStylingContext(index + HEADER_OFFSET, getLView()), styleIndex, valueToAdd, DEFAULT_TEMPLATE_DIRECTIVE_INDEX, forceOverride);
     }
@@ -11905,7 +11905,7 @@
      *
      * @codeGenApi
      */
-    function ΔelementHostStyleProp(styleIndex, value, suffix, forceOverride) {
+    function ɵɵelementHostStyleProp(styleIndex, value, suffix, forceOverride) {
         var directiveStylingIndex = getActiveDirectiveStylingIndex();
         var hostElementIndex = getSelectedIndex();
         var lView = getLView();
@@ -11950,7 +11950,7 @@
      *
      * @codeGenApi
      */
-    function ΔelementClassProp(index, classIndex, value, forceOverride) {
+    function ɵɵelementClassProp(index, classIndex, value, forceOverride) {
         var input = (value instanceof BoundPlayerFactory) ?
             value :
             booleanOrNull(value);
@@ -11974,7 +11974,7 @@
      *
      * @codeGenApi
      */
-    function ΔelementHostClassProp(classIndex, value, forceOverride) {
+    function ɵɵelementHostClassProp(classIndex, value, forceOverride) {
         var directiveStylingIndex = getActiveDirectiveStylingIndex();
         var hostElementIndex = getSelectedIndex();
         var lView = getLView();
@@ -12010,7 +12010,7 @@
      *
      * @codeGenApi
      */
-    function ΔelementStylingMap(index, classes, styles) {
+    function ɵɵelementStylingMap(index, classes, styles) {
         var lView = getLView();
         var tNode = getTNode(index, lView);
         var stylingContext = getStylingContext(index + HEADER_OFFSET, lView);
@@ -12054,7 +12054,7 @@
      *
      * @codeGenApi
      */
-    function ΔelementHostStylingMap(classes, styles) {
+    function ɵɵelementHostStylingMap(classes, styles) {
         var directiveStylingIndex = getActiveDirectiveStylingIndex();
         var hostElementIndex = getSelectedIndex();
         var lView = getLView();
@@ -12073,7 +12073,7 @@
      *
      * @codeGenApi
      */
-    function ΔelementStylingApply(index) {
+    function ɵɵelementStylingApply(index) {
         elementStylingApplyInternal(DEFAULT_TEMPLATE_DIRECTIVE_INDEX, index);
     }
     /**
@@ -12086,7 +12086,7 @@
      *
      * @codeGenApi
      */
-    function ΔelementHostStylingApply() {
+    function ɵɵelementHostStylingApply() {
         elementStylingApplyInternal(getActiveDirectiveStylingIndex(), getSelectedIndex());
     }
     function elementStylingApplyInternal(directiveStylingIndex, index) {
@@ -12136,7 +12136,7 @@
      *
      * @codeGenApi
      */
-    function ΔelementStart(index, name, attrs, localRefs) {
+    function ɵɵelementStart(index, name, attrs, localRefs) {
         var lView = getLView();
         var tView = lView[TVIEW];
         ngDevMode && assertEqual(lView[BINDING_INDEX], tView.bindingStartIndex, 'elements should be created before any bindings ');
@@ -12205,7 +12205,7 @@
      *
      * @codeGenApi
      */
-    function ΔelementEnd() {
+    function ɵɵelementEnd() {
         var previousOrParentTNode = getPreviousOrParentTNode();
         if (getIsParent()) {
             setIsParent(false);
@@ -12249,9 +12249,9 @@
      *
      * @codeGenApi
      */
-    function Δelement(index, name, attrs, localRefs) {
-        ΔelementStart(index, name, attrs, localRefs);
-        ΔelementEnd();
+    function ɵɵelement(index, name, attrs, localRefs) {
+        ɵɵelementStart(index, name, attrs, localRefs);
+        ɵɵelementEnd();
     }
     /**
      * Updates the value of removes an attribute on an Element.
@@ -12265,7 +12265,7 @@
      *
      * @codeGenApi
      */
-    function ΔelementAttribute(index, name, value, sanitizer, namespace) {
+    function ɵɵelementAttribute(index, name, value, sanitizer, namespace) {
         if (value !== NO_CHANGE) {
             ngDevMode && validateAgainstEventAttributes(name);
             var lView = getLView();
@@ -12329,7 +12329,7 @@
      *
      * @codeGenApi
      */
-    function ΔelementHostAttrs(attrs) {
+    function ɵɵelementHostAttrs(attrs) {
         var hostElementIndex = getSelectedIndex();
         var lView = getLView();
         var tNode = getTNode(hostElementIndex, lView);
@@ -12374,7 +12374,7 @@
      *
      * @codeGenApi
      */
-    function ΔelementContainerStart(index, attrs, localRefs) {
+    function ɵɵelementContainerStart(index, attrs, localRefs) {
         var lView = getLView();
         var tView = lView[TVIEW];
         var renderer = lView[RENDERER];
@@ -12404,7 +12404,7 @@
      *
      * @codeGenApi
      */
-    function ΔelementContainerEnd() {
+    function ɵɵelementContainerEnd() {
         var previousOrParentTNode = getPreviousOrParentTNode();
         var lView = getLView();
         var tView = lView[TVIEW];
@@ -12442,7 +12442,7 @@
      *
      * @codeGenApi
      */
-    function ΔembeddedViewStart(viewBlockId, consts, vars) {
+    function ɵɵembeddedViewStart(viewBlockId, consts, vars) {
         var lView = getLView();
         var previousOrParentTNode = getPreviousOrParentTNode();
         // The previous node can be a view node if we are processing an inline for loop
@@ -12535,7 +12535,7 @@
      *
      * @codeGenApi
      */
-    function ΔembeddedViewEnd() {
+    function ɵɵembeddedViewEnd() {
         var lView = getLView();
         var viewHost = lView[T_HOST];
         if (isCreationMode(lView)) {
@@ -12560,7 +12560,7 @@
      *
      * @codeGenApi
      */
-    function ΔgetCurrentView() {
+    function ɵɵgetCurrentView() {
         return getLView();
     }
 
@@ -12609,7 +12609,7 @@
      *
      * @codeGenApi
      */
-    function Δlistener(eventName, listenerFn, useCapture, eventTargetResolver) {
+    function ɵɵlistener(eventName, listenerFn, useCapture, eventTargetResolver) {
         if (useCapture === void 0) { useCapture = false; }
         listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver);
     }
@@ -12634,7 +12634,7 @@
      *
      * @codeGenApi
     */
-    function ΔcomponentHostSyntheticListener(eventName, listenerFn, useCapture, eventTargetResolver) {
+    function ɵɵcomponentHostSyntheticListener(eventName, listenerFn, useCapture, eventTargetResolver) {
         if (useCapture === void 0) { useCapture = false; }
         listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver, loadComponentRenderer);
     }
@@ -12830,7 +12830,7 @@
      *
      * @codeGenApi
      */
-    function ΔnextContext(level) {
+    function ɵɵnextContext(level) {
         if (level === void 0) { level = 1; }
         return nextContextImpl(level);
     }
@@ -12858,7 +12858,7 @@
      *
      * @codeGenApi
      */
-    function ΔprojectionDef(selectors) {
+    function ɵɵprojectionDef(selectors) {
         var componentNode = findComponentView(getLView())[T_HOST];
         if (!componentNode.projection) {
             var noOfNodeBuckets = selectors ? selectors.length + 1 : 1;
@@ -12890,7 +12890,7 @@
       *
      * @codeGenApi
     */
-    function Δprojection(nodeIndex, selectorIndex, attrs) {
+    function ɵɵprojection(nodeIndex, selectorIndex, attrs) {
         if (selectorIndex === void 0) { selectorIndex = 0; }
         var lView = getLView();
         var tProjectionNode = createNodeAtIndex(nodeIndex, 1 /* Projection */, null, null, attrs || null);
@@ -13119,7 +13119,7 @@
      *
      * @codeGenApi
      */
-    function Δbind(value) {
+    function ɵɵbind(value) {
         var lView = getLView();
         var bindingIndex = lView[BINDING_INDEX]++;
         storeBindingMetadata(lView);
@@ -13143,7 +13143,7 @@
      *
      * @codeGenApi
     */
-    function ΔelementProperty(index, propName, value, sanitizer, nativeOnly) {
+    function ɵɵelementProperty(index, propName, value, sanitizer, nativeOnly) {
         elementPropertyInternal(index, propName, value, sanitizer, nativeOnly);
     }
     /**
@@ -13169,7 +13169,7 @@
      *
      * @codeGenApi
      */
-    function ΔcomponentHostSyntheticProperty(index, propName, value, sanitizer, nativeOnly) {
+    function ɵɵcomponentHostSyntheticProperty(index, propName, value, sanitizer, nativeOnly) {
         elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadComponentRenderer);
     }
 
@@ -13194,7 +13194,7 @@
      *
      * @codeGenApi
      */
-    function ΔinterpolationV(values) {
+    function ɵɵinterpolationV(values) {
         ngDevMode && assertLessThan(2, values.length, 'should have at least 3 values');
         ngDevMode && assertEqual(values.length % 2, 1, 'should have an odd number of values');
         var different = false;
@@ -13233,7 +13233,7 @@
      *
      * @codeGenApi
      */
-    function Δinterpolation1(prefix, v0, suffix) {
+    function ɵɵinterpolation1(prefix, v0, suffix) {
         var lView = getLView();
         var different = bindingUpdated(lView, lView[BINDING_INDEX]++, v0);
         storeBindingMetadata(lView, prefix, suffix);
@@ -13244,7 +13244,7 @@
      *
      * @codeGenApi
      */
-    function Δinterpolation2(prefix, v0, i0, v1, suffix) {
+    function ɵɵinterpolation2(prefix, v0, i0, v1, suffix) {
         var lView = getLView();
         var bindingIndex = lView[BINDING_INDEX];
         var different = bindingUpdated2(lView, bindingIndex, v0, v1);
@@ -13261,7 +13261,7 @@
      *
      * @codeGenApi
      */
-    function Δinterpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
+    function ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
         var lView = getLView();
         var bindingIndex = lView[BINDING_INDEX];
         var different = bindingUpdated3(lView, bindingIndex, v0, v1, v2);
@@ -13282,7 +13282,7 @@
      *
      * @codeGenApi
      */
-    function Δinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
+    function ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
         var lView = getLView();
         var bindingIndex = lView[BINDING_INDEX];
         var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
@@ -13305,7 +13305,7 @@
      *
      * @codeGenApi
      */
-    function Δinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
+    function ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
         var lView = getLView();
         var bindingIndex = lView[BINDING_INDEX];
         var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
@@ -13330,7 +13330,7 @@
      *
      * @codeGenApi
      */
-    function Δinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
+    function ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
         var lView = getLView();
         var bindingIndex = lView[BINDING_INDEX];
         var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
@@ -13356,7 +13356,7 @@
      *
      * @codeGenApi
      */
-    function Δinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
+    function ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
         var lView = getLView();
         var bindingIndex = lView[BINDING_INDEX];
         var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
@@ -13384,7 +13384,7 @@
      *
      * @codeGenApi
      */
-    function Δinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
+    function ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
         var lView = getLView();
         var bindingIndex = lView[BINDING_INDEX];
         var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
@@ -13437,7 +13437,7 @@
      *
      * @codeGenApi
      */
-    function Δselect(index) {
+    function ɵɵselect(index) {
         ngDevMode && assertGreaterThan(index, -1, 'Invalid index');
         ngDevMode &&
             assertLessThan(index, getLView().length - HEADER_OFFSET, 'Should be within range for the view data');
@@ -13461,7 +13461,7 @@
      *
      * @codeGenApi
      */
-    function Δtext(index, value) {
+    function ɵɵtext(index, value) {
         var lView = getLView();
         ngDevMode && assertEqual(lView[BINDING_INDEX], lView[TVIEW].bindingStartIndex, 'text nodes should be created before any bindings');
         ngDevMode && ngDevMode.rendererCreateTextNode++;
@@ -13480,7 +13480,7 @@
      *
      * @codeGenApi
      */
-    function ΔtextBinding(index, value) {
+    function ɵɵtextBinding(index, value) {
         if (value !== NO_CHANGE) {
             var lView = getLView();
             ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
@@ -14115,7 +14115,7 @@
      *
      * @codeGenApi
      */
-    function ΔNgOnChangesFeature() {
+    function ɵɵNgOnChangesFeature() {
         // This option ensures that the ngOnChanges lifecycle hook will be inherited
         // from superclasses (in InheritDefinitionFeature).
         NgOnChangesFeatureImpl.ngInherit = true;
@@ -14182,7 +14182,7 @@
      *
      * @codeGenApi
      */
-    function ΔInheritDefinitionFeature(definition) {
+    function ɵɵInheritDefinitionFeature(definition) {
         var superType = getSuperType(definition.type);
         var _loop_1 = function () {
             var e_1, _a;
@@ -14322,7 +14322,7 @@
                     definition.onDestroy = definition.onDestroy || superPrototype.ngOnDestroy;
                     definition.onInit = definition.onInit || superPrototype.ngOnInit;
                     if (superPrototype.ngOnChanges) {
-                        ΔNgOnChangesFeature()(definition);
+                        ɵɵNgOnChangesFeature()(definition);
                     }
                 }
             }
@@ -14697,7 +14697,7 @@
                 factory = function () { return resolveForwardRef(provider.useValue); };
             }
             else if (isExistingProvider(provider)) {
-                factory = function () { return Δinject(resolveForwardRef(provider.useExisting)); };
+                factory = function () { return ɵɵinject(resolveForwardRef(provider.useExisting)); };
             }
             else if (isFactoryProvider(provider)) {
                 factory = function () { return provider.useFactory.apply(provider, __spread(injectArgs(provider.deps || []))); };
@@ -14829,7 +14829,7 @@
             }
             if (isTypeProvider(provider) || !provider.multi) {
                 // Single provider case: the factory is created and pushed immediately
-                var factory = new NodeInjectorFactory(providerFactory, isViewProvider, ΔdirectiveInject);
+                var factory = new NodeInjectorFactory(providerFactory, isViewProvider, ɵɵdirectiveInject);
                 var existingFactoryIndex = indexOf(token, tInjectables, isViewProvider ? beginIndex : beginIndex + cptViewProvidersCount, endIndex);
                 if (existingFactoryIndex == -1) {
                     diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, lView), lView, token);
@@ -14967,7 +14967,7 @@
      * Creates a multi factory.
      */
     function multiFactory(factoryFn, index, isViewProvider, isComponent, f) {
-        var factory = new NodeInjectorFactory(factoryFn, isViewProvider, ΔdirectiveInject);
+        var factory = new NodeInjectorFactory(factoryFn, isViewProvider, ɵɵdirectiveInject);
         factory.multi = [];
         factory.index = index;
         factory.componentProviders = 0;
@@ -15005,7 +15005,7 @@
      *
      * @codeGenApi
      */
-    function ΔProvidersFeature(providers, viewProviders) {
+    function ɵɵProvidersFeature(providers, viewProviders) {
         if (viewProviders === void 0) { viewProviders = []; }
         return function (definition) {
             definition.providersResolver =
@@ -15914,7 +15914,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.11+84.sha-54058ba.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.11+85.sha-b057806.with-local-changes');
 
     /**
      * @license
@@ -16915,7 +16915,7 @@
             }
         };
         /** @nocollapse */
-        IterableDiffers.ngInjectableDef = ΔdefineInjectable({
+        IterableDiffers.ngInjectableDef = ɵɵdefineInjectable({
             providedIn: 'root',
             factory: function () { return new IterableDiffers([new DefaultIterableDifferFactory()]); }
         });
@@ -16991,7 +16991,7 @@
             throw new Error("Cannot find a differ supporting object '" + kv + "'");
         };
         /** @nocollapse */
-        KeyValueDiffers.ngInjectableDef = ΔdefineInjectable({
+        KeyValueDiffers.ngInjectableDef = ɵɵdefineInjectable({
             providedIn: 'root',
             factory: function () { return new KeyValueDiffers([new DefaultKeyValueDifferFactory()]); }
         });
@@ -18999,7 +18999,7 @@
     /**
      * Default {@link RootContext} for all components rendered with {@link renderComponent}.
      */
-    var ROOT_CONTEXT = new InjectionToken('ROOT_CONTEXT_TOKEN', { providedIn: 'root', factory: function () { return createRootContext(Δinject(SCHEDULER)); } });
+    var ROOT_CONTEXT = new InjectionToken('ROOT_CONTEXT_TOKEN', { providedIn: 'root', factory: function () { return createRootContext(ɵɵinject(SCHEDULER)); } });
     /**
      * A change detection scheduler token for {@link RootContext}. This token is the default value used
      * for the default `RootContext` found in the {@link ROOT_CONTEXT} token.
@@ -19474,7 +19474,7 @@
      *
      * @codeGenApi
      */
-    function Δi18nStart(index, message, subTemplateIndex) {
+    function ɵɵi18nStart(index, message, subTemplateIndex) {
         var tView = getLView()[TVIEW];
         ngDevMode && assertDefined(tView, "tView should be defined");
         i18nIndexStack[++i18nIndexStackPointer] = index;
@@ -19637,7 +19637,7 @@
      *
      * @codeGenApi
      */
-    function Δi18nPostprocess(message, replacements) {
+    function ɵɵi18nPostprocess(message, replacements) {
         if (replacements === void 0) { replacements = {}; }
         /**
          * Step 1: resolve all multi-value placeholders like [�#5�|�*1:1��#2:1�|�#4:1�]
@@ -19728,7 +19728,7 @@
      *
      * @codeGenApi
      */
-    function Δi18nEnd() {
+    function ɵɵi18nEnd() {
         var tView = getLView()[TVIEW];
         ngDevMode && assertDefined(tView, "tView should be defined");
         i18nEndFirstPass(tView);
@@ -19821,7 +19821,7 @@
                         var elementNodeIndex = opCode >>> 3 /* SHIFT_REF */;
                         var attrName = createOpCodes[++i];
                         var attrValue = createOpCodes[++i];
-                        ΔelementAttribute(elementNodeIndex, attrName, attrValue);
+                        ɵɵelementAttribute(elementNodeIndex, attrName, attrValue);
                         break;
                     default:
                         throw new Error("Unable to determine the type of mutate operation for \"" + opCode + "\"");
@@ -19891,10 +19891,10 @@
                                 case 1 /* Attr */:
                                     var attrName = updateOpCodes[++j];
                                     var sanitizeFn = updateOpCodes[++j];
-                                    ΔelementAttribute(nodeIndex, attrName, value, sanitizeFn);
+                                    ɵɵelementAttribute(nodeIndex, attrName, value, sanitizeFn);
                                     break;
                                 case 0 /* Text */:
-                                    ΔtextBinding(nodeIndex, value);
+                                    ɵɵtextBinding(nodeIndex, value);
                                     break;
                                 case 2 /* IcuSwitch */:
                                     tIcuIndex = updateOpCodes[++j];
@@ -19950,7 +19950,7 @@
         if (removedPhRNode) {
             nativeRemoveNode(viewData[RENDERER], removedPhRNode);
         }
-        var slotValue = Δload(index);
+        var slotValue = ɵɵload(index);
         if (isLContainer(slotValue)) {
             var lContainer = slotValue;
             if (removedPhTNode.type !== 0 /* Container */) {
@@ -19985,9 +19985,9 @@
      *
      * @codeGenApi
      */
-    function Δi18n(index, message, subTemplateIndex) {
-        Δi18nStart(index, message, subTemplateIndex);
-        Δi18nEnd();
+    function ɵɵi18n(index, message, subTemplateIndex) {
+        ɵɵi18nStart(index, message, subTemplateIndex);
+        ɵɵi18nEnd();
     }
     /**
      * Marks a list of attributes as translatable.
@@ -19997,7 +19997,7 @@
      *
      * @codeGenApi
      */
-    function Δi18nAttributes(index, values) {
+    function ɵɵi18nAttributes(index, values) {
         var tView = getLView()[TVIEW];
         ngDevMode && assertDefined(tView, "tView should be defined");
         if (tView.firstTemplatePass && tView.data[index + HEADER_OFFSET] === null) {
@@ -20025,7 +20025,7 @@
                         addAllToArray(generateBindingUpdateOpCodes(value, previousElementIndex, attrName), updateOpCodes);
                     }
                     else {
-                        ΔelementAttribute(previousElementIndex, attrName, value);
+                        ɵɵelementAttribute(previousElementIndex, attrName, value);
                     }
                 }
             }
@@ -20042,7 +20042,7 @@
      *
      * @codeGenApi
      */
-    function Δi18nExp(expression) {
+    function ɵɵi18nExp(expression) {
         if (expression !== NO_CHANGE) {
             changeMask = changeMask | (1 << shiftsCounter);
         }
@@ -20056,7 +20056,7 @@
      *
      * @codeGenApi
      */
-    function Δi18nApply(index) {
+    function ɵɵi18nApply(index) {
         if (shiftsCounter) {
             var lView = getLView();
             var tView = lView[TVIEW];
@@ -20705,7 +20705,7 @@
      * @publicApi
      * @deprecated this method is temporary & should not be used as it will be removed soon
      */
-    function Δi18nLocalize(input, placeholders) {
+    function ɵɵi18nLocalize(input, placeholders) {
         if (placeholders === void 0) { placeholders = {}; }
         if (typeof TRANSLATIONS[input] !== 'undefined') { // to account for empty string
             input = TRANSLATIONS[input];
@@ -20881,7 +20881,7 @@
      *
      * @codeGenApi
      */
-    function ΔpureFunction0(slotOffset, pureFn, thisArg) {
+    function ɵɵpureFunction0(slotOffset, pureFn, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
         var bindingIndex = getBindingRoot() + slotOffset;
         var lView = getLView();
@@ -20901,7 +20901,7 @@
      *
      * @codeGenApi
      */
-    function ΔpureFunction1(slotOffset, pureFn, exp, thisArg) {
+    function ɵɵpureFunction1(slotOffset, pureFn, exp, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
         var lView = getLView();
         var bindingIndex = getBindingRoot() + slotOffset;
@@ -20922,7 +20922,7 @@
      *
      * @codeGenApi
      */
-    function ΔpureFunction2(slotOffset, pureFn, exp1, exp2, thisArg) {
+    function ɵɵpureFunction2(slotOffset, pureFn, exp1, exp2, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
         var bindingIndex = getBindingRoot() + slotOffset;
         var lView = getLView();
@@ -20944,7 +20944,7 @@
      *
      * @codeGenApi
      */
-    function ΔpureFunction3(slotOffset, pureFn, exp1, exp2, exp3, thisArg) {
+    function ɵɵpureFunction3(slotOffset, pureFn, exp1, exp2, exp3, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
         var bindingIndex = getBindingRoot() + slotOffset;
         var lView = getLView();
@@ -20967,7 +20967,7 @@
      *
      * @codeGenApi
      */
-    function ΔpureFunction4(slotOffset, pureFn, exp1, exp2, exp3, exp4, thisArg) {
+    function ɵɵpureFunction4(slotOffset, pureFn, exp1, exp2, exp3, exp4, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
         var bindingIndex = getBindingRoot() + slotOffset;
         var lView = getLView();
@@ -20991,7 +20991,7 @@
      *
      * @codeGenApi
      */
-    function ΔpureFunction5(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, thisArg) {
+    function ɵɵpureFunction5(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
         var bindingIndex = getBindingRoot() + slotOffset;
         var lView = getLView();
@@ -21018,7 +21018,7 @@
      *
      * @codeGenApi
      */
-    function ΔpureFunction6(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, thisArg) {
+    function ɵɵpureFunction6(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
         var bindingIndex = getBindingRoot() + slotOffset;
         var lView = getLView();
@@ -21047,7 +21047,7 @@
      *
      * @codeGenApi
      */
-    function ΔpureFunction7(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, thisArg) {
+    function ɵɵpureFunction7(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
         var bindingIndex = getBindingRoot() + slotOffset;
         var lView = getLView();
@@ -21077,7 +21077,7 @@
      *
      * @codeGenApi
      */
-    function ΔpureFunction8(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, thisArg) {
+    function ɵɵpureFunction8(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
         var bindingIndex = getBindingRoot() + slotOffset;
         var lView = getLView();
@@ -21103,7 +21103,7 @@
      *
      * @codeGenApi
      */
-    function ΔpureFunctionV(slotOffset, pureFn, exps, thisArg) {
+    function ɵɵpureFunctionV(slotOffset, pureFn, exps, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
         var bindingIndex = getBindingRoot() + slotOffset;
         var different = false;
@@ -21131,7 +21131,7 @@
      *
      * @codeGenApi
      */
-    function Δpipe(index, pipeName) {
+    function ɵɵpipe(index, pipeName) {
         var tView = getLView()[TVIEW];
         var pipeDef;
         var adjustedIndex = index + HEADER_OFFSET;
@@ -21182,9 +21182,9 @@
      *
      * @codeGenApi
      */
-    function ΔpipeBind1(index, slotOffset, v1) {
-        var pipeInstance = Δload(index);
-        return unwrapValue$1(isPure(index) ? ΔpureFunction1(slotOffset, pipeInstance.transform, v1, pipeInstance) :
+    function ɵɵpipeBind1(index, slotOffset, v1) {
+        var pipeInstance = ɵɵload(index);
+        return unwrapValue$1(isPure(index) ? ɵɵpureFunction1(slotOffset, pipeInstance.transform, v1, pipeInstance) :
             pipeInstance.transform(v1));
     }
     /**
@@ -21200,9 +21200,9 @@
      *
      * @codeGenApi
      */
-    function ΔpipeBind2(index, slotOffset, v1, v2) {
-        var pipeInstance = Δload(index);
-        return unwrapValue$1(isPure(index) ? ΔpureFunction2(slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
+    function ɵɵpipeBind2(index, slotOffset, v1, v2) {
+        var pipeInstance = ɵɵload(index);
+        return unwrapValue$1(isPure(index) ? ɵɵpureFunction2(slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
             pipeInstance.transform(v1, v2));
     }
     /**
@@ -21219,9 +21219,10 @@
      *
      * @codeGenApi
      */
-    function ΔpipeBind3(index, slotOffset, v1, v2, v3) {
-        var pipeInstance = Δload(index);
-        return unwrapValue$1(isPure(index) ? ΔpureFunction3(slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
+    function ɵɵpipeBind3(index, slotOffset, v1, v2, v3) {
+        var pipeInstance = ɵɵload(index);
+        return unwrapValue$1(isPure(index) ?
+            ɵɵpureFunction3(slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
             pipeInstance.transform(v1, v2, v3));
     }
     /**
@@ -21239,10 +21240,10 @@
      *
      * @codeGenApi
      */
-    function ΔpipeBind4(index, slotOffset, v1, v2, v3, v4) {
-        var pipeInstance = Δload(index);
+    function ɵɵpipeBind4(index, slotOffset, v1, v2, v3, v4) {
+        var pipeInstance = ɵɵload(index);
         return unwrapValue$1(isPure(index) ?
-            ΔpureFunction4(slotOffset, pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
+            ɵɵpureFunction4(slotOffset, pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
             pipeInstance.transform(v1, v2, v3, v4));
     }
     /**
@@ -21257,9 +21258,9 @@
      *
      * @codeGenApi
      */
-    function ΔpipeBindV(index, slotOffset, values) {
-        var pipeInstance = Δload(index);
-        return unwrapValue$1(isPure(index) ? ΔpureFunctionV(slotOffset, pipeInstance.transform, values, pipeInstance) :
+    function ɵɵpipeBindV(index, slotOffset, values) {
+        var pipeInstance = ɵɵload(index);
+        return unwrapValue$1(isPure(index) ? ɵɵpureFunctionV(slotOffset, pipeInstance.transform, values, pipeInstance) :
             pipeInstance.transform.apply(pipeInstance, values));
     }
     function isPure(index) {
@@ -21790,7 +21791,7 @@
      *
      * @codeGenApi
      */
-    function ΔqueryRefresh(queryList) {
+    function ɵɵqueryRefresh(queryList) {
         var queryListImpl = queryList;
         var creationMode = isCreationMode();
         // if creation mode and static or update mode and not static
@@ -21810,10 +21811,10 @@
      *
      * @codeGenApi
      */
-    function ΔstaticViewQuery(
+    function ɵɵstaticViewQuery(
     // TODO(FW-486): "read" should be an AbstractType
     predicate, descend, read) {
-        var queryList = ΔviewQuery(predicate, descend, read);
+        var queryList = ɵɵviewQuery(predicate, descend, read);
         var tView = getLView()[TVIEW];
         queryList._static = true;
         if (!tView.staticViewQueries) {
@@ -21830,7 +21831,7 @@
      *
      * @codeGenApi
      */
-    function ΔviewQuery(
+    function ɵɵviewQuery(
     // TODO(FW-486): "read" should be an AbstractType
     predicate, descend, read) {
         var lView = getLView();
@@ -21849,10 +21850,10 @@
      *
      * @codeGenApi
      */
-    function ΔloadViewQuery() {
+    function ɵɵloadViewQuery() {
         var index = getCurrentQueryIndex();
         setCurrentQueryIndex(index + 1);
-        return Δload(index - HEADER_OFFSET);
+        return ɵɵload(index - HEADER_OFFSET);
     }
     /**
      * Registers a QueryList, associated with a content query, for later refresh (part of a view
@@ -21866,7 +21867,7 @@
      *
      * @codeGenApi
      */
-    function ΔcontentQuery(directiveIndex, predicate, descend, 
+    function ɵɵcontentQuery(directiveIndex, predicate, descend, 
     // TODO(FW-486): "read" should be an AbstractType
     read) {
         var lView = getLView();
@@ -21894,10 +21895,10 @@
      *
      * @codeGenApi
      */
-    function ΔstaticContentQuery(directiveIndex, predicate, descend, 
+    function ɵɵstaticContentQuery(directiveIndex, predicate, descend, 
     // TODO(FW-486): "read" should be an AbstractType
     read) {
-        var queryList = ΔcontentQuery(directiveIndex, predicate, descend, read);
+        var queryList = ɵɵcontentQuery(directiveIndex, predicate, descend, read);
         var tView = getLView()[TVIEW];
         queryList._static = true;
         if (!tView.staticContentQueries) {
@@ -21908,7 +21909,7 @@
      *
      * @codeGenApi
      */
-    function ΔloadContentQuery() {
+    function ɵɵloadContentQuery() {
         var lView = getLView();
         ngDevMode &&
             assertDefined(lView[CONTENT_QUERIES], 'Content QueryList array should be defined if reading a query.');
@@ -21931,7 +21932,7 @@
      *
      * @codeGenApi
      */
-    function ΔtemplateRefExtractor(tNode, currentView) {
+    function ɵɵtemplateRefExtractor(tNode, currentView) {
         return createTemplateRef(TemplateRef, ElementRef, tNode, currentView);
     }
 
@@ -21956,118 +21957,118 @@
      * This should be kept up to date with the public exports of @angular/core.
      */
     var angularCoreEnv = {
-        'ΔdefineBase': ΔdefineBase,
-        'ΔdefineComponent': ΔdefineComponent,
-        'ΔdefineDirective': ΔdefineDirective,
-        'ΔdefineInjectable': ΔdefineInjectable,
-        'ΔdefineInjector': ΔdefineInjector,
-        'ΔdefineNgModule': ΔdefineNgModule,
-        'ΔdefinePipe': ΔdefinePipe,
-        'ΔdirectiveInject': ΔdirectiveInject,
-        'ΔgetFactoryOf': ΔgetFactoryOf,
-        'ΔgetInheritedFactory': ΔgetInheritedFactory,
-        'Δinject': Δinject,
-        'ΔinjectAttribute': ΔinjectAttribute,
-        'ΔtemplateRefExtractor': ΔtemplateRefExtractor,
-        'ΔNgOnChangesFeature': ΔNgOnChangesFeature,
-        'ΔProvidersFeature': ΔProvidersFeature,
-        'ΔInheritDefinitionFeature': ΔInheritDefinitionFeature,
-        'ΔelementAttribute': ΔelementAttribute,
-        'Δbind': Δbind,
-        'Δcontainer': Δcontainer,
-        'ΔnextContext': ΔnextContext,
-        'ΔcontainerRefreshStart': ΔcontainerRefreshStart,
-        'ΔcontainerRefreshEnd': ΔcontainerRefreshEnd,
-        'ΔnamespaceHTML': ΔnamespaceHTML,
-        'ΔnamespaceMathML': ΔnamespaceMathML,
-        'ΔnamespaceSVG': ΔnamespaceSVG,
-        'ΔenableBindings': ΔenableBindings,
-        'ΔdisableBindings': ΔdisableBindings,
-        'ΔallocHostVars': ΔallocHostVars,
-        'ΔelementStart': ΔelementStart,
-        'ΔelementEnd': ΔelementEnd,
-        'Δelement': Δelement,
-        'ΔelementContainerStart': ΔelementContainerStart,
-        'ΔelementContainerEnd': ΔelementContainerEnd,
-        'ΔpureFunction0': ΔpureFunction0,
-        'ΔpureFunction1': ΔpureFunction1,
-        'ΔpureFunction2': ΔpureFunction2,
-        'ΔpureFunction3': ΔpureFunction3,
-        'ΔpureFunction4': ΔpureFunction4,
-        'ΔpureFunction5': ΔpureFunction5,
-        'ΔpureFunction6': ΔpureFunction6,
-        'ΔpureFunction7': ΔpureFunction7,
-        'ΔpureFunction8': ΔpureFunction8,
-        'ΔpureFunctionV': ΔpureFunctionV,
-        'ΔgetCurrentView': ΔgetCurrentView,
-        'ΔrestoreView': ΔrestoreView,
-        'Δinterpolation1': Δinterpolation1,
-        'Δinterpolation2': Δinterpolation2,
-        'Δinterpolation3': Δinterpolation3,
-        'Δinterpolation4': Δinterpolation4,
-        'Δinterpolation5': Δinterpolation5,
-        'Δinterpolation6': Δinterpolation6,
-        'Δinterpolation7': Δinterpolation7,
-        'Δinterpolation8': Δinterpolation8,
-        'ΔinterpolationV': ΔinterpolationV,
-        'Δlistener': Δlistener,
-        'Δload': Δload,
-        'Δprojection': Δprojection,
-        'ΔelementProperty': ΔelementProperty,
-        'ΔcomponentHostSyntheticProperty': ΔcomponentHostSyntheticProperty,
-        'ΔcomponentHostSyntheticListener': ΔcomponentHostSyntheticListener,
-        'ΔpipeBind1': ΔpipeBind1,
-        'ΔpipeBind2': ΔpipeBind2,
-        'ΔpipeBind3': ΔpipeBind3,
-        'ΔpipeBind4': ΔpipeBind4,
-        'ΔpipeBindV': ΔpipeBindV,
-        'ΔprojectionDef': ΔprojectionDef,
-        'Δpipe': Δpipe,
-        'ΔqueryRefresh': ΔqueryRefresh,
-        'ΔviewQuery': ΔviewQuery,
-        'ΔstaticViewQuery': ΔstaticViewQuery,
-        'ΔstaticContentQuery': ΔstaticContentQuery,
-        'ΔloadViewQuery': ΔloadViewQuery,
-        'ΔcontentQuery': ΔcontentQuery,
-        'ΔloadContentQuery': ΔloadContentQuery,
-        'Δreference': Δreference,
-        'ΔelementHostAttrs': ΔelementHostAttrs,
-        'ΔelementStyling': ΔelementStyling,
-        'ΔelementStylingMap': ΔelementStylingMap,
-        'ΔelementStyleProp': ΔelementStyleProp,
-        'ΔelementStylingApply': ΔelementStylingApply,
-        'ΔelementClassProp': ΔelementClassProp,
-        'ΔelementHostStyling': ΔelementHostStyling,
-        'ΔelementHostStylingMap': ΔelementHostStylingMap,
-        'ΔelementHostStyleProp': ΔelementHostStyleProp,
-        'ΔelementHostStylingApply': ΔelementHostStylingApply,
-        'ΔelementHostClassProp': ΔelementHostClassProp,
-        'Δselect': Δselect,
-        'Δtemplate': Δtemplate,
-        'Δtext': Δtext,
-        'ΔtextBinding': ΔtextBinding,
-        'ΔembeddedViewStart': ΔembeddedViewStart,
-        'ΔembeddedViewEnd': ΔembeddedViewEnd,
-        'Δi18n': Δi18n,
-        'Δi18nAttributes': Δi18nAttributes,
-        'Δi18nExp': Δi18nExp,
-        'Δi18nStart': Δi18nStart,
-        'Δi18nEnd': Δi18nEnd,
-        'Δi18nApply': Δi18nApply,
-        'Δi18nPostprocess': Δi18nPostprocess,
-        'Δi18nLocalize': Δi18nLocalize,
-        'ΔresolveWindow': ΔresolveWindow,
-        'ΔresolveDocument': ΔresolveDocument,
-        'ΔresolveBody': ΔresolveBody,
-        'ΔsetComponentScope': ΔsetComponentScope,
-        'ΔsetNgModuleScope': ΔsetNgModuleScope,
-        'ΔsanitizeHtml': ΔsanitizeHtml,
-        'ΔsanitizeStyle': ΔsanitizeStyle,
-        'ΔdefaultStyleSanitizer': ΔdefaultStyleSanitizer,
-        'ΔsanitizeResourceUrl': ΔsanitizeResourceUrl,
-        'ΔsanitizeScript': ΔsanitizeScript,
-        'ΔsanitizeUrl': ΔsanitizeUrl,
-        'ΔsanitizeUrlOrResourceUrl': ΔsanitizeUrlOrResourceUrl
+        'ɵɵdefineBase': ɵɵdefineBase,
+        'ɵɵdefineComponent': ɵɵdefineComponent,
+        'ɵɵdefineDirective': ɵɵdefineDirective,
+        'ɵɵdefineInjectable': ɵɵdefineInjectable,
+        'ɵɵdefineInjector': ɵɵdefineInjector,
+        'ɵɵdefineNgModule': ɵɵdefineNgModule,
+        'ɵɵdefinePipe': ɵɵdefinePipe,
+        'ɵɵdirectiveInject': ɵɵdirectiveInject,
+        'ɵɵgetFactoryOf': ɵɵgetFactoryOf,
+        'ɵɵgetInheritedFactory': ɵɵgetInheritedFactory,
+        'ɵɵinject': ɵɵinject,
+        'ɵɵinjectAttribute': ɵɵinjectAttribute,
+        'ɵɵtemplateRefExtractor': ɵɵtemplateRefExtractor,
+        'ɵɵNgOnChangesFeature': ɵɵNgOnChangesFeature,
+        'ɵɵProvidersFeature': ɵɵProvidersFeature,
+        'ɵɵInheritDefinitionFeature': ɵɵInheritDefinitionFeature,
+        'ɵɵelementAttribute': ɵɵelementAttribute,
+        'ɵɵbind': ɵɵbind,
+        'ɵɵcontainer': ɵɵcontainer,
+        'ɵɵnextContext': ɵɵnextContext,
+        'ɵɵcontainerRefreshStart': ɵɵcontainerRefreshStart,
+        'ɵɵcontainerRefreshEnd': ɵɵcontainerRefreshEnd,
+        'ɵɵnamespaceHTML': ɵɵnamespaceHTML,
+        'ɵɵnamespaceMathML': ɵɵnamespaceMathML,
+        'ɵɵnamespaceSVG': ɵɵnamespaceSVG,
+        'ɵɵenableBindings': ɵɵenableBindings,
+        'ɵɵdisableBindings': ɵɵdisableBindings,
+        'ɵɵallocHostVars': ɵɵallocHostVars,
+        'ɵɵelementStart': ɵɵelementStart,
+        'ɵɵelementEnd': ɵɵelementEnd,
+        'ɵɵelement': ɵɵelement,
+        'ɵɵelementContainerStart': ɵɵelementContainerStart,
+        'ɵɵelementContainerEnd': ɵɵelementContainerEnd,
+        'ɵɵpureFunction0': ɵɵpureFunction0,
+        'ɵɵpureFunction1': ɵɵpureFunction1,
+        'ɵɵpureFunction2': ɵɵpureFunction2,
+        'ɵɵpureFunction3': ɵɵpureFunction3,
+        'ɵɵpureFunction4': ɵɵpureFunction4,
+        'ɵɵpureFunction5': ɵɵpureFunction5,
+        'ɵɵpureFunction6': ɵɵpureFunction6,
+        'ɵɵpureFunction7': ɵɵpureFunction7,
+        'ɵɵpureFunction8': ɵɵpureFunction8,
+        'ɵɵpureFunctionV': ɵɵpureFunctionV,
+        'ɵɵgetCurrentView': ɵɵgetCurrentView,
+        'ɵɵrestoreView': ɵɵrestoreView,
+        'ɵɵinterpolation1': ɵɵinterpolation1,
+        'ɵɵinterpolation2': ɵɵinterpolation2,
+        'ɵɵinterpolation3': ɵɵinterpolation3,
+        'ɵɵinterpolation4': ɵɵinterpolation4,
+        'ɵɵinterpolation5': ɵɵinterpolation5,
+        'ɵɵinterpolation6': ɵɵinterpolation6,
+        'ɵɵinterpolation7': ɵɵinterpolation7,
+        'ɵɵinterpolation8': ɵɵinterpolation8,
+        'ɵɵinterpolationV': ɵɵinterpolationV,
+        'ɵɵlistener': ɵɵlistener,
+        'ɵɵload': ɵɵload,
+        'ɵɵprojection': ɵɵprojection,
+        'ɵɵelementProperty': ɵɵelementProperty,
+        'ɵɵcomponentHostSyntheticProperty': ɵɵcomponentHostSyntheticProperty,
+        'ɵɵcomponentHostSyntheticListener': ɵɵcomponentHostSyntheticListener,
+        'ɵɵpipeBind1': ɵɵpipeBind1,
+        'ɵɵpipeBind2': ɵɵpipeBind2,
+        'ɵɵpipeBind3': ɵɵpipeBind3,
+        'ɵɵpipeBind4': ɵɵpipeBind4,
+        'ɵɵpipeBindV': ɵɵpipeBindV,
+        'ɵɵprojectionDef': ɵɵprojectionDef,
+        'ɵɵpipe': ɵɵpipe,
+        'ɵɵqueryRefresh': ɵɵqueryRefresh,
+        'ɵɵviewQuery': ɵɵviewQuery,
+        'ɵɵstaticViewQuery': ɵɵstaticViewQuery,
+        'ɵɵstaticContentQuery': ɵɵstaticContentQuery,
+        'ɵɵloadViewQuery': ɵɵloadViewQuery,
+        'ɵɵcontentQuery': ɵɵcontentQuery,
+        'ɵɵloadContentQuery': ɵɵloadContentQuery,
+        'ɵɵreference': ɵɵreference,
+        'ɵɵelementHostAttrs': ɵɵelementHostAttrs,
+        'ɵɵelementStyling': ɵɵelementStyling,
+        'ɵɵelementStylingMap': ɵɵelementStylingMap,
+        'ɵɵelementStyleProp': ɵɵelementStyleProp,
+        'ɵɵelementStylingApply': ɵɵelementStylingApply,
+        'ɵɵelementClassProp': ɵɵelementClassProp,
+        'ɵɵelementHostStyling': ɵɵelementHostStyling,
+        'ɵɵelementHostStylingMap': ɵɵelementHostStylingMap,
+        'ɵɵelementHostStyleProp': ɵɵelementHostStyleProp,
+        'ɵɵelementHostStylingApply': ɵɵelementHostStylingApply,
+        'ɵɵelementHostClassProp': ɵɵelementHostClassProp,
+        'ɵɵselect': ɵɵselect,
+        'ɵɵtemplate': ɵɵtemplate,
+        'ɵɵtext': ɵɵtext,
+        'ɵɵtextBinding': ɵɵtextBinding,
+        'ɵɵembeddedViewStart': ɵɵembeddedViewStart,
+        'ɵɵembeddedViewEnd': ɵɵembeddedViewEnd,
+        'ɵɵi18n': ɵɵi18n,
+        'ɵɵi18nAttributes': ɵɵi18nAttributes,
+        'ɵɵi18nExp': ɵɵi18nExp,
+        'ɵɵi18nStart': ɵɵi18nStart,
+        'ɵɵi18nEnd': ɵɵi18nEnd,
+        'ɵɵi18nApply': ɵɵi18nApply,
+        'ɵɵi18nPostprocess': ɵɵi18nPostprocess,
+        'ɵɵi18nLocalize': ɵɵi18nLocalize,
+        'ɵɵresolveWindow': ɵɵresolveWindow,
+        'ɵɵresolveDocument': ɵɵresolveDocument,
+        'ɵɵresolveBody': ɵɵresolveBody,
+        'ɵɵsetComponentScope': ɵɵsetComponentScope,
+        'ɵɵsetNgModuleScope': ɵɵsetNgModuleScope,
+        'ɵɵsanitizeHtml': ɵɵsanitizeHtml,
+        'ɵɵsanitizeStyle': ɵɵsanitizeStyle,
+        'ɵɵdefaultStyleSanitizer': ɵɵdefaultStyleSanitizer,
+        'ɵɵsanitizeResourceUrl': ɵɵsanitizeResourceUrl,
+        'ɵɵsanitizeScript': ɵɵsanitizeScript,
+        'ɵɵsanitizeUrl': ɵɵsanitizeUrl,
+        'ɵɵsanitizeUrlOrResourceUrl': ɵɵsanitizeUrlOrResourceUrl
     };
 
     /**
@@ -22939,7 +22940,7 @@
             }
             this.initialized = true;
         };
-        ApplicationInitStatus.ngInjectableDef = ΔdefineInjectable({ token: ApplicationInitStatus, factory: function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(Δinject(APP_INITIALIZER, 8)); }, providedIn: null });
+        ApplicationInitStatus.ngInjectableDef = ɵɵdefineInjectable({ token: ApplicationInitStatus, factory: function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(ɵɵinject(APP_INITIALIZER, 8)); }, providedIn: null });
         return ApplicationInitStatus;
     }());
     /*@__PURE__*/ setClassMetadata(ApplicationInitStatus, [{
@@ -23028,7 +23029,7 @@
             // tslint:disable-next-line:no-console
             console.warn(message);
         };
-        Console.ngInjectableDef = ΔdefineInjectable({ token: Console, factory: function Console_Factory(t) { return new (t || Console)(); }, providedIn: null });
+        Console.ngInjectableDef = ɵɵdefineInjectable({ token: Console, factory: function Console_Factory(t) { return new (t || Console)(); }, providedIn: null });
         return Console;
     }());
     /*@__PURE__*/ setClassMetadata(Console, [{
@@ -23121,7 +23122,7 @@
          * Returns the id for a given NgModule, if one is defined and known to the compiler.
          */
         Compiler.prototype.getModuleId = function (moduleType) { return undefined; };
-        Compiler.ngInjectableDef = ΔdefineInjectable({ token: Compiler, factory: function Compiler_Factory(t) { return new (t || Compiler)(); }, providedIn: null });
+        Compiler.ngInjectableDef = ɵɵdefineInjectable({ token: Compiler, factory: function Compiler_Factory(t) { return new (t || Compiler)(); }, providedIn: null });
         return Compiler;
     }());
     /*@__PURE__*/ setClassMetadata(Compiler, [{
@@ -23740,7 +23741,7 @@
             // TODO(juliemr): implement.
             return [];
         };
-        Testability.ngInjectableDef = ΔdefineInjectable({ token: Testability, factory: function Testability_Factory(t) { return new (t || Testability)(Δinject(NgZone)); }, providedIn: null });
+        Testability.ngInjectableDef = ɵɵdefineInjectable({ token: Testability, factory: function Testability_Factory(t) { return new (t || Testability)(ɵɵinject(NgZone)); }, providedIn: null });
         return Testability;
     }());
     /*@__PURE__*/ setClassMetadata(Testability, [{
@@ -23796,7 +23797,7 @@
             if (findInAncestors === void 0) { findInAncestors = true; }
             return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
         };
-        TestabilityRegistry.ngInjectableDef = ΔdefineInjectable({ token: TestabilityRegistry, factory: function TestabilityRegistry_Factory(t) { return new (t || TestabilityRegistry)(); }, providedIn: null });
+        TestabilityRegistry.ngInjectableDef = ɵɵdefineInjectable({ token: TestabilityRegistry, factory: function TestabilityRegistry_Factory(t) { return new (t || TestabilityRegistry)(); }, providedIn: null });
         return TestabilityRegistry;
     }());
     /*@__PURE__*/ setClassMetadata(TestabilityRegistry, [{
@@ -24072,7 +24073,7 @@
             enumerable: true,
             configurable: true
         });
-        PlatformRef.ngInjectableDef = ΔdefineInjectable({ token: PlatformRef, factory: function PlatformRef_Factory(t) { return new (t || PlatformRef)(Δinject(Injector)); }, providedIn: null });
+        PlatformRef.ngInjectableDef = ɵɵdefineInjectable({ token: PlatformRef, factory: function PlatformRef_Factory(t) { return new (t || PlatformRef)(ɵɵinject(Injector)); }, providedIn: null });
         return PlatformRef;
     }());
     /*@__PURE__*/ setClassMetadata(PlatformRef, [{
@@ -24424,7 +24425,7 @@
         });
         /** @internal */
         ApplicationRef._tickScope = wtfCreateScope('ApplicationRef#tick()');
-        ApplicationRef.ngInjectableDef = ΔdefineInjectable({ token: ApplicationRef, factory: function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(Δinject(NgZone), Δinject(Console), Δinject(Injector), Δinject(ErrorHandler), Δinject(ComponentFactoryResolver), Δinject(ApplicationInitStatus)); }, providedIn: null });
+        ApplicationRef.ngInjectableDef = ɵɵdefineInjectable({ token: ApplicationRef, factory: function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(ɵɵinject(NgZone), ɵɵinject(Console), ɵɵinject(Injector), ɵɵinject(ErrorHandler), ɵɵinject(ComponentFactoryResolver), ɵɵinject(ApplicationInitStatus)); }, providedIn: null });
         return ApplicationRef;
     }());
     /*@__PURE__*/ setClassMetadata(ApplicationRef, [{
@@ -24510,7 +24511,7 @@
                 .then(function (module) { return module[exportName + factoryClassSuffix]; })
                 .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
         };
-        SystemJsNgModuleLoader.ngInjectableDef = ΔdefineInjectable({ token: SystemJsNgModuleLoader, factory: function SystemJsNgModuleLoader_Factory(t) { return new (t || SystemJsNgModuleLoader)(Δinject(Compiler), Δinject(SystemJsNgModuleLoaderConfig, 8)); }, providedIn: null });
+        SystemJsNgModuleLoader.ngInjectableDef = ɵɵdefineInjectable({ token: SystemJsNgModuleLoader, factory: function SystemJsNgModuleLoader_Factory(t) { return new (t || SystemJsNgModuleLoader)(ɵɵinject(Compiler), ɵɵinject(SystemJsNgModuleLoaderConfig, 8)); }, providedIn: null });
         return SystemJsNgModuleLoader;
     }());
     /*@__PURE__*/ setClassMetadata(SystemJsNgModuleLoader, [{
@@ -25448,8 +25449,8 @@
         // Inject ApplicationRef to make it eager...
         function ApplicationModule(appRef) {
         }
-        ApplicationModule.ngModuleDef = ΔdefineNgModule({ type: ApplicationModule });
-        ApplicationModule.ngInjectorDef = ΔdefineInjector({ factory: function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(Δinject(ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS });
+        ApplicationModule.ngModuleDef = ɵɵdefineNgModule({ type: ApplicationModule });
+        ApplicationModule.ngInjectorDef = ɵɵdefineInjector({ factory: function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(ɵɵinject(ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS });
         return ApplicationModule;
     }());
     /*@__PURE__*/ setClassMetadata(ApplicationModule, [{
@@ -27865,15 +27866,15 @@
     exports.NO_ERRORS_SCHEMA = NO_ERRORS_SCHEMA;
     exports.Version = Version;
     exports.VERSION = VERSION;
-    exports.ΔdefineInjectable = ΔdefineInjectable;
+    exports.ɵɵdefineInjectable = ɵɵdefineInjectable;
     exports.defineInjectable = defineInjectable;
-    exports.ΔdefineInjector = ΔdefineInjector;
+    exports.ɵɵdefineInjector = ɵɵdefineInjector;
     exports.forwardRef = forwardRef;
     exports.resolveForwardRef = resolveForwardRef;
     exports.Injectable = Injectable;
     exports.INJECTOR = INJECTOR;
     exports.Injector = Injector;
-    exports.Δinject = Δinject;
+    exports.ɵɵinject = ɵɵinject;
     exports.inject = inject;
     exports.ReflectiveInjector = ReflectiveInjector;
     exports.ResolvedReflectiveFactory = ResolvedReflectiveFactory;
@@ -27949,123 +27950,123 @@
     exports.ɵoverrideComponentView = overrideComponentView;
     exports.ɵoverrideProvider = overrideProvider;
     exports.ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR;
-    exports.ΔdefineBase = ΔdefineBase;
-    exports.ΔdefineComponent = ΔdefineComponent;
-    exports.ΔdefineDirective = ΔdefineDirective;
-    exports.ΔdefinePipe = ΔdefinePipe;
-    exports.ΔdefineNgModule = ΔdefineNgModule;
+    exports.ɵɵdefineBase = ɵɵdefineBase;
+    exports.ɵɵdefineComponent = ɵɵdefineComponent;
+    exports.ɵɵdefineDirective = ɵɵdefineDirective;
+    exports.ɵɵdefinePipe = ɵɵdefinePipe;
+    exports.ɵɵdefineNgModule = ɵɵdefineNgModule;
     exports.ɵdetectChanges = detectChanges;
     exports.ɵrenderComponent = renderComponent;
     exports.ɵRender3ComponentFactory = ComponentFactory$1;
     exports.ɵRender3ComponentRef = ComponentRef$1;
-    exports.ΔdirectiveInject = ΔdirectiveInject;
-    exports.ΔinjectAttribute = ΔinjectAttribute;
-    exports.ΔgetFactoryOf = ΔgetFactoryOf;
-    exports.ΔgetInheritedFactory = ΔgetInheritedFactory;
-    exports.ΔsetComponentScope = ΔsetComponentScope;
-    exports.ΔsetNgModuleScope = ΔsetNgModuleScope;
-    exports.ΔtemplateRefExtractor = ΔtemplateRefExtractor;
-    exports.ΔProvidersFeature = ΔProvidersFeature;
-    exports.ΔInheritDefinitionFeature = ΔInheritDefinitionFeature;
-    exports.ΔNgOnChangesFeature = ΔNgOnChangesFeature;
+    exports.ɵɵdirectiveInject = ɵɵdirectiveInject;
+    exports.ɵɵinjectAttribute = ɵɵinjectAttribute;
+    exports.ɵɵgetFactoryOf = ɵɵgetFactoryOf;
+    exports.ɵɵgetInheritedFactory = ɵɵgetInheritedFactory;
+    exports.ɵɵsetComponentScope = ɵɵsetComponentScope;
+    exports.ɵɵsetNgModuleScope = ɵɵsetNgModuleScope;
+    exports.ɵɵtemplateRefExtractor = ɵɵtemplateRefExtractor;
+    exports.ɵɵProvidersFeature = ɵɵProvidersFeature;
+    exports.ɵɵInheritDefinitionFeature = ɵɵInheritDefinitionFeature;
+    exports.ɵɵNgOnChangesFeature = ɵɵNgOnChangesFeature;
     exports.ɵLifecycleHooksFeature = LifecycleHooksFeature;
     exports.ɵRender3NgModuleRef = NgModuleRef$1;
     exports.ɵmarkDirty = markDirty;
     exports.ɵNgModuleFactory = NgModuleFactory$1;
     exports.ɵNO_CHANGE = NO_CHANGE;
-    exports.Δcontainer = Δcontainer;
-    exports.ΔnextContext = ΔnextContext;
-    exports.ΔelementStart = ΔelementStart;
-    exports.ΔnamespaceHTML = ΔnamespaceHTML;
-    exports.ΔnamespaceMathML = ΔnamespaceMathML;
-    exports.ΔnamespaceSVG = ΔnamespaceSVG;
-    exports.Δelement = Δelement;
-    exports.Δlistener = Δlistener;
-    exports.Δtext = Δtext;
-    exports.ΔembeddedViewStart = ΔembeddedViewStart;
-    exports.Δprojection = Δprojection;
-    exports.Δbind = Δbind;
-    exports.Δinterpolation1 = Δinterpolation1;
-    exports.Δinterpolation2 = Δinterpolation2;
-    exports.Δinterpolation3 = Δinterpolation3;
-    exports.Δinterpolation4 = Δinterpolation4;
-    exports.Δinterpolation5 = Δinterpolation5;
-    exports.Δinterpolation6 = Δinterpolation6;
-    exports.Δinterpolation7 = Δinterpolation7;
-    exports.Δinterpolation8 = Δinterpolation8;
-    exports.ΔinterpolationV = ΔinterpolationV;
-    exports.ΔpipeBind1 = ΔpipeBind1;
-    exports.ΔpipeBind2 = ΔpipeBind2;
-    exports.ΔpipeBind3 = ΔpipeBind3;
-    exports.ΔpipeBind4 = ΔpipeBind4;
-    exports.ΔpipeBindV = ΔpipeBindV;
-    exports.ΔpureFunction0 = ΔpureFunction0;
-    exports.ΔpureFunction1 = ΔpureFunction1;
-    exports.ΔpureFunction2 = ΔpureFunction2;
-    exports.ΔpureFunction3 = ΔpureFunction3;
-    exports.ΔpureFunction4 = ΔpureFunction4;
-    exports.ΔpureFunction5 = ΔpureFunction5;
-    exports.ΔpureFunction6 = ΔpureFunction6;
-    exports.ΔpureFunction7 = ΔpureFunction7;
-    exports.ΔpureFunction8 = ΔpureFunction8;
-    exports.ΔpureFunctionV = ΔpureFunctionV;
-    exports.ΔgetCurrentView = ΔgetCurrentView;
+    exports.ɵɵcontainer = ɵɵcontainer;
+    exports.ɵɵnextContext = ɵɵnextContext;
+    exports.ɵɵelementStart = ɵɵelementStart;
+    exports.ɵɵnamespaceHTML = ɵɵnamespaceHTML;
+    exports.ɵɵnamespaceMathML = ɵɵnamespaceMathML;
+    exports.ɵɵnamespaceSVG = ɵɵnamespaceSVG;
+    exports.ɵɵelement = ɵɵelement;
+    exports.ɵɵlistener = ɵɵlistener;
+    exports.ɵɵtext = ɵɵtext;
+    exports.ɵɵembeddedViewStart = ɵɵembeddedViewStart;
+    exports.ɵɵprojection = ɵɵprojection;
+    exports.ɵɵbind = ɵɵbind;
+    exports.ɵɵinterpolation1 = ɵɵinterpolation1;
+    exports.ɵɵinterpolation2 = ɵɵinterpolation2;
+    exports.ɵɵinterpolation3 = ɵɵinterpolation3;
+    exports.ɵɵinterpolation4 = ɵɵinterpolation4;
+    exports.ɵɵinterpolation5 = ɵɵinterpolation5;
+    exports.ɵɵinterpolation6 = ɵɵinterpolation6;
+    exports.ɵɵinterpolation7 = ɵɵinterpolation7;
+    exports.ɵɵinterpolation8 = ɵɵinterpolation8;
+    exports.ɵɵinterpolationV = ɵɵinterpolationV;
+    exports.ɵɵpipeBind1 = ɵɵpipeBind1;
+    exports.ɵɵpipeBind2 = ɵɵpipeBind2;
+    exports.ɵɵpipeBind3 = ɵɵpipeBind3;
+    exports.ɵɵpipeBind4 = ɵɵpipeBind4;
+    exports.ɵɵpipeBindV = ɵɵpipeBindV;
+    exports.ɵɵpureFunction0 = ɵɵpureFunction0;
+    exports.ɵɵpureFunction1 = ɵɵpureFunction1;
+    exports.ɵɵpureFunction2 = ɵɵpureFunction2;
+    exports.ɵɵpureFunction3 = ɵɵpureFunction3;
+    exports.ɵɵpureFunction4 = ɵɵpureFunction4;
+    exports.ɵɵpureFunction5 = ɵɵpureFunction5;
+    exports.ɵɵpureFunction6 = ɵɵpureFunction6;
+    exports.ɵɵpureFunction7 = ɵɵpureFunction7;
+    exports.ɵɵpureFunction8 = ɵɵpureFunction8;
+    exports.ɵɵpureFunctionV = ɵɵpureFunctionV;
+    exports.ɵɵgetCurrentView = ɵɵgetCurrentView;
     exports.ɵgetDirectives = getDirectives;
     exports.ɵgetHostElement = getHostElement;
-    exports.ΔrestoreView = ΔrestoreView;
-    exports.ΔcontainerRefreshStart = ΔcontainerRefreshStart;
-    exports.ΔcontainerRefreshEnd = ΔcontainerRefreshEnd;
-    exports.ΔqueryRefresh = ΔqueryRefresh;
-    exports.ΔviewQuery = ΔviewQuery;
-    exports.ΔstaticViewQuery = ΔstaticViewQuery;
-    exports.ΔstaticContentQuery = ΔstaticContentQuery;
-    exports.ΔloadViewQuery = ΔloadViewQuery;
-    exports.ΔcontentQuery = ΔcontentQuery;
-    exports.ΔloadContentQuery = ΔloadContentQuery;
-    exports.ΔelementEnd = ΔelementEnd;
-    exports.ΔelementProperty = ΔelementProperty;
-    exports.ΔcomponentHostSyntheticProperty = ΔcomponentHostSyntheticProperty;
-    exports.ΔcomponentHostSyntheticListener = ΔcomponentHostSyntheticListener;
-    exports.ΔprojectionDef = ΔprojectionDef;
-    exports.Δreference = Δreference;
-    exports.ΔenableBindings = ΔenableBindings;
-    exports.ΔdisableBindings = ΔdisableBindings;
-    exports.ΔallocHostVars = ΔallocHostVars;
-    exports.ΔelementAttribute = ΔelementAttribute;
-    exports.ΔelementContainerStart = ΔelementContainerStart;
-    exports.ΔelementContainerEnd = ΔelementContainerEnd;
-    exports.ΔelementStyling = ΔelementStyling;
-    exports.ΔelementStylingMap = ΔelementStylingMap;
-    exports.ΔelementStyleProp = ΔelementStyleProp;
-    exports.ΔelementStylingApply = ΔelementStylingApply;
-    exports.ΔelementClassProp = ΔelementClassProp;
-    exports.ΔelementHostAttrs = ΔelementHostAttrs;
-    exports.ΔelementHostStyling = ΔelementHostStyling;
-    exports.ΔelementHostStylingMap = ΔelementHostStylingMap;
-    exports.ΔelementHostStyleProp = ΔelementHostStyleProp;
-    exports.ΔelementHostClassProp = ΔelementHostClassProp;
-    exports.ΔelementHostStylingApply = ΔelementHostStylingApply;
-    exports.Δselect = Δselect;
-    exports.ΔtextBinding = ΔtextBinding;
-    exports.Δtemplate = Δtemplate;
-    exports.ΔembeddedViewEnd = ΔembeddedViewEnd;
+    exports.ɵɵrestoreView = ɵɵrestoreView;
+    exports.ɵɵcontainerRefreshStart = ɵɵcontainerRefreshStart;
+    exports.ɵɵcontainerRefreshEnd = ɵɵcontainerRefreshEnd;
+    exports.ɵɵqueryRefresh = ɵɵqueryRefresh;
+    exports.ɵɵviewQuery = ɵɵviewQuery;
+    exports.ɵɵstaticViewQuery = ɵɵstaticViewQuery;
+    exports.ɵɵstaticContentQuery = ɵɵstaticContentQuery;
+    exports.ɵɵloadViewQuery = ɵɵloadViewQuery;
+    exports.ɵɵcontentQuery = ɵɵcontentQuery;
+    exports.ɵɵloadContentQuery = ɵɵloadContentQuery;
+    exports.ɵɵelementEnd = ɵɵelementEnd;
+    exports.ɵɵelementProperty = ɵɵelementProperty;
+    exports.ɵɵcomponentHostSyntheticProperty = ɵɵcomponentHostSyntheticProperty;
+    exports.ɵɵcomponentHostSyntheticListener = ɵɵcomponentHostSyntheticListener;
+    exports.ɵɵprojectionDef = ɵɵprojectionDef;
+    exports.ɵɵreference = ɵɵreference;
+    exports.ɵɵenableBindings = ɵɵenableBindings;
+    exports.ɵɵdisableBindings = ɵɵdisableBindings;
+    exports.ɵɵallocHostVars = ɵɵallocHostVars;
+    exports.ɵɵelementAttribute = ɵɵelementAttribute;
+    exports.ɵɵelementContainerStart = ɵɵelementContainerStart;
+    exports.ɵɵelementContainerEnd = ɵɵelementContainerEnd;
+    exports.ɵɵelementStyling = ɵɵelementStyling;
+    exports.ɵɵelementStylingMap = ɵɵelementStylingMap;
+    exports.ɵɵelementStyleProp = ɵɵelementStyleProp;
+    exports.ɵɵelementStylingApply = ɵɵelementStylingApply;
+    exports.ɵɵelementClassProp = ɵɵelementClassProp;
+    exports.ɵɵelementHostAttrs = ɵɵelementHostAttrs;
+    exports.ɵɵelementHostStyling = ɵɵelementHostStyling;
+    exports.ɵɵelementHostStylingMap = ɵɵelementHostStylingMap;
+    exports.ɵɵelementHostStyleProp = ɵɵelementHostStyleProp;
+    exports.ɵɵelementHostClassProp = ɵɵelementHostClassProp;
+    exports.ɵɵelementHostStylingApply = ɵɵelementHostStylingApply;
+    exports.ɵɵselect = ɵɵselect;
+    exports.ɵɵtextBinding = ɵɵtextBinding;
+    exports.ɵɵtemplate = ɵɵtemplate;
+    exports.ɵɵembeddedViewEnd = ɵɵembeddedViewEnd;
     exports.ɵstore = store;
-    exports.Δload = Δload;
-    exports.Δpipe = Δpipe;
+    exports.ɵɵload = ɵɵload;
+    exports.ɵɵpipe = ɵɵpipe;
     exports.ɵwhenRendered = whenRendered;
-    exports.Δi18n = Δi18n;
-    exports.Δi18nAttributes = Δi18nAttributes;
-    exports.Δi18nExp = Δi18nExp;
-    exports.Δi18nStart = Δi18nStart;
-    exports.Δi18nEnd = Δi18nEnd;
-    exports.Δi18nApply = Δi18nApply;
-    exports.Δi18nPostprocess = Δi18nPostprocess;
+    exports.ɵɵi18n = ɵɵi18n;
+    exports.ɵɵi18nAttributes = ɵɵi18nAttributes;
+    exports.ɵɵi18nExp = ɵɵi18nExp;
+    exports.ɵɵi18nStart = ɵɵi18nStart;
+    exports.ɵɵi18nEnd = ɵɵi18nEnd;
+    exports.ɵɵi18nApply = ɵɵi18nApply;
+    exports.ɵɵi18nPostprocess = ɵɵi18nPostprocess;
     exports.ɵi18nConfigureLocalize = i18nConfigureLocalize;
-    exports.Δi18nLocalize = Δi18nLocalize;
+    exports.ɵɵi18nLocalize = ɵɵi18nLocalize;
     exports.ɵsetClassMetadata = setClassMetadata;
-    exports.ΔresolveWindow = ΔresolveWindow;
-    exports.ΔresolveDocument = ΔresolveDocument;
-    exports.ΔresolveBody = ΔresolveBody;
+    exports.ɵɵresolveWindow = ɵɵresolveWindow;
+    exports.ɵɵresolveDocument = ɵɵresolveDocument;
+    exports.ɵɵresolveBody = ɵɵresolveBody;
     exports.ɵcompileComponent = compileComponent;
     exports.ɵcompileDirective = compileDirective;
     exports.ɵcompileNgModule = compileNgModule;
@@ -28075,13 +28076,13 @@
     exports.ɵflushModuleScopingQueueAsMuchAsPossible = flushModuleScopingQueueAsMuchAsPossible;
     exports.ɵtransitiveScopesFor = transitiveScopesFor;
     exports.ɵcompilePipe = compilePipe;
-    exports.ΔsanitizeHtml = ΔsanitizeHtml;
-    exports.ΔsanitizeStyle = ΔsanitizeStyle;
-    exports.ΔdefaultStyleSanitizer = ΔdefaultStyleSanitizer;
-    exports.ΔsanitizeScript = ΔsanitizeScript;
-    exports.ΔsanitizeUrl = ΔsanitizeUrl;
-    exports.ΔsanitizeResourceUrl = ΔsanitizeResourceUrl;
-    exports.ΔsanitizeUrlOrResourceUrl = ΔsanitizeUrlOrResourceUrl;
+    exports.ɵɵsanitizeHtml = ɵɵsanitizeHtml;
+    exports.ɵɵsanitizeStyle = ɵɵsanitizeStyle;
+    exports.ɵɵdefaultStyleSanitizer = ɵɵdefaultStyleSanitizer;
+    exports.ɵɵsanitizeScript = ɵɵsanitizeScript;
+    exports.ɵɵsanitizeUrl = ɵɵsanitizeUrl;
+    exports.ɵɵsanitizeResourceUrl = ɵɵsanitizeResourceUrl;
+    exports.ɵɵsanitizeUrlOrResourceUrl = ɵɵsanitizeUrlOrResourceUrl;
     exports.ɵbypassSanitizationTrustHtml = bypassSanitizationTrustHtml;
     exports.ɵbypassSanitizationTrustStyle = bypassSanitizationTrustStyle;
     exports.ɵbypassSanitizationTrustScript = bypassSanitizationTrustScript;

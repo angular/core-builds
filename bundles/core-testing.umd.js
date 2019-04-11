@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+84.sha-54058ba.with-local-changes
+ * @license Angular v8.0.0-beta.11+85.sha-b057806.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1582,8 +1582,8 @@
             var R3ErrorHandlerModule = /** @class */ (function () {
                 function R3ErrorHandlerModule() {
                 }
-                R3ErrorHandlerModule.ngModuleDef = i0.ΔdefineNgModule({ type: R3ErrorHandlerModule });
-                R3ErrorHandlerModule.ngInjectorDef = i0.ΔdefineInjector({ factory: function R3ErrorHandlerModule_Factory(t) { return new (t || R3ErrorHandlerModule)(); }, providers: [{ provide: i0.ErrorHandler, useClass: R3TestErrorHandler }] });
+                R3ErrorHandlerModule.ngModuleDef = i0.ɵɵdefineNgModule({ type: R3ErrorHandlerModule });
+                R3ErrorHandlerModule.ngInjectorDef = i0.ɵɵdefineInjector({ factory: function R3ErrorHandlerModule_Factory(t) { return new (t || R3ErrorHandlerModule)(); }, providers: [{ provide: i0.ErrorHandler, useClass: R3TestErrorHandler }] });
                 return R3ErrorHandlerModule;
             }());
             /*@__PURE__*/ i0.ɵsetClassMetadata(R3ErrorHandlerModule, [{
@@ -1625,8 +1625,8 @@
                 var CompilerModule = /** @class */ (function () {
                     function CompilerModule() {
                     }
-                    CompilerModule.ngModuleDef = i0.ΔdefineNgModule({ type: CompilerModule });
-                    CompilerModule.ngInjectorDef = i0.ΔdefineInjector({ factory: function CompilerModule_Factory(t) { return new (t || CompilerModule)(); }, providers: providers });
+                    CompilerModule.ngModuleDef = i0.ɵɵdefineNgModule({ type: CompilerModule });
+                    CompilerModule.ngInjectorDef = i0.ɵɵdefineInjector({ factory: function CompilerModule_Factory(t) { return new (t || CompilerModule)(); }, providers: providers });
                     return CompilerModule;
                 }());
                 /*@__PURE__*/ i0.ɵsetClassMetadata(CompilerModule, [{
@@ -2124,10 +2124,10 @@
          * This can be used for errors created by compileModule...
          */
         TestingCompiler.prototype.getComponentFromError = function (error) { throw unimplemented(); };
-        TestingCompiler.ngInjectableDef = i0.ΔdefineInjectable({ token: TestingCompiler, factory: function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory((t || TestingCompiler)); }, providedIn: null });
+        TestingCompiler.ngInjectableDef = i0.ɵɵdefineInjectable({ token: TestingCompiler, factory: function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory((t || TestingCompiler)); }, providedIn: null });
         return TestingCompiler;
     }(i0.Compiler));
-    var ɵTestingCompiler_BaseFactory = i0.ΔgetInheritedFactory(TestingCompiler);
+    var ɵTestingCompiler_BaseFactory = i0.ɵɵgetInheritedFactory(TestingCompiler);
     /*@__PURE__*/ i0.ɵsetClassMetadata(TestingCompiler, [{
             type: i0.Injectable
         }], null, null);

@@ -90,7 +90,7 @@ export declare function query<T>(predicate: Type<any> | string[], descend: boole
  *
  * @codeGenApi
  */
-export declare function ΔqueryRefresh(queryList: QueryList<any>): boolean;
+export declare function ɵɵqueryRefresh(queryList: QueryList<any>): boolean;
 /**
  * Creates new QueryList for a static view query.
  *
@@ -100,7 +100,7 @@ export declare function ΔqueryRefresh(queryList: QueryList<any>): boolean;
  *
  * @codeGenApi
  */
-export declare function ΔstaticViewQuery<T>(predicate: Type<any> | string[], descend: boolean, read: any): void;
+export declare function ɵɵstaticViewQuery<T>(predicate: Type<any> | string[], descend: boolean, read: any): void;
 /**
  * Creates new QueryList, stores the reference in LView and returns QueryList.
  *
@@ -111,13 +111,13 @@ export declare function ΔstaticViewQuery<T>(predicate: Type<any> | string[], de
  *
  * @codeGenApi
  */
-export declare function ΔviewQuery<T>(predicate: Type<any> | string[], descend: boolean, read: any): QueryList<T>;
+export declare function ɵɵviewQuery<T>(predicate: Type<any> | string[], descend: boolean, read: any): QueryList<T>;
 /**
  * Loads current View Query and moves the pointer/index to the next View Query in LView.
  *
  * @codeGenApi
  */
-export declare function ΔloadViewQuery<T>(): T;
+export declare function ɵɵloadViewQuery<T>(): T;
 /**
  * Registers a QueryList, associated with a content query, for later refresh (part of a view
  * refresh).
@@ -130,7 +130,7 @@ export declare function ΔloadViewQuery<T>(): T;
  *
  * @codeGenApi
  */
-export declare function ΔcontentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read: any): QueryList<T>;
+export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read: any): QueryList<T>;
 /**
  * Registers a QueryList, associated with a static content query, for later refresh
  * (part of a view refresh).
@@ -143,9 +143,9 @@ export declare function ΔcontentQuery<T>(directiveIndex: number, predicate: Typ
  *
  * @codeGenApi
  */
-export declare function ΔstaticContentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read: any): void;
+export declare function ɵɵstaticContentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read: any): void;
 /**
  *
  * @codeGenApi
  */
-export declare function ΔloadContentQuery<T>(): QueryList<T>;
+export declare function ɵɵloadContentQuery<T>(): QueryList<T>;

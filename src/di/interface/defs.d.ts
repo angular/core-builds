@@ -21,7 +21,7 @@ import { ClassProvider, ConstructorProvider, ExistingProvider, FactoryProvider, 
  *
  * @publicApi
  */
-export interface ΔInjectableDef<T> {
+export interface ɵɵInjectableDef<T> {
     /**
      * Specifies that the given type belongs to a particular injector:
      * - `InjectorType` such as `NgModule`,
@@ -52,7 +52,7 @@ export interface ΔInjectableDef<T> {
  *
  * @publicApi
  */
-export interface ΔInjectorDef<T> {
+export interface ɵɵInjectorDef<T> {
     factory: () => T;
     providers: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | any[])[];
     imports: (InjectorType<any> | InjectorTypeWithProviders<any>)[];
@@ -112,16 +112,16 @@ export interface InjectorTypeWithProviders<T> {
  *
  * @publicApi
  */
-export declare function ΔdefineInjectable<T>(opts: {
+export declare function ɵɵdefineInjectable<T>(opts: {
     providedIn?: Type<any> | 'root' | 'any' | null;
     factory: () => T;
 }): never;
 /**
  * @deprecated in v8, delete after v10. This API should be used only be generated code, and that
- * code should now use ΔdefineInjectable instead.
+ * code should now use ɵɵdefineInjectable instead.
  * @publicApi
  */
-export declare const defineInjectable: typeof ΔdefineInjectable;
+export declare const defineInjectable: typeof ɵɵdefineInjectable;
 /**
  * Construct an `InjectorDef` which configures an injector.
  *
@@ -142,7 +142,7 @@ export declare const defineInjectable: typeof ΔdefineInjectable;
  *
  * @publicApi
  */
-export declare function ΔdefineInjector(options: {
+export declare function ɵɵdefineInjector(options: {
     factory: () => any;
     providers?: any[];
     imports?: any[];
@@ -152,12 +152,12 @@ export declare function ΔdefineInjector(options: {
  *
  * @param type type which may have `ngInjectableDef`
  */
-export declare function getInjectableDef<T>(type: any): ΔInjectableDef<T> | null;
+export declare function getInjectableDef<T>(type: any): ɵɵInjectableDef<T> | null;
 /**
  * Read the `ngInjectorDef` type in a way which is immune to accidentally reading inherited value.
  *
  * @param type type which may have `ngInjectorDef`
  */
-export declare function getInjectorDef<T>(type: any): ΔInjectorDef<T> | null;
+export declare function getInjectorDef<T>(type: any): ɵɵInjectorDef<T> | null;
 export declare const NG_INJECTABLE_DEF: string;
 export declare const NG_INJECTOR_DEF: string;

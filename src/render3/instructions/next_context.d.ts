@@ -10,4 +10,4 @@
  *
  * @codeGenApi
  */
-export declare function ΔnextContext<T = any>(level?: number): T;
+export declare function ɵɵnextContext<T = any>(level?: number): T;

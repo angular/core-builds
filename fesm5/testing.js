@@ -1,10 +1,10 @@
 /**
- * @license Angular v8.0.0-beta.11+84.sha-54058ba.with-local-changes
+ * @license Angular v8.0.0-beta.11+85.sha-b057806.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { RendererFactory2, getDebugNode, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, COMPILER_OPTIONS, ΔdefineNgModule, ΔdefineInjector, ɵsetClassMetadata, ɵNgModuleFactory, ErrorHandler, ɵgetInjectableDef, ɵNG_COMPONENT_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵpatchComponentDefWithScope, ɵNG_INJECTOR_DEF, ɵNG_MODULE_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, ɵtransitiveScopesFor, ModuleWithComponentFactories, ɵresetCompiledComponents, Injector, InjectFlags, ɵflushModuleScopingQueueAsMuchAsPossible, ΔdefineInjectable, ΔgetInheritedFactory, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, ɵivyEnabled, Optional, SkipSelf } from '@angular/core';
+import { RendererFactory2, getDebugNode, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, COMPILER_OPTIONS, ɵɵdefineNgModule, ɵɵdefineInjector, ɵsetClassMetadata, ɵNgModuleFactory, ErrorHandler, ɵgetInjectableDef, ɵNG_COMPONENT_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵpatchComponentDefWithScope, ɵNG_INJECTOR_DEF, ɵNG_MODULE_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, ɵtransitiveScopesFor, ModuleWithComponentFactories, ɵresetCompiledComponents, Injector, InjectFlags, ɵflushModuleScopingQueueAsMuchAsPossible, ɵɵdefineInjectable, ɵɵgetInheritedFactory, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, ɵivyEnabled, Optional, SkipSelf } from '@angular/core';
 import { __read, __extends, __spread, __awaiter, __generator, __values, __decorate } from 'tslib';
 import { ResourceLoader } from '@angular/compiler';
 
@@ -1473,8 +1473,8 @@ var R3TestBedCompiler = /** @class */ (function () {
         var R3ErrorHandlerModule = /** @class */ (function () {
             function R3ErrorHandlerModule() {
             }
-            R3ErrorHandlerModule.ngModuleDef = ΔdefineNgModule({ type: R3ErrorHandlerModule });
-            R3ErrorHandlerModule.ngInjectorDef = ΔdefineInjector({ factory: function R3ErrorHandlerModule_Factory(t) { return new (t || R3ErrorHandlerModule)(); }, providers: [{ provide: ErrorHandler, useClass: R3TestErrorHandler }] });
+            R3ErrorHandlerModule.ngModuleDef = ɵɵdefineNgModule({ type: R3ErrorHandlerModule });
+            R3ErrorHandlerModule.ngInjectorDef = ɵɵdefineInjector({ factory: function R3ErrorHandlerModule_Factory(t) { return new (t || R3ErrorHandlerModule)(); }, providers: [{ provide: ErrorHandler, useClass: R3TestErrorHandler }] });
             return R3ErrorHandlerModule;
         }());
         /*@__PURE__*/ ɵsetClassMetadata(R3ErrorHandlerModule, [{
@@ -1516,8 +1516,8 @@ var R3TestBedCompiler = /** @class */ (function () {
             var CompilerModule = /** @class */ (function () {
                 function CompilerModule() {
                 }
-                CompilerModule.ngModuleDef = ΔdefineNgModule({ type: CompilerModule });
-                CompilerModule.ngInjectorDef = ΔdefineInjector({ factory: function CompilerModule_Factory(t) { return new (t || CompilerModule)(); }, providers: providers });
+                CompilerModule.ngModuleDef = ɵɵdefineNgModule({ type: CompilerModule });
+                CompilerModule.ngInjectorDef = ɵɵdefineInjector({ factory: function CompilerModule_Factory(t) { return new (t || CompilerModule)(); }, providers: providers });
                 return CompilerModule;
             }());
             /*@__PURE__*/ ɵsetClassMetadata(CompilerModule, [{
@@ -2015,10 +2015,10 @@ var TestingCompiler = /** @class */ (function (_super) {
      * This can be used for errors created by compileModule...
      */
     TestingCompiler.prototype.getComponentFromError = function (error) { throw unimplemented(); };
-    TestingCompiler.ngInjectableDef = ΔdefineInjectable({ token: TestingCompiler, factory: function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory((t || TestingCompiler)); }, providedIn: null });
+    TestingCompiler.ngInjectableDef = ɵɵdefineInjectable({ token: TestingCompiler, factory: function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory((t || TestingCompiler)); }, providedIn: null });
     return TestingCompiler;
 }(Compiler));
-var ɵTestingCompiler_BaseFactory = ΔgetInheritedFactory(TestingCompiler);
+var ɵTestingCompiler_BaseFactory = ɵɵgetInheritedFactory(TestingCompiler);
 /*@__PURE__*/ ɵsetClassMetadata(TestingCompiler, [{
         type: Injectable
     }], null, null);

@@ -48,7 +48,7 @@ export declare function getTranslationForTemplate(message: string, subTemplateIn
  *
  * @codeGenApi
  */
-export declare function Δi18nStart(index: number, message: string, subTemplateIndex?: number): void;
+export declare function ɵɵi18nStart(index: number, message: string, subTemplateIndex?: number): void;
 /**
  * Handles message string post-processing for internationalization.
  *
@@ -68,7 +68,7 @@ export declare function Δi18nStart(index: number, message: string, subTemplateI
  *
  * @codeGenApi
  */
-export declare function Δi18nPostprocess(message: string, replacements?: {
+export declare function ɵɵi18nPostprocess(message: string, replacements?: {
     [key: string]: (string | string[]);
 }): string;
 /**
@@ -77,7 +77,7 @@ export declare function Δi18nPostprocess(message: string, replacements?: {
  *
  * @codeGenApi
  */
-export declare function Δi18nEnd(): void;
+export declare function ɵɵi18nEnd(): void;
 /**
  *
  * Use this instruction to create a translation block that doesn't contain any placeholder.
@@ -104,7 +104,7 @@ export declare function Δi18nEnd(): void;
  *
  * @codeGenApi
  */
-export declare function Δi18n(index: number, message: string, subTemplateIndex?: number): void;
+export declare function ɵɵi18n(index: number, message: string, subTemplateIndex?: number): void;
 /**
  * Marks a list of attributes as translatable.
  *
@@ -113,7 +113,7 @@ export declare function Δi18n(index: number, message: string, subTemplateIndex?
  *
  * @codeGenApi
  */
-export declare function Δi18nAttributes(index: number, values: string[]): void;
+export declare function ɵɵi18nAttributes(index: number, values: string[]): void;
 /**
  * Stores the values of the bindings during each update cycle in order to determine if we need to
  * update the translated nodes.
@@ -122,7 +122,7 @@ export declare function Δi18nAttributes(index: number, values: string[]): void;
  *
  * @codeGenApi
  */
-export declare function Δi18nExp<T>(expression: T | NO_CHANGE): void;
+export declare function ɵɵi18nExp<T>(expression: T | NO_CHANGE): void;
 /**
  * Updates a translation block or an i18n attribute when the bindings have changed.
  *
@@ -131,7 +131,7 @@ export declare function Δi18nExp<T>(expression: T | NO_CHANGE): void;
  *
  * @codeGenApi
  */
-export declare function Δi18nApply(index: number): void;
+export declare function ɵɵi18nApply(index: number): void;
 export interface I18nLocalizeOptions {
     translations: {
         [key: string]: string;
@@ -153,6 +153,6 @@ export declare function i18nConfigureLocalize(options?: I18nLocalizeOptions): vo
  * @publicApi
  * @deprecated this method is temporary & should not be used as it will be removed soon
  */
-export declare function Δi18nLocalize(input: string, placeholders?: {
+export declare function ɵɵi18nLocalize(input: string, placeholders?: {
     [key: string]: string;
 }): string;
