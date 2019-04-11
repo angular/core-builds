@@ -28,7 +28,7 @@ import { CssSelectorList } from '../interfaces/projection';
  * @param selectors A collection of parsed CSS selectors
  * @param rawSelectors A collection of CSS selectors in the raw, un-parsed form
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔprojectionDef(selectors?: CssSelectorList[]): void;
 /**
@@ -40,6 +40,6 @@ export declare function ΔprojectionDef(selectors?: CssSelectorList[]): void;
  *        - 0 when the selector is `*` (or unspecified as this is the default value),
  *        - 1 based index of the selector from the {@link projectionDef}
   *
- * @publicApi
+ * @codeGenApi
 */
 export declare function Δprojection(nodeIndex: number, selectorIndex?: number, attrs?: TAttributes): void;

@@ -11,12 +11,12 @@ import { TAttributes } from '../interfaces/node';
  * the DOM (as a comment node can't have attributes). Attributes are here only for directive
  * matching purposes and setting initial inputs of directives.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔelementContainerStart(index: number, attrs?: TAttributes | null, localRefs?: string[] | null): void;
 /**
  * Mark the end of the <ng-container>.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔelementContainerEnd(): void;

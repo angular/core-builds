@@ -75,7 +75,7 @@ export interface PipeType<T> extends Type<T> {
     ngPipeDef: never;
 }
 /**
- * @publicApi
+ * @codeGenApi
  */
 export declare type ΔDirectiveDefWithMeta<T, Selector extends string, ExportAs extends string[], InputMap extends {
     [key: string]: string;
@@ -91,7 +91,7 @@ export declare type ΔDirectiveDefWithMeta<T, Selector extends string, ExportAs 
  *
  * See: {@link defineBase}
  *
- * @publicApi
+ * @codeGenApi
  */
 export interface ΔBaseDef<T> {
     /**
@@ -176,7 +176,7 @@ export interface DirectiveDef<T> extends ΔBaseDef<T> {
     setInput: (<U extends T>(this: DirectiveDef<U>, instance: U, value: any, publicName: string, privateName: string) => void) | null;
 }
 /**
- * @publicApi
+ * @codeGenApi
  */
 export declare type ΔComponentDefWithMeta<T, Selector extends String, ExportAs extends string[], InputMap extends {
     [key: string]: string;
@@ -306,7 +306,7 @@ export interface PipeDef<T> {
     onDestroy: (() => void) | null;
 }
 /**
- * @publicApi
+ * @codeGenApi
  */
 export declare type ΔPipeDefWithMeta<T, Name extends string> = PipeDef<T>;
 export interface DirectiveDefFeature {

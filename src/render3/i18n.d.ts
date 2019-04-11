@@ -45,7 +45,7 @@ export declare function getTranslationForTemplate(message: string, subTemplateIn
  * @param message The translation message.
  * @param subTemplateIndex Optional sub-template index in the `message`.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function Δi18nStart(index: number, message: string, subTemplateIndex?: number): void;
 /**
@@ -65,7 +65,7 @@ export declare function Δi18nStart(index: number, message: string, subTemplateI
  *
  * @returns Transformed string that can be consumed by i18nStart instruction
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function Δi18nPostprocess(message: string, replacements?: {
     [key: string]: (string | string[]);
@@ -74,7 +74,7 @@ export declare function Δi18nPostprocess(message: string, replacements?: {
  * Translates a translation block marked by `i18nStart` and `i18nEnd`. It inserts the text/ICU nodes
  * into the render tree, moves the placeholder nodes and removes the deleted nodes.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function Δi18nEnd(): void;
 /**
@@ -101,7 +101,7 @@ export declare function Δi18nEnd(): void;
  * @param message The translation message.
  * @param subTemplateIndex Optional sub-template index in the `message`.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function Δi18n(index: number, message: string, subTemplateIndex?: number): void;
 /**
@@ -110,7 +110,7 @@ export declare function Δi18n(index: number, message: string, subTemplateIndex?
  * @param index A unique index in the static block
  * @param values
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function Δi18nAttributes(index: number, values: string[]): void;
 /**
@@ -119,7 +119,7 @@ export declare function Δi18nAttributes(index: number, values: string[]): void;
  *
  * @param expression The binding's new value or NO_CHANGE
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function Δi18nExp<T>(expression: T | NO_CHANGE): void;
 /**
@@ -128,6 +128,6 @@ export declare function Δi18nExp<T>(expression: T | NO_CHANGE): void;
  * @param index Index of either {@link i18nStart} (translation block) or {@link i18nAttributes}
  * (i18n attribute) on which it should update the content.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function Δi18nApply(index: number): void;

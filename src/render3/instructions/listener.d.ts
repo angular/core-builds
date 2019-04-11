@@ -18,7 +18,7 @@ import { GlobalTargetResolver } from '../interfaces/renderer';
  * @param eventTargetResolver Function that returns global target information in case this listener
  * should be attached to a global object like window, document or body
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function Δlistener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
 /**
@@ -40,6 +40,6 @@ export declare function Δlistener(eventName: string, listenerFn: (e?: any) => a
 * @param eventTargetResolver Function that returns global target information in case this listener
 * should be attached to a global object like window, document or body
  *
- * @publicApi
+ * @codeGenApi
 */
 export declare function ΔcomponentHostSyntheticListener<T>(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;

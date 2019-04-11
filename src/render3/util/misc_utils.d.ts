@@ -19,7 +19,7 @@ export declare function renderStringify(value: any): string;
 export declare const defaultScheduler: any;
 /**
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔresolveWindow(element: RElement & {
     ownerDocument: Document;
@@ -29,7 +29,7 @@ export declare function ΔresolveWindow(element: RElement & {
 };
 /**
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔresolveDocument(element: RElement & {
     ownerDocument: Document;
@@ -39,7 +39,7 @@ export declare function ΔresolveDocument(element: RElement & {
 };
 /**
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔresolveBody(element: RElement & {
     ownerDocument: Document;

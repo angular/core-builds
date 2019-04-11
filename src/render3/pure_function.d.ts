@@ -31,7 +31,7 @@
  * @param thisArg Optional calling context of pureFn
  * @returns value
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔpureFunction0<T>(slotOffset: number, pureFn: () => T, thisArg?: any): T;
 /**
@@ -44,7 +44,7 @@ export declare function ΔpureFunction0<T>(slotOffset: number, pureFn: () => T, 
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔpureFunction1(slotOffset: number, pureFn: (v: any) => any, exp: any, thisArg?: any): any;
 /**
@@ -58,7 +58,7 @@ export declare function ΔpureFunction1(slotOffset: number, pureFn: (v: any) => 
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔpureFunction2(slotOffset: number, pureFn: (v1: any, v2: any) => any, exp1: any, exp2: any, thisArg?: any): any;
 /**
@@ -73,7 +73,7 @@ export declare function ΔpureFunction2(slotOffset: number, pureFn: (v1: any, v2
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔpureFunction3(slotOffset: number, pureFn: (v1: any, v2: any, v3: any) => any, exp1: any, exp2: any, exp3: any, thisArg?: any): any;
 /**
@@ -89,7 +89,7 @@ export declare function ΔpureFunction3(slotOffset: number, pureFn: (v1: any, v2
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔpureFunction4(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, thisArg?: any): any;
 /**
@@ -106,7 +106,7 @@ export declare function ΔpureFunction4(slotOffset: number, pureFn: (v1: any, v2
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔpureFunction5(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, thisArg?: any): any;
 /**
@@ -124,7 +124,7 @@ export declare function ΔpureFunction5(slotOffset: number, pureFn: (v1: any, v2
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔpureFunction6(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any, v6: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, exp6: any, thisArg?: any): any;
 /**
@@ -143,7 +143,7 @@ export declare function ΔpureFunction6(slotOffset: number, pureFn: (v1: any, v2
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔpureFunction7(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any, v6: any, v7: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, exp6: any, exp7: any, thisArg?: any): any;
 /**
@@ -163,7 +163,7 @@ export declare function ΔpureFunction7(slotOffset: number, pureFn: (v1: any, v2
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔpureFunction8(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any, v6: any, v7: any, v8: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, exp6: any, exp7: any, exp8: any, thisArg?: any): any;
 /**
@@ -179,6 +179,6 @@ export declare function ΔpureFunction8(slotOffset: number, pureFn: (v1: any, v2
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔpureFunctionV(slotOffset: number, pureFn: (...v: any[]) => any, exps: any[], thisArg?: any): any;

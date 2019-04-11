@@ -17,6 +17,6 @@
  * ```
  * @param index the index of the item to act on with the following instructions
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function Δselect(index: number): void;

@@ -13,13 +13,13 @@ import { SanitizerFn } from '../interfaces/sanitization';
  * hold an attribute name and elements with an odd index hold an attribute value, ex.:
  * ['id', 'warning5', 'class', 'alert']
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔelementStart(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
 /**
  * Mark the end of the element.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔelementEnd(): void;
 /**
@@ -31,7 +31,7 @@ export declare function ΔelementEnd(): void;
  *              element on creation. Use [AttributeMarker] to denote the meaning of this array.
  * @param localRefs A set of local reference bindings on the element.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function Δelement(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
 /**
@@ -44,7 +44,7 @@ export declare function Δelement(index: number, name: string, attrs?: TAttribut
  * @param sanitizer An optional function used to sanitize the value.
  * @param namespace Optional namespace to use when setting the attribute.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔelementAttribute(index: number, name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): void;
 /**
@@ -84,6 +84,6 @@ export declare function ΔelementAttribute(index: number, name: string, value: a
  * @param attrs An array of static values (attributes, classes and styles) with the correct marker
  * values.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔelementHostAttrs(attrs: TAttributes): void;

@@ -35,6 +35,6 @@ import { DirectiveDef } from '../interfaces/definition';
  *
  * @param definition
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔProvidersFeature<T>(providers: Provider[], viewProviders?: Provider[]): (definition: DirectiveDef<T>) => void;

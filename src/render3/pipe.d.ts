@@ -12,7 +12,7 @@
  * @param pipeName The name of the pipe
  * @returns T the instance of the pipe.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function Δpipe(index: number, pipeName: string): any;
 /**
@@ -25,7 +25,7 @@ export declare function Δpipe(index: number, pipeName: string): any;
  * @param slotOffset the offset in the reserved slot space
  * @param v1 1st argument to {@link PipeTransform#transform}.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔpipeBind1(index: number, slotOffset: number, v1: any): any;
 /**
@@ -39,7 +39,7 @@ export declare function ΔpipeBind1(index: number, slotOffset: number, v1: any):
  * @param v1 1st argument to {@link PipeTransform#transform}.
  * @param v2 2nd argument to {@link PipeTransform#transform}.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔpipeBind2(index: number, slotOffset: number, v1: any, v2: any): any;
 /**
@@ -54,7 +54,7 @@ export declare function ΔpipeBind2(index: number, slotOffset: number, v1: any, 
  * @param v2 2nd argument to {@link PipeTransform#transform}.
  * @param v3 4rd argument to {@link PipeTransform#transform}.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔpipeBind3(index: number, slotOffset: number, v1: any, v2: any, v3: any): any;
 /**
@@ -70,7 +70,7 @@ export declare function ΔpipeBind3(index: number, slotOffset: number, v1: any, 
  * @param v3 3rd argument to {@link PipeTransform#transform}.
  * @param v4 4th argument to {@link PipeTransform#transform}.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔpipeBind4(index: number, slotOffset: number, v1: any, v2: any, v3: any, v4: any): any;
 /**
@@ -83,6 +83,6 @@ export declare function ΔpipeBind4(index: number, slotOffset: number, v1: any, 
  * @param slotOffset the offset in the reserved slot space
  * @param values Array of arguments to pass to {@link PipeTransform#transform} method.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔpipeBindV(index: number, slotOffset: number, values: any[]): any;

@@ -10,6 +10,6 @@
  *
  * @param count Amount of vars to be allocated
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔallocHostVars(count: number): void;

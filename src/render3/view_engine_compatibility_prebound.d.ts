@@ -12,6 +12,6 @@ import { LView } from './interfaces/view';
  * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
  * `<ng-template>` element.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔtemplateRefExtractor(tNode: TNode, currentView: LView): ViewEngine_TemplateRef<{}> | null;

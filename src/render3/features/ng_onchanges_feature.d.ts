@@ -26,6 +26,6 @@ import { DirectiveDefFeature } from '../interfaces/definition';
  * });
  * ```
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔNgOnChangesFeature<T>(): DirectiveDefFeature;

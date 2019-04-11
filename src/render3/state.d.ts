@@ -31,7 +31,7 @@ export declare function getBindingsEnabled(): boolean;
  * </div>
  * ```
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔenableBindings(): void;
 /**
@@ -51,7 +51,7 @@ export declare function ΔenableBindings(): void;
  * </div>
  * ```
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔdisableBindings(): void;
 export declare function getLView(): LView;
@@ -135,7 +135,7 @@ export declare function getActiveDirectiveSuperClassDepth(): number;
  *
  * @param viewToRestore The OpaqueViewState instance to restore.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔrestoreView(viewToRestore: OpaqueViewState): void;
 export declare function getPreviousOrParentTNode(): TNode;
@@ -194,20 +194,20 @@ export declare function setSelectedIndex(index: number): void;
 /**
  * Sets the namespace used to create elements to `'http://www.w3.org/2000/svg'` in global state.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔnamespaceSVG(): void;
 /**
  * Sets the namespace used to create elements to `'http://www.w3.org/1998/MathML/'` in global state.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔnamespaceMathML(): void;
 /**
  * Sets the namespace used to create elements no `null`, which forces element creation to use
  * `createElement` rather than `createElementNS`.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔnamespaceHTML(): void;
 export declare function getNamespace(): string | null;

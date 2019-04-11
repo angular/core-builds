@@ -5,7 +5,7 @@ import { NO_CHANGE } from '../tokens';
  * @param index Index of the node in the data array
  * @param value Value to write. This value will be stringified.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function Δtext(index: number, value?: any): void;
 /**
@@ -15,6 +15,6 @@ export declare function Δtext(index: number, value?: any): void;
  * @param index Index of the node in the data array.
  * @param value Stringified value to write.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔtextBinding<T>(index: number, value: T | NO_CHANGE): void;

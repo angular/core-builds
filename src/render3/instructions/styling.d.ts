@@ -25,7 +25,7 @@ import { NO_CHANGE } from '../tokens';
  * @param styleSanitizer An optional sanitizer function that will be used to sanitize any CSS
  *        style values that are applied to the element (during rendering).
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔelementStyling(classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
 /**
@@ -49,7 +49,7 @@ export declare function ΔelementStyling(classBindingNames?: string[] | null, st
  *        will not be used if the same property is assigned in another directive or
  *        on the element directly.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔelementHostStyling(classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
 /**
@@ -76,7 +76,7 @@ export declare function ΔelementHostStyling(classBindingNames?: string[] | null
  * @param forceOverride Whether or not to update the styling value immediately
  *        (despite the other bindings possibly having priority)
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔelementStyleProp(index: number, styleIndex: number, value: string | number | String | PlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
 /**
@@ -102,7 +102,7 @@ export declare function ΔelementStyleProp(index: number, styleIndex: number, va
  * @param forceOverride Whether or not to update the styling value immediately
  *        (despite the other bindings possibly having priority)
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔelementHostStyleProp(styleIndex: number, value: string | number | String | PlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
 /**
@@ -121,7 +121,7 @@ export declare function ΔelementHostStyleProp(styleIndex: number, value: string
  * @param forceOverride Whether or not this value will be applied regardless
  *        of where it is being set within the styling priority structure.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔelementClassProp(index: number, classIndex: number, value: boolean | PlayerFactory, forceOverride?: boolean): void;
 /**
@@ -140,7 +140,7 @@ export declare function ΔelementClassProp(index: number, classIndex: number, va
  * @param forceOverride Whether or not this value will be applied regardless
  *        of where it is being set within the stylings priority structure.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔelementHostClassProp(classIndex: number, value: boolean | PlayerFactory, forceOverride?: boolean): void;
 /**
@@ -161,7 +161,7 @@ export declare function ΔelementHostClassProp(classIndex: number, value: boolea
  *        Any missing styles (that have already been applied to the element beforehand) will be
  *        removed (unset) from the element's styling.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔelementStylingMap(index: number, classes: {
     [key: string]: any;
@@ -189,7 +189,7 @@ export declare function ΔelementStylingMap(index: number, classes: {
  *        Any missing styles (that have already been applied to the element beforehand) will be
  *        removed (unset) from the element's styling.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔelementHostStylingMap(classes: {
     [key: string]: any;
@@ -205,7 +205,7 @@ export declare function ΔelementHostStylingMap(classes: {
  *
  * @param index Index of the element's with which styling is associated.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔelementStylingApply(index: number): void;
 /**
@@ -216,7 +216,7 @@ export declare function ΔelementStylingApply(index: number): void;
  * been run and will only apply styling to the host element if any
  * styling bindings have been updated.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔelementHostStylingApply(): void;
 export declare function elementStylingApplyInternal(directiveStylingIndex: number, index: number): void;

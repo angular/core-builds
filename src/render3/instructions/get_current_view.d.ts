@@ -13,6 +13,6 @@ import { OpaqueViewState } from '../interfaces/view';
  * of the current view and restore it when listeners are invoked. This allows
  * walking the declaration view tree in listeners to get vars from parent views.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔgetCurrentView(): OpaqueViewState;

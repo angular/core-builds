@@ -8,6 +8,6 @@
  * @param level The relative level of the view from which to grab context compared to contextVewData
  * @returns context
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔnextContext<T = any>(level?: number): T;

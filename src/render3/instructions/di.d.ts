@@ -29,13 +29,13 @@ import { Type } from '../../interface/type';
  * @param flags Injection flags
  * @returns the value from the injector or `null` when not found
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔdirectiveInject<T>(token: Type<T> | InjectionToken<T>): T;
 export declare function ΔdirectiveInject<T>(token: Type<T> | InjectionToken<T>, flags: InjectFlags): T;
 /**
  * Facade for the attribute injection from DI.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔinjectAttribute(attrNameToInject: string): string | null;

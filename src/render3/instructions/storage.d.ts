@@ -8,12 +8,12 @@ export declare function store<T>(index: number, value: T): void;
  *
  * @param index The index of the local ref in contextViewData.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function Δreference<T>(index: number): T;
 /**
  * Retrieves a value from current `viewData`.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function Δload<T>(index: number): T;

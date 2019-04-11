@@ -12,12 +12,12 @@ import { RenderFlags } from '../interfaces/definition';
  * @param viewBlockId The ID of this view
  * @return boolean Whether or not this view is in creation mode
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔembeddedViewStart(viewBlockId: number, consts: number, vars: number): RenderFlags;
 /**
  * Marks the end of an embedded view.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔembeddedViewEnd(): void;

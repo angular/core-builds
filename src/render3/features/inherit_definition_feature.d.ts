@@ -10,6 +10,6 @@ import { ComponentDef, DirectiveDef } from '../interfaces/definition';
  * Merges the definition from a super class to a sub class.
  * @param definition The definition that is a SubClass of another directive of component
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ΔInheritDefinitionFeature(definition: DirectiveDef<any> | ComponentDef<any>): void;
