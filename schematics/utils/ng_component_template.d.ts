@@ -5,15 +5,19 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/// <amd-module name="@angular/core/schematics/migrations/template-var-assignment/angular/ng_component_template" />
+/// <amd-module name="@angular/core/schematics/utils/ng_component_template" />
 import * as ts from 'typescript';
 export interface ResolvedTemplate {
+    /** Class declaration that contains this template. */
+    container: ts.ClassDeclaration;
     /** File content of the given template. */
     content: string;
     /** Start offset of the template content (e.g. in the inline source file) */
     start: number;
     /** Whether the given template is inline or not. */
     inline: boolean;
+    /** Path to the file that contains this template. */
+    filePath: string;
     /**
      * Gets the character and line of a given position index in the template.
      * If the template is declared inline within a TypeScript source file, the line and

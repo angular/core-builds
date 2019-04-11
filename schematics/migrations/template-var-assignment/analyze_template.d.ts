@@ -7,7 +7,7 @@
  */
 /// <amd-module name="@angular/core/schematics/migrations/template-var-assignment/analyze_template" />
 import { PropertyWrite } from '@angular/compiler';
-import { ResolvedTemplate } from './angular/ng_component_template';
+import { ResolvedTemplate } from '../../utils/ng_component_template';
 export interface TemplateVariableAssignment {
     node: PropertyWrite;
     start: number;

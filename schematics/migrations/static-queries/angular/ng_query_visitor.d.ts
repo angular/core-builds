@@ -7,6 +7,7 @@
  */
 /// <amd-module name="@angular/core/schematics/migrations/static-queries/angular/ng_query_visitor" />
 import * as ts from 'typescript';
+import { ResolvedTemplate } from '../../../utils/ng_component_template';
 import { NgQueryDefinition } from './query-definition';
 /** Resolved metadata of a given class. */
 export interface ClassMetadata {
@@ -16,6 +17,8 @@ export interface ClassMetadata {
     superClass: ts.ClassDeclaration | null;
     /** List of property names that declare an Angular input within the given class. */
     ngInputNames: string[];
+    /** Component template that belongs to that class if present. */
+    template?: ResolvedTemplate;
 }
 /** Type that describes a map which can be used to get a class declaration's metadata. */
 export declare type ClassMetadataMap = Map<ts.ClassDeclaration, ClassMetadata>;
