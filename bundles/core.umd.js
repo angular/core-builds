@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+69.sha-a80637e.with-local-changes
+ * @license Angular v8.0.0-beta.11+71.sha-faf8fdd.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12627,6 +12627,34 @@
         if (useCapture === void 0) { useCapture = false; }
         listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver, loadComponentRenderer);
     }
+    /**
+     * A utility function that checks if a given element has already an event handler registered for an
+     * event with a specified name. The TView.cleanup data structure is used to find out which events
+     * are registered for a given element.
+     */
+    function findExistingListener(lView, eventName, tNodeIdx) {
+        var tView = lView[TVIEW];
+        var tCleanup = tView.cleanup;
+        if (tCleanup != null) {
+            for (var i = 0; i < tCleanup.length - 1; i += 2) {
+                if (tCleanup[i] === eventName && tCleanup[i + 1] === tNodeIdx) {
+                    // We have found a matching event name on the same node but it might not have been
+                    // registered yet, so we must explicitly verify entries in the LView cleanup data
+                    // structures.
+                    var lCleanup = lView[CLEANUP];
+                    var listenerIdxInLCleanup = tCleanup[i + 2];
+                    return lCleanup.length > listenerIdxInLCleanup ? lCleanup[listenerIdxInLCleanup] : null;
+                }
+                // TView.cleanup can have a mix of 4-elements entries (for event handler cleanups) or
+                // 2-element entries (for directive and queries destroy hooks). As such we can encounter
+                // blocks of 4 or 2 items in the tView.cleanup and this is why we iterate over 2 elements
+                // first and jump another 2 elements if we detect listeners cleanup (4 elements). Also check
+                // documentation of TView.cleanup for more details of this data structure layout.
+                i += 2;
+            }
+        }
+        return null;
+    }
     function listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver, loadRendererFn) {
         if (useCapture === void 0) { useCapture = false; }
         var lView = getLView();
@@ -12640,31 +12668,53 @@
             var native = getNativeByTNode(tNode, lView);
             var resolved = eventTargetResolver ? eventTargetResolver(native) : {};
             var target = resolved.target || native;
-            ngDevMode && ngDevMode.rendererAddEventListener++;
             var renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
             var lCleanup = getCleanup(lView);
             var lCleanupIndex = lCleanup.length;
-            var useCaptureOrSubIdx = useCapture;
+            var idxOrTargetGetter = eventTargetResolver ?
+                function (_lView) { return eventTargetResolver(unwrapRNode(_lView[tNode.index])).target; } :
+                tNode.index;
             // In order to match current behavior, native DOM event listeners must be added for all
             // events (including outputs).
             if (isProceduralRenderer(renderer)) {
-                // The first argument of `listen` function in Procedural Renderer is:
-                // - either a target name (as a string) in case of global target (window, document, body)
-                // - or element reference (in all other cases)
-                listenerFn = wrapListener(tNode, lView, listenerFn, false /** preventDefault */);
-                var cleanupFn = renderer.listen(resolved.name || target, eventName, listenerFn);
-                lCleanup.push(listenerFn, cleanupFn);
-                useCaptureOrSubIdx = lCleanupIndex + 1;
+                // There might be cases where multiple directives on the same element try to register an event
+                // handler function for the same event. In this situation we want to avoid registration of
+                // several native listeners as each registration would be intercepted by NgZone and
+                // trigger change detection. This would mean that a single user action would result in several
+                // change detections being invoked. To avoid this situation we want to have only one call to
+                // native handler registration (for the same element and same type of event).
+                //
+                // In order to have just one native event handler in presence of multiple handler functions,
+                // we just register a first handler function as a native event listener and then chain
+                // (coalesce) other handler functions on top of the first native handler function.
+                //
+                // Please note that the coalescing described here doesn't happen for events specifying an
+                // alternative target (ex. (document:click)) - this is to keep backward compatibility with the
+                // view engine.
+                var existingListener = eventTargetResolver ? null : findExistingListener(lView, eventName, tNode.index);
+                if (existingListener !== null) {
+                    // Attach a new listener at the head of the coalesced listeners list.
+                    listenerFn.__ngNextListenerFn__ = existingListener.__ngNextListenerFn__;
+                    existingListener.__ngNextListenerFn__ = listenerFn;
+                }
+                else {
+                    // The first argument of `listen` function in Procedural Renderer is:
+                    // - either a target name (as a string) in case of global target (window, document, body)
+                    // - or element reference (in all other cases)
+                    listenerFn = wrapListener(tNode, lView, listenerFn, false /** preventDefault */);
+                    var cleanupFn = renderer.listen(resolved.name || target, eventName, listenerFn);
+                    ngDevMode && ngDevMode.rendererAddEventListener++;
+                    lCleanup.push(listenerFn, cleanupFn);
+                    tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, lCleanupIndex + 1);
+                }
             }
             else {
                 listenerFn = wrapListener(tNode, lView, listenerFn, true /** preventDefault */);
                 target.addEventListener(eventName, listenerFn, useCapture);
+                ngDevMode && ngDevMode.rendererAddEventListener++;
                 lCleanup.push(listenerFn);
+                tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, useCapture);
             }
-            var idxOrTargetGetter = eventTargetResolver ?
-                function (_lView) { return eventTargetResolver(unwrapRNode(_lView[tNode.index])).target; } :
-                tNode.index;
-            tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, useCaptureOrSubIdx);
         }
         // subscribe to directive outputs
         if (tNode.outputs === undefined) {
@@ -12695,6 +12745,15 @@
             }
         }
     }
+    function executeListenerWithErrorHandling(lView, listenerFn, e) {
+        try {
+            return listenerFn(e);
+        }
+        catch (error) {
+            handleError(lView, error);
+            return false;
+        }
+    }
     /**
      * Wraps an event listener with a function that marks ancestors dirty and prevents default behavior,
      * if applicable.
@@ -12716,18 +12775,20 @@
             if ((lView[FLAGS] & 32 /* ManualOnPush */) === 0) {
                 markViewDirty(startView);
             }
-            try {
-                var result = listenerFn(e);
-                if (wrapWithPreventDefault && result === false) {
-                    e.preventDefault();
-                    // Necessary for legacy browsers that don't support preventDefault (e.g. IE)
-                    e.returnValue = false;
-                }
-                return result;
+            var result = executeListenerWithErrorHandling(lView, listenerFn, e);
+            // A just-invoked listener function might have coalesced listeners so we need to check for
+            // their presence and invoke as needed.
+            var nextListenerFn = wrapListenerIn_markDirtyAndPreventDefault.__ngNextListenerFn__;
+            while (nextListenerFn) {
+                result = executeListenerWithErrorHandling(lView, nextListenerFn, e);
+                nextListenerFn = nextListenerFn.__ngNextListenerFn__;
             }
-            catch (error) {
-                handleError(lView, error);
+            if (wrapWithPreventDefault && result === false) {
+                e.preventDefault();
+                // Necessary for legacy browsers that don't support preventDefault (e.g. IE)
+                e.returnValue = false;
             }
+            return result;
         };
     }
 
@@ -15844,7 +15905,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.11+69.sha-a80637e.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.11+71.sha-faf8fdd.with-local-changes');
 
     /**
      * @license
