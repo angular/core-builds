@@ -18,7 +18,7 @@ export { detectChanges, markDirty, store, tick, ΔallocHostVars, Δbind, Δcompo
 export { RenderFlags } from './interfaces/definition';
 export { CssSelectorList } from './interfaces/projection';
 export { ΔrestoreView, ΔenableBindings, ΔdisableBindings, } from './state';
-export { Δi18n, Δi18nAttributes, Δi18nExp, Δi18nStart, Δi18nEnd, Δi18nApply, Δi18nPostprocess, } from './i18n';
+export { Δi18n, Δi18nAttributes, Δi18nExp, Δi18nStart, Δi18nEnd, Δi18nApply, Δi18nPostprocess, i18nConfigureLocalize, Δi18nLocalize, } from './i18n';
 export { NgModuleFactory, NgModuleRef, NgModuleType } from './ng_module_ref';
 export { AttributeMarker } from './interfaces/node';
 export { setClassMetadata, } from './metadata';

@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import '../util/ng_i18n_closure_mode';
 import { NO_CHANGE } from './tokens';
 /**
  * Extracts a part of a message and removes the rest.
@@ -131,3 +132,27 @@ export declare function Δi18nExp<T>(expression: T | NO_CHANGE): void;
  * @codeGenApi
  */
 export declare function Δi18nApply(index: number): void;
+export interface I18nLocalizeOptions {
+    translations: {
+        [key: string]: string;
+    };
+}
+/**
+ * Set the configuration for `i18nLocalize`.
+ *
+ * @deprecated this method is temporary & should not be used as it will be removed soon
+ */
+export declare function i18nConfigureLocalize(options?: I18nLocalizeOptions): void;
+/**
+ * A goog.getMsg-like function for users that do not use Closure.
+ *
+ * This method is required as a *temporary* measure to prevent i18n tests from being blocked while
+ * running outside of Closure Compiler. This method will not be needed once runtime translation
+ * service support is introduced.
+ *
+ * @publicApi
+ * @deprecated this method is temporary & should not be used as it will be removed soon
+ */
+export declare function Δi18nLocalize(input: string, placeholders?: {
+    [key: string]: string;
+}): string;
