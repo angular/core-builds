@@ -8,6 +8,6 @@
 /// <amd-module name="@angular/core/schematics/utils/typescript/visit_nodes" />
 import * as ts from 'typescript';
 export interface TypeScriptVisitor {
-    visitNode(node: ts.Node): any;
+    visitNode(node: ts.Node): void;
 }
 export declare function visitAllNodes(node: ts.Node, visitors: TypeScriptVisitor[]): void;
