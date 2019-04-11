@@ -1,3 +1,11 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+import { TAttributes } from '../interfaces/node';
 import { CssSelectorList } from '../interfaces/projection';
 /**
  * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
@@ -22,7 +30,7 @@ import { CssSelectorList } from '../interfaces/projection';
  *
  * @publicApi
  */
-export declare function ΔprojectionDef(selectors?: CssSelectorList[], textSelectors?: string[]): void;
+export declare function ΔprojectionDef(selectors?: CssSelectorList[]): void;
 /**
  * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
  * to the projectionDef instruction.
@@ -34,4 +42,4 @@ export declare function ΔprojectionDef(selectors?: CssSelectorList[], textSelec
   *
  * @publicApi
 */
-export declare function Δprojection(nodeIndex: number, selectorIndex?: number, attrs?: string[]): void;
+export declare function Δprojection(nodeIndex: number, selectorIndex?: number, attrs?: TAttributes): void;

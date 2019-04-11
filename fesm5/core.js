@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+75.sha-f98093a.with-local-changes
+ * @license Angular v8.0.0-beta.11+76.sha-def73a6.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4348,15 +4348,6 @@ function getNamespace() {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var NG_PROJECT_AS_ATTR_NAME = 'ngProjectAs';
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 // TODO: cleanup once the code is merged in angular/angular
 var RendererStyleFlags3;
 (function (RendererStyleFlags3) {
@@ -4957,20 +4948,18 @@ function setUpAttributes(native, attrs) {
             /// attrName is string;
             var attrName = value;
             var attrVal = attrs[++i];
-            if (attrName !== NG_PROJECT_AS_ATTR_NAME) {
-                // Standard attributes
-                ngDevMode && ngDevMode.rendererSetAttribute++;
-                if (isAnimationProp(attrName)) {
-                    if (isProc) {
-                        renderer.setProperty(native, attrName, attrVal);
-                    }
+            // Standard attributes
+            ngDevMode && ngDevMode.rendererSetAttribute++;
+            if (isAnimationProp(attrName)) {
+                if (isProc) {
+                    renderer.setProperty(native, attrName, attrVal);
                 }
-                else {
-                    isProc ?
-                        renderer
-                            .setAttribute(native, attrName, attrVal) :
-                        native.setAttribute(attrName, attrVal);
-                }
+            }
+            else {
+                isProc ?
+                    renderer
+                        .setAttribute(native, attrName, attrVal) :
+                    native.setAttribute(attrName, attrVal);
             }
             i++;
         }
@@ -7292,6 +7281,14 @@ function throwErrorIfNoChangesMode(creationMode, oldValue, currValue) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 /** A special value which designates that a value has not changed. */
 var NO_CHANGE = {};
 
@@ -9109,7 +9106,7 @@ function isNodeMatchingSelectorList(tNode, selector, isProjectionMode) {
 function getProjectAsAttrValue(tNode) {
     var nodeAttrs = tNode.attrs;
     if (nodeAttrs != null) {
-        var ngProjectAsAttrIdx = nodeAttrs.indexOf(NG_PROJECT_AS_ATTR_NAME);
+        var ngProjectAsAttrIdx = nodeAttrs.indexOf(5 /* ProjectAs */);
         // only check for ngProjectAs in attribute names, don't accidentally match attribute's value
         // (attribute names are stored at even indexes)
         if ((ngProjectAsAttrIdx & 1) === 0) {
@@ -9122,17 +9119,18 @@ function getProjectAsAttrValue(tNode) {
  * Checks a given node against matching projection selectors and returns
  * selector index (or 0 if none matched).
  *
- * This function takes into account the ngProjectAs attribute: if present its value will be
- * compared to the raw (un-parsed) CSS selector instead of using standard selector matching logic.
+ * This function takes into account the parsed ngProjectAs selector from the node's attributes.
+ * If present, it will check whether the ngProjectAs selector matches any of the projection
+ * selectors.
  */
-function matchingProjectionSelectorIndex(tNode, selectors, textSelectors) {
+function matchingProjectionSelectorIndex(tNode, selectors) {
     var ngProjectAsAttrVal = getProjectAsAttrValue(tNode);
     for (var i = 0; i < selectors.length; i++) {
-        // if a node has the ngProjectAs attribute match it against unparsed selector
-        // match a node against a parsed selector only if ngProjectAs attribute is not present
-        if (ngProjectAsAttrVal === textSelectors[i] ||
-            ngProjectAsAttrVal === null &&
-                isNodeMatchingSelectorList(tNode, selectors[i], /* isProjectionMode */ true)) {
+        // If we ran into an `ngProjectAs` attribute, we should match its parsed selector
+        // to the list of selectors, otherwise we fall back to matching against the node.
+        if (ngProjectAsAttrVal === null ?
+            isNodeMatchingSelectorList(tNode, selectors[i], /* isProjectionMode */ true) :
+            isSelectorInSelectorList(ngProjectAsAttrVal, selectors[i])) {
             return i + 1; // first matching selector "captures" a given node
         }
     }
@@ -9158,6 +9156,26 @@ function matchTemplateAttribute(attrs, name) {
         }
     }
     return -1;
+}
+/**
+ * Checks whether a selector is inside a CssSelectorList
+ * @param selector Selector to be checked.
+ * @param list List in which to look for the selector.
+ */
+function isSelectorInSelectorList(selector, list) {
+    selectorListLoop: for (var i = 0; i < list.length; i++) {
+        var currentSelectorInList = list[i];
+        if (selector.length !== currentSelectorInList.length) {
+            continue;
+        }
+        for (var j = 0; j < selector.length; j++) {
+            if (selector[j] !== currentSelectorInList[j]) {
+                continue selectorListLoop;
+            }
+        }
+        return true;
+    }
+    return false;
 }
 
 /**
@@ -10210,6 +10228,11 @@ function generateInitialInputs(directiveIndex, inputs, tNode) {
         if (attrName === 0 /* NamespaceURI */) {
             // We do not allow inputs on namespaced attributes.
             i += 4;
+            continue;
+        }
+        else if (attrName === 5 /* ProjectAs */) {
+            // Skip over the `ngProjectAs` value.
+            i += 2;
             continue;
         }
         // If we hit any other attribute markers, we're done anyway. None of those are valid inputs.
@@ -12812,7 +12835,7 @@ function ΔnextContext(level) {
  *
  * @publicApi
  */
-function ΔprojectionDef(selectors, textSelectors) {
+function ΔprojectionDef(selectors) {
     var componentNode = findComponentView(getLView())[T_HOST];
     if (!componentNode.projection) {
         var noOfNodeBuckets = selectors ? selectors.length + 1 : 1;
@@ -12821,9 +12844,7 @@ function ΔprojectionDef(selectors, textSelectors) {
         var tails = projectionHeads.slice();
         var componentChild = componentNode.child;
         while (componentChild !== null) {
-            var bucketIndex = selectors ?
-                matchingProjectionSelectorIndex(componentChild, selectors, textSelectors) :
-                0;
+            var bucketIndex = selectors ? matchingProjectionSelectorIndex(componentChild, selectors) : 0;
             if (tails[bucketIndex]) {
                 tails[bucketIndex].projectionNext = componentChild;
             }
@@ -15875,7 +15896,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.11+75.sha-f98093a.with-local-changes');
+var VERSION = new Version('8.0.0-beta.11+76.sha-def73a6.with-local-changes');
 
 /**
  * @license

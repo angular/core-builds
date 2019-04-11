@@ -19,12 +19,13 @@ import { CssSelector, CssSelectorList } from './interfaces/projection';
  */
 export declare function isNodeMatchingSelector(tNode: TNode, selector: CssSelector, isProjectionMode: boolean): boolean;
 export declare function isNodeMatchingSelectorList(tNode: TNode, selector: CssSelectorList, isProjectionMode?: boolean): boolean;
-export declare function getProjectAsAttrValue(tNode: TNode): string | null;
+export declare function getProjectAsAttrValue(tNode: TNode): CssSelector | null;
 /**
  * Checks a given node against matching projection selectors and returns
  * selector index (or 0 if none matched).
  *
- * This function takes into account the ngProjectAs attribute: if present its value will be
- * compared to the raw (un-parsed) CSS selector instead of using standard selector matching logic.
+ * This function takes into account the parsed ngProjectAs selector from the node's attributes.
+ * If present, it will check whether the ngProjectAs selector matches any of the projection
+ * selectors.
  */
-export declare function matchingProjectionSelectorIndex(tNode: TNode, selectors: CssSelectorList[], textSelectors: string[]): number;
+export declare function matchingProjectionSelectorIndex(tNode: TNode, selectors: CssSelectorList[]): number;

@@ -56,5 +56,4 @@ export declare const enum SelectorFlags {
     /** Mode for matching class names */
     CLASS = 8
 }
-export declare const NG_PROJECT_AS_ATTR_NAME = "ngProjectAs";
 export declare const unusedValueExportToPlacateAjd = 1;

@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { AttributeMarker, TAttributes } from '../interfaces/node';
+import { CssSelector } from '../interfaces/projection';
 import { RElement } from '../interfaces/renderer';
 /**
  * Assigns all attribute values to the provided element via the inferred renderer.
@@ -43,4 +44,4 @@ export declare function attrsStylingIndexOf(attrs: TAttributes, startIndex: numb
  * @param marker The attribute marker to test.
  * @returns true if the marker is a "name-only" marker (e.g. `Bindings` or `Template`).
  */
-export declare function isNameOnlyAttributeMarker(marker: string | AttributeMarker): boolean;
+export declare function isNameOnlyAttributeMarker(marker: string | AttributeMarker | CssSelector): boolean;
