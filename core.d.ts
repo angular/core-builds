@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+75.sha-f98093a.with-local-changes
+ * @license Angular v8.0.0-beta.11+76.sha-def73a6.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6834,10 +6834,11 @@ declare const T_HOST = 6;
 
 /**
  * A combination of:
- * - attribute names and values
- * - special markers acting as flags to alter attributes processing.
+ * - Attribute names and values.
+ * - Special markers acting as flags to alter attributes processing.
+ * - Parsed ngProjectAs selectors.
  */
-declare type TAttributes = (string | ɵAttributeMarker)[];
+declare type TAttributes = (string | ɵAttributeMarker | CssSelector)[];
 
 /** Static data for an LContainer */
 declare interface TContainerNode extends TNode {
@@ -9224,7 +9225,23 @@ export declare const enum ɵAttributeMarker {
      * ['dirA', '', AttributeMarker.Bindings, 'dirB']
      * ```
      */
-    Template = 4
+    Template = 4,
+    /**
+     * Signals that the following attribute is `ngProjectAs` and its value is a parsed `CssSelector`.
+     *
+     * For example, given the following HTML:
+     *
+     * ```
+     * <h1 attr="value" ngProjectAs="[title]">
+     * ```
+     *
+     * the generated code for the `element()` instruction would include:
+     *
+     * ```
+     * ['attr', 'value', AttributeMarker.ProjectAs, ['', 'title', '']]
+     * ```
+     */
+    ProjectAs = 5
 }
 
 export declare const enum ɵBindingFlags {
@@ -12103,7 +12120,7 @@ export declare type ΔPipeDefWithMeta<T, Name extends string> = ɵPipeDef<T>;
   *
  * @publicApi
 */
-export declare function Δprojection(nodeIndex: number, selectorIndex?: number, attrs?: string[]): void;
+export declare function Δprojection(nodeIndex: number, selectorIndex?: number, attrs?: TAttributes): void;
 
 /**
  * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
@@ -12128,7 +12145,7 @@ export declare function Δprojection(nodeIndex: number, selectorIndex?: number, 
  *
  * @publicApi
  */
-export declare function ΔprojectionDef(selectors?: ɵCssSelectorList[], textSelectors?: string[]): void;
+export declare function ΔprojectionDef(selectors?: ɵCssSelectorList[]): void;
 
 /**
  * This feature resolves the providers of a directive (or component),
