@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+64.sha-675f390.with-local-changes
+ * @license Angular v8.0.0-beta.11+85.sha-b057806.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -358,17 +358,17 @@
      *
      * @publicApi
      */
-    function ΔdefineInjectable(opts) {
+    function ɵɵdefineInjectable(opts) {
         return {
             providedIn: opts.providedIn || null, factory: opts.factory, value: undefined,
         };
     }
     /**
      * @deprecated in v8, delete after v10. This API should be used only be generated code, and that
-     * code should now use ΔdefineInjectable instead.
+     * code should now use ɵɵdefineInjectable instead.
      * @publicApi
      */
-    var defineInjectable = ΔdefineInjectable;
+    var defineInjectable = ɵɵdefineInjectable;
     /**
      * Construct an `InjectorDef` which configures an injector.
      *
@@ -389,7 +389,7 @@
      *
      * @publicApi
      */
-    function ΔdefineInjector(options) {
+    function ɵɵdefineInjector(options) {
         return {
             factory: options.factory, providers: options.providers || [], imports: options.imports || [],
         };
@@ -593,16 +593,16 @@
             return _currentInjector.get(token, flags & exports.InjectFlags.Optional ? null : undefined, flags);
         }
     }
-    function Δinject(token, flags) {
+    function ɵɵinject(token, flags) {
         if (flags === void 0) { flags = exports.InjectFlags.Default; }
         return (_injectImplementation || injectInjectorOnly)(token, flags);
     }
     /**
      * @deprecated in v8, delete after v10. This API should be used only be generated code, and that
-     * code should now use Δinject instead.
+     * code should now use ɵɵinject instead.
      * @publicApi
      */
-    var inject = Δinject;
+    var inject = ɵɵinject;
     /**
      * Injects `root` tokens in limp mode.
      *
@@ -650,10 +650,10 @@
                         type = meta;
                     }
                 }
-                args.push(Δinject(type, flags));
+                args.push(ɵɵinject(type, flags));
             }
             else {
-                args.push(Δinject(arg));
+                args.push(ɵɵinject(arg));
             }
         }
         return args;
@@ -672,10 +672,10 @@
      * This should be kept up to date with the public exports of @angular/core.
      */
     var angularCoreDiEnv = {
-        'ΔdefineInjectable': ΔdefineInjectable,
-        'ΔdefineInjector': ΔdefineInjector,
-        'Δinject': Δinject,
-        'ΔgetFactoryOf': getFactoryOf,
+        'ɵɵdefineInjectable': ɵɵdefineInjectable,
+        'ɵɵdefineInjector': ɵɵdefineInjector,
+        'ɵɵinject': ɵɵinject,
+        'ɵɵgetFactoryOf': getFactoryOf,
     };
     function getFactoryOf(type) {
         var typeAny = type;
@@ -1128,7 +1128,7 @@
         }
         else if (provider.useExisting) {
             var existingProvider_1 = provider;
-            return function () { return Δinject(existingProvider_1.useExisting); };
+            return function () { return ɵɵinject(existingProvider_1.useExisting); };
         }
         else if (provider.useFactory) {
             var factoryProvider_1 = provider;
@@ -1175,7 +1175,7 @@
      */
     function render2CompileInjectable(injectableType, options) {
         if (options && options.providedIn !== undefined && !getInjectableDef(injectableType)) {
-            injectableType.ngInjectableDef = ΔdefineInjectable({
+            injectableType.ngInjectableDef = ɵɵdefineInjectable({
                 providedIn: options.providedIn,
                 factory: convertInjectableProviderToFactory(injectableType, options),
             });
@@ -1245,7 +1245,7 @@
                 this.__NG_ELEMENT_ID__ = options;
             }
             else if (options !== undefined) {
-                this.ngInjectableDef = ΔdefineInjectable({
+                this.ngInjectableDef = ɵɵdefineInjectable({
                     providedIn: options.providedIn || 'root',
                     factory: options.factory,
                 });
@@ -1331,9 +1331,9 @@
         Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
         Injector.NULL = new NullInjector();
         /** @nocollapse */
-        Injector.ngInjectableDef = ΔdefineInjectable({
+        Injector.ngInjectableDef = ɵɵdefineInjectable({
             providedIn: 'any',
-            factory: function () { return Δinject(INJECTOR); },
+            factory: function () { return ɵɵinject(INJECTOR); },
         });
         /**
          * @internal
@@ -2863,31 +2863,19 @@
             stylingApply: 0,
             stylingApplyCacheMiss: 0,
         };
-        // NOTE: Under Ivy we may have both window & global defined in the Node
-        //    environment since ensureDocument() in render3.ts sets global.window.
-        if (typeof window != 'undefined') {
-            // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
-            window['ngDevMode'] = newCounters;
-        }
-        if (typeof global != 'undefined') {
-            // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
-            global['ngDevMode'] = newCounters;
-        }
-        if (typeof self != 'undefined') {
-            // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
-            self['ngDevMode'] = newCounters;
-        }
+        // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
+        _global['ngDevMode'] = newCounters;
         return newCounters;
     }
     /**
      * This checks to see if the `ngDevMode` has been set. If yes,
-     * than we honor it, otherwise we default to dev mode with additional checks.
+     * then we honor it, otherwise we default to dev mode with additional checks.
      *
      * The idea is that unless we are doing production build where we explicitly
      * set `ngDevMode == false` we should be helping the developer by providing
      * as much early warning and errors as possible.
      */
-    if (typeof ngDevMode === 'undefined' || ngDevMode) {
+    if (typeof _global['ngDevMode'] === 'undefined' || _global['ngDevMode']) {
         ngDevModeResetPerfCounters();
     }
 
@@ -2948,23 +2936,23 @@
     ).bind(_global);
     /**
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔresolveWindow(element) {
+    function ɵɵresolveWindow(element) {
         return { name: 'window', target: element.ownerDocument.defaultView };
     }
     /**
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔresolveDocument(element) {
+    function ɵɵresolveDocument(element) {
         return { name: 'document', target: element.ownerDocument };
     }
     /**
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔresolveBody(element) {
+    function ɵɵresolveBody(element) {
         return { name: 'body', target: element.ownerDocument.body };
     }
     /**
@@ -3094,9 +3082,9 @@
      *   });
      * }
      * ```
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔdefineComponent(componentDefinition) {
+    function ɵɵdefineComponent(componentDefinition) {
         var type = componentDefinition.type;
         var typePrototype = type.prototype;
         var declaredInputs = {};
@@ -3157,9 +3145,9 @@
         return def;
     }
     /**
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔsetComponentScope(type, directives, pipes) {
+    function ɵɵsetComponentScope(type, directives, pipes) {
         var def = type.ngComponentDef;
         def.directiveDefs = function () { return directives.map(extractDirectiveDef); };
         def.pipeDefs = function () { return pipes.map(extractPipeDef); };
@@ -3179,9 +3167,9 @@
         return def;
     }
     /**
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔdefineNgModule(def) {
+    function ɵɵdefineNgModule(def) {
         var res = {
             type: def.type,
             bootstrap: def.bootstrap || EMPTY_ARRAY$1,
@@ -3201,9 +3189,9 @@
      * marked pure to tree-shake it from the bundle, allowing for all referenced declarations
      * to become eligible for tree-shaking as well.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔsetNgModuleScope(type, scope) {
+    function ɵɵsetNgModuleScope(type, scope) {
         var ngModuleDef = getNgModuleDef(type, true);
         ngModuleDef.declarations = scope.declarations || EMPTY_ARRAY$1;
         ngModuleDef.imports = scope.imports || EMPTY_ARRAY$1;
@@ -3290,7 +3278,7 @@
      * # Example
      * ```ts
      * class ShouldBeInherited {
-     *   static ngBaseDef = ΔdefineBase({
+     *   static ngBaseDef = ɵɵdefineBase({
      *      ...
      *   })
      * }
@@ -3298,9 +3286,9 @@
      *
      * @param baseDefinition The base definition parameters
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔdefineBase(baseDefinition) {
+    function ɵɵdefineBase(baseDefinition) {
         var declaredInputs = {};
         return {
             inputs: invertObject(baseDefinition.inputs, declaredInputs),
@@ -3316,15 +3304,15 @@
      * class MyDirective {
      *   // Generated by Angular Template Compiler
      *   // [Symbol] syntax will not be supported by TypeScript until v2.7
-     *   static ngDirectiveDef = ΔdefineDirective({
+     *   static ngDirectiveDef = ɵɵdefineDirective({
      *     ...
      *   });
      * }
      * ```
      *
-     * @publicApi
+     * @codeGenApi
      */
-    var ΔdefineDirective = ΔdefineComponent;
+    var ɵɵdefineDirective = ɵɵdefineComponent;
     /**
      * Create a pipe definition object.
      *
@@ -3339,9 +3327,9 @@
      * ```
      * @param pipeDef Pipe definition generated by the compiler
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔdefinePipe(pipeDef) {
+    function ɵɵdefinePipe(pipeDef) {
         return {
             name: pipeDef.name,
             factory: pipeDef.factory,
@@ -4077,17 +4065,17 @@
      *   Should match component / directive.
      * </my-comp>
      * <div ngNonBindable>
-     *   <!-- ΔdisableBindings() -->
+     *   <!-- ɵɵdisableBindings() -->
      *   <my-comp my-directive>
      *     Should not match component / directive because we are in ngNonBindable.
      *   </my-comp>
-     *   <!-- ΔenableBindings() -->
+     *   <!-- ɵɵenableBindings() -->
      * </div>
      * ```
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔenableBindings() {
+    function ɵɵenableBindings() {
         bindingsEnabled = true;
     }
     /**
@@ -4099,17 +4087,17 @@
      *   Should match component / directive.
      * </my-comp>
      * <div ngNonBindable>
-     *   <!-- ΔdisableBindings() -->
+     *   <!-- ɵɵdisableBindings() -->
      *   <my-comp my-directive>
      *     Should not match component / directive because we are in ngNonBindable.
      *   </my-comp>
-     *   <!-- ΔenableBindings() -->
+     *   <!-- ɵɵenableBindings() -->
      * </div>
      * ```
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔdisableBindings() {
+    function ɵɵdisableBindings() {
         bindingsEnabled = false;
     }
     function getLView() {
@@ -4249,9 +4237,9 @@
      *
      * @param viewToRestore The OpaqueViewState instance to restore.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔrestoreView(viewToRestore) {
+    function ɵɵrestoreView(viewToRestore) {
         contextLView = viewToRestore;
     }
     /** Used to set the parent property when nodes are created and track query results. */
@@ -4437,40 +4425,31 @@
     /**
      * Sets the namespace used to create elements to `'http://www.w3.org/2000/svg'` in global state.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔnamespaceSVG() {
+    function ɵɵnamespaceSVG() {
         _currentNamespace = 'http://www.w3.org/2000/svg';
     }
     /**
      * Sets the namespace used to create elements to `'http://www.w3.org/1998/MathML/'` in global state.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔnamespaceMathML() {
+    function ɵɵnamespaceMathML() {
         _currentNamespace = 'http://www.w3.org/1998/MathML/';
     }
     /**
      * Sets the namespace used to create elements no `null`, which forces element creation to use
      * `createElement` rather than `createElementNS`.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔnamespaceHTML() {
+    function ɵɵnamespaceHTML() {
         _currentNamespace = null;
     }
     function getNamespace() {
         return _currentNamespace;
     }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var NG_PROJECT_AS_ATTR_NAME = 'ngProjectAs';
 
     /**
      * @license
@@ -5079,20 +5058,18 @@
                 /// attrName is string;
                 var attrName = value;
                 var attrVal = attrs[++i];
-                if (attrName !== NG_PROJECT_AS_ATTR_NAME) {
-                    // Standard attributes
-                    ngDevMode && ngDevMode.rendererSetAttribute++;
-                    if (isAnimationProp(attrName)) {
-                        if (isProc) {
-                            renderer.setProperty(native, attrName, attrVal);
-                        }
+                // Standard attributes
+                ngDevMode && ngDevMode.rendererSetAttribute++;
+                if (isAnimationProp(attrName)) {
+                    if (isProc) {
+                        renderer.setProperty(native, attrName, attrVal);
                     }
-                    else {
-                        isProc ?
-                            renderer
-                                .setAttribute(native, attrName, attrVal) :
-                            native.setAttribute(attrName, attrVal);
-                    }
+                }
+                else {
+                    isProc ?
+                        renderer
+                            .setAttribute(native, attrName, attrVal) :
+                        native.setAttribute(attrName, attrVal);
                 }
                 i++;
             }
@@ -5787,9 +5764,9 @@
         return NodeInjector;
     }());
     /**
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔgetFactoryOf(type) {
+    function ɵɵgetFactoryOf(type) {
         var typeAny = type;
         var def = getComponentDef(typeAny) || getDirectiveDef(typeAny) ||
             getPipeDef(typeAny) || getInjectableDef(typeAny) || getInjectorDef(typeAny);
@@ -5799,11 +5776,11 @@
         return def.factory;
     }
     /**
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔgetInheritedFactory(type) {
+    function ɵɵgetInheritedFactory(type) {
         var proto = Object.getPrototypeOf(type.prototype).constructor;
-        var factory = ΔgetFactoryOf(proto);
+        var factory = ɵɵgetFactoryOf(proto);
         if (factory !== null) {
             return factory;
         }
@@ -5911,6 +5888,973 @@
         };
         return ErrorHandler;
     }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Defines a schema that allows an NgModule to contain the following:
+     * - Non-Angular elements named with dash case (`-`).
+     * - Element properties named with dash case (`-`).
+     * Dash case is the naming convention for custom elements.
+     *
+     * @publicApi
+     */
+    var CUSTOM_ELEMENTS_SCHEMA = {
+        name: 'custom-elements'
+    };
+    /**
+     * Defines a schema that allows any property on any element.
+     *
+     * @publicApi
+     */
+    var NO_ERRORS_SCHEMA = {
+        name: 'no-errors-schema'
+    };
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var BRAND = '__SANITIZER_TRUSTED_BRAND__';
+    function allowSanitizationBypass(value, type) {
+        return (value instanceof String && value[BRAND] === type);
+    }
+    /**
+     * Mark `html` string as trusted.
+     *
+     * This function wraps the trusted string in `String` and brands it in a way which makes it
+     * recognizable to {@link htmlSanitizer} to be trusted implicitly.
+     *
+     * @param trustedHtml `html` string which needs to be implicitly trusted.
+     * @returns a `html` `String` which has been branded to be implicitly trusted.
+     */
+    function bypassSanitizationTrustHtml(trustedHtml) {
+        return bypassSanitizationTrustString(trustedHtml, "Html" /* Html */);
+    }
+    /**
+     * Mark `style` string as trusted.
+     *
+     * This function wraps the trusted string in `String` and brands it in a way which makes it
+     * recognizable to {@link styleSanitizer} to be trusted implicitly.
+     *
+     * @param trustedStyle `style` string which needs to be implicitly trusted.
+     * @returns a `style` `String` which has been branded to be implicitly trusted.
+     */
+    function bypassSanitizationTrustStyle(trustedStyle) {
+        return bypassSanitizationTrustString(trustedStyle, "Style" /* Style */);
+    }
+    /**
+     * Mark `script` string as trusted.
+     *
+     * This function wraps the trusted string in `String` and brands it in a way which makes it
+     * recognizable to {@link scriptSanitizer} to be trusted implicitly.
+     *
+     * @param trustedScript `script` string which needs to be implicitly trusted.
+     * @returns a `script` `String` which has been branded to be implicitly trusted.
+     */
+    function bypassSanitizationTrustScript(trustedScript) {
+        return bypassSanitizationTrustString(trustedScript, "Script" /* Script */);
+    }
+    /**
+     * Mark `url` string as trusted.
+     *
+     * This function wraps the trusted string in `String` and brands it in a way which makes it
+     * recognizable to {@link urlSanitizer} to be trusted implicitly.
+     *
+     * @param trustedUrl `url` string which needs to be implicitly trusted.
+     * @returns a `url` `String` which has been branded to be implicitly trusted.
+     */
+    function bypassSanitizationTrustUrl(trustedUrl) {
+        return bypassSanitizationTrustString(trustedUrl, "Url" /* Url */);
+    }
+    /**
+     * Mark `url` string as trusted.
+     *
+     * This function wraps the trusted string in `String` and brands it in a way which makes it
+     * recognizable to {@link resourceUrlSanitizer} to be trusted implicitly.
+     *
+     * @param trustedResourceUrl `url` string which needs to be implicitly trusted.
+     * @returns a `url` `String` which has been branded to be implicitly trusted.
+     */
+    function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
+        return bypassSanitizationTrustString(trustedResourceUrl, "ResourceUrl" /* ResourceUrl */);
+    }
+    function bypassSanitizationTrustString(trustedString, mode) {
+        var trusted = new String(trustedString);
+        trusted[BRAND] = mode;
+        return trusted;
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * This file is used to control if the default rendering pipeline should be `ViewEngine` or `Ivy`.
+     *
+     * For more information on how to run and debug tests with either Ivy or View Engine (legacy),
+     * please see [BAZEL.md](./docs/BAZEL.md).
+     */
+    var _devMode = true;
+    var _runModeLocked = false;
+    /**
+     * Returns whether Angular is in development mode. After called once,
+     * the value is locked and won't change any more.
+     *
+     * By default, this is true, unless a user calls `enableProdMode` before calling this.
+     *
+     * @publicApi
+     */
+    function isDevMode() {
+        _runModeLocked = true;
+        return _devMode;
+    }
+    /**
+     * Disable Angular's development mode, which turns off assertions and other
+     * checks within the framework.
+     *
+     * One important assertion this disables verifies that a change detection pass
+     * does not result in additional changes to any bindings (also known as
+     * unidirectional data flow).
+     *
+     * @publicApi
+     */
+    function enableProdMode() {
+        if (_runModeLocked) {
+            throw new Error('Cannot enable prod mode after platform setup.');
+        }
+        _devMode = false;
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * This helper class is used to get hold of an inert tree of DOM elements containing dirty HTML
+     * that needs sanitizing.
+     * Depending upon browser support we must use one of three strategies for doing this.
+     * Support: Safari 10.x -> XHR strategy
+     * Support: Firefox -> DomParser strategy
+     * Default: InertDocument strategy
+     */
+    var InertBodyHelper = /** @class */ (function () {
+        function InertBodyHelper(defaultDoc) {
+            this.defaultDoc = defaultDoc;
+            this.inertDocument = this.defaultDoc.implementation.createHTMLDocument('sanitization-inert');
+            this.inertBodyElement = this.inertDocument.body;
+            if (this.inertBodyElement == null) {
+                // usually there should be only one body element in the document, but IE doesn't have any, so
+                // we need to create one.
+                var inertHtml = this.inertDocument.createElement('html');
+                this.inertDocument.appendChild(inertHtml);
+                this.inertBodyElement = this.inertDocument.createElement('body');
+                inertHtml.appendChild(this.inertBodyElement);
+            }
+            this.inertBodyElement.innerHTML = '<svg><g onload="this.parentNode.remove()"></g></svg>';
+            if (this.inertBodyElement.querySelector && !this.inertBodyElement.querySelector('svg')) {
+                // We just hit the Safari 10.1 bug - which allows JS to run inside the SVG G element
+                // so use the XHR strategy.
+                this.getInertBodyElement = this.getInertBodyElement_XHR;
+                return;
+            }
+            this.inertBodyElement.innerHTML =
+                '<svg><p><style><img src="</style><img src=x onerror=alert(1)//">';
+            if (this.inertBodyElement.querySelector && this.inertBodyElement.querySelector('svg img')) {
+                // We just hit the Firefox bug - which prevents the inner img JS from being sanitized
+                // so use the DOMParser strategy, if it is available.
+                // If the DOMParser is not available then we are not in Firefox (Server/WebWorker?) so we
+                // fall through to the default strategy below.
+                if (isDOMParserAvailable()) {
+                    this.getInertBodyElement = this.getInertBodyElement_DOMParser;
+                    return;
+                }
+            }
+            // None of the bugs were hit so it is safe for us to use the default InertDocument strategy
+            this.getInertBodyElement = this.getInertBodyElement_InertDocument;
+        }
+        /**
+         * Use XHR to create and fill an inert body element (on Safari 10.1)
+         * See
+         * https://github.com/cure53/DOMPurify/blob/a992d3a75031cb8bb032e5ea8399ba972bdf9a65/src/purify.js#L439-L449
+         */
+        InertBodyHelper.prototype.getInertBodyElement_XHR = function (html) {
+            // We add these extra elements to ensure that the rest of the content is parsed as expected
+            // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
+            // `<head>` tag.
+            html = '<body><remove></remove>' + html + '</body>';
+            try {
+                html = encodeURI(html);
+            }
+            catch (_a) {
+                return null;
+            }
+            var xhr = new XMLHttpRequest();
+            xhr.responseType = 'document';
+            xhr.open('GET', 'data:text/html;charset=utf-8,' + html, false);
+            xhr.send(undefined);
+            var body = xhr.response.body;
+            body.removeChild(body.firstChild);
+            return body;
+        };
+        /**
+         * Use DOMParser to create and fill an inert body element (on Firefox)
+         * See https://github.com/cure53/DOMPurify/releases/tag/0.6.7
+         *
+         */
+        InertBodyHelper.prototype.getInertBodyElement_DOMParser = function (html) {
+            // We add these extra elements to ensure that the rest of the content is parsed as expected
+            // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
+            // `<head>` tag.
+            html = '<body><remove></remove>' + html + '</body>';
+            try {
+                var body = new window
+                    .DOMParser()
+                    .parseFromString(html, 'text/html')
+                    .body;
+                body.removeChild(body.firstChild);
+                return body;
+            }
+            catch (_a) {
+                return null;
+            }
+        };
+        /**
+         * Use an HTML5 `template` element, if supported, or an inert body element created via
+         * `createHtmlDocument` to create and fill an inert DOM element.
+         * This is the default sane strategy to use if the browser does not require one of the specialised
+         * strategies above.
+         */
+        InertBodyHelper.prototype.getInertBodyElement_InertDocument = function (html) {
+            // Prefer using <template> element if supported.
+            var templateEl = this.inertDocument.createElement('template');
+            if ('content' in templateEl) {
+                templateEl.innerHTML = html;
+                return templateEl;
+            }
+            this.inertBodyElement.innerHTML = html;
+            // Support: IE 9-11 only
+            // strip custom-namespaced attributes on IE<=11
+            if (this.defaultDoc.documentMode) {
+                this.stripCustomNsAttrs(this.inertBodyElement);
+            }
+            return this.inertBodyElement;
+        };
+        /**
+         * When IE9-11 comes across an unknown namespaced attribute e.g. 'xlink:foo' it adds 'xmlns:ns1'
+         * attribute to declare ns1 namespace and prefixes the attribute with 'ns1' (e.g.
+         * 'ns1:xlink:foo').
+         *
+         * This is undesirable since we don't want to allow any of these custom attributes. This method
+         * strips them all.
+         */
+        InertBodyHelper.prototype.stripCustomNsAttrs = function (el) {
+            var elAttrs = el.attributes;
+            // loop backwards so that we can support removals.
+            for (var i = elAttrs.length - 1; 0 < i; i--) {
+                var attrib = elAttrs.item(i);
+                var attrName = attrib.name;
+                if (attrName === 'xmlns:ns1' || attrName.indexOf('ns1:') === 0) {
+                    el.removeAttribute(attrName);
+                }
+            }
+            var childNode = el.firstChild;
+            while (childNode) {
+                if (childNode.nodeType === Node.ELEMENT_NODE)
+                    this.stripCustomNsAttrs(childNode);
+                childNode = childNode.nextSibling;
+            }
+        };
+        return InertBodyHelper;
+    }());
+    /**
+     * We need to determine whether the DOMParser exists in the global context.
+     * The try-catch is because, on some browsers, trying to access this property
+     * on window can actually throw an error.
+     *
+     * @suppress {uselessCode}
+     */
+    function isDOMParserAvailable() {
+        try {
+            return !!window.DOMParser;
+        }
+        catch (_a) {
+            return false;
+        }
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * A pattern that recognizes a commonly useful subset of URLs that are safe.
+     *
+     * This regular expression matches a subset of URLs that will not cause script
+     * execution if used in URL context within a HTML document. Specifically, this
+     * regular expression matches if (comment from here on and regex copied from
+     * Soy's EscapingConventions):
+     * (1) Either an allowed protocol (http, https, mailto or ftp).
+     * (2) or no protocol.  A protocol must be followed by a colon. The below
+     *     allows that by allowing colons only after one of the characters [/?#].
+     *     A colon after a hash (#) must be in the fragment.
+     *     Otherwise, a colon after a (?) must be in a query.
+     *     Otherwise, a colon after a single solidus (/) must be in a path.
+     *     Otherwise, a colon after a double solidus (//) must be in the authority
+     *     (before port).
+     *
+     * The pattern disallows &, used in HTML entity declarations before
+     * one of the characters in [/?#]. This disallows HTML entities used in the
+     * protocol name, which should never happen, e.g. "h&#116;tp" for "http".
+     * It also disallows HTML entities in the first path part of a relative path,
+     * e.g. "foo&lt;bar/baz".  Our existing escaping functions should not produce
+     * that. More importantly, it disallows masking of a colon,
+     * e.g. "javascript&#58;...".
+     *
+     * This regular expression was taken from the Closure sanitization library.
+     */
+    var SAFE_URL_PATTERN = /^(?:(?:https?|mailto|ftp|tel|file):|[^&:/?#]*(?:[/?#]|$))/gi;
+    /** A pattern that matches safe data URLs. Only matches image, video and audio types. */
+    var DATA_URL_PATTERN = /^data:(?:image\/(?:bmp|gif|jpeg|jpg|png|tiff|webp)|video\/(?:mpeg|mp4|ogg|webm)|audio\/(?:mp3|oga|ogg|opus));base64,[a-z0-9+\/]+=*$/i;
+    function _sanitizeUrl(url) {
+        url = String(url);
+        if (url.match(SAFE_URL_PATTERN) || url.match(DATA_URL_PATTERN))
+            return url;
+        if (isDevMode()) {
+            console.warn("WARNING: sanitizing unsafe URL value " + url + " (see http://g.co/ng/security#xss)");
+        }
+        return 'unsafe:' + url;
+    }
+    function sanitizeSrcset(srcset) {
+        srcset = String(srcset);
+        return srcset.split(',').map(function (srcset) { return _sanitizeUrl(srcset.trim()); }).join(', ');
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    function tagSet(tags) {
+        var e_1, _a;
+        var res = {};
+        try {
+            for (var _b = __values(tags.split(',')), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var t = _c.value;
+                res[t] = true;
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+        return res;
+    }
+    function merge() {
+        var e_2, _a;
+        var sets = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            sets[_i] = arguments[_i];
+        }
+        var res = {};
+        try {
+            for (var sets_1 = __values(sets), sets_1_1 = sets_1.next(); !sets_1_1.done; sets_1_1 = sets_1.next()) {
+                var s = sets_1_1.value;
+                for (var v in s) {
+                    if (s.hasOwnProperty(v))
+                        res[v] = true;
+                }
+            }
+        }
+        catch (e_2_1) { e_2 = { error: e_2_1 }; }
+        finally {
+            try {
+                if (sets_1_1 && !sets_1_1.done && (_a = sets_1.return)) _a.call(sets_1);
+            }
+            finally { if (e_2) throw e_2.error; }
+        }
+        return res;
+    }
+    // Good source of info about elements and attributes
+    // http://dev.w3.org/html5/spec/Overview.html#semantics
+    // http://simon.html5.org/html-elements
+    // Safe Void Elements - HTML5
+    // http://dev.w3.org/html5/spec/Overview.html#void-elements
+    var VOID_ELEMENTS = tagSet('area,br,col,hr,img,wbr');
+    // Elements that you can, intentionally, leave open (and which close themselves)
+    // http://dev.w3.org/html5/spec/Overview.html#optional-tags
+    var OPTIONAL_END_TAG_BLOCK_ELEMENTS = tagSet('colgroup,dd,dt,li,p,tbody,td,tfoot,th,thead,tr');
+    var OPTIONAL_END_TAG_INLINE_ELEMENTS = tagSet('rp,rt');
+    var OPTIONAL_END_TAG_ELEMENTS = merge(OPTIONAL_END_TAG_INLINE_ELEMENTS, OPTIONAL_END_TAG_BLOCK_ELEMENTS);
+    // Safe Block Elements - HTML5
+    var BLOCK_ELEMENTS = merge(OPTIONAL_END_TAG_BLOCK_ELEMENTS, tagSet('address,article,' +
+        'aside,blockquote,caption,center,del,details,dialog,dir,div,dl,figure,figcaption,footer,h1,h2,h3,h4,h5,' +
+        'h6,header,hgroup,hr,ins,main,map,menu,nav,ol,pre,section,summary,table,ul'));
+    // Inline Elements - HTML5
+    var INLINE_ELEMENTS = merge(OPTIONAL_END_TAG_INLINE_ELEMENTS, tagSet('a,abbr,acronym,audio,b,' +
+        'bdi,bdo,big,br,cite,code,del,dfn,em,font,i,img,ins,kbd,label,map,mark,picture,q,ruby,rp,rt,s,' +
+        'samp,small,source,span,strike,strong,sub,sup,time,track,tt,u,var,video'));
+    var VALID_ELEMENTS = merge(VOID_ELEMENTS, BLOCK_ELEMENTS, INLINE_ELEMENTS, OPTIONAL_END_TAG_ELEMENTS);
+    // Attributes that have href and hence need to be sanitized
+    var URI_ATTRS = tagSet('background,cite,href,itemtype,longdesc,poster,src,xlink:href');
+    // Attributes that have special href set hence need to be sanitized
+    var SRCSET_ATTRS = tagSet('srcset');
+    var HTML_ATTRS = tagSet('abbr,accesskey,align,alt,autoplay,axis,bgcolor,border,cellpadding,cellspacing,class,clear,color,cols,colspan,' +
+        'compact,controls,coords,datetime,default,dir,download,face,headers,height,hidden,hreflang,hspace,' +
+        'ismap,itemscope,itemprop,kind,label,lang,language,loop,media,muted,nohref,nowrap,open,preload,rel,rev,role,rows,rowspan,rules,' +
+        'scope,scrolling,shape,size,sizes,span,srclang,start,summary,tabindex,target,title,translate,type,usemap,' +
+        'valign,value,vspace,width');
+    // NB: This currently consciously doesn't support SVG. SVG sanitization has had several security
+    // issues in the past, so it seems safer to leave it out if possible. If support for binding SVG via
+    // innerHTML is required, SVG attributes should be added here.
+    // NB: Sanitization does not allow <form> elements or other active elements (<button> etc). Those
+    // can be sanitized, but they increase security surface area without a legitimate use case, so they
+    // are left out here.
+    var VALID_ATTRS = merge(URI_ATTRS, SRCSET_ATTRS, HTML_ATTRS);
+    // Elements whose content should not be traversed/preserved, if the elements themselves are invalid.
+    //
+    // Typically, `<invalid>Some content</invalid>` would traverse (and in this case preserve)
+    // `Some content`, but strip `invalid-element` opening/closing tags. For some elements, though, we
+    // don't want to preserve the content, if the elements themselves are going to be removed.
+    var SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS = tagSet('script,style,template');
+    /**
+     * SanitizingHtmlSerializer serializes a DOM fragment, stripping out any unsafe elements and unsafe
+     * attributes.
+     */
+    var SanitizingHtmlSerializer = /** @class */ (function () {
+        function SanitizingHtmlSerializer() {
+            // Explicitly track if something was stripped, to avoid accidentally warning of sanitization just
+            // because characters were re-encoded.
+            this.sanitizedSomething = false;
+            this.buf = [];
+        }
+        SanitizingHtmlSerializer.prototype.sanitizeChildren = function (el) {
+            // This cannot use a TreeWalker, as it has to run on Angular's various DOM adapters.
+            // However this code never accesses properties off of `document` before deleting its contents
+            // again, so it shouldn't be vulnerable to DOM clobbering.
+            var current = el.firstChild;
+            var traverseContent = true;
+            while (current) {
+                if (current.nodeType === Node.ELEMENT_NODE) {
+                    traverseContent = this.startElement(current);
+                }
+                else if (current.nodeType === Node.TEXT_NODE) {
+                    this.chars(current.nodeValue);
+                }
+                else {
+                    // Strip non-element, non-text nodes.
+                    this.sanitizedSomething = true;
+                }
+                if (traverseContent && current.firstChild) {
+                    current = current.firstChild;
+                    continue;
+                }
+                while (current) {
+                    // Leaving the element. Walk up and to the right, closing tags as we go.
+                    if (current.nodeType === Node.ELEMENT_NODE) {
+                        this.endElement(current);
+                    }
+                    var next = this.checkClobberedElement(current, current.nextSibling);
+                    if (next) {
+                        current = next;
+                        break;
+                    }
+                    current = this.checkClobberedElement(current, current.parentNode);
+                }
+            }
+            return this.buf.join('');
+        };
+        /**
+         * Sanitizes an opening element tag (if valid) and returns whether the element's contents should
+         * be traversed. Element content must always be traversed (even if the element itself is not
+         * valid/safe), unless the element is one of `SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS`.
+         *
+         * @param element The element to sanitize.
+         * @return True if the element's contents should be traversed.
+         */
+        SanitizingHtmlSerializer.prototype.startElement = function (element) {
+            var tagName = element.nodeName.toLowerCase();
+            if (!VALID_ELEMENTS.hasOwnProperty(tagName)) {
+                this.sanitizedSomething = true;
+                return !SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS.hasOwnProperty(tagName);
+            }
+            this.buf.push('<');
+            this.buf.push(tagName);
+            var elAttrs = element.attributes;
+            for (var i = 0; i < elAttrs.length; i++) {
+                var elAttr = elAttrs.item(i);
+                var attrName = elAttr.name;
+                var lower = attrName.toLowerCase();
+                if (!VALID_ATTRS.hasOwnProperty(lower)) {
+                    this.sanitizedSomething = true;
+                    continue;
+                }
+                var value = elAttr.value;
+                // TODO(martinprobst): Special case image URIs for data:image/...
+                if (URI_ATTRS[lower])
+                    value = _sanitizeUrl(value);
+                if (SRCSET_ATTRS[lower])
+                    value = sanitizeSrcset(value);
+                this.buf.push(' ', attrName, '="', encodeEntities(value), '"');
+            }
+            this.buf.push('>');
+            return true;
+        };
+        SanitizingHtmlSerializer.prototype.endElement = function (current) {
+            var tagName = current.nodeName.toLowerCase();
+            if (VALID_ELEMENTS.hasOwnProperty(tagName) && !VOID_ELEMENTS.hasOwnProperty(tagName)) {
+                this.buf.push('</');
+                this.buf.push(tagName);
+                this.buf.push('>');
+            }
+        };
+        SanitizingHtmlSerializer.prototype.chars = function (chars) { this.buf.push(encodeEntities(chars)); };
+        SanitizingHtmlSerializer.prototype.checkClobberedElement = function (node, nextNode) {
+            if (nextNode &&
+                (node.compareDocumentPosition(nextNode) &
+                    Node.DOCUMENT_POSITION_CONTAINED_BY) === Node.DOCUMENT_POSITION_CONTAINED_BY) {
+                throw new Error("Failed to sanitize html because the element is clobbered: " + node.outerHTML);
+            }
+            return nextNode;
+        };
+        return SanitizingHtmlSerializer;
+    }());
+    // Regular Expressions for parsing tags and attributes
+    var SURROGATE_PAIR_REGEXP = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
+    // ! to ~ is the ASCII range.
+    var NON_ALPHANUMERIC_REGEXP = /([^\#-~ |!])/g;
+    /**
+     * Escapes all potentially dangerous characters, so that the
+     * resulting string can be safely inserted into attribute or
+     * element text.
+     * @param value
+     */
+    function encodeEntities(value) {
+        return value.replace(/&/g, '&amp;')
+            .replace(SURROGATE_PAIR_REGEXP, function (match) {
+            var hi = match.charCodeAt(0);
+            var low = match.charCodeAt(1);
+            return '&#' + (((hi - 0xD800) * 0x400) + (low - 0xDC00) + 0x10000) + ';';
+        })
+            .replace(NON_ALPHANUMERIC_REGEXP, function (match) { return '&#' + match.charCodeAt(0) + ';'; })
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+    var inertBodyHelper;
+    /**
+     * Sanitizes the given unsafe, untrusted HTML fragment, and returns HTML text that is safe to add to
+     * the DOM in a browser environment.
+     */
+    function _sanitizeHtml(defaultDoc, unsafeHtmlInput) {
+        var inertBodyElement = null;
+        try {
+            inertBodyHelper = inertBodyHelper || new InertBodyHelper(defaultDoc);
+            // Make sure unsafeHtml is actually a string (TypeScript types are not enforced at runtime).
+            var unsafeHtml = unsafeHtmlInput ? String(unsafeHtmlInput) : '';
+            inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
+            // mXSS protection. Repeatedly parse the document to make sure it stabilizes, so that a browser
+            // trying to auto-correct incorrect HTML cannot cause formerly inert HTML to become dangerous.
+            var mXSSAttempts = 5;
+            var parsedHtml = unsafeHtml;
+            do {
+                if (mXSSAttempts === 0) {
+                    throw new Error('Failed to sanitize html because the input is unstable');
+                }
+                mXSSAttempts--;
+                unsafeHtml = parsedHtml;
+                parsedHtml = inertBodyElement.innerHTML;
+                inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
+            } while (unsafeHtml !== parsedHtml);
+            var sanitizer = new SanitizingHtmlSerializer();
+            var safeHtml = sanitizer.sanitizeChildren(getTemplateContent(inertBodyElement) || inertBodyElement);
+            if (isDevMode() && sanitizer.sanitizedSomething) {
+                console.warn('WARNING: sanitizing HTML stripped some content, see http://g.co/ng/security#xss');
+            }
+            return safeHtml;
+        }
+        finally {
+            // In case anything goes wrong, clear out inertElement to reset the entire DOM structure.
+            if (inertBodyElement) {
+                var parent_1 = getTemplateContent(inertBodyElement) || inertBodyElement;
+                while (parent_1.firstChild) {
+                    parent_1.removeChild(parent_1.firstChild);
+                }
+            }
+        }
+    }
+    function getTemplateContent(el) {
+        return 'content' in el /** Microsoft/TypeScript#21517 */ && isTemplateElement(el) ?
+            el.content :
+            null;
+    }
+    function isTemplateElement(el) {
+        return el.nodeType === Node.ELEMENT_NODE && el.nodeName === 'TEMPLATE';
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    (function (SecurityContext) {
+        SecurityContext[SecurityContext["NONE"] = 0] = "NONE";
+        SecurityContext[SecurityContext["HTML"] = 1] = "HTML";
+        SecurityContext[SecurityContext["STYLE"] = 2] = "STYLE";
+        SecurityContext[SecurityContext["SCRIPT"] = 3] = "SCRIPT";
+        SecurityContext[SecurityContext["URL"] = 4] = "URL";
+        SecurityContext[SecurityContext["RESOURCE_URL"] = 5] = "RESOURCE_URL";
+    })(exports.SecurityContext || (exports.SecurityContext = {}));
+    /**
+     * Sanitizer is used by the views to sanitize potentially dangerous values.
+     *
+     * @publicApi
+     */
+    var Sanitizer = /** @class */ (function () {
+        function Sanitizer() {
+        }
+        return Sanitizer;
+    }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Regular expression for safe style values.
+     *
+     * Quotes (" and ') are allowed, but a check must be done elsewhere to ensure they're balanced.
+     *
+     * ',' allows multiple values to be assigned to the same property (e.g. background-attachment or
+     * font-family) and hence could allow multiple values to get injected, but that should pose no risk
+     * of XSS.
+     *
+     * The function expression checks only for XSS safety, not for CSS validity.
+     *
+     * This regular expression was taken from the Closure sanitization library, and augmented for
+     * transformation values.
+     */
+    var VALUES = '[-,."\'%_!# a-zA-Z0-9]+';
+    var TRANSFORMATION_FNS = '(?:matrix|translate|scale|rotate|skew|perspective)(?:X|Y|3d)?';
+    var COLOR_FNS = '(?:rgb|hsl)a?';
+    var GRADIENTS = '(?:repeating-)?(?:linear|radial)-gradient';
+    var CSS3_FNS = '(?:calc|attr)';
+    var FN_ARGS = '\\([-0-9.%, #a-zA-Z]+\\)';
+    var SAFE_STYLE_VALUE = new RegExp("^(" + VALUES + "|" +
+        ("(?:" + TRANSFORMATION_FNS + "|" + COLOR_FNS + "|" + GRADIENTS + "|" + CSS3_FNS + ")") +
+        (FN_ARGS + ")$"), 'g');
+    /**
+     * Matches a `url(...)` value with an arbitrary argument as long as it does
+     * not contain parentheses.
+     *
+     * The URL value still needs to be sanitized separately.
+     *
+     * `url(...)` values are a very common use case, e.g. for `background-image`. With carefully crafted
+     * CSS style rules, it is possible to construct an information leak with `url` values in CSS, e.g.
+     * by observing whether scroll bars are displayed, or character ranges used by a font face
+     * definition.
+     *
+     * Angular only allows binding CSS values (as opposed to entire CSS rules), so it is unlikely that
+     * binding a URL value without further cooperation from the page will cause an information leak, and
+     * if so, it is just a leak, not a full blown XSS vulnerability.
+     *
+     * Given the common use case, low likelihood of attack vector, and low impact of an attack, this
+     * code is permissive and allows URLs that sanitize otherwise.
+     */
+    var URL_RE = /^url\(([^)]+)\)$/;
+    /**
+     * Checks that quotes (" and ') are properly balanced inside a string. Assumes
+     * that neither escape (\) nor any other character that could result in
+     * breaking out of a string parsing context are allowed;
+     * see http://www.w3.org/TR/css3-syntax/#string-token-diagram.
+     *
+     * This code was taken from the Closure sanitization library.
+     */
+    function hasBalancedQuotes(value) {
+        var outsideSingle = true;
+        var outsideDouble = true;
+        for (var i = 0; i < value.length; i++) {
+            var c = value.charAt(i);
+            if (c === '\'' && outsideDouble) {
+                outsideSingle = !outsideSingle;
+            }
+            else if (c === '"' && outsideSingle) {
+                outsideDouble = !outsideDouble;
+            }
+        }
+        return outsideSingle && outsideDouble;
+    }
+    /**
+     * Sanitizes the given untrusted CSS style property value (i.e. not an entire object, just a single
+     * value) and returns a value that is safe to use in a browser environment.
+     */
+    function _sanitizeStyle(value) {
+        value = String(value).trim(); // Make sure it's actually a string.
+        if (!value)
+            return '';
+        // Single url(...) values are supported, but only for URLs that sanitize cleanly. See above for
+        // reasoning behind this.
+        var urlMatch = value.match(URL_RE);
+        if ((urlMatch && _sanitizeUrl(urlMatch[1]) === urlMatch[1]) ||
+            value.match(SAFE_STYLE_VALUE) && hasBalancedQuotes(value)) {
+            return value; // Safe style values.
+        }
+        if (isDevMode()) {
+            console.warn("WARNING: sanitizing unsafe style value " + value + " (see http://g.co/ng/security#xss).");
+        }
+        return 'unsafe';
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
+     * dangerous content.
+     *
+     * This method parses the `html` and locates potentially dangerous content (such as urls and
+     * javascript) and removes it.
+     *
+     * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustHtml}.
+     *
+     * @param unsafeHtml untrusted `html`, typically from the user.
+     * @returns `html` string which is safe to display to user, because all of the dangerous javascript
+     * and urls have been removed.
+     *
+     * @publicApi
+     */
+    function ɵɵsanitizeHtml(unsafeHtml) {
+        var sanitizer = getSanitizer();
+        if (sanitizer) {
+            return sanitizer.sanitize(exports.SecurityContext.HTML, unsafeHtml) || '';
+        }
+        if (allowSanitizationBypass(unsafeHtml, "Html" /* Html */)) {
+            return unsafeHtml.toString();
+        }
+        return _sanitizeHtml(document, renderStringify(unsafeHtml));
+    }
+    /**
+     * A `style` sanitizer which converts untrusted `style` **string** into trusted string by removing
+     * dangerous content.
+     *
+     * This method parses the `style` and locates potentially dangerous content (such as urls and
+     * javascript) and removes it.
+     *
+     * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustStyle}.
+     *
+     * @param unsafeStyle untrusted `style`, typically from the user.
+     * @returns `style` string which is safe to bind to the `style` properties, because all of the
+     * dangerous javascript and urls have been removed.
+     *
+     * @publicApi
+     */
+    function ɵɵsanitizeStyle(unsafeStyle) {
+        var sanitizer = getSanitizer();
+        if (sanitizer) {
+            return sanitizer.sanitize(exports.SecurityContext.STYLE, unsafeStyle) || '';
+        }
+        if (allowSanitizationBypass(unsafeStyle, "Style" /* Style */)) {
+            return unsafeStyle.toString();
+        }
+        return _sanitizeStyle(renderStringify(unsafeStyle));
+    }
+    /**
+     * A `url` sanitizer which converts untrusted `url` **string** into trusted string by removing
+     * dangerous
+     * content.
+     *
+     * This method parses the `url` and locates potentially dangerous content (such as javascript) and
+     * removes it.
+     *
+     * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustUrl}.
+     *
+     * @param unsafeUrl untrusted `url`, typically from the user.
+     * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
+     * all of the dangerous javascript has been removed.
+     *
+     * @publicApi
+     */
+    function ɵɵsanitizeUrl(unsafeUrl) {
+        var sanitizer = getSanitizer();
+        if (sanitizer) {
+            return sanitizer.sanitize(exports.SecurityContext.URL, unsafeUrl) || '';
+        }
+        if (allowSanitizationBypass(unsafeUrl, "Url" /* Url */)) {
+            return unsafeUrl.toString();
+        }
+        return _sanitizeUrl(renderStringify(unsafeUrl));
+    }
+    /**
+     * A `url` sanitizer which only lets trusted `url`s through.
+     *
+     * This passes only `url`s marked trusted by calling {@link bypassSanitizationTrustResourceUrl}.
+     *
+     * @param unsafeResourceUrl untrusted `url`, typically from the user.
+     * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
+     * only trusted `url`s have been allowed to pass.
+     *
+     * @publicApi
+     */
+    function ɵɵsanitizeResourceUrl(unsafeResourceUrl) {
+        var sanitizer = getSanitizer();
+        if (sanitizer) {
+            return sanitizer.sanitize(exports.SecurityContext.RESOURCE_URL, unsafeResourceUrl) || '';
+        }
+        if (allowSanitizationBypass(unsafeResourceUrl, "ResourceUrl" /* ResourceUrl */)) {
+            return unsafeResourceUrl.toString();
+        }
+        throw new Error('unsafe value used in a resource URL context (see http://g.co/ng/security#xss)');
+    }
+    /**
+     * A `script` sanitizer which only lets trusted javascript through.
+     *
+     * This passes only `script`s marked trusted by calling {@link
+     * bypassSanitizationTrustScript}.
+     *
+     * @param unsafeScript untrusted `script`, typically from the user.
+     * @returns `url` string which is safe to bind to the `<script>` element such as `<img src>`,
+     * because only trusted `scripts` have been allowed to pass.
+     *
+     * @publicApi
+     */
+    function ɵɵsanitizeScript(unsafeScript) {
+        var sanitizer = getSanitizer();
+        if (sanitizer) {
+            return sanitizer.sanitize(exports.SecurityContext.SCRIPT, unsafeScript) || '';
+        }
+        if (allowSanitizationBypass(unsafeScript, "Script" /* Script */)) {
+            return unsafeScript.toString();
+        }
+        throw new Error('unsafe value used in a script context');
+    }
+    /**
+     * Detects which sanitizer to use for URL property, based on tag name and prop name.
+     *
+     * The rules are based on the RESOURCE_URL context config from
+     * `packages/compiler/src/schema/dom_security_schema.ts`.
+     * If tag and prop names don't match Resource URL schema, use URL sanitizer.
+     */
+    function getUrlSanitizer(tag, prop) {
+        if ((prop === 'src' && (tag === 'embed' || tag === 'frame' || tag === 'iframe' ||
+            tag === 'media' || tag === 'script')) ||
+            (prop === 'href' && (tag === 'base' || tag === 'link'))) {
+            return ɵɵsanitizeResourceUrl;
+        }
+        return ɵɵsanitizeUrl;
+    }
+    /**
+     * Sanitizes URL, selecting sanitizer function based on tag and property names.
+     *
+     * This function is used in case we can't define security context at compile time, when only prop
+     * name is available. This happens when we generate host bindings for Directives/Components. The
+     * host element is unknown at compile time, so we defer calculation of specific sanitizer to
+     * runtime.
+     *
+     * @param unsafeUrl untrusted `url`, typically from the user.
+     * @param tag target element tag name.
+     * @param prop name of the property that contains the value.
+     * @returns `url` string which is safe to bind.
+     *
+     * @publicApi
+     */
+    function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl, tag, prop) {
+        return getUrlSanitizer(tag, prop)(unsafeUrl);
+    }
+    /**
+     * The default style sanitizer will handle sanitization for style properties by
+     * sanitizing any CSS property that can include a `url` value (usually image-based properties)
+     *
+     * @publicApi
+     */
+    var ɵɵdefaultStyleSanitizer = function (prop, value) {
+        if (value === undefined) {
+            return prop === 'background-image' || prop === 'background' || prop === 'border-image' ||
+                prop === 'filter' || prop === 'list-style' || prop === 'list-style-image';
+        }
+        return ɵɵsanitizeStyle(value);
+    };
+    function validateAgainstEventProperties(name) {
+        if (name.toLowerCase().startsWith('on')) {
+            var msg = "Binding to event property '" + name + "' is disallowed for security reasons, " +
+                ("please use (" + name.slice(2) + ")=...") +
+                ("\nIf '" + name + "' is a directive input, make sure the directive is imported by the") +
+                " current module.";
+            throw new Error(msg);
+        }
+    }
+    function validateAgainstEventAttributes(name) {
+        if (name.toLowerCase().startsWith('on')) {
+            var msg = "Binding to event attribute '" + name + "' is disallowed for security reasons, " +
+                ("please use (" + name.slice(2) + ")=...");
+            throw new Error(msg);
+        }
+    }
+    function getSanitizer() {
+        var lView = getLView();
+        return lView && lView[SANITIZER];
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    function normalizeDebugBindingName(name) {
+        // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
+        name = camelCaseToDashCase(name.replace(/[$@]/g, '_'));
+        return "ng-reflect-" + name;
+    }
+    var CAMEL_CASE_REGEXP = /([A-Z])/g;
+    function camelCaseToDashCase(input) {
+        return input.replace(CAMEL_CASE_REGEXP, function () {
+            var m = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                m[_i] = arguments[_i];
+            }
+            return '-' + m[1].toLowerCase();
+        });
+    }
+    function normalizeDebugBindingValue(value) {
+        try {
+            // Limit the size of the value as otherwise the DOM just gets polluted.
+            return value != null ? value.toString().slice(0, 30) : value;
+        }
+        catch (e) {
+            return '[ERROR] Exception while trying to serialize the value';
+        }
+    }
 
     /**
      * @license
@@ -6421,6 +7365,14 @@
         // TODO: include debug context
         throw new Error(msg);
     }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
 
     /**
      * @license
@@ -8254,7 +9206,7 @@
     function getProjectAsAttrValue(tNode) {
         var nodeAttrs = tNode.attrs;
         if (nodeAttrs != null) {
-            var ngProjectAsAttrIdx = nodeAttrs.indexOf(NG_PROJECT_AS_ATTR_NAME);
+            var ngProjectAsAttrIdx = nodeAttrs.indexOf(5 /* ProjectAs */);
             // only check for ngProjectAs in attribute names, don't accidentally match attribute's value
             // (attribute names are stored at even indexes)
             if ((ngProjectAsAttrIdx & 1) === 0) {
@@ -8267,17 +9219,18 @@
      * Checks a given node against matching projection selectors and returns
      * selector index (or 0 if none matched).
      *
-     * This function takes into account the ngProjectAs attribute: if present its value will be
-     * compared to the raw (un-parsed) CSS selector instead of using standard selector matching logic.
+     * This function takes into account the parsed ngProjectAs selector from the node's attributes.
+     * If present, it will check whether the ngProjectAs selector matches any of the projection
+     * selectors.
      */
-    function matchingProjectionSelectorIndex(tNode, selectors, textSelectors) {
+    function matchingProjectionSelectorIndex(tNode, selectors) {
         var ngProjectAsAttrVal = getProjectAsAttrValue(tNode);
         for (var i = 0; i < selectors.length; i++) {
-            // if a node has the ngProjectAs attribute match it against unparsed selector
-            // match a node against a parsed selector only if ngProjectAs attribute is not present
-            if (ngProjectAsAttrVal === textSelectors[i] ||
-                ngProjectAsAttrVal === null &&
-                    isNodeMatchingSelectorList(tNode, selectors[i], /* isProjectionMode */ true)) {
+            // If we ran into an `ngProjectAs` attribute, we should match its parsed selector
+            // to the list of selectors, otherwise we fall back to matching against the node.
+            if (ngProjectAsAttrVal === null ?
+                isNodeMatchingSelectorList(tNode, selectors[i], /* isProjectionMode */ true) :
+                isSelectorInSelectorList(ngProjectAsAttrVal, selectors[i])) {
                 return i + 1; // first matching selector "captures" a given node
             }
         }
@@ -8303,6 +9256,26 @@
             }
         }
         return -1;
+    }
+    /**
+     * Checks whether a selector is inside a CssSelectorList
+     * @param selector Selector to be checked.
+     * @param list List in which to look for the selector.
+     */
+    function isSelectorInSelectorList(selector, list) {
+        selectorListLoop: for (var i = 0; i < list.length; i++) {
+            var currentSelectorInList = list[i];
+            if (selector.length !== currentSelectorInList.length) {
+                continue;
+            }
+            for (var j = 0; j < selector.length; j++) {
+                if (selector[j] !== currentSelectorInList[j]) {
+                    continue selectorListLoop;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -8573,9 +9546,9 @@
                 setPreviousOrParentTNode(null);
                 oldView = enterView(viewToRender, viewToRender[T_HOST]);
                 resetPreOrderHookFlags(viewToRender);
-                ΔnamespaceHTML();
+                ɵɵnamespaceHTML();
                 // Reset the selected index so we can assert that `select` was called later
-                ngDevMode && setSelectedIndex(-1);
+                setSelectedIndex(-1);
                 tView.template(getRenderFlags(viewToRender), context);
                 // This must be set to false immediately after the first creation run because in an
                 // ngFor loop, all the views will be created together before update mode runs and turns
@@ -8603,9 +9576,9 @@
             if (creationModeIsActive) {
                 // creation mode pass
                 if (templateFn) {
-                    ΔnamespaceHTML();
+                    ɵɵnamespaceHTML();
                     // Reset the selected index so we can assert that `select` was called later
-                    ngDevMode && setSelectedIndex(-1);
+                    setSelectedIndex(-1);
                     templateFn(1 /* Create */, context);
                 }
                 refreshDescendantViews(hostView);
@@ -8900,12 +9873,153 @@
         }
         return propStore;
     }
-    //////////////////////////
-    //// Text
-    //////////////////////////
-    //////////////////////////
-    //// Directive
-    //////////////////////////
+    /**
+    * Mapping between attributes names that don't correspond to their element property names.
+    */
+    var ATTR_TO_PROP = {
+        'class': 'className',
+        'for': 'htmlFor',
+        'formaction': 'formAction',
+        'innerHtml': 'innerHTML',
+        'readonly': 'readOnly',
+        'tabindex': 'tabIndex',
+    };
+    function elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadRendererFn) {
+        if (value === NO_CHANGE)
+            return;
+        var lView = getLView();
+        var element = getNativeByIndex(index, lView);
+        var tNode = getTNode(index, lView);
+        var inputData;
+        var dataValue;
+        if (!nativeOnly && (inputData = initializeTNodeInputs(tNode)) &&
+            (dataValue = inputData[propName])) {
+            setInputsForProperty(lView, dataValue, value);
+            if (isComponent(tNode))
+                markDirtyIfOnPush(lView, index + HEADER_OFFSET);
+            if (ngDevMode) {
+                if (tNode.type === 3 /* Element */ || tNode.type === 0 /* Container */) {
+                    setNgReflectProperties(lView, element, tNode.type, dataValue, value);
+                }
+            }
+        }
+        else if (tNode.type === 3 /* Element */) {
+            propName = ATTR_TO_PROP[propName] || propName;
+            if (ngDevMode) {
+                validateAgainstEventProperties(propName);
+                validateAgainstUnknownProperties(lView, element, propName, tNode);
+                ngDevMode.rendererSetProperty++;
+            }
+            savePropertyDebugData(tNode, lView, propName, lView[TVIEW].data, nativeOnly);
+            var renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
+            // It is assumed that the sanitizer is only added when the compiler determines that the property
+            // is risky, so sanitization can be done without further checks.
+            value = sanitizer != null ? sanitizer(value, tNode.tagName || '', propName) : value;
+            if (isProceduralRenderer(renderer)) {
+                renderer.setProperty(element, propName, value);
+            }
+            else if (!isAnimationProp(propName)) {
+                element.setProperty ? element.setProperty(propName, value) :
+                    element[propName] = value;
+            }
+        }
+        else if (tNode.type === 0 /* Container */) {
+            // If the node is a container and the property didn't
+            // match any of the inputs or schemas we should throw.
+            if (ngDevMode && !matchingSchemas(lView, tNode.tagName)) {
+                throw createUnknownPropertyError(propName, tNode);
+            }
+        }
+    }
+    /** If node is an OnPush component, marks its LView dirty. */
+    function markDirtyIfOnPush(lView, viewIndex) {
+        ngDevMode && assertLView(lView);
+        var childComponentLView = getComponentViewByIndex(viewIndex, lView);
+        if (!(childComponentLView[FLAGS] & 16 /* CheckAlways */)) {
+            childComponentLView[FLAGS] |= 64 /* Dirty */;
+        }
+    }
+    function setNgReflectProperties(lView, element, type, inputs, value) {
+        var _a;
+        for (var i = 0; i < inputs.length; i += 3) {
+            var renderer = lView[RENDERER];
+            var attrName = normalizeDebugBindingName(inputs[i + 2]);
+            var debugValue = normalizeDebugBindingValue(value);
+            if (type === 3 /* Element */) {
+                isProceduralRenderer(renderer) ?
+                    renderer.setAttribute(element, attrName, debugValue) :
+                    element.setAttribute(attrName, debugValue);
+            }
+            else if (value !== undefined) {
+                var value_1 = "bindings=" + JSON.stringify((_a = {}, _a[attrName] = debugValue, _a), null, 2);
+                if (isProceduralRenderer(renderer)) {
+                    renderer.setValue(element, value_1);
+                }
+                else {
+                    element.textContent = value_1;
+                }
+            }
+        }
+    }
+    function validateAgainstUnknownProperties(hostView, element, propName, tNode) {
+        // If the tag matches any of the schemas we shouldn't throw.
+        if (matchingSchemas(hostView, tNode.tagName)) {
+            return;
+        }
+        // If prop is not a known property of the HTML element...
+        if (!(propName in element) &&
+            // and we are in a browser context... (web worker nodes should be skipped)
+            typeof Node === 'function' && element instanceof Node &&
+            // and isn't a synthetic animation property...
+            propName[0] !== ANIMATION_PROP_PREFIX) {
+            // ... it is probably a user error and we should throw.
+            throw createUnknownPropertyError(propName, tNode);
+        }
+    }
+    function matchingSchemas(hostView, tagName) {
+        var schemas = hostView[TVIEW].schemas;
+        if (schemas !== null) {
+            for (var i = 0; i < schemas.length; i++) {
+                var schema = schemas[i];
+                if (schema === NO_ERRORS_SCHEMA ||
+                    schema === CUSTOM_ELEMENTS_SCHEMA && tagName && tagName.indexOf('-') > -1) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    /**
+    * Stores debugging data for this property binding on first template pass.
+    * This enables features like DebugElement.properties.
+    */
+    function savePropertyDebugData(tNode, lView, propName, tData, nativeOnly) {
+        var lastBindingIndex = lView[BINDING_INDEX] - 1;
+        // Bind/interpolation functions save binding metadata in the last binding index,
+        // but leave the property name blank. If the interpolation delimiter is at the 0
+        // index, we know that this is our first pass and the property name still needs to
+        // be set.
+        var bindingMetadata = tData[lastBindingIndex];
+        if (bindingMetadata[0] == INTERPOLATION_DELIMITER) {
+            tData[lastBindingIndex] = propName + bindingMetadata;
+            // We don't want to store indices for host bindings because they are stored in a
+            // different part of LView (the expando section).
+            if (!nativeOnly) {
+                if (tNode.propertyMetadataStartIndex == -1) {
+                    tNode.propertyMetadataStartIndex = lastBindingIndex;
+                }
+                tNode.propertyMetadataEndIndex = lastBindingIndex + 1;
+            }
+        }
+    }
+    /**
+    * Creates an error that should be thrown when encountering an unknown property on an element.
+    * @param propName Name of the invalid property.
+    * @param tNode Node on which we encountered the error.
+    */
+    function createUnknownPropertyError(propName, tNode) {
+        return new Error("Template error: Can't bind to '" + propName + "' since it isn't a known property of '" + tNode.tagName + "'.");
+    }
     /**
      * Instantiate a root component.
      */
@@ -9216,6 +10330,11 @@
                 i += 4;
                 continue;
             }
+            else if (attrName === 5 /* ProjectAs */) {
+                // Skip over the `ngProjectAs` value.
+                i += 2;
+                continue;
+            }
             // If we hit any other attribute markers, we're done anyway. None of those are valid inputs.
             if (typeof attrName === 'number')
                 break;
@@ -9484,10 +10603,10 @@
         var creationMode = isCreationMode(hostView);
         try {
             resetPreOrderHookFlags(hostView);
-            ΔnamespaceHTML();
+            ɵɵnamespaceHTML();
             creationMode && executeViewQueryFn(1 /* Create */, hostTView, component);
             // Reset the selected index so we can assert that `select` was called later
-            ngDevMode && setSelectedIndex(-1);
+            setSelectedIndex(-1);
             templateFn(getRenderFlags(hostView), component);
             refreshDescendantViews(hostView);
             // Only check view queries again in creation mode if there are static view queries
@@ -9659,9 +10778,9 @@
      *
      * @param count Amount of vars to be allocated
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔallocHostVars(count) {
+    function ɵɵallocHostVars(count) {
         var lView = getLView();
         var tView = lView[TVIEW];
         if (!tView.firstTemplatePass)
@@ -10526,9 +11645,9 @@
      *
      * @param index The index of the container in the data array
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δcontainer(index) {
+    function ɵɵcontainer(index) {
         var tNode = containerInternal(index, null, null);
         var lView = getLView();
         if (lView[TVIEW].firstTemplatePass) {
@@ -10554,9 +11673,9 @@
      * @param localRefExtractor A function which extracts local-refs values from the template.
      *        Defaults to the current element associated with the local-ref.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δtemplate(index, templateFn, consts, vars, tagName, attrs, localRefs, localRefExtractor) {
+    function ɵɵtemplate(index, templateFn, consts, vars, tagName, attrs, localRefs, localRefExtractor) {
         var lView = getLView();
         var tView = lView[TVIEW];
         // TODO: consider a separate node type for templates
@@ -10575,9 +11694,9 @@
      *
      * @param index The index of the container in the data array
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔcontainerRefreshStart(index) {
+    function ɵɵcontainerRefreshStart(index) {
         var lView = getLView();
         var tView = lView[TVIEW];
         var previousOrParentTNode = loadInternal(tView.data, index);
@@ -10594,9 +11713,9 @@
      *
      * Marking the end of LContainer is the time when to child views get inserted or removed.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔcontainerRefreshEnd() {
+    function ɵɵcontainerRefreshEnd() {
         var previousOrParentTNode = getPreviousOrParentTNode();
         if (getIsParent()) {
             setIsParent(false);
@@ -10677,18 +11796,18 @@
      *
      * @param index The index of the local ref in contextViewData.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δreference(index) {
+    function ɵɵreference(index) {
         var contextLView = getContextLView();
         return loadInternal(contextLView, index);
     }
     /**
      * Retrieves a value from current `viewData`.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δload(index) {
+    function ɵɵload(index) {
         return loadInternal(getLView(), index);
     }
 
@@ -10699,7 +11818,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    function ΔdirectiveInject(token, flags) {
+    function ɵɵdirectiveInject(token, flags) {
         if (flags === void 0) { flags = exports.InjectFlags.Default; }
         token = resolveForwardRef(token);
         return getOrCreateInjectable(getPreviousOrParentTNode(), getLView(), token, flags);
@@ -10707,918 +11826,10 @@
     /**
      * Facade for the attribute injection from DI.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔinjectAttribute(attrNameToInject) {
+    function ɵɵinjectAttribute(attrNameToInject) {
         return injectAttributeImpl(getPreviousOrParentTNode(), attrNameToInject);
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var BRAND = '__SANITIZER_TRUSTED_BRAND__';
-    function allowSanitizationBypass(value, type) {
-        return (value instanceof String && value[BRAND] === type);
-    }
-    /**
-     * Mark `html` string as trusted.
-     *
-     * This function wraps the trusted string in `String` and brands it in a way which makes it
-     * recognizable to {@link htmlSanitizer} to be trusted implicitly.
-     *
-     * @param trustedHtml `html` string which needs to be implicitly trusted.
-     * @returns a `html` `String` which has been branded to be implicitly trusted.
-     */
-    function bypassSanitizationTrustHtml(trustedHtml) {
-        return bypassSanitizationTrustString(trustedHtml, "Html" /* Html */);
-    }
-    /**
-     * Mark `style` string as trusted.
-     *
-     * This function wraps the trusted string in `String` and brands it in a way which makes it
-     * recognizable to {@link styleSanitizer} to be trusted implicitly.
-     *
-     * @param trustedStyle `style` string which needs to be implicitly trusted.
-     * @returns a `style` `String` which has been branded to be implicitly trusted.
-     */
-    function bypassSanitizationTrustStyle(trustedStyle) {
-        return bypassSanitizationTrustString(trustedStyle, "Style" /* Style */);
-    }
-    /**
-     * Mark `script` string as trusted.
-     *
-     * This function wraps the trusted string in `String` and brands it in a way which makes it
-     * recognizable to {@link scriptSanitizer} to be trusted implicitly.
-     *
-     * @param trustedScript `script` string which needs to be implicitly trusted.
-     * @returns a `script` `String` which has been branded to be implicitly trusted.
-     */
-    function bypassSanitizationTrustScript(trustedScript) {
-        return bypassSanitizationTrustString(trustedScript, "Script" /* Script */);
-    }
-    /**
-     * Mark `url` string as trusted.
-     *
-     * This function wraps the trusted string in `String` and brands it in a way which makes it
-     * recognizable to {@link urlSanitizer} to be trusted implicitly.
-     *
-     * @param trustedUrl `url` string which needs to be implicitly trusted.
-     * @returns a `url` `String` which has been branded to be implicitly trusted.
-     */
-    function bypassSanitizationTrustUrl(trustedUrl) {
-        return bypassSanitizationTrustString(trustedUrl, "Url" /* Url */);
-    }
-    /**
-     * Mark `url` string as trusted.
-     *
-     * This function wraps the trusted string in `String` and brands it in a way which makes it
-     * recognizable to {@link resourceUrlSanitizer} to be trusted implicitly.
-     *
-     * @param trustedResourceUrl `url` string which needs to be implicitly trusted.
-     * @returns a `url` `String` which has been branded to be implicitly trusted.
-     */
-    function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
-        return bypassSanitizationTrustString(trustedResourceUrl, "ResourceUrl" /* ResourceUrl */);
-    }
-    function bypassSanitizationTrustString(trustedString, mode) {
-        var trusted = new String(trustedString);
-        trusted[BRAND] = mode;
-        return trusted;
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * This file is used to control if the default rendering pipeline should be `ViewEngine` or `Ivy`.
-     *
-     * For more information on how to run and debug tests with either Ivy or View Engine (legacy),
-     * please see [BAZEL.md](./docs/BAZEL.md).
-     */
-    var _devMode = true;
-    var _runModeLocked = false;
-    /**
-     * Returns whether Angular is in development mode. After called once,
-     * the value is locked and won't change any more.
-     *
-     * By default, this is true, unless a user calls `enableProdMode` before calling this.
-     *
-     * @publicApi
-     */
-    function isDevMode() {
-        _runModeLocked = true;
-        return _devMode;
-    }
-    /**
-     * Disable Angular's development mode, which turns off assertions and other
-     * checks within the framework.
-     *
-     * One important assertion this disables verifies that a change detection pass
-     * does not result in additional changes to any bindings (also known as
-     * unidirectional data flow).
-     *
-     * @publicApi
-     */
-    function enableProdMode() {
-        if (_runModeLocked) {
-            throw new Error('Cannot enable prod mode after platform setup.');
-        }
-        _devMode = false;
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * This helper class is used to get hold of an inert tree of DOM elements containing dirty HTML
-     * that needs sanitizing.
-     * Depending upon browser support we must use one of three strategies for doing this.
-     * Support: Safari 10.x -> XHR strategy
-     * Support: Firefox -> DomParser strategy
-     * Default: InertDocument strategy
-     */
-    var InertBodyHelper = /** @class */ (function () {
-        function InertBodyHelper(defaultDoc) {
-            this.defaultDoc = defaultDoc;
-            this.inertDocument = this.defaultDoc.implementation.createHTMLDocument('sanitization-inert');
-            this.inertBodyElement = this.inertDocument.body;
-            if (this.inertBodyElement == null) {
-                // usually there should be only one body element in the document, but IE doesn't have any, so
-                // we need to create one.
-                var inertHtml = this.inertDocument.createElement('html');
-                this.inertDocument.appendChild(inertHtml);
-                this.inertBodyElement = this.inertDocument.createElement('body');
-                inertHtml.appendChild(this.inertBodyElement);
-            }
-            this.inertBodyElement.innerHTML = '<svg><g onload="this.parentNode.remove()"></g></svg>';
-            if (this.inertBodyElement.querySelector && !this.inertBodyElement.querySelector('svg')) {
-                // We just hit the Safari 10.1 bug - which allows JS to run inside the SVG G element
-                // so use the XHR strategy.
-                this.getInertBodyElement = this.getInertBodyElement_XHR;
-                return;
-            }
-            this.inertBodyElement.innerHTML =
-                '<svg><p><style><img src="</style><img src=x onerror=alert(1)//">';
-            if (this.inertBodyElement.querySelector && this.inertBodyElement.querySelector('svg img')) {
-                // We just hit the Firefox bug - which prevents the inner img JS from being sanitized
-                // so use the DOMParser strategy, if it is available.
-                // If the DOMParser is not available then we are not in Firefox (Server/WebWorker?) so we
-                // fall through to the default strategy below.
-                if (isDOMParserAvailable()) {
-                    this.getInertBodyElement = this.getInertBodyElement_DOMParser;
-                    return;
-                }
-            }
-            // None of the bugs were hit so it is safe for us to use the default InertDocument strategy
-            this.getInertBodyElement = this.getInertBodyElement_InertDocument;
-        }
-        /**
-         * Use XHR to create and fill an inert body element (on Safari 10.1)
-         * See
-         * https://github.com/cure53/DOMPurify/blob/a992d3a75031cb8bb032e5ea8399ba972bdf9a65/src/purify.js#L439-L449
-         */
-        InertBodyHelper.prototype.getInertBodyElement_XHR = function (html) {
-            // We add these extra elements to ensure that the rest of the content is parsed as expected
-            // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
-            // `<head>` tag.
-            html = '<body><remove></remove>' + html + '</body>';
-            try {
-                html = encodeURI(html);
-            }
-            catch (_a) {
-                return null;
-            }
-            var xhr = new XMLHttpRequest();
-            xhr.responseType = 'document';
-            xhr.open('GET', 'data:text/html;charset=utf-8,' + html, false);
-            xhr.send(undefined);
-            var body = xhr.response.body;
-            body.removeChild(body.firstChild);
-            return body;
-        };
-        /**
-         * Use DOMParser to create and fill an inert body element (on Firefox)
-         * See https://github.com/cure53/DOMPurify/releases/tag/0.6.7
-         *
-         */
-        InertBodyHelper.prototype.getInertBodyElement_DOMParser = function (html) {
-            // We add these extra elements to ensure that the rest of the content is parsed as expected
-            // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
-            // `<head>` tag.
-            html = '<body><remove></remove>' + html + '</body>';
-            try {
-                var body = new window
-                    .DOMParser()
-                    .parseFromString(html, 'text/html')
-                    .body;
-                body.removeChild(body.firstChild);
-                return body;
-            }
-            catch (_a) {
-                return null;
-            }
-        };
-        /**
-         * Use an HTML5 `template` element, if supported, or an inert body element created via
-         * `createHtmlDocument` to create and fill an inert DOM element.
-         * This is the default sane strategy to use if the browser does not require one of the specialised
-         * strategies above.
-         */
-        InertBodyHelper.prototype.getInertBodyElement_InertDocument = function (html) {
-            // Prefer using <template> element if supported.
-            var templateEl = this.inertDocument.createElement('template');
-            if ('content' in templateEl) {
-                templateEl.innerHTML = html;
-                return templateEl;
-            }
-            this.inertBodyElement.innerHTML = html;
-            // Support: IE 9-11 only
-            // strip custom-namespaced attributes on IE<=11
-            if (this.defaultDoc.documentMode) {
-                this.stripCustomNsAttrs(this.inertBodyElement);
-            }
-            return this.inertBodyElement;
-        };
-        /**
-         * When IE9-11 comes across an unknown namespaced attribute e.g. 'xlink:foo' it adds 'xmlns:ns1'
-         * attribute to declare ns1 namespace and prefixes the attribute with 'ns1' (e.g.
-         * 'ns1:xlink:foo').
-         *
-         * This is undesirable since we don't want to allow any of these custom attributes. This method
-         * strips them all.
-         */
-        InertBodyHelper.prototype.stripCustomNsAttrs = function (el) {
-            var elAttrs = el.attributes;
-            // loop backwards so that we can support removals.
-            for (var i = elAttrs.length - 1; 0 < i; i--) {
-                var attrib = elAttrs.item(i);
-                var attrName = attrib.name;
-                if (attrName === 'xmlns:ns1' || attrName.indexOf('ns1:') === 0) {
-                    el.removeAttribute(attrName);
-                }
-            }
-            var childNode = el.firstChild;
-            while (childNode) {
-                if (childNode.nodeType === Node.ELEMENT_NODE)
-                    this.stripCustomNsAttrs(childNode);
-                childNode = childNode.nextSibling;
-            }
-        };
-        return InertBodyHelper;
-    }());
-    /**
-     * We need to determine whether the DOMParser exists in the global context.
-     * The try-catch is because, on some browsers, trying to access this property
-     * on window can actually throw an error.
-     *
-     * @suppress {uselessCode}
-     */
-    function isDOMParserAvailable() {
-        try {
-            return !!window.DOMParser;
-        }
-        catch (_a) {
-            return false;
-        }
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * A pattern that recognizes a commonly useful subset of URLs that are safe.
-     *
-     * This regular expression matches a subset of URLs that will not cause script
-     * execution if used in URL context within a HTML document. Specifically, this
-     * regular expression matches if (comment from here on and regex copied from
-     * Soy's EscapingConventions):
-     * (1) Either an allowed protocol (http, https, mailto or ftp).
-     * (2) or no protocol.  A protocol must be followed by a colon. The below
-     *     allows that by allowing colons only after one of the characters [/?#].
-     *     A colon after a hash (#) must be in the fragment.
-     *     Otherwise, a colon after a (?) must be in a query.
-     *     Otherwise, a colon after a single solidus (/) must be in a path.
-     *     Otherwise, a colon after a double solidus (//) must be in the authority
-     *     (before port).
-     *
-     * The pattern disallows &, used in HTML entity declarations before
-     * one of the characters in [/?#]. This disallows HTML entities used in the
-     * protocol name, which should never happen, e.g. "h&#116;tp" for "http".
-     * It also disallows HTML entities in the first path part of a relative path,
-     * e.g. "foo&lt;bar/baz".  Our existing escaping functions should not produce
-     * that. More importantly, it disallows masking of a colon,
-     * e.g. "javascript&#58;...".
-     *
-     * This regular expression was taken from the Closure sanitization library.
-     */
-    var SAFE_URL_PATTERN = /^(?:(?:https?|mailto|ftp|tel|file):|[^&:/?#]*(?:[/?#]|$))/gi;
-    /** A pattern that matches safe data URLs. Only matches image, video and audio types. */
-    var DATA_URL_PATTERN = /^data:(?:image\/(?:bmp|gif|jpeg|jpg|png|tiff|webp)|video\/(?:mpeg|mp4|ogg|webm)|audio\/(?:mp3|oga|ogg|opus));base64,[a-z0-9+\/]+=*$/i;
-    function _sanitizeUrl(url) {
-        url = String(url);
-        if (url.match(SAFE_URL_PATTERN) || url.match(DATA_URL_PATTERN))
-            return url;
-        if (isDevMode()) {
-            console.warn("WARNING: sanitizing unsafe URL value " + url + " (see http://g.co/ng/security#xss)");
-        }
-        return 'unsafe:' + url;
-    }
-    function sanitizeSrcset(srcset) {
-        srcset = String(srcset);
-        return srcset.split(',').map(function (srcset) { return _sanitizeUrl(srcset.trim()); }).join(', ');
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    function tagSet(tags) {
-        var e_1, _a;
-        var res = {};
-        try {
-            for (var _b = __values(tags.split(',')), _c = _b.next(); !_c.done; _c = _b.next()) {
-                var t = _c.value;
-                res[t] = true;
-            }
-        }
-        catch (e_1_1) { e_1 = { error: e_1_1 }; }
-        finally {
-            try {
-                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
-            }
-            finally { if (e_1) throw e_1.error; }
-        }
-        return res;
-    }
-    function merge() {
-        var e_2, _a;
-        var sets = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            sets[_i] = arguments[_i];
-        }
-        var res = {};
-        try {
-            for (var sets_1 = __values(sets), sets_1_1 = sets_1.next(); !sets_1_1.done; sets_1_1 = sets_1.next()) {
-                var s = sets_1_1.value;
-                for (var v in s) {
-                    if (s.hasOwnProperty(v))
-                        res[v] = true;
-                }
-            }
-        }
-        catch (e_2_1) { e_2 = { error: e_2_1 }; }
-        finally {
-            try {
-                if (sets_1_1 && !sets_1_1.done && (_a = sets_1.return)) _a.call(sets_1);
-            }
-            finally { if (e_2) throw e_2.error; }
-        }
-        return res;
-    }
-    // Good source of info about elements and attributes
-    // http://dev.w3.org/html5/spec/Overview.html#semantics
-    // http://simon.html5.org/html-elements
-    // Safe Void Elements - HTML5
-    // http://dev.w3.org/html5/spec/Overview.html#void-elements
-    var VOID_ELEMENTS = tagSet('area,br,col,hr,img,wbr');
-    // Elements that you can, intentionally, leave open (and which close themselves)
-    // http://dev.w3.org/html5/spec/Overview.html#optional-tags
-    var OPTIONAL_END_TAG_BLOCK_ELEMENTS = tagSet('colgroup,dd,dt,li,p,tbody,td,tfoot,th,thead,tr');
-    var OPTIONAL_END_TAG_INLINE_ELEMENTS = tagSet('rp,rt');
-    var OPTIONAL_END_TAG_ELEMENTS = merge(OPTIONAL_END_TAG_INLINE_ELEMENTS, OPTIONAL_END_TAG_BLOCK_ELEMENTS);
-    // Safe Block Elements - HTML5
-    var BLOCK_ELEMENTS = merge(OPTIONAL_END_TAG_BLOCK_ELEMENTS, tagSet('address,article,' +
-        'aside,blockquote,caption,center,del,details,dialog,dir,div,dl,figure,figcaption,footer,h1,h2,h3,h4,h5,' +
-        'h6,header,hgroup,hr,ins,main,map,menu,nav,ol,pre,section,summary,table,ul'));
-    // Inline Elements - HTML5
-    var INLINE_ELEMENTS = merge(OPTIONAL_END_TAG_INLINE_ELEMENTS, tagSet('a,abbr,acronym,audio,b,' +
-        'bdi,bdo,big,br,cite,code,del,dfn,em,font,i,img,ins,kbd,label,map,mark,picture,q,ruby,rp,rt,s,' +
-        'samp,small,source,span,strike,strong,sub,sup,time,track,tt,u,var,video'));
-    var VALID_ELEMENTS = merge(VOID_ELEMENTS, BLOCK_ELEMENTS, INLINE_ELEMENTS, OPTIONAL_END_TAG_ELEMENTS);
-    // Attributes that have href and hence need to be sanitized
-    var URI_ATTRS = tagSet('background,cite,href,itemtype,longdesc,poster,src,xlink:href');
-    // Attributes that have special href set hence need to be sanitized
-    var SRCSET_ATTRS = tagSet('srcset');
-    var HTML_ATTRS = tagSet('abbr,accesskey,align,alt,autoplay,axis,bgcolor,border,cellpadding,cellspacing,class,clear,color,cols,colspan,' +
-        'compact,controls,coords,datetime,default,dir,download,face,headers,height,hidden,hreflang,hspace,' +
-        'ismap,itemscope,itemprop,kind,label,lang,language,loop,media,muted,nohref,nowrap,open,preload,rel,rev,role,rows,rowspan,rules,' +
-        'scope,scrolling,shape,size,sizes,span,srclang,start,summary,tabindex,target,title,translate,type,usemap,' +
-        'valign,value,vspace,width');
-    // NB: This currently consciously doesn't support SVG. SVG sanitization has had several security
-    // issues in the past, so it seems safer to leave it out if possible. If support for binding SVG via
-    // innerHTML is required, SVG attributes should be added here.
-    // NB: Sanitization does not allow <form> elements or other active elements (<button> etc). Those
-    // can be sanitized, but they increase security surface area without a legitimate use case, so they
-    // are left out here.
-    var VALID_ATTRS = merge(URI_ATTRS, SRCSET_ATTRS, HTML_ATTRS);
-    // Elements whose content should not be traversed/preserved, if the elements themselves are invalid.
-    //
-    // Typically, `<invalid>Some content</invalid>` would traverse (and in this case preserve)
-    // `Some content`, but strip `invalid-element` opening/closing tags. For some elements, though, we
-    // don't want to preserve the content, if the elements themselves are going to be removed.
-    var SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS = tagSet('script,style,template');
-    /**
-     * SanitizingHtmlSerializer serializes a DOM fragment, stripping out any unsafe elements and unsafe
-     * attributes.
-     */
-    var SanitizingHtmlSerializer = /** @class */ (function () {
-        function SanitizingHtmlSerializer() {
-            // Explicitly track if something was stripped, to avoid accidentally warning of sanitization just
-            // because characters were re-encoded.
-            this.sanitizedSomething = false;
-            this.buf = [];
-        }
-        SanitizingHtmlSerializer.prototype.sanitizeChildren = function (el) {
-            // This cannot use a TreeWalker, as it has to run on Angular's various DOM adapters.
-            // However this code never accesses properties off of `document` before deleting its contents
-            // again, so it shouldn't be vulnerable to DOM clobbering.
-            var current = el.firstChild;
-            var traverseContent = true;
-            while (current) {
-                if (current.nodeType === Node.ELEMENT_NODE) {
-                    traverseContent = this.startElement(current);
-                }
-                else if (current.nodeType === Node.TEXT_NODE) {
-                    this.chars(current.nodeValue);
-                }
-                else {
-                    // Strip non-element, non-text nodes.
-                    this.sanitizedSomething = true;
-                }
-                if (traverseContent && current.firstChild) {
-                    current = current.firstChild;
-                    continue;
-                }
-                while (current) {
-                    // Leaving the element. Walk up and to the right, closing tags as we go.
-                    if (current.nodeType === Node.ELEMENT_NODE) {
-                        this.endElement(current);
-                    }
-                    var next = this.checkClobberedElement(current, current.nextSibling);
-                    if (next) {
-                        current = next;
-                        break;
-                    }
-                    current = this.checkClobberedElement(current, current.parentNode);
-                }
-            }
-            return this.buf.join('');
-        };
-        /**
-         * Sanitizes an opening element tag (if valid) and returns whether the element's contents should
-         * be traversed. Element content must always be traversed (even if the element itself is not
-         * valid/safe), unless the element is one of `SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS`.
-         *
-         * @param element The element to sanitize.
-         * @return True if the element's contents should be traversed.
-         */
-        SanitizingHtmlSerializer.prototype.startElement = function (element) {
-            var tagName = element.nodeName.toLowerCase();
-            if (!VALID_ELEMENTS.hasOwnProperty(tagName)) {
-                this.sanitizedSomething = true;
-                return !SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS.hasOwnProperty(tagName);
-            }
-            this.buf.push('<');
-            this.buf.push(tagName);
-            var elAttrs = element.attributes;
-            for (var i = 0; i < elAttrs.length; i++) {
-                var elAttr = elAttrs.item(i);
-                var attrName = elAttr.name;
-                var lower = attrName.toLowerCase();
-                if (!VALID_ATTRS.hasOwnProperty(lower)) {
-                    this.sanitizedSomething = true;
-                    continue;
-                }
-                var value = elAttr.value;
-                // TODO(martinprobst): Special case image URIs for data:image/...
-                if (URI_ATTRS[lower])
-                    value = _sanitizeUrl(value);
-                if (SRCSET_ATTRS[lower])
-                    value = sanitizeSrcset(value);
-                this.buf.push(' ', attrName, '="', encodeEntities(value), '"');
-            }
-            this.buf.push('>');
-            return true;
-        };
-        SanitizingHtmlSerializer.prototype.endElement = function (current) {
-            var tagName = current.nodeName.toLowerCase();
-            if (VALID_ELEMENTS.hasOwnProperty(tagName) && !VOID_ELEMENTS.hasOwnProperty(tagName)) {
-                this.buf.push('</');
-                this.buf.push(tagName);
-                this.buf.push('>');
-            }
-        };
-        SanitizingHtmlSerializer.prototype.chars = function (chars) { this.buf.push(encodeEntities(chars)); };
-        SanitizingHtmlSerializer.prototype.checkClobberedElement = function (node, nextNode) {
-            if (nextNode &&
-                (node.compareDocumentPosition(nextNode) &
-                    Node.DOCUMENT_POSITION_CONTAINED_BY) === Node.DOCUMENT_POSITION_CONTAINED_BY) {
-                throw new Error("Failed to sanitize html because the element is clobbered: " + node.outerHTML);
-            }
-            return nextNode;
-        };
-        return SanitizingHtmlSerializer;
-    }());
-    // Regular Expressions for parsing tags and attributes
-    var SURROGATE_PAIR_REGEXP = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
-    // ! to ~ is the ASCII range.
-    var NON_ALPHANUMERIC_REGEXP = /([^\#-~ |!])/g;
-    /**
-     * Escapes all potentially dangerous characters, so that the
-     * resulting string can be safely inserted into attribute or
-     * element text.
-     * @param value
-     */
-    function encodeEntities(value) {
-        return value.replace(/&/g, '&amp;')
-            .replace(SURROGATE_PAIR_REGEXP, function (match) {
-            var hi = match.charCodeAt(0);
-            var low = match.charCodeAt(1);
-            return '&#' + (((hi - 0xD800) * 0x400) + (low - 0xDC00) + 0x10000) + ';';
-        })
-            .replace(NON_ALPHANUMERIC_REGEXP, function (match) { return '&#' + match.charCodeAt(0) + ';'; })
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
-    }
-    var inertBodyHelper;
-    /**
-     * Sanitizes the given unsafe, untrusted HTML fragment, and returns HTML text that is safe to add to
-     * the DOM in a browser environment.
-     */
-    function _sanitizeHtml(defaultDoc, unsafeHtmlInput) {
-        var inertBodyElement = null;
-        try {
-            inertBodyHelper = inertBodyHelper || new InertBodyHelper(defaultDoc);
-            // Make sure unsafeHtml is actually a string (TypeScript types are not enforced at runtime).
-            var unsafeHtml = unsafeHtmlInput ? String(unsafeHtmlInput) : '';
-            inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
-            // mXSS protection. Repeatedly parse the document to make sure it stabilizes, so that a browser
-            // trying to auto-correct incorrect HTML cannot cause formerly inert HTML to become dangerous.
-            var mXSSAttempts = 5;
-            var parsedHtml = unsafeHtml;
-            do {
-                if (mXSSAttempts === 0) {
-                    throw new Error('Failed to sanitize html because the input is unstable');
-                }
-                mXSSAttempts--;
-                unsafeHtml = parsedHtml;
-                parsedHtml = inertBodyElement.innerHTML;
-                inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
-            } while (unsafeHtml !== parsedHtml);
-            var sanitizer = new SanitizingHtmlSerializer();
-            var safeHtml = sanitizer.sanitizeChildren(getTemplateContent(inertBodyElement) || inertBodyElement);
-            if (isDevMode() && sanitizer.sanitizedSomething) {
-                console.warn('WARNING: sanitizing HTML stripped some content, see http://g.co/ng/security#xss');
-            }
-            return safeHtml;
-        }
-        finally {
-            // In case anything goes wrong, clear out inertElement to reset the entire DOM structure.
-            if (inertBodyElement) {
-                var parent_1 = getTemplateContent(inertBodyElement) || inertBodyElement;
-                while (parent_1.firstChild) {
-                    parent_1.removeChild(parent_1.firstChild);
-                }
-            }
-        }
-    }
-    function getTemplateContent(el) {
-        return 'content' in el /** Microsoft/TypeScript#21517 */ && isTemplateElement(el) ?
-            el.content :
-            null;
-    }
-    function isTemplateElement(el) {
-        return el.nodeType === Node.ELEMENT_NODE && el.nodeName === 'TEMPLATE';
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    (function (SecurityContext) {
-        SecurityContext[SecurityContext["NONE"] = 0] = "NONE";
-        SecurityContext[SecurityContext["HTML"] = 1] = "HTML";
-        SecurityContext[SecurityContext["STYLE"] = 2] = "STYLE";
-        SecurityContext[SecurityContext["SCRIPT"] = 3] = "SCRIPT";
-        SecurityContext[SecurityContext["URL"] = 4] = "URL";
-        SecurityContext[SecurityContext["RESOURCE_URL"] = 5] = "RESOURCE_URL";
-    })(exports.SecurityContext || (exports.SecurityContext = {}));
-    /**
-     * Sanitizer is used by the views to sanitize potentially dangerous values.
-     *
-     * @publicApi
-     */
-    var Sanitizer = /** @class */ (function () {
-        function Sanitizer() {
-        }
-        return Sanitizer;
-    }());
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Regular expression for safe style values.
-     *
-     * Quotes (" and ') are allowed, but a check must be done elsewhere to ensure they're balanced.
-     *
-     * ',' allows multiple values to be assigned to the same property (e.g. background-attachment or
-     * font-family) and hence could allow multiple values to get injected, but that should pose no risk
-     * of XSS.
-     *
-     * The function expression checks only for XSS safety, not for CSS validity.
-     *
-     * This regular expression was taken from the Closure sanitization library, and augmented for
-     * transformation values.
-     */
-    var VALUES = '[-,."\'%_!# a-zA-Z0-9]+';
-    var TRANSFORMATION_FNS = '(?:matrix|translate|scale|rotate|skew|perspective)(?:X|Y|3d)?';
-    var COLOR_FNS = '(?:rgb|hsl)a?';
-    var GRADIENTS = '(?:repeating-)?(?:linear|radial)-gradient';
-    var CSS3_FNS = '(?:calc|attr)';
-    var FN_ARGS = '\\([-0-9.%, #a-zA-Z]+\\)';
-    var SAFE_STYLE_VALUE = new RegExp("^(" + VALUES + "|" +
-        ("(?:" + TRANSFORMATION_FNS + "|" + COLOR_FNS + "|" + GRADIENTS + "|" + CSS3_FNS + ")") +
-        (FN_ARGS + ")$"), 'g');
-    /**
-     * Matches a `url(...)` value with an arbitrary argument as long as it does
-     * not contain parentheses.
-     *
-     * The URL value still needs to be sanitized separately.
-     *
-     * `url(...)` values are a very common use case, e.g. for `background-image`. With carefully crafted
-     * CSS style rules, it is possible to construct an information leak with `url` values in CSS, e.g.
-     * by observing whether scroll bars are displayed, or character ranges used by a font face
-     * definition.
-     *
-     * Angular only allows binding CSS values (as opposed to entire CSS rules), so it is unlikely that
-     * binding a URL value without further cooperation from the page will cause an information leak, and
-     * if so, it is just a leak, not a full blown XSS vulnerability.
-     *
-     * Given the common use case, low likelihood of attack vector, and low impact of an attack, this
-     * code is permissive and allows URLs that sanitize otherwise.
-     */
-    var URL_RE = /^url\(([^)]+)\)$/;
-    /**
-     * Checks that quotes (" and ') are properly balanced inside a string. Assumes
-     * that neither escape (\) nor any other character that could result in
-     * breaking out of a string parsing context are allowed;
-     * see http://www.w3.org/TR/css3-syntax/#string-token-diagram.
-     *
-     * This code was taken from the Closure sanitization library.
-     */
-    function hasBalancedQuotes(value) {
-        var outsideSingle = true;
-        var outsideDouble = true;
-        for (var i = 0; i < value.length; i++) {
-            var c = value.charAt(i);
-            if (c === '\'' && outsideDouble) {
-                outsideSingle = !outsideSingle;
-            }
-            else if (c === '"' && outsideSingle) {
-                outsideDouble = !outsideDouble;
-            }
-        }
-        return outsideSingle && outsideDouble;
-    }
-    /**
-     * Sanitizes the given untrusted CSS style property value (i.e. not an entire object, just a single
-     * value) and returns a value that is safe to use in a browser environment.
-     */
-    function _sanitizeStyle(value) {
-        value = String(value).trim(); // Make sure it's actually a string.
-        if (!value)
-            return '';
-        // Single url(...) values are supported, but only for URLs that sanitize cleanly. See above for
-        // reasoning behind this.
-        var urlMatch = value.match(URL_RE);
-        if ((urlMatch && _sanitizeUrl(urlMatch[1]) === urlMatch[1]) ||
-            value.match(SAFE_STYLE_VALUE) && hasBalancedQuotes(value)) {
-            return value; // Safe style values.
-        }
-        if (isDevMode()) {
-            console.warn("WARNING: sanitizing unsafe style value " + value + " (see http://g.co/ng/security#xss).");
-        }
-        return 'unsafe';
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
-     * dangerous content.
-     *
-     * This method parses the `html` and locates potentially dangerous content (such as urls and
-     * javascript) and removes it.
-     *
-     * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustHtml}.
-     *
-     * @param unsafeHtml untrusted `html`, typically from the user.
-     * @returns `html` string which is safe to display to user, because all of the dangerous javascript
-     * and urls have been removed.
-     *
-     * @publicApi
-     */
-    function ΔsanitizeHtml(unsafeHtml) {
-        var sanitizer = getSanitizer();
-        if (sanitizer) {
-            return sanitizer.sanitize(exports.SecurityContext.HTML, unsafeHtml) || '';
-        }
-        if (allowSanitizationBypass(unsafeHtml, "Html" /* Html */)) {
-            return unsafeHtml.toString();
-        }
-        return _sanitizeHtml(document, renderStringify(unsafeHtml));
-    }
-    /**
-     * A `style` sanitizer which converts untrusted `style` **string** into trusted string by removing
-     * dangerous content.
-     *
-     * This method parses the `style` and locates potentially dangerous content (such as urls and
-     * javascript) and removes it.
-     *
-     * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustStyle}.
-     *
-     * @param unsafeStyle untrusted `style`, typically from the user.
-     * @returns `style` string which is safe to bind to the `style` properties, because all of the
-     * dangerous javascript and urls have been removed.
-     *
-     * @publicApi
-     */
-    function ΔsanitizeStyle(unsafeStyle) {
-        var sanitizer = getSanitizer();
-        if (sanitizer) {
-            return sanitizer.sanitize(exports.SecurityContext.STYLE, unsafeStyle) || '';
-        }
-        if (allowSanitizationBypass(unsafeStyle, "Style" /* Style */)) {
-            return unsafeStyle.toString();
-        }
-        return _sanitizeStyle(renderStringify(unsafeStyle));
-    }
-    /**
-     * A `url` sanitizer which converts untrusted `url` **string** into trusted string by removing
-     * dangerous
-     * content.
-     *
-     * This method parses the `url` and locates potentially dangerous content (such as javascript) and
-     * removes it.
-     *
-     * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustUrl}.
-     *
-     * @param unsafeUrl untrusted `url`, typically from the user.
-     * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
-     * all of the dangerous javascript has been removed.
-     *
-     * @publicApi
-     */
-    function ΔsanitizeUrl(unsafeUrl) {
-        var sanitizer = getSanitizer();
-        if (sanitizer) {
-            return sanitizer.sanitize(exports.SecurityContext.URL, unsafeUrl) || '';
-        }
-        if (allowSanitizationBypass(unsafeUrl, "Url" /* Url */)) {
-            return unsafeUrl.toString();
-        }
-        return _sanitizeUrl(renderStringify(unsafeUrl));
-    }
-    /**
-     * A `url` sanitizer which only lets trusted `url`s through.
-     *
-     * This passes only `url`s marked trusted by calling {@link bypassSanitizationTrustResourceUrl}.
-     *
-     * @param unsafeResourceUrl untrusted `url`, typically from the user.
-     * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
-     * only trusted `url`s have been allowed to pass.
-     *
-     * @publicApi
-     */
-    function ΔsanitizeResourceUrl(unsafeResourceUrl) {
-        var sanitizer = getSanitizer();
-        if (sanitizer) {
-            return sanitizer.sanitize(exports.SecurityContext.RESOURCE_URL, unsafeResourceUrl) || '';
-        }
-        if (allowSanitizationBypass(unsafeResourceUrl, "ResourceUrl" /* ResourceUrl */)) {
-            return unsafeResourceUrl.toString();
-        }
-        throw new Error('unsafe value used in a resource URL context (see http://g.co/ng/security#xss)');
-    }
-    /**
-     * A `script` sanitizer which only lets trusted javascript through.
-     *
-     * This passes only `script`s marked trusted by calling {@link
-     * bypassSanitizationTrustScript}.
-     *
-     * @param unsafeScript untrusted `script`, typically from the user.
-     * @returns `url` string which is safe to bind to the `<script>` element such as `<img src>`,
-     * because only trusted `scripts` have been allowed to pass.
-     *
-     * @publicApi
-     */
-    function ΔsanitizeScript(unsafeScript) {
-        var sanitizer = getSanitizer();
-        if (sanitizer) {
-            return sanitizer.sanitize(exports.SecurityContext.SCRIPT, unsafeScript) || '';
-        }
-        if (allowSanitizationBypass(unsafeScript, "Script" /* Script */)) {
-            return unsafeScript.toString();
-        }
-        throw new Error('unsafe value used in a script context');
-    }
-    /**
-     * Detects which sanitizer to use for URL property, based on tag name and prop name.
-     *
-     * The rules are based on the RESOURCE_URL context config from
-     * `packages/compiler/src/schema/dom_security_schema.ts`.
-     * If tag and prop names don't match Resource URL schema, use URL sanitizer.
-     */
-    function getUrlSanitizer(tag, prop) {
-        if ((prop === 'src' && (tag === 'embed' || tag === 'frame' || tag === 'iframe' ||
-            tag === 'media' || tag === 'script')) ||
-            (prop === 'href' && (tag === 'base' || tag === 'link'))) {
-            return ΔsanitizeResourceUrl;
-        }
-        return ΔsanitizeUrl;
-    }
-    /**
-     * Sanitizes URL, selecting sanitizer function based on tag and property names.
-     *
-     * This function is used in case we can't define security context at compile time, when only prop
-     * name is available. This happens when we generate host bindings for Directives/Components. The
-     * host element is unknown at compile time, so we defer calculation of specific sanitizer to
-     * runtime.
-     *
-     * @param unsafeUrl untrusted `url`, typically from the user.
-     * @param tag target element tag name.
-     * @param prop name of the property that contains the value.
-     * @returns `url` string which is safe to bind.
-     *
-     * @publicApi
-     */
-    function ΔsanitizeUrlOrResourceUrl(unsafeUrl, tag, prop) {
-        return getUrlSanitizer(tag, prop)(unsafeUrl);
-    }
-    /**
-     * The default style sanitizer will handle sanitization for style properties by
-     * sanitizing any CSS property that can include a `url` value (usually image-based properties)
-     *
-     * @publicApi
-     */
-    var ΔdefaultStyleSanitizer = function (prop, value) {
-        if (value === undefined) {
-            return prop === 'background-image' || prop === 'background' || prop === 'border-image' ||
-                prop === 'filter' || prop === 'list-style' || prop === 'list-style-image';
-        }
-        return ΔsanitizeStyle(value);
-    };
-    function validateAgainstEventProperties(name) {
-        if (name.toLowerCase().startsWith('on')) {
-            var msg = "Binding to event property '" + name + "' is disallowed for security reasons, " +
-                ("please use (" + name.slice(2) + ")=...") +
-                ("\nIf '" + name + "' is a directive input, make sure the directive is imported by the") +
-                " current module.";
-            throw new Error(msg);
-        }
-    }
-    function validateAgainstEventAttributes(name) {
-        if (name.toLowerCase().startsWith('on')) {
-            var msg = "Binding to event attribute '" + name + "' is disallowed for security reasons, " +
-                ("please use (" + name.slice(2) + ")=...");
-            throw new Error(msg);
-        }
-    }
-    function getSanitizer() {
-        var lView = getLView();
-        return lView && lView[SANITIZER];
     }
 
     /*
@@ -11658,9 +11869,9 @@
      * @param styleSanitizer An optional sanitizer function that will be used to sanitize any CSS
      *        style values that are applied to the element (during rendering).
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔelementStyling(classBindingNames, styleBindingNames, styleSanitizer) {
+    function ɵɵelementStyling(classBindingNames, styleBindingNames, styleSanitizer) {
         var tNode = getPreviousOrParentTNode();
         if (!tNode.stylingTemplate) {
             tNode.stylingTemplate = createEmptyStylingContext();
@@ -11694,9 +11905,9 @@
      *        will not be used if the same property is assigned in another directive or
      *        on the element directly.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔelementHostStyling(classBindingNames, styleBindingNames, styleSanitizer) {
+    function ɵɵelementHostStyling(classBindingNames, styleBindingNames, styleSanitizer) {
         var tNode = getPreviousOrParentTNode();
         if (!tNode.stylingTemplate) {
             tNode.stylingTemplate = createEmptyStylingContext();
@@ -11740,9 +11951,9 @@
      * @param forceOverride Whether or not to update the styling value immediately
      *        (despite the other bindings possibly having priority)
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔelementStyleProp(index, styleIndex, value, suffix, forceOverride) {
+    function ɵɵelementStyleProp(index, styleIndex, value, suffix, forceOverride) {
         var valueToAdd = resolveStylePropValue(value, suffix);
         updateStyleProp(getStylingContext(index + HEADER_OFFSET, getLView()), styleIndex, valueToAdd, DEFAULT_TEMPLATE_DIRECTIVE_INDEX, forceOverride);
     }
@@ -11769,9 +11980,9 @@
      * @param forceOverride Whether or not to update the styling value immediately
      *        (despite the other bindings possibly having priority)
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔelementHostStyleProp(styleIndex, value, suffix, forceOverride) {
+    function ɵɵelementHostStyleProp(styleIndex, value, suffix, forceOverride) {
         var directiveStylingIndex = getActiveDirectiveStylingIndex();
         var hostElementIndex = getSelectedIndex();
         var lView = getLView();
@@ -11814,9 +12025,9 @@
      * @param forceOverride Whether or not this value will be applied regardless
      *        of where it is being set within the styling priority structure.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔelementClassProp(index, classIndex, value, forceOverride) {
+    function ɵɵelementClassProp(index, classIndex, value, forceOverride) {
         var input = (value instanceof BoundPlayerFactory) ?
             value :
             booleanOrNull(value);
@@ -11838,9 +12049,9 @@
      * @param forceOverride Whether or not this value will be applied regardless
      *        of where it is being set within the stylings priority structure.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔelementHostClassProp(classIndex, value, forceOverride) {
+    function ɵɵelementHostClassProp(classIndex, value, forceOverride) {
         var directiveStylingIndex = getActiveDirectiveStylingIndex();
         var hostElementIndex = getSelectedIndex();
         var lView = getLView();
@@ -11874,9 +12085,9 @@
      *        Any missing styles (that have already been applied to the element beforehand) will be
      *        removed (unset) from the element's styling.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔelementStylingMap(index, classes, styles) {
+    function ɵɵelementStylingMap(index, classes, styles) {
         var lView = getLView();
         var tNode = getTNode(index, lView);
         var stylingContext = getStylingContext(index + HEADER_OFFSET, lView);
@@ -11918,9 +12129,9 @@
      *        Any missing styles (that have already been applied to the element beforehand) will be
      *        removed (unset) from the element's styling.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔelementHostStylingMap(classes, styles) {
+    function ɵɵelementHostStylingMap(classes, styles) {
         var directiveStylingIndex = getActiveDirectiveStylingIndex();
         var hostElementIndex = getSelectedIndex();
         var lView = getLView();
@@ -11937,9 +12148,9 @@
      *
      * @param index Index of the element's with which styling is associated.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔelementStylingApply(index) {
+    function ɵɵelementStylingApply(index) {
         elementStylingApplyInternal(DEFAULT_TEMPLATE_DIRECTIVE_INDEX, index);
     }
     /**
@@ -11950,9 +12161,9 @@
      * been run and will only apply styling to the host element if any
      * styling bindings have been updated.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔelementHostStylingApply() {
+    function ɵɵelementHostStylingApply() {
         elementStylingApplyInternal(getActiveDirectiveStylingIndex(), getSelectedIndex());
     }
     function elementStylingApplyInternal(directiveStylingIndex, index) {
@@ -12000,9 +12211,9 @@
      * hold an attribute name and elements with an odd index hold an attribute value, ex.:
      * ['id', 'warning5', 'class', 'alert']
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔelementStart(index, name, attrs, localRefs) {
+    function ɵɵelementStart(index, name, attrs, localRefs) {
         var lView = getLView();
         var tView = lView[TVIEW];
         ngDevMode && assertEqual(lView[BINDING_INDEX], tView.bindingStartIndex, 'elements should be created before any bindings ');
@@ -12069,9 +12280,9 @@
     /**
      * Mark the end of the element.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔelementEnd() {
+    function ɵɵelementEnd() {
         var previousOrParentTNode = getPreviousOrParentTNode();
         if (getIsParent()) {
             setIsParent(false);
@@ -12113,11 +12324,11 @@
      *              element on creation. Use [AttributeMarker] to denote the meaning of this array.
      * @param localRefs A set of local reference bindings on the element.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δelement(index, name, attrs, localRefs) {
-        ΔelementStart(index, name, attrs, localRefs);
-        ΔelementEnd();
+    function ɵɵelement(index, name, attrs, localRefs) {
+        ɵɵelementStart(index, name, attrs, localRefs);
+        ɵɵelementEnd();
     }
     /**
      * Updates the value of removes an attribute on an Element.
@@ -12129,9 +12340,9 @@
      * @param sanitizer An optional function used to sanitize the value.
      * @param namespace Optional namespace to use when setting the attribute.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔelementAttribute(index, name, value, sanitizer, namespace) {
+    function ɵɵelementAttribute(index, name, value, sanitizer, namespace) {
         if (value !== NO_CHANGE) {
             ngDevMode && validateAgainstEventAttributes(name);
             var lView = getLView();
@@ -12193,9 +12404,9 @@
      * @param attrs An array of static values (attributes, classes and styles) with the correct marker
      * values.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔelementHostAttrs(attrs) {
+    function ɵɵelementHostAttrs(attrs) {
         var hostElementIndex = getSelectedIndex();
         var lView = getLView();
         var tNode = getTNode(hostElementIndex, lView);
@@ -12238,9 +12449,9 @@
      * the DOM (as a comment node can't have attributes). Attributes are here only for directive
      * matching purposes and setting initial inputs of directives.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔelementContainerStart(index, attrs, localRefs) {
+    function ɵɵelementContainerStart(index, attrs, localRefs) {
         var lView = getLView();
         var tView = lView[TVIEW];
         var renderer = lView[RENDERER];
@@ -12268,9 +12479,9 @@
     /**
      * Mark the end of the <ng-container>.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔelementContainerEnd() {
+    function ɵɵelementContainerEnd() {
         var previousOrParentTNode = getPreviousOrParentTNode();
         var lView = getLView();
         var tView = lView[TVIEW];
@@ -12306,9 +12517,9 @@
      * @param viewBlockId The ID of this view
      * @return boolean Whether or not this view is in creation mode
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔembeddedViewStart(viewBlockId, consts, vars) {
+    function ɵɵembeddedViewStart(viewBlockId, consts, vars) {
         var lView = getLView();
         var previousOrParentTNode = getPreviousOrParentTNode();
         // The previous node can be a view node if we are processing an inline for loop
@@ -12399,9 +12610,9 @@
     /**
      * Marks the end of an embedded view.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔembeddedViewEnd() {
+    function ɵɵembeddedViewEnd() {
         var lView = getLView();
         var viewHost = lView[T_HOST];
         if (isCreationMode(lView)) {
@@ -12424,9 +12635,9 @@
      * of the current view and restore it when listeners are invoked. This allows
      * walking the declaration view tree in listeners to get vars from parent views.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔgetCurrentView() {
+    function ɵɵgetCurrentView() {
         return getLView();
     }
 
@@ -12473,9 +12684,9 @@
      * @param eventTargetResolver Function that returns global target information in case this listener
      * should be attached to a global object like window, document or body
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δlistener(eventName, listenerFn, useCapture, eventTargetResolver) {
+    function ɵɵlistener(eventName, listenerFn, useCapture, eventTargetResolver) {
         if (useCapture === void 0) { useCapture = false; }
         listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver);
     }
@@ -12498,11 +12709,39 @@
     * @param eventTargetResolver Function that returns global target information in case this listener
     * should be attached to a global object like window, document or body
      *
-     * @publicApi
+     * @codeGenApi
     */
-    function ΔcomponentHostSyntheticListener(eventName, listenerFn, useCapture, eventTargetResolver) {
+    function ɵɵcomponentHostSyntheticListener(eventName, listenerFn, useCapture, eventTargetResolver) {
         if (useCapture === void 0) { useCapture = false; }
         listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver, loadComponentRenderer);
+    }
+    /**
+     * A utility function that checks if a given element has already an event handler registered for an
+     * event with a specified name. The TView.cleanup data structure is used to find out which events
+     * are registered for a given element.
+     */
+    function findExistingListener(lView, eventName, tNodeIdx) {
+        var tView = lView[TVIEW];
+        var tCleanup = tView.cleanup;
+        if (tCleanup != null) {
+            for (var i = 0; i < tCleanup.length - 1; i += 2) {
+                if (tCleanup[i] === eventName && tCleanup[i + 1] === tNodeIdx) {
+                    // We have found a matching event name on the same node but it might not have been
+                    // registered yet, so we must explicitly verify entries in the LView cleanup data
+                    // structures.
+                    var lCleanup = lView[CLEANUP];
+                    var listenerIdxInLCleanup = tCleanup[i + 2];
+                    return lCleanup.length > listenerIdxInLCleanup ? lCleanup[listenerIdxInLCleanup] : null;
+                }
+                // TView.cleanup can have a mix of 4-elements entries (for event handler cleanups) or
+                // 2-element entries (for directive and queries destroy hooks). As such we can encounter
+                // blocks of 4 or 2 items in the tView.cleanup and this is why we iterate over 2 elements
+                // first and jump another 2 elements if we detect listeners cleanup (4 elements). Also check
+                // documentation of TView.cleanup for more details of this data structure layout.
+                i += 2;
+            }
+        }
+        return null;
     }
     function listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver, loadRendererFn) {
         if (useCapture === void 0) { useCapture = false; }
@@ -12517,31 +12756,53 @@
             var native = getNativeByTNode(tNode, lView);
             var resolved = eventTargetResolver ? eventTargetResolver(native) : {};
             var target = resolved.target || native;
-            ngDevMode && ngDevMode.rendererAddEventListener++;
             var renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
             var lCleanup = getCleanup(lView);
             var lCleanupIndex = lCleanup.length;
-            var useCaptureOrSubIdx = useCapture;
+            var idxOrTargetGetter = eventTargetResolver ?
+                function (_lView) { return eventTargetResolver(unwrapRNode(_lView[tNode.index])).target; } :
+                tNode.index;
             // In order to match current behavior, native DOM event listeners must be added for all
             // events (including outputs).
             if (isProceduralRenderer(renderer)) {
-                // The first argument of `listen` function in Procedural Renderer is:
-                // - either a target name (as a string) in case of global target (window, document, body)
-                // - or element reference (in all other cases)
-                listenerFn = wrapListener(tNode, lView, listenerFn, false /** preventDefault */);
-                var cleanupFn = renderer.listen(resolved.name || target, eventName, listenerFn);
-                lCleanup.push(listenerFn, cleanupFn);
-                useCaptureOrSubIdx = lCleanupIndex + 1;
+                // There might be cases where multiple directives on the same element try to register an event
+                // handler function for the same event. In this situation we want to avoid registration of
+                // several native listeners as each registration would be intercepted by NgZone and
+                // trigger change detection. This would mean that a single user action would result in several
+                // change detections being invoked. To avoid this situation we want to have only one call to
+                // native handler registration (for the same element and same type of event).
+                //
+                // In order to have just one native event handler in presence of multiple handler functions,
+                // we just register a first handler function as a native event listener and then chain
+                // (coalesce) other handler functions on top of the first native handler function.
+                //
+                // Please note that the coalescing described here doesn't happen for events specifying an
+                // alternative target (ex. (document:click)) - this is to keep backward compatibility with the
+                // view engine.
+                var existingListener = eventTargetResolver ? null : findExistingListener(lView, eventName, tNode.index);
+                if (existingListener !== null) {
+                    // Attach a new listener at the head of the coalesced listeners list.
+                    listenerFn.__ngNextListenerFn__ = existingListener.__ngNextListenerFn__;
+                    existingListener.__ngNextListenerFn__ = listenerFn;
+                }
+                else {
+                    // The first argument of `listen` function in Procedural Renderer is:
+                    // - either a target name (as a string) in case of global target (window, document, body)
+                    // - or element reference (in all other cases)
+                    listenerFn = wrapListener(tNode, lView, listenerFn, false /** preventDefault */);
+                    var cleanupFn = renderer.listen(resolved.name || target, eventName, listenerFn);
+                    ngDevMode && ngDevMode.rendererAddEventListener++;
+                    lCleanup.push(listenerFn, cleanupFn);
+                    tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, lCleanupIndex + 1);
+                }
             }
             else {
                 listenerFn = wrapListener(tNode, lView, listenerFn, true /** preventDefault */);
                 target.addEventListener(eventName, listenerFn, useCapture);
+                ngDevMode && ngDevMode.rendererAddEventListener++;
                 lCleanup.push(listenerFn);
+                tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, useCapture);
             }
-            var idxOrTargetGetter = eventTargetResolver ?
-                function (_lView) { return eventTargetResolver(unwrapRNode(_lView[tNode.index])).target; } :
-                tNode.index;
-            tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, useCaptureOrSubIdx);
         }
         // subscribe to directive outputs
         if (tNode.outputs === undefined) {
@@ -12572,6 +12833,15 @@
             }
         }
     }
+    function executeListenerWithErrorHandling(lView, listenerFn, e) {
+        try {
+            return listenerFn(e);
+        }
+        catch (error) {
+            handleError(lView, error);
+            return false;
+        }
+    }
     /**
      * Wraps an event listener with a function that marks ancestors dirty and prevents default behavior,
      * if applicable.
@@ -12593,18 +12863,20 @@
             if ((lView[FLAGS] & 32 /* ManualOnPush */) === 0) {
                 markViewDirty(startView);
             }
-            try {
-                var result = listenerFn(e);
-                if (wrapWithPreventDefault && result === false) {
-                    e.preventDefault();
-                    // Necessary for legacy browsers that don't support preventDefault (e.g. IE)
-                    e.returnValue = false;
-                }
-                return result;
+            var result = executeListenerWithErrorHandling(lView, listenerFn, e);
+            // A just-invoked listener function might have coalesced listeners so we need to check for
+            // their presence and invoke as needed.
+            var nextListenerFn = wrapListenerIn_markDirtyAndPreventDefault.__ngNextListenerFn__;
+            while (nextListenerFn) {
+                result = executeListenerWithErrorHandling(lView, nextListenerFn, e);
+                nextListenerFn = nextListenerFn.__ngNextListenerFn__;
             }
-            catch (error) {
-                handleError(lView, error);
+            if (wrapWithPreventDefault && result === false) {
+                e.preventDefault();
+                // Necessary for legacy browsers that don't support preventDefault (e.g. IE)
+                e.returnValue = false;
             }
+            return result;
         };
     }
 
@@ -12633,9 +12905,9 @@
      * @param level The relative level of the view from which to grab context compared to contextVewData
      * @returns context
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔnextContext(level) {
+    function ɵɵnextContext(level) {
         if (level === void 0) { level = 1; }
         return nextContextImpl(level);
     }
@@ -12661,9 +12933,9 @@
      * @param selectors A collection of parsed CSS selectors
      * @param rawSelectors A collection of CSS selectors in the raw, un-parsed form
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔprojectionDef(selectors, textSelectors) {
+    function ɵɵprojectionDef(selectors) {
         var componentNode = findComponentView(getLView())[T_HOST];
         if (!componentNode.projection) {
             var noOfNodeBuckets = selectors ? selectors.length + 1 : 1;
@@ -12672,9 +12944,7 @@
             var tails = projectionHeads.slice();
             var componentChild = componentNode.child;
             while (componentChild !== null) {
-                var bucketIndex = selectors ?
-                    matchingProjectionSelectorIndex(componentChild, selectors, textSelectors) :
-                    0;
+                var bucketIndex = selectors ? matchingProjectionSelectorIndex(componentChild, selectors) : 0;
                 if (tails[bucketIndex]) {
                     tails[bucketIndex].projectionNext = componentChild;
                 }
@@ -12695,9 +12965,9 @@
      *        - 0 when the selector is `*` (or unspecified as this is the default value),
      *        - 1 based index of the selector from the {@link projectionDef}
       *
-     * @publicApi
+     * @codeGenApi
     */
-    function Δprojection(nodeIndex, selectorIndex, attrs) {
+    function ɵɵprojection(nodeIndex, selectorIndex, attrs) {
         if (selectorIndex === void 0) { selectorIndex = 0; }
         var lView = getLView();
         var tProjectionNode = createNodeAtIndex(nodeIndex, 1 /* Projection */, null, null, attrs || null);
@@ -12708,65 +12978,6 @@
         setIsParent(false);
         // re-distribution of projectable nodes is stored on a component's view level
         appendProjectedNodes(lView, tProjectionNode, selectorIndex, findComponentView(lView));
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Defines a schema that allows an NgModule to contain the following:
-     * - Non-Angular elements named with dash case (`-`).
-     * - Element properties named with dash case (`-`).
-     * Dash case is the naming convention for custom elements.
-     *
-     * @publicApi
-     */
-    var CUSTOM_ELEMENTS_SCHEMA = {
-        name: 'custom-elements'
-    };
-    /**
-     * Defines a schema that allows any property on any element.
-     *
-     * @publicApi
-     */
-    var NO_ERRORS_SCHEMA = {
-        name: 'no-errors-schema'
-    };
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    function normalizeDebugBindingName(name) {
-        // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
-        name = camelCaseToDashCase(name.replace(/[$@]/g, '_'));
-        return "ng-reflect-" + name;
-    }
-    var CAMEL_CASE_REGEXP = /([A-Z])/g;
-    function camelCaseToDashCase(input) {
-        return input.replace(CAMEL_CASE_REGEXP, function () {
-            var m = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                m[_i] = arguments[_i];
-            }
-            return '-' + m[1].toLowerCase();
-        });
-    }
-    function normalizeDebugBindingValue(value) {
-        try {
-            // Limit the size of the value as otherwise the DOM just gets polluted.
-            return value != null ? value.toString().slice(0, 30) : value;
-        }
-        catch (e) {
-            return '[ERROR] Exception while trying to serialize the value';
-        }
     }
 
     /**
@@ -12983,9 +13194,9 @@
      *
      * @param value Value to diff
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δbind(value) {
+    function ɵɵbind(value) {
         var lView = getLView();
         var bindingIndex = lView[BINDING_INDEX]++;
         storeBindingMetadata(lView);
@@ -13007,9 +13218,9 @@
     * @param nativeOnly Whether or not we should only set native properties and skip input check
     * (this is necessary for host property bindings)
      *
-     * @publicApi
+     * @codeGenApi
     */
-    function ΔelementProperty(index, propName, value, sanitizer, nativeOnly) {
+    function ɵɵelementProperty(index, propName, value, sanitizer, nativeOnly) {
         elementPropertyInternal(index, propName, value, sanitizer, nativeOnly);
     }
     /**
@@ -13033,157 +13244,10 @@
      * @param nativeOnly Whether or not we should only set native properties and skip input check
      * (this is necessary for host property bindings)
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔcomponentHostSyntheticProperty(index, propName, value, sanitizer, nativeOnly) {
+    function ɵɵcomponentHostSyntheticProperty(index, propName, value, sanitizer, nativeOnly) {
         elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadComponentRenderer);
-    }
-    /**
-    * Mapping between attributes names that don't correspond to their element property names.
-    */
-    var ATTR_TO_PROP = {
-        'class': 'className',
-        'for': 'htmlFor',
-        'formaction': 'formAction',
-        'innerHtml': 'innerHTML',
-        'readonly': 'readOnly',
-        'tabindex': 'tabIndex',
-    };
-    function elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadRendererFn) {
-        if (value === NO_CHANGE)
-            return;
-        var lView = getLView();
-        var element = getNativeByIndex(index, lView);
-        var tNode = getTNode(index, lView);
-        var inputData;
-        var dataValue;
-        if (!nativeOnly && (inputData = initializeTNodeInputs(tNode)) &&
-            (dataValue = inputData[propName])) {
-            setInputsForProperty(lView, dataValue, value);
-            if (isComponent(tNode))
-                markDirtyIfOnPush(lView, index + HEADER_OFFSET);
-            if (ngDevMode) {
-                if (tNode.type === 3 /* Element */ || tNode.type === 0 /* Container */) {
-                    setNgReflectProperties(lView, element, tNode.type, dataValue, value);
-                }
-            }
-        }
-        else if (tNode.type === 3 /* Element */) {
-            propName = ATTR_TO_PROP[propName] || propName;
-            if (ngDevMode) {
-                validateAgainstEventProperties(propName);
-                validateAgainstUnknownProperties(lView, element, propName, tNode);
-                ngDevMode.rendererSetProperty++;
-            }
-            savePropertyDebugData(tNode, lView, propName, lView[TVIEW].data, nativeOnly);
-            var renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
-            // It is assumed that the sanitizer is only added when the compiler determines that the property
-            // is risky, so sanitization can be done without further checks.
-            value = sanitizer != null ? sanitizer(value, tNode.tagName || '', propName) : value;
-            if (isProceduralRenderer(renderer)) {
-                renderer.setProperty(element, propName, value);
-            }
-            else if (!isAnimationProp(propName)) {
-                element.setProperty ? element.setProperty(propName, value) :
-                    element[propName] = value;
-            }
-        }
-        else if (tNode.type === 0 /* Container */) {
-            // If the node is a container and the property didn't
-            // match any of the inputs or schemas we should throw.
-            if (ngDevMode && !matchingSchemas(lView, tNode.tagName)) {
-                throw createUnknownPropertyError(propName, tNode);
-            }
-        }
-    }
-    /** If node is an OnPush component, marks its LView dirty. */
-    function markDirtyIfOnPush(lView, viewIndex) {
-        ngDevMode && assertLView(lView);
-        var childComponentLView = getComponentViewByIndex(viewIndex, lView);
-        if (!(childComponentLView[FLAGS] & 16 /* CheckAlways */)) {
-            childComponentLView[FLAGS] |= 64 /* Dirty */;
-        }
-    }
-    function setNgReflectProperties(lView, element, type, inputs, value) {
-        var _a;
-        for (var i = 0; i < inputs.length; i += 3) {
-            var renderer = lView[RENDERER];
-            var attrName = normalizeDebugBindingName(inputs[i + 2]);
-            var debugValue = normalizeDebugBindingValue(value);
-            if (type === 3 /* Element */) {
-                isProceduralRenderer(renderer) ?
-                    renderer.setAttribute(element, attrName, debugValue) :
-                    element.setAttribute(attrName, debugValue);
-            }
-            else if (value !== undefined) {
-                var value_1 = "bindings=" + JSON.stringify((_a = {}, _a[attrName] = debugValue, _a), null, 2);
-                if (isProceduralRenderer(renderer)) {
-                    renderer.setValue(element, value_1);
-                }
-                else {
-                    element.textContent = value_1;
-                }
-            }
-        }
-    }
-    function validateAgainstUnknownProperties(hostView, element, propName, tNode) {
-        // If the tag matches any of the schemas we shouldn't throw.
-        if (matchingSchemas(hostView, tNode.tagName)) {
-            return;
-        }
-        // If prop is not a known property of the HTML element...
-        if (!(propName in element) &&
-            // and we are in a browser context... (web worker nodes should be skipped)
-            typeof Node === 'function' && element instanceof Node &&
-            // and isn't a synthetic animation property...
-            propName[0] !== ANIMATION_PROP_PREFIX) {
-            // ... it is probably a user error and we should throw.
-            throw createUnknownPropertyError(propName, tNode);
-        }
-    }
-    function matchingSchemas(hostView, tagName) {
-        var schemas = hostView[TVIEW].schemas;
-        if (schemas !== null) {
-            for (var i = 0; i < schemas.length; i++) {
-                var schema = schemas[i];
-                if (schema === NO_ERRORS_SCHEMA ||
-                    schema === CUSTOM_ELEMENTS_SCHEMA && tagName && tagName.indexOf('-') > -1) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-    /**
-     * Stores debugging data for this property binding on first template pass.
-     * This enables features like DebugElement.properties.
-     */
-    function savePropertyDebugData(tNode, lView, propName, tData, nativeOnly) {
-        var lastBindingIndex = lView[BINDING_INDEX] - 1;
-        // Bind/interpolation functions save binding metadata in the last binding index,
-        // but leave the property name blank. If the interpolation delimiter is at the 0
-        // index, we know that this is our first pass and the property name still needs to
-        // be set.
-        var bindingMetadata = tData[lastBindingIndex];
-        if (bindingMetadata[0] == INTERPOLATION_DELIMITER) {
-            tData[lastBindingIndex] = propName + bindingMetadata;
-            // We don't want to store indices for host bindings because they are stored in a
-            // different part of LView (the expando section).
-            if (!nativeOnly) {
-                if (tNode.propertyMetadataStartIndex == -1) {
-                    tNode.propertyMetadataStartIndex = lastBindingIndex;
-                }
-                tNode.propertyMetadataEndIndex = lastBindingIndex + 1;
-            }
-        }
-    }
-    /**
-     * Creates an error that should be thrown when encountering an unknown property on an element.
-     * @param propName Name of the invalid property.
-     * @param tNode Node on which we encountered the error.
-     */
-    function createUnknownPropertyError(propName, tNode) {
-        return new Error("Template error: Can't bind to '" + propName + "' since it isn't a known property of '" + tNode.tagName + "'.");
     }
 
     /**
@@ -13205,9 +13269,9 @@
      *
      * Returns the concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔinterpolationV(values) {
+    function ɵɵinterpolationV(values) {
         ngDevMode && assertLessThan(2, values.length, 'should have at least 3 values');
         ngDevMode && assertEqual(values.length % 2, 1, 'should have an odd number of values');
         var different = false;
@@ -13244,9 +13308,9 @@
      * @param v0 value checked for change.
      * @param suffix static value used for concatenation only.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δinterpolation1(prefix, v0, suffix) {
+    function ɵɵinterpolation1(prefix, v0, suffix) {
         var lView = getLView();
         var different = bindingUpdated(lView, lView[BINDING_INDEX]++, v0);
         storeBindingMetadata(lView, prefix, suffix);
@@ -13255,9 +13319,9 @@
     /**
      * Creates an interpolation binding with 2 expressions.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δinterpolation2(prefix, v0, i0, v1, suffix) {
+    function ɵɵinterpolation2(prefix, v0, i0, v1, suffix) {
         var lView = getLView();
         var bindingIndex = lView[BINDING_INDEX];
         var different = bindingUpdated2(lView, bindingIndex, v0, v1);
@@ -13272,9 +13336,9 @@
     /**
      * Creates an interpolation binding with 3 expressions.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δinterpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
+    function ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
         var lView = getLView();
         var bindingIndex = lView[BINDING_INDEX];
         var different = bindingUpdated3(lView, bindingIndex, v0, v1, v2);
@@ -13293,9 +13357,9 @@
     /**
      * Create an interpolation binding with 4 expressions.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
+    function ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
         var lView = getLView();
         var bindingIndex = lView[BINDING_INDEX];
         var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
@@ -13316,9 +13380,9 @@
     /**
      * Creates an interpolation binding with 5 expressions.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
+    function ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
         var lView = getLView();
         var bindingIndex = lView[BINDING_INDEX];
         var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
@@ -13341,9 +13405,9 @@
     /**
      * Creates an interpolation binding with 6 expressions.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
+    function ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
         var lView = getLView();
         var bindingIndex = lView[BINDING_INDEX];
         var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
@@ -13367,9 +13431,9 @@
     /**
      * Creates an interpolation binding with 7 expressions.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
+    function ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
         var lView = getLView();
         var bindingIndex = lView[BINDING_INDEX];
         var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
@@ -13395,9 +13459,9 @@
     /**
      * Creates an interpolation binding with 8 expressions.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
+    function ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
         var lView = getLView();
         var bindingIndex = lView[BINDING_INDEX];
         var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
@@ -13430,7 +13494,7 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * Selects an index of an item to act on and flushes lifecycle hooks up to this point
+     * Selects an element for later binding instructions.
      *
      * Used in conjunction with instructions like {@link property} to act on elements with specified
      * indices, for example those created with {@link element} or {@link elementStart}.
@@ -13448,9 +13512,9 @@
      * ```
      * @param index the index of the item to act on with the following instructions
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δselect(index) {
+    function ɵɵselect(index) {
         ngDevMode && assertGreaterThan(index, -1, 'Invalid index');
         ngDevMode &&
             assertLessThan(index, getLView().length - HEADER_OFFSET, 'Should be within range for the view data');
@@ -13472,9 +13536,9 @@
      * @param index Index of the node in the data array
      * @param value Value to write. This value will be stringified.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δtext(index, value) {
+    function ɵɵtext(index, value) {
         var lView = getLView();
         ngDevMode && assertEqual(lView[BINDING_INDEX], lView[TVIEW].bindingStartIndex, 'text nodes should be created before any bindings');
         ngDevMode && ngDevMode.rendererCreateTextNode++;
@@ -13491,9 +13555,9 @@
      * @param index Index of the node in the data array.
      * @param value Stringified value to write.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔtextBinding(index, value) {
+    function ɵɵtextBinding(index, value) {
         if (value !== NO_CHANGE) {
             var lView = getLView();
             ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
@@ -14126,9 +14190,9 @@
      * });
      * ```
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔNgOnChangesFeature() {
+    function ɵɵNgOnChangesFeature() {
         // This option ensures that the ngOnChanges lifecycle hook will be inherited
         // from superclasses (in InheritDefinitionFeature).
         NgOnChangesFeatureImpl.ngInherit = true;
@@ -14193,9 +14257,9 @@
      * Merges the definition from a super class to a sub class.
      * @param definition The definition that is a SubClass of another directive of component
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔInheritDefinitionFeature(definition) {
+    function ɵɵInheritDefinitionFeature(definition) {
         var superType = getSuperType(definition.type);
         var _loop_1 = function () {
             var e_1, _a;
@@ -14335,7 +14399,7 @@
                     definition.onDestroy = definition.onDestroy || superPrototype.ngOnDestroy;
                     definition.onInit = definition.onInit || superPrototype.ngOnInit;
                     if (superPrototype.ngOnChanges) {
-                        ΔNgOnChangesFeature()(definition);
+                        ɵɵNgOnChangesFeature()(definition);
                     }
                 }
             }
@@ -14710,7 +14774,7 @@
                 factory = function () { return resolveForwardRef(provider.useValue); };
             }
             else if (isExistingProvider(provider)) {
-                factory = function () { return Δinject(resolveForwardRef(provider.useExisting)); };
+                factory = function () { return ɵɵinject(resolveForwardRef(provider.useExisting)); };
             }
             else if (isFactoryProvider(provider)) {
                 factory = function () { return provider.useFactory.apply(provider, __spread(injectArgs(provider.deps || []))); };
@@ -14842,7 +14906,7 @@
             }
             if (isTypeProvider(provider) || !provider.multi) {
                 // Single provider case: the factory is created and pushed immediately
-                var factory = new NodeInjectorFactory(providerFactory, isViewProvider, ΔdirectiveInject);
+                var factory = new NodeInjectorFactory(providerFactory, isViewProvider, ɵɵdirectiveInject);
                 var existingFactoryIndex = indexOf(token, tInjectables, isViewProvider ? beginIndex : beginIndex + cptViewProvidersCount, endIndex);
                 if (existingFactoryIndex == -1) {
                     diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, lView), lView, token);
@@ -14980,7 +15044,7 @@
      * Creates a multi factory.
      */
     function multiFactory(factoryFn, index, isViewProvider, isComponent, f) {
-        var factory = new NodeInjectorFactory(factoryFn, isViewProvider, ΔdirectiveInject);
+        var factory = new NodeInjectorFactory(factoryFn, isViewProvider, ɵɵdirectiveInject);
         factory.multi = [];
         factory.index = index;
         factory.componentProviders = 0;
@@ -15016,9 +15080,9 @@
      *
      * @param definition
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔProvidersFeature(providers, viewProviders) {
+    function ɵɵProvidersFeature(providers, viewProviders) {
         if (viewProviders === void 0) { viewProviders = []; }
         return function (definition) {
             definition.providersResolver =
@@ -15936,7 +16000,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.11+64.sha-675f390.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.11+85.sha-b057806.with-local-changes');
 
     /**
      * @license
@@ -16937,7 +17001,7 @@
             }
         };
         /** @nocollapse */
-        IterableDiffers.ngInjectableDef = ΔdefineInjectable({
+        IterableDiffers.ngInjectableDef = ɵɵdefineInjectable({
             providedIn: 'root',
             factory: function () { return new IterableDiffers([new DefaultIterableDifferFactory()]); }
         });
@@ -17013,7 +17077,7 @@
             throw new Error("Cannot find a differ supporting object '" + kv + "'");
         };
         /** @nocollapse */
-        KeyValueDiffers.ngInjectableDef = ΔdefineInjectable({
+        KeyValueDiffers.ngInjectableDef = ɵɵdefineInjectable({
             providedIn: 'root',
             factory: function () { return new KeyValueDiffers([new DefaultKeyValueDifferFactory()]); }
         });
@@ -19041,7 +19105,7 @@
     /**
      * Default {@link RootContext} for all components rendered with {@link renderComponent}.
      */
-    var ROOT_CONTEXT = new InjectionToken('ROOT_CONTEXT_TOKEN', { providedIn: 'root', factory: function () { return createRootContext(Δinject(SCHEDULER)); } });
+    var ROOT_CONTEXT = new InjectionToken('ROOT_CONTEXT_TOKEN', { providedIn: 'root', factory: function () { return createRootContext(ɵɵinject(SCHEDULER)); } });
     /**
      * A change detection scheduler token for {@link RootContext}. This token is the default value used
      * for the default `RootContext` found in the {@link ROOT_CONTEXT} token.
@@ -19197,6 +19261,19 @@
         };
         return ComponentRef;
     }(ComponentRef));
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    if (typeof _global['ngI18nClosureMode'] === 'undefined') {
+        // Make sure to refer to ngI18nClosureMode as ['ngI18nClosureMode'] for closure.
+        _global['ngI18nClosureMode'] =
+            typeof _global['goog'] !== 'undefined' && typeof _global['goog'].getMsg === 'function';
+    }
 
     /**
      * @license
@@ -19501,9 +19578,9 @@
      * @param message The translation message.
      * @param subTemplateIndex Optional sub-template index in the `message`.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δi18nStart(index, message, subTemplateIndex) {
+    function ɵɵi18nStart(index, message, subTemplateIndex) {
         var tView = getLView()[TVIEW];
         ngDevMode && assertDefined(tView, "tView should be defined");
         i18nIndexStack[++i18nIndexStackPointer] = index;
@@ -19664,9 +19741,9 @@
      *
      * @returns Transformed string that can be consumed by i18nStart instruction
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δi18nPostprocess(message, replacements) {
+    function ɵɵi18nPostprocess(message, replacements) {
         if (replacements === void 0) { replacements = {}; }
         /**
          * Step 1: resolve all multi-value placeholders like [�#5�|�*1:1��#2:1�|�#4:1�]
@@ -19755,9 +19832,9 @@
      * Translates a translation block marked by `i18nStart` and `i18nEnd`. It inserts the text/ICU nodes
      * into the render tree, moves the placeholder nodes and removes the deleted nodes.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δi18nEnd() {
+    function ɵɵi18nEnd() {
         var tView = getLView()[TVIEW];
         ngDevMode && assertDefined(tView, "tView should be defined");
         i18nEndFirstPass(tView);
@@ -19850,7 +19927,7 @@
                         var elementNodeIndex = opCode >>> 3 /* SHIFT_REF */;
                         var attrName = createOpCodes[++i];
                         var attrValue = createOpCodes[++i];
-                        ΔelementAttribute(elementNodeIndex, attrName, attrValue);
+                        ɵɵelementAttribute(elementNodeIndex, attrName, attrValue);
                         break;
                     default:
                         throw new Error("Unable to determine the type of mutate operation for \"" + opCode + "\"");
@@ -19920,10 +19997,10 @@
                                 case 1 /* Attr */:
                                     var attrName = updateOpCodes[++j];
                                     var sanitizeFn = updateOpCodes[++j];
-                                    ΔelementAttribute(nodeIndex, attrName, value, sanitizeFn);
+                                    ɵɵelementAttribute(nodeIndex, attrName, value, sanitizeFn);
                                     break;
                                 case 0 /* Text */:
-                                    ΔtextBinding(nodeIndex, value);
+                                    ɵɵtextBinding(nodeIndex, value);
                                     break;
                                 case 2 /* IcuSwitch */:
                                     tIcuIndex = updateOpCodes[++j];
@@ -19979,7 +20056,7 @@
         if (removedPhRNode) {
             nativeRemoveNode(viewData[RENDERER], removedPhRNode);
         }
-        var slotValue = Δload(index);
+        var slotValue = ɵɵload(index);
         if (isLContainer(slotValue)) {
             var lContainer = slotValue;
             if (removedPhTNode.type !== 0 /* Container */) {
@@ -20012,11 +20089,11 @@
      * @param message The translation message.
      * @param subTemplateIndex Optional sub-template index in the `message`.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δi18n(index, message, subTemplateIndex) {
-        Δi18nStart(index, message, subTemplateIndex);
-        Δi18nEnd();
+    function ɵɵi18n(index, message, subTemplateIndex) {
+        ɵɵi18nStart(index, message, subTemplateIndex);
+        ɵɵi18nEnd();
     }
     /**
      * Marks a list of attributes as translatable.
@@ -20024,9 +20101,9 @@
      * @param index A unique index in the static block
      * @param values
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δi18nAttributes(index, values) {
+    function ɵɵi18nAttributes(index, values) {
         var tView = getLView()[TVIEW];
         ngDevMode && assertDefined(tView, "tView should be defined");
         if (tView.firstTemplatePass && tView.data[index + HEADER_OFFSET] === null) {
@@ -20054,7 +20131,7 @@
                         addAllToArray(generateBindingUpdateOpCodes(value, previousElementIndex, attrName), updateOpCodes);
                     }
                     else {
-                        ΔelementAttribute(previousElementIndex, attrName, value);
+                        ɵɵelementAttribute(previousElementIndex, attrName, value);
                     }
                 }
             }
@@ -20069,9 +20146,9 @@
      *
      * @param expression The binding's new value or NO_CHANGE
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δi18nExp(expression) {
+    function ɵɵi18nExp(expression) {
         if (expression !== NO_CHANGE) {
             changeMask = changeMask | (1 << shiftsCounter);
         }
@@ -20083,9 +20160,9 @@
      * @param index Index of either {@link i18nStart} (translation block) or {@link i18nAttributes}
      * (i18n attribute) on which it should update the content.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δi18nApply(index) {
+    function ɵɵi18nApply(index) {
         if (shiftsCounter) {
             var lView = getLView();
             var tView = lView[TVIEW];
@@ -20711,6 +20788,38 @@
             }
         }
     }
+    var TRANSLATIONS = {};
+    /**
+     * Set the configuration for `i18nLocalize`.
+     *
+     * @deprecated this method is temporary & should not be used as it will be removed soon
+     */
+    function i18nConfigureLocalize(options) {
+        if (options === void 0) { options = {
+            translations: {}
+        }; }
+        TRANSLATIONS = options.translations;
+    }
+    var LOCALIZE_PH_REGEXP = /\{\$(.*?)\}/g;
+    /**
+     * A goog.getMsg-like function for users that do not use Closure.
+     *
+     * This method is required as a *temporary* measure to prevent i18n tests from being blocked while
+     * running outside of Closure Compiler. This method will not be needed once runtime translation
+     * service support is introduced.
+     *
+     * @publicApi
+     * @deprecated this method is temporary & should not be used as it will be removed soon
+     */
+    function ɵɵi18nLocalize(input, placeholders) {
+        if (placeholders === void 0) { placeholders = {}; }
+        if (typeof TRANSLATIONS[input] !== 'undefined') { // to account for empty string
+            input = TRANSLATIONS[input];
+        }
+        return Object.keys(placeholders).length ?
+            input.replace(LOCALIZE_PH_REGEXP, function (match, key) { return placeholders[key] || ''; }) :
+            input;
+    }
 
     /**
      * @license
@@ -20876,9 +20985,9 @@
      * @param thisArg Optional calling context of pureFn
      * @returns value
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔpureFunction0(slotOffset, pureFn, thisArg) {
+    function ɵɵpureFunction0(slotOffset, pureFn, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
         var bindingIndex = getBindingRoot() + slotOffset;
         var lView = getLView();
@@ -20896,9 +21005,9 @@
      * @param thisArg Optional calling context of pureFn
      * @returns Updated or cached value
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔpureFunction1(slotOffset, pureFn, exp, thisArg) {
+    function ɵɵpureFunction1(slotOffset, pureFn, exp, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
         var lView = getLView();
         var bindingIndex = getBindingRoot() + slotOffset;
@@ -20917,9 +21026,9 @@
      * @param thisArg Optional calling context of pureFn
      * @returns Updated or cached value
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔpureFunction2(slotOffset, pureFn, exp1, exp2, thisArg) {
+    function ɵɵpureFunction2(slotOffset, pureFn, exp1, exp2, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
         var bindingIndex = getBindingRoot() + slotOffset;
         var lView = getLView();
@@ -20939,9 +21048,9 @@
      * @param thisArg Optional calling context of pureFn
      * @returns Updated or cached value
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔpureFunction3(slotOffset, pureFn, exp1, exp2, exp3, thisArg) {
+    function ɵɵpureFunction3(slotOffset, pureFn, exp1, exp2, exp3, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
         var bindingIndex = getBindingRoot() + slotOffset;
         var lView = getLView();
@@ -20962,9 +21071,9 @@
      * @param thisArg Optional calling context of pureFn
      * @returns Updated or cached value
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔpureFunction4(slotOffset, pureFn, exp1, exp2, exp3, exp4, thisArg) {
+    function ɵɵpureFunction4(slotOffset, pureFn, exp1, exp2, exp3, exp4, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
         var bindingIndex = getBindingRoot() + slotOffset;
         var lView = getLView();
@@ -20986,9 +21095,9 @@
      * @param thisArg Optional calling context of pureFn
      * @returns Updated or cached value
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔpureFunction5(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, thisArg) {
+    function ɵɵpureFunction5(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
         var bindingIndex = getBindingRoot() + slotOffset;
         var lView = getLView();
@@ -21013,9 +21122,9 @@
      * @param thisArg Optional calling context of pureFn
      * @returns Updated or cached value
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔpureFunction6(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, thisArg) {
+    function ɵɵpureFunction6(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
         var bindingIndex = getBindingRoot() + slotOffset;
         var lView = getLView();
@@ -21042,9 +21151,9 @@
      * @param thisArg Optional calling context of pureFn
      * @returns Updated or cached value
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔpureFunction7(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, thisArg) {
+    function ɵɵpureFunction7(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
         var bindingIndex = getBindingRoot() + slotOffset;
         var lView = getLView();
@@ -21072,9 +21181,9 @@
      * @param thisArg Optional calling context of pureFn
      * @returns Updated or cached value
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔpureFunction8(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, thisArg) {
+    function ɵɵpureFunction8(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
         var bindingIndex = getBindingRoot() + slotOffset;
         var lView = getLView();
@@ -21098,9 +21207,9 @@
      * @param thisArg Optional calling context of pureFn
      * @returns Updated or cached value
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔpureFunctionV(slotOffset, pureFn, exps, thisArg) {
+    function ɵɵpureFunctionV(slotOffset, pureFn, exps, thisArg) {
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
         var bindingIndex = getBindingRoot() + slotOffset;
         var different = false;
@@ -21126,9 +21235,9 @@
      * @param pipeName The name of the pipe
      * @returns T the instance of the pipe.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function Δpipe(index, pipeName) {
+    function ɵɵpipe(index, pipeName) {
         var tView = getLView()[TVIEW];
         var pipeDef;
         var adjustedIndex = index + HEADER_OFFSET;
@@ -21177,11 +21286,11 @@
      * @param slotOffset the offset in the reserved slot space
      * @param v1 1st argument to {@link PipeTransform#transform}.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔpipeBind1(index, slotOffset, v1) {
-        var pipeInstance = Δload(index);
-        return unwrapValue$1(isPure(index) ? ΔpureFunction1(slotOffset, pipeInstance.transform, v1, pipeInstance) :
+    function ɵɵpipeBind1(index, slotOffset, v1) {
+        var pipeInstance = ɵɵload(index);
+        return unwrapValue$1(isPure(index) ? ɵɵpureFunction1(slotOffset, pipeInstance.transform, v1, pipeInstance) :
             pipeInstance.transform(v1));
     }
     /**
@@ -21195,11 +21304,11 @@
      * @param v1 1st argument to {@link PipeTransform#transform}.
      * @param v2 2nd argument to {@link PipeTransform#transform}.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔpipeBind2(index, slotOffset, v1, v2) {
-        var pipeInstance = Δload(index);
-        return unwrapValue$1(isPure(index) ? ΔpureFunction2(slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
+    function ɵɵpipeBind2(index, slotOffset, v1, v2) {
+        var pipeInstance = ɵɵload(index);
+        return unwrapValue$1(isPure(index) ? ɵɵpureFunction2(slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
             pipeInstance.transform(v1, v2));
     }
     /**
@@ -21214,11 +21323,12 @@
      * @param v2 2nd argument to {@link PipeTransform#transform}.
      * @param v3 4rd argument to {@link PipeTransform#transform}.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔpipeBind3(index, slotOffset, v1, v2, v3) {
-        var pipeInstance = Δload(index);
-        return unwrapValue$1(isPure(index) ? ΔpureFunction3(slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
+    function ɵɵpipeBind3(index, slotOffset, v1, v2, v3) {
+        var pipeInstance = ɵɵload(index);
+        return unwrapValue$1(isPure(index) ?
+            ɵɵpureFunction3(slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
             pipeInstance.transform(v1, v2, v3));
     }
     /**
@@ -21234,12 +21344,12 @@
      * @param v3 3rd argument to {@link PipeTransform#transform}.
      * @param v4 4th argument to {@link PipeTransform#transform}.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔpipeBind4(index, slotOffset, v1, v2, v3, v4) {
-        var pipeInstance = Δload(index);
+    function ɵɵpipeBind4(index, slotOffset, v1, v2, v3, v4) {
+        var pipeInstance = ɵɵload(index);
         return unwrapValue$1(isPure(index) ?
-            ΔpureFunction4(slotOffset, pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
+            ɵɵpureFunction4(slotOffset, pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
             pipeInstance.transform(v1, v2, v3, v4));
     }
     /**
@@ -21252,11 +21362,11 @@
      * @param slotOffset the offset in the reserved slot space
      * @param values Array of arguments to pass to {@link PipeTransform#transform} method.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔpipeBindV(index, slotOffset, values) {
-        var pipeInstance = Δload(index);
-        return unwrapValue$1(isPure(index) ? ΔpureFunctionV(slotOffset, pipeInstance.transform, values, pipeInstance) :
+    function ɵɵpipeBindV(index, slotOffset, values) {
+        var pipeInstance = ɵɵload(index);
+        return unwrapValue$1(isPure(index) ? ɵɵpureFunctionV(slotOffset, pipeInstance.transform, values, pipeInstance) :
             pipeInstance.transform.apply(pipeInstance, values));
     }
     function isPure(index) {
@@ -21785,9 +21895,9 @@
      * @returns `true` if a query got dirty during change detection or if this is a static query
      * resolving in creation mode, `false` otherwise.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔqueryRefresh(queryList) {
+    function ɵɵqueryRefresh(queryList) {
         var queryListImpl = queryList;
         var creationMode = isCreationMode();
         // if creation mode and static or update mode and not static
@@ -21805,12 +21915,12 @@
      * @param descend Whether or not to descend into children
      * @param read What to save in the query
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔstaticViewQuery(
+    function ɵɵstaticViewQuery(
     // TODO(FW-486): "read" should be an AbstractType
     predicate, descend, read) {
-        var queryList = ΔviewQuery(predicate, descend, read);
+        var queryList = ɵɵviewQuery(predicate, descend, read);
         var tView = getLView()[TVIEW];
         queryList._static = true;
         if (!tView.staticViewQueries) {
@@ -21825,9 +21935,9 @@
      * @param read What to save in the query
      * @returns QueryList<T>
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔviewQuery(
+    function ɵɵviewQuery(
     // TODO(FW-486): "read" should be an AbstractType
     predicate, descend, read) {
         var lView = getLView();
@@ -21844,12 +21954,12 @@
     /**
      * Loads current View Query and moves the pointer/index to the next View Query in LView.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔloadViewQuery() {
+    function ɵɵloadViewQuery() {
         var index = getCurrentQueryIndex();
         setCurrentQueryIndex(index + 1);
-        return Δload(index - HEADER_OFFSET);
+        return ɵɵload(index - HEADER_OFFSET);
     }
     /**
      * Registers a QueryList, associated with a content query, for later refresh (part of a view
@@ -21861,9 +21971,9 @@
      * @param read What to save in the query
      * @returns QueryList<T>
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔcontentQuery(directiveIndex, predicate, descend, 
+    function ɵɵcontentQuery(directiveIndex, predicate, descend, 
     // TODO(FW-486): "read" should be an AbstractType
     read) {
         var lView = getLView();
@@ -21889,12 +21999,12 @@
      * @param read What to save in the query
      * @returns QueryList<T>
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔstaticContentQuery(directiveIndex, predicate, descend, 
+    function ɵɵstaticContentQuery(directiveIndex, predicate, descend, 
     // TODO(FW-486): "read" should be an AbstractType
     read) {
-        var queryList = ΔcontentQuery(directiveIndex, predicate, descend, read);
+        var queryList = ɵɵcontentQuery(directiveIndex, predicate, descend, read);
         var tView = getLView()[TVIEW];
         queryList._static = true;
         if (!tView.staticContentQueries) {
@@ -21903,9 +22013,9 @@
     }
     /**
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔloadContentQuery() {
+    function ɵɵloadContentQuery() {
         var lView = getLView();
         ngDevMode &&
             assertDefined(lView[CONTENT_QUERIES], 'Content QueryList array should be defined if reading a query.');
@@ -21926,9 +22036,9 @@
      * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
      * `<ng-template>` element.
      *
-     * @publicApi
+     * @codeGenApi
      */
-    function ΔtemplateRefExtractor(tNode, currentView) {
+    function ɵɵtemplateRefExtractor(tNode, currentView) {
         return createTemplateRef(TemplateRef, ElementRef, tNode, currentView);
     }
 
@@ -21953,117 +22063,118 @@
      * This should be kept up to date with the public exports of @angular/core.
      */
     var angularCoreEnv = {
-        'ΔdefineBase': ΔdefineBase,
-        'ΔdefineComponent': ΔdefineComponent,
-        'ΔdefineDirective': ΔdefineDirective,
-        'ΔdefineInjectable': ΔdefineInjectable,
-        'ΔdefineInjector': ΔdefineInjector,
-        'ΔdefineNgModule': ΔdefineNgModule,
-        'ΔdefinePipe': ΔdefinePipe,
-        'ΔdirectiveInject': ΔdirectiveInject,
-        'ΔgetFactoryOf': ΔgetFactoryOf,
-        'ΔgetInheritedFactory': ΔgetInheritedFactory,
-        'Δinject': Δinject,
-        'ΔinjectAttribute': ΔinjectAttribute,
-        'ΔtemplateRefExtractor': ΔtemplateRefExtractor,
-        'ΔNgOnChangesFeature': ΔNgOnChangesFeature,
-        'ΔProvidersFeature': ΔProvidersFeature,
-        'ΔInheritDefinitionFeature': ΔInheritDefinitionFeature,
-        'ΔelementAttribute': ΔelementAttribute,
-        'Δbind': Δbind,
-        'Δcontainer': Δcontainer,
-        'ΔnextContext': ΔnextContext,
-        'ΔcontainerRefreshStart': ΔcontainerRefreshStart,
-        'ΔcontainerRefreshEnd': ΔcontainerRefreshEnd,
-        'ΔnamespaceHTML': ΔnamespaceHTML,
-        'ΔnamespaceMathML': ΔnamespaceMathML,
-        'ΔnamespaceSVG': ΔnamespaceSVG,
-        'ΔenableBindings': ΔenableBindings,
-        'ΔdisableBindings': ΔdisableBindings,
-        'ΔallocHostVars': ΔallocHostVars,
-        'ΔelementStart': ΔelementStart,
-        'ΔelementEnd': ΔelementEnd,
-        'Δelement': Δelement,
-        'ΔelementContainerStart': ΔelementContainerStart,
-        'ΔelementContainerEnd': ΔelementContainerEnd,
-        'ΔpureFunction0': ΔpureFunction0,
-        'ΔpureFunction1': ΔpureFunction1,
-        'ΔpureFunction2': ΔpureFunction2,
-        'ΔpureFunction3': ΔpureFunction3,
-        'ΔpureFunction4': ΔpureFunction4,
-        'ΔpureFunction5': ΔpureFunction5,
-        'ΔpureFunction6': ΔpureFunction6,
-        'ΔpureFunction7': ΔpureFunction7,
-        'ΔpureFunction8': ΔpureFunction8,
-        'ΔpureFunctionV': ΔpureFunctionV,
-        'ΔgetCurrentView': ΔgetCurrentView,
-        'ΔrestoreView': ΔrestoreView,
-        'Δinterpolation1': Δinterpolation1,
-        'Δinterpolation2': Δinterpolation2,
-        'Δinterpolation3': Δinterpolation3,
-        'Δinterpolation4': Δinterpolation4,
-        'Δinterpolation5': Δinterpolation5,
-        'Δinterpolation6': Δinterpolation6,
-        'Δinterpolation7': Δinterpolation7,
-        'Δinterpolation8': Δinterpolation8,
-        'ΔinterpolationV': ΔinterpolationV,
-        'Δlistener': Δlistener,
-        'Δload': Δload,
-        'Δprojection': Δprojection,
-        'ΔelementProperty': ΔelementProperty,
-        'ΔcomponentHostSyntheticProperty': ΔcomponentHostSyntheticProperty,
-        'ΔcomponentHostSyntheticListener': ΔcomponentHostSyntheticListener,
-        'ΔpipeBind1': ΔpipeBind1,
-        'ΔpipeBind2': ΔpipeBind2,
-        'ΔpipeBind3': ΔpipeBind3,
-        'ΔpipeBind4': ΔpipeBind4,
-        'ΔpipeBindV': ΔpipeBindV,
-        'ΔprojectionDef': ΔprojectionDef,
-        'Δpipe': Δpipe,
-        'ΔqueryRefresh': ΔqueryRefresh,
-        'ΔviewQuery': ΔviewQuery,
-        'ΔstaticViewQuery': ΔstaticViewQuery,
-        'ΔstaticContentQuery': ΔstaticContentQuery,
-        'ΔloadViewQuery': ΔloadViewQuery,
-        'ΔcontentQuery': ΔcontentQuery,
-        'ΔloadContentQuery': ΔloadContentQuery,
-        'Δreference': Δreference,
-        'ΔelementHostAttrs': ΔelementHostAttrs,
-        'ΔelementStyling': ΔelementStyling,
-        'ΔelementStylingMap': ΔelementStylingMap,
-        'ΔelementStyleProp': ΔelementStyleProp,
-        'ΔelementStylingApply': ΔelementStylingApply,
-        'ΔelementClassProp': ΔelementClassProp,
-        'ΔelementHostStyling': ΔelementHostStyling,
-        'ΔelementHostStylingMap': ΔelementHostStylingMap,
-        'ΔelementHostStyleProp': ΔelementHostStyleProp,
-        'ΔelementHostStylingApply': ΔelementHostStylingApply,
-        'ΔelementHostClassProp': ΔelementHostClassProp,
-        'Δselect': Δselect,
-        'Δtemplate': Δtemplate,
-        'Δtext': Δtext,
-        'ΔtextBinding': ΔtextBinding,
-        'ΔembeddedViewStart': ΔembeddedViewStart,
-        'ΔembeddedViewEnd': ΔembeddedViewEnd,
-        'Δi18n': Δi18n,
-        'Δi18nAttributes': Δi18nAttributes,
-        'Δi18nExp': Δi18nExp,
-        'Δi18nStart': Δi18nStart,
-        'Δi18nEnd': Δi18nEnd,
-        'Δi18nApply': Δi18nApply,
-        'Δi18nPostprocess': Δi18nPostprocess,
-        'ΔresolveWindow': ΔresolveWindow,
-        'ΔresolveDocument': ΔresolveDocument,
-        'ΔresolveBody': ΔresolveBody,
-        'ΔsetComponentScope': ΔsetComponentScope,
-        'ΔsetNgModuleScope': ΔsetNgModuleScope,
-        'ΔsanitizeHtml': ΔsanitizeHtml,
-        'ΔsanitizeStyle': ΔsanitizeStyle,
-        'ΔdefaultStyleSanitizer': ΔdefaultStyleSanitizer,
-        'ΔsanitizeResourceUrl': ΔsanitizeResourceUrl,
-        'ΔsanitizeScript': ΔsanitizeScript,
-        'ΔsanitizeUrl': ΔsanitizeUrl,
-        'ΔsanitizeUrlOrResourceUrl': ΔsanitizeUrlOrResourceUrl
+        'ɵɵdefineBase': ɵɵdefineBase,
+        'ɵɵdefineComponent': ɵɵdefineComponent,
+        'ɵɵdefineDirective': ɵɵdefineDirective,
+        'ɵɵdefineInjectable': ɵɵdefineInjectable,
+        'ɵɵdefineInjector': ɵɵdefineInjector,
+        'ɵɵdefineNgModule': ɵɵdefineNgModule,
+        'ɵɵdefinePipe': ɵɵdefinePipe,
+        'ɵɵdirectiveInject': ɵɵdirectiveInject,
+        'ɵɵgetFactoryOf': ɵɵgetFactoryOf,
+        'ɵɵgetInheritedFactory': ɵɵgetInheritedFactory,
+        'ɵɵinject': ɵɵinject,
+        'ɵɵinjectAttribute': ɵɵinjectAttribute,
+        'ɵɵtemplateRefExtractor': ɵɵtemplateRefExtractor,
+        'ɵɵNgOnChangesFeature': ɵɵNgOnChangesFeature,
+        'ɵɵProvidersFeature': ɵɵProvidersFeature,
+        'ɵɵInheritDefinitionFeature': ɵɵInheritDefinitionFeature,
+        'ɵɵelementAttribute': ɵɵelementAttribute,
+        'ɵɵbind': ɵɵbind,
+        'ɵɵcontainer': ɵɵcontainer,
+        'ɵɵnextContext': ɵɵnextContext,
+        'ɵɵcontainerRefreshStart': ɵɵcontainerRefreshStart,
+        'ɵɵcontainerRefreshEnd': ɵɵcontainerRefreshEnd,
+        'ɵɵnamespaceHTML': ɵɵnamespaceHTML,
+        'ɵɵnamespaceMathML': ɵɵnamespaceMathML,
+        'ɵɵnamespaceSVG': ɵɵnamespaceSVG,
+        'ɵɵenableBindings': ɵɵenableBindings,
+        'ɵɵdisableBindings': ɵɵdisableBindings,
+        'ɵɵallocHostVars': ɵɵallocHostVars,
+        'ɵɵelementStart': ɵɵelementStart,
+        'ɵɵelementEnd': ɵɵelementEnd,
+        'ɵɵelement': ɵɵelement,
+        'ɵɵelementContainerStart': ɵɵelementContainerStart,
+        'ɵɵelementContainerEnd': ɵɵelementContainerEnd,
+        'ɵɵpureFunction0': ɵɵpureFunction0,
+        'ɵɵpureFunction1': ɵɵpureFunction1,
+        'ɵɵpureFunction2': ɵɵpureFunction2,
+        'ɵɵpureFunction3': ɵɵpureFunction3,
+        'ɵɵpureFunction4': ɵɵpureFunction4,
+        'ɵɵpureFunction5': ɵɵpureFunction5,
+        'ɵɵpureFunction6': ɵɵpureFunction6,
+        'ɵɵpureFunction7': ɵɵpureFunction7,
+        'ɵɵpureFunction8': ɵɵpureFunction8,
+        'ɵɵpureFunctionV': ɵɵpureFunctionV,
+        'ɵɵgetCurrentView': ɵɵgetCurrentView,
+        'ɵɵrestoreView': ɵɵrestoreView,
+        'ɵɵinterpolation1': ɵɵinterpolation1,
+        'ɵɵinterpolation2': ɵɵinterpolation2,
+        'ɵɵinterpolation3': ɵɵinterpolation3,
+        'ɵɵinterpolation4': ɵɵinterpolation4,
+        'ɵɵinterpolation5': ɵɵinterpolation5,
+        'ɵɵinterpolation6': ɵɵinterpolation6,
+        'ɵɵinterpolation7': ɵɵinterpolation7,
+        'ɵɵinterpolation8': ɵɵinterpolation8,
+        'ɵɵinterpolationV': ɵɵinterpolationV,
+        'ɵɵlistener': ɵɵlistener,
+        'ɵɵload': ɵɵload,
+        'ɵɵprojection': ɵɵprojection,
+        'ɵɵelementProperty': ɵɵelementProperty,
+        'ɵɵcomponentHostSyntheticProperty': ɵɵcomponentHostSyntheticProperty,
+        'ɵɵcomponentHostSyntheticListener': ɵɵcomponentHostSyntheticListener,
+        'ɵɵpipeBind1': ɵɵpipeBind1,
+        'ɵɵpipeBind2': ɵɵpipeBind2,
+        'ɵɵpipeBind3': ɵɵpipeBind3,
+        'ɵɵpipeBind4': ɵɵpipeBind4,
+        'ɵɵpipeBindV': ɵɵpipeBindV,
+        'ɵɵprojectionDef': ɵɵprojectionDef,
+        'ɵɵpipe': ɵɵpipe,
+        'ɵɵqueryRefresh': ɵɵqueryRefresh,
+        'ɵɵviewQuery': ɵɵviewQuery,
+        'ɵɵstaticViewQuery': ɵɵstaticViewQuery,
+        'ɵɵstaticContentQuery': ɵɵstaticContentQuery,
+        'ɵɵloadViewQuery': ɵɵloadViewQuery,
+        'ɵɵcontentQuery': ɵɵcontentQuery,
+        'ɵɵloadContentQuery': ɵɵloadContentQuery,
+        'ɵɵreference': ɵɵreference,
+        'ɵɵelementHostAttrs': ɵɵelementHostAttrs,
+        'ɵɵelementStyling': ɵɵelementStyling,
+        'ɵɵelementStylingMap': ɵɵelementStylingMap,
+        'ɵɵelementStyleProp': ɵɵelementStyleProp,
+        'ɵɵelementStylingApply': ɵɵelementStylingApply,
+        'ɵɵelementClassProp': ɵɵelementClassProp,
+        'ɵɵelementHostStyling': ɵɵelementHostStyling,
+        'ɵɵelementHostStylingMap': ɵɵelementHostStylingMap,
+        'ɵɵelementHostStyleProp': ɵɵelementHostStyleProp,
+        'ɵɵelementHostStylingApply': ɵɵelementHostStylingApply,
+        'ɵɵelementHostClassProp': ɵɵelementHostClassProp,
+        'ɵɵselect': ɵɵselect,
+        'ɵɵtemplate': ɵɵtemplate,
+        'ɵɵtext': ɵɵtext,
+        'ɵɵtextBinding': ɵɵtextBinding,
+        'ɵɵembeddedViewStart': ɵɵembeddedViewStart,
+        'ɵɵembeddedViewEnd': ɵɵembeddedViewEnd,
+        'ɵɵi18n': ɵɵi18n,
+        'ɵɵi18nAttributes': ɵɵi18nAttributes,
+        'ɵɵi18nExp': ɵɵi18nExp,
+        'ɵɵi18nStart': ɵɵi18nStart,
+        'ɵɵi18nEnd': ɵɵi18nEnd,
+        'ɵɵi18nApply': ɵɵi18nApply,
+        'ɵɵi18nPostprocess': ɵɵi18nPostprocess,
+        'ɵɵi18nLocalize': ɵɵi18nLocalize,
+        'ɵɵresolveWindow': ɵɵresolveWindow,
+        'ɵɵresolveDocument': ɵɵresolveDocument,
+        'ɵɵresolveBody': ɵɵresolveBody,
+        'ɵɵsetComponentScope': ɵɵsetComponentScope,
+        'ɵɵsetNgModuleScope': ɵɵsetNgModuleScope,
+        'ɵɵsanitizeHtml': ɵɵsanitizeHtml,
+        'ɵɵsanitizeStyle': ɵɵsanitizeStyle,
+        'ɵɵdefaultStyleSanitizer': ɵɵdefaultStyleSanitizer,
+        'ɵɵsanitizeResourceUrl': ɵɵsanitizeResourceUrl,
+        'ɵɵsanitizeScript': ɵɵsanitizeScript,
+        'ɵɵsanitizeUrl': ɵɵsanitizeUrl,
+        'ɵɵsanitizeUrlOrResourceUrl': ɵɵsanitizeUrlOrResourceUrl
     };
 
     /**
@@ -22897,7 +23008,7 @@
         if (metadata && metadata.exports) {
             imports = __spread(imports, [metadata.exports]);
         }
-        moduleType.ngInjectorDef = ΔdefineInjector({
+        moduleType.ngInjectorDef = ɵɵdefineInjector({
             factory: convertInjectableProviderToFactory(moduleType, { useClass: moduleType }),
             providers: metadata && metadata.providers,
             imports: imports,
@@ -25412,7 +25523,7 @@
      *
      * @publicApi
      */
-    var TRANSLATIONS = new InjectionToken('Translations');
+    var TRANSLATIONS$1 = new InjectionToken('Translations');
     /**
      * Provide this token at bootstrap to set the format of your {@link TRANSLATIONS}: `xtb`,
      * `xlf` or `xlf2`.
@@ -27943,7 +28054,7 @@
     exports.Testability = Testability;
     exports.TestabilityRegistry = TestabilityRegistry;
     exports.setTestabilityGetter = setTestabilityGetter;
-    exports.TRANSLATIONS = TRANSLATIONS;
+    exports.TRANSLATIONS = TRANSLATIONS$1;
     exports.TRANSLATIONS_FORMAT = TRANSLATIONS_FORMAT;
     exports.LOCALE_ID = LOCALE_ID;
     exports.ApplicationModule = ApplicationModule;
@@ -27974,15 +28085,15 @@
     exports.NO_ERRORS_SCHEMA = NO_ERRORS_SCHEMA;
     exports.Version = Version;
     exports.VERSION = VERSION;
-    exports.ΔdefineInjectable = ΔdefineInjectable;
+    exports.ɵɵdefineInjectable = ɵɵdefineInjectable;
     exports.defineInjectable = defineInjectable;
-    exports.ΔdefineInjector = ΔdefineInjector;
+    exports.ɵɵdefineInjector = ɵɵdefineInjector;
     exports.forwardRef = forwardRef;
     exports.resolveForwardRef = resolveForwardRef;
     exports.Injectable = Injectable;
     exports.INJECTOR = INJECTOR;
     exports.Injector = Injector;
-    exports.Δinject = Δinject;
+    exports.ɵɵinject = ɵɵinject;
     exports.inject = inject;
     exports.ReflectiveInjector = ReflectiveInjector;
     exports.ResolvedReflectiveFactory = ResolvedReflectiveFactory;
@@ -28058,121 +28169,123 @@
     exports.ɵoverrideComponentView = overrideComponentView;
     exports.ɵoverrideProvider = overrideProvider;
     exports.ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR;
-    exports.ΔdefineBase = ΔdefineBase;
-    exports.ΔdefineComponent = ΔdefineComponent;
-    exports.ΔdefineDirective = ΔdefineDirective;
-    exports.ΔdefinePipe = ΔdefinePipe;
-    exports.ΔdefineNgModule = ΔdefineNgModule;
+    exports.ɵɵdefineBase = ɵɵdefineBase;
+    exports.ɵɵdefineComponent = ɵɵdefineComponent;
+    exports.ɵɵdefineDirective = ɵɵdefineDirective;
+    exports.ɵɵdefinePipe = ɵɵdefinePipe;
+    exports.ɵɵdefineNgModule = ɵɵdefineNgModule;
     exports.ɵdetectChanges = detectChanges;
     exports.ɵrenderComponent = renderComponent;
     exports.ɵRender3ComponentFactory = ComponentFactory$1;
     exports.ɵRender3ComponentRef = ComponentRef$1;
-    exports.ΔdirectiveInject = ΔdirectiveInject;
-    exports.ΔinjectAttribute = ΔinjectAttribute;
-    exports.ΔgetFactoryOf = ΔgetFactoryOf;
-    exports.ΔgetInheritedFactory = ΔgetInheritedFactory;
-    exports.ΔsetComponentScope = ΔsetComponentScope;
-    exports.ΔsetNgModuleScope = ΔsetNgModuleScope;
-    exports.ΔtemplateRefExtractor = ΔtemplateRefExtractor;
-    exports.ΔProvidersFeature = ΔProvidersFeature;
-    exports.ΔInheritDefinitionFeature = ΔInheritDefinitionFeature;
-    exports.ΔNgOnChangesFeature = ΔNgOnChangesFeature;
+    exports.ɵɵdirectiveInject = ɵɵdirectiveInject;
+    exports.ɵɵinjectAttribute = ɵɵinjectAttribute;
+    exports.ɵɵgetFactoryOf = ɵɵgetFactoryOf;
+    exports.ɵɵgetInheritedFactory = ɵɵgetInheritedFactory;
+    exports.ɵɵsetComponentScope = ɵɵsetComponentScope;
+    exports.ɵɵsetNgModuleScope = ɵɵsetNgModuleScope;
+    exports.ɵɵtemplateRefExtractor = ɵɵtemplateRefExtractor;
+    exports.ɵɵProvidersFeature = ɵɵProvidersFeature;
+    exports.ɵɵInheritDefinitionFeature = ɵɵInheritDefinitionFeature;
+    exports.ɵɵNgOnChangesFeature = ɵɵNgOnChangesFeature;
     exports.ɵLifecycleHooksFeature = LifecycleHooksFeature;
     exports.ɵRender3NgModuleRef = NgModuleRef$1;
     exports.ɵmarkDirty = markDirty;
     exports.ɵNgModuleFactory = NgModuleFactory$1;
     exports.ɵNO_CHANGE = NO_CHANGE;
-    exports.Δcontainer = Δcontainer;
-    exports.ΔnextContext = ΔnextContext;
-    exports.ΔelementStart = ΔelementStart;
-    exports.ΔnamespaceHTML = ΔnamespaceHTML;
-    exports.ΔnamespaceMathML = ΔnamespaceMathML;
-    exports.ΔnamespaceSVG = ΔnamespaceSVG;
-    exports.Δelement = Δelement;
-    exports.Δlistener = Δlistener;
-    exports.Δtext = Δtext;
-    exports.ΔembeddedViewStart = ΔembeddedViewStart;
-    exports.Δprojection = Δprojection;
-    exports.Δbind = Δbind;
-    exports.Δinterpolation1 = Δinterpolation1;
-    exports.Δinterpolation2 = Δinterpolation2;
-    exports.Δinterpolation3 = Δinterpolation3;
-    exports.Δinterpolation4 = Δinterpolation4;
-    exports.Δinterpolation5 = Δinterpolation5;
-    exports.Δinterpolation6 = Δinterpolation6;
-    exports.Δinterpolation7 = Δinterpolation7;
-    exports.Δinterpolation8 = Δinterpolation8;
-    exports.ΔinterpolationV = ΔinterpolationV;
-    exports.ΔpipeBind1 = ΔpipeBind1;
-    exports.ΔpipeBind2 = ΔpipeBind2;
-    exports.ΔpipeBind3 = ΔpipeBind3;
-    exports.ΔpipeBind4 = ΔpipeBind4;
-    exports.ΔpipeBindV = ΔpipeBindV;
-    exports.ΔpureFunction0 = ΔpureFunction0;
-    exports.ΔpureFunction1 = ΔpureFunction1;
-    exports.ΔpureFunction2 = ΔpureFunction2;
-    exports.ΔpureFunction3 = ΔpureFunction3;
-    exports.ΔpureFunction4 = ΔpureFunction4;
-    exports.ΔpureFunction5 = ΔpureFunction5;
-    exports.ΔpureFunction6 = ΔpureFunction6;
-    exports.ΔpureFunction7 = ΔpureFunction7;
-    exports.ΔpureFunction8 = ΔpureFunction8;
-    exports.ΔpureFunctionV = ΔpureFunctionV;
-    exports.ΔgetCurrentView = ΔgetCurrentView;
+    exports.ɵɵcontainer = ɵɵcontainer;
+    exports.ɵɵnextContext = ɵɵnextContext;
+    exports.ɵɵelementStart = ɵɵelementStart;
+    exports.ɵɵnamespaceHTML = ɵɵnamespaceHTML;
+    exports.ɵɵnamespaceMathML = ɵɵnamespaceMathML;
+    exports.ɵɵnamespaceSVG = ɵɵnamespaceSVG;
+    exports.ɵɵelement = ɵɵelement;
+    exports.ɵɵlistener = ɵɵlistener;
+    exports.ɵɵtext = ɵɵtext;
+    exports.ɵɵembeddedViewStart = ɵɵembeddedViewStart;
+    exports.ɵɵprojection = ɵɵprojection;
+    exports.ɵɵbind = ɵɵbind;
+    exports.ɵɵinterpolation1 = ɵɵinterpolation1;
+    exports.ɵɵinterpolation2 = ɵɵinterpolation2;
+    exports.ɵɵinterpolation3 = ɵɵinterpolation3;
+    exports.ɵɵinterpolation4 = ɵɵinterpolation4;
+    exports.ɵɵinterpolation5 = ɵɵinterpolation5;
+    exports.ɵɵinterpolation6 = ɵɵinterpolation6;
+    exports.ɵɵinterpolation7 = ɵɵinterpolation7;
+    exports.ɵɵinterpolation8 = ɵɵinterpolation8;
+    exports.ɵɵinterpolationV = ɵɵinterpolationV;
+    exports.ɵɵpipeBind1 = ɵɵpipeBind1;
+    exports.ɵɵpipeBind2 = ɵɵpipeBind2;
+    exports.ɵɵpipeBind3 = ɵɵpipeBind3;
+    exports.ɵɵpipeBind4 = ɵɵpipeBind4;
+    exports.ɵɵpipeBindV = ɵɵpipeBindV;
+    exports.ɵɵpureFunction0 = ɵɵpureFunction0;
+    exports.ɵɵpureFunction1 = ɵɵpureFunction1;
+    exports.ɵɵpureFunction2 = ɵɵpureFunction2;
+    exports.ɵɵpureFunction3 = ɵɵpureFunction3;
+    exports.ɵɵpureFunction4 = ɵɵpureFunction4;
+    exports.ɵɵpureFunction5 = ɵɵpureFunction5;
+    exports.ɵɵpureFunction6 = ɵɵpureFunction6;
+    exports.ɵɵpureFunction7 = ɵɵpureFunction7;
+    exports.ɵɵpureFunction8 = ɵɵpureFunction8;
+    exports.ɵɵpureFunctionV = ɵɵpureFunctionV;
+    exports.ɵɵgetCurrentView = ɵɵgetCurrentView;
     exports.ɵgetDirectives = getDirectives;
     exports.ɵgetHostElement = getHostElement;
-    exports.ΔrestoreView = ΔrestoreView;
-    exports.ΔcontainerRefreshStart = ΔcontainerRefreshStart;
-    exports.ΔcontainerRefreshEnd = ΔcontainerRefreshEnd;
-    exports.ΔqueryRefresh = ΔqueryRefresh;
-    exports.ΔviewQuery = ΔviewQuery;
-    exports.ΔstaticViewQuery = ΔstaticViewQuery;
-    exports.ΔstaticContentQuery = ΔstaticContentQuery;
-    exports.ΔloadViewQuery = ΔloadViewQuery;
-    exports.ΔcontentQuery = ΔcontentQuery;
-    exports.ΔloadContentQuery = ΔloadContentQuery;
-    exports.ΔelementEnd = ΔelementEnd;
-    exports.ΔelementProperty = ΔelementProperty;
-    exports.ΔcomponentHostSyntheticProperty = ΔcomponentHostSyntheticProperty;
-    exports.ΔcomponentHostSyntheticListener = ΔcomponentHostSyntheticListener;
-    exports.ΔprojectionDef = ΔprojectionDef;
-    exports.Δreference = Δreference;
-    exports.ΔenableBindings = ΔenableBindings;
-    exports.ΔdisableBindings = ΔdisableBindings;
-    exports.ΔallocHostVars = ΔallocHostVars;
-    exports.ΔelementAttribute = ΔelementAttribute;
-    exports.ΔelementContainerStart = ΔelementContainerStart;
-    exports.ΔelementContainerEnd = ΔelementContainerEnd;
-    exports.ΔelementStyling = ΔelementStyling;
-    exports.ΔelementStylingMap = ΔelementStylingMap;
-    exports.ΔelementStyleProp = ΔelementStyleProp;
-    exports.ΔelementStylingApply = ΔelementStylingApply;
-    exports.ΔelementClassProp = ΔelementClassProp;
-    exports.ΔelementHostAttrs = ΔelementHostAttrs;
-    exports.ΔelementHostStyling = ΔelementHostStyling;
-    exports.ΔelementHostStylingMap = ΔelementHostStylingMap;
-    exports.ΔelementHostStyleProp = ΔelementHostStyleProp;
-    exports.ΔelementHostClassProp = ΔelementHostClassProp;
-    exports.ΔelementHostStylingApply = ΔelementHostStylingApply;
-    exports.Δselect = Δselect;
-    exports.ΔtextBinding = ΔtextBinding;
-    exports.Δtemplate = Δtemplate;
-    exports.ΔembeddedViewEnd = ΔembeddedViewEnd;
+    exports.ɵɵrestoreView = ɵɵrestoreView;
+    exports.ɵɵcontainerRefreshStart = ɵɵcontainerRefreshStart;
+    exports.ɵɵcontainerRefreshEnd = ɵɵcontainerRefreshEnd;
+    exports.ɵɵqueryRefresh = ɵɵqueryRefresh;
+    exports.ɵɵviewQuery = ɵɵviewQuery;
+    exports.ɵɵstaticViewQuery = ɵɵstaticViewQuery;
+    exports.ɵɵstaticContentQuery = ɵɵstaticContentQuery;
+    exports.ɵɵloadViewQuery = ɵɵloadViewQuery;
+    exports.ɵɵcontentQuery = ɵɵcontentQuery;
+    exports.ɵɵloadContentQuery = ɵɵloadContentQuery;
+    exports.ɵɵelementEnd = ɵɵelementEnd;
+    exports.ɵɵelementProperty = ɵɵelementProperty;
+    exports.ɵɵcomponentHostSyntheticProperty = ɵɵcomponentHostSyntheticProperty;
+    exports.ɵɵcomponentHostSyntheticListener = ɵɵcomponentHostSyntheticListener;
+    exports.ɵɵprojectionDef = ɵɵprojectionDef;
+    exports.ɵɵreference = ɵɵreference;
+    exports.ɵɵenableBindings = ɵɵenableBindings;
+    exports.ɵɵdisableBindings = ɵɵdisableBindings;
+    exports.ɵɵallocHostVars = ɵɵallocHostVars;
+    exports.ɵɵelementAttribute = ɵɵelementAttribute;
+    exports.ɵɵelementContainerStart = ɵɵelementContainerStart;
+    exports.ɵɵelementContainerEnd = ɵɵelementContainerEnd;
+    exports.ɵɵelementStyling = ɵɵelementStyling;
+    exports.ɵɵelementStylingMap = ɵɵelementStylingMap;
+    exports.ɵɵelementStyleProp = ɵɵelementStyleProp;
+    exports.ɵɵelementStylingApply = ɵɵelementStylingApply;
+    exports.ɵɵelementClassProp = ɵɵelementClassProp;
+    exports.ɵɵelementHostAttrs = ɵɵelementHostAttrs;
+    exports.ɵɵelementHostStyling = ɵɵelementHostStyling;
+    exports.ɵɵelementHostStylingMap = ɵɵelementHostStylingMap;
+    exports.ɵɵelementHostStyleProp = ɵɵelementHostStyleProp;
+    exports.ɵɵelementHostClassProp = ɵɵelementHostClassProp;
+    exports.ɵɵelementHostStylingApply = ɵɵelementHostStylingApply;
+    exports.ɵɵselect = ɵɵselect;
+    exports.ɵɵtextBinding = ɵɵtextBinding;
+    exports.ɵɵtemplate = ɵɵtemplate;
+    exports.ɵɵembeddedViewEnd = ɵɵembeddedViewEnd;
     exports.ɵstore = store;
-    exports.Δload = Δload;
-    exports.Δpipe = Δpipe;
+    exports.ɵɵload = ɵɵload;
+    exports.ɵɵpipe = ɵɵpipe;
     exports.ɵwhenRendered = whenRendered;
-    exports.Δi18n = Δi18n;
-    exports.Δi18nAttributes = Δi18nAttributes;
-    exports.Δi18nExp = Δi18nExp;
-    exports.Δi18nStart = Δi18nStart;
-    exports.Δi18nEnd = Δi18nEnd;
-    exports.Δi18nApply = Δi18nApply;
-    exports.Δi18nPostprocess = Δi18nPostprocess;
+    exports.ɵɵi18n = ɵɵi18n;
+    exports.ɵɵi18nAttributes = ɵɵi18nAttributes;
+    exports.ɵɵi18nExp = ɵɵi18nExp;
+    exports.ɵɵi18nStart = ɵɵi18nStart;
+    exports.ɵɵi18nEnd = ɵɵi18nEnd;
+    exports.ɵɵi18nApply = ɵɵi18nApply;
+    exports.ɵɵi18nPostprocess = ɵɵi18nPostprocess;
+    exports.ɵi18nConfigureLocalize = i18nConfigureLocalize;
+    exports.ɵɵi18nLocalize = ɵɵi18nLocalize;
     exports.ɵsetClassMetadata = setClassMetadata;
-    exports.ΔresolveWindow = ΔresolveWindow;
-    exports.ΔresolveDocument = ΔresolveDocument;
-    exports.ΔresolveBody = ΔresolveBody;
+    exports.ɵɵresolveWindow = ɵɵresolveWindow;
+    exports.ɵɵresolveDocument = ɵɵresolveDocument;
+    exports.ɵɵresolveBody = ɵɵresolveBody;
     exports.ɵcompileComponent = compileComponent;
     exports.ɵcompileDirective = compileDirective;
     exports.ɵcompileNgModule = compileNgModule;
@@ -28182,13 +28295,13 @@
     exports.ɵflushModuleScopingQueueAsMuchAsPossible = flushModuleScopingQueueAsMuchAsPossible;
     exports.ɵtransitiveScopesFor = transitiveScopesFor;
     exports.ɵcompilePipe = compilePipe;
-    exports.ΔsanitizeHtml = ΔsanitizeHtml;
-    exports.ΔsanitizeStyle = ΔsanitizeStyle;
-    exports.ΔdefaultStyleSanitizer = ΔdefaultStyleSanitizer;
-    exports.ΔsanitizeScript = ΔsanitizeScript;
-    exports.ΔsanitizeUrl = ΔsanitizeUrl;
-    exports.ΔsanitizeResourceUrl = ΔsanitizeResourceUrl;
-    exports.ΔsanitizeUrlOrResourceUrl = ΔsanitizeUrlOrResourceUrl;
+    exports.ɵɵsanitizeHtml = ɵɵsanitizeHtml;
+    exports.ɵɵsanitizeStyle = ɵɵsanitizeStyle;
+    exports.ɵɵdefaultStyleSanitizer = ɵɵdefaultStyleSanitizer;
+    exports.ɵɵsanitizeScript = ɵɵsanitizeScript;
+    exports.ɵɵsanitizeUrl = ɵɵsanitizeUrl;
+    exports.ɵɵsanitizeResourceUrl = ɵɵsanitizeResourceUrl;
+    exports.ɵɵsanitizeUrlOrResourceUrl = ɵɵsanitizeUrlOrResourceUrl;
     exports.ɵbypassSanitizationTrustHtml = bypassSanitizationTrustHtml;
     exports.ɵbypassSanitizationTrustStyle = bypassSanitizationTrustStyle;
     exports.ɵbypassSanitizationTrustScript = bypassSanitizationTrustScript;
