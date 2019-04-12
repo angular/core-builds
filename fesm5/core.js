@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+85.sha-b057806.with-local-changes
+ * @license Angular v8.0.0-beta.11+87.sha-ac3dc3c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15955,7 +15955,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.11+85.sha-b057806.with-local-changes');
+var VERSION = new Version('8.0.0-beta.11+87.sha-ac3dc3c.with-local-changes');
 
 /**
  * @license
@@ -24582,6 +24582,17 @@ function _mergeArrays(parts) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+var SWITCH_IVY_ENABLED__POST_R3__ = true;
+var SWITCH_IVY_ENABLED__PRE_R3__ = false;
+var ivyEnabled = SWITCH_IVY_ENABLED__PRE_R3__;
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 var _SEPARATOR = '#';
 var FACTORY_CLASS_SUFFIX = 'NgFactory';
 /**
@@ -24609,8 +24620,8 @@ var SystemJsNgModuleLoader = /** @class */ (function () {
         this._config = config || DEFAULT_CONFIG;
     }
     SystemJsNgModuleLoader.prototype.load = function (path) {
-        var offlineMode = this._compiler instanceof Compiler;
-        return offlineMode ? this.loadFactory(path) : this.loadAndCompile(path);
+        var legacyOfflineMode = !ivyEnabled && this._compiler instanceof Compiler;
+        return legacyOfflineMode ? this.loadFactory(path) : this.loadAndCompile(path);
     };
     SystemJsNgModuleLoader.prototype.loadAndCompile = function (path) {
         var _this = this;
@@ -25611,17 +25622,6 @@ var ApplicationModule = /** @class */ (function () {
     ], ApplicationModule);
     return ApplicationModule;
 }());
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-var SWITCH_IVY_ENABLED__POST_R3__ = true;
-var SWITCH_IVY_ENABLED__PRE_R3__ = false;
-var ivyEnabled = SWITCH_IVY_ENABLED__PRE_R3__;
 
 /**
  * @license
