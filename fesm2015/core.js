@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+85.sha-b057806.with-local-changes
+ * @license Angular v8.0.0-beta.11+87.sha-ac3dc3c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19721,7 +19721,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.11+85.sha-b057806.with-local-changes');
+const VERSION = new Version('8.0.0-beta.11+87.sha-ac3dc3c.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -31311,6 +31311,22 @@ function _mergeArrays(parts) {
  * found in the LICENSE file at https://angular.io/license
  */
 /** @type {?} */
+const SWITCH_IVY_ENABLED__POST_R3__ = true;
+/** @type {?} */
+const ivyEnabled = SWITCH_IVY_ENABLED__POST_R3__;
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/** @type {?} */
 const _SEPARATOR = '#';
 /** @type {?} */
 const FACTORY_CLASS_SUFFIX = 'NgFactory';
@@ -31347,8 +31363,8 @@ class SystemJsNgModuleLoader {
      */
     load(path) {
         /** @type {?} */
-        const offlineMode = this._compiler instanceof Compiler;
-        return offlineMode ? this.loadFactory(path) : this.loadAndCompile(path);
+        const legacyOfflineMode = !ivyEnabled && this._compiler instanceof Compiler;
+        return legacyOfflineMode ? this.loadFactory(path) : this.loadAndCompile(path);
     }
     /**
      * @private
@@ -32547,22 +32563,6 @@ ApplicationModule.ctorParameters = () => [
         type: NgModule,
         args: [{ providers: APPLICATION_MODULE_PROVIDERS }]
     }], function () { return [{ type: ApplicationRef }]; }, null);
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/** @type {?} */
-const SWITCH_IVY_ENABLED__POST_R3__ = true;
-/** @type {?} */
-const ivyEnabled = SWITCH_IVY_ENABLED__POST_R3__;
 
 /**
  * @fileoverview added by tsickle
