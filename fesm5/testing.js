@@ -1,10 +1,10 @@
 /**
- * @license Angular v8.0.0-beta.11+87.sha-ac3dc3c.with-local-changes
+ * @license Angular v8.0.0-beta.11+90.sha-0aa0f11.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { RendererFactory2, getDebugNode, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, COMPILER_OPTIONS, ɵɵdefineNgModule, ɵɵdefineInjector, ɵsetClassMetadata, ɵNgModuleFactory, ErrorHandler, ɵgetInjectableDef, ɵNG_COMPONENT_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵpatchComponentDefWithScope, ɵNG_INJECTOR_DEF, ɵNG_MODULE_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, ɵtransitiveScopesFor, ModuleWithComponentFactories, ɵresetCompiledComponents, Injector, InjectFlags, ɵflushModuleScopingQueueAsMuchAsPossible, ɵɵdefineInjectable, ɵɵgetInheritedFactory, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, ɵivyEnabled, Optional, SkipSelf } from '@angular/core';
+import { RendererFactory2, getDebugNode, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, COMPILER_OPTIONS, ɵɵdefineNgModule, ɵɵdefineInjector, ɵsetClassMetadata, ɵNgModuleFactory, ɵgetInjectableDef, ɵNG_COMPONENT_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵpatchComponentDefWithScope, ɵNG_INJECTOR_DEF, ɵNG_MODULE_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, ɵtransitiveScopesFor, ModuleWithComponentFactories, ɵresetCompiledComponents, Injector, InjectFlags, ɵflushModuleScopingQueueAsMuchAsPossible, ɵɵdefineInjectable, ɵɵgetInheritedFactory, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, ɵivyEnabled, Optional, SkipSelf } from '@angular/core';
 import { __read, __extends, __spread, __awaiter, __generator, __values, __decorate } from 'tslib';
 import { ResourceLoader } from '@angular/compiler';
 
@@ -1470,23 +1470,12 @@ var R3TestBedCompiler = /** @class */ (function () {
             ], RootScopeModule);
             return RootScopeModule;
         }());
-        var R3ErrorHandlerModule = /** @class */ (function () {
-            function R3ErrorHandlerModule() {
-            }
-            R3ErrorHandlerModule.ngModuleDef = ɵɵdefineNgModule({ type: R3ErrorHandlerModule });
-            R3ErrorHandlerModule.ngInjectorDef = ɵɵdefineInjector({ factory: function R3ErrorHandlerModule_Factory(t) { return new (t || R3ErrorHandlerModule)(); }, providers: [{ provide: ErrorHandler, useClass: R3TestErrorHandler }] });
-            return R3ErrorHandlerModule;
-        }());
-        /*@__PURE__*/ ɵsetClassMetadata(R3ErrorHandlerModule, [{
-                type: NgModule,
-                args: [{ providers: [{ provide: ErrorHandler, useClass: R3TestErrorHandler }] }]
-            }], null, null);
         var ngZone = new NgZone({ enableLongStackTrace: true });
         var providers = __spread([
             { provide: NgZone, useValue: ngZone },
             { provide: Compiler, useFactory: function () { return new R3TestCompiler(_this); } }
         ], this.providers, this.providerOverrides);
-        var imports = [RootScopeModule, this.additionalModuleTypes, R3ErrorHandlerModule, this.imports || []];
+        var imports = [RootScopeModule, this.additionalModuleTypes, this.imports || []];
         // clang-format off
         ɵcompileNgModuleDefs(this.testModuleType, {
             declarations: this.declarations,
@@ -1594,15 +1583,6 @@ function flatten(values, mapFn) {
     });
     return out;
 }
-/** Error handler used for tests. Rethrows errors rather than logging them out. */
-var R3TestErrorHandler = /** @class */ (function (_super) {
-    __extends(R3TestErrorHandler, _super);
-    function R3TestErrorHandler() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    R3TestErrorHandler.prototype.handleError = function (error) { throw error; };
-    return R3TestErrorHandler;
-}(ErrorHandler));
 var R3TestCompiler = /** @class */ (function () {
     function R3TestCompiler(testBed) {
         this.testBed = testBed;

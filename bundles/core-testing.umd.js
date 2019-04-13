@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+87.sha-ac3dc3c.with-local-changes
+ * @license Angular v8.0.0-beta.11+90.sha-0aa0f11.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1579,23 +1579,12 @@
                 ], RootScopeModule);
                 return RootScopeModule;
             }());
-            var R3ErrorHandlerModule = /** @class */ (function () {
-                function R3ErrorHandlerModule() {
-                }
-                R3ErrorHandlerModule.ngModuleDef = i0.ɵɵdefineNgModule({ type: R3ErrorHandlerModule });
-                R3ErrorHandlerModule.ngInjectorDef = i0.ɵɵdefineInjector({ factory: function R3ErrorHandlerModule_Factory(t) { return new (t || R3ErrorHandlerModule)(); }, providers: [{ provide: i0.ErrorHandler, useClass: R3TestErrorHandler }] });
-                return R3ErrorHandlerModule;
-            }());
-            /*@__PURE__*/ i0.ɵsetClassMetadata(R3ErrorHandlerModule, [{
-                    type: i0.NgModule,
-                    args: [{ providers: [{ provide: i0.ErrorHandler, useClass: R3TestErrorHandler }] }]
-                }], null, null);
             var ngZone = new i0.NgZone({ enableLongStackTrace: true });
             var providers = __spread([
                 { provide: i0.NgZone, useValue: ngZone },
                 { provide: i0.Compiler, useFactory: function () { return new R3TestCompiler(_this); } }
             ], this.providers, this.providerOverrides);
-            var imports = [RootScopeModule, this.additionalModuleTypes, R3ErrorHandlerModule, this.imports || []];
+            var imports = [RootScopeModule, this.additionalModuleTypes, this.imports || []];
             // clang-format off
             i0.ɵcompileNgModuleDefs(this.testModuleType, {
                 declarations: this.declarations,
@@ -1703,15 +1692,6 @@
         });
         return out;
     }
-    /** Error handler used for tests. Rethrows errors rather than logging them out. */
-    var R3TestErrorHandler = /** @class */ (function (_super) {
-        __extends(R3TestErrorHandler, _super);
-        function R3TestErrorHandler() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        R3TestErrorHandler.prototype.handleError = function (error) { throw error; };
-        return R3TestErrorHandler;
-    }(i0.ErrorHandler));
     var R3TestCompiler = /** @class */ (function () {
         function R3TestCompiler(testBed) {
             this.testBed = testBed;
