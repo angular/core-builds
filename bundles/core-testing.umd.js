@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+87.sha-ac3dc3c.with-local-changes
+ * @license Angular v8.0.0-beta.11+90.sha-0aa0f11.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1586,20 +1586,12 @@
                 ], RootScopeModule);
                 return RootScopeModule;
             }());
-            var R3ErrorHandlerModule = /** @class */ (function () {
-                function R3ErrorHandlerModule() {
-                }
-                R3ErrorHandlerModule = __decorate([
-                    core.NgModule({ providers: [{ provide: core.ErrorHandler, useClass: R3TestErrorHandler }] })
-                ], R3ErrorHandlerModule);
-                return R3ErrorHandlerModule;
-            }());
             var ngZone = new core.NgZone({ enableLongStackTrace: true });
             var providers = __spread([
                 { provide: core.NgZone, useValue: ngZone },
                 { provide: core.Compiler, useFactory: function () { return new R3TestCompiler(_this); } }
             ], this.providers, this.providerOverrides);
-            var imports = [RootScopeModule, this.additionalModuleTypes, R3ErrorHandlerModule, this.imports || []];
+            var imports = [RootScopeModule, this.additionalModuleTypes, this.imports || []];
             // clang-format off
             core.ɵcompileNgModuleDefs(this.testModuleType, {
                 declarations: this.declarations,
@@ -1704,15 +1696,6 @@
         });
         return out;
     }
-    /** Error handler used for tests. Rethrows errors rather than logging them out. */
-    var R3TestErrorHandler = /** @class */ (function (_super) {
-        __extends(R3TestErrorHandler, _super);
-        function R3TestErrorHandler() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        R3TestErrorHandler.prototype.handleError = function (error) { throw error; };
-        return R3TestErrorHandler;
-    }(core.ErrorHandler));
     var R3TestCompiler = /** @class */ (function () {
         function R3TestCompiler(testBed) {
             this.testBed = testBed;

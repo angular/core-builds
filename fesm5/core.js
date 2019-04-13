@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+87.sha-ac3dc3c.with-local-changes
+ * @license Angular v8.0.0-beta.11+90.sha-0aa0f11.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15955,7 +15955,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.11+87.sha-ac3dc3c.with-local-changes');
+var VERSION = new Version('8.0.0-beta.11+90.sha-0aa0f11.with-local-changes');
 
 /**
  * @license
@@ -19227,7 +19227,8 @@ var ComponentRef$1 = /** @class */ (function (_super) {
 if (typeof _global['ngI18nClosureMode'] === 'undefined') {
     // Make sure to refer to ngI18nClosureMode as ['ngI18nClosureMode'] for closure.
     _global['ngI18nClosureMode'] =
-        typeof _global['goog'] !== 'undefined' && typeof _global['goog'].getMsg === 'function';
+        // TODO(FW-1250): validate that this actually, you know, works.
+        typeof goog !== 'undefined' && typeof goog.getMsg === 'function';
 }
 
 /**
