@@ -1,0 +1,15 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+import { global } from './global';
+if (typeof global['ngI18nClosureMode'] === 'undefined') {
+    // Make sure to refer to ngI18nClosureMode as ['ngI18nClosureMode'] for closure.
+    global['ngI18nClosureMode'] =
+        // TODO(FW-1250): validate that this actually, you know, works.
+        typeof goog !== 'undefined' && typeof goog.getMsg === 'function';
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibmdfaTE4bl9jbG9zdXJlX21vZGUuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi8uLi8uLi9wYWNrYWdlcy9jb3JlL3NyYy91dGlsL25nX2kxOG5fY2xvc3VyZV9tb2RlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBOzs7Ozs7R0FNRztBQUVILE9BQU8sRUFBQyxNQUFNLEVBQUMsTUFBTSxVQUFVLENBQUM7QUFNaEMsSUFBSSxPQUFPLE1BQU0sQ0FBQyxtQkFBbUIsQ0FBQyxLQUFLLFdBQVcsRUFBRTtJQUN0RCxnRkFBZ0Y7SUFDaEYsTUFBTSxDQUFDLG1CQUFtQixDQUFDO1FBQ3ZCLCtEQUErRDtRQUMvRCxPQUFPLElBQUksS0FBSyxXQUFXLElBQUksT0FBTyxJQUFJLENBQUMsTUFBTSxLQUFLLFVBQVUsQ0FBQztDQUN0RSIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQGxpY2Vuc2VcbiAqIENvcHlyaWdodCBHb29nbGUgSW5jLiBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIFVzZSBvZiB0aGlzIHNvdXJjZSBjb2RlIGlzIGdvdmVybmVkIGJ5IGFuIE1JVC1zdHlsZSBsaWNlbnNlIHRoYXQgY2FuIGJlXG4gKiBmb3VuZCBpbiB0aGUgTElDRU5TRSBmaWxlIGF0IGh0dHBzOi8vYW5ndWxhci5pby9saWNlbnNlXG4gKi9cblxuaW1wb3J0IHtnbG9iYWx9IGZyb20gJy4vZ2xvYmFsJztcblxuZGVjbGFyZSBnbG9iYWwge1xuICBjb25zdCBuZ0kxOG5DbG9zdXJlTW9kZTogYm9vbGVhbjtcbn1cblxuaWYgKHR5cGVvZiBnbG9iYWxbJ25nSTE4bkNsb3N1cmVNb2RlJ10gPT09ICd1bmRlZmluZWQnKSB7XG4gIC8vIE1ha2Ugc3VyZSB0byByZWZlciB0byBuZ0kxOG5DbG9zdXJlTW9kZSBhcyBbJ25nSTE4bkNsb3N1cmVNb2RlJ10gZm9yIGNsb3N1cmUuXG4gIGdsb2JhbFsnbmdJMThuQ2xvc3VyZU1vZGUnXSA9XG4gICAgICAvLyBUT0RPKEZXLTEyNTApOiB2YWxpZGF0ZSB0aGF0IHRoaXMgYWN0dWFsbHksIHlvdSBrbm93LCB3b3Jrcy5cbiAgICAgIHR5cGVvZiBnb29nICE9PSAndW5kZWZpbmVkJyAmJiB0eXBlb2YgZ29vZy5nZXRNc2cgPT09ICdmdW5jdGlvbic7XG59XG4iXX0=
