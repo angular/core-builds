@@ -9,6 +9,7 @@ export declare const NG_COMPONENT_DEF: string;
 export declare const NG_DIRECTIVE_DEF: string;
 export declare const NG_PIPE_DEF: string;
 export declare const NG_MODULE_DEF: string;
+export declare const NG_LOCALE_ID_DEF: string;
 export declare const NG_BASE_DEF: string;
 /**
  * If a directive is diPublic, bloomAdd sets a property on the type with this constant as

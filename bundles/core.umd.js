@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.12+4.sha-d1d0f4a.with-local-changes
+ * @license Angular v8.0.0-beta.12+6.sha-6a8cca7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2595,6 +2595,7 @@
     var NG_DIRECTIVE_DEF = getClosureSafeProperty({ ngDirectiveDef: getClosureSafeProperty });
     var NG_PIPE_DEF = getClosureSafeProperty({ ngPipeDef: getClosureSafeProperty });
     var NG_MODULE_DEF = getClosureSafeProperty({ ngModuleDef: getClosureSafeProperty });
+    var NG_LOCALE_ID_DEF = getClosureSafeProperty({ ngLocaleIdDef: getClosureSafeProperty });
     var NG_BASE_DEF = getClosureSafeProperty({ ngBaseDef: getClosureSafeProperty });
     /**
      * If a directive is diPublic, bloomAdd sets a property on the type with this constant as
@@ -3281,6 +3282,9 @@
         }
         return ngModuleDef;
     }
+    function getNgLocaleIdDef(type) {
+        return type[NG_LOCALE_ID_DEF] || null;
+    }
 
     /**
      * @license
@@ -3416,6 +3420,12 @@
     }
     function getNativeByTNode(tNode, hostView) {
         return unwrapRNode(hostView[tNode.index]);
+    }
+    /**
+     * A helper function that returns `true` if a given `TNode` has any matching directives.
+     */
+    function hasDirectives(tNode) {
+        return tNode.directiveEnd > tNode.directiveStart;
     }
     function getTNode(index, view) {
         ngDevMode && assertGreaterThan(index, -1, 'wrong index for TNode');
@@ -12698,11 +12708,16 @@
                 // In order to have just one native event handler in presence of multiple handler functions,
                 // we just register a first handler function as a native event listener and then chain
                 // (coalesce) other handler functions on top of the first native handler function.
-                //
+                var existingListener = null;
                 // Please note that the coalescing described here doesn't happen for events specifying an
                 // alternative target (ex. (document:click)) - this is to keep backward compatibility with the
                 // view engine.
-                var existingListener = eventTargetResolver ? null : findExistingListener(lView, eventName, tNode.index);
+                // Also, we don't have to search for existing listeners is there are no directives
+                // matching on a given node as we can't register multiple event handlers for the same event in
+                // a template (this would mean having duplicate attributes).
+                if (!eventTargetResolver && hasDirectives(tNode)) {
+                    existingListener = findExistingListener(lView, eventName, tNode.index);
+                }
                 if (existingListener !== null) {
                     // Attach a new listener at the head of the coalesced listeners list.
                     listenerFn.__ngNextListenerFn__ = existingListener.__ngNextListenerFn__;
@@ -15914,7 +15929,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.12+4.sha-d1d0f4a.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.12+6.sha-6a8cca7.with-local-changes');
 
     /**
      * @license
@@ -19178,6 +19193,151 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
+     * This const is used to store the locale data registered with `registerLocaleData`
+     */
+    var LOCALE_DATA = {};
+    (function (LocaleDataIndex) {
+        LocaleDataIndex[LocaleDataIndex["LocaleId"] = 0] = "LocaleId";
+        LocaleDataIndex[LocaleDataIndex["DayPeriodsFormat"] = 1] = "DayPeriodsFormat";
+        LocaleDataIndex[LocaleDataIndex["DayPeriodsStandalone"] = 2] = "DayPeriodsStandalone";
+        LocaleDataIndex[LocaleDataIndex["DaysFormat"] = 3] = "DaysFormat";
+        LocaleDataIndex[LocaleDataIndex["DaysStandalone"] = 4] = "DaysStandalone";
+        LocaleDataIndex[LocaleDataIndex["MonthsFormat"] = 5] = "MonthsFormat";
+        LocaleDataIndex[LocaleDataIndex["MonthsStandalone"] = 6] = "MonthsStandalone";
+        LocaleDataIndex[LocaleDataIndex["Eras"] = 7] = "Eras";
+        LocaleDataIndex[LocaleDataIndex["FirstDayOfWeek"] = 8] = "FirstDayOfWeek";
+        LocaleDataIndex[LocaleDataIndex["WeekendRange"] = 9] = "WeekendRange";
+        LocaleDataIndex[LocaleDataIndex["DateFormat"] = 10] = "DateFormat";
+        LocaleDataIndex[LocaleDataIndex["TimeFormat"] = 11] = "TimeFormat";
+        LocaleDataIndex[LocaleDataIndex["DateTimeFormat"] = 12] = "DateTimeFormat";
+        LocaleDataIndex[LocaleDataIndex["NumberSymbols"] = 13] = "NumberSymbols";
+        LocaleDataIndex[LocaleDataIndex["NumberFormats"] = 14] = "NumberFormats";
+        LocaleDataIndex[LocaleDataIndex["CurrencySymbol"] = 15] = "CurrencySymbol";
+        LocaleDataIndex[LocaleDataIndex["CurrencyName"] = 16] = "CurrencyName";
+        LocaleDataIndex[LocaleDataIndex["Currencies"] = 17] = "Currencies";
+        LocaleDataIndex[LocaleDataIndex["PluralCase"] = 18] = "PluralCase";
+        LocaleDataIndex[LocaleDataIndex["ExtraData"] = 19] = "ExtraData";
+    })(exports.ɵLocaleDataIndex || (exports.ɵLocaleDataIndex = {}));
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    // THIS CODE IS GENERATED - DO NOT MODIFY
+    // See angular/tools/gulp-tasks/cldr/extract.js
+    var u = undefined;
+    function plural(n) {
+        var i = Math.floor(Math.abs(n)), v = n.toString().replace(/^[^.]*\.?/, '').length;
+        if (i === 1 && v === 0)
+            return 1;
+        return 5;
+    }
+    var localeEn = [
+        'en', [['a', 'p'], ['AM', 'PM'], u], [['AM', 'PM'], u, u],
+        [
+            ['S', 'M', 'T', 'W', 'T', 'F', 'S'], ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+            ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+            ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+        ],
+        u,
+        [
+            ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'],
+            ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            [
+                'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
+                'October', 'November', 'December'
+            ]
+        ],
+        u, [['B', 'A'], ['BC', 'AD'], ['Before Christ', 'Anno Domini']], 0, [6, 0],
+        ['M/d/yy', 'MMM d, y', 'MMMM d, y', 'EEEE, MMMM d, y'],
+        ['h:mm a', 'h:mm:ss a', 'h:mm:ss a z', 'h:mm:ss a zzzz'], ['{1}, {0}', u, '{1} \'at\' {0}', u],
+        ['.', ',', ';', '%', '+', '-', 'E', '×', '‰', '∞', 'NaN', ':'],
+        ['#,##0.###', '#,##0%', '¤#,##0.00', '#E0'], '$', 'US Dollar', {}, plural
+    ];
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Retrieves the plural function used by ICU expressions to determine the plural case to use
+     * for a given locale.
+     * @param locale A locale code for the locale format rules to use.
+     * @returns The plural function for the locale.
+     * @see `NgPlural`
+     * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n)
+     */
+    function getLocalePluralCase(locale) {
+        var data = findLocaleData(locale);
+        return data[exports.ɵLocaleDataIndex.PluralCase];
+    }
+    /**
+     * Finds the locale data for a given locale.
+     *
+     * @param locale The locale code.
+     * @returns The locale data.
+     * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n)
+     */
+    function findLocaleData(locale) {
+        var normalizedLocale = locale.toLowerCase().replace(/_/g, '-');
+        var match = LOCALE_DATA[normalizedLocale];
+        if (match) {
+            return match;
+        }
+        // let's try to find a parent locale
+        var parentLocale = normalizedLocale.split('-')[0];
+        match = LOCALE_DATA[parentLocale];
+        if (match) {
+            return match;
+        }
+        if (parentLocale === 'en') {
+            return localeEn;
+        }
+        throw new Error("Missing locale data for the locale \"" + locale + "\".");
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Returns the plural case based on the locale
+     */
+    function getPluralCase(value, locale) {
+        var plural = getLocalePluralCase(locale)(value);
+        switch (plural) {
+            case 0:
+                return 'zero';
+            case 1:
+                return 'one';
+            case 2:
+                return 'two';
+            case 3:
+                return 'few';
+            case 4:
+                return 'many';
+            default:
+                return 'other';
+        }
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
     * Equivalent to ES6 spread, add each item to an array.
     *
     * @param items The items to add
@@ -20079,405 +20239,6 @@
             shiftsCounter = 0;
         }
     }
-    var Plural;
-    (function (Plural) {
-        Plural[Plural["Zero"] = 0] = "Zero";
-        Plural[Plural["One"] = 1] = "One";
-        Plural[Plural["Two"] = 2] = "Two";
-        Plural[Plural["Few"] = 3] = "Few";
-        Plural[Plural["Many"] = 4] = "Many";
-        Plural[Plural["Other"] = 5] = "Other";
-    })(Plural || (Plural = {}));
-    /**
-     * Returns the plural case based on the locale.
-     * This is a copy of the deprecated function that we used in Angular v4.
-     * // TODO(ocombe): remove this once we can the real getPluralCase function
-     *
-     * @deprecated from v5 the plural case function is in locale data files common/locales/*.ts
-     */
-    function getPluralCase(locale, nLike) {
-        if (typeof nLike === 'string') {
-            nLike = parseInt(nLike, 10);
-        }
-        var n = nLike;
-        var nDecimal = n.toString().replace(/^[^.]*\.?/, '');
-        var i = Math.floor(Math.abs(n));
-        var v = nDecimal.length;
-        var f = parseInt(nDecimal, 10);
-        var t = parseInt(n.toString().replace(/^[^.]*\.?|0+$/g, ''), 10) || 0;
-        var lang = locale.split('-')[0].toLowerCase();
-        switch (lang) {
-            case 'af':
-            case 'asa':
-            case 'az':
-            case 'bem':
-            case 'bez':
-            case 'bg':
-            case 'brx':
-            case 'ce':
-            case 'cgg':
-            case 'chr':
-            case 'ckb':
-            case 'ee':
-            case 'el':
-            case 'eo':
-            case 'es':
-            case 'eu':
-            case 'fo':
-            case 'fur':
-            case 'gsw':
-            case 'ha':
-            case 'haw':
-            case 'hu':
-            case 'jgo':
-            case 'jmc':
-            case 'ka':
-            case 'kk':
-            case 'kkj':
-            case 'kl':
-            case 'ks':
-            case 'ksb':
-            case 'ky':
-            case 'lb':
-            case 'lg':
-            case 'mas':
-            case 'mgo':
-            case 'ml':
-            case 'mn':
-            case 'nb':
-            case 'nd':
-            case 'ne':
-            case 'nn':
-            case 'nnh':
-            case 'nyn':
-            case 'om':
-            case 'or':
-            case 'os':
-            case 'ps':
-            case 'rm':
-            case 'rof':
-            case 'rwk':
-            case 'saq':
-            case 'seh':
-            case 'sn':
-            case 'so':
-            case 'sq':
-            case 'ta':
-            case 'te':
-            case 'teo':
-            case 'tk':
-            case 'tr':
-            case 'ug':
-            case 'uz':
-            case 'vo':
-            case 'vun':
-            case 'wae':
-            case 'xog':
-                if (n === 1)
-                    return Plural.One;
-                return Plural.Other;
-            case 'ak':
-            case 'ln':
-            case 'mg':
-            case 'pa':
-            case 'ti':
-                if (n === Math.floor(n) && n >= 0 && n <= 1)
-                    return Plural.One;
-                return Plural.Other;
-            case 'am':
-            case 'as':
-            case 'bn':
-            case 'fa':
-            case 'gu':
-            case 'hi':
-            case 'kn':
-            case 'mr':
-            case 'zu':
-                if (i === 0 || n === 1)
-                    return Plural.One;
-                return Plural.Other;
-            case 'ar':
-                if (n === 0)
-                    return Plural.Zero;
-                if (n === 1)
-                    return Plural.One;
-                if (n === 2)
-                    return Plural.Two;
-                if (n % 100 === Math.floor(n % 100) && n % 100 >= 3 && n % 100 <= 10)
-                    return Plural.Few;
-                if (n % 100 === Math.floor(n % 100) && n % 100 >= 11 && n % 100 <= 99)
-                    return Plural.Many;
-                return Plural.Other;
-            case 'ast':
-            case 'ca':
-            case 'de':
-            case 'en':
-            case 'et':
-            case 'fi':
-            case 'fy':
-            case 'gl':
-            case 'it':
-            case 'nl':
-            case 'sv':
-            case 'sw':
-            case 'ur':
-            case 'yi':
-                if (i === 1 && v === 0)
-                    return Plural.One;
-                return Plural.Other;
-            case 'be':
-                if (n % 10 === 1 && !(n % 100 === 11))
-                    return Plural.One;
-                if (n % 10 === Math.floor(n % 10) && n % 10 >= 2 && n % 10 <= 4 &&
-                    !(n % 100 >= 12 && n % 100 <= 14))
-                    return Plural.Few;
-                if (n % 10 === 0 || n % 10 === Math.floor(n % 10) && n % 10 >= 5 && n % 10 <= 9 ||
-                    n % 100 === Math.floor(n % 100) && n % 100 >= 11 && n % 100 <= 14)
-                    return Plural.Many;
-                return Plural.Other;
-            case 'br':
-                if (n % 10 === 1 && !(n % 100 === 11 || n % 100 === 71 || n % 100 === 91))
-                    return Plural.One;
-                if (n % 10 === 2 && !(n % 100 === 12 || n % 100 === 72 || n % 100 === 92))
-                    return Plural.Two;
-                if (n % 10 === Math.floor(n % 10) && (n % 10 >= 3 && n % 10 <= 4 || n % 10 === 9) &&
-                    !(n % 100 >= 10 && n % 100 <= 19 || n % 100 >= 70 && n % 100 <= 79 ||
-                        n % 100 >= 90 && n % 100 <= 99))
-                    return Plural.Few;
-                if (!(n === 0) && n % 1e6 === 0)
-                    return Plural.Many;
-                return Plural.Other;
-            case 'bs':
-            case 'hr':
-            case 'sr':
-                if (v === 0 && i % 10 === 1 && !(i % 100 === 11) || f % 10 === 1 && !(f % 100 === 11))
-                    return Plural.One;
-                if (v === 0 && i % 10 === Math.floor(i % 10) && i % 10 >= 2 && i % 10 <= 4 &&
-                    !(i % 100 >= 12 && i % 100 <= 14) ||
-                    f % 10 === Math.floor(f % 10) && f % 10 >= 2 && f % 10 <= 4 &&
-                        !(f % 100 >= 12 && f % 100 <= 14))
-                    return Plural.Few;
-                return Plural.Other;
-            case 'cs':
-            case 'sk':
-                if (i === 1 && v === 0)
-                    return Plural.One;
-                if (i === Math.floor(i) && i >= 2 && i <= 4 && v === 0)
-                    return Plural.Few;
-                if (!(v === 0))
-                    return Plural.Many;
-                return Plural.Other;
-            case 'cy':
-                if (n === 0)
-                    return Plural.Zero;
-                if (n === 1)
-                    return Plural.One;
-                if (n === 2)
-                    return Plural.Two;
-                if (n === 3)
-                    return Plural.Few;
-                if (n === 6)
-                    return Plural.Many;
-                return Plural.Other;
-            case 'da':
-                if (n === 1 || !(t === 0) && (i === 0 || i === 1))
-                    return Plural.One;
-                return Plural.Other;
-            case 'dsb':
-            case 'hsb':
-                if (v === 0 && i % 100 === 1 || f % 100 === 1)
-                    return Plural.One;
-                if (v === 0 && i % 100 === 2 || f % 100 === 2)
-                    return Plural.Two;
-                if (v === 0 && i % 100 === Math.floor(i % 100) && i % 100 >= 3 && i % 100 <= 4 ||
-                    f % 100 === Math.floor(f % 100) && f % 100 >= 3 && f % 100 <= 4)
-                    return Plural.Few;
-                return Plural.Other;
-            case 'ff':
-            case 'fr':
-            case 'hy':
-            case 'kab':
-                if (i === 0 || i === 1)
-                    return Plural.One;
-                return Plural.Other;
-            case 'fil':
-                if (v === 0 && (i === 1 || i === 2 || i === 3) ||
-                    v === 0 && !(i % 10 === 4 || i % 10 === 6 || i % 10 === 9) ||
-                    !(v === 0) && !(f % 10 === 4 || f % 10 === 6 || f % 10 === 9))
-                    return Plural.One;
-                return Plural.Other;
-            case 'ga':
-                if (n === 1)
-                    return Plural.One;
-                if (n === 2)
-                    return Plural.Two;
-                if (n === Math.floor(n) && n >= 3 && n <= 6)
-                    return Plural.Few;
-                if (n === Math.floor(n) && n >= 7 && n <= 10)
-                    return Plural.Many;
-                return Plural.Other;
-            case 'gd':
-                if (n === 1 || n === 11)
-                    return Plural.One;
-                if (n === 2 || n === 12)
-                    return Plural.Two;
-                if (n === Math.floor(n) && (n >= 3 && n <= 10 || n >= 13 && n <= 19))
-                    return Plural.Few;
-                return Plural.Other;
-            case 'gv':
-                if (v === 0 && i % 10 === 1)
-                    return Plural.One;
-                if (v === 0 && i % 10 === 2)
-                    return Plural.Two;
-                if (v === 0 &&
-                    (i % 100 === 0 || i % 100 === 20 || i % 100 === 40 || i % 100 === 60 || i % 100 === 80))
-                    return Plural.Few;
-                if (!(v === 0))
-                    return Plural.Many;
-                return Plural.Other;
-            case 'he':
-                if (i === 1 && v === 0)
-                    return Plural.One;
-                if (i === 2 && v === 0)
-                    return Plural.Two;
-                if (v === 0 && !(n >= 0 && n <= 10) && n % 10 === 0)
-                    return Plural.Many;
-                return Plural.Other;
-            case 'is':
-                if (t === 0 && i % 10 === 1 && !(i % 100 === 11) || !(t === 0))
-                    return Plural.One;
-                return Plural.Other;
-            case 'ksh':
-                if (n === 0)
-                    return Plural.Zero;
-                if (n === 1)
-                    return Plural.One;
-                return Plural.Other;
-            case 'kw':
-            case 'naq':
-            case 'se':
-            case 'smn':
-                if (n === 1)
-                    return Plural.One;
-                if (n === 2)
-                    return Plural.Two;
-                return Plural.Other;
-            case 'lag':
-                if (n === 0)
-                    return Plural.Zero;
-                if ((i === 0 || i === 1) && !(n === 0))
-                    return Plural.One;
-                return Plural.Other;
-            case 'lt':
-                if (n % 10 === 1 && !(n % 100 >= 11 && n % 100 <= 19))
-                    return Plural.One;
-                if (n % 10 === Math.floor(n % 10) && n % 10 >= 2 && n % 10 <= 9 &&
-                    !(n % 100 >= 11 && n % 100 <= 19))
-                    return Plural.Few;
-                if (!(f === 0))
-                    return Plural.Many;
-                return Plural.Other;
-            case 'lv':
-            case 'prg':
-                if (n % 10 === 0 || n % 100 === Math.floor(n % 100) && n % 100 >= 11 && n % 100 <= 19 ||
-                    v === 2 && f % 100 === Math.floor(f % 100) && f % 100 >= 11 && f % 100 <= 19)
-                    return Plural.Zero;
-                if (n % 10 === 1 && !(n % 100 === 11) || v === 2 && f % 10 === 1 && !(f % 100 === 11) ||
-                    !(v === 2) && f % 10 === 1)
-                    return Plural.One;
-                return Plural.Other;
-            case 'mk':
-                if (v === 0 && i % 10 === 1 || f % 10 === 1)
-                    return Plural.One;
-                return Plural.Other;
-            case 'mt':
-                if (n === 1)
-                    return Plural.One;
-                if (n === 0 || n % 100 === Math.floor(n % 100) && n % 100 >= 2 && n % 100 <= 10)
-                    return Plural.Few;
-                if (n % 100 === Math.floor(n % 100) && n % 100 >= 11 && n % 100 <= 19)
-                    return Plural.Many;
-                return Plural.Other;
-            case 'pl':
-                if (i === 1 && v === 0)
-                    return Plural.One;
-                if (v === 0 && i % 10 === Math.floor(i % 10) && i % 10 >= 2 && i % 10 <= 4 &&
-                    !(i % 100 >= 12 && i % 100 <= 14))
-                    return Plural.Few;
-                if (v === 0 && !(i === 1) && i % 10 === Math.floor(i % 10) && i % 10 >= 0 && i % 10 <= 1 ||
-                    v === 0 && i % 10 === Math.floor(i % 10) && i % 10 >= 5 && i % 10 <= 9 ||
-                    v === 0 && i % 100 === Math.floor(i % 100) && i % 100 >= 12 && i % 100 <= 14)
-                    return Plural.Many;
-                return Plural.Other;
-            case 'pt':
-                if (n === Math.floor(n) && n >= 0 && n <= 2 && !(n === 2))
-                    return Plural.One;
-                return Plural.Other;
-            case 'ro':
-                if (i === 1 && v === 0)
-                    return Plural.One;
-                if (!(v === 0) || n === 0 ||
-                    !(n === 1) && n % 100 === Math.floor(n % 100) && n % 100 >= 1 && n % 100 <= 19)
-                    return Plural.Few;
-                return Plural.Other;
-            case 'ru':
-            case 'uk':
-                if (v === 0 && i % 10 === 1 && !(i % 100 === 11))
-                    return Plural.One;
-                if (v === 0 && i % 10 === Math.floor(i % 10) && i % 10 >= 2 && i % 10 <= 4 &&
-                    !(i % 100 >= 12 && i % 100 <= 14))
-                    return Plural.Few;
-                if (v === 0 && i % 10 === 0 ||
-                    v === 0 && i % 10 === Math.floor(i % 10) && i % 10 >= 5 && i % 10 <= 9 ||
-                    v === 0 && i % 100 === Math.floor(i % 100) && i % 100 >= 11 && i % 100 <= 14)
-                    return Plural.Many;
-                return Plural.Other;
-            case 'shi':
-                if (i === 0 || n === 1)
-                    return Plural.One;
-                if (n === Math.floor(n) && n >= 2 && n <= 10)
-                    return Plural.Few;
-                return Plural.Other;
-            case 'si':
-                if (n === 0 || n === 1 || i === 0 && f === 1)
-                    return Plural.One;
-                return Plural.Other;
-            case 'sl':
-                if (v === 0 && i % 100 === 1)
-                    return Plural.One;
-                if (v === 0 && i % 100 === 2)
-                    return Plural.Two;
-                if (v === 0 && i % 100 === Math.floor(i % 100) && i % 100 >= 3 && i % 100 <= 4 || !(v === 0))
-                    return Plural.Few;
-                return Plural.Other;
-            case 'tzm':
-                if (n === Math.floor(n) && n >= 0 && n <= 1 || n === Math.floor(n) && n >= 11 && n <= 99)
-                    return Plural.One;
-                return Plural.Other;
-            // When there is no specification, the default is always "other"
-            // Spec: http://cldr.unicode.org/index/cldr-spec/plural-rules
-            // > other (required—general plural form — also used if the language only has a single form)
-            default:
-                return Plural.Other;
-        }
-    }
-    function getPluralCategory(value, locale) {
-        var plural = getPluralCase(locale, value);
-        switch (plural) {
-            case Plural.Zero:
-                return 'zero';
-            case Plural.One:
-                return 'one';
-            case Plural.Two:
-                return 'two';
-            case Plural.Few:
-                return 'few';
-            case Plural.Many:
-                return 'many';
-            default:
-                return 'other';
-        }
-    }
     /**
      * Returns the index of the current case of an ICU expression depending on the main binding value
      *
@@ -20489,9 +20250,7 @@
         if (index === -1) {
             switch (icuExpression.type) {
                 case 1 /* plural */: {
-                    // TODO(ocombe): replace this hard-coded value by the real LOCALE_ID value
-                    var locale = 'en-US';
-                    var resolvedCase = getPluralCategory(bindingValue, locale);
+                    var resolvedCase = getPluralCase(bindingValue, getLocaleId());
                     index = icuExpression.cases.indexOf(resolvedCase);
                     if (index === -1 && resolvedCase !== 'other') {
                         index = icuExpression.cases.indexOf('other');
@@ -20703,7 +20462,7 @@
      * running outside of Closure Compiler. This method will not be needed once runtime translation
      * service support is introduced.
      *
-     * @publicApi
+     * @codeGenApi
      * @deprecated this method is temporary & should not be used as it will be removed soon
      */
     function ɵɵi18nLocalize(input, placeholders) {
@@ -20714,6 +20473,31 @@
         return Object.keys(placeholders).length ?
             input.replace(LOCALIZE_PH_REGEXP, function (match, key) { return placeholders[key] || ''; }) :
             input;
+    }
+    /**
+     * The locale id that the application is currently using (for translations and ICU expressions).
+     * This is the ivy version of `LOCALE_ID` that was defined as an injection token for the view engine
+     * but is now defined as a global value.
+     */
+    var DEFAULT_LOCALE_ID = 'en-US';
+    var LOCALE_ID = DEFAULT_LOCALE_ID;
+    /**
+     * Sets the locale id that will be used for translations and ICU expressions.
+     * This is the ivy version of `LOCALE_ID` that was defined as an injection token for the view engine
+     * but is now defined as a global value.
+     *
+     * @param localeId
+     */
+    function setLocaleId(localeId) {
+        LOCALE_ID = localeId.toLowerCase().replace(/_/g, '-');
+    }
+    /**
+     * Gets the locale id that will be used for translations and ICU expressions.
+     * This is the ivy version of `LOCALE_ID` that was defined as an injection token for the view engine
+     * but is now defined as a global value.
+     */
+    function getLocaleId() {
+        return LOCALE_ID;
     }
 
     /**
@@ -20739,6 +20523,10 @@
             _this.destroyCbs = [];
             var ngModuleDef = getNgModuleDef(ngModuleType);
             ngDevMode && assertDefined(ngModuleDef, "NgModule '" + stringify(ngModuleType) + "' is not a subtype of 'NgModuleType'.");
+            var ngLocaleIdDef = getNgLocaleIdDef(ngModuleType);
+            if (ngLocaleIdDef) {
+                setLocaleId(ngLocaleIdDef);
+            }
             _this._bootstrapComponents = maybeUnwrapFn(ngModuleDef.bootstrap);
             var additionalProviders = [
                 {
@@ -23045,6 +22833,89 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
+     * Provide this token to set the locale of your application.
+     * It is used for i18n extraction, by i18n pipes (DatePipe, I18nPluralPipe, CurrencyPipe,
+     * DecimalPipe and PercentPipe) and by ICU expressions.
+     *
+     * See the [i18n guide](guide/i18n#setting-up-locale) for more information.
+     *
+     * @usageNotes
+     * ### Example
+     *
+     * ```typescript
+     * import { LOCALE_ID } from '@angular/core';
+     * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+     * import { AppModule } from './app/app.module';
+     *
+     * platformBrowserDynamic().bootstrapModule(AppModule, {
+     *   providers: [{provide: LOCALE_ID, useValue: 'en-US' }]
+     * });
+     * ```
+     *
+     * @publicApi
+     */
+    var LOCALE_ID$1 = new InjectionToken('LocaleId');
+    /**
+     * Use this token at bootstrap to provide the content of your translation file (`xtb`,
+     * `xlf` or `xlf2`) when you want to translate your application in another language.
+     *
+     * See the [i18n guide](guide/i18n#merge) for more information.
+     *
+     * @usageNotes
+     * ### Example
+     *
+     * ```typescript
+     * import { TRANSLATIONS } from '@angular/core';
+     * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+     * import { AppModule } from './app/app.module';
+     *
+     * // content of your translation file
+     * const translations = '....';
+     *
+     * platformBrowserDynamic().bootstrapModule(AppModule, {
+     *   providers: [{provide: TRANSLATIONS, useValue: translations }]
+     * });
+     * ```
+     *
+     * @publicApi
+     */
+    var TRANSLATIONS$1 = new InjectionToken('Translations');
+    /**
+     * Provide this token at bootstrap to set the format of your {@link TRANSLATIONS}: `xtb`,
+     * `xlf` or `xlf2`.
+     *
+     * See the [i18n guide](guide/i18n#merge) for more information.
+     *
+     * @usageNotes
+     * ### Example
+     *
+     * ```typescript
+     * import { TRANSLATIONS_FORMAT } from '@angular/core';
+     * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+     * import { AppModule } from './app/app.module';
+     *
+     * platformBrowserDynamic().bootstrapModule(AppModule, {
+     *   providers: [{provide: TRANSLATIONS_FORMAT, useValue: 'xlf' }]
+     * });
+     * ```
+     *
+     * @publicApi
+     */
+    var TRANSLATIONS_FORMAT = new InjectionToken('TranslationsFormat');
+    (function (MissingTranslationStrategy) {
+        MissingTranslationStrategy[MissingTranslationStrategy["Error"] = 0] = "Error";
+        MissingTranslationStrategy[MissingTranslationStrategy["Warning"] = 1] = "Warning";
+        MissingTranslationStrategy[MissingTranslationStrategy["Ignore"] = 2] = "Ignore";
+    })(exports.MissingTranslationStrategy || (exports.MissingTranslationStrategy = {}));
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
      * Combination of NgModuleFactory and ComponentFactorys.
      *
      * @publicApi
@@ -23996,6 +23867,9 @@
                 if (!exceptionHandler) {
                     throw new Error('No ErrorHandler. Is platform module (BrowserModule) included?');
                 }
+                // If the `LOCALE_ID` provider is defined at bootstrap we set the value for runtime i18n (ivy)
+                var localeId = moduleRef.injector.get(LOCALE_ID$1, DEFAULT_LOCALE_ID);
+                setLocaleId(localeId);
                 moduleRef.onDestroy(function () { return remove(_this._modules, moduleRef); });
                 ngZone.runOutsideAngular(function () { return ngZone.onError.subscribe({ next: function (error) { exceptionHandler.handleError(error); } }); });
                 return _callAndReportToErrorHandler(exceptionHandler, ngZone, function () {
@@ -25310,89 +25184,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    /**
-     * Provide this token to set the locale of your application.
-     * It is used for i18n extraction, by i18n pipes (DatePipe, I18nPluralPipe, CurrencyPipe,
-     * DecimalPipe and PercentPipe) and by ICU expressions.
-     *
-     * See the [i18n guide](guide/i18n#setting-up-locale) for more information.
-     *
-     * @usageNotes
-     * ### Example
-     *
-     * ```typescript
-     * import { LOCALE_ID } from '@angular/core';
-     * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-     * import { AppModule } from './app/app.module';
-     *
-     * platformBrowserDynamic().bootstrapModule(AppModule, {
-     *   providers: [{provide: LOCALE_ID, useValue: 'en-US' }]
-     * });
-     * ```
-     *
-     * @publicApi
-     */
-    var LOCALE_ID = new InjectionToken('LocaleId');
-    /**
-     * Use this token at bootstrap to provide the content of your translation file (`xtb`,
-     * `xlf` or `xlf2`) when you want to translate your application in another language.
-     *
-     * See the [i18n guide](guide/i18n#merge) for more information.
-     *
-     * @usageNotes
-     * ### Example
-     *
-     * ```typescript
-     * import { TRANSLATIONS } from '@angular/core';
-     * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-     * import { AppModule } from './app/app.module';
-     *
-     * // content of your translation file
-     * const translations = '....';
-     *
-     * platformBrowserDynamic().bootstrapModule(AppModule, {
-     *   providers: [{provide: TRANSLATIONS, useValue: translations }]
-     * });
-     * ```
-     *
-     * @publicApi
-     */
-    var TRANSLATIONS$1 = new InjectionToken('Translations');
-    /**
-     * Provide this token at bootstrap to set the format of your {@link TRANSLATIONS}: `xtb`,
-     * `xlf` or `xlf2`.
-     *
-     * See the [i18n guide](guide/i18n#merge) for more information.
-     *
-     * @usageNotes
-     * ### Example
-     *
-     * ```typescript
-     * import { TRANSLATIONS_FORMAT } from '@angular/core';
-     * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-     * import { AppModule } from './app/app.module';
-     *
-     * platformBrowserDynamic().bootstrapModule(AppModule, {
-     *   providers: [{provide: TRANSLATIONS_FORMAT, useValue: 'xlf' }]
-     * });
-     * ```
-     *
-     * @publicApi
-     */
-    var TRANSLATIONS_FORMAT = new InjectionToken('TranslationsFormat');
-    (function (MissingTranslationStrategy) {
-        MissingTranslationStrategy[MissingTranslationStrategy["Error"] = 0] = "Error";
-        MissingTranslationStrategy[MissingTranslationStrategy["Warning"] = 1] = "Warning";
-        MissingTranslationStrategy[MissingTranslationStrategy["Ignore"] = 2] = "Ignore";
-    })(exports.MissingTranslationStrategy || (exports.MissingTranslationStrategy = {}));
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     function _iterableDiffersFactory() {
         return defaultIterableDiffers;
     }
@@ -25423,9 +25214,9 @@
         { provide: IterableDiffers, useFactory: _iterableDiffersFactory, deps: [] },
         { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory, deps: [] },
         {
-            provide: LOCALE_ID,
+            provide: LOCALE_ID$1,
             useFactory: _localeFactory,
-            deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
+            deps: [[new Inject(LOCALE_ID$1), new Optional(), new SkipSelf()]]
         },
     ];
     /**
@@ -27838,7 +27629,7 @@
     exports.setTestabilityGetter = setTestabilityGetter;
     exports.TRANSLATIONS = TRANSLATIONS$1;
     exports.TRANSLATIONS_FORMAT = TRANSLATIONS_FORMAT;
-    exports.LOCALE_ID = LOCALE_ID;
+    exports.LOCALE_ID = LOCALE_ID$1;
     exports.ApplicationModule = ApplicationModule;
     exports.wtfCreateScope = wtfCreateScope;
     exports.wtfLeave = wtfLeave;
@@ -27951,6 +27742,9 @@
     exports.ɵoverrideComponentView = overrideComponentView;
     exports.ɵoverrideProvider = overrideProvider;
     exports.ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR;
+    exports.ɵgetLocalePluralCase = getLocalePluralCase;
+    exports.ɵfindLocaleData = findLocaleData;
+    exports.ɵLOCALE_DATA = LOCALE_DATA;
     exports.ɵɵdefineBase = ɵɵdefineBase;
     exports.ɵɵdefineComponent = ɵɵdefineComponent;
     exports.ɵɵdefineDirective = ɵɵdefineDirective;
@@ -28064,6 +27858,8 @@
     exports.ɵɵi18nPostprocess = ɵɵi18nPostprocess;
     exports.ɵi18nConfigureLocalize = i18nConfigureLocalize;
     exports.ɵɵi18nLocalize = ɵɵi18nLocalize;
+    exports.ɵsetLocaleId = setLocaleId;
+    exports.ɵDEFAULT_LOCALE_ID = DEFAULT_LOCALE_ID;
     exports.ɵsetClassMetadata = setClassMetadata;
     exports.ɵɵresolveWindow = ɵɵresolveWindow;
     exports.ɵɵresolveDocument = ɵɵresolveDocument;

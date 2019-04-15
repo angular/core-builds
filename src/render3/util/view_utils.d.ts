@@ -72,6 +72,10 @@ export declare function isStylingContext(value: RNode | LView | LContainer | Sty
  */
 export declare function getNativeByIndex(index: number, lView: LView): RNode;
 export declare function getNativeByTNode(tNode: TNode, hostView: LView): RNode;
+/**
+ * A helper function that returns `true` if a given `TNode` has any matching directives.
+ */
+export declare function hasDirectives(tNode: TNode): boolean;
 export declare function getTNode(index: number, view: LView): TNode;
 /** Retrieves a value from any `LView` or `TData`. */
 export declare function loadInternal<T>(view: LView | TData, index: number): T;
