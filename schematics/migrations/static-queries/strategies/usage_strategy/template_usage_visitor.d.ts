@@ -5,13 +5,13 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/// <amd-module name="@angular/core/schematics/migrations/static-queries/angular/query_read_html_visitor" />
+/// <amd-module name="@angular/core/schematics/migrations/static-queries/strategies/usage_strategy/template_usage_visitor" />
 import { BoundAttribute, BoundEvent, BoundText, Element, Node, NullVisitor, Template } from '@angular/compiler/src/render3/r3_ast';
 /**
  * AST visitor that traverses the Render3 HTML AST in order to check if the given
  * query property is accessed statically in the template.
  */
-export declare class QueryReadHtmlVisitor extends NullVisitor {
+export declare class TemplateUsageVisitor extends NullVisitor {
     queryPropertyName: string;
     private hasQueryTemplateReference;
     private expressionAstVisitor;
