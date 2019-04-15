@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.12+4.sha-d1d0f4a.with-local-changes
+ * @license Angular v8.0.0-beta.12+6.sha-6a8cca7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1356,7 +1356,7 @@ declare interface CreateComponentOptions {
      * Typically, the features in this list are features that cannot be added to the
      * other features list in the component definition because they rely on other factors.
      *
-     * Example: `RootLifecycleHooks` is a function that adds lifecycle hook capabilities
+     * Example: `LifecycleHooksFeature` is a function that adds lifecycle hook capabilities
      * to root components in a tree-shakable way. It cannot be added to the component
      * features list because there's no way of knowing when the component will be used as
      * a root component.
@@ -9568,6 +9568,13 @@ export declare function ɵcrt(values: {
  */
 export declare type ɵCssSelectorList = CssSelector[];
 
+/**
+ * The locale id that the application is currently using (for translations and ICU expressions).
+ * This is the ivy version of `LOCALE_ID` that was defined as an injection token for the view engine
+ * but is now defined as a global value.
+ */
+export declare const ɵDEFAULT_LOCALE_ID = "en-US";
+
 export declare const ɵdefaultIterableDiffers: IterableDiffers;
 
 export declare const ɵdefaultKeyValueDiffers: KeyValueDiffers;
@@ -9694,6 +9701,15 @@ export declare const ɵEMPTY_MAP: {
 };
 
 /**
+ * Finds the locale data for a given locale.
+ *
+ * @param locale The locale code.
+ * @returns The locale data.
+ * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n)
+ */
+export declare function ɵfindLocaleData(locale: string): any;
+
+/**
  * Loops over queued module definitions, if a given module definition has all of its
  * declarations resolved, it dequeues that module definition and sets the scope on
  * its declarations.
@@ -9756,6 +9772,17 @@ export declare function ɵgetInjectableDef<T>(type: any): ɵɵInjectableDef<T> |
  * @param target Component, Directive or DOM Node.
  */
 export declare function ɵgetLContext(target: any): ɵLContext | null;
+
+
+/**
+ * Retrieves the plural function used by ICU expressions to determine the plural case to use
+ * for a given locale.
+ * @param locale A locale code for the locale format rules to use.
+ * @returns The plural function for the locale.
+ * @see `NgPlural`
+ * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n)
+ */
+export declare function ɵgetLocalePluralCase(locale: string): (value: number) => number;
 
 export declare function ɵgetModuleFactory__POST_R3__(id: string): NgModuleFactory<any>;
 
@@ -9868,6 +9895,39 @@ export declare interface ɵLContext {
  * ```
  */
 export declare function ɵLifecycleHooksFeature(component: any, def: ɵComponentDef<any>): void;
+
+/**
+ * This const is used to store the locale data registered with `registerLocaleData`
+ */
+export declare const ɵLOCALE_DATA: {
+    [localeId: string]: any;
+};
+
+/**
+ * Index of each type of locale data from the locale data array
+ */
+export declare enum ɵLocaleDataIndex {
+    LocaleId = 0,
+    DayPeriodsFormat = 1,
+    DayPeriodsStandalone = 2,
+    DaysFormat = 3,
+    DaysStandalone = 4,
+    MonthsFormat = 5,
+    MonthsStandalone = 6,
+    Eras = 7,
+    FirstDayOfWeek = 8,
+    WeekendRange = 9,
+    DateFormat = 10,
+    TimeFormat = 11,
+    DateTimeFormat = 12,
+    NumberSymbols = 13,
+    NumberFormats = 14,
+    CurrencySymbol = 15,
+    CurrencyName = 16,
+    Currencies = 17,
+    PluralCase = 18,
+    ExtraData = 19
+}
 
 
 export declare function ɵlooseIdentical(a: any, b: any): boolean;
@@ -10412,6 +10472,15 @@ export declare function ɵsetClassMetadata(type: Type<any>, decorators: any[] | 
 } | null): void;
 
 export declare function ɵsetCurrentInjector(injector: Injector | null | undefined): Injector | undefined | null;
+
+/**
+ * Sets the locale id that will be used for translations and ICU expressions.
+ * This is the ivy version of `LOCALE_ID` that was defined as an injection token for the view engine
+ * but is now defined as a global value.
+ *
+ * @param localeId
+ */
+export declare function ɵsetLocaleId(localeId: string): void;
 
 
 export declare type ɵSetterFn = (obj: any, value: any) => void;
@@ -11709,7 +11778,7 @@ export declare function ɵɵi18nExp<T>(expression: T | ɵNO_CHANGE): void;
  * running outside of Closure Compiler. This method will not be needed once runtime translation
  * service support is introduced.
  *
- * @publicApi
+ * @codeGenApi
  * @deprecated this method is temporary & should not be used as it will be removed soon
  */
 export declare function ɵɵi18nLocalize(input: string, placeholders?: {
