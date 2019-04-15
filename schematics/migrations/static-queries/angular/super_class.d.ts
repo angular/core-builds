@@ -7,12 +7,9 @@
  */
 /// <amd-module name="@angular/core/schematics/migrations/static-queries/angular/super_class" />
 import * as ts from 'typescript';
-import { FunctionContext } from './declaration_usage_visitor';
 import { ClassMetadataMap } from './ng_query_visitor';
 /**
- * Updates the specified function context to map abstract super-class class members
- * to their implementation TypeScript nodes. This allows us to run the declaration visitor
- * for the super class with the context of the "baseClass" (e.g. with implemented abstract
- * class members)
+ * Gets all chained super-class TypeScript declarations for the given class
+ * by using the specified class metadata map.
  */
-export declare function updateSuperClassAbstractMembersContext(baseClass: ts.ClassDeclaration, context: FunctionContext, classMetadataMap: ClassMetadataMap): void;
+export declare function getSuperClassDeclarations(classDecl: ts.ClassDeclaration, classMetadataMap: ClassMetadataMap): ts.ClassDeclaration[];

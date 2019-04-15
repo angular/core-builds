@@ -34,7 +34,7 @@ export interface ResolvedTemplate {
  */
 export declare class NgComponentTemplateVisitor {
     typeChecker: ts.TypeChecker;
-    resolvedTemplates: Map<string, ResolvedTemplate>;
+    resolvedTemplates: ResolvedTemplate[];
     constructor(typeChecker: ts.TypeChecker);
     visitNode(node: ts.Node): void;
     private visitClassDeclaration;
