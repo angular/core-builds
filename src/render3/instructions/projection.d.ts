@@ -39,7 +39,7 @@ export declare function ɵɵprojectionDef(selectors?: CssSelectorList[]): void;
  * @param selectorIndex:
  *        - 0 when the selector is `*` (or unspecified as this is the default value),
  *        - 1 based index of the selector from the {@link projectionDef}
-  *
+ *
  * @codeGenApi
 */
 export declare function ɵɵprojection(nodeIndex: number, selectorIndex?: number, attrs?: TAttributes): void;
