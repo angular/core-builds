@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.12+6.sha-6a8cca7.with-local-changes
+ * @license Angular v8.0.0-beta.12+8.sha-b2962db.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12929,7 +12929,7 @@ function ɵɵprojectionDef(selectors) {
  * @param selectorIndex:
  *        - 0 when the selector is `*` (or unspecified as this is the default value),
  *        - 1 based index of the selector from the {@link projectionDef}
-  *
+ *
  * @codeGenApi
 */
 function ɵɵprojection(nodeIndex, selectorIndex, attrs) {
@@ -15970,7 +15970,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.12+6.sha-6a8cca7.with-local-changes');
+var VERSION = new Version('8.0.0-beta.12+8.sha-b2962db.with-local-changes');
 
 /**
  * @license
