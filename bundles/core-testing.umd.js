@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.12+17.sha-9147092.with-local-changes
+ * @license Angular v8.0.0-beta.12+24.sha-2bfb6a0.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1199,17 +1199,20 @@
         };
         R3TestBedCompiler.prototype.overrideProvider = function (token, provider) {
             var providerDef = provider.useFactory ?
-                { provide: token, useFactory: provider.useFactory, deps: provider.deps || [] } :
-                { provide: token, useValue: provider.useValue };
+                {
+                    provide: token,
+                    useFactory: provider.useFactory,
+                    deps: provider.deps || [],
+                    multi: provider.multi,
+                } :
+                { provide: token, useValue: provider.useValue, multi: provider.multi };
             var injectableDef;
             var isRoot = (typeof token !== 'string' && (injectableDef = core.ɵgetInjectableDef(token)) &&
                 injectableDef.providedIn === 'root');
             var overridesBucket = isRoot ? this.rootProviderOverrides : this.providerOverrides;
             overridesBucket.push(providerDef);
-            // Keep all overrides grouped by token as well for fast lookups using token
-            var overridesForToken = this.providerOverridesByToken.get(token) || [];
-            overridesForToken.push(providerDef);
-            this.providerOverridesByToken.set(token, overridesForToken);
+            // Keep overrides grouped by token as well for fast lookups using token
+            this.providerOverridesByToken.set(token, providerDef);
         };
         R3TestBedCompiler.prototype.overrideTemplateUsingTestingModule = function (type, template) {
             var _this = this;
@@ -1392,7 +1395,7 @@
                 if (this.hasProviderOverrides(injectorDef.providers)) {
                     this.maybeStoreNgDef(core.ɵNG_INJECTOR_DEF, moduleType);
                     this.storeFieldOfDefOnType(moduleType, core.ɵNG_INJECTOR_DEF, 'providers');
-                    injectorDef.providers = __spread(injectorDef.providers, this.getProviderOverrides(injectorDef.providers));
+                    injectorDef.providers = this.getOverriddenProviders(injectorDef.providers);
                 }
                 // Apply provider overrides to imported modules recursively
                 var moduleDef = moduleType[core.ɵNG_MODULE_DEF];
@@ -1635,10 +1638,8 @@
         });
         // get overrides for a specific provider (if any)
         R3TestBedCompiler.prototype.getSingleProviderOverrides = function (provider) {
-            var token = provider && typeof provider === 'object' && provider.hasOwnProperty('provide') ?
-                provider.provide :
-                provider;
-            return this.providerOverridesByToken.get(token) || [];
+            var token = getProviderToken(provider);
+            return this.providerOverridesByToken.get(token) || null;
         };
         R3TestBedCompiler.prototype.getProviderOverrides = function (providers) {
             var _this = this;
@@ -1649,7 +1650,45 @@
             // provider. The outer flatten() then flattens the produced overrides array. If this is not
             // done, the array can contain other empty arrays (e.g. `[[], []]`) which leak into the
             // providers array and contaminate any error messages that might be generated.
-            return flatten(flatten(providers, function (provider) { return _this.getSingleProviderOverrides(provider); }));
+            return flatten(flatten(providers, function (provider) { return _this.getSingleProviderOverrides(provider) || []; }));
+        };
+        R3TestBedCompiler.prototype.getOverriddenProviders = function (providers) {
+            var _this = this;
+            if (!providers || !providers.length || this.providerOverridesByToken.size === 0)
+                return [];
+            var overrides = this.getProviderOverrides(providers);
+            var hasMultiProviderOverrides = overrides.some(isMultiProvider);
+            var overriddenProviders = __spread(providers, overrides);
+            // No additional processing is required in case we have no multi providers to override
+            if (!hasMultiProviderOverrides) {
+                return overriddenProviders;
+            }
+            var final = [];
+            var seenMultiProviders = new Set();
+            // We iterate through the list of providers in reverse order to make sure multi provider
+            // overrides take precedence over the values defined in provider list. We also fiter out all
+            // multi providers that have overrides, keeping overridden values only.
+            forEachRight(overriddenProviders, function (provider) {
+                var token = getProviderToken(provider);
+                if (isMultiProvider(provider) && _this.providerOverridesByToken.has(token)) {
+                    if (!seenMultiProviders.has(token)) {
+                        seenMultiProviders.add(token);
+                        if (provider && provider.useValue && Array.isArray(provider.useValue)) {
+                            forEachRight(provider.useValue, function (value) {
+                                // Unwrap provider override array into individual providers in final set.
+                                final.unshift({ provide: token, useValue: value, multi: true });
+                            });
+                        }
+                        else {
+                            final.unshift(provider);
+                        }
+                    }
+                }
+                else {
+                    final.unshift(provider);
+                }
+            });
+            return final;
         };
         R3TestBedCompiler.prototype.hasProviderOverrides = function (providers) {
             return this.getProviderOverrides(providers).length > 0;
@@ -1660,10 +1699,7 @@
             if (def && def.providersResolver) {
                 this.maybeStoreNgDef(field, declaration);
                 var resolver_1 = def.providersResolver;
-                var processProvidersFn_1 = function (providers) {
-                    var overrides = _this.getProviderOverrides(providers);
-                    return __spread(providers, overrides);
-                };
+                var processProvidersFn_1 = function (providers) { return _this.getOverriddenProviders(providers); };
                 this.storeFieldOfDefOnType(declaration, field, 'providersResolver');
                 def.providersResolver = function (ngDef) { return resolver_1(ngDef, processProvidersFn_1); };
             }
@@ -1695,6 +1731,20 @@
             }
         });
         return out;
+    }
+    function getProviderField(provider, field) {
+        return provider && typeof provider === 'object' && provider[field];
+    }
+    function getProviderToken(provider) {
+        return getProviderField(provider, 'provide') || provider;
+    }
+    function isMultiProvider(provider) {
+        return !!getProviderField(provider, 'multi');
+    }
+    function forEachRight(values, fn) {
+        for (var idx = values.length - 1; idx >= 0; idx--) {
+            fn(values[idx], idx);
+        }
     }
     var R3TestCompiler = /** @class */ (function () {
         function R3TestCompiler(testBed) {

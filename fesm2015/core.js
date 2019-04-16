@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.12+17.sha-9147092.with-local-changes
+ * @license Angular v8.0.0-beta.12+24.sha-2bfb6a0.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4786,6 +4786,33 @@ function callHook(currentView, initPhase, arr, i) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
+/** @type {?} */
+let stylingContext = null;
+/**
+ * Gets the most recent styling context value.
+ *
+ * Note that only one styling context is stored at a given time.
+ * @return {?}
+ */
+function getCachedStylingContext() {
+    return stylingContext;
+}
+/**
+ * Sets the most recent styling context value.
+ *
+ * Note that only one styling context is stored at a given time.
+ *
+ * @param {?} context The styling context value that will be stored
+ * @return {?}
+ */
+function setCachedStylingContext(context) {
+    stylingContext = context;
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
 /**
  * Store the element depth count. This is used to identify the root elements of the template
  * so that we can than attach `LView` to only those elements.
@@ -5280,6 +5307,7 @@ function leaveView(newView) {
             lView[BINDING_INDEX] = tView.bindingStartIndex;
         }
     }
+    setCachedStylingContext(null);
     enterView(newView, null);
 }
 /** @type {?} */
@@ -5306,6 +5334,9 @@ function getSelectedIndex() {
  */
 function setSelectedIndex(index) {
     _selectedIndex = index;
+    // remove the styling context from the cache
+    // because we are now on a different element
+    setCachedStylingContext(null);
 }
 /** @type {?} */
 let _currentNamespace = null;
@@ -5908,7 +5939,7 @@ function allocStylingContext(element, templateStyleContext) {
  * @param {?} viewData The view to search for the styling context
  * @return {?}
  */
-function getStylingContext(index, viewData) {
+function getStylingContextFromLView(index, viewData) {
     /** @type {?} */
     let storageIndex = index;
     /** @type {?} */
@@ -6066,7 +6097,7 @@ function getOrCreatePlayerContext(target, context) {
     }
     const { lView, nodeIndex } = context;
     /** @type {?} */
-    const stylingContext = getStylingContext(nodeIndex, lView);
+    const stylingContext = getStylingContextFromLView(nodeIndex, lView);
     return getPlayerContext(stylingContext) || allocPlayerContext(stylingContext);
 }
 /**
@@ -14786,7 +14817,9 @@ function initElementStyling(tNode, classBindingNames, styleBindingNames, styleSa
 function ɵɵelementStyleProp(index, styleIndex, value, suffix, forceOverride) {
     /** @type {?} */
     const valueToAdd = resolveStylePropValue(value, suffix);
-    updateStyleProp(getStylingContext(index + HEADER_OFFSET, getLView()), styleIndex, valueToAdd, DEFAULT_TEMPLATE_DIRECTIVE_INDEX, forceOverride);
+    /** @type {?} */
+    const stylingContext = getStylingContext(index, getLView());
+    updateStyleProp(stylingContext, styleIndex, valueToAdd, DEFAULT_TEMPLATE_DIRECTIVE_INDEX, forceOverride);
 }
 /**
  * Update a host style binding value on the host element within a component/directive.
@@ -14820,9 +14853,7 @@ function ɵɵelementHostStyleProp(styleIndex, value, suffix, forceOverride) {
     /** @type {?} */
     const hostElementIndex = getSelectedIndex();
     /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const stylingContext = getStylingContext(hostElementIndex + HEADER_OFFSET, lView);
+    const stylingContext = getStylingContext(hostElementIndex, getLView());
     /** @type {?} */
     const valueToAdd = resolveStylePropValue(value, suffix);
     /** @type {?} */
@@ -14877,7 +14908,9 @@ function ɵɵelementClassProp(index, classIndex, value, forceOverride) {
     const input = (value instanceof BoundPlayerFactory) ?
         ((/** @type {?} */ (value))) :
         booleanOrNull(value);
-    updateClassProp(getStylingContext(index + HEADER_OFFSET, getLView()), classIndex, input, DEFAULT_TEMPLATE_DIRECTIVE_INDEX, forceOverride);
+    /** @type {?} */
+    const stylingContext = getStylingContext(index, getLView());
+    updateClassProp(stylingContext, classIndex, input, DEFAULT_TEMPLATE_DIRECTIVE_INDEX, forceOverride);
 }
 /**
  * Update a class host binding for a directive's/component's host element within
@@ -14904,9 +14937,7 @@ function ɵɵelementHostClassProp(classIndex, value, forceOverride) {
     /** @type {?} */
     const hostElementIndex = getSelectedIndex();
     /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const stylingContext = getStylingContext(hostElementIndex + HEADER_OFFSET, lView);
+    const stylingContext = getStylingContext(hostElementIndex, getLView());
     /** @type {?} */
     const input = (value instanceof BoundPlayerFactory) ?
         ((/** @type {?} */ (value))) :
@@ -14949,9 +14980,9 @@ function ɵɵelementStylingMap(index, classes, styles) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
-    const tNode = getTNode(index, lView);
+    const stylingContext = getStylingContext(index, lView);
     /** @type {?} */
-    const stylingContext = getStylingContext(index + HEADER_OFFSET, lView);
+    const tNode = getTNode(index, lView);
     // inputs are only evaluated from a template binding into a directive, therefore,
     // there should not be a situation where a directive host bindings function
     // evaluates the inputs (this should only happen in the template function)
@@ -15003,9 +15034,7 @@ function ɵɵelementHostStylingMap(classes, styles) {
     /** @type {?} */
     const hostElementIndex = getSelectedIndex();
     /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const stylingContext = getStylingContext(hostElementIndex + HEADER_OFFSET, lView);
+    const stylingContext = getStylingContext(hostElementIndex, getLView());
     /** @type {?} */
     const args = [stylingContext, classes, styles, directiveStylingIndex];
     enqueueHostInstruction(stylingContext, directiveStylingIndex, updateStylingMap, args);
@@ -15057,7 +15086,7 @@ function elementStylingApplyInternal(directiveStylingIndex, index) {
     /** @type {?} */
     const isFirstRender = (lView[FLAGS] & 8 /* FirstLViewPass */) !== 0;
     /** @type {?} */
-    const stylingContext = getStylingContext(index + HEADER_OFFSET, lView);
+    const stylingContext = getStylingContext(index, lView);
     /** @type {?} */
     const totalPlayersQueued = renderStyling(stylingContext, renderer, lView, isFirstRender, null, null, directiveStylingIndex);
     if (totalPlayersQueued > 0) {
@@ -15065,6 +15094,14 @@ function elementStylingApplyInternal(directiveStylingIndex, index) {
         const rootContext = getRootContext(lView);
         scheduleTick(rootContext, 2 /* FlushPlayers */);
     }
+    // because select(n) may not run between every instruction, the cached styling
+    // context may not get cleared between elements. The reason for this is because
+    // styling bindings (like `[style]` and `[class]`) are not recognized as property
+    // bindings by default so a select(n) instruction is not generated. To ensure the
+    // context is loaded correctly for the next element the cache below is pre-emptively
+    // cleared because there is no code in Angular that applies more styling code after a
+    // styling flush has occurred. Note that this will be fixed once FW-1254 lands.
+    setCachedStylingContext(null);
 }
 /**
  * @return {?}
@@ -15077,6 +15114,25 @@ function getActiveDirectiveStylingIndex() {
     // parent directive. To help the styling code distinguish between a parent
     // sub-classed directive the inheritance depth is taken into account as well.
     return getActiveDirectiveId() + getActiveDirectiveSuperClassDepth();
+}
+/**
+ * @param {?} index
+ * @param {?} lView
+ * @return {?}
+ */
+function getStylingContext(index, lView) {
+    /** @type {?} */
+    let context = getCachedStylingContext();
+    if (!context) {
+        context = getStylingContextFromLView(index + HEADER_OFFSET, lView);
+        setCachedStylingContext(context);
+    }
+    else if (ngDevMode) {
+        /** @type {?} */
+        const actualContext = getStylingContextFromLView(index + HEADER_OFFSET, lView);
+        assertEqual(context, actualContext, 'The cached styling context is invalid');
+    }
+    return context;
 }
 
 /**
@@ -15206,14 +15262,15 @@ function ɵɵelementEnd() {
     // this is fired at the end of elementEnd because ALL of the stylingBindings code
     // (for directives and the template) have now executed which means the styling
     // context can be instantiated properly.
+    /** @type {?} */
+    let stylingContext = null;
     if (hasClassInput(previousOrParentTNode)) {
-        /** @type {?} */
-        const stylingContext = getStylingContext(previousOrParentTNode.index, lView);
+        stylingContext = getStylingContextFromLView(previousOrParentTNode.index, lView);
         setInputsForProperty(lView, (/** @type {?} */ ((/** @type {?} */ (previousOrParentTNode.inputs))['class'])), getInitialClassNameValue(stylingContext));
     }
     if (hasStyleInput(previousOrParentTNode)) {
-        /** @type {?} */
-        const stylingContext = getStylingContext(previousOrParentTNode.index, lView);
+        stylingContext =
+            stylingContext || getStylingContextFromLView(previousOrParentTNode.index, lView);
         setInputsForProperty(lView, (/** @type {?} */ ((/** @type {?} */ (previousOrParentTNode.inputs))['style'])), getInitialStyleStringValue(stylingContext));
     }
 }
@@ -16859,7 +16916,7 @@ function getPlayers(ref) {
         return [];
     }
     /** @type {?} */
-    const stylingContext = getStylingContext(context.nodeIndex, context.lView);
+    const stylingContext = getStylingContextFromLView(context.nodeIndex, context.lView);
     /** @type {?} */
     const playerContext = stylingContext ? getPlayerContext(stylingContext) : null;
     return playerContext ? getPlayersInternal(playerContext) : [];
@@ -19831,7 +19888,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.12+17.sha-9147092.with-local-changes');
+const VERSION = new Version('8.0.0-beta.12+24.sha-2bfb6a0.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -32018,7 +32075,7 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
             /** @type {?} */
             const lContext = loadLContextFromNode(element);
             /** @type {?} */
-            const stylingContext = getStylingContext(lContext.nodeIndex, lContext.lView);
+            const stylingContext = getStylingContextFromLView(lContext.nodeIndex, lContext.lView);
             if (stylingContext) {
                 for (let i = 10 /* SingleStylesStartPosition */; i < stylingContext.length; i += 4 /* Size */) {
                     if (isClassBasedValue(stylingContext, i)) {
@@ -32056,7 +32113,7 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
             /** @type {?} */
             const lContext = loadLContextFromNode(element);
             /** @type {?} */
-            const stylingContext = getStylingContext(lContext.nodeIndex, lContext.lView);
+            const stylingContext = getStylingContextFromLView(lContext.nodeIndex, lContext.lView);
             if (stylingContext) {
                 for (let i = 10 /* SingleStylesStartPosition */; i < stylingContext.length; i += 4 /* Size */) {
                     if (!isClassBasedValue(stylingContext, i)) {
@@ -32318,17 +32375,17 @@ function collectPropertyBindings(tNode, lView, tData) {
     let bindingIndex = getFirstBindingIndex(tNode.propertyMetadataStartIndex, tData);
     while (bindingIndex < tNode.propertyMetadataEndIndex) {
         /** @type {?} */
-        let value = '';
+        let value;
         /** @type {?} */
         let propMetadata = (/** @type {?} */ (tData[bindingIndex]));
         while (!isPropMetadataString(propMetadata)) {
             // This is the first value for an interpolation. We need to build up
             // the full interpolation by combining runtime values in LView with
             // the static interstitial values stored in TData.
-            value += renderStringify(lView[bindingIndex]) + tData[bindingIndex];
+            value = (value || '') + renderStringify(lView[bindingIndex]) + tData[bindingIndex];
             propMetadata = (/** @type {?} */ (tData[++bindingIndex]));
         }
-        value += lView[bindingIndex];
+        value = value === undefined ? lView[bindingIndex] : value += lView[bindingIndex];
         // Property metadata string has 3 parts: property name, prefix, and suffix
         /** @type {?} */
         const metadataParts = propMetadata.split(INTERPOLATION_DELIMITER);
@@ -32336,8 +32393,11 @@ function collectPropertyBindings(tNode, lView, tData) {
         const propertyName = metadataParts[0];
         // Attr bindings don't have property names and should be skipped
         if (propertyName) {
-            // Wrap value with prefix and suffix (will be '' for normal bindings)
-            properties[propertyName] = metadataParts[1] + value + metadataParts[2];
+            // Wrap value with prefix and suffix (will be '' for normal bindings), if they're defined.
+            // Avoid wrapping for normal bindings so that the value doesn't get cast to a string.
+            properties[propertyName] = (metadataParts[1] && metadataParts[2]) ?
+                metadataParts[1] + value + metadataParts[2] :
+                value;
         }
         bindingIndex++;
     }
