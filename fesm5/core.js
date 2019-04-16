@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.12+25.sha-86a3f90.with-local-changes
+ * @license Angular v8.0.0-beta.13.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12779,7 +12779,8 @@ function listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver
 }
 function executeListenerWithErrorHandling(lView, listenerFn, e) {
     try {
-        return listenerFn(e);
+        // Only explicitly returning false from a listener should preventDefault
+        return listenerFn(e) !== false;
     }
     catch (error) {
         handleError(lView, error);
@@ -12812,7 +12813,8 @@ function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
         // their presence and invoke as needed.
         var nextListenerFn = wrapListenerIn_markDirtyAndPreventDefault.__ngNextListenerFn__;
         while (nextListenerFn) {
-            result = executeListenerWithErrorHandling(lView, nextListenerFn, e);
+            // We should prevent default if any of the listeners explicitly return false
+            result = executeListenerWithErrorHandling(lView, nextListenerFn, e) && result;
             nextListenerFn = nextListenerFn.__ngNextListenerFn__;
         }
         if (wrapWithPreventDefault && result === false) {
@@ -15940,7 +15942,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.12+25.sha-86a3f90.with-local-changes');
+var VERSION = new Version('8.0.0-beta.13.with-local-changes');
 
 /**
  * @license
