@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.12+19.sha-ca755a6.with-local-changes
+ * @license Angular v8.0.0-beta.12+21.sha-5f1b637.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1407,8 +1407,13 @@ class R3TestBedCompiler {
     overrideProvider(token, provider) {
         /** @type {?} */
         const providerDef = provider.useFactory ?
-            { provide: token, useFactory: provider.useFactory, deps: provider.deps || [] } :
-            { provide: token, useValue: provider.useValue };
+            {
+                provide: token,
+                useFactory: provider.useFactory,
+                deps: provider.deps || [],
+                multi: provider.multi,
+            } :
+            { provide: token, useValue: provider.useValue, multi: provider.multi };
         /** @type {?} */
         let injectableDef;
         /** @type {?} */
@@ -1417,11 +1422,8 @@ class R3TestBedCompiler {
         /** @type {?} */
         const overridesBucket = isRoot ? this.rootProviderOverrides : this.providerOverrides;
         overridesBucket.push(providerDef);
-        // Keep all overrides grouped by token as well for fast lookups using token
-        /** @type {?} */
-        const overridesForToken = this.providerOverridesByToken.get(token) || [];
-        overridesForToken.push(providerDef);
-        this.providerOverridesByToken.set(token, overridesForToken);
+        // Keep overrides grouped by token as well for fast lookups using token
+        this.providerOverridesByToken.set(token, providerDef);
     }
     /**
      * @param {?} type
@@ -1681,10 +1683,7 @@ class R3TestBedCompiler {
             if (this.hasProviderOverrides(injectorDef.providers)) {
                 this.maybeStoreNgDef(ɵNG_INJECTOR_DEF, moduleType);
                 this.storeFieldOfDefOnType(moduleType, ɵNG_INJECTOR_DEF, 'providers');
-                injectorDef.providers = [
-                    ...injectorDef.providers,
-                    ...this.getProviderOverrides(injectorDef.providers)
-                ];
+                injectorDef.providers = this.getOverriddenProviders(injectorDef.providers);
             }
             // Apply provider overrides to imported modules recursively
             /** @type {?} */
@@ -1979,10 +1978,8 @@ class R3TestBedCompiler {
      */
     getSingleProviderOverrides(provider) {
         /** @type {?} */
-        const token = provider && typeof provider === 'object' && provider.hasOwnProperty('provide') ?
-            provider.provide :
-            provider;
-        return this.providerOverridesByToken.get(token) || [];
+        const token = getProviderToken(provider);
+        return this.providerOverridesByToken.get(token) || null;
     }
     /**
      * @private
@@ -2001,7 +1998,63 @@ class R3TestBedCompiler {
          * @param {?} provider
          * @return {?}
          */
-        (provider) => this.getSingleProviderOverrides(provider))));
+        (provider) => this.getSingleProviderOverrides(provider) || [])));
+    }
+    /**
+     * @private
+     * @param {?=} providers
+     * @return {?}
+     */
+    getOverriddenProviders(providers) {
+        if (!providers || !providers.length || this.providerOverridesByToken.size === 0)
+            return [];
+        /** @type {?} */
+        const overrides = this.getProviderOverrides(providers);
+        /** @type {?} */
+        const hasMultiProviderOverrides = overrides.some(isMultiProvider);
+        /** @type {?} */
+        const overriddenProviders = [...providers, ...overrides];
+        // No additional processing is required in case we have no multi providers to override
+        if (!hasMultiProviderOverrides) {
+            return overriddenProviders;
+        }
+        /** @type {?} */
+        const final = [];
+        /** @type {?} */
+        const seenMultiProviders = new Set();
+        // We iterate through the list of providers in reverse order to make sure multi provider
+        // overrides take precedence over the values defined in provider list. We also fiter out all
+        // multi providers that have overrides, keeping overridden values only.
+        forEachRight(overriddenProviders, (/**
+         * @param {?} provider
+         * @return {?}
+         */
+        (provider) => {
+            /** @type {?} */
+            const token = getProviderToken(provider);
+            if (isMultiProvider(provider) && this.providerOverridesByToken.has(token)) {
+                if (!seenMultiProviders.has(token)) {
+                    seenMultiProviders.add(token);
+                    if (provider && provider.useValue && Array.isArray(provider.useValue)) {
+                        forEachRight(provider.useValue, (/**
+                         * @param {?} value
+                         * @return {?}
+                         */
+                        (value) => {
+                            // Unwrap provider override array into individual providers in final set.
+                            final.unshift({ provide: token, useValue: value, multi: true });
+                        }));
+                    }
+                    else {
+                        final.unshift(provider);
+                    }
+                }
+            }
+            else {
+                final.unshift(provider);
+            }
+        }));
+        return final;
     }
     /**
      * @private
@@ -2029,11 +2082,7 @@ class R3TestBedCompiler {
              * @param {?} providers
              * @return {?}
              */
-            (providers) => {
-                /** @type {?} */
-                const overrides = this.getProviderOverrides(providers);
-                return [...providers, ...overrides];
-            });
+            (providers) => this.getOverriddenProviders(providers));
             this.storeFieldOfDefOnType(declaration, field, 'providersResolver');
             def.providersResolver = (/**
              * @param {?} ngDef
@@ -2092,6 +2141,39 @@ function flatten(values, mapFn) {
         }
     }));
     return out;
+}
+/**
+ * @param {?} provider
+ * @param {?} field
+ * @return {?}
+ */
+function getProviderField(provider, field) {
+    return provider && typeof provider === 'object' && ((/** @type {?} */ (provider)))[field];
+}
+/**
+ * @param {?} provider
+ * @return {?}
+ */
+function getProviderToken(provider) {
+    return getProviderField(provider, 'provide') || provider;
+}
+/**
+ * @param {?} provider
+ * @return {?}
+ */
+function isMultiProvider(provider) {
+    return !!getProviderField(provider, 'multi');
+}
+/**
+ * @template T
+ * @param {?} values
+ * @param {?} fn
+ * @return {?}
+ */
+function forEachRight(values, fn) {
+    for (let idx = values.length - 1; idx >= 0; idx--) {
+        fn(values[idx], idx);
+    }
 }
 class R3TestCompiler {
     /**

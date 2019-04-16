@@ -45,6 +45,7 @@ export declare class R3TestBedCompiler {
         useFactory?: Function;
         useValue?: any;
         deps?: any[];
+        multi?: boolean;
     }): void;
     overrideTemplateUsingTestingModule(type: Type<any>, template: string): void;
     compileComponents(): Promise<void>;
@@ -72,6 +73,7 @@ export declare class R3TestBedCompiler {
     readonly injector: Injector;
     private getSingleProviderOverrides;
     private getProviderOverrides;
+    private getOverriddenProviders;
     private hasProviderOverrides;
     private patchDefWithProviderOverrides;
 }
