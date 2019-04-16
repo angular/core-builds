@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+85.sha-b057806.with-local-changes
+ * @license Angular v8.0.0-beta.12+17.sha-9147092.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3433,6 +3433,12 @@ function getNativeByIndex(index, lView) {
 }
 function getNativeByTNode(tNode, hostView) {
     return unwrapRNode(hostView[tNode.index]);
+}
+/**
+ * A helper function that returns `true` if a given `TNode` has any matching directives.
+ */
+function hasDirectives(tNode) {
+    return tNode.directiveEnd > tNode.directiveStart;
 }
 function getTNode(index, view) {
     ngDevMode && assertGreaterThan(index, -1, 'wrong index for TNode');
@@ -12725,11 +12731,16 @@ function listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver
             // In order to have just one native event handler in presence of multiple handler functions,
             // we just register a first handler function as a native event listener and then chain
             // (coalesce) other handler functions on top of the first native handler function.
-            //
+            var existingListener = null;
             // Please note that the coalescing described here doesn't happen for events specifying an
             // alternative target (ex. (document:click)) - this is to keep backward compatibility with the
             // view engine.
-            var existingListener = eventTargetResolver ? null : findExistingListener(lView, eventName, tNode.index);
+            // Also, we don't have to search for existing listeners is there are no directives
+            // matching on a given node as we can't register multiple event handlers for the same event in
+            // a template (this would mean having duplicate attributes).
+            if (!eventTargetResolver && hasDirectives(tNode)) {
+                existingListener = findExistingListener(lView, eventName, tNode.index);
+            }
             if (existingListener !== null) {
                 // Attach a new listener at the head of the coalesced listeners list.
                 listenerFn.__ngNextListenerFn__ = existingListener.__ngNextListenerFn__;
@@ -12914,7 +12925,7 @@ function ɵɵprojectionDef(selectors) {
  * @param selectorIndex:
  *        - 0 when the selector is `*` (or unspecified as this is the default value),
  *        - 1 based index of the selector from the {@link projectionDef}
-  *
+ *
  * @codeGenApi
 */
 function ɵɵprojection(nodeIndex, selectorIndex, attrs) {
@@ -15955,7 +15966,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.11+85.sha-b057806.with-local-changes');
+var VERSION = new Version('8.0.0-beta.12+17.sha-9147092.with-local-changes');
 
 /**
  * @license
@@ -19227,7 +19238,8 @@ var ComponentRef$1 = /** @class */ (function (_super) {
 if (typeof _global['ngI18nClosureMode'] === 'undefined') {
     // Make sure to refer to ngI18nClosureMode as ['ngI18nClosureMode'] for closure.
     _global['ngI18nClosureMode'] =
-        typeof _global['goog'] !== 'undefined' && typeof _global['goog'].getMsg === 'function';
+        // TODO(FW-1250): validate that this actually, you know, works.
+        typeof goog !== 'undefined' && typeof goog.getMsg === 'function';
 }
 
 /**
@@ -24582,6 +24594,17 @@ function _mergeArrays(parts) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+var SWITCH_IVY_ENABLED__POST_R3__ = true;
+var SWITCH_IVY_ENABLED__PRE_R3__ = false;
+var ivyEnabled = SWITCH_IVY_ENABLED__PRE_R3__;
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 var _SEPARATOR = '#';
 var FACTORY_CLASS_SUFFIX = 'NgFactory';
 /**
@@ -24609,8 +24632,8 @@ var SystemJsNgModuleLoader = /** @class */ (function () {
         this._config = config || DEFAULT_CONFIG;
     }
     SystemJsNgModuleLoader.prototype.load = function (path) {
-        var offlineMode = this._compiler instanceof Compiler;
-        return offlineMode ? this.loadFactory(path) : this.loadAndCompile(path);
+        var legacyOfflineMode = !ivyEnabled && this._compiler instanceof Compiler;
+        return legacyOfflineMode ? this.loadFactory(path) : this.loadAndCompile(path);
     };
     SystemJsNgModuleLoader.prototype.loadAndCompile = function (path) {
         var _this = this;
@@ -25611,17 +25634,6 @@ var ApplicationModule = /** @class */ (function () {
     ], ApplicationModule);
     return ApplicationModule;
 }());
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-var SWITCH_IVY_ENABLED__POST_R3__ = true;
-var SWITCH_IVY_ENABLED__PRE_R3__ = false;
-var ivyEnabled = SWITCH_IVY_ENABLED__PRE_R3__;
 
 /**
  * @license

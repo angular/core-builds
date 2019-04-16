@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.11+85.sha-b057806.with-local-changes
+ * @license Angular v8.0.0-beta.12+17.sha-9147092.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12144,7 +12144,7 @@ export declare type ɵɵPipeDefWithMeta<T, Name extends string> = ɵPipeDef<T>;
  * @param selectorIndex:
  *        - 0 when the selector is `*` (or unspecified as this is the default value),
  *        - 1 based index of the selector from the {@link projectionDef}
-  *
+ *
  * @codeGenApi
 */
 export declare function ɵɵprojection(nodeIndex: number, selectorIndex?: number, attrs?: TAttributes): void;

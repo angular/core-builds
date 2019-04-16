@@ -17,4 +17,4 @@ export interface TemplateVariableAssignment {
  * Analyzes a given resolved template by looking for property assignments to local
  * template variables within bound events.
  */
-export declare function analyzeResolvedTemplate(filePath: string, template: ResolvedTemplate): TemplateVariableAssignment[] | null;
+export declare function analyzeResolvedTemplate(template: ResolvedTemplate): TemplateVariableAssignment[] | null;

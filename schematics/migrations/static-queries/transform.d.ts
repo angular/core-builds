@@ -12,4 +12,4 @@ import { NgQueryDefinition, QueryTiming } from './angular/query-definition';
  * Transforms the given query decorator by explicitly specifying the timing based on the
  * determined timing. The updated decorator call expression node will be returned.
  */
-export declare function getTransformedQueryCallExpr(query: NgQueryDefinition, timing: QueryTiming): ts.CallExpression | null;
+export declare function getTransformedQueryCallExpr(query: NgQueryDefinition, timing: QueryTiming | null, createTodo: boolean): ts.CallExpression | null;
