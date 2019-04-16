@@ -150,29 +150,9 @@ export declare function i18nConfigureLocalize(options?: I18nLocalizeOptions): vo
  * running outside of Closure Compiler. This method will not be needed once runtime translation
  * service support is introduced.
  *
- * @codeGenApi
+ * @publicApi
  * @deprecated this method is temporary & should not be used as it will be removed soon
  */
 export declare function ɵɵi18nLocalize(input: string, placeholders?: {
     [key: string]: string;
 }): string;
-/**
- * The locale id that the application is currently using (for translations and ICU expressions).
- * This is the ivy version of `LOCALE_ID` that was defined as an injection token for the view engine
- * but is now defined as a global value.
- */
-export declare const DEFAULT_LOCALE_ID = "en-US";
-/**
- * Sets the locale id that will be used for translations and ICU expressions.
- * This is the ivy version of `LOCALE_ID` that was defined as an injection token for the view engine
- * but is now defined as a global value.
- *
- * @param localeId
- */
-export declare function setLocaleId(localeId: string): void;
-/**
- * Gets the locale id that will be used for translations and ICU expressions.
- * This is the ivy version of `LOCALE_ID` that was defined as an injection token for the view engine
- * but is now defined as a global value.
- */
-export declare function getLocaleId(): string;

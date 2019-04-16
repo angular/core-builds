@@ -485,4 +485,3 @@ export declare function getDirectiveDef<T>(type: any): DirectiveDef<T> | null;
 export declare function getPipeDef<T>(type: any): PipeDef<T> | null;
 export declare function getNgModuleDef<T>(type: any, throwNotFound: true): NgModuleDef<T>;
 export declare function getNgModuleDef<T>(type: any): NgModuleDef<T> | null;
-export declare function getNgLocaleIdDef(type: any): string | null;
