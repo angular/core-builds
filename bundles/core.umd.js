@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.13+6.sha-1a56cd5.with-local-changes
+ * @license Angular v8.0.0-beta.13+7.sha-5fee9da.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12789,7 +12789,8 @@
         var tCleanup = tView.cleanup;
         if (tCleanup != null) {
             for (var i = 0; i < tCleanup.length - 1; i += 2) {
-                if (tCleanup[i] === eventName && tCleanup[i + 1] === tNodeIdx) {
+                var cleanupEventName = tCleanup[i];
+                if (cleanupEventName === eventName && tCleanup[i + 1] === tNodeIdx) {
                     // We have found a matching event name on the same node but it might not have been
                     // registered yet, so we must explicitly verify entries in the LView cleanup data
                     // structures.
@@ -12802,7 +12803,9 @@
                 // blocks of 4 or 2 items in the tView.cleanup and this is why we iterate over 2 elements
                 // first and jump another 2 elements if we detect listeners cleanup (4 elements). Also check
                 // documentation of TView.cleanup for more details of this data structure layout.
-                i += 2;
+                if (typeof cleanupEventName === 'string') {
+                    i += 2;
+                }
             }
         }
         return null;
@@ -16071,7 +16074,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.13+6.sha-1a56cd5.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.13+7.sha-5fee9da.with-local-changes');
 
     /**
      * @license
