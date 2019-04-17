@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.13+7.sha-5fee9da.with-local-changes
+ * @license Angular v8.0.0-beta.13+8.sha-696e520.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8935,8 +8935,20 @@ export declare interface ɵangular_packages_core_core_bm extends Array<any> {
     [PREORDER_HOOK_FLAGS]: PreOrderHookFlags;
 }
 
+
+/**
+ * Convince closure compiler that the wrapped function has no side-effects.
+ *
+ * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
+ * allow us to execute a function but have closure compiler mark the call as no-side-effects.
+ * It is important that the return value for the `noSideEffects` function be assigned
+ * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
+ * compiler.
+ */
+export declare function ɵangular_packages_core_core_bn(fn: () => void): string;
+
 /** Retrieves a value from any `LView` or `TData`. */
-export declare function ɵangular_packages_core_core_bn<T>(view: ɵangular_packages_core_core_bm | TData, index: number): T;
+export declare function ɵangular_packages_core_core_bo<T>(view: ɵangular_packages_core_core_bm | TData, index: number): T;
 
 /**
  * Returns the `RootContext` instance that is associated with
@@ -8945,10 +8957,10 @@ export declare function ɵangular_packages_core_core_bn<T>(view: ɵangular_packa
  *
  * @param viewOrComponent the `LView` or component to get the root context for.
  */
-export declare function ɵangular_packages_core_core_bo(viewOrComponent: ɵangular_packages_core_core_bm | {}): RootContext;
+export declare function ɵangular_packages_core_core_bp(viewOrComponent: ɵangular_packages_core_core_bm | {}): RootContext;
 
 
-export declare function ɵangular_packages_core_core_bp<T>(objWithPropertyToExtract: T): string;
+export declare function ɵangular_packages_core_core_bq<T>(objWithPropertyToExtract: T): string;
 
 export declare class ɵangular_packages_core_core_c implements ReflectiveInjector {
     private static INJECTOR_KEY;
