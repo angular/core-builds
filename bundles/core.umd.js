@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.13+2.sha-d9c39dc.with-local-changes
+ * @license Angular v8.0.0-beta.13+10.sha-83291f0.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3200,10 +3200,12 @@
      * @codeGenApi
      */
     function ɵɵsetNgModuleScope(type, scope) {
-        var ngModuleDef = getNgModuleDef(type, true);
-        ngModuleDef.declarations = scope.declarations || EMPTY_ARRAY$1;
-        ngModuleDef.imports = scope.imports || EMPTY_ARRAY$1;
-        ngModuleDef.exports = scope.exports || EMPTY_ARRAY$1;
+        return noSideEffects(function () {
+            var ngModuleDef = getNgModuleDef(type, true);
+            ngModuleDef.declarations = scope.declarations || EMPTY_ARRAY$1;
+            ngModuleDef.imports = scope.imports || EMPTY_ARRAY$1;
+            ngModuleDef.exports = scope.exports || EMPTY_ARRAY$1;
+        });
     }
     /**
      * Inverts an inputs or outputs lookup such that the keys, which were the
@@ -12789,7 +12791,8 @@
         var tCleanup = tView.cleanup;
         if (tCleanup != null) {
             for (var i = 0; i < tCleanup.length - 1; i += 2) {
-                if (tCleanup[i] === eventName && tCleanup[i + 1] === tNodeIdx) {
+                var cleanupEventName = tCleanup[i];
+                if (cleanupEventName === eventName && tCleanup[i + 1] === tNodeIdx) {
                     // We have found a matching event name on the same node but it might not have been
                     // registered yet, so we must explicitly verify entries in the LView cleanup data
                     // structures.
@@ -12802,7 +12805,9 @@
                 // blocks of 4 or 2 items in the tView.cleanup and this is why we iterate over 2 elements
                 // first and jump another 2 elements if we detect listeners cleanup (4 elements). Also check
                 // documentation of TView.cleanup for more details of this data structure layout.
-                i += 2;
+                if (typeof cleanupEventName === 'string') {
+                    i += 2;
+                }
             }
         }
         return null;
@@ -16071,7 +16076,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.13+2.sha-d9c39dc.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.13+10.sha-83291f0.with-local-changes');
 
     /**
      * @license
@@ -20986,42 +20991,44 @@
      * tree-shaken away during production builds.
      */
     function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
-        var _a;
-        var clazz = type;
-        // We determine whether a class has its own metadata by taking the metadata from the parent
-        // constructor and checking whether it's the same as the subclass metadata below. We can't use
-        // `hasOwnProperty` here because it doesn't work correctly in IE10 for static fields that are
-        // defined by TS. See https://github.com/angular/angular/pull/28439#issuecomment-459349218.
-        var parentPrototype = clazz.prototype ? Object.getPrototypeOf(clazz.prototype) : null;
-        var parentConstructor = parentPrototype && parentPrototype.constructor;
-        if (decorators !== null) {
-            if (clazz.decorators !== undefined &&
-                (!parentConstructor || parentConstructor.decorators !== clazz.decorators)) {
-                (_a = clazz.decorators).push.apply(_a, __spread(decorators));
+        return noSideEffects(function () {
+            var _a;
+            var clazz = type;
+            // We determine whether a class has its own metadata by taking the metadata from the parent
+            // constructor and checking whether it's the same as the subclass metadata below. We can't use
+            // `hasOwnProperty` here because it doesn't work correctly in IE10 for static fields that are
+            // defined by TS. See https://github.com/angular/angular/pull/28439#issuecomment-459349218.
+            var parentPrototype = clazz.prototype ? Object.getPrototypeOf(clazz.prototype) : null;
+            var parentConstructor = parentPrototype && parentPrototype.constructor;
+            if (decorators !== null) {
+                if (clazz.decorators !== undefined &&
+                    (!parentConstructor || parentConstructor.decorators !== clazz.decorators)) {
+                    (_a = clazz.decorators).push.apply(_a, __spread(decorators));
+                }
+                else {
+                    clazz.decorators = decorators;
+                }
             }
-            else {
-                clazz.decorators = decorators;
+            if (ctorParameters !== null) {
+                // Rather than merging, clobber the existing parameters. If other projects exist which use
+                // tsickle-style annotations and reflect over them in the same way, this could cause issues,
+                // but that is vanishingly unlikely.
+                clazz.ctorParameters = ctorParameters;
             }
-        }
-        if (ctorParameters !== null) {
-            // Rather than merging, clobber the existing parameters. If other projects exist which use
-            // tsickle-style annotations and reflect over them in the same way, this could cause issues,
-            // but that is vanishingly unlikely.
-            clazz.ctorParameters = ctorParameters;
-        }
-        if (propDecorators !== null) {
-            // The property decorator objects are merged as it is possible different fields have different
-            // decorator types. Decorators on individual fields are not merged, as it's also incredibly
-            // unlikely that a field will be decorated both with an Angular decorator and a non-Angular
-            // decorator that's also been downleveled.
-            if (clazz.propDecorators !== undefined &&
-                (!parentConstructor || parentConstructor.propDecorators !== clazz.propDecorators)) {
-                clazz.propDecorators = __assign({}, clazz.propDecorators, propDecorators);
+            if (propDecorators !== null) {
+                // The property decorator objects are merged as it is possible different fields have different
+                // decorator types. Decorators on individual fields are not merged, as it's also incredibly
+                // unlikely that a field will be decorated both with an Angular decorator and a non-Angular
+                // decorator that's also been downleveled.
+                if (clazz.propDecorators !== undefined &&
+                    (!parentConstructor || parentConstructor.propDecorators !== clazz.propDecorators)) {
+                    clazz.propDecorators = __assign({}, clazz.propDecorators, propDecorators);
+                }
+                else {
+                    clazz.propDecorators = propDecorators;
+                }
             }
-            else {
-                clazz.propDecorators = propDecorators;
-            }
-        }
+        });
     }
 
     /**
@@ -28102,15 +28109,16 @@
     exports.ɵangular_packages_core_core_be = getPreviousOrParentTNode;
     exports.ɵangular_packages_core_core_bf = nextContextImpl;
     exports.ɵangular_packages_core_core_bj = BoundPlayerFactory;
-    exports.ɵangular_packages_core_core_bo = getRootContext;
-    exports.ɵangular_packages_core_core_bn = loadInternal;
+    exports.ɵangular_packages_core_core_bp = getRootContext;
+    exports.ɵangular_packages_core_core_bo = loadInternal;
     exports.ɵangular_packages_core_core_g = createElementRef;
     exports.ɵangular_packages_core_core_h = createTemplateRef;
     exports.ɵangular_packages_core_core_i = createViewRef;
     exports.ɵangular_packages_core_core_bh = getUrlSanitizer;
+    exports.ɵangular_packages_core_core_bn = noSideEffects;
     exports.ɵangular_packages_core_core_bk = makeParamDecorator;
     exports.ɵangular_packages_core_core_bl = makePropDecorator;
-    exports.ɵangular_packages_core_core_bp = getClosureSafeProperty;
+    exports.ɵangular_packages_core_core_bq = getClosureSafeProperty;
     exports.ɵangular_packages_core_core_z = _def;
     exports.ɵangular_packages_core_core_ba = DebugContext;
     exports.createPlatform = createPlatform;
