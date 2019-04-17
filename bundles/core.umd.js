@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.12+26.sha-1794a8e.with-local-changes
+ * @license Angular v8.0.0-beta.13+2.sha-d9c39dc.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3141,6 +3141,14 @@
             def.pipeDefs = pipeTypes ?
                 function () { return (typeof pipeTypes === 'function' ? pipeTypes() : pipeTypes).map(extractPipeDef); } :
                 null;
+            // Add ngInjectableDef so components are reachable through the module injector by default
+            // (unless it has already been set by the @Injectable decorator). This is mostly to
+            // support injecting components in tests. In real application code, components should
+            // be retrieved through the node injector, so this isn't a problem.
+            if (!type.hasOwnProperty(NG_INJECTABLE_DEF)) {
+                type[NG_INJECTABLE_DEF] =
+                    ɵɵdefineInjectable({ factory: componentDefinition.factory });
+            }
         });
         return def;
     }
@@ -11851,7 +11859,12 @@
     function ɵɵdirectiveInject(token, flags) {
         if (flags === void 0) { flags = exports.InjectFlags.Default; }
         token = resolveForwardRef(token);
-        return getOrCreateInjectable(getPreviousOrParentTNode(), getLView(), token, flags);
+        var lView = getLView();
+        // Fall back to inject() if view hasn't been created. This situation can happen in tests
+        // if inject utilities are used before bootstrapping.
+        if (lView == null)
+            return ɵɵinject(token, flags);
+        return getOrCreateInjectable(getPreviousOrParentTNode(), lView, token, flags);
     }
     /**
      * Facade for the attribute injection from DI.
@@ -16058,7 +16071,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.12+26.sha-1794a8e.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.13+2.sha-d9c39dc.with-local-changes');
 
     /**
      * @license
@@ -22771,6 +22784,10 @@
             // Make the property configurable in dev mode to allow overriding in tests
             configurable: !!ngDevMode,
         });
+        // Add ngInjectableDef so components are reachable through the module injector by default
+        // This is mostly to support injecting components in tests. In real application code,
+        // components should be retrieved through the node injector, so this isn't a problem.
+        compileInjectable(type);
     }
     function hasSelectorScope(component) {
         return component.ngSelectorScope !== undefined;
@@ -22800,6 +22817,10 @@
             // Make the property configurable in dev mode to allow overriding in tests
             configurable: !!ngDevMode,
         });
+        // Add ngInjectableDef so directives are reachable through the module injector by default
+        // This is mostly to support injecting directives in tests. In real application code,
+        // directives should be retrieved through the node injector, so this isn't a problem.
+        compileInjectable(type);
     }
     function extendsDirectlyFromObject(type) {
         return Object.getPrototypeOf(type.prototype) === Object.prototype;
