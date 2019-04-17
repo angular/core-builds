@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.13+7.sha-5fee9da.with-local-changes
+ * @license Angular v8.0.0-beta.13+8.sha-696e520.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3693,11 +3693,16 @@ function ɵɵdefineNgModule(def) {
  * @return {?}
  */
 function ɵɵsetNgModuleScope(type, scope) {
-    /** @type {?} */
-    /** @nocollapse */ const ngModuleDef = getNgModuleDef(type, true);
-    ngModuleDef.declarations = scope.declarations || EMPTY_ARRAY;
-    ngModuleDef.imports = scope.imports || EMPTY_ARRAY;
-    ngModuleDef.exports = scope.exports || EMPTY_ARRAY;
+    return (/** @type {?} */ (noSideEffects((/**
+     * @return {?}
+     */
+    () => {
+        /** @type {?} */
+        /** @nocollapse */ const ngModuleDef = getNgModuleDef(type, true);
+        ngModuleDef.declarations = scope.declarations || EMPTY_ARRAY;
+        ngModuleDef.imports = scope.imports || EMPTY_ARRAY;
+        ngModuleDef.exports = scope.exports || EMPTY_ARRAY;
+    }))));
 }
 /**
  * Inverts an inputs or outputs lookup such that the keys, which were the
@@ -19811,7 +19816,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.13+7.sha-5fee9da.with-local-changes');
+const VERSION = new Version('8.0.0-beta.13+8.sha-696e520.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -26462,44 +26467,49 @@ class NgModuleFactory$1 extends NgModuleFactory {
  * @return {?}
  */
 function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
-    /** @type {?} */
-    const clazz = (/** @type {?} */ (type));
-    // We determine whether a class has its own metadata by taking the metadata from the parent
-    // constructor and checking whether it's the same as the subclass metadata below. We can't use
-    // `hasOwnProperty` here because it doesn't work correctly in IE10 for static fields that are
-    // defined by TS. See https://github.com/angular/angular/pull/28439#issuecomment-459349218.
-    /** @type {?} */
-    const parentPrototype = clazz.prototype ? Object.getPrototypeOf(clazz.prototype) : null;
-    /** @type {?} */
-    const parentConstructor = parentPrototype && parentPrototype.constructor;
-    if (decorators !== null) {
-        if (clazz.decorators !== undefined &&
-            (!parentConstructor || parentConstructor.decorators !== clazz.decorators)) {
-            clazz.decorators.push(...decorators);
+    return (/** @type {?} */ (noSideEffects((/**
+     * @return {?}
+     */
+    () => {
+        /** @type {?} */
+        const clazz = (/** @type {?} */ (type));
+        // We determine whether a class has its own metadata by taking the metadata from the parent
+        // constructor and checking whether it's the same as the subclass metadata below. We can't use
+        // `hasOwnProperty` here because it doesn't work correctly in IE10 for static fields that are
+        // defined by TS. See https://github.com/angular/angular/pull/28439#issuecomment-459349218.
+        /** @type {?} */
+        const parentPrototype = clazz.prototype ? Object.getPrototypeOf(clazz.prototype) : null;
+        /** @type {?} */
+        const parentConstructor = parentPrototype && parentPrototype.constructor;
+        if (decorators !== null) {
+            if (clazz.decorators !== undefined &&
+                (!parentConstructor || parentConstructor.decorators !== clazz.decorators)) {
+                clazz.decorators.push(...decorators);
+            }
+            else {
+                clazz.decorators = decorators;
+            }
         }
-        else {
-            clazz.decorators = decorators;
+        if (ctorParameters !== null) {
+            // Rather than merging, clobber the existing parameters. If other projects exist which use
+            // tsickle-style annotations and reflect over them in the same way, this could cause issues,
+            // but that is vanishingly unlikely.
+            clazz.ctorParameters = ctorParameters;
         }
-    }
-    if (ctorParameters !== null) {
-        // Rather than merging, clobber the existing parameters. If other projects exist which use
-        // tsickle-style annotations and reflect over them in the same way, this could cause issues,
-        // but that is vanishingly unlikely.
-        clazz.ctorParameters = ctorParameters;
-    }
-    if (propDecorators !== null) {
-        // The property decorator objects are merged as it is possible different fields have different
-        // decorator types. Decorators on individual fields are not merged, as it's also incredibly
-        // unlikely that a field will be decorated both with an Angular decorator and a non-Angular
-        // decorator that's also been downleveled.
-        if (clazz.propDecorators !== undefined &&
-            (!parentConstructor || parentConstructor.propDecorators !== clazz.propDecorators)) {
-            clazz.propDecorators = Object.assign({}, clazz.propDecorators, propDecorators);
+        if (propDecorators !== null) {
+            // The property decorator objects are merged as it is possible different fields have different
+            // decorator types. Decorators on individual fields are not merged, as it's also incredibly
+            // unlikely that a field will be decorated both with an Angular decorator and a non-Angular
+            // decorator that's also been downleveled.
+            if (clazz.propDecorators !== undefined &&
+                (!parentConstructor || parentConstructor.propDecorators !== clazz.propDecorators)) {
+                clazz.propDecorators = Object.assign({}, clazz.propDecorators, propDecorators);
+            }
+            else {
+                clazz.propDecorators = propDecorators;
+            }
         }
-        else {
-            clazz.propDecorators = propDecorators;
-        }
-    }
+    }))));
 }
 
 /**
@@ -29326,14 +29336,6 @@ ApplicationInitStatus.ctorParameters = () => [
     { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional }] }
 ];
 /** @nocollapse */ ApplicationInitStatus.ngInjectableDef = ɵɵdefineInjectable({ token: ApplicationInitStatus, factory: function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(ɵɵinject(APP_INITIALIZER, 8)); }, providedIn: null });
-/*@__PURE__*/ setClassMetadata(ApplicationInitStatus, [{
-        type: Injectable
-    }], function () { return [{ type: undefined, decorators: [{
-                type: Inject,
-                args: [APP_INITIALIZER]
-            }, {
-                type: Optional
-            }] }]; }, null);
 
 /**
  * @fileoverview added by tsickle
@@ -29436,9 +29438,6 @@ Console.decorators = [
     { type: Injectable },
 ];
 /** @nocollapse */ Console.ngInjectableDef = ɵɵdefineInjectable({ token: Console, factory: function Console_Factory(t) { return new (t || Console)(); }, providedIn: null });
-/*@__PURE__*/ setClassMetadata(Console, [{
-        type: Injectable
-    }], null, null);
 
 /**
  * @fileoverview added by tsickle
@@ -29581,9 +29580,6 @@ Compiler.decorators = [
     { type: Injectable },
 ];
 /** @nocollapse */ Compiler.ngInjectableDef = ɵɵdefineInjectable({ token: Compiler, factory: function Compiler_Factory(t) { return new (t || Compiler)(); }, providedIn: null });
-/*@__PURE__*/ setClassMetadata(Compiler, [{
-        type: Injectable
-    }], null, null);
 /**
  * Token to provide CompilerOptions in the platform injector.
  *
@@ -30414,9 +30410,6 @@ Testability.ctorParameters = () => [
     { type: NgZone }
 ];
 /** @nocollapse */ Testability.ngInjectableDef = ɵɵdefineInjectable({ token: Testability, factory: function Testability_Factory(t) { return new (t || Testability)(ɵɵinject(NgZone)); }, providedIn: null });
-/*@__PURE__*/ setClassMetadata(Testability, [{
-        type: Injectable
-    }], function () { return [{ type: NgZone }]; }, null);
 /**
  * A global registry of {\@link Testability} instances for specific elements.
  * \@publicApi
@@ -30482,9 +30475,6 @@ TestabilityRegistry.decorators = [
 /** @nocollapse */
 TestabilityRegistry.ctorParameters = () => [];
 /** @nocollapse */ TestabilityRegistry.ngInjectableDef = ɵɵdefineInjectable({ token: TestabilityRegistry, factory: function TestabilityRegistry_Factory(t) { return new (t || TestabilityRegistry)(); }, providedIn: null });
-/*@__PURE__*/ setClassMetadata(TestabilityRegistry, [{
-        type: Injectable
-    }], function () { return []; }, null);
 class _NoopGetTestability {
     /**
      * @param {?} registry
@@ -30899,9 +30889,6 @@ PlatformRef.ctorParameters = () => [
     { type: Injector }
 ];
 /** @nocollapse */ PlatformRef.ngInjectableDef = ɵɵdefineInjectable({ token: PlatformRef, factory: function PlatformRef_Factory(t) { return new (t || PlatformRef)(ɵɵinject(Injector)); }, providedIn: null });
-/*@__PURE__*/ setClassMetadata(PlatformRef, [{
-        type: Injectable
-    }], function () { return [{ type: Injector }]; }, null);
 /**
  * @param {?=} ngZoneOption
  * @return {?}
@@ -31357,9 +31344,6 @@ ApplicationRef.ctorParameters = () => [
     { type: ApplicationInitStatus }
 ];
 /** @nocollapse */ ApplicationRef.ngInjectableDef = ɵɵdefineInjectable({ token: ApplicationRef, factory: function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(ɵɵinject(NgZone), ɵɵinject(Console), ɵɵinject(Injector), ɵɵinject(ErrorHandler), ɵɵinject(ComponentFactoryResolver), ɵɵinject(ApplicationInitStatus)); }, providedIn: null });
-/*@__PURE__*/ setClassMetadata(ApplicationRef, [{
-        type: Injectable
-    }], function () { return [{ type: NgZone }, { type: Console }, { type: Injector }, { type: ErrorHandler }, { type: ComponentFactoryResolver }, { type: ApplicationInitStatus }]; }, null);
 /**
  * @template T
  * @param {?} list
@@ -31527,11 +31511,6 @@ SystemJsNgModuleLoader.ctorParameters = () => [
     { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional }] }
 ];
 /** @nocollapse */ SystemJsNgModuleLoader.ngInjectableDef = ɵɵdefineInjectable({ token: SystemJsNgModuleLoader, factory: function SystemJsNgModuleLoader_Factory(t) { return new (t || SystemJsNgModuleLoader)(ɵɵinject(Compiler), ɵɵinject(SystemJsNgModuleLoaderConfig, 8)); }, providedIn: null });
-/*@__PURE__*/ setClassMetadata(SystemJsNgModuleLoader, [{
-        type: Injectable
-    }], function () { return [{ type: Compiler }, { type: SystemJsNgModuleLoaderConfig, decorators: [{
-                type: Optional
-            }] }]; }, null);
 /**
  * @param {?} value
  * @param {?} modulePath
@@ -32661,10 +32640,6 @@ ApplicationModule.ctorParameters = () => [
 ];
 /** @nocollapse */ ApplicationModule.ngModuleDef = ɵɵdefineNgModule({ type: ApplicationModule });
 /** @nocollapse */ ApplicationModule.ngInjectorDef = ɵɵdefineInjector({ factory: function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(ɵɵinject(ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS });
-/*@__PURE__*/ setClassMetadata(ApplicationModule, [{
-        type: NgModule,
-        args: [{ providers: APPLICATION_MODULE_PROVIDERS }]
-    }], function () { return [{ type: ApplicationRef }]; }, null);
 
 /**
  * @fileoverview added by tsickle
