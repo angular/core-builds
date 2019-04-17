@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.13+1.sha-ca2462c.with-local-changes
+ * @license Angular v8.0.0-beta.13+2.sha-d9c39dc.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11747,7 +11747,12 @@ function ɵɵload(index) {
 function ɵɵdirectiveInject(token, flags) {
     if (flags === void 0) { flags = InjectFlags.Default; }
     token = resolveForwardRef(token);
-    return getOrCreateInjectable(getPreviousOrParentTNode(), getLView(), token, flags);
+    var lView = getLView();
+    // Fall back to inject() if view hasn't been created. This situation can happen in tests
+    // if inject utilities are used before bootstrapping.
+    if (lView == null)
+        return ɵɵinject(token, flags);
+    return getOrCreateInjectable(getPreviousOrParentTNode(), lView, token, flags);
 }
 /**
  * Facade for the attribute injection from DI.
@@ -15950,7 +15955,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.13+1.sha-ca2462c.with-local-changes');
+var VERSION = new Version('8.0.0-beta.13+2.sha-d9c39dc.with-local-changes');
 
 /**
  * @license
