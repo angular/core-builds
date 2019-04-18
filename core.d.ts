@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.13+10.sha-83291f0.with-local-changes
+ * @license Angular v8.0.0-beta.13+16.sha-4bde40f.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1505,8 +1505,17 @@ declare class DebugElement__POST_R3__ extends DebugNode__POST_R3__ implements De
 /**
  * @publicApi
  */
+export declare class DebugEventListener {
+    name: string;
+    callback: Function;
+    constructor(name: string, callback: Function);
+}
+
+/**
+ * @publicApi
+ */
 export declare interface DebugNode {
-    readonly listeners: EventListener[];
+    readonly listeners: DebugEventListener[];
     readonly parent: DebugElement | null;
     readonly nativeNode: any;
     readonly injector: Injector;
@@ -1532,7 +1541,7 @@ declare class DebugNode__POST_R3__ implements DebugNode {
     readonly injector: Injector;
     readonly componentInstance: any;
     readonly context: any;
-    readonly listeners: EventListener[];
+    readonly listeners: DebugEventListener[];
     readonly references: {
         [key: string]: any;
     };
@@ -2282,12 +2291,6 @@ export declare class EventEmitter<T> extends Subject<T> {
      * notification from this emitter.
      */
     subscribe(generatorOrNext?: any, error?: any, complete?: any): Subscription;
-}
-
-declare class EventListener {
-    name: string;
-    callback: Function;
-    constructor(name: string, callback: Function);
 }
 
 /**
@@ -9040,7 +9043,7 @@ export declare function ɵangular_packages_core_core_i(hostTNode: TNode, hostVie
 export declare function ɵangular_packages_core_core_j(id: string): NgModuleFactory<any>;
 
 export declare class ɵangular_packages_core_core_k {
-    readonly listeners: EventListener[];
+    readonly listeners: DebugEventListener[];
     readonly parent: DebugElement | null;
     readonly nativeNode: any;
     private readonly _debugContext;
