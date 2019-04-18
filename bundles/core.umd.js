@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.13+10.sha-83291f0.with-local-changes
+ * @license Angular v8.0.0-beta.13+16.sha-4bde40f.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15990,7 +15990,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.13+10.sha-83291f0.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.13+16.sha-4bde40f.with-local-changes');
 
     /**
      * @license
@@ -24685,12 +24685,15 @@
      * found in the LICENSE file at https://angular.io/license
      */
 
-    var EventListener = /** @class */ (function () {
-        function EventListener(name, callback) {
+    /**
+     * @publicApi
+     */
+    var DebugEventListener = /** @class */ (function () {
+        function DebugEventListener(name, callback) {
             this.name = name;
             this.callback = callback;
         }
-        return EventListener;
+        return DebugEventListener;
     }());
     var DebugNode__PRE_R3__ = /** @class */ (function () {
         function DebugNode__PRE_R3__(nativeNode, parent, _debugContext) {
@@ -27738,7 +27741,7 @@
             if (typeof target !== 'string') {
                 var debugEl = getDebugNode(target);
                 if (debugEl) {
-                    debugEl.listeners.push(new EventListener(eventName, callback));
+                    debugEl.listeners.push(new DebugEventListener(eventName, callback));
                 }
             }
             return this.delegate.listen(target, eventName, callback);
@@ -27884,6 +27887,7 @@
     exports.APP_INITIALIZER = APP_INITIALIZER;
     exports.ApplicationInitStatus = ApplicationInitStatus;
     exports.DebugElement = DebugElement;
+    exports.DebugEventListener = DebugEventListener;
     exports.DebugNode = DebugNode;
     exports.asNativeElements = asNativeElements;
     exports.getDebugNode = getDebugNode;

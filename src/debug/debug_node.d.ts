@@ -7,7 +7,10 @@
  */
 import { Injector } from '../di';
 import { DebugContext } from '../view/index';
-export declare class EventListener {
+/**
+ * @publicApi
+ */
+export declare class DebugEventListener {
     name: string;
     callback: Function;
     constructor(name: string, callback: Function);
@@ -16,7 +19,7 @@ export declare class EventListener {
  * @publicApi
  */
 export interface DebugNode {
-    readonly listeners: EventListener[];
+    readonly listeners: DebugEventListener[];
     readonly parent: DebugElement | null;
     readonly nativeNode: any;
     readonly injector: Injector;
@@ -28,7 +31,7 @@ export interface DebugNode {
     readonly providerTokens: any[];
 }
 export declare class DebugNode__PRE_R3__ {
-    readonly listeners: EventListener[];
+    readonly listeners: DebugEventListener[];
     readonly parent: DebugElement | null;
     readonly nativeNode: any;
     private readonly _debugContext;
@@ -104,7 +107,7 @@ declare class DebugNode__POST_R3__ implements DebugNode {
     readonly injector: Injector;
     readonly componentInstance: any;
     readonly context: any;
-    readonly listeners: EventListener[];
+    readonly listeners: DebugEventListener[];
     readonly references: {
         [key: string]: any;
     };
