@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.13+10.sha-83291f0.with-local-changes
+ * @license Angular v8.0.0-beta.13+21.sha-78146c1.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2874,8 +2874,10 @@
      * The idea is that unless we are doing production build where we explicitly
      * set `ngDevMode == false` we should be helping the developer by providing
      * as much early warning and errors as possible.
+     *
+     * NOTE: changes to the `ngDevMode` name must be synced with `compiler-cli/src/tooling.ts`.
      */
-    if (typeof _global['ngDevMode'] === 'undefined' || _global['ngDevMode']) {
+    if (typeof ngDevMode === 'undefined' || ngDevMode) {
         ngDevModeResetPerfCounters();
     }
 
@@ -16076,7 +16078,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.13+10.sha-83291f0.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.13+21.sha-78146c1.with-local-changes');
 
     /**
      * @license
@@ -19345,7 +19347,10 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    if (typeof _global['ngI18nClosureMode'] === 'undefined') {
+    /**
+     * NOTE: changes to the `ngI18nClosureMode` name must be synced with `compiler-cli/src/tooling.ts`.
+     */
+    if (typeof ngI18nClosureMode === 'undefined') {
         // Make sure to refer to ngI18nClosureMode as ['ngI18nClosureMode'] for closure.
         _global['ngI18nClosureMode'] =
             // TODO(FW-1250): validate that this actually, you know, works.
@@ -24891,12 +24896,15 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var EventListener = /** @class */ (function () {
-        function EventListener(name, callback) {
+    /**
+     * @publicApi
+     */
+    var DebugEventListener = /** @class */ (function () {
+        function DebugEventListener(name, callback) {
             this.name = name;
             this.callback = callback;
         }
-        return EventListener;
+        return DebugEventListener;
     }());
     var DebugNode__PRE_R3__ = /** @class */ (function () {
         function DebugNode__PRE_R3__(nativeNode, parent, _debugContext) {
@@ -27949,7 +27957,7 @@
             if (typeof target !== 'string') {
                 var debugEl = getDebugNode(target);
                 if (debugEl) {
-                    debugEl.listeners.push(new EventListener(eventName, callback));
+                    debugEl.listeners.push(new DebugEventListener(eventName, callback));
                 }
             }
             return this.delegate.listen(target, eventName, callback);
@@ -28139,6 +28147,7 @@
     exports.APP_INITIALIZER = APP_INITIALIZER;
     exports.ApplicationInitStatus = ApplicationInitStatus;
     exports.DebugElement = DebugElement;
+    exports.DebugEventListener = DebugEventListener;
     exports.DebugNode = DebugNode;
     exports.asNativeElements = asNativeElements;
     exports.getDebugNode = getDebugNode;
