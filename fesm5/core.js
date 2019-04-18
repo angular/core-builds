@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.13+18.sha-b9251fd.with-local-changes
+ * @license Angular v8.0.0-beta.13+20.sha-e1f51ea.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2752,8 +2752,10 @@ function ngDevModeResetPerfCounters() {
  * The idea is that unless we are doing production build where we explicitly
  * set `ngDevMode == false` we should be helping the developer by providing
  * as much early warning and errors as possible.
+ *
+ * NOTE: changes to the `ngDevMode` name must be synced with `compiler-cli/src/tooling.ts`.
  */
-if (typeof _global['ngDevMode'] === 'undefined' || _global['ngDevMode']) {
+if (typeof ngDevMode === 'undefined' || ngDevMode) {
     ngDevModeResetPerfCounters();
 }
 
@@ -15960,7 +15962,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.13+18.sha-b9251fd.with-local-changes');
+var VERSION = new Version('8.0.0-beta.13+20.sha-e1f51ea.with-local-changes');
 
 /**
  * @license
@@ -19209,7 +19211,10 @@ var ComponentRef$1 = /** @class */ (function (_super) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-if (typeof _global['ngI18nClosureMode'] === 'undefined') {
+/**
+ * NOTE: changes to the `ngI18nClosureMode` name must be synced with `compiler-cli/src/tooling.ts`.
+ */
+if (typeof ngI18nClosureMode === 'undefined') {
     // Make sure to refer to ngI18nClosureMode as ['ngI18nClosureMode'] for closure.
     _global['ngI18nClosureMode'] =
         // TODO(FW-1250): validate that this actually, you know, works.
