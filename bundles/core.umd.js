@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.13+33.sha-5650e38.with-local-changes
+ * @license Angular v8.0.0-beta.13+35.sha-9b93bd6.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11711,9 +11711,18 @@
     function addTContainerToQueries(lView, tContainerNode) {
         var queries = lView[QUERIES];
         if (queries) {
-            queries.addNode(tContainerNode);
             var lContainer = lView[tContainerNode.index];
-            lContainer[QUERIES] = queries.container();
+            if (lContainer[QUERIES]) {
+                // Query container should only exist if it was created through a dynamic view
+                // in a directive constructor. In this case, we must splice the template
+                // matches in before the view matches to ensure query results in embedded views
+                // don't clobber query results on the template node itself.
+                queries.insertNodeBeforeViews(tContainerNode);
+            }
+            else {
+                queries.addNode(tContainerNode);
+                lContainer[QUERIES] = queries.container();
+            }
         }
     }
     function containerInternal(index, tagName, attrs) {
@@ -15585,6 +15594,12 @@
                     return _this;
                 }
                 TemplateRef_.prototype.createEmbeddedView = function (context, container, index) {
+                    var currentQueries = this._declarationParentView[QUERIES];
+                    // Query container may be missing if this view was created in a directive
+                    // constructor. Create it now to avoid losing results in embedded views.
+                    if (currentQueries && this._hostLContainer[QUERIES] == null) {
+                        this._hostLContainer[QUERIES] = currentQueries.container();
+                    }
                     var lView = createEmbeddedViewAndNode(this._tView, context, this._declarationParentView, this._hostLContainer[QUERIES], this._injectorIndex);
                     if (container) {
                         insertView(lView, container, index);
@@ -15992,7 +16007,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.13+33.sha-5650e38.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.13+35.sha-9b93bd6.with-local-changes');
 
     /**
      * @license
@@ -21668,8 +21683,12 @@
             insertView$1(index, this.deep);
         };
         LQueries_.prototype.addNode = function (tNode) {
-            add(this.deep, tNode);
-            add(this.shallow, tNode);
+            add(this.deep, tNode, false);
+            add(this.shallow, tNode, false);
+        };
+        LQueries_.prototype.insertNodeBeforeViews = function (tNode) {
+            add(this.deep, tNode, true);
+            add(this.shallow, tNode, true);
         };
         LQueries_.prototype.removeView = function () {
             removeView$1(this.shallow);
@@ -21797,7 +21816,16 @@
         // detect it using appropriate tNode type
         return queryByTNodeType(tNode, currentView);
     }
-    function add(query, tNode) {
+    /**
+     * Add query matches for a given node.
+     *
+     * @param query The first query in the linked list
+     * @param tNode The TNode to match against queries
+     * @param insertBeforeContainer Whether or not we should add matches before the last
+     * container array. This mode is necessary if the query container had to be created
+     * out of order (e.g. a view was created in a constructor)
+     */
+    function add(query, tNode, insertBeforeContainer) {
         var currentView = getLView();
         while (query) {
             var predicate = query.predicate;
@@ -21814,7 +21842,7 @@
                     }
                 }
                 if (result !== null) {
-                    addMatch(query, result);
+                    addMatch(query, result, insertBeforeContainer);
                 }
             }
             else {
@@ -21824,7 +21852,7 @@
                     if (matchingIdx !== null) {
                         var result = queryRead(tNode, currentView, predicate.read, matchingIdx);
                         if (result !== null) {
-                            addMatch(query, result);
+                            addMatch(query, result, insertBeforeContainer);
                         }
                     }
                 }
@@ -21832,8 +21860,12 @@
             query = query.next;
         }
     }
-    function addMatch(query, matchingValue) {
-        query.values.push(matchingValue);
+    function addMatch(query, matchingValue, insertBeforeViewMatches) {
+        // Views created in constructors may have their container values created too early. In this case,
+        // ensure template node results are spliced before container results. Otherwise, results inside
+        // embedded views will appear before results on parent template nodes when flattened.
+        insertBeforeViewMatches ? query.values.splice(-1, 0, matchingValue) :
+            query.values.push(matchingValue);
         query.list.setDirty();
     }
     function createPredicate(predicate, read) {

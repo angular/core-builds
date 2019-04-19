@@ -70,6 +70,7 @@ export declare class LQueries_ implements LQueries {
     createView(): LQueries | null;
     insertView(index: number): void;
     addNode(tNode: TElementNode | TContainerNode | TElementContainerNode): void;
+    insertNodeBeforeViews(tNode: TElementNode | TContainerNode | TElementContainerNode): void;
     removeView(): void;
 }
 /**
