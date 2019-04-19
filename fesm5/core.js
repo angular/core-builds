@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.13+28.sha-c1d5fbd.with-local-changes
+ * @license Angular v8.0.0-beta.13+29.sha-f9bb53a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15962,7 +15962,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.13+28.sha-c1d5fbd.with-local-changes');
+var VERSION = new Version('8.0.0-beta.13+29.sha-f9bb53a.with-local-changes');
 
 /**
  * @license
@@ -19120,7 +19120,15 @@ var ComponentFactory$1 = /** @class */ (function (_super) {
             locateHostElement(rendererFactory, rootSelectorOrNode);
         var rootFlags = this.componentDef.onPush ? 64 /* Dirty */ | 512 /* IsRoot */ :
             16 /* CheckAlways */ | 512 /* IsRoot */;
-        var rootContext = !isInternalRootView ? rootViewInjector.get(ROOT_CONTEXT) : createRootContext();
+        // Check whether this Component needs to be isolated from other components, i.e. whether it
+        // should be placed into its own (empty) root context or existing root context should be used.
+        // Note: this is internal-only convention and might change in the future, so it should not be
+        // relied upon externally.
+        var isIsolated = typeof rootSelectorOrNode === 'string' &&
+            /^#root-ng-internal-isolated-\d+/.test(rootSelectorOrNode);
+        var rootContext = (isInternalRootView || isIsolated) ?
+            createRootContext() :
+            rootViewInjector.get(ROOT_CONTEXT);
         var renderer = rendererFactory.createRenderer(hostRNode, this.componentDef);
         if (rootSelectorOrNode && hostRNode) {
             ngDevMode && ngDevMode.rendererSetAttribute++;
