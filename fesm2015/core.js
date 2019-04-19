@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.13+51.sha-d9ce8a4.with-local-changes
+ * @license Angular v8.0.0-beta.13+52.sha-4e13700.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6199,7 +6199,7 @@ function setUpAttributes(native, attrs) {
                 native.setAttributeNS(namespaceURI, attrName, attrVal);
         }
         else {
-            /// attrName is string;
+            // attrName is string;
             /** @type {?} */
             const attrName = (/** @type {?} */ (value));
             /** @type {?} */
@@ -12298,7 +12298,18 @@ function elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, 
             markDirtyIfOnPush(lView, index + HEADER_OFFSET);
         if (ngDevMode) {
             if (tNode.type === 3 /* Element */ || tNode.type === 0 /* Container */) {
-                setNgReflectProperties(lView, element, tNode.type, dataValue, value);
+                /**
+                 * dataValue is an array containing runtime input or output names for the directives:
+                 * i+0: directive instance index
+                 * i+1: publicName
+                 * i+2: privateName
+                 *
+                 * e.g. [0, 'change', 'change-minified']
+                 * we want to set the reflected property with the privateName: dataValue[i+2]
+                 */
+                for (let i = 0; i < dataValue.length; i += 3) {
+                    setNgReflectProperty(lView, element, tNode.type, (/** @type {?} */ (dataValue[i + 2])), value);
+                }
             }
         }
     }
@@ -12349,32 +12360,29 @@ function markDirtyIfOnPush(lView, viewIndex) {
  * @param {?} lView
  * @param {?} element
  * @param {?} type
- * @param {?} inputs
+ * @param {?} attrName
  * @param {?} value
  * @return {?}
  */
-function setNgReflectProperties(lView, element, type, inputs, value) {
-    for (let i = 0; i < inputs.length; i += 3) {
+function setNgReflectProperty(lView, element, type, attrName, value) {
+    /** @type {?} */
+    const renderer = lView[RENDERER];
+    attrName = normalizeDebugBindingName(attrName);
+    /** @type {?} */
+    const debugValue = normalizeDebugBindingValue(value);
+    if (type === 3 /* Element */) {
+        isProceduralRenderer(renderer) ?
+            renderer.setAttribute(((/** @type {?} */ (element))), attrName, debugValue) :
+            ((/** @type {?} */ (element))).setAttribute(attrName, debugValue);
+    }
+    else if (value !== undefined) {
         /** @type {?} */
-        const renderer = lView[RENDERER];
-        /** @type {?} */
-        const attrName = normalizeDebugBindingName((/** @type {?} */ (inputs[i + 2])));
-        /** @type {?} */
-        const debugValue = normalizeDebugBindingValue(value);
-        if (type === 3 /* Element */) {
-            isProceduralRenderer(renderer) ?
-                renderer.setAttribute(((/** @type {?} */ (element))), attrName, debugValue) :
-                ((/** @type {?} */ (element))).setAttribute(attrName, debugValue);
+        const value = `bindings=${JSON.stringify({ [attrName]: debugValue }, null, 2)}`;
+        if (isProceduralRenderer(renderer)) {
+            renderer.setValue(((/** @type {?} */ (element))), value);
         }
-        else if (value !== undefined) {
-            /** @type {?} */
-            const value = `bindings=${JSON.stringify({ [attrName]: debugValue }, null, 2)}`;
-            if (isProceduralRenderer(renderer)) {
-                renderer.setValue(((/** @type {?} */ (element))), value);
-            }
-            else {
-                ((/** @type {?} */ (element))).textContent = value;
-            }
+        else {
+            ((/** @type {?} */ (element))).textContent = value;
         }
     }
 }
@@ -12840,7 +12848,7 @@ function addComponentLogic(lView, previousOrParentTNode, def) {
  * @template T
  * @param {?} directiveIndex Index of the directive in directives array
  * @param {?} instance Instance of the directive on which to set the initial inputs
- * @param {?} def
+ * @param {?} def The directive def that contains the list of inputs
  * @param {?} tNode The static data for this node
  * @return {?}
  */
@@ -12867,6 +12875,13 @@ function setInputsFromAttrs(directiveIndex, instance, def, tNode) {
             }
             else {
                 ((/** @type {?} */ (instance)))[privateName] = value;
+            }
+            if (ngDevMode) {
+                /** @type {?} */
+                const lView = getLView();
+                /** @type {?} */
+                const nativeElement = (/** @type {?} */ (getNativeByTNode(tNode, lView)));
+                setNgReflectProperty(lView, nativeElement, tNode.type, privateName, value);
             }
         }
     }
@@ -13353,7 +13368,8 @@ function handleError(lView, error) {
  * Set the inputs of directives at the current node to corresponding value.
  *
  * @param {?} lView the `LView` which contains the directives.
- * @param {?} inputs
+ * @param {?} inputs mapping between the public "input" name and privately-known,
+ * possibly minified, property names to write to.
  * @param {?} value Value to set.
  * @return {?}
  */
@@ -19931,7 +19947,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.13+51.sha-d9ce8a4.with-local-changes');
+const VERSION = new Version('8.0.0-beta.13+52.sha-4e13700.with-local-changes');
 
 /**
  * @fileoverview added by tsickle

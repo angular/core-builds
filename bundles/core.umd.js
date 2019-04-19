@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.13+51.sha-d9ce8a4.with-local-changes
+ * @license Angular v8.0.0-beta.13+52.sha-4e13700.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5097,7 +5097,7 @@
                     native.setAttributeNS(namespaceURI, attrName, attrVal);
             }
             else {
-                /// attrName is string;
+                // attrName is string;
                 var attrName = value;
                 var attrVal = attrs[++i];
                 // Standard attributes
@@ -9887,7 +9887,7 @@
     /**
      * Consolidates all inputs or outputs of all directives on this logical node.
      *
-     * @param tNodeFlags node flags
+     * @param tNode
      * @param direction whether to consider inputs or outputs
      * @returns PropertyAliases|null aggregate of all properties if any, `null` otherwise
      */
@@ -9941,7 +9941,18 @@
                 markDirtyIfOnPush(lView, index + HEADER_OFFSET);
             if (ngDevMode) {
                 if (tNode.type === 3 /* Element */ || tNode.type === 0 /* Container */) {
-                    setNgReflectProperties(lView, element, tNode.type, dataValue, value);
+                    /**
+                     * dataValue is an array containing runtime input or output names for the directives:
+                     * i+0: directive instance index
+                     * i+1: publicName
+                     * i+2: privateName
+                     *
+                     * e.g. [0, 'change', 'change-minified']
+                     * we want to set the reflected property with the privateName: dataValue[i+2]
+                     */
+                    for (var i = 0; i < dataValue.length; i += 3) {
+                        setNgReflectProperty(lView, element, tNode.type, dataValue[i + 2], value);
+                    }
                 }
             }
         }
@@ -9981,25 +9992,23 @@
             childComponentLView[FLAGS] |= 64 /* Dirty */;
         }
     }
-    function setNgReflectProperties(lView, element, type, inputs, value) {
+    function setNgReflectProperty(lView, element, type, attrName, value) {
         var _a;
-        for (var i = 0; i < inputs.length; i += 3) {
-            var renderer = lView[RENDERER];
-            var attrName = normalizeDebugBindingName(inputs[i + 2]);
-            var debugValue = normalizeDebugBindingValue(value);
-            if (type === 3 /* Element */) {
-                isProceduralRenderer(renderer) ?
-                    renderer.setAttribute(element, attrName, debugValue) :
-                    element.setAttribute(attrName, debugValue);
+        var renderer = lView[RENDERER];
+        attrName = normalizeDebugBindingName(attrName);
+        var debugValue = normalizeDebugBindingValue(value);
+        if (type === 3 /* Element */) {
+            isProceduralRenderer(renderer) ?
+                renderer.setAttribute(element, attrName, debugValue) :
+                element.setAttribute(attrName, debugValue);
+        }
+        else if (value !== undefined) {
+            var value_1 = "bindings=" + JSON.stringify((_a = {}, _a[attrName] = debugValue, _a), null, 2);
+            if (isProceduralRenderer(renderer)) {
+                renderer.setValue(element, value_1);
             }
-            else if (value !== undefined) {
-                var value_1 = "bindings=" + JSON.stringify((_a = {}, _a[attrName] = debugValue, _a), null, 2);
-                if (isProceduralRenderer(renderer)) {
-                    renderer.setValue(element, value_1);
-                }
-                else {
-                    element.textContent = value_1;
-                }
+            else {
+                element.textContent = value_1;
             }
         }
     }
@@ -10321,7 +10330,7 @@
      *
      * @param directiveIndex Index of the directive in directives array
      * @param instance Instance of the directive on which to set the initial inputs
-     * @param inputs The list of inputs from the directive def
+     * @param def The directive def that contains the list of inputs
      * @param tNode The static data for this node
      */
     function setInputsFromAttrs(directiveIndex, instance, def, tNode) {
@@ -10341,6 +10350,11 @@
                 }
                 else {
                     instance[privateName] = value;
+                }
+                if (ngDevMode) {
+                    var lView = getLView();
+                    var nativeElement = getNativeByTNode(tNode, lView);
+                    setNgReflectProperty(lView, nativeElement, tNode.type, privateName, value);
                 }
             }
         }
@@ -10732,7 +10746,7 @@
      * Set the inputs of directives at the current node to corresponding value.
      *
      * @param lView the `LView` which contains the directives.
-     * @param inputAliases mapping between the public "input" name and privately-known,
+     * @param inputs mapping between the public "input" name and privately-known,
      * possibly minified, property names to write to.
      * @param value Value to set.
      */
@@ -16093,7 +16107,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.13+51.sha-d9ce8a4.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.13+52.sha-4e13700.with-local-changes');
 
     /**
      * @license
