@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.13+21.sha-78146c1.with-local-changes
+ * @license Angular v8.0.0-beta.13+51.sha-d9ce8a4.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11788,9 +11788,18 @@
     function addTContainerToQueries(lView, tContainerNode) {
         var queries = lView[QUERIES];
         if (queries) {
-            queries.addNode(tContainerNode);
             var lContainer = lView[tContainerNode.index];
-            lContainer[QUERIES] = queries.container();
+            if (lContainer[QUERIES]) {
+                // Query container should only exist if it was created through a dynamic view
+                // in a directive constructor. In this case, we must splice the template
+                // matches in before the view matches to ensure query results in embedded views
+                // don't clobber query results on the template node itself.
+                queries.insertNodeBeforeViews(tContainerNode);
+            }
+            else {
+                queries.addNode(tContainerNode);
+                lContainer[QUERIES] = queries.container();
+            }
         }
     }
     function containerInternal(index, tagName, attrs) {
@@ -15662,6 +15671,12 @@
                     return _this;
                 }
                 TemplateRef_.prototype.createEmbeddedView = function (context, container, index) {
+                    var currentQueries = this._declarationParentView[QUERIES];
+                    // Query container may be missing if this view was created in a directive
+                    // constructor. Create it now to avoid losing results in embedded views.
+                    if (currentQueries && this._hostLContainer[QUERIES] == null) {
+                        this._hostLContainer[QUERIES] = currentQueries.container();
+                    }
                     var lView = createEmbeddedViewAndNode(this._tView, context, this._declarationParentView, this._hostLContainer[QUERIES], this._injectorIndex);
                     if (container) {
                         insertView(lView, container, index);
@@ -16078,7 +16093,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.13+21.sha-78146c1.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.13+51.sha-d9ce8a4.with-local-changes');
 
     /**
      * @license
@@ -19256,7 +19271,15 @@
                 locateHostElement(rendererFactory, rootSelectorOrNode);
             var rootFlags = this.componentDef.onPush ? 64 /* Dirty */ | 512 /* IsRoot */ :
                 16 /* CheckAlways */ | 512 /* IsRoot */;
-            var rootContext = !isInternalRootView ? rootViewInjector.get(ROOT_CONTEXT) : createRootContext();
+            // Check whether this Component needs to be isolated from other components, i.e. whether it
+            // should be placed into its own (empty) root context or existing root context should be used.
+            // Note: this is internal-only convention and might change in the future, so it should not be
+            // relied upon externally.
+            var isIsolated = typeof rootSelectorOrNode === 'string' &&
+                /^#root-ng-internal-isolated-\d+/.test(rootSelectorOrNode);
+            var rootContext = (isInternalRootView || isIsolated) ?
+                createRootContext() :
+                rootViewInjector.get(ROOT_CONTEXT);
             var renderer = rendererFactory.createRenderer(hostRNode, this.componentDef);
             if (rootSelectorOrNode && hostRNode) {
                 ngDevMode && ngDevMode.rendererSetAttribute++;
@@ -21766,8 +21789,12 @@
             insertView$1(index, this.deep);
         };
         LQueries_.prototype.addNode = function (tNode) {
-            add(this.deep, tNode);
-            add(this.shallow, tNode);
+            add(this.deep, tNode, false);
+            add(this.shallow, tNode, false);
+        };
+        LQueries_.prototype.insertNodeBeforeViews = function (tNode) {
+            add(this.deep, tNode, true);
+            add(this.shallow, tNode, true);
         };
         LQueries_.prototype.removeView = function () {
             removeView$1(this.shallow);
@@ -21895,7 +21922,16 @@
         // detect it using appropriate tNode type
         return queryByTNodeType(tNode, currentView);
     }
-    function add(query, tNode) {
+    /**
+     * Add query matches for a given node.
+     *
+     * @param query The first query in the linked list
+     * @param tNode The TNode to match against queries
+     * @param insertBeforeContainer Whether or not we should add matches before the last
+     * container array. This mode is necessary if the query container had to be created
+     * out of order (e.g. a view was created in a constructor)
+     */
+    function add(query, tNode, insertBeforeContainer) {
         var currentView = getLView();
         while (query) {
             var predicate = query.predicate;
@@ -21912,7 +21948,7 @@
                     }
                 }
                 if (result !== null) {
-                    addMatch(query, result);
+                    addMatch(query, result, insertBeforeContainer);
                 }
             }
             else {
@@ -21922,7 +21958,7 @@
                     if (matchingIdx !== null) {
                         var result = queryRead(tNode, currentView, predicate.read, matchingIdx);
                         if (result !== null) {
-                            addMatch(query, result);
+                            addMatch(query, result, insertBeforeContainer);
                         }
                     }
                 }
@@ -21930,8 +21966,12 @@
             query = query.next;
         }
     }
-    function addMatch(query, matchingValue) {
-        query.values.push(matchingValue);
+    function addMatch(query, matchingValue, insertBeforeViewMatches) {
+        // Views created in constructors may have their container values created too early. In this case,
+        // ensure template node results are spliced before container results. Otherwise, results inside
+        // embedded views will appear before results on parent template nodes when flattened.
+        insertBeforeViewMatches ? query.values.splice(-1, 0, matchingValue) :
+            query.values.push(matchingValue);
         query.list.setDirty();
     }
     function createPredicate(predicate, read) {
@@ -22142,6 +22182,71 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
+     * Used to load ng module factories.
+     *
+     * @publicApi
+     */
+    var NgModuleFactoryLoader = /** @class */ (function () {
+        function NgModuleFactoryLoader() {
+        }
+        return NgModuleFactoryLoader;
+    }());
+    /**
+     * Map of module-id to the corresponding NgModule.
+     * - In pre Ivy we track NgModuleFactory,
+     * - In post Ivy we track the NgModuleType
+     */
+    var modules = new Map();
+    /**
+     * Registers a loaded module. Should only be called from generated NgModuleFactory code.
+     * @publicApi
+     */
+    function registerModuleFactory(id, factory) {
+        var existing = modules.get(id);
+        assertSameOrNotExisting(id, existing && existing.moduleType, factory.moduleType);
+        modules.set(id, factory);
+    }
+    function assertSameOrNotExisting(id, type, incoming) {
+        if (type && type !== incoming) {
+            throw new Error("Duplicate module registered for " + id + " - " + stringify(type) + " vs " + stringify(type.name));
+        }
+    }
+    function registerNgModuleType(id, ngModuleType) {
+        var existing = modules.get(id);
+        assertSameOrNotExisting(id, existing, ngModuleType);
+        modules.set(id, ngModuleType);
+    }
+    function getModuleFactory__PRE_R3__(id) {
+        var factory = modules.get(id);
+        if (!factory)
+            throw noModuleError(id);
+        return factory;
+    }
+    function getModuleFactory__POST_R3__(id) {
+        var type = modules.get(id);
+        if (!type)
+            throw noModuleError(id);
+        return new NgModuleFactory$1(type);
+    }
+    /**
+     * Returns the NgModuleFactory with the given id, if it exists and has been loaded.
+     * Factories for modules that do not specify an `id` cannot be retrieved. Throws if the module
+     * cannot be found.
+     * @publicApi
+     */
+    var getModuleFactory = getModuleFactory__PRE_R3__;
+    function noModuleError(id) {
+        return new Error("No module with ID " + id + " loaded");
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
      * A mapping of the @angular/core API surface used in generated expressions to the actual symbols.
      *
      * This should be kept up to date with the public exports of @angular/core.
@@ -22258,73 +22363,9 @@
         'ɵɵsanitizeResourceUrl': ɵɵsanitizeResourceUrl,
         'ɵɵsanitizeScript': ɵɵsanitizeScript,
         'ɵɵsanitizeUrl': ɵɵsanitizeUrl,
-        'ɵɵsanitizeUrlOrResourceUrl': ɵɵsanitizeUrlOrResourceUrl
+        'ɵɵsanitizeUrlOrResourceUrl': ɵɵsanitizeUrlOrResourceUrl,
+        'ɵregisterNgModuleType': registerNgModuleType,
     };
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Used to load ng module factories.
-     *
-     * @publicApi
-     */
-    var NgModuleFactoryLoader = /** @class */ (function () {
-        function NgModuleFactoryLoader() {
-        }
-        return NgModuleFactoryLoader;
-    }());
-    /**
-     * Map of module-id to the corresponding NgModule.
-     * - In pre Ivy we track NgModuleFactory,
-     * - In post Ivy we track the NgModuleType
-     */
-    var modules = new Map();
-    /**
-     * Registers a loaded module. Should only be called from generated NgModuleFactory code.
-     * @publicApi
-     */
-    function registerModuleFactory(id, factory) {
-        var existing = modules.get(id);
-        assertSameOrNotExisting(id, existing && existing.moduleType, factory.moduleType);
-        modules.set(id, factory);
-    }
-    function assertSameOrNotExisting(id, type, incoming) {
-        if (type && type !== incoming) {
-            throw new Error("Duplicate module registered for " + id + " - " + stringify(type) + " vs " + stringify(type.name));
-        }
-    }
-    function registerNgModuleType(id, ngModuleType) {
-        var existing = modules.get(id);
-        assertSameOrNotExisting(id, existing, ngModuleType);
-        modules.set(id, ngModuleType);
-    }
-    function getModuleFactory__PRE_R3__(id) {
-        var factory = modules.get(id);
-        if (!factory)
-            throw noModuleError(id);
-        return factory;
-    }
-    function getModuleFactory__POST_R3__(id) {
-        var type = modules.get(id);
-        if (!type)
-            throw noModuleError(id);
-        return new NgModuleFactory$1(type);
-    }
-    /**
-     * Returns the NgModuleFactory with the given id, if it exists and has been loaded.
-     * Factories for modules that do not specify an `id` cannot be retrieved. Throws if the module
-     * cannot be found.
-     * @publicApi
-     */
-    var getModuleFactory = getModuleFactory__PRE_R3__;
-    function noModuleError(id) {
-        return new Error("No module with ID " + id + " loaded");
-    }
 
     /**
      * @license
@@ -28438,6 +28479,7 @@
     exports.ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ = SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__;
     exports.ɵSWITCH_RENDERER2_FACTORY__POST_R3__ = SWITCH_RENDERER2_FACTORY__POST_R3__;
     exports.ɵgetModuleFactory__POST_R3__ = getModuleFactory__POST_R3__;
+    exports.ɵregisterNgModuleType = registerNgModuleType;
     exports.ɵpublishGlobalUtil = publishGlobalUtil;
     exports.ɵpublishDefaultGlobalUtils = publishDefaultGlobalUtils;
     exports.ɵcreateInjector = createInjector;

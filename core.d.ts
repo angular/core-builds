@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.13+21.sha-78146c1.with-local-changes
+ * @license Angular v8.0.0-beta.13+51.sha-d9ce8a4.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3852,6 +3852,12 @@ declare interface LQueries {
      * if matching query predicate.
      */
     addNode(tNode: ɵangular_packages_core_core_bg | TContainerNode | TElementContainerNode): void;
+    /**
+     * Notify `LQueries` that a new `TNode` has been created and needs to be added to query results
+     * if matching query predicate. This is a special mode invoked if the query container has to
+     * be created out of order (e.g. view created in the constructor of a directive).
+     */
+    insertNodeBeforeViews(tNode: ɵangular_packages_core_core_bg | TContainerNode | TElementContainerNode): void;
     /**
      * Notify `LQueries` that a new LContainer was added to ivy data structures. As a result we need
      * to prepare room for views that might be inserted into this container.
@@ -10269,6 +10275,8 @@ export declare class ɵReflectionCapabilities implements PlatformReflectionCapab
  * @publicApi
  */
 export declare function ɵregisterModuleFactory(id: string, factory: NgModuleFactory<any>): void;
+
+export declare function ɵregisterNgModuleType(id: string, ngModuleType: ɵNgModuleType): void;
 
 /**
  * Render3 implementation of {@link viewEngine_ComponentFactory}.
