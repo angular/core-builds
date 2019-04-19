@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.13+36.sha-d7f7826.with-local-changes
+ * @license Angular v8.0.0-beta.13+38.sha-0df719a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16007,7 +16007,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.13+36.sha-d7f7826.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.13+38.sha-0df719a.with-local-changes');
 
     /**
      * @license
@@ -22069,6 +22069,58 @@
      */
 
     /**
+     * Used to load ng module factories.
+     *
+     * @publicApi
+     */
+    var NgModuleFactoryLoader = /** @class */ (function () {
+        function NgModuleFactoryLoader() {
+        }
+        return NgModuleFactoryLoader;
+    }());
+    /**
+     * Map of module-id to the corresponding NgModule.
+     * - In pre Ivy we track NgModuleFactory,
+     * - In post Ivy we track the NgModuleType
+     */
+    var modules = new Map();
+    /**
+     * Registers a loaded module. Should only be called from generated NgModuleFactory code.
+     * @publicApi
+     */
+    function registerModuleFactory(id, factory) {
+        var existing = modules.get(id);
+        assertSameOrNotExisting(id, existing && existing.moduleType, factory.moduleType);
+        modules.set(id, factory);
+    }
+    function assertSameOrNotExisting(id, type, incoming) {
+        if (type && type !== incoming) {
+            throw new Error("Duplicate module registered for " + id + " - " + stringify(type) + " vs " + stringify(type.name));
+        }
+    }
+    function registerNgModuleType(id, ngModuleType) {
+        var existing = modules.get(id);
+        assertSameOrNotExisting(id, existing, ngModuleType);
+        modules.set(id, ngModuleType);
+    }
+    function getModuleFactory__POST_R3__(id) {
+        var type = modules.get(id);
+        if (!type)
+            throw noModuleError(id);
+        return new NgModuleFactory$1(type);
+    }
+    /**
+     * Returns the NgModuleFactory with the given id, if it exists and has been loaded.
+     * Factories for modules that do not specify an `id` cannot be retrieved. Throws if the module
+     * cannot be found.
+     * @publicApi
+     */
+    var getModuleFactory = getModuleFactory__POST_R3__;
+    function noModuleError(id) {
+        return new Error("No module with ID " + id + " loaded");
+    }
+
+    /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
      *
@@ -22192,60 +22244,9 @@
         'ɵɵsanitizeResourceUrl': ɵɵsanitizeResourceUrl,
         'ɵɵsanitizeScript': ɵɵsanitizeScript,
         'ɵɵsanitizeUrl': ɵɵsanitizeUrl,
-        'ɵɵsanitizeUrlOrResourceUrl': ɵɵsanitizeUrlOrResourceUrl
+        'ɵɵsanitizeUrlOrResourceUrl': ɵɵsanitizeUrlOrResourceUrl,
+        'ɵregisterNgModuleType': registerNgModuleType,
     };
-
-    /**
-     * Used to load ng module factories.
-     *
-     * @publicApi
-     */
-    var NgModuleFactoryLoader = /** @class */ (function () {
-        function NgModuleFactoryLoader() {
-        }
-        return NgModuleFactoryLoader;
-    }());
-    /**
-     * Map of module-id to the corresponding NgModule.
-     * - In pre Ivy we track NgModuleFactory,
-     * - In post Ivy we track the NgModuleType
-     */
-    var modules = new Map();
-    /**
-     * Registers a loaded module. Should only be called from generated NgModuleFactory code.
-     * @publicApi
-     */
-    function registerModuleFactory(id, factory) {
-        var existing = modules.get(id);
-        assertSameOrNotExisting(id, existing && existing.moduleType, factory.moduleType);
-        modules.set(id, factory);
-    }
-    function assertSameOrNotExisting(id, type, incoming) {
-        if (type && type !== incoming) {
-            throw new Error("Duplicate module registered for " + id + " - " + stringify(type) + " vs " + stringify(type.name));
-        }
-    }
-    function registerNgModuleType(id, ngModuleType) {
-        var existing = modules.get(id);
-        assertSameOrNotExisting(id, existing, ngModuleType);
-        modules.set(id, ngModuleType);
-    }
-    function getModuleFactory__POST_R3__(id) {
-        var type = modules.get(id);
-        if (!type)
-            throw noModuleError(id);
-        return new NgModuleFactory$1(type);
-    }
-    /**
-     * Returns the NgModuleFactory with the given id, if it exists and has been loaded.
-     * Factories for modules that do not specify an `id` cannot be retrieved. Throws if the module
-     * cannot be found.
-     * @publicApi
-     */
-    var getModuleFactory = getModuleFactory__POST_R3__;
-    function noModuleError(id) {
-        return new Error("No module with ID " + id + " loaded");
-    }
 
     /**
      * @license
@@ -28223,6 +28224,7 @@
     exports.ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ = SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__;
     exports.ɵSWITCH_RENDERER2_FACTORY__POST_R3__ = SWITCH_RENDERER2_FACTORY__POST_R3__;
     exports.ɵgetModuleFactory__POST_R3__ = getModuleFactory__POST_R3__;
+    exports.ɵregisterNgModuleType = registerNgModuleType;
     exports.ɵpublishGlobalUtil = publishGlobalUtil;
     exports.ɵpublishDefaultGlobalUtils = publishDefaultGlobalUtils;
     exports.ɵcreateInjector = createInjector;
