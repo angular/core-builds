@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.13+55.sha-a181e8e.with-local-changes
+ * @license Angular v8.0.0-beta.13+57.sha-f348dea.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7580,6 +7580,13 @@ declare interface TrustedUrlString extends TrustedString {
     [BRAND]: BypassType.Url;
 }
 
+/**
+ * Tsickle has a bug where it creates an infinite loop for a function returning itself.
+ * This is a temporary type that will be removed when the issue is resolved.
+ * https://github.com/angular/tsickle/issues/1009)
+ */
+declare type TsickleIssue1009 = any;
+
 /** Static data for a text node */
 declare interface TTextNode extends TNode {
     /** Index in the data[] array */
@@ -12196,6 +12203,28 @@ export declare function ɵɵprojection(nodeIndex: number, selectorIndex?: number
  * @codeGenApi
  */
 export declare function ɵɵprojectionDef(selectors?: ɵCssSelectorList[]): void;
+
+/**
+ * Update a property on a selected element.
+ *
+ * Operates on the element selected by index via the {@link select} instruction.
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled
+ *
+ * @param propName Name of property. Because it is going to DOM, this is not subject to
+ *        renaming as part of minification.
+ * @param value New value to write.
+ * @param sanitizer An optional function used to sanitize the value.
+ * @param nativeOnly Whether or not we should only set native properties and skip input check
+ * (this is necessary for host property bindings)
+ * @returns This function returns itself so that it may be chained
+ * (e.g. `property('name', ctx.name)('title', ctx.title)`)
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵproperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): TsickleIssue1009;
 
 /**
  * This feature resolves the providers of a directive (or component),
