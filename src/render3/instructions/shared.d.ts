@@ -177,12 +177,13 @@ export declare function createTNode(tParent: TElementNode | TContainerNode | nul
 /**
  * Consolidates all inputs or outputs of all directives on this logical node.
  *
- * @param tNodeFlags node flags
+ * @param tNode
  * @param direction whether to consider inputs or outputs
  * @returns PropertyAliases|null aggregate of all properties if any, `null` otherwise
  */
 export declare function generatePropertyAliases(tNode: TNode, direction: BindingDirection): PropertyAliases | null;
 export declare function elementPropertyInternal<T>(index: number, propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean, loadRendererFn?: ((tNode: TNode, lView: LView) => Renderer3) | null): void;
+export declare function setNgReflectProperty(lView: LView, element: RElement | RComment, type: TNodeType, attrName: string, value: any): void;
 /**
  * Instantiate a root component.
  */
@@ -315,7 +316,7 @@ export declare function handleError(lView: LView, error: any): void;
  * Set the inputs of directives at the current node to corresponding value.
  *
  * @param lView the `LView` which contains the directives.
- * @param inputAliases mapping between the public "input" name and privately-known,
+ * @param inputs mapping between the public "input" name and privately-known,
  * possibly minified, property names to write to.
  * @param value Value to set.
  */
