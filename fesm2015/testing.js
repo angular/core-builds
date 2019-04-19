@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.13+28.sha-c1d5fbd.with-local-changes
+ * @license Angular v8.0.0-beta.13+29.sha-f9bb53a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2605,7 +2605,7 @@ class TestBedRender3 {
         /** @type {?} */
         const testComponentRenderer = this.get(TestComponentRenderer);
         /** @type {?} */
-        const rootElId = `root${_nextRootElementId++}`;
+        const rootElId = `root-ng-internal-isolated-${_nextRootElementId++}`;
         testComponentRenderer.insertRootElement(rootElId);
         /** @nocollapse @type {?} */
         const componentDef = ((/** @type {?} */ (type))).ngComponentDef;
