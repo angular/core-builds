@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.13+65.sha-96a8289.with-local-changes
+ * @license Angular v8.0.0-beta.13+67.sha-645e305.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9165,6 +9165,15 @@ function findAttrIndexInNode(name, attrs, isInlineTemplate, isProjectionMode) {
             else if (maybeAttrName === 3 /* Bindings */) {
                 bindingsMode = true;
             }
+            else if (maybeAttrName === 1 /* Classes */) {
+                var value = attrs[++i];
+                // We should skip classes here because we have a separate mechanism for
+                // matching classes in projection mode.
+                while (typeof value === 'string') {
+                    value = attrs[++i];
+                }
+                continue;
+            }
             else if (maybeAttrName === 4 /* Template */) {
                 // We do not care about Template attributes in this scenario.
                 break;
@@ -16106,7 +16115,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-beta.13+65.sha-96a8289.with-local-changes');
+var VERSION = new Version('8.0.0-beta.13+67.sha-645e305.with-local-changes');
 
 /**
  * @license
