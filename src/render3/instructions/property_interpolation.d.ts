@@ -93,6 +93,7 @@ export declare function ɵɵinterpolation8(prefix: string, v0: any, i0: string, 
  * @param v0 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @returns itself, so that it may be chained.
+ * @codeGenApi
  */
 export declare function ɵɵpropertyInterpolate(propName: string, v0: any): TsickleIssue1009;
 /**
@@ -120,6 +121,7 @@ export declare function ɵɵpropertyInterpolate(propName: string, v0: any): Tsic
  * @param v0 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @returns itself, so that it may be chained.
+ * @codeGenApi
  */
 export declare function ɵɵpropertyInterpolate1(propName: string, prefix: string, v0: any, suffix: string): TsickleIssue1009;
 /**
@@ -149,6 +151,7 @@ export declare function ɵɵpropertyInterpolate1(propName: string, prefix: strin
  * @param v1 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @returns itself, so that it may be chained.
+ * @codeGenApi
  */
 export declare function ɵɵpropertyInterpolate2(propName: string, prefix: string, v0: any, i0: string, v1: any, suffix: string): TsickleIssue1009;
 /**
@@ -181,6 +184,7 @@ export declare function ɵɵpropertyInterpolate2(propName: string, prefix: strin
  * @param v2 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @returns itself, so that it may be chained.
+ * @codeGenApi
  */
 export declare function ɵɵpropertyInterpolate3(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): TsickleIssue1009;
 /**
@@ -215,6 +219,7 @@ export declare function ɵɵpropertyInterpolate3(propName: string, prefix: strin
  * @param v3 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @returns itself, so that it may be chained.
+ * @codeGenApi
  */
 export declare function ɵɵpropertyInterpolate4(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): TsickleIssue1009;
 /**
@@ -251,6 +256,7 @@ export declare function ɵɵpropertyInterpolate4(propName: string, prefix: strin
  * @param v4 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @returns itself, so that it may be chained.
+ * @codeGenApi
  */
 export declare function ɵɵpropertyInterpolate5(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string): TsickleIssue1009;
 /**
@@ -289,6 +295,7 @@ export declare function ɵɵpropertyInterpolate5(propName: string, prefix: strin
  * @param v5 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @returns itself, so that it may be chained.
+ * @codeGenApi
  */
 export declare function ɵɵpropertyInterpolate6(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string): TsickleIssue1009;
 /**
@@ -329,6 +336,7 @@ export declare function ɵɵpropertyInterpolate6(propName: string, prefix: strin
  * @param v6 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @returns itself, so that it may be chained.
+ * @codeGenApi
  */
 export declare function ɵɵpropertyInterpolate7(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): TsickleIssue1009;
 /**
@@ -371,6 +379,7 @@ export declare function ɵɵpropertyInterpolate7(propName: string, prefix: strin
  * @param v7 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @returns itself, so that it may be chained.
+ * @codeGenApi
  */
 export declare function ɵɵpropertyInterpolate8(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): TsickleIssue1009;
 /**
@@ -400,5 +409,6 @@ export declare function ɵɵpropertyInterpolate8(propName: string, prefix: strin
  * string prefix and ending with a string suffix.
  * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
  * @returns itself, so that it may be chained.
+ * @codeGenApi
  */
 export declare function ɵɵpropertyInterpolateV(propName: string, values: any[]): TsickleIssue1009;
