@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.12+18.sha-1b7749d.with-local-changes
+ * @license Angular v8.0.0-beta.13+62.sha-5c8d156.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2874,8 +2874,10 @@
      * The idea is that unless we are doing production build where we explicitly
      * set `ngDevMode == false` we should be helping the developer by providing
      * as much early warning and errors as possible.
+     *
+     * NOTE: changes to the `ngDevMode` name must be synced with `compiler-cli/src/tooling.ts`.
      */
-    if (typeof _global['ngDevMode'] === 'undefined' || _global['ngDevMode']) {
+    if (typeof ngDevMode === 'undefined' || ngDevMode) {
         ngDevModeResetPerfCounters();
     }
 
@@ -3141,6 +3143,14 @@
             def.pipeDefs = pipeTypes ?
                 function () { return (typeof pipeTypes === 'function' ? pipeTypes() : pipeTypes).map(extractPipeDef); } :
                 null;
+            // Add ngInjectableDef so components are reachable through the module injector by default
+            // (unless it has already been set by the @Injectable decorator). This is mostly to
+            // support injecting components in tests. In real application code, components should
+            // be retrieved through the node injector, so this isn't a problem.
+            if (!type.hasOwnProperty(NG_INJECTABLE_DEF)) {
+                type[NG_INJECTABLE_DEF] =
+                    ɵɵdefineInjectable({ factory: componentDefinition.factory });
+            }
         });
         return def;
     }
@@ -3192,10 +3202,12 @@
      * @codeGenApi
      */
     function ɵɵsetNgModuleScope(type, scope) {
-        var ngModuleDef = getNgModuleDef(type, true);
-        ngModuleDef.declarations = scope.declarations || EMPTY_ARRAY$1;
-        ngModuleDef.imports = scope.imports || EMPTY_ARRAY$1;
-        ngModuleDef.exports = scope.exports || EMPTY_ARRAY$1;
+        return noSideEffects(function () {
+            var ngModuleDef = getNgModuleDef(type, true);
+            ngModuleDef.declarations = scope.declarations || EMPTY_ARRAY$1;
+            ngModuleDef.imports = scope.imports || EMPTY_ARRAY$1;
+            ngModuleDef.exports = scope.exports || EMPTY_ARRAY$1;
+        });
     }
     /**
      * Inverts an inputs or outputs lookup such that the keys, which were the
@@ -4009,6 +4021,26 @@
         }
     }
 
+    var stylingContext = null;
+    /**
+     * Gets the most recent styling context value.
+     *
+     * Note that only one styling context is stored at a given time.
+     */
+    function getCachedStylingContext() {
+        return stylingContext;
+    }
+    /**
+     * Sets the most recent styling context value.
+     *
+     * Note that only one styling context is stored at a given time.
+     *
+     * @param context The styling context value that will be stored
+     */
+    function setCachedStylingContext(context) {
+        stylingContext = context;
+    }
+
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -4404,6 +4436,7 @@
                 lView[BINDING_INDEX] = tView.bindingStartIndex;
             }
         }
+        setCachedStylingContext(null);
         enterView(newView, null);
     }
     var _selectedIndex = -1;
@@ -4414,8 +4447,6 @@
      * current `LView` to act on.
      */
     function getSelectedIndex() {
-        ngDevMode &&
-            assertGreaterThan(_selectedIndex, -1, 'select() should be called prior to retrieving the selected index');
         return _selectedIndex;
     }
     /**
@@ -4426,6 +4457,9 @@
      */
     function setSelectedIndex(index) {
         _selectedIndex = index;
+        // remove the styling context from the cache
+        // because we are now on a different element
+        setCachedStylingContext(null);
     }
     var _currentNamespace = null;
     /**
@@ -4893,7 +4927,7 @@
      * @param index Index of the style allocation. See: `elementStyling`.
      * @param viewData The view to search for the styling context
      */
-    function getStylingContext(index, viewData) {
+    function getStylingContextFromLView(index, viewData) {
         var storageIndex = index;
         var slotValue = viewData[storageIndex];
         var wrapper = viewData;
@@ -4996,7 +5030,7 @@
             return null;
         }
         var lView = context.lView, nodeIndex = context.nodeIndex;
-        var stylingContext = getStylingContext(nodeIndex, lView);
+        var stylingContext = getStylingContextFromLView(nodeIndex, lView);
         return getPlayerContext(stylingContext) || allocPlayerContext(stylingContext);
     }
     function getPlayerContext(stylingContext) {
@@ -5061,7 +5095,7 @@
                     native.setAttributeNS(namespaceURI, attrName, attrVal);
             }
             else {
-                /// attrName is string;
+                // attrName is string;
                 var attrName = value;
                 var attrVal = attrs[++i];
                 // Standard attributes
@@ -9324,50 +9358,55 @@
     }
     /** Sets the host bindings for the current view. */
     function setHostBindings(tView, viewData) {
-        if (tView.expandoInstructions) {
-            var bindingRootIndex = viewData[BINDING_INDEX] = tView.expandoStartIndex;
-            setBindingRoot(bindingRootIndex);
-            var currentDirectiveIndex = -1;
-            var currentElementIndex = -1;
-            for (var i = 0; i < tView.expandoInstructions.length; i++) {
-                var instruction = tView.expandoInstructions[i];
-                if (typeof instruction === 'number') {
-                    if (instruction <= 0) {
-                        // Negative numbers mean that we are starting new EXPANDO block and need to update
-                        // the current element and directive index.
-                        currentElementIndex = -instruction;
-                        setActiveHostElement(currentElementIndex);
-                        // Injector block and providers are taken into account.
-                        var providerCount = tView.expandoInstructions[++i];
-                        bindingRootIndex += INJECTOR_BLOOM_PARENT_SIZE + providerCount;
-                        currentDirectiveIndex = bindingRootIndex;
+        var selectedIndex = getSelectedIndex();
+        try {
+            if (tView.expandoInstructions) {
+                var bindingRootIndex = viewData[BINDING_INDEX] = tView.expandoStartIndex;
+                setBindingRoot(bindingRootIndex);
+                var currentDirectiveIndex = -1;
+                var currentElementIndex = -1;
+                for (var i = 0; i < tView.expandoInstructions.length; i++) {
+                    var instruction = tView.expandoInstructions[i];
+                    if (typeof instruction === 'number') {
+                        if (instruction <= 0) {
+                            // Negative numbers mean that we are starting new EXPANDO block and need to update
+                            // the current element and directive index.
+                            currentElementIndex = -instruction;
+                            setActiveHostElement(currentElementIndex);
+                            // Injector block and providers are taken into account.
+                            var providerCount = tView.expandoInstructions[++i];
+                            bindingRootIndex += INJECTOR_BLOOM_PARENT_SIZE + providerCount;
+                            currentDirectiveIndex = bindingRootIndex;
+                        }
+                        else {
+                            // This is either the injector size (so the binding root can skip over directives
+                            // and get to the first set of host bindings on this node) or the host var count
+                            // (to get to the next set of host bindings on this node).
+                            bindingRootIndex += instruction;
+                        }
+                        setBindingRoot(bindingRootIndex);
                     }
                     else {
-                        // This is either the injector size (so the binding root can skip over directives
-                        // and get to the first set of host bindings on this node) or the host var count
-                        // (to get to the next set of host bindings on this node).
-                        bindingRootIndex += instruction;
+                        // If it's not a number, it's a host binding function that needs to be executed.
+                        if (instruction !== null) {
+                            viewData[BINDING_INDEX] = bindingRootIndex;
+                            var hostCtx = unwrapRNode(viewData[currentDirectiveIndex]);
+                            instruction(2 /* Update */, hostCtx, currentElementIndex);
+                            // Each directive gets a uniqueId value that is the same for both
+                            // create and update calls when the hostBindings function is called. The
+                            // directive uniqueId is not set anywhere--it is just incremented between
+                            // each hostBindings call and is useful for helping instruction code
+                            // uniquely determine which directive is currently active when executed.
+                            incrementActiveDirectiveId();
+                        }
+                        currentDirectiveIndex++;
                     }
-                    setBindingRoot(bindingRootIndex);
-                }
-                else {
-                    // If it's not a number, it's a host binding function that needs to be executed.
-                    if (instruction !== null) {
-                        viewData[BINDING_INDEX] = bindingRootIndex;
-                        var hostCtx = unwrapRNode(viewData[currentDirectiveIndex]);
-                        instruction(2 /* Update */, hostCtx, currentElementIndex);
-                        // Each directive gets a uniqueId value that is the same for both
-                        // create and update calls when the hostBindings function is called. The
-                        // directive uniqueId is not set anywhere--it is just incremented between
-                        // each hostBindings call and is useful for helping instruction code
-                        // uniquely determine which directive is currently active when executed.
-                        incrementActiveDirectiveId();
-                    }
-                    currentDirectiveIndex++;
                 }
             }
         }
-        setActiveHostElement(null);
+        finally {
+            setActiveHostElement(selectedIndex);
+        }
     }
     /** Refreshes content queries for all directives in the given view. */
     function refreshContentQueries(tView, lView) {
@@ -9552,10 +9591,7 @@
                 setPreviousOrParentTNode(null);
                 oldView = enterView(viewToRender, viewToRender[T_HOST]);
                 resetPreOrderHookFlags(viewToRender);
-                ɵɵnamespaceHTML();
-                // Reset the selected index so we can assert that `select` was called later
-                setSelectedIndex(-1);
-                tView.template(getRenderFlags(viewToRender), context);
+                executeTemplate(tView.template, getRenderFlags(viewToRender), context);
                 // This must be set to false immediately after the first creation run because in an
                 // ngFor loop, all the views will be created together before update mode runs and turns
                 // off firstTemplatePass. If we don't set it here, instances will perform directive
@@ -9581,18 +9617,13 @@
             }
             if (creationModeIsActive) {
                 // creation mode pass
-                if (templateFn) {
-                    ɵɵnamespaceHTML();
-                    // Reset the selected index so we can assert that `select` was called later
-                    setSelectedIndex(-1);
-                    templateFn(1 /* Create */, context);
-                }
+                templateFn && executeTemplate(templateFn, 1 /* Create */, context);
                 refreshDescendantViews(hostView);
                 hostView[FLAGS] &= ~4 /* CreationMode */;
             }
             // update mode pass
             resetPreOrderHookFlags(hostView);
-            templateFn && templateFn(2 /* Update */, context);
+            templateFn && executeTemplate(templateFn, 2 /* Update */, context);
             refreshDescendantViews(hostView);
         }
         finally {
@@ -9600,6 +9631,17 @@
                 rendererFactory.end();
             }
             leaveView(oldView);
+        }
+    }
+    function executeTemplate(templateFn, rf, context) {
+        ɵɵnamespaceHTML();
+        var prevSelectedIndex = getSelectedIndex();
+        try {
+            setActiveHostElement(null);
+            templateFn(rf, context);
+        }
+        finally {
+            setSelectedIndex(prevSelectedIndex);
         }
     }
     /**
@@ -9851,7 +9893,7 @@
     /**
      * Consolidates all inputs or outputs of all directives on this logical node.
      *
-     * @param tNodeFlags node flags
+     * @param tNode
      * @param direction whether to consider inputs or outputs
      * @returns PropertyAliases|null aggregate of all properties if any, `null` otherwise
      */
@@ -9905,7 +9947,18 @@
                 markDirtyIfOnPush(lView, index + HEADER_OFFSET);
             if (ngDevMode) {
                 if (tNode.type === 3 /* Element */ || tNode.type === 0 /* Container */) {
-                    setNgReflectProperties(lView, element, tNode.type, dataValue, value);
+                    /**
+                     * dataValue is an array containing runtime input or output names for the directives:
+                     * i+0: directive instance index
+                     * i+1: publicName
+                     * i+2: privateName
+                     *
+                     * e.g. [0, 'change', 'change-minified']
+                     * we want to set the reflected property with the privateName: dataValue[i+2]
+                     */
+                    for (var i = 0; i < dataValue.length; i += 3) {
+                        setNgReflectProperty(lView, element, tNode.type, dataValue[i + 2], value);
+                    }
                 }
             }
         }
@@ -9945,25 +9998,23 @@
             childComponentLView[FLAGS] |= 64 /* Dirty */;
         }
     }
-    function setNgReflectProperties(lView, element, type, inputs, value) {
+    function setNgReflectProperty(lView, element, type, attrName, value) {
         var _a;
-        for (var i = 0; i < inputs.length; i += 3) {
-            var renderer = lView[RENDERER];
-            var attrName = normalizeDebugBindingName(inputs[i + 2]);
-            var debugValue = normalizeDebugBindingValue(value);
-            if (type === 3 /* Element */) {
-                isProceduralRenderer(renderer) ?
-                    renderer.setAttribute(element, attrName, debugValue) :
-                    element.setAttribute(attrName, debugValue);
+        var renderer = lView[RENDERER];
+        attrName = normalizeDebugBindingName(attrName);
+        var debugValue = normalizeDebugBindingValue(value);
+        if (type === 3 /* Element */) {
+            isProceduralRenderer(renderer) ?
+                renderer.setAttribute(element, attrName, debugValue) :
+                element.setAttribute(attrName, debugValue);
+        }
+        else if (value !== undefined) {
+            var value_1 = "bindings=" + JSON.stringify((_a = {}, _a[attrName] = debugValue, _a), null, 2);
+            if (isProceduralRenderer(renderer)) {
+                renderer.setValue(element, value_1);
             }
-            else if (value !== undefined) {
-                var value_1 = "bindings=" + JSON.stringify((_a = {}, _a[attrName] = debugValue, _a), null, 2);
-                if (isProceduralRenderer(renderer)) {
-                    renderer.setValue(element, value_1);
-                }
-                else {
-                    element.textContent = value_1;
-                }
+            else {
+                element.textContent = value_1;
             }
         }
     }
@@ -10102,24 +10153,29 @@
         var expando = tView.expandoInstructions;
         var firstTemplatePass = tView.firstTemplatePass;
         var elementIndex = tNode.index - HEADER_OFFSET;
-        setActiveHostElement(elementIndex);
-        for (var i = start; i < end; i++) {
-            var def = tView.data[i];
-            var directive = viewData[i];
-            if (def.hostBindings) {
-                invokeHostBindingsInCreationMode(def, expando, directive, tNode, firstTemplatePass);
-                // Each directive gets a uniqueId value that is the same for both
-                // create and update calls when the hostBindings function is called. The
-                // directive uniqueId is not set anywhere--it is just incremented between
-                // each hostBindings call and is useful for helping instruction code
-                // uniquely determine which directive is currently active when executed.
-                incrementActiveDirectiveId();
-            }
-            else if (firstTemplatePass) {
-                expando.push(null);
+        var selectedIndex = getSelectedIndex();
+        try {
+            setActiveHostElement(elementIndex);
+            for (var i = start; i < end; i++) {
+                var def = tView.data[i];
+                var directive = viewData[i];
+                if (def.hostBindings) {
+                    invokeHostBindingsInCreationMode(def, expando, directive, tNode, firstTemplatePass);
+                    // Each directive gets a uniqueId value that is the same for both
+                    // create and update calls when the hostBindings function is called. The
+                    // directive uniqueId is not set anywhere--it is just incremented between
+                    // each hostBindings call and is useful for helping instruction code
+                    // uniquely determine which directive is currently active when executed.
+                    incrementActiveDirectiveId();
+                }
+                else if (firstTemplatePass) {
+                    expando.push(null);
+                }
             }
         }
-        setActiveHostElement(null);
+        finally {
+            setActiveHostElement(selectedIndex);
+        }
     }
     function invokeHostBindingsInCreationMode(def, expando, directive, tNode, firstTemplatePass) {
         var previousExpandoLength = expando.length;
@@ -10285,7 +10341,7 @@
      *
      * @param directiveIndex Index of the directive in directives array
      * @param instance Instance of the directive on which to set the initial inputs
-     * @param inputs The list of inputs from the directive def
+     * @param def The directive def that contains the list of inputs
      * @param tNode The static data for this node
      */
     function setInputsFromAttrs(directiveIndex, instance, def, tNode) {
@@ -10305,6 +10361,11 @@
                 }
                 else {
                     instance[privateName] = value;
+                }
+                if (ngDevMode) {
+                    var lView = getLView();
+                    var nativeElement = getNativeByTNode(tNode, lView);
+                    setNgReflectProperty(lView, nativeElement, tNode.type, privateName, value);
                 }
             }
         }
@@ -10609,11 +10670,8 @@
         var creationMode = isCreationMode(hostView);
         try {
             resetPreOrderHookFlags(hostView);
-            ɵɵnamespaceHTML();
             creationMode && executeViewQueryFn(1 /* Create */, hostTView, component);
-            // Reset the selected index so we can assert that `select` was called later
-            setSelectedIndex(-1);
-            templateFn(getRenderFlags(hostView), component);
+            executeTemplate(templateFn, getRenderFlags(hostView), component);
             refreshDescendantViews(hostView);
             // Only check view queries again in creation mode if there are static view queries
             if (!creationMode || hostTView.staticViewQueries) {
@@ -10696,7 +10754,7 @@
      * Set the inputs of directives at the current node to corresponding value.
      *
      * @param lView the `LView` which contains the directives.
-     * @param inputAliases mapping between the public "input" name and privately-known,
+     * @param inputs mapping between the public "input" name and privately-known,
      * possibly minified, property names to write to.
      * @param value Value to set.
      */
@@ -11196,19 +11254,21 @@
     function detachView(lContainer, removeIndex) {
         var views = lContainer[VIEWS];
         var viewToDetach = views[removeIndex];
-        if (removeIndex > 0) {
-            views[removeIndex - 1][NEXT] = viewToDetach[NEXT];
+        if (viewToDetach) {
+            if (removeIndex > 0) {
+                views[removeIndex - 1][NEXT] = viewToDetach[NEXT];
+            }
+            views.splice(removeIndex, 1);
+            addRemoveViewFromContainer(viewToDetach, false);
+            if ((viewToDetach[FLAGS] & 128 /* Attached */) &&
+                !(viewToDetach[FLAGS] & 256 /* Destroyed */) && viewToDetach[QUERIES]) {
+                viewToDetach[QUERIES].removeView();
+            }
+            viewToDetach[PARENT] = null;
+            viewToDetach[NEXT] = null;
+            // Unsets the attached flag
+            viewToDetach[FLAGS] &= ~128 /* Attached */;
         }
-        views.splice(removeIndex, 1);
-        addRemoveViewFromContainer(viewToDetach, false);
-        if ((viewToDetach[FLAGS] & 128 /* Attached */) &&
-            !(viewToDetach[FLAGS] & 256 /* Destroyed */) && viewToDetach[QUERIES]) {
-            viewToDetach[QUERIES].removeView();
-        }
-        viewToDetach[PARENT] = null;
-        viewToDetach[NEXT] = null;
-        // Unsets the attached flag
-        viewToDetach[FLAGS] &= ~128 /* Attached */;
         return viewToDetach;
     }
     /**
@@ -11219,8 +11279,10 @@
      */
     function removeView(lContainer, removeIndex) {
         var view = lContainer[VIEWS][removeIndex];
-        detachView(lContainer, removeIndex);
-        destroyLView(view);
+        if (view) {
+            detachView(lContainer, removeIndex);
+            destroyLView(view);
+        }
     }
     /**
      * A standalone function which destroys an LView,
@@ -11752,9 +11814,18 @@
     function addTContainerToQueries(lView, tContainerNode) {
         var queries = lView[QUERIES];
         if (queries) {
-            queries.addNode(tContainerNode);
             var lContainer = lView[tContainerNode.index];
-            lContainer[QUERIES] = queries.container();
+            if (lContainer[QUERIES]) {
+                // Query container should only exist if it was created through a dynamic view
+                // in a directive constructor. In this case, we must splice the template
+                // matches in before the view matches to ensure query results in embedded views
+                // don't clobber query results on the template node itself.
+                queries.insertNodeBeforeViews(tContainerNode);
+            }
+            else {
+                queries.addNode(tContainerNode);
+                lContainer[QUERIES] = queries.container();
+            }
         }
     }
     function containerInternal(index, tagName, attrs) {
@@ -11827,7 +11898,12 @@
     function ɵɵdirectiveInject(token, flags) {
         if (flags === void 0) { flags = exports.InjectFlags.Default; }
         token = resolveForwardRef(token);
-        return getOrCreateInjectable(getPreviousOrParentTNode(), getLView(), token, flags);
+        var lView = getLView();
+        // Fall back to inject() if view hasn't been created. This situation can happen in tests
+        // if inject utilities are used before bootstrapping.
+        if (lView == null)
+            return ɵɵinject(token, flags);
+        return getOrCreateInjectable(getPreviousOrParentTNode(), lView, token, flags);
     }
     /**
      * Facade for the attribute injection from DI.
@@ -11961,7 +12037,8 @@
      */
     function ɵɵelementStyleProp(index, styleIndex, value, suffix, forceOverride) {
         var valueToAdd = resolveStylePropValue(value, suffix);
-        updateStyleProp(getStylingContext(index + HEADER_OFFSET, getLView()), styleIndex, valueToAdd, DEFAULT_TEMPLATE_DIRECTIVE_INDEX, forceOverride);
+        var stylingContext = getStylingContext(index, getLView());
+        updateStyleProp(stylingContext, styleIndex, valueToAdd, DEFAULT_TEMPLATE_DIRECTIVE_INDEX, forceOverride);
     }
     /**
      * Update a host style binding value on the host element within a component/directive.
@@ -11991,8 +12068,7 @@
     function ɵɵelementHostStyleProp(styleIndex, value, suffix, forceOverride) {
         var directiveStylingIndex = getActiveDirectiveStylingIndex();
         var hostElementIndex = getSelectedIndex();
-        var lView = getLView();
-        var stylingContext = getStylingContext(hostElementIndex + HEADER_OFFSET, lView);
+        var stylingContext = getStylingContext(hostElementIndex, getLView());
         var valueToAdd = resolveStylePropValue(value, suffix);
         var args = [stylingContext, styleIndex, valueToAdd, directiveStylingIndex, forceOverride];
         enqueueHostInstruction(stylingContext, directiveStylingIndex, updateStyleProp, args);
@@ -12037,7 +12113,8 @@
         var input = (value instanceof BoundPlayerFactory) ?
             value :
             booleanOrNull(value);
-        updateClassProp(getStylingContext(index + HEADER_OFFSET, getLView()), classIndex, input, DEFAULT_TEMPLATE_DIRECTIVE_INDEX, forceOverride);
+        var stylingContext = getStylingContext(index, getLView());
+        updateClassProp(stylingContext, classIndex, input, DEFAULT_TEMPLATE_DIRECTIVE_INDEX, forceOverride);
     }
     /**
      * Update a class host binding for a directive's/component's host element within
@@ -12060,8 +12137,7 @@
     function ɵɵelementHostClassProp(classIndex, value, forceOverride) {
         var directiveStylingIndex = getActiveDirectiveStylingIndex();
         var hostElementIndex = getSelectedIndex();
-        var lView = getLView();
-        var stylingContext = getStylingContext(hostElementIndex + HEADER_OFFSET, lView);
+        var stylingContext = getStylingContext(hostElementIndex, getLView());
         var input = (value instanceof BoundPlayerFactory) ?
             value :
             booleanOrNull(value);
@@ -12095,8 +12171,8 @@
      */
     function ɵɵelementStylingMap(index, classes, styles) {
         var lView = getLView();
+        var stylingContext = getStylingContext(index, lView);
         var tNode = getTNode(index, lView);
-        var stylingContext = getStylingContext(index + HEADER_OFFSET, lView);
         // inputs are only evaluated from a template binding into a directive, therefore,
         // there should not be a situation where a directive host bindings function
         // evaluates the inputs (this should only happen in the template function)
@@ -12140,8 +12216,7 @@
     function ɵɵelementHostStylingMap(classes, styles) {
         var directiveStylingIndex = getActiveDirectiveStylingIndex();
         var hostElementIndex = getSelectedIndex();
-        var lView = getLView();
-        var stylingContext = getStylingContext(hostElementIndex + HEADER_OFFSET, lView);
+        var stylingContext = getStylingContext(hostElementIndex, getLView());
         var args = [stylingContext, classes, styles, directiveStylingIndex];
         enqueueHostInstruction(stylingContext, directiveStylingIndex, updateStylingMap, args);
     }
@@ -12180,12 +12255,20 @@
         // the styling apply code knows not to actually apply the values...
         var renderer = tNode.type === 3 /* Element */ ? lView[RENDERER] : null;
         var isFirstRender = (lView[FLAGS] & 8 /* FirstLViewPass */) !== 0;
-        var stylingContext = getStylingContext(index + HEADER_OFFSET, lView);
+        var stylingContext = getStylingContext(index, lView);
         var totalPlayersQueued = renderStyling(stylingContext, renderer, lView, isFirstRender, null, null, directiveStylingIndex);
         if (totalPlayersQueued > 0) {
             var rootContext = getRootContext(lView);
             scheduleTick(rootContext, 2 /* FlushPlayers */);
         }
+        // because select(n) may not run between every instruction, the cached styling
+        // context may not get cleared between elements. The reason for this is because
+        // styling bindings (like `[style]` and `[class]`) are not recognized as property
+        // bindings by default so a select(n) instruction is not generated. To ensure the
+        // context is loaded correctly for the next element the cache below is pre-emptively
+        // cleared because there is no code in Angular that applies more styling code after a
+        // styling flush has occurred. Note that this will be fixed once FW-1254 lands.
+        setCachedStylingContext(null);
     }
     function getActiveDirectiveStylingIndex() {
         // whenever a directive's hostBindings function is called a uniqueId value
@@ -12195,6 +12278,18 @@
         // parent directive. To help the styling code distinguish between a parent
         // sub-classed directive the inheritance depth is taken into account as well.
         return getActiveDirectiveId() + getActiveDirectiveSuperClassDepth();
+    }
+    function getStylingContext(index, lView) {
+        var context = getCachedStylingContext();
+        if (!context) {
+            context = getStylingContextFromLView(index + HEADER_OFFSET, lView);
+            setCachedStylingContext(context);
+        }
+        else if (ngDevMode) {
+            var actualContext = getStylingContextFromLView(index + HEADER_OFFSET, lView);
+            assertEqual(context, actualContext, 'The cached styling context is invalid');
+        }
+        return context;
     }
 
     /**
@@ -12312,12 +12407,14 @@
         // this is fired at the end of elementEnd because ALL of the stylingBindings code
         // (for directives and the template) have now executed which means the styling
         // context can be instantiated properly.
+        var stylingContext = null;
         if (hasClassInput(previousOrParentTNode)) {
-            var stylingContext = getStylingContext(previousOrParentTNode.index, lView);
+            stylingContext = getStylingContextFromLView(previousOrParentTNode.index, lView);
             setInputsForProperty(lView, previousOrParentTNode.inputs['class'], getInitialClassNameValue(stylingContext));
         }
         if (hasStyleInput(previousOrParentTNode)) {
-            var stylingContext = getStylingContext(previousOrParentTNode.index, lView);
+            stylingContext =
+                stylingContext || getStylingContextFromLView(previousOrParentTNode.index, lView);
             setInputsForProperty(lView, previousOrParentTNode.inputs['style'], getInitialStyleStringValue(stylingContext));
         }
     }
@@ -12731,7 +12828,8 @@
         var tCleanup = tView.cleanup;
         if (tCleanup != null) {
             for (var i = 0; i < tCleanup.length - 1; i += 2) {
-                if (tCleanup[i] === eventName && tCleanup[i + 1] === tNodeIdx) {
+                var cleanupEventName = tCleanup[i];
+                if (cleanupEventName === eventName && tCleanup[i + 1] === tNodeIdx) {
                     // We have found a matching event name on the same node but it might not have been
                     // registered yet, so we must explicitly verify entries in the LView cleanup data
                     // structures.
@@ -12744,7 +12842,9 @@
                 // blocks of 4 or 2 items in the tView.cleanup and this is why we iterate over 2 elements
                 // first and jump another 2 elements if we detect listeners cleanup (4 elements). Also check
                 // documentation of TView.cleanup for more details of this data structure layout.
-                i += 2;
+                if (typeof cleanupEventName === 'string') {
+                    i += 2;
+                }
             }
         }
         return null;
@@ -12846,7 +12946,8 @@
     }
     function executeListenerWithErrorHandling(lView, listenerFn, e) {
         try {
-            return listenerFn(e);
+            // Only explicitly returning false from a listener should preventDefault
+            return listenerFn(e) !== false;
         }
         catch (error) {
             handleError(lView, error);
@@ -12879,7 +12980,8 @@
             // their presence and invoke as needed.
             var nextListenerFn = wrapListenerIn_markDirtyAndPreventDefault.__ngNextListenerFn__;
             while (nextListenerFn) {
-                result = executeListenerWithErrorHandling(lView, nextListenerFn, e);
+                // We should prevent default if any of the listeners explicitly return false
+                result = executeListenerWithErrorHandling(lView, nextListenerFn, e) && result;
                 nextListenerFn = nextListenerFn.__ngNextListenerFn__;
             }
             if (wrapWithPreventDefault && result === false) {
@@ -13200,6 +13302,33 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    /**
+     * Update a property on a selected element.
+     *
+     * Operates on the element selected by index via the {@link select} instruction.
+     *
+     * If the property name also exists as an input property on one of the element's directives,
+     * the component property will be set instead of the element property. This check must
+     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled
+     *
+     * @param propName Name of property. Because it is going to DOM, this is not subject to
+     *        renaming as part of minification.
+     * @param value New value to write.
+     * @param sanitizer An optional function used to sanitize the value.
+     * @param nativeOnly Whether or not we should only set native properties and skip input check
+     * (this is necessary for host property bindings)
+     * @returns This function returns itself so that it may be chained
+     * (e.g. `property('name', ctx.name)('title', ctx.title)`)
+     *
+     * @codeGenApi
+     */
+    function ɵɵproperty(propName, value, sanitizer, nativeOnly) {
+        var index = getSelectedIndex();
+        ngDevMode && assertNotEqual(index, -1, 'selected index cannot be -1');
+        var bindReconciledValue = ɵɵbind(value);
+        elementPropertyInternal(index, propName, bindReconciledValue, sanitizer, nativeOnly);
+        return ɵɵproperty;
+    }
     /**
      * Creates a single value binding.
      *
@@ -13529,9 +13658,14 @@
         ngDevMode && assertGreaterThan(index, -1, 'Invalid index');
         ngDevMode &&
             assertLessThan(index, getLView().length - HEADER_OFFSET, 'Should be within range for the view data');
-        setSelectedIndex(index);
         var lView = getLView();
+        // Flush the initial hooks for elements in the view that have been added up to this point.
         executePreOrderHooks(lView, lView[TVIEW], getCheckNoChangesMode(), index);
+        // We must set the selected index *after* running the hooks, because hooks may have side-effects
+        // that cause other template functions to run, thus updating the selected index, which is global
+        // state. If we run `setSelectedIndex` *before* we run the hooks, in some cases the selected index
+        // will be altered by the time we leave the `ɵɵselect` instruction.
+        setSelectedIndex(index);
     }
 
     /**
@@ -13638,7 +13772,7 @@
             ngDevMode && throwInvalidRefError();
             return [];
         }
-        var stylingContext = getStylingContext(context.nodeIndex, context.lView);
+        var stylingContext = getStylingContextFromLView(context.nodeIndex, context.lView);
         var playerContext = stylingContext ? getPlayerContext(stylingContext) : null;
         return playerContext ? getPlayersInternal(playerContext) : [];
     }
@@ -15595,6 +15729,12 @@
                     return _this;
                 }
                 TemplateRef_.prototype.createEmbeddedView = function (context, container, index) {
+                    var currentQueries = this._declarationParentView[QUERIES];
+                    // Query container may be missing if this view was created in a directive
+                    // constructor. Create it now to avoid losing results in embedded views.
+                    if (currentQueries && this._hostLContainer[QUERIES] == null) {
+                        this._hostLContainer[QUERIES] = currentQueries.container();
+                    }
                     var lView = createEmbeddedViewAndNode(this._tView, context, this._declarationParentView, this._hostLContainer[QUERIES], this._injectorIndex);
                     if (container) {
                         insertView(lView, container, index);
@@ -15739,7 +15879,7 @@
                 ViewContainerRef_.prototype.detach = function (index) {
                     var adjustedIdx = this._adjustIndex(index, -1);
                     var view = detachView(this._lContainer, adjustedIdx);
-                    var wasDetached = this._viewRefs.splice(adjustedIdx, 1)[0] != null;
+                    var wasDetached = view && this._viewRefs.splice(adjustedIdx, 1)[0] != null;
                     return wasDetached ? new ViewRef(view, view[CONTEXT], -1) : null;
                 };
                 ViewContainerRef_.prototype._adjustIndex = function (index, shift) {
@@ -16011,7 +16151,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.12+18.sha-1b7749d.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.13+62.sha-5c8d156.with-local-changes');
 
     /**
      * @license
@@ -19189,7 +19329,15 @@
                 locateHostElement(rendererFactory, rootSelectorOrNode);
             var rootFlags = this.componentDef.onPush ? 64 /* Dirty */ | 512 /* IsRoot */ :
                 16 /* CheckAlways */ | 512 /* IsRoot */;
-            var rootContext = !isInternalRootView ? rootViewInjector.get(ROOT_CONTEXT) : createRootContext();
+            // Check whether this Component needs to be isolated from other components, i.e. whether it
+            // should be placed into its own (empty) root context or existing root context should be used.
+            // Note: this is internal-only convention and might change in the future, so it should not be
+            // relied upon externally.
+            var isIsolated = typeof rootSelectorOrNode === 'string' &&
+                /^#root-ng-internal-isolated-\d+/.test(rootSelectorOrNode);
+            var rootContext = (isInternalRootView || isIsolated) ?
+                createRootContext() :
+                rootViewInjector.get(ROOT_CONTEXT);
             var renderer = rendererFactory.createRenderer(hostRNode, this.componentDef);
             if (rootSelectorOrNode && hostRNode) {
                 ngDevMode && ngDevMode.rendererSetAttribute++;
@@ -19280,7 +19428,10 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    if (typeof _global['ngI18nClosureMode'] === 'undefined') {
+    /**
+     * NOTE: changes to the `ngI18nClosureMode` name must be synced with `compiler-cli/src/tooling.ts`.
+     */
+    if (typeof ngI18nClosureMode === 'undefined') {
         // Make sure to refer to ngI18nClosureMode as ['ngI18nClosureMode'] for closure.
         _global['ngI18nClosureMode'] =
             // TODO(FW-1250): validate that this actually, you know, works.
@@ -20926,42 +21077,44 @@
      * tree-shaken away during production builds.
      */
     function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
-        var _a;
-        var clazz = type;
-        // We determine whether a class has its own metadata by taking the metadata from the parent
-        // constructor and checking whether it's the same as the subclass metadata below. We can't use
-        // `hasOwnProperty` here because it doesn't work correctly in IE10 for static fields that are
-        // defined by TS. See https://github.com/angular/angular/pull/28439#issuecomment-459349218.
-        var parentPrototype = clazz.prototype ? Object.getPrototypeOf(clazz.prototype) : null;
-        var parentConstructor = parentPrototype && parentPrototype.constructor;
-        if (decorators !== null) {
-            if (clazz.decorators !== undefined &&
-                (!parentConstructor || parentConstructor.decorators !== clazz.decorators)) {
-                (_a = clazz.decorators).push.apply(_a, __spread(decorators));
+        return noSideEffects(function () {
+            var _a;
+            var clazz = type;
+            // We determine whether a class has its own metadata by taking the metadata from the parent
+            // constructor and checking whether it's the same as the subclass metadata below. We can't use
+            // `hasOwnProperty` here because it doesn't work correctly in IE10 for static fields that are
+            // defined by TS. See https://github.com/angular/angular/pull/28439#issuecomment-459349218.
+            var parentPrototype = clazz.prototype ? Object.getPrototypeOf(clazz.prototype) : null;
+            var parentConstructor = parentPrototype && parentPrototype.constructor;
+            if (decorators !== null) {
+                if (clazz.decorators !== undefined &&
+                    (!parentConstructor || parentConstructor.decorators !== clazz.decorators)) {
+                    (_a = clazz.decorators).push.apply(_a, __spread(decorators));
+                }
+                else {
+                    clazz.decorators = decorators;
+                }
             }
-            else {
-                clazz.decorators = decorators;
+            if (ctorParameters !== null) {
+                // Rather than merging, clobber the existing parameters. If other projects exist which use
+                // tsickle-style annotations and reflect over them in the same way, this could cause issues,
+                // but that is vanishingly unlikely.
+                clazz.ctorParameters = ctorParameters;
             }
-        }
-        if (ctorParameters !== null) {
-            // Rather than merging, clobber the existing parameters. If other projects exist which use
-            // tsickle-style annotations and reflect over them in the same way, this could cause issues,
-            // but that is vanishingly unlikely.
-            clazz.ctorParameters = ctorParameters;
-        }
-        if (propDecorators !== null) {
-            // The property decorator objects are merged as it is possible different fields have different
-            // decorator types. Decorators on individual fields are not merged, as it's also incredibly
-            // unlikely that a field will be decorated both with an Angular decorator and a non-Angular
-            // decorator that's also been downleveled.
-            if (clazz.propDecorators !== undefined &&
-                (!parentConstructor || parentConstructor.propDecorators !== clazz.propDecorators)) {
-                clazz.propDecorators = __assign({}, clazz.propDecorators, propDecorators);
+            if (propDecorators !== null) {
+                // The property decorator objects are merged as it is possible different fields have different
+                // decorator types. Decorators on individual fields are not merged, as it's also incredibly
+                // unlikely that a field will be decorated both with an Angular decorator and a non-Angular
+                // decorator that's also been downleveled.
+                if (clazz.propDecorators !== undefined &&
+                    (!parentConstructor || parentConstructor.propDecorators !== clazz.propDecorators)) {
+                    clazz.propDecorators = __assign({}, clazz.propDecorators, propDecorators);
+                }
+                else {
+                    clazz.propDecorators = propDecorators;
+                }
             }
-            else {
-                clazz.propDecorators = propDecorators;
-            }
-        }
+        });
     }
 
     /**
@@ -21694,8 +21847,12 @@
             insertView$1(index, this.deep);
         };
         LQueries_.prototype.addNode = function (tNode) {
-            add(this.deep, tNode);
-            add(this.shallow, tNode);
+            add(this.deep, tNode, false);
+            add(this.shallow, tNode, false);
+        };
+        LQueries_.prototype.insertNodeBeforeViews = function (tNode) {
+            add(this.deep, tNode, true);
+            add(this.shallow, tNode, true);
         };
         LQueries_.prototype.removeView = function () {
             removeView$1(this.shallow);
@@ -21823,7 +21980,16 @@
         // detect it using appropriate tNode type
         return queryByTNodeType(tNode, currentView);
     }
-    function add(query, tNode) {
+    /**
+     * Add query matches for a given node.
+     *
+     * @param query The first query in the linked list
+     * @param tNode The TNode to match against queries
+     * @param insertBeforeContainer Whether or not we should add matches before the last
+     * container array. This mode is necessary if the query container had to be created
+     * out of order (e.g. a view was created in a constructor)
+     */
+    function add(query, tNode, insertBeforeContainer) {
         var currentView = getLView();
         while (query) {
             var predicate = query.predicate;
@@ -21840,7 +22006,7 @@
                     }
                 }
                 if (result !== null) {
-                    addMatch(query, result);
+                    addMatch(query, result, insertBeforeContainer);
                 }
             }
             else {
@@ -21850,7 +22016,7 @@
                     if (matchingIdx !== null) {
                         var result = queryRead(tNode, currentView, predicate.read, matchingIdx);
                         if (result !== null) {
-                            addMatch(query, result);
+                            addMatch(query, result, insertBeforeContainer);
                         }
                     }
                 }
@@ -21858,8 +22024,12 @@
             query = query.next;
         }
     }
-    function addMatch(query, matchingValue) {
-        query.values.push(matchingValue);
+    function addMatch(query, matchingValue, insertBeforeViewMatches) {
+        // Views created in constructors may have their container values created too early. In this case,
+        // ensure template node results are spliced before container results. Otherwise, results inside
+        // embedded views will appear before results on parent template nodes when flattened.
+        insertBeforeViewMatches ? query.values.splice(-1, 0, matchingValue) :
+            query.values.push(matchingValue);
         query.list.setDirty();
     }
     function createPredicate(predicate, read) {
@@ -22070,6 +22240,71 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
+     * Used to load ng module factories.
+     *
+     * @publicApi
+     */
+    var NgModuleFactoryLoader = /** @class */ (function () {
+        function NgModuleFactoryLoader() {
+        }
+        return NgModuleFactoryLoader;
+    }());
+    /**
+     * Map of module-id to the corresponding NgModule.
+     * - In pre Ivy we track NgModuleFactory,
+     * - In post Ivy we track the NgModuleType
+     */
+    var modules = new Map();
+    /**
+     * Registers a loaded module. Should only be called from generated NgModuleFactory code.
+     * @publicApi
+     */
+    function registerModuleFactory(id, factory) {
+        var existing = modules.get(id);
+        assertSameOrNotExisting(id, existing && existing.moduleType, factory.moduleType);
+        modules.set(id, factory);
+    }
+    function assertSameOrNotExisting(id, type, incoming) {
+        if (type && type !== incoming) {
+            throw new Error("Duplicate module registered for " + id + " - " + stringify(type) + " vs " + stringify(type.name));
+        }
+    }
+    function registerNgModuleType(id, ngModuleType) {
+        var existing = modules.get(id);
+        assertSameOrNotExisting(id, existing, ngModuleType);
+        modules.set(id, ngModuleType);
+    }
+    function getModuleFactory__PRE_R3__(id) {
+        var factory = modules.get(id);
+        if (!factory)
+            throw noModuleError(id);
+        return factory;
+    }
+    function getModuleFactory__POST_R3__(id) {
+        var type = modules.get(id);
+        if (!type)
+            throw noModuleError(id);
+        return new NgModuleFactory$1(type);
+    }
+    /**
+     * Returns the NgModuleFactory with the given id, if it exists and has been loaded.
+     * Factories for modules that do not specify an `id` cannot be retrieved. Throws if the module
+     * cannot be found.
+     * @publicApi
+     */
+    var getModuleFactory = getModuleFactory__PRE_R3__;
+    function noModuleError(id) {
+        return new Error("No module with ID " + id + " loaded");
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
      * A mapping of the @angular/core API surface used in generated expressions to the actual symbols.
      *
      * This should be kept up to date with the public exports of @angular/core.
@@ -22141,6 +22376,7 @@
         'ɵɵpipeBind4': ɵɵpipeBind4,
         'ɵɵpipeBindV': ɵɵpipeBindV,
         'ɵɵprojectionDef': ɵɵprojectionDef,
+        'ɵɵproperty': ɵɵproperty,
         'ɵɵpipe': ɵɵpipe,
         'ɵɵqueryRefresh': ɵɵqueryRefresh,
         'ɵɵviewQuery': ɵɵviewQuery,
@@ -22186,73 +22422,9 @@
         'ɵɵsanitizeResourceUrl': ɵɵsanitizeResourceUrl,
         'ɵɵsanitizeScript': ɵɵsanitizeScript,
         'ɵɵsanitizeUrl': ɵɵsanitizeUrl,
-        'ɵɵsanitizeUrlOrResourceUrl': ɵɵsanitizeUrlOrResourceUrl
+        'ɵɵsanitizeUrlOrResourceUrl': ɵɵsanitizeUrlOrResourceUrl,
+        'ɵregisterNgModuleType': registerNgModuleType,
     };
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Used to load ng module factories.
-     *
-     * @publicApi
-     */
-    var NgModuleFactoryLoader = /** @class */ (function () {
-        function NgModuleFactoryLoader() {
-        }
-        return NgModuleFactoryLoader;
-    }());
-    /**
-     * Map of module-id to the corresponding NgModule.
-     * - In pre Ivy we track NgModuleFactory,
-     * - In post Ivy we track the NgModuleType
-     */
-    var modules = new Map();
-    /**
-     * Registers a loaded module. Should only be called from generated NgModuleFactory code.
-     * @publicApi
-     */
-    function registerModuleFactory(id, factory) {
-        var existing = modules.get(id);
-        assertSameOrNotExisting(id, existing && existing.moduleType, factory.moduleType);
-        modules.set(id, factory);
-    }
-    function assertSameOrNotExisting(id, type, incoming) {
-        if (type && type !== incoming) {
-            throw new Error("Duplicate module registered for " + id + " - " + stringify(type) + " vs " + stringify(type.name));
-        }
-    }
-    function registerNgModuleType(id, ngModuleType) {
-        var existing = modules.get(id);
-        assertSameOrNotExisting(id, existing, ngModuleType);
-        modules.set(id, ngModuleType);
-    }
-    function getModuleFactory__PRE_R3__(id) {
-        var factory = modules.get(id);
-        if (!factory)
-            throw noModuleError(id);
-        return factory;
-    }
-    function getModuleFactory__POST_R3__(id) {
-        var type = modules.get(id);
-        if (!type)
-            throw noModuleError(id);
-        return new NgModuleFactory$1(type);
-    }
-    /**
-     * Returns the NgModuleFactory with the given id, if it exists and has been loaded.
-     * Factories for modules that do not specify an `id` cannot be retrieved. Throws if the module
-     * cannot be found.
-     * @publicApi
-     */
-    var getModuleFactory = getModuleFactory__PRE_R3__;
-    function noModuleError(id) {
-        return new Error("No module with ID " + id + " loaded");
-    }
 
     /**
      * @license
@@ -22724,6 +22896,10 @@
             // Make the property configurable in dev mode to allow overriding in tests
             configurable: !!ngDevMode,
         });
+        // Add ngInjectableDef so components are reachable through the module injector by default
+        // This is mostly to support injecting components in tests. In real application code,
+        // components should be retrieved through the node injector, so this isn't a problem.
+        compileInjectable(type);
     }
     function hasSelectorScope(component) {
         return component.ngSelectorScope !== undefined;
@@ -22753,6 +22929,10 @@
             // Make the property configurable in dev mode to allow overriding in tests
             configurable: !!ngDevMode,
         });
+        // Add ngInjectableDef so directives are reachable through the module injector by default
+        // This is mostly to support injecting directives in tests. In real application code,
+        // directives should be retrieved through the node injector, so this isn't a problem.
+        compileInjectable(type);
     }
     function extendsDirectlyFromObject(type) {
         return Object.getPrototypeOf(type.prototype) === Object.prototype;
@@ -24816,12 +24996,15 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var EventListener = /** @class */ (function () {
-        function EventListener(name, callback) {
+    /**
+     * @publicApi
+     */
+    var DebugEventListener = /** @class */ (function () {
+        function DebugEventListener(name, callback) {
             this.name = name;
             this.callback = callback;
         }
-        return EventListener;
+        return DebugEventListener;
     }());
     var DebugNode__PRE_R3__ = /** @class */ (function () {
         function DebugNode__PRE_R3__(nativeNode, parent, _debugContext) {
@@ -25094,7 +25277,7 @@
                 var element = this.nativeElement;
                 if (element) {
                     var lContext = loadLContextFromNode(element);
-                    var stylingContext = getStylingContext(lContext.nodeIndex, lContext.lView);
+                    var stylingContext = getStylingContextFromLView(lContext.nodeIndex, lContext.lView);
                     if (stylingContext) {
                         for (var i = 10 /* SingleStylesStartPosition */; i < stylingContext.length; i += 4 /* Size */) {
                             if (isClassBasedValue(stylingContext, i)) {
@@ -25126,7 +25309,7 @@
                 var element = this.nativeElement;
                 if (element) {
                     var lContext = loadLContextFromNode(element);
-                    var stylingContext = getStylingContext(lContext.nodeIndex, lContext.lView);
+                    var stylingContext = getStylingContextFromLView(lContext.nodeIndex, lContext.lView);
                     if (stylingContext) {
                         for (var i = 10 /* SingleStylesStartPosition */; i < stylingContext.length; i += 4 /* Size */) {
                             if (!isClassBasedValue(stylingContext, i)) {
@@ -25346,23 +25529,26 @@
         var properties = {};
         var bindingIndex = getFirstBindingIndex(tNode.propertyMetadataStartIndex, tData);
         while (bindingIndex < tNode.propertyMetadataEndIndex) {
-            var value = '';
+            var value = void 0;
             var propMetadata = tData[bindingIndex];
             while (!isPropMetadataString(propMetadata)) {
                 // This is the first value for an interpolation. We need to build up
                 // the full interpolation by combining runtime values in LView with
                 // the static interstitial values stored in TData.
-                value += renderStringify(lView[bindingIndex]) + tData[bindingIndex];
+                value = (value || '') + renderStringify(lView[bindingIndex]) + tData[bindingIndex];
                 propMetadata = tData[++bindingIndex];
             }
-            value += lView[bindingIndex];
+            value = value === undefined ? lView[bindingIndex] : value += lView[bindingIndex];
             // Property metadata string has 3 parts: property name, prefix, and suffix
             var metadataParts = propMetadata.split(INTERPOLATION_DELIMITER);
             var propertyName = metadataParts[0];
             // Attr bindings don't have property names and should be skipped
             if (propertyName) {
-                // Wrap value with prefix and suffix (will be '' for normal bindings)
-                properties[propertyName] = metadataParts[1] + value + metadataParts[2];
+                // Wrap value with prefix and suffix (will be '' for normal bindings), if they're defined.
+                // Avoid wrapping for normal bindings so that the value doesn't get cast to a string.
+                properties[propertyName] = (metadataParts[1] && metadataParts[2]) ?
+                    metadataParts[1] + value + metadataParts[2] :
+                    value;
             }
             bindingIndex++;
         }
@@ -27871,7 +28057,7 @@
             if (typeof target !== 'string') {
                 var debugEl = getDebugNode(target);
                 if (debugEl) {
-                    debugEl.listeners.push(new EventListener(eventName, callback));
+                    debugEl.listeners.push(new DebugEventListener(eventName, callback));
                 }
             }
             return this.delegate.listen(target, eventName, callback);
@@ -28031,15 +28217,16 @@
     exports.ɵangular_packages_core_core_be = getPreviousOrParentTNode;
     exports.ɵangular_packages_core_core_bf = nextContextImpl;
     exports.ɵangular_packages_core_core_bj = BoundPlayerFactory;
-    exports.ɵangular_packages_core_core_bo = getRootContext;
-    exports.ɵangular_packages_core_core_bn = loadInternal;
+    exports.ɵangular_packages_core_core_bp = getRootContext;
+    exports.ɵangular_packages_core_core_bo = loadInternal;
     exports.ɵangular_packages_core_core_g = createElementRef;
     exports.ɵangular_packages_core_core_h = createTemplateRef;
     exports.ɵangular_packages_core_core_i = createViewRef;
     exports.ɵangular_packages_core_core_bh = getUrlSanitizer;
+    exports.ɵangular_packages_core_core_bn = noSideEffects;
     exports.ɵangular_packages_core_core_bk = makeParamDecorator;
     exports.ɵangular_packages_core_core_bl = makePropDecorator;
-    exports.ɵangular_packages_core_core_bp = getClosureSafeProperty;
+    exports.ɵangular_packages_core_core_bq = getClosureSafeProperty;
     exports.ɵangular_packages_core_core_z = _def;
     exports.ɵangular_packages_core_core_ba = DebugContext;
     exports.createPlatform = createPlatform;
@@ -28060,6 +28247,7 @@
     exports.APP_INITIALIZER = APP_INITIALIZER;
     exports.ApplicationInitStatus = ApplicationInitStatus;
     exports.DebugElement = DebugElement;
+    exports.DebugEventListener = DebugEventListener;
     exports.DebugNode = DebugNode;
     exports.asNativeElements = asNativeElements;
     exports.getDebugNode = getDebugNode;
@@ -28256,6 +28444,7 @@
     exports.ɵɵloadContentQuery = ɵɵloadContentQuery;
     exports.ɵɵelementEnd = ɵɵelementEnd;
     exports.ɵɵelementProperty = ɵɵelementProperty;
+    exports.ɵɵproperty = ɵɵproperty;
     exports.ɵɵcomponentHostSyntheticProperty = ɵɵcomponentHostSyntheticProperty;
     exports.ɵɵcomponentHostSyntheticListener = ɵɵcomponentHostSyntheticListener;
     exports.ɵɵprojectionDef = ɵɵprojectionDef;
@@ -28350,6 +28539,7 @@
     exports.ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ = SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__;
     exports.ɵSWITCH_RENDERER2_FACTORY__POST_R3__ = SWITCH_RENDERER2_FACTORY__POST_R3__;
     exports.ɵgetModuleFactory__POST_R3__ = getModuleFactory__POST_R3__;
+    exports.ɵregisterNgModuleType = registerNgModuleType;
     exports.ɵpublishGlobalUtil = publishGlobalUtil;
     exports.ɵpublishDefaultGlobalUtils = publishDefaultGlobalUtils;
     exports.ɵcreateInjector = createInjector;

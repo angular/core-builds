@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.12+18.sha-1b7749d.with-local-changes
+ * @license Angular v8.0.0-beta.13+62.sha-5c8d156.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1505,8 +1505,17 @@ declare class DebugElement__POST_R3__ extends DebugNode__POST_R3__ implements De
 /**
  * @publicApi
  */
+export declare class DebugEventListener {
+    name: string;
+    callback: Function;
+    constructor(name: string, callback: Function);
+}
+
+/**
+ * @publicApi
+ */
 export declare interface DebugNode {
-    readonly listeners: EventListener[];
+    readonly listeners: DebugEventListener[];
     readonly parent: DebugElement | null;
     readonly nativeNode: any;
     readonly injector: Injector;
@@ -1532,7 +1541,7 @@ declare class DebugNode__POST_R3__ implements DebugNode {
     readonly injector: Injector;
     readonly componentInstance: any;
     readonly context: any;
-    readonly listeners: EventListener[];
+    readonly listeners: DebugEventListener[];
     readonly references: {
         [key: string]: any;
     };
@@ -2282,12 +2291,6 @@ export declare class EventEmitter<T> extends Subject<T> {
      * notification from this emitter.
      */
     subscribe(generatorOrNext?: any, error?: any, complete?: any): Subscription;
-}
-
-declare class EventListener {
-    name: string;
-    callback: Function;
-    constructor(name: string, callback: Function);
 }
 
 /**
@@ -3849,6 +3852,12 @@ declare interface LQueries {
      * if matching query predicate.
      */
     addNode(tNode: ɵangular_packages_core_core_bg | TContainerNode | TElementContainerNode): void;
+    /**
+     * Notify `LQueries` that a new `TNode` has been created and needs to be added to query results
+     * if matching query predicate. This is a special mode invoked if the query container has to
+     * be created out of order (e.g. view created in the constructor of a directive).
+     */
+    insertNodeBeforeViews(tNode: ɵangular_packages_core_core_bg | TContainerNode | TElementContainerNode): void;
     /**
      * Notify `LQueries` that a new LContainer was added to ivy data structures. As a result we need
      * to prepare room for views that might be inserted into this container.
@@ -7571,6 +7580,13 @@ declare interface TrustedUrlString extends TrustedString {
     [BRAND]: BypassType.Url;
 }
 
+/**
+ * Tsickle has a bug where it creates an infinite loop for a function returning itself.
+ * This is a temporary type that will be removed when the issue is resolved.
+ * https://github.com/angular/tsickle/issues/1009)
+ */
+declare type TsickleIssue1009 = any;
+
 /** Static data for a text node */
 declare interface TTextNode extends TNode {
     /** Index in the data[] array */
@@ -8935,8 +8951,20 @@ export declare interface ɵangular_packages_core_core_bm extends Array<any> {
     [PREORDER_HOOK_FLAGS]: PreOrderHookFlags;
 }
 
+
+/**
+ * Convince closure compiler that the wrapped function has no side-effects.
+ *
+ * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
+ * allow us to execute a function but have closure compiler mark the call as no-side-effects.
+ * It is important that the return value for the `noSideEffects` function be assigned
+ * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
+ * compiler.
+ */
+export declare function ɵangular_packages_core_core_bn(fn: () => void): string;
+
 /** Retrieves a value from any `LView` or `TData`. */
-export declare function ɵangular_packages_core_core_bn<T>(view: ɵangular_packages_core_core_bm | TData, index: number): T;
+export declare function ɵangular_packages_core_core_bo<T>(view: ɵangular_packages_core_core_bm | TData, index: number): T;
 
 /**
  * Returns the `RootContext` instance that is associated with
@@ -8945,10 +8973,10 @@ export declare function ɵangular_packages_core_core_bn<T>(view: ɵangular_packa
  *
  * @param viewOrComponent the `LView` or component to get the root context for.
  */
-export declare function ɵangular_packages_core_core_bo(viewOrComponent: ɵangular_packages_core_core_bm | {}): RootContext;
+export declare function ɵangular_packages_core_core_bp(viewOrComponent: ɵangular_packages_core_core_bm | {}): RootContext;
 
 
-export declare function ɵangular_packages_core_core_bp<T>(objWithPropertyToExtract: T): string;
+export declare function ɵangular_packages_core_core_bq<T>(objWithPropertyToExtract: T): string;
 
 export declare class ɵangular_packages_core_core_c implements ReflectiveInjector {
     private static INJECTOR_KEY;
@@ -9028,7 +9056,7 @@ export declare function ɵangular_packages_core_core_i(hostTNode: TNode, hostVie
 export declare function ɵangular_packages_core_core_j(id: string): NgModuleFactory<any>;
 
 export declare class ɵangular_packages_core_core_k {
-    readonly listeners: EventListener[];
+    readonly listeners: DebugEventListener[];
     readonly parent: DebugElement | null;
     readonly nativeNode: any;
     private readonly _debugContext;
@@ -10254,6 +10282,8 @@ export declare class ɵReflectionCapabilities implements PlatformReflectionCapab
  * @publicApi
  */
 export declare function ɵregisterModuleFactory(id: string, factory: NgModuleFactory<any>): void;
+
+export declare function ɵregisterNgModuleType(id: string, ngModuleType: ɵNgModuleType): void;
 
 /**
  * Render3 implementation of {@link viewEngine_ComponentFactory}.
@@ -12173,6 +12203,28 @@ export declare function ɵɵprojection(nodeIndex: number, selectorIndex?: number
  * @codeGenApi
  */
 export declare function ɵɵprojectionDef(selectors?: ɵCssSelectorList[]): void;
+
+/**
+ * Update a property on a selected element.
+ *
+ * Operates on the element selected by index via the {@link select} instruction.
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled
+ *
+ * @param propName Name of property. Because it is going to DOM, this is not subject to
+ *        renaming as part of minification.
+ * @param value New value to write.
+ * @param sanitizer An optional function used to sanitize the value.
+ * @param nativeOnly Whether or not we should only set native properties and skip input check
+ * (this is necessary for host property bindings)
+ * @returns This function returns itself so that it may be chained
+ * (e.g. `property('name', ctx.name)('title', ctx.title)`)
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵproperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): TsickleIssue1009;
 
 /**
  * This feature resolves the providers of a directive (or component),
