@@ -13,6 +13,7 @@ export declare type CallExpressionDecorator = ts.Decorator & {
 export interface NgDecorator {
     name: string;
     node: CallExpressionDecorator;
+    importNode: ts.ImportDeclaration;
 }
 /**
  * Gets all decorators which are imported from an Angular package (e.g. "@angular/core")

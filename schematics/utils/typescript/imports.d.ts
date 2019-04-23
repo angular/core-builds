@@ -10,6 +10,7 @@ import * as ts from 'typescript';
 export declare type Import = {
     name: string;
     importModule: string;
+    node: ts.ImportDeclaration;
 };
 /** Gets import information about the specified identifier by using the Type checker. */
 export declare function getImportOfIdentifier(typeChecker: ts.TypeChecker, node: ts.Identifier): Import | null;
