@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.13+62.sha-5c8d156.with-local-changes
+ * @license Angular v8.0.0-beta.13+91.sha-b61c9df.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -239,13 +239,14 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    var ɵ0 = function (token) { return ({ token: token }); };
     /**
      * Inject decorator and metadata.
      *
      * @Annotation
      * @publicApi
      */
-    var Inject = makeParamDecorator('Inject', function (token) { return ({ token: token }); });
+    var Inject = makeParamDecorator('Inject', ɵ0);
     /**
      * Optional decorator and metadata.
      *
@@ -274,13 +275,14 @@
      * @publicApi
      */
     var Host = makeParamDecorator('Host');
+    var ɵ1 = function (attributeName) { return ({ attributeName: attributeName }); };
     /**
      * Attribute decorator and metadata.
      *
      * @Annotation
      * @publicApi
      */
-    var Attribute = makeParamDecorator('Attribute', function (attributeName) { return ({ attributeName: attributeName }); });
+    var Attribute = makeParamDecorator('Attribute', ɵ1);
 
     /**
      * @license
@@ -1090,8 +1092,8 @@
             },
         });
     }
-    var ɵ0 = getClosureSafeProperty;
-    var USE_VALUE = getClosureSafeProperty({ provide: String, useValue: ɵ0 });
+    var ɵ0$1 = getClosureSafeProperty;
+    var USE_VALUE = getClosureSafeProperty({ provide: String, useValue: ɵ0$1 });
     function isUseClassProvider(meta) {
         return meta.useClass !== undefined;
     }
@@ -1112,8 +1114,8 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var ɵ0$1 = getClosureSafeProperty;
-    var USE_VALUE$1 = getClosureSafeProperty({ provide: String, useValue: ɵ0$1 });
+    var ɵ0$2 = getClosureSafeProperty;
+    var USE_VALUE$1 = getClosureSafeProperty({ provide: String, useValue: ɵ0$2 });
     var EMPTY_ARRAY = [];
     function convertInjectableProviderToFactory(type, provider) {
         if (!provider) {
@@ -1163,13 +1165,14 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    var ɵ0$3 = function (type, meta) { return SWITCH_COMPILE_INJECTABLE(type, meta); };
     /**
      * Injectable decorator and metadata.
      *
      * @Annotation
      * @publicApi
      */
-    var Injectable = makeDecorator('Injectable', undefined, undefined, undefined, function (type, meta) { return SWITCH_COMPILE_INJECTABLE(type, meta); });
+    var Injectable = makeDecorator('Injectable', undefined, undefined, undefined, ɵ0$3);
     /**
      * Supports @Injectable() in JIT mode for Render2.
      */
@@ -1350,7 +1353,8 @@
     var MULTI_PROVIDER_FN = function () {
         return Array.prototype.slice.call(arguments);
     };
-    var USE_VALUE$2 = getClosureSafeProperty({ provide: String, useValue: getClosureSafeProperty });
+    var ɵ2 = getClosureSafeProperty;
+    var USE_VALUE$2 = getClosureSafeProperty({ provide: String, useValue: ɵ2 });
     var NG_TOKEN_PATH = 'ngTokenPath';
     var NG_TEMP_TOKEN_PATH = 'ngTempTokenPath';
     var NULL_INJECTOR = Injector.NULL;
@@ -2553,6 +2557,10 @@
         }
         return Query;
     }());
+    var ɵ0$4 = function (selector, data) {
+        if (data === void 0) { data = {}; }
+        return (__assign({ selector: selector, first: false, isViewQuery: false, descendants: false }, data));
+    };
     /**
      * ContentChildren decorator and metadata.
      *
@@ -2560,10 +2568,11 @@
      * @Annotation
      * @publicApi
      */
-    var ContentChildren = makePropDecorator('ContentChildren', function (selector, data) {
+    var ContentChildren = makePropDecorator('ContentChildren', ɵ0$4, Query);
+    var ɵ1$1 = function (selector, data) {
         if (data === void 0) { data = {}; }
-        return (__assign({ selector: selector, first: false, isViewQuery: false, descendants: false }, data));
-    }, Query);
+        return (__assign({ selector: selector, first: true, isViewQuery: false, descendants: true }, data));
+    };
     /**
      * ContentChild decorator and metadata.
      *
@@ -2572,29 +2581,28 @@
      *
      * @publicApi
      */
-    var ContentChild = makePropDecorator('ContentChild', function (selector, data) {
+    var ContentChild = makePropDecorator('ContentChild', ɵ1$1, Query);
+    var ɵ2$1 = function (selector, data) {
         if (data === void 0) { data = {}; }
-        return (__assign({ selector: selector, first: true, isViewQuery: false, descendants: true }, data));
-    }, Query);
+        return (__assign({ selector: selector, first: false, isViewQuery: true, descendants: true }, data));
+    };
     /**
      * ViewChildren decorator and metadata.
      *
      * @Annotation
      * @publicApi
      */
-    var ViewChildren = makePropDecorator('ViewChildren', function (selector, data) {
-        if (data === void 0) { data = {}; }
-        return (__assign({ selector: selector, first: false, isViewQuery: true, descendants: true }, data));
-    }, Query);
+    var ViewChildren = makePropDecorator('ViewChildren', ɵ2$1, Query);
+    var ɵ3 = function (selector, data) {
+        return (__assign({ selector: selector, first: true, isViewQuery: true, descendants: true }, data));
+    };
     /**
      * ViewChild decorator and metadata.
      *
      * @Annotation
      * @publicApi
      */
-    var ViewChild = makePropDecorator('ViewChild', function (selector, data) {
-        return (__assign({ selector: selector, first: true, isViewQuery: true, descendants: true }, data));
-    }, Query);
+    var ViewChild = makePropDecorator('ViewChild', ɵ3, Query);
 
     /**
      * @license
@@ -4508,8 +4516,9 @@
     function isProceduralRenderer(renderer) {
         return !!(renderer.listen);
     }
+    var ɵ0$5 = function (hostElement, rendererType) { return document; };
     var domRendererFactory3 = {
-        createRenderer: function (hostElement, rendererType) { return document; }
+        createRenderer: ɵ0$5
     };
 
     /**
@@ -9215,6 +9224,15 @@
                 else if (maybeAttrName === 3 /* Bindings */) {
                     bindingsMode = true;
                 }
+                else if (maybeAttrName === 1 /* Classes */) {
+                    var value = attrs[++i];
+                    // We should skip classes here because we have a separate mechanism for
+                    // matching classes in projection mode.
+                    while (typeof value === 'string') {
+                        value = attrs[++i];
+                    }
+                    continue;
+                }
                 else if (maybeAttrName === 4 /* Template */) {
                     // We do not care about Template attributes in this scenario.
                     break;
@@ -13625,6 +13643,397 @@
                 renderStringify(v6) + i6 + renderStringify(v7) + suffix :
             NO_CHANGE;
     }
+    /////////////////////////////////////////////////////////////////////
+    /// NEW INSTRUCTIONS
+    /////////////////////////////////////////////////////////////////////
+    /**
+     * Shared reference to a string, used in `ɵɵpropertyInterpolate`.
+     */
+    var EMPTY_STRING = '';
+    /**
+     *
+     * Update an interpolated property on an element with a lone bound value
+     *
+     * Used when the value passed to a property has 1 interpolated value in it, an no additional text
+     * surrounds that interpolated value:
+     *
+     * ```html
+     * <div title="{{v0}}"></div>
+     * ```
+     *
+     * Its compiled representation is::
+     *
+     * ```ts
+     * ɵɵpropertyInterpolate('title', v0);
+     * ```
+     *
+     * If the property name also exists as an input property on one of the element's directives,
+     * the component property will be set instead of the element property. This check must
+     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+     *
+     * @param propName The name of the property to update
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵpropertyInterpolate(propName, v0) {
+        ɵɵpropertyInterpolate1(propName, EMPTY_STRING, v0, EMPTY_STRING);
+        return ɵɵpropertyInterpolate;
+    }
+    /**
+     *
+     * Update an interpolated property on an element with single bound value surrounded by text.
+     *
+     * Used when the value passed to a property has 1 interpolated value in it:
+     *
+     * ```html
+     * <div title="prefix{{v0}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is::
+     *
+     * ```ts
+     * ɵɵpropertyInterpolate1('title', 'prefix', v0, 'suffix');
+     * ```
+     *
+     * If the property name also exists as an input property on one of the element's directives,
+     * the component property will be set instead of the element property. This check must
+     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+     *
+     * @param propName The name of the property to update
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵpropertyInterpolate1(propName, prefix, v0, suffix) {
+        var index = getSelectedIndex();
+        elementPropertyInternal(index, propName, ɵɵinterpolation1(prefix, v0, suffix));
+        return ɵɵpropertyInterpolate1;
+    }
+    /**
+     *
+     * Update an interpolated property on an element with 2 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 2 interpolated values in it:
+     *
+     * ```html
+     * <div title="prefix{{v0}}-{{v1}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is::
+     *
+     * ```ts
+     * ɵɵpropertyInterpolate2('title', 'prefix', v0, '-', v1, 'suffix');
+     * ```
+     *
+     * If the property name also exists as an input property on one of the element's directives,
+     * the component property will be set instead of the element property. This check must
+     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+     *
+     * @param propName The name of the property to update
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵpropertyInterpolate2(propName, prefix, v0, i0, v1, suffix) {
+        var index = getSelectedIndex();
+        elementPropertyInternal(index, propName, ɵɵinterpolation2(prefix, v0, i0, v1, suffix));
+        return ɵɵpropertyInterpolate2;
+    }
+    /**
+     *
+     * Update an interpolated property on an element with 3 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 3 interpolated values in it:
+     *
+     * ```html
+     * <div title="prefix{{v0}}-{{v1}}-{{v2}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is::
+     *
+     * ```ts
+     * ɵɵpropertyInterpolate3(
+     * 'title', 'prefix', v0, '-', v1, '-', v2, 'suffix');
+     * ```
+     *
+     * If the property name also exists as an input property on one of the element's directives,
+     * the component property will be set instead of the element property. This check must
+     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+     *
+     * @param propName The name of the property to update
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵpropertyInterpolate3(propName, prefix, v0, i0, v1, i1, v2, suffix) {
+        var index = getSelectedIndex();
+        elementPropertyInternal(index, propName, ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix));
+        return ɵɵpropertyInterpolate3;
+    }
+    /**
+     *
+     * Update an interpolated property on an element with 4 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 4 interpolated values in it:
+     *
+     * ```html
+     * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is::
+     *
+     * ```ts
+     * ɵɵpropertyInterpolate4(
+     * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, 'suffix');
+     * ```
+     *
+     * If the property name also exists as an input property on one of the element's directives,
+     * the component property will be set instead of the element property. This check must
+     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+     *
+     * @param propName The name of the property to update
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵpropertyInterpolate4(propName, prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
+        var index = getSelectedIndex();
+        elementPropertyInternal(index, propName, ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix));
+        return ɵɵpropertyInterpolate4;
+    }
+    /**
+     *
+     * Update an interpolated property on an element with 5 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 5 interpolated values in it:
+     *
+     * ```html
+     * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is::
+     *
+     * ```ts
+     * ɵɵpropertyInterpolate5(
+     * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, 'suffix');
+     * ```
+     *
+     * If the property name also exists as an input property on one of the element's directives,
+     * the component property will be set instead of the element property. This check must
+     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+     *
+     * @param propName The name of the property to update
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param i3 Static value used for concatenation only.
+     * @param v4 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵpropertyInterpolate5(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
+        var index = getSelectedIndex();
+        elementPropertyInternal(index, propName, ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix));
+        return ɵɵpropertyInterpolate5;
+    }
+    /**
+     *
+     * Update an interpolated property on an element with 6 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 6 interpolated values in it:
+     *
+     * ```html
+     * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is::
+     *
+     * ```ts
+     * ɵɵpropertyInterpolate6(
+     *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, 'suffix');
+     * ```
+     *
+     * If the property name also exists as an input property on one of the element's directives,
+     * the component property will be set instead of the element property. This check must
+     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+     *
+     * @param propName The name of the property to update
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param i3 Static value used for concatenation only.
+     * @param v4 Value checked for change.
+     * @param i4 Static value used for concatenation only.
+     * @param v5 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵpropertyInterpolate6(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
+        var index = getSelectedIndex();
+        elementPropertyInternal(index, propName, ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix));
+        return ɵɵpropertyInterpolate6;
+    }
+    /**
+     *
+     * Update an interpolated property on an element with 7 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 7 interpolated values in it:
+     *
+     * ```html
+     * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is::
+     *
+     * ```ts
+     * ɵɵpropertyInterpolate7(
+     *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, 'suffix');
+     * ```
+     *
+     * If the property name also exists as an input property on one of the element's directives,
+     * the component property will be set instead of the element property. This check must
+     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+     *
+     * @param propName The name of the property to update
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param i3 Static value used for concatenation only.
+     * @param v4 Value checked for change.
+     * @param i4 Static value used for concatenation only.
+     * @param v5 Value checked for change.
+     * @param i5 Static value used for concatenation only.
+     * @param v6 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵpropertyInterpolate7(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
+        var index = getSelectedIndex();
+        elementPropertyInternal(index, propName, ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix));
+        return ɵɵpropertyInterpolate7;
+    }
+    /**
+     *
+     * Update an interpolated property on an element with 8 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 8 interpolated values in it:
+     *
+     * ```html
+     * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is::
+     *
+     * ```ts
+     * ɵɵpropertyInterpolate8(
+     *  'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, 'suffix');
+     * ```
+     *
+     * If the property name also exists as an input property on one of the element's directives,
+     * the component property will be set instead of the element property. This check must
+     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+     *
+     * @param propName The name of the property to update
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param i3 Static value used for concatenation only.
+     * @param v4 Value checked for change.
+     * @param i4 Static value used for concatenation only.
+     * @param v5 Value checked for change.
+     * @param i5 Static value used for concatenation only.
+     * @param v6 Value checked for change.
+     * @param i6 Static value used for concatenation only.
+     * @param v7 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
+        var index = getSelectedIndex();
+        elementPropertyInternal(index, propName, ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix));
+        return ɵɵpropertyInterpolate8;
+    }
+    /**
+     * Update an interpolated property on an element with 8 or more bound values surrounded by text.
+     *
+     * Used when the number of interpolated values exceeds 7.
+     *
+     * ```html
+     * <div
+     *  title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}-{{v8}}-{{v9}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is::
+     *
+     * ```ts
+     * ɵɵpropertyInterpolateV(
+     *  'title', ['prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, '-', v9,
+     *  'suffix']);
+     * ```
+     *
+     * If the property name also exists as an input property on one of the element's directives,
+     * the component property will be set instead of the element property. This check must
+     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+     *
+     * @param propName The name of the property to update.
+     * @param values The a collection of values and the strings inbetween those values, beginning with a
+     * string prefix and ending with a string suffix.
+     * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵpropertyInterpolateV(propName, values) {
+        var index = getSelectedIndex();
+        elementPropertyInternal(index, propName, ɵɵinterpolationV(values));
+        return ɵɵpropertyInterpolateV;
+    }
 
     /**
      * @license
@@ -16151,7 +16560,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.13+62.sha-5c8d156.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.13+91.sha-b61c9df.with-local-changes');
 
     /**
      * @license
@@ -22377,6 +22786,16 @@
         'ɵɵpipeBindV': ɵɵpipeBindV,
         'ɵɵprojectionDef': ɵɵprojectionDef,
         'ɵɵproperty': ɵɵproperty,
+        'ɵɵpropertyInterpolate': ɵɵpropertyInterpolate,
+        'ɵɵpropertyInterpolate1': ɵɵpropertyInterpolate1,
+        'ɵɵpropertyInterpolate2': ɵɵpropertyInterpolate2,
+        'ɵɵpropertyInterpolate3': ɵɵpropertyInterpolate3,
+        'ɵɵpropertyInterpolate4': ɵɵpropertyInterpolate4,
+        'ɵɵpropertyInterpolate5': ɵɵpropertyInterpolate5,
+        'ɵɵpropertyInterpolate6': ɵɵpropertyInterpolate6,
+        'ɵɵpropertyInterpolate7': ɵɵpropertyInterpolate7,
+        'ɵɵpropertyInterpolate8': ɵɵpropertyInterpolate8,
+        'ɵɵpropertyInterpolateV': ɵɵpropertyInterpolateV,
         'ɵɵpipe': ɵɵpipe,
         'ɵɵqueryRefresh': ɵɵqueryRefresh,
         'ɵɵviewQuery': ɵɵviewQuery,
@@ -23056,30 +23475,33 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    var ɵ0$6 = function (dir) {
+        if (dir === void 0) { dir = {}; }
+        return dir;
+    }, ɵ1$2 = function (type, meta) { return SWITCH_COMPILE_DIRECTIVE(type, meta); };
     /**
      * Type of the Directive metadata.
      *
      * @publicApi
      */
-    var Directive = makeDecorator('Directive', function (dir) {
-        if (dir === void 0) { dir = {}; }
-        return dir;
-    }, undefined, undefined, function (type, meta) { return SWITCH_COMPILE_DIRECTIVE(type, meta); });
+    var Directive = makeDecorator('Directive', ɵ0$6, undefined, undefined, ɵ1$2);
+    var ɵ2$2 = function (c) {
+        if (c === void 0) { c = {}; }
+        return (__assign({ changeDetection: exports.ChangeDetectionStrategy.Default }, c));
+    }, ɵ3$1 = function (type, meta) { return SWITCH_COMPILE_COMPONENT(type, meta); };
     /**
      * Component decorator and metadata.
      *
      * @Annotation
      * @publicApi
      */
-    var Component = makeDecorator('Component', function (c) {
-        if (c === void 0) { c = {}; }
-        return (__assign({ changeDetection: exports.ChangeDetectionStrategy.Default }, c));
-    }, Directive, undefined, function (type, meta) { return SWITCH_COMPILE_COMPONENT(type, meta); });
+    var Component = makeDecorator('Component', ɵ2$2, Directive, undefined, ɵ3$1);
+    var ɵ4 = function (p) { return (__assign({ pure: true }, p)); }, ɵ5 = function (type, meta) { return SWITCH_COMPILE_PIPE(type, meta); };
     /**
      * @Annotation
      * @publicApi
      */
-    var Pipe = makeDecorator('Pipe', function (p) { return (__assign({ pure: true }, p)); }, undefined, undefined, function (type, meta) { return SWITCH_COMPILE_PIPE(type, meta); });
+    var Pipe = makeDecorator('Pipe', ɵ4, undefined, undefined, ɵ5);
     var initializeBaseDef = function (target) {
         var constructor = target.constructor;
         var inheritedBaseDef = constructor.ngBaseDef;
@@ -23113,21 +23535,25 @@
             defProp[name] = args[0] || name;
         };
     };
+    var ɵ8 = function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); }, ɵ9 = function (baseDef) { return baseDef.inputs || {}; };
     /**
      * @Annotation
      * @publicApi
      */
-    var Input = makePropDecorator('Input', function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); }, undefined, updateBaseDefFromIOProp(function (baseDef) { return baseDef.inputs || {}; }));
+    var Input = makePropDecorator('Input', ɵ8, undefined, updateBaseDefFromIOProp(ɵ9));
+    var ɵ10 = function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); }, ɵ11 = function (baseDef) { return baseDef.outputs || {}; };
     /**
      * @Annotation
      * @publicApi
      */
-    var Output = makePropDecorator('Output', function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); }, undefined, updateBaseDefFromIOProp(function (baseDef) { return baseDef.outputs || {}; }));
+    var Output = makePropDecorator('Output', ɵ10, undefined, updateBaseDefFromIOProp(ɵ11));
+    var ɵ12 = function (hostPropertyName) { return ({ hostPropertyName: hostPropertyName }); };
     /**
      * @Annotation
      * @publicApi
      */
-    var HostBinding = makePropDecorator('HostBinding', function (hostPropertyName) { return ({ hostPropertyName: hostPropertyName }); });
+    var HostBinding = makePropDecorator('HostBinding', ɵ12);
+    var ɵ13 = function (eventName, args) { return ({ eventName: eventName, args: args }); };
     /**
      * Binds a CSS event to a host listener and supplies configuration metadata.
      * Angular invokes the supplied handler method when the host element emits the specified event,
@@ -23160,7 +23586,7 @@
      * @Annotation
      * @publicApi
      */
-    var HostListener = makePropDecorator('HostListener', function (eventName, args) { return ({ eventName: eventName, args: args }); });
+    var HostListener = makePropDecorator('HostListener', ɵ13);
     var SWITCH_COMPILE_COMPONENT__POST_R3__ = compileComponent;
     var SWITCH_COMPILE_DIRECTIVE__POST_R3__ = compileDirective;
     var SWITCH_COMPILE_PIPE__POST_R3__ = compilePipe;
@@ -23178,11 +23604,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    /**
-     * @Annotation
-     * @publicApi
-     */
-    var NgModule = makeDecorator('NgModule', function (ngModule) { return ngModule; }, undefined, undefined, 
+    var ɵ0$7 = function (ngModule) { return ngModule; }, ɵ1$3 = 
     /**
      * Decorator that marks the following class as an NgModule, and supplies
      * configuration metadata for it.
@@ -23194,7 +23616,12 @@
      * * The `imports` and `exports` options bring in members from other modules, and make
      * this module's members available to others.
      */
-    function (type, meta) { return SWITCH_COMPILE_NGMODULE(type, meta); });
+    function (type, meta) { return SWITCH_COMPILE_NGMODULE(type, meta); };
+    /**
+     * @Annotation
+     * @publicApi
+     */
+    var NgModule = makeDecorator('NgModule', ɵ0$7, undefined, undefined, ɵ1$3);
     function preR3NgModuleCompile(moduleType, metadata) {
         var imports = (metadata && metadata.imports) || [];
         if (metadata && metadata.exports) {
@@ -28304,6 +28731,8 @@
     exports.Self = Self;
     exports.SkipSelf = SkipSelf;
     exports.Host = Host;
+    exports.ɵ0 = ɵ0;
+    exports.ɵ1 = ɵ1;
     exports.NgZone = NgZone;
     exports.ɵNoopNgZone = NoopNgZone;
     exports.RenderComponentType = RenderComponentType;
@@ -28445,6 +28874,16 @@
     exports.ɵɵelementEnd = ɵɵelementEnd;
     exports.ɵɵelementProperty = ɵɵelementProperty;
     exports.ɵɵproperty = ɵɵproperty;
+    exports.ɵɵpropertyInterpolate = ɵɵpropertyInterpolate;
+    exports.ɵɵpropertyInterpolate1 = ɵɵpropertyInterpolate1;
+    exports.ɵɵpropertyInterpolate2 = ɵɵpropertyInterpolate2;
+    exports.ɵɵpropertyInterpolate3 = ɵɵpropertyInterpolate3;
+    exports.ɵɵpropertyInterpolate4 = ɵɵpropertyInterpolate4;
+    exports.ɵɵpropertyInterpolate5 = ɵɵpropertyInterpolate5;
+    exports.ɵɵpropertyInterpolate6 = ɵɵpropertyInterpolate6;
+    exports.ɵɵpropertyInterpolate7 = ɵɵpropertyInterpolate7;
+    exports.ɵɵpropertyInterpolate8 = ɵɵpropertyInterpolate8;
+    exports.ɵɵpropertyInterpolateV = ɵɵpropertyInterpolateV;
     exports.ɵɵcomponentHostSyntheticProperty = ɵɵcomponentHostSyntheticProperty;
     exports.ɵɵcomponentHostSyntheticListener = ɵɵcomponentHostSyntheticListener;
     exports.ɵɵprojectionDef = ɵɵprojectionDef;

@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.13+62.sha-5c8d156.with-local-changes
+ * @license Angular v8.0.0-beta.13+91.sha-b61c9df.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -126,6 +126,11 @@ function makePropDecorator(name, props, parentClass, additionalProcessing) {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 // WARNING: interface has both a type and a value, skipping emit
+const ɵ0 = /**
+ * @param {?} token
+ * @return {?}
+ */
+(token) => ({ token });
 /**
  * Inject decorator and metadata.
  *
@@ -133,11 +138,7 @@ function makePropDecorator(name, props, parentClass, additionalProcessing) {
  * \@publicApi
  * @type {?}
  */
-const Inject = makeParamDecorator('Inject', (/**
- * @param {?} token
- * @return {?}
- */
-(token) => ({ token })));
+const Inject = makeParamDecorator('Inject', (ɵ0));
 // WARNING: interface has both a type and a value, skipping emit
 /**
  * Optional decorator and metadata.
@@ -175,6 +176,11 @@ const SkipSelf = makeParamDecorator('SkipSelf');
  */
 const Host = makeParamDecorator('Host');
 // WARNING: interface has both a type and a value, skipping emit
+const ɵ1 = /**
+ * @param {?=} attributeName
+ * @return {?}
+ */
+(attributeName) => ({ attributeName });
 /**
  * Attribute decorator and metadata.
  *
@@ -182,11 +188,7 @@ const Host = makeParamDecorator('Host');
  * \@publicApi
  * @type {?}
  */
-const Attribute = makeParamDecorator('Attribute', (/**
- * @param {?=} attributeName
- * @return {?}
- */
-(attributeName) => ({ attributeName })));
+const Attribute = makeParamDecorator('Attribute', (ɵ1));
 
 /**
  * @license
@@ -1069,9 +1071,9 @@ function compileInjectable(type, srcMeta) {
         }),
     });
 }
-const ɵ0 = getClosureSafeProperty;
+const ɵ0$1 = getClosureSafeProperty;
 /** @type {?} */
-const USE_VALUE = getClosureSafeProperty({ provide: String, useValue: ɵ0 });
+const USE_VALUE = getClosureSafeProperty({ provide: String, useValue: ɵ0$1 });
 /**
  * @param {?} meta
  * @return {?}
@@ -1105,9 +1107,9 @@ function isUseExistingProvider(meta) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
-const ɵ0$1 = getClosureSafeProperty;
+const ɵ0$2 = getClosureSafeProperty;
 /** @type {?} */
-const USE_VALUE$1 = getClosureSafeProperty({ provide: String, useValue: ɵ0$1 });
+const USE_VALUE$1 = getClosureSafeProperty({ provide: String, useValue: ɵ0$2 });
 /** @type {?} */
 const EMPTY_ARRAY = [];
 /**
@@ -1186,6 +1188,12 @@ function convertInjectableProviderToFactory(type, provider) {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 // WARNING: interface has both a type and a value, skipping emit
+const ɵ0$3 = /**
+ * @param {?} type
+ * @param {?} meta
+ * @return {?}
+ */
+(type, meta) => SWITCH_COMPILE_INJECTABLE((/** @type {?} */ (type)), meta);
 /**
  * Injectable decorator and metadata.
  *
@@ -1193,12 +1201,7 @@ function convertInjectableProviderToFactory(type, provider) {
  * \@publicApi
  * @type {?}
  */
-const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, (/**
- * @param {?} type
- * @param {?} meta
- * @return {?}
- */
-(type, meta) => SWITCH_COMPILE_INJECTABLE((/** @type {?} */ (type)), meta)));
+const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, (ɵ0$3));
 /**
  * Supports \@Injectable() in JIT mode for Render2.
  * @param {?} injectableType
@@ -1409,8 +1412,9 @@ const MULTI_PROVIDER_FN = (/**
 function () {
     return Array.prototype.slice.call(arguments);
 });
+const ɵ2 = getClosureSafeProperty;
 /** @type {?} */
-const USE_VALUE$2 = getClosureSafeProperty({ provide: String, useValue: getClosureSafeProperty });
+const USE_VALUE$2 = getClosureSafeProperty({ provide: String, useValue: ɵ2 });
 /** @type {?} */
 const NG_TOKEN_PATH = 'ngTokenPath';
 /** @type {?} */
@@ -2963,6 +2967,12 @@ const ANALYZE_FOR_ENTRY_COMPONENTS = new InjectionToken('AnalyzeForEntryComponen
  */
 class Query {
 }
+const ɵ0$4 = /**
+ * @param {?=} selector
+ * @param {?=} data
+ * @return {?}
+ */
+(selector, data = {}) => (Object.assign({ selector, first: false, isViewQuery: false, descendants: false }, data));
 /**
  * ContentChildren decorator and metadata.
  *
@@ -2971,12 +2981,13 @@ class Query {
  * \@publicApi
  * @type {?}
  */
-const ContentChildren = makePropDecorator('ContentChildren', (/**
+const ContentChildren = makePropDecorator('ContentChildren', (ɵ0$4), Query);
+const ɵ1$1 = /**
  * @param {?=} selector
  * @param {?=} data
  * @return {?}
  */
-(selector, data = {}) => (Object.assign({ selector, first: false, isViewQuery: false, descendants: false }, data))), Query);
+(selector, data = {}) => (Object.assign({ selector, first: true, isViewQuery: false, descendants: true }, data));
 /**
  * ContentChild decorator and metadata.
  *
@@ -2986,12 +2997,13 @@ const ContentChildren = makePropDecorator('ContentChildren', (/**
  * \@publicApi
  * @type {?}
  */
-const ContentChild = makePropDecorator('ContentChild', (/**
+const ContentChild = makePropDecorator('ContentChild', (ɵ1$1), Query);
+const ɵ2$1 = /**
  * @param {?=} selector
  * @param {?=} data
  * @return {?}
  */
-(selector, data = {}) => (Object.assign({ selector, first: true, isViewQuery: false, descendants: true }, data))), Query);
+(selector, data = {}) => (Object.assign({ selector, first: false, isViewQuery: true, descendants: true }, data));
 /**
  * ViewChildren decorator and metadata.
  *
@@ -2999,12 +3011,13 @@ const ContentChild = makePropDecorator('ContentChild', (/**
  * \@publicApi
  * @type {?}
  */
-const ViewChildren = makePropDecorator('ViewChildren', (/**
- * @param {?=} selector
- * @param {?=} data
+const ViewChildren = makePropDecorator('ViewChildren', (ɵ2$1), Query);
+const ɵ3 = /**
+ * @param {?} selector
+ * @param {?} data
  * @return {?}
  */
-(selector, data = {}) => (Object.assign({ selector, first: false, isViewQuery: true, descendants: true }, data))), Query);
+(selector, data) => (Object.assign({ selector, first: true, isViewQuery: true, descendants: true }, data));
 /**
  * ViewChild decorator and metadata.
  *
@@ -3012,12 +3025,7 @@ const ViewChildren = makePropDecorator('ViewChildren', (/**
  * \@publicApi
  * @type {?}
  */
-const ViewChild = makePropDecorator('ViewChild', (/**
- * @param {?} selector
- * @param {?} data
- * @return {?}
- */
-(selector, data) => (Object.assign({ selector, first: true, isViewQuery: true, descendants: true }, data))), Query);
+const ViewChild = makePropDecorator('ViewChild', (ɵ3), Query);
 
 /**
  * @fileoverview added by tsickle
@@ -5422,14 +5430,15 @@ RendererStyleFlags3[RendererStyleFlags3.DashCase] = 'DashCase';
 function isProceduralRenderer(renderer) {
     return !!(((/** @type {?} */ (renderer))).listen);
 }
+const ɵ0$5 = /**
+ * @param {?} hostElement
+ * @param {?} rendererType
+ * @return {?}
+ */
+(hostElement, rendererType) => { return document; };
 /** @type {?} */
 const domRendererFactory3 = {
-    createRenderer: (/**
-     * @param {?} hostElement
-     * @param {?} rendererType
-     * @return {?}
-     */
-    (hostElement, rendererType) => { return document; })
+    createRenderer: (ɵ0$5)
 };
 
 /**
@@ -11357,6 +11366,16 @@ function findAttrIndexInNode(name, attrs, isInlineTemplate, isProjectionMode) {
             else if (maybeAttrName === 3 /* Bindings */) {
                 bindingsMode = true;
             }
+            else if (maybeAttrName === 1 /* Classes */) {
+                /** @type {?} */
+                let value = attrs[++i];
+                // We should skip classes here because we have a separate mechanism for
+                // matching classes in projection mode.
+                while (typeof value === 'string') {
+                    value = attrs[++i];
+                }
+                continue;
+            }
             else if (maybeAttrName === 4 /* Template */) {
                 // We do not care about Template attributes in this scenario.
                 break;
@@ -16869,6 +16888,405 @@ function ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, 
             renderStringify(v6) + i6 + renderStringify(v7) + suffix :
         NO_CHANGE;
 }
+/////////////////////////////////////////////////////////////////////
+/// NEW INSTRUCTIONS
+/////////////////////////////////////////////////////////////////////
+/**
+ * Shared reference to a string, used in `ɵɵpropertyInterpolate`.
+ * @type {?}
+ */
+const EMPTY_STRING = '';
+/**
+ *
+ * Update an interpolated property on an element with a lone bound value
+ *
+ * Used when the value passed to a property has 1 interpolated value in it, an no additional text
+ * surrounds that interpolated value:
+ *
+ * ```html
+ * <div title="{{v0}}"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵpropertyInterpolate('title', v0);
+ * ```
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `\@Inputs` don't have to be re-compiled.
+ *
+ * \@codeGenApi
+ * @param {?} propName The name of the property to update
+ * @param {?} v0 Value checked for change.
+ * @return {?} itself, so that it may be chained.
+ */
+function ɵɵpropertyInterpolate(propName, v0) {
+    ɵɵpropertyInterpolate1(propName, EMPTY_STRING, v0, EMPTY_STRING);
+    return ɵɵpropertyInterpolate;
+}
+/**
+ *
+ * Update an interpolated property on an element with single bound value surrounded by text.
+ *
+ * Used when the value passed to a property has 1 interpolated value in it:
+ *
+ * ```html
+ * <div title="prefix{{v0}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵpropertyInterpolate1('title', 'prefix', v0, 'suffix');
+ * ```
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `\@Inputs` don't have to be re-compiled.
+ *
+ * \@codeGenApi
+ * @param {?} propName The name of the property to update
+ * @param {?} prefix Static value used for concatenation only.
+ * @param {?} v0 Value checked for change.
+ * @param {?} suffix Static value used for concatenation only.
+ * @return {?} itself, so that it may be chained.
+ */
+function ɵɵpropertyInterpolate1(propName, prefix, v0, suffix) {
+    /** @type {?} */
+    const index = getSelectedIndex();
+    elementPropertyInternal(index, propName, ɵɵinterpolation1(prefix, v0, suffix));
+    return ɵɵpropertyInterpolate1;
+}
+/**
+ *
+ * Update an interpolated property on an element with 2 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 2 interpolated values in it:
+ *
+ * ```html
+ * <div title="prefix{{v0}}-{{v1}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵpropertyInterpolate2('title', 'prefix', v0, '-', v1, 'suffix');
+ * ```
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `\@Inputs` don't have to be re-compiled.
+ *
+ * \@codeGenApi
+ * @param {?} propName The name of the property to update
+ * @param {?} prefix Static value used for concatenation only.
+ * @param {?} v0 Value checked for change.
+ * @param {?} i0 Static value used for concatenation only.
+ * @param {?} v1 Value checked for change.
+ * @param {?} suffix Static value used for concatenation only.
+ * @return {?} itself, so that it may be chained.
+ */
+function ɵɵpropertyInterpolate2(propName, prefix, v0, i0, v1, suffix) {
+    /** @type {?} */
+    const index = getSelectedIndex();
+    elementPropertyInternal(index, propName, ɵɵinterpolation2(prefix, v0, i0, v1, suffix));
+    return ɵɵpropertyInterpolate2;
+}
+/**
+ *
+ * Update an interpolated property on an element with 3 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 3 interpolated values in it:
+ *
+ * ```html
+ * <div title="prefix{{v0}}-{{v1}}-{{v2}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵpropertyInterpolate3(
+ * 'title', 'prefix', v0, '-', v1, '-', v2, 'suffix');
+ * ```
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `\@Inputs` don't have to be re-compiled.
+ *
+ * \@codeGenApi
+ * @param {?} propName The name of the property to update
+ * @param {?} prefix Static value used for concatenation only.
+ * @param {?} v0 Value checked for change.
+ * @param {?} i0 Static value used for concatenation only.
+ * @param {?} v1 Value checked for change.
+ * @param {?} i1 Static value used for concatenation only.
+ * @param {?} v2 Value checked for change.
+ * @param {?} suffix Static value used for concatenation only.
+ * @return {?} itself, so that it may be chained.
+ */
+function ɵɵpropertyInterpolate3(propName, prefix, v0, i0, v1, i1, v2, suffix) {
+    /** @type {?} */
+    const index = getSelectedIndex();
+    elementPropertyInternal(index, propName, ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix));
+    return ɵɵpropertyInterpolate3;
+}
+/**
+ *
+ * Update an interpolated property on an element with 4 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 4 interpolated values in it:
+ *
+ * ```html
+ * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵpropertyInterpolate4(
+ * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, 'suffix');
+ * ```
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `\@Inputs` don't have to be re-compiled.
+ *
+ * \@codeGenApi
+ * @param {?} propName The name of the property to update
+ * @param {?} prefix Static value used for concatenation only.
+ * @param {?} v0 Value checked for change.
+ * @param {?} i0 Static value used for concatenation only.
+ * @param {?} v1 Value checked for change.
+ * @param {?} i1 Static value used for concatenation only.
+ * @param {?} v2 Value checked for change.
+ * @param {?} i2 Static value used for concatenation only.
+ * @param {?} v3 Value checked for change.
+ * @param {?} suffix Static value used for concatenation only.
+ * @return {?} itself, so that it may be chained.
+ */
+function ɵɵpropertyInterpolate4(propName, prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
+    /** @type {?} */
+    const index = getSelectedIndex();
+    elementPropertyInternal(index, propName, ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix));
+    return ɵɵpropertyInterpolate4;
+}
+/**
+ *
+ * Update an interpolated property on an element with 5 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 5 interpolated values in it:
+ *
+ * ```html
+ * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵpropertyInterpolate5(
+ * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, 'suffix');
+ * ```
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `\@Inputs` don't have to be re-compiled.
+ *
+ * \@codeGenApi
+ * @param {?} propName The name of the property to update
+ * @param {?} prefix Static value used for concatenation only.
+ * @param {?} v0 Value checked for change.
+ * @param {?} i0 Static value used for concatenation only.
+ * @param {?} v1 Value checked for change.
+ * @param {?} i1 Static value used for concatenation only.
+ * @param {?} v2 Value checked for change.
+ * @param {?} i2 Static value used for concatenation only.
+ * @param {?} v3 Value checked for change.
+ * @param {?} i3 Static value used for concatenation only.
+ * @param {?} v4 Value checked for change.
+ * @param {?} suffix Static value used for concatenation only.
+ * @return {?} itself, so that it may be chained.
+ */
+function ɵɵpropertyInterpolate5(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
+    /** @type {?} */
+    const index = getSelectedIndex();
+    elementPropertyInternal(index, propName, ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix));
+    return ɵɵpropertyInterpolate5;
+}
+/**
+ *
+ * Update an interpolated property on an element with 6 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 6 interpolated values in it:
+ *
+ * ```html
+ * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵpropertyInterpolate6(
+ *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, 'suffix');
+ * ```
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `\@Inputs` don't have to be re-compiled.
+ *
+ * \@codeGenApi
+ * @param {?} propName The name of the property to update
+ * @param {?} prefix Static value used for concatenation only.
+ * @param {?} v0 Value checked for change.
+ * @param {?} i0 Static value used for concatenation only.
+ * @param {?} v1 Value checked for change.
+ * @param {?} i1 Static value used for concatenation only.
+ * @param {?} v2 Value checked for change.
+ * @param {?} i2 Static value used for concatenation only.
+ * @param {?} v3 Value checked for change.
+ * @param {?} i3 Static value used for concatenation only.
+ * @param {?} v4 Value checked for change.
+ * @param {?} i4 Static value used for concatenation only.
+ * @param {?} v5 Value checked for change.
+ * @param {?} suffix Static value used for concatenation only.
+ * @return {?} itself, so that it may be chained.
+ */
+function ɵɵpropertyInterpolate6(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
+    /** @type {?} */
+    const index = getSelectedIndex();
+    elementPropertyInternal(index, propName, ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix));
+    return ɵɵpropertyInterpolate6;
+}
+/**
+ *
+ * Update an interpolated property on an element with 7 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 7 interpolated values in it:
+ *
+ * ```html
+ * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵpropertyInterpolate7(
+ *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, 'suffix');
+ * ```
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `\@Inputs` don't have to be re-compiled.
+ *
+ * \@codeGenApi
+ * @param {?} propName The name of the property to update
+ * @param {?} prefix Static value used for concatenation only.
+ * @param {?} v0 Value checked for change.
+ * @param {?} i0 Static value used for concatenation only.
+ * @param {?} v1 Value checked for change.
+ * @param {?} i1 Static value used for concatenation only.
+ * @param {?} v2 Value checked for change.
+ * @param {?} i2 Static value used for concatenation only.
+ * @param {?} v3 Value checked for change.
+ * @param {?} i3 Static value used for concatenation only.
+ * @param {?} v4 Value checked for change.
+ * @param {?} i4 Static value used for concatenation only.
+ * @param {?} v5 Value checked for change.
+ * @param {?} i5 Static value used for concatenation only.
+ * @param {?} v6 Value checked for change.
+ * @param {?} suffix Static value used for concatenation only.
+ * @return {?} itself, so that it may be chained.
+ */
+function ɵɵpropertyInterpolate7(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
+    /** @type {?} */
+    const index = getSelectedIndex();
+    elementPropertyInternal(index, propName, ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix));
+    return ɵɵpropertyInterpolate7;
+}
+/**
+ *
+ * Update an interpolated property on an element with 8 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 8 interpolated values in it:
+ *
+ * ```html
+ * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵpropertyInterpolate8(
+ *  'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, 'suffix');
+ * ```
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `\@Inputs` don't have to be re-compiled.
+ *
+ * \@codeGenApi
+ * @param {?} propName The name of the property to update
+ * @param {?} prefix Static value used for concatenation only.
+ * @param {?} v0 Value checked for change.
+ * @param {?} i0 Static value used for concatenation only.
+ * @param {?} v1 Value checked for change.
+ * @param {?} i1 Static value used for concatenation only.
+ * @param {?} v2 Value checked for change.
+ * @param {?} i2 Static value used for concatenation only.
+ * @param {?} v3 Value checked for change.
+ * @param {?} i3 Static value used for concatenation only.
+ * @param {?} v4 Value checked for change.
+ * @param {?} i4 Static value used for concatenation only.
+ * @param {?} v5 Value checked for change.
+ * @param {?} i5 Static value used for concatenation only.
+ * @param {?} v6 Value checked for change.
+ * @param {?} i6 Static value used for concatenation only.
+ * @param {?} v7 Value checked for change.
+ * @param {?} suffix Static value used for concatenation only.
+ * @return {?} itself, so that it may be chained.
+ */
+function ɵɵpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
+    /** @type {?} */
+    const index = getSelectedIndex();
+    elementPropertyInternal(index, propName, ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix));
+    return ɵɵpropertyInterpolate8;
+}
+/**
+ * Update an interpolated property on an element with 8 or more bound values surrounded by text.
+ *
+ * Used when the number of interpolated values exceeds 7.
+ *
+ * ```html
+ * <div
+ *  title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}-{{v8}}-{{v9}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵpropertyInterpolateV(
+ *  'title', ['prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, '-', v9,
+ *  'suffix']);
+ * ```
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `\@Inputs` don't have to be re-compiled.
+ *
+ * \@codeGenApi
+ * @param {?} propName The name of the property to update.
+ * @param {?} values The a collection of values and the strings inbetween those values, beginning with a
+ * string prefix and ending with a string suffix.
+ * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
+ * @return {?} itself, so that it may be chained.
+ */
+function ɵɵpropertyInterpolateV(propName, values) {
+    /** @type {?} */
+    const index = getSelectedIndex();
+    elementPropertyInternal(index, propName, ɵɵinterpolationV(values));
+    return ɵɵpropertyInterpolateV;
+}
 
 /**
  * @fileoverview added by tsickle
@@ -20004,7 +20422,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.13+62.sha-5c8d156.with-local-changes');
+const VERSION = new Version('8.0.0-beta.13+91.sha-b61c9df.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -28299,6 +28717,16 @@ const angularCoreEnv = {
     'ɵɵpipeBindV': ɵɵpipeBindV,
     'ɵɵprojectionDef': ɵɵprojectionDef,
     'ɵɵproperty': ɵɵproperty,
+    'ɵɵpropertyInterpolate': ɵɵpropertyInterpolate,
+    'ɵɵpropertyInterpolate1': ɵɵpropertyInterpolate1,
+    'ɵɵpropertyInterpolate2': ɵɵpropertyInterpolate2,
+    'ɵɵpropertyInterpolate3': ɵɵpropertyInterpolate3,
+    'ɵɵpropertyInterpolate4': ɵɵpropertyInterpolate4,
+    'ɵɵpropertyInterpolate5': ɵɵpropertyInterpolate5,
+    'ɵɵpropertyInterpolate6': ɵɵpropertyInterpolate6,
+    'ɵɵpropertyInterpolate7': ɵɵpropertyInterpolate7,
+    'ɵɵpropertyInterpolate8': ɵɵpropertyInterpolate8,
+    'ɵɵpropertyInterpolateV': ɵɵpropertyInterpolateV,
     'ɵɵpipe': ɵɵpipe,
     'ɵɵqueryRefresh': ɵɵqueryRefresh,
     'ɵɵviewQuery': ɵɵviewQuery,
@@ -29255,23 +29683,34 @@ function compilePipe(type, meta) {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 // WARNING: interface has both a type and a value, skipping emit
+const ɵ0$6 = /**
+ * @param {?=} dir
+ * @return {?}
+ */
+(dir = {}) => dir, ɵ1$2 = /**
+ * @param {?} type
+ * @param {?} meta
+ * @return {?}
+ */
+(type, meta) => SWITCH_COMPILE_DIRECTIVE(type, meta);
 /**
  * Type of the Directive metadata.
  *
  * \@publicApi
  * @type {?}
  */
-const Directive = makeDecorator('Directive', (/**
- * @param {?=} dir
+const Directive = makeDecorator('Directive', (ɵ0$6), undefined, undefined, (ɵ1$2));
+// WARNING: interface has both a type and a value, skipping emit
+const ɵ2$2 = /**
+ * @param {?=} c
  * @return {?}
  */
-(dir = {}) => dir), undefined, undefined, (/**
+(c = {}) => (Object.assign({ changeDetection: ChangeDetectionStrategy.Default }, c)), ɵ3$1 = /**
  * @param {?} type
  * @param {?} meta
  * @return {?}
  */
-(type, meta) => SWITCH_COMPILE_DIRECTIVE(type, meta)));
-// WARNING: interface has both a type and a value, skipping emit
+(type, meta) => SWITCH_COMPILE_COMPONENT(type, meta);
 /**
  * Component decorator and metadata.
  *
@@ -29279,32 +29718,24 @@ const Directive = makeDecorator('Directive', (/**
  * \@publicApi
  * @type {?}
  */
-const Component = makeDecorator('Component', (/**
- * @param {?=} c
+const Component = makeDecorator('Component', (ɵ2$2), Directive, undefined, (ɵ3$1));
+// WARNING: interface has both a type and a value, skipping emit
+const ɵ4 = /**
+ * @param {?} p
  * @return {?}
  */
-(c = {}) => (Object.assign({ changeDetection: ChangeDetectionStrategy.Default }, c))), Directive, undefined, (/**
+(p) => (Object.assign({ pure: true }, p)), ɵ5 = /**
  * @param {?} type
  * @param {?} meta
  * @return {?}
  */
-(type, meta) => SWITCH_COMPILE_COMPONENT(type, meta)));
-// WARNING: interface has both a type and a value, skipping emit
+(type, meta) => SWITCH_COMPILE_PIPE(type, meta);
 /**
  * \@Annotation
  * \@publicApi
  * @type {?}
  */
-const Pipe = makeDecorator('Pipe', (/**
- * @param {?} p
- * @return {?}
- */
-(p) => (Object.assign({ pure: true }, p))), undefined, undefined, (/**
- * @param {?} type
- * @param {?} meta
- * @return {?}
- */
-(type, meta) => SWITCH_COMPILE_PIPE(type, meta)));
+const Pipe = makeDecorator('Pipe', (ɵ4), undefined, undefined, (ɵ5));
 // WARNING: interface has both a type and a value, skipping emit
 /** @type {?} */
 const initializeBaseDef = (/**
@@ -29355,47 +29786,56 @@ const updateBaseDefFromIOProp = (/**
     const defProp = getProp(baseDef);
     defProp[name] = args[0] || name;
 }));
-/**
- * \@Annotation
- * \@publicApi
- * @type {?}
- */
-const Input = makePropDecorator('Input', (/**
+const ɵ8 = /**
  * @param {?=} bindingPropertyName
  * @return {?}
  */
-(bindingPropertyName) => ({ bindingPropertyName })), undefined, updateBaseDefFromIOProp((/**
+(bindingPropertyName) => ({ bindingPropertyName }), ɵ9 = /**
  * @param {?} baseDef
  * @return {?}
  */
-baseDef => baseDef.inputs || {})));
-// WARNING: interface has both a type and a value, skipping emit
+baseDef => baseDef.inputs || {};
 /**
  * \@Annotation
  * \@publicApi
  * @type {?}
  */
-const Output = makePropDecorator('Output', (/**
+const Input = makePropDecorator('Input', (ɵ8), undefined, updateBaseDefFromIOProp((ɵ9)));
+// WARNING: interface has both a type and a value, skipping emit
+const ɵ10 = /**
  * @param {?=} bindingPropertyName
  * @return {?}
  */
-(bindingPropertyName) => ({ bindingPropertyName })), undefined, updateBaseDefFromIOProp((/**
+(bindingPropertyName) => ({ bindingPropertyName }), ɵ11 = /**
  * @param {?} baseDef
  * @return {?}
  */
-baseDef => baseDef.outputs || {})));
-// WARNING: interface has both a type and a value, skipping emit
+baseDef => baseDef.outputs || {};
 /**
  * \@Annotation
  * \@publicApi
  * @type {?}
  */
-const HostBinding = makePropDecorator('HostBinding', (/**
+const Output = makePropDecorator('Output', (ɵ10), undefined, updateBaseDefFromIOProp((ɵ11)));
+// WARNING: interface has both a type and a value, skipping emit
+const ɵ12 = /**
  * @param {?=} hostPropertyName
  * @return {?}
  */
-(hostPropertyName) => ({ hostPropertyName })));
+(hostPropertyName) => ({ hostPropertyName });
+/**
+ * \@Annotation
+ * \@publicApi
+ * @type {?}
+ */
+const HostBinding = makePropDecorator('HostBinding', (ɵ12));
 // WARNING: interface has both a type and a value, skipping emit
+const ɵ13 = /**
+ * @param {?=} eventName
+ * @param {?=} args
+ * @return {?}
+ */
+(eventName, args) => ({ eventName, args });
 /**
  * Binds a CSS event to a host listener and supplies configuration metadata.
  * Angular invokes the supplied handler method when the host element emits the specified event,
@@ -29429,12 +29869,7 @@ const HostBinding = makePropDecorator('HostBinding', (/**
  * \@publicApi
  * @type {?}
  */
-const HostListener = makePropDecorator('HostListener', (/**
- * @param {?=} eventName
- * @param {?=} args
- * @return {?}
- */
-(eventName, args) => ({ eventName, args })));
+const HostListener = makePropDecorator('HostListener', (ɵ13));
 /** @type {?} */
 const SWITCH_COMPILE_COMPONENT__POST_R3__ = compileComponent;
 /** @type {?} */
@@ -29459,16 +29894,11 @@ const SWITCH_COMPILE_PIPE = SWITCH_COMPILE_PIPE__PRE_R3__;
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 // WARNING: interface has both a type and a value, skipping emit
-/**
- * \@Annotation
- * \@publicApi
- * @type {?}
- */
-const NgModule = makeDecorator('NgModule', (/**
+const ɵ0$7 = /**
  * @param {?} ngModule
  * @return {?}
  */
-(ngModule) => ngModule), undefined, undefined, (/**
+(ngModule) => ngModule, ɵ1$3 = /**
  * Decorator that marks the following class as an NgModule, and supplies
  * configuration metadata for it.
  *
@@ -29482,7 +29912,13 @@ const NgModule = makeDecorator('NgModule', (/**
  * @param {?} meta
  * @return {?}
  */
-(type, meta) => SWITCH_COMPILE_NGMODULE(type, meta)));
+(type, meta) => SWITCH_COMPILE_NGMODULE(type, meta);
+/**
+ * \@Annotation
+ * \@publicApi
+ * @type {?}
+ */
+const NgModule = makeDecorator('NgModule', (ɵ0$7), undefined, undefined, (ɵ1$3));
 /**
  * @param {?} moduleType
  * @param {?} metadata
@@ -36298,5 +36734,5 @@ class NgModuleFactory_ extends NgModuleFactory {
  * Generated bundle index. Do not edit.
  */
 
-export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_r, _iterableDiffersFactory as ɵangular_packages_core_core_o, _keyValueDiffersFactory as ɵangular_packages_core_core_p, _localeFactory as ɵangular_packages_core_core_q, zoneSchedulerFactory as ɵangular_packages_core_core_s, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, DefaultIterableDifferFactory as ɵangular_packages_core_core_m, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_n, DebugElement__PRE_R3__ as ɵangular_packages_core_core_l, DebugNode__PRE_R3__ as ɵangular_packages_core_core_k, NullInjector as ɵangular_packages_core_core_a, injectInjectorOnly as ɵangular_packages_core_core_b, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, getModuleFactory__PRE_R3__ as ɵangular_packages_core_core_j, wtfEnabled as ɵangular_packages_core_core_t, createScope as ɵangular_packages_core_core_v, detectWTF as ɵangular_packages_core_core_u, endTimeRange as ɵangular_packages_core_core_y, leave as ɵangular_packages_core_core_w, startTimeRange as ɵangular_packages_core_core_x, SCHEDULER as ɵangular_packages_core_core_bb, injectAttributeImpl as ɵangular_packages_core_core_bc, getLView as ɵangular_packages_core_core_bd, getPreviousOrParentTNode as ɵangular_packages_core_core_be, nextContextImpl as ɵangular_packages_core_core_bf, BoundPlayerFactory as ɵangular_packages_core_core_bj, getRootContext as ɵangular_packages_core_core_bp, loadInternal as ɵangular_packages_core_core_bo, createElementRef as ɵangular_packages_core_core_g, createTemplateRef as ɵangular_packages_core_core_h, createViewRef as ɵangular_packages_core_core_i, getUrlSanitizer as ɵangular_packages_core_core_bh, noSideEffects as ɵangular_packages_core_core_bn, makeParamDecorator as ɵangular_packages_core_core_bk, makePropDecorator as ɵangular_packages_core_core_bl, getClosureSafeProperty as ɵangular_packages_core_core_bq, _def as ɵangular_packages_core_core_z, DebugContext as ɵangular_packages_core_core_ba, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugEventListener, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS$1 as TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, ViewEncapsulation, Version, VERSION, InjectFlags, ɵɵdefineInjectable, defineInjectable, ɵɵdefineInjector, forwardRef, resolveForwardRef, Injectable, INJECTOR, Injector, ɵɵinject, inject, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, ɵɵdefineBase, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefinePipe, ɵɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, ɵɵdirectiveInject, ɵɵinjectAttribute, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵtemplateRefExtractor, ɵɵProvidersFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, ɵɵcontainer, ɵɵnextContext, ɵɵelementStart, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵelement, ɵɵlistener, ɵɵtext, ɵɵembeddedViewStart, ɵɵprojection, ɵɵbind, ɵɵinterpolation1, ɵɵinterpolation2, ɵɵinterpolation3, ɵɵinterpolation4, ɵɵinterpolation5, ɵɵinterpolation6, ɵɵinterpolation7, ɵɵinterpolation8, ɵɵinterpolationV, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, ɵɵrestoreView, ɵɵcontainerRefreshStart, ɵɵcontainerRefreshEnd, ɵɵqueryRefresh, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵstaticContentQuery, ɵɵloadViewQuery, ɵɵcontentQuery, ɵɵloadContentQuery, ɵɵelementEnd, ɵɵelementProperty, ɵɵproperty, ɵɵcomponentHostSyntheticProperty, ɵɵcomponentHostSyntheticListener, ɵɵprojectionDef, ɵɵreference, ɵɵenableBindings, ɵɵdisableBindings, ɵɵallocHostVars, ɵɵelementAttribute, ɵɵelementContainerStart, ɵɵelementContainerEnd, ɵɵelementStyling, ɵɵelementStylingMap, ɵɵelementStyleProp, ɵɵelementStylingApply, ɵɵelementClassProp, ɵɵelementHostAttrs, ɵɵelementHostStyling, ɵɵelementHostStylingMap, ɵɵelementHostStyleProp, ɵɵelementHostClassProp, ɵɵelementHostStylingApply, ɵɵselect, ɵɵtextBinding, ɵɵtemplate, ɵɵembeddedViewEnd, store as ɵstore, ɵɵload, ɵɵpipe, whenRendered as ɵwhenRendered, ɵɵi18n, ɵɵi18nAttributes, ɵɵi18nExp, ɵɵi18nStart, ɵɵi18nEnd, ɵɵi18nApply, ɵɵi18nPostprocess, i18nConfigureLocalize as ɵi18nConfigureLocalize, ɵɵi18nLocalize, setClassMetadata as ɵsetClassMetadata, ɵɵresolveWindow, ɵɵresolveDocument, ɵɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, ɵɵsanitizeHtml, ɵɵsanitizeStyle, ɵɵdefaultStyleSanitizer, ɵɵsanitizeScript, ɵɵsanitizeUrl, ɵɵsanitizeResourceUrl, ɵɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, registerNgModuleType as ɵregisterNgModuleType, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, createInjector as ɵcreateInjector, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$3 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_r, _iterableDiffersFactory as ɵangular_packages_core_core_o, _keyValueDiffersFactory as ɵangular_packages_core_core_p, _localeFactory as ɵangular_packages_core_core_q, zoneSchedulerFactory as ɵangular_packages_core_core_s, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, DefaultIterableDifferFactory as ɵangular_packages_core_core_m, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_n, DebugElement__PRE_R3__ as ɵangular_packages_core_core_l, DebugNode__PRE_R3__ as ɵangular_packages_core_core_k, NullInjector as ɵangular_packages_core_core_a, injectInjectorOnly as ɵangular_packages_core_core_b, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, getModuleFactory__PRE_R3__ as ɵangular_packages_core_core_j, wtfEnabled as ɵangular_packages_core_core_t, createScope as ɵangular_packages_core_core_v, detectWTF as ɵangular_packages_core_core_u, endTimeRange as ɵangular_packages_core_core_y, leave as ɵangular_packages_core_core_w, startTimeRange as ɵangular_packages_core_core_x, SCHEDULER as ɵangular_packages_core_core_bb, injectAttributeImpl as ɵangular_packages_core_core_bc, getLView as ɵangular_packages_core_core_bd, getPreviousOrParentTNode as ɵangular_packages_core_core_be, nextContextImpl as ɵangular_packages_core_core_bf, BoundPlayerFactory as ɵangular_packages_core_core_bj, getRootContext as ɵangular_packages_core_core_bp, loadInternal as ɵangular_packages_core_core_bo, createElementRef as ɵangular_packages_core_core_g, createTemplateRef as ɵangular_packages_core_core_h, createViewRef as ɵangular_packages_core_core_i, getUrlSanitizer as ɵangular_packages_core_core_bh, noSideEffects as ɵangular_packages_core_core_bn, makeParamDecorator as ɵangular_packages_core_core_bk, makePropDecorator as ɵangular_packages_core_core_bl, getClosureSafeProperty as ɵangular_packages_core_core_bq, _def as ɵangular_packages_core_core_z, DebugContext as ɵangular_packages_core_core_ba, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugEventListener, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS$1 as TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, ViewEncapsulation, Version, VERSION, InjectFlags, ɵɵdefineInjectable, defineInjectable, ɵɵdefineInjector, forwardRef, resolveForwardRef, Injectable, INJECTOR, Injector, ɵɵinject, inject, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, ɵɵdefineBase, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefinePipe, ɵɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, ɵɵdirectiveInject, ɵɵinjectAttribute, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵtemplateRefExtractor, ɵɵProvidersFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, ɵɵcontainer, ɵɵnextContext, ɵɵelementStart, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵelement, ɵɵlistener, ɵɵtext, ɵɵembeddedViewStart, ɵɵprojection, ɵɵbind, ɵɵinterpolation1, ɵɵinterpolation2, ɵɵinterpolation3, ɵɵinterpolation4, ɵɵinterpolation5, ɵɵinterpolation6, ɵɵinterpolation7, ɵɵinterpolation8, ɵɵinterpolationV, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, ɵɵrestoreView, ɵɵcontainerRefreshStart, ɵɵcontainerRefreshEnd, ɵɵqueryRefresh, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵstaticContentQuery, ɵɵloadViewQuery, ɵɵcontentQuery, ɵɵloadContentQuery, ɵɵelementEnd, ɵɵelementProperty, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵcomponentHostSyntheticProperty, ɵɵcomponentHostSyntheticListener, ɵɵprojectionDef, ɵɵreference, ɵɵenableBindings, ɵɵdisableBindings, ɵɵallocHostVars, ɵɵelementAttribute, ɵɵelementContainerStart, ɵɵelementContainerEnd, ɵɵelementStyling, ɵɵelementStylingMap, ɵɵelementStyleProp, ɵɵelementStylingApply, ɵɵelementClassProp, ɵɵelementHostAttrs, ɵɵelementHostStyling, ɵɵelementHostStylingMap, ɵɵelementHostStyleProp, ɵɵelementHostClassProp, ɵɵelementHostStylingApply, ɵɵselect, ɵɵtextBinding, ɵɵtemplate, ɵɵembeddedViewEnd, store as ɵstore, ɵɵload, ɵɵpipe, whenRendered as ɵwhenRendered, ɵɵi18n, ɵɵi18nAttributes, ɵɵi18nExp, ɵɵi18nStart, ɵɵi18nEnd, ɵɵi18nApply, ɵɵi18nPostprocess, i18nConfigureLocalize as ɵi18nConfigureLocalize, ɵɵi18nLocalize, setClassMetadata as ɵsetClassMetadata, ɵɵresolveWindow, ɵɵresolveDocument, ɵɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, ɵɵsanitizeHtml, ɵɵsanitizeStyle, ɵɵdefaultStyleSanitizer, ɵɵsanitizeScript, ɵɵsanitizeUrl, ɵɵsanitizeResourceUrl, ɵɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, registerNgModuleType as ɵregisterNgModuleType, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, createInjector as ɵcreateInjector, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$3 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map

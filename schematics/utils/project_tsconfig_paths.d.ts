@@ -11,4 +11,7 @@ import { Tree } from '@angular-devkit/schematics';
  * Gets all tsconfig paths from a CLI project by reading the workspace configuration
  * and looking for common tsconfig locations.
  */
-export declare function getProjectTsConfigPaths(tree: Tree): string[];
+export declare function getProjectTsConfigPaths(tree: Tree): {
+    buildPaths: string[];
+    testPaths: string[];
+};
