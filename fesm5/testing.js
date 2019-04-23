@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.13+80.sha-9873356.with-local-changes
+ * @license Angular v8.0.0-beta.13+88.sha-8e8e89a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1468,18 +1468,14 @@ var R3TestBedCompiler = /** @class */ (function () {
     };
     R3TestBedCompiler.prototype.compileTestModule = function () {
         var _this = this;
-        var rootProviderOverrides = this.rootProviderOverrides;
         var RootScopeModule = /** @class */ (function () {
             function RootScopeModule() {
             }
-            RootScopeModule = __decorate([
-                NgModule({
-                    providers: __spread(rootProviderOverrides),
-                    jit: true,
-                })
-            ], RootScopeModule);
             return RootScopeModule;
         }());
+        ɵcompileNgModuleDefs(RootScopeModule, {
+            providers: __spread(this.rootProviderOverrides),
+        });
         var ngZone = new NgZone({ enableLongStackTrace: true });
         var providers = __spread([
             { provide: NgZone, useValue: ngZone },

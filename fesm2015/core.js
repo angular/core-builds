@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.13+80.sha-9873356.with-local-changes
+ * @license Angular v8.0.0-beta.13+88.sha-8e8e89a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -126,6 +126,11 @@ function makePropDecorator(name, props, parentClass, additionalProcessing) {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 // WARNING: interface has both a type and a value, skipping emit
+const ɵ0 = /**
+ * @param {?} token
+ * @return {?}
+ */
+(token) => ({ token });
 /**
  * Inject decorator and metadata.
  *
@@ -133,11 +138,7 @@ function makePropDecorator(name, props, parentClass, additionalProcessing) {
  * \@publicApi
  * @type {?}
  */
-const Inject = makeParamDecorator('Inject', (/**
- * @param {?} token
- * @return {?}
- */
-(token) => ({ token })));
+const Inject = makeParamDecorator('Inject', (ɵ0));
 // WARNING: interface has both a type and a value, skipping emit
 /**
  * Optional decorator and metadata.
@@ -175,6 +176,11 @@ const SkipSelf = makeParamDecorator('SkipSelf');
  */
 const Host = makeParamDecorator('Host');
 // WARNING: interface has both a type and a value, skipping emit
+const ɵ1 = /**
+ * @param {?=} attributeName
+ * @return {?}
+ */
+(attributeName) => ({ attributeName });
 /**
  * Attribute decorator and metadata.
  *
@@ -182,11 +188,7 @@ const Host = makeParamDecorator('Host');
  * \@publicApi
  * @type {?}
  */
-const Attribute = makeParamDecorator('Attribute', (/**
- * @param {?=} attributeName
- * @return {?}
- */
-(attributeName) => ({ attributeName })));
+const Attribute = makeParamDecorator('Attribute', (ɵ1));
 
 /**
  * @license
@@ -1069,9 +1071,9 @@ function compileInjectable(type, srcMeta) {
         }),
     });
 }
-const ɵ0 = getClosureSafeProperty;
+const ɵ0$1 = getClosureSafeProperty;
 /** @type {?} */
-const USE_VALUE = getClosureSafeProperty({ provide: String, useValue: ɵ0 });
+const USE_VALUE = getClosureSafeProperty({ provide: String, useValue: ɵ0$1 });
 /**
  * @param {?} meta
  * @return {?}
@@ -1105,9 +1107,9 @@ function isUseExistingProvider(meta) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
-const ɵ0$1 = getClosureSafeProperty;
+const ɵ0$2 = getClosureSafeProperty;
 /** @type {?} */
-const USE_VALUE$1 = getClosureSafeProperty({ provide: String, useValue: ɵ0$1 });
+const USE_VALUE$1 = getClosureSafeProperty({ provide: String, useValue: ɵ0$2 });
 /** @type {?} */
 const EMPTY_ARRAY = [];
 /**
@@ -1186,6 +1188,12 @@ function convertInjectableProviderToFactory(type, provider) {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 // WARNING: interface has both a type and a value, skipping emit
+const ɵ0$3 = /**
+ * @param {?} type
+ * @param {?} meta
+ * @return {?}
+ */
+(type, meta) => SWITCH_COMPILE_INJECTABLE((/** @type {?} */ (type)), meta);
 /**
  * Injectable decorator and metadata.
  *
@@ -1193,12 +1201,7 @@ function convertInjectableProviderToFactory(type, provider) {
  * \@publicApi
  * @type {?}
  */
-const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, (/**
- * @param {?} type
- * @param {?} meta
- * @return {?}
- */
-(type, meta) => SWITCH_COMPILE_INJECTABLE((/** @type {?} */ (type)), meta)));
+const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, (ɵ0$3));
 /**
  * Supports \@Injectable() in JIT mode for Render2.
  * @param {?} injectableType
@@ -1409,8 +1412,9 @@ const MULTI_PROVIDER_FN = (/**
 function () {
     return Array.prototype.slice.call(arguments);
 });
+const ɵ2 = getClosureSafeProperty;
 /** @type {?} */
-const USE_VALUE$2 = getClosureSafeProperty({ provide: String, useValue: getClosureSafeProperty });
+const USE_VALUE$2 = getClosureSafeProperty({ provide: String, useValue: ɵ2 });
 /** @type {?} */
 const NG_TOKEN_PATH = 'ngTokenPath';
 /** @type {?} */
@@ -2963,6 +2967,12 @@ const ANALYZE_FOR_ENTRY_COMPONENTS = new InjectionToken('AnalyzeForEntryComponen
  */
 class Query {
 }
+const ɵ0$4 = /**
+ * @param {?=} selector
+ * @param {?=} data
+ * @return {?}
+ */
+(selector, data = {}) => (Object.assign({ selector, first: false, isViewQuery: false, descendants: false }, data));
 /**
  * ContentChildren decorator and metadata.
  *
@@ -2971,12 +2981,13 @@ class Query {
  * \@publicApi
  * @type {?}
  */
-const ContentChildren = makePropDecorator('ContentChildren', (/**
+const ContentChildren = makePropDecorator('ContentChildren', (ɵ0$4), Query);
+const ɵ1$1 = /**
  * @param {?=} selector
  * @param {?=} data
  * @return {?}
  */
-(selector, data = {}) => (Object.assign({ selector, first: false, isViewQuery: false, descendants: false }, data))), Query);
+(selector, data = {}) => (Object.assign({ selector, first: true, isViewQuery: false, descendants: true }, data));
 /**
  * ContentChild decorator and metadata.
  *
@@ -2986,12 +2997,13 @@ const ContentChildren = makePropDecorator('ContentChildren', (/**
  * \@publicApi
  * @type {?}
  */
-const ContentChild = makePropDecorator('ContentChild', (/**
+const ContentChild = makePropDecorator('ContentChild', (ɵ1$1), Query);
+const ɵ2$1 = /**
  * @param {?=} selector
  * @param {?=} data
  * @return {?}
  */
-(selector, data = {}) => (Object.assign({ selector, first: true, isViewQuery: false, descendants: true }, data))), Query);
+(selector, data = {}) => (Object.assign({ selector, first: false, isViewQuery: true, descendants: true }, data));
 /**
  * ViewChildren decorator and metadata.
  *
@@ -2999,12 +3011,13 @@ const ContentChild = makePropDecorator('ContentChild', (/**
  * \@publicApi
  * @type {?}
  */
-const ViewChildren = makePropDecorator('ViewChildren', (/**
- * @param {?=} selector
- * @param {?=} data
+const ViewChildren = makePropDecorator('ViewChildren', (ɵ2$1), Query);
+const ɵ3 = /**
+ * @param {?} selector
+ * @param {?} data
  * @return {?}
  */
-(selector, data = {}) => (Object.assign({ selector, first: false, isViewQuery: true, descendants: true }, data))), Query);
+(selector, data) => (Object.assign({ selector, first: true, isViewQuery: true, descendants: true }, data));
 /**
  * ViewChild decorator and metadata.
  *
@@ -3012,12 +3025,7 @@ const ViewChildren = makePropDecorator('ViewChildren', (/**
  * \@publicApi
  * @type {?}
  */
-const ViewChild = makePropDecorator('ViewChild', (/**
- * @param {?} selector
- * @param {?} data
- * @return {?}
- */
-(selector, data) => (Object.assign({ selector, first: true, isViewQuery: true, descendants: true }, data))), Query);
+const ViewChild = makePropDecorator('ViewChild', (ɵ3), Query);
 
 /**
  * @fileoverview added by tsickle
@@ -5422,14 +5430,15 @@ RendererStyleFlags3[RendererStyleFlags3.DashCase] = 'DashCase';
 function isProceduralRenderer(renderer) {
     return !!(((/** @type {?} */ (renderer))).listen);
 }
+const ɵ0$5 = /**
+ * @param {?} hostElement
+ * @param {?} rendererType
+ * @return {?}
+ */
+(hostElement, rendererType) => { return document; };
 /** @type {?} */
 const domRendererFactory3 = {
-    createRenderer: (/**
-     * @param {?} hostElement
-     * @param {?} rendererType
-     * @return {?}
-     */
-    (hostElement, rendererType) => { return document; })
+    createRenderer: (ɵ0$5)
 };
 
 /**
@@ -20413,7 +20422,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.13+80.sha-9873356.with-local-changes');
+const VERSION = new Version('8.0.0-beta.13+88.sha-8e8e89a.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -29674,23 +29683,34 @@ function compilePipe(type, meta) {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 // WARNING: interface has both a type and a value, skipping emit
+const ɵ0$6 = /**
+ * @param {?=} dir
+ * @return {?}
+ */
+(dir = {}) => dir, ɵ1$2 = /**
+ * @param {?} type
+ * @param {?} meta
+ * @return {?}
+ */
+(type, meta) => SWITCH_COMPILE_DIRECTIVE(type, meta);
 /**
  * Type of the Directive metadata.
  *
  * \@publicApi
  * @type {?}
  */
-const Directive = makeDecorator('Directive', (/**
- * @param {?=} dir
+const Directive = makeDecorator('Directive', (ɵ0$6), undefined, undefined, (ɵ1$2));
+// WARNING: interface has both a type and a value, skipping emit
+const ɵ2$2 = /**
+ * @param {?=} c
  * @return {?}
  */
-(dir = {}) => dir), undefined, undefined, (/**
+(c = {}) => (Object.assign({ changeDetection: ChangeDetectionStrategy.Default }, c)), ɵ3$1 = /**
  * @param {?} type
  * @param {?} meta
  * @return {?}
  */
-(type, meta) => SWITCH_COMPILE_DIRECTIVE(type, meta)));
-// WARNING: interface has both a type and a value, skipping emit
+(type, meta) => SWITCH_COMPILE_COMPONENT(type, meta);
 /**
  * Component decorator and metadata.
  *
@@ -29698,32 +29718,24 @@ const Directive = makeDecorator('Directive', (/**
  * \@publicApi
  * @type {?}
  */
-const Component = makeDecorator('Component', (/**
- * @param {?=} c
+const Component = makeDecorator('Component', (ɵ2$2), Directive, undefined, (ɵ3$1));
+// WARNING: interface has both a type and a value, skipping emit
+const ɵ4 = /**
+ * @param {?} p
  * @return {?}
  */
-(c = {}) => (Object.assign({ changeDetection: ChangeDetectionStrategy.Default }, c))), Directive, undefined, (/**
+(p) => (Object.assign({ pure: true }, p)), ɵ5 = /**
  * @param {?} type
  * @param {?} meta
  * @return {?}
  */
-(type, meta) => SWITCH_COMPILE_COMPONENT(type, meta)));
-// WARNING: interface has both a type and a value, skipping emit
+(type, meta) => SWITCH_COMPILE_PIPE(type, meta);
 /**
  * \@Annotation
  * \@publicApi
  * @type {?}
  */
-const Pipe = makeDecorator('Pipe', (/**
- * @param {?} p
- * @return {?}
- */
-(p) => (Object.assign({ pure: true }, p))), undefined, undefined, (/**
- * @param {?} type
- * @param {?} meta
- * @return {?}
- */
-(type, meta) => SWITCH_COMPILE_PIPE(type, meta)));
+const Pipe = makeDecorator('Pipe', (ɵ4), undefined, undefined, (ɵ5));
 // WARNING: interface has both a type and a value, skipping emit
 /** @type {?} */
 const initializeBaseDef = (/**
@@ -29774,47 +29786,56 @@ const updateBaseDefFromIOProp = (/**
     const defProp = getProp(baseDef);
     defProp[name] = args[0] || name;
 }));
-/**
- * \@Annotation
- * \@publicApi
- * @type {?}
- */
-const Input = makePropDecorator('Input', (/**
+const ɵ8 = /**
  * @param {?=} bindingPropertyName
  * @return {?}
  */
-(bindingPropertyName) => ({ bindingPropertyName })), undefined, updateBaseDefFromIOProp((/**
+(bindingPropertyName) => ({ bindingPropertyName }), ɵ9 = /**
  * @param {?} baseDef
  * @return {?}
  */
-baseDef => baseDef.inputs || {})));
-// WARNING: interface has both a type and a value, skipping emit
+baseDef => baseDef.inputs || {};
 /**
  * \@Annotation
  * \@publicApi
  * @type {?}
  */
-const Output = makePropDecorator('Output', (/**
+const Input = makePropDecorator('Input', (ɵ8), undefined, updateBaseDefFromIOProp((ɵ9)));
+// WARNING: interface has both a type and a value, skipping emit
+const ɵ10 = /**
  * @param {?=} bindingPropertyName
  * @return {?}
  */
-(bindingPropertyName) => ({ bindingPropertyName })), undefined, updateBaseDefFromIOProp((/**
+(bindingPropertyName) => ({ bindingPropertyName }), ɵ11 = /**
  * @param {?} baseDef
  * @return {?}
  */
-baseDef => baseDef.outputs || {})));
-// WARNING: interface has both a type and a value, skipping emit
+baseDef => baseDef.outputs || {};
 /**
  * \@Annotation
  * \@publicApi
  * @type {?}
  */
-const HostBinding = makePropDecorator('HostBinding', (/**
+const Output = makePropDecorator('Output', (ɵ10), undefined, updateBaseDefFromIOProp((ɵ11)));
+// WARNING: interface has both a type and a value, skipping emit
+const ɵ12 = /**
  * @param {?=} hostPropertyName
  * @return {?}
  */
-(hostPropertyName) => ({ hostPropertyName })));
+(hostPropertyName) => ({ hostPropertyName });
+/**
+ * \@Annotation
+ * \@publicApi
+ * @type {?}
+ */
+const HostBinding = makePropDecorator('HostBinding', (ɵ12));
 // WARNING: interface has both a type and a value, skipping emit
+const ɵ13 = /**
+ * @param {?=} eventName
+ * @param {?=} args
+ * @return {?}
+ */
+(eventName, args) => ({ eventName, args });
 /**
  * Binds a CSS event to a host listener and supplies configuration metadata.
  * Angular invokes the supplied handler method when the host element emits the specified event,
@@ -29848,12 +29869,7 @@ const HostBinding = makePropDecorator('HostBinding', (/**
  * \@publicApi
  * @type {?}
  */
-const HostListener = makePropDecorator('HostListener', (/**
- * @param {?=} eventName
- * @param {?=} args
- * @return {?}
- */
-(eventName, args) => ({ eventName, args })));
+const HostListener = makePropDecorator('HostListener', (ɵ13));
 /** @type {?} */
 const SWITCH_COMPILE_COMPONENT__POST_R3__ = compileComponent;
 /** @type {?} */
@@ -29878,16 +29894,11 @@ const SWITCH_COMPILE_PIPE = SWITCH_COMPILE_PIPE__PRE_R3__;
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 // WARNING: interface has both a type and a value, skipping emit
-/**
- * \@Annotation
- * \@publicApi
- * @type {?}
- */
-const NgModule = makeDecorator('NgModule', (/**
+const ɵ0$7 = /**
  * @param {?} ngModule
  * @return {?}
  */
-(ngModule) => ngModule), undefined, undefined, (/**
+(ngModule) => ngModule, ɵ1$3 = /**
  * Decorator that marks the following class as an NgModule, and supplies
  * configuration metadata for it.
  *
@@ -29901,7 +29912,13 @@ const NgModule = makeDecorator('NgModule', (/**
  * @param {?} meta
  * @return {?}
  */
-(type, meta) => SWITCH_COMPILE_NGMODULE(type, meta)));
+(type, meta) => SWITCH_COMPILE_NGMODULE(type, meta);
+/**
+ * \@Annotation
+ * \@publicApi
+ * @type {?}
+ */
+const NgModule = makeDecorator('NgModule', (ɵ0$7), undefined, undefined, (ɵ1$3));
 /**
  * @param {?} moduleType
  * @param {?} metadata
