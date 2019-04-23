@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.13+82.sha-8e73f9b.with-local-changes
+ * @license Angular v8.0.0-beta.13+83.sha-00ce9aa.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1896,16 +1896,11 @@ class R3TestBedCompiler {
      * @return {?}
      */
     compileTestModule() {
-        /** @type {?} */
-        const rootProviderOverrides = this.rootProviderOverrides;
         class RootScopeModule {
         }
-        RootScopeModule.decorators = [
-            { type: NgModule, args: [{
-                        providers: [...rootProviderOverrides],
-                        jit: true,
-                    },] },
-        ];
+        ɵcompileNgModuleDefs((/** @type {?} */ (RootScopeModule)), {
+            providers: [...this.rootProviderOverrides],
+        });
         /** @type {?} */
         const ngZone = new NgZone({ enableLongStackTrace: true });
         /** @type {?} */
