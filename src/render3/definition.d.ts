@@ -340,6 +340,15 @@ export declare function ɵɵdefineBase<T>(baseDefinition: {
     outputs?: {
         [P in keyof T]?: string;
     };
+    /**
+     * Function to create instances of content queries associated with a given directive.
+     */
+    contentQueries?: ContentQueriesFunction<T> | null;
+    /**
+     * Additional set of instructions specific to view query processing. This could be seen as a
+     * set of instructions to be inserted into the template function.
+     */
+    viewQuery?: ViewQueriesFunction<T> | null;
 }): ɵɵBaseDef<T>;
 /**
  * Create a directive definition object.
@@ -483,5 +492,6 @@ export declare function ɵɵdefinePipe<T>(pipeDef: {
 export declare function getComponentDef<T>(type: any): ComponentDef<T> | null;
 export declare function getDirectiveDef<T>(type: any): DirectiveDef<T> | null;
 export declare function getPipeDef<T>(type: any): PipeDef<T> | null;
+export declare function getBaseDef<T>(type: any): ɵɵBaseDef<T> | null;
 export declare function getNgModuleDef<T>(type: any, throwNotFound: true): NgModuleDef<T>;
 export declare function getNgModuleDef<T>(type: any): NgModuleDef<T> | null;
