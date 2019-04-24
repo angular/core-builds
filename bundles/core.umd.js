@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.14+3.sha-d92fb25.with-local-changes
+ * @license Angular v8.0.0-beta.14+19.sha-3938563.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2676,26 +2676,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var NG_COMPONENT_DEF = getClosureSafeProperty({ ngComponentDef: getClosureSafeProperty });
-    var NG_DIRECTIVE_DEF = getClosureSafeProperty({ ngDirectiveDef: getClosureSafeProperty });
-    var NG_PIPE_DEF = getClosureSafeProperty({ ngPipeDef: getClosureSafeProperty });
-    var NG_MODULE_DEF = getClosureSafeProperty({ ngModuleDef: getClosureSafeProperty });
-    var NG_BASE_DEF = getClosureSafeProperty({ ngBaseDef: getClosureSafeProperty });
-    /**
-     * If a directive is diPublic, bloomAdd sets a property on the type with this constant as
-     * the key and the directive's unique ID as the value. This allows us to map directives to their
-     * bloom filter bit for DI.
-     */
-    // TODO(misko): This is wrong. The NG_ELEMENT_ID should never be minified.
-    var NG_ELEMENT_ID = getClosureSafeProperty({ __NG_ELEMENT_ID__: getClosureSafeProperty });
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     /**
      * Used to resolve resource URLs on `@Component` when used with JIT compilation.
      *
@@ -2890,6 +2870,26 @@
     }
 
     /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Convince closure compiler that the wrapped function has no side-effects.
+     *
+     * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
+     * allow us to execute a function but have closure compiler mark the call as no-side-effects.
+     * It is important that the return value for the `noSideEffects` function be assigned
+     * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
+     * compiler.
+     */
+    function noSideEffects(fn) {
+        return '' + { toString: fn };
+    }
+
+    /**
     * @license
     * Copyright Google Inc. All Rights Reserved.
     *
@@ -2917,158 +2917,18 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    var NG_COMPONENT_DEF = getClosureSafeProperty({ ngComponentDef: getClosureSafeProperty });
+    var NG_DIRECTIVE_DEF = getClosureSafeProperty({ ngDirectiveDef: getClosureSafeProperty });
+    var NG_PIPE_DEF = getClosureSafeProperty({ ngPipeDef: getClosureSafeProperty });
+    var NG_MODULE_DEF = getClosureSafeProperty({ ngModuleDef: getClosureSafeProperty });
+    var NG_BASE_DEF = getClosureSafeProperty({ ngBaseDef: getClosureSafeProperty });
     /**
-     * Returns whether the values are different from a change detection stand point.
-     *
-     * Constraints are relaxed in checkNoChanges mode. See `devModeEqual` for details.
+     * If a directive is diPublic, bloomAdd sets a property on the type with this constant as
+     * the key and the directive's unique ID as the value. This allows us to map directives to their
+     * bloom filter bit for DI.
      */
-    function isDifferent(a, b) {
-        // NaN is the only value that is not equal to itself so the first
-        // test checks if both a and b are not NaN
-        return !(a !== a && b !== b) && a !== b;
-    }
-    /**
-     * Used for stringify render output in Ivy.
-     */
-    function renderStringify(value) {
-        if (typeof value == 'function')
-            return value.name || value;
-        if (typeof value == 'string')
-            return value;
-        if (value == null)
-            return '';
-        if (typeof value == 'object' && typeof value.type == 'function')
-            return value.type.name || value.type;
-        return '' + value;
-    }
-    var defaultScheduler = (typeof requestAnimationFrame !== 'undefined' && requestAnimationFrame || // browser only
-        setTimeout // everything else
-    ).bind(_global);
-    /**
-     *
-     * @codeGenApi
-     */
-    function ɵɵresolveWindow(element) {
-        return { name: 'window', target: element.ownerDocument.defaultView };
-    }
-    /**
-     *
-     * @codeGenApi
-     */
-    function ɵɵresolveDocument(element) {
-        return { name: 'document', target: element.ownerDocument };
-    }
-    /**
-     *
-     * @codeGenApi
-     */
-    function ɵɵresolveBody(element) {
-        return { name: 'body', target: element.ownerDocument.body };
-    }
-    /**
-     * The special delimiter we use to separate property names, prefixes, and suffixes
-     * in property binding metadata. See storeBindingMetadata().
-     *
-     * We intentionally use the Unicode "REPLACEMENT CHARACTER" (U+FFFD) as a delimiter
-     * because it is a very uncommon character that is unlikely to be part of a user's
-     * property names or interpolation strings. If it is in fact used in a property
-     * binding, DebugElement.properties will not return the correct value for that
-     * binding. However, there should be no runtime effect for real applications.
-     *
-     * This character is typically rendered as a question mark inside of a diamond.
-     * See https://en.wikipedia.org/wiki/Specials_(Unicode_block)
-     *
-     */
-    var INTERPOLATION_DELIMITER = "\uFFFD";
-    /**
-     * Determines whether or not the given string is a property metadata string.
-     * See storeBindingMetadata().
-     */
-    function isPropMetadataString(str) {
-        return str.indexOf(INTERPOLATION_DELIMITER) >= 0;
-    }
-    /**
-     * Unwrap a value which might be behind a closure (for forward declaration reasons).
-     */
-    function maybeUnwrapFn(value) {
-        if (value instanceof Function) {
-            return value();
-        }
-        else {
-            return value;
-        }
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    function assertEqual(actual, expected, msg) {
-        if (actual != expected) {
-            throwError(msg);
-        }
-    }
-    function assertNotEqual(actual, expected, msg) {
-        if (actual == expected) {
-            throwError(msg);
-        }
-    }
-    function assertNotSame(actual, expected, msg) {
-        if (actual === expected) {
-            throwError(msg);
-        }
-    }
-    function assertLessThan(actual, expected, msg) {
-        if (actual >= expected) {
-            throwError(msg);
-        }
-    }
-    function assertGreaterThan(actual, expected, msg) {
-        if (actual <= expected) {
-            throwError(msg);
-        }
-    }
-    function assertDefined(actual, msg) {
-        if (actual == null) {
-            throwError(msg);
-        }
-    }
-    function throwError(msg) {
-        // tslint:disable-next-line
-        debugger; // Left intentionally for better debugger experience.
-        throw new Error("ASSERTION ERROR: " + msg);
-    }
-    function assertDomNode(node) {
-        // If we're in a worker, `Node` will not be defined.
-        assertEqual((typeof Node !== 'undefined' && node instanceof Node) ||
-            (typeof node === 'object' && node.constructor.name === 'WebWorkerRenderNode'), true, 'The provided value must be an instance of a DOM Node');
-    }
-    function assertDataInRange(arr, index) {
-        assertLessThan(index, arr ? arr.length : 0, 'index expected to be a valid data index');
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Convince closure compiler that the wrapped function has no side-effects.
-     *
-     * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
-     * allow us to execute a function but have closure compiler mark the call as no-side-effects.
-     * It is important that the return value for the `noSideEffects` function be assigned
-     * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
-     * compiler.
-     */
-    function noSideEffects(fn) {
-        return '' + { toString: fn };
-    }
+    // TODO(misko): This is wrong. The NG_ELEMENT_ID should never be minified.
+    var NG_ELEMENT_ID = getClosureSafeProperty({ __NG_ELEMENT_ID__: getClosureSafeProperty });
 
     /**
      * @license
@@ -3314,6 +3174,8 @@
             inputs: invertObject(baseDefinition.inputs, declaredInputs),
             declaredInputs: declaredInputs,
             outputs: invertObject(baseDefinition.outputs),
+            viewQuery: baseDefinition.viewQuery || null,
+            contentQueries: baseDefinition.contentQueries || null,
         };
     }
     /**
@@ -3371,12 +3233,166 @@
     function getPipeDef(type) {
         return type[NG_PIPE_DEF] || null;
     }
+    function getBaseDef(type) {
+        return type[NG_BASE_DEF] || null;
+    }
     function getNgModuleDef(type, throwNotFound) {
         var ngModuleDef = type[NG_MODULE_DEF] || null;
         if (!ngModuleDef && throwNotFound === true) {
             throw new Error("Type " + stringify(type) + " does not have 'ngModuleDef' property.");
         }
         return ngModuleDef;
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Returns whether the values are different from a change detection stand point.
+     *
+     * Constraints are relaxed in checkNoChanges mode. See `devModeEqual` for details.
+     */
+    function isDifferent(a, b) {
+        // NaN is the only value that is not equal to itself so the first
+        // test checks if both a and b are not NaN
+        return !(a !== a && b !== b) && a !== b;
+    }
+    /**
+     * Used for stringify render output in Ivy.
+     * Important! This function is very performance-sensitive and we should
+     * be extra careful not to introduce megamorphic reads in it.
+     */
+    function renderStringify(value) {
+        if (typeof value === 'function')
+            return value.name || value;
+        if (typeof value === 'string')
+            return value;
+        if (value == null)
+            return '';
+        return '' + value;
+    }
+    /**
+     * Used to stringify a value so that it can be displayed in an error message.
+     * Important! This function contains a megamorphic read and should only be
+     * used for error messages.
+     */
+    function stringifyForError(value) {
+        if (typeof value === 'object' && value != null && typeof value.type === 'function') {
+            return value.type.name || value.type;
+        }
+        return renderStringify(value);
+    }
+    var defaultScheduler = (typeof requestAnimationFrame !== 'undefined' && requestAnimationFrame || // browser only
+        setTimeout // everything else
+    ).bind(_global);
+    /**
+     *
+     * @codeGenApi
+     */
+    function ɵɵresolveWindow(element) {
+        return { name: 'window', target: element.ownerDocument.defaultView };
+    }
+    /**
+     *
+     * @codeGenApi
+     */
+    function ɵɵresolveDocument(element) {
+        return { name: 'document', target: element.ownerDocument };
+    }
+    /**
+     *
+     * @codeGenApi
+     */
+    function ɵɵresolveBody(element) {
+        return { name: 'body', target: element.ownerDocument.body };
+    }
+    /**
+     * The special delimiter we use to separate property names, prefixes, and suffixes
+     * in property binding metadata. See storeBindingMetadata().
+     *
+     * We intentionally use the Unicode "REPLACEMENT CHARACTER" (U+FFFD) as a delimiter
+     * because it is a very uncommon character that is unlikely to be part of a user's
+     * property names or interpolation strings. If it is in fact used in a property
+     * binding, DebugElement.properties will not return the correct value for that
+     * binding. However, there should be no runtime effect for real applications.
+     *
+     * This character is typically rendered as a question mark inside of a diamond.
+     * See https://en.wikipedia.org/wiki/Specials_(Unicode_block)
+     *
+     */
+    var INTERPOLATION_DELIMITER = "\uFFFD";
+    /**
+     * Determines whether or not the given string is a property metadata string.
+     * See storeBindingMetadata().
+     */
+    function isPropMetadataString(str) {
+        return str.indexOf(INTERPOLATION_DELIMITER) >= 0;
+    }
+    /**
+     * Unwrap a value which might be behind a closure (for forward declaration reasons).
+     */
+    function maybeUnwrapFn(value) {
+        if (value instanceof Function) {
+            return value();
+        }
+        else {
+            return value;
+        }
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    function assertEqual(actual, expected, msg) {
+        if (actual != expected) {
+            throwError(msg);
+        }
+    }
+    function assertNotEqual(actual, expected, msg) {
+        if (actual == expected) {
+            throwError(msg);
+        }
+    }
+    function assertNotSame(actual, expected, msg) {
+        if (actual === expected) {
+            throwError(msg);
+        }
+    }
+    function assertLessThan(actual, expected, msg) {
+        if (actual >= expected) {
+            throwError(msg);
+        }
+    }
+    function assertGreaterThan(actual, expected, msg) {
+        if (actual <= expected) {
+            throwError(msg);
+        }
+    }
+    function assertDefined(actual, msg) {
+        if (actual == null) {
+            throwError(msg);
+        }
+    }
+    function throwError(msg) {
+        // tslint:disable-next-line
+        debugger; // Left intentionally for better debugger experience.
+        throw new Error("ASSERTION ERROR: " + msg);
+    }
+    function assertDomNode(node) {
+        // If we're in a worker, `Node` will not be defined.
+        assertEqual((typeof Node !== 'undefined' && node instanceof Node) ||
+            (typeof node === 'object' && node.constructor.name === 'WebWorkerRenderNode'), true, 'The provided value must be an instance of a DOM Node');
+    }
+    function assertDataInRange(arr, index) {
+        assertLessThan(index, arr ? arr.length : 0, 'index expected to be a valid data index');
     }
 
     /**
@@ -5549,7 +5565,7 @@
                 try {
                     var value = bloomHash();
                     if (value == null && !(flags & exports.InjectFlags.Optional)) {
-                        throw new Error("No provider for " + renderStringify(token) + "!");
+                        throw new Error("No provider for " + stringifyForError(token) + "!");
                     }
                     else {
                         return value;
@@ -5645,7 +5661,7 @@
             return notFoundValue;
         }
         else {
-            throw new Error("NodeInjector: NOT_FOUND [" + renderStringify(token) + "]");
+            throw new Error("NodeInjector: NOT_FOUND [" + stringifyForError(token) + "]");
         }
     }
     var NOT_FOUND = {};
@@ -5729,7 +5745,7 @@
         if (isFactory(value)) {
             var factory = value;
             if (factory.resolving) {
-                throw new Error("Circular dep for " + renderStringify(tData[index]));
+                throw new Error("Circular dep for " + stringifyForError(tData[index]));
             }
             var previousIncludeViewProviders = setIncludeViewProviders(factory.canSeeViewProviders);
             factory.resolving = true;
@@ -9818,7 +9834,7 @@
         return blueprint;
     }
     function createError(text, token) {
-        return new Error("Renderer: " + text + " [" + renderStringify(token) + "]");
+        return new Error("Renderer: " + text + " [" + stringifyForError(token) + "]");
     }
     /**
      * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.
@@ -14346,7 +14362,7 @@
         if (throwOnNotFound === void 0) { throwOnNotFound = true; }
         var context = getLContext(target);
         if (!context && throwOnNotFound) {
-            throw new Error(ngDevMode ? "Unable to find context associated with " + renderStringify(target) :
+            throw new Error(ngDevMode ? "Unable to find context associated with " + stringifyForError(target) :
                 'Invalid ng target');
         }
         return context;
@@ -14839,7 +14855,10 @@
                 writeableDef.outputs = maybeUnwrapEmpty(definition.outputs);
             }
             if (baseDef) {
-                // Merge inputs and outputs
+                var baseViewQuery = baseDef.viewQuery;
+                var baseContentQueries = baseDef.contentQueries;
+                baseViewQuery && inheritViewQuery(definition, baseViewQuery);
+                baseContentQueries && inheritContentQueries(definition, baseContentQueries);
                 fillProperties(definition.inputs, baseDef.inputs);
                 fillProperties(definition.declaredInputs, baseDef.declaredInputs);
                 fillProperties(definition.outputs, baseDef.outputs);
@@ -14876,34 +14895,11 @@
                         definition.hostBindings = superHostBindings_1;
                     }
                 }
-                // Merge View Queries
-                var prevViewQuery_1 = definition.viewQuery;
-                var superViewQuery_1 = superDef.viewQuery;
-                if (superViewQuery_1) {
-                    if (prevViewQuery_1) {
-                        definition.viewQuery = function (rf, ctx) {
-                            superViewQuery_1(rf, ctx);
-                            prevViewQuery_1(rf, ctx);
-                        };
-                    }
-                    else {
-                        definition.viewQuery = superViewQuery_1;
-                    }
-                }
-                // Merge Content Queries
-                var prevContentQueries_1 = definition.contentQueries;
-                var superContentQueries_1 = superDef.contentQueries;
-                if (superContentQueries_1) {
-                    if (prevContentQueries_1) {
-                        definition.contentQueries = function (rf, ctx, directiveIndex) {
-                            superContentQueries_1(rf, ctx, directiveIndex);
-                            prevContentQueries_1(rf, ctx, directiveIndex);
-                        };
-                    }
-                    else {
-                        definition.contentQueries = superContentQueries_1;
-                    }
-                }
+                // Merge queries
+                var superViewQuery = superDef.viewQuery;
+                var superContentQueries = superDef.contentQueries;
+                superViewQuery && inheritViewQuery(definition, superViewQuery);
+                superContentQueries && inheritContentQueries(definition, superContentQueries);
                 // Merge inputs and outputs
                 fillProperties(definition.inputs, superDef.inputs);
                 fillProperties(definition.declaredInputs, superDef.declaredInputs);
@@ -14972,6 +14968,30 @@
         }
         else {
             return value;
+        }
+    }
+    function inheritViewQuery(definition, superViewQuery) {
+        var prevViewQuery = definition.viewQuery;
+        if (prevViewQuery) {
+            definition.viewQuery = function (rf, ctx) {
+                superViewQuery(rf, ctx);
+                prevViewQuery(rf, ctx);
+            };
+        }
+        else {
+            definition.viewQuery = superViewQuery;
+        }
+    }
+    function inheritContentQueries(definition, superContentQueries) {
+        var prevContentQueries = definition.contentQueries;
+        if (prevContentQueries) {
+            definition.contentQueries = function (rf, ctx, directiveIndex) {
+                superContentQueries(rf, ctx, directiveIndex);
+                prevContentQueries(rf, ctx, directiveIndex);
+            };
+        }
+        else {
+            definition.contentQueries = superContentQueries;
         }
     }
 
@@ -16560,7 +16580,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.14+3.sha-d92fb25.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.14+19.sha-3938563.with-local-changes');
 
     /**
      * @license
@@ -22996,7 +23016,7 @@
             type = resolveForwardRef(type);
             var def = getComponentDef(type) || getDirectiveDef(type) || getPipeDef(type);
             if (!def) {
-                errors.push("Unexpected value '" + renderStringify(type) + "' declared by the module '" + renderStringify(moduleType) + "'. Please add a @Pipe/@Directive/@Component annotation.");
+                errors.push("Unexpected value '" + stringifyForError(type) + "' declared by the module '" + stringifyForError(moduleType) + "'. Please add a @Pipe/@Directive/@Component annotation.");
             }
         }
         function verifyExportsAreDeclaredOrReExported(type) {
@@ -23008,7 +23028,7 @@
                 // Modules don't need to be declared or imported.
                 if (combinedDeclarations.lastIndexOf(type) === -1) {
                     // We are exporting something which we don't explicitly declare or import.
-                    errors.push("Can't export " + kind + " " + renderStringify(type) + " from " + renderStringify(moduleType) + " as it was neither declared nor imported!");
+                    errors.push("Can't export " + kind + " " + stringifyForError(type) + " from " + stringifyForError(moduleType) + " as it was neither declared nor imported!");
                 }
             }
         }
@@ -23016,10 +23036,10 @@
             type = resolveForwardRef(type);
             var existingModule = ownerNgModule.get(type);
             if (existingModule && existingModule !== moduleType) {
-                var modules = [existingModule, moduleType].map(renderStringify).sort();
-                errors.push("Type " + renderStringify(type) + " is part of the declarations of 2 modules: " + modules[0] + " and " + modules[1] + "! " +
-                    ("Please consider moving " + renderStringify(type) + " to a higher module that imports " + modules[0] + " and " + modules[1] + ". ") +
-                    ("You can also create a new NgModule that exports and includes " + renderStringify(type) + " then import that NgModule in " + modules[0] + " and " + modules[1] + "."));
+                var modules = [existingModule, moduleType].map(stringifyForError).sort();
+                errors.push("Type " + stringifyForError(type) + " is part of the declarations of 2 modules: " + modules[0] + " and " + modules[1] + "! " +
+                    ("Please consider moving " + stringifyForError(type) + " to a higher module that imports " + modules[0] + " and " + modules[1] + ". ") +
+                    ("You can also create a new NgModule that exports and includes " + stringifyForError(type) + " then import that NgModule in " + modules[0] + " and " + modules[1] + "."));
             }
             else {
                 // Mark type as having owner.
@@ -23030,13 +23050,13 @@
             type = resolveForwardRef(type);
             var existingModule = ownerNgModule.get(type);
             if (!existingModule) {
-                errors.push("Component " + renderStringify(type) + " is not part of any NgModule or the module has not been imported into your module.");
+                errors.push("Component " + stringifyForError(type) + " is not part of any NgModule or the module has not been imported into your module.");
             }
         }
         function verifyCorrectBootstrapType(type) {
             type = resolveForwardRef(type);
             if (!getComponentDef(type)) {
-                errors.push(renderStringify(type) + " cannot be used as an entry component.");
+                errors.push(stringifyForError(type) + " cannot be used as an entry component.");
             }
         }
         function verifyComponentEntryComponentsIsPartOfNgModule(type) {
@@ -23282,9 +23302,9 @@
                 var compiler = getCompilerFacade();
                 if (ngComponentDef === null) {
                     if (componentNeedsResolution(metadata)) {
-                        var error = ["Component '" + renderStringify(type) + "' is not resolved:"];
+                        var error = ["Component '" + type.name + "' is not resolved:"];
                         if (metadata.templateUrl) {
-                            error.push(" - templateUrl: " + renderStringify(metadata.templateUrl));
+                            error.push(" - templateUrl: " + metadata.templateUrl);
                         }
                         if (metadata.styleUrls && metadata.styleUrls.length) {
                             error.push(" - styleUrls: " + JSON.stringify(metadata.styleUrls));
@@ -23292,8 +23312,11 @@
                         error.push("Did you run and wait for 'resolveComponentResources()'?");
                         throw new Error(error.join('\n'));
                     }
-                    var templateUrl = metadata.templateUrl || "ng:///" + renderStringify(type) + "/template.html";
-                    var meta = __assign({}, directiveMetadata(type, metadata), { typeSourceSpan: compiler.createParseSourceSpan('Component', renderStringify(type), templateUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY$1, animations: metadata.animations, directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || exports.ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
+                    var templateUrl = metadata.templateUrl || "ng:///" + type.name + "/template.html";
+                    var meta = __assign({}, directiveMetadata(type, metadata), { typeSourceSpan: compiler.createParseSourceSpan('Component', type.name, templateUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY$1, animations: metadata.animations, directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || exports.ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
+                    if (meta.usesInheritance) {
+                        addBaseDefToUndecoratedParents(type);
+                    }
                     ngComponentDef = compiler.compileComponent(angularCoreEnv, templateUrl, meta);
                     // When NgModule decorator executed, we enqueued the module definition such that
                     // it would only dequeue and add itself as module scope to all of its declarations,
@@ -23339,8 +23362,10 @@
                     var sourceMapUrl = "ng://" + name_1 + "/ngDirectiveDef.js";
                     var compiler = getCompilerFacade();
                     var facade = directiveMetadata(type, directive);
-                    facade.typeSourceSpan =
-                        compiler.createParseSourceSpan('Directive', renderStringify(type), sourceMapUrl);
+                    facade.typeSourceSpan = compiler.createParseSourceSpan('Directive', name_1, sourceMapUrl);
+                    if (facade.usesInheritance) {
+                        addBaseDefToUndecoratedParents(type);
+                    }
                     ngDirectiveDef = compiler.compileDirective(angularCoreEnv, sourceMapUrl, facade);
                 }
                 return ngDirectiveDef;
@@ -23382,6 +23407,68 @@
             viewQueries: extractQueriesMetadata(type, propMetadata, isViewQuery),
         };
     }
+    /**
+     * Adds an `ngBaseDef` to all parent classes of a type that don't have an Angular decorator.
+     */
+    function addBaseDefToUndecoratedParents(type) {
+        var objPrototype = Object.prototype;
+        var parent = Object.getPrototypeOf(type);
+        // Go up the prototype until we hit `Object`.
+        while (parent && parent !== objPrototype) {
+            // Since inheritance works if the class was annotated already, we only need to add
+            // the base def if there are no annotations and the base def hasn't been created already.
+            if (!getDirectiveDef(parent) && !getComponentDef(parent) && !getBaseDef(parent)) {
+                var facade = extractBaseDefMetadata(parent);
+                facade && compileBase(parent, facade);
+            }
+            parent = Object.getPrototypeOf(parent);
+        }
+    }
+    /** Compiles the base metadata into a base definition. */
+    function compileBase(type, facade) {
+        var ngBaseDef = null;
+        Object.defineProperty(type, NG_BASE_DEF, {
+            get: function () {
+                if (ngBaseDef === null) {
+                    var name_2 = type && type.name;
+                    var sourceMapUrl = "ng://" + name_2 + "/ngBaseDef.js";
+                    var compiler = getCompilerFacade();
+                    ngBaseDef = compiler.compileBase(angularCoreEnv, sourceMapUrl, facade);
+                }
+                return ngBaseDef;
+            },
+            // Make the property configurable in dev mode to allow overriding in tests
+            configurable: !!ngDevMode,
+        });
+    }
+    /** Extracts the metadata necessary to construct an `ngBaseDef` from a class. */
+    function extractBaseDefMetadata(type) {
+        var propMetadata = getReflect().ownPropMetadata(type);
+        var viewQueries = extractQueriesMetadata(type, propMetadata, isViewQuery);
+        var queries = extractQueriesMetadata(type, propMetadata, isContentQuery);
+        var inputs;
+        var outputs;
+        var _loop_1 = function (field) {
+            propMetadata[field].forEach(function (ann) {
+                if (ann.ngMetadataName === 'Input') {
+                    inputs = inputs || {};
+                    inputs[field] = ann.bindingPropertyName ? [ann.bindingPropertyName, field] : field;
+                }
+                else if (ann.ngMetadataName === 'Output') {
+                    outputs = outputs || {};
+                    outputs[field] = ann.bindingPropertyName || field;
+                }
+            });
+        };
+        for (var field in propMetadata) {
+            _loop_1(field);
+        }
+        // Only generate the base def if there's any info inside it.
+        if (inputs || outputs || viewQueries.length || queries.length) {
+            return { inputs: inputs, outputs: outputs, viewQueries: viewQueries, queries: queries };
+        }
+        return null;
+    }
     function convertToR3QueryPredicate(selector) {
         return typeof selector === 'string' ? splitByComma(selector) : resolveForwardRef(selector);
     }
@@ -23397,14 +23484,14 @@
     }
     function extractQueriesMetadata(type, propMetadata, isQueryAnn) {
         var queriesMeta = [];
-        var _loop_1 = function (field) {
+        var _loop_2 = function (field) {
             if (propMetadata.hasOwnProperty(field)) {
                 var annotations_1 = propMetadata[field];
                 annotations_1.forEach(function (ann) {
                     if (isQueryAnn(ann)) {
                         if (!ann.selector) {
                             throw new Error("Can't construct a query for the property \"" + field + "\" of " +
-                                ("\"" + renderStringify(type) + "\" since the query selector wasn't defined."));
+                                ("\"" + stringifyForError(type) + "\" since the query selector wasn't defined."));
                         }
                         if (annotations_1.some(isInputAnn)) {
                             throw new Error("Cannot combine @Input decorators with query decorators");
@@ -23415,7 +23502,7 @@
             }
         };
         for (var field in propMetadata) {
-            _loop_1(field);
+            _loop_2(field);
         }
         return queriesMeta;
     }
@@ -23452,14 +23539,16 @@
         Object.defineProperty(type, NG_PIPE_DEF, {
             get: function () {
                 if (ngPipeDef === null) {
-                    ngPipeDef = getCompilerFacade().compilePipe(angularCoreEnv, "ng://" + renderStringify(type) + "/ngPipeDef.js", {
-                        type: type,
-                        typeArgumentCount: 0,
-                        name: type.name,
-                        deps: reflectDependencies(type),
-                        pipeName: meta.name,
-                        pure: meta.pure !== undefined ? meta.pure : true
-                    });
+                    var typeName = type.name;
+                    ngPipeDef =
+                        getCompilerFacade().compilePipe(angularCoreEnv, "ng://" + typeName + "/ngPipeDef.js", {
+                            type: type,
+                            typeArgumentCount: 0,
+                            name: typeName,
+                            deps: reflectDependencies(type),
+                            pipeName: meta.name,
+                            pure: meta.pure !== undefined ? meta.pure : true
+                        });
                 }
                 return ngPipeDef;
             },
@@ -23502,58 +23591,25 @@
      * @publicApi
      */
     var Pipe = makeDecorator('Pipe', ɵ4, undefined, undefined, ɵ5);
-    var initializeBaseDef = function (target) {
-        var constructor = target.constructor;
-        var inheritedBaseDef = constructor.ngBaseDef;
-        var baseDef = constructor.ngBaseDef = {
-            inputs: {},
-            outputs: {},
-            declaredInputs: {},
-        };
-        if (inheritedBaseDef) {
-            fillProperties(baseDef.inputs, inheritedBaseDef.inputs);
-            fillProperties(baseDef.outputs, inheritedBaseDef.outputs);
-            fillProperties(baseDef.declaredInputs, inheritedBaseDef.declaredInputs);
-        }
-    };
-    /**
-     * Does the work of creating the `ngBaseDef` property for the `Input` and `Output` decorators.
-     * @param key "inputs" or "outputs"
-     */
-    var updateBaseDefFromIOProp = function (getProp) {
-        return function (target, name) {
-            var args = [];
-            for (var _i = 2; _i < arguments.length; _i++) {
-                args[_i - 2] = arguments[_i];
-            }
-            var constructor = target.constructor;
-            if (!constructor.hasOwnProperty(NG_BASE_DEF)) {
-                initializeBaseDef(target);
-            }
-            var baseDef = constructor.ngBaseDef;
-            var defProp = getProp(baseDef);
-            defProp[name] = args[0] || name;
-        };
-    };
-    var ɵ8 = function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); }, ɵ9 = function (baseDef) { return baseDef.inputs || {}; };
+    var ɵ6 = function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); };
     /**
      * @Annotation
      * @publicApi
      */
-    var Input = makePropDecorator('Input', ɵ8, undefined, updateBaseDefFromIOProp(ɵ9));
-    var ɵ10 = function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); }, ɵ11 = function (baseDef) { return baseDef.outputs || {}; };
+    var Input = makePropDecorator('Input', ɵ6);
+    var ɵ7 = function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); };
     /**
      * @Annotation
      * @publicApi
      */
-    var Output = makePropDecorator('Output', ɵ10, undefined, updateBaseDefFromIOProp(ɵ11));
-    var ɵ12 = function (hostPropertyName) { return ({ hostPropertyName: hostPropertyName }); };
+    var Output = makePropDecorator('Output', ɵ7);
+    var ɵ8 = function (hostPropertyName) { return ({ hostPropertyName: hostPropertyName }); };
     /**
      * @Annotation
      * @publicApi
      */
-    var HostBinding = makePropDecorator('HostBinding', ɵ12);
-    var ɵ13 = function (eventName, args) { return ({ eventName: eventName, args: args }); };
+    var HostBinding = makePropDecorator('HostBinding', ɵ8);
+    var ɵ9 = function (eventName, args) { return ({ eventName: eventName, args: args }); };
     /**
      * Binds a CSS event to a host listener and supplies configuration metadata.
      * Angular invokes the supplied handler method when the host element emits the specified event,
@@ -23586,7 +23642,7 @@
      * @Annotation
      * @publicApi
      */
-    var HostListener = makePropDecorator('HostListener', ɵ13);
+    var HostListener = makePropDecorator('HostListener', ɵ9);
     var SWITCH_COMPILE_COMPONENT__POST_R3__ = compileComponent;
     var SWITCH_COMPILE_DIRECTIVE__POST_R3__ = compileDirective;
     var SWITCH_COMPILE_PIPE__POST_R3__ = compilePipe;
