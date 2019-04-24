@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.14+15.sha-24c61cb.with-local-changes
+ * @license Angular v8.0.0-beta.14+16.sha-2e21997.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3872,19 +3872,32 @@ function isDifferent(a, b) {
 }
 /**
  * Used for stringify render output in Ivy.
+ * Important! This function is very performance-sensitive and we should
+ * be extra careful not to introduce megamorphic reads in it.
  * @param {?} value
  * @return {?}
  */
 function renderStringify(value) {
-    if (typeof value == 'function')
+    if (typeof value === 'function')
         return value.name || value;
-    if (typeof value == 'string')
+    if (typeof value === 'string')
         return value;
     if (value == null)
         return '';
-    if (typeof value == 'object' && typeof value.type == 'function')
-        return value.type.name || value.type;
     return '' + value;
+}
+/**
+ * Used to stringify a value so that it can be displayed in an error message.
+ * Important! This function contains a megamorphic read and should only be
+ * used for error messages.
+ * @param {?} value
+ * @return {?}
+ */
+function stringifyForError(value) {
+    if (typeof value === 'object' && value != null && typeof value.type === 'function') {
+        return value.type.name || value.type;
+    }
+    return renderStringify(value);
 }
 /** @type {?} */
 const defaultScheduler = (typeof requestAnimationFrame !== 'undefined' && requestAnimationFrame || // browser only
@@ -6737,7 +6750,7 @@ function getOrCreateInjectable(tNode, lView, token, flags = InjectFlags.Default,
                 /** @type {?} */
                 const value = bloomHash();
                 if (value == null && !(flags & InjectFlags.Optional)) {
-                    throw new Error(`No provider for ${renderStringify(token)}!`);
+                    throw new Error(`No provider for ${stringifyForError(token)}!`);
                 }
                 else {
                     return value;
@@ -6841,7 +6854,7 @@ function getOrCreateInjectable(tNode, lView, token, flags = InjectFlags.Default,
         return notFoundValue;
     }
     else {
-        throw new Error(`NodeInjector: NOT_FOUND [${renderStringify(token)}]`);
+        throw new Error(`NodeInjector: NOT_FOUND [${stringifyForError(token)}]`);
     }
 }
 /** @type {?} */
@@ -6960,7 +6973,7 @@ function getNodeInjectable(tData, lData, index, tNode) {
         /** @type {?} */
         const factory = value;
         if (factory.resolving) {
-            throw new Error(`Circular dep for ${renderStringify(tData[index])}`);
+            throw new Error(`Circular dep for ${stringifyForError(tData[index])}`);
         }
         /** @type {?} */
         const previousIncludeViewProviders = setIncludeViewProviders(factory.canSeeViewProviders);
@@ -12157,7 +12170,7 @@ function createViewBlueprint(bindingStartIndex, initialViewLength) {
  * @return {?}
  */
 function createError(text, token) {
-    return new Error(`Renderer: ${text} [${renderStringify(token)}]`);
+    return new Error(`Renderer: ${text} [${stringifyForError(token)}]`);
 }
 /**
  * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.
@@ -17647,7 +17660,7 @@ function loadLContext(target, throwOnNotFound = true) {
     /** @type {?} */
     const context = getLContext(target);
     if (!context && throwOnNotFound) {
-        throw new Error(ngDevMode ? `Unable to find context associated with ${renderStringify(target)}` :
+        throw new Error(ngDevMode ? `Unable to find context associated with ${stringifyForError(target)}` :
             'Invalid ng target');
     }
     return context;
@@ -20446,7 +20459,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.14+15.sha-24c61cb.with-local-changes');
+const VERSION = new Version('8.0.0-beta.14+16.sha-2e21997.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -28991,7 +29004,7 @@ function verifySemanticsOfNgModuleDef(moduleType) {
         /** @type {?} */
         const def = getComponentDef(type) || getDirectiveDef(type) || getPipeDef(type);
         if (!def) {
-            errors.push(`Unexpected value '${renderStringify(type)}' declared by the module '${renderStringify(moduleType)}'. Please add a @Pipe/@Directive/@Component annotation.`);
+            errors.push(`Unexpected value '${stringifyForError(type)}' declared by the module '${stringifyForError(moduleType)}'. Please add a @Pipe/@Directive/@Component annotation.`);
         }
     }
     /**
@@ -29008,7 +29021,7 @@ function verifySemanticsOfNgModuleDef(moduleType) {
             // Modules don't need to be declared or imported.
             if (combinedDeclarations.lastIndexOf(type) === -1) {
                 // We are exporting something which we don't explicitly declare or import.
-                errors.push(`Can't export ${kind} ${renderStringify(type)} from ${renderStringify(moduleType)} as it was neither declared nor imported!`);
+                errors.push(`Can't export ${kind} ${stringifyForError(type)} from ${stringifyForError(moduleType)} as it was neither declared nor imported!`);
             }
         }
     }
@@ -29022,10 +29035,10 @@ function verifySemanticsOfNgModuleDef(moduleType) {
         const existingModule = ownerNgModule.get(type);
         if (existingModule && existingModule !== moduleType) {
             /** @type {?} */
-            const modules = [existingModule, moduleType].map(renderStringify).sort();
-            errors.push(`Type ${renderStringify(type)} is part of the declarations of 2 modules: ${modules[0]} and ${modules[1]}! ` +
-                `Please consider moving ${renderStringify(type)} to a higher module that imports ${modules[0]} and ${modules[1]}. ` +
-                `You can also create a new NgModule that exports and includes ${renderStringify(type)} then import that NgModule in ${modules[0]} and ${modules[1]}.`);
+            const modules = [existingModule, moduleType].map(stringifyForError).sort();
+            errors.push(`Type ${stringifyForError(type)} is part of the declarations of 2 modules: ${modules[0]} and ${modules[1]}! ` +
+                `Please consider moving ${stringifyForError(type)} to a higher module that imports ${modules[0]} and ${modules[1]}. ` +
+                `You can also create a new NgModule that exports and includes ${stringifyForError(type)} then import that NgModule in ${modules[0]} and ${modules[1]}.`);
         }
         else {
             // Mark type as having owner.
@@ -29041,7 +29054,7 @@ function verifySemanticsOfNgModuleDef(moduleType) {
         /** @type {?} */
         const existingModule = ownerNgModule.get(type);
         if (!existingModule) {
-            errors.push(`Component ${renderStringify(type)} is not part of any NgModule or the module has not been imported into your module.`);
+            errors.push(`Component ${stringifyForError(type)} is not part of any NgModule or the module has not been imported into your module.`);
         }
     }
     /**
@@ -29051,7 +29064,7 @@ function verifySemanticsOfNgModuleDef(moduleType) {
     function verifyCorrectBootstrapType(type) {
         type = resolveForwardRef(type);
         if (!getComponentDef(type)) {
-            errors.push(`${renderStringify(type)} cannot be used as an entry component.`);
+            errors.push(`${stringifyForError(type)} cannot be used as an entry component.`);
         }
     }
     /**
@@ -29435,9 +29448,9 @@ function compileComponent(type, metadata) {
             if (ngComponentDef === null) {
                 if (componentNeedsResolution(metadata)) {
                     /** @type {?} */
-                    const error = [`Component '${renderStringify(type)}' is not resolved:`];
+                    const error = [`Component '${type.name}' is not resolved:`];
                     if (metadata.templateUrl) {
-                        error.push(` - templateUrl: ${renderStringify(metadata.templateUrl)}`);
+                        error.push(` - templateUrl: ${metadata.templateUrl}`);
                     }
                     if (metadata.styleUrls && metadata.styleUrls.length) {
                         error.push(` - styleUrls: ${JSON.stringify(metadata.styleUrls)}`);
@@ -29446,9 +29459,9 @@ function compileComponent(type, metadata) {
                     throw new Error(error.join('\n'));
                 }
                 /** @type {?} */
-                const templateUrl = metadata.templateUrl || `ng:///${renderStringify(type)}/template.html`;
+                const templateUrl = metadata.templateUrl || `ng:///${type.name}/template.html`;
                 /** @type {?} */
-                const meta = Object.assign({}, directiveMetadata(type, metadata), { typeSourceSpan: compiler.createParseSourceSpan('Component', renderStringify(type), templateUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY$1, animations: metadata.animations, directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
+                const meta = Object.assign({}, directiveMetadata(type, metadata), { typeSourceSpan: compiler.createParseSourceSpan('Component', type.name, templateUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY$1, animations: metadata.animations, directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
                 if (meta.usesInheritance) {
                     addBaseDefToUndecoratedParents(type);
                 }
@@ -29514,8 +29527,7 @@ function compileDirective(type, directive) {
                 const compiler = getCompilerFacade();
                 /** @type {?} */
                 const facade = directiveMetadata((/** @type {?} */ (type)), directive);
-                facade.typeSourceSpan =
-                    compiler.createParseSourceSpan('Directive', renderStringify(type), sourceMapUrl);
+                facade.typeSourceSpan = compiler.createParseSourceSpan('Directive', name, sourceMapUrl);
                 if (facade.usesInheritance) {
                     addBaseDefToUndecoratedParents(type);
                 }
@@ -29700,7 +29712,7 @@ function extractQueriesMetadata(type, propMetadata, isQueryAnn) {
                 if (isQueryAnn(ann)) {
                     if (!ann.selector) {
                         throw new Error(`Can't construct a query for the property "${field}" of ` +
-                            `"${renderStringify(type)}" since the query selector wasn't defined.`);
+                            `"${stringifyForError(type)}" since the query selector wasn't defined.`);
                     }
                     if (annotations.some(isInputAnn)) {
                         throw new Error(`Cannot combine @Input decorators with query decorators`);
@@ -29781,14 +29793,17 @@ function compilePipe(type, meta) {
          */
         () => {
             if (ngPipeDef === null) {
-                ngPipeDef = getCompilerFacade().compilePipe(angularCoreEnv, `ng://${renderStringify(type)}/ngPipeDef.js`, {
-                    type: type,
-                    typeArgumentCount: 0,
-                    name: type.name,
-                    deps: reflectDependencies(type),
-                    pipeName: meta.name,
-                    pure: meta.pure !== undefined ? meta.pure : true
-                });
+                /** @type {?} */
+                const typeName = type.name;
+                ngPipeDef =
+                    getCompilerFacade().compilePipe(angularCoreEnv, `ng://${typeName}/ngPipeDef.js`, {
+                        type: type,
+                        typeArgumentCount: 0,
+                        name: typeName,
+                        deps: reflectDependencies(type),
+                        pipeName: meta.name,
+                        pure: meta.pure !== undefined ? meta.pure : true
+                    });
             }
             return ngPipeDef;
         }),
