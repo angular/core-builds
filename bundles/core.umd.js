@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.14+15.sha-24c61cb.with-local-changes
+ * @license Angular v8.0.0-beta.14+16.sha-2e21997.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3178,17 +3178,28 @@
     }
     /**
      * Used for stringify render output in Ivy.
+     * Important! This function is very performance-sensitive and we should
+     * be extra careful not to introduce megamorphic reads in it.
      */
     function renderStringify(value) {
-        if (typeof value == 'function')
+        if (typeof value === 'function')
             return value.name || value;
-        if (typeof value == 'string')
+        if (typeof value === 'string')
             return value;
         if (value == null)
             return '';
-        if (typeof value == 'object' && typeof value.type == 'function')
-            return value.type.name || value.type;
         return '' + value;
+    }
+    /**
+     * Used to stringify a value so that it can be displayed in an error message.
+     * Important! This function contains a megamorphic read and should only be
+     * used for error messages.
+     */
+    function stringifyForError(value) {
+        if (typeof value === 'object' && value != null && typeof value.type === 'function') {
+            return value.type.name || value.type;
+        }
+        return renderStringify(value);
     }
     var defaultScheduler = (typeof requestAnimationFrame !== 'undefined' && requestAnimationFrame || // browser only
         setTimeout // everything else
@@ -5468,7 +5479,7 @@
                 try {
                     var value = bloomHash();
                     if (value == null && !(flags & exports.InjectFlags.Optional)) {
-                        throw new Error("No provider for " + renderStringify(token) + "!");
+                        throw new Error("No provider for " + stringifyForError(token) + "!");
                     }
                     else {
                         return value;
@@ -5564,7 +5575,7 @@
             return notFoundValue;
         }
         else {
-            throw new Error("NodeInjector: NOT_FOUND [" + renderStringify(token) + "]");
+            throw new Error("NodeInjector: NOT_FOUND [" + stringifyForError(token) + "]");
         }
     }
     var NOT_FOUND = {};
@@ -5648,7 +5659,7 @@
         if (isFactory(value)) {
             var factory = value;
             if (factory.resolving) {
-                throw new Error("Circular dep for " + renderStringify(tData[index]));
+                throw new Error("Circular dep for " + stringifyForError(tData[index]));
             }
             var previousIncludeViewProviders = setIncludeViewProviders(factory.canSeeViewProviders);
             factory.resolving = true;
@@ -9737,7 +9748,7 @@
         return blueprint;
     }
     function createError(text, token) {
-        return new Error("Renderer: " + text + " [" + renderStringify(token) + "]");
+        return new Error("Renderer: " + text + " [" + stringifyForError(token) + "]");
     }
     /**
      * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.
@@ -14265,7 +14276,7 @@
         if (throwOnNotFound === void 0) { throwOnNotFound = true; }
         var context = getLContext(target);
         if (!context && throwOnNotFound) {
-            throw new Error(ngDevMode ? "Unable to find context associated with " + renderStringify(target) :
+            throw new Error(ngDevMode ? "Unable to find context associated with " + stringifyForError(target) :
                 'Invalid ng target');
         }
         return context;
@@ -16474,7 +16485,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.14+15.sha-24c61cb.with-local-changes');
+    var VERSION = new Version('8.0.0-beta.14+16.sha-2e21997.with-local-changes');
 
     /**
      * @license
@@ -22877,7 +22888,7 @@
             type = resolveForwardRef(type);
             var def = getComponentDef(type) || getDirectiveDef(type) || getPipeDef(type);
             if (!def) {
-                errors.push("Unexpected value '" + renderStringify(type) + "' declared by the module '" + renderStringify(moduleType) + "'. Please add a @Pipe/@Directive/@Component annotation.");
+                errors.push("Unexpected value '" + stringifyForError(type) + "' declared by the module '" + stringifyForError(moduleType) + "'. Please add a @Pipe/@Directive/@Component annotation.");
             }
         }
         function verifyExportsAreDeclaredOrReExported(type) {
@@ -22889,7 +22900,7 @@
                 // Modules don't need to be declared or imported.
                 if (combinedDeclarations.lastIndexOf(type) === -1) {
                     // We are exporting something which we don't explicitly declare or import.
-                    errors.push("Can't export " + kind + " " + renderStringify(type) + " from " + renderStringify(moduleType) + " as it was neither declared nor imported!");
+                    errors.push("Can't export " + kind + " " + stringifyForError(type) + " from " + stringifyForError(moduleType) + " as it was neither declared nor imported!");
                 }
             }
         }
@@ -22897,10 +22908,10 @@
             type = resolveForwardRef(type);
             var existingModule = ownerNgModule.get(type);
             if (existingModule && existingModule !== moduleType) {
-                var modules = [existingModule, moduleType].map(renderStringify).sort();
-                errors.push("Type " + renderStringify(type) + " is part of the declarations of 2 modules: " + modules[0] + " and " + modules[1] + "! " +
-                    ("Please consider moving " + renderStringify(type) + " to a higher module that imports " + modules[0] + " and " + modules[1] + ". ") +
-                    ("You can also create a new NgModule that exports and includes " + renderStringify(type) + " then import that NgModule in " + modules[0] + " and " + modules[1] + "."));
+                var modules = [existingModule, moduleType].map(stringifyForError).sort();
+                errors.push("Type " + stringifyForError(type) + " is part of the declarations of 2 modules: " + modules[0] + " and " + modules[1] + "! " +
+                    ("Please consider moving " + stringifyForError(type) + " to a higher module that imports " + modules[0] + " and " + modules[1] + ". ") +
+                    ("You can also create a new NgModule that exports and includes " + stringifyForError(type) + " then import that NgModule in " + modules[0] + " and " + modules[1] + "."));
             }
             else {
                 // Mark type as having owner.
@@ -22911,13 +22922,13 @@
             type = resolveForwardRef(type);
             var existingModule = ownerNgModule.get(type);
             if (!existingModule) {
-                errors.push("Component " + renderStringify(type) + " is not part of any NgModule or the module has not been imported into your module.");
+                errors.push("Component " + stringifyForError(type) + " is not part of any NgModule or the module has not been imported into your module.");
             }
         }
         function verifyCorrectBootstrapType(type) {
             type = resolveForwardRef(type);
             if (!getComponentDef(type)) {
-                errors.push(renderStringify(type) + " cannot be used as an entry component.");
+                errors.push(stringifyForError(type) + " cannot be used as an entry component.");
             }
         }
         function verifyComponentEntryComponentsIsPartOfNgModule(type) {
@@ -23163,9 +23174,9 @@
                 var compiler = getCompilerFacade();
                 if (ngComponentDef === null) {
                     if (componentNeedsResolution(metadata)) {
-                        var error = ["Component '" + renderStringify(type) + "' is not resolved:"];
+                        var error = ["Component '" + type.name + "' is not resolved:"];
                         if (metadata.templateUrl) {
-                            error.push(" - templateUrl: " + renderStringify(metadata.templateUrl));
+                            error.push(" - templateUrl: " + metadata.templateUrl);
                         }
                         if (metadata.styleUrls && metadata.styleUrls.length) {
                             error.push(" - styleUrls: " + JSON.stringify(metadata.styleUrls));
@@ -23173,8 +23184,8 @@
                         error.push("Did you run and wait for 'resolveComponentResources()'?");
                         throw new Error(error.join('\n'));
                     }
-                    var templateUrl = metadata.templateUrl || "ng:///" + renderStringify(type) + "/template.html";
-                    var meta = __assign({}, directiveMetadata(type, metadata), { typeSourceSpan: compiler.createParseSourceSpan('Component', renderStringify(type), templateUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || exports.ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
+                    var templateUrl = metadata.templateUrl || "ng:///" + type.name + "/template.html";
+                    var meta = __assign({}, directiveMetadata(type, metadata), { typeSourceSpan: compiler.createParseSourceSpan('Component', type.name, templateUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || exports.ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
                     if (meta.usesInheritance) {
                         addBaseDefToUndecoratedParents(type);
                     }
@@ -23223,8 +23234,7 @@
                     var sourceMapUrl = "ng://" + name_1 + "/ngDirectiveDef.js";
                     var compiler = getCompilerFacade();
                     var facade = directiveMetadata(type, directive);
-                    facade.typeSourceSpan =
-                        compiler.createParseSourceSpan('Directive', renderStringify(type), sourceMapUrl);
+                    facade.typeSourceSpan = compiler.createParseSourceSpan('Directive', name_1, sourceMapUrl);
                     if (facade.usesInheritance) {
                         addBaseDefToUndecoratedParents(type);
                     }
@@ -23353,7 +23363,7 @@
                     if (isQueryAnn(ann)) {
                         if (!ann.selector) {
                             throw new Error("Can't construct a query for the property \"" + field + "\" of " +
-                                ("\"" + renderStringify(type) + "\" since the query selector wasn't defined."));
+                                ("\"" + stringifyForError(type) + "\" since the query selector wasn't defined."));
                         }
                         if (annotations_1.some(isInputAnn)) {
                             throw new Error("Cannot combine @Input decorators with query decorators");
@@ -23401,14 +23411,16 @@
         Object.defineProperty(type, NG_PIPE_DEF, {
             get: function () {
                 if (ngPipeDef === null) {
-                    ngPipeDef = getCompilerFacade().compilePipe(angularCoreEnv, "ng://" + renderStringify(type) + "/ngPipeDef.js", {
-                        type: type,
-                        typeArgumentCount: 0,
-                        name: type.name,
-                        deps: reflectDependencies(type),
-                        pipeName: meta.name,
-                        pure: meta.pure !== undefined ? meta.pure : true
-                    });
+                    var typeName = type.name;
+                    ngPipeDef =
+                        getCompilerFacade().compilePipe(angularCoreEnv, "ng://" + typeName + "/ngPipeDef.js", {
+                            type: type,
+                            typeArgumentCount: 0,
+                            name: typeName,
+                            deps: reflectDependencies(type),
+                            pipeName: meta.name,
+                            pure: meta.pure !== undefined ? meta.pure : true
+                        });
                 }
                 return ngPipeDef;
             },
