@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.14+5.sha-8ca208f.with-local-changes
+ * @license Angular v8.0.0-beta.14+6.sha-c7f1b0a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9666,16 +9666,6 @@ export declare interface ɵDirectiveDef<T> extends ɵɵBaseDef<T> {
      */
     factory: FactoryFn<T>;
     /**
-     * Function to create and refresh content queries associated with a given directive.
-     */
-    contentQueries: ContentQueriesFunction<T> | null;
-    /**
-     * Query-related instructions for a directive. Note that while directives don't have a
-     * view and as such view queries won't necessarily do anything, there might be
-     * components that extend the directive.
-     */
-    viewQuery: ViewQueriesFunction<T> | null;
-    /**
      * Refreshes host bindings on the associated directive.
      */
     hostBindings: HostBindingsFunction<T> | null;
@@ -10554,7 +10544,7 @@ export declare function ɵɵallocHostVars(count: number): void;
  * Runtime information for classes that are inherited by components or directives
  * that aren't defined as components or directives.
  *
- * This is an internal data structure used by the render to determine what inputs
+ * This is an internal data structure used by the renderer to determine what inputs
  * and outputs should be inherited.
  *
  * See: {@link defineBase}
@@ -10585,6 +10575,16 @@ export declare interface ɵɵBaseDef<T> {
     readonly outputs: {
         [P in keyof T]: string;
     };
+    /**
+     * Function to create and refresh content queries associated with a given directive.
+     */
+    contentQueries: ContentQueriesFunction<T> | null;
+    /**
+     * Query-related instructions for a directive. Note that while directives don't have a
+     * view and as such view queries won't necessarily do anything, there might be
+     * components that extend the directive.
+     */
+    viewQuery: ViewQueriesFunction<T> | null;
 }
 
 /**
@@ -10782,6 +10782,15 @@ export declare function ɵɵdefineBase<T>(baseDefinition: {
     outputs?: {
         [P in keyof T]?: string;
     };
+    /**
+     * Function to create instances of content queries associated with a given directive.
+     */
+    contentQueries?: ContentQueriesFunction<T> | null;
+    /**
+     * Additional set of instructions specific to view query processing. This could be seen as a
+     * set of instructions to be inserted into the template function.
+     */
+    viewQuery?: ViewQueriesFunction<T> | null;
 }): ɵɵBaseDef<T>;
 
 /**

@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.14+5.sha-8ca208f.with-local-changes
+ * @license Angular v8.0.0-beta.14+6.sha-c7f1b0a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3109,29 +3109,6 @@ function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
-/** @type {?} */
-const NG_COMPONENT_DEF = getClosureSafeProperty({ ngComponentDef: getClosureSafeProperty });
-/** @type {?} */
-const NG_DIRECTIVE_DEF = getClosureSafeProperty({ ngDirectiveDef: getClosureSafeProperty });
-/** @type {?} */
-const NG_PIPE_DEF = getClosureSafeProperty({ ngPipeDef: getClosureSafeProperty });
-/** @type {?} */
-const NG_MODULE_DEF = getClosureSafeProperty({ ngModuleDef: getClosureSafeProperty });
-/** @type {?} */
-const NG_BASE_DEF = getClosureSafeProperty({ ngBaseDef: getClosureSafeProperty });
-// TODO(misko): This is wrong. The NG_ELEMENT_ID should never be minified.
-/**
- * If a directive is diPublic, bloomAdd sets a property on the type with this constant as
- * the key and the directive's unique ID as the value. This allows us to map directives to their
- * bloom filter bit for DI.
- * @type {?}
- */
-const NG_ELEMENT_ID = getClosureSafeProperty({ __NG_ELEMENT_ID__: getClosureSafeProperty });
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -3406,6 +3383,26 @@ if (typeof ngDevMode === 'undefined' || ngDevMode) {
 }
 
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Convince closure compiler that the wrapped function has no side-effects.
+ *
+ * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
+ * allow us to execute a function but have closure compiler mark the call as no-side-effects.
+ * It is important that the return value for the `noSideEffects` function be assigned
+ * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
+ * compiler.
+ */
+function noSideEffects(fn) {
+    return '' + { toString: fn };
+}
+
+/**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
@@ -3429,176 +3426,24 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
-/**
- * Returns whether the values are different from a change detection stand point.
- *
- * Constraints are relaxed in checkNoChanges mode. See `devModeEqual` for details.
- * @param {?} a
- * @param {?} b
- * @return {?}
- */
-function isDifferent(a, b) {
-    // NaN is the only value that is not equal to itself so the first
-    // test checks if both a and b are not NaN
-    return !(a !== a && b !== b) && a !== b;
-}
-/**
- * Used for stringify render output in Ivy.
- * @param {?} value
- * @return {?}
- */
-function renderStringify(value) {
-    if (typeof value == 'function')
-        return value.name || value;
-    if (typeof value == 'string')
-        return value;
-    if (value == null)
-        return '';
-    if (typeof value == 'object' && typeof value.type == 'function')
-        return value.type.name || value.type;
-    return '' + value;
-}
 /** @type {?} */
-const defaultScheduler = (typeof requestAnimationFrame !== 'undefined' && requestAnimationFrame || // browser only
-    setTimeout // everything else
-).bind(_global);
+const NG_COMPONENT_DEF = getClosureSafeProperty({ ngComponentDef: getClosureSafeProperty });
+/** @type {?} */
+const NG_DIRECTIVE_DEF = getClosureSafeProperty({ ngDirectiveDef: getClosureSafeProperty });
+/** @type {?} */
+const NG_PIPE_DEF = getClosureSafeProperty({ ngPipeDef: getClosureSafeProperty });
+/** @type {?} */
+const NG_MODULE_DEF = getClosureSafeProperty({ ngModuleDef: getClosureSafeProperty });
+/** @type {?} */
+const NG_BASE_DEF = getClosureSafeProperty({ ngBaseDef: getClosureSafeProperty });
+// TODO(misko): This is wrong. The NG_ELEMENT_ID should never be minified.
 /**
- *
- * \@codeGenApi
- * @param {?} element
- * @return {?}
- */
-function ɵɵresolveWindow(element) {
-    return { name: 'window', target: element.ownerDocument.defaultView };
-}
-/**
- *
- * \@codeGenApi
- * @param {?} element
- * @return {?}
- */
-function ɵɵresolveDocument(element) {
-    return { name: 'document', target: element.ownerDocument };
-}
-/**
- *
- * \@codeGenApi
- * @param {?} element
- * @return {?}
- */
-function ɵɵresolveBody(element) {
-    return { name: 'body', target: element.ownerDocument.body };
-}
-/**
- * The special delimiter we use to separate property names, prefixes, and suffixes
- * in property binding metadata. See storeBindingMetadata().
- *
- * We intentionally use the Unicode "REPLACEMENT CHARACTER" (U+FFFD) as a delimiter
- * because it is a very uncommon character that is unlikely to be part of a user's
- * property names or interpolation strings. If it is in fact used in a property
- * binding, DebugElement.properties will not return the correct value for that
- * binding. However, there should be no runtime effect for real applications.
- *
- * This character is typically rendered as a question mark inside of a diamond.
- * See https://en.wikipedia.org/wiki/Specials_(Unicode_block)
- *
+ * If a directive is diPublic, bloomAdd sets a property on the type with this constant as
+ * the key and the directive's unique ID as the value. This allows us to map directives to their
+ * bloom filter bit for DI.
  * @type {?}
  */
-const INTERPOLATION_DELIMITER = `�`;
-/**
- * Determines whether or not the given string is a property metadata string.
- * See storeBindingMetadata().
- * @param {?} str
- * @return {?}
- */
-function isPropMetadataString(str) {
-    return str.indexOf(INTERPOLATION_DELIMITER) >= 0;
-}
-/**
- * Unwrap a value which might be behind a closure (for forward declaration reasons).
- * @template T
- * @param {?} value
- * @return {?}
- */
-function maybeUnwrapFn(value) {
-    if (value instanceof Function) {
-        return value();
-    }
-    else {
-        return value;
-    }
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-function assertEqual(actual, expected, msg) {
-    if (actual != expected) {
-        throwError(msg);
-    }
-}
-function assertNotEqual(actual, expected, msg) {
-    if (actual == expected) {
-        throwError(msg);
-    }
-}
-function assertNotSame(actual, expected, msg) {
-    if (actual === expected) {
-        throwError(msg);
-    }
-}
-function assertLessThan(actual, expected, msg) {
-    if (actual >= expected) {
-        throwError(msg);
-    }
-}
-function assertGreaterThan(actual, expected, msg) {
-    if (actual <= expected) {
-        throwError(msg);
-    }
-}
-function assertDefined(actual, msg) {
-    if (actual == null) {
-        throwError(msg);
-    }
-}
-function throwError(msg) {
-    // tslint:disable-next-line
-    debugger; // Left intentionally for better debugger experience.
-    throw new Error(`ASSERTION ERROR: ${msg}`);
-}
-function assertDomNode(node) {
-    // If we're in a worker, `Node` will not be defined.
-    assertEqual((typeof Node !== 'undefined' && node instanceof Node) ||
-        (typeof node === 'object' && node.constructor.name === 'WebWorkerRenderNode'), true, 'The provided value must be an instance of a DOM Node');
-}
-function assertDataInRange(arr, index) {
-    assertLessThan(index, arr ? arr.length : 0, 'index expected to be a valid data index');
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Convince closure compiler that the wrapped function has no side-effects.
- *
- * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
- * allow us to execute a function but have closure compiler mark the call as no-side-effects.
- * It is important that the return value for the `noSideEffects` function be assigned
- * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
- * compiler.
- */
-function noSideEffects(fn) {
-    return '' + { toString: fn };
-}
+const NG_ELEMENT_ID = getClosureSafeProperty({ __NG_ELEMENT_ID__: getClosureSafeProperty });
 
 /**
  * @fileoverview added by tsickle
@@ -3910,6 +3755,8 @@ function ɵɵdefineBase(baseDefinition) {
         inputs: invertObject((/** @type {?} */ (baseDefinition.inputs)), declaredInputs),
         declaredInputs: declaredInputs,
         outputs: invertObject((/** @type {?} */ (baseDefinition.outputs))),
+        viewQuery: baseDefinition.viewQuery || null,
+        contentQueries: baseDefinition.contentQueries || null,
     };
 }
 /**
@@ -3986,6 +3833,14 @@ function getPipeDef(type) {
 /**
  * @template T
  * @param {?} type
+ * @return {?}
+ */
+function getBaseDef(type) {
+    return ((/** @type {?} */ (type)))[NG_BASE_DEF] || null;
+}
+/**
+ * @template T
+ * @param {?} type
  * @param {?=} throwNotFound
  * @return {?}
  */
@@ -3996,6 +3851,161 @@ function getNgModuleDef(type, throwNotFound) {
         throw new Error(`Type ${stringify(type)} does not have 'ngModuleDef' property.`);
     }
     return ngModuleDef;
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Returns whether the values are different from a change detection stand point.
+ *
+ * Constraints are relaxed in checkNoChanges mode. See `devModeEqual` for details.
+ * @param {?} a
+ * @param {?} b
+ * @return {?}
+ */
+function isDifferent(a, b) {
+    // NaN is the only value that is not equal to itself so the first
+    // test checks if both a and b are not NaN
+    return !(a !== a && b !== b) && a !== b;
+}
+/**
+ * Used for stringify render output in Ivy.
+ * @param {?} value
+ * @return {?}
+ */
+function renderStringify(value) {
+    if (typeof value == 'function')
+        return value.name || value;
+    if (typeof value == 'string')
+        return value;
+    if (value == null)
+        return '';
+    if (typeof value == 'object' && typeof value.type == 'function')
+        return value.type.name || value.type;
+    return '' + value;
+}
+/** @type {?} */
+const defaultScheduler = (typeof requestAnimationFrame !== 'undefined' && requestAnimationFrame || // browser only
+    setTimeout // everything else
+).bind(_global);
+/**
+ *
+ * \@codeGenApi
+ * @param {?} element
+ * @return {?}
+ */
+function ɵɵresolveWindow(element) {
+    return { name: 'window', target: element.ownerDocument.defaultView };
+}
+/**
+ *
+ * \@codeGenApi
+ * @param {?} element
+ * @return {?}
+ */
+function ɵɵresolveDocument(element) {
+    return { name: 'document', target: element.ownerDocument };
+}
+/**
+ *
+ * \@codeGenApi
+ * @param {?} element
+ * @return {?}
+ */
+function ɵɵresolveBody(element) {
+    return { name: 'body', target: element.ownerDocument.body };
+}
+/**
+ * The special delimiter we use to separate property names, prefixes, and suffixes
+ * in property binding metadata. See storeBindingMetadata().
+ *
+ * We intentionally use the Unicode "REPLACEMENT CHARACTER" (U+FFFD) as a delimiter
+ * because it is a very uncommon character that is unlikely to be part of a user's
+ * property names or interpolation strings. If it is in fact used in a property
+ * binding, DebugElement.properties will not return the correct value for that
+ * binding. However, there should be no runtime effect for real applications.
+ *
+ * This character is typically rendered as a question mark inside of a diamond.
+ * See https://en.wikipedia.org/wiki/Specials_(Unicode_block)
+ *
+ * @type {?}
+ */
+const INTERPOLATION_DELIMITER = `�`;
+/**
+ * Determines whether or not the given string is a property metadata string.
+ * See storeBindingMetadata().
+ * @param {?} str
+ * @return {?}
+ */
+function isPropMetadataString(str) {
+    return str.indexOf(INTERPOLATION_DELIMITER) >= 0;
+}
+/**
+ * Unwrap a value which might be behind a closure (for forward declaration reasons).
+ * @template T
+ * @param {?} value
+ * @return {?}
+ */
+function maybeUnwrapFn(value) {
+    if (value instanceof Function) {
+        return value();
+    }
+    else {
+        return value;
+    }
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function assertEqual(actual, expected, msg) {
+    if (actual != expected) {
+        throwError(msg);
+    }
+}
+function assertNotEqual(actual, expected, msg) {
+    if (actual == expected) {
+        throwError(msg);
+    }
+}
+function assertNotSame(actual, expected, msg) {
+    if (actual === expected) {
+        throwError(msg);
+    }
+}
+function assertLessThan(actual, expected, msg) {
+    if (actual >= expected) {
+        throwError(msg);
+    }
+}
+function assertGreaterThan(actual, expected, msg) {
+    if (actual <= expected) {
+        throwError(msg);
+    }
+}
+function assertDefined(actual, msg) {
+    if (actual == null) {
+        throwError(msg);
+    }
+}
+function throwError(msg) {
+    // tslint:disable-next-line
+    debugger; // Left intentionally for better debugger experience.
+    throw new Error(`ASSERTION ERROR: ${msg}`);
+}
+function assertDomNode(node) {
+    // If we're in a worker, `Node` will not be defined.
+    assertEqual((typeof Node !== 'undefined' && node instanceof Node) ||
+        (typeof node === 'object' && node.constructor.name === 'WebWorkerRenderNode'), true, 'The provided value must be an instance of a DOM Node');
+}
+function assertDataInRange(arr, index) {
+    assertLessThan(index, arr ? arr.length : 0, 'index expected to be a valid data index');
 }
 
 /**
@@ -18241,7 +18251,12 @@ function ɵɵInheritDefinitionFeature(definition) {
             writeableDef.outputs = maybeUnwrapEmpty(definition.outputs);
         }
         if (baseDef) {
-            // Merge inputs and outputs
+            /** @type {?} */
+            const baseViewQuery = baseDef.viewQuery;
+            /** @type {?} */
+            const baseContentQueries = baseDef.contentQueries;
+            baseViewQuery && inheritViewQuery(definition, baseViewQuery);
+            baseContentQueries && inheritContentQueries(definition, baseContentQueries);
             fillProperties(definition.inputs, baseDef.inputs);
             fillProperties(definition.declaredInputs, baseDef.declaredInputs);
             fillProperties(definition.outputs, baseDef.outputs);
@@ -18286,51 +18301,13 @@ function ɵɵInheritDefinitionFeature(definition) {
                     definition.hostBindings = superHostBindings;
                 }
             }
-            // Merge View Queries
-            /** @type {?} */
-            const prevViewQuery = definition.viewQuery;
+            // Merge queries
             /** @type {?} */
             const superViewQuery = superDef.viewQuery;
-            if (superViewQuery) {
-                if (prevViewQuery) {
-                    definition.viewQuery = (/**
-                     * @template T
-                     * @param {?} rf
-                     * @param {?} ctx
-                     * @return {?}
-                     */
-                    (rf, ctx) => {
-                        superViewQuery(rf, ctx);
-                        prevViewQuery(rf, ctx);
-                    });
-                }
-                else {
-                    definition.viewQuery = superViewQuery;
-                }
-            }
-            // Merge Content Queries
-            /** @type {?} */
-            const prevContentQueries = definition.contentQueries;
             /** @type {?} */
             const superContentQueries = superDef.contentQueries;
-            if (superContentQueries) {
-                if (prevContentQueries) {
-                    definition.contentQueries = (/**
-                     * @template T
-                     * @param {?} rf
-                     * @param {?} ctx
-                     * @param {?} directiveIndex
-                     * @return {?}
-                     */
-                    (rf, ctx, directiveIndex) => {
-                        superContentQueries(rf, ctx, directiveIndex);
-                        prevContentQueries(rf, ctx, directiveIndex);
-                    });
-                }
-                else {
-                    definition.contentQueries = superContentQueries;
-                }
-            }
+            superViewQuery && inheritViewQuery(definition, superViewQuery);
+            superContentQueries && inheritContentQueries(definition, superContentQueries);
             // Merge inputs and outputs
             fillProperties(definition.inputs, superDef.inputs);
             fillProperties(definition.declaredInputs, superDef.declaredInputs);
@@ -18392,6 +18369,53 @@ function maybeUnwrapEmpty(value) {
     }
     else {
         return value;
+    }
+}
+/**
+ * @param {?} definition
+ * @param {?} superViewQuery
+ * @return {?}
+ */
+function inheritViewQuery(definition, superViewQuery) {
+    /** @type {?} */
+    const prevViewQuery = definition.viewQuery;
+    if (prevViewQuery) {
+        definition.viewQuery = (/**
+         * @param {?} rf
+         * @param {?} ctx
+         * @return {?}
+         */
+        (rf, ctx) => {
+            superViewQuery(rf, ctx);
+            prevViewQuery(rf, ctx);
+        });
+    }
+    else {
+        definition.viewQuery = superViewQuery;
+    }
+}
+/**
+ * @param {?} definition
+ * @param {?} superContentQueries
+ * @return {?}
+ */
+function inheritContentQueries(definition, superContentQueries) {
+    /** @type {?} */
+    const prevContentQueries = definition.contentQueries;
+    if (prevContentQueries) {
+        definition.contentQueries = (/**
+         * @param {?} rf
+         * @param {?} ctx
+         * @param {?} directiveIndex
+         * @return {?}
+         */
+        (rf, ctx, directiveIndex) => {
+            superContentQueries(rf, ctx, directiveIndex);
+            prevContentQueries(rf, ctx, directiveIndex);
+        });
+    }
+    else {
+        definition.contentQueries = superContentQueries;
     }
 }
 
@@ -20422,7 +20446,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-beta.14+5.sha-8ca208f.with-local-changes');
+const VERSION = new Version('8.0.0-beta.14+6.sha-c7f1b0a.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -29425,6 +29449,9 @@ function compileComponent(type, metadata) {
                 const templateUrl = metadata.templateUrl || `ng:///${renderStringify(type)}/template.html`;
                 /** @type {?} */
                 const meta = Object.assign({}, directiveMetadata(type, metadata), { typeSourceSpan: compiler.createParseSourceSpan('Component', renderStringify(type), templateUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY$1, animations: metadata.animations, directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
+                if (meta.usesInheritance) {
+                    addBaseDefToUndecoratedParents(type);
+                }
                 ngComponentDef = compiler.compileComponent(angularCoreEnv, templateUrl, meta);
                 // When NgModule decorator executed, we enqueued the module definition such that
                 // it would only dequeue and add itself as module scope to all of its declarations,
@@ -29489,6 +29516,9 @@ function compileDirective(type, directive) {
                 const facade = directiveMetadata((/** @type {?} */ (type)), directive);
                 facade.typeSourceSpan =
                     compiler.createParseSourceSpan('Directive', renderStringify(type), sourceMapUrl);
+                if (facade.usesInheritance) {
+                    addBaseDefToUndecoratedParents(type);
+                }
                 ngDirectiveDef = compiler.compileDirective(angularCoreEnv, sourceMapUrl, facade);
             }
             return ngDirectiveDef;
@@ -29537,6 +29567,95 @@ function directiveMetadata(type, metadata) {
         providers: metadata.providers || null,
         viewQueries: extractQueriesMetadata(type, propMetadata, isViewQuery),
     };
+}
+/**
+ * Adds an `ngBaseDef` to all parent classes of a type that don't have an Angular decorator.
+ * @param {?} type
+ * @return {?}
+ */
+function addBaseDefToUndecoratedParents(type) {
+    /** @type {?} */
+    const objPrototype = Object.prototype;
+    /** @type {?} */
+    let parent = Object.getPrototypeOf(type);
+    // Go up the prototype until we hit `Object`.
+    while (parent && parent !== objPrototype) {
+        // Since inheritance works if the class was annotated already, we only need to add
+        // the base def if there are no annotations and the base def hasn't been created already.
+        if (!getDirectiveDef(parent) && !getComponentDef(parent) && !getBaseDef(parent)) {
+            /** @type {?} */
+            const facade = extractBaseDefMetadata(parent);
+            facade && compileBase(parent, facade);
+        }
+        parent = Object.getPrototypeOf(parent);
+    }
+}
+/**
+ * Compiles the base metadata into a base definition.
+ * @param {?} type
+ * @param {?} facade
+ * @return {?}
+ */
+function compileBase(type, facade) {
+    /** @type {?} */
+    /** @nocollapse */ let ngBaseDef = null;
+    Object.defineProperty(type, NG_BASE_DEF, {
+        get: (/**
+         * @return {?}
+         */
+        () => {
+            if (ngBaseDef === null) {
+                /** @type {?} */
+                const name = type && type.name;
+                /** @type {?} */
+                const sourceMapUrl = `ng://${name}/ngBaseDef.js`;
+                /** @type {?} */
+                const compiler = getCompilerFacade();
+                ngBaseDef = compiler.compileBase(angularCoreEnv, sourceMapUrl, facade);
+            }
+            return ngBaseDef;
+        }),
+        // Make the property configurable in dev mode to allow overriding in tests
+        configurable: !!ngDevMode,
+    });
+}
+/**
+ * Extracts the metadata necessary to construct an `ngBaseDef` from a class.
+ * @param {?} type
+ * @return {?}
+ */
+function extractBaseDefMetadata(type) {
+    /** @type {?} */
+    const propMetadata = getReflect().ownPropMetadata(type);
+    /** @type {?} */
+    const viewQueries = extractQueriesMetadata(type, propMetadata, isViewQuery);
+    /** @type {?} */
+    const queries = extractQueriesMetadata(type, propMetadata, isContentQuery);
+    /** @type {?} */
+    let inputs;
+    /** @type {?} */
+    let outputs;
+    for (const field in propMetadata) {
+        propMetadata[field].forEach((/**
+         * @param {?} ann
+         * @return {?}
+         */
+        ann => {
+            if (ann.ngMetadataName === 'Input') {
+                inputs = inputs || {};
+                inputs[field] = ann.bindingPropertyName ? [ann.bindingPropertyName, field] : field;
+            }
+            else if (ann.ngMetadataName === 'Output') {
+                outputs = outputs || {};
+                outputs[field] = ann.bindingPropertyName || field;
+            }
+        }));
+    }
+    // Only generate the base def if there's any info inside it.
+    if (inputs || outputs || viewQueries.length || queries.length) {
+        return { inputs, outputs, viewQueries, queries };
+    }
+    return null;
 }
 /**
  * @param {?} selector
@@ -29737,88 +29856,31 @@ const ɵ4 = /**
  */
 const Pipe = makeDecorator('Pipe', (ɵ4), undefined, undefined, (ɵ5));
 // WARNING: interface has both a type and a value, skipping emit
-/** @type {?} */
-const initializeBaseDef = (/**
- * @param {?} target
+const ɵ6 = /**
+ * @param {?=} bindingPropertyName
  * @return {?}
  */
-(target) => {
-    /** @type {?} */
-    const constructor = target.constructor;
-    /** @nocollapse @type {?} */
-    const inheritedBaseDef = constructor.ngBaseDef;
-    /** @type {?} */
-    const baseDef = constructor.ngBaseDef = {
-        inputs: {},
-        outputs: {},
-        declaredInputs: {},
-    };
-    if (inheritedBaseDef) {
-        fillProperties(baseDef.inputs, inheritedBaseDef.inputs);
-        fillProperties(baseDef.outputs, inheritedBaseDef.outputs);
-        fillProperties(baseDef.declaredInputs, inheritedBaseDef.declaredInputs);
-    }
-});
+(bindingPropertyName) => ({ bindingPropertyName });
 /**
- * Does the work of creating the `ngBaseDef` property for the `Input` and `Output` decorators.
- * \@param key "inputs" or "outputs"
+ * \@Annotation
+ * \@publicApi
  * @type {?}
  */
-const updateBaseDefFromIOProp = (/**
- * @param {?} getProp
+const Input = makePropDecorator('Input', (ɵ6));
+// WARNING: interface has both a type and a value, skipping emit
+const ɵ7 = /**
+ * @param {?=} bindingPropertyName
  * @return {?}
  */
-(getProp) => (/**
- * @param {?} target
- * @param {?} name
- * @param {...?} args
- * @return {?}
+(bindingPropertyName) => ({ bindingPropertyName });
+/**
+ * \@Annotation
+ * \@publicApi
+ * @type {?}
  */
-(target, name, ...args) => {
-    /** @type {?} */
-    const constructor = target.constructor;
-    if (!constructor.hasOwnProperty(NG_BASE_DEF)) {
-        initializeBaseDef(target);
-    }
-    /** @nocollapse @type {?} */
-    const baseDef = constructor.ngBaseDef;
-    /** @type {?} */
-    const defProp = getProp(baseDef);
-    defProp[name] = args[0] || name;
-}));
+const Output = makePropDecorator('Output', (ɵ7));
+// WARNING: interface has both a type and a value, skipping emit
 const ɵ8 = /**
- * @param {?=} bindingPropertyName
- * @return {?}
- */
-(bindingPropertyName) => ({ bindingPropertyName }), ɵ9 = /**
- * @param {?} baseDef
- * @return {?}
- */
-baseDef => baseDef.inputs || {};
-/**
- * \@Annotation
- * \@publicApi
- * @type {?}
- */
-const Input = makePropDecorator('Input', (ɵ8), undefined, updateBaseDefFromIOProp((ɵ9)));
-// WARNING: interface has both a type and a value, skipping emit
-const ɵ10 = /**
- * @param {?=} bindingPropertyName
- * @return {?}
- */
-(bindingPropertyName) => ({ bindingPropertyName }), ɵ11 = /**
- * @param {?} baseDef
- * @return {?}
- */
-baseDef => baseDef.outputs || {};
-/**
- * \@Annotation
- * \@publicApi
- * @type {?}
- */
-const Output = makePropDecorator('Output', (ɵ10), undefined, updateBaseDefFromIOProp((ɵ11)));
-// WARNING: interface has both a type and a value, skipping emit
-const ɵ12 = /**
  * @param {?=} hostPropertyName
  * @return {?}
  */
@@ -29828,9 +29890,9 @@ const ɵ12 = /**
  * \@publicApi
  * @type {?}
  */
-const HostBinding = makePropDecorator('HostBinding', (ɵ12));
+const HostBinding = makePropDecorator('HostBinding', (ɵ8));
 // WARNING: interface has both a type and a value, skipping emit
-const ɵ13 = /**
+const ɵ9 = /**
  * @param {?=} eventName
  * @param {?=} args
  * @return {?}
@@ -29869,7 +29931,7 @@ const ɵ13 = /**
  * \@publicApi
  * @type {?}
  */
-const HostListener = makePropDecorator('HostListener', (ɵ13));
+const HostListener = makePropDecorator('HostListener', (ɵ9));
 /** @type {?} */
 const SWITCH_COMPILE_COMPONENT__POST_R3__ = compileComponent;
 /** @type {?} */
