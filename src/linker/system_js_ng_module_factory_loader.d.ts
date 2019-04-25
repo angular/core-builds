@@ -7,6 +7,8 @@ import * as i0 from "../r3_symbols";
  * token.
  *
  * @publicApi
+ * @deprecated the `string` form of `loadChildren` is deprecated, and `SystemJsNgModuleLoaderConfig`
+ * is part of its implementation. See `LoadChildren` for more details.
  */
 export declare abstract class SystemJsNgModuleLoaderConfig {
     /**
@@ -21,6 +23,8 @@ export declare abstract class SystemJsNgModuleLoaderConfig {
 /**
  * NgModuleFactoryLoader that uses SystemJS to load NgModuleFactory
  * @publicApi
+ * @deprecated the `string` form of `loadChildren` is deprecated, and `SystemJsNgModuleLoader` is
+ * part of its implementation. See `LoadChildren` for more details.
  */
 export declare class SystemJsNgModuleLoader implements NgModuleFactoryLoader {
     private _compiler;
