@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.14+31.sha-071ee64.with-local-changes
+ * @license Angular v8.0.0-beta.14+74.sha-6de4cbd.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4317,6 +4317,8 @@ export declare abstract class NgModuleFactory<T> {
  * Used to load ng module factories.
  *
  * @publicApi
+ * @deprecated the `string` form of `loadChildren` is deprecated, and `NgModuleFactoryLoader` is
+ * part of its implementation. See `LoadChildren` for more details.
  */
 export declare abstract class NgModuleFactoryLoader {
     abstract load(path: string): Promise<NgModuleFactory<any>>;
@@ -6818,6 +6820,8 @@ declare const enum StylingIndex {
 /**
  * NgModuleFactoryLoader that uses SystemJS to load NgModuleFactory
  * @publicApi
+ * @deprecated the `string` form of `loadChildren` is deprecated, and `SystemJsNgModuleLoader` is
+ * part of its implementation. See `LoadChildren` for more details.
  */
 export declare class SystemJsNgModuleLoader implements NgModuleFactoryLoader {
     private _compiler;
@@ -6833,6 +6837,8 @@ export declare class SystemJsNgModuleLoader implements NgModuleFactoryLoader {
  * token.
  *
  * @publicApi
+ * @deprecated the `string` form of `loadChildren` is deprecated, and `SystemJsNgModuleLoaderConfig`
+ * is part of its implementation. See `LoadChildren` for more details.
  */
 export declare abstract class SystemJsNgModuleLoaderConfig {
     /**
