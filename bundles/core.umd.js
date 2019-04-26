@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+5.sha-71b8b35.with-local-changes
+ * @license Angular v8.0.0-rc.0+6.sha-b9f0720.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -600,8 +600,27 @@
         return (_injectImplementation || injectInjectorOnly)(token, flags);
     }
     /**
-     * @deprecated in v8, delete after v10. This API should be used only be generated code, and that
-     * code should now use ɵɵinject instead.
+     * Injects a token from the currently active injector.
+     *
+     * Must be used in the context of a factory function such as one defined for an
+     * `InjectionToken`. Throws an error if not called from such a context.
+     *
+     * Within such a factory function, using this function to request injection of a dependency
+     * is faster and more type-safe than providing an additional array of dependencies
+     * (as has been common with `useFactory` providers).
+     *
+     * @param token The injection token for the dependency to be injected.
+     * @param flags Optional flags that control how injection is executed.
+     * The flags correspond to injection strategies that can be specified with
+     * parameter decorators `@Host`, `@Self`, `@SkipSef`, and `@Optional`.
+     * @returns True if injection is successful, null otherwise.
+     *
+     * @usageNotes
+     *
+     * ### Example
+     *
+     * {@example core/di/ts/injector_spec.ts region='ShakableInjectionToken'}
+     *
      * @publicApi
      */
     var inject = ɵɵinject;
@@ -16588,7 +16607,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-rc.0+5.sha-71b8b35.with-local-changes');
+    var VERSION = new Version('8.0.0-rc.0+6.sha-b9f0720.with-local-changes');
 
     /**
      * @license
