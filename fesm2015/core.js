@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+10.sha-f3ce8ee.with-local-changes
+ * @license Angular v8.0.0-rc.0+11.sha-6c86ae7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15814,6 +15814,8 @@ function listenerInternal(eventName, listenerFn, useCapture = false, eventTarget
     /** @type {?} */
     const tCleanup = firstTemplatePass && (tView.cleanup || (tView.cleanup = []));
     ngDevMode && assertNodeOfPossibleTypes(tNode, 3 /* Element */, 0 /* Container */, 4 /* ElementContainer */);
+    /** @type {?} */
+    let processOutputs = true;
     // add native event listener - applicable to elements only
     if (tNode.type === 3 /* Element */) {
         /** @type {?} */
@@ -15864,6 +15866,7 @@ function listenerInternal(eventName, listenerFn, useCapture = false, eventTarget
                 // Attach a new listener at the head of the coalesced listeners list.
                 ((/** @type {?} */ (listenerFn))).__ngNextListenerFn__ = ((/** @type {?} */ (existingListener))).__ngNextListenerFn__;
                 ((/** @type {?} */ (existingListener))).__ngNextListenerFn__ = listenerFn;
+                processOutputs = false;
             }
             else {
                 // The first argument of `listen` function in Procedural Renderer is:
@@ -15895,7 +15898,7 @@ function listenerInternal(eventName, listenerFn, useCapture = false, eventTarget
     const outputs = tNode.outputs;
     /** @type {?} */
     let props;
-    if (outputs && (props = outputs[eventName])) {
+    if (processOutputs && outputs && (props = outputs[eventName])) {
         /** @type {?} */
         const propsLength = props.length;
         if (propsLength) {
@@ -20386,7 +20389,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-rc.0+10.sha-f3ce8ee.with-local-changes');
+const VERSION = new Version('8.0.0-rc.0+11.sha-6c86ae7.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
