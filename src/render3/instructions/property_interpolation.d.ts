@@ -1,3 +1,4 @@
+import { SanitizerFn } from '../interfaces/sanitization';
 import { NO_CHANGE } from '../tokens';
 import { TsickleIssue1009 } from './shared';
 /**
@@ -92,10 +93,11 @@ export declare function ɵɵinterpolation8(prefix: string, v0: any, i0: string, 
  * @param prefix Static value used for concatenation only.
  * @param v0 Value checked for change.
  * @param suffix Static value used for concatenation only.
+ * @param sanitizer An optional sanitizer function
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate(propName: string, v0: any): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate(propName: string, v0: any, sanitizer?: SanitizerFn): TsickleIssue1009;
 /**
  *
  * Update an interpolated property on an element with single bound value surrounded by text.
@@ -120,10 +122,11 @@ export declare function ɵɵpropertyInterpolate(propName: string, v0: any): Tsic
  * @param prefix Static value used for concatenation only.
  * @param v0 Value checked for change.
  * @param suffix Static value used for concatenation only.
+ * @param sanitizer An optional sanitizer function
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate1(propName: string, prefix: string, v0: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate1(propName: string, prefix: string, v0: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
 /**
  *
  * Update an interpolated property on an element with 2 bound values surrounded by text.
@@ -150,10 +153,11 @@ export declare function ɵɵpropertyInterpolate1(propName: string, prefix: strin
  * @param i0 Static value used for concatenation only.
  * @param v1 Value checked for change.
  * @param suffix Static value used for concatenation only.
+ * @param sanitizer An optional sanitizer function
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate2(propName: string, prefix: string, v0: any, i0: string, v1: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate2(propName: string, prefix: string, v0: any, i0: string, v1: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
 /**
  *
  * Update an interpolated property on an element with 3 bound values surrounded by text.
@@ -183,10 +187,11 @@ export declare function ɵɵpropertyInterpolate2(propName: string, prefix: strin
  * @param i1 Static value used for concatenation only.
  * @param v2 Value checked for change.
  * @param suffix Static value used for concatenation only.
+ * @param sanitizer An optional sanitizer function
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate3(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate3(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
 /**
  *
  * Update an interpolated property on an element with 4 bound values surrounded by text.
@@ -218,10 +223,11 @@ export declare function ɵɵpropertyInterpolate3(propName: string, prefix: strin
  * @param i2 Static value used for concatenation only.
  * @param v3 Value checked for change.
  * @param suffix Static value used for concatenation only.
+ * @param sanitizer An optional sanitizer function
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate4(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate4(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
 /**
  *
  * Update an interpolated property on an element with 5 bound values surrounded by text.
@@ -255,10 +261,11 @@ export declare function ɵɵpropertyInterpolate4(propName: string, prefix: strin
  * @param i3 Static value used for concatenation only.
  * @param v4 Value checked for change.
  * @param suffix Static value used for concatenation only.
+ * @param sanitizer An optional sanitizer function
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate5(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate5(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
 /**
  *
  * Update an interpolated property on an element with 6 bound values surrounded by text.
@@ -294,10 +301,11 @@ export declare function ɵɵpropertyInterpolate5(propName: string, prefix: strin
  * @param i4 Static value used for concatenation only.
  * @param v5 Value checked for change.
  * @param suffix Static value used for concatenation only.
+ * @param sanitizer An optional sanitizer function
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate6(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate6(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
 /**
  *
  * Update an interpolated property on an element with 7 bound values surrounded by text.
@@ -335,10 +343,11 @@ export declare function ɵɵpropertyInterpolate6(propName: string, prefix: strin
  * @param i5 Static value used for concatenation only.
  * @param v6 Value checked for change.
  * @param suffix Static value used for concatenation only.
+ * @param sanitizer An optional sanitizer function
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate7(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate7(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
 /**
  *
  * Update an interpolated property on an element with 8 bound values surrounded by text.
@@ -378,10 +387,11 @@ export declare function ɵɵpropertyInterpolate7(propName: string, prefix: strin
  * @param i6 Static value used for concatenation only.
  * @param v7 Value checked for change.
  * @param suffix Static value used for concatenation only.
+ * @param sanitizer An optional sanitizer function
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate8(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate8(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
 /**
  * Update an interpolated property on an element with 8 or more bound values surrounded by text.
  *
@@ -408,7 +418,8 @@ export declare function ɵɵpropertyInterpolate8(propName: string, prefix: strin
  * @param values The a collection of values and the strings inbetween those values, beginning with a
  * string prefix and ending with a string suffix.
  * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
+ * @param sanitizer An optional sanitizer function
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolateV(propName: string, values: any[]): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolateV(propName: string, values: any[], sanitizer?: SanitizerFn): TsickleIssue1009;
