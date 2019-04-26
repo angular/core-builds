@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-beta.14+74.sha-6de4cbd.with-local-changes
+ * @license Angular v8.0.0-rc.0+11.sha-6c86ae7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -600,8 +600,27 @@
         return (_injectImplementation || injectInjectorOnly)(token, flags);
     }
     /**
-     * @deprecated in v8, delete after v10. This API should be used only be generated code, and that
-     * code should now use ɵɵinject instead.
+     * Injects a token from the currently active injector.
+     *
+     * Must be used in the context of a factory function such as one defined for an
+     * `InjectionToken`. Throws an error if not called from such a context.
+     *
+     * Within such a factory function, using this function to request injection of a dependency
+     * is faster and more type-safe than providing an additional array of dependencies
+     * (as has been common with `useFactory` providers).
+     *
+     * @param token The injection token for the dependency to be injected.
+     * @param flags Optional flags that control how injection is executed.
+     * The flags correspond to injection strategies that can be specified with
+     * parameter decorators `@Host`, `@Self`, `@SkipSef`, and `@Optional`.
+     * @returns True if injection is successful, null otherwise.
+     *
+     * @usageNotes
+     *
+     * ### Example
+     *
+     * {@example core/di/ts/injector_spec.ts region='ShakableInjectionToken'}
+     *
      * @publicApi
      */
     var inject = ɵɵinject;
@@ -12899,6 +12918,7 @@
         var firstTemplatePass = tView.firstTemplatePass;
         var tCleanup = firstTemplatePass && (tView.cleanup || (tView.cleanup = []));
         ngDevMode && assertNodeOfPossibleTypes(tNode, 3 /* Element */, 0 /* Container */, 4 /* ElementContainer */);
+        var processOutputs = true;
         // add native event listener - applicable to elements only
         if (tNode.type === 3 /* Element */) {
             var native = getNativeByTNode(tNode, lView);
@@ -12937,6 +12957,7 @@
                     // Attach a new listener at the head of the coalesced listeners list.
                     listenerFn.__ngNextListenerFn__ = existingListener.__ngNextListenerFn__;
                     existingListener.__ngNextListenerFn__ = listenerFn;
+                    processOutputs = false;
                 }
                 else {
                     // The first argument of `listen` function in Procedural Renderer is:
@@ -12965,7 +12986,7 @@
         }
         var outputs = tNode.outputs;
         var props;
-        if (outputs && (props = outputs[eventName])) {
+        if (processOutputs && outputs && (props = outputs[eventName])) {
             var propsLength = props.length;
             if (propsLength) {
                 var lCleanup = getCleanup(lView);
@@ -13671,10 +13692,6 @@
     /// NEW INSTRUCTIONS
     /////////////////////////////////////////////////////////////////////
     /**
-     * Shared reference to a string, used in `ɵɵpropertyInterpolate`.
-     */
-    var EMPTY_STRING = '';
-    /**
      *
      * Update an interpolated property on an element with a lone bound value
      *
@@ -13699,11 +13716,12 @@
      * @param prefix Static value used for concatenation only.
      * @param v0 Value checked for change.
      * @param suffix Static value used for concatenation only.
+     * @param sanitizer An optional sanitizer function
      * @returns itself, so that it may be chained.
      * @codeGenApi
      */
-    function ɵɵpropertyInterpolate(propName, v0) {
-        ɵɵpropertyInterpolate1(propName, EMPTY_STRING, v0, EMPTY_STRING);
+    function ɵɵpropertyInterpolate(propName, v0, sanitizer) {
+        ɵɵpropertyInterpolate1(propName, '', v0, '', sanitizer);
         return ɵɵpropertyInterpolate;
     }
     /**
@@ -13730,12 +13748,13 @@
      * @param prefix Static value used for concatenation only.
      * @param v0 Value checked for change.
      * @param suffix Static value used for concatenation only.
+     * @param sanitizer An optional sanitizer function
      * @returns itself, so that it may be chained.
      * @codeGenApi
      */
-    function ɵɵpropertyInterpolate1(propName, prefix, v0, suffix) {
+    function ɵɵpropertyInterpolate1(propName, prefix, v0, suffix, sanitizer) {
         var index = getSelectedIndex();
-        elementPropertyInternal(index, propName, ɵɵinterpolation1(prefix, v0, suffix));
+        elementPropertyInternal(index, propName, ɵɵinterpolation1(prefix, v0, suffix), sanitizer);
         return ɵɵpropertyInterpolate1;
     }
     /**
@@ -13764,12 +13783,13 @@
      * @param i0 Static value used for concatenation only.
      * @param v1 Value checked for change.
      * @param suffix Static value used for concatenation only.
+     * @param sanitizer An optional sanitizer function
      * @returns itself, so that it may be chained.
      * @codeGenApi
      */
-    function ɵɵpropertyInterpolate2(propName, prefix, v0, i0, v1, suffix) {
+    function ɵɵpropertyInterpolate2(propName, prefix, v0, i0, v1, suffix, sanitizer) {
         var index = getSelectedIndex();
-        elementPropertyInternal(index, propName, ɵɵinterpolation2(prefix, v0, i0, v1, suffix));
+        elementPropertyInternal(index, propName, ɵɵinterpolation2(prefix, v0, i0, v1, suffix), sanitizer);
         return ɵɵpropertyInterpolate2;
     }
     /**
@@ -13801,12 +13821,13 @@
      * @param i1 Static value used for concatenation only.
      * @param v2 Value checked for change.
      * @param suffix Static value used for concatenation only.
+     * @param sanitizer An optional sanitizer function
      * @returns itself, so that it may be chained.
      * @codeGenApi
      */
-    function ɵɵpropertyInterpolate3(propName, prefix, v0, i0, v1, i1, v2, suffix) {
+    function ɵɵpropertyInterpolate3(propName, prefix, v0, i0, v1, i1, v2, suffix, sanitizer) {
         var index = getSelectedIndex();
-        elementPropertyInternal(index, propName, ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix));
+        elementPropertyInternal(index, propName, ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix), sanitizer);
         return ɵɵpropertyInterpolate3;
     }
     /**
@@ -13840,12 +13861,13 @@
      * @param i2 Static value used for concatenation only.
      * @param v3 Value checked for change.
      * @param suffix Static value used for concatenation only.
+     * @param sanitizer An optional sanitizer function
      * @returns itself, so that it may be chained.
      * @codeGenApi
      */
-    function ɵɵpropertyInterpolate4(propName, prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
+    function ɵɵpropertyInterpolate4(propName, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, sanitizer) {
         var index = getSelectedIndex();
-        elementPropertyInternal(index, propName, ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix));
+        elementPropertyInternal(index, propName, ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix), sanitizer);
         return ɵɵpropertyInterpolate4;
     }
     /**
@@ -13881,12 +13903,13 @@
      * @param i3 Static value used for concatenation only.
      * @param v4 Value checked for change.
      * @param suffix Static value used for concatenation only.
+     * @param sanitizer An optional sanitizer function
      * @returns itself, so that it may be chained.
      * @codeGenApi
      */
-    function ɵɵpropertyInterpolate5(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
+    function ɵɵpropertyInterpolate5(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, sanitizer) {
         var index = getSelectedIndex();
-        elementPropertyInternal(index, propName, ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix));
+        elementPropertyInternal(index, propName, ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix), sanitizer);
         return ɵɵpropertyInterpolate5;
     }
     /**
@@ -13924,12 +13947,13 @@
      * @param i4 Static value used for concatenation only.
      * @param v5 Value checked for change.
      * @param suffix Static value used for concatenation only.
+     * @param sanitizer An optional sanitizer function
      * @returns itself, so that it may be chained.
      * @codeGenApi
      */
-    function ɵɵpropertyInterpolate6(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
+    function ɵɵpropertyInterpolate6(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, sanitizer) {
         var index = getSelectedIndex();
-        elementPropertyInternal(index, propName, ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix));
+        elementPropertyInternal(index, propName, ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix), sanitizer);
         return ɵɵpropertyInterpolate6;
     }
     /**
@@ -13969,12 +13993,13 @@
      * @param i5 Static value used for concatenation only.
      * @param v6 Value checked for change.
      * @param suffix Static value used for concatenation only.
+     * @param sanitizer An optional sanitizer function
      * @returns itself, so that it may be chained.
      * @codeGenApi
      */
-    function ɵɵpropertyInterpolate7(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
+    function ɵɵpropertyInterpolate7(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, sanitizer) {
         var index = getSelectedIndex();
-        elementPropertyInternal(index, propName, ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix));
+        elementPropertyInternal(index, propName, ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix), sanitizer);
         return ɵɵpropertyInterpolate7;
     }
     /**
@@ -14016,12 +14041,13 @@
      * @param i6 Static value used for concatenation only.
      * @param v7 Value checked for change.
      * @param suffix Static value used for concatenation only.
+     * @param sanitizer An optional sanitizer function
      * @returns itself, so that it may be chained.
      * @codeGenApi
      */
-    function ɵɵpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
+    function ɵɵpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, sanitizer) {
         var index = getSelectedIndex();
-        elementPropertyInternal(index, propName, ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix));
+        elementPropertyInternal(index, propName, ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix), sanitizer);
         return ɵɵpropertyInterpolate8;
     }
     /**
@@ -14050,12 +14076,13 @@
      * @param values The a collection of values and the strings inbetween those values, beginning with a
      * string prefix and ending with a string suffix.
      * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
+     * @param sanitizer An optional sanitizer function
      * @returns itself, so that it may be chained.
      * @codeGenApi
      */
-    function ɵɵpropertyInterpolateV(propName, values) {
+    function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
         var index = getSelectedIndex();
-        elementPropertyInternal(index, propName, ɵɵinterpolationV(values));
+        elementPropertyInternal(index, propName, ɵɵinterpolationV(values), sanitizer);
         return ɵɵpropertyInterpolateV;
     }
 
@@ -16588,7 +16615,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-beta.14+74.sha-6de4cbd.with-local-changes');
+    var VERSION = new Version('8.0.0-rc.0+11.sha-6c86ae7.with-local-changes');
 
     /**
      * @license
