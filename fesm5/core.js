@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+18.sha-c99d379.with-local-changes
+ * @license Angular v8.0.0-rc.0+38.sha-e5c3695.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9944,17 +9944,23 @@ function setNgReflectProperty(lView, element, type, attrName, value) {
     attrName = normalizeDebugBindingName(attrName);
     var debugValue = normalizeDebugBindingValue(value);
     if (type === 3 /* Element */) {
-        isProceduralRenderer(renderer) ?
-            renderer.setAttribute(element, attrName, debugValue) :
-            element.setAttribute(attrName, debugValue);
-    }
-    else if (value !== undefined) {
-        var value_1 = "bindings=" + JSON.stringify((_a = {}, _a[attrName] = debugValue, _a), null, 2);
-        if (isProceduralRenderer(renderer)) {
-            renderer.setValue(element, value_1);
+        if (value == null) {
+            isProceduralRenderer(renderer) ? renderer.removeAttribute(element, attrName) :
+                element.removeAttribute(attrName);
         }
         else {
-            element.textContent = value_1;
+            isProceduralRenderer(renderer) ?
+                renderer.setAttribute(element, attrName, debugValue) :
+                element.setAttribute(attrName, debugValue);
+        }
+    }
+    else {
+        var textContent = "bindings=" + JSON.stringify((_a = {}, _a[attrName] = debugValue, _a), null, 2);
+        if (isProceduralRenderer(renderer)) {
+            renderer.setValue(element, textContent);
+        }
+        else {
+            element.textContent = textContent;
         }
     }
 }
@@ -16490,7 +16496,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-rc.0+18.sha-c99d379.with-local-changes');
+var VERSION = new Version('8.0.0-rc.0+38.sha-e5c3695.with-local-changes');
 
 /**
  * @license
@@ -19778,7 +19784,7 @@ function addAllToArray(items, arr) {
 /**
  * Flattens an array in non-recursive way. Input arrays are not modified.
  */
-function flatten(list) {
+function flatten(list, mapFn) {
     var result = [];
     var i = 0;
     while (i < list.length) {
@@ -19793,7 +19799,7 @@ function flatten(list) {
             }
         }
         else {
-            result.push(item);
+            result.push(mapFn ? mapFn(item) : item);
             i++;
         }
     }
@@ -22815,7 +22821,7 @@ function compileNgModule(moduleType, ngModule) {
 function compileNgModuleDefs(moduleType, ngModule) {
     ngDevMode && assertDefined(moduleType, 'Required value moduleType');
     ngDevMode && assertDefined(ngModule, 'Required value ngModule');
-    var declarations = flatten$1(ngModule.declarations || EMPTY_ARRAY$3);
+    var declarations = flatten(ngModule.declarations || EMPTY_ARRAY$3);
     var ngModuleDef = null;
     Object.defineProperty(moduleType, NG_MODULE_DEF, {
         configurable: true,
@@ -22823,14 +22829,14 @@ function compileNgModuleDefs(moduleType, ngModule) {
             if (ngModuleDef === null) {
                 ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, "ng://" + moduleType.name + "/ngModuleDef.js", {
                     type: moduleType,
-                    bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$3, resolveForwardRef),
+                    bootstrap: flatten(ngModule.bootstrap || EMPTY_ARRAY$3, resolveForwardRef),
                     declarations: declarations.map(resolveForwardRef),
-                    imports: flatten$1(ngModule.imports || EMPTY_ARRAY$3, resolveForwardRef)
+                    imports: flatten(ngModule.imports || EMPTY_ARRAY$3, resolveForwardRef)
                         .map(expandModuleWithProviders),
-                    exports: flatten$1(ngModule.exports || EMPTY_ARRAY$3, resolveForwardRef)
+                    exports: flatten(ngModule.exports || EMPTY_ARRAY$3, resolveForwardRef)
                         .map(expandModuleWithProviders),
                     emitInline: true,
-                    schemas: ngModule.schemas ? flatten$1(ngModule.schemas) : null,
+                    schemas: ngModule.schemas ? flatten(ngModule.schemas) : null,
                 });
             }
             return ngModuleDef;
@@ -22871,16 +22877,17 @@ function verifySemanticsOfNgModuleDef(moduleType) {
     var errors = [];
     var declarations = maybeUnwrapFn(ngModuleDef.declarations);
     var imports = maybeUnwrapFn(ngModuleDef.imports);
+    flatten(imports, unwrapModuleWithProvidersImports).forEach(verifySemanticsOfNgModuleDef);
     var exports = maybeUnwrapFn(ngModuleDef.exports);
     declarations.forEach(verifyDeclarationsHaveDefinitions);
-    var combinedDeclarations = __spread(declarations.map(resolveForwardRef), flatten$1(imports.map(computeCombinedExports), resolveForwardRef));
+    var combinedDeclarations = __spread(declarations.map(resolveForwardRef), flatten(imports.map(computeCombinedExports), resolveForwardRef));
     exports.forEach(verifyExportsAreDeclaredOrReExported);
     declarations.forEach(verifyDeclarationIsUnique);
     declarations.forEach(verifyComponentEntryComponentsIsPartOfNgModule);
     var ngModule = getAnnotation(moduleType, 'NgModule');
     if (ngModule) {
         ngModule.imports &&
-            flatten$1(ngModule.imports, unwrapModuleWithProvidersImports)
+            flatten(ngModule.imports, unwrapModuleWithProvidersImports)
                 .forEach(verifySemanticsOfNgModuleDef);
         ngModule.bootstrap && ngModule.bootstrap.forEach(verifyCorrectBootstrapType);
         ngModule.bootstrap && ngModule.bootstrap.forEach(verifyComponentIsPartOfNgModule);
@@ -22999,7 +23006,7 @@ function resetCompiledComponents() {
 function computeCombinedExports(type) {
     type = resolveForwardRef(type);
     var ngModuleDef = getNgModuleDef(type, true);
-    return __spread(flatten$1(maybeUnwrapFn(ngModuleDef.exports).map(function (type) {
+    return __spread(flatten(maybeUnwrapFn(ngModuleDef.exports).map(function (type) {
         var ngModuleDef = getNgModuleDef(type);
         if (ngModuleDef) {
             verifySemanticsOfNgModuleDef(type);
@@ -23016,7 +23023,7 @@ function computeCombinedExports(type) {
  * the `ngSelectorScope` property of the declared type.
  */
 function setScopeOnDeclaredComponents(moduleType, ngModule) {
-    var declarations = flatten$1(ngModule.declarations || EMPTY_ARRAY$3);
+    var declarations = flatten(ngModule.declarations || EMPTY_ARRAY$3);
     var transitiveScopes = transitiveScopesFor(moduleType);
     declarations.forEach(function (declaration) {
         if (declaration.hasOwnProperty(NG_COMPONENT_DEF)) {
@@ -23130,18 +23137,6 @@ function transitiveScopesFor(moduleType, processNgModuleFn) {
     });
     def.transitiveCompileScopes = scopes;
     return scopes;
-}
-function flatten$1(values, mapFn) {
-    var out = [];
-    values.forEach(function (value) {
-        if (Array.isArray(value)) {
-            out.push.apply(out, __spread(flatten$1(value, mapFn)));
-        }
-        else {
-            out.push(mapFn ? mapFn(value) : value);
-        }
-    });
-    return out;
 }
 function expandModuleWithProviders(value) {
     if (isModuleWithProviders(value)) {

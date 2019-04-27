@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+18.sha-c99d379.with-local-changes
+ * @license Angular v8.0.0-rc.0+38.sha-e5c3695.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12357,18 +12357,24 @@ function setNgReflectProperty(lView, element, type, attrName, value) {
     /** @type {?} */
     const debugValue = normalizeDebugBindingValue(value);
     if (type === 3 /* Element */) {
-        isProceduralRenderer(renderer) ?
-            renderer.setAttribute(((/** @type {?} */ (element))), attrName, debugValue) :
-            ((/** @type {?} */ (element))).setAttribute(attrName, debugValue);
-    }
-    else if (value !== undefined) {
-        /** @type {?} */
-        const value = `bindings=${JSON.stringify({ [attrName]: debugValue }, null, 2)}`;
-        if (isProceduralRenderer(renderer)) {
-            renderer.setValue(((/** @type {?} */ (element))), value);
+        if (value == null) {
+            isProceduralRenderer(renderer) ? renderer.removeAttribute(((/** @type {?} */ (element))), attrName) :
+                ((/** @type {?} */ (element))).removeAttribute(attrName);
         }
         else {
-            ((/** @type {?} */ (element))).textContent = value;
+            isProceduralRenderer(renderer) ?
+                renderer.setAttribute(((/** @type {?} */ (element))), attrName, debugValue) :
+                ((/** @type {?} */ (element))).setAttribute(attrName, debugValue);
+        }
+    }
+    else {
+        /** @type {?} */
+        const textContent = `bindings=${JSON.stringify({ [attrName]: debugValue }, null, 2)}`;
+        if (isProceduralRenderer(renderer)) {
+            renderer.setValue(((/** @type {?} */ (element))), textContent);
+        }
+        else {
+            ((/** @type {?} */ (element))).textContent = textContent;
         }
     }
 }
@@ -20389,7 +20395,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-rc.0+18.sha-c99d379.with-local-changes');
+const VERSION = new Version('8.0.0-rc.0+38.sha-e5c3695.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -25083,7 +25089,7 @@ function addAllToArray(items, arr) {
 /**
  * Flattens an array in non-recursive way. Input arrays are not modified.
  */
-function flatten(list) {
+function flatten(list, mapFn) {
     const result = [];
     let i = 0;
     while (i < list.length) {
@@ -25098,7 +25104,7 @@ function flatten(list) {
             }
         }
         else {
-            result.push(item);
+            result.push(mapFn ? mapFn(item) : item);
             i++;
         }
     }
@@ -28802,7 +28808,7 @@ function compileNgModuleDefs(moduleType, ngModule) {
     ngDevMode && assertDefined(moduleType, 'Required value moduleType');
     ngDevMode && assertDefined(ngModule, 'Required value ngModule');
     /** @type {?} */
-    const declarations = flatten$1(ngModule.declarations || EMPTY_ARRAY$3);
+    const declarations = flatten(ngModule.declarations || EMPTY_ARRAY$3);
     /** @type {?} */
     /** @nocollapse */ let ngModuleDef = null;
     Object.defineProperty(moduleType, NG_MODULE_DEF, {
@@ -28814,14 +28820,14 @@ function compileNgModuleDefs(moduleType, ngModule) {
             if (ngModuleDef === null) {
                 ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, `ng://${moduleType.name}/ngModuleDef.js`, {
                     type: moduleType,
-                    bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$3, resolveForwardRef),
+                    bootstrap: flatten(ngModule.bootstrap || EMPTY_ARRAY$3, resolveForwardRef),
                     declarations: declarations.map(resolveForwardRef),
-                    imports: flatten$1(ngModule.imports || EMPTY_ARRAY$3, resolveForwardRef)
+                    imports: flatten(ngModule.imports || EMPTY_ARRAY$3, resolveForwardRef)
                         .map(expandModuleWithProviders),
-                    exports: flatten$1(ngModule.exports || EMPTY_ARRAY$3, resolveForwardRef)
+                    exports: flatten(ngModule.exports || EMPTY_ARRAY$3, resolveForwardRef)
                         .map(expandModuleWithProviders),
                     emitInline: true,
-                    schemas: ngModule.schemas ? flatten$1(ngModule.schemas) : null,
+                    schemas: ngModule.schemas ? flatten(ngModule.schemas) : null,
                 });
             }
             return ngModuleDef;
@@ -28875,13 +28881,14 @@ function verifySemanticsOfNgModuleDef(moduleType) {
     const declarations = maybeUnwrapFn(ngModuleDef.declarations);
     /** @type {?} */
     const imports = maybeUnwrapFn(ngModuleDef.imports);
+    flatten(imports, unwrapModuleWithProvidersImports).forEach(verifySemanticsOfNgModuleDef);
     /** @type {?} */
     const exports = maybeUnwrapFn(ngModuleDef.exports);
     declarations.forEach(verifyDeclarationsHaveDefinitions);
     /** @type {?} */
     const combinedDeclarations = [
         ...declarations.map(resolveForwardRef),
-        ...flatten$1(imports.map(computeCombinedExports), resolveForwardRef),
+        ...flatten(imports.map(computeCombinedExports), resolveForwardRef),
     ];
     exports.forEach(verifyExportsAreDeclaredOrReExported);
     declarations.forEach(verifyDeclarationIsUnique);
@@ -28890,7 +28897,7 @@ function verifySemanticsOfNgModuleDef(moduleType) {
     const ngModule = getAnnotation(moduleType, 'NgModule');
     if (ngModule) {
         ngModule.imports &&
-            flatten$1(ngModule.imports, unwrapModuleWithProvidersImports)
+            flatten(ngModule.imports, unwrapModuleWithProvidersImports)
                 .forEach(verifySemanticsOfNgModuleDef);
         ngModule.bootstrap && ngModule.bootstrap.forEach(verifyCorrectBootstrapType);
         ngModule.bootstrap && ngModule.bootstrap.forEach(verifyComponentIsPartOfNgModule);
@@ -29067,7 +29074,7 @@ function computeCombinedExports(type) {
     type = resolveForwardRef(type);
     /** @type {?} */
     /** @nocollapse */ const ngModuleDef = getNgModuleDef(type, true);
-    return [...flatten$1(maybeUnwrapFn(ngModuleDef.exports).map((/**
+    return [...flatten(maybeUnwrapFn(ngModuleDef.exports).map((/**
          * @param {?} type
          * @return {?}
          */
@@ -29093,7 +29100,7 @@ function computeCombinedExports(type) {
  */
 function setScopeOnDeclaredComponents(moduleType, ngModule) {
     /** @type {?} */
-    const declarations = flatten$1(ngModule.declarations || EMPTY_ARRAY$3);
+    const declarations = flatten(ngModule.declarations || EMPTY_ARRAY$3);
     /** @type {?} */
     const transitiveScopes = transitiveScopesFor(moduleType);
     declarations.forEach((/**
@@ -29273,29 +29280,6 @@ function transitiveScopesFor(moduleType, processNgModuleFn) {
     }));
     def.transitiveCompileScopes = scopes;
     return scopes;
-}
-/**
- * @template T
- * @param {?} values
- * @param {?=} mapFn
- * @return {?}
- */
-function flatten$1(values, mapFn) {
-    /** @type {?} */
-    const out = [];
-    values.forEach((/**
-     * @param {?} value
-     * @return {?}
-     */
-    value => {
-        if (Array.isArray(value)) {
-            out.push(...flatten$1(value, mapFn));
-        }
-        else {
-            out.push(mapFn ? mapFn(value) : value);
-        }
-    }));
-    return out;
 }
 /**
  * @param {?} value
