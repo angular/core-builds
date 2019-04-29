@@ -10,10 +10,10 @@ import * as ts from 'typescript';
 /** Name of the Injectable decorator. */
 export declare const INJECTABLE_DECORATOR_NAME = "Injectable";
 /**
- * Adds a named import to an import declaration node.
+ * Adds an import to a named import node, if the import does not exist already.
  * @param node Node to which to add the import.
  * @param importName Name of the import that should be added.
  */
-export declare function addNamedImport(node: ts.ImportDeclaration, importName: string): ts.ImportDeclaration;
+export declare function addImport(node: ts.NamedImports, importName: string): ts.NamedImports;
 /** Gets the named imports node from an import declaration. */
 export declare function getNamedImports(node: ts.ImportDeclaration): ts.NamedImports | null;
