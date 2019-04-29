@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+11.sha-6c86ae7.with-local-changes
+ * @license Angular v8.0.0-rc.0+66.sha-68ff2cc.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3195,6 +3195,7 @@
             outputs: invertObject(baseDefinition.outputs),
             viewQuery: baseDefinition.viewQuery || null,
             contentQueries: baseDefinition.contentQueries || null,
+            hostBindings: baseDefinition.hostBindings || null
         };
     }
     /**
@@ -10065,17 +10066,23 @@
         attrName = normalizeDebugBindingName(attrName);
         var debugValue = normalizeDebugBindingValue(value);
         if (type === 3 /* Element */) {
-            isProceduralRenderer(renderer) ?
-                renderer.setAttribute(element, attrName, debugValue) :
-                element.setAttribute(attrName, debugValue);
-        }
-        else if (value !== undefined) {
-            var value_1 = "bindings=" + JSON.stringify((_a = {}, _a[attrName] = debugValue, _a), null, 2);
-            if (isProceduralRenderer(renderer)) {
-                renderer.setValue(element, value_1);
+            if (value == null) {
+                isProceduralRenderer(renderer) ? renderer.removeAttribute(element, attrName) :
+                    element.removeAttribute(attrName);
             }
             else {
-                element.textContent = value_1;
+                isProceduralRenderer(renderer) ?
+                    renderer.setAttribute(element, attrName, debugValue) :
+                    element.setAttribute(attrName, debugValue);
+            }
+        }
+        else {
+            var textContent = "bindings=" + JSON.stringify((_a = {}, _a[attrName] = debugValue, _a), null, 2);
+            if (isProceduralRenderer(renderer)) {
+                renderer.setValue(element, textContent);
+            }
+            else {
+                element.textContent = textContent;
             }
         }
     }
@@ -14865,9 +14872,9 @@
      * @codeGenApi
      */
     function ɵɵInheritDefinitionFeature(definition) {
+        var e_1, _a;
         var superType = getSuperType(definition.type);
-        var _loop_1 = function () {
-            var e_1, _a;
+        while (superType) {
             var superDef = undefined;
             if (isComponentDef(definition)) {
                 // Don't use getComponentDef/getDirectiveDef. This logic relies on inheritance.
@@ -14892,6 +14899,8 @@
             if (baseDef) {
                 var baseViewQuery = baseDef.viewQuery;
                 var baseContentQueries = baseDef.contentQueries;
+                var baseHostBindings = baseDef.hostBindings;
+                baseHostBindings && inheritHostBindings(definition, baseHostBindings);
                 baseViewQuery && inheritViewQuery(definition, baseViewQuery);
                 baseContentQueries && inheritContentQueries(definition, baseContentQueries);
                 fillProperties(definition.inputs, baseDef.inputs);
@@ -14900,36 +14909,8 @@
             }
             if (superDef) {
                 // Merge hostBindings
-                var prevHostBindings_1 = definition.hostBindings;
-                var superHostBindings_1 = superDef.hostBindings;
-                if (superHostBindings_1) {
-                    if (prevHostBindings_1) {
-                        // because inheritance is unknown during compile time, the runtime code
-                        // needs to be informed of the super-class depth so that instruction code
-                        // can distinguish one host bindings function from another. The reason why
-                        // relying on the directive uniqueId exclusively is not enough is because the
-                        // uniqueId value and the directive instance stay the same between hostBindings
-                        // calls throughout the directive inheritance chain. This means that without
-                        // a super-class depth value, there is no way to know whether a parent or
-                        // sub-class host bindings function is currently being executed.
-                        definition.hostBindings = function (rf, ctx, elementIndex) {
-                            // The reason why we increment first and then decrement is so that parent
-                            // hostBindings calls have a higher id value compared to sub-class hostBindings
-                            // calls (this way the leaf directive is always at a super-class depth of 0).
-                            adjustActiveDirectiveSuperClassDepthPosition(1);
-                            try {
-                                superHostBindings_1(rf, ctx, elementIndex);
-                            }
-                            finally {
-                                adjustActiveDirectiveSuperClassDepthPosition(-1);
-                            }
-                            prevHostBindings_1(rf, ctx, elementIndex);
-                        };
-                    }
-                    else {
-                        definition.hostBindings = superHostBindings_1;
-                    }
-                }
+                var superHostBindings = superDef.hostBindings;
+                superHostBindings && inheritHostBindings(definition, superHostBindings);
                 // Merge queries
                 var superViewQuery = superDef.viewQuery;
                 var superContentQueries = superDef.contentQueries;
@@ -14989,9 +14970,6 @@
                 }
             }
             superType = Object.getPrototypeOf(superType);
-        };
-        while (superType) {
-            _loop_1();
         }
     }
     function maybeUnwrapEmpty(value) {
@@ -15027,6 +15005,35 @@
         }
         else {
             definition.contentQueries = superContentQueries;
+        }
+    }
+    function inheritHostBindings(definition, superHostBindings) {
+        var prevHostBindings = definition.hostBindings;
+        if (prevHostBindings) {
+            // because inheritance is unknown during compile time, the runtime code
+            // needs to be informed of the super-class depth so that instruction code
+            // can distinguish one host bindings function from another. The reason why
+            // relying on the directive uniqueId exclusively is not enough is because the
+            // uniqueId value and the directive instance stay the same between hostBindings
+            // calls throughout the directive inheritance chain. This means that without
+            // a super-class depth value, there is no way to know whether a parent or
+            // sub-class host bindings function is currently being executed.
+            definition.hostBindings = function (rf, ctx, elementIndex) {
+                // The reason why we increment first and then decrement is so that parent
+                // hostBindings calls have a higher id value compared to sub-class hostBindings
+                // calls (this way the leaf directive is always at a super-class depth of 0).
+                adjustActiveDirectiveSuperClassDepthPosition(1);
+                try {
+                    superHostBindings(rf, ctx, elementIndex);
+                }
+                finally {
+                    adjustActiveDirectiveSuperClassDepthPosition(-1);
+                }
+                prevHostBindings(rf, ctx, elementIndex);
+            };
+        }
+        else {
+            definition.hostBindings = superHostBindings;
         }
     }
 
@@ -16615,7 +16622,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-rc.0+11.sha-6c86ae7.with-local-changes');
+    var VERSION = new Version('8.0.0-rc.0+66.sha-68ff2cc.with-local-changes');
 
     /**
      * @license
@@ -19923,7 +19930,7 @@
     /**
      * Flattens an array in non-recursive way. Input arrays are not modified.
      */
-    function flatten(list) {
+    function flatten(list, mapFn) {
         var result = [];
         var i = 0;
         while (i < list.length) {
@@ -19938,7 +19945,7 @@
                 }
             }
             else {
-                result.push(item);
+                result.push(mapFn ? mapFn(item) : item);
                 i++;
             }
         }
@@ -22973,7 +22980,7 @@
     function compileNgModuleDefs(moduleType, ngModule) {
         ngDevMode && assertDefined(moduleType, 'Required value moduleType');
         ngDevMode && assertDefined(ngModule, 'Required value ngModule');
-        var declarations = flatten$1(ngModule.declarations || EMPTY_ARRAY$4);
+        var declarations = flatten(ngModule.declarations || EMPTY_ARRAY$4);
         var ngModuleDef = null;
         Object.defineProperty(moduleType, NG_MODULE_DEF, {
             configurable: true,
@@ -22981,14 +22988,14 @@
                 if (ngModuleDef === null) {
                     ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, "ng://" + moduleType.name + "/ngModuleDef.js", {
                         type: moduleType,
-                        bootstrap: flatten$1(ngModule.bootstrap || EMPTY_ARRAY$4, resolveForwardRef),
+                        bootstrap: flatten(ngModule.bootstrap || EMPTY_ARRAY$4, resolveForwardRef),
                         declarations: declarations.map(resolveForwardRef),
-                        imports: flatten$1(ngModule.imports || EMPTY_ARRAY$4, resolveForwardRef)
+                        imports: flatten(ngModule.imports || EMPTY_ARRAY$4, resolveForwardRef)
                             .map(expandModuleWithProviders),
-                        exports: flatten$1(ngModule.exports || EMPTY_ARRAY$4, resolveForwardRef)
+                        exports: flatten(ngModule.exports || EMPTY_ARRAY$4, resolveForwardRef)
                             .map(expandModuleWithProviders),
                         emitInline: true,
-                        schemas: ngModule.schemas ? flatten$1(ngModule.schemas) : null,
+                        schemas: ngModule.schemas ? flatten(ngModule.schemas) : null,
                     });
                 }
                 return ngModuleDef;
@@ -23029,16 +23036,17 @@
         var errors = [];
         var declarations = maybeUnwrapFn(ngModuleDef.declarations);
         var imports = maybeUnwrapFn(ngModuleDef.imports);
+        flatten(imports, unwrapModuleWithProvidersImports).forEach(verifySemanticsOfNgModuleDef);
         var exports = maybeUnwrapFn(ngModuleDef.exports);
         declarations.forEach(verifyDeclarationsHaveDefinitions);
-        var combinedDeclarations = __spread(declarations.map(resolveForwardRef), flatten$1(imports.map(computeCombinedExports), resolveForwardRef));
+        var combinedDeclarations = __spread(declarations.map(resolveForwardRef), flatten(imports.map(computeCombinedExports), resolveForwardRef));
         exports.forEach(verifyExportsAreDeclaredOrReExported);
         declarations.forEach(verifyDeclarationIsUnique);
         declarations.forEach(verifyComponentEntryComponentsIsPartOfNgModule);
         var ngModule = getAnnotation(moduleType, 'NgModule');
         if (ngModule) {
             ngModule.imports &&
-                flatten$1(ngModule.imports, unwrapModuleWithProvidersImports)
+                flatten(ngModule.imports, unwrapModuleWithProvidersImports)
                     .forEach(verifySemanticsOfNgModuleDef);
             ngModule.bootstrap && ngModule.bootstrap.forEach(verifyCorrectBootstrapType);
             ngModule.bootstrap && ngModule.bootstrap.forEach(verifyComponentIsPartOfNgModule);
@@ -23157,7 +23165,7 @@
     function computeCombinedExports(type) {
         type = resolveForwardRef(type);
         var ngModuleDef = getNgModuleDef(type, true);
-        return __spread(flatten$1(maybeUnwrapFn(ngModuleDef.exports).map(function (type) {
+        return __spread(flatten(maybeUnwrapFn(ngModuleDef.exports).map(function (type) {
             var ngModuleDef = getNgModuleDef(type);
             if (ngModuleDef) {
                 verifySemanticsOfNgModuleDef(type);
@@ -23174,7 +23182,7 @@
      * the `ngSelectorScope` property of the declared type.
      */
     function setScopeOnDeclaredComponents(moduleType, ngModule) {
-        var declarations = flatten$1(ngModule.declarations || EMPTY_ARRAY$4);
+        var declarations = flatten(ngModule.declarations || EMPTY_ARRAY$4);
         var transitiveScopes = transitiveScopesFor(moduleType);
         declarations.forEach(function (declaration) {
             if (declaration.hasOwnProperty(NG_COMPONENT_DEF)) {
@@ -23288,18 +23296,6 @@
         });
         def.transitiveCompileScopes = scopes;
         return scopes;
-    }
-    function flatten$1(values, mapFn) {
-        var out = [];
-        values.forEach(function (value) {
-            if (Array.isArray(value)) {
-                out.push.apply(out, __spread(flatten$1(value, mapFn)));
-            }
-            else {
-                out.push(mapFn ? mapFn(value) : value);
-            }
-        });
-        return out;
     }
     function expandModuleWithProviders(value) {
         if (isModuleWithProviders(value)) {
@@ -23485,15 +23481,22 @@
         var queries = extractQueriesMetadata(type, propMetadata, isContentQuery);
         var inputs;
         var outputs;
+        // We only need to know whether there are any HostListener or HostBinding
+        // decorators present, the parsing logic is in the compiler already.
+        var hasHostDecorators = false;
         var _loop_1 = function (field) {
             propMetadata[field].forEach(function (ann) {
-                if (ann.ngMetadataName === 'Input') {
+                var metadataName = ann.ngMetadataName;
+                if (metadataName === 'Input') {
                     inputs = inputs || {};
                     inputs[field] = ann.bindingPropertyName ? [ann.bindingPropertyName, field] : field;
                 }
-                else if (ann.ngMetadataName === 'Output') {
+                else if (metadataName === 'Output') {
                     outputs = outputs || {};
                     outputs[field] = ann.bindingPropertyName || field;
+                }
+                else if (metadataName === 'HostBinding' || metadataName === 'HostListener') {
+                    hasHostDecorators = true;
                 }
             });
         };
@@ -23501,8 +23504,8 @@
             _loop_1(field);
         }
         // Only generate the base def if there's any info inside it.
-        if (inputs || outputs || viewQueries.length || queries.length) {
-            return { inputs: inputs, outputs: outputs, viewQueries: viewQueries, queries: queries };
+        if (inputs || outputs || viewQueries.length || queries.length || hasHostDecorators) {
+            return { name: type.name, inputs: inputs, outputs: outputs, viewQueries: viewQueries, queries: queries, propMetadata: propMetadata };
         }
         return null;
     }
