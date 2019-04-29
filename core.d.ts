@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+65.sha-164d160.with-local-changes
+ * @license Angular v8.0.0-rc.0+66.sha-68ff2cc.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9690,10 +9690,6 @@ export declare interface ɵDirectiveDef<T> extends ɵɵBaseDef<T> {
      * Factory function used to create a new directive instance.
      */
     factory: FactoryFn<T>;
-    /**
-     * Refreshes host bindings on the associated directive.
-     */
-    hostBindings: HostBindingsFunction<T> | null;
     onChanges: (() => void) | null;
     onInit: (() => void) | null;
     doCheck: (() => void) | null;
@@ -10610,6 +10606,10 @@ export declare interface ɵɵBaseDef<T> {
      * components that extend the directive.
      */
     viewQuery: ViewQueriesFunction<T> | null;
+    /**
+     * Refreshes host bindings on the associated directive.
+     */
+    hostBindings: HostBindingsFunction<T> | null;
 }
 
 /**
@@ -10816,6 +10816,10 @@ export declare function ɵɵdefineBase<T>(baseDefinition: {
      * set of instructions to be inserted into the template function.
      */
     viewQuery?: ViewQueriesFunction<T> | null;
+    /**
+     * Function executed by the parent template to allow children to apply host bindings.
+     */
+    hostBindings?: HostBindingsFunction<T>;
 }): ɵɵBaseDef<T>;
 
 /**

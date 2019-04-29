@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+65.sha-164d160.with-local-changes
+ * @license Angular v8.0.0-rc.0+66.sha-68ff2cc.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3135,6 +3135,7 @@ function ɵɵdefineBase(baseDefinition) {
         outputs: invertObject(baseDefinition.outputs),
         viewQuery: baseDefinition.viewQuery || null,
         contentQueries: baseDefinition.contentQueries || null,
+        hostBindings: baseDefinition.hostBindings || null
     };
 }
 /**
@@ -14821,9 +14822,9 @@ function getSuperType(type) {
  * @codeGenApi
  */
 function ɵɵInheritDefinitionFeature(definition) {
+    var e_1, _a;
     var superType = getSuperType(definition.type);
-    var _loop_1 = function () {
-        var e_1, _a;
+    while (superType) {
         var superDef = undefined;
         if (isComponentDef(definition)) {
             // Don't use getComponentDef/getDirectiveDef. This logic relies on inheritance.
@@ -14848,6 +14849,8 @@ function ɵɵInheritDefinitionFeature(definition) {
         if (baseDef) {
             var baseViewQuery = baseDef.viewQuery;
             var baseContentQueries = baseDef.contentQueries;
+            var baseHostBindings = baseDef.hostBindings;
+            baseHostBindings && inheritHostBindings(definition, baseHostBindings);
             baseViewQuery && inheritViewQuery(definition, baseViewQuery);
             baseContentQueries && inheritContentQueries(definition, baseContentQueries);
             fillProperties(definition.inputs, baseDef.inputs);
@@ -14856,36 +14859,8 @@ function ɵɵInheritDefinitionFeature(definition) {
         }
         if (superDef) {
             // Merge hostBindings
-            var prevHostBindings_1 = definition.hostBindings;
-            var superHostBindings_1 = superDef.hostBindings;
-            if (superHostBindings_1) {
-                if (prevHostBindings_1) {
-                    // because inheritance is unknown during compile time, the runtime code
-                    // needs to be informed of the super-class depth so that instruction code
-                    // can distinguish one host bindings function from another. The reason why
-                    // relying on the directive uniqueId exclusively is not enough is because the
-                    // uniqueId value and the directive instance stay the same between hostBindings
-                    // calls throughout the directive inheritance chain. This means that without
-                    // a super-class depth value, there is no way to know whether a parent or
-                    // sub-class host bindings function is currently being executed.
-                    definition.hostBindings = function (rf, ctx, elementIndex) {
-                        // The reason why we increment first and then decrement is so that parent
-                        // hostBindings calls have a higher id value compared to sub-class hostBindings
-                        // calls (this way the leaf directive is always at a super-class depth of 0).
-                        adjustActiveDirectiveSuperClassDepthPosition(1);
-                        try {
-                            superHostBindings_1(rf, ctx, elementIndex);
-                        }
-                        finally {
-                            adjustActiveDirectiveSuperClassDepthPosition(-1);
-                        }
-                        prevHostBindings_1(rf, ctx, elementIndex);
-                    };
-                }
-                else {
-                    definition.hostBindings = superHostBindings_1;
-                }
-            }
+            var superHostBindings = superDef.hostBindings;
+            superHostBindings && inheritHostBindings(definition, superHostBindings);
             // Merge queries
             var superViewQuery = superDef.viewQuery;
             var superContentQueries = superDef.contentQueries;
@@ -14945,9 +14920,6 @@ function ɵɵInheritDefinitionFeature(definition) {
             }
         }
         superType = Object.getPrototypeOf(superType);
-    };
-    while (superType) {
-        _loop_1();
     }
 }
 function maybeUnwrapEmpty(value) {
@@ -14983,6 +14955,35 @@ function inheritContentQueries(definition, superContentQueries) {
     }
     else {
         definition.contentQueries = superContentQueries;
+    }
+}
+function inheritHostBindings(definition, superHostBindings) {
+    var prevHostBindings = definition.hostBindings;
+    if (prevHostBindings) {
+        // because inheritance is unknown during compile time, the runtime code
+        // needs to be informed of the super-class depth so that instruction code
+        // can distinguish one host bindings function from another. The reason why
+        // relying on the directive uniqueId exclusively is not enough is because the
+        // uniqueId value and the directive instance stay the same between hostBindings
+        // calls throughout the directive inheritance chain. This means that without
+        // a super-class depth value, there is no way to know whether a parent or
+        // sub-class host bindings function is currently being executed.
+        definition.hostBindings = function (rf, ctx, elementIndex) {
+            // The reason why we increment first and then decrement is so that parent
+            // hostBindings calls have a higher id value compared to sub-class hostBindings
+            // calls (this way the leaf directive is always at a super-class depth of 0).
+            adjustActiveDirectiveSuperClassDepthPosition(1);
+            try {
+                superHostBindings(rf, ctx, elementIndex);
+            }
+            finally {
+                adjustActiveDirectiveSuperClassDepthPosition(-1);
+            }
+            prevHostBindings(rf, ctx, elementIndex);
+        };
+    }
+    else {
+        definition.hostBindings = superHostBindings;
     }
 }
 
@@ -16576,7 +16577,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-rc.0+65.sha-164d160.with-local-changes');
+var VERSION = new Version('8.0.0-rc.0+66.sha-68ff2cc.with-local-changes');
 
 /**
  * @license
@@ -23435,15 +23436,22 @@ function extractBaseDefMetadata(type) {
     var queries = extractQueriesMetadata(type, propMetadata, isContentQuery);
     var inputs;
     var outputs;
+    // We only need to know whether there are any HostListener or HostBinding
+    // decorators present, the parsing logic is in the compiler already.
+    var hasHostDecorators = false;
     var _loop_1 = function (field) {
         propMetadata[field].forEach(function (ann) {
-            if (ann.ngMetadataName === 'Input') {
+            var metadataName = ann.ngMetadataName;
+            if (metadataName === 'Input') {
                 inputs = inputs || {};
                 inputs[field] = ann.bindingPropertyName ? [ann.bindingPropertyName, field] : field;
             }
-            else if (ann.ngMetadataName === 'Output') {
+            else if (metadataName === 'Output') {
                 outputs = outputs || {};
                 outputs[field] = ann.bindingPropertyName || field;
+            }
+            else if (metadataName === 'HostBinding' || metadataName === 'HostListener') {
+                hasHostDecorators = true;
             }
         });
     };
@@ -23451,8 +23459,8 @@ function extractBaseDefMetadata(type) {
         _loop_1(field);
     }
     // Only generate the base def if there's any info inside it.
-    if (inputs || outputs || viewQueries.length || queries.length) {
-        return { inputs: inputs, outputs: outputs, viewQueries: viewQueries, queries: queries };
+    if (inputs || outputs || viewQueries.length || queries.length || hasHostDecorators) {
+        return { name: type.name, inputs: inputs, outputs: outputs, viewQueries: viewQueries, queries: queries, propMetadata: propMetadata };
     }
     return null;
 }
