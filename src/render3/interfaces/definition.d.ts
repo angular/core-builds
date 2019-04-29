@@ -127,6 +127,10 @@ export interface ɵɵBaseDef<T> {
      * components that extend the directive.
      */
     viewQuery: ViewQueriesFunction<T> | null;
+    /**
+     * Refreshes host bindings on the associated directive.
+     */
+    hostBindings: HostBindingsFunction<T> | null;
 }
 /**
  * Runtime link information for Directives.
@@ -157,10 +161,6 @@ export interface DirectiveDef<T> extends ɵɵBaseDef<T> {
      * Factory function used to create a new directive instance.
      */
     factory: FactoryFn<T>;
-    /**
-     * Refreshes host bindings on the associated directive.
-     */
-    hostBindings: HostBindingsFunction<T> | null;
     onChanges: (() => void) | null;
     onInit: (() => void) | null;
     doCheck: (() => void) | null;

@@ -349,6 +349,10 @@ export declare function ɵɵdefineBase<T>(baseDefinition: {
      * set of instructions to be inserted into the template function.
      */
     viewQuery?: ViewQueriesFunction<T> | null;
+    /**
+     * Function executed by the parent template to allow children to apply host bindings.
+     */
+    hostBindings?: HostBindingsFunction<T>;
 }): ɵɵBaseDef<T>;
 /**
  * Create a directive definition object.

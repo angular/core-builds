@@ -139,6 +139,10 @@ export interface R3ComponentMetadataFacade extends R3DirectiveMetadataFacade {
     changeDetection?: ChangeDetectionStrategy;
 }
 export interface R3BaseMetadataFacade {
+    name: string;
+    propMetadata: {
+        [key: string]: any[];
+    };
     inputs?: {
         [key: string]: string | [string, string];
     };
