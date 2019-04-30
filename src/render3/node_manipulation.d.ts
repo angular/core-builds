@@ -7,7 +7,7 @@
  */
 import { LContainer } from './interfaces/container';
 import { TNode, TProjectionNode, TViewNode } from './interfaces/node';
-import { RComment, RElement, RNode, RText, Renderer3 } from './interfaces/renderer';
+import { RElement, RNode, RText, Renderer3 } from './interfaces/renderer';
 import { LView } from './interfaces/view';
 export declare function getLContainer(tNode: TViewNode, embeddedView: LView): LContainer | null;
 export declare function createTextNode(value: any, renderer: Renderer3): RText;
@@ -120,7 +120,7 @@ export declare function nativeNextSibling(renderer: Renderer3, node: RNode): RNo
  * @returns Whether or not the child was appended
  */
 export declare function appendChild(childEl: RNode | RNode[], childTNode: TNode, currentView: LView): void;
-export declare function getBeforeNodeForView(index: number, views: LView[], containerNative: RComment): RNode;
+export declare function getBeforeNodeForView(index: number, lContainer: LContainer): RNode;
 /**
  * Removes a native node itself using a given renderer. To remove the node we are looking up its
  * parent from the native tree as not all platforms / browsers support the equivalent of
