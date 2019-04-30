@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+69.sha-00ffc03.with-local-changes
+ * @license Angular v8.0.0-rc.0+70.sha-ad94e02.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3807,14 +3807,6 @@ declare interface LContainer extends Array<any> {
     [T_HOST]: TNode;
     /** The comment element that serves as an anchor for this LContainer. */
     readonly [NATIVE]: RComment;
-    /**
-  *A list of the container's currently active child views. Views will be inserted
-  *here as they are added and spliced from here when they are removed. We need
-  *to keep a record of current views so we know which views are already in the DOM
-  *(and don't need to be re-added) and so we can remove views from the DOM when they
-  *are no longer required.
-  */
-    [VIEWS]: ɵangular_packages_core_core_bm[];
 }
 
 /**
@@ -8534,8 +8526,6 @@ declare class ViewRef_2<T> implements EmbeddedViewRef<T>, InternalViewRef, viewE
     attachToAppRef(appRef: ApplicationRef): void;
     private _lookUpContext;
 }
-
-declare const VIEWS = 8;
 
 /**
  * Bitmask of states
