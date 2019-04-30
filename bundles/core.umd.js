@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+70.sha-ad94e02.with-local-changes
+ * @license Angular v8.0.0-rc.0+71.sha-37c598d.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15012,31 +15012,36 @@
     }
     function inheritHostBindings(definition, superHostBindings) {
         var prevHostBindings = definition.hostBindings;
-        if (prevHostBindings) {
-            // because inheritance is unknown during compile time, the runtime code
-            // needs to be informed of the super-class depth so that instruction code
-            // can distinguish one host bindings function from another. The reason why
-            // relying on the directive uniqueId exclusively is not enough is because the
-            // uniqueId value and the directive instance stay the same between hostBindings
-            // calls throughout the directive inheritance chain. This means that without
-            // a super-class depth value, there is no way to know whether a parent or
-            // sub-class host bindings function is currently being executed.
-            definition.hostBindings = function (rf, ctx, elementIndex) {
-                // The reason why we increment first and then decrement is so that parent
-                // hostBindings calls have a higher id value compared to sub-class hostBindings
-                // calls (this way the leaf directive is always at a super-class depth of 0).
-                adjustActiveDirectiveSuperClassDepthPosition(1);
-                try {
-                    superHostBindings(rf, ctx, elementIndex);
-                }
-                finally {
-                    adjustActiveDirectiveSuperClassDepthPosition(-1);
-                }
-                prevHostBindings(rf, ctx, elementIndex);
-            };
-        }
-        else {
-            definition.hostBindings = superHostBindings;
+        // If the subclass does not have a host bindings function, we set the subclass host binding
+        // function to be the superclass's (in this feature). We should check if they're the same here
+        // to ensure we don't inherit it twice.
+        if (superHostBindings !== prevHostBindings) {
+            if (prevHostBindings) {
+                // because inheritance is unknown during compile time, the runtime code
+                // needs to be informed of the super-class depth so that instruction code
+                // can distinguish one host bindings function from another. The reason why
+                // relying on the directive uniqueId exclusively is not enough is because the
+                // uniqueId value and the directive instance stay the same between hostBindings
+                // calls throughout the directive inheritance chain. This means that without
+                // a super-class depth value, there is no way to know whether a parent or
+                // sub-class host bindings function is currently being executed.
+                definition.hostBindings = function (rf, ctx, elementIndex) {
+                    // The reason why we increment first and then decrement is so that parent
+                    // hostBindings calls have a higher id value compared to sub-class hostBindings
+                    // calls (this way the leaf directive is always at a super-class depth of 0).
+                    adjustActiveDirectiveSuperClassDepthPosition(1);
+                    try {
+                        superHostBindings(rf, ctx, elementIndex);
+                    }
+                    finally {
+                        adjustActiveDirectiveSuperClassDepthPosition(-1);
+                    }
+                    prevHostBindings(rf, ctx, elementIndex);
+                };
+            }
+            else {
+                definition.hostBindings = superHostBindings;
+            }
         }
     }
 
@@ -16630,7 +16635,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-rc.0+70.sha-ad94e02.with-local-changes');
+    var VERSION = new Version('8.0.0-rc.0+71.sha-37c598d.with-local-changes');
 
     /**
      * @license
