@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+68.sha-e53cf81.with-local-changes
+ * @license Angular v8.0.0-rc.0+69.sha-00ffc03.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -559,7 +559,7 @@ function injectRootLimpMode(token, notFoundValue, flags) {
 function injectArgs(types) {
     var args = [];
     for (var i = 0; i < types.length; i++) {
-        var arg = types[i];
+        var arg = resolveForwardRef(types[i]);
         if (Array.isArray(arg)) {
             if (arg.length === 0) {
                 throw new Error('Arguments array must have arguments.');
@@ -16497,7 +16497,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-rc.0+68.sha-e53cf81.with-local-changes');
+var VERSION = new Version('8.0.0-rc.0+69.sha-00ffc03.with-local-changes');
 
 /**
  * @license

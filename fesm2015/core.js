@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+68.sha-e53cf81.with-local-changes
+ * @license Angular v8.0.0-rc.0+69.sha-00ffc03.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -593,7 +593,7 @@ function injectArgs(types) {
     const args = [];
     for (let i = 0; i < types.length; i++) {
         /** @type {?} */
-        const arg = types[i];
+        const arg = resolveForwardRef(types[i]);
         if (Array.isArray(arg)) {
             if (arg.length === 0) {
                 throw new Error('Arguments array must have arguments.');
@@ -20405,7 +20405,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-rc.0+68.sha-e53cf81.with-local-changes');
+const VERSION = new Version('8.0.0-rc.0+69.sha-00ffc03.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
