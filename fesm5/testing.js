@@ -1,10 +1,10 @@
 /**
- * @license Angular v8.0.0-rc.0+77.sha-5b80ab3.with-local-changes
+ * @license Angular v8.0.0-rc.0+79.sha-b70d20b.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { RendererFactory2, getDebugNode, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, COMPILER_OPTIONS, ɵɵdefineNgModule, ɵɵdefineInjector, ɵsetClassMetadata, ɵNgModuleFactory, ɵgetInjectableDef, ɵNG_COMPONENT_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵpatchComponentDefWithScope, ɵNG_INJECTOR_DEF, ɵNG_MODULE_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, ɵtransitiveScopesFor, ModuleWithComponentFactories, ɵresetCompiledComponents, Injector, InjectFlags, ɵflushModuleScopingQueueAsMuchAsPossible, ɵɵdefineInjectable, ɵɵgetInheritedFactory, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, ɵivyEnabled, Optional, SkipSelf } from '@angular/core';
+import { RendererFactory2, getDebugNode, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, COMPILER_OPTIONS, ɵcompileNgModuleDefs, ɵNgModuleFactory, ɵgetInjectableDef, ɵNG_COMPONENT_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵpatchComponentDefWithScope, ɵNG_INJECTOR_DEF, ɵNG_MODULE_DEF, NgZone, Compiler, ɵtransitiveScopesFor, ModuleWithComponentFactories, ɵresetCompiledComponents, Injector, InjectFlags, ɵflushModuleScopingQueueAsMuchAsPossible, ɵɵdefineInjectable, ɵɵgetInheritedFactory, ɵsetClassMetadata, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, ɵivyEnabled, Optional, SkipSelf } from '@angular/core';
 import { __read, __extends, __spread, __awaiter, __generator, __values, __decorate } from 'tslib';
 import { ResourceLoader } from '@angular/compiler';
 
@@ -988,6 +988,13 @@ var NgModuleResolver = /** @class */ (function (_super) {
     return NgModuleResolver;
 }(OverrideResolver));
 
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 var TESTING_MODULE = 'TestingModule';
 var R3TestBedCompiler = /** @class */ (function () {
     function R3TestBedCompiler(platform, additionalModuleTypes) {
@@ -1504,14 +1511,9 @@ var R3TestBedCompiler = /** @class */ (function () {
             var CompilerModule = /** @class */ (function () {
                 function CompilerModule() {
                 }
-                CompilerModule.ngModuleDef = ɵɵdefineNgModule({ type: CompilerModule });
-                CompilerModule.ngInjectorDef = ɵɵdefineInjector({ factory: function CompilerModule_Factory(t) { return new (t || CompilerModule)(); }, providers: providers });
                 return CompilerModule;
             }());
-            /*@__PURE__*/ ɵsetClassMetadata(CompilerModule, [{
-                    type: NgModule,
-                    args: [{ providers: providers }]
-                }], null, null);
+            ɵcompileNgModuleDefs(CompilerModule, { providers: providers });
             var CompilerModuleFactory = new ɵNgModuleFactory(CompilerModule);
             this._injector = CompilerModuleFactory.create(this.platform.injector).injector;
             return this._injector;

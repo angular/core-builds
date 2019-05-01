@@ -1,10 +1,10 @@
 /**
- * @license Angular v8.0.0-rc.0+77.sha-5b80ab3.with-local-changes
+ * @license Angular v8.0.0-rc.0+79.sha-b70d20b.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode, RendererFactory2, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, ɵNG_COMPONENT_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵpatchComponentDefWithScope, ɵNG_INJECTOR_DEF, ɵNG_MODULE_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵɵdefineNgModule, ɵɵdefineInjector, ɵsetClassMetadata, ɵNgModuleFactory, ModuleWithComponentFactories, ɵtransitiveScopesFor, Injector, InjectFlags, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, Injectable, ɵɵdefineInjectable, ɵɵgetInheritedFactory, ɵivyEnabled, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, Optional, SkipSelf } from '@angular/core';
+import { getDebugNode, RendererFactory2, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, ɵNG_COMPONENT_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵpatchComponentDefWithScope, ɵNG_INJECTOR_DEF, ɵNG_MODULE_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, ɵtransitiveScopesFor, Injector, InjectFlags, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, Injectable, ɵɵdefineInjectable, ɵɵgetInheritedFactory, ɵsetClassMetadata, ɵivyEnabled, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, Optional, SkipSelf } from '@angular/core';
 import { __awaiter } from 'tslib';
 import { ResourceLoader } from '@angular/compiler';
 
@@ -1270,11 +1270,8 @@ class NgModuleResolver extends OverrideResolver {
 }
 
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
 const TESTING_MODULE = 'TestingModule';
@@ -1951,15 +1948,7 @@ class R3TestBedCompiler {
         // TODO(ocombe): make this work with an Injector directly instead of creating a module for it
         class CompilerModule {
         }
-        CompilerModule.decorators = [
-            { type: NgModule, args: [{ providers },] },
-        ];
-        /** @nocollapse */ CompilerModule.ngModuleDef = ɵɵdefineNgModule({ type: CompilerModule });
-        /** @nocollapse */ CompilerModule.ngInjectorDef = ɵɵdefineInjector({ factory: function CompilerModule_Factory(t) { return new (t || CompilerModule)(); }, providers: providers });
-        /*@__PURE__*/ ɵsetClassMetadata(CompilerModule, [{
-                type: NgModule,
-                args: [{ providers }]
-            }], null, null);
+        ɵcompileNgModuleDefs((/** @type {?} */ (CompilerModule)), { providers });
         /** @type {?} */
         const CompilerModuleFactory = new ɵNgModuleFactory(CompilerModule);
         this._injector = CompilerModuleFactory.create(this.platform.injector).injector;

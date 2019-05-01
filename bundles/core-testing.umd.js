@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+77.sha-5b80ab3.with-local-changes
+ * @license Angular v8.0.0-rc.0+79.sha-b70d20b.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1097,6 +1097,13 @@
         return NgModuleResolver;
     }(OverrideResolver));
 
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     var TESTING_MODULE = 'TestingModule';
     var R3TestBedCompiler = /** @class */ (function () {
         function R3TestBedCompiler(platform, additionalModuleTypes) {
@@ -1613,14 +1620,9 @@
                 var CompilerModule = /** @class */ (function () {
                     function CompilerModule() {
                     }
-                    CompilerModule.ngModuleDef = i0.ɵɵdefineNgModule({ type: CompilerModule });
-                    CompilerModule.ngInjectorDef = i0.ɵɵdefineInjector({ factory: function CompilerModule_Factory(t) { return new (t || CompilerModule)(); }, providers: providers });
                     return CompilerModule;
                 }());
-                /*@__PURE__*/ i0.ɵsetClassMetadata(CompilerModule, [{
-                        type: i0.NgModule,
-                        args: [{ providers: providers }]
-                    }], null, null);
+                i0.ɵcompileNgModuleDefs(CompilerModule, { providers: providers });
                 var CompilerModuleFactory = new i0.ɵNgModuleFactory(CompilerModule);
                 this._injector = CompilerModuleFactory.create(this.platform.injector).injector;
                 return this._injector;
