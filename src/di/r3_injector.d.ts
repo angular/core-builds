@@ -55,6 +55,7 @@ export declare class R3Injector {
      */
     destroy(): void;
     get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: any, flags?: InjectFlags): T;
+    toString(): string;
     private assertNotDestroyed;
     /**
      * Add an `InjectorType` or `InjectorDefTypeWithProviders` and all of its transitive providers

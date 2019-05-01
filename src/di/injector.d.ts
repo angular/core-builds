@@ -9,20 +9,9 @@ import { Type } from '../interface/type';
 import { InjectionToken } from './injection_token';
 import { InjectFlags } from './interface/injector';
 import { StaticProvider } from './interface/provider';
-export declare const SOURCE = "__source";
-export declare const THROW_IF_NOT_FOUND: Object;
-/**
- * An InjectionToken that gets the current `Injector` for `createInjector()`-style injectors.
- *
- * Requesting this token instead of `Injector` allows `StaticInjector` to be tree-shaken from a
- * project.
- *
- * @publicApi
- */
-export declare const INJECTOR: InjectionToken<Injector>;
-export declare class NullInjector implements Injector {
-    get(token: any, notFoundValue?: any): any;
-}
+export declare function INJECTOR_IMPL__PRE_R3__(providers: StaticProvider[], parent: Injector | undefined, name: string): StaticInjector;
+export declare function INJECTOR_IMPL__POST_R3__(providers: StaticProvider[], parent: Injector | undefined, name: string): Injector;
+export declare const INJECTOR_IMPL: typeof INJECTOR_IMPL__PRE_R3__;
 /**
  * Concrete injectors implement this interface.
  *
@@ -65,8 +54,6 @@ export declare abstract class Injector {
     /** @nocollapse */
     static ngInjectableDef: never;
 }
-export declare const USE_VALUE: string;
-export declare const NG_TEMP_TOKEN_PATH = "ngTempTokenPath";
 export declare class StaticInjector implements Injector {
     readonly parent: Injector;
     readonly source: string | null;
@@ -76,4 +63,3 @@ export declare class StaticInjector implements Injector {
     get(token: any, notFoundValue?: any): any;
     toString(): string;
 }
-export declare function catchInjectorError(e: any, token: any, injectorErrorName: string, source: string | null): never;

@@ -34,3 +34,4 @@ export { SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST
 export { getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, registerNgModuleType as ɵregisterNgModuleType, } from './linker/ng_module_factory_loader';
 export { publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils } from './render3/util/global_utils';
 export { createInjector as ɵcreateInjector } from './di/r3_injector';
+export { INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__ } from './di/injector';

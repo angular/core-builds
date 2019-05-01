@@ -9,6 +9,19 @@ import { Type } from '../interface/type';
 import { InjectionToken } from './injection_token';
 import { Injector } from './injector';
 import { InjectFlags } from './interface/injector';
+/**
+ * An InjectionToken that gets the current `Injector` for `createInjector()`-style injectors.
+ *
+ * Requesting this token instead of `Injector` allows `StaticInjector` to be tree-shaken from a
+ * project.
+ *
+ * @publicApi
+ */
+export declare const INJECTOR: InjectionToken<Injector>;
+export declare const THROW_IF_NOT_FOUND: Object;
+export declare const NG_TEMP_TOKEN_PATH = "ngTempTokenPath";
+export declare const SOURCE = "__source";
+export declare const USE_VALUE: string;
 export declare function setCurrentInjector(injector: Injector | null | undefined): Injector | undefined | null;
 /**
  * Sets the current inject implementation.
@@ -63,3 +76,8 @@ export declare const inject: typeof ɵɵinject;
  */
 export declare function injectRootLimpMode<T>(token: Type<T> | InjectionToken<T>, notFoundValue: T | undefined, flags: InjectFlags): T | null;
 export declare function injectArgs(types: (Type<any> | InjectionToken<any> | any[])[]): any[];
+export declare class NullInjector implements Injector {
+    get(token: any, notFoundValue?: any): any;
+}
+export declare function catchInjectorError(e: any, token: any, injectorErrorName: string, source: string | null): never;
+export declare function formatError(text: string, obj: any, injectorErrorName: string, source?: string | null): string;
