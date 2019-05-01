@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+72.sha-b15a403.with-local-changes
+ * @license Angular v8.0.0-rc.0+73.sha-b1506a3.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -605,16 +605,16 @@ function injectArgs(types) {
             for (let j = 0; j < arg.length; j++) {
                 /** @type {?} */
                 const meta = arg[j];
-                if (meta instanceof Optional || meta.ngMetadataName === 'Optional') {
+                if (meta instanceof Optional || meta.ngMetadataName === 'Optional' || meta === Optional) {
                     flags |= InjectFlags.Optional;
                 }
-                else if (meta instanceof SkipSelf || meta.ngMetadataName === 'SkipSelf') {
+                else if (meta instanceof SkipSelf || meta.ngMetadataName === 'SkipSelf' || meta === SkipSelf) {
                     flags |= InjectFlags.SkipSelf;
                 }
-                else if (meta instanceof Self || meta.ngMetadataName === 'Self') {
+                else if (meta instanceof Self || meta.ngMetadataName === 'Self' || meta === Self) {
                     flags |= InjectFlags.Self;
                 }
-                else if (meta instanceof Inject) {
+                else if (meta instanceof Inject || meta === Inject) {
                     type = meta.token;
                 }
                 else {
@@ -20419,7 +20419,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-rc.0+72.sha-b15a403.with-local-changes');
+const VERSION = new Version('8.0.0-rc.0+73.sha-b1506a3.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
