@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+77.sha-5b80ab3.with-local-changes
+ * @license Angular v8.0.0-rc.0+79.sha-b70d20b.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1620,11 +1620,9 @@
                 var CompilerModule = /** @class */ (function () {
                     function CompilerModule() {
                     }
-                    CompilerModule = __decorate([
-                        core.NgModule({ providers: providers })
-                    ], CompilerModule);
                     return CompilerModule;
                 }());
+                core.ɵcompileNgModuleDefs(CompilerModule, { providers: providers });
                 var CompilerModuleFactory = new core.ɵNgModuleFactory(CompilerModule);
                 this._injector = CompilerModuleFactory.create(this.platform.injector).injector;
                 return this._injector;
