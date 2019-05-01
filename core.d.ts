@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+73.sha-b1506a3.with-local-changes
+ * @license Angular v8.0.0-rc.0+74.sha-7d6f488.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5372,6 +5372,7 @@ declare class R3Injector {
      */
     destroy(): void;
     get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: any, flags?: InjectFlags): T;
+    toString(): string;
     private assertNotDestroyed;
     /**
      * Add an `InjectorType` or `InjectorDefTypeWithProviders` and all of its transitive providers
@@ -8699,13 +8700,13 @@ export declare const ɵALLOW_MULTIPLE_PLATFORMS: InjectionToken<boolean>;
 
 export declare function ɵand(flags: ɵNodeFlags, matchedQueriesDsl: null | [string | number, ɵQueryValueType][], ngContentIndex: null | number, childCount: number, handleEvent?: null | ElementHandleEventFn, templateFactory?: ViewDefinitionFactory): NodeDef;
 
-export declare class ɵangular_packages_core_core_a implements Injector {
+export declare function ɵangular_packages_core_core_a<T>(token: Type<T> | InjectionToken<T>): T;
+
+export declare function ɵangular_packages_core_core_a<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
+
+export declare class ɵangular_packages_core_core_b implements Injector {
     get(token: any, notFoundValue?: any): any;
 }
-
-export declare function ɵangular_packages_core_core_b<T>(token: Type<T> | InjectionToken<T>): T;
-
-export declare function ɵangular_packages_core_core_b<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
 
 export declare abstract class ɵangular_packages_core_core_ba {
     abstract readonly view: ViewData;
@@ -9813,6 +9814,8 @@ export declare const ɵglobal: any;
 export declare function ɵi18nConfigureLocalize(options?: I18nLocalizeOptions): void;
 
 export declare function ɵinitServicesIfNeeded(): void;
+
+export declare function ɵINJECTOR_IMPL__POST_R3__(providers: StaticProvider[], parent: Injector | undefined, name: string): Injector;
 
 export declare function ɵinlineInterpolate(valueCount: number, c0: string, a1: any, c1: string, a2?: any, c2?: string, a3?: any, c3?: string, a4?: any, c4?: string, a5?: any, c5?: string, a6?: any, c6?: string, a7?: any, c7?: string, a8?: any, c8?: string, a9?: any, c9?: string): string;
 
