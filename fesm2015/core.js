@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+66.sha-68ff2cc.with-local-changes
+ * @license Angular v8.0.0-rc.0+73.sha-b1506a3.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -595,7 +595,7 @@ function injectArgs(types) {
     const args = [];
     for (let i = 0; i < types.length; i++) {
         /** @type {?} */
-        const arg = types[i];
+        const arg = resolveForwardRef(types[i]);
         if (Array.isArray(arg)) {
             if (arg.length === 0) {
                 throw new Error('Arguments array must have arguments.');
@@ -607,16 +607,16 @@ function injectArgs(types) {
             for (let j = 0; j < arg.length; j++) {
                 /** @type {?} */
                 const meta = arg[j];
-                if (meta instanceof Optional || meta.ngMetadataName === 'Optional') {
+                if (meta instanceof Optional || meta.ngMetadataName === 'Optional' || meta === Optional) {
                     flags |= InjectFlags.Optional;
                 }
-                else if (meta instanceof SkipSelf || meta.ngMetadataName === 'SkipSelf') {
+                else if (meta instanceof SkipSelf || meta.ngMetadataName === 'SkipSelf' || meta === SkipSelf) {
                     flags |= InjectFlags.SkipSelf;
                 }
-                else if (meta instanceof Self || meta.ngMetadataName === 'Self') {
+                else if (meta instanceof Self || meta.ngMetadataName === 'Self' || meta === Self) {
                     flags |= InjectFlags.Self;
                 }
-                else if (meta instanceof Inject) {
+                else if (meta instanceof Inject || meta === Inject) {
                     type = meta.token;
                 }
                 else {
@@ -4121,8 +4121,14 @@ const ACTIVE_INDEX = 2;
 // As we already have these constants in LView, we don't need to re-create them.
 /** @type {?} */
 const NATIVE = 7;
-/** @type {?} */
-const VIEWS = 8;
+/**
+ * Size of LContainer's header. Represents the index after which all views in the
+ * container will be inserted. We need to keep a record of current views so we know
+ * which views are already in the DOM (and don't need to be re-added) and so we can
+ * remove views from the DOM when they are no longer required.
+ * @type {?}
+ */
+const CONTAINER_HEADER_OFFSET = 8;
 
 /**
  * @fileoverview added by tsickle
@@ -8657,7 +8663,8 @@ class LContainerDebug {
      * @return {?}
      */
     get views() {
-        return this._raw_lContainer[VIEWS].map((/** @type {?} */ (toDebug)));
+        return this._raw_lContainer.slice(CONTAINER_HEADER_OFFSET)
+            .map((/** @type {?} */ (toDebug)));
     }
     /**
      * @return {?}
@@ -13063,7 +13070,6 @@ function createLContainer(hostNative, currentView, native, tNode, isForViewConta
         null,
         tNode,
         native,
-        [],
     ];
     ngDevMode && attachLContainerDebug(lContainer);
     return lContainer;
@@ -13079,12 +13085,10 @@ function refreshDynamicEmbeddedViews(lView) {
         // Note: current can be an LView or an LContainer instance, but here we are only interested
         // in LContainer. We can tell it's an LContainer because its length is less than the LView
         // header.
-        if (current.length < HEADER_OFFSET && current[ACTIVE_INDEX] === -1) {
-            /** @type {?} */
-            const container = (/** @type {?} */ (current));
-            for (let i = 0; i < container[VIEWS].length; i++) {
+        if (current[ACTIVE_INDEX] === -1 && isLContainer(current)) {
+            for (let i = CONTAINER_HEADER_OFFSET; i < current.length; i++) {
                 /** @type {?} */
-                const dynamicViewData = container[VIEWS][i];
+                const dynamicViewData = current[i];
                 // The directives and pipes are not needed here as an existing view is only being refreshed.
                 ngDevMode && assertDefined(dynamicViewData[TVIEW], 'TView must be allocated');
                 renderEmbeddedTemplate(dynamicViewData, dynamicViewData[TVIEW], (/** @type {?} */ (dynamicViewData[CONTEXT])));
@@ -13749,8 +13753,10 @@ function walkTNodeTree(viewToWalk, action, renderer, renderParent, beforeNode) {
             if (isLContainer(nodeOrContainer)) {
                 // This element has an LContainer, and its comment needs to be handled
                 executeNodeAction(action, renderer, renderParent, nodeOrContainer[NATIVE], tNode, beforeNode);
-                if (nodeOrContainer[VIEWS].length) {
-                    currentView = nodeOrContainer[VIEWS][0];
+                /** @type {?} */
+                const firstView = nodeOrContainer[CONTAINER_HEADER_OFFSET];
+                if (firstView) {
+                    currentView = firstView;
                     nextTNode = currentView[TVIEW].node;
                     // When the walker enters a container, then the beforeNode has to become the local native
                     // comment node.
@@ -13762,8 +13768,10 @@ function walkTNodeTree(viewToWalk, action, renderer, renderParent, beforeNode) {
             /** @type {?} */
             const lContainer = (/** @type {?} */ ((/** @type {?} */ (currentView))[tNode.index]));
             executeNodeAction(action, renderer, renderParent, lContainer[NATIVE], tNode, beforeNode);
-            if (lContainer[VIEWS].length) {
-                currentView = lContainer[VIEWS][0];
+            /** @type {?} */
+            const firstView = lContainer[CONTAINER_HEADER_OFFSET];
+            if (firstView) {
+                currentView = firstView;
                 nextTNode = currentView[TVIEW].node;
                 // When the walker enters a container, then the beforeNode has to become the local native
                 // comment node.
@@ -13957,9 +13965,9 @@ function destroyViewTree(rootView) {
             ngDevMode && assertLContainer(lViewOrLContainer);
             // If container, traverse down to its first LView.
             /** @type {?} */
-            const views = (/** @type {?} */ (lViewOrLContainer[VIEWS]));
-            if (views.length > 0)
-                next = views[0];
+            const firstView = lViewOrLContainer[CONTAINER_HEADER_OFFSET];
+            if (firstView)
+                next = firstView;
         }
         if (!next) {
             // Only clean up view when moving to the side or up, as destroy hooks
@@ -13991,18 +13999,19 @@ function insertView(lView, lContainer, index) {
     ngDevMode && assertLView(lView);
     ngDevMode && assertLContainer(lContainer);
     /** @type {?} */
-    const views = lContainer[VIEWS];
-    ngDevMode && assertDefined(views, 'Container must have views');
+    const indexInContainer = CONTAINER_HEADER_OFFSET + index;
+    /** @type {?} */
+    const containerLength = lContainer.length;
     if (index > 0) {
         // This is a new view, we need to add it to the children.
-        views[index - 1][NEXT] = lView;
+        lContainer[indexInContainer - 1][NEXT] = lView;
     }
-    if (index < views.length) {
-        lView[NEXT] = views[index];
-        views.splice(index, 0, lView);
+    if (index < containerLength - CONTAINER_HEADER_OFFSET) {
+        lView[NEXT] = lContainer[indexInContainer];
+        lContainer.splice(CONTAINER_HEADER_OFFSET + index, 0, lView);
     }
     else {
-        views.push(lView);
+        lContainer.push(lView);
         lView[NEXT] = null;
     }
     lView[PARENT] = lContainer;
@@ -14024,15 +14033,17 @@ function insertView(lView, lContainer, index) {
  * @return {?} Detached LView instance.
  */
 function detachView(lContainer, removeIndex) {
+    if (lContainer.length <= CONTAINER_HEADER_OFFSET)
+        return;
     /** @type {?} */
-    const views = lContainer[VIEWS];
+    const indexInContainer = CONTAINER_HEADER_OFFSET + removeIndex;
     /** @type {?} */
-    const viewToDetach = views[removeIndex];
+    const viewToDetach = lContainer[indexInContainer];
     if (viewToDetach) {
         if (removeIndex > 0) {
-            views[removeIndex - 1][NEXT] = (/** @type {?} */ (viewToDetach[NEXT]));
+            lContainer[indexInContainer - 1][NEXT] = (/** @type {?} */ (viewToDetach[NEXT]));
         }
-        views.splice(removeIndex, 1);
+        lContainer.splice(CONTAINER_HEADER_OFFSET + removeIndex, 1);
         addRemoveViewFromContainer(viewToDetach, false);
         if ((viewToDetach[FLAGS] & 128 /* Attached */) &&
             !(viewToDetach[FLAGS] & 256 /* Destroyed */) && viewToDetach[QUERIES]) {
@@ -14054,11 +14065,8 @@ function detachView(lContainer, removeIndex) {
  */
 function removeView(lContainer, removeIndex) {
     /** @type {?} */
-    const view = lContainer[VIEWS][removeIndex];
-    if (view) {
-        detachView(lContainer, removeIndex);
-        destroyLView(view);
-    }
+    const detachedView = detachView(lContainer, removeIndex);
+    detachedView && destroyLView(detachedView);
 }
 /**
  * A standalone function which destroys an LView,
@@ -14383,10 +14391,8 @@ function getNativeAnchorNode(parentTNode, lView) {
         /** @type {?} */
         const lContainer = (/** @type {?} */ (getLContainer((/** @type {?} */ (parentTNode)), lView)));
         /** @type {?} */
-        const views = lContainer[VIEWS];
-        /** @type {?} */
-        const index = views.indexOf(lView);
-        return getBeforeNodeForView(index, views, lContainer[NATIVE]);
+        const index = lContainer.indexOf(lView, CONTAINER_HEADER_OFFSET) - CONTAINER_HEADER_OFFSET;
+        return getBeforeNodeForView(index, lContainer);
     }
     else if (parentTNode.type === 4 /* ElementContainer */ ||
         parentTNode.type === 5 /* IcuContainer */) {
@@ -14439,14 +14445,15 @@ function getHighestElementOrICUContainer(tNode) {
 }
 /**
  * @param {?} index
- * @param {?} views
- * @param {?} containerNative
+ * @param {?} lContainer
  * @return {?}
  */
-function getBeforeNodeForView(index, views, containerNative) {
-    if (index + 1 < views.length) {
+function getBeforeNodeForView(index, lContainer) {
+    /** @type {?} */
+    const containerNative = lContainer[NATIVE];
+    if (index + 1 < lContainer.length - CONTAINER_HEADER_OFFSET) {
         /** @type {?} */
-        const view = (/** @type {?} */ (views[index + 1]));
+        const view = (/** @type {?} */ (lContainer[CONTAINER_HEADER_OFFSET + index + 1]));
         /** @type {?} */
         const viewTNode = (/** @type {?} */ (view[T_HOST]));
         return viewTNode.child ? getNativeByTNode(viewTNode.child, view) : containerNative;
@@ -14533,10 +14540,8 @@ function appendProjectedNode(projectedTNode, tProjectionNode, currentView, proje
         // Alternatively a container is projected at the root of a component's template
         // and can't be re-projected (as not content of any component).
         // Assign the final projection location in those cases.
-        /** @type {?} */
-        const views = nodeOrContainer[VIEWS];
-        for (let i = 0; i < views.length; i++) {
-            addRemoveViewFromContainer(views[i], true, nodeOrContainer[NATIVE]);
+        for (let i = CONTAINER_HEADER_OFFSET; i < nodeOrContainer.length; i++) {
+            addRemoveViewFromContainer(nodeOrContainer[i], true, nodeOrContainer[NATIVE]);
         }
     }
     else {
@@ -14667,7 +14672,7 @@ function ɵɵcontainerRefreshEnd() {
     /** @type {?} */
     const nextIndex = lContainer[ACTIVE_INDEX];
     // remove extra views at the end of the container
-    while (nextIndex < lContainer[VIEWS].length) {
+    while (nextIndex < lContainer.length - CONTAINER_HEADER_OFFSET) {
         removeView(lContainer, nextIndex);
     }
 }
@@ -15720,20 +15725,18 @@ function getOrCreateEmbeddedTView(viewIndex, consts, vars, parent) {
  * @param {?} lContainer to search for views
  * @param {?} startIdx starting index in the views array to search from
  * @param {?} viewBlockId exact view block id to look for
- * @return {?} index of a found view or -1 if not found
+ * @return {?}
  */
 function scanForView(lContainer, startIdx, viewBlockId) {
-    /** @type {?} */
-    const views = lContainer[VIEWS];
-    for (let i = startIdx; i < views.length; i++) {
+    for (let i = startIdx + CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
         /** @type {?} */
-        const viewAtPositionId = views[i][TVIEW].id;
+        const viewAtPositionId = lContainer[i][TVIEW].id;
         if (viewAtPositionId === viewBlockId) {
-            return views[i];
+            return lContainer[i];
         }
         else if (viewAtPositionId < viewBlockId) {
             // found a view that should not be at this position - remove
-            removeView(lContainer, i);
+            removeView(lContainer, i - CONTAINER_HEADER_OFFSET);
         }
         else {
             // found a view with id greater than the one we are searching for
@@ -18450,37 +18453,42 @@ function inheritContentQueries(definition, superContentQueries) {
 function inheritHostBindings(definition, superHostBindings) {
     /** @type {?} */
     const prevHostBindings = definition.hostBindings;
-    if (prevHostBindings) {
-        // because inheritance is unknown during compile time, the runtime code
-        // needs to be informed of the super-class depth so that instruction code
-        // can distinguish one host bindings function from another. The reason why
-        // relying on the directive uniqueId exclusively is not enough is because the
-        // uniqueId value and the directive instance stay the same between hostBindings
-        // calls throughout the directive inheritance chain. This means that without
-        // a super-class depth value, there is no way to know whether a parent or
-        // sub-class host bindings function is currently being executed.
-        definition.hostBindings = (/**
-         * @param {?} rf
-         * @param {?} ctx
-         * @param {?} elementIndex
-         * @return {?}
-         */
-        (rf, ctx, elementIndex) => {
-            // The reason why we increment first and then decrement is so that parent
-            // hostBindings calls have a higher id value compared to sub-class hostBindings
-            // calls (this way the leaf directive is always at a super-class depth of 0).
-            adjustActiveDirectiveSuperClassDepthPosition(1);
-            try {
-                superHostBindings(rf, ctx, elementIndex);
-            }
-            finally {
-                adjustActiveDirectiveSuperClassDepthPosition(-1);
-            }
-            prevHostBindings(rf, ctx, elementIndex);
-        });
-    }
-    else {
-        definition.hostBindings = superHostBindings;
+    // If the subclass does not have a host bindings function, we set the subclass host binding
+    // function to be the superclass's (in this feature). We should check if they're the same here
+    // to ensure we don't inherit it twice.
+    if (superHostBindings !== prevHostBindings) {
+        if (prevHostBindings) {
+            // because inheritance is unknown during compile time, the runtime code
+            // needs to be informed of the super-class depth so that instruction code
+            // can distinguish one host bindings function from another. The reason why
+            // relying on the directive uniqueId exclusively is not enough is because the
+            // uniqueId value and the directive instance stay the same between hostBindings
+            // calls throughout the directive inheritance chain. This means that without
+            // a super-class depth value, there is no way to know whether a parent or
+            // sub-class host bindings function is currently being executed.
+            definition.hostBindings = (/**
+             * @param {?} rf
+             * @param {?} ctx
+             * @param {?} elementIndex
+             * @return {?}
+             */
+            (rf, ctx, elementIndex) => {
+                // The reason why we increment first and then decrement is so that parent
+                // hostBindings calls have a higher id value compared to sub-class hostBindings
+                // calls (this way the leaf directive is always at a super-class depth of 0).
+                adjustActiveDirectiveSuperClassDepthPosition(1);
+                try {
+                    superHostBindings(rf, ctx, elementIndex);
+                }
+                finally {
+                    adjustActiveDirectiveSuperClassDepthPosition(-1);
+                }
+                prevHostBindings(rf, ctx, elementIndex);
+            });
+        }
+        else {
+            definition.hostBindings = superHostBindings;
+        }
     }
 }
 
@@ -20087,7 +20095,7 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
              * @return {?}
              */
             clear() {
-                while (this._lContainer[VIEWS].length) {
+                while (this.length) {
                     this.remove(0);
                 }
             }
@@ -20099,7 +20107,13 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
             /**
              * @return {?}
              */
-            get length() { return this._lContainer[VIEWS].length; }
+            get length() {
+                // Note that if there are no views, the container
+                // length will be smaller than the header offset.
+                /** @type {?} */
+                const viewAmount = this._lContainer.length - CONTAINER_HEADER_OFFSET;
+                return viewAmount > 0 ? viewAmount : 0;
+            }
             /**
              * @template C
              * @param {?} templateRef
@@ -20157,7 +20171,7 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 }
                 insertView(lView, this._lContainer, adjustedIdx);
                 /** @type {?} */
-                const beforeNode = getBeforeNodeForView(adjustedIdx, this._lContainer[VIEWS], this._lContainer[NATIVE]);
+                const beforeNode = getBeforeNodeForView(adjustedIdx, this._lContainer);
                 addRemoveViewFromContainer(lView, true, beforeNode);
                 ((/** @type {?} */ (viewRef))).attachToViewContainerRef(this);
                 this._viewRefs.splice(adjustedIdx, 0, viewRef);
@@ -20215,12 +20229,12 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
              */
             _adjustIndex(index, shift = 0) {
                 if (index == null) {
-                    return this._lContainer[VIEWS].length + shift;
+                    return this.length + shift;
                 }
                 if (ngDevMode) {
                     assertGreaterThan(index, -1, 'index must be positive');
                     // +1 because it's legal to insert at the end.
-                    assertLessThan(index, this._lContainer[VIEWS].length + 1 + shift, 'index');
+                    assertLessThan(index, this.length + 1 + shift, 'index');
                 }
                 return index;
             }
@@ -20511,7 +20525,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-rc.0+66.sha-68ff2cc.with-local-changes');
+const VERSION = new Version('8.0.0-rc.0+73.sha-b1506a3.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -33055,9 +33069,9 @@ function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly, ro
  * @return {?}
  */
 function _queryNodeChildrenInContainerR3(lContainer, predicate, matches, elementsOnly, rootNativeNode) {
-    for (let i = 0; i < lContainer[VIEWS].length; i++) {
+    for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
         /** @type {?} */
-        const childView = lContainer[VIEWS][i];
+        const childView = lContainer[i];
         _queryNodeChildrenR3((/** @type {?} */ (childView[TVIEW].node)), childView, predicate, matches, elementsOnly, rootNativeNode);
     }
 }
