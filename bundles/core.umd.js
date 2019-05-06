@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+87.sha-d6538eb.with-local-changes
+ * @license Angular v8.0.0-rc.0+88.sha-b2437c4.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10124,8 +10124,7 @@
         'tabindex': 'tabIndex',
     };
     function elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadRendererFn) {
-        if (value === NO_CHANGE)
-            return;
+        ngDevMode && assertNotSame(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
         var lView = getLView();
         var element = getNativeByIndex(index, lView);
         var tNode = getTNode(index, lView);
@@ -13521,7 +13520,9 @@
         var index = getSelectedIndex();
         ngDevMode && assertNotEqual(index, -1, 'selected index cannot be -1');
         var bindReconciledValue = ɵɵbind(value);
-        elementPropertyInternal(index, propName, bindReconciledValue, sanitizer, nativeOnly);
+        if (bindReconciledValue !== NO_CHANGE) {
+            elementPropertyInternal(index, propName, bindReconciledValue, sanitizer, nativeOnly);
+        }
         return ɵɵproperty;
     }
     /**
@@ -13556,7 +13557,9 @@
      * @codeGenApi
     */
     function ɵɵelementProperty(index, propName, value, sanitizer, nativeOnly) {
-        elementPropertyInternal(index, propName, value, sanitizer, nativeOnly);
+        if (value !== NO_CHANGE) {
+            elementPropertyInternal(index, propName, value, sanitizer, nativeOnly);
+        }
     }
     /**
      * Updates a synthetic host binding (e.g. `[@foo]`) on a component.
@@ -13582,7 +13585,9 @@
      * @codeGenApi
      */
     function ɵɵcomponentHostSyntheticProperty(index, propName, value, sanitizer, nativeOnly) {
-        elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadComponentRenderer);
+        if (value !== NO_CHANGE) {
+            elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadComponentRenderer);
+        }
     }
 
     /**
@@ -13886,7 +13891,10 @@
      */
     function ɵɵpropertyInterpolate1(propName, prefix, v0, suffix, sanitizer) {
         var index = getSelectedIndex();
-        elementPropertyInternal(index, propName, ɵɵinterpolation1(prefix, v0, suffix), sanitizer);
+        var interpolatedValue = ɵɵinterpolation1(prefix, v0, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        }
         return ɵɵpropertyInterpolate1;
     }
     /**
@@ -13921,7 +13929,10 @@
      */
     function ɵɵpropertyInterpolate2(propName, prefix, v0, i0, v1, suffix, sanitizer) {
         var index = getSelectedIndex();
-        elementPropertyInternal(index, propName, ɵɵinterpolation2(prefix, v0, i0, v1, suffix), sanitizer);
+        var interpolatedValue = ɵɵinterpolation2(prefix, v0, i0, v1, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        }
         return ɵɵpropertyInterpolate2;
     }
     /**
@@ -13959,7 +13970,10 @@
      */
     function ɵɵpropertyInterpolate3(propName, prefix, v0, i0, v1, i1, v2, suffix, sanitizer) {
         var index = getSelectedIndex();
-        elementPropertyInternal(index, propName, ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix), sanitizer);
+        var interpolatedValue = ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        }
         return ɵɵpropertyInterpolate3;
     }
     /**
@@ -13999,7 +14013,10 @@
      */
     function ɵɵpropertyInterpolate4(propName, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, sanitizer) {
         var index = getSelectedIndex();
-        elementPropertyInternal(index, propName, ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix), sanitizer);
+        var interpolatedValue = ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        }
         return ɵɵpropertyInterpolate4;
     }
     /**
@@ -14041,7 +14058,10 @@
      */
     function ɵɵpropertyInterpolate5(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, sanitizer) {
         var index = getSelectedIndex();
-        elementPropertyInternal(index, propName, ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix), sanitizer);
+        var interpolatedValue = ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        }
         return ɵɵpropertyInterpolate5;
     }
     /**
@@ -14085,7 +14105,10 @@
      */
     function ɵɵpropertyInterpolate6(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, sanitizer) {
         var index = getSelectedIndex();
-        elementPropertyInternal(index, propName, ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix), sanitizer);
+        var interpolatedValue = ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        }
         return ɵɵpropertyInterpolate6;
     }
     /**
@@ -14131,7 +14154,10 @@
      */
     function ɵɵpropertyInterpolate7(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, sanitizer) {
         var index = getSelectedIndex();
-        elementPropertyInternal(index, propName, ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix), sanitizer);
+        var interpolatedValue = ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        }
         return ɵɵpropertyInterpolate7;
     }
     /**
@@ -14179,7 +14205,10 @@
      */
     function ɵɵpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, sanitizer) {
         var index = getSelectedIndex();
-        elementPropertyInternal(index, propName, ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix), sanitizer);
+        var interpolatedValue = ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        }
         return ɵɵpropertyInterpolate8;
     }
     /**
@@ -14214,7 +14243,10 @@
      */
     function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
         var index = getSelectedIndex();
-        elementPropertyInternal(index, propName, ɵɵinterpolationV(values), sanitizer);
+        var interpolatedValue = ɵɵinterpolationV(values);
+        if (interpolatedValue !== NO_CHANGE) {
+            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        }
         return ɵɵpropertyInterpolateV;
     }
 
@@ -16330,7 +16362,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-rc.0+87.sha-d6538eb.with-local-changes');
+    var VERSION = new Version('8.0.0-rc.0+88.sha-b2437c4.with-local-changes');
 
     /**
      * @license

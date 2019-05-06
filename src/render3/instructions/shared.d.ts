@@ -16,7 +16,6 @@ import { RComment, RElement, RText, Renderer3, RendererFactory3 } from '../inter
 import { SanitizerFn } from '../interfaces/sanitization';
 import { StylingContext } from '../interfaces/styling';
 import { ExpandoInstructions, LView, LViewFlags, RootContext, RootContextFlags, TView } from '../interfaces/view';
-import { NO_CHANGE } from '../tokens';
 export declare const enum BindingDirection {
     Input = 0,
     Output = 1
@@ -182,7 +181,7 @@ export declare function createTNode(tParent: TElementNode | TContainerNode | nul
  * @returns PropertyAliases|null aggregate of all properties if any, `null` otherwise
  */
 export declare function generatePropertyAliases(tNode: TNode, direction: BindingDirection): PropertyAliases | null;
-export declare function elementPropertyInternal<T>(index: number, propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean, loadRendererFn?: ((tNode: TNode, lView: LView) => Renderer3) | null): void;
+export declare function elementPropertyInternal<T>(index: number, propName: string, value: T, sanitizer?: SanitizerFn | null, nativeOnly?: boolean, loadRendererFn?: ((tNode: TNode, lView: LView) => Renderer3) | null): void;
 export declare function setNgReflectProperty(lView: LView, element: RElement | RComment, type: TNodeType, attrName: string, value: any): void;
 /**
  * Instantiate a root component.
