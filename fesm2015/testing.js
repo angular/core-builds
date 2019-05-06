@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+73.sha-b1506a3.with-local-changes
+ * @license Angular v8.0.0-rc.0+80.sha-30d1f29.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1948,9 +1948,7 @@ class R3TestBedCompiler {
         // TODO(ocombe): make this work with an Injector directly instead of creating a module for it
         class CompilerModule {
         }
-        CompilerModule.decorators = [
-            { type: NgModule, args: [{ providers },] },
-        ];
+        ɵcompileNgModuleDefs((/** @type {?} */ (CompilerModule)), { providers });
         /** @type {?} */
         const CompilerModuleFactory = new ɵNgModuleFactory(CompilerModule);
         this._injector = CompilerModuleFactory.create(this.platform.injector).injector;
