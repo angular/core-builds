@@ -28,8 +28,10 @@ declare global {
         rendererMoveNode: number;
         rendererRemoveNode: number;
         rendererCreateComment: number;
-        stylingMap: number;
-        stylingMapCacheMiss: number;
+        styleMap: number;
+        styleMapCacheMiss: number;
+        classMap: number;
+        classMapCacheMiss: number;
         stylingProp: number;
         stylingPropCacheMiss: number;
         stylingApply: number;

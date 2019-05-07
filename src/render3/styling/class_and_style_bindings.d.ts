@@ -82,17 +82,16 @@ export declare function updateContextWithBindings(context: StylingContext, direc
  */
 export declare function findOrPatchDirectiveIntoRegistry(context: StylingContext, directiveIndex: number, staticModeOnly: boolean, styleSanitizer?: StyleSanitizeFn | null): boolean;
 /**
- * Registers the provided multi styling (`[style]` and `[class]`) values to the context.
+ * Registers the provided multi class values to the context.
  *
- * This function will iterate over the provided `classesInput` and `stylesInput` map
- * values and insert/update or remove them from the context at exactly the right
- * spot.
+ * This function will iterate over the provided `classesInput` values and
+ * insert/update or remove them from the context at exactly the right spot.
  *
  * This function also takes in a directive which implies that the styling values will
  * be evaluated for that directive with respect to any other styling that already exists
- * on the context. When there are styles that conflict (e.g. say `ngStyle` and `[style]`
- * both update the `width` property at the same time) then the styling algorithm code below
- * will decide which one wins based on the directive styling prioritization mechanism. This
+ * on the context. When there are styles that conflict (e.g. say `ngClass` and `[class]`
+ * both update the `foo` className value at the same time) then the styling algorithm code below
+ * will decide which one wins based on the directive styling prioritization mechanism. (This
  * mechanism is better explained in render3/interfaces/styling.ts#directives).
  *
  * This function will not render any styling values on screen, but is rather designed to
@@ -105,13 +104,36 @@ export declare function findOrPatchDirectiveIntoRegistry(context: StylingContext
  * @param classesInput The key/value map of CSS class names that will be used for the update.
  * @param stylesInput The key/value map of CSS styles that will be used for the update.
  */
-export declare function updateStylingMap(context: StylingContext, classesInput: {
+export declare function updateClassMap(context: StylingContext, classesInput: {
     [key: string]: any;
 } | string | BoundPlayerFactory<null | string | {
     [key: string]: any;
-}> | null, stylesInput?: {
+}> | null, directiveIndex?: number): void;
+/**
+ * Registers the provided multi style values to the context.
+ *
+ * This function will iterate over the provided `stylesInput` values and
+ * insert/update or remove them from the context at exactly the right spot.
+ *
+ * This function also takes in a directive which implies that the styling values will
+ * be evaluated for that directive with respect to any other styling that already exists
+ * on the context. When there are styles that conflict (e.g. say `ngStyle` and `[style]`
+ * both update the `width` property at the same time) then the styling algorithm code below
+ * will decide which one wins based on the directive styling prioritization mechanism. (This
+ * mechanism is better explained in render3/interfaces/styling.ts#directives).
+ *
+ * This function will not render any styling values on screen, but is rather designed to
+ * prepare the context for that. `renderStyling` must be called afterwards to render any
+ * styling data that was set in this function (note that `updateClassProp` and
+ * `updateStyleProp` are designed to be run after this function is run).
+ *
+ * @param context The styling context that will be updated with the
+ *    newly provided style values.
+ * @param stylesInput The key/value map of CSS styles that will be used for the update.
+ */
+export declare function updateStyleMap(context: StylingContext, stylesInput: {
     [key: string]: any;
-} | BoundPlayerFactory<null | {
+} | string | BoundPlayerFactory<null | string | {
     [key: string]: any;
 }> | null, directiveIndex?: number): void;
 /**
