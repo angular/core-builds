@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+91.sha-b40f6f3.with-local-changes
+ * @license Angular v8.0.0-rc.0+97.sha-be8fbac.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2608,7 +2608,7 @@ declare type HostFeature = (<T>(component: T, componentDef: ɵComponentDef<T>) =
  * the styling is applied).
  *
  * This queue is used when any `hostStyling` instructions are executed from the `hostBindings`
- * function. Template-level styling functions (e.g. `elementStylingMap` and `elementClassProp`)
+ * function. Template-level styling functions (e.g. `elementStyleMap` and `elementClassProp`)
  * do not make use of this queue (they are applied to the styling context immediately).
  *
  * Due to the nature of how components/directives are evaluated, directives (both parent and
@@ -6606,8 +6606,8 @@ declare interface StyleSanitizeFn {
  * values are and how they work.
  *
  * Each time a binding property is updated (whether it be through a single
- * property instruction like `elementStyleProp`, `elementClassProp` or
- * `elementStylingMap`) then the values in the context will be updated as
+ * property instruction like `elementStyleProp`, `elementClassProp`,
+ * `elementStyleMap` or `elementClassMap`) then the values in the context will be updated as
  * well.
  *
  * If for example `[style.width]` updates to `555px` then its value will be reflected
@@ -6645,7 +6645,8 @@ declare interface StyleSanitizeFn {
  * - `elementStyling`
  * - `elementStyleProp`
  * - `elementClassProp`
- * - `elementStylingMap`
+ * - `elementStyleMap`
+ * - `elementClassMap`
  * - `elementStylingApply`
  *
  * Each time a directive value is passed in, it will be converted into an index by examining the
@@ -6777,12 +6778,12 @@ declare interface StylingContext extends Array<{
      */
     [StylingIndex.SinglePropOffsetPositions]: SinglePropOffsetValues;
     /**
-     * The last class value that was interpreted by elementStylingMap. This is cached
+     * The last class value that was interpreted by `elementStyleMap`. This is cached
      * So that the algorithm can exit early incase the value has not changed.
      */
     [StylingIndex.CachedMultiClasses]: any | MapBasedOffsetValues;
     /**
-     * The last style value that was interpreted by elementStylingMap. This is cached
+     * The last style value that was interpreted by `elementClassMap`. This is cached
      * So that the algorithm can exit early incase the value has not changed.
      */
     [StylingIndex.CachedMultiStyles]: any | MapBasedOffsetValues;
@@ -6790,7 +6791,7 @@ declare interface StylingContext extends Array<{
      * A queue of all hostStyling instructions.
      *
      * This array (queue) is populated only when host-level styling instructions
-     * (e.g. `hostStylingMap` and `hostClassProp`) are used to apply style and
+     * (e.g. `hostStyleMap` and `hostClassProp`) are used to apply style and
      * class values via host bindings to the host element. Despite these being
      * standard angular instructions, they are not designed to immediately apply
      * their values to the styling context when executed. What happens instead is
@@ -11310,6 +11311,27 @@ export declare function ɵɵelement(index: number, name: string, attrs?: TAttrib
 export declare function ɵɵelementAttribute(index: number, name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): void;
 
 /**
+ * Update class bindings using an object literal or class-string on an element.
+ *
+ * This instruction is meant to apply styling via the `[class]="exp"` template bindings.
+ * When classes are applied to the element they will then be updated with
+ * respect to any styles/classes set via `elementClassProp`. If any
+ * classes are set to falsy then they will be removed from the element.
+ *
+ * Note that the styling instruction will not be applied until `elementStylingApply` is called.
+ *
+ * @param index Index of the element's with which styling is associated.
+ * @param classes A key/value map or string of CSS classes that will be added to the
+ *        given element. Any missing classes (that have already been applied to the element
+ *        beforehand) will be removed (unset) from the element's list of CSS classes.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵelementClassMap(index: number, classes: {
+    [styleName: string]: any;
+} | ɵNO_CHANGE | string | null): void;
+
+/**
  * Update a class binding on an element with the provided value.
  *
  * This instruction is meant to handle the `[class.foo]="exp"` case and,
@@ -11401,6 +11423,29 @@ export declare function ɵɵelementEnd(): void;
 export declare function ɵɵelementHostAttrs(attrs: TAttributes): void;
 
 /**
+ * Update class host bindings using object literals on an element within the host
+ * bindings function for a directive/component.
+ *
+ * This instruction is meant to apply styling via the `@HostBinding('class')`
+ * host bindings for a component's or directive's host element.
+ * When classes are applied to the host element they will then be updated
+ * with respect to any other classes set with `elementHostClassProp`. If
+ * any classes are set to falsy then they will be removed from the element.
+ *
+ * Note that the styling instruction will not be applied until
+ * `elementHostStylingApply` is called.
+ *
+ * @param classes A key/value map or string of CSS classes that will be added to the
+ *        given element. Any missing classes (that have already been applied to the element
+ *        beforehand) will be removed (unset) from the element's list of CSS classes.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵelementHostClassMap(classes: {
+    [key: string]: any;
+} | string | ɵNO_CHANGE | null): void;
+
+/**
  * Update a class host binding for a directive's/component's host element within
  * the host bindings function.
  *
@@ -11421,11 +11466,34 @@ export declare function ɵɵelementHostAttrs(attrs: TAttributes): void;
 export declare function ɵɵelementHostClassProp(classIndex: number, value: boolean | ɵPlayerFactory, forceOverride?: boolean): void;
 
 /**
+ * Update style host bindings using object literals on an element within the host
+ * bindings function for a directive/component.
+ *
+ * This instruction is meant to apply styling via the `@HostBinding('style')`
+ * host bindings for a component's or directive's host element.
+ * When styles are applied to the host element they will then be updated
+ * with respect to any other styles set with `elementHostStyleProp`. If
+ * If any styles are set to falsy then they will be removed from the element.
+ *
+ * Note that the styling instruction will not be applied until
+ * `elementHostStylingApply` is called.
+ *
+ * @param styles A key/value style map of the styles that will be applied to the given element.
+ *        Any missing styles (that have already been applied to the element beforehand) will be
+ *        removed (unset) from the element's styling.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵelementHostStyleMap(styles: {
+    [styleName: string]: any;
+} | ɵNO_CHANGE | null): void;
+
+/**
  * Update a host style binding value on the host element within a component/directive.
  *
  * If the style value is falsy then it will be removed from the host element
  * (or assigned a different value depending if there are any styles placed
- * on the same element with `elementHostStylingMap` or any static styles that
+ * on the same element with `elementHostStyleMap` or any static styles that
  * are present from when the element was patched with `elementHostStyling`).
  *
  * Note that the styling applied to the host element once
@@ -11475,43 +11543,14 @@ export declare function ɵɵelementHostStyling(classBindingNames?: string[] | nu
 /**
  * Apply all style and class host binding values to the element.
  *
- * This instruction is meant to be run after `elementHostStylingMap`,
- * `elementHostStyleProp` or `elementHostClassProp` instructions have
- * been run and will only apply styling to the host element if any
- * styling bindings have been updated.
+ * This instruction is meant to be run after both `elementHostStyleMap`
+ * `elementHostClassMap`, `elementHostStyleProp` or `elementHostClassProp`
+ * instructions have been run and will only apply styling to the host
+ * element if any styling bindings have been updated.
  *
  * @codeGenApi
  */
 export declare function ɵɵelementHostStylingApply(): void;
-
-/**
- * Update style and/or class host bindings using object literals on an element within the host
- * bindings function for a directive/component.
- *
- * This instruction is meant to apply styling via the `@HostBinding('style')` and
- * `@HostBinding('class')` bindings for a component's or directive's host element.
- * When styles/classes are applied to the host element they will then be updated
- * with respect to any styles/classes set with `elementHostStyleProp` or
- * `elementHostClassProp`. If any styles or classes are set to falsy then they
- * will be removed from the element.
- *
- * Note that the styling instruction will not be applied until
- * `elementHostStylingApply` is called.
- *
- * @param classes A key/value map or string of CSS classes that will be added to the
- *        given element. Any missing classes (that have already been applied to the element
- *        beforehand) will be removed (unset) from the element's list of CSS classes.
- * @param styles A key/value style map of the styles that will be applied to the given element.
- *        Any missing styles (that have already been applied to the element beforehand) will be
- *        removed (unset) from the element's styling.
- *
- * @codeGenApi
- */
-export declare function ɵɵelementHostStylingMap(classes: {
-    [key: string]: any;
-} | string | ɵNO_CHANGE | null, styles?: {
-    [styleName: string]: any;
-} | ɵNO_CHANGE | null): void;
 
 /**
 * **TODO: Remove this function after `property` is in use**
@@ -11551,11 +11590,32 @@ export declare function ɵɵelementProperty<T>(index: number, propName: string, 
 export declare function ɵɵelementStart(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
 
 /**
+ * Update style bindings using an object literal on an element.
+ *
+ * This instruction is meant to apply styling via the `[style]="exp"` template bindings.
+ * When styles are applied to the element they will then be updated with respect to
+ * any styles/classes set via `elementStyleProp`. If any styles are set to falsy
+ * then they will be removed from the element.
+ *
+ * Note that the styling instruction will not be applied until `elementStylingApply` is called.
+ *
+ * @param index Index of the element's with which styling is associated.
+ * @param styles A key/value style map of the styles that will be applied to the given element.
+ *        Any missing styles (that have already been applied to the element beforehand) will be
+ *        removed (unset) from the element's styling.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵelementStyleMap(index: number, styles: {
+    [styleName: string]: any;
+} | ɵNO_CHANGE | null): void;
+
+/**
  * Update a style binding on an element with the provided value.
  *
  * If the style value is falsy then it will be removed from the element
  * (or assigned a different value depending if there are any styles placed
- * on the element with `elementStylingMap` or any static styles that are
+ * on the element with `elementStyleMap` or any static styles that are
  * present from when the element was created with `elementStyling`).
  *
  * Note that the styling element is updated as part of `elementStylingApply`.
@@ -11602,41 +11662,15 @@ export declare function ɵɵelementStyling(classBindingNames?: string[] | null, 
 /**
  * Apply all style and class binding values to the element.
  *
- * This instruction is meant to be run after `elementStylingMap`, `elementStyleProp`
- * or `elementClassProp` instructions have been run and will only apply styling to
- * the element if any styling bindings have been updated.
+ * This instruction is meant to be run after `elementStyleMap`, `elementClassMap`,
+ * `elementStyleProp` or `elementClassProp` instructions have been run and will
+ * only apply styling to the element if any styling bindings have been updated.
  *
  * @param index Index of the element's with which styling is associated.
  *
  * @codeGenApi
  */
 export declare function ɵɵelementStylingApply(index: number): void;
-
-/**
- * Update style and/or class bindings using object literals on an element.
- *
- * This instruction is meant to apply styling via the `[style]="exp"` and `[class]="exp"` template
- * bindings. When styles/classes are applied to the element they will then be updated with
- * respect to any styles/classes set with `elementStyleProp` or `elementClassProp`. If any
- * styles or classes are set to falsy then they will be removed from the element.
- *
- * Note that the styling instruction will not be applied until `elementStylingApply` is called.
- *
- * @param index Index of the element's with which styling is associated.
- * @param classes A key/value map or string of CSS classes that will be added to the
- *        given element. Any missing classes (that have already been applied to the element
- *        beforehand) will be removed (unset) from the element's list of CSS classes.
- * @param styles A key/value style map of the styles that will be applied to the given element.
- *        Any missing styles (that have already been applied to the element beforehand) will be
- *        removed (unset) from the element's styling.
- *
- * @codeGenApi
- */
-export declare function ɵɵelementStylingMap(index: number, classes: {
-    [key: string]: any;
-} | string | ɵNO_CHANGE | null, styles?: {
-    [styleName: string]: any;
-} | ɵNO_CHANGE | null): void;
 
 /**
  * Marks the end of an embedded view.
