@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+101.sha-345a3cd.with-local-changes
+ * @license Angular v8.0.0-rc.0+102.sha-392473e.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1250,7 +1250,7 @@ function compileInjectable(type, srcMeta) {
                     // Can't happen - either hasAProvider will be false, or one of the providers will be set.
                     throw new Error(`Unreachable state.`);
                 }
-                def = getCompilerFacade().compileInjectable(angularCoreDiEnv, `ng://${type.name}/ngInjectableDef.js`, compilerMeta);
+                def = getCompilerFacade().compileInjectable(angularCoreDiEnv, `ng:///${type.name}/ngInjectableDef.js`, compilerMeta);
             }
             return def;
         }),
@@ -20259,7 +20259,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-rc.0+101.sha-345a3cd.with-local-changes');
+const VERSION = new Version('8.0.0-rc.0+102.sha-392473e.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -28684,7 +28684,7 @@ function compileNgModuleDefs(moduleType, ngModule) {
          */
         () => {
             if (ngModuleDef === null) {
-                ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, `ng://${moduleType.name}/ngModuleDef.js`, {
+                ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, `ng:///${moduleType.name}/ngModuleDef.js`, {
                     type: moduleType,
                     bootstrap: flatten(ngModule.bootstrap || EMPTY_ARRAY$3, resolveForwardRef),
                     declarations: declarations.map(resolveForwardRef),
@@ -28722,7 +28722,7 @@ function compileNgModuleDefs(moduleType, ngModule) {
                         (ngModule.exports || EMPTY_ARRAY$3).map(resolveForwardRef),
                     ],
                 };
-                ngInjectorDef = getCompilerFacade().compileInjector(angularCoreEnv, `ng://${moduleType.name}/ngInjectorDef.js`, meta);
+                ngInjectorDef = getCompilerFacade().compileInjector(angularCoreEnv, `ng:///${moduleType.name}/ngInjectorDef.js`, meta);
             }
             return ngInjectorDef;
         }),
@@ -29278,7 +29278,7 @@ function compileDirective(type, directive) {
                 /** @type {?} */
                 const name = type && type.name;
                 /** @type {?} */
-                const sourceMapUrl = `ng://${name}/ngDirectiveDef.js`;
+                const sourceMapUrl = `ng:///${name}/ngDirectiveDef.js`;
                 /** @type {?} */
                 const compiler = getCompilerFacade();
                 /** @type {?} */
@@ -29561,7 +29561,7 @@ function compilePipe(type, meta) {
                 /** @type {?} */
                 const typeName = type.name;
                 ngPipeDef =
-                    getCompilerFacade().compilePipe(angularCoreEnv, `ng://${typeName}/ngPipeDef.js`, {
+                    getCompilerFacade().compilePipe(angularCoreEnv, `ng:///${typeName}/ngPipeDef.js`, {
                         type: type,
                         typeArgumentCount: 0,
                         name: typeName,
