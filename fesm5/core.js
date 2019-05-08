@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+118.sha-9a807bd.with-local-changes
+ * @license Angular v8.0.0-rc.0+119.sha-728db88.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7100,7 +7100,7 @@ var SAFE_STYLE_VALUE = new RegExp("^(" + VALUES + "|" +
  * Given the common use case, low likelihood of attack vector, and low impact of an attack, this
  * code is permissive and allows URLs that sanitize otherwise.
  */
-var URL_RE = /^url\(([^)]+)\)$/;
+var URL_RE = /^url\(([\w\W]*)\)$/;
 /**
  * Checks that quotes (" and ') are properly balanced inside a string. Assumes
  * that neither escape (\) nor any other character that could result in
@@ -16710,7 +16710,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-rc.0+118.sha-9a807bd.with-local-changes');
+var VERSION = new Version('8.0.0-rc.0+119.sha-728db88.with-local-changes');
 
 /**
  * @license
