@@ -27,6 +27,8 @@ declare global {
         rendererDestroyNode: number;
         rendererMoveNode: number;
         rendererRemoveNode: number;
+        rendererAppendChild: number;
+        rendererInsertBefore: number;
         rendererCreateComment: number;
         styleMap: number;
         styleMapCacheMiss: number;
