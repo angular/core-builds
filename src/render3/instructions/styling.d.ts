@@ -62,7 +62,6 @@ export declare function ɵɵelementHostStyling(classBindingNames?: string[] | nu
  *
  * Note that the styling element is updated as part of `elementStylingApply`.
  *
- * @param index Index of the element's with which styling is associated.
  * @param styleIndex Index of style to update. This index value refers to the
  *        index of the style in the style bindings array that was passed into
  *        `elementStyling`.
@@ -78,7 +77,7 @@ export declare function ɵɵelementHostStyling(classBindingNames?: string[] | nu
  *
  * @codeGenApi
  */
-export declare function ɵɵelementStyleProp(index: number, styleIndex: number, value: string | number | String | PlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
+export declare function ɵɵelementStyleProp(styleIndex: number, value: string | number | String | PlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
 /**
  * Update a host style binding value on the host element within a component/directive.
  *
@@ -112,7 +111,6 @@ export declare function ɵɵelementHostStyleProp(styleIndex: number, value: stri
  * therefore, the class binding itself must already be allocated using
  * `elementStyling` within the creation block.
  *
- * @param index Index of the element's with which styling is associated.
  * @param classIndex Index of class to toggle. This index value refers to the
  *        index of the class in the class bindings array that was passed into
  *        `elementStyling` (which is meant to be called before this
@@ -123,7 +121,7 @@ export declare function ɵɵelementHostStyleProp(styleIndex: number, value: stri
  *
  * @codeGenApi
  */
-export declare function ɵɵelementClassProp(index: number, classIndex: number, value: boolean | PlayerFactory, forceOverride?: boolean): void;
+export declare function ɵɵelementClassProp(classIndex: number, value: boolean | PlayerFactory, forceOverride?: boolean): void;
 /**
  * Update a class host binding for a directive's/component's host element within
  * the host bindings function.
@@ -153,14 +151,13 @@ export declare function ɵɵelementHostClassProp(classIndex: number, value: bool
  *
  * Note that the styling instruction will not be applied until `elementStylingApply` is called.
  *
- * @param index Index of the element's with which styling is associated.
  * @param styles A key/value style map of the styles that will be applied to the given element.
  *        Any missing styles (that have already been applied to the element beforehand) will be
  *        removed (unset) from the element's styling.
  *
  * @codeGenApi
  */
-export declare function ɵɵelementStyleMap(index: number, styles: {
+export declare function ɵɵelementStyleMap(styles: {
     [styleName: string]: any;
 } | NO_CHANGE | null): void;
 /**
@@ -173,14 +170,13 @@ export declare function ɵɵelementStyleMap(index: number, styles: {
  *
  * Note that the styling instruction will not be applied until `elementStylingApply` is called.
  *
- * @param index Index of the element's with which styling is associated.
  * @param classes A key/value map or string of CSS classes that will be added to the
  *        given element. Any missing classes (that have already been applied to the element
  *        beforehand) will be removed (unset) from the element's list of CSS classes.
  *
  * @codeGenApi
  */
-export declare function ɵɵelementClassMap(index: number, classes: {
+export declare function ɵɵelementClassMap(classes: {
     [styleName: string]: any;
 } | NO_CHANGE | string | null): void;
 /**
@@ -234,11 +230,9 @@ export declare function ɵɵelementHostClassMap(classes: {
  * `elementStyleProp` or `elementClassProp` instructions have been run and will
  * only apply styling to the element if any styling bindings have been updated.
  *
- * @param index Index of the element's with which styling is associated.
- *
  * @codeGenApi
  */
-export declare function ɵɵelementStylingApply(index: number): void;
+export declare function ɵɵelementStylingApply(): void;
 /**
  * Apply all style and class host binding values to the element.
  *
