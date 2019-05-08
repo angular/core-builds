@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.3+13.sha-5bbbe3f.with-local-changes
+ * @license Angular v8.0.0-rc.3+14.sha-dd8651d.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6679,7 +6679,7 @@
      * Given the common use case, low likelihood of attack vector, and low impact of an attack, this
      * code is permissive and allows URLs that sanitize otherwise.
      */
-    var URL_RE = /^url\(([^)]+)\)$/;
+    var URL_RE = /^url\(([\w\W]*)\)$/;
     /**
      * Checks that quotes (" and ') are properly balanced inside a string. Assumes
      * that neither escape (\) nor any other character that could result in
@@ -16621,7 +16621,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-rc.3+13.sha-5bbbe3f.with-local-changes');
+    var VERSION = new Version('8.0.0-rc.3+14.sha-dd8651d.with-local-changes');
 
     /**
      * @license
