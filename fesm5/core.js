@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+120.sha-452f121.with-local-changes
+ * @license Angular v8.0.0-rc.0+121.sha-c016e2c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4635,7 +4635,7 @@ function setActiveHostElement(elementIndex) {
     if (elementIndex === void 0) { elementIndex = null; }
     if (_selectedIndex !== elementIndex) {
         setSelectedIndex(elementIndex == null ? -1 : elementIndex);
-        activeDirectiveId = MIN_DIRECTIVE_ID;
+        activeDirectiveId = elementIndex == null ? 0 : MIN_DIRECTIVE_ID;
         activeDirectiveSuperClassDepthPosition = 0;
         activeDirectiveSuperClassHeight = 0;
     }
@@ -10179,6 +10179,7 @@ function createDirectivesAndLocals(tView, lView, localRefs, localRefExtractor) {
     instantiateAllDirectives(tView, lView, previousOrParentTNode);
     invokeDirectivesHostBindings(tView, lView, previousOrParentTNode);
     saveResolvedLocalsInData(lView, previousOrParentTNode, localRefExtractor);
+    setActiveHostElement(null);
 }
 /**
  * Takes a list of local names and indices and pushes the resolved local variable values
@@ -12409,14 +12410,6 @@ function ɵɵinjectAttribute(attrNameToInject) {
  * - elementStyleProp
  * - elementClassProp
  * - elementStylingApply
- *
- * Host bindings level styling instructions:
- * - elementHostStyling
- * - elementHostStyleMap
- * - elementHostClassMap
- * - elementHostStyleProp
- * - elementHostClassProp
- * - elementHostStylingApply
  */
 /**
  * Allocates style and class binding properties on the element during creation mode.
@@ -12435,6 +12428,9 @@ function ɵɵinjectAttribute(attrNameToInject) {
  * @param styleSanitizer An optional sanitizer function that will be used to sanitize any CSS
  *        style values that are applied to the element (during rendering).
  *
+ * Note that this will allocate the provided style/class bindings to the host element if
+ * this function is called within a host binding.
+ *
  * @codeGenApi
  */
 function ɵɵelementStyling(classBindingNames, styleBindingNames, styleSanitizer) {
@@ -12442,53 +12438,28 @@ function ɵɵelementStyling(classBindingNames, styleBindingNames, styleSanitizer
     if (!tNode.stylingTemplate) {
         tNode.stylingTemplate = createEmptyStylingContext();
     }
-    // calling the function below ensures that the template's binding values
-    // are applied as the first set of bindings into the context. If any other
-    // styling bindings are set on the same element (by directives and/or
-    // components) then they will be applied at the end of the `elementEnd`
-    // instruction (because directives are created first before styling is
-    // executed for a new element).
-    initElementStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, DEFAULT_TEMPLATE_DIRECTIVE_INDEX);
-}
-/**
- * Allocates style and class binding properties on the host element during creation mode
- * within the host bindings function of a directive or component.
- *
- * This instruction is meant to be called during creation mode to register all
- * dynamic style and class host bindings on the host element of a directive or
- * component. Note that this is only used for binding values (see `elementHostAttrs`
- * to learn how to assign static styling values to the host element).
- *
- * @param classBindingNames An array containing bindable class names.
- *        The `elementHostClassProp` instruction refers to the class name by index in
- *        this array (i.e. `['foo', 'bar']` means `foo=0` and `bar=1`).
- * @param styleBindingNames An array containing bindable style properties.
- *        The `elementHostStyleProp` instruction refers to the class name by index in
- *        this array (i.e. `['width', 'height']` means `width=0` and `height=1`).
- * @param styleSanitizer An optional sanitizer function that will be used to sanitize any CSS
- *        style values that are applied to the element (during rendering).
- *        Note that the sanitizer instance itself is tied to the provided `directive` and
- *        will not be used if the same property is assigned in another directive or
- *        on the element directly.
- *
- * @codeGenApi
- */
-function ɵɵelementHostStyling(classBindingNames, styleBindingNames, styleSanitizer) {
-    var tNode = getPreviousOrParentTNode();
-    if (!tNode.stylingTemplate) {
-        tNode.stylingTemplate = createEmptyStylingContext();
-    }
     var directiveStylingIndex = getActiveDirectiveStylingIndex();
-    // despite the binding being applied in a queue (below), the allocation
-    // of the directive into the context happens right away. The reason for
-    // this is to retain the ordering of the directives (which is important
-    // for the prioritization of bindings).
-    allocateOrUpdateDirectiveIntoContext(tNode.stylingTemplate, directiveStylingIndex);
-    var fns = tNode.onElementCreationFns = tNode.onElementCreationFns || [];
-    fns.push(function () {
-        initElementStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, directiveStylingIndex);
-        registerHostDirective(tNode.stylingTemplate, directiveStylingIndex);
-    });
+    if (directiveStylingIndex) {
+        // despite the binding being applied in a queue (below), the allocation
+        // of the directive into the context happens right away. The reason for
+        // this is to retain the ordering of the directives (which is important
+        // for the prioritization of bindings).
+        allocateOrUpdateDirectiveIntoContext(tNode.stylingTemplate, directiveStylingIndex);
+        var fns = tNode.onElementCreationFns = tNode.onElementCreationFns || [];
+        fns.push(function () {
+            initElementStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, directiveStylingIndex);
+            registerHostDirective(tNode.stylingTemplate, directiveStylingIndex);
+        });
+    }
+    else {
+        // calling the function below ensures that the template's binding values
+        // are applied as the first set of bindings into the context. If any other
+        // styling bindings are set on the same element (by directives and/or
+        // components) then they will be applied at the end of the `elementEnd`
+        // instruction (because directives are created first before styling is
+        // executed for a new element).
+        initElementStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, DEFAULT_TEMPLATE_DIRECTIVE_INDEX);
+    }
 }
 function initElementStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, directiveStylingIndex) {
     updateContextWithBindings(tNode.stylingTemplate, directiveStylingIndex, classBindingNames, styleBindingNames, styleSanitizer);
@@ -12506,15 +12477,15 @@ function initElementStyling(tNode, classBindingNames, styleBindingNames, styleSa
  * @param styleIndex Index of style to update. This index value refers to the
  *        index of the style in the style bindings array that was passed into
  *        `elementStyling`.
- * @param value New value to write (falsy to remove). Note that if a directive also
- *        attempts to write to the same binding value (via `elementHostStyleProp`)
- *        then it will only be able to do so if the binding value assigned via
- *        `elementStyleProp` is falsy (or doesn't exist at all).
+ * @param value New value to write (falsy to remove).
  * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
  *        Note that when a suffix is provided then the underlying sanitizer will
  *        be ignored.
  * @param forceOverride Whether or not to update the styling value immediately
  *        (despite the other bindings possibly having priority)
+ *
+ * Note that this will apply the provided style value to the host element if this function is called
+ * within a host binding.
  *
  * @codeGenApi
  */
@@ -12522,40 +12493,14 @@ function ɵɵelementStyleProp(styleIndex, value, suffix, forceOverride) {
     var index = getSelectedIndex();
     var valueToAdd = resolveStylePropValue(value, suffix);
     var stylingContext = getStylingContext(index, getLView());
-    updateStyleProp(stylingContext, styleIndex, valueToAdd, DEFAULT_TEMPLATE_DIRECTIVE_INDEX, forceOverride);
-}
-/**
- * Update a host style binding value on the host element within a component/directive.
- *
- * If the style value is falsy then it will be removed from the host element
- * (or assigned a different value depending if there are any styles placed
- * on the same element with `elementHostStyleMap` or any static styles that
- * are present from when the element was patched with `elementHostStyling`).
- *
- * Note that the styling applied to the host element once
- * `elementHostStylingApply` is called.
- *
- * @param styleIndex Index of style to update. This index value refers to the
- *        index of the style in the style bindings array that was passed into
- *        `elementHostStyling`.
- * @param value New value to write (falsy to remove). The value may or may not
- *        be applied to the element depending on the template/component/directive
- *        prioritization (see `interfaces/styling.ts`)
- * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
- *        Note that when a suffix is provided then the underlying sanitizer will
- *        be ignored.
- * @param forceOverride Whether or not to update the styling value immediately
- *        (despite the other bindings possibly having priority)
- *
- * @codeGenApi
- */
-function ɵɵelementHostStyleProp(styleIndex, value, suffix, forceOverride) {
     var directiveStylingIndex = getActiveDirectiveStylingIndex();
-    var hostElementIndex = getSelectedIndex();
-    var stylingContext = getStylingContext(hostElementIndex, getLView());
-    var valueToAdd = resolveStylePropValue(value, suffix);
-    var args = [stylingContext, styleIndex, valueToAdd, directiveStylingIndex, forceOverride];
-    enqueueHostInstruction(stylingContext, directiveStylingIndex, updateStyleProp, args);
+    if (directiveStylingIndex) {
+        var args = [stylingContext, styleIndex, valueToAdd, directiveStylingIndex, forceOverride];
+        enqueueHostInstruction(stylingContext, directiveStylingIndex, updateStyleProp, args);
+    }
+    else {
+        updateStyleProp(stylingContext, styleIndex, valueToAdd, DEFAULT_TEMPLATE_DIRECTIVE_INDEX, forceOverride);
+    }
 }
 function resolveStylePropValue(value, suffix) {
     var valueToAdd = null;
@@ -12590,6 +12535,9 @@ function resolveStylePropValue(value, suffix) {
  * @param forceOverride Whether or not this value will be applied regardless
  *        of where it is being set within the styling priority structure.
  *
+ * Note that this will apply the provided class value to the host element if this function
+ * is called within a host binding.
+ *
  * @codeGenApi
  */
 function ɵɵelementClassProp(classIndex, value, forceOverride) {
@@ -12597,36 +12545,15 @@ function ɵɵelementClassProp(classIndex, value, forceOverride) {
     var input = (value instanceof BoundPlayerFactory) ?
         value :
         booleanOrNull(value);
-    var stylingContext = getStylingContext(index, getLView());
-    updateClassProp(stylingContext, classIndex, input, DEFAULT_TEMPLATE_DIRECTIVE_INDEX, forceOverride);
-}
-/**
- * Update a class host binding for a directive's/component's host element within
- * the host bindings function.
- *
- * This instruction is meant to handle the `@HostBinding('class.foo')` case and,
- * therefore, the class binding itself must already be allocated using
- * `elementHostStyling` within the creation block.
- *
- * @param classIndex Index of class to toggle. This index value refers to the
- *        index of the class in the class bindings array that was passed into
- *        `elementHostStlying` (which is meant to be called before this
- *        function is).
- * @param value A true/false value which will turn the class on or off.
- * @param forceOverride Whether or not this value will be applied regardless
- *        of where it is being set within the stylings priority structure.
- *
- * @codeGenApi
- */
-function ɵɵelementHostClassProp(classIndex, value, forceOverride) {
     var directiveStylingIndex = getActiveDirectiveStylingIndex();
-    var hostElementIndex = getSelectedIndex();
-    var stylingContext = getStylingContext(hostElementIndex, getLView());
-    var input = (value instanceof BoundPlayerFactory) ?
-        value :
-        booleanOrNull(value);
-    var args = [stylingContext, classIndex, input, directiveStylingIndex, forceOverride];
-    enqueueHostInstruction(stylingContext, directiveStylingIndex, updateClassProp, args);
+    var stylingContext = getStylingContext(index, getLView());
+    if (directiveStylingIndex) {
+        var args = [stylingContext, classIndex, input, directiveStylingIndex, forceOverride];
+        enqueueHostInstruction(stylingContext, directiveStylingIndex, updateClassProp, args);
+    }
+    else {
+        updateClassProp(stylingContext, classIndex, input, DEFAULT_TEMPLATE_DIRECTIVE_INDEX, forceOverride);
+    }
 }
 function booleanOrNull(value) {
     if (typeof value === 'boolean')
@@ -12647,23 +12574,33 @@ function booleanOrNull(value) {
  *        Any missing styles (that have already been applied to the element beforehand) will be
  *        removed (unset) from the element's styling.
  *
+ * Note that this will apply the provided styleMap value to the host element if this function
+ * is called within a host binding.
+ *
  * @codeGenApi
  */
 function ɵɵelementStyleMap(styles) {
     var index = getSelectedIndex();
     var lView = getLView();
     var stylingContext = getStylingContext(index, lView);
-    var tNode = getTNode(index, lView);
-    // inputs are only evaluated from a template binding into a directive, therefore,
-    // there should not be a situation where a directive host bindings function
-    // evaluates the inputs (this should only happen in the template function)
-    if (hasStyleInput(tNode) && styles !== NO_CHANGE) {
-        var initialStyles = getInitialClassNameValue(stylingContext);
-        var styleInputVal = (initialStyles.length ? (initialStyles + ' ') : '') + forceStylesAsString(styles);
-        setInputsForProperty(lView, tNode.inputs['style'], styleInputVal);
-        styles = NO_CHANGE;
+    var directiveStylingIndex = getActiveDirectiveStylingIndex();
+    if (directiveStylingIndex) {
+        var args = [stylingContext, styles, directiveStylingIndex];
+        enqueueHostInstruction(stylingContext, directiveStylingIndex, updateStyleMap, args);
     }
-    updateStyleMap(stylingContext, styles);
+    else {
+        var tNode = getTNode(index, lView);
+        // inputs are only evaluated from a template binding into a directive, therefore,
+        // there should not be a situation where a directive host bindings function
+        // evaluates the inputs (this should only happen in the template function)
+        if (hasStyleInput(tNode) && styles !== NO_CHANGE) {
+            var initialStyles = getInitialClassNameValue(stylingContext);
+            var styleInputVal = (initialStyles.length ? (initialStyles + ' ') : '') + forceStylesAsString(styles);
+            setInputsForProperty(lView, tNode.inputs['style'], styleInputVal);
+            styles = NO_CHANGE;
+        }
+        updateStyleMap(stylingContext, styles);
+    }
 }
 /**
  * Update class bindings using an object literal or class-string on an element.
@@ -12674,6 +12611,8 @@ function ɵɵelementStyleMap(styles) {
  * classes are set to falsy then they will be removed from the element.
  *
  * Note that the styling instruction will not be applied until `elementStylingApply` is called.
+ * Note that this will the provided classMap value to the host element if this function is called
+ * within a host binding.
  *
  * @param classes A key/value map or string of CSS classes that will be added to the
  *        given element. Any missing classes (that have already been applied to the element
@@ -12685,69 +12624,24 @@ function ɵɵelementClassMap(classes) {
     var index = getSelectedIndex();
     var lView = getLView();
     var stylingContext = getStylingContext(index, lView);
-    var tNode = getTNode(index, lView);
-    // inputs are only evaluated from a template binding into a directive, therefore,
-    // there should not be a situation where a directive host bindings function
-    // evaluates the inputs (this should only happen in the template function)
-    if (hasClassInput(tNode) && classes !== NO_CHANGE) {
-        var initialClasses = getInitialClassNameValue(stylingContext);
-        var classInputVal = (initialClasses.length ? (initialClasses + ' ') : '') + forceClassesAsString(classes);
-        setInputsForProperty(lView, tNode.inputs['class'], classInputVal);
-        classes = NO_CHANGE;
+    var directiveStylingIndex = getActiveDirectiveStylingIndex();
+    if (directiveStylingIndex) {
+        var args = [stylingContext, classes, directiveStylingIndex];
+        enqueueHostInstruction(stylingContext, directiveStylingIndex, updateClassMap, args);
     }
-    updateClassMap(stylingContext, classes);
-}
-/**
- * Update style host bindings using object literals on an element within the host
- * bindings function for a directive/component.
- *
- * This instruction is meant to apply styling via the `@HostBinding('style')`
- * host bindings for a component's or directive's host element.
- * When styles are applied to the host element they will then be updated
- * with respect to any other styles set with `elementHostStyleProp`. If
- * If any styles are set to falsy then they will be removed from the element.
- *
- * Note that the styling instruction will not be applied until
- * `elementHostStylingApply` is called.
- *
- * @param styles A key/value style map of the styles that will be applied to the given element.
- *        Any missing styles (that have already been applied to the element beforehand) will be
- *        removed (unset) from the element's styling.
- *
- * @codeGenApi
- */
-function ɵɵelementHostStyleMap(styles) {
-    var directiveStylingIndex = getActiveDirectiveStylingIndex();
-    var hostElementIndex = getSelectedIndex();
-    var stylingContext = getStylingContext(hostElementIndex, getLView());
-    var args = [stylingContext, styles, directiveStylingIndex];
-    enqueueHostInstruction(stylingContext, directiveStylingIndex, updateStyleMap, args);
-}
-/**
- * Update class host bindings using object literals on an element within the host
- * bindings function for a directive/component.
- *
- * This instruction is meant to apply styling via the `@HostBinding('class')`
- * host bindings for a component's or directive's host element.
- * When classes are applied to the host element they will then be updated
- * with respect to any other classes set with `elementHostClassProp`. If
- * any classes are set to falsy then they will be removed from the element.
- *
- * Note that the styling instruction will not be applied until
- * `elementHostStylingApply` is called.
- *
- * @param classes A key/value map or string of CSS classes that will be added to the
- *        given element. Any missing classes (that have already been applied to the element
- *        beforehand) will be removed (unset) from the element's list of CSS classes.
- *
- * @codeGenApi
- */
-function ɵɵelementHostClassMap(classes) {
-    var directiveStylingIndex = getActiveDirectiveStylingIndex();
-    var hostElementIndex = getSelectedIndex();
-    var stylingContext = getStylingContext(hostElementIndex, getLView());
-    var args = [stylingContext, classes, directiveStylingIndex];
-    enqueueHostInstruction(stylingContext, directiveStylingIndex, updateClassMap, args);
+    else {
+        var tNode = getTNode(index, lView);
+        // inputs are only evaluated from a template binding into a directive, therefore,
+        // there should not be a situation where a directive host bindings function
+        // evaluates the inputs (this should only happen in the template function)
+        if (hasClassInput(tNode) && classes !== NO_CHANGE) {
+            var initialClasses = getInitialClassNameValue(stylingContext);
+            var classInputVal = (initialClasses.length ? (initialClasses + ' ') : '') + forceClassesAsString(classes);
+            setInputsForProperty(lView, tNode.inputs['class'], classInputVal);
+            classes = NO_CHANGE;
+        }
+        updateClassMap(stylingContext, classes);
+    }
 }
 /**
  * Apply all style and class binding values to the element.
@@ -12760,22 +12654,7 @@ function ɵɵelementHostClassMap(classes) {
  */
 function ɵɵelementStylingApply() {
     var index = getSelectedIndex();
-    elementStylingApplyInternal(DEFAULT_TEMPLATE_DIRECTIVE_INDEX, index);
-}
-/**
- * Apply all style and class host binding values to the element.
- *
- * This instruction is meant to be run after both `elementHostStyleMap`
- * `elementHostClassMap`, `elementHostStyleProp` or `elementHostClassProp`
- * instructions have been run and will only apply styling to the host
- * element if any styling bindings have been updated.
- *
- * @codeGenApi
- */
-function ɵɵelementHostStylingApply() {
-    elementStylingApplyInternal(getActiveDirectiveStylingIndex(), getSelectedIndex());
-}
-function elementStylingApplyInternal(directiveStylingIndex, index) {
+    var directiveStylingIndex = getActiveDirectiveStylingIndex() || DEFAULT_TEMPLATE_DIRECTIVE_INDEX;
     var lView = getLView();
     var tNode = getTNode(index, lView);
     // if a non-element value is being processed then we can't render values
@@ -15097,6 +14976,9 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     if (opts === void 0) { opts = {}; }
     ngDevMode && publishDefaultGlobalUtils();
     ngDevMode && assertComponentType(componentType);
+    // this is preemptively set to avoid having test and debug code accidentally
+    // read data from a previous application state...
+    setActiveHostElement(null);
     var rendererFactory = opts.rendererFactory || domRendererFactory3;
     var sanitizer = opts.sanitizer || null;
     var componentDef = getComponentDef(componentType);
@@ -16710,7 +16592,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-rc.0+120.sha-452f121.with-local-changes');
+var VERSION = new Version('8.0.0-rc.0+121.sha-c016e2c.with-local-changes');
 
 /**
  * @license
@@ -22964,12 +22846,6 @@ var angularCoreEnv = {
     'ɵɵelementStyleProp': ɵɵelementStyleProp,
     'ɵɵelementStylingApply': ɵɵelementStylingApply,
     'ɵɵelementClassProp': ɵɵelementClassProp,
-    'ɵɵelementHostClassMap': ɵɵelementHostClassMap,
-    'ɵɵelementHostStyling': ɵɵelementHostStyling,
-    'ɵɵelementHostStyleMap': ɵɵelementHostStyleMap,
-    'ɵɵelementHostStyleProp': ɵɵelementHostStyleProp,
-    'ɵɵelementHostStylingApply': ɵɵelementHostStylingApply,
-    'ɵɵelementHostClassProp': ɵɵelementHostClassProp,
     'ɵɵselect': ɵɵselect,
     'ɵɵtemplate': ɵɵtemplate,
     'ɵɵtext': ɵɵtext,
@@ -28830,5 +28706,5 @@ var NgModuleFactory_ = /** @class */ (function (_super) {
  * Generated bundle index. Do not edit.
  */
 
-export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_r, _iterableDiffersFactory as ɵangular_packages_core_core_o, _keyValueDiffersFactory as ɵangular_packages_core_core_p, _localeFactory as ɵangular_packages_core_core_q, zoneSchedulerFactory as ɵangular_packages_core_core_s, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, DefaultIterableDifferFactory as ɵangular_packages_core_core_m, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_n, DebugElement__PRE_R3__ as ɵangular_packages_core_core_l, DebugNode__PRE_R3__ as ɵangular_packages_core_core_k, NullInjector as ɵangular_packages_core_core_b, injectInjectorOnly as ɵangular_packages_core_core_a, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, getModuleFactory__PRE_R3__ as ɵangular_packages_core_core_j, wtfEnabled as ɵangular_packages_core_core_t, createScope as ɵangular_packages_core_core_v, detectWTF as ɵangular_packages_core_core_u, endTimeRange as ɵangular_packages_core_core_y, leave as ɵangular_packages_core_core_w, startTimeRange as ɵangular_packages_core_core_x, SCHEDULER as ɵangular_packages_core_core_bb, injectAttributeImpl as ɵangular_packages_core_core_bc, getLView as ɵangular_packages_core_core_bd, getPreviousOrParentTNode as ɵangular_packages_core_core_be, nextContextImpl as ɵangular_packages_core_core_bf, BoundPlayerFactory as ɵangular_packages_core_core_bj, getRootContext as ɵangular_packages_core_core_bp, loadInternal as ɵangular_packages_core_core_bo, createElementRef as ɵangular_packages_core_core_g, createTemplateRef as ɵangular_packages_core_core_h, createViewRef as ɵangular_packages_core_core_i, getUrlSanitizer as ɵangular_packages_core_core_bh, noSideEffects as ɵangular_packages_core_core_bn, makeParamDecorator as ɵangular_packages_core_core_bk, makePropDecorator as ɵangular_packages_core_core_bl, getClosureSafeProperty as ɵangular_packages_core_core_bq, _def as ɵangular_packages_core_core_z, DebugContext as ɵangular_packages_core_core_ba, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugEventListener, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS$1 as TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, ViewEncapsulation, Version, VERSION, InjectFlags, ɵɵdefineInjectable, defineInjectable, ɵɵdefineInjector, forwardRef, resolveForwardRef, Injectable, Injector, ɵɵinject, inject, INJECTOR, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, ɵ0, ɵ1, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, ɵɵdefineBase, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefinePipe, ɵɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, ɵɵdirectiveInject, ɵɵinjectAttribute, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵtemplateRefExtractor, ɵɵProvidersFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, ɵɵcontainer, ɵɵnextContext, ɵɵelementStart, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵelement, ɵɵlistener, ɵɵtext, ɵɵembeddedViewStart, ɵɵprojection, ɵɵbind, ɵɵinterpolation1, ɵɵinterpolation2, ɵɵinterpolation3, ɵɵinterpolation4, ɵɵinterpolation5, ɵɵinterpolation6, ɵɵinterpolation7, ɵɵinterpolation8, ɵɵinterpolationV, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, ɵɵrestoreView, ɵɵcontainerRefreshStart, ɵɵcontainerRefreshEnd, ɵɵqueryRefresh, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵstaticContentQuery, ɵɵloadViewQuery, ɵɵcontentQuery, ɵɵloadContentQuery, ɵɵelementEnd, ɵɵelementProperty, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵcomponentHostSyntheticProperty, ɵɵcomponentHostSyntheticListener, ɵɵprojectionDef, ɵɵreference, ɵɵenableBindings, ɵɵdisableBindings, ɵɵallocHostVars, ɵɵelementAttribute, ɵɵelementContainerStart, ɵɵelementContainerEnd, ɵɵelementStyling, ɵɵelementStyleMap, ɵɵelementClassMap, ɵɵelementStyleProp, ɵɵelementStylingApply, ɵɵelementClassProp, ɵɵelementHostAttrs, ɵɵelementHostClassMap, ɵɵelementHostStyleMap, ɵɵelementHostStyling, ɵɵelementHostStyleProp, ɵɵelementHostClassProp, ɵɵelementHostStylingApply, ɵɵselect, ɵɵtextBinding, ɵɵtemplate, ɵɵembeddedViewEnd, store as ɵstore, ɵɵload, ɵɵpipe, whenRendered as ɵwhenRendered, ɵɵi18n, ɵɵi18nAttributes, ɵɵi18nExp, ɵɵi18nStart, ɵɵi18nEnd, ɵɵi18nApply, ɵɵi18nPostprocess, i18nConfigureLocalize as ɵi18nConfigureLocalize, ɵɵi18nLocalize, setClassMetadata as ɵsetClassMetadata, ɵɵresolveWindow, ɵɵresolveDocument, ɵɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, ɵɵsanitizeHtml, ɵɵsanitizeStyle, ɵɵdefaultStyleSanitizer, ɵɵsanitizeScript, ɵɵsanitizeUrl, ɵɵsanitizeResourceUrl, ɵɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, registerNgModuleType as ɵregisterNgModuleType, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, createInjector as ɵcreateInjector, INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$3 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_r, _iterableDiffersFactory as ɵangular_packages_core_core_o, _keyValueDiffersFactory as ɵangular_packages_core_core_p, _localeFactory as ɵangular_packages_core_core_q, zoneSchedulerFactory as ɵangular_packages_core_core_s, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, DefaultIterableDifferFactory as ɵangular_packages_core_core_m, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_n, DebugElement__PRE_R3__ as ɵangular_packages_core_core_l, DebugNode__PRE_R3__ as ɵangular_packages_core_core_k, NullInjector as ɵangular_packages_core_core_b, injectInjectorOnly as ɵangular_packages_core_core_a, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, getModuleFactory__PRE_R3__ as ɵangular_packages_core_core_j, wtfEnabled as ɵangular_packages_core_core_t, createScope as ɵangular_packages_core_core_v, detectWTF as ɵangular_packages_core_core_u, endTimeRange as ɵangular_packages_core_core_y, leave as ɵangular_packages_core_core_w, startTimeRange as ɵangular_packages_core_core_x, SCHEDULER as ɵangular_packages_core_core_bb, injectAttributeImpl as ɵangular_packages_core_core_bc, getLView as ɵangular_packages_core_core_bd, getPreviousOrParentTNode as ɵangular_packages_core_core_be, nextContextImpl as ɵangular_packages_core_core_bf, BoundPlayerFactory as ɵangular_packages_core_core_bj, getRootContext as ɵangular_packages_core_core_bp, loadInternal as ɵangular_packages_core_core_bo, createElementRef as ɵangular_packages_core_core_g, createTemplateRef as ɵangular_packages_core_core_h, createViewRef as ɵangular_packages_core_core_i, getUrlSanitizer as ɵangular_packages_core_core_bh, noSideEffects as ɵangular_packages_core_core_bn, makeParamDecorator as ɵangular_packages_core_core_bk, makePropDecorator as ɵangular_packages_core_core_bl, getClosureSafeProperty as ɵangular_packages_core_core_bq, _def as ɵangular_packages_core_core_z, DebugContext as ɵangular_packages_core_core_ba, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugEventListener, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS$1 as TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, ViewEncapsulation, Version, VERSION, InjectFlags, ɵɵdefineInjectable, defineInjectable, ɵɵdefineInjector, forwardRef, resolveForwardRef, Injectable, Injector, ɵɵinject, inject, INJECTOR, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, ɵ0, ɵ1, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, ɵɵdefineBase, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefinePipe, ɵɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, ɵɵdirectiveInject, ɵɵinjectAttribute, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵtemplateRefExtractor, ɵɵProvidersFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, ɵɵcontainer, ɵɵnextContext, ɵɵelementStart, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵelement, ɵɵlistener, ɵɵtext, ɵɵembeddedViewStart, ɵɵprojection, ɵɵbind, ɵɵinterpolation1, ɵɵinterpolation2, ɵɵinterpolation3, ɵɵinterpolation4, ɵɵinterpolation5, ɵɵinterpolation6, ɵɵinterpolation7, ɵɵinterpolation8, ɵɵinterpolationV, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, ɵɵrestoreView, ɵɵcontainerRefreshStart, ɵɵcontainerRefreshEnd, ɵɵqueryRefresh, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵstaticContentQuery, ɵɵloadViewQuery, ɵɵcontentQuery, ɵɵloadContentQuery, ɵɵelementEnd, ɵɵelementProperty, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵcomponentHostSyntheticProperty, ɵɵcomponentHostSyntheticListener, ɵɵprojectionDef, ɵɵreference, ɵɵenableBindings, ɵɵdisableBindings, ɵɵallocHostVars, ɵɵelementAttribute, ɵɵelementContainerStart, ɵɵelementContainerEnd, ɵɵelementStyling, ɵɵelementStyleMap, ɵɵelementClassMap, ɵɵelementStyleProp, ɵɵelementStylingApply, ɵɵelementClassProp, ɵɵelementHostAttrs, ɵɵselect, ɵɵtextBinding, ɵɵtemplate, ɵɵembeddedViewEnd, store as ɵstore, ɵɵload, ɵɵpipe, whenRendered as ɵwhenRendered, ɵɵi18n, ɵɵi18nAttributes, ɵɵi18nExp, ɵɵi18nStart, ɵɵi18nEnd, ɵɵi18nApply, ɵɵi18nPostprocess, i18nConfigureLocalize as ɵi18nConfigureLocalize, ɵɵi18nLocalize, setClassMetadata as ɵsetClassMetadata, ɵɵresolveWindow, ɵɵresolveDocument, ɵɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, ɵɵsanitizeHtml, ɵɵsanitizeStyle, ɵɵdefaultStyleSanitizer, ɵɵsanitizeScript, ɵɵsanitizeUrl, ɵɵsanitizeResourceUrl, ɵɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, registerNgModuleType as ɵregisterNgModuleType, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, createInjector as ɵcreateInjector, INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$3 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map
