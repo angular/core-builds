@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+120.sha-452f121.with-local-changes
+ * @license Angular v8.0.0-rc.0+121.sha-c016e2c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4375,7 +4375,7 @@
         if (elementIndex === void 0) { elementIndex = null; }
         if (_selectedIndex !== elementIndex) {
             setSelectedIndex(elementIndex == null ? -1 : elementIndex);
-            activeDirectiveId = MIN_DIRECTIVE_ID;
+            activeDirectiveId = elementIndex == null ? 0 : MIN_DIRECTIVE_ID;
             activeDirectiveSuperClassDepthPosition = 0;
             activeDirectiveSuperClassHeight = 0;
         }
@@ -9908,6 +9908,7 @@
         instantiateAllDirectives(tView, lView, previousOrParentTNode);
         invokeDirectivesHostBindings(tView, lView, previousOrParentTNode);
         saveResolvedLocalsInData(lView, previousOrParentTNode, localRefExtractor);
+        setActiveHostElement(null);
     }
     /**
      * Takes a list of local names and indices and pushes the resolved local variable values
@@ -12138,14 +12139,6 @@
      * - elementStyleProp
      * - elementClassProp
      * - elementStylingApply
-     *
-     * Host bindings level styling instructions:
-     * - elementHostStyling
-     * - elementHostStyleMap
-     * - elementHostClassMap
-     * - elementHostStyleProp
-     * - elementHostClassProp
-     * - elementHostStylingApply
      */
     /**
      * Allocates style and class binding properties on the element during creation mode.
@@ -12164,6 +12157,9 @@
      * @param styleSanitizer An optional sanitizer function that will be used to sanitize any CSS
      *        style values that are applied to the element (during rendering).
      *
+     * Note that this will allocate the provided style/class bindings to the host element if
+     * this function is called within a host binding.
+     *
      * @codeGenApi
      */
     function ɵɵelementStyling(classBindingNames, styleBindingNames, styleSanitizer) {
@@ -12171,53 +12167,28 @@
         if (!tNode.stylingTemplate) {
             tNode.stylingTemplate = createEmptyStylingContext();
         }
-        // calling the function below ensures that the template's binding values
-        // are applied as the first set of bindings into the context. If any other
-        // styling bindings are set on the same element (by directives and/or
-        // components) then they will be applied at the end of the `elementEnd`
-        // instruction (because directives are created first before styling is
-        // executed for a new element).
-        initElementStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, DEFAULT_TEMPLATE_DIRECTIVE_INDEX);
-    }
-    /**
-     * Allocates style and class binding properties on the host element during creation mode
-     * within the host bindings function of a directive or component.
-     *
-     * This instruction is meant to be called during creation mode to register all
-     * dynamic style and class host bindings on the host element of a directive or
-     * component. Note that this is only used for binding values (see `elementHostAttrs`
-     * to learn how to assign static styling values to the host element).
-     *
-     * @param classBindingNames An array containing bindable class names.
-     *        The `elementHostClassProp` instruction refers to the class name by index in
-     *        this array (i.e. `['foo', 'bar']` means `foo=0` and `bar=1`).
-     * @param styleBindingNames An array containing bindable style properties.
-     *        The `elementHostStyleProp` instruction refers to the class name by index in
-     *        this array (i.e. `['width', 'height']` means `width=0` and `height=1`).
-     * @param styleSanitizer An optional sanitizer function that will be used to sanitize any CSS
-     *        style values that are applied to the element (during rendering).
-     *        Note that the sanitizer instance itself is tied to the provided `directive` and
-     *        will not be used if the same property is assigned in another directive or
-     *        on the element directly.
-     *
-     * @codeGenApi
-     */
-    function ɵɵelementHostStyling(classBindingNames, styleBindingNames, styleSanitizer) {
-        var tNode = getPreviousOrParentTNode();
-        if (!tNode.stylingTemplate) {
-            tNode.stylingTemplate = createEmptyStylingContext();
-        }
         var directiveStylingIndex = getActiveDirectiveStylingIndex();
-        // despite the binding being applied in a queue (below), the allocation
-        // of the directive into the context happens right away. The reason for
-        // this is to retain the ordering of the directives (which is important
-        // for the prioritization of bindings).
-        allocateOrUpdateDirectiveIntoContext(tNode.stylingTemplate, directiveStylingIndex);
-        var fns = tNode.onElementCreationFns = tNode.onElementCreationFns || [];
-        fns.push(function () {
-            initElementStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, directiveStylingIndex);
-            registerHostDirective(tNode.stylingTemplate, directiveStylingIndex);
-        });
+        if (directiveStylingIndex) {
+            // despite the binding being applied in a queue (below), the allocation
+            // of the directive into the context happens right away. The reason for
+            // this is to retain the ordering of the directives (which is important
+            // for the prioritization of bindings).
+            allocateOrUpdateDirectiveIntoContext(tNode.stylingTemplate, directiveStylingIndex);
+            var fns = tNode.onElementCreationFns = tNode.onElementCreationFns || [];
+            fns.push(function () {
+                initElementStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, directiveStylingIndex);
+                registerHostDirective(tNode.stylingTemplate, directiveStylingIndex);
+            });
+        }
+        else {
+            // calling the function below ensures that the template's binding values
+            // are applied as the first set of bindings into the context. If any other
+            // styling bindings are set on the same element (by directives and/or
+            // components) then they will be applied at the end of the `elementEnd`
+            // instruction (because directives are created first before styling is
+            // executed for a new element).
+            initElementStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, DEFAULT_TEMPLATE_DIRECTIVE_INDEX);
+        }
     }
     function initElementStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, directiveStylingIndex) {
         updateContextWithBindings(tNode.stylingTemplate, directiveStylingIndex, classBindingNames, styleBindingNames, styleSanitizer);
@@ -12235,15 +12206,15 @@
      * @param styleIndex Index of style to update. This index value refers to the
      *        index of the style in the style bindings array that was passed into
      *        `elementStyling`.
-     * @param value New value to write (falsy to remove). Note that if a directive also
-     *        attempts to write to the same binding value (via `elementHostStyleProp`)
-     *        then it will only be able to do so if the binding value assigned via
-     *        `elementStyleProp` is falsy (or doesn't exist at all).
+     * @param value New value to write (falsy to remove).
      * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
      *        Note that when a suffix is provided then the underlying sanitizer will
      *        be ignored.
      * @param forceOverride Whether or not to update the styling value immediately
      *        (despite the other bindings possibly having priority)
+     *
+     * Note that this will apply the provided style value to the host element if this function is called
+     * within a host binding.
      *
      * @codeGenApi
      */
@@ -12251,40 +12222,14 @@
         var index = getSelectedIndex();
         var valueToAdd = resolveStylePropValue(value, suffix);
         var stylingContext = getStylingContext(index, getLView());
-        updateStyleProp(stylingContext, styleIndex, valueToAdd, DEFAULT_TEMPLATE_DIRECTIVE_INDEX, forceOverride);
-    }
-    /**
-     * Update a host style binding value on the host element within a component/directive.
-     *
-     * If the style value is falsy then it will be removed from the host element
-     * (or assigned a different value depending if there are any styles placed
-     * on the same element with `elementHostStyleMap` or any static styles that
-     * are present from when the element was patched with `elementHostStyling`).
-     *
-     * Note that the styling applied to the host element once
-     * `elementHostStylingApply` is called.
-     *
-     * @param styleIndex Index of style to update. This index value refers to the
-     *        index of the style in the style bindings array that was passed into
-     *        `elementHostStyling`.
-     * @param value New value to write (falsy to remove). The value may or may not
-     *        be applied to the element depending on the template/component/directive
-     *        prioritization (see `interfaces/styling.ts`)
-     * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
-     *        Note that when a suffix is provided then the underlying sanitizer will
-     *        be ignored.
-     * @param forceOverride Whether or not to update the styling value immediately
-     *        (despite the other bindings possibly having priority)
-     *
-     * @codeGenApi
-     */
-    function ɵɵelementHostStyleProp(styleIndex, value, suffix, forceOverride) {
         var directiveStylingIndex = getActiveDirectiveStylingIndex();
-        var hostElementIndex = getSelectedIndex();
-        var stylingContext = getStylingContext(hostElementIndex, getLView());
-        var valueToAdd = resolveStylePropValue(value, suffix);
-        var args = [stylingContext, styleIndex, valueToAdd, directiveStylingIndex, forceOverride];
-        enqueueHostInstruction(stylingContext, directiveStylingIndex, updateStyleProp, args);
+        if (directiveStylingIndex) {
+            var args = [stylingContext, styleIndex, valueToAdd, directiveStylingIndex, forceOverride];
+            enqueueHostInstruction(stylingContext, directiveStylingIndex, updateStyleProp, args);
+        }
+        else {
+            updateStyleProp(stylingContext, styleIndex, valueToAdd, DEFAULT_TEMPLATE_DIRECTIVE_INDEX, forceOverride);
+        }
     }
     function resolveStylePropValue(value, suffix) {
         var valueToAdd = null;
@@ -12319,6 +12264,9 @@
      * @param forceOverride Whether or not this value will be applied regardless
      *        of where it is being set within the styling priority structure.
      *
+     * Note that this will apply the provided class value to the host element if this function
+     * is called within a host binding.
+     *
      * @codeGenApi
      */
     function ɵɵelementClassProp(classIndex, value, forceOverride) {
@@ -12326,36 +12274,15 @@
         var input = (value instanceof BoundPlayerFactory) ?
             value :
             booleanOrNull(value);
-        var stylingContext = getStylingContext(index, getLView());
-        updateClassProp(stylingContext, classIndex, input, DEFAULT_TEMPLATE_DIRECTIVE_INDEX, forceOverride);
-    }
-    /**
-     * Update a class host binding for a directive's/component's host element within
-     * the host bindings function.
-     *
-     * This instruction is meant to handle the `@HostBinding('class.foo')` case and,
-     * therefore, the class binding itself must already be allocated using
-     * `elementHostStyling` within the creation block.
-     *
-     * @param classIndex Index of class to toggle. This index value refers to the
-     *        index of the class in the class bindings array that was passed into
-     *        `elementHostStlying` (which is meant to be called before this
-     *        function is).
-     * @param value A true/false value which will turn the class on or off.
-     * @param forceOverride Whether or not this value will be applied regardless
-     *        of where it is being set within the stylings priority structure.
-     *
-     * @codeGenApi
-     */
-    function ɵɵelementHostClassProp(classIndex, value, forceOverride) {
         var directiveStylingIndex = getActiveDirectiveStylingIndex();
-        var hostElementIndex = getSelectedIndex();
-        var stylingContext = getStylingContext(hostElementIndex, getLView());
-        var input = (value instanceof BoundPlayerFactory) ?
-            value :
-            booleanOrNull(value);
-        var args = [stylingContext, classIndex, input, directiveStylingIndex, forceOverride];
-        enqueueHostInstruction(stylingContext, directiveStylingIndex, updateClassProp, args);
+        var stylingContext = getStylingContext(index, getLView());
+        if (directiveStylingIndex) {
+            var args = [stylingContext, classIndex, input, directiveStylingIndex, forceOverride];
+            enqueueHostInstruction(stylingContext, directiveStylingIndex, updateClassProp, args);
+        }
+        else {
+            updateClassProp(stylingContext, classIndex, input, DEFAULT_TEMPLATE_DIRECTIVE_INDEX, forceOverride);
+        }
     }
     function booleanOrNull(value) {
         if (typeof value === 'boolean')
@@ -12376,23 +12303,33 @@
      *        Any missing styles (that have already been applied to the element beforehand) will be
      *        removed (unset) from the element's styling.
      *
+     * Note that this will apply the provided styleMap value to the host element if this function
+     * is called within a host binding.
+     *
      * @codeGenApi
      */
     function ɵɵelementStyleMap(styles) {
         var index = getSelectedIndex();
         var lView = getLView();
         var stylingContext = getStylingContext(index, lView);
-        var tNode = getTNode(index, lView);
-        // inputs are only evaluated from a template binding into a directive, therefore,
-        // there should not be a situation where a directive host bindings function
-        // evaluates the inputs (this should only happen in the template function)
-        if (hasStyleInput(tNode) && styles !== NO_CHANGE) {
-            var initialStyles = getInitialClassNameValue(stylingContext);
-            var styleInputVal = (initialStyles.length ? (initialStyles + ' ') : '') + forceStylesAsString(styles);
-            setInputsForProperty(lView, tNode.inputs['style'], styleInputVal);
-            styles = NO_CHANGE;
+        var directiveStylingIndex = getActiveDirectiveStylingIndex();
+        if (directiveStylingIndex) {
+            var args = [stylingContext, styles, directiveStylingIndex];
+            enqueueHostInstruction(stylingContext, directiveStylingIndex, updateStyleMap, args);
         }
-        updateStyleMap(stylingContext, styles);
+        else {
+            var tNode = getTNode(index, lView);
+            // inputs are only evaluated from a template binding into a directive, therefore,
+            // there should not be a situation where a directive host bindings function
+            // evaluates the inputs (this should only happen in the template function)
+            if (hasStyleInput(tNode) && styles !== NO_CHANGE) {
+                var initialStyles = getInitialClassNameValue(stylingContext);
+                var styleInputVal = (initialStyles.length ? (initialStyles + ' ') : '') + forceStylesAsString(styles);
+                setInputsForProperty(lView, tNode.inputs['style'], styleInputVal);
+                styles = NO_CHANGE;
+            }
+            updateStyleMap(stylingContext, styles);
+        }
     }
     /**
      * Update class bindings using an object literal or class-string on an element.
@@ -12403,6 +12340,8 @@
      * classes are set to falsy then they will be removed from the element.
      *
      * Note that the styling instruction will not be applied until `elementStylingApply` is called.
+     * Note that this will the provided classMap value to the host element if this function is called
+     * within a host binding.
      *
      * @param classes A key/value map or string of CSS classes that will be added to the
      *        given element. Any missing classes (that have already been applied to the element
@@ -12414,69 +12353,24 @@
         var index = getSelectedIndex();
         var lView = getLView();
         var stylingContext = getStylingContext(index, lView);
-        var tNode = getTNode(index, lView);
-        // inputs are only evaluated from a template binding into a directive, therefore,
-        // there should not be a situation where a directive host bindings function
-        // evaluates the inputs (this should only happen in the template function)
-        if (hasClassInput(tNode) && classes !== NO_CHANGE) {
-            var initialClasses = getInitialClassNameValue(stylingContext);
-            var classInputVal = (initialClasses.length ? (initialClasses + ' ') : '') + forceClassesAsString(classes);
-            setInputsForProperty(lView, tNode.inputs['class'], classInputVal);
-            classes = NO_CHANGE;
+        var directiveStylingIndex = getActiveDirectiveStylingIndex();
+        if (directiveStylingIndex) {
+            var args = [stylingContext, classes, directiveStylingIndex];
+            enqueueHostInstruction(stylingContext, directiveStylingIndex, updateClassMap, args);
         }
-        updateClassMap(stylingContext, classes);
-    }
-    /**
-     * Update style host bindings using object literals on an element within the host
-     * bindings function for a directive/component.
-     *
-     * This instruction is meant to apply styling via the `@HostBinding('style')`
-     * host bindings for a component's or directive's host element.
-     * When styles are applied to the host element they will then be updated
-     * with respect to any other styles set with `elementHostStyleProp`. If
-     * If any styles are set to falsy then they will be removed from the element.
-     *
-     * Note that the styling instruction will not be applied until
-     * `elementHostStylingApply` is called.
-     *
-     * @param styles A key/value style map of the styles that will be applied to the given element.
-     *        Any missing styles (that have already been applied to the element beforehand) will be
-     *        removed (unset) from the element's styling.
-     *
-     * @codeGenApi
-     */
-    function ɵɵelementHostStyleMap(styles) {
-        var directiveStylingIndex = getActiveDirectiveStylingIndex();
-        var hostElementIndex = getSelectedIndex();
-        var stylingContext = getStylingContext(hostElementIndex, getLView());
-        var args = [stylingContext, styles, directiveStylingIndex];
-        enqueueHostInstruction(stylingContext, directiveStylingIndex, updateStyleMap, args);
-    }
-    /**
-     * Update class host bindings using object literals on an element within the host
-     * bindings function for a directive/component.
-     *
-     * This instruction is meant to apply styling via the `@HostBinding('class')`
-     * host bindings for a component's or directive's host element.
-     * When classes are applied to the host element they will then be updated
-     * with respect to any other classes set with `elementHostClassProp`. If
-     * any classes are set to falsy then they will be removed from the element.
-     *
-     * Note that the styling instruction will not be applied until
-     * `elementHostStylingApply` is called.
-     *
-     * @param classes A key/value map or string of CSS classes that will be added to the
-     *        given element. Any missing classes (that have already been applied to the element
-     *        beforehand) will be removed (unset) from the element's list of CSS classes.
-     *
-     * @codeGenApi
-     */
-    function ɵɵelementHostClassMap(classes) {
-        var directiveStylingIndex = getActiveDirectiveStylingIndex();
-        var hostElementIndex = getSelectedIndex();
-        var stylingContext = getStylingContext(hostElementIndex, getLView());
-        var args = [stylingContext, classes, directiveStylingIndex];
-        enqueueHostInstruction(stylingContext, directiveStylingIndex, updateClassMap, args);
+        else {
+            var tNode = getTNode(index, lView);
+            // inputs are only evaluated from a template binding into a directive, therefore,
+            // there should not be a situation where a directive host bindings function
+            // evaluates the inputs (this should only happen in the template function)
+            if (hasClassInput(tNode) && classes !== NO_CHANGE) {
+                var initialClasses = getInitialClassNameValue(stylingContext);
+                var classInputVal = (initialClasses.length ? (initialClasses + ' ') : '') + forceClassesAsString(classes);
+                setInputsForProperty(lView, tNode.inputs['class'], classInputVal);
+                classes = NO_CHANGE;
+            }
+            updateClassMap(stylingContext, classes);
+        }
     }
     /**
      * Apply all style and class binding values to the element.
@@ -12489,22 +12383,7 @@
      */
     function ɵɵelementStylingApply() {
         var index = getSelectedIndex();
-        elementStylingApplyInternal(DEFAULT_TEMPLATE_DIRECTIVE_INDEX, index);
-    }
-    /**
-     * Apply all style and class host binding values to the element.
-     *
-     * This instruction is meant to be run after both `elementHostStyleMap`
-     * `elementHostClassMap`, `elementHostStyleProp` or `elementHostClassProp`
-     * instructions have been run and will only apply styling to the host
-     * element if any styling bindings have been updated.
-     *
-     * @codeGenApi
-     */
-    function ɵɵelementHostStylingApply() {
-        elementStylingApplyInternal(getActiveDirectiveStylingIndex(), getSelectedIndex());
-    }
-    function elementStylingApplyInternal(directiveStylingIndex, index) {
+        var directiveStylingIndex = getActiveDirectiveStylingIndex() || DEFAULT_TEMPLATE_DIRECTIVE_INDEX;
         var lView = getLView();
         var tNode = getTNode(index, lView);
         // if a non-element value is being processed then we can't render values
@@ -14826,6 +14705,9 @@
         if (opts === void 0) { opts = {}; }
         ngDevMode && publishDefaultGlobalUtils();
         ngDevMode && assertComponentType(componentType);
+        // this is preemptively set to avoid having test and debug code accidentally
+        // read data from a previous application state...
+        setActiveHostElement(null);
         var rendererFactory = opts.rendererFactory || domRendererFactory3;
         var sanitizer = opts.sanitizer || null;
         var componentDef = getComponentDef(componentType);
@@ -16425,7 +16307,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-rc.0+120.sha-452f121.with-local-changes');
+    var VERSION = new Version('8.0.0-rc.0+121.sha-c016e2c.with-local-changes');
 
     /**
      * @license
@@ -22646,12 +22528,6 @@
         'ɵɵelementStyleProp': ɵɵelementStyleProp,
         'ɵɵelementStylingApply': ɵɵelementStylingApply,
         'ɵɵelementClassProp': ɵɵelementClassProp,
-        'ɵɵelementHostClassMap': ɵɵelementHostClassMap,
-        'ɵɵelementHostStyling': ɵɵelementHostStyling,
-        'ɵɵelementHostStyleMap': ɵɵelementHostStyleMap,
-        'ɵɵelementHostStyleProp': ɵɵelementHostStyleProp,
-        'ɵɵelementHostStylingApply': ɵɵelementHostStylingApply,
-        'ɵɵelementHostClassProp': ɵɵelementHostClassProp,
         'ɵɵselect': ɵɵselect,
         'ɵɵtemplate': ɵɵtemplate,
         'ɵɵtext': ɵɵtext,
@@ -28627,12 +28503,6 @@
     exports.ɵɵelementStylingApply = ɵɵelementStylingApply;
     exports.ɵɵelementClassProp = ɵɵelementClassProp;
     exports.ɵɵelementHostAttrs = ɵɵelementHostAttrs;
-    exports.ɵɵelementHostClassMap = ɵɵelementHostClassMap;
-    exports.ɵɵelementHostStyleMap = ɵɵelementHostStyleMap;
-    exports.ɵɵelementHostStyling = ɵɵelementHostStyling;
-    exports.ɵɵelementHostStyleProp = ɵɵelementHostStyleProp;
-    exports.ɵɵelementHostClassProp = ɵɵelementHostClassProp;
-    exports.ɵɵelementHostStylingApply = ɵɵelementHostStylingApply;
     exports.ɵɵselect = ɵɵselect;
     exports.ɵɵtextBinding = ɵɵtextBinding;
     exports.ɵɵtemplate = ɵɵtemplate;
