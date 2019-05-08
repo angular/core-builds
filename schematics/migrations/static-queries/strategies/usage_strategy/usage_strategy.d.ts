@@ -19,7 +19,7 @@ export declare class QueryUsageStrategy implements TimingStrategy {
     private classMetadata;
     private typeChecker;
     constructor(classMetadata: ClassMetadataMap, typeChecker: ts.TypeChecker);
-    setup(): boolean;
+    setup(): void;
     /**
      * Analyzes the usage of the given query and determines the query timing based
      * on the current usage of the query.
