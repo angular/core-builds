@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+97.sha-be8fbac.with-local-changes
+ * @license Angular v8.0.0-rc.0+102.sha-392473e.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1241,7 +1241,7 @@
                         // Can't happen - either hasAProvider will be false, or one of the providers will be set.
                         throw new Error("Unreachable state.");
                     }
-                    def = getCompilerFacade().compileInjectable(angularCoreDiEnv, "ng://" + type.name + "/ngInjectableDef.js", compilerMeta);
+                    def = getCompilerFacade().compileInjectable(angularCoreDiEnv, "ng:///" + type.name + "/ngInjectableDef.js", compilerMeta);
                 }
                 return def;
             },
@@ -16752,7 +16752,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-rc.0+97.sha-be8fbac.with-local-changes');
+    var VERSION = new Version('8.0.0-rc.0+102.sha-392473e.with-local-changes');
 
     /**
      * @license
@@ -23118,7 +23118,7 @@
             configurable: true,
             get: function () {
                 if (ngModuleDef === null) {
-                    ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, "ng://" + moduleType.name + "/ngModuleDef.js", {
+                    ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, "ng:///" + moduleType.name + "/ngModuleDef.js", {
                         type: moduleType,
                         bootstrap: flatten(ngModule.bootstrap || EMPTY_ARRAY$4, resolveForwardRef),
                         declarations: declarations.map(resolveForwardRef),
@@ -23151,7 +23151,7 @@
                             (ngModule.exports || EMPTY_ARRAY$4).map(resolveForwardRef),
                         ],
                     };
-                    ngInjectorDef = getCompilerFacade().compileInjector(angularCoreEnv, "ng://" + moduleType.name + "/ngInjectorDef.js", meta);
+                    ngInjectorDef = getCompilerFacade().compileInjector(angularCoreEnv, "ng:///" + moduleType.name + "/ngInjectorDef.js", meta);
                 }
                 return ngInjectorDef;
             },
@@ -23524,7 +23524,7 @@
             get: function () {
                 if (ngDirectiveDef === null) {
                     var name_1 = type && type.name;
-                    var sourceMapUrl = "ng://" + name_1 + "/ngDirectiveDef.js";
+                    var sourceMapUrl = "ng:///" + name_1 + "/ngDirectiveDef.js";
                     var compiler = getCompilerFacade();
                     var facade = directiveMetadata(type, directive);
                     facade.typeSourceSpan = compiler.createParseSourceSpan('Directive', name_1, sourceMapUrl);
@@ -23713,7 +23713,7 @@
                 if (ngPipeDef === null) {
                     var typeName = type.name;
                     ngPipeDef =
-                        getCompilerFacade().compilePipe(angularCoreEnv, "ng://" + typeName + "/ngPipeDef.js", {
+                        getCompilerFacade().compilePipe(angularCoreEnv, "ng:///" + typeName + "/ngPipeDef.js", {
                             type: type,
                             typeArgumentCount: 0,
                             name: typeName,
