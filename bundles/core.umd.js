@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+104.sha-8ced321.with-local-changes
+ * @license Angular v8.0.0-rc.0+113.sha-29786e8.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3322,6 +3322,8 @@
             rendererDestroyNode: 0,
             rendererMoveNode: 0,
             rendererRemoveNode: 0,
+            rendererAppendChild: 0,
+            rendererInsertBefore: 0,
             rendererCreateComment: 0,
             styleMap: 0,
             styleMapCacheMiss: 0,
@@ -12015,6 +12017,7 @@
      * actual renderer being used.
      */
     function nativeInsertBefore(renderer, parent, child, beforeNode) {
+        ngDevMode && ngDevMode.rendererInsertBefore++;
         if (isProceduralRenderer(renderer)) {
             renderer.insertBefore(parent, child, beforeNode);
         }
@@ -12023,6 +12026,7 @@
         }
     }
     function nativeAppendChild(renderer, parent, child) {
+        ngDevMode && ngDevMode.rendererAppendChild++;
         if (isProceduralRenderer(renderer)) {
             renderer.appendChild(parent, child);
         }
@@ -12549,7 +12553,6 @@
      *
      * Note that the styling element is updated as part of `elementStylingApply`.
      *
-     * @param index Index of the element's with which styling is associated.
      * @param styleIndex Index of style to update. This index value refers to the
      *        index of the style in the style bindings array that was passed into
      *        `elementStyling`.
@@ -12565,7 +12568,8 @@
      *
      * @codeGenApi
      */
-    function ɵɵelementStyleProp(index, styleIndex, value, suffix, forceOverride) {
+    function ɵɵelementStyleProp(styleIndex, value, suffix, forceOverride) {
+        var index = getSelectedIndex();
         var valueToAdd = resolveStylePropValue(value, suffix);
         var stylingContext = getStylingContext(index, getLView());
         updateStyleProp(stylingContext, styleIndex, valueToAdd, DEFAULT_TEMPLATE_DIRECTIVE_INDEX, forceOverride);
@@ -12628,7 +12632,6 @@
      * therefore, the class binding itself must already be allocated using
      * `elementStyling` within the creation block.
      *
-     * @param index Index of the element's with which styling is associated.
      * @param classIndex Index of class to toggle. This index value refers to the
      *        index of the class in the class bindings array that was passed into
      *        `elementStyling` (which is meant to be called before this
@@ -12639,7 +12642,8 @@
      *
      * @codeGenApi
      */
-    function ɵɵelementClassProp(index, classIndex, value, forceOverride) {
+    function ɵɵelementClassProp(classIndex, value, forceOverride) {
+        var index = getSelectedIndex();
         var input = (value instanceof BoundPlayerFactory) ?
             value :
             booleanOrNull(value);
@@ -12689,14 +12693,14 @@
      *
      * Note that the styling instruction will not be applied until `elementStylingApply` is called.
      *
-     * @param index Index of the element's with which styling is associated.
      * @param styles A key/value style map of the styles that will be applied to the given element.
      *        Any missing styles (that have already been applied to the element beforehand) will be
      *        removed (unset) from the element's styling.
      *
      * @codeGenApi
      */
-    function ɵɵelementStyleMap(index, styles) {
+    function ɵɵelementStyleMap(styles) {
+        var index = getSelectedIndex();
         var lView = getLView();
         var stylingContext = getStylingContext(index, lView);
         var tNode = getTNode(index, lView);
@@ -12721,14 +12725,14 @@
      *
      * Note that the styling instruction will not be applied until `elementStylingApply` is called.
      *
-     * @param index Index of the element's with which styling is associated.
      * @param classes A key/value map or string of CSS classes that will be added to the
      *        given element. Any missing classes (that have already been applied to the element
      *        beforehand) will be removed (unset) from the element's list of CSS classes.
      *
      * @codeGenApi
      */
-    function ɵɵelementClassMap(index, classes) {
+    function ɵɵelementClassMap(classes) {
+        var index = getSelectedIndex();
         var lView = getLView();
         var stylingContext = getStylingContext(index, lView);
         var tNode = getTNode(index, lView);
@@ -12802,11 +12806,10 @@
      * `elementStyleProp` or `elementClassProp` instructions have been run and will
      * only apply styling to the element if any styling bindings have been updated.
      *
-     * @param index Index of the element's with which styling is associated.
-     *
      * @codeGenApi
      */
-    function ɵɵelementStylingApply(index) {
+    function ɵɵelementStylingApply() {
+        var index = getSelectedIndex();
         elementStylingApplyInternal(DEFAULT_TEMPLATE_DIRECTIVE_INDEX, index);
     }
     /**
@@ -16752,7 +16755,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-rc.0+104.sha-8ced321.with-local-changes');
+    var VERSION = new Version('8.0.0-rc.0+113.sha-29786e8.with-local-changes');
 
     /**
      * @license

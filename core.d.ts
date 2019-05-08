@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+104.sha-8ced321.with-local-changes
+ * @license Angular v8.0.0-rc.0+113.sha-29786e8.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11320,14 +11320,13 @@ export declare function ɵɵelementAttribute(index: number, name: string, value:
  *
  * Note that the styling instruction will not be applied until `elementStylingApply` is called.
  *
- * @param index Index of the element's with which styling is associated.
  * @param classes A key/value map or string of CSS classes that will be added to the
  *        given element. Any missing classes (that have already been applied to the element
  *        beforehand) will be removed (unset) from the element's list of CSS classes.
  *
  * @codeGenApi
  */
-export declare function ɵɵelementClassMap(index: number, classes: {
+export declare function ɵɵelementClassMap(classes: {
     [styleName: string]: any;
 } | ɵNO_CHANGE | string | null): void;
 
@@ -11338,7 +11337,6 @@ export declare function ɵɵelementClassMap(index: number, classes: {
  * therefore, the class binding itself must already be allocated using
  * `elementStyling` within the creation block.
  *
- * @param index Index of the element's with which styling is associated.
  * @param classIndex Index of class to toggle. This index value refers to the
  *        index of the class in the class bindings array that was passed into
  *        `elementStyling` (which is meant to be called before this
@@ -11349,7 +11347,7 @@ export declare function ɵɵelementClassMap(index: number, classes: {
  *
  * @codeGenApi
  */
-export declare function ɵɵelementClassProp(index: number, classIndex: number, value: boolean | ɵPlayerFactory, forceOverride?: boolean): void;
+export declare function ɵɵelementClassProp(classIndex: number, value: boolean | ɵPlayerFactory, forceOverride?: boolean): void;
 
 /**
  * Mark the end of the <ng-container>.
@@ -11599,14 +11597,13 @@ export declare function ɵɵelementStart(index: number, name: string, attrs?: TA
  *
  * Note that the styling instruction will not be applied until `elementStylingApply` is called.
  *
- * @param index Index of the element's with which styling is associated.
  * @param styles A key/value style map of the styles that will be applied to the given element.
  *        Any missing styles (that have already been applied to the element beforehand) will be
  *        removed (unset) from the element's styling.
  *
  * @codeGenApi
  */
-export declare function ɵɵelementStyleMap(index: number, styles: {
+export declare function ɵɵelementStyleMap(styles: {
     [styleName: string]: any;
 } | ɵNO_CHANGE | null): void;
 
@@ -11620,7 +11617,6 @@ export declare function ɵɵelementStyleMap(index: number, styles: {
  *
  * Note that the styling element is updated as part of `elementStylingApply`.
  *
- * @param index Index of the element's with which styling is associated.
  * @param styleIndex Index of style to update. This index value refers to the
  *        index of the style in the style bindings array that was passed into
  *        `elementStyling`.
@@ -11636,7 +11632,7 @@ export declare function ɵɵelementStyleMap(index: number, styles: {
  *
  * @codeGenApi
  */
-export declare function ɵɵelementStyleProp(index: number, styleIndex: number, value: string | number | String | ɵPlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
+export declare function ɵɵelementStyleProp(styleIndex: number, value: string | number | String | ɵPlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
 
 /**
  * Allocates style and class binding properties on the element during creation mode.
@@ -11666,11 +11662,9 @@ export declare function ɵɵelementStyling(classBindingNames?: string[] | null, 
  * `elementStyleProp` or `elementClassProp` instructions have been run and will
  * only apply styling to the element if any styling bindings have been updated.
  *
- * @param index Index of the element's with which styling is associated.
- *
  * @codeGenApi
  */
-export declare function ɵɵelementStylingApply(index: number): void;
+export declare function ɵɵelementStylingApply(): void;
 
 /**
  * Marks the end of an embedded view.
