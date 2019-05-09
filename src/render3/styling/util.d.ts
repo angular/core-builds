@@ -48,7 +48,7 @@ export declare function allocStylingContext(element: RElement | null, templateSt
  * every style declaration such as `<div style="color: red">` would result `StyleContext`
  * which would create unnecessary memory pressure.
  *
- * @param index Index of the style allocation. See: `elementStyling`.
+ * @param index Index of the style allocation. See: `styling`.
  * @param viewData The view to search for the styling context
  */
 export declare function getStylingContextFromLView(index: number, viewData: LView): StylingContext;
