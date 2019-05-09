@@ -36,7 +36,9 @@ export declare class NgQueryResolveVisitor {
     constructor(typeChecker: ts.TypeChecker);
     visitNode(node: ts.Node): void;
     private visitPropertyDeclaration;
+    private visitAccessorDeclaration;
     private visitClassDeclaration;
+    private _recordQueryDeclaration;
     private _recordClassInputSetters;
     private _recordClassInheritances;
     private _getClassMetadata;
