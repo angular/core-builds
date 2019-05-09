@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+121.sha-c016e2c.with-local-changes
+ * @license Angular v8.0.0-rc.0+124.sha-d70b1ff.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5439,7 +5439,7 @@
      * every style declaration such as `<div style="color: red">` would result `StyleContext`
      * which would create unnecessary memory pressure.
      *
-     * @param index Index of the style allocation. See: `elementStyling`.
+     * @param index Index of the style allocation. See: `styling`.
      * @param viewData The view to search for the styling context
      */
     function getStylingContextFromLView(index, viewData) {
@@ -8218,8 +8218,8 @@
         var multiClassesStartIndex = multiStylesStartIndex + stylesOffset;
         // because we're inserting more bindings into the context, this means that the
         // binding values need to be referenced the singlePropOffsetValues array so that
-        // the template/directive can easily find them inside of the `elementStyleProp`
-        // and the `elementClassProp` functions without iterating through the entire context.
+        // the template/directive can easily find them inside of the `styleProp`
+        // and the `classProp` functions without iterating through the entire context.
         // The first step to setting up these reference points is to mark how many bindings
         // are being added. Even if these bindings already exist in the context, the directive
         // or template code will still call them unknowingly. Therefore the total values need
@@ -12454,12 +12454,12 @@
      * The instructions present in this file are:
      *
      * Template level styling instructions:
-     * - elementStyling
-     * - elementStyleMap
-     * - elementClassMap
-     * - elementStyleProp
-     * - elementClassProp
-     * - elementStylingApply
+     * - styling
+     * - styleMap
+     * - classMap
+     * - styleProp
+     * - classProp
+     * - stylingApply
      */
     /**
      * Allocates style and class binding properties on the element during creation mode.
@@ -12470,10 +12470,10 @@
      * values to an element).
      *
      * @param classBindingNames An array containing bindable class names.
-     *        The `elementClassProp` instruction refers to the class name by index in
+     *        The `classProp` instruction refers to the class name by index in
      *        this array (i.e. `['foo', 'bar']` means `foo=0` and `bar=1`).
      * @param styleBindingNames An array containing bindable style properties.
-     *        The `elementStyleProp` instruction refers to the class name by index in
+     *        The `styleProp` instruction refers to the class name by index in
      *        this array (i.e. `['width', 'height']` means `width=0` and `height=1`).
      * @param styleSanitizer An optional sanitizer function that will be used to sanitize any CSS
      *        style values that are applied to the element (during rendering).
@@ -12483,7 +12483,7 @@
      *
      * @codeGenApi
      */
-    function ɵɵelementStyling(classBindingNames, styleBindingNames, styleSanitizer) {
+    function ɵɵstyling(classBindingNames, styleBindingNames, styleSanitizer) {
         var tNode = getPreviousOrParentTNode();
         if (!tNode.stylingTemplate) {
             tNode.stylingTemplate = createEmptyStylingContext();
@@ -12497,7 +12497,7 @@
             allocateOrUpdateDirectiveIntoContext(tNode.stylingTemplate, directiveStylingIndex);
             var fns = tNode.onElementCreationFns = tNode.onElementCreationFns || [];
             fns.push(function () {
-                initElementStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, directiveStylingIndex);
+                initstyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, directiveStylingIndex);
                 registerHostDirective(tNode.stylingTemplate, directiveStylingIndex);
             });
         }
@@ -12508,10 +12508,10 @@
             // components) then they will be applied at the end of the `elementEnd`
             // instruction (because directives are created first before styling is
             // executed for a new element).
-            initElementStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, DEFAULT_TEMPLATE_DIRECTIVE_INDEX);
+            initstyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, DEFAULT_TEMPLATE_DIRECTIVE_INDEX);
         }
     }
-    function initElementStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, directiveStylingIndex) {
+    function initstyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, directiveStylingIndex) {
         updateContextWithBindings(tNode.stylingTemplate, directiveStylingIndex, classBindingNames, styleBindingNames, styleSanitizer);
     }
     /**
@@ -12519,14 +12519,14 @@
      *
      * If the style value is falsy then it will be removed from the element
      * (or assigned a different value depending if there are any styles placed
-     * on the element with `elementStyleMap` or any static styles that are
-     * present from when the element was created with `elementStyling`).
+     * on the element with `styleMap` or any static styles that are
+     * present from when the element was created with `styling`).
      *
-     * Note that the styling element is updated as part of `elementStylingApply`.
+     * Note that the styling element is updated as part of `stylingApply`.
      *
      * @param styleIndex Index of style to update. This index value refers to the
      *        index of the style in the style bindings array that was passed into
-     *        `elementStyling`.
+     *        `styling`.
      * @param value New value to write (falsy to remove).
      * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
      *        Note that when a suffix is provided then the underlying sanitizer will
@@ -12539,7 +12539,7 @@
      *
      * @codeGenApi
      */
-    function ɵɵelementStyleProp(styleIndex, value, suffix, forceOverride) {
+    function ɵɵstyleProp(styleIndex, value, suffix, forceOverride) {
         var index = getSelectedIndex();
         var valueToAdd = resolveStylePropValue(value, suffix);
         var stylingContext = getStylingContext(index, getLView());
@@ -12575,11 +12575,11 @@
      *
      * This instruction is meant to handle the `[class.foo]="exp"` case and,
      * therefore, the class binding itself must already be allocated using
-     * `elementStyling` within the creation block.
+     * `styling` within the creation block.
      *
      * @param classIndex Index of class to toggle. This index value refers to the
      *        index of the class in the class bindings array that was passed into
-     *        `elementStyling` (which is meant to be called before this
+     *        `styling` (which is meant to be called before this
      *        function is).
      * @param value A true/false value which will turn the class on or off.
      * @param forceOverride Whether or not this value will be applied regardless
@@ -12590,7 +12590,7 @@
      *
      * @codeGenApi
      */
-    function ɵɵelementClassProp(classIndex, value, forceOverride) {
+    function ɵɵclassProp(classIndex, value, forceOverride) {
         var index = getSelectedIndex();
         var input = (value instanceof BoundPlayerFactory) ?
             value :
@@ -12615,10 +12615,10 @@
      *
      * This instruction is meant to apply styling via the `[style]="exp"` template bindings.
      * When styles are applied to the element they will then be updated with respect to
-     * any styles/classes set via `elementStyleProp`. If any styles are set to falsy
+     * any styles/classes set via `styleProp`. If any styles are set to falsy
      * then they will be removed from the element.
      *
-     * Note that the styling instruction will not be applied until `elementStylingApply` is called.
+     * Note that the styling instruction will not be applied until `stylingApply` is called.
      *
      * @param styles A key/value style map of the styles that will be applied to the given element.
      *        Any missing styles (that have already been applied to the element beforehand) will be
@@ -12629,7 +12629,7 @@
      *
      * @codeGenApi
      */
-    function ɵɵelementStyleMap(styles) {
+    function ɵɵstyleMap(styles) {
         var index = getSelectedIndex();
         var lView = getLView();
         var stylingContext = getStylingContext(index, lView);
@@ -12657,10 +12657,10 @@
      *
      * This instruction is meant to apply styling via the `[class]="exp"` template bindings.
      * When classes are applied to the element they will then be updated with
-     * respect to any styles/classes set via `elementClassProp`. If any
+     * respect to any styles/classes set via `classProp`. If any
      * classes are set to falsy then they will be removed from the element.
      *
-     * Note that the styling instruction will not be applied until `elementStylingApply` is called.
+     * Note that the styling instruction will not be applied until `stylingApply` is called.
      * Note that this will the provided classMap value to the host element if this function is called
      * within a host binding.
      *
@@ -12670,7 +12670,7 @@
      *
      * @codeGenApi
      */
-    function ɵɵelementClassMap(classes) {
+    function ɵɵclassMap(classes) {
         var index = getSelectedIndex();
         var lView = getLView();
         var stylingContext = getStylingContext(index, lView);
@@ -12696,13 +12696,13 @@
     /**
      * Apply all style and class binding values to the element.
      *
-     * This instruction is meant to be run after `elementStyleMap`, `elementClassMap`,
-     * `elementStyleProp` or `elementClassProp` instructions have been run and will
+     * This instruction is meant to be run after `styleMap`, `classMap`,
+     * `styleProp` or `classProp` instructions have been run and will
      * only apply styling to the element if any styling bindings have been updated.
      *
      * @codeGenApi
      */
-    function ɵɵelementStylingApply() {
+    function ɵɵstylingApply() {
         var index = getSelectedIndex();
         var directiveStylingIndex = getActiveDirectiveStylingIndex() || DEFAULT_TEMPLATE_DIRECTIVE_INDEX;
         var lView = getLView();
@@ -16637,7 +16637,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-rc.0+121.sha-c016e2c.with-local-changes');
+    var VERSION = new Version('8.0.0-rc.0+124.sha-d70b1ff.with-local-changes');
 
     /**
      * @license
@@ -22885,12 +22885,12 @@
         'ɵɵloadContentQuery': ɵɵloadContentQuery,
         'ɵɵreference': ɵɵreference,
         'ɵɵelementHostAttrs': ɵɵelementHostAttrs,
-        'ɵɵelementClassMap': ɵɵelementClassMap,
-        'ɵɵelementStyling': ɵɵelementStyling,
-        'ɵɵelementStyleMap': ɵɵelementStyleMap,
-        'ɵɵelementStyleProp': ɵɵelementStyleProp,
-        'ɵɵelementStylingApply': ɵɵelementStylingApply,
-        'ɵɵelementClassProp': ɵɵelementClassProp,
+        'ɵɵclassMap': ɵɵclassMap,
+        'ɵɵstyling': ɵɵstyling,
+        'ɵɵstyleMap': ɵɵstyleMap,
+        'ɵɵstyleProp': ɵɵstyleProp,
+        'ɵɵstylingApply': ɵɵstylingApply,
+        'ɵɵclassProp': ɵɵclassProp,
         'ɵɵselect': ɵɵselect,
         'ɵɵtemplate': ɵɵtemplate,
         'ɵɵtext': ɵɵtext,
@@ -29005,12 +29005,12 @@
     exports.ɵɵelementAttribute = ɵɵelementAttribute;
     exports.ɵɵelementContainerStart = ɵɵelementContainerStart;
     exports.ɵɵelementContainerEnd = ɵɵelementContainerEnd;
-    exports.ɵɵelementStyling = ɵɵelementStyling;
-    exports.ɵɵelementStyleMap = ɵɵelementStyleMap;
-    exports.ɵɵelementClassMap = ɵɵelementClassMap;
-    exports.ɵɵelementStyleProp = ɵɵelementStyleProp;
-    exports.ɵɵelementStylingApply = ɵɵelementStylingApply;
-    exports.ɵɵelementClassProp = ɵɵelementClassProp;
+    exports.ɵɵstyling = ɵɵstyling;
+    exports.ɵɵstyleMap = ɵɵstyleMap;
+    exports.ɵɵclassMap = ɵɵclassMap;
+    exports.ɵɵstyleProp = ɵɵstyleProp;
+    exports.ɵɵstylingApply = ɵɵstylingApply;
+    exports.ɵɵclassProp = ɵɵclassProp;
     exports.ɵɵelementHostAttrs = ɵɵelementHostAttrs;
     exports.ɵɵselect = ɵɵselect;
     exports.ɵɵtextBinding = ɵɵtextBinding;
