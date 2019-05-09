@@ -19,17 +19,10 @@ export declare enum QueryType {
     ContentChild = 1
 }
 export interface NgQueryDefinition {
-    /** Name of the query. Set to "null" in case the query name is not statically analyzable. */
-    name: string | null;
     /** Type of the query definition. */
     type: QueryType;
-    /** Node that declares this query. */
-    node: ts.Node;
-    /**
-     * Property declaration that refers to the query value. For accessors there
-     * is no property that is guaranteed to access the query value.
-     */
-    property: ts.PropertyDeclaration | null;
+    /** Property that declares the query. */
+    property: ts.PropertyDeclaration;
     /** Decorator that declares this as a query. */
     decorator: NgDecorator;
     /** Class declaration that holds this query. */
