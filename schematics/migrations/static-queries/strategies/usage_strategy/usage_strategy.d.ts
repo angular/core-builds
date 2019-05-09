@@ -25,4 +25,9 @@ export declare class QueryUsageStrategy implements TimingStrategy {
      * on the current usage of the query.
      */
     detectTiming(query: NgQueryDefinition): TimingResult;
+    /**
+     * Checks whether a given query is used statically within the given class, its super
+     * class or derived classes.
+     */
+    private analyzeQueryUsage;
 }
