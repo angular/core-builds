@@ -15,6 +15,15 @@ export declare const DELEGATE_CTOR: RegExp;
 export declare const INHERITED_CLASS: RegExp;
 export declare const INHERITED_CLASS_WITH_CTOR: RegExp;
 export declare const INHERITED_CLASS_WITH_DELEGATE_CTOR: RegExp;
+/**
+ * Determine whether a stringified type is a class which delegates its constructor
+ * to its parent.
+ *
+ * This is not trivial since compiled code can actually contain a constructor function
+ * even if the original source code did not. For instance, when the child class contains
+ * an initialized instance property.
+ */
+export declare function isDelegateCtor(typeStr: string): boolean;
 export declare class ReflectionCapabilities implements PlatformReflectionCapabilities {
     private _reflect;
     constructor(reflect?: any);
