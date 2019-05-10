@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+136.sha-9abf114.with-local-changes
+ * @license Angular v8.0.0-rc.0+139.sha-1f2b39a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -869,6 +869,18 @@ const DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*arguments\
 const INHERITED_CLASS = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{/;
 const INHERITED_CLASS_WITH_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{[\s\S]*constructor\s*\(/;
 const INHERITED_CLASS_WITH_DELEGATE_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{[\s\S]*constructor\s*\(\)\s*{\s+super\(\.\.\.arguments\)/;
+/**
+ * Determine whether a stringified type is a class which delegates its constructor
+ * to its parent.
+ *
+ * This is not trivial since compiled code can actually contain a constructor function
+ * even if the original source code did not. For instance, when the child class contains
+ * an initialized instance property.
+ */
+function isDelegateCtor(typeStr) {
+    return DELEGATE_CTOR.test(typeStr) || INHERITED_CLASS_WITH_DELEGATE_CTOR.test(typeStr) ||
+        (INHERITED_CLASS.test(typeStr) && !INHERITED_CLASS_WITH_CTOR.test(typeStr));
+}
 class ReflectionCapabilities {
     constructor(reflect) { this._reflect = reflect || _global['Reflect']; }
     isReflectionEnabled() { return true; }
@@ -910,8 +922,7 @@ class ReflectionCapabilities {
         // This also helps to work around for https://github.com/Microsoft/TypeScript/issues/12439
         // that sets 'design:paramtypes' to []
         // if a class inherits from another class but has no ctor declared itself.
-        if (DELEGATE_CTOR.exec(typeStr) || INHERITED_CLASS_WITH_DELEGATE_CTOR.exec(typeStr) ||
-            (INHERITED_CLASS.exec(typeStr) && !INHERITED_CLASS_WITH_CTOR.exec(typeStr))) {
+        if (isDelegateCtor(typeStr)) {
             return null;
         }
         // Prefer the direct API.
@@ -20566,7 +20577,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-rc.0+136.sha-9abf114.with-local-changes');
+const VERSION = new Version('8.0.0-rc.0+139.sha-1f2b39a.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
