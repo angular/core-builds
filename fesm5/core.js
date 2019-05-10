@@ -1,5 +1,5 @@
 /**
- * @license Angular v7.2.14+17.sha-b4a2cbb.with-local-changes
+ * @license Angular v7.2.15+1.sha-b62a9d0.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10744,7 +10744,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('7.2.14+17.sha-b4a2cbb.with-local-changes');
+var VERSION = new Version('7.2.15+1.sha-b62a9d0.with-local-changes');
 
 /**
  * @license
