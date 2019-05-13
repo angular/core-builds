@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+146.sha-fbff03b.with-local-changes
+ * @license Angular v8.0.0-rc.0+161.sha-197584d.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4347,6 +4347,7 @@ function ɵɵdefineNgModule(def) {
         exports: def.exports || EMPTY_ARRAY$2,
         transitiveCompileScopes: null,
         schemas: def.schemas || null,
+        id: def.id || null,
     };
     return (/** @type {?} */ (res));
 }
@@ -20577,7 +20578,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-rc.0+146.sha-fbff03b.with-local-changes');
+const VERSION = new Version('8.0.0-rc.0+161.sha-197584d.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -27138,6 +27139,60 @@ function ɵɵi18nLocalize(input, placeholders = {}) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
+/**
+ * Map of module-id to the corresponding NgModule.
+ * - In pre Ivy we track NgModuleFactory,
+ * - In post Ivy we track the NgModuleType
+ * @type {?}
+ */
+const modules = new Map();
+/**
+ * Registers a loaded module. Should only be called from generated NgModuleFactory code.
+ * \@publicApi
+ * @param {?} id
+ * @param {?} factory
+ * @return {?}
+ */
+function registerModuleFactory(id, factory) {
+    /** @type {?} */
+    const existing = (/** @type {?} */ (modules.get(id)));
+    assertSameOrNotExisting(id, existing && existing.moduleType, factory.moduleType);
+    modules.set(id, factory);
+}
+/**
+ * @param {?} id
+ * @param {?} type
+ * @param {?} incoming
+ * @return {?}
+ */
+function assertSameOrNotExisting(id, type, incoming) {
+    if (type && type !== incoming) {
+        throw new Error(`Duplicate module registered for ${id} - ${stringify(type)} vs ${stringify(type.name)}`);
+    }
+}
+/**
+ * @param {?} id
+ * @param {?} ngModuleType
+ * @return {?}
+ */
+function registerNgModuleType(id, ngModuleType) {
+    /** @type {?} */
+    const existing = (/** @type {?} */ (modules.get(id)));
+    assertSameOrNotExisting(id, existing, ngModuleType);
+    modules.set(id, ngModuleType);
+}
+/**
+ * @param {?} id
+ * @return {?}
+ */
+function getRegisteredNgModuleType(id) {
+    return modules.get(id);
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
 /** @type {?} */
 const COMPONENT_FACTORY_RESOLVER = {
     provide: ComponentFactoryResolver,
@@ -27232,7 +27287,15 @@ class NgModuleFactory$1 extends NgModuleFactory {
      * @return {?}
      */
     create(parentInjector) {
-        return new NgModuleRef$1(this.moduleType, parentInjector);
+        /** @type {?} */
+        const moduleType = this.moduleType;
+        /** @type {?} */
+        const moduleRef = new NgModuleRef$1(moduleType, parentInjector);
+        /** @type {?} */
+        /** @nocollapse */ const ngModuleDef = getNgModuleDef(moduleType);
+        ngModuleDef && ngModuleDef.id &&
+            registerNgModuleType(ngModuleDef.id, (/** @type {?} */ (moduleType)));
+        return moduleRef;
     }
 }
 
@@ -28707,100 +28770,6 @@ function ɵɵtemplateRefExtractor(tNode, currentView) {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
- * Used to load ng module factories.
- *
- * \@publicApi
- * @deprecated the `string` form of `loadChildren` is deprecated, and `NgModuleFactoryLoader` is
- * part of its implementation. See `LoadChildren` for more details.
- * @abstract
- */
-class NgModuleFactoryLoader {
-}
-/**
- * Map of module-id to the corresponding NgModule.
- * - In pre Ivy we track NgModuleFactory,
- * - In post Ivy we track the NgModuleType
- * @type {?}
- */
-const modules = new Map();
-/**
- * Registers a loaded module. Should only be called from generated NgModuleFactory code.
- * \@publicApi
- * @param {?} id
- * @param {?} factory
- * @return {?}
- */
-function registerModuleFactory(id, factory) {
-    /** @type {?} */
-    const existing = (/** @type {?} */ (modules.get(id)));
-    assertSameOrNotExisting(id, existing && existing.moduleType, factory.moduleType);
-    modules.set(id, factory);
-}
-/**
- * @param {?} id
- * @param {?} type
- * @param {?} incoming
- * @return {?}
- */
-function assertSameOrNotExisting(id, type, incoming) {
-    if (type && type !== incoming) {
-        throw new Error(`Duplicate module registered for ${id} - ${stringify(type)} vs ${stringify(type.name)}`);
-    }
-}
-/**
- * @param {?} id
- * @param {?} ngModuleType
- * @return {?}
- */
-function registerNgModuleType(id, ngModuleType) {
-    /** @type {?} */
-    const existing = (/** @type {?} */ (modules.get(id)));
-    assertSameOrNotExisting(id, existing, ngModuleType);
-    modules.set(id, ngModuleType);
-}
-/**
- * @param {?} id
- * @return {?}
- */
-function getModuleFactory__PRE_R3__(id) {
-    /** @type {?} */
-    const factory = (/** @type {?} */ (modules.get(id)));
-    if (!factory)
-        throw noModuleError(id);
-    return factory;
-}
-/**
- * @param {?} id
- * @return {?}
- */
-function getModuleFactory__POST_R3__(id) {
-    /** @type {?} */
-    const type = (/** @type {?} */ (modules.get(id)));
-    if (!type)
-        throw noModuleError(id);
-    return new NgModuleFactory$1(type);
-}
-/**
- * Returns the NgModuleFactory with the given id, if it exists and has been loaded.
- * Factories for modules that do not specify an `id` cannot be retrieved. Throws if the module
- * cannot be found.
- * \@publicApi
- * @type {?}
- */
-const getModuleFactory = getModuleFactory__PRE_R3__;
-/**
- * @param {?} id
- * @return {?}
- */
-function noModuleError(id) {
-    return new Error(`No module with ID ${id} loaded`);
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
  * A mapping of the \@angular/core API surface used in generated expressions to the actual symbols.
  *
  * This should be kept up to date with the public exports of \@angular/core.
@@ -28926,7 +28895,6 @@ const angularCoreEnv = {
     'ɵɵsanitizeScript': ɵɵsanitizeScript,
     'ɵɵsanitizeUrl': ɵɵsanitizeUrl,
     'ɵɵsanitizeUrlOrResourceUrl': ɵɵsanitizeUrlOrResourceUrl,
-    'ɵregisterNgModuleType': registerNgModuleType,
 };
 
 /**
@@ -29032,14 +29000,12 @@ function compileNgModuleDefs(moduleType, ngModule) {
                         .map(expandModuleWithProviders),
                     emitInline: true,
                     schemas: ngModule.schemas ? flatten(ngModule.schemas) : null,
+                    id: ngModule.id || null,
                 });
             }
             return ngModuleDef;
         })
     });
-    if (ngModule.id) {
-        registerNgModuleType(ngModule.id, moduleType);
-    }
     /** @type {?} */
     /** @nocollapse */ let ngInjectorDef = null;
     Object.defineProperty(moduleType, NG_INJECTOR_DEF, {
@@ -32264,6 +32230,58 @@ function _mergeArrays(parts) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Used to load ng module factories.
+ *
+ * \@publicApi
+ * @deprecated the `string` form of `loadChildren` is deprecated, and `NgModuleFactoryLoader` is
+ * part of its implementation. See `LoadChildren` for more details.
+ * @abstract
+ */
+class NgModuleFactoryLoader {
+}
+/**
+ * @param {?} id
+ * @return {?}
+ */
+function getModuleFactory__PRE_R3__(id) {
+    /** @type {?} */
+    const factory = (/** @type {?} */ (getRegisteredNgModuleType(id)));
+    if (!factory)
+        throw noModuleError(id);
+    return factory;
+}
+/**
+ * @param {?} id
+ * @return {?}
+ */
+function getModuleFactory__POST_R3__(id) {
+    /** @type {?} */
+    const type = (/** @type {?} */ (getRegisteredNgModuleType(id)));
+    if (!type)
+        throw noModuleError(id);
+    return new NgModuleFactory$1(type);
+}
+/**
+ * Returns the NgModuleFactory with the given id, if it exists and has been loaded.
+ * Factories for modules that do not specify an `id` cannot be retrieved. Throws if the module
+ * cannot be found.
+ * \@publicApi
+ * @type {?}
+ */
+const getModuleFactory = getModuleFactory__PRE_R3__;
+/**
+ * @param {?} id
+ * @return {?}
+ */
+function noModuleError(id) {
+    return new Error(`No module with ID ${id} loaded`);
+}
 
 /**
  * @fileoverview added by tsickle

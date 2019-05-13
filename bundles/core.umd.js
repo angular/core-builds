@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+146.sha-fbff03b.with-local-changes
+ * @license Angular v8.0.0-rc.0+161.sha-197584d.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3550,6 +3550,7 @@
             exports: def.exports || EMPTY_ARRAY$2,
             transitiveCompileScopes: null,
             schemas: def.schemas || null,
+            id: def.id || null,
         };
         return res;
     }
@@ -16648,7 +16649,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-rc.0+146.sha-fbff03b.with-local-changes');
+    var VERSION = new Version('8.0.0-rc.0+161.sha-197584d.with-local-changes');
 
     /**
      * @license
@@ -21488,6 +21489,42 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    /**
+     * Map of module-id to the corresponding NgModule.
+     * - In pre Ivy we track NgModuleFactory,
+     * - In post Ivy we track the NgModuleType
+     */
+    var modules = new Map();
+    /**
+     * Registers a loaded module. Should only be called from generated NgModuleFactory code.
+     * @publicApi
+     */
+    function registerModuleFactory(id, factory) {
+        var existing = modules.get(id);
+        assertSameOrNotExisting(id, existing && existing.moduleType, factory.moduleType);
+        modules.set(id, factory);
+    }
+    function assertSameOrNotExisting(id, type, incoming) {
+        if (type && type !== incoming) {
+            throw new Error("Duplicate module registered for " + id + " - " + stringify(type) + " vs " + stringify(type.name));
+        }
+    }
+    function registerNgModuleType(id, ngModuleType) {
+        var existing = modules.get(id);
+        assertSameOrNotExisting(id, existing, ngModuleType);
+        modules.set(id, ngModuleType);
+    }
+    function getRegisteredNgModuleType(id) {
+        return modules.get(id);
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     var COMPONENT_FACTORY_RESOLVER = {
         provide: ComponentFactoryResolver,
         useClass: ComponentFactoryResolver$1,
@@ -21552,7 +21589,12 @@
             return _this;
         }
         NgModuleFactory.prototype.create = function (parentInjector) {
-            return new NgModuleRef$1(this.moduleType, parentInjector);
+            var moduleType = this.moduleType;
+            var moduleRef = new NgModuleRef$1(moduleType, parentInjector);
+            var ngModuleDef = getNgModuleDef(moduleType);
+            ngModuleDef && ngModuleDef.id &&
+                registerNgModuleType(ngModuleDef.id, moduleType);
+            return moduleRef;
         };
         return NgModuleFactory;
     }(NgModuleFactory));
@@ -22737,73 +22779,6 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * Used to load ng module factories.
-     *
-     * @publicApi
-     * @deprecated the `string` form of `loadChildren` is deprecated, and `NgModuleFactoryLoader` is
-     * part of its implementation. See `LoadChildren` for more details.
-     */
-    var NgModuleFactoryLoader = /** @class */ (function () {
-        function NgModuleFactoryLoader() {
-        }
-        return NgModuleFactoryLoader;
-    }());
-    /**
-     * Map of module-id to the corresponding NgModule.
-     * - In pre Ivy we track NgModuleFactory,
-     * - In post Ivy we track the NgModuleType
-     */
-    var modules = new Map();
-    /**
-     * Registers a loaded module. Should only be called from generated NgModuleFactory code.
-     * @publicApi
-     */
-    function registerModuleFactory(id, factory) {
-        var existing = modules.get(id);
-        assertSameOrNotExisting(id, existing && existing.moduleType, factory.moduleType);
-        modules.set(id, factory);
-    }
-    function assertSameOrNotExisting(id, type, incoming) {
-        if (type && type !== incoming) {
-            throw new Error("Duplicate module registered for " + id + " - " + stringify(type) + " vs " + stringify(type.name));
-        }
-    }
-    function registerNgModuleType(id, ngModuleType) {
-        var existing = modules.get(id);
-        assertSameOrNotExisting(id, existing, ngModuleType);
-        modules.set(id, ngModuleType);
-    }
-    function getModuleFactory__PRE_R3__(id) {
-        var factory = modules.get(id);
-        if (!factory)
-            throw noModuleError(id);
-        return factory;
-    }
-    function getModuleFactory__POST_R3__(id) {
-        var type = modules.get(id);
-        if (!type)
-            throw noModuleError(id);
-        return new NgModuleFactory$1(type);
-    }
-    /**
-     * Returns the NgModuleFactory with the given id, if it exists and has been loaded.
-     * Factories for modules that do not specify an `id` cannot be retrieved. Throws if the module
-     * cannot be found.
-     * @publicApi
-     */
-    var getModuleFactory = getModuleFactory__PRE_R3__;
-    function noModuleError(id) {
-        return new Error("No module with ID " + id + " loaded");
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
      * A mapping of the @angular/core API surface used in generated expressions to the actual symbols.
      *
      * This should be kept up to date with the public exports of @angular/core.
@@ -22928,7 +22903,6 @@
         'ɵɵsanitizeScript': ɵɵsanitizeScript,
         'ɵɵsanitizeUrl': ɵɵsanitizeUrl,
         'ɵɵsanitizeUrlOrResourceUrl': ɵɵsanitizeUrlOrResourceUrl,
-        'ɵregisterNgModuleType': registerNgModuleType,
     };
 
     /**
@@ -23018,14 +22992,12 @@
                             .map(expandModuleWithProviders),
                         emitInline: true,
                         schemas: ngModule.schemas ? flatten(ngModule.schemas) : null,
+                        id: ngModule.id || null,
                     });
                 }
                 return ngModuleDef;
             }
         });
-        if (ngModule.id) {
-            registerNgModuleType(ngModule.id, moduleType);
-        }
         var ngInjectorDef = null;
         Object.defineProperty(moduleType, NG_INJECTOR_DEF, {
             get: function () {
@@ -25356,6 +25328,48 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Used to load ng module factories.
+     *
+     * @publicApi
+     * @deprecated the `string` form of `loadChildren` is deprecated, and `NgModuleFactoryLoader` is
+     * part of its implementation. See `LoadChildren` for more details.
+     */
+    var NgModuleFactoryLoader = /** @class */ (function () {
+        function NgModuleFactoryLoader() {
+        }
+        return NgModuleFactoryLoader;
+    }());
+    function getModuleFactory__PRE_R3__(id) {
+        var factory = getRegisteredNgModuleType(id);
+        if (!factory)
+            throw noModuleError(id);
+        return factory;
+    }
+    function getModuleFactory__POST_R3__(id) {
+        var type = getRegisteredNgModuleType(id);
+        if (!type)
+            throw noModuleError(id);
+        return new NgModuleFactory$1(type);
+    }
+    /**
+     * Returns the NgModuleFactory with the given id, if it exists and has been loaded.
+     * Factories for modules that do not specify an `id` cannot be retrieved. Throws if the module
+     * cannot be found.
+     * @publicApi
+     */
+    var getModuleFactory = getModuleFactory__PRE_R3__;
+    function noModuleError(id) {
+        return new Error("No module with ID " + id + " loaded");
+    }
 
     /**
      * @license
