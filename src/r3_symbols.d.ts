@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+156.sha-2f35dbf.with-local-changes
+ * @license Angular v8.0.0-rc.0+157.sha-f74373f.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -611,6 +611,8 @@ export declare interface NgModuleDef<T> {
     transitiveCompileScopes: NgModuleTransitiveScopes | null;
     /** The set of schemas that declare elements to be allowed in the NgModule. */
     schemas: SchemaMetadata[] | null;
+    /** Unique ID for the module with which it should be registered.  */
+    id: string | null;
 }
 
 export declare class NgModuleFactory<T> extends NgModuleFactory_2<T> {
@@ -933,6 +935,8 @@ export declare function ɵɵdefineNgModule<T>(def: {
     exports?: Type<any>[] | (() => Type<any>[]);
     /** The set of schemas that declare elements to be allowed in the NgModule. */
     schemas?: SchemaMetadata[] | null;
+    /** Unique ID for the module that is used with `getModuleFactory`. */
+    id?: string | null;
 }): never;
 
 /**
