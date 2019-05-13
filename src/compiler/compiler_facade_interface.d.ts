@@ -91,6 +91,7 @@ export interface R3NgModuleMetadataFacade {
     schemas: {
         name: string;
     }[] | null;
+    id: string | null;
 }
 export interface R3InjectorMetadataFacade {
     name: string;

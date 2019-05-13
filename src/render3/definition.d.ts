@@ -242,6 +242,8 @@ export declare function ɵɵdefineNgModule<T>(def: {
     exports?: Type<any>[] | (() => Type<any>[]);
     /** The set of schemas that declare elements to be allowed in the NgModule. */
     schemas?: SchemaMetadata[] | null;
+    /** Unique ID for the module that is used with `getModuleFactory`. */
+    id?: string | null;
 }): never;
 /**
  * Adds the module metadata that is necessary to compute the module's transitive scope to an
