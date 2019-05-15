@@ -5,10 +5,10 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-export { ɵɵinject } from './di/injector_compatibility';
-export { ɵɵInjectableDef, ɵɵInjectorDef, ɵɵdefineInjectable, ɵɵdefineInjector } from './di/interface/defs';
-export { NgModuleDef, ɵɵNgModuleDefWithMeta } from './metadata/ng_module';
-export { ɵɵdefineNgModule } from './render3/definition';
+export { Δinject } from './di/injector_compatibility';
+export { ΔInjectableDef, ΔInjectorDef, ΔdefineInjectable, ΔdefineInjector } from './di/interface/defs';
+export { NgModuleDef, ΔNgModuleDefWithMeta } from './metadata/ng_module';
+export { ΔdefineNgModule } from './render3/definition';
 export { setClassMetadata } from './render3/metadata';
 export { NgModuleFactory } from './render3/ng_module_ref';
 /**

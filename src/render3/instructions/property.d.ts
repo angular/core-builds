@@ -21,7 +21,7 @@ import { TsickleIssue1009 } from './shared';
  *
  * @codeGenApi
  */
-export declare function ɵɵproperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): TsickleIssue1009;
+export declare function Δproperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): TsickleIssue1009;
 /**
  * Creates a single value binding.
  *
@@ -29,7 +29,7 @@ export declare function ɵɵproperty<T>(propName: string, value: T, sanitizer?: 
  *
  * @codeGenApi
  */
-export declare function ɵɵbind<T>(value: T): T | NO_CHANGE;
+export declare function Δbind<T>(value: T): T | NO_CHANGE;
 /**
 * **TODO: Remove this function after `property` is in use**
 * Update a property on an element.
@@ -48,7 +48,7 @@ export declare function ɵɵbind<T>(value: T): T | NO_CHANGE;
  *
  * @codeGenApi
 */
-export declare function ɵɵelementProperty<T>(index: number, propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): void;
+export declare function ΔelementProperty<T>(index: number, propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): void;
 /**
  * Updates a synthetic host binding (e.g. `[@foo]`) on a component.
  *
@@ -72,4 +72,4 @@ export declare function ɵɵelementProperty<T>(index: number, propName: string, 
  *
  * @codeGenApi
  */
-export declare function ɵɵcomponentHostSyntheticProperty<T>(index: number, propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): void;
+export declare function ΔcomponentHostSyntheticProperty<T>(index: number, propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): void;

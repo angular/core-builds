@@ -15,13 +15,13 @@ import { SanitizerFn } from '../interfaces/sanitization';
  *
  * @codeGenApi
  */
-export declare function ɵɵelementStart(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+export declare function ΔelementStart(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
 /**
  * Mark the end of the element.
  *
  * @codeGenApi
  */
-export declare function ɵɵelementEnd(): void;
+export declare function ΔelementEnd(): void;
 /**
  * Creates an empty element using {@link elementStart} and {@link elementEnd}
  *
@@ -33,7 +33,7 @@ export declare function ɵɵelementEnd(): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵelement(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+export declare function Δelement(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
 /**
  * Updates the value of removes an attribute on an Element.
  *
@@ -46,7 +46,7 @@ export declare function ɵɵelement(index: number, name: string, attrs?: TAttrib
  *
  * @codeGenApi
  */
-export declare function ɵɵelementAttribute(index: number, name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): void;
+export declare function ΔelementAttribute(index: number, name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): void;
 /**
  * Assign static attribute values to a host element.
  *
@@ -86,4 +86,4 @@ export declare function ɵɵelementAttribute(index: number, name: string, value:
  *
  * @codeGenApi
  */
-export declare function ɵɵelementHostAttrs(attrs: TAttributes): void;
+export declare function ΔelementHostAttrs(attrs: TAttributes): void;

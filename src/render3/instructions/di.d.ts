@@ -19,9 +19,9 @@ import { Type } from '../../interface/type';
  * class SomeDirective {
  *   constructor(directive: DirectiveA) {}
  *
- *   static ngDirectiveDef = ɵɵdefineDirective({
+ *   static ngDirectiveDef = ΔdefineDirective({
  *     type: SomeDirective,
- *     factory: () => new SomeDirective(ɵɵdirectiveInject(DirectiveA))
+ *     factory: () => new SomeDirective(ΔdirectiveInject(DirectiveA))
  *   });
  * }
  * ```
@@ -31,11 +31,11 @@ import { Type } from '../../interface/type';
  *
  * @codeGenApi
  */
-export declare function ɵɵdirectiveInject<T>(token: Type<T> | InjectionToken<T>): T;
-export declare function ɵɵdirectiveInject<T>(token: Type<T> | InjectionToken<T>, flags: InjectFlags): T;
+export declare function ΔdirectiveInject<T>(token: Type<T> | InjectionToken<T>): T;
+export declare function ΔdirectiveInject<T>(token: Type<T> | InjectionToken<T>, flags: InjectFlags): T;
 /**
  * Facade for the attribute injection from DI.
  *
  * @codeGenApi
  */
-export declare function ɵɵinjectAttribute(attrNameToInject: string): string | null;
+export declare function ΔinjectAttribute(attrNameToInject: string): string | null;

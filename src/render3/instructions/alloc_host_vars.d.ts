@@ -12,4 +12,4 @@
  *
  * @codeGenApi
  */
-export declare function ɵɵallocHostVars(count: number): void;
+export declare function ΔallocHostVars(count: number): void;

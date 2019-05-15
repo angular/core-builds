@@ -7,7 +7,7 @@ import { NO_CHANGE } from '../tokens';
  *
  * @codeGenApi
  */
-export declare function ɵɵtext(index: number, value?: any): void;
+export declare function Δtext(index: number, value?: any): void;
 /**
  * Create text node with binding
  * Bindings should be handled externally with the proper interpolation(1-8) method
@@ -17,4 +17,4 @@ export declare function ɵɵtext(index: number, value?: any): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵtextBinding<T>(index: number, value: T | NO_CHANGE): void;
+export declare function ΔtextBinding<T>(index: number, value: T | NO_CHANGE): void;

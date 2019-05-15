@@ -11,7 +11,7 @@ import { LocalRefExtractor, TAttributes } from '../interfaces/node';
  *
  * @codeGenApi
  */
-export declare function ɵɵcontainer(index: number): void;
+export declare function Δcontainer(index: number): void;
 /**
  * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
  *
@@ -31,7 +31,7 @@ export declare function ɵɵcontainer(index: number): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵtemplate(index: number, templateFn: ComponentTemplate<any> | null, consts: number, vars: number, tagName?: string | null, attrs?: TAttributes | null, localRefs?: string[] | null, localRefExtractor?: LocalRefExtractor): void;
+export declare function Δtemplate(index: number, templateFn: ComponentTemplate<any> | null, consts: number, vars: number, tagName?: string | null, attrs?: TAttributes | null, localRefs?: string[] | null, localRefExtractor?: LocalRefExtractor): void;
 /**
  * Sets a container up to receive views.
  *
@@ -39,7 +39,7 @@ export declare function ɵɵtemplate(index: number, templateFn: ComponentTemplat
  *
  * @codeGenApi
  */
-export declare function ɵɵcontainerRefreshStart(index: number): void;
+export declare function ΔcontainerRefreshStart(index: number): void;
 /**
  * Marks the end of the LContainer.
  *
@@ -47,4 +47,4 @@ export declare function ɵɵcontainerRefreshStart(index: number): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵcontainerRefreshEnd(): void;
+export declare function ΔcontainerRefreshEnd(): void;

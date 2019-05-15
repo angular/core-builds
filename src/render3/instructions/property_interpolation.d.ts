@@ -15,7 +15,7 @@ import { TsickleIssue1009 } from './shared';
  *
  * @codeGenApi
  */
-export declare function ɵɵinterpolationV(values: any[]): string | NO_CHANGE;
+export declare function ΔinterpolationV(values: any[]): string | NO_CHANGE;
 /**
  * Creates an interpolation binding with 1 expression.
  *
@@ -25,49 +25,49 @@ export declare function ɵɵinterpolationV(values: any[]): string | NO_CHANGE;
  *
  * @codeGenApi
  */
-export declare function ɵɵinterpolation1(prefix: string, v0: any, suffix: string): string | NO_CHANGE;
+export declare function Δinterpolation1(prefix: string, v0: any, suffix: string): string | NO_CHANGE;
 /**
  * Creates an interpolation binding with 2 expressions.
  *
  * @codeGenApi
  */
-export declare function ɵɵinterpolation2(prefix: string, v0: any, i0: string, v1: any, suffix: string): string | NO_CHANGE;
+export declare function Δinterpolation2(prefix: string, v0: any, i0: string, v1: any, suffix: string): string | NO_CHANGE;
 /**
  * Creates an interpolation binding with 3 expressions.
  *
  * @codeGenApi
  */
-export declare function ɵɵinterpolation3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): string | NO_CHANGE;
+export declare function Δinterpolation3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): string | NO_CHANGE;
 /**
  * Create an interpolation binding with 4 expressions.
  *
  * @codeGenApi
  */
-export declare function ɵɵinterpolation4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): string | NO_CHANGE;
+export declare function Δinterpolation4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): string | NO_CHANGE;
 /**
  * Creates an interpolation binding with 5 expressions.
  *
  * @codeGenApi
  */
-export declare function ɵɵinterpolation5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string): string | NO_CHANGE;
+export declare function Δinterpolation5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string): string | NO_CHANGE;
 /**
  * Creates an interpolation binding with 6 expressions.
  *
  * @codeGenApi
  */
-export declare function ɵɵinterpolation6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string): string | NO_CHANGE;
+export declare function Δinterpolation6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string): string | NO_CHANGE;
 /**
  * Creates an interpolation binding with 7 expressions.
  *
  * @codeGenApi
  */
-export declare function ɵɵinterpolation7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): string | NO_CHANGE;
+export declare function Δinterpolation7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): string | NO_CHANGE;
 /**
  * Creates an interpolation binding with 8 expressions.
  *
  * @codeGenApi
  */
-export declare function ɵɵinterpolation8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): string | NO_CHANGE;
+export declare function Δinterpolation8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): string | NO_CHANGE;
 /**
  *
  * Update an interpolated property on an element with a lone bound value
@@ -82,7 +82,7 @@ export declare function ɵɵinterpolation8(prefix: string, v0: any, i0: string, 
  * Its compiled representation is::
  *
  * ```ts
- * ɵɵpropertyInterpolate('title', v0);
+ * ΔpropertyInterpolate('title', v0);
  * ```
  *
  * If the property name also exists as an input property on one of the element's directives,
@@ -97,7 +97,7 @@ export declare function ɵɵinterpolation8(prefix: string, v0: any, i0: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate(propName: string, v0: any, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ΔpropertyInterpolate(propName: string, v0: any, sanitizer?: SanitizerFn): TsickleIssue1009;
 /**
  *
  * Update an interpolated property on an element with single bound value surrounded by text.
@@ -111,7 +111,7 @@ export declare function ɵɵpropertyInterpolate(propName: string, v0: any, sanit
  * Its compiled representation is::
  *
  * ```ts
- * ɵɵpropertyInterpolate1('title', 'prefix', v0, 'suffix');
+ * ΔpropertyInterpolate1('title', 'prefix', v0, 'suffix');
  * ```
  *
  * If the property name also exists as an input property on one of the element's directives,
@@ -126,7 +126,7 @@ export declare function ɵɵpropertyInterpolate(propName: string, v0: any, sanit
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate1(propName: string, prefix: string, v0: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ΔpropertyInterpolate1(propName: string, prefix: string, v0: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
 /**
  *
  * Update an interpolated property on an element with 2 bound values surrounded by text.
@@ -140,7 +140,7 @@ export declare function ɵɵpropertyInterpolate1(propName: string, prefix: strin
  * Its compiled representation is::
  *
  * ```ts
- * ɵɵpropertyInterpolate2('title', 'prefix', v0, '-', v1, 'suffix');
+ * ΔpropertyInterpolate2('title', 'prefix', v0, '-', v1, 'suffix');
  * ```
  *
  * If the property name also exists as an input property on one of the element's directives,
@@ -157,7 +157,7 @@ export declare function ɵɵpropertyInterpolate1(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate2(propName: string, prefix: string, v0: any, i0: string, v1: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ΔpropertyInterpolate2(propName: string, prefix: string, v0: any, i0: string, v1: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
 /**
  *
  * Update an interpolated property on an element with 3 bound values surrounded by text.
@@ -171,7 +171,7 @@ export declare function ɵɵpropertyInterpolate2(propName: string, prefix: strin
  * Its compiled representation is::
  *
  * ```ts
- * ɵɵpropertyInterpolate3(
+ * ΔpropertyInterpolate3(
  * 'title', 'prefix', v0, '-', v1, '-', v2, 'suffix');
  * ```
  *
@@ -191,7 +191,7 @@ export declare function ɵɵpropertyInterpolate2(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate3(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ΔpropertyInterpolate3(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
 /**
  *
  * Update an interpolated property on an element with 4 bound values surrounded by text.
@@ -205,7 +205,7 @@ export declare function ɵɵpropertyInterpolate3(propName: string, prefix: strin
  * Its compiled representation is::
  *
  * ```ts
- * ɵɵpropertyInterpolate4(
+ * ΔpropertyInterpolate4(
  * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, 'suffix');
  * ```
  *
@@ -227,7 +227,7 @@ export declare function ɵɵpropertyInterpolate3(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate4(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ΔpropertyInterpolate4(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
 /**
  *
  * Update an interpolated property on an element with 5 bound values surrounded by text.
@@ -241,7 +241,7 @@ export declare function ɵɵpropertyInterpolate4(propName: string, prefix: strin
  * Its compiled representation is::
  *
  * ```ts
- * ɵɵpropertyInterpolate5(
+ * ΔpropertyInterpolate5(
  * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, 'suffix');
  * ```
  *
@@ -265,7 +265,7 @@ export declare function ɵɵpropertyInterpolate4(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate5(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ΔpropertyInterpolate5(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
 /**
  *
  * Update an interpolated property on an element with 6 bound values surrounded by text.
@@ -279,7 +279,7 @@ export declare function ɵɵpropertyInterpolate5(propName: string, prefix: strin
  * Its compiled representation is::
  *
  * ```ts
- * ɵɵpropertyInterpolate6(
+ * ΔpropertyInterpolate6(
  *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, 'suffix');
  * ```
  *
@@ -305,7 +305,7 @@ export declare function ɵɵpropertyInterpolate5(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate6(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ΔpropertyInterpolate6(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
 /**
  *
  * Update an interpolated property on an element with 7 bound values surrounded by text.
@@ -319,7 +319,7 @@ export declare function ɵɵpropertyInterpolate6(propName: string, prefix: strin
  * Its compiled representation is::
  *
  * ```ts
- * ɵɵpropertyInterpolate7(
+ * ΔpropertyInterpolate7(
  *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, 'suffix');
  * ```
  *
@@ -347,7 +347,7 @@ export declare function ɵɵpropertyInterpolate6(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate7(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ΔpropertyInterpolate7(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
 /**
  *
  * Update an interpolated property on an element with 8 bound values surrounded by text.
@@ -361,7 +361,7 @@ export declare function ɵɵpropertyInterpolate7(propName: string, prefix: strin
  * Its compiled representation is::
  *
  * ```ts
- * ɵɵpropertyInterpolate8(
+ * ΔpropertyInterpolate8(
  *  'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, 'suffix');
  * ```
  *
@@ -391,7 +391,7 @@ export declare function ɵɵpropertyInterpolate7(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate8(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ΔpropertyInterpolate8(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
 /**
  * Update an interpolated property on an element with 8 or more bound values surrounded by text.
  *
@@ -405,7 +405,7 @@ export declare function ɵɵpropertyInterpolate8(propName: string, prefix: strin
  * Its compiled representation is::
  *
  * ```ts
- * ɵɵpropertyInterpolateV(
+ * ΔpropertyInterpolateV(
  *  'title', ['prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, '-', v9,
  *  'suffix']);
  * ```
@@ -422,4 +422,4 @@ export declare function ɵɵpropertyInterpolate8(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolateV(propName: string, values: any[], sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ΔpropertyInterpolateV(propName: string, values: any[], sanitizer?: SanitizerFn): TsickleIssue1009;

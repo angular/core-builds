@@ -12,4 +12,4 @@ import { ComponentDef, DirectiveDef } from '../interfaces/definition';
  *
  * @codeGenApi
  */
-export declare function ɵɵInheritDefinitionFeature(definition: DirectiveDef<any> | ComponentDef<any>): void;
+export declare function ΔInheritDefinitionFeature(definition: DirectiveDef<any> | ComponentDef<any>): void;

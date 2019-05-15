@@ -14,7 +14,7 @@
  *
  * @codeGenApi
  */
-export declare function ɵɵpipe(index: number, pipeName: string): any;
+export declare function Δpipe(index: number, pipeName: string): any;
 /**
  * Invokes a pipe with 1 arguments.
  *
@@ -27,7 +27,7 @@ export declare function ɵɵpipe(index: number, pipeName: string): any;
  *
  * @codeGenApi
  */
-export declare function ɵɵpipeBind1(index: number, slotOffset: number, v1: any): any;
+export declare function ΔpipeBind1(index: number, slotOffset: number, v1: any): any;
 /**
  * Invokes a pipe with 2 arguments.
  *
@@ -41,7 +41,7 @@ export declare function ɵɵpipeBind1(index: number, slotOffset: number, v1: any
  *
  * @codeGenApi
  */
-export declare function ɵɵpipeBind2(index: number, slotOffset: number, v1: any, v2: any): any;
+export declare function ΔpipeBind2(index: number, slotOffset: number, v1: any, v2: any): any;
 /**
  * Invokes a pipe with 3 arguments.
  *
@@ -56,7 +56,7 @@ export declare function ɵɵpipeBind2(index: number, slotOffset: number, v1: any
  *
  * @codeGenApi
  */
-export declare function ɵɵpipeBind3(index: number, slotOffset: number, v1: any, v2: any, v3: any): any;
+export declare function ΔpipeBind3(index: number, slotOffset: number, v1: any, v2: any, v3: any): any;
 /**
  * Invokes a pipe with 4 arguments.
  *
@@ -72,7 +72,7 @@ export declare function ɵɵpipeBind3(index: number, slotOffset: number, v1: any
  *
  * @codeGenApi
  */
-export declare function ɵɵpipeBind4(index: number, slotOffset: number, v1: any, v2: any, v3: any, v4: any): any;
+export declare function ΔpipeBind4(index: number, slotOffset: number, v1: any, v2: any, v3: any, v4: any): any;
 /**
  * Invokes a pipe with variable number of arguments.
  *
@@ -85,4 +85,4 @@ export declare function ɵɵpipeBind4(index: number, slotOffset: number, v1: any
  *
  * @codeGenApi
  */
-export declare function ɵɵpipeBindV(index: number, slotOffset: number, values: any[]): any;
+export declare function ΔpipeBindV(index: number, slotOffset: number, values: any[]): any;

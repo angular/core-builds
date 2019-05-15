@@ -30,7 +30,7 @@ import { NO_CHANGE } from '../tokens';
  *
  * @codeGenApi
  */
-export declare function ɵɵstyling(classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
+export declare function Δstyling(classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
 /**
  * Update a style binding on an element with the provided value.
  *
@@ -56,7 +56,7 @@ export declare function ɵɵstyling(classBindingNames?: string[] | null, styleBi
  *
  * @codeGenApi
  */
-export declare function ɵɵstyleProp(styleIndex: number, value: string | number | String | PlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
+export declare function ΔstyleProp(styleIndex: number, value: string | number | String | PlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
 /**
  * Update a class binding on an element with the provided value.
  *
@@ -77,7 +77,7 @@ export declare function ɵɵstyleProp(styleIndex: number, value: string | number
  *
  * @codeGenApi
  */
-export declare function ɵɵclassProp(classIndex: number, value: boolean | PlayerFactory, forceOverride?: boolean): void;
+export declare function ΔclassProp(classIndex: number, value: boolean | PlayerFactory, forceOverride?: boolean): void;
 /**
  * Update style bindings using an object literal on an element.
  *
@@ -97,7 +97,7 @@ export declare function ɵɵclassProp(classIndex: number, value: boolean | Playe
  *
  * @codeGenApi
  */
-export declare function ɵɵstyleMap(styles: {
+export declare function ΔstyleMap(styles: {
     [styleName: string]: any;
 } | NO_CHANGE | null): void;
 /**
@@ -118,7 +118,7 @@ export declare function ɵɵstyleMap(styles: {
  *
  * @codeGenApi
  */
-export declare function ɵɵclassMap(classes: {
+export declare function ΔclassMap(classes: {
     [styleName: string]: any;
 } | NO_CHANGE | string | null): void;
 /**
@@ -130,5 +130,5 @@ export declare function ɵɵclassMap(classes: {
  *
  * @codeGenApi
  */
-export declare function ɵɵstylingApply(): void;
+export declare function ΔstylingApply(): void;
 export declare function getActiveDirectiveStylingIndex(): number;

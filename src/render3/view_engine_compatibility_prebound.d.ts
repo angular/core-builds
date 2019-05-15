@@ -14,4 +14,4 @@ import { LView } from './interfaces/view';
  *
  * @codeGenApi
  */
-export declare function ɵɵtemplateRefExtractor(tNode: TNode, currentView: LView): ViewEngine_TemplateRef<{}> | null;
+export declare function ΔtemplateRefExtractor(tNode: TNode, currentView: LView): ViewEngine_TemplateRef<{}> | null;

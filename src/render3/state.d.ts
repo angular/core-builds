@@ -23,17 +23,17 @@ export declare function getBindingsEnabled(): boolean;
  *   Should match component / directive.
  * </my-comp>
  * <div ngNonBindable>
- *   <!-- ɵɵdisableBindings() -->
+ *   <!-- ΔdisableBindings() -->
  *   <my-comp my-directive>
  *     Should not match component / directive because we are in ngNonBindable.
  *   </my-comp>
- *   <!-- ɵɵenableBindings() -->
+ *   <!-- ΔenableBindings() -->
  * </div>
  * ```
  *
  * @codeGenApi
  */
-export declare function ɵɵenableBindings(): void;
+export declare function ΔenableBindings(): void;
 /**
  * Disables directive matching on element.
  *
@@ -43,17 +43,17 @@ export declare function ɵɵenableBindings(): void;
  *   Should match component / directive.
  * </my-comp>
  * <div ngNonBindable>
- *   <!-- ɵɵdisableBindings() -->
+ *   <!-- ΔdisableBindings() -->
  *   <my-comp my-directive>
  *     Should not match component / directive because we are in ngNonBindable.
  *   </my-comp>
- *   <!-- ɵɵenableBindings() -->
+ *   <!-- ΔenableBindings() -->
  * </div>
  * ```
  *
  * @codeGenApi
  */
-export declare function ɵɵdisableBindings(): void;
+export declare function ΔdisableBindings(): void;
 export declare function getLView(): LView;
 /**
  * Sets the active directive host element and resets the directive id value
@@ -137,7 +137,7 @@ export declare function getActiveDirectiveSuperClassDepth(): number;
  *
  * @codeGenApi
  */
-export declare function ɵɵrestoreView(viewToRestore: OpaqueViewState): void;
+export declare function ΔrestoreView(viewToRestore: OpaqueViewState): void;
 export declare function getPreviousOrParentTNode(): TNode;
 export declare function setPreviousOrParentTNode(tNode: TNode): void;
 export declare function setTNodeAndViewData(tNode: TNode, view: LView): void;
@@ -196,18 +196,18 @@ export declare function setSelectedIndex(index: number): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵnamespaceSVG(): void;
+export declare function ΔnamespaceSVG(): void;
 /**
  * Sets the namespace used to create elements to `'http://www.w3.org/1998/MathML/'` in global state.
  *
  * @codeGenApi
  */
-export declare function ɵɵnamespaceMathML(): void;
+export declare function ΔnamespaceMathML(): void;
 /**
  * Sets the namespace used to create elements no `null`, which forces element creation to use
  * `createElement` rather than `createElementNS`.
  *
  * @codeGenApi
  */
-export declare function ɵɵnamespaceHTML(): void;
+export declare function ΔnamespaceHTML(): void;
 export declare function getNamespace(): string | null;
