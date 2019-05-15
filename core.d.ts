@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+185.sha-35c1750.with-local-changes
+ * @license Angular v8.0.0-rc.0+186.sha-1a0e500.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9761,9 +9761,10 @@ export declare function ɵgetDirectives(target: {}): Array<{}>;
 export declare function ɵgetHostElement<T>(directive: T): Element;
 
 /**
- * Read the `ngInjectableDef` type in a way which is immune to accidentally reading inherited value.
+ * Read the `ngInjectableDef` for `type` in a way which is immune to accidentally reading inherited
+ * value.
  *
- * @param type type which may have `ngInjectableDef`
+ * @param type A type which may have its own (non-inherited) `ngInjectableDef`.
  */
 export declare function ɵgetInjectableDef<T>(type: any): ΔInjectableDef<T> | null;
 

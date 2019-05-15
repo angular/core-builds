@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+185.sha-35c1750.with-local-changes
+ * @license Angular v8.0.0-rc.0+186.sha-1a0e500.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -318,12 +318,33 @@ function ΔdefineInjector(options) {
     };
 }
 /**
- * Read the `ngInjectableDef` type in a way which is immune to accidentally reading inherited value.
+ * Read the `ngInjectableDef` for `type` in a way which is immune to accidentally reading inherited
+ * value.
  *
- * @param type type which may have `ngInjectableDef`
+ * @param type A type which may have its own (non-inherited) `ngInjectableDef`.
  */
 function getInjectableDef(type) {
     return type && type.hasOwnProperty(NG_INJECTABLE_DEF) ? type[NG_INJECTABLE_DEF] : null;
+}
+/**
+ * Read the `ngInjectableDef` for `type` or read the `ngInjectableDef` from one of its ancestors.
+ *
+ * @param type A type which may have `ngInjectableDef`, via inheritance.
+ *
+ * @deprecated Will be removed in v10, where an error will occur in the scenario if we find the
+ * `ngInjectableDef` on an ancestor only.
+ */
+function getInheritedInjectableDef(type) {
+    if (type && type[NG_INJECTABLE_DEF]) {
+        // TODO(FW-1307): Re-add ngDevMode when closure can handle it
+        // ngDevMode &&
+        console.warn("DEPRECATED: DI is instantiating a token \"" + type.name + "\" that inherits its @Injectable decorator but does not provide one itself.\n" +
+            ("This will become an error in v10. Please add @Injectable() to the \"" + type.name + "\" class."));
+        return type[NG_INJECTABLE_DEF];
+    }
+    else {
+        return null;
+    }
 }
 /**
  * Read the `ngInjectorDef` type in a way which is immune to accidentally reading inherited value.
@@ -1628,26 +1649,47 @@ var R3Injector = /** @class */ (function () {
     return R3Injector;
 }());
 function injectableDefOrInjectorDefFactory(token) {
+    // Most tokens will have an ngInjectableDef directly on them, which specifies a factory directly.
     var injectableDef = getInjectableDef(token);
-    if (injectableDef === null) {
-        var injectorDef = getInjectorDef(token);
-        if (injectorDef !== null) {
-            return injectorDef.factory;
-        }
-        else if (token instanceof InjectionToken) {
-            throw new Error("Token " + stringify(token) + " is missing an ngInjectableDef definition.");
-        }
-        else if (token instanceof Function) {
-            var paramLength = token.length;
-            if (paramLength > 0) {
-                var args = new Array(paramLength).fill('?');
-                throw new Error("Can't resolve all parameters for " + stringify(token) + ": (" + args.join(', ') + ").");
-            }
-            return function () { return new token(); };
-        }
-        throw new Error('unreachable');
+    if (injectableDef !== null) {
+        return injectableDef.factory;
     }
-    return injectableDef.factory;
+    // If the token is an NgModule, it's also injectable but the factory is on its ngInjectorDef.
+    var injectorDef = getInjectorDef(token);
+    if (injectorDef !== null) {
+        return injectorDef.factory;
+    }
+    // InjectionTokens should have an ngInjectableDef and thus should be handled above.
+    // If it's missing that, it's an error.
+    if (token instanceof InjectionToken) {
+        throw new Error("Token " + stringify(token) + " is missing an ngInjectableDef definition.");
+    }
+    // Undecorated types can sometimes be created if they have no constructor arguments.
+    if (token instanceof Function) {
+        return getUndecoratedInjectableFactory(token);
+    }
+    // There was no way to resolve a factory for this token.
+    throw new Error('unreachable');
+}
+function getUndecoratedInjectableFactory(token) {
+    // If the token has parameters then it has dependencies that we cannot resolve implicitly.
+    var paramLength = token.length;
+    if (paramLength > 0) {
+        var args = new Array(paramLength).fill('?');
+        throw new Error("Can't resolve all parameters for " + stringify(token) + ": (" + args.join(', ') + ").");
+    }
+    // The constructor function appears to have no parameters.
+    // This might be because it inherits from a super-class. In which case, use an ngInjectableDef
+    // from an ancestor if there is one.
+    // Otherwise this really is a simple class with no dependencies, so return a factory that
+    // just instantiates the zero-arg constructor.
+    var inheritedInjectableDef = getInheritedInjectableDef(token);
+    if (inheritedInjectableDef !== null) {
+        return inheritedInjectableDef.factory;
+    }
+    else {
+        return function () { return new token(); };
+    }
 }
 function providerToRecord(provider, ngModuleType, providers) {
     var factory = providerToFactory(provider, ngModuleType, providers);
@@ -16615,7 +16657,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-rc.0+185.sha-35c1750.with-local-changes');
+var VERSION = new Version('8.0.0-rc.0+186.sha-1a0e500.with-local-changes');
 
 /**
  * @license
