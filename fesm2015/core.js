@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.3+50.sha-db64b01.with-local-changes
+ * @license Angular v8.0.0-rc.3+52.sha-b12e76d.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1439,8 +1439,6 @@ const NG_TOKEN_PATH = 'ngTokenPath';
 /** @type {?} */
 const NG_TEMP_TOKEN_PATH = 'ngTempTokenPath';
 /** @type {?} */
-const NULL_INJECTOR = Injector.NULL;
-/** @type {?} */
 const NEW_LINE = /\n/gm;
 /** @type {?} */
 const NO_NEW_LINE = 'ɵ';
@@ -1450,7 +1448,7 @@ class StaticInjector {
      * @param {?=} parent
      * @param {?=} source
      */
-    constructor(providers, parent = NULL_INJECTOR, source = null) {
+    constructor(providers, parent = Injector.NULL, source = null) {
         this.parent = parent;
         this.source = source;
         /** @type {?} */
@@ -1673,7 +1671,7 @@ function resolveToken(token, record, records, parent, notFoundValue, flags) {
                     records, 
                     // If we don't know how to resolve dependency and we should not check parent for it,
                     // than pass in Null injector.
-                    !childRecord && !(options & 4 /* CheckParent */) ? NULL_INJECTOR : parent, options & 1 /* Optional */ ? null : Injector.THROW_IF_NOT_FOUND, InjectFlags.Default));
+                    !childRecord && !(options & 4 /* CheckParent */) ? Injector.NULL : parent, options & 1 /* Optional */ ? null : Injector.THROW_IF_NOT_FOUND, InjectFlags.Default));
                 }
             }
             record.value = value = useNew ? new ((/** @type {?} */ (fn)))(...deps) : fn.apply(obj, deps);
@@ -3437,7 +3435,11 @@ const EMPTY_OBJ = {};
 const EMPTY_ARRAY$1 = [];
 // freezing the values prevents any code from accidentally inserting new values in
 if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+    // These property accesses can be ignored because ngDevMode will be set to false
+    // when optimizing code and the whole if statement will be dropped.
+    // tslint:disable-next-line:no-toplevel-property-access
     Object.freeze(EMPTY_OBJ);
+    // tslint:disable-next-line:no-toplevel-property-access
     Object.freeze(EMPTY_ARRAY$1);
 }
 
@@ -3918,10 +3920,14 @@ function stringifyForError(value) {
     }
     return renderStringify(value);
 }
-/** @type {?} */
-const defaultScheduler = (typeof requestAnimationFrame !== 'undefined' && requestAnimationFrame || // browser only
+const ɵ0$5 = /**
+ * @return {?}
+ */
+() => (typeof requestAnimationFrame !== 'undefined' && requestAnimationFrame || // browser only
     setTimeout // everything else
 ).bind(_global);
+/** @type {?} */
+const defaultScheduler = ((ɵ0$5))();
 /**
  *
  * \@codeGenApi
@@ -4540,15 +4546,14 @@ class NodeInjectorFactory {
         this.injectImpl = injectImplementation;
     }
 }
-/** @type {?} */
-const FactoryPrototype = NodeInjectorFactory.prototype;
 /**
  * @param {?} obj
  * @return {?}
  */
 function isFactory(obj) {
     // See: https://jsperf.com/instanceof-vs-getprototypeof
-    return obj !== null && typeof obj == 'object' && Object.getPrototypeOf(obj) == FactoryPrototype;
+    return obj !== null && typeof obj == 'object' &&
+        Object.getPrototypeOf(obj) == NodeInjectorFactory.prototype;
 }
 
 /**
@@ -5472,7 +5477,7 @@ RendererStyleFlags3[RendererStyleFlags3.DashCase] = 'DashCase';
 function isProceduralRenderer(renderer) {
     return !!(((/** @type {?} */ (renderer))).listen);
 }
-const ɵ0$5 = /**
+const ɵ0$6 = /**
  * @param {?} hostElement
  * @param {?} rendererType
  * @return {?}
@@ -5480,7 +5485,7 @@ const ɵ0$5 = /**
 (hostElement, rendererType) => { return document; };
 /** @type {?} */
 const domRendererFactory3 = {
-    createRenderer: (ɵ0$5)
+    createRenderer: (ɵ0$6)
 };
 
 /**
@@ -11562,12 +11567,16 @@ function isSelectorInSelectorList(selector, list) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
+const ɵ0$7 = /**
+ * @return {?}
+ */
+() => Promise.resolve(null);
 /**
  * A permanent marker promise which signifies that the current CD tree is
  * clean.
  * @type {?}
  */
-const _CLEAN_PROMISE = Promise.resolve(null);
+const _CLEAN_PROMISE = ((ɵ0$7))();
 /**
  * Refreshes the view, executing the following steps in that order:
  * triggers init hooks, refreshes dynamic embedded views, triggers content hooks, sets host
@@ -18510,15 +18519,15 @@ const EMPTY_ARRAY$2 = (/** @type {?} */ ([]));
  * A lazily initialized NullInjector.
  * @type {?}
  */
-let NULL_INJECTOR$1 = undefined;
+let NULL_INJECTOR = undefined;
 /**
  * @return {?}
  */
 function getNullInjector() {
-    if (NULL_INJECTOR$1 === undefined) {
-        NULL_INJECTOR$1 = new NullInjector();
+    if (NULL_INJECTOR === undefined) {
+        NULL_INJECTOR = new NullInjector();
     }
-    return NULL_INJECTOR$1;
+    return NULL_INJECTOR;
 }
 /**
  * Create a new `Injector` which is configured using a `defType` of `InjectorType<any>`s.
@@ -20501,7 +20510,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-rc.3+50.sha-db64b01.with-local-changes');
+const VERSION = new Version('8.0.0-rc.3+52.sha-b12e76d.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -25183,9 +25192,13 @@ class ComponentRef$1 extends ComponentRef {
  * NOTE: changes to the `ngI18nClosureMode` name must be synced with `compiler-cli/src/tooling.ts`.
  */
 if (typeof ngI18nClosureMode === 'undefined') {
+    // These property accesses can be ignored because ngI18nClosureMode will be set to false
+    // when optimizing code and the whole if statement will be dropped.
     // Make sure to refer to ngI18nClosureMode as ['ngI18nClosureMode'] for closure.
+    // tslint:disable-next-line:no-toplevel-property-access
     _global['ngI18nClosureMode'] =
         // TODO(FW-1250): validate that this actually, you know, works.
+        // tslint:disable-next-line:no-toplevel-property-access
         typeof goog !== 'undefined' && typeof goog.getMsg === 'function';
 }
 
@@ -28724,13 +28737,10 @@ function noModuleError(id) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
-/**
- * A mapping of the \@angular/core API surface used in generated expressions to the actual symbols.
- *
- * This should be kept up to date with the public exports of \@angular/core.
- * @type {?}
+const ɵ0$8 = /**
+ * @return {?}
  */
-const angularCoreEnv = {
+() => ({
     'ɵɵdefineBase': ɵɵdefineBase,
     'ɵɵdefineComponent': ɵɵdefineComponent,
     'ɵɵdefineDirective': ɵɵdefineDirective,
@@ -28855,7 +28865,14 @@ const angularCoreEnv = {
     'ɵɵsanitizeUrl': ɵɵsanitizeUrl,
     'ɵɵsanitizeUrlOrResourceUrl': ɵɵsanitizeUrlOrResourceUrl,
     'ɵregisterNgModuleType': registerNgModuleType,
-};
+});
+/**
+ * A mapping of the \@angular/core API surface used in generated expressions to the actual symbols.
+ *
+ * This should be kept up to date with the public exports of \@angular/core.
+ * @type {?}
+ */
+const angularCoreEnv = ((ɵ0$8))();
 
 /**
  * @fileoverview added by tsickle
@@ -29839,7 +29856,7 @@ function compilePipe(type, meta) {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 // WARNING: interface has both a type and a value, skipping emit
-const ɵ0$6 = /**
+const ɵ0$9 = /**
  * @param {?=} dir
  * @return {?}
  */
@@ -29855,7 +29872,7 @@ const ɵ0$6 = /**
  * \@publicApi
  * @type {?}
  */
-const Directive = makeDecorator('Directive', (ɵ0$6), undefined, undefined, (ɵ1$2));
+const Directive = makeDecorator('Directive', (ɵ0$9), undefined, undefined, (ɵ1$2));
 // WARNING: interface has both a type and a value, skipping emit
 const ɵ2$2 = /**
  * @param {?=} c
@@ -29993,7 +30010,7 @@ const SWITCH_COMPILE_PIPE = SWITCH_COMPILE_PIPE__PRE_R3__;
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 // WARNING: interface has both a type and a value, skipping emit
-const ɵ0$7 = /**
+const ɵ0$a = /**
  * @param {?} ngModule
  * @return {?}
  */
@@ -30017,7 +30034,7 @@ const ɵ0$7 = /**
  * \@publicApi
  * @type {?}
  */
-const NgModule = makeDecorator('NgModule', (ɵ0$7), undefined, undefined, (ɵ1$3));
+const NgModule = makeDecorator('NgModule', (ɵ0$a), undefined, undefined, (ɵ1$3));
 /**
  * @param {?} moduleType
  * @param {?} metadata
@@ -30554,7 +30571,7 @@ const wtfEndTimeRange = wtfEnabled ? endTimeRange : (/**
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-const promise = Promise.resolve(0);
+const promise = (() => Promise.resolve(0))();
 function scheduleMicroTask(fn) {
     if (typeof Zone === 'undefined') {
         // use promise to schedule microTask instead of use Zone
