@@ -154,11 +154,21 @@ export declare function ΔdefineInjector(options: {
     imports?: any[];
 }): never;
 /**
- * Read the `ngInjectableDef` type in a way which is immune to accidentally reading inherited value.
+ * Read the `ngInjectableDef` for `type` in a way which is immune to accidentally reading inherited
+ * value.
  *
- * @param type type which may have `ngInjectableDef`
+ * @param type A type which may have its own (non-inherited) `ngInjectableDef`.
  */
 export declare function getInjectableDef<T>(type: any): ΔInjectableDef<T> | null;
+/**
+ * Read the `ngInjectableDef` for `type` or read the `ngInjectableDef` from one of its ancestors.
+ *
+ * @param type A type which may have `ngInjectableDef`, via inheritance.
+ *
+ * @deprecated Will be removed in v10, where an error will occur in the scenario if we find the
+ * `ngInjectableDef` on an ancestor only.
+ */
+export declare function getInheritedInjectableDef<T>(type: any): ΔInjectableDef<T> | null;
 /**
  * Read the `ngInjectorDef` type in a way which is immune to accidentally reading inherited value.
  *
