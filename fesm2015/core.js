@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+182.sha-79d4b16.with-local-changes
+ * @license Angular v8.0.0-rc.0+199.sha-e9ead2b.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -315,12 +315,33 @@ function ΔdefineInjector(options) {
     };
 }
 /**
- * Read the `ngInjectableDef` type in a way which is immune to accidentally reading inherited value.
+ * Read the `ngInjectableDef` for `type` in a way which is immune to accidentally reading inherited
+ * value.
  *
- * @param type type which may have `ngInjectableDef`
+ * @param type A type which may have its own (non-inherited) `ngInjectableDef`.
  */
 function getInjectableDef(type) {
     return type && type.hasOwnProperty(NG_INJECTABLE_DEF) ? type[NG_INJECTABLE_DEF] : null;
+}
+/**
+ * Read the `ngInjectableDef` for `type` or read the `ngInjectableDef` from one of its ancestors.
+ *
+ * @param type A type which may have `ngInjectableDef`, via inheritance.
+ *
+ * @deprecated Will be removed in v10, where an error will occur in the scenario if we find the
+ * `ngInjectableDef` on an ancestor only.
+ */
+function getInheritedInjectableDef(type) {
+    if (type && type[NG_INJECTABLE_DEF]) {
+        // TODO(FW-1307): Re-add ngDevMode when closure can handle it
+        // ngDevMode &&
+        console.warn(`DEPRECATED: DI is instantiating a token "${type.name}" that inherits its @Injectable decorator but does not provide one itself.\n` +
+            `This will become an error in v10. Please add @Injectable() to the "${type.name}" class.`);
+        return type[NG_INJECTABLE_DEF];
+    }
+    else {
+        return null;
+    }
 }
 /**
  * Read the `ngInjectorDef` type in a way which is immune to accidentally reading inherited value.
@@ -1921,33 +1942,59 @@ class R3Injector {
  * @return {?}
  */
 function injectableDefOrInjectorDefFactory(token) {
+    // Most tokens will have an ngInjectableDef directly on them, which specifies a factory directly.
     /** @type {?} */
-    const injectableDef = getInjectableDef((/** @type {?} */ (token)));
-    if (injectableDef === null) {
-        /** @type {?} */
-        const injectorDef = getInjectorDef((/** @type {?} */ (token)));
-        if (injectorDef !== null) {
-            return injectorDef.factory;
-        }
-        else if (token instanceof InjectionToken) {
-            throw new Error(`Token ${stringify(token)} is missing an ngInjectableDef definition.`);
-        }
-        else if (token instanceof Function) {
-            /** @type {?} */
-            const paramLength = token.length;
-            if (paramLength > 0) {
-                /** @type {?} */
-                const args = new Array(paramLength).fill('?');
-                throw new Error(`Can't resolve all parameters for ${stringify(token)}: (${args.join(', ')}).`);
-            }
-            return (/**
-             * @return {?}
-             */
-            () => new ((/** @type {?} */ (token)))());
-        }
-        throw new Error('unreachable');
+    const injectableDef = getInjectableDef(token);
+    if (injectableDef !== null) {
+        return injectableDef.factory;
     }
-    return injectableDef.factory;
+    // If the token is an NgModule, it's also injectable but the factory is on its ngInjectorDef.
+    /** @type {?} */
+    const injectorDef = getInjectorDef(token);
+    if (injectorDef !== null) {
+        return injectorDef.factory;
+    }
+    // InjectionTokens should have an ngInjectableDef and thus should be handled above.
+    // If it's missing that, it's an error.
+    if (token instanceof InjectionToken) {
+        throw new Error(`Token ${stringify(token)} is missing an ngInjectableDef definition.`);
+    }
+    // Undecorated types can sometimes be created if they have no constructor arguments.
+    if (token instanceof Function) {
+        return getUndecoratedInjectableFactory(token);
+    }
+    // There was no way to resolve a factory for this token.
+    throw new Error('unreachable');
+}
+/**
+ * @param {?} token
+ * @return {?}
+ */
+function getUndecoratedInjectableFactory(token) {
+    // If the token has parameters then it has dependencies that we cannot resolve implicitly.
+    /** @type {?} */
+    const paramLength = token.length;
+    if (paramLength > 0) {
+        /** @type {?} */
+        const args = new Array(paramLength).fill('?');
+        throw new Error(`Can't resolve all parameters for ${stringify(token)}: (${args.join(', ')}).`);
+    }
+    // The constructor function appears to have no parameters.
+    // This might be because it inherits from a super-class. In which case, use an ngInjectableDef
+    // from an ancestor if there is one.
+    // Otherwise this really is a simple class with no dependencies, so return a factory that
+    // just instantiates the zero-arg constructor.
+    /** @type {?} */
+    const inheritedInjectableDef = getInheritedInjectableDef(token);
+    if (inheritedInjectableDef !== null) {
+        return inheritedInjectableDef.factory;
+    }
+    else {
+        return (/**
+         * @return {?}
+         */
+        () => new ((/** @type {?} */ (token)))());
+    }
 }
 /**
  * @param {?} provider
@@ -9730,10 +9777,13 @@ function registerHostDirective(context, directiveIndex) {
  */
 function enqueueHostInstruction(context, priority, instructionFn, instructionFnArgs) {
     /** @type {?} */
-    const buffer = (/** @type {?} */ (context[8 /* HostInstructionsQueue */]));
-    /** @type {?} */
-    const index = findNextInsertionIndex(buffer, priority);
-    buffer.splice(index, 0, priority, instructionFn, instructionFnArgs);
+    const buffer = context[8 /* HostInstructionsQueue */];
+    // Buffer may be null if host element is a template node. In this case, just ignore the style.
+    if (buffer != null) {
+        /** @type {?} */
+        const index = findNextInsertionIndex(buffer, priority);
+        buffer.splice(index, 0, priority, instructionFn, instructionFnArgs);
+    }
 }
 /**
  * Figures out where exactly to to insert the next host instruction queue entry.
@@ -12500,18 +12550,16 @@ function createNodeAtIndex(index, type, native, name, attrs) {
         /** @type {?} */
         const tParentNode = parentInSameView ? (/** @type {?} */ (parent)) : null;
         tNode = tView.data[adjustedIndex] = createTNode(tParentNode, type, adjustedIndex, name, attrs);
-    }
-    // Now link ourselves into the tree.
-    // We need this even if tNode exists, otherwise we might end up pointing to unexisting tNodes when
-    // we use i18n (especially with ICU expressions that update the DOM during the update phase).
-    if (previousOrParentTNode) {
-        if (isParent && previousOrParentTNode.child == null &&
-            (tNode.parent !== null || previousOrParentTNode.type === 2 /* View */)) {
-            // We are in the same view, which means we are adding content node to the parent view.
-            previousOrParentTNode.child = tNode;
-        }
-        else if (!isParent) {
-            previousOrParentTNode.next = tNode;
+        // Now link ourselves into the tree.
+        if (previousOrParentTNode) {
+            if (isParent && previousOrParentTNode.child == null &&
+                (tNode.parent !== null || previousOrParentTNode.type === 2 /* View */)) {
+                // We are in the same view, which means we are adding content node to the parent view.
+                previousOrParentTNode.child = tNode;
+            }
+            else if (!isParent) {
+                previousOrParentTNode.next = tNode;
+            }
         }
     }
     if (tView.firstChild == null) {
@@ -20590,7 +20638,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-rc.0+182.sha-79d4b16.with-local-changes');
+const VERSION = new Version('8.0.0-rc.0+199.sha-e9ead2b.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
