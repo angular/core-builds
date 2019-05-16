@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+190.sha-0051ddf.with-local-changes
+ * @license Angular v8.0.0-rc.0+193.sha-c62c5e2.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7979,8 +7979,11 @@ function registerHostDirective(context, directiveIndex) {
  */
 function enqueueHostInstruction(context, priority, instructionFn, instructionFnArgs) {
     var buffer = context[8 /* HostInstructionsQueue */];
-    var index = findNextInsertionIndex(buffer, priority);
-    buffer.splice(index, 0, priority, instructionFn, instructionFnArgs);
+    // Buffer may be null if host element is a template node. In this case, just ignore the style.
+    if (buffer != null) {
+        var index = findNextInsertionIndex(buffer, priority);
+        buffer.splice(index, 0, priority, instructionFn, instructionFnArgs);
+    }
 }
 /**
  * Figures out where exactly to to insert the next host instruction queue entry.
@@ -10028,18 +10031,16 @@ function createNodeAtIndex(index, type, native, name, attrs) {
         var parentInSameView = parent_1 && parent_1 !== lView[T_HOST];
         var tParentNode = parentInSameView ? parent_1 : null;
         tNode = tView.data[adjustedIndex] = createTNode(tParentNode, type, adjustedIndex, name, attrs);
-    }
-    // Now link ourselves into the tree.
-    // We need this even if tNode exists, otherwise we might end up pointing to unexisting tNodes when
-    // we use i18n (especially with ICU expressions that update the DOM during the update phase).
-    if (previousOrParentTNode) {
-        if (isParent && previousOrParentTNode.child == null &&
-            (tNode.parent !== null || previousOrParentTNode.type === 2 /* View */)) {
-            // We are in the same view, which means we are adding content node to the parent view.
-            previousOrParentTNode.child = tNode;
-        }
-        else if (!isParent) {
-            previousOrParentTNode.next = tNode;
+        // Now link ourselves into the tree.
+        if (previousOrParentTNode) {
+            if (isParent && previousOrParentTNode.child == null &&
+                (tNode.parent !== null || previousOrParentTNode.type === 2 /* View */)) {
+                // We are in the same view, which means we are adding content node to the parent view.
+                previousOrParentTNode.child = tNode;
+            }
+            else if (!isParent) {
+                previousOrParentTNode.next = tNode;
+            }
         }
     }
     if (tView.firstChild == null) {
@@ -16657,7 +16658,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-rc.0+190.sha-0051ddf.with-local-changes');
+var VERSION = new Version('8.0.0-rc.0+193.sha-c62c5e2.with-local-changes');
 
 /**
  * @license
