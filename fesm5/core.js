@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+199.sha-e9ead2b.with-local-changes
+ * @license Angular v8.0.0-rc.0+216.sha-c9b588b.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1845,11 +1845,10 @@ var CIRCULAR$1 = IDENT;
 var MULTI_PROVIDER_FN = function () {
     return Array.prototype.slice.call(arguments);
 };
-var NULL_INJECTOR$1 = Injector.NULL;
 var NO_NEW_LINE$1 = 'ɵ';
 var StaticInjector = /** @class */ (function () {
     function StaticInjector(providers, parent, source) {
-        if (parent === void 0) { parent = NULL_INJECTOR$1; }
+        if (parent === void 0) { parent = Injector.NULL; }
         if (source === void 0) { source = null; }
         this.parent = parent;
         this.source = source;
@@ -2007,7 +2006,7 @@ function resolveToken(token, record, records, parent, notFoundValue, flags) {
                     records, 
                     // If we don't know how to resolve dependency and we should not check parent for it,
                     // than pass in Null injector.
-                    !childRecord && !(options & 4 /* CheckParent */) ? NULL_INJECTOR$1 : parent, options & 1 /* Optional */ ? null : Injector.THROW_IF_NOT_FOUND, InjectFlags.Default));
+                    !childRecord && !(options & 4 /* CheckParent */) ? Injector.NULL : parent, options & 1 /* Optional */ ? null : Injector.THROW_IF_NOT_FOUND, InjectFlags.Default));
                 }
             }
             record.value = value = useNew ? new ((_a = fn).bind.apply(_a, __spread([void 0], deps)))() : fn.apply(obj, deps);
@@ -3393,7 +3392,11 @@ var EMPTY_OBJ = {};
 var EMPTY_ARRAY$2 = [];
 // freezing the values prevents any code from accidentally inserting new values in
 if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+    // These property accesses can be ignored because ngDevMode will be set to false
+    // when optimizing code and the whole if statement will be dropped.
+    // tslint:disable-next-line:no-toplevel-property-access
     Object.freeze(EMPTY_OBJ);
+    // tslint:disable-next-line:no-toplevel-property-access
     Object.freeze(EMPTY_ARRAY$2);
 }
 
@@ -3775,9 +3778,12 @@ function stringifyForError(value) {
     }
     return renderStringify(value);
 }
-var defaultScheduler = (typeof requestAnimationFrame !== 'undefined' && requestAnimationFrame || // browser only
-    setTimeout // everything else
-).bind(_global);
+var ɵ0$6 = function () {
+    return (typeof requestAnimationFrame !== 'undefined' && requestAnimationFrame || // browser only
+        setTimeout // everything else
+    ).bind(_global);
+};
+var defaultScheduler = (ɵ0$6)();
 /**
  *
  * @codeGenApi
@@ -4261,10 +4267,10 @@ var NodeInjectorFactory = /** @class */ (function () {
     }
     return NodeInjectorFactory;
 }());
-var FactoryPrototype = NodeInjectorFactory.prototype;
 function isFactory(obj) {
     // See: https://jsperf.com/instanceof-vs-getprototypeof
-    return obj !== null && typeof obj == 'object' && Object.getPrototypeOf(obj) == FactoryPrototype;
+    return obj !== null && typeof obj == 'object' &&
+        Object.getPrototypeOf(obj) == NodeInjectorFactory.prototype;
 }
 
 /**
@@ -5027,9 +5033,9 @@ var RendererStyleFlags3;
 function isProceduralRenderer(renderer) {
     return !!(renderer.listen);
 }
-var ɵ0$6 = function (hostElement, rendererType) { return document; };
+var ɵ0$7 = function (hostElement, rendererType) { return document; };
 var domRendererFactory3 = {
-    createRenderer: ɵ0$6
+    createRenderer: ɵ0$7
 };
 
 /**
@@ -9863,11 +9869,12 @@ function isSelectorInSelectorList(selector, list) {
     return false;
 }
 
+var ɵ0$8 = function () { return Promise.resolve(null); };
 /**
  * A permanent marker promise which signifies that the current CD tree is
  * clean.
  */
-var _CLEAN_PROMISE = Promise.resolve(null);
+var _CLEAN_PROMISE = (ɵ0$8)();
 /**
  * Refreshes the view, executing the following steps in that order:
  * triggers init hooks, refreshes dynamic embedded views, triggers content hooks, sets host
@@ -16658,7 +16665,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-rc.0+199.sha-e9ead2b.with-local-changes');
+var VERSION = new Version('8.0.0-rc.0+216.sha-c9b588b.with-local-changes');
 
 /**
  * @license
@@ -19939,9 +19946,13 @@ var ComponentRef$1 = /** @class */ (function (_super) {
  * NOTE: changes to the `ngI18nClosureMode` name must be synced with `compiler-cli/src/tooling.ts`.
  */
 if (typeof ngI18nClosureMode === 'undefined') {
+    // These property accesses can be ignored because ngI18nClosureMode will be set to false
+    // when optimizing code and the whole if statement will be dropped.
     // Make sure to refer to ngI18nClosureMode as ['ngI18nClosureMode'] for closure.
+    // tslint:disable-next-line:no-toplevel-property-access
     _global['ngI18nClosureMode'] =
         // TODO(FW-1250): validate that this actually, you know, works.
+        // tslint:disable-next-line:no-toplevel-property-access
         typeof goog !== 'undefined' && typeof goog.getMsg === 'function';
 }
 
@@ -22786,12 +22797,7 @@ function ΔtemplateRefExtractor(tNode, currentView) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * A mapping of the @angular/core API surface used in generated expressions to the actual symbols.
- *
- * This should be kept up to date with the public exports of @angular/core.
- */
-var angularCoreEnv = {
+var ɵ0$9 = function () { return ({
     'ΔdefineBase': ΔdefineBase,
     'ΔdefineComponent': ΔdefineComponent,
     'ΔdefineDirective': ΔdefineDirective,
@@ -22911,7 +22917,13 @@ var angularCoreEnv = {
     'ΔsanitizeScript': ΔsanitizeScript,
     'ΔsanitizeUrl': ΔsanitizeUrl,
     'ΔsanitizeUrlOrResourceUrl': ΔsanitizeUrlOrResourceUrl,
-};
+}); };
+/**
+ * A mapping of the @angular/core API surface used in generated expressions to the actual symbols.
+ *
+ * This should be kept up to date with the public exports of @angular/core.
+ */
+var angularCoreEnv = (ɵ0$9)();
 
 /**
  * @license
@@ -23606,7 +23618,7 @@ function compilePipe(type, meta) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var ɵ0$7 = function (dir) {
+var ɵ0$a = function (dir) {
     if (dir === void 0) { dir = {}; }
     return dir;
 }, ɵ1$2 = function (type, meta) { return SWITCH_COMPILE_DIRECTIVE(type, meta); };
@@ -23615,7 +23627,7 @@ var ɵ0$7 = function (dir) {
  *
  * @publicApi
  */
-var Directive = makeDecorator('Directive', ɵ0$7, undefined, undefined, ɵ1$2);
+var Directive = makeDecorator('Directive', ɵ0$a, undefined, undefined, ɵ1$2);
 var ɵ2$1 = function (c) {
     if (c === void 0) { c = {}; }
     return (__assign({ changeDetection: ChangeDetectionStrategy.Default }, c));
@@ -23702,7 +23714,7 @@ var SWITCH_COMPILE_PIPE = SWITCH_COMPILE_PIPE__PRE_R3__;
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var ɵ0$8 = function (ngModule) { return ngModule; }, ɵ1$3 = 
+var ɵ0$b = function (ngModule) { return ngModule; }, ɵ1$3 = 
 /**
  * Decorator that marks the following class as an NgModule, and supplies
  * configuration metadata for it.
@@ -23719,7 +23731,7 @@ function (type, meta) { return SWITCH_COMPILE_NGMODULE(type, meta); };
  * @Annotation
  * @publicApi
  */
-var NgModule = makeDecorator('NgModule', ɵ0$8, undefined, undefined, ɵ1$3);
+var NgModule = makeDecorator('NgModule', ɵ0$b, undefined, undefined, ɵ1$3);
 function preR3NgModuleCompile(moduleType, metadata) {
     var imports = (metadata && metadata.imports) || [];
     if (metadata && metadata.exports) {
@@ -24122,7 +24134,7 @@ var wtfEndTimeRange = wtfEnabled ? endTimeRange : function (r) { return null; };
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var promise = Promise.resolve(0);
+var promise = (function () { return Promise.resolve(0); })();
 function scheduleMicroTask(fn) {
     if (typeof Zone === 'undefined') {
         // use promise to schedule microTask instead of use Zone
