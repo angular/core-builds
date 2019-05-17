@@ -12,6 +12,7 @@ import { LQueries } from './interfaces/query';
 import { RComment, RElement } from './interfaces/renderer';
 import { StylingContext } from './interfaces/styling';
 import { LView, LViewFlags } from './interfaces/view';
+import { DebugStyling as DebugNewStyling } from './styling_next/styling_debug';
 export declare function attachLViewDebug(lView: LView): void;
 export declare function attachLContainerDebug(lContainer: LContainer): void;
 export declare function toDebug(obj: LView): LViewDebug;
@@ -72,6 +73,8 @@ export declare class LViewDebug {
 export interface DebugNode {
     html: string | null;
     native: Node;
+    styles: DebugNewStyling | null;
+    classes: DebugNewStyling | null;
     nodes: DebugNode[] | null;
     component: LViewDebug | null;
 }

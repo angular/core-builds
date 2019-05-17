@@ -248,6 +248,7 @@ export declare function generateConfigSummary(source: StylingContext): LogSummar
 export declare function generateConfigSummary(source: StylingContext, index: number): LogSummary;
 export declare function getDirectiveIndexFromEntry(context: StylingContext, index: number): number;
 export declare function compareLogSummaries(a: LogSummary, b: LogSummary): string[];
+export declare function getSinglePropIndexValue(context: StylingContext, directiveIndex: number, offset: number, isClassBased: boolean): number;
 /**
  * Returns the className string of all the initial classes for the element.
  *

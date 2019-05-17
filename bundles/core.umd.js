@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+240.sha-848e53e.with-local-changes
+ * @license Angular v8.0.0-rc.0+241.sha-f03475c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3586,6 +3586,38 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    // Below are constants for LView indices to help us look up LView members
+    // without having to remember the specific indices.
+    // Uglify will inline these when minifying so there shouldn't be a cost.
+    var HOST = 0;
+    var TVIEW = 1;
+    var FLAGS = 2;
+    var PARENT = 3;
+    var NEXT = 4;
+    var QUERIES = 5;
+    var T_HOST = 6;
+    var BINDING_INDEX = 7;
+    var CLEANUP = 8;
+    var CONTEXT = 9;
+    var INJECTOR$1 = 10;
+    var RENDERER_FACTORY = 11;
+    var RENDERER = 12;
+    var SANITIZER = 13;
+    var CHILD_HEAD = 14;
+    var CHILD_TAIL = 15;
+    var CONTENT_QUERIES = 16;
+    var DECLARATION_VIEW = 17;
+    var PREORDER_HOOK_FLAGS = 18;
+    /** Size of LView's header. Necessary to adjust for it when setting slots.  */
+    var HEADER_OFFSET = 20;
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     function assertEqual(actual, expected, msg) {
         if (actual != expected) {
             throwError(msg);
@@ -3629,38 +3661,6 @@
     function assertDataInRange(arr, index) {
         assertLessThan(index, arr ? arr.length : 0, 'index expected to be a valid data index');
     }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    // Below are constants for LView indices to help us look up LView members
-    // without having to remember the specific indices.
-    // Uglify will inline these when minifying so there shouldn't be a cost.
-    var HOST = 0;
-    var TVIEW = 1;
-    var FLAGS = 2;
-    var PARENT = 3;
-    var NEXT = 4;
-    var QUERIES = 5;
-    var T_HOST = 6;
-    var BINDING_INDEX = 7;
-    var CLEANUP = 8;
-    var CONTEXT = 9;
-    var INJECTOR$1 = 10;
-    var RENDERER_FACTORY = 11;
-    var RENDERER = 12;
-    var SANITIZER = 13;
-    var CHILD_HEAD = 14;
-    var CHILD_TAIL = 15;
-    var CONTENT_QUERIES = 16;
-    var DECLARATION_VIEW = 17;
-    var PREORDER_HOOK_FLAGS = 18;
-    /** Size of LView's header. Necessary to adjust for it when setting slots.  */
-    var HEADER_OFFSET = 20;
 
     /**
      * @license
@@ -3879,172 +3879,6 @@
     function assertLView(value) {
         assertDefined(value, 'LView must be defined');
         assertEqual(isLView(value), true, 'Expecting LView');
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var TNODE = 8;
-    var PARENT_INJECTOR = 8;
-    var INJECTOR_BLOOM_PARENT_SIZE = 9;
-    var NO_PARENT_INJECTOR = -1;
-    /**
-     * Each injector is saved in 9 contiguous slots in `LView` and 9 contiguous slots in
-     * `TView.data`. This allows us to store information about the current node's tokens (which
-     * can be shared in `TView`) as well as the tokens of its ancestor nodes (which cannot be
-     * shared, so they live in `LView`).
-     *
-     * Each of these slots (aside from the last slot) contains a bloom filter. This bloom filter
-     * determines whether a directive is available on the associated node or not. This prevents us
-     * from searching the directives array at this level unless it's probable the directive is in it.
-     *
-     * See: https://en.wikipedia.org/wiki/Bloom_filter for more about bloom filters.
-     *
-     * Because all injectors have been flattened into `LView` and `TViewData`, they cannot typed
-     * using interfaces as they were previously. The start index of each `LInjector` and `TInjector`
-     * will differ based on where it is flattened into the main array, so it's not possible to know
-     * the indices ahead of time and save their types here. The interfaces are still included here
-     * for documentation purposes.
-     *
-     * export interface LInjector extends Array<any> {
-     *
-     *    // Cumulative bloom for directive IDs 0-31  (IDs are % BLOOM_SIZE)
-     *    [0]: number;
-     *
-     *    // Cumulative bloom for directive IDs 32-63
-     *    [1]: number;
-     *
-     *    // Cumulative bloom for directive IDs 64-95
-     *    [2]: number;
-     *
-     *    // Cumulative bloom for directive IDs 96-127
-     *    [3]: number;
-     *
-     *    // Cumulative bloom for directive IDs 128-159
-     *    [4]: number;
-     *
-     *    // Cumulative bloom for directive IDs 160 - 191
-     *    [5]: number;
-     *
-     *    // Cumulative bloom for directive IDs 192 - 223
-     *    [6]: number;
-     *
-     *    // Cumulative bloom for directive IDs 224 - 255
-     *    [7]: number;
-     *
-     *    // We need to store a reference to the injector's parent so DI can keep looking up
-     *    // the injector tree until it finds the dependency it's looking for.
-     *    [PARENT_INJECTOR]: number;
-     * }
-     *
-     * export interface TInjector extends Array<any> {
-     *
-     *    // Shared node bloom for directive IDs 0-31  (IDs are % BLOOM_SIZE)
-     *    [0]: number;
-     *
-     *    // Shared node bloom for directive IDs 32-63
-     *    [1]: number;
-     *
-     *    // Shared node bloom for directive IDs 64-95
-     *    [2]: number;
-     *
-     *    // Shared node bloom for directive IDs 96-127
-     *    [3]: number;
-     *
-     *    // Shared node bloom for directive IDs 128-159
-     *    [4]: number;
-     *
-     *    // Shared node bloom for directive IDs 160 - 191
-     *    [5]: number;
-     *
-     *    // Shared node bloom for directive IDs 192 - 223
-     *    [6]: number;
-     *
-     *    // Shared node bloom for directive IDs 224 - 255
-     *    [7]: number;
-     *
-     *    // Necessary to find directive indices for a particular node.
-     *    [TNODE]: TElementNode|TElementContainerNode|TContainerNode;
-     *  }
-     */
-    /**
-    * Factory for creating instances of injectors in the NodeInjector.
-    *
-    * This factory is complicated by the fact that it can resolve `multi` factories as well.
-    *
-    * NOTE: Some of the fields are optional which means that this class has two hidden classes.
-    * - One without `multi` support (most common)
-    * - One with `multi` values, (rare).
-    *
-    * Since VMs can cache up to 4 inline hidden classes this is OK.
-    *
-    * - Single factory: Only `resolving` and `factory` is defined.
-    * - `providers` factory: `componentProviders` is a number and `index = -1`.
-    * - `viewProviders` factory: `componentProviders` is a number and `index` points to `providers`.
-    */
-    var NodeInjectorFactory = /** @class */ (function () {
-        function NodeInjectorFactory(
-        /**
-         * Factory to invoke in order to create a new instance.
-         */
-        factory, 
-        /**
-         * Set to `true` if the token is declared in `viewProviders` (or if it is component).
-         */
-        isViewProvider, injectImplementation) {
-            this.factory = factory;
-            /**
-             * Marker set to true during factory invocation to see if we get into recursive loop.
-             * Recursive loop causes an error to be displayed.
-             */
-            this.resolving = false;
-            this.canSeeViewProviders = isViewProvider;
-            this.injectImpl = injectImplementation;
-        }
-        return NodeInjectorFactory;
-    }());
-    function isFactory(obj) {
-        // See: https://jsperf.com/instanceof-vs-getprototypeof
-        return obj !== null && typeof obj == 'object' &&
-            Object.getPrototypeOf(obj) == NodeInjectorFactory.prototype;
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    function assertNodeType(tNode, type) {
-        assertDefined(tNode, 'should be called with a TNode');
-        assertEqual(tNode.type, type, "should be a " + typeName(type));
-    }
-    function assertNodeOfPossibleTypes(tNode) {
-        var types = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            types[_i - 1] = arguments[_i];
-        }
-        assertDefined(tNode, 'should be called with a TNode');
-        var found = types.some(function (type) { return tNode.type === type; });
-        assertEqual(found, true, "Should be one of " + types.map(typeName).join(', ') + " but got " + typeName(tNode.type));
-    }
-    function typeName(type) {
-        if (type == 1 /* Projection */)
-            return 'Projection';
-        if (type == 0 /* Container */)
-            return 'Container';
-        if (type == 2 /* View */)
-            return 'View';
-        if (type == 3 /* Element */)
-            return 'Element';
-        if (type == 4 /* ElementContainer */)
-            return 'ElementContainer';
-        return '<unknown>';
     }
 
     /**
@@ -4519,6 +4353,26 @@
             Math.max(activeDirectiveSuperClassHeight, activeDirectiveSuperClassDepthPosition);
     }
     /**
+     * Returns he current depth of the super/sub class inheritance chain.
+     *
+     * This will return how many inherited directive/component classes
+     * exist in the current chain.
+     *
+     * ```typescript
+     * @Directive({ selector: '[super-dir]' })
+     * class SuperDir {}
+     *
+     * @Directive({ selector: '[sub-dir]' })
+     * class SubDir extends SuperDir {}
+     *
+     * // if `<div sub-dir>` is used then the super class height is `1`
+     * // if `<div super-dir>` is used then the super class height is `0`
+     * ```
+     */
+    function getActiveDirectiveSuperClassHeight() {
+        return activeDirectiveSuperClassHeight;
+    }
+    /**
      * Returns the current super class (reverse inheritance) depth for a directive.
      *
      * This is designed to help instruction code distinguish different hostBindings
@@ -4754,6 +4608,1089 @@
     }
     function getNamespace() {
         return _currentNamespace;
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var BRAND = '__SANITIZER_TRUSTED_BRAND__';
+    function allowSanitizationBypass(value, type) {
+        return (value instanceof String && value[BRAND] === type);
+    }
+    /**
+     * Mark `html` string as trusted.
+     *
+     * This function wraps the trusted string in `String` and brands it in a way which makes it
+     * recognizable to {@link htmlSanitizer} to be trusted implicitly.
+     *
+     * @param trustedHtml `html` string which needs to be implicitly trusted.
+     * @returns a `html` `String` which has been branded to be implicitly trusted.
+     */
+    function bypassSanitizationTrustHtml(trustedHtml) {
+        return bypassSanitizationTrustString(trustedHtml, "Html" /* Html */);
+    }
+    /**
+     * Mark `style` string as trusted.
+     *
+     * This function wraps the trusted string in `String` and brands it in a way which makes it
+     * recognizable to {@link styleSanitizer} to be trusted implicitly.
+     *
+     * @param trustedStyle `style` string which needs to be implicitly trusted.
+     * @returns a `style` `String` which has been branded to be implicitly trusted.
+     */
+    function bypassSanitizationTrustStyle(trustedStyle) {
+        return bypassSanitizationTrustString(trustedStyle, "Style" /* Style */);
+    }
+    /**
+     * Mark `script` string as trusted.
+     *
+     * This function wraps the trusted string in `String` and brands it in a way which makes it
+     * recognizable to {@link scriptSanitizer} to be trusted implicitly.
+     *
+     * @param trustedScript `script` string which needs to be implicitly trusted.
+     * @returns a `script` `String` which has been branded to be implicitly trusted.
+     */
+    function bypassSanitizationTrustScript(trustedScript) {
+        return bypassSanitizationTrustString(trustedScript, "Script" /* Script */);
+    }
+    /**
+     * Mark `url` string as trusted.
+     *
+     * This function wraps the trusted string in `String` and brands it in a way which makes it
+     * recognizable to {@link urlSanitizer} to be trusted implicitly.
+     *
+     * @param trustedUrl `url` string which needs to be implicitly trusted.
+     * @returns a `url` `String` which has been branded to be implicitly trusted.
+     */
+    function bypassSanitizationTrustUrl(trustedUrl) {
+        return bypassSanitizationTrustString(trustedUrl, "Url" /* Url */);
+    }
+    /**
+     * Mark `url` string as trusted.
+     *
+     * This function wraps the trusted string in `String` and brands it in a way which makes it
+     * recognizable to {@link resourceUrlSanitizer} to be trusted implicitly.
+     *
+     * @param trustedResourceUrl `url` string which needs to be implicitly trusted.
+     * @returns a `url` `String` which has been branded to be implicitly trusted.
+     */
+    function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
+        return bypassSanitizationTrustString(trustedResourceUrl, "ResourceUrl" /* ResourceUrl */);
+    }
+    function bypassSanitizationTrustString(trustedString, mode) {
+        var trusted = new String(trustedString);
+        trusted[BRAND] = mode;
+        return trusted;
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * This file is used to control if the default rendering pipeline should be `ViewEngine` or `Ivy`.
+     *
+     * For more information on how to run and debug tests with either Ivy or View Engine (legacy),
+     * please see [BAZEL.md](./docs/BAZEL.md).
+     */
+    var _devMode = true;
+    var _runModeLocked = false;
+    /**
+     * Returns whether Angular is in development mode. After called once,
+     * the value is locked and won't change any more.
+     *
+     * By default, this is true, unless a user calls `enableProdMode` before calling this.
+     *
+     * @publicApi
+     */
+    function isDevMode() {
+        _runModeLocked = true;
+        return _devMode;
+    }
+    /**
+     * Disable Angular's development mode, which turns off assertions and other
+     * checks within the framework.
+     *
+     * One important assertion this disables verifies that a change detection pass
+     * does not result in additional changes to any bindings (also known as
+     * unidirectional data flow).
+     *
+     * @publicApi
+     */
+    function enableProdMode() {
+        if (_runModeLocked) {
+            throw new Error('Cannot enable prod mode after platform setup.');
+        }
+        _devMode = false;
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * This helper class is used to get hold of an inert tree of DOM elements containing dirty HTML
+     * that needs sanitizing.
+     * Depending upon browser support we must use one of three strategies for doing this.
+     * Support: Safari 10.x -> XHR strategy
+     * Support: Firefox -> DomParser strategy
+     * Default: InertDocument strategy
+     */
+    var InertBodyHelper = /** @class */ (function () {
+        function InertBodyHelper(defaultDoc) {
+            this.defaultDoc = defaultDoc;
+            this.inertDocument = this.defaultDoc.implementation.createHTMLDocument('sanitization-inert');
+            this.inertBodyElement = this.inertDocument.body;
+            if (this.inertBodyElement == null) {
+                // usually there should be only one body element in the document, but IE doesn't have any, so
+                // we need to create one.
+                var inertHtml = this.inertDocument.createElement('html');
+                this.inertDocument.appendChild(inertHtml);
+                this.inertBodyElement = this.inertDocument.createElement('body');
+                inertHtml.appendChild(this.inertBodyElement);
+            }
+            this.inertBodyElement.innerHTML = '<svg><g onload="this.parentNode.remove()"></g></svg>';
+            if (this.inertBodyElement.querySelector && !this.inertBodyElement.querySelector('svg')) {
+                // We just hit the Safari 10.1 bug - which allows JS to run inside the SVG G element
+                // so use the XHR strategy.
+                this.getInertBodyElement = this.getInertBodyElement_XHR;
+                return;
+            }
+            this.inertBodyElement.innerHTML =
+                '<svg><p><style><img src="</style><img src=x onerror=alert(1)//">';
+            if (this.inertBodyElement.querySelector && this.inertBodyElement.querySelector('svg img')) {
+                // We just hit the Firefox bug - which prevents the inner img JS from being sanitized
+                // so use the DOMParser strategy, if it is available.
+                // If the DOMParser is not available then we are not in Firefox (Server/WebWorker?) so we
+                // fall through to the default strategy below.
+                if (isDOMParserAvailable()) {
+                    this.getInertBodyElement = this.getInertBodyElement_DOMParser;
+                    return;
+                }
+            }
+            // None of the bugs were hit so it is safe for us to use the default InertDocument strategy
+            this.getInertBodyElement = this.getInertBodyElement_InertDocument;
+        }
+        /**
+         * Use XHR to create and fill an inert body element (on Safari 10.1)
+         * See
+         * https://github.com/cure53/DOMPurify/blob/a992d3a75031cb8bb032e5ea8399ba972bdf9a65/src/purify.js#L439-L449
+         */
+        InertBodyHelper.prototype.getInertBodyElement_XHR = function (html) {
+            // We add these extra elements to ensure that the rest of the content is parsed as expected
+            // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
+            // `<head>` tag.
+            html = '<body><remove></remove>' + html + '</body>';
+            try {
+                html = encodeURI(html);
+            }
+            catch (_a) {
+                return null;
+            }
+            var xhr = new XMLHttpRequest();
+            xhr.responseType = 'document';
+            xhr.open('GET', 'data:text/html;charset=utf-8,' + html, false);
+            xhr.send(undefined);
+            var body = xhr.response.body;
+            body.removeChild(body.firstChild);
+            return body;
+        };
+        /**
+         * Use DOMParser to create and fill an inert body element (on Firefox)
+         * See https://github.com/cure53/DOMPurify/releases/tag/0.6.7
+         *
+         */
+        InertBodyHelper.prototype.getInertBodyElement_DOMParser = function (html) {
+            // We add these extra elements to ensure that the rest of the content is parsed as expected
+            // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
+            // `<head>` tag.
+            html = '<body><remove></remove>' + html + '</body>';
+            try {
+                var body = new window
+                    .DOMParser()
+                    .parseFromString(html, 'text/html')
+                    .body;
+                body.removeChild(body.firstChild);
+                return body;
+            }
+            catch (_a) {
+                return null;
+            }
+        };
+        /**
+         * Use an HTML5 `template` element, if supported, or an inert body element created via
+         * `createHtmlDocument` to create and fill an inert DOM element.
+         * This is the default sane strategy to use if the browser does not require one of the specialised
+         * strategies above.
+         */
+        InertBodyHelper.prototype.getInertBodyElement_InertDocument = function (html) {
+            // Prefer using <template> element if supported.
+            var templateEl = this.inertDocument.createElement('template');
+            if ('content' in templateEl) {
+                templateEl.innerHTML = html;
+                return templateEl;
+            }
+            this.inertBodyElement.innerHTML = html;
+            // Support: IE 9-11 only
+            // strip custom-namespaced attributes on IE<=11
+            if (this.defaultDoc.documentMode) {
+                this.stripCustomNsAttrs(this.inertBodyElement);
+            }
+            return this.inertBodyElement;
+        };
+        /**
+         * When IE9-11 comes across an unknown namespaced attribute e.g. 'xlink:foo' it adds 'xmlns:ns1'
+         * attribute to declare ns1 namespace and prefixes the attribute with 'ns1' (e.g.
+         * 'ns1:xlink:foo').
+         *
+         * This is undesirable since we don't want to allow any of these custom attributes. This method
+         * strips them all.
+         */
+        InertBodyHelper.prototype.stripCustomNsAttrs = function (el) {
+            var elAttrs = el.attributes;
+            // loop backwards so that we can support removals.
+            for (var i = elAttrs.length - 1; 0 < i; i--) {
+                var attrib = elAttrs.item(i);
+                var attrName = attrib.name;
+                if (attrName === 'xmlns:ns1' || attrName.indexOf('ns1:') === 0) {
+                    el.removeAttribute(attrName);
+                }
+            }
+            var childNode = el.firstChild;
+            while (childNode) {
+                if (childNode.nodeType === Node.ELEMENT_NODE)
+                    this.stripCustomNsAttrs(childNode);
+                childNode = childNode.nextSibling;
+            }
+        };
+        return InertBodyHelper;
+    }());
+    /**
+     * We need to determine whether the DOMParser exists in the global context.
+     * The try-catch is because, on some browsers, trying to access this property
+     * on window can actually throw an error.
+     *
+     * @suppress {uselessCode}
+     */
+    function isDOMParserAvailable() {
+        try {
+            return !!window.DOMParser;
+        }
+        catch (_a) {
+            return false;
+        }
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * A pattern that recognizes a commonly useful subset of URLs that are safe.
+     *
+     * This regular expression matches a subset of URLs that will not cause script
+     * execution if used in URL context within a HTML document. Specifically, this
+     * regular expression matches if (comment from here on and regex copied from
+     * Soy's EscapingConventions):
+     * (1) Either an allowed protocol (http, https, mailto or ftp).
+     * (2) or no protocol.  A protocol must be followed by a colon. The below
+     *     allows that by allowing colons only after one of the characters [/?#].
+     *     A colon after a hash (#) must be in the fragment.
+     *     Otherwise, a colon after a (?) must be in a query.
+     *     Otherwise, a colon after a single solidus (/) must be in a path.
+     *     Otherwise, a colon after a double solidus (//) must be in the authority
+     *     (before port).
+     *
+     * The pattern disallows &, used in HTML entity declarations before
+     * one of the characters in [/?#]. This disallows HTML entities used in the
+     * protocol name, which should never happen, e.g. "h&#116;tp" for "http".
+     * It also disallows HTML entities in the first path part of a relative path,
+     * e.g. "foo&lt;bar/baz".  Our existing escaping functions should not produce
+     * that. More importantly, it disallows masking of a colon,
+     * e.g. "javascript&#58;...".
+     *
+     * This regular expression was taken from the Closure sanitization library.
+     */
+    var SAFE_URL_PATTERN = /^(?:(?:https?|mailto|ftp|tel|file):|[^&:/?#]*(?:[/?#]|$))/gi;
+    /** A pattern that matches safe data URLs. Only matches image, video and audio types. */
+    var DATA_URL_PATTERN = /^data:(?:image\/(?:bmp|gif|jpeg|jpg|png|tiff|webp)|video\/(?:mpeg|mp4|ogg|webm)|audio\/(?:mp3|oga|ogg|opus));base64,[a-z0-9+\/]+=*$/i;
+    function _sanitizeUrl(url) {
+        url = String(url);
+        if (url.match(SAFE_URL_PATTERN) || url.match(DATA_URL_PATTERN))
+            return url;
+        if (isDevMode()) {
+            console.warn("WARNING: sanitizing unsafe URL value " + url + " (see http://g.co/ng/security#xss)");
+        }
+        return 'unsafe:' + url;
+    }
+    function sanitizeSrcset(srcset) {
+        srcset = String(srcset);
+        return srcset.split(',').map(function (srcset) { return _sanitizeUrl(srcset.trim()); }).join(', ');
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    function tagSet(tags) {
+        var e_1, _a;
+        var res = {};
+        try {
+            for (var _b = __values(tags.split(',')), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var t = _c.value;
+                res[t] = true;
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+        return res;
+    }
+    function merge() {
+        var e_2, _a;
+        var sets = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            sets[_i] = arguments[_i];
+        }
+        var res = {};
+        try {
+            for (var sets_1 = __values(sets), sets_1_1 = sets_1.next(); !sets_1_1.done; sets_1_1 = sets_1.next()) {
+                var s = sets_1_1.value;
+                for (var v in s) {
+                    if (s.hasOwnProperty(v))
+                        res[v] = true;
+                }
+            }
+        }
+        catch (e_2_1) { e_2 = { error: e_2_1 }; }
+        finally {
+            try {
+                if (sets_1_1 && !sets_1_1.done && (_a = sets_1.return)) _a.call(sets_1);
+            }
+            finally { if (e_2) throw e_2.error; }
+        }
+        return res;
+    }
+    // Good source of info about elements and attributes
+    // http://dev.w3.org/html5/spec/Overview.html#semantics
+    // http://simon.html5.org/html-elements
+    // Safe Void Elements - HTML5
+    // http://dev.w3.org/html5/spec/Overview.html#void-elements
+    var VOID_ELEMENTS = tagSet('area,br,col,hr,img,wbr');
+    // Elements that you can, intentionally, leave open (and which close themselves)
+    // http://dev.w3.org/html5/spec/Overview.html#optional-tags
+    var OPTIONAL_END_TAG_BLOCK_ELEMENTS = tagSet('colgroup,dd,dt,li,p,tbody,td,tfoot,th,thead,tr');
+    var OPTIONAL_END_TAG_INLINE_ELEMENTS = tagSet('rp,rt');
+    var OPTIONAL_END_TAG_ELEMENTS = merge(OPTIONAL_END_TAG_INLINE_ELEMENTS, OPTIONAL_END_TAG_BLOCK_ELEMENTS);
+    // Safe Block Elements - HTML5
+    var BLOCK_ELEMENTS = merge(OPTIONAL_END_TAG_BLOCK_ELEMENTS, tagSet('address,article,' +
+        'aside,blockquote,caption,center,del,details,dialog,dir,div,dl,figure,figcaption,footer,h1,h2,h3,h4,h5,' +
+        'h6,header,hgroup,hr,ins,main,map,menu,nav,ol,pre,section,summary,table,ul'));
+    // Inline Elements - HTML5
+    var INLINE_ELEMENTS = merge(OPTIONAL_END_TAG_INLINE_ELEMENTS, tagSet('a,abbr,acronym,audio,b,' +
+        'bdi,bdo,big,br,cite,code,del,dfn,em,font,i,img,ins,kbd,label,map,mark,picture,q,ruby,rp,rt,s,' +
+        'samp,small,source,span,strike,strong,sub,sup,time,track,tt,u,var,video'));
+    var VALID_ELEMENTS = merge(VOID_ELEMENTS, BLOCK_ELEMENTS, INLINE_ELEMENTS, OPTIONAL_END_TAG_ELEMENTS);
+    // Attributes that have href and hence need to be sanitized
+    var URI_ATTRS = tagSet('background,cite,href,itemtype,longdesc,poster,src,xlink:href');
+    // Attributes that have special href set hence need to be sanitized
+    var SRCSET_ATTRS = tagSet('srcset');
+    var HTML_ATTRS = tagSet('abbr,accesskey,align,alt,autoplay,axis,bgcolor,border,cellpadding,cellspacing,class,clear,color,cols,colspan,' +
+        'compact,controls,coords,datetime,default,dir,download,face,headers,height,hidden,hreflang,hspace,' +
+        'ismap,itemscope,itemprop,kind,label,lang,language,loop,media,muted,nohref,nowrap,open,preload,rel,rev,role,rows,rowspan,rules,' +
+        'scope,scrolling,shape,size,sizes,span,srclang,start,summary,tabindex,target,title,translate,type,usemap,' +
+        'valign,value,vspace,width');
+    // Accessibility attributes as per WAI-ARIA 1.1 (W3C Working Draft 14 December 2018)
+    var ARIA_ATTRS = tagSet('aria-activedescendant,aria-atomic,aria-autocomplete,aria-busy,aria-checked,aria-colcount,aria-colindex,' +
+        'aria-colspan,aria-controls,aria-current,aria-describedby,aria-details,aria-disabled,aria-dropeffect,' +
+        'aria-errormessage,aria-expanded,aria-flowto,aria-grabbed,aria-haspopup,aria-hidden,aria-invalid,' +
+        'aria-keyshortcuts,aria-label,aria-labelledby,aria-level,aria-live,aria-modal,aria-multiline,' +
+        'aria-multiselectable,aria-orientation,aria-owns,aria-placeholder,aria-posinset,aria-pressed,aria-readonly,' +
+        'aria-relevant,aria-required,aria-roledescription,aria-rowcount,aria-rowindex,aria-rowspan,aria-selected,' +
+        'aria-setsize,aria-sort,aria-valuemax,aria-valuemin,aria-valuenow,aria-valuetext');
+    // NB: This currently consciously doesn't support SVG. SVG sanitization has had several security
+    // issues in the past, so it seems safer to leave it out if possible. If support for binding SVG via
+    // innerHTML is required, SVG attributes should be added here.
+    // NB: Sanitization does not allow <form> elements or other active elements (<button> etc). Those
+    // can be sanitized, but they increase security surface area without a legitimate use case, so they
+    // are left out here.
+    var VALID_ATTRS = merge(URI_ATTRS, SRCSET_ATTRS, HTML_ATTRS, ARIA_ATTRS);
+    // Elements whose content should not be traversed/preserved, if the elements themselves are invalid.
+    //
+    // Typically, `<invalid>Some content</invalid>` would traverse (and in this case preserve)
+    // `Some content`, but strip `invalid-element` opening/closing tags. For some elements, though, we
+    // don't want to preserve the content, if the elements themselves are going to be removed.
+    var SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS = tagSet('script,style,template');
+    /**
+     * SanitizingHtmlSerializer serializes a DOM fragment, stripping out any unsafe elements and unsafe
+     * attributes.
+     */
+    var SanitizingHtmlSerializer = /** @class */ (function () {
+        function SanitizingHtmlSerializer() {
+            // Explicitly track if something was stripped, to avoid accidentally warning of sanitization just
+            // because characters were re-encoded.
+            this.sanitizedSomething = false;
+            this.buf = [];
+        }
+        SanitizingHtmlSerializer.prototype.sanitizeChildren = function (el) {
+            // This cannot use a TreeWalker, as it has to run on Angular's various DOM adapters.
+            // However this code never accesses properties off of `document` before deleting its contents
+            // again, so it shouldn't be vulnerable to DOM clobbering.
+            var current = el.firstChild;
+            var traverseContent = true;
+            while (current) {
+                if (current.nodeType === Node.ELEMENT_NODE) {
+                    traverseContent = this.startElement(current);
+                }
+                else if (current.nodeType === Node.TEXT_NODE) {
+                    this.chars(current.nodeValue);
+                }
+                else {
+                    // Strip non-element, non-text nodes.
+                    this.sanitizedSomething = true;
+                }
+                if (traverseContent && current.firstChild) {
+                    current = current.firstChild;
+                    continue;
+                }
+                while (current) {
+                    // Leaving the element. Walk up and to the right, closing tags as we go.
+                    if (current.nodeType === Node.ELEMENT_NODE) {
+                        this.endElement(current);
+                    }
+                    var next = this.checkClobberedElement(current, current.nextSibling);
+                    if (next) {
+                        current = next;
+                        break;
+                    }
+                    current = this.checkClobberedElement(current, current.parentNode);
+                }
+            }
+            return this.buf.join('');
+        };
+        /**
+         * Sanitizes an opening element tag (if valid) and returns whether the element's contents should
+         * be traversed. Element content must always be traversed (even if the element itself is not
+         * valid/safe), unless the element is one of `SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS`.
+         *
+         * @param element The element to sanitize.
+         * @return True if the element's contents should be traversed.
+         */
+        SanitizingHtmlSerializer.prototype.startElement = function (element) {
+            var tagName = element.nodeName.toLowerCase();
+            if (!VALID_ELEMENTS.hasOwnProperty(tagName)) {
+                this.sanitizedSomething = true;
+                return !SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS.hasOwnProperty(tagName);
+            }
+            this.buf.push('<');
+            this.buf.push(tagName);
+            var elAttrs = element.attributes;
+            for (var i = 0; i < elAttrs.length; i++) {
+                var elAttr = elAttrs.item(i);
+                var attrName = elAttr.name;
+                var lower = attrName.toLowerCase();
+                if (!VALID_ATTRS.hasOwnProperty(lower)) {
+                    this.sanitizedSomething = true;
+                    continue;
+                }
+                var value = elAttr.value;
+                // TODO(martinprobst): Special case image URIs for data:image/...
+                if (URI_ATTRS[lower])
+                    value = _sanitizeUrl(value);
+                if (SRCSET_ATTRS[lower])
+                    value = sanitizeSrcset(value);
+                this.buf.push(' ', attrName, '="', encodeEntities(value), '"');
+            }
+            this.buf.push('>');
+            return true;
+        };
+        SanitizingHtmlSerializer.prototype.endElement = function (current) {
+            var tagName = current.nodeName.toLowerCase();
+            if (VALID_ELEMENTS.hasOwnProperty(tagName) && !VOID_ELEMENTS.hasOwnProperty(tagName)) {
+                this.buf.push('</');
+                this.buf.push(tagName);
+                this.buf.push('>');
+            }
+        };
+        SanitizingHtmlSerializer.prototype.chars = function (chars) { this.buf.push(encodeEntities(chars)); };
+        SanitizingHtmlSerializer.prototype.checkClobberedElement = function (node, nextNode) {
+            if (nextNode &&
+                (node.compareDocumentPosition(nextNode) &
+                    Node.DOCUMENT_POSITION_CONTAINED_BY) === Node.DOCUMENT_POSITION_CONTAINED_BY) {
+                throw new Error("Failed to sanitize html because the element is clobbered: " + node.outerHTML);
+            }
+            return nextNode;
+        };
+        return SanitizingHtmlSerializer;
+    }());
+    // Regular Expressions for parsing tags and attributes
+    var SURROGATE_PAIR_REGEXP = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
+    // ! to ~ is the ASCII range.
+    var NON_ALPHANUMERIC_REGEXP = /([^\#-~ |!])/g;
+    /**
+     * Escapes all potentially dangerous characters, so that the
+     * resulting string can be safely inserted into attribute or
+     * element text.
+     * @param value
+     */
+    function encodeEntities(value) {
+        return value.replace(/&/g, '&amp;')
+            .replace(SURROGATE_PAIR_REGEXP, function (match) {
+            var hi = match.charCodeAt(0);
+            var low = match.charCodeAt(1);
+            return '&#' + (((hi - 0xD800) * 0x400) + (low - 0xDC00) + 0x10000) + ';';
+        })
+            .replace(NON_ALPHANUMERIC_REGEXP, function (match) { return '&#' + match.charCodeAt(0) + ';'; })
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+    var inertBodyHelper;
+    /**
+     * Sanitizes the given unsafe, untrusted HTML fragment, and returns HTML text that is safe to add to
+     * the DOM in a browser environment.
+     */
+    function _sanitizeHtml(defaultDoc, unsafeHtmlInput) {
+        var inertBodyElement = null;
+        try {
+            inertBodyHelper = inertBodyHelper || new InertBodyHelper(defaultDoc);
+            // Make sure unsafeHtml is actually a string (TypeScript types are not enforced at runtime).
+            var unsafeHtml = unsafeHtmlInput ? String(unsafeHtmlInput) : '';
+            inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
+            // mXSS protection. Repeatedly parse the document to make sure it stabilizes, so that a browser
+            // trying to auto-correct incorrect HTML cannot cause formerly inert HTML to become dangerous.
+            var mXSSAttempts = 5;
+            var parsedHtml = unsafeHtml;
+            do {
+                if (mXSSAttempts === 0) {
+                    throw new Error('Failed to sanitize html because the input is unstable');
+                }
+                mXSSAttempts--;
+                unsafeHtml = parsedHtml;
+                parsedHtml = inertBodyElement.innerHTML;
+                inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
+            } while (unsafeHtml !== parsedHtml);
+            var sanitizer = new SanitizingHtmlSerializer();
+            var safeHtml = sanitizer.sanitizeChildren(getTemplateContent(inertBodyElement) || inertBodyElement);
+            if (isDevMode() && sanitizer.sanitizedSomething) {
+                console.warn('WARNING: sanitizing HTML stripped some content, see http://g.co/ng/security#xss');
+            }
+            return safeHtml;
+        }
+        finally {
+            // In case anything goes wrong, clear out inertElement to reset the entire DOM structure.
+            if (inertBodyElement) {
+                var parent_1 = getTemplateContent(inertBodyElement) || inertBodyElement;
+                while (parent_1.firstChild) {
+                    parent_1.removeChild(parent_1.firstChild);
+                }
+            }
+        }
+    }
+    function getTemplateContent(el) {
+        return 'content' in el /** Microsoft/TypeScript#21517 */ && isTemplateElement(el) ?
+            el.content :
+            null;
+    }
+    function isTemplateElement(el) {
+        return el.nodeType === Node.ELEMENT_NODE && el.nodeName === 'TEMPLATE';
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    (function (SecurityContext) {
+        SecurityContext[SecurityContext["NONE"] = 0] = "NONE";
+        SecurityContext[SecurityContext["HTML"] = 1] = "HTML";
+        SecurityContext[SecurityContext["STYLE"] = 2] = "STYLE";
+        SecurityContext[SecurityContext["SCRIPT"] = 3] = "SCRIPT";
+        SecurityContext[SecurityContext["URL"] = 4] = "URL";
+        SecurityContext[SecurityContext["RESOURCE_URL"] = 5] = "RESOURCE_URL";
+    })(exports.SecurityContext || (exports.SecurityContext = {}));
+    /**
+     * Sanitizer is used by the views to sanitize potentially dangerous values.
+     *
+     * @publicApi
+     */
+    var Sanitizer = /** @class */ (function () {
+        function Sanitizer() {
+        }
+        return Sanitizer;
+    }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Regular expression for safe style values.
+     *
+     * Quotes (" and ') are allowed, but a check must be done elsewhere to ensure they're balanced.
+     *
+     * ',' allows multiple values to be assigned to the same property (e.g. background-attachment or
+     * font-family) and hence could allow multiple values to get injected, but that should pose no risk
+     * of XSS.
+     *
+     * The function expression checks only for XSS safety, not for CSS validity.
+     *
+     * This regular expression was taken from the Closure sanitization library, and augmented for
+     * transformation values.
+     */
+    var VALUES = '[-,."\'%_!# a-zA-Z0-9]+';
+    var TRANSFORMATION_FNS = '(?:matrix|translate|scale|rotate|skew|perspective)(?:X|Y|3d)?';
+    var COLOR_FNS = '(?:rgb|hsl)a?';
+    var GRADIENTS = '(?:repeating-)?(?:linear|radial)-gradient';
+    var CSS3_FNS = '(?:calc|attr)';
+    var FN_ARGS = '\\([-0-9.%, #a-zA-Z]+\\)';
+    var SAFE_STYLE_VALUE = new RegExp("^(" + VALUES + "|" +
+        ("(?:" + TRANSFORMATION_FNS + "|" + COLOR_FNS + "|" + GRADIENTS + "|" + CSS3_FNS + ")") +
+        (FN_ARGS + ")$"), 'g');
+    /**
+     * Matches a `url(...)` value with an arbitrary argument as long as it does
+     * not contain parentheses.
+     *
+     * The URL value still needs to be sanitized separately.
+     *
+     * `url(...)` values are a very common use case, e.g. for `background-image`. With carefully crafted
+     * CSS style rules, it is possible to construct an information leak with `url` values in CSS, e.g.
+     * by observing whether scroll bars are displayed, or character ranges used by a font face
+     * definition.
+     *
+     * Angular only allows binding CSS values (as opposed to entire CSS rules), so it is unlikely that
+     * binding a URL value without further cooperation from the page will cause an information leak, and
+     * if so, it is just a leak, not a full blown XSS vulnerability.
+     *
+     * Given the common use case, low likelihood of attack vector, and low impact of an attack, this
+     * code is permissive and allows URLs that sanitize otherwise.
+     */
+    var URL_RE = /^url\(([^)]+)\)$/;
+    /**
+     * Checks that quotes (" and ') are properly balanced inside a string. Assumes
+     * that neither escape (\) nor any other character that could result in
+     * breaking out of a string parsing context are allowed;
+     * see http://www.w3.org/TR/css3-syntax/#string-token-diagram.
+     *
+     * This code was taken from the Closure sanitization library.
+     */
+    function hasBalancedQuotes(value) {
+        var outsideSingle = true;
+        var outsideDouble = true;
+        for (var i = 0; i < value.length; i++) {
+            var c = value.charAt(i);
+            if (c === '\'' && outsideDouble) {
+                outsideSingle = !outsideSingle;
+            }
+            else if (c === '"' && outsideSingle) {
+                outsideDouble = !outsideDouble;
+            }
+        }
+        return outsideSingle && outsideDouble;
+    }
+    /**
+     * Sanitizes the given untrusted CSS style property value (i.e. not an entire object, just a single
+     * value) and returns a value that is safe to use in a browser environment.
+     */
+    function _sanitizeStyle(value) {
+        value = String(value).trim(); // Make sure it's actually a string.
+        if (!value)
+            return '';
+        // Single url(...) values are supported, but only for URLs that sanitize cleanly. See above for
+        // reasoning behind this.
+        var urlMatch = value.match(URL_RE);
+        if ((urlMatch && _sanitizeUrl(urlMatch[1]) === urlMatch[1]) ||
+            value.match(SAFE_STYLE_VALUE) && hasBalancedQuotes(value)) {
+            return value; // Safe style values.
+        }
+        if (isDevMode()) {
+            console.warn("WARNING: sanitizing unsafe style value " + value + " (see http://g.co/ng/security#xss).");
+        }
+        return 'unsafe';
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
+     * dangerous content.
+     *
+     * This method parses the `html` and locates potentially dangerous content (such as urls and
+     * javascript) and removes it.
+     *
+     * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustHtml}.
+     *
+     * @param unsafeHtml untrusted `html`, typically from the user.
+     * @returns `html` string which is safe to display to user, because all of the dangerous javascript
+     * and urls have been removed.
+     *
+     * @publicApi
+     */
+    function ΔsanitizeHtml(unsafeHtml) {
+        var sanitizer = getSanitizer();
+        if (sanitizer) {
+            return sanitizer.sanitize(exports.SecurityContext.HTML, unsafeHtml) || '';
+        }
+        if (allowSanitizationBypass(unsafeHtml, "Html" /* Html */)) {
+            return unsafeHtml.toString();
+        }
+        return _sanitizeHtml(document, renderStringify(unsafeHtml));
+    }
+    /**
+     * A `style` sanitizer which converts untrusted `style` **string** into trusted string by removing
+     * dangerous content.
+     *
+     * This method parses the `style` and locates potentially dangerous content (such as urls and
+     * javascript) and removes it.
+     *
+     * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustStyle}.
+     *
+     * @param unsafeStyle untrusted `style`, typically from the user.
+     * @returns `style` string which is safe to bind to the `style` properties, because all of the
+     * dangerous javascript and urls have been removed.
+     *
+     * @publicApi
+     */
+    function ΔsanitizeStyle(unsafeStyle) {
+        var sanitizer = getSanitizer();
+        if (sanitizer) {
+            return sanitizer.sanitize(exports.SecurityContext.STYLE, unsafeStyle) || '';
+        }
+        if (allowSanitizationBypass(unsafeStyle, "Style" /* Style */)) {
+            return unsafeStyle.toString();
+        }
+        return _sanitizeStyle(renderStringify(unsafeStyle));
+    }
+    /**
+     * A `url` sanitizer which converts untrusted `url` **string** into trusted string by removing
+     * dangerous
+     * content.
+     *
+     * This method parses the `url` and locates potentially dangerous content (such as javascript) and
+     * removes it.
+     *
+     * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustUrl}.
+     *
+     * @param unsafeUrl untrusted `url`, typically from the user.
+     * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
+     * all of the dangerous javascript has been removed.
+     *
+     * @publicApi
+     */
+    function ΔsanitizeUrl(unsafeUrl) {
+        var sanitizer = getSanitizer();
+        if (sanitizer) {
+            return sanitizer.sanitize(exports.SecurityContext.URL, unsafeUrl) || '';
+        }
+        if (allowSanitizationBypass(unsafeUrl, "Url" /* Url */)) {
+            return unsafeUrl.toString();
+        }
+        return _sanitizeUrl(renderStringify(unsafeUrl));
+    }
+    /**
+     * A `url` sanitizer which only lets trusted `url`s through.
+     *
+     * This passes only `url`s marked trusted by calling {@link bypassSanitizationTrustResourceUrl}.
+     *
+     * @param unsafeResourceUrl untrusted `url`, typically from the user.
+     * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
+     * only trusted `url`s have been allowed to pass.
+     *
+     * @publicApi
+     */
+    function ΔsanitizeResourceUrl(unsafeResourceUrl) {
+        var sanitizer = getSanitizer();
+        if (sanitizer) {
+            return sanitizer.sanitize(exports.SecurityContext.RESOURCE_URL, unsafeResourceUrl) || '';
+        }
+        if (allowSanitizationBypass(unsafeResourceUrl, "ResourceUrl" /* ResourceUrl */)) {
+            return unsafeResourceUrl.toString();
+        }
+        throw new Error('unsafe value used in a resource URL context (see http://g.co/ng/security#xss)');
+    }
+    /**
+     * A `script` sanitizer which only lets trusted javascript through.
+     *
+     * This passes only `script`s marked trusted by calling {@link
+     * bypassSanitizationTrustScript}.
+     *
+     * @param unsafeScript untrusted `script`, typically from the user.
+     * @returns `url` string which is safe to bind to the `<script>` element such as `<img src>`,
+     * because only trusted `scripts` have been allowed to pass.
+     *
+     * @publicApi
+     */
+    function ΔsanitizeScript(unsafeScript) {
+        var sanitizer = getSanitizer();
+        if (sanitizer) {
+            return sanitizer.sanitize(exports.SecurityContext.SCRIPT, unsafeScript) || '';
+        }
+        if (allowSanitizationBypass(unsafeScript, "Script" /* Script */)) {
+            return unsafeScript.toString();
+        }
+        throw new Error('unsafe value used in a script context');
+    }
+    /**
+     * Detects which sanitizer to use for URL property, based on tag name and prop name.
+     *
+     * The rules are based on the RESOURCE_URL context config from
+     * `packages/compiler/src/schema/dom_security_schema.ts`.
+     * If tag and prop names don't match Resource URL schema, use URL sanitizer.
+     */
+    function getUrlSanitizer(tag, prop) {
+        if ((prop === 'src' && (tag === 'embed' || tag === 'frame' || tag === 'iframe' ||
+            tag === 'media' || tag === 'script')) ||
+            (prop === 'href' && (tag === 'base' || tag === 'link'))) {
+            return ΔsanitizeResourceUrl;
+        }
+        return ΔsanitizeUrl;
+    }
+    /**
+     * Sanitizes URL, selecting sanitizer function based on tag and property names.
+     *
+     * This function is used in case we can't define security context at compile time, when only prop
+     * name is available. This happens when we generate host bindings for Directives/Components. The
+     * host element is unknown at compile time, so we defer calculation of specific sanitizer to
+     * runtime.
+     *
+     * @param unsafeUrl untrusted `url`, typically from the user.
+     * @param tag target element tag name.
+     * @param prop name of the property that contains the value.
+     * @returns `url` string which is safe to bind.
+     *
+     * @publicApi
+     */
+    function ΔsanitizeUrlOrResourceUrl(unsafeUrl, tag, prop) {
+        return getUrlSanitizer(tag, prop)(unsafeUrl);
+    }
+    /**
+     * The default style sanitizer will handle sanitization for style properties by
+     * sanitizing any CSS property that can include a `url` value (usually image-based properties)
+     *
+     * @publicApi
+     */
+    var ΔdefaultStyleSanitizer = function (prop, value) {
+        if (value === undefined) {
+            return prop === 'background-image' || prop === 'background' || prop === 'border-image' ||
+                prop === 'filter' || prop === 'list-style' || prop === 'list-style-image' ||
+                prop === 'clip-path';
+        }
+        return ΔsanitizeStyle(value);
+    };
+    function validateAgainstEventProperties(name) {
+        if (name.toLowerCase().startsWith('on')) {
+            var msg = "Binding to event property '" + name + "' is disallowed for security reasons, " +
+                ("please use (" + name.slice(2) + ")=...") +
+                ("\nIf '" + name + "' is a directive input, make sure the directive is imported by the") +
+                " current module.";
+            throw new Error(msg);
+        }
+    }
+    function validateAgainstEventAttributes(name) {
+        if (name.toLowerCase().startsWith('on')) {
+            var msg = "Binding to event attribute '" + name + "' is disallowed for security reasons, " +
+                ("please use (" + name.slice(2) + ")=...");
+            throw new Error(msg);
+        }
+    }
+    function getSanitizer() {
+        var lView = getLView();
+        return lView && lView[SANITIZER];
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var TNODE = 8;
+    var PARENT_INJECTOR = 8;
+    var INJECTOR_BLOOM_PARENT_SIZE = 9;
+    var NO_PARENT_INJECTOR = -1;
+    /**
+     * Each injector is saved in 9 contiguous slots in `LView` and 9 contiguous slots in
+     * `TView.data`. This allows us to store information about the current node's tokens (which
+     * can be shared in `TView`) as well as the tokens of its ancestor nodes (which cannot be
+     * shared, so they live in `LView`).
+     *
+     * Each of these slots (aside from the last slot) contains a bloom filter. This bloom filter
+     * determines whether a directive is available on the associated node or not. This prevents us
+     * from searching the directives array at this level unless it's probable the directive is in it.
+     *
+     * See: https://en.wikipedia.org/wiki/Bloom_filter for more about bloom filters.
+     *
+     * Because all injectors have been flattened into `LView` and `TViewData`, they cannot typed
+     * using interfaces as they were previously. The start index of each `LInjector` and `TInjector`
+     * will differ based on where it is flattened into the main array, so it's not possible to know
+     * the indices ahead of time and save their types here. The interfaces are still included here
+     * for documentation purposes.
+     *
+     * export interface LInjector extends Array<any> {
+     *
+     *    // Cumulative bloom for directive IDs 0-31  (IDs are % BLOOM_SIZE)
+     *    [0]: number;
+     *
+     *    // Cumulative bloom for directive IDs 32-63
+     *    [1]: number;
+     *
+     *    // Cumulative bloom for directive IDs 64-95
+     *    [2]: number;
+     *
+     *    // Cumulative bloom for directive IDs 96-127
+     *    [3]: number;
+     *
+     *    // Cumulative bloom for directive IDs 128-159
+     *    [4]: number;
+     *
+     *    // Cumulative bloom for directive IDs 160 - 191
+     *    [5]: number;
+     *
+     *    // Cumulative bloom for directive IDs 192 - 223
+     *    [6]: number;
+     *
+     *    // Cumulative bloom for directive IDs 224 - 255
+     *    [7]: number;
+     *
+     *    // We need to store a reference to the injector's parent so DI can keep looking up
+     *    // the injector tree until it finds the dependency it's looking for.
+     *    [PARENT_INJECTOR]: number;
+     * }
+     *
+     * export interface TInjector extends Array<any> {
+     *
+     *    // Shared node bloom for directive IDs 0-31  (IDs are % BLOOM_SIZE)
+     *    [0]: number;
+     *
+     *    // Shared node bloom for directive IDs 32-63
+     *    [1]: number;
+     *
+     *    // Shared node bloom for directive IDs 64-95
+     *    [2]: number;
+     *
+     *    // Shared node bloom for directive IDs 96-127
+     *    [3]: number;
+     *
+     *    // Shared node bloom for directive IDs 128-159
+     *    [4]: number;
+     *
+     *    // Shared node bloom for directive IDs 160 - 191
+     *    [5]: number;
+     *
+     *    // Shared node bloom for directive IDs 192 - 223
+     *    [6]: number;
+     *
+     *    // Shared node bloom for directive IDs 224 - 255
+     *    [7]: number;
+     *
+     *    // Necessary to find directive indices for a particular node.
+     *    [TNODE]: TElementNode|TElementContainerNode|TContainerNode;
+     *  }
+     */
+    /**
+    * Factory for creating instances of injectors in the NodeInjector.
+    *
+    * This factory is complicated by the fact that it can resolve `multi` factories as well.
+    *
+    * NOTE: Some of the fields are optional which means that this class has two hidden classes.
+    * - One without `multi` support (most common)
+    * - One with `multi` values, (rare).
+    *
+    * Since VMs can cache up to 4 inline hidden classes this is OK.
+    *
+    * - Single factory: Only `resolving` and `factory` is defined.
+    * - `providers` factory: `componentProviders` is a number and `index = -1`.
+    * - `viewProviders` factory: `componentProviders` is a number and `index` points to `providers`.
+    */
+    var NodeInjectorFactory = /** @class */ (function () {
+        function NodeInjectorFactory(
+        /**
+         * Factory to invoke in order to create a new instance.
+         */
+        factory, 
+        /**
+         * Set to `true` if the token is declared in `viewProviders` (or if it is component).
+         */
+        isViewProvider, injectImplementation) {
+            this.factory = factory;
+            /**
+             * Marker set to true during factory invocation to see if we get into recursive loop.
+             * Recursive loop causes an error to be displayed.
+             */
+            this.resolving = false;
+            this.canSeeViewProviders = isViewProvider;
+            this.injectImpl = injectImplementation;
+        }
+        return NodeInjectorFactory;
+    }());
+    function isFactory(obj) {
+        // See: https://jsperf.com/instanceof-vs-getprototypeof
+        return obj !== null && typeof obj == 'object' &&
+            Object.getPrototypeOf(obj) == NodeInjectorFactory.prototype;
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    function assertNodeType(tNode, type) {
+        assertDefined(tNode, 'should be called with a TNode');
+        assertEqual(tNode.type, type, "should be a " + typeName(type));
+    }
+    function assertNodeOfPossibleTypes(tNode) {
+        var types = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            types[_i - 1] = arguments[_i];
+        }
+        assertDefined(tNode, 'should be called with a TNode');
+        var found = types.some(function (type) { return tNode.type === type; });
+        assertEqual(found, true, "Should be one of " + types.map(typeName).join(', ') + " but got " + typeName(tNode.type));
+    }
+    function typeName(type) {
+        if (type == 1 /* Projection */)
+            return 'Projection';
+        if (type == 0 /* Container */)
+            return 'Container';
+        if (type == 2 /* View */)
+            return 'View';
+        if (type == 3 /* Element */)
+            return 'Element';
+        if (type == 4 /* ElementContainer */)
+            return 'ElementContainer';
+        return '<unknown>';
     }
 
     /**
@@ -6228,923 +7165,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var BRAND = '__SANITIZER_TRUSTED_BRAND__';
-    function allowSanitizationBypass(value, type) {
-        return (value instanceof String && value[BRAND] === type);
-    }
-    /**
-     * Mark `html` string as trusted.
-     *
-     * This function wraps the trusted string in `String` and brands it in a way which makes it
-     * recognizable to {@link htmlSanitizer} to be trusted implicitly.
-     *
-     * @param trustedHtml `html` string which needs to be implicitly trusted.
-     * @returns a `html` `String` which has been branded to be implicitly trusted.
-     */
-    function bypassSanitizationTrustHtml(trustedHtml) {
-        return bypassSanitizationTrustString(trustedHtml, "Html" /* Html */);
-    }
-    /**
-     * Mark `style` string as trusted.
-     *
-     * This function wraps the trusted string in `String` and brands it in a way which makes it
-     * recognizable to {@link styleSanitizer} to be trusted implicitly.
-     *
-     * @param trustedStyle `style` string which needs to be implicitly trusted.
-     * @returns a `style` `String` which has been branded to be implicitly trusted.
-     */
-    function bypassSanitizationTrustStyle(trustedStyle) {
-        return bypassSanitizationTrustString(trustedStyle, "Style" /* Style */);
-    }
-    /**
-     * Mark `script` string as trusted.
-     *
-     * This function wraps the trusted string in `String` and brands it in a way which makes it
-     * recognizable to {@link scriptSanitizer} to be trusted implicitly.
-     *
-     * @param trustedScript `script` string which needs to be implicitly trusted.
-     * @returns a `script` `String` which has been branded to be implicitly trusted.
-     */
-    function bypassSanitizationTrustScript(trustedScript) {
-        return bypassSanitizationTrustString(trustedScript, "Script" /* Script */);
-    }
-    /**
-     * Mark `url` string as trusted.
-     *
-     * This function wraps the trusted string in `String` and brands it in a way which makes it
-     * recognizable to {@link urlSanitizer} to be trusted implicitly.
-     *
-     * @param trustedUrl `url` string which needs to be implicitly trusted.
-     * @returns a `url` `String` which has been branded to be implicitly trusted.
-     */
-    function bypassSanitizationTrustUrl(trustedUrl) {
-        return bypassSanitizationTrustString(trustedUrl, "Url" /* Url */);
-    }
-    /**
-     * Mark `url` string as trusted.
-     *
-     * This function wraps the trusted string in `String` and brands it in a way which makes it
-     * recognizable to {@link resourceUrlSanitizer} to be trusted implicitly.
-     *
-     * @param trustedResourceUrl `url` string which needs to be implicitly trusted.
-     * @returns a `url` `String` which has been branded to be implicitly trusted.
-     */
-    function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
-        return bypassSanitizationTrustString(trustedResourceUrl, "ResourceUrl" /* ResourceUrl */);
-    }
-    function bypassSanitizationTrustString(trustedString, mode) {
-        var trusted = new String(trustedString);
-        trusted[BRAND] = mode;
-        return trusted;
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * This file is used to control if the default rendering pipeline should be `ViewEngine` or `Ivy`.
-     *
-     * For more information on how to run and debug tests with either Ivy or View Engine (legacy),
-     * please see [BAZEL.md](./docs/BAZEL.md).
-     */
-    var _devMode = true;
-    var _runModeLocked = false;
-    /**
-     * Returns whether Angular is in development mode. After called once,
-     * the value is locked and won't change any more.
-     *
-     * By default, this is true, unless a user calls `enableProdMode` before calling this.
-     *
-     * @publicApi
-     */
-    function isDevMode() {
-        _runModeLocked = true;
-        return _devMode;
-    }
-    /**
-     * Disable Angular's development mode, which turns off assertions and other
-     * checks within the framework.
-     *
-     * One important assertion this disables verifies that a change detection pass
-     * does not result in additional changes to any bindings (also known as
-     * unidirectional data flow).
-     *
-     * @publicApi
-     */
-    function enableProdMode() {
-        if (_runModeLocked) {
-            throw new Error('Cannot enable prod mode after platform setup.');
-        }
-        _devMode = false;
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * This helper class is used to get hold of an inert tree of DOM elements containing dirty HTML
-     * that needs sanitizing.
-     * Depending upon browser support we must use one of three strategies for doing this.
-     * Support: Safari 10.x -> XHR strategy
-     * Support: Firefox -> DomParser strategy
-     * Default: InertDocument strategy
-     */
-    var InertBodyHelper = /** @class */ (function () {
-        function InertBodyHelper(defaultDoc) {
-            this.defaultDoc = defaultDoc;
-            this.inertDocument = this.defaultDoc.implementation.createHTMLDocument('sanitization-inert');
-            this.inertBodyElement = this.inertDocument.body;
-            if (this.inertBodyElement == null) {
-                // usually there should be only one body element in the document, but IE doesn't have any, so
-                // we need to create one.
-                var inertHtml = this.inertDocument.createElement('html');
-                this.inertDocument.appendChild(inertHtml);
-                this.inertBodyElement = this.inertDocument.createElement('body');
-                inertHtml.appendChild(this.inertBodyElement);
-            }
-            this.inertBodyElement.innerHTML = '<svg><g onload="this.parentNode.remove()"></g></svg>';
-            if (this.inertBodyElement.querySelector && !this.inertBodyElement.querySelector('svg')) {
-                // We just hit the Safari 10.1 bug - which allows JS to run inside the SVG G element
-                // so use the XHR strategy.
-                this.getInertBodyElement = this.getInertBodyElement_XHR;
-                return;
-            }
-            this.inertBodyElement.innerHTML =
-                '<svg><p><style><img src="</style><img src=x onerror=alert(1)//">';
-            if (this.inertBodyElement.querySelector && this.inertBodyElement.querySelector('svg img')) {
-                // We just hit the Firefox bug - which prevents the inner img JS from being sanitized
-                // so use the DOMParser strategy, if it is available.
-                // If the DOMParser is not available then we are not in Firefox (Server/WebWorker?) so we
-                // fall through to the default strategy below.
-                if (isDOMParserAvailable()) {
-                    this.getInertBodyElement = this.getInertBodyElement_DOMParser;
-                    return;
-                }
-            }
-            // None of the bugs were hit so it is safe for us to use the default InertDocument strategy
-            this.getInertBodyElement = this.getInertBodyElement_InertDocument;
-        }
-        /**
-         * Use XHR to create and fill an inert body element (on Safari 10.1)
-         * See
-         * https://github.com/cure53/DOMPurify/blob/a992d3a75031cb8bb032e5ea8399ba972bdf9a65/src/purify.js#L439-L449
-         */
-        InertBodyHelper.prototype.getInertBodyElement_XHR = function (html) {
-            // We add these extra elements to ensure that the rest of the content is parsed as expected
-            // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
-            // `<head>` tag.
-            html = '<body><remove></remove>' + html + '</body>';
-            try {
-                html = encodeURI(html);
-            }
-            catch (_a) {
-                return null;
-            }
-            var xhr = new XMLHttpRequest();
-            xhr.responseType = 'document';
-            xhr.open('GET', 'data:text/html;charset=utf-8,' + html, false);
-            xhr.send(undefined);
-            var body = xhr.response.body;
-            body.removeChild(body.firstChild);
-            return body;
-        };
-        /**
-         * Use DOMParser to create and fill an inert body element (on Firefox)
-         * See https://github.com/cure53/DOMPurify/releases/tag/0.6.7
-         *
-         */
-        InertBodyHelper.prototype.getInertBodyElement_DOMParser = function (html) {
-            // We add these extra elements to ensure that the rest of the content is parsed as expected
-            // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
-            // `<head>` tag.
-            html = '<body><remove></remove>' + html + '</body>';
-            try {
-                var body = new window
-                    .DOMParser()
-                    .parseFromString(html, 'text/html')
-                    .body;
-                body.removeChild(body.firstChild);
-                return body;
-            }
-            catch (_a) {
-                return null;
-            }
-        };
-        /**
-         * Use an HTML5 `template` element, if supported, or an inert body element created via
-         * `createHtmlDocument` to create and fill an inert DOM element.
-         * This is the default sane strategy to use if the browser does not require one of the specialised
-         * strategies above.
-         */
-        InertBodyHelper.prototype.getInertBodyElement_InertDocument = function (html) {
-            // Prefer using <template> element if supported.
-            var templateEl = this.inertDocument.createElement('template');
-            if ('content' in templateEl) {
-                templateEl.innerHTML = html;
-                return templateEl;
-            }
-            this.inertBodyElement.innerHTML = html;
-            // Support: IE 9-11 only
-            // strip custom-namespaced attributes on IE<=11
-            if (this.defaultDoc.documentMode) {
-                this.stripCustomNsAttrs(this.inertBodyElement);
-            }
-            return this.inertBodyElement;
-        };
-        /**
-         * When IE9-11 comes across an unknown namespaced attribute e.g. 'xlink:foo' it adds 'xmlns:ns1'
-         * attribute to declare ns1 namespace and prefixes the attribute with 'ns1' (e.g.
-         * 'ns1:xlink:foo').
-         *
-         * This is undesirable since we don't want to allow any of these custom attributes. This method
-         * strips them all.
-         */
-        InertBodyHelper.prototype.stripCustomNsAttrs = function (el) {
-            var elAttrs = el.attributes;
-            // loop backwards so that we can support removals.
-            for (var i = elAttrs.length - 1; 0 < i; i--) {
-                var attrib = elAttrs.item(i);
-                var attrName = attrib.name;
-                if (attrName === 'xmlns:ns1' || attrName.indexOf('ns1:') === 0) {
-                    el.removeAttribute(attrName);
-                }
-            }
-            var childNode = el.firstChild;
-            while (childNode) {
-                if (childNode.nodeType === Node.ELEMENT_NODE)
-                    this.stripCustomNsAttrs(childNode);
-                childNode = childNode.nextSibling;
-            }
-        };
-        return InertBodyHelper;
-    }());
-    /**
-     * We need to determine whether the DOMParser exists in the global context.
-     * The try-catch is because, on some browsers, trying to access this property
-     * on window can actually throw an error.
-     *
-     * @suppress {uselessCode}
-     */
-    function isDOMParserAvailable() {
-        try {
-            return !!window.DOMParser;
-        }
-        catch (_a) {
-            return false;
-        }
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * A pattern that recognizes a commonly useful subset of URLs that are safe.
-     *
-     * This regular expression matches a subset of URLs that will not cause script
-     * execution if used in URL context within a HTML document. Specifically, this
-     * regular expression matches if (comment from here on and regex copied from
-     * Soy's EscapingConventions):
-     * (1) Either an allowed protocol (http, https, mailto or ftp).
-     * (2) or no protocol.  A protocol must be followed by a colon. The below
-     *     allows that by allowing colons only after one of the characters [/?#].
-     *     A colon after a hash (#) must be in the fragment.
-     *     Otherwise, a colon after a (?) must be in a query.
-     *     Otherwise, a colon after a single solidus (/) must be in a path.
-     *     Otherwise, a colon after a double solidus (//) must be in the authority
-     *     (before port).
-     *
-     * The pattern disallows &, used in HTML entity declarations before
-     * one of the characters in [/?#]. This disallows HTML entities used in the
-     * protocol name, which should never happen, e.g. "h&#116;tp" for "http".
-     * It also disallows HTML entities in the first path part of a relative path,
-     * e.g. "foo&lt;bar/baz".  Our existing escaping functions should not produce
-     * that. More importantly, it disallows masking of a colon,
-     * e.g. "javascript&#58;...".
-     *
-     * This regular expression was taken from the Closure sanitization library.
-     */
-    var SAFE_URL_PATTERN = /^(?:(?:https?|mailto|ftp|tel|file):|[^&:/?#]*(?:[/?#]|$))/gi;
-    /** A pattern that matches safe data URLs. Only matches image, video and audio types. */
-    var DATA_URL_PATTERN = /^data:(?:image\/(?:bmp|gif|jpeg|jpg|png|tiff|webp)|video\/(?:mpeg|mp4|ogg|webm)|audio\/(?:mp3|oga|ogg|opus));base64,[a-z0-9+\/]+=*$/i;
-    function _sanitizeUrl(url) {
-        url = String(url);
-        if (url.match(SAFE_URL_PATTERN) || url.match(DATA_URL_PATTERN))
-            return url;
-        if (isDevMode()) {
-            console.warn("WARNING: sanitizing unsafe URL value " + url + " (see http://g.co/ng/security#xss)");
-        }
-        return 'unsafe:' + url;
-    }
-    function sanitizeSrcset(srcset) {
-        srcset = String(srcset);
-        return srcset.split(',').map(function (srcset) { return _sanitizeUrl(srcset.trim()); }).join(', ');
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    function tagSet(tags) {
-        var e_1, _a;
-        var res = {};
-        try {
-            for (var _b = __values(tags.split(',')), _c = _b.next(); !_c.done; _c = _b.next()) {
-                var t = _c.value;
-                res[t] = true;
-            }
-        }
-        catch (e_1_1) { e_1 = { error: e_1_1 }; }
-        finally {
-            try {
-                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
-            }
-            finally { if (e_1) throw e_1.error; }
-        }
-        return res;
-    }
-    function merge() {
-        var e_2, _a;
-        var sets = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            sets[_i] = arguments[_i];
-        }
-        var res = {};
-        try {
-            for (var sets_1 = __values(sets), sets_1_1 = sets_1.next(); !sets_1_1.done; sets_1_1 = sets_1.next()) {
-                var s = sets_1_1.value;
-                for (var v in s) {
-                    if (s.hasOwnProperty(v))
-                        res[v] = true;
-                }
-            }
-        }
-        catch (e_2_1) { e_2 = { error: e_2_1 }; }
-        finally {
-            try {
-                if (sets_1_1 && !sets_1_1.done && (_a = sets_1.return)) _a.call(sets_1);
-            }
-            finally { if (e_2) throw e_2.error; }
-        }
-        return res;
-    }
-    // Good source of info about elements and attributes
-    // http://dev.w3.org/html5/spec/Overview.html#semantics
-    // http://simon.html5.org/html-elements
-    // Safe Void Elements - HTML5
-    // http://dev.w3.org/html5/spec/Overview.html#void-elements
-    var VOID_ELEMENTS = tagSet('area,br,col,hr,img,wbr');
-    // Elements that you can, intentionally, leave open (and which close themselves)
-    // http://dev.w3.org/html5/spec/Overview.html#optional-tags
-    var OPTIONAL_END_TAG_BLOCK_ELEMENTS = tagSet('colgroup,dd,dt,li,p,tbody,td,tfoot,th,thead,tr');
-    var OPTIONAL_END_TAG_INLINE_ELEMENTS = tagSet('rp,rt');
-    var OPTIONAL_END_TAG_ELEMENTS = merge(OPTIONAL_END_TAG_INLINE_ELEMENTS, OPTIONAL_END_TAG_BLOCK_ELEMENTS);
-    // Safe Block Elements - HTML5
-    var BLOCK_ELEMENTS = merge(OPTIONAL_END_TAG_BLOCK_ELEMENTS, tagSet('address,article,' +
-        'aside,blockquote,caption,center,del,details,dialog,dir,div,dl,figure,figcaption,footer,h1,h2,h3,h4,h5,' +
-        'h6,header,hgroup,hr,ins,main,map,menu,nav,ol,pre,section,summary,table,ul'));
-    // Inline Elements - HTML5
-    var INLINE_ELEMENTS = merge(OPTIONAL_END_TAG_INLINE_ELEMENTS, tagSet('a,abbr,acronym,audio,b,' +
-        'bdi,bdo,big,br,cite,code,del,dfn,em,font,i,img,ins,kbd,label,map,mark,picture,q,ruby,rp,rt,s,' +
-        'samp,small,source,span,strike,strong,sub,sup,time,track,tt,u,var,video'));
-    var VALID_ELEMENTS = merge(VOID_ELEMENTS, BLOCK_ELEMENTS, INLINE_ELEMENTS, OPTIONAL_END_TAG_ELEMENTS);
-    // Attributes that have href and hence need to be sanitized
-    var URI_ATTRS = tagSet('background,cite,href,itemtype,longdesc,poster,src,xlink:href');
-    // Attributes that have special href set hence need to be sanitized
-    var SRCSET_ATTRS = tagSet('srcset');
-    var HTML_ATTRS = tagSet('abbr,accesskey,align,alt,autoplay,axis,bgcolor,border,cellpadding,cellspacing,class,clear,color,cols,colspan,' +
-        'compact,controls,coords,datetime,default,dir,download,face,headers,height,hidden,hreflang,hspace,' +
-        'ismap,itemscope,itemprop,kind,label,lang,language,loop,media,muted,nohref,nowrap,open,preload,rel,rev,role,rows,rowspan,rules,' +
-        'scope,scrolling,shape,size,sizes,span,srclang,start,summary,tabindex,target,title,translate,type,usemap,' +
-        'valign,value,vspace,width');
-    // Accessibility attributes as per WAI-ARIA 1.1 (W3C Working Draft 14 December 2018)
-    var ARIA_ATTRS = tagSet('aria-activedescendant,aria-atomic,aria-autocomplete,aria-busy,aria-checked,aria-colcount,aria-colindex,' +
-        'aria-colspan,aria-controls,aria-current,aria-describedby,aria-details,aria-disabled,aria-dropeffect,' +
-        'aria-errormessage,aria-expanded,aria-flowto,aria-grabbed,aria-haspopup,aria-hidden,aria-invalid,' +
-        'aria-keyshortcuts,aria-label,aria-labelledby,aria-level,aria-live,aria-modal,aria-multiline,' +
-        'aria-multiselectable,aria-orientation,aria-owns,aria-placeholder,aria-posinset,aria-pressed,aria-readonly,' +
-        'aria-relevant,aria-required,aria-roledescription,aria-rowcount,aria-rowindex,aria-rowspan,aria-selected,' +
-        'aria-setsize,aria-sort,aria-valuemax,aria-valuemin,aria-valuenow,aria-valuetext');
-    // NB: This currently consciously doesn't support SVG. SVG sanitization has had several security
-    // issues in the past, so it seems safer to leave it out if possible. If support for binding SVG via
-    // innerHTML is required, SVG attributes should be added here.
-    // NB: Sanitization does not allow <form> elements or other active elements (<button> etc). Those
-    // can be sanitized, but they increase security surface area without a legitimate use case, so they
-    // are left out here.
-    var VALID_ATTRS = merge(URI_ATTRS, SRCSET_ATTRS, HTML_ATTRS, ARIA_ATTRS);
-    // Elements whose content should not be traversed/preserved, if the elements themselves are invalid.
-    //
-    // Typically, `<invalid>Some content</invalid>` would traverse (and in this case preserve)
-    // `Some content`, but strip `invalid-element` opening/closing tags. For some elements, though, we
-    // don't want to preserve the content, if the elements themselves are going to be removed.
-    var SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS = tagSet('script,style,template');
-    /**
-     * SanitizingHtmlSerializer serializes a DOM fragment, stripping out any unsafe elements and unsafe
-     * attributes.
-     */
-    var SanitizingHtmlSerializer = /** @class */ (function () {
-        function SanitizingHtmlSerializer() {
-            // Explicitly track if something was stripped, to avoid accidentally warning of sanitization just
-            // because characters were re-encoded.
-            this.sanitizedSomething = false;
-            this.buf = [];
-        }
-        SanitizingHtmlSerializer.prototype.sanitizeChildren = function (el) {
-            // This cannot use a TreeWalker, as it has to run on Angular's various DOM adapters.
-            // However this code never accesses properties off of `document` before deleting its contents
-            // again, so it shouldn't be vulnerable to DOM clobbering.
-            var current = el.firstChild;
-            var traverseContent = true;
-            while (current) {
-                if (current.nodeType === Node.ELEMENT_NODE) {
-                    traverseContent = this.startElement(current);
-                }
-                else if (current.nodeType === Node.TEXT_NODE) {
-                    this.chars(current.nodeValue);
-                }
-                else {
-                    // Strip non-element, non-text nodes.
-                    this.sanitizedSomething = true;
-                }
-                if (traverseContent && current.firstChild) {
-                    current = current.firstChild;
-                    continue;
-                }
-                while (current) {
-                    // Leaving the element. Walk up and to the right, closing tags as we go.
-                    if (current.nodeType === Node.ELEMENT_NODE) {
-                        this.endElement(current);
-                    }
-                    var next = this.checkClobberedElement(current, current.nextSibling);
-                    if (next) {
-                        current = next;
-                        break;
-                    }
-                    current = this.checkClobberedElement(current, current.parentNode);
-                }
-            }
-            return this.buf.join('');
-        };
-        /**
-         * Sanitizes an opening element tag (if valid) and returns whether the element's contents should
-         * be traversed. Element content must always be traversed (even if the element itself is not
-         * valid/safe), unless the element is one of `SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS`.
-         *
-         * @param element The element to sanitize.
-         * @return True if the element's contents should be traversed.
-         */
-        SanitizingHtmlSerializer.prototype.startElement = function (element) {
-            var tagName = element.nodeName.toLowerCase();
-            if (!VALID_ELEMENTS.hasOwnProperty(tagName)) {
-                this.sanitizedSomething = true;
-                return !SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS.hasOwnProperty(tagName);
-            }
-            this.buf.push('<');
-            this.buf.push(tagName);
-            var elAttrs = element.attributes;
-            for (var i = 0; i < elAttrs.length; i++) {
-                var elAttr = elAttrs.item(i);
-                var attrName = elAttr.name;
-                var lower = attrName.toLowerCase();
-                if (!VALID_ATTRS.hasOwnProperty(lower)) {
-                    this.sanitizedSomething = true;
-                    continue;
-                }
-                var value = elAttr.value;
-                // TODO(martinprobst): Special case image URIs for data:image/...
-                if (URI_ATTRS[lower])
-                    value = _sanitizeUrl(value);
-                if (SRCSET_ATTRS[lower])
-                    value = sanitizeSrcset(value);
-                this.buf.push(' ', attrName, '="', encodeEntities(value), '"');
-            }
-            this.buf.push('>');
-            return true;
-        };
-        SanitizingHtmlSerializer.prototype.endElement = function (current) {
-            var tagName = current.nodeName.toLowerCase();
-            if (VALID_ELEMENTS.hasOwnProperty(tagName) && !VOID_ELEMENTS.hasOwnProperty(tagName)) {
-                this.buf.push('</');
-                this.buf.push(tagName);
-                this.buf.push('>');
-            }
-        };
-        SanitizingHtmlSerializer.prototype.chars = function (chars) { this.buf.push(encodeEntities(chars)); };
-        SanitizingHtmlSerializer.prototype.checkClobberedElement = function (node, nextNode) {
-            if (nextNode &&
-                (node.compareDocumentPosition(nextNode) &
-                    Node.DOCUMENT_POSITION_CONTAINED_BY) === Node.DOCUMENT_POSITION_CONTAINED_BY) {
-                throw new Error("Failed to sanitize html because the element is clobbered: " + node.outerHTML);
-            }
-            return nextNode;
-        };
-        return SanitizingHtmlSerializer;
-    }());
-    // Regular Expressions for parsing tags and attributes
-    var SURROGATE_PAIR_REGEXP = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
-    // ! to ~ is the ASCII range.
-    var NON_ALPHANUMERIC_REGEXP = /([^\#-~ |!])/g;
-    /**
-     * Escapes all potentially dangerous characters, so that the
-     * resulting string can be safely inserted into attribute or
-     * element text.
-     * @param value
-     */
-    function encodeEntities(value) {
-        return value.replace(/&/g, '&amp;')
-            .replace(SURROGATE_PAIR_REGEXP, function (match) {
-            var hi = match.charCodeAt(0);
-            var low = match.charCodeAt(1);
-            return '&#' + (((hi - 0xD800) * 0x400) + (low - 0xDC00) + 0x10000) + ';';
-        })
-            .replace(NON_ALPHANUMERIC_REGEXP, function (match) { return '&#' + match.charCodeAt(0) + ';'; })
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
-    }
-    var inertBodyHelper;
-    /**
-     * Sanitizes the given unsafe, untrusted HTML fragment, and returns HTML text that is safe to add to
-     * the DOM in a browser environment.
-     */
-    function _sanitizeHtml(defaultDoc, unsafeHtmlInput) {
-        var inertBodyElement = null;
-        try {
-            inertBodyHelper = inertBodyHelper || new InertBodyHelper(defaultDoc);
-            // Make sure unsafeHtml is actually a string (TypeScript types are not enforced at runtime).
-            var unsafeHtml = unsafeHtmlInput ? String(unsafeHtmlInput) : '';
-            inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
-            // mXSS protection. Repeatedly parse the document to make sure it stabilizes, so that a browser
-            // trying to auto-correct incorrect HTML cannot cause formerly inert HTML to become dangerous.
-            var mXSSAttempts = 5;
-            var parsedHtml = unsafeHtml;
-            do {
-                if (mXSSAttempts === 0) {
-                    throw new Error('Failed to sanitize html because the input is unstable');
-                }
-                mXSSAttempts--;
-                unsafeHtml = parsedHtml;
-                parsedHtml = inertBodyElement.innerHTML;
-                inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
-            } while (unsafeHtml !== parsedHtml);
-            var sanitizer = new SanitizingHtmlSerializer();
-            var safeHtml = sanitizer.sanitizeChildren(getTemplateContent(inertBodyElement) || inertBodyElement);
-            if (isDevMode() && sanitizer.sanitizedSomething) {
-                console.warn('WARNING: sanitizing HTML stripped some content, see http://g.co/ng/security#xss');
-            }
-            return safeHtml;
-        }
-        finally {
-            // In case anything goes wrong, clear out inertElement to reset the entire DOM structure.
-            if (inertBodyElement) {
-                var parent_1 = getTemplateContent(inertBodyElement) || inertBodyElement;
-                while (parent_1.firstChild) {
-                    parent_1.removeChild(parent_1.firstChild);
-                }
-            }
-        }
-    }
-    function getTemplateContent(el) {
-        return 'content' in el /** Microsoft/TypeScript#21517 */ && isTemplateElement(el) ?
-            el.content :
-            null;
-    }
-    function isTemplateElement(el) {
-        return el.nodeType === Node.ELEMENT_NODE && el.nodeName === 'TEMPLATE';
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    (function (SecurityContext) {
-        SecurityContext[SecurityContext["NONE"] = 0] = "NONE";
-        SecurityContext[SecurityContext["HTML"] = 1] = "HTML";
-        SecurityContext[SecurityContext["STYLE"] = 2] = "STYLE";
-        SecurityContext[SecurityContext["SCRIPT"] = 3] = "SCRIPT";
-        SecurityContext[SecurityContext["URL"] = 4] = "URL";
-        SecurityContext[SecurityContext["RESOURCE_URL"] = 5] = "RESOURCE_URL";
-    })(exports.SecurityContext || (exports.SecurityContext = {}));
-    /**
-     * Sanitizer is used by the views to sanitize potentially dangerous values.
-     *
-     * @publicApi
-     */
-    var Sanitizer = /** @class */ (function () {
-        function Sanitizer() {
-        }
-        return Sanitizer;
-    }());
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Regular expression for safe style values.
-     *
-     * Quotes (" and ') are allowed, but a check must be done elsewhere to ensure they're balanced.
-     *
-     * ',' allows multiple values to be assigned to the same property (e.g. background-attachment or
-     * font-family) and hence could allow multiple values to get injected, but that should pose no risk
-     * of XSS.
-     *
-     * The function expression checks only for XSS safety, not for CSS validity.
-     *
-     * This regular expression was taken from the Closure sanitization library, and augmented for
-     * transformation values.
-     */
-    var VALUES = '[-,."\'%_!# a-zA-Z0-9]+';
-    var TRANSFORMATION_FNS = '(?:matrix|translate|scale|rotate|skew|perspective)(?:X|Y|3d)?';
-    var COLOR_FNS = '(?:rgb|hsl)a?';
-    var GRADIENTS = '(?:repeating-)?(?:linear|radial)-gradient';
-    var CSS3_FNS = '(?:calc|attr)';
-    var FN_ARGS = '\\([-0-9.%, #a-zA-Z]+\\)';
-    var SAFE_STYLE_VALUE = new RegExp("^(" + VALUES + "|" +
-        ("(?:" + TRANSFORMATION_FNS + "|" + COLOR_FNS + "|" + GRADIENTS + "|" + CSS3_FNS + ")") +
-        (FN_ARGS + ")$"), 'g');
-    /**
-     * Matches a `url(...)` value with an arbitrary argument as long as it does
-     * not contain parentheses.
-     *
-     * The URL value still needs to be sanitized separately.
-     *
-     * `url(...)` values are a very common use case, e.g. for `background-image`. With carefully crafted
-     * CSS style rules, it is possible to construct an information leak with `url` values in CSS, e.g.
-     * by observing whether scroll bars are displayed, or character ranges used by a font face
-     * definition.
-     *
-     * Angular only allows binding CSS values (as opposed to entire CSS rules), so it is unlikely that
-     * binding a URL value without further cooperation from the page will cause an information leak, and
-     * if so, it is just a leak, not a full blown XSS vulnerability.
-     *
-     * Given the common use case, low likelihood of attack vector, and low impact of an attack, this
-     * code is permissive and allows URLs that sanitize otherwise.
-     */
-    var URL_RE = /^url\(([^)]+)\)$/;
-    /**
-     * Checks that quotes (" and ') are properly balanced inside a string. Assumes
-     * that neither escape (\) nor any other character that could result in
-     * breaking out of a string parsing context are allowed;
-     * see http://www.w3.org/TR/css3-syntax/#string-token-diagram.
-     *
-     * This code was taken from the Closure sanitization library.
-     */
-    function hasBalancedQuotes(value) {
-        var outsideSingle = true;
-        var outsideDouble = true;
-        for (var i = 0; i < value.length; i++) {
-            var c = value.charAt(i);
-            if (c === '\'' && outsideDouble) {
-                outsideSingle = !outsideSingle;
-            }
-            else if (c === '"' && outsideSingle) {
-                outsideDouble = !outsideDouble;
-            }
-        }
-        return outsideSingle && outsideDouble;
-    }
-    /**
-     * Sanitizes the given untrusted CSS style property value (i.e. not an entire object, just a single
-     * value) and returns a value that is safe to use in a browser environment.
-     */
-    function _sanitizeStyle(value) {
-        value = String(value).trim(); // Make sure it's actually a string.
-        if (!value)
-            return '';
-        // Single url(...) values are supported, but only for URLs that sanitize cleanly. See above for
-        // reasoning behind this.
-        var urlMatch = value.match(URL_RE);
-        if ((urlMatch && _sanitizeUrl(urlMatch[1]) === urlMatch[1]) ||
-            value.match(SAFE_STYLE_VALUE) && hasBalancedQuotes(value)) {
-            return value; // Safe style values.
-        }
-        if (isDevMode()) {
-            console.warn("WARNING: sanitizing unsafe style value " + value + " (see http://g.co/ng/security#xss).");
-        }
-        return 'unsafe';
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
-     * dangerous content.
-     *
-     * This method parses the `html` and locates potentially dangerous content (such as urls and
-     * javascript) and removes it.
-     *
-     * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustHtml}.
-     *
-     * @param unsafeHtml untrusted `html`, typically from the user.
-     * @returns `html` string which is safe to display to user, because all of the dangerous javascript
-     * and urls have been removed.
-     *
-     * @publicApi
-     */
-    function ΔsanitizeHtml(unsafeHtml) {
-        var sanitizer = getSanitizer();
-        if (sanitizer) {
-            return sanitizer.sanitize(exports.SecurityContext.HTML, unsafeHtml) || '';
-        }
-        if (allowSanitizationBypass(unsafeHtml, "Html" /* Html */)) {
-            return unsafeHtml.toString();
-        }
-        return _sanitizeHtml(document, renderStringify(unsafeHtml));
-    }
-    /**
-     * A `style` sanitizer which converts untrusted `style` **string** into trusted string by removing
-     * dangerous content.
-     *
-     * This method parses the `style` and locates potentially dangerous content (such as urls and
-     * javascript) and removes it.
-     *
-     * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustStyle}.
-     *
-     * @param unsafeStyle untrusted `style`, typically from the user.
-     * @returns `style` string which is safe to bind to the `style` properties, because all of the
-     * dangerous javascript and urls have been removed.
-     *
-     * @publicApi
-     */
-    function ΔsanitizeStyle(unsafeStyle) {
-        var sanitizer = getSanitizer();
-        if (sanitizer) {
-            return sanitizer.sanitize(exports.SecurityContext.STYLE, unsafeStyle) || '';
-        }
-        if (allowSanitizationBypass(unsafeStyle, "Style" /* Style */)) {
-            return unsafeStyle.toString();
-        }
-        return _sanitizeStyle(renderStringify(unsafeStyle));
-    }
-    /**
-     * A `url` sanitizer which converts untrusted `url` **string** into trusted string by removing
-     * dangerous
-     * content.
-     *
-     * This method parses the `url` and locates potentially dangerous content (such as javascript) and
-     * removes it.
-     *
-     * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustUrl}.
-     *
-     * @param unsafeUrl untrusted `url`, typically from the user.
-     * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
-     * all of the dangerous javascript has been removed.
-     *
-     * @publicApi
-     */
-    function ΔsanitizeUrl(unsafeUrl) {
-        var sanitizer = getSanitizer();
-        if (sanitizer) {
-            return sanitizer.sanitize(exports.SecurityContext.URL, unsafeUrl) || '';
-        }
-        if (allowSanitizationBypass(unsafeUrl, "Url" /* Url */)) {
-            return unsafeUrl.toString();
-        }
-        return _sanitizeUrl(renderStringify(unsafeUrl));
-    }
-    /**
-     * A `url` sanitizer which only lets trusted `url`s through.
-     *
-     * This passes only `url`s marked trusted by calling {@link bypassSanitizationTrustResourceUrl}.
-     *
-     * @param unsafeResourceUrl untrusted `url`, typically from the user.
-     * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
-     * only trusted `url`s have been allowed to pass.
-     *
-     * @publicApi
-     */
-    function ΔsanitizeResourceUrl(unsafeResourceUrl) {
-        var sanitizer = getSanitizer();
-        if (sanitizer) {
-            return sanitizer.sanitize(exports.SecurityContext.RESOURCE_URL, unsafeResourceUrl) || '';
-        }
-        if (allowSanitizationBypass(unsafeResourceUrl, "ResourceUrl" /* ResourceUrl */)) {
-            return unsafeResourceUrl.toString();
-        }
-        throw new Error('unsafe value used in a resource URL context (see http://g.co/ng/security#xss)');
-    }
-    /**
-     * A `script` sanitizer which only lets trusted javascript through.
-     *
-     * This passes only `script`s marked trusted by calling {@link
-     * bypassSanitizationTrustScript}.
-     *
-     * @param unsafeScript untrusted `script`, typically from the user.
-     * @returns `url` string which is safe to bind to the `<script>` element such as `<img src>`,
-     * because only trusted `scripts` have been allowed to pass.
-     *
-     * @publicApi
-     */
-    function ΔsanitizeScript(unsafeScript) {
-        var sanitizer = getSanitizer();
-        if (sanitizer) {
-            return sanitizer.sanitize(exports.SecurityContext.SCRIPT, unsafeScript) || '';
-        }
-        if (allowSanitizationBypass(unsafeScript, "Script" /* Script */)) {
-            return unsafeScript.toString();
-        }
-        throw new Error('unsafe value used in a script context');
-    }
-    /**
-     * Detects which sanitizer to use for URL property, based on tag name and prop name.
-     *
-     * The rules are based on the RESOURCE_URL context config from
-     * `packages/compiler/src/schema/dom_security_schema.ts`.
-     * If tag and prop names don't match Resource URL schema, use URL sanitizer.
-     */
-    function getUrlSanitizer(tag, prop) {
-        if ((prop === 'src' && (tag === 'embed' || tag === 'frame' || tag === 'iframe' ||
-            tag === 'media' || tag === 'script')) ||
-            (prop === 'href' && (tag === 'base' || tag === 'link'))) {
-            return ΔsanitizeResourceUrl;
-        }
-        return ΔsanitizeUrl;
-    }
-    /**
-     * Sanitizes URL, selecting sanitizer function based on tag and property names.
-     *
-     * This function is used in case we can't define security context at compile time, when only prop
-     * name is available. This happens when we generate host bindings for Directives/Components. The
-     * host element is unknown at compile time, so we defer calculation of specific sanitizer to
-     * runtime.
-     *
-     * @param unsafeUrl untrusted `url`, typically from the user.
-     * @param tag target element tag name.
-     * @param prop name of the property that contains the value.
-     * @returns `url` string which is safe to bind.
-     *
-     * @publicApi
-     */
-    function ΔsanitizeUrlOrResourceUrl(unsafeUrl, tag, prop) {
-        return getUrlSanitizer(tag, prop)(unsafeUrl);
-    }
-    /**
-     * The default style sanitizer will handle sanitization for style properties by
-     * sanitizing any CSS property that can include a `url` value (usually image-based properties)
-     *
-     * @publicApi
-     */
-    var ΔdefaultStyleSanitizer = function (prop, value) {
-        if (value === undefined) {
-            return prop === 'background-image' || prop === 'background' || prop === 'border-image' ||
-                prop === 'filter' || prop === 'list-style' || prop === 'list-style-image' ||
-                prop === 'clip-path';
-        }
-        return ΔsanitizeStyle(value);
-    };
-    function validateAgainstEventProperties(name) {
-        if (name.toLowerCase().startsWith('on')) {
-            var msg = "Binding to event property '" + name + "' is disallowed for security reasons, " +
-                ("please use (" + name.slice(2) + ")=...") +
-                ("\nIf '" + name + "' is a directive input, make sure the directive is imported by the") +
-                " current module.";
-            throw new Error(msg);
-        }
-    }
-    function validateAgainstEventAttributes(name) {
-        if (name.toLowerCase().startsWith('on')) {
-            var msg = "Binding to event attribute '" + name + "' is disallowed for security reasons, " +
-                ("please use (" + name.slice(2) + ")=...");
-            throw new Error(msg);
-        }
-    }
-    function getSanitizer() {
-        var lView = getLView();
-        return lView && lView[SANITIZER];
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     function normalizeDebugBindingName(name) {
         // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
         name = camelCaseToDashCase(name.replace(/[$@]/g, '_'));
@@ -7195,6 +7215,21 @@
     };
 
     /**
+    * @license
+    * Copyright Google Inc. All Rights Reserved.
+    *
+    * Use of this source code is governed by an MIT-style license that can be
+    * found in the LICENSE file at https://angular.io/license
+    */
+    var _stylingMode = 0;
+    function runtimeIsNewStylingInUse() {
+        return _stylingMode > 0 /* UseOld */;
+    }
+    function runtimeAllowOldStyling() {
+        return _stylingMode < 2 /* UseNew */;
+    }
+
+    /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
      *
@@ -7204,481 +7239,6 @@
     function attachDebugObject(obj, debug) {
         Object.defineProperty(obj, 'debug', { value: debug, enumerable: false });
     }
-    /*
-     * This file contains conditionally attached classes which provide human readable (debug) level
-     * information for `LView`, `LContainer` and other internal data structures. These data structures
-     * are stored internally as array which makes it very difficult during debugging to reason about the
-     * current state of the system.
-     *
-     * Patching the array with extra property does change the array's hidden class' but it does not
-     * change the cost of access, therefore this patching should not have significant if any impact in
-     * `ngDevMode` mode. (see: https://jsperf.com/array-vs-monkey-patch-array)
-     *
-     * So instead of seeing:
-     * ```
-     * Array(30) [Object, 659, null, …]
-     * ```
-     *
-     * You get to see:
-     * ```
-     * LViewDebug {
-     *   views: [...],
-     *   flags: {attached: true, ...}
-     *   nodes: [
-     *     {html: '<div id="123">', ..., nodes: [
-     *       {html: '<span>', ..., nodes: null}
-     *     ]}
-     *   ]
-     * }
-     * ```
-     */
-    function attachLViewDebug(lView) {
-        attachDebugObject(lView, new LViewDebug(lView));
-    }
-    function attachLContainerDebug(lContainer) {
-        attachDebugObject(lContainer, new LContainerDebug(lContainer));
-    }
-    function toDebug(obj) {
-        if (obj) {
-            var debug = obj.debug;
-            assertDefined(debug, 'Object does not have a debug representation.');
-            return debug;
-        }
-        else {
-            return obj;
-        }
-    }
-    /**
-     * Use this method to unwrap a native element in `LView` and convert it into HTML for easier
-     * reading.
-     *
-     * @param value possibly wrapped native DOM node.
-     * @param includeChildren If `true` then the serialized HTML form will include child elements (same
-     * as `outerHTML`). If `false` then the serialized HTML form will only contain the element itself
-     * (will not serialize child elements).
-     */
-    function toHtml(value, includeChildren) {
-        if (includeChildren === void 0) { includeChildren = false; }
-        var node = unwrapRNode(value);
-        if (node) {
-            var isTextNode = node.nodeType === Node.TEXT_NODE;
-            var outerHTML = (isTextNode ? node.textContent : node.outerHTML) || '';
-            if (includeChildren || isTextNode) {
-                return outerHTML;
-            }
-            else {
-                var innerHTML = node.innerHTML;
-                return outerHTML.split(innerHTML)[0] || null;
-            }
-        }
-        else {
-            return null;
-        }
-    }
-    var LViewDebug = /** @class */ (function () {
-        function LViewDebug(_raw_lView) {
-            this._raw_lView = _raw_lView;
-        }
-        Object.defineProperty(LViewDebug.prototype, "flags", {
-            /**
-             * Flags associated with the `LView` unpacked into a more readable state.
-             */
-            get: function () {
-                var flags = this._raw_lView[FLAGS];
-                return {
-                    __raw__flags__: flags,
-                    initPhaseState: flags & 3 /* InitPhaseStateMask */,
-                    creationMode: !!(flags & 4 /* CreationMode */),
-                    firstViewPass: !!(flags & 8 /* FirstLViewPass */),
-                    checkAlways: !!(flags & 16 /* CheckAlways */),
-                    dirty: !!(flags & 64 /* Dirty */),
-                    attached: !!(flags & 128 /* Attached */),
-                    destroyed: !!(flags & 256 /* Destroyed */),
-                    isRoot: !!(flags & 512 /* IsRoot */),
-                    indexWithinInitPhase: flags >> 10 /* IndexWithinInitPhaseShift */,
-                };
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(LViewDebug.prototype, "parent", {
-            get: function () { return toDebug(this._raw_lView[PARENT]); },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(LViewDebug.prototype, "host", {
-            get: function () { return toHtml(this._raw_lView[HOST], true); },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(LViewDebug.prototype, "context", {
-            get: function () { return this._raw_lView[CONTEXT]; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(LViewDebug.prototype, "nodes", {
-            /**
-             * The tree of nodes associated with the current `LView`. The nodes have been normalized into a
-             * tree structure with relevant details pulled out for readability.
-             */
-            get: function () {
-                var lView = this._raw_lView;
-                var tNode = lView[TVIEW].firstChild;
-                return toDebugNodes(tNode, lView);
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(LViewDebug.prototype, "__other__", {
-            /**
-             * Additional information which is hidden behind a property. The extra level of indirection is
-             * done so that the debug view would not be cluttered with properties which are only rarely
-             * relevant to the developer.
-             */
-            get: function () {
-                return {
-                    tView: this._raw_lView[TVIEW],
-                    cleanup: this._raw_lView[CLEANUP],
-                    injector: this._raw_lView[INJECTOR$1],
-                    rendererFactory: this._raw_lView[RENDERER_FACTORY],
-                    renderer: this._raw_lView[RENDERER],
-                    sanitizer: this._raw_lView[SANITIZER],
-                    childHead: toDebug(this._raw_lView[CHILD_HEAD]),
-                    next: toDebug(this._raw_lView[NEXT]),
-                    childTail: toDebug(this._raw_lView[CHILD_TAIL]),
-                    declarationView: toDebug(this._raw_lView[DECLARATION_VIEW]),
-                    contentQueries: this._raw_lView[CONTENT_QUERIES],
-                    queries: this._raw_lView[QUERIES],
-                    tHost: this._raw_lView[T_HOST],
-                    bindingIndex: this._raw_lView[BINDING_INDEX],
-                };
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(LViewDebug.prototype, "childViews", {
-            /**
-             * Normalized view of child views (and containers) attached at this location.
-             */
-            get: function () {
-                var childViews = [];
-                var child = this.__other__.childHead;
-                while (child) {
-                    childViews.push(child);
-                    child = child.__other__.next;
-                }
-                return childViews;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        return LViewDebug;
-    }());
-    /**
-     * Turns a flat list of nodes into a tree by walking the associated `TNode` tree.
-     *
-     * @param tNode
-     * @param lView
-     */
-    function toDebugNodes(tNode, lView) {
-        if (tNode) {
-            var debugNodes = [];
-            var tNodeCursor = tNode;
-            while (tNodeCursor) {
-                var rawValue = lView[tNode.index];
-                var native = unwrapRNode(rawValue);
-                var componentLViewDebug = toDebug(readLViewValue(rawValue));
-                debugNodes.push({
-                    html: toHtml(native),
-                    native: native,
-                    nodes: toDebugNodes(tNode.child, lView),
-                    component: componentLViewDebug
-                });
-                tNodeCursor = tNodeCursor.next;
-            }
-            return debugNodes;
-        }
-        else {
-            return null;
-        }
-    }
-    var LContainerDebug = /** @class */ (function () {
-        function LContainerDebug(_raw_lContainer) {
-            this._raw_lContainer = _raw_lContainer;
-        }
-        Object.defineProperty(LContainerDebug.prototype, "activeIndex", {
-            get: function () { return this._raw_lContainer[ACTIVE_INDEX]; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(LContainerDebug.prototype, "views", {
-            get: function () {
-                return this._raw_lContainer.slice(CONTAINER_HEADER_OFFSET)
-                    .map(toDebug);
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(LContainerDebug.prototype, "parent", {
-            get: function () { return toDebug(this._raw_lContainer[PARENT]); },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(LContainerDebug.prototype, "queries", {
-            get: function () { return this._raw_lContainer[QUERIES]; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(LContainerDebug.prototype, "host", {
-            get: function () { return this._raw_lContainer[HOST]; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(LContainerDebug.prototype, "native", {
-            get: function () { return this._raw_lContainer[NATIVE]; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(LContainerDebug.prototype, "__other__", {
-            get: function () {
-                return {
-                    next: toDebug(this._raw_lContainer[NEXT]),
-                };
-            },
-            enumerable: true,
-            configurable: true
-        });
-        return LContainerDebug;
-    }());
-    /**
-     * Return an `LView` value if found.
-     *
-     * @param value `LView` if any
-     */
-    function readLViewValue(value) {
-        while (Array.isArray(value)) {
-            // This check is not quite right, as it does not take into account `StylingContext`
-            // This is why it is in debug, not in util.ts
-            if (value.length >= HEADER_OFFSET - 1)
-                return value;
-            value = value[HOST];
-        }
-        return null;
-    }
-    var I18NDebugItem = /** @class */ (function () {
-        function I18NDebugItem(__raw_opCode, _lView, nodeIndex, type) {
-            this.__raw_opCode = __raw_opCode;
-            this._lView = _lView;
-            this.nodeIndex = nodeIndex;
-            this.type = type;
-        }
-        Object.defineProperty(I18NDebugItem.prototype, "tNode", {
-            get: function () { return getTNode(this.nodeIndex, this._lView); },
-            enumerable: true,
-            configurable: true
-        });
-        return I18NDebugItem;
-    }());
-    /**
-     * Turns a list of "Create" & "Update" OpCodes into a human-readable list of operations for
-     * debugging purposes.
-     * @param mutateOpCodes mutation opCodes to read
-     * @param updateOpCodes update opCodes to read
-     * @param icus list of ICU expressions
-     * @param lView The view the opCodes are acting on
-     */
-    function attachI18nOpCodesDebug(mutateOpCodes, updateOpCodes, icus, lView) {
-        attachDebugObject(mutateOpCodes, new I18nMutateOpCodesDebug(mutateOpCodes, lView));
-        attachDebugObject(updateOpCodes, new I18nUpdateOpCodesDebug(updateOpCodes, icus, lView));
-        if (icus) {
-            icus.forEach(function (icu) {
-                icu.create.forEach(function (icuCase) { attachDebugObject(icuCase, new I18nMutateOpCodesDebug(icuCase, lView)); });
-                icu.update.forEach(function (icuCase) {
-                    attachDebugObject(icuCase, new I18nUpdateOpCodesDebug(icuCase, icus, lView));
-                });
-            });
-        }
-    }
-    var I18nMutateOpCodesDebug = /** @class */ (function () {
-        function I18nMutateOpCodesDebug(__raw_opCodes, __lView) {
-            this.__raw_opCodes = __raw_opCodes;
-            this.__lView = __lView;
-        }
-        Object.defineProperty(I18nMutateOpCodesDebug.prototype, "operations", {
-            /**
-             * A list of operation information about how the OpCodes will act on the view.
-             */
-            get: function () {
-                var _a = this, __lView = _a.__lView, __raw_opCodes = _a.__raw_opCodes;
-                var results = [];
-                for (var i = 0; i < __raw_opCodes.length; i++) {
-                    var opCode = __raw_opCodes[i];
-                    var result = void 0;
-                    if (typeof opCode === 'string') {
-                        result = {
-                            __raw_opCode: opCode,
-                            type: 'Create Text Node',
-                            nodeIndex: __raw_opCodes[++i],
-                            text: opCode,
-                        };
-                    }
-                    if (typeof opCode === 'number') {
-                        switch (opCode & 7 /* MASK_OPCODE */) {
-                            case 1 /* AppendChild */:
-                                var destinationNodeIndex = opCode >>> 17 /* SHIFT_PARENT */;
-                                result = new I18NDebugItem(opCode, __lView, destinationNodeIndex, 'AppendChild');
-                                break;
-                            case 0 /* Select */:
-                                var nodeIndex = opCode >>> 3 /* SHIFT_REF */;
-                                result = new I18NDebugItem(opCode, __lView, nodeIndex, 'Select');
-                                break;
-                            case 5 /* ElementEnd */:
-                                var elementIndex = opCode >>> 3 /* SHIFT_REF */;
-                                result = new I18NDebugItem(opCode, __lView, elementIndex, 'ElementEnd');
-                                break;
-                            case 4 /* Attr */:
-                                elementIndex = opCode >>> 3 /* SHIFT_REF */;
-                                result = new I18NDebugItem(opCode, __lView, elementIndex, 'Attr');
-                                result['attrName'] = __raw_opCodes[++i];
-                                result['attrValue'] = __raw_opCodes[++i];
-                                break;
-                        }
-                    }
-                    if (!result) {
-                        switch (opCode) {
-                            case COMMENT_MARKER:
-                                result = {
-                                    __raw_opCode: opCode,
-                                    type: 'COMMENT_MARKER',
-                                    commentValue: __raw_opCodes[++i],
-                                    nodeIndex: __raw_opCodes[++i],
-                                };
-                                break;
-                            case ELEMENT_MARKER:
-                                result = {
-                                    __raw_opCode: opCode,
-                                    type: 'ELEMENT_MARKER',
-                                };
-                                break;
-                        }
-                    }
-                    if (!result) {
-                        result = {
-                            __raw_opCode: opCode,
-                            type: 'Unknown Op Code',
-                            code: opCode,
-                        };
-                    }
-                    results.push(result);
-                }
-                return results;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        return I18nMutateOpCodesDebug;
-    }());
-    var I18nUpdateOpCodesDebug = /** @class */ (function () {
-        function I18nUpdateOpCodesDebug(__raw_opCodes, icus, __lView) {
-            this.__raw_opCodes = __raw_opCodes;
-            this.icus = icus;
-            this.__lView = __lView;
-        }
-        Object.defineProperty(I18nUpdateOpCodesDebug.prototype, "operations", {
-            /**
-             * A list of operation information about how the OpCodes will act on the view.
-             */
-            get: function () {
-                var _a = this, __lView = _a.__lView, __raw_opCodes = _a.__raw_opCodes, icus = _a.icus;
-                var results = [];
-                for (var i = 0; i < __raw_opCodes.length; i++) {
-                    // bit code to check if we should apply the next update
-                    var checkBit = __raw_opCodes[i];
-                    // Number of opCodes to skip until next set of update codes
-                    var skipCodes = __raw_opCodes[++i];
-                    var value = '';
-                    for (var j = i + 1; j <= (i + skipCodes); j++) {
-                        var opCode = __raw_opCodes[j];
-                        if (typeof opCode === 'string') {
-                            value += opCode;
-                        }
-                        else if (typeof opCode == 'number') {
-                            if (opCode < 0) {
-                                // It's a binding index whose value is negative
-                                // We cannot know the value of the binding so we only show the index
-                                value += "\uFFFD" + (-opCode - 1) + "\uFFFD";
-                            }
-                            else {
-                                var nodeIndex = opCode >>> 2 /* SHIFT_REF */;
-                                var tIcuIndex = void 0;
-                                var tIcu = void 0;
-                                switch (opCode & 3 /* MASK_OPCODE */) {
-                                    case 1 /* Attr */:
-                                        var attrName = __raw_opCodes[++j];
-                                        var sanitizeFn = __raw_opCodes[++j];
-                                        results.push({
-                                            __raw_opCode: opCode,
-                                            checkBit: checkBit,
-                                            type: 'Attr',
-                                            attrValue: value, attrName: attrName, sanitizeFn: sanitizeFn,
-                                        });
-                                        break;
-                                    case 0 /* Text */:
-                                        results.push({
-                                            __raw_opCode: opCode,
-                                            checkBit: checkBit,
-                                            type: 'Text', nodeIndex: nodeIndex,
-                                            text: value,
-                                        });
-                                        break;
-                                    case 2 /* IcuSwitch */:
-                                        tIcuIndex = __raw_opCodes[++j];
-                                        tIcu = icus[tIcuIndex];
-                                        var result = new I18NDebugItem(opCode, __lView, nodeIndex, 'IcuSwitch');
-                                        result['tIcuIndex'] = tIcuIndex;
-                                        result['checkBit'] = checkBit;
-                                        result['mainBinding'] = value;
-                                        result['tIcu'] = tIcu;
-                                        results.push(result);
-                                        break;
-                                    case 3 /* IcuUpdate */:
-                                        tIcuIndex = __raw_opCodes[++j];
-                                        tIcu = icus[tIcuIndex];
-                                        result = new I18NDebugItem(opCode, __lView, nodeIndex, 'IcuUpdate');
-                                        result['tIcuIndex'] = tIcuIndex;
-                                        result['checkBit'] = checkBit;
-                                        result['tIcu'] = tIcu;
-                                        results.push(result);
-                                        break;
-                                }
-                            }
-                        }
-                    }
-                    i += skipCodes;
-                }
-                return results;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        return I18nUpdateOpCodesDebug;
-    }());
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
 
     /**
      * @license
@@ -9309,6 +8869,989 @@
     }
 
     /**
+     * Creates a new instance of the `TStylingContext`.
+     */
+    function allocStylingContext$1() {
+        return [0 /* Initial */, 0];
+    }
+    /**
+     * Temporary function that allows for a string-based property name to be
+     * obtained from an index-based property identifier.
+     *
+     * This function will be removed once the new styling refactor code (which
+     * lives inside of `render3/styling_next/`) replaces the existing styling
+     * implementation.
+     */
+    function getBindingNameFromIndex(stylingContext, offset, directiveIndex, isClassBased) {
+        var singleIndex = getSinglePropIndexValue(stylingContext, directiveIndex, offset, isClassBased);
+        return getProp(stylingContext, singleIndex);
+    }
+    function updateContextDirectiveIndex(context, index) {
+        context[1 /* MaxDirectiveIndexPosition */] = index;
+    }
+    function getConfig(context) {
+        return context[0 /* ConfigPosition */];
+    }
+    function setConfig(context, value) {
+        context[0 /* ConfigPosition */] = value;
+    }
+    function getProp$1(context, index) {
+        return context[index + 2 /* PropOffset */];
+    }
+    function getGuardMask(context, index) {
+        return context[index + 0 /* MaskOffset */];
+    }
+    function getValuesCount(context, index) {
+        return context[index + 1 /* ValuesCountOffset */];
+    }
+    function getValue$1(context, index, offset) {
+        return context[index + 3 /* BindingsStartOffset */ + offset];
+    }
+    function getDefaultValue(context, index) {
+        var valuesCount = getValuesCount(context, index);
+        return context[index + 3 /* BindingsStartOffset */ + valuesCount - 1];
+    }
+    /**
+     * Temporary function which determines whether or not a context is
+     * allowed to be flushed based on the provided directive index.
+     */
+    function allowStylingFlush(context, index) {
+        return index === context[1 /* MaxDirectiveIndexPosition */];
+    }
+    function lockContext(context) {
+        setConfig(context, getConfig(context) | 1 /* Locked */);
+    }
+    function isContextLocked(context) {
+        return (getConfig(context) & 1 /* Locked */) > 0;
+    }
+
+    /**
+    * @license
+    * Copyright Google Inc. All Rights Reserved.
+    *
+    * Use of this source code is governed by an MIT-style license that can be
+    * found in the LICENSE file at https://angular.io/license
+    */
+    /**
+     * This file contains the core logic for styling in Angular.
+     *
+     * All styling bindings (i.e. `[style]`, `[style.prop]`, `[class]` and `[class.name]`)
+     * will have their values be applied through the logic in this file.
+     *
+     * When a binding is encountered (e.g. `<div [style.width]="w">`) then
+     * the binding data will be populated into a `TStylingContext` data-structure.
+     * There is only one `TStylingContext` per `TNode` and each element instance
+     * will update its style/class binding values in concert with the styling
+     * context.
+     *
+     * To learn more about the algorithm see `TStylingContext`.
+     */
+    // the values below are global to all styling code below. Each value
+    // will either increment or mutate each time a styling instruction is
+    // executed. Do not modify the values below.
+    var currentStyleIndex = 0;
+    var currentClassIndex = 0;
+    var stylesBitMask = 0;
+    var classesBitMask = 0;
+    var deferredBindingQueue = [];
+    var DEFAULT_BINDING_VALUE = null;
+    var DEFAULT_SIZE_VALUE = 1;
+    var DEFAULT_MASK_VALUE = 0;
+    var DEFAULT_BINDING_INDEX_VALUE = -1;
+    var BIT_MASK_APPLY_ALL = -1;
+    /**
+     * Visits a class-based binding and updates the new value (if changed).
+     *
+     * This function is called each time a class-based styling instruction
+     * is executed. It's important that it's always called (even if the value
+     * has not changed) so that the inner counter index value is incremented.
+     * This way, each instruction is always guaranteed to get the same counter
+     * state each time its called (which then allows the `TStylingContext`
+     * and the bit mask values to be in sync).
+     */
+    function updateClassBinding(context, data, prop, bindingIndex, value, deferRegistration) {
+        var index = currentClassIndex++;
+        if (updateBindingData(context, data, index, prop, bindingIndex, value, deferRegistration)) {
+            classesBitMask |= 1 << index;
+        }
+    }
+    /**
+     * Visits a style-based binding and updates the new value (if changed).
+     *
+     * This function is called each time a style-based styling instruction
+     * is executed. It's important that it's always called (even if the value
+     * has not changed) so that the inner counter index value is incremented.
+     * This way, each instruction is always guaranteed to get the same counter
+     * state each time its called (which then allows the `TStylingContext`
+     * and the bit mask values to be in sync).
+     */
+    function updateStyleBinding(context, data, prop, bindingIndex, value, deferRegistration) {
+        var index = currentStyleIndex++;
+        if (updateBindingData(context, data, index, prop, bindingIndex, value, deferRegistration)) {
+            stylesBitMask |= 1 << index;
+        }
+    }
+    function updateBindingData(context, data, counterIndex, prop, bindingIndex, value, deferRegistration) {
+        if (!isContextLocked(context)) {
+            if (deferRegistration) {
+                deferBindingRegistration(context, counterIndex, prop, bindingIndex);
+            }
+            else {
+                deferredBindingQueue.length && flushDeferredBindings();
+                // this will only happen during the first update pass of the
+                // context. The reason why we can't use `tNode.firstTemplatePass`
+                // here is because its not guaranteed to be true when the first
+                // update pass is executed (remember that all styling instructions
+                // are run in the update phase, and, as a result, are no more
+                // styling instructions that are run in the creation phase).
+                registerBinding(context, counterIndex, prop, bindingIndex);
+            }
+        }
+        if (data[bindingIndex] !== value) {
+            data[bindingIndex] = value;
+            return true;
+        }
+        return false;
+    }
+    /**
+     * Schedules a binding registration to be run at a later point.
+     *
+     * The reasoning for this feature is to ensure that styling
+     * bindings are registered in the correct order for when
+     * directives/components have a super/sub class inheritance
+     * chains. Each directive's styling bindings must be
+     * registered into the context in reverse order. Therefore all
+     * bindings will be buffered in reverse order and then applied
+     * after the inheritance chain exits.
+     */
+    function deferBindingRegistration(context, counterIndex, prop, bindingIndex) {
+        deferredBindingQueue.splice(0, 0, context, counterIndex, prop, bindingIndex);
+    }
+    /**
+     * Flushes the collection of deferred bindings and causes each entry
+     * to be registered into the context.
+     */
+    function flushDeferredBindings() {
+        var i = 0;
+        while (i < deferredBindingQueue.length) {
+            var context = deferredBindingQueue[i++];
+            var count = deferredBindingQueue[i++];
+            var prop = deferredBindingQueue[i++];
+            var bindingIndex = deferredBindingQueue[i++];
+            registerBinding(context, count, prop, bindingIndex);
+        }
+        deferredBindingQueue.length = 0;
+    }
+    /**
+     * Registers the provided binding (prop + bindingIndex) into the context.
+     *
+     * This function is shared between bindings that are assigned immediately
+     * (via `updateBindingData`) and at a deferred stage. When called, it will
+     * figure out exactly where to place the binding data in the context.
+     *
+     * It is needed because it will either update or insert a styling property
+     * into the context at the correct spot.
+     *
+     * When called, one of two things will happen:
+     *
+     * 1) If the property already exists in the context then it will just add
+     *    the provided `bindingValue` to the end of the binding sources region
+     *    for that particular property.
+     *
+     *    - If the binding value is a number then it will be added as a new
+     *      binding index source next to the other binding sources for the property.
+     *
+     *    - Otherwise, if the binding value is a string/boolean/null type then it will
+     *      replace the default value for the property if the default value is `null`.
+     *
+     * 2) If the property does not exist then it will be inserted into the context.
+     *    The styling context relies on all properties being stored in alphabetical
+     *    order, so it knows exactly where to store it.
+     *
+     *    When inserted, a default `null` value is created for the property which exists
+     *    as the default value for the binding. If the bindingValue property is inserted
+     *    and it is either a string, number or null value then that will replace the default
+     *    value.
+     */
+    function registerBinding(context, countId, prop, bindingValue) {
+        var i = 2 /* ValuesStartPosition */;
+        var found = false;
+        while (i < context.length) {
+            var valuesCount = getValuesCount(context, i);
+            var p = getProp$1(context, i);
+            found = prop <= p;
+            if (found) {
+                // all style/class bindings are sorted by property name
+                if (prop < p) {
+                    allocateNewContextEntry(context, i, prop);
+                }
+                addBindingIntoContext(context, i, bindingValue, countId);
+                break;
+            }
+            i += 3 /* BindingsStartOffset */ + valuesCount;
+        }
+        if (!found) {
+            allocateNewContextEntry(context, context.length, prop);
+            addBindingIntoContext(context, i, bindingValue, countId);
+        }
+    }
+    function allocateNewContextEntry(context, index, prop) {
+        context.splice(index, 0, DEFAULT_MASK_VALUE, DEFAULT_SIZE_VALUE, prop, DEFAULT_BINDING_VALUE);
+    }
+    /**
+     * Inserts a new binding value into a styling property tuple in the `TStylingContext`.
+     *
+     * A bindingValue is inserted into a context during the first update pass
+     * of a template or host bindings function. When this occurs, two things
+     * happen:
+     *
+     * - If the bindingValue value is a number then it is treated as a bindingIndex
+     *   value (a index in the `LView`) and it will be inserted next to the other
+     *   binding index entries.
+     *
+     * - Otherwise the binding value will update the default value for the property
+     *   and this will only happen if the default value is `null`.
+     */
+    function addBindingIntoContext(context, index, bindingValue, countId) {
+        var valuesCount = getValuesCount(context, index);
+        // -1 is used because we want the last value that's in the list (not the next slot)
+        var lastValueIndex = index + 3 /* BindingsStartOffset */ + valuesCount - 1;
+        if (typeof bindingValue === 'number') {
+            context.splice(lastValueIndex, 0, bindingValue);
+            context[index + 1 /* ValuesCountOffset */]++;
+            context[index + 0 /* MaskOffset */] |= 1 << countId;
+        }
+        else if (typeof bindingValue === 'string' && context[lastValueIndex] == null) {
+            context[lastValueIndex] = bindingValue;
+        }
+    }
+    /**
+     * Applies all class entries in the provided context to the provided element.
+     */
+    function applyClasses(renderer, data, context, element, directiveIndex) {
+        if (allowStylingFlush(context, directiveIndex)) {
+            var isFirstPass = isContextLocked(context);
+            isFirstPass && lockContext(context);
+            applyStyling(context, renderer, element, data, classesBitMask, setClass$1, isFirstPass);
+            currentClassIndex = 0;
+            classesBitMask = 0;
+        }
+    }
+    /**
+     * Applies all style entries in the provided context to the provided element.
+     */
+    function applyStyles(renderer, data, context, element, directiveIndex) {
+        if (allowStylingFlush(context, directiveIndex)) {
+            var isFirstPass = isContextLocked(context);
+            isFirstPass && lockContext(context);
+            applyStyling(context, renderer, element, data, stylesBitMask, setStyle$1, isFirstPass);
+            currentStyleIndex = 0;
+            stylesBitMask = 0;
+        }
+    }
+    /**
+     * Runs through the provided styling context and applies each value to
+     * the provided element (via the renderer) if one or more values are present.
+     *
+     * Note that this function is not designed to be called in isolation (use
+     * `applyClasses` and `applyStyles` to actually apply styling values).
+     */
+    function applyStyling(context, renderer, element, bindingData, bitMask, applyStylingFn, forceApplyDefaultValues) {
+        deferredBindingQueue.length && flushDeferredBindings();
+        if (bitMask) {
+            var processAllEntries = bitMask === BIT_MASK_APPLY_ALL;
+            var i = 2 /* ValuesStartPosition */;
+            while (i < context.length) {
+                var valuesCount = getValuesCount(context, i);
+                var guardMask = getGuardMask(context, i);
+                // the guard mask value is non-zero if and when
+                // there are binding values present for the property.
+                // If there are ONLY static values (i.e. `style="prop:val")
+                // then the guard value will stay as zero.
+                var processEntry = processAllEntries || (guardMask ? (bitMask & guardMask) : forceApplyDefaultValues);
+                if (processEntry) {
+                    var prop = getProp$1(context, i);
+                    var limit = valuesCount - 1;
+                    for (var j = 0; j <= limit; j++) {
+                        var isFinalValue = j === limit;
+                        var bindingValue = getValue$1(context, i, j);
+                        var bindingIndex = isFinalValue ? DEFAULT_BINDING_INDEX_VALUE : bindingValue;
+                        var valueToApply = isFinalValue ? bindingValue : bindingData[bindingIndex];
+                        if (isValueDefined(valueToApply) || isFinalValue) {
+                            applyStylingFn(renderer, element, prop, valueToApply, bindingIndex);
+                            break;
+                        }
+                    }
+                }
+                i += 3 /* BindingsStartOffset */ + valuesCount;
+            }
+        }
+    }
+    function isValueDefined(value) {
+        // the reason why null is compared against is because
+        // a CSS class value that is set to `false` must be
+        // respected (otherwise it would be treated as falsy).
+        // Empty string values are because developers usually
+        // set a value to an empty string to remove it.
+        return value != null && value !== '';
+    }
+    /**
+     * Assigns a style value to a style property for the given element.
+     */
+    var setStyle$1 = function (renderer, native, prop, value) {
+        if (value) {
+            // opacity, z-index and flexbox all have number values
+            // and these need to be converted into strings so that
+            // they can be assigned properly.
+            value = value.toString();
+            ngDevMode && ngDevMode.rendererSetStyle++;
+            renderer && isProceduralRenderer(renderer) ?
+                renderer.setStyle(native, prop, value, RendererStyleFlags3.DashCase) :
+                native.style.setProperty(prop, value);
+        }
+        else {
+            ngDevMode && ngDevMode.rendererRemoveStyle++;
+            renderer && isProceduralRenderer(renderer) ?
+                renderer.removeStyle(native, prop, RendererStyleFlags3.DashCase) :
+                native.style.removeProperty(prop);
+        }
+    };
+    /**
+     * Adds/removes the provided className value to the provided element.
+     */
+    var setClass$1 = function (renderer, native, className, value) {
+        if (className !== '') {
+            if (value) {
+                ngDevMode && ngDevMode.rendererAddClass++;
+                renderer && isProceduralRenderer(renderer) ? renderer.addClass(native, className) :
+                    native.classList.add(className);
+            }
+            else {
+                ngDevMode && ngDevMode.rendererRemoveClass++;
+                renderer && isProceduralRenderer(renderer) ? renderer.removeClass(native, className) :
+                    native.classList.remove(className);
+            }
+        }
+    };
+
+    /**
+     * Instantiates and attaches an instance of `TStylingContextDebug` to the provided context.
+     */
+    function attachStylingDebugObject(context) {
+        var debug = new TStylingContextDebug(context);
+        attachDebugObject(context, debug);
+        return debug;
+    }
+    /**
+     * A human-readable debug summary of the styling data present within `TStylingContext`.
+     *
+     * This class is designed to be used within testing code or when an
+     * application has `ngDevMode` activated.
+     */
+    var TStylingContextDebug = /** @class */ (function () {
+        function TStylingContextDebug(context) {
+            this.context = context;
+        }
+        Object.defineProperty(TStylingContextDebug.prototype, "isLocked", {
+            get: function () { return isContextLocked(this.context); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(TStylingContextDebug.prototype, "entries", {
+            /**
+             * Returns a detailed summary of each styling entry in the context.
+             *
+             * See `TStylingTupleSummary`.
+             */
+            get: function () {
+                var context = this.context;
+                var entries = {};
+                var start = 2 /* ValuesStartPosition */;
+                var i = start;
+                while (i < context.length) {
+                    var prop = getProp$1(context, i);
+                    var guardMask = getGuardMask(context, i);
+                    var valuesCount = getValuesCount(context, i);
+                    var defaultValue = getDefaultValue(context, i);
+                    var bindingsStartPosition = i + 3 /* BindingsStartOffset */;
+                    var sources = [];
+                    for (var j = 0; j < valuesCount; j++) {
+                        sources.push(context[bindingsStartPosition + j]);
+                    }
+                    entries[prop] = { prop: prop, guardMask: guardMask, valuesCount: valuesCount, defaultValue: defaultValue, sources: sources };
+                    i += 3 /* BindingsStartOffset */ + valuesCount;
+                }
+                return entries;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return TStylingContextDebug;
+    }());
+    /**
+     * A human-readable debug summary of the styling data present for a `DebugNode` instance.
+     *
+     * This class is designed to be used within testing code or when an
+     * application has `ngDevMode` activated.
+     */
+    var NodeStylingDebug = /** @class */ (function () {
+        function NodeStylingDebug(context, _data) {
+            this.context = context;
+            this._data = _data;
+            this._contextDebug = this.context.debug;
+        }
+        Object.defineProperty(NodeStylingDebug.prototype, "summary", {
+            /**
+             * Returns a detailed summary of each styling entry in the context and
+             * what their runtime representation is.
+             *
+             * See `StylingSummary`.
+             */
+            get: function () {
+                var _this = this;
+                var contextEntries = this._contextDebug.entries;
+                var finalValues = {};
+                this._mapValues(function (prop, value, bindingIndex) {
+                    finalValues[prop] = { value: value, bindingIndex: bindingIndex };
+                });
+                var entries = {};
+                var values = this.values;
+                var props = Object.keys(values);
+                for (var i = 0; i < props.length; i++) {
+                    var prop = props[i];
+                    var contextEntry = contextEntries[prop];
+                    var sourceValues = contextEntry.sources.map(function (v) {
+                        var value;
+                        var bindingIndex;
+                        if (typeof v === 'number') {
+                            value = _this._data[v];
+                            bindingIndex = v;
+                        }
+                        else {
+                            value = v;
+                            bindingIndex = null;
+                        }
+                        return { bindingIndex: bindingIndex, value: value };
+                    });
+                    var finalValue = finalValues[prop];
+                    var bindingIndex = finalValue.bindingIndex;
+                    bindingIndex = bindingIndex === DEFAULT_BINDING_INDEX_VALUE ? null : bindingIndex;
+                    entries[prop] = { prop: prop, value: finalValue.value, bindingIndex: bindingIndex, sourceValues: sourceValues };
+                }
+                return entries;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(NodeStylingDebug.prototype, "values", {
+            /**
+             * Returns a key/value map of all the styles/classes that were last applied to the element.
+             */
+            get: function () {
+                var entries = {};
+                this._mapValues(function (prop, value) { entries[prop] = value; });
+                return entries;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        NodeStylingDebug.prototype._mapValues = function (fn) {
+            // there is no need to store/track an element instance. The
+            // element is only used when the styling algorithm attempts to
+            // style the value (and we mock out the stylingApplyFn anyway).
+            var mockElement = {};
+            var mapFn = function (renderer, element, prop, value, bindingIndex) {
+                fn(prop, value, bindingIndex);
+            };
+            applyStyling(this.context, null, mockElement, this._data, BIT_MASK_APPLY_ALL, mapFn);
+        };
+        return NodeStylingDebug;
+    }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /*
+     * This file contains conditionally attached classes which provide human readable (debug) level
+     * information for `LView`, `LContainer` and other internal data structures. These data structures
+     * are stored internally as array which makes it very difficult during debugging to reason about the
+     * current state of the system.
+     *
+     * Patching the array with extra property does change the array's hidden class' but it does not
+     * change the cost of access, therefore this patching should not have significant if any impact in
+     * `ngDevMode` mode. (see: https://jsperf.com/array-vs-monkey-patch-array)
+     *
+     * So instead of seeing:
+     * ```
+     * Array(30) [Object, 659, null, …]
+     * ```
+     *
+     * You get to see:
+     * ```
+     * LViewDebug {
+     *   views: [...],
+     *   flags: {attached: true, ...}
+     *   nodes: [
+     *     {html: '<div id="123">', ..., nodes: [
+     *       {html: '<span>', ..., nodes: null}
+     *     ]}
+     *   ]
+     * }
+     * ```
+     */
+    function attachLViewDebug(lView) {
+        attachDebugObject(lView, new LViewDebug(lView));
+    }
+    function attachLContainerDebug(lContainer) {
+        attachDebugObject(lContainer, new LContainerDebug(lContainer));
+    }
+    function toDebug(obj) {
+        if (obj) {
+            var debug = obj.debug;
+            assertDefined(debug, 'Object does not have a debug representation.');
+            return debug;
+        }
+        else {
+            return obj;
+        }
+    }
+    /**
+     * Use this method to unwrap a native element in `LView` and convert it into HTML for easier
+     * reading.
+     *
+     * @param value possibly wrapped native DOM node.
+     * @param includeChildren If `true` then the serialized HTML form will include child elements (same
+     * as `outerHTML`). If `false` then the serialized HTML form will only contain the element itself
+     * (will not serialize child elements).
+     */
+    function toHtml(value, includeChildren) {
+        if (includeChildren === void 0) { includeChildren = false; }
+        var node = unwrapRNode(value);
+        if (node) {
+            var isTextNode = node.nodeType === Node.TEXT_NODE;
+            var outerHTML = (isTextNode ? node.textContent : node.outerHTML) || '';
+            if (includeChildren || isTextNode) {
+                return outerHTML;
+            }
+            else {
+                var innerHTML = node.innerHTML;
+                return outerHTML.split(innerHTML)[0] || null;
+            }
+        }
+        else {
+            return null;
+        }
+    }
+    var LViewDebug = /** @class */ (function () {
+        function LViewDebug(_raw_lView) {
+            this._raw_lView = _raw_lView;
+        }
+        Object.defineProperty(LViewDebug.prototype, "flags", {
+            /**
+             * Flags associated with the `LView` unpacked into a more readable state.
+             */
+            get: function () {
+                var flags = this._raw_lView[FLAGS];
+                return {
+                    __raw__flags__: flags,
+                    initPhaseState: flags & 3 /* InitPhaseStateMask */,
+                    creationMode: !!(flags & 4 /* CreationMode */),
+                    firstViewPass: !!(flags & 8 /* FirstLViewPass */),
+                    checkAlways: !!(flags & 16 /* CheckAlways */),
+                    dirty: !!(flags & 64 /* Dirty */),
+                    attached: !!(flags & 128 /* Attached */),
+                    destroyed: !!(flags & 256 /* Destroyed */),
+                    isRoot: !!(flags & 512 /* IsRoot */),
+                    indexWithinInitPhase: flags >> 10 /* IndexWithinInitPhaseShift */,
+                };
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "parent", {
+            get: function () { return toDebug(this._raw_lView[PARENT]); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "host", {
+            get: function () { return toHtml(this._raw_lView[HOST], true); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "context", {
+            get: function () { return this._raw_lView[CONTEXT]; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "nodes", {
+            /**
+             * The tree of nodes associated with the current `LView`. The nodes have been normalized into a
+             * tree structure with relevant details pulled out for readability.
+             */
+            get: function () {
+                var lView = this._raw_lView;
+                var tNode = lView[TVIEW].firstChild;
+                return toDebugNodes(tNode, lView);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "__other__", {
+            /**
+             * Additional information which is hidden behind a property. The extra level of indirection is
+             * done so that the debug view would not be cluttered with properties which are only rarely
+             * relevant to the developer.
+             */
+            get: function () {
+                return {
+                    tView: this._raw_lView[TVIEW],
+                    cleanup: this._raw_lView[CLEANUP],
+                    injector: this._raw_lView[INJECTOR$1],
+                    rendererFactory: this._raw_lView[RENDERER_FACTORY],
+                    renderer: this._raw_lView[RENDERER],
+                    sanitizer: this._raw_lView[SANITIZER],
+                    childHead: toDebug(this._raw_lView[CHILD_HEAD]),
+                    next: toDebug(this._raw_lView[NEXT]),
+                    childTail: toDebug(this._raw_lView[CHILD_TAIL]),
+                    declarationView: toDebug(this._raw_lView[DECLARATION_VIEW]),
+                    contentQueries: this._raw_lView[CONTENT_QUERIES],
+                    queries: this._raw_lView[QUERIES],
+                    tHost: this._raw_lView[T_HOST],
+                    bindingIndex: this._raw_lView[BINDING_INDEX],
+                };
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "childViews", {
+            /**
+             * Normalized view of child views (and containers) attached at this location.
+             */
+            get: function () {
+                var childViews = [];
+                var child = this.__other__.childHead;
+                while (child) {
+                    childViews.push(child);
+                    child = child.__other__.next;
+                }
+                return childViews;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return LViewDebug;
+    }());
+    /**
+     * Turns a flat list of nodes into a tree by walking the associated `TNode` tree.
+     *
+     * @param tNode
+     * @param lView
+     */
+    function toDebugNodes(tNode, lView) {
+        if (tNode) {
+            var debugNodes = [];
+            var tNodeCursor = tNode;
+            while (tNodeCursor) {
+                var rawValue = lView[tNode.index];
+                var native = unwrapRNode(rawValue);
+                var componentLViewDebug = isStylingContext(rawValue) ? null : toDebug(readLViewValue(rawValue));
+                var styles = null;
+                var classes = null;
+                if (runtimeIsNewStylingInUse()) {
+                    styles = tNode.newStyles ? new NodeStylingDebug(tNode.newStyles, lView) : null;
+                    classes = tNode.newClasses ? new NodeStylingDebug(tNode.newClasses, lView) : null;
+                }
+                debugNodes.push({
+                    html: toHtml(native),
+                    native: native, styles: styles, classes: classes,
+                    nodes: toDebugNodes(tNode.child, lView),
+                    component: componentLViewDebug,
+                });
+                tNodeCursor = tNodeCursor.next;
+            }
+            return debugNodes;
+        }
+        else {
+            return null;
+        }
+    }
+    var LContainerDebug = /** @class */ (function () {
+        function LContainerDebug(_raw_lContainer) {
+            this._raw_lContainer = _raw_lContainer;
+        }
+        Object.defineProperty(LContainerDebug.prototype, "activeIndex", {
+            get: function () { return this._raw_lContainer[ACTIVE_INDEX]; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LContainerDebug.prototype, "views", {
+            get: function () {
+                return this._raw_lContainer.slice(CONTAINER_HEADER_OFFSET)
+                    .map(toDebug);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LContainerDebug.prototype, "parent", {
+            get: function () { return toDebug(this._raw_lContainer[PARENT]); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LContainerDebug.prototype, "queries", {
+            get: function () { return this._raw_lContainer[QUERIES]; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LContainerDebug.prototype, "host", {
+            get: function () { return this._raw_lContainer[HOST]; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LContainerDebug.prototype, "native", {
+            get: function () { return this._raw_lContainer[NATIVE]; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LContainerDebug.prototype, "__other__", {
+            get: function () {
+                return {
+                    next: toDebug(this._raw_lContainer[NEXT]),
+                };
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return LContainerDebug;
+    }());
+    /**
+     * Return an `LView` value if found.
+     *
+     * @param value `LView` if any
+     */
+    function readLViewValue(value) {
+        while (Array.isArray(value)) {
+            // This check is not quite right, as it does not take into account `StylingContext`
+            // This is why it is in debug, not in util.ts
+            if (value.length >= HEADER_OFFSET - 1)
+                return value;
+            value = value[HOST];
+        }
+        return null;
+    }
+    var I18NDebugItem = /** @class */ (function () {
+        function I18NDebugItem(__raw_opCode, _lView, nodeIndex, type) {
+            this.__raw_opCode = __raw_opCode;
+            this._lView = _lView;
+            this.nodeIndex = nodeIndex;
+            this.type = type;
+        }
+        Object.defineProperty(I18NDebugItem.prototype, "tNode", {
+            get: function () { return getTNode(this.nodeIndex, this._lView); },
+            enumerable: true,
+            configurable: true
+        });
+        return I18NDebugItem;
+    }());
+    /**
+     * Turns a list of "Create" & "Update" OpCodes into a human-readable list of operations for
+     * debugging purposes.
+     * @param mutateOpCodes mutation opCodes to read
+     * @param updateOpCodes update opCodes to read
+     * @param icus list of ICU expressions
+     * @param lView The view the opCodes are acting on
+     */
+    function attachI18nOpCodesDebug(mutateOpCodes, updateOpCodes, icus, lView) {
+        attachDebugObject(mutateOpCodes, new I18nMutateOpCodesDebug(mutateOpCodes, lView));
+        attachDebugObject(updateOpCodes, new I18nUpdateOpCodesDebug(updateOpCodes, icus, lView));
+        if (icus) {
+            icus.forEach(function (icu) {
+                icu.create.forEach(function (icuCase) { attachDebugObject(icuCase, new I18nMutateOpCodesDebug(icuCase, lView)); });
+                icu.update.forEach(function (icuCase) {
+                    attachDebugObject(icuCase, new I18nUpdateOpCodesDebug(icuCase, icus, lView));
+                });
+            });
+        }
+    }
+    var I18nMutateOpCodesDebug = /** @class */ (function () {
+        function I18nMutateOpCodesDebug(__raw_opCodes, __lView) {
+            this.__raw_opCodes = __raw_opCodes;
+            this.__lView = __lView;
+        }
+        Object.defineProperty(I18nMutateOpCodesDebug.prototype, "operations", {
+            /**
+             * A list of operation information about how the OpCodes will act on the view.
+             */
+            get: function () {
+                var _a = this, __lView = _a.__lView, __raw_opCodes = _a.__raw_opCodes;
+                var results = [];
+                for (var i = 0; i < __raw_opCodes.length; i++) {
+                    var opCode = __raw_opCodes[i];
+                    var result = void 0;
+                    if (typeof opCode === 'string') {
+                        result = {
+                            __raw_opCode: opCode,
+                            type: 'Create Text Node',
+                            nodeIndex: __raw_opCodes[++i],
+                            text: opCode,
+                        };
+                    }
+                    if (typeof opCode === 'number') {
+                        switch (opCode & 7 /* MASK_OPCODE */) {
+                            case 1 /* AppendChild */:
+                                var destinationNodeIndex = opCode >>> 17 /* SHIFT_PARENT */;
+                                result = new I18NDebugItem(opCode, __lView, destinationNodeIndex, 'AppendChild');
+                                break;
+                            case 0 /* Select */:
+                                var nodeIndex = opCode >>> 3 /* SHIFT_REF */;
+                                result = new I18NDebugItem(opCode, __lView, nodeIndex, 'Select');
+                                break;
+                            case 5 /* ElementEnd */:
+                                var elementIndex = opCode >>> 3 /* SHIFT_REF */;
+                                result = new I18NDebugItem(opCode, __lView, elementIndex, 'ElementEnd');
+                                break;
+                            case 4 /* Attr */:
+                                elementIndex = opCode >>> 3 /* SHIFT_REF */;
+                                result = new I18NDebugItem(opCode, __lView, elementIndex, 'Attr');
+                                result['attrName'] = __raw_opCodes[++i];
+                                result['attrValue'] = __raw_opCodes[++i];
+                                break;
+                        }
+                    }
+                    if (!result) {
+                        switch (opCode) {
+                            case COMMENT_MARKER:
+                                result = {
+                                    __raw_opCode: opCode,
+                                    type: 'COMMENT_MARKER',
+                                    commentValue: __raw_opCodes[++i],
+                                    nodeIndex: __raw_opCodes[++i],
+                                };
+                                break;
+                            case ELEMENT_MARKER:
+                                result = {
+                                    __raw_opCode: opCode,
+                                    type: 'ELEMENT_MARKER',
+                                };
+                                break;
+                        }
+                    }
+                    if (!result) {
+                        result = {
+                            __raw_opCode: opCode,
+                            type: 'Unknown Op Code',
+                            code: opCode,
+                        };
+                    }
+                    results.push(result);
+                }
+                return results;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return I18nMutateOpCodesDebug;
+    }());
+    var I18nUpdateOpCodesDebug = /** @class */ (function () {
+        function I18nUpdateOpCodesDebug(__raw_opCodes, icus, __lView) {
+            this.__raw_opCodes = __raw_opCodes;
+            this.icus = icus;
+            this.__lView = __lView;
+        }
+        Object.defineProperty(I18nUpdateOpCodesDebug.prototype, "operations", {
+            /**
+             * A list of operation information about how the OpCodes will act on the view.
+             */
+            get: function () {
+                var _a = this, __lView = _a.__lView, __raw_opCodes = _a.__raw_opCodes, icus = _a.icus;
+                var results = [];
+                for (var i = 0; i < __raw_opCodes.length; i++) {
+                    // bit code to check if we should apply the next update
+                    var checkBit = __raw_opCodes[i];
+                    // Number of opCodes to skip until next set of update codes
+                    var skipCodes = __raw_opCodes[++i];
+                    var value = '';
+                    for (var j = i + 1; j <= (i + skipCodes); j++) {
+                        var opCode = __raw_opCodes[j];
+                        if (typeof opCode === 'string') {
+                            value += opCode;
+                        }
+                        else if (typeof opCode == 'number') {
+                            if (opCode < 0) {
+                                // It's a binding index whose value is negative
+                                // We cannot know the value of the binding so we only show the index
+                                value += "\uFFFD" + (-opCode - 1) + "\uFFFD";
+                            }
+                            else {
+                                var nodeIndex = opCode >>> 2 /* SHIFT_REF */;
+                                var tIcuIndex = void 0;
+                                var tIcu = void 0;
+                                switch (opCode & 3 /* MASK_OPCODE */) {
+                                    case 1 /* Attr */:
+                                        var attrName = __raw_opCodes[++j];
+                                        var sanitizeFn = __raw_opCodes[++j];
+                                        results.push({
+                                            __raw_opCode: opCode,
+                                            checkBit: checkBit,
+                                            type: 'Attr',
+                                            attrValue: value, attrName: attrName, sanitizeFn: sanitizeFn,
+                                        });
+                                        break;
+                                    case 0 /* Text */:
+                                        results.push({
+                                            __raw_opCode: opCode,
+                                            checkBit: checkBit,
+                                            type: 'Text', nodeIndex: nodeIndex,
+                                            text: value,
+                                        });
+                                        break;
+                                    case 2 /* IcuSwitch */:
+                                        tIcuIndex = __raw_opCodes[++j];
+                                        tIcu = icus[tIcuIndex];
+                                        var result = new I18NDebugItem(opCode, __lView, nodeIndex, 'IcuSwitch');
+                                        result['tIcuIndex'] = tIcuIndex;
+                                        result['checkBit'] = checkBit;
+                                        result['mainBinding'] = value;
+                                        result['tIcu'] = tIcu;
+                                        results.push(result);
+                                        break;
+                                    case 3 /* IcuUpdate */:
+                                        tIcuIndex = __raw_opCodes[++j];
+                                        tIcu = icus[tIcuIndex];
+                                        result = new I18NDebugItem(opCode, __lView, nodeIndex, 'IcuUpdate');
+                                        result['tIcuIndex'] = tIcuIndex;
+                                        result['checkBit'] = checkBit;
+                                        result['tIcu'] = tIcu;
+                                        results.push(result);
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                    i += skipCodes;
+                }
+                return results;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return I18nUpdateOpCodesDebug;
+    }());
+
+    // Note: This hack is necessary so we don't erroneously get a circular dependency
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+
+    /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
      *
@@ -10168,6 +10711,10 @@
             stylingTemplate: null,
             projection: null,
             onElementCreationFns: null,
+            // TODO (matsko): rename this to `styles` once the old styling impl is gone
+            newStyles: null,
+            // TODO (matsko): rename this to `classes` once the old styling impl is gone
+            newClasses: null,
         };
     }
     /**
@@ -12199,6 +12746,187 @@
         return injectAttributeImpl(getPreviousOrParentTNode(), attrNameToInject);
     }
 
+    /**
+     * This file contains the core logic for how styling instructions are processed in Angular.
+     *
+     * To learn more about the algorithm see `TStylingContext`.
+     */
+    /**
+     * Temporary function to bridge styling functionality between this new
+     * refactor (which is here inside of `styling_next/`) and the old
+     * implementation (which lives inside of `styling/`).
+     *
+     * This function is executed during the creation block of an element.
+     * Because the existing styling implementation issues a call to the
+     * `styling()` instruction, this instruction will also get run. The
+     * central idea here is that the directive index values are bound
+     * into the context. The directive index is temporary and is only
+     * required until the `select(n)` instruction is fully functional.
+     */
+    function stylingInit() {
+        var lView = getLView();
+        var index = getSelectedIndex();
+        var tNode = getTNode(index, lView);
+        updateLastDirectiveIndex(tNode, getActiveDirectiveStylingIndex());
+    }
+    /**
+     * Mirror implementation of the `styleProp()` instruction (found in `instructions/styling.ts`).
+     */
+    function styleProp(prop, value, suffix) {
+        var index = getSelectedIndex();
+        var lView = getLView();
+        var bindingIndex = lView[BINDING_INDEX]++;
+        var tNode = getTNode(index, lView);
+        var tContext = getStylesContext(tNode);
+        var defer = getActiveDirectiveSuperClassHeight() > 0;
+        updateStyleBinding(tContext, lView, prop, bindingIndex, value, defer);
+    }
+    /**
+     * Mirror implementation of the `classProp()` instruction (found in `instructions/styling.ts`).
+     */
+    function classProp(className, value) {
+        var index = getSelectedIndex();
+        var lView = getLView();
+        var bindingIndex = lView[BINDING_INDEX]++;
+        var tNode = getTNode(index, lView);
+        var tContext = getClassesContext(tNode);
+        var defer = getActiveDirectiveSuperClassHeight() > 0;
+        updateClassBinding(tContext, lView, className, bindingIndex, value, defer);
+    }
+    /**
+     * Temporary function to bridge styling functionality between this new
+     * refactor (which is here inside of `styling_next/`) and the old
+     * implementation (which lives inside of `styling/`).
+     *
+     * The new styling refactor ensures that styling flushing is called
+     * automatically when a template function exits or a follow-up element
+     * is visited (i.e. when `select(n)` is called). Because the `select(n)`
+     * instruction is not fully implemented yet (it doesn't actually execute
+     * host binding instruction code at the right time), this means that a
+     * styling apply function is still needed.
+     *
+     * This function is a mirror implementation of the `stylingApply()`
+     * instruction (found in `instructions/styling.ts`).
+     */
+    function stylingApply() {
+        var index = getSelectedIndex();
+        var lView = getLView();
+        var tNode = getTNode(index, lView);
+        var renderer = getRenderer(tNode, lView);
+        var native = getNativeFromLView(index, lView);
+        var directiveIndex = getActiveDirectiveStylingIndex();
+        applyClasses(renderer, lView, getClassesContext(tNode), native, directiveIndex);
+        applyStyles(renderer, lView, getStylesContext(tNode), native, directiveIndex);
+    }
+    function getStylesContext(tNode) {
+        return getContext(tNode, false);
+    }
+    function getClassesContext(tNode) {
+        return getContext(tNode, true);
+    }
+    /**
+     * Returns/instantiates a styling context from/to a `tNode` instance.
+     */
+    function getContext(tNode, isClassBased) {
+        var context = isClassBased ? tNode.newClasses : tNode.newStyles;
+        if (!context) {
+            context = allocStylingContext$1();
+            if (ngDevMode) {
+                attachStylingDebugObject(context);
+            }
+            if (isClassBased) {
+                tNode.newClasses = context;
+            }
+            else {
+                tNode.newStyles = context;
+            }
+        }
+        return context;
+    }
+    /**
+     * Temporary function to bridge styling functionality between this new
+     * refactor (which is here inside of `styling_next/`) and the old
+     * implementation (which lives inside of `styling/`).
+     *
+     * The purpose of this function is to traverse through the LView data
+     * for a specific element index and return the native node. Because the
+     * current implementation relies on there being a styling context array,
+     * the code below will need to loop through these array values until it
+     * gets a native element node.
+     *
+     * Note that this code is temporary and will disappear once the new
+     * styling refactor lands in its entirety.
+     */
+    function getNativeFromLView(index, viewData) {
+        var storageIndex = index + HEADER_OFFSET;
+        var slotValue = viewData[storageIndex];
+        var wrapper = viewData;
+        while (Array.isArray(slotValue)) {
+            wrapper = slotValue;
+            slotValue = slotValue[HOST];
+        }
+        if (isStylingContext(wrapper)) {
+            return wrapper[0 /* ElementPosition */];
+        }
+        else {
+            return slotValue;
+        }
+    }
+    function getRenderer(tNode, lView) {
+        return tNode.type === 3 /* Element */ ? lView[RENDERER] : null;
+    }
+    /**
+     * Searches and assigns provided all static style/class entries (found in the `attrs` value)
+     * and registers them in their respective styling contexts.
+     */
+    function registerInitialStylingIntoContext(tNode, attrs, startIndex) {
+        var classesContext;
+        var stylesContext;
+        var mode = -1;
+        for (var i = startIndex; i < attrs.length; i++) {
+            var attr = attrs[i];
+            if (typeof attr == 'number') {
+                mode = attr;
+            }
+            else if (mode == 1 /* Classes */) {
+                classesContext = classesContext || getClassesContext(tNode);
+                registerBinding(classesContext, -1, attr, true);
+            }
+            else if (mode == 2 /* Styles */) {
+                stylesContext = stylesContext || getStylesContext(tNode);
+                registerBinding(stylesContext, -1, attr, attrs[++i]);
+            }
+        }
+    }
+    /**
+     * Mirror implementation of the same function found in `instructions/styling.ts`.
+     */
+    function getActiveDirectiveStylingIndex() {
+        // whenever a directive's hostBindings function is called a uniqueId value
+        // is assigned. Normally this is enough to help distinguish one directive
+        // from another for the styling context, but there are situations where a
+        // sub-class directive could inherit and assign styling in concert with a
+        // parent directive. To help the styling code distinguish between a parent
+        // sub-classed directive the inheritance depth is taken into account as well.
+        return getActiveDirectiveId() + getActiveDirectiveSuperClassDepth();
+    }
+    /**
+     * Temporary function that will update the max directive index value in
+     * both the classes and styles contexts present on the provided `tNode`.
+     *
+     * This code is only used because the `select(n)` code functionality is not
+     * yet 100% functional. The `select(n)` instruction cannot yet evaluate host
+     * bindings function code in sync with the associated template function code.
+     * For this reason the styling algorithm needs to track the last directive index
+     * value so that it knows exactly when to render styling to the element since
+     * `stylingApply()` is called multiple times per CD (`stylingApply` will be
+     * removed once `select(n)` is fixed).
+     */
+    function updateLastDirectiveIndex(tNode, directiveIndex) {
+        updateContextDirectiveIndex(getClassesContext(tNode), directiveIndex);
+        updateContextDirectiveIndex(getStylesContext(tNode), directiveIndex);
+    }
+
     /*
      * The contents of this file include the instructions for all styling-related
      * operations in Angular.
@@ -12240,8 +12968,14 @@
         if (!tNode.stylingTemplate) {
             tNode.stylingTemplate = createEmptyStylingContext();
         }
-        var directiveStylingIndex = getActiveDirectiveStylingIndex();
+        var directiveStylingIndex = getActiveDirectiveStylingIndex$1();
         if (directiveStylingIndex) {
+            // this is temporary hack to get the existing styling instructions to
+            // play ball with the new refactored implementation.
+            // TODO (matsko): remove this once the old implementation is not needed.
+            if (runtimeIsNewStylingInUse()) {
+                stylingInit();
+            }
             // despite the binding being applied in a queue (below), the allocation
             // of the directive into the context happens right away. The reason for
             // this is to retain the ordering of the directives (which is important
@@ -12249,7 +12983,7 @@
             allocateOrUpdateDirectiveIntoContext(tNode.stylingTemplate, directiveStylingIndex);
             var fns = tNode.onElementCreationFns = tNode.onElementCreationFns || [];
             fns.push(function () {
-                initstyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, directiveStylingIndex);
+                initStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, directiveStylingIndex);
                 registerHostDirective(tNode.stylingTemplate, directiveStylingIndex);
             });
         }
@@ -12260,10 +12994,10 @@
             // components) then they will be applied at the end of the `elementEnd`
             // instruction (because directives are created first before styling is
             // executed for a new element).
-            initstyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, DEFAULT_TEMPLATE_DIRECTIVE_INDEX);
+            initStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, DEFAULT_TEMPLATE_DIRECTIVE_INDEX);
         }
     }
-    function initstyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, directiveStylingIndex) {
+    function initStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer, directiveStylingIndex) {
         updateContextWithBindings(tNode.stylingTemplate, directiveStylingIndex, classBindingNames, styleBindingNames, styleSanitizer);
     }
     /**
@@ -12295,13 +13029,20 @@
         var index = getSelectedIndex();
         var valueToAdd = resolveStylePropValue(value, suffix);
         var stylingContext = getStylingContext(index, getLView());
-        var directiveStylingIndex = getActiveDirectiveStylingIndex();
+        var directiveStylingIndex = getActiveDirectiveStylingIndex$1();
         if (directiveStylingIndex) {
             var args = [stylingContext, styleIndex, valueToAdd, directiveStylingIndex, forceOverride];
             enqueueHostInstruction(stylingContext, directiveStylingIndex, updateStyleProp, args);
         }
         else {
             updateStyleProp(stylingContext, styleIndex, valueToAdd, DEFAULT_TEMPLATE_DIRECTIVE_INDEX, forceOverride);
+        }
+        if (runtimeIsNewStylingInUse()) {
+            var prop = getBindingNameFromIndex(stylingContext, styleIndex, directiveStylingIndex, false);
+            // the reason why we cast the value as `boolean` is
+            // because the new styling refactor does not yet support
+            // sanitization or animation players.
+            styleProp(prop, value, suffix);
         }
     }
     function resolveStylePropValue(value, suffix) {
@@ -12347,7 +13088,7 @@
         var input = (value instanceof BoundPlayerFactory) ?
             value :
             booleanOrNull(value);
-        var directiveStylingIndex = getActiveDirectiveStylingIndex();
+        var directiveStylingIndex = getActiveDirectiveStylingIndex$1();
         var stylingContext = getStylingContext(index, getLView());
         if (directiveStylingIndex) {
             var args = [stylingContext, classIndex, input, directiveStylingIndex, forceOverride];
@@ -12355,6 +13096,13 @@
         }
         else {
             updateClassProp(stylingContext, classIndex, input, DEFAULT_TEMPLATE_DIRECTIVE_INDEX, forceOverride);
+        }
+        if (runtimeIsNewStylingInUse()) {
+            var prop = getBindingNameFromIndex(stylingContext, classIndex, directiveStylingIndex, true);
+            // the reason why we cast the value as `boolean` is
+            // because the new styling refactor does not yet support
+            // sanitization or animation players.
+            classProp(prop, input);
         }
     }
     function booleanOrNull(value) {
@@ -12385,7 +13133,7 @@
         var index = getSelectedIndex();
         var lView = getLView();
         var stylingContext = getStylingContext(index, lView);
-        var directiveStylingIndex = getActiveDirectiveStylingIndex();
+        var directiveStylingIndex = getActiveDirectiveStylingIndex$1();
         if (directiveStylingIndex) {
             var args = [stylingContext, styles, directiveStylingIndex];
             enqueueHostInstruction(stylingContext, directiveStylingIndex, updateStyleMap, args);
@@ -12426,7 +13174,7 @@
         var index = getSelectedIndex();
         var lView = getLView();
         var stylingContext = getStylingContext(index, lView);
-        var directiveStylingIndex = getActiveDirectiveStylingIndex();
+        var directiveStylingIndex = getActiveDirectiveStylingIndex$1();
         if (directiveStylingIndex) {
             var args = [stylingContext, classes, directiveStylingIndex];
             enqueueHostInstruction(stylingContext, directiveStylingIndex, updateClassMap, args);
@@ -12456,7 +13204,7 @@
      */
     function ΔstylingApply() {
         var index = getSelectedIndex();
-        var directiveStylingIndex = getActiveDirectiveStylingIndex() || DEFAULT_TEMPLATE_DIRECTIVE_INDEX;
+        var directiveStylingIndex = getActiveDirectiveStylingIndex$1() || DEFAULT_TEMPLATE_DIRECTIVE_INDEX;
         var lView = getLView();
         var tNode = getTNode(index, lView);
         // if a non-element value is being processed then we can't render values
@@ -12465,10 +13213,12 @@
         var renderer = tNode.type === 3 /* Element */ ? lView[RENDERER] : null;
         var isFirstRender = (lView[FLAGS] & 8 /* FirstLViewPass */) !== 0;
         var stylingContext = getStylingContext(index, lView);
-        var totalPlayersQueued = renderStyling(stylingContext, renderer, lView, isFirstRender, null, null, directiveStylingIndex);
-        if (totalPlayersQueued > 0) {
-            var rootContext = getRootContext(lView);
-            scheduleTick(rootContext, 2 /* FlushPlayers */);
+        if (runtimeAllowOldStyling()) {
+            var totalPlayersQueued = renderStyling(stylingContext, renderer, lView, isFirstRender, null, null, directiveStylingIndex);
+            if (totalPlayersQueued > 0) {
+                var rootContext = getRootContext(lView);
+                scheduleTick(rootContext, 2 /* FlushPlayers */);
+            }
         }
         // because select(n) may not run between every instruction, the cached styling
         // context may not get cleared between elements. The reason for this is because
@@ -12478,8 +13228,11 @@
         // cleared because there is no code in Angular that applies more styling code after a
         // styling flush has occurred. Note that this will be fixed once FW-1254 lands.
         setCachedStylingContext(null);
+        if (runtimeIsNewStylingInUse()) {
+            stylingApply();
+        }
     }
-    function getActiveDirectiveStylingIndex() {
+    function getActiveDirectiveStylingIndex$1() {
         // whenever a directive's hostBindings function is called a uniqueId value
         // is assigned. Normally this is enough to help distinguish one directive
         // from another for the styling context, but there are situations where a
@@ -12534,8 +13287,9 @@
         var tNode = createNodeAtIndex(index, 3 /* Element */, native, name, attrs || null);
         var initialStylesIndex = 0;
         var initialClassesIndex = 0;
+        var lastAttrIndex = -1;
         if (attrs) {
-            var lastAttrIndex = setUpAttributes(native, attrs);
+            lastAttrIndex = setUpAttributes(native, attrs);
             // it's important to only prepare styling-related datastructures once for a given
             // tNode and not each time an element is created. Also, the styling code is designed
             // to be patched and constructed at various points, but only up until the styling
@@ -12579,6 +13333,9 @@
         if (tNode.stylingTemplate) {
             renderInitialClasses(native, tNode.stylingTemplate, renderer, initialClassesIndex);
             renderInitialStyles(native, tNode.stylingTemplate, renderer, initialStylesIndex);
+        }
+        if (runtimeIsNewStylingInUse() && lastAttrIndex >= 0) {
+            registerInitialStylingIntoContext(tNode, attrs, lastAttrIndex);
         }
         var currentQueries = lView[QUERIES];
         if (currentQueries) {
@@ -12730,7 +13487,7 @@
             var lastAttrIndex = setUpAttributes(native, attrs);
             var stylingAttrsStartIndex = attrsStylingIndexOf(attrs, lastAttrIndex);
             if (stylingAttrsStartIndex >= 0) {
-                var directiveStylingIndex = getActiveDirectiveStylingIndex();
+                var directiveStylingIndex = getActiveDirectiveStylingIndex$1();
                 if (tNode.stylingTemplate) {
                     patchContextWithStaticAttrs(tNode.stylingTemplate, attrs, stylingAttrsStartIndex, directiveStylingIndex);
                 }
@@ -14470,7 +15227,7 @@
      *
      * @publicApi
      */
-    function getContext(element) {
+    function getContext$1(element) {
         var context = loadLContextFromNode(element);
         return context.lView[CONTEXT];
     }
@@ -14727,7 +15484,7 @@
         if (!_published) {
             _published = true;
             publishGlobalUtil('getComponent', getComponent);
-            publishGlobalUtil('getContext', getContext);
+            publishGlobalUtil('getContext', getContext$1);
             publishGlobalUtil('getListeners', getListeners);
             publishGlobalUtil('getViewComponent', getViewComponent);
             publishGlobalUtil('getHostElement', getHostElement);
@@ -16380,7 +17137,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-rc.0+240.sha-848e53e.with-local-changes');
+    var VERSION = new Version('8.0.0-rc.0+241.sha-f03475c.with-local-changes');
 
     /**
      * @license
@@ -25358,7 +26115,7 @@
             configurable: true
         });
         Object.defineProperty(DebugNode__POST_R3__.prototype, "context", {
-            get: function () { return getContext(this.nativeNode); },
+            get: function () { return getContext$1(this.nativeNode); },
             enumerable: true,
             configurable: true
         });
