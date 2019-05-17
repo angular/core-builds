@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+243.sha-0937062.with-local-changes
+ * @license Angular v8.0.0-rc.0+244.sha-eda09e6.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2152,7 +2152,7 @@
          * This can be used for errors created by compileModule...
          */
         TestingCompiler.prototype.getComponentFromError = function (error) { throw unimplemented(); };
-        TestingCompiler.ngInjectableDef = i0.ΔdefineInjectable({ token: TestingCompiler, factory: function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory((t || TestingCompiler)); }, providedIn: null });
+        TestingCompiler.ngInjectableDef = i0.ΔdefineInjectable({ token: TestingCompiler, factory: function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory(t || TestingCompiler); }, providedIn: null });
         return TestingCompiler;
     }(i0.Compiler));
     var ɵTestingCompiler_BaseFactory = i0.ΔgetInheritedFactory(TestingCompiler);
