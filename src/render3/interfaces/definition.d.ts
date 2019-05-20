@@ -9,12 +9,12 @@ import { SchemaMetadata, ViewEncapsulation } from '../../core';
 import { ProcessProvidersFunction } from '../../di/interface/provider';
 import { Type } from '../../interface/type';
 import { CssSelectorList } from './projection';
+import { TView } from './view';
 /**
  * Definition of what a template rendering function should look like for a component.
  */
 export declare type ComponentTemplate<T> = {
     <U extends T>(rf: RenderFlags, ctx: T | U): void;
-    ngPrivateData?: never;
 };
 /**
  * Definition of what a view queries function should look like.
@@ -267,6 +267,11 @@ export interface ComponentDef<T> extends DirectiveDef<T> {
      * The set of schemas that declare elements to be allowed in the component's template.
      */
     schemas: SchemaMetadata[] | null;
+    /**
+     * Ivy runtime uses this place to store the computed tView for the component. This gets filled on
+     * the first run of component.
+     */
+    tView: TView | null;
     /**
      * Used to store the result of `noSideEffects` function so that it is not removed by closure
      * compiler. The property should never be read.

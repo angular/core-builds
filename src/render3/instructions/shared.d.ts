@@ -60,18 +60,6 @@ export declare function assignTViewNodeToLView(tView: TView, tParentNode: TNode 
  */
 export declare function allocExpando(view: LView, numSlotsToAlloc: number): void;
 /**
- *
- * @param hostNode Existing node to render into.
- * @param templateFn Template function with the instructions.
- * @param consts The number of nodes, local refs, and pipes in this template
- * @param context to pass into the template.
- * @param providedRendererFactory renderer factory to use
- * @param host The host element node to use
- * @param directives Directive defs that should be used for matching
- * @param pipes Pipe defs that should be used for matching
- */
-export declare function renderTemplate<T>(hostNode: RElement, templateFn: ComponentTemplate<T>, consts: number, vars: number, context: T, providedRendererFactory: RendererFactory3, componentView: LView | null, directives?: DirectiveDefListOrFactory | null, pipes?: PipeDefListOrFactory | null, sanitizer?: Sanitizer | null): LView;
-/**
  * Used for creating the LViewNode of a dynamic embedded view,
  * either through ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
  * Such lViewNode will then be renderer with renderEmbeddedTemplate() (see below).
@@ -88,6 +76,7 @@ export declare function createEmbeddedViewAndNode<T>(tView: TView, context: T, d
  * TView for dynamically created views on their host TNode, which only has one instance.
  */
 export declare function renderEmbeddedTemplate<T>(viewToRender: LView, tView: TView, context: T): void;
+export declare function renderComponentOrTemplate<T>(hostView: LView, context: T, templateFn?: ComponentTemplate<T>): void;
 /**
  * Appropriately sets `stylingTemplate` on a TNode
  *
@@ -110,16 +99,10 @@ export declare function createDirectivesAndLocals(tView: TView, lView: LView, lo
  * Gets TView from a template function or creates a new TView
  * if it doesn't already exist.
  *
- * @param templateFn The template from which to get static data
- * @param consts The number of nodes, local refs, and pipes in this view
- * @param vars The number of bindings and pure function bindings in this view
- * @param directives Directive defs that should be saved on TView
- * @param pipes Pipe defs that should be saved on TView
- * @param viewQuery View query that should be saved on TView
- * @param schemas Schemas that should be saved on TView
+ * @param def ComponentDef
  * @returns TView
  */
-export declare function getOrCreateTView(templateFn: ComponentTemplate<any>, consts: number, vars: number, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null, viewQuery: ViewQueriesFunction<any> | null, schemas: SchemaMetadata[] | null): TView;
+export declare function getOrCreateTView(def: ComponentDef<any>): TView;
 /**
  * Creates a TView instance
  *
