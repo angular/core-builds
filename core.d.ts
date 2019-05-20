@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+257.sha-c1135ee.with-local-changes
+ * @license Angular v8.0.0-rc.0+259.sha-6454f76.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1142,7 +1142,6 @@ export declare abstract class ComponentRef<C> {
  */
 declare type ComponentTemplate<T> = {
     <U extends T>(rf: ɵRenderFlags, ctx: T | U): void;
-    ngPrivateData?: never;
 };
 
 /**
@@ -7832,7 +7831,7 @@ declare const TVIEW = 1;
  * The static data for an LView (shared between all templates of a
  * given type).
  *
- * Stored on the template function as ngPrivateData.
+ * Stored on the `ComponentDef.tView`.
  */
 declare interface TView {
     /**
@@ -9771,6 +9770,11 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
      * The set of schemas that declare elements to be allowed in the component's template.
      */
     schemas: SchemaMetadata[] | null;
+    /**
+     * Ivy runtime uses this place to store the computed tView for the component. This gets filled on
+     * the first run of component.
+     */
+    tView: TView | null;
     /**
      * Used to store the result of `noSideEffects` function so that it is not removed by closure
      * compiler. The property should never be read.
