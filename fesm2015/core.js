@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+283.sha-7c0667d.with-local-changes
+ * @license Angular v8.0.0-rc.0+288.sha-0f5da82.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21270,7 +21270,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-rc.0+283.sha-7c0667d.with-local-changes');
+const VERSION = new Version('8.0.0-rc.0+288.sha-0f5da82.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -28894,10 +28894,10 @@ class LQueries_ {
      */
     track(queryList, predicate, descend, read) {
         if (descend) {
-            this.deep = createQuery(this.deep, queryList, predicate, read != null ? read : null);
+            this.deep = createLQuery(this.deep, queryList, predicate, read != null ? read : null);
         }
         else {
-            this.shallow = createQuery(this.shallow, queryList, predicate, read != null ? read : null);
+            this.shallow = createLQuery(this.shallow, queryList, predicate, read != null ? read : null);
         }
     }
     /**
@@ -29223,7 +29223,7 @@ function createPredicate(predicate, read) {
  * @param {?} read
  * @return {?}
  */
-function createQuery(previous, queryList, predicate, read) {
+function createLQuery(previous, queryList, predicate, read) {
     return {
         next: previous,
         list: queryList,
@@ -29233,26 +29233,26 @@ function createQuery(previous, queryList, predicate, read) {
     };
 }
 /**
- * Creates and returns a QueryList.
+ * Creates a QueryList and stores it in LView's collection of active queries (LQueries).
  *
  * @template T
+ * @param {?} lView
  * @param {?} predicate The type for which the query will search
  * @param {?} descend Whether or not to descend into children
  * @param {?} read What to save in the query
+ * @param {?} isStatic
  * @return {?} QueryList<T>
  */
-function query(
+function createQueryListInLView(
 // TODO: "read" should be an AbstractType (FW-486)
-predicate, descend, read) {
+lView, predicate, descend, read, isStatic) {
     ngDevMode && assertPreviousIsParent(getIsParent());
-    /** @type {?} */
-    const lView = getLView();
     /** @type {?} */
     const queryList = (/** @type {?} */ (new QueryList()));
     /** @type {?} */
     const queries = lView[QUERIES] || (lView[QUERIES] = new LQueries_(null, null, null));
     queryList._valuesTree = [];
-    queryList._static = false;
+    queryList._static = isStatic;
     queries.track(queryList, predicate, descend, read);
     storeCleanupWithContext(lView, queryList, queryList.destroy);
     return queryList;
@@ -29295,13 +29295,11 @@ function ɵɵstaticViewQuery(
 // TODO(FW-486): "read" should be an AbstractType
 predicate, descend, read) {
     /** @type {?} */
-    const queryList = (/** @type {?} */ (ɵɵviewQuery(predicate, descend, read)));
+    const lView = getLView();
     /** @type {?} */
-    const tView = getLView()[TVIEW];
-    queryList._static = true;
-    if (!tView.staticViewQueries) {
-        tView.staticViewQueries = true;
-    }
+    const tView = lView[TVIEW];
+    viewQueryInternal(lView, tView, predicate, descend, read, true);
+    tView.staticViewQueries = true;
 }
 /**
  * Creates new QueryList, stores the reference in LView and returns QueryList.
@@ -29321,16 +29319,29 @@ predicate, descend, read) {
     const lView = getLView();
     /** @type {?} */
     const tView = lView[TVIEW];
+    return viewQueryInternal(lView, tView, predicate, descend, read, false);
+}
+/**
+ * @template T
+ * @param {?} lView
+ * @param {?} tView
+ * @param {?} predicate
+ * @param {?} descend
+ * @param {?} read
+ * @param {?} isStatic
+ * @return {?}
+ */
+function viewQueryInternal(lView, tView, predicate, descend, read, isStatic) {
     if (tView.firstTemplatePass) {
         tView.expandoStartIndex++;
     }
     /** @type {?} */
     const index = getCurrentQueryIndex();
     /** @type {?} */
-    const viewQuery = query(predicate, descend, read);
-    store(index - HEADER_OFFSET, viewQuery);
+    const queryList = createQueryListInLView(lView, predicate, descend, read, isStatic);
+    store(index - HEADER_OFFSET, queryList);
     setCurrentQueryIndex(index + 1);
-    return viewQuery;
+    return queryList;
 }
 /**
  * Loads current View Query and moves the pointer/index to the next View Query in LView.
@@ -29343,7 +29354,7 @@ function ɵɵloadViewQuery() {
     /** @type {?} */
     const index = getCurrentQueryIndex();
     setCurrentQueryIndex(index + 1);
-    return ɵɵload(index - HEADER_OFFSET);
+    return loadInternal(getLView(), index - HEADER_OFFSET);
 }
 /**
  * Registers a QueryList, associated with a content query, for later refresh (part of a view
@@ -29365,8 +29376,24 @@ read) {
     const lView = getLView();
     /** @type {?} */
     const tView = lView[TVIEW];
+    return contentQueryInternal(lView, tView, directiveIndex, predicate, descend, read, false);
+}
+/**
+ * @template T
+ * @param {?} lView
+ * @param {?} tView
+ * @param {?} directiveIndex
+ * @param {?} predicate
+ * @param {?} descend
+ * @param {?} read
+ * @param {?} isStatic
+ * @return {?}
+ */
+function contentQueryInternal(lView, tView, directiveIndex, predicate, descend, 
+// TODO(FW-486): "read" should be an AbstractType
+read, isStatic) {
     /** @type {?} */
-    const contentQuery = query(predicate, descend, read);
+    const contentQuery = createQueryListInLView(lView, predicate, descend, read, isStatic);
     (lView[CONTENT_QUERIES] || (lView[CONTENT_QUERIES] = [])).push(contentQuery);
     if (tView.firstTemplatePass) {
         /** @type {?} */
@@ -29396,13 +29423,11 @@ function ɵɵstaticContentQuery(directiveIndex, predicate, descend,
 // TODO(FW-486): "read" should be an AbstractType
 read) {
     /** @type {?} */
-    const queryList = (/** @type {?} */ (ɵɵcontentQuery(directiveIndex, predicate, descend, read)));
+    const lView = getLView();
     /** @type {?} */
-    const tView = getLView()[TVIEW];
-    queryList._static = true;
-    if (!tView.staticContentQueries) {
-        tView.staticContentQueries = true;
-    }
+    const tView = lView[TVIEW];
+    contentQueryInternal(lView, tView, directiveIndex, predicate, descend, read, true);
+    tView.staticContentQueries = true;
 }
 /**
  *
@@ -34671,7 +34696,7 @@ function queryDef(flags, id, bindings) {
 /**
  * @return {?}
  */
-function createQuery$1() {
+function createQuery() {
     return new QueryList();
 }
 /**
@@ -35737,7 +35762,7 @@ function createViewNodes(view) {
                 break;
             case 67108864 /* TypeContentQuery */:
             case 134217728 /* TypeViewQuery */:
-                nodeData = (/** @type {?} */ (createQuery$1()));
+                nodeData = (/** @type {?} */ (createQuery()));
                 break;
             case 8 /* TypeNgContent */:
                 appendNgContent(view, renderHost, nodeDef);
