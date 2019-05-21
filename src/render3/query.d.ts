@@ -74,6 +74,15 @@ export declare class LQueries_ implements LQueries {
     removeView(): void;
 }
 /**
+ * Creates and returns a QueryList.
+ *
+ * @param predicate The type for which the query will search
+ * @param descend Whether or not to descend into children
+ * @param read What to save in the query
+ * @returns QueryList<T>
+ */
+export declare function query<T>(predicate: Type<any> | string[], descend: boolean, read: any): QueryList<T>;
+/**
  * Refreshes a query by combining matches from all active views and removing matches from deleted
  * views.
  *
