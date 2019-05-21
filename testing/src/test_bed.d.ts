@@ -40,10 +40,7 @@ export interface TestBed {
     compileComponents(): Promise<any>;
     get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
     /**
-     * deprecated from v8.0.0 use Type<T> or InjectionToken<T>
-     * This does not use the deprecated jsdoc tag on purpose
-     * because it renders all overloads as deprecated in TSLint
-     * due to https://github.com/palantir/tslint/issues/4522.
+     * @deprecated from v8.0.0 use Type<T> or InjectionToken<T>
      */
     get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function, context?: any): any;
