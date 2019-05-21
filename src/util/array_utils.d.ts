@@ -13,6 +13,6 @@
 */
 export declare function addAllToArray(items: any[], arr: any[]): void;
 /**
- * Flattens an array in non-recursive way. Input arrays are not modified.
+ * Flattens an array.
  */
-export declare function flatten(list: any[], mapFn?: (value: any) => any): any[];
+export declare function flatten(list: any[], dst?: any[]): any[];
