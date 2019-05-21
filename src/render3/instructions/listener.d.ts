@@ -20,7 +20,7 @@ import { GlobalTargetResolver } from '../interfaces/renderer';
  *
  * @codeGenApi
  */
-export declare function Δlistener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
+export declare function ɵɵlistener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
 /**
 * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component.
 *
@@ -42,4 +42,4 @@ export declare function Δlistener(eventName: string, listenerFn: (e?: any) => a
  *
  * @codeGenApi
 */
-export declare function ΔcomponentHostSyntheticListener<T>(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
+export declare function ɵɵcomponentHostSyntheticListener<T>(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;

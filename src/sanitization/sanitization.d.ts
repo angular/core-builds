@@ -21,7 +21,7 @@ import { StyleSanitizeFn } from './style_sanitizer';
  *
  * @publicApi
  */
-export declare function ΔsanitizeHtml(unsafeHtml: any): string;
+export declare function ɵɵsanitizeHtml(unsafeHtml: any): string;
 /**
  * A `style` sanitizer which converts untrusted `style` **string** into trusted string by removing
  * dangerous content.
@@ -37,7 +37,7 @@ export declare function ΔsanitizeHtml(unsafeHtml: any): string;
  *
  * @publicApi
  */
-export declare function ΔsanitizeStyle(unsafeStyle: any): string;
+export declare function ɵɵsanitizeStyle(unsafeStyle: any): string;
 /**
  * A `url` sanitizer which converts untrusted `url` **string** into trusted string by removing
  * dangerous
@@ -54,7 +54,7 @@ export declare function ΔsanitizeStyle(unsafeStyle: any): string;
  *
  * @publicApi
  */
-export declare function ΔsanitizeUrl(unsafeUrl: any): string;
+export declare function ɵɵsanitizeUrl(unsafeUrl: any): string;
 /**
  * A `url` sanitizer which only lets trusted `url`s through.
  *
@@ -66,7 +66,7 @@ export declare function ΔsanitizeUrl(unsafeUrl: any): string;
  *
  * @publicApi
  */
-export declare function ΔsanitizeResourceUrl(unsafeResourceUrl: any): string;
+export declare function ɵɵsanitizeResourceUrl(unsafeResourceUrl: any): string;
 /**
  * A `script` sanitizer which only lets trusted javascript through.
  *
@@ -79,7 +79,7 @@ export declare function ΔsanitizeResourceUrl(unsafeResourceUrl: any): string;
  *
  * @publicApi
  */
-export declare function ΔsanitizeScript(unsafeScript: any): string;
+export declare function ɵɵsanitizeScript(unsafeScript: any): string;
 /**
  * Detects which sanitizer to use for URL property, based on tag name and prop name.
  *
@@ -87,7 +87,7 @@ export declare function ΔsanitizeScript(unsafeScript: any): string;
  * `packages/compiler/src/schema/dom_security_schema.ts`.
  * If tag and prop names don't match Resource URL schema, use URL sanitizer.
  */
-export declare function getUrlSanitizer(tag: string, prop: string): typeof ΔsanitizeResourceUrl;
+export declare function getUrlSanitizer(tag: string, prop: string): typeof ɵɵsanitizeResourceUrl;
 /**
  * Sanitizes URL, selecting sanitizer function based on tag and property names.
  *
@@ -103,13 +103,13 @@ export declare function getUrlSanitizer(tag: string, prop: string): typeof Δsan
  *
  * @publicApi
  */
-export declare function ΔsanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string, prop: string): any;
+export declare function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string, prop: string): any;
 /**
  * The default style sanitizer will handle sanitization for style properties by
  * sanitizing any CSS property that can include a `url` value (usually image-based properties)
  *
  * @publicApi
  */
-export declare const ΔdefaultStyleSanitizer: StyleSanitizeFn;
+export declare const ɵɵdefaultStyleSanitizer: StyleSanitizeFn;
 export declare function validateAgainstEventProperties(name: string): void;
 export declare function validateAgainstEventAttributes(name: string): void;

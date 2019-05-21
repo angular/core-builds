@@ -28,4 +28,4 @@ import { DirectiveDefFeature } from '../interfaces/definition';
  *
  * @codeGenApi
  */
-export declare function ΔNgOnChangesFeature<T>(): DirectiveDefFeature;
+export declare function ɵɵNgOnChangesFeature<T>(): DirectiveDefFeature;

@@ -15,4 +15,4 @@ import { OpaqueViewState } from '../interfaces/view';
  *
  * @codeGenApi
  */
-export declare function ΔgetCurrentView(): OpaqueViewState;
+export declare function ɵɵgetCurrentView(): OpaqueViewState;

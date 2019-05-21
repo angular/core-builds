@@ -40,8 +40,8 @@ export declare function injectInjectorOnly<T>(token: Type<T> | InjectionToken<T>
  * @see inject
  * @codeGenApi
  */
-export declare function Δinject<T>(token: Type<T> | InjectionToken<T>): T;
-export declare function Δinject<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
+export declare function ɵɵinject<T>(token: Type<T> | InjectionToken<T>): T;
+export declare function ɵɵinject<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
 /**
  * Injects a token from the currently active injector.
  *
@@ -66,12 +66,7 @@ export declare function Δinject<T>(token: Type<T> | InjectionToken<T>, flags?: 
  *
  * @publicApi
  */
-export declare const inject: typeof Δinject;
-/**
- * @deprecated delete by v8, use `inject`.
- * @codeGenApi
- */
-export declare const ɵɵinject: typeof Δinject;
+export declare const inject: typeof ɵɵinject;
 /**
  * Injects `root` tokens in limp mode.
  *

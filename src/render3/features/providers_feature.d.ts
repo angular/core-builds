@@ -37,4 +37,4 @@ import { DirectiveDef } from '../interfaces/definition';
  *
  * @codeGenApi
  */
-export declare function ΔProvidersFeature<T>(providers: Provider[], viewProviders?: Provider[]): (definition: DirectiveDef<T>) => void;
+export declare function ɵɵProvidersFeature<T>(providers: Provider[], viewProviders?: Provider[]): (definition: DirectiveDef<T>) => void;

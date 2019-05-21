@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+259.sha-6454f76.with-local-changes
+ * @license Angular v8.0.0-rc.0+262.sha-d7eaae6.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -270,23 +270,17 @@ function fillProperties(target, source) {
  *
  * @codeGenApi
  */
-function ΔdefineInjectable(opts) {
+function ɵɵdefineInjectable(opts) {
     return {
         providedIn: opts.providedIn || null, factory: opts.factory, value: undefined,
     };
 }
 /**
  * @deprecated in v8, delete after v10. This API should be used only be generated code, and that
- * code should now use ΔdefineInjectable instead.
+ * code should now use ɵɵdefineInjectable instead.
  * @publicApi
  */
-const defineInjectable = ΔdefineInjectable;
-/**
- * @deprecated delete before v8. Use `defineInjectable`, which is also deprecated, but will be
- * around until v10.
- * @publicApi
- */
-const ɵɵdefineInjectable = ΔdefineInjectable;
+const defineInjectable = ɵɵdefineInjectable;
 /**
  * Construct an `InjectorDef` which configures an injector.
  *
@@ -307,7 +301,7 @@ const ɵɵdefineInjectable = ΔdefineInjectable;
  *
  * @publicApi
  */
-function ΔdefineInjector(options) {
+function ɵɵdefineInjector(options) {
     return {
         factory: options.factory, providers: options.providers || [], imports: options.imports || [],
     };
@@ -554,7 +548,7 @@ class InjectionToken {
             ((/** @type {?} */ (this))).__NG_ELEMENT_ID__ = options;
         }
         else if (options !== undefined) {
-            /** @nocollapse */ this.ngInjectableDef = ΔdefineInjectable({
+            /** @nocollapse */ this.ngInjectableDef = ɵɵdefineInjectable({
                 providedIn: options.providedIn || 'root',
                 factory: options.factory,
             });
@@ -659,7 +653,7 @@ function injectInjectorOnly(token, flags = InjectFlags.Default) {
  * @param {?=} flags
  * @return {?}
  */
-function Δinject(token, flags = InjectFlags.Default) {
+function ɵɵinject(token, flags = InjectFlags.Default) {
     return (_injectImplementation || injectInjectorOnly)(token, flags);
 }
 /**
@@ -687,13 +681,7 @@ function Δinject(token, flags = InjectFlags.Default) {
  * \@publicApi
  * @type {?}
  */
-const inject = Δinject;
-/**
- * @deprecated delete by v8, use `inject`.
- * \@codeGenApi
- * @type {?}
- */
-const ɵɵinject = Δinject;
+const inject = ɵɵinject;
 /**
  * Injects `root` tokens in limp mode.
  *
@@ -756,10 +744,10 @@ function injectArgs(types) {
                     type = meta;
                 }
             }
-            args.push(Δinject((/** @type {?} */ (type)), flags));
+            args.push(ɵɵinject((/** @type {?} */ (type)), flags));
         }
         else {
-            args.push(Δinject(arg));
+            args.push(ɵɵinject(arg));
         }
     }
     return args;
@@ -842,10 +830,10 @@ function formatError(text, obj, injectorErrorName, source = null) {
  * @type {?}
  */
 const angularCoreDiEnv = {
-    'ΔdefineInjectable': ΔdefineInjectable,
-    'ΔdefineInjector': ΔdefineInjector,
-    'Δinject': Δinject,
-    'ΔgetFactoryOf': getFactoryOf,
+    'ɵɵdefineInjectable': ɵɵdefineInjectable,
+    'ɵɵdefineInjector': ɵɵdefineInjector,
+    'ɵɵinject': ɵɵinject,
+    'ɵɵgetFactoryOf': getFactoryOf,
 };
 /**
  * @template T
@@ -1943,7 +1931,7 @@ function providerToFactory(provider, ngModuleType, providers) {
             factory = (/**
              * @return {?}
              */
-            () => Δinject(resolveForwardRef(provider.useExisting)));
+            () => ɵɵinject(resolveForwardRef(provider.useExisting)));
         }
         else if (isFactoryProvider(provider)) {
             factory = (/**
@@ -2113,12 +2101,12 @@ class Injector {
 Injector.THROW_IF_NOT_FOUND = THROW_IF_NOT_FOUND;
 Injector.NULL = new NullInjector();
 /** @nocollapse */
-/** @nocollapse */ Injector.ngInjectableDef = ΔdefineInjectable({
+/** @nocollapse */ Injector.ngInjectableDef = ɵɵdefineInjectable({
     providedIn: (/** @type {?} */ ('any')),
     factory: (/**
      * @return {?}
      */
-    () => Δinject(INJECTOR)),
+    () => ɵɵinject(INJECTOR)),
 });
 /**
  * \@internal
@@ -3829,7 +3817,7 @@ let _renderCompCount = 0;
  * @param {?} componentDefinition
  * @return {?}
  */
-function ΔdefineComponent(componentDefinition) {
+function ɵɵdefineComponent(componentDefinition) {
     /** @type {?} */
     const type = componentDefinition.type;
     /** @type {?} */
@@ -3917,7 +3905,7 @@ function ΔdefineComponent(componentDefinition) {
         // be retrieved through the node injector, so this isn't a problem.
         if (!type.hasOwnProperty(NG_INJECTABLE_DEF)) {
             ((/** @type {?} */ (type)))[NG_INJECTABLE_DEF] =
-                ΔdefineInjectable({ factory: (/** @type {?} */ (componentDefinition.factory)) });
+                ɵɵdefineInjectable({ factory: (/** @type {?} */ (componentDefinition.factory)) });
         }
     }))));
     return (/** @type {?} */ (def));
@@ -3929,7 +3917,7 @@ function ΔdefineComponent(componentDefinition) {
  * @param {?} pipes
  * @return {?}
  */
-function ΔsetComponentScope(type, directives, pipes) {
+function ɵɵsetComponentScope(type, directives, pipes) {
     /** @type {?} */
     const def = ((/** @type {?} */ (type.ngComponentDef)));
     def.directiveDefs = (/**
@@ -3971,7 +3959,7 @@ function extractPipeDef(type) {
  * @param {?} def
  * @return {?}
  */
-function ΔdefineNgModule(def) {
+function ɵɵdefineNgModule(def) {
     /** @type {?} */
     const res = {
         type: def.type,
@@ -3998,7 +3986,7 @@ function ΔdefineNgModule(def) {
  * @param {?} scope
  * @return {?}
  */
-function ΔsetNgModuleScope(type, scope) {
+function ɵɵsetNgModuleScope(type, scope) {
     return (/** @type {?} */ (noSideEffects((/**
      * @return {?}
      */
@@ -4097,7 +4085,7 @@ function invertObject(obj, secondary) {
  * # Example
  * ```ts
  * class ShouldBeInherited {
- *   static ngBaseDef = ΔdefineBase({
+ *   static ngBaseDef = ɵɵdefineBase({
  *      ...
  *   })
  * }
@@ -4109,7 +4097,7 @@ function invertObject(obj, secondary) {
  *
  * @return {?}
  */
-function ΔdefineBase(baseDefinition) {
+function ɵɵdefineBase(baseDefinition) {
     /** @type {?} */
     const declaredInputs = (/** @type {?} */ ({}));
     return {
@@ -4129,7 +4117,7 @@ function ΔdefineBase(baseDefinition) {
  * class MyDirective {
  *   // Generated by Angular Template Compiler
  *   // [Symbol] syntax will not be supported by TypeScript until v2.7
- *   static ngDirectiveDef = ΔdefineDirective({
+ *   static ngDirectiveDef = ɵɵdefineDirective({
  *     ...
  *   });
  * }
@@ -4138,7 +4126,7 @@ function ΔdefineBase(baseDefinition) {
  * \@codeGenApi
  * @type {?}
  */
-const ΔdefineDirective = (/** @type {?} */ ((/** @type {?} */ (ΔdefineComponent))));
+const ɵɵdefineDirective = (/** @type {?} */ ((/** @type {?} */ (ɵɵdefineComponent))));
 /**
  * Create a pipe definition object.
  *
@@ -4157,7 +4145,7 @@ const ΔdefineDirective = (/** @type {?} */ ((/** @type {?} */ (ΔdefineComponen
  *
  * @return {?}
  */
-function ΔdefinePipe(pipeDef) {
+function ɵɵdefinePipe(pipeDef) {
     return (/** @type {?} */ (((/** @type {?} */ ({
         name: pipeDef.name,
         factory: pipeDef.factory,
@@ -4274,7 +4262,7 @@ const defaultScheduler = ((/**
  * @param {?} element
  * @return {?}
  */
-function ΔresolveWindow(element) {
+function ɵɵresolveWindow(element) {
     return { name: 'window', target: element.ownerDocument.defaultView };
 }
 /**
@@ -4283,7 +4271,7 @@ function ΔresolveWindow(element) {
  * @param {?} element
  * @return {?}
  */
-function ΔresolveDocument(element) {
+function ɵɵresolveDocument(element) {
     return { name: 'document', target: element.ownerDocument };
 }
 /**
@@ -4292,7 +4280,7 @@ function ΔresolveDocument(element) {
  * @param {?} element
  * @return {?}
  */
-function ΔresolveBody(element) {
+function ɵɵresolveBody(element) {
     return { name: 'body', target: element.ownerDocument.body };
 }
 /**
@@ -5116,18 +5104,18 @@ function getBindingsEnabled() {
  *   Should match component / directive.
  * </my-comp>
  * <div ngNonBindable>
- *   <!-- ΔdisableBindings() -->
+ *   <!-- ɵɵdisableBindings() -->
  *   <my-comp my-directive>
  *     Should not match component / directive because we are in ngNonBindable.
  *   </my-comp>
- *   <!-- ΔenableBindings() -->
+ *   <!-- ɵɵenableBindings() -->
  * </div>
  * ```
  *
  * \@codeGenApi
  * @return {?}
  */
-function ΔenableBindings() {
+function ɵɵenableBindings() {
     bindingsEnabled = true;
 }
 /**
@@ -5139,18 +5127,18 @@ function ΔenableBindings() {
  *   Should match component / directive.
  * </my-comp>
  * <div ngNonBindable>
- *   <!-- ΔdisableBindings() -->
+ *   <!-- ɵɵdisableBindings() -->
  *   <my-comp my-directive>
  *     Should not match component / directive because we are in ngNonBindable.
  *   </my-comp>
- *   <!-- ΔenableBindings() -->
+ *   <!-- ɵɵenableBindings() -->
  * </div>
  * ```
  *
  * \@codeGenApi
  * @return {?}
  */
-function ΔdisableBindings() {
+function ɵɵdisableBindings() {
     bindingsEnabled = false;
 }
 /**
@@ -5325,7 +5313,7 @@ function getActiveDirectiveSuperClassDepth() {
  *
  * @return {?}
  */
-function ΔrestoreView(viewToRestore) {
+function ɵɵrestoreView(viewToRestore) {
     contextLView = (/** @type {?} */ ((/** @type {?} */ (viewToRestore))));
 }
 /**
@@ -5590,7 +5578,7 @@ let _currentNamespace = null;
  * \@codeGenApi
  * @return {?}
  */
-function ΔnamespaceSVG() {
+function ɵɵnamespaceSVG() {
     _currentNamespace = 'http://www.w3.org/2000/svg';
 }
 /**
@@ -5599,7 +5587,7 @@ function ΔnamespaceSVG() {
  * \@codeGenApi
  * @return {?}
  */
-function ΔnamespaceMathML() {
+function ɵɵnamespaceMathML() {
     _currentNamespace = 'http://www.w3.org/1998/MathML/';
 }
 /**
@@ -5609,7 +5597,7 @@ function ΔnamespaceMathML() {
  * \@codeGenApi
  * @return {?}
  */
-function ΔnamespaceHTML() {
+function ɵɵnamespaceHTML() {
     _currentNamespace = null;
 }
 /**
@@ -6494,7 +6482,7 @@ function _sanitizeStyle(value) {
  * and urls have been removed.
  *
  */
-function ΔsanitizeHtml(unsafeHtml) {
+function ɵɵsanitizeHtml(unsafeHtml) {
     /** @type {?} */
     const sanitizer = getSanitizer();
     if (sanitizer) {
@@ -6520,7 +6508,7 @@ function ΔsanitizeHtml(unsafeHtml) {
  * dangerous javascript and urls have been removed.
  *
  */
-function ΔsanitizeStyle(unsafeStyle) {
+function ɵɵsanitizeStyle(unsafeStyle) {
     /** @type {?} */
     const sanitizer = getSanitizer();
     if (sanitizer) {
@@ -6547,7 +6535,7 @@ function ΔsanitizeStyle(unsafeStyle) {
  * all of the dangerous javascript has been removed.
  *
  */
-function ΔsanitizeUrl(unsafeUrl) {
+function ɵɵsanitizeUrl(unsafeUrl) {
     /** @type {?} */
     const sanitizer = getSanitizer();
     if (sanitizer) {
@@ -6569,7 +6557,7 @@ function ΔsanitizeUrl(unsafeUrl) {
  * only trusted `url`s have been allowed to pass.
  *
  */
-function ΔsanitizeResourceUrl(unsafeResourceUrl) {
+function ɵɵsanitizeResourceUrl(unsafeResourceUrl) {
     /** @type {?} */
     const sanitizer = getSanitizer();
     if (sanitizer) {
@@ -6592,7 +6580,7 @@ function ΔsanitizeResourceUrl(unsafeResourceUrl) {
  * because only trusted `scripts` have been allowed to pass.
  *
  */
-function ΔsanitizeScript(unsafeScript) {
+function ɵɵsanitizeScript(unsafeScript) {
     /** @type {?} */
     const sanitizer = getSanitizer();
     if (sanitizer) {
@@ -6617,9 +6605,9 @@ function getUrlSanitizer(tag, prop) {
     if ((prop === 'src' && (tag === 'embed' || tag === 'frame' || tag === 'iframe' ||
         tag === 'media' || tag === 'script')) ||
         (prop === 'href' && (tag === 'base' || tag === 'link'))) {
-        return ΔsanitizeResourceUrl;
+        return ɵɵsanitizeResourceUrl;
     }
-    return ΔsanitizeUrl;
+    return ɵɵsanitizeUrl;
 }
 /**
  * Sanitizes URL, selecting sanitizer function based on tag and property names.
@@ -6636,7 +6624,7 @@ function getUrlSanitizer(tag, prop) {
  * @return {?} `url` string which is safe to bind.
  *
  */
-function ΔsanitizeUrlOrResourceUrl(unsafeUrl, tag, prop) {
+function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl, tag, prop) {
     return getUrlSanitizer(tag, prop)(unsafeUrl);
 }
 /**
@@ -6646,7 +6634,7 @@ function ΔsanitizeUrlOrResourceUrl(unsafeUrl, tag, prop) {
  * \@publicApi
  * @type {?}
  */
-const ΔdefaultStyleSanitizer = ((/** @type {?} */ ((/**
+const ɵɵdefaultStyleSanitizer = ((/** @type {?} */ ((/**
  * @param {?} prop
  * @param {?=} value
  * @return {?}
@@ -6657,7 +6645,7 @@ function (prop, value) {
             prop === 'filter' || prop === 'list-style' || prop === 'list-style-image' ||
             prop === 'clip-path';
     }
-    return ΔsanitizeStyle(value);
+    return ɵɵsanitizeStyle(value);
 }))));
 /**
  * @param {?} name
@@ -8555,7 +8543,7 @@ class NodeInjector {
  * @param {?} type
  * @return {?}
  */
-function ΔgetFactoryOf(type) {
+function ɵɵgetFactoryOf(type) {
     /** @type {?} */
     const typeAny = (/** @type {?} */ (type));
     /** @type {?} */
@@ -8572,11 +8560,11 @@ function ΔgetFactoryOf(type) {
  * @param {?} type
  * @return {?}
  */
-function ΔgetInheritedFactory(type) {
+function ɵɵgetInheritedFactory(type) {
     /** @type {?} */
     const proto = (/** @type {?} */ (Object.getPrototypeOf(type.prototype).constructor));
     /** @type {?} */
-    const factory = ΔgetFactoryOf(proto);
+    const factory = ɵɵgetFactoryOf(proto);
     if (factory !== null) {
         return factory;
     }
@@ -13120,7 +13108,7 @@ function renderComponentOrTemplate(hostView, context, templateFn) {
  * @return {?}
  */
 function executeTemplate(templateFn, rf, context) {
-    ΔnamespaceHTML();
+    ɵɵnamespaceHTML();
     /** @type {?} */
     const prevSelectedIndex = getSelectedIndex();
     try {
@@ -14683,7 +14671,7 @@ function getParentInjectorTNode(location, startView, startTNode) {
  *
  * @return {?}
  */
-function ΔallocHostVars(count) {
+function ɵɵallocHostVars(count) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -15690,7 +15678,7 @@ function appendProjectedNode(projectedTNode, tProjectionNode, currentView, proje
  *
  * @return {?}
  */
-function Δcontainer(index) {
+function ɵɵcontainer(index) {
     /** @type {?} */
     const tNode = containerInternal(index, null, null);
     /** @type {?} */
@@ -15721,7 +15709,7 @@ function Δcontainer(index) {
  *
  * @return {?}
  */
-function Δtemplate(index, templateFn, consts, vars, tagName, attrs, localRefs, localRefExtractor) {
+function ɵɵtemplate(index, templateFn, consts, vars, tagName, attrs, localRefs, localRefExtractor) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -15746,7 +15734,7 @@ function Δtemplate(index, templateFn, consts, vars, tagName, attrs, localRefs, 
  *
  * @return {?}
  */
-function ΔcontainerRefreshStart(index) {
+function ɵɵcontainerRefreshStart(index) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -15769,7 +15757,7 @@ function ΔcontainerRefreshStart(index) {
  * \@codeGenApi
  * @return {?}
  */
-function ΔcontainerRefreshEnd() {
+function ɵɵcontainerRefreshEnd() {
     /** @type {?} */
     let previousOrParentTNode = getPreviousOrParentTNode();
     if (getIsParent()) {
@@ -15888,7 +15876,7 @@ function store(index, value) {
  *
  * @return {?}
  */
-function Δreference(index) {
+function ɵɵreference(index) {
     /** @type {?} */
     const contextLView = getContextLView();
     return loadInternal(contextLView, index);
@@ -15901,7 +15889,7 @@ function Δreference(index) {
  * @param {?} index
  * @return {?}
  */
-function Δload(index) {
+function ɵɵload(index) {
     return loadInternal(getLView(), index);
 }
 
@@ -15915,14 +15903,14 @@ function Δload(index) {
  * @param {?=} flags
  * @return {?}
  */
-function ΔdirectiveInject(token, flags = InjectFlags.Default) {
+function ɵɵdirectiveInject(token, flags = InjectFlags.Default) {
     token = resolveForwardRef(token);
     /** @type {?} */
     const lView = getLView();
     // Fall back to inject() if view hasn't been created. This situation can happen in tests
     // if inject utilities are used before bootstrapping.
     if (lView == null)
-        return Δinject(token, flags);
+        return ɵɵinject(token, flags);
     return getOrCreateInjectable((/** @type {?} */ (getPreviousOrParentTNode())), lView, token, flags);
 }
 /**
@@ -15932,7 +15920,7 @@ function ΔdirectiveInject(token, flags = InjectFlags.Default) {
  * @param {?} attrNameToInject
  * @return {?}
  */
-function ΔinjectAttribute(attrNameToInject) {
+function ɵɵinjectAttribute(attrNameToInject) {
     return injectAttributeImpl(getPreviousOrParentTNode(), attrNameToInject);
 }
 
@@ -16227,7 +16215,7 @@ function updateLastDirectiveIndex(tNode, directiveIndex) {
  *
  * @return {?}
  */
-function Δstyling(classBindingNames, styleBindingNames, styleSanitizer) {
+function ɵɵstyling(classBindingNames, styleBindingNames, styleSanitizer) {
     /** @type {?} */
     const tNode = getPreviousOrParentTNode();
     if (!tNode.stylingTemplate) {
@@ -16304,7 +16292,7 @@ function initStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer
  *
  * @return {?}
  */
-function ΔstyleProp(styleIndex, value, suffix, forceOverride) {
+function ɵɵstyleProp(styleIndex, value, suffix, forceOverride) {
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
@@ -16375,7 +16363,7 @@ function resolveStylePropValue(value, suffix) {
  *
  * @return {?}
  */
-function ΔclassProp(classIndex, value, forceOverride) {
+function ɵɵclassProp(classIndex, value, forceOverride) {
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
@@ -16432,7 +16420,7 @@ function booleanOrNull(value) {
  *
  * @return {?}
  */
-function ΔstyleMap(styles) {
+function ɵɵstyleMap(styles) {
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
@@ -16482,7 +16470,7 @@ function ΔstyleMap(styles) {
  *
  * @return {?}
  */
-function ΔclassMap(classes) {
+function ɵɵclassMap(classes) {
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
@@ -16523,7 +16511,7 @@ function ΔclassMap(classes) {
  * \@codeGenApi
  * @return {?}
  */
-function ΔstylingApply() {
+function ɵɵstylingApply() {
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
@@ -16614,7 +16602,7 @@ function getStylingContext(index, lView) {
  *
  * @return {?}
  */
-function ΔelementStart(index, name, attrs, localRefs) {
+function ɵɵelementStart(index, name, attrs, localRefs) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -16698,7 +16686,7 @@ function ΔelementStart(index, name, attrs, localRefs) {
  * \@codeGenApi
  * @return {?}
  */
-function ΔelementEnd() {
+function ɵɵelementEnd() {
     /** @type {?} */
     let previousOrParentTNode = getPreviousOrParentTNode();
     if (getIsParent()) {
@@ -16749,9 +16737,9 @@ function ΔelementEnd() {
  *
  * @return {?}
  */
-function Δelement(index, name, attrs, localRefs) {
-    ΔelementStart(index, name, attrs, localRefs);
-    ΔelementEnd();
+function ɵɵelement(index, name, attrs, localRefs) {
+    ɵɵelementStart(index, name, attrs, localRefs);
+    ɵɵelementEnd();
 }
 /**
  * Updates the value of removes an attribute on an Element.
@@ -16766,7 +16754,7 @@ function Δelement(index, name, attrs, localRefs) {
  *
  * @return {?}
  */
-function ΔelementAttribute(index, name, value, sanitizer, namespace) {
+function ɵɵelementAttribute(index, name, value, sanitizer, namespace) {
     if (value !== NO_CHANGE) {
         ngDevMode && validateAgainstEventAttributes(name);
         /** @type {?} */
@@ -16835,7 +16823,7 @@ function ΔelementAttribute(index, name, value, sanitizer, namespace) {
  *
  * @return {?}
  */
-function ΔelementHostAttrs(attrs) {
+function ɵɵelementHostAttrs(attrs) {
     /** @type {?} */
     const hostElementIndex = getSelectedIndex();
     /** @type {?} */
@@ -16885,7 +16873,7 @@ function ΔelementHostAttrs(attrs) {
  *
  * @return {?}
  */
-function ΔelementContainerStart(index, attrs, localRefs) {
+function ɵɵelementContainerStart(index, attrs, localRefs) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -16923,7 +16911,7 @@ function ΔelementContainerStart(index, attrs, localRefs) {
  * \@codeGenApi
  * @return {?}
  */
-function ΔelementContainerEnd() {
+function ɵɵelementContainerEnd() {
     /** @type {?} */
     let previousOrParentTNode = getPreviousOrParentTNode();
     /** @type {?} */
@@ -16964,7 +16952,7 @@ function ΔelementContainerEnd() {
  * @return {?} boolean Whether or not this view is in creation mode
  *
  */
-function ΔembeddedViewStart(viewBlockId, consts, vars) {
+function ɵɵembeddedViewStart(viewBlockId, consts, vars) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -17066,7 +17054,7 @@ function scanForView(lContainer, startIdx, viewBlockId) {
  * \@codeGenApi
  * @return {?}
  */
-function ΔembeddedViewEnd() {
+function ɵɵembeddedViewEnd() {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -17100,7 +17088,7 @@ function ΔembeddedViewEnd() {
  * \@codeGenApi
  * @return {?}
  */
-function ΔgetCurrentView() {
+function ɵɵgetCurrentView() {
     return (/** @type {?} */ ((/** @type {?} */ (getLView()))));
 }
 
@@ -17147,7 +17135,7 @@ function isObservable(obj) {
  *
  * @return {?}
  */
-function Δlistener(eventName, listenerFn, useCapture = false, eventTargetResolver) {
+function ɵɵlistener(eventName, listenerFn, useCapture = false, eventTargetResolver) {
     listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver);
 }
 /**
@@ -17173,7 +17161,7 @@ function Δlistener(eventName, listenerFn, useCapture = false, eventTargetResolv
  *
  * @return {?}
  */
-function ΔcomponentHostSyntheticListener(eventName, listenerFn, useCapture = false, eventTargetResolver) {
+function ɵɵcomponentHostSyntheticListener(eventName, listenerFn, useCapture = false, eventTargetResolver) {
     listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver, loadComponentRenderer);
 }
 /**
@@ -17434,7 +17422,7 @@ function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
  * @return {?} context
  *
  */
-function ΔnextContext(level = 1) {
+function ɵɵnextContext(level = 1) {
     return nextContextImpl(level);
 }
 
@@ -17464,7 +17452,7 @@ function ΔnextContext(level = 1) {
  * @param {?=} selectors A collection of parsed CSS selectors
  * @return {?}
  */
-function ΔprojectionDef(selectors) {
+function ɵɵprojectionDef(selectors) {
     /** @type {?} */
     const componentNode = (/** @type {?} */ (findComponentView(getLView())[T_HOST]));
     if (!componentNode.projection) {
@@ -17501,7 +17489,7 @@ function ΔprojectionDef(selectors) {
  * @param {?=} attrs
  * @return {?}
  */
-function Δprojection(nodeIndex, selectorIndex = 0, attrs) {
+function ɵɵprojection(nodeIndex, selectorIndex = 0, attrs) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -17827,16 +17815,16 @@ function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
  * (e.g. `property('name', ctx.name)('title', ctx.title)`)
  *
  */
-function Δproperty(propName, value, sanitizer, nativeOnly) {
+function ɵɵproperty(propName, value, sanitizer, nativeOnly) {
     /** @type {?} */
     const index = getSelectedIndex();
     ngDevMode && assertNotEqual(index, -1, 'selected index cannot be -1');
     /** @type {?} */
-    const bindReconciledValue = Δbind(value);
+    const bindReconciledValue = ɵɵbind(value);
     if (bindReconciledValue !== NO_CHANGE) {
         elementPropertyInternal(index, propName, bindReconciledValue, sanitizer, nativeOnly);
     }
-    return Δproperty;
+    return ɵɵproperty;
 }
 /**
  * Creates a single value binding.
@@ -17847,7 +17835,7 @@ function Δproperty(propName, value, sanitizer, nativeOnly) {
  *
  * @return {?}
  */
-function Δbind(value) {
+function ɵɵbind(value) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -17875,7 +17863,7 @@ function Δbind(value) {
  *
  * @return {?}
  */
-function ΔelementProperty(index, propName, value, sanitizer, nativeOnly) {
+function ɵɵelementProperty(index, propName, value, sanitizer, nativeOnly) {
     if (value !== NO_CHANGE) {
         elementPropertyInternal(index, propName, value, sanitizer, nativeOnly);
     }
@@ -17905,7 +17893,7 @@ function ΔelementProperty(index, propName, value, sanitizer, nativeOnly) {
  *
  * @return {?}
  */
-function ΔcomponentHostSyntheticProperty(index, propName, value, sanitizer, nativeOnly) {
+function ɵɵcomponentHostSyntheticProperty(index, propName, value, sanitizer, nativeOnly) {
     if (value !== NO_CHANGE) {
         elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadComponentRenderer);
     }
@@ -17931,7 +17919,7 @@ function ΔcomponentHostSyntheticProperty(index, propName, value, sanitizer, nat
  * @param {?} values
  * @return {?}
  */
-function ΔinterpolationV(values) {
+function ɵɵinterpolationV(values) {
     ngDevMode && assertLessThan(2, values.length, 'should have at least 3 values');
     ngDevMode && assertEqual(values.length % 2, 1, 'should have an odd number of values');
     /** @type {?} */
@@ -17976,7 +17964,7 @@ function ΔinterpolationV(values) {
  *
  * @return {?}
  */
-function Δinterpolation1(prefix, v0, suffix) {
+function ɵɵinterpolation1(prefix, v0, suffix) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -17995,7 +17983,7 @@ function Δinterpolation1(prefix, v0, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function Δinterpolation2(prefix, v0, i0, v1, suffix) {
+function ɵɵinterpolation2(prefix, v0, i0, v1, suffix) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -18024,7 +18012,7 @@ function Δinterpolation2(prefix, v0, i0, v1, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function Δinterpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
+function ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -18060,7 +18048,7 @@ function Δinterpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function Δinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
+function ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -18100,7 +18088,7 @@ function Δinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function Δinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
+function ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -18144,7 +18132,7 @@ function Δinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function Δinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
+function ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -18191,7 +18179,7 @@ function Δinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, su
  * @param {?} suffix
  * @return {?}
  */
-function Δinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
+function ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -18242,7 +18230,7 @@ function Δinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5
  * @param {?} suffix
  * @return {?}
  */
-function Δinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
+function ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -18288,7 +18276,7 @@ function Δinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5
  * Its compiled representation is::
  *
  * ```ts
- * ΔpropertyInterpolate('title', v0);
+ * ɵɵpropertyInterpolate('title', v0);
  * ```
  *
  * If the property name also exists as an input property on one of the element's directives,
@@ -18301,9 +18289,9 @@ function Δinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5
  * @param {?=} sanitizer An optional sanitizer function
  * @return {?} itself, so that it may be chained.
  */
-function ΔpropertyInterpolate(propName, v0, sanitizer) {
-    ΔpropertyInterpolate1(propName, '', v0, '', sanitizer);
-    return ΔpropertyInterpolate;
+function ɵɵpropertyInterpolate(propName, v0, sanitizer) {
+    ɵɵpropertyInterpolate1(propName, '', v0, '', sanitizer);
+    return ɵɵpropertyInterpolate;
 }
 /**
  *
@@ -18318,7 +18306,7 @@ function ΔpropertyInterpolate(propName, v0, sanitizer) {
  * Its compiled representation is::
  *
  * ```ts
- * ΔpropertyInterpolate1('title', 'prefix', v0, 'suffix');
+ * ɵɵpropertyInterpolate1('title', 'prefix', v0, 'suffix');
  * ```
  *
  * If the property name also exists as an input property on one of the element's directives,
@@ -18333,15 +18321,15 @@ function ΔpropertyInterpolate(propName, v0, sanitizer) {
  * @param {?=} sanitizer An optional sanitizer function
  * @return {?} itself, so that it may be chained.
  */
-function ΔpropertyInterpolate1(propName, prefix, v0, suffix, sanitizer) {
+function ɵɵpropertyInterpolate1(propName, prefix, v0, suffix, sanitizer) {
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
-    const interpolatedValue = Δinterpolation1(prefix, v0, suffix);
+    const interpolatedValue = ɵɵinterpolation1(prefix, v0, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
     }
-    return ΔpropertyInterpolate1;
+    return ɵɵpropertyInterpolate1;
 }
 /**
  *
@@ -18356,7 +18344,7 @@ function ΔpropertyInterpolate1(propName, prefix, v0, suffix, sanitizer) {
  * Its compiled representation is::
  *
  * ```ts
- * ΔpropertyInterpolate2('title', 'prefix', v0, '-', v1, 'suffix');
+ * ɵɵpropertyInterpolate2('title', 'prefix', v0, '-', v1, 'suffix');
  * ```
  *
  * If the property name also exists as an input property on one of the element's directives,
@@ -18373,15 +18361,15 @@ function ΔpropertyInterpolate1(propName, prefix, v0, suffix, sanitizer) {
  * @param {?=} sanitizer An optional sanitizer function
  * @return {?} itself, so that it may be chained.
  */
-function ΔpropertyInterpolate2(propName, prefix, v0, i0, v1, suffix, sanitizer) {
+function ɵɵpropertyInterpolate2(propName, prefix, v0, i0, v1, suffix, sanitizer) {
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
-    const interpolatedValue = Δinterpolation2(prefix, v0, i0, v1, suffix);
+    const interpolatedValue = ɵɵinterpolation2(prefix, v0, i0, v1, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
     }
-    return ΔpropertyInterpolate2;
+    return ɵɵpropertyInterpolate2;
 }
 /**
  *
@@ -18396,7 +18384,7 @@ function ΔpropertyInterpolate2(propName, prefix, v0, i0, v1, suffix, sanitizer)
  * Its compiled representation is::
  *
  * ```ts
- * ΔpropertyInterpolate3(
+ * ɵɵpropertyInterpolate3(
  * 'title', 'prefix', v0, '-', v1, '-', v2, 'suffix');
  * ```
  *
@@ -18416,15 +18404,15 @@ function ΔpropertyInterpolate2(propName, prefix, v0, i0, v1, suffix, sanitizer)
  * @param {?=} sanitizer An optional sanitizer function
  * @return {?} itself, so that it may be chained.
  */
-function ΔpropertyInterpolate3(propName, prefix, v0, i0, v1, i1, v2, suffix, sanitizer) {
+function ɵɵpropertyInterpolate3(propName, prefix, v0, i0, v1, i1, v2, suffix, sanitizer) {
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
-    const interpolatedValue = Δinterpolation3(prefix, v0, i0, v1, i1, v2, suffix);
+    const interpolatedValue = ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
     }
-    return ΔpropertyInterpolate3;
+    return ɵɵpropertyInterpolate3;
 }
 /**
  *
@@ -18439,7 +18427,7 @@ function ΔpropertyInterpolate3(propName, prefix, v0, i0, v1, i1, v2, suffix, sa
  * Its compiled representation is::
  *
  * ```ts
- * ΔpropertyInterpolate4(
+ * ɵɵpropertyInterpolate4(
  * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, 'suffix');
  * ```
  *
@@ -18461,15 +18449,15 @@ function ΔpropertyInterpolate3(propName, prefix, v0, i0, v1, i1, v2, suffix, sa
  * @param {?=} sanitizer An optional sanitizer function
  * @return {?} itself, so that it may be chained.
  */
-function ΔpropertyInterpolate4(propName, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, sanitizer) {
+function ɵɵpropertyInterpolate4(propName, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, sanitizer) {
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
-    const interpolatedValue = Δinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+    const interpolatedValue = ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
     }
-    return ΔpropertyInterpolate4;
+    return ɵɵpropertyInterpolate4;
 }
 /**
  *
@@ -18484,7 +18472,7 @@ function ΔpropertyInterpolate4(propName, prefix, v0, i0, v1, i1, v2, i2, v3, su
  * Its compiled representation is::
  *
  * ```ts
- * ΔpropertyInterpolate5(
+ * ɵɵpropertyInterpolate5(
  * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, 'suffix');
  * ```
  *
@@ -18508,15 +18496,15 @@ function ΔpropertyInterpolate4(propName, prefix, v0, i0, v1, i1, v2, i2, v3, su
  * @param {?=} sanitizer An optional sanitizer function
  * @return {?} itself, so that it may be chained.
  */
-function ΔpropertyInterpolate5(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, sanitizer) {
+function ɵɵpropertyInterpolate5(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, sanitizer) {
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
-    const interpolatedValue = Δinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+    const interpolatedValue = ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
     }
-    return ΔpropertyInterpolate5;
+    return ɵɵpropertyInterpolate5;
 }
 /**
  *
@@ -18531,7 +18519,7 @@ function ΔpropertyInterpolate5(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3
  * Its compiled representation is::
  *
  * ```ts
- * ΔpropertyInterpolate6(
+ * ɵɵpropertyInterpolate6(
  *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, 'suffix');
  * ```
  *
@@ -18557,15 +18545,15 @@ function ΔpropertyInterpolate5(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3
  * @param {?=} sanitizer An optional sanitizer function
  * @return {?} itself, so that it may be chained.
  */
-function ΔpropertyInterpolate6(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, sanitizer) {
+function ɵɵpropertyInterpolate6(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, sanitizer) {
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
-    const interpolatedValue = Δinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+    const interpolatedValue = ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
     }
-    return ΔpropertyInterpolate6;
+    return ɵɵpropertyInterpolate6;
 }
 /**
  *
@@ -18580,7 +18568,7 @@ function ΔpropertyInterpolate6(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3
  * Its compiled representation is::
  *
  * ```ts
- * ΔpropertyInterpolate7(
+ * ɵɵpropertyInterpolate7(
  *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, 'suffix');
  * ```
  *
@@ -18608,15 +18596,15 @@ function ΔpropertyInterpolate6(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3
  * @param {?=} sanitizer An optional sanitizer function
  * @return {?} itself, so that it may be chained.
  */
-function ΔpropertyInterpolate7(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, sanitizer) {
+function ɵɵpropertyInterpolate7(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, sanitizer) {
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
-    const interpolatedValue = Δinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+    const interpolatedValue = ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
     }
-    return ΔpropertyInterpolate7;
+    return ɵɵpropertyInterpolate7;
 }
 /**
  *
@@ -18631,7 +18619,7 @@ function ΔpropertyInterpolate7(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3
  * Its compiled representation is::
  *
  * ```ts
- * ΔpropertyInterpolate8(
+ * ɵɵpropertyInterpolate8(
  *  'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, 'suffix');
  * ```
  *
@@ -18661,15 +18649,15 @@ function ΔpropertyInterpolate7(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3
  * @param {?=} sanitizer An optional sanitizer function
  * @return {?} itself, so that it may be chained.
  */
-function ΔpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, sanitizer) {
+function ɵɵpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, sanitizer) {
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
-    const interpolatedValue = Δinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+    const interpolatedValue = ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
     }
-    return ΔpropertyInterpolate8;
+    return ɵɵpropertyInterpolate8;
 }
 /**
  * Update an interpolated property on an element with 8 or more bound values surrounded by text.
@@ -18684,7 +18672,7 @@ function ΔpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3
  * Its compiled representation is::
  *
  * ```ts
- * ΔpropertyInterpolateV(
+ * ɵɵpropertyInterpolateV(
  *  'title', ['prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, '-', v9,
  *  'suffix']);
  * ```
@@ -18701,15 +18689,15 @@ function ΔpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3
  * @param {?=} sanitizer An optional sanitizer function
  * @return {?} itself, so that it may be chained.
  */
-function ΔpropertyInterpolateV(propName, values, sanitizer) {
+function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
-    const interpolatedValue = ΔinterpolationV(values);
+    const interpolatedValue = ɵɵinterpolationV(values);
     if (interpolatedValue !== NO_CHANGE) {
         elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
     }
-    return ΔpropertyInterpolateV;
+    return ɵɵpropertyInterpolateV;
 }
 
 /**
@@ -18738,7 +18726,7 @@ function ΔpropertyInterpolateV(propName, values, sanitizer) {
  *
  * @return {?}
  */
-function Δselect(index) {
+function ɵɵselect(index) {
     ngDevMode && assertGreaterThan(index, -1, 'Invalid index');
     ngDevMode &&
         assertLessThan(index, getLView().length - HEADER_OFFSET, 'Should be within range for the view data');
@@ -18749,7 +18737,7 @@ function Δselect(index) {
     // We must set the selected index *after* running the hooks, because hooks may have side-effects
     // that cause other template functions to run, thus updating the selected index, which is global
     // state. If we run `setSelectedIndex` *before* we run the hooks, in some cases the selected index
-    // will be altered by the time we leave the `Δselect` instruction.
+    // will be altered by the time we leave the `ɵɵselect` instruction.
     setSelectedIndex(index);
 }
 
@@ -18766,7 +18754,7 @@ function Δselect(index) {
  *
  * @return {?}
  */
-function Δtext(index, value) {
+function ɵɵtext(index, value) {
     /** @type {?} */
     const lView = getLView();
     ngDevMode && assertEqual(lView[BINDING_INDEX], lView[TVIEW].bindingStartIndex, 'text nodes should be created before any bindings');
@@ -18790,7 +18778,7 @@ function Δtext(index, value) {
  *
  * @return {?}
  */
-function ΔtextBinding(index, value) {
+function ɵɵtextBinding(index, value) {
     if (value !== NO_CHANGE) {
         /** @type {?} */
         const lView = getLView();
@@ -19531,7 +19519,7 @@ class SimpleChange {
  * @template T
  * @return {?}
  */
-function ΔNgOnChangesFeature() {
+function ɵɵNgOnChangesFeature() {
     // This option ensures that the ngOnChanges lifecycle hook will be inherited
     // from superclasses (in InheritDefinitionFeature).
     ((/** @type {?} */ (NgOnChangesFeatureImpl))).ngInherit = true;
@@ -19639,7 +19627,7 @@ function getSuperType(type) {
  *
  * @return {?}
  */
-function ΔInheritDefinitionFeature(definition) {
+function ɵɵInheritDefinitionFeature(definition) {
     /** @type {?} */
     let superType = getSuperType(definition.type);
     while (superType) {
@@ -19734,7 +19722,7 @@ function ΔInheritDefinitionFeature(definition) {
                 definition.onDestroy = definition.onDestroy || superPrototype.ngOnDestroy;
                 definition.onInit = definition.onInit || superPrototype.ngOnInit;
                 if (superPrototype.ngOnChanges) {
-                    ΔNgOnChangesFeature()(definition);
+                    ɵɵNgOnChangesFeature()(definition);
                 }
             }
         }
@@ -19936,7 +19924,7 @@ function resolveProvider(provider, tInjectables, lInjectablesBlueprint, isCompon
         if (isTypeProvider(provider) || !provider.multi) {
             // Single provider case: the factory is created and pushed immediately
             /** @type {?} */
-            const factory = new NodeInjectorFactory(providerFactory, isViewProvider, ΔdirectiveInject);
+            const factory = new NodeInjectorFactory(providerFactory, isViewProvider, ɵɵdirectiveInject);
             /** @type {?} */
             const existingFactoryIndex = indexOf(token, tInjectables, isViewProvider ? beginIndex : beginIndex + cptViewProvidersCount, endIndex);
             if (existingFactoryIndex == -1) {
@@ -20116,7 +20104,7 @@ function multiResolve(factories, result) {
  */
 function multiFactory(factoryFn, index, isViewProvider, isComponent, f) {
     /** @type {?} */
-    const factory = new NodeInjectorFactory(factoryFn, isViewProvider, ΔdirectiveInject);
+    const factory = new NodeInjectorFactory(factoryFn, isViewProvider, ɵɵdirectiveInject);
     factory.multi = [];
     factory.index = index;
     factory.componentProviders = 0;
@@ -20160,7 +20148,7 @@ function multiFactory(factoryFn, index, isViewProvider, isComponent, f) {
  * @param {?=} viewProviders
  * @return {?}
  */
-function ΔProvidersFeature(providers, viewProviders = []) {
+function ɵɵProvidersFeature(providers, viewProviders = []) {
     return (/**
      * @param {?} definition
      * @return {?}
@@ -21279,7 +21267,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-rc.0+259.sha-6454f76.with-local-changes');
+const VERSION = new Version('8.0.0-rc.0+262.sha-d7eaae6.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -22640,7 +22628,7 @@ class IterableDiffers {
     }
 }
 /** @nocollapse */
-/** @nocollapse */ IterableDiffers.ngInjectableDef = ΔdefineInjectable({
+/** @nocollapse */ IterableDiffers.ngInjectableDef = ɵɵdefineInjectable({
     providedIn: 'root',
     factory: (/**
      * @nocollapse @return {?}
@@ -22743,7 +22731,7 @@ class KeyValueDiffers {
     }
 }
 /** @nocollapse */
-/** @nocollapse */ KeyValueDiffers.ngInjectableDef = ΔdefineInjectable({
+/** @nocollapse */ KeyValueDiffers.ngInjectableDef = ɵɵdefineInjectable({
     providedIn: 'root',
     factory: (/**
      * @nocollapse @return {?}
@@ -25715,7 +25703,7 @@ function toRefArray(map) {
 const ROOT_CONTEXT = new InjectionToken('ROOT_CONTEXT_TOKEN', { providedIn: 'root', factory: (/**
      * @return {?}
      */
-    () => createRootContext(Δinject(SCHEDULER))) });
+    () => createRootContext(ɵɵinject(SCHEDULER))) });
 /**
  * A change detection scheduler token for {\@link RootContext}. This token is the default value used
  * for the default `RootContext` found in the {\@link ROOT_CONTEXT} token.
@@ -26324,7 +26312,7 @@ const parentIndexStack = [];
  *
  * @return {?}
  */
-function Δi18nStart(index, message, subTemplateIndex) {
+function ɵɵi18nStart(index, message, subTemplateIndex) {
     /** @type {?} */
     const tView = getLView()[TVIEW];
     ngDevMode && assertDefined(tView, `tView should be defined`);
@@ -26527,7 +26515,7 @@ function appendI18nNode(tNode, parentTNode, previousTNode) {
  * @return {?} Transformed string that can be consumed by i18nStart instruction
  *
  */
-function Δi18nPostprocess(message, replacements = {}) {
+function ɵɵi18nPostprocess(message, replacements = {}) {
     /**
      * Step 1: resolve all multi-value placeholders like [�#5�|�*1:1��#2:1�|�#4:1�]
      *
@@ -26659,7 +26647,7 @@ function Δi18nPostprocess(message, replacements = {}) {
  * \@codeGenApi
  * @return {?}
  */
-function Δi18nEnd() {
+function ɵɵi18nEnd() {
     /** @type {?} */
     const tView = getLView()[TVIEW];
     ngDevMode && assertDefined(tView, `tView should be defined`);
@@ -26788,7 +26776,7 @@ function readCreateOpCodes(index, createOpCodes, icus, viewData) {
                     const attrName = (/** @type {?} */ (createOpCodes[++i]));
                     /** @type {?} */
                     const attrValue = (/** @type {?} */ (createOpCodes[++i]));
-                    ΔelementAttribute(elementNodeIndex, attrName, attrValue);
+                    ɵɵelementAttribute(elementNodeIndex, attrName, attrValue);
                     break;
                 default:
                     throw new Error(`Unable to determine the type of mutate operation for "${opCode}"`);
@@ -26883,10 +26871,10 @@ function readUpdateOpCodes(updateOpCodes, icus, bindingsStartIndex, changeMask, 
                                 const attrName = (/** @type {?} */ (updateOpCodes[++j]));
                                 /** @type {?} */
                                 const sanitizeFn = (/** @type {?} */ (updateOpCodes[++j]));
-                                ΔelementAttribute(nodeIndex, attrName, value, sanitizeFn);
+                                ɵɵelementAttribute(nodeIndex, attrName, value, sanitizeFn);
                                 break;
                             case 0 /* Text */:
-                                ΔtextBinding(nodeIndex, value);
+                                ɵɵtextBinding(nodeIndex, value);
                                 break;
                             case 2 /* IcuSwitch */:
                                 tIcuIndex = (/** @type {?} */ (updateOpCodes[++j]));
@@ -26959,7 +26947,7 @@ function removeNode(index, viewData) {
         nativeRemoveNode(viewData[RENDERER], removedPhRNode);
     }
     /** @type {?} */
-    const slotValue = (/** @type {?} */ (Δload(index)));
+    const slotValue = (/** @type {?} */ (ɵɵload(index)));
     if (isLContainer(slotValue)) {
         /** @type {?} */
         const lContainer = (/** @type {?} */ (slotValue));
@@ -26996,9 +26984,9 @@ function removeNode(index, viewData) {
  *
  * @return {?}
  */
-function Δi18n(index, message, subTemplateIndex) {
-    Δi18nStart(index, message, subTemplateIndex);
-    Δi18nEnd();
+function ɵɵi18n(index, message, subTemplateIndex) {
+    ɵɵi18nStart(index, message, subTemplateIndex);
+    ɵɵi18nEnd();
 }
 /**
  * Marks a list of attributes as translatable.
@@ -27009,7 +26997,7 @@ function Δi18n(index, message, subTemplateIndex) {
  *
  * @return {?}
  */
-function Δi18nAttributes(index, values) {
+function ɵɵi18nAttributes(index, values) {
     /** @type {?} */
     const tView = getLView()[TVIEW];
     ngDevMode && assertDefined(tView, `tView should be defined`);
@@ -27050,7 +27038,7 @@ function i18nAttributesFirstPass(tView, index, values) {
                     addAllToArray(generateBindingUpdateOpCodes(value, previousElementIndex, attrName), updateOpCodes);
                 }
                 else {
-                    ΔelementAttribute(previousElementIndex, attrName, value);
+                    ɵɵelementAttribute(previousElementIndex, attrName, value);
                 }
             }
         }
@@ -27071,7 +27059,7 @@ let shiftsCounter = 0;
  *
  * @return {?}
  */
-function Δi18nExp(expression) {
+function ɵɵi18nExp(expression) {
     if (expression !== NO_CHANGE) {
         changeMask = changeMask | (1 << shiftsCounter);
     }
@@ -27086,7 +27074,7 @@ function Δi18nExp(expression) {
  *
  * @return {?}
  */
-function Δi18nApply(index) {
+function ɵɵi18nApply(index) {
     if (shiftsCounter) {
         /** @type {?} */
         const lView = getLView();
@@ -27811,7 +27799,7 @@ const LOCALIZE_PH_REGEXP = /\{\$(.*?)\}/g;
  * @param {?=} placeholders
  * @return {?}
  */
-function Δi18nLocalize(input, placeholders = {}) {
+function ɵɵi18nLocalize(input, placeholders = {}) {
     if (typeof TRANSLATIONS[input] !== 'undefined') { // to account for empty string
         input = TRANSLATIONS[input];
     }
@@ -28086,7 +28074,7 @@ function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
  * @return {?} value
  *
  */
-function ΔpureFunction0(slotOffset, pureFn, thisArg) {
+function ɵɵpureFunction0(slotOffset, pureFn, thisArg) {
     // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
     /** @type {?} */
     const bindingIndex = getBindingRoot() + slotOffset;
@@ -28108,7 +28096,7 @@ function ΔpureFunction0(slotOffset, pureFn, thisArg) {
  * @return {?} Updated or cached value
  *
  */
-function ΔpureFunction1(slotOffset, pureFn, exp, thisArg) {
+function ɵɵpureFunction1(slotOffset, pureFn, exp, thisArg) {
     // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
     /** @type {?} */
     const lView = getLView();
@@ -28131,7 +28119,7 @@ function ΔpureFunction1(slotOffset, pureFn, exp, thisArg) {
  * @return {?} Updated or cached value
  *
  */
-function ΔpureFunction2(slotOffset, pureFn, exp1, exp2, thisArg) {
+function ɵɵpureFunction2(slotOffset, pureFn, exp1, exp2, thisArg) {
     // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
     /** @type {?} */
     const bindingIndex = getBindingRoot() + slotOffset;
@@ -28155,7 +28143,7 @@ function ΔpureFunction2(slotOffset, pureFn, exp1, exp2, thisArg) {
  * @return {?} Updated or cached value
  *
  */
-function ΔpureFunction3(slotOffset, pureFn, exp1, exp2, exp3, thisArg) {
+function ɵɵpureFunction3(slotOffset, pureFn, exp1, exp2, exp3, thisArg) {
     // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
     /** @type {?} */
     const bindingIndex = getBindingRoot() + slotOffset;
@@ -28180,7 +28168,7 @@ function ΔpureFunction3(slotOffset, pureFn, exp1, exp2, exp3, thisArg) {
  * @return {?} Updated or cached value
  *
  */
-function ΔpureFunction4(slotOffset, pureFn, exp1, exp2, exp3, exp4, thisArg) {
+function ɵɵpureFunction4(slotOffset, pureFn, exp1, exp2, exp3, exp4, thisArg) {
     // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
     /** @type {?} */
     const bindingIndex = getBindingRoot() + slotOffset;
@@ -28206,7 +28194,7 @@ function ΔpureFunction4(slotOffset, pureFn, exp1, exp2, exp3, exp4, thisArg) {
  * @return {?} Updated or cached value
  *
  */
-function ΔpureFunction5(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, thisArg) {
+function ɵɵpureFunction5(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, thisArg) {
     // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
     /** @type {?} */
     const bindingIndex = getBindingRoot() + slotOffset;
@@ -28236,7 +28224,7 @@ function ΔpureFunction5(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, thisA
  * @return {?} Updated or cached value
  *
  */
-function ΔpureFunction6(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, thisArg) {
+function ɵɵpureFunction6(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, thisArg) {
     // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
     /** @type {?} */
     const bindingIndex = getBindingRoot() + slotOffset;
@@ -28268,7 +28256,7 @@ function ΔpureFunction6(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6,
  * @return {?} Updated or cached value
  *
  */
-function ΔpureFunction7(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, thisArg) {
+function ɵɵpureFunction7(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, thisArg) {
     // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
     /** @type {?} */
     const bindingIndex = getBindingRoot() + slotOffset;
@@ -28301,7 +28289,7 @@ function ΔpureFunction7(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6,
  * @return {?} Updated or cached value
  *
  */
-function ΔpureFunction8(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, thisArg) {
+function ɵɵpureFunction8(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, thisArg) {
     // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
     /** @type {?} */
     const bindingIndex = getBindingRoot() + slotOffset;
@@ -28330,7 +28318,7 @@ function ΔpureFunction8(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6,
  * @return {?} Updated or cached value
  *
  */
-function ΔpureFunctionV(slotOffset, pureFn, exps, thisArg) {
+function ɵɵpureFunctionV(slotOffset, pureFn, exps, thisArg) {
     // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
     /** @type {?} */
     let bindingIndex = getBindingRoot() + slotOffset;
@@ -28358,7 +28346,7 @@ function ΔpureFunctionV(slotOffset, pureFn, exps, thisArg) {
  * @return {?} T the instance of the pipe.
  *
  */
-function Δpipe(index, pipeName) {
+function ɵɵpipe(index, pipeName) {
     /** @type {?} */
     const tView = getLView()[TVIEW];
     /** @type {?} */
@@ -28415,10 +28403,10 @@ function getPipeDef$1(name, registry) {
  *
  * @return {?}
  */
-function ΔpipeBind1(index, slotOffset, v1) {
+function ɵɵpipeBind1(index, slotOffset, v1) {
     /** @type {?} */
-    const pipeInstance = Δload(index);
-    return unwrapValue$1(isPure(index) ? ΔpureFunction1(slotOffset, pipeInstance.transform, v1, pipeInstance) :
+    const pipeInstance = ɵɵload(index);
+    return unwrapValue$1(isPure(index) ? ɵɵpureFunction1(slotOffset, pipeInstance.transform, v1, pipeInstance) :
         pipeInstance.transform(v1));
 }
 /**
@@ -28435,10 +28423,10 @@ function ΔpipeBind1(index, slotOffset, v1) {
  *
  * @return {?}
  */
-function ΔpipeBind2(index, slotOffset, v1, v2) {
+function ɵɵpipeBind2(index, slotOffset, v1, v2) {
     /** @type {?} */
-    const pipeInstance = Δload(index);
-    return unwrapValue$1(isPure(index) ? ΔpureFunction2(slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
+    const pipeInstance = ɵɵload(index);
+    return unwrapValue$1(isPure(index) ? ɵɵpureFunction2(slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
         pipeInstance.transform(v1, v2));
 }
 /**
@@ -28456,10 +28444,11 @@ function ΔpipeBind2(index, slotOffset, v1, v2) {
  *
  * @return {?}
  */
-function ΔpipeBind3(index, slotOffset, v1, v2, v3) {
+function ɵɵpipeBind3(index, slotOffset, v1, v2, v3) {
     /** @type {?} */
-    const pipeInstance = Δload(index);
-    return unwrapValue$1(isPure(index) ? ΔpureFunction3(slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
+    const pipeInstance = ɵɵload(index);
+    return unwrapValue$1(isPure(index) ?
+        ɵɵpureFunction3(slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
         pipeInstance.transform(v1, v2, v3));
 }
 /**
@@ -28478,11 +28467,11 @@ function ΔpipeBind3(index, slotOffset, v1, v2, v3) {
  *
  * @return {?}
  */
-function ΔpipeBind4(index, slotOffset, v1, v2, v3, v4) {
+function ɵɵpipeBind4(index, slotOffset, v1, v2, v3, v4) {
     /** @type {?} */
-    const pipeInstance = Δload(index);
+    const pipeInstance = ɵɵload(index);
     return unwrapValue$1(isPure(index) ?
-        ΔpureFunction4(slotOffset, pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
+        ɵɵpureFunction4(slotOffset, pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
         pipeInstance.transform(v1, v2, v3, v4));
 }
 /**
@@ -28498,10 +28487,10 @@ function ΔpipeBind4(index, slotOffset, v1, v2, v3, v4) {
  *
  * @return {?}
  */
-function ΔpipeBindV(index, slotOffset, values) {
+function ɵɵpipeBindV(index, slotOffset, values) {
     /** @type {?} */
-    const pipeInstance = Δload(index);
-    return unwrapValue$1(isPure(index) ? ΔpureFunctionV(slotOffset, pipeInstance.transform, values, pipeInstance) :
+    const pipeInstance = ɵɵload(index);
+    return unwrapValue$1(isPure(index) ? ɵɵpureFunctionV(slotOffset, pipeInstance.transform, values, pipeInstance) :
         pipeInstance.transform.apply(pipeInstance, values));
 }
 /**
@@ -29277,7 +29266,7 @@ predicate, descend, read) {
  * resolving in creation mode, `false` otherwise.
  *
  */
-function ΔqueryRefresh(queryList) {
+function ɵɵqueryRefresh(queryList) {
     /** @type {?} */
     const queryListImpl = ((/** @type {?} */ ((/** @type {?} */ (queryList)))));
     /** @type {?} */
@@ -29301,11 +29290,11 @@ function ΔqueryRefresh(queryList) {
  *
  * @return {?}
  */
-function ΔstaticViewQuery(
+function ɵɵstaticViewQuery(
 // TODO(FW-486): "read" should be an AbstractType
 predicate, descend, read) {
     /** @type {?} */
-    const queryList = (/** @type {?} */ (ΔviewQuery(predicate, descend, read)));
+    const queryList = (/** @type {?} */ (ɵɵviewQuery(predicate, descend, read)));
     /** @type {?} */
     const tView = getLView()[TVIEW];
     queryList._static = true;
@@ -29324,7 +29313,7 @@ predicate, descend, read) {
  * @return {?} QueryList<T>
  *
  */
-function ΔviewQuery(
+function ɵɵviewQuery(
 // TODO(FW-486): "read" should be an AbstractType
 predicate, descend, read) {
     /** @type {?} */
@@ -29349,11 +29338,11 @@ predicate, descend, read) {
  * @template T
  * @return {?}
  */
-function ΔloadViewQuery() {
+function ɵɵloadViewQuery() {
     /** @type {?} */
     const index = getCurrentQueryIndex();
     setCurrentQueryIndex(index + 1);
-    return Δload(index - HEADER_OFFSET);
+    return ɵɵload(index - HEADER_OFFSET);
 }
 /**
  * Registers a QueryList, associated with a content query, for later refresh (part of a view
@@ -29368,7 +29357,7 @@ function ΔloadViewQuery() {
  * @return {?} QueryList<T>
  *
  */
-function ΔcontentQuery(directiveIndex, predicate, descend, 
+function ɵɵcontentQuery(directiveIndex, predicate, descend, 
 // TODO(FW-486): "read" should be an AbstractType
 read) {
     /** @type {?} */
@@ -29402,11 +29391,11 @@ read) {
  * @return {?} QueryList<T>
  *
  */
-function ΔstaticContentQuery(directiveIndex, predicate, descend, 
+function ɵɵstaticContentQuery(directiveIndex, predicate, descend, 
 // TODO(FW-486): "read" should be an AbstractType
 read) {
     /** @type {?} */
-    const queryList = (/** @type {?} */ (ΔcontentQuery(directiveIndex, predicate, descend, read)));
+    const queryList = (/** @type {?} */ (ɵɵcontentQuery(directiveIndex, predicate, descend, read)));
     /** @type {?} */
     const tView = getLView()[TVIEW];
     queryList._static = true;
@@ -29420,7 +29409,7 @@ read) {
  * @template T
  * @return {?}
  */
-function ΔloadContentQuery() {
+function ɵɵloadContentQuery() {
     /** @type {?} */
     const lView = getLView();
     ngDevMode &&
@@ -29445,7 +29434,7 @@ function ΔloadContentQuery() {
  * @param {?} currentView
  * @return {?}
  */
-function ΔtemplateRefExtractor(tNode, currentView) {
+function ɵɵtemplateRefExtractor(tNode, currentView) {
     return createTemplateRef(TemplateRef, ElementRef, tNode, currentView);
 }
 
@@ -29468,125 +29457,125 @@ const angularCoreEnv = ((/**
  * @return {?}
  */
 () => ({
-    'ΔdefineBase': ΔdefineBase,
-    'ΔdefineComponent': ΔdefineComponent,
-    'ΔdefineDirective': ΔdefineDirective,
-    'ΔdefineInjectable': ΔdefineInjectable,
-    'ΔdefineInjector': ΔdefineInjector,
-    'ΔdefineNgModule': ΔdefineNgModule,
-    'ΔdefinePipe': ΔdefinePipe,
-    'ΔdirectiveInject': ΔdirectiveInject,
-    'ΔgetFactoryOf': ΔgetFactoryOf,
-    'ΔgetInheritedFactory': ΔgetInheritedFactory,
-    'Δinject': Δinject,
-    'ΔinjectAttribute': ΔinjectAttribute,
-    'ΔtemplateRefExtractor': ΔtemplateRefExtractor,
-    'ΔNgOnChangesFeature': ΔNgOnChangesFeature,
-    'ΔProvidersFeature': ΔProvidersFeature,
-    'ΔInheritDefinitionFeature': ΔInheritDefinitionFeature,
-    'ΔelementAttribute': ΔelementAttribute,
-    'Δbind': Δbind,
-    'Δcontainer': Δcontainer,
-    'ΔnextContext': ΔnextContext,
-    'ΔcontainerRefreshStart': ΔcontainerRefreshStart,
-    'ΔcontainerRefreshEnd': ΔcontainerRefreshEnd,
-    'ΔnamespaceHTML': ΔnamespaceHTML,
-    'ΔnamespaceMathML': ΔnamespaceMathML,
-    'ΔnamespaceSVG': ΔnamespaceSVG,
-    'ΔenableBindings': ΔenableBindings,
-    'ΔdisableBindings': ΔdisableBindings,
-    'ΔallocHostVars': ΔallocHostVars,
-    'ΔelementStart': ΔelementStart,
-    'ΔelementEnd': ΔelementEnd,
-    'Δelement': Δelement,
-    'ΔelementContainerStart': ΔelementContainerStart,
-    'ΔelementContainerEnd': ΔelementContainerEnd,
-    'ΔpureFunction0': ΔpureFunction0,
-    'ΔpureFunction1': ΔpureFunction1,
-    'ΔpureFunction2': ΔpureFunction2,
-    'ΔpureFunction3': ΔpureFunction3,
-    'ΔpureFunction4': ΔpureFunction4,
-    'ΔpureFunction5': ΔpureFunction5,
-    'ΔpureFunction6': ΔpureFunction6,
-    'ΔpureFunction7': ΔpureFunction7,
-    'ΔpureFunction8': ΔpureFunction8,
-    'ΔpureFunctionV': ΔpureFunctionV,
-    'ΔgetCurrentView': ΔgetCurrentView,
-    'ΔrestoreView': ΔrestoreView,
-    'Δinterpolation1': Δinterpolation1,
-    'Δinterpolation2': Δinterpolation2,
-    'Δinterpolation3': Δinterpolation3,
-    'Δinterpolation4': Δinterpolation4,
-    'Δinterpolation5': Δinterpolation5,
-    'Δinterpolation6': Δinterpolation6,
-    'Δinterpolation7': Δinterpolation7,
-    'Δinterpolation8': Δinterpolation8,
-    'ΔinterpolationV': ΔinterpolationV,
-    'Δlistener': Δlistener,
-    'Δload': Δload,
-    'Δprojection': Δprojection,
-    'ΔelementProperty': ΔelementProperty,
-    'ΔcomponentHostSyntheticProperty': ΔcomponentHostSyntheticProperty,
-    'ΔcomponentHostSyntheticListener': ΔcomponentHostSyntheticListener,
-    'ΔpipeBind1': ΔpipeBind1,
-    'ΔpipeBind2': ΔpipeBind2,
-    'ΔpipeBind3': ΔpipeBind3,
-    'ΔpipeBind4': ΔpipeBind4,
-    'ΔpipeBindV': ΔpipeBindV,
-    'ΔprojectionDef': ΔprojectionDef,
-    'Δproperty': Δproperty,
-    'ΔpropertyInterpolate': ΔpropertyInterpolate,
-    'ΔpropertyInterpolate1': ΔpropertyInterpolate1,
-    'ΔpropertyInterpolate2': ΔpropertyInterpolate2,
-    'ΔpropertyInterpolate3': ΔpropertyInterpolate3,
-    'ΔpropertyInterpolate4': ΔpropertyInterpolate4,
-    'ΔpropertyInterpolate5': ΔpropertyInterpolate5,
-    'ΔpropertyInterpolate6': ΔpropertyInterpolate6,
-    'ΔpropertyInterpolate7': ΔpropertyInterpolate7,
-    'ΔpropertyInterpolate8': ΔpropertyInterpolate8,
-    'ΔpropertyInterpolateV': ΔpropertyInterpolateV,
-    'Δpipe': Δpipe,
-    'ΔqueryRefresh': ΔqueryRefresh,
-    'ΔviewQuery': ΔviewQuery,
-    'ΔstaticViewQuery': ΔstaticViewQuery,
-    'ΔstaticContentQuery': ΔstaticContentQuery,
-    'ΔloadViewQuery': ΔloadViewQuery,
-    'ΔcontentQuery': ΔcontentQuery,
-    'ΔloadContentQuery': ΔloadContentQuery,
-    'Δreference': Δreference,
-    'ΔelementHostAttrs': ΔelementHostAttrs,
-    'ΔclassMap': ΔclassMap,
-    'Δstyling': Δstyling,
-    'ΔstyleMap': ΔstyleMap,
-    'ΔstyleProp': ΔstyleProp,
-    'ΔstylingApply': ΔstylingApply,
-    'ΔclassProp': ΔclassProp,
-    'Δselect': Δselect,
-    'Δtemplate': Δtemplate,
-    'Δtext': Δtext,
-    'ΔtextBinding': ΔtextBinding,
-    'ΔembeddedViewStart': ΔembeddedViewStart,
-    'ΔembeddedViewEnd': ΔembeddedViewEnd,
-    'Δi18n': Δi18n,
-    'Δi18nAttributes': Δi18nAttributes,
-    'Δi18nExp': Δi18nExp,
-    'Δi18nStart': Δi18nStart,
-    'Δi18nEnd': Δi18nEnd,
-    'Δi18nApply': Δi18nApply,
-    'Δi18nPostprocess': Δi18nPostprocess,
-    'Δi18nLocalize': Δi18nLocalize,
-    'ΔresolveWindow': ΔresolveWindow,
-    'ΔresolveDocument': ΔresolveDocument,
-    'ΔresolveBody': ΔresolveBody,
-    'ΔsetComponentScope': ΔsetComponentScope,
-    'ΔsetNgModuleScope': ΔsetNgModuleScope,
-    'ΔsanitizeHtml': ΔsanitizeHtml,
-    'ΔsanitizeStyle': ΔsanitizeStyle,
-    'ΔdefaultStyleSanitizer': ΔdefaultStyleSanitizer,
-    'ΔsanitizeResourceUrl': ΔsanitizeResourceUrl,
-    'ΔsanitizeScript': ΔsanitizeScript,
-    'ΔsanitizeUrl': ΔsanitizeUrl,
-    'ΔsanitizeUrlOrResourceUrl': ΔsanitizeUrlOrResourceUrl,
+    'ɵɵdefineBase': ɵɵdefineBase,
+    'ɵɵdefineComponent': ɵɵdefineComponent,
+    'ɵɵdefineDirective': ɵɵdefineDirective,
+    'ɵɵdefineInjectable': ɵɵdefineInjectable,
+    'ɵɵdefineInjector': ɵɵdefineInjector,
+    'ɵɵdefineNgModule': ɵɵdefineNgModule,
+    'ɵɵdefinePipe': ɵɵdefinePipe,
+    'ɵɵdirectiveInject': ɵɵdirectiveInject,
+    'ɵɵgetFactoryOf': ɵɵgetFactoryOf,
+    'ɵɵgetInheritedFactory': ɵɵgetInheritedFactory,
+    'ɵɵinject': ɵɵinject,
+    'ɵɵinjectAttribute': ɵɵinjectAttribute,
+    'ɵɵtemplateRefExtractor': ɵɵtemplateRefExtractor,
+    'ɵɵNgOnChangesFeature': ɵɵNgOnChangesFeature,
+    'ɵɵProvidersFeature': ɵɵProvidersFeature,
+    'ɵɵInheritDefinitionFeature': ɵɵInheritDefinitionFeature,
+    'ɵɵelementAttribute': ɵɵelementAttribute,
+    'ɵɵbind': ɵɵbind,
+    'ɵɵcontainer': ɵɵcontainer,
+    'ɵɵnextContext': ɵɵnextContext,
+    'ɵɵcontainerRefreshStart': ɵɵcontainerRefreshStart,
+    'ɵɵcontainerRefreshEnd': ɵɵcontainerRefreshEnd,
+    'ɵɵnamespaceHTML': ɵɵnamespaceHTML,
+    'ɵɵnamespaceMathML': ɵɵnamespaceMathML,
+    'ɵɵnamespaceSVG': ɵɵnamespaceSVG,
+    'ɵɵenableBindings': ɵɵenableBindings,
+    'ɵɵdisableBindings': ɵɵdisableBindings,
+    'ɵɵallocHostVars': ɵɵallocHostVars,
+    'ɵɵelementStart': ɵɵelementStart,
+    'ɵɵelementEnd': ɵɵelementEnd,
+    'ɵɵelement': ɵɵelement,
+    'ɵɵelementContainerStart': ɵɵelementContainerStart,
+    'ɵɵelementContainerEnd': ɵɵelementContainerEnd,
+    'ɵɵpureFunction0': ɵɵpureFunction0,
+    'ɵɵpureFunction1': ɵɵpureFunction1,
+    'ɵɵpureFunction2': ɵɵpureFunction2,
+    'ɵɵpureFunction3': ɵɵpureFunction3,
+    'ɵɵpureFunction4': ɵɵpureFunction4,
+    'ɵɵpureFunction5': ɵɵpureFunction5,
+    'ɵɵpureFunction6': ɵɵpureFunction6,
+    'ɵɵpureFunction7': ɵɵpureFunction7,
+    'ɵɵpureFunction8': ɵɵpureFunction8,
+    'ɵɵpureFunctionV': ɵɵpureFunctionV,
+    'ɵɵgetCurrentView': ɵɵgetCurrentView,
+    'ɵɵrestoreView': ɵɵrestoreView,
+    'ɵɵinterpolation1': ɵɵinterpolation1,
+    'ɵɵinterpolation2': ɵɵinterpolation2,
+    'ɵɵinterpolation3': ɵɵinterpolation3,
+    'ɵɵinterpolation4': ɵɵinterpolation4,
+    'ɵɵinterpolation5': ɵɵinterpolation5,
+    'ɵɵinterpolation6': ɵɵinterpolation6,
+    'ɵɵinterpolation7': ɵɵinterpolation7,
+    'ɵɵinterpolation8': ɵɵinterpolation8,
+    'ɵɵinterpolationV': ɵɵinterpolationV,
+    'ɵɵlistener': ɵɵlistener,
+    'ɵɵload': ɵɵload,
+    'ɵɵprojection': ɵɵprojection,
+    'ɵɵelementProperty': ɵɵelementProperty,
+    'ɵɵcomponentHostSyntheticProperty': ɵɵcomponentHostSyntheticProperty,
+    'ɵɵcomponentHostSyntheticListener': ɵɵcomponentHostSyntheticListener,
+    'ɵɵpipeBind1': ɵɵpipeBind1,
+    'ɵɵpipeBind2': ɵɵpipeBind2,
+    'ɵɵpipeBind3': ɵɵpipeBind3,
+    'ɵɵpipeBind4': ɵɵpipeBind4,
+    'ɵɵpipeBindV': ɵɵpipeBindV,
+    'ɵɵprojectionDef': ɵɵprojectionDef,
+    'ɵɵproperty': ɵɵproperty,
+    'ɵɵpropertyInterpolate': ɵɵpropertyInterpolate,
+    'ɵɵpropertyInterpolate1': ɵɵpropertyInterpolate1,
+    'ɵɵpropertyInterpolate2': ɵɵpropertyInterpolate2,
+    'ɵɵpropertyInterpolate3': ɵɵpropertyInterpolate3,
+    'ɵɵpropertyInterpolate4': ɵɵpropertyInterpolate4,
+    'ɵɵpropertyInterpolate5': ɵɵpropertyInterpolate5,
+    'ɵɵpropertyInterpolate6': ɵɵpropertyInterpolate6,
+    'ɵɵpropertyInterpolate7': ɵɵpropertyInterpolate7,
+    'ɵɵpropertyInterpolate8': ɵɵpropertyInterpolate8,
+    'ɵɵpropertyInterpolateV': ɵɵpropertyInterpolateV,
+    'ɵɵpipe': ɵɵpipe,
+    'ɵɵqueryRefresh': ɵɵqueryRefresh,
+    'ɵɵviewQuery': ɵɵviewQuery,
+    'ɵɵstaticViewQuery': ɵɵstaticViewQuery,
+    'ɵɵstaticContentQuery': ɵɵstaticContentQuery,
+    'ɵɵloadViewQuery': ɵɵloadViewQuery,
+    'ɵɵcontentQuery': ɵɵcontentQuery,
+    'ɵɵloadContentQuery': ɵɵloadContentQuery,
+    'ɵɵreference': ɵɵreference,
+    'ɵɵelementHostAttrs': ɵɵelementHostAttrs,
+    'ɵɵclassMap': ɵɵclassMap,
+    'ɵɵstyling': ɵɵstyling,
+    'ɵɵstyleMap': ɵɵstyleMap,
+    'ɵɵstyleProp': ɵɵstyleProp,
+    'ɵɵstylingApply': ɵɵstylingApply,
+    'ɵɵclassProp': ɵɵclassProp,
+    'ɵɵselect': ɵɵselect,
+    'ɵɵtemplate': ɵɵtemplate,
+    'ɵɵtext': ɵɵtext,
+    'ɵɵtextBinding': ɵɵtextBinding,
+    'ɵɵembeddedViewStart': ɵɵembeddedViewStart,
+    'ɵɵembeddedViewEnd': ɵɵembeddedViewEnd,
+    'ɵɵi18n': ɵɵi18n,
+    'ɵɵi18nAttributes': ɵɵi18nAttributes,
+    'ɵɵi18nExp': ɵɵi18nExp,
+    'ɵɵi18nStart': ɵɵi18nStart,
+    'ɵɵi18nEnd': ɵɵi18nEnd,
+    'ɵɵi18nApply': ɵɵi18nApply,
+    'ɵɵi18nPostprocess': ɵɵi18nPostprocess,
+    'ɵɵi18nLocalize': ɵɵi18nLocalize,
+    'ɵɵresolveWindow': ɵɵresolveWindow,
+    'ɵɵresolveDocument': ɵɵresolveDocument,
+    'ɵɵresolveBody': ɵɵresolveBody,
+    'ɵɵsetComponentScope': ɵɵsetComponentScope,
+    'ɵɵsetNgModuleScope': ɵɵsetNgModuleScope,
+    'ɵɵsanitizeHtml': ɵɵsanitizeHtml,
+    'ɵɵsanitizeStyle': ɵɵsanitizeStyle,
+    'ɵɵdefaultStyleSanitizer': ɵɵdefaultStyleSanitizer,
+    'ɵɵsanitizeResourceUrl': ɵɵsanitizeResourceUrl,
+    'ɵɵsanitizeScript': ɵɵsanitizeScript,
+    'ɵɵsanitizeUrl': ɵɵsanitizeUrl,
+    'ɵɵsanitizeUrlOrResourceUrl': ɵɵsanitizeUrlOrResourceUrl,
 })))();
 
 /**
@@ -30847,7 +30836,7 @@ ApplicationInitStatus.decorators = [
 ApplicationInitStatus.ctorParameters = () => [
     { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional }] }
 ];
-/** @nocollapse */ ApplicationInitStatus.ngInjectableDef = ΔdefineInjectable({ token: ApplicationInitStatus, factory: function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(Δinject(APP_INITIALIZER, 8)); }, providedIn: null });
+/** @nocollapse */ ApplicationInitStatus.ngInjectableDef = ɵɵdefineInjectable({ token: ApplicationInitStatus, factory: function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(ɵɵinject(APP_INITIALIZER, 8)); }, providedIn: null });
 
 /**
  * @fileoverview added by tsickle
@@ -30949,7 +30938,7 @@ class Console {
 Console.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */ Console.ngInjectableDef = ΔdefineInjectable({ token: Console, factory: function Console_Factory(t) { return new (t || Console)(); }, providedIn: null });
+/** @nocollapse */ Console.ngInjectableDef = ɵɵdefineInjectable({ token: Console, factory: function Console_Factory(t) { return new (t || Console)(); }, providedIn: null });
 
 /**
  * @fileoverview added by tsickle
@@ -31091,7 +31080,7 @@ class Compiler {
 Compiler.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */ Compiler.ngInjectableDef = ΔdefineInjectable({ token: Compiler, factory: function Compiler_Factory(t) { return new (t || Compiler)(); }, providedIn: null });
+/** @nocollapse */ Compiler.ngInjectableDef = ɵɵdefineInjectable({ token: Compiler, factory: function Compiler_Factory(t) { return new (t || Compiler)(); }, providedIn: null });
 /**
  * Token to provide CompilerOptions in the platform injector.
  *
@@ -31921,7 +31910,7 @@ Testability.decorators = [
 Testability.ctorParameters = () => [
     { type: NgZone }
 ];
-/** @nocollapse */ Testability.ngInjectableDef = ΔdefineInjectable({ token: Testability, factory: function Testability_Factory(t) { return new (t || Testability)(Δinject(NgZone)); }, providedIn: null });
+/** @nocollapse */ Testability.ngInjectableDef = ɵɵdefineInjectable({ token: Testability, factory: function Testability_Factory(t) { return new (t || Testability)(ɵɵinject(NgZone)); }, providedIn: null });
 /**
  * A global registry of {\@link Testability} instances for specific elements.
  * \@publicApi
@@ -31986,7 +31975,7 @@ TestabilityRegistry.decorators = [
 ];
 /** @nocollapse */
 TestabilityRegistry.ctorParameters = () => [];
-/** @nocollapse */ TestabilityRegistry.ngInjectableDef = ΔdefineInjectable({ token: TestabilityRegistry, factory: function TestabilityRegistry_Factory(t) { return new (t || TestabilityRegistry)(); }, providedIn: null });
+/** @nocollapse */ TestabilityRegistry.ngInjectableDef = ɵɵdefineInjectable({ token: TestabilityRegistry, factory: function TestabilityRegistry_Factory(t) { return new (t || TestabilityRegistry)(); }, providedIn: null });
 class _NoopGetTestability {
     /**
      * @param {?} registry
@@ -32400,7 +32389,7 @@ PlatformRef.decorators = [
 PlatformRef.ctorParameters = () => [
     { type: Injector }
 ];
-/** @nocollapse */ PlatformRef.ngInjectableDef = ΔdefineInjectable({ token: PlatformRef, factory: function PlatformRef_Factory(t) { return new (t || PlatformRef)(Δinject(Injector)); }, providedIn: null });
+/** @nocollapse */ PlatformRef.ngInjectableDef = ɵɵdefineInjectable({ token: PlatformRef, factory: function PlatformRef_Factory(t) { return new (t || PlatformRef)(ɵɵinject(Injector)); }, providedIn: null });
 /**
  * @param {?=} ngZoneOption
  * @return {?}
@@ -32855,7 +32844,7 @@ ApplicationRef.ctorParameters = () => [
     { type: ComponentFactoryResolver },
     { type: ApplicationInitStatus }
 ];
-/** @nocollapse */ ApplicationRef.ngInjectableDef = ΔdefineInjectable({ token: ApplicationRef, factory: function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(Δinject(NgZone), Δinject(Console), Δinject(Injector), Δinject(ErrorHandler), Δinject(ComponentFactoryResolver), Δinject(ApplicationInitStatus)); }, providedIn: null });
+/** @nocollapse */ ApplicationRef.ngInjectableDef = ɵɵdefineInjectable({ token: ApplicationRef, factory: function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(ɵɵinject(NgZone), ɵɵinject(Console), ɵɵinject(Injector), ɵɵinject(ErrorHandler), ɵɵinject(ComponentFactoryResolver), ɵɵinject(ApplicationInitStatus)); }, providedIn: null });
 /**
  * @template T
  * @param {?} list
@@ -33067,7 +33056,7 @@ SystemJsNgModuleLoader.ctorParameters = () => [
     { type: Compiler },
     { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional }] }
 ];
-/** @nocollapse */ SystemJsNgModuleLoader.ngInjectableDef = ΔdefineInjectable({ token: SystemJsNgModuleLoader, factory: function SystemJsNgModuleLoader_Factory(t) { return new (t || SystemJsNgModuleLoader)(Δinject(Compiler), Δinject(SystemJsNgModuleLoaderConfig, 8)); }, providedIn: null });
+/** @nocollapse */ SystemJsNgModuleLoader.ngInjectableDef = ɵɵdefineInjectable({ token: SystemJsNgModuleLoader, factory: function SystemJsNgModuleLoader_Factory(t) { return new (t || SystemJsNgModuleLoader)(ɵɵinject(Compiler), ɵɵinject(SystemJsNgModuleLoaderConfig, 8)); }, providedIn: null });
 /**
  * @param {?} value
  * @param {?} modulePath
@@ -34198,8 +34187,8 @@ ApplicationModule.decorators = [
 ApplicationModule.ctorParameters = () => [
     { type: ApplicationRef }
 ];
-/** @nocollapse */ ApplicationModule.ngModuleDef = ΔdefineNgModule({ type: ApplicationModule });
-/** @nocollapse */ ApplicationModule.ngInjectorDef = ΔdefineInjector({ factory: function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(Δinject(ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS });
+/** @nocollapse */ ApplicationModule.ngModuleDef = ɵɵdefineNgModule({ type: ApplicationModule });
+/** @nocollapse */ ApplicationModule.ngInjectorDef = ɵɵdefineInjector({ factory: function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(ɵɵinject(ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS });
 
 /**
  * @fileoverview added by tsickle
@@ -37592,5 +37581,5 @@ class NgModuleFactory_ extends NgModuleFactory {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugEventListener, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS$1 as TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, ViewEncapsulation, Version, VERSION, InjectFlags, ΔdefineInjectable, defineInjectable, ɵɵdefineInjectable, ΔdefineInjector, forwardRef, resolveForwardRef, Injectable, Injector, Δinject, inject, ɵɵinject, INJECTOR, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, ΔdefineBase, ΔdefineComponent, ΔdefineDirective, ΔdefinePipe, ΔdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, ΔdirectiveInject, ΔinjectAttribute, ΔgetFactoryOf, ΔgetInheritedFactory, ΔsetComponentScope, ΔsetNgModuleScope, ΔtemplateRefExtractor, ΔProvidersFeature, ΔInheritDefinitionFeature, ΔNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, Δcontainer, ΔnextContext, ΔelementStart, ΔnamespaceHTML, ΔnamespaceMathML, ΔnamespaceSVG, Δelement, Δlistener, Δtext, ΔembeddedViewStart, Δprojection, Δbind, Δinterpolation1, Δinterpolation2, Δinterpolation3, Δinterpolation4, Δinterpolation5, Δinterpolation6, Δinterpolation7, Δinterpolation8, ΔinterpolationV, ΔpipeBind1, ΔpipeBind2, ΔpipeBind3, ΔpipeBind4, ΔpipeBindV, ΔpureFunction0, ΔpureFunction1, ΔpureFunction2, ΔpureFunction3, ΔpureFunction4, ΔpureFunction5, ΔpureFunction6, ΔpureFunction7, ΔpureFunction8, ΔpureFunctionV, ΔgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, ΔrestoreView, ΔcontainerRefreshStart, ΔcontainerRefreshEnd, ΔqueryRefresh, ΔviewQuery, ΔstaticViewQuery, ΔstaticContentQuery, ΔloadViewQuery, ΔcontentQuery, ΔloadContentQuery, ΔelementEnd, ΔelementProperty, Δproperty, ΔpropertyInterpolate, ΔpropertyInterpolate1, ΔpropertyInterpolate2, ΔpropertyInterpolate3, ΔpropertyInterpolate4, ΔpropertyInterpolate5, ΔpropertyInterpolate6, ΔpropertyInterpolate7, ΔpropertyInterpolate8, ΔpropertyInterpolateV, ΔcomponentHostSyntheticProperty, ΔcomponentHostSyntheticListener, ΔprojectionDef, Δreference, ΔenableBindings, ΔdisableBindings, ΔallocHostVars, ΔelementAttribute, ΔelementContainerStart, ΔelementContainerEnd, Δstyling, ΔstyleMap, ΔclassMap, ΔstyleProp, ΔstylingApply, ΔclassProp, ΔelementHostAttrs, Δselect, ΔtextBinding, Δtemplate, ΔembeddedViewEnd, store as ɵstore, Δload, Δpipe, whenRendered as ɵwhenRendered, Δi18n, Δi18nAttributes, Δi18nExp, Δi18nStart, Δi18nEnd, Δi18nApply, Δi18nPostprocess, i18nConfigureLocalize as ɵi18nConfigureLocalize, Δi18nLocalize, setClassMetadata as ɵsetClassMetadata, ΔresolveWindow, ΔresolveDocument, ΔresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, ΔsanitizeHtml, ΔsanitizeStyle, ΔdefaultStyleSanitizer, ΔsanitizeScript, ΔsanitizeUrl, ΔsanitizeResourceUrl, ΔsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, registerNgModuleType as ɵregisterNgModuleType, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, createInjector as ɵcreateInjector, INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$2 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugEventListener, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS$1 as TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, ViewEncapsulation, Version, VERSION, InjectFlags, ɵɵdefineInjectable, defineInjectable, ɵɵdefineInjector, forwardRef, resolveForwardRef, Injectable, Injector, ɵɵinject, inject, INJECTOR, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, ɵɵdefineBase, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefinePipe, ɵɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, ɵɵdirectiveInject, ɵɵinjectAttribute, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵtemplateRefExtractor, ɵɵProvidersFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, ɵɵcontainer, ɵɵnextContext, ɵɵelementStart, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵelement, ɵɵlistener, ɵɵtext, ɵɵembeddedViewStart, ɵɵprojection, ɵɵbind, ɵɵinterpolation1, ɵɵinterpolation2, ɵɵinterpolation3, ɵɵinterpolation4, ɵɵinterpolation5, ɵɵinterpolation6, ɵɵinterpolation7, ɵɵinterpolation8, ɵɵinterpolationV, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, ɵɵrestoreView, ɵɵcontainerRefreshStart, ɵɵcontainerRefreshEnd, ɵɵqueryRefresh, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵstaticContentQuery, ɵɵloadViewQuery, ɵɵcontentQuery, ɵɵloadContentQuery, ɵɵelementEnd, ɵɵelementProperty, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵcomponentHostSyntheticProperty, ɵɵcomponentHostSyntheticListener, ɵɵprojectionDef, ɵɵreference, ɵɵenableBindings, ɵɵdisableBindings, ɵɵallocHostVars, ɵɵelementAttribute, ɵɵelementContainerStart, ɵɵelementContainerEnd, ɵɵstyling, ɵɵstyleMap, ɵɵclassMap, ɵɵstyleProp, ɵɵstylingApply, ɵɵclassProp, ɵɵelementHostAttrs, ɵɵselect, ɵɵtextBinding, ɵɵtemplate, ɵɵembeddedViewEnd, store as ɵstore, ɵɵload, ɵɵpipe, whenRendered as ɵwhenRendered, ɵɵi18n, ɵɵi18nAttributes, ɵɵi18nExp, ɵɵi18nStart, ɵɵi18nEnd, ɵɵi18nApply, ɵɵi18nPostprocess, i18nConfigureLocalize as ɵi18nConfigureLocalize, ɵɵi18nLocalize, setClassMetadata as ɵsetClassMetadata, ɵɵresolveWindow, ɵɵresolveDocument, ɵɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, ɵɵsanitizeHtml, ɵɵsanitizeStyle, ɵɵdefaultStyleSanitizer, ɵɵsanitizeScript, ɵɵsanitizeUrl, ɵɵsanitizeResourceUrl, ɵɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, registerNgModuleType as ɵregisterNgModuleType, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, createInjector as ɵcreateInjector, INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$2 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map
