@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+264.sha-e58e5ec.with-local-changes
+ * @license Angular v8.0.0-rc.0+268.sha-df1d3fb.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11199,7 +11199,10 @@
      */
     function generateInitialInputs(directiveIndex, inputs, tNode) {
         var initialInputData = tNode.initialInputs || (tNode.initialInputs = []);
-        initialInputData[directiveIndex] = null;
+        // Ensure that we don't create sparse arrays
+        for (var i_1 = initialInputData.length; i_1 <= directiveIndex; i_1++) {
+            initialInputData.push(null);
+        }
         var attrs = tNode.attrs;
         var i = 0;
         while (i < attrs.length) {
@@ -13805,7 +13808,7 @@
         // add native event listener - applicable to elements only
         if (tNode.type === 3 /* Element */) {
             var native = getNativeByTNode(tNode, lView);
-            var resolved = eventTargetResolver ? eventTargetResolver(native) : {};
+            var resolved = eventTargetResolver ? eventTargetResolver(native) : EMPTY_OBJ;
             var target = resolved.target || native;
             var renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
             var lCleanup = getCleanup(lView);
@@ -17117,7 +17120,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-rc.0+264.sha-e58e5ec.with-local-changes');
+    var VERSION = new Version('8.0.0-rc.0+268.sha-df1d3fb.with-local-changes');
 
     /**
      * @license
@@ -23017,10 +23020,9 @@
     }
     function addMatch(query, matchingValue, insertBeforeViewMatches) {
         // Views created in constructors may have their container values created too early. In this case,
-        // ensure template node results are spliced before container results. Otherwise, results inside
+        // ensure template node results are unshifted before container results. Otherwise, results inside
         // embedded views will appear before results on parent template nodes when flattened.
-        insertBeforeViewMatches ? query.values.splice(-1, 0, matchingValue) :
-            query.values.push(matchingValue);
+        insertBeforeViewMatches ? query.values.unshift(matchingValue) : query.values.push(matchingValue);
         query.list.setDirty();
     }
     function createPredicate(predicate, read) {
