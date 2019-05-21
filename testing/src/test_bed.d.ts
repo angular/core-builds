@@ -63,23 +63,6 @@ export interface TestBed {
         useValue?: any;
         deps?: any[];
     }): void;
-    /**
-     * Overwrites all providers for the given token with the given provider definition.
-     *
-     * @deprecated as it makes all NgModules lazy. Introduced only for migrating off of it.
-     */
-    deprecatedOverrideProvider(token: any, provider: {
-        useFactory: Function;
-        deps: any[];
-    }): void;
-    deprecatedOverrideProvider(token: any, provider: {
-        useValue: any;
-    }): void;
-    deprecatedOverrideProvider(token: any, provider: {
-        useFactory?: Function;
-        useValue?: any;
-        deps?: any[];
-    }): void;
     overrideTemplateUsingTestingModule(component: Type<any>, template: string): void;
     createComponent<T>(component: Type<T>): ComponentFixture<T>;
 }
@@ -154,18 +137,6 @@ export declare class TestBedViewEngine implements Injector, TestBed {
     static overrideProvider(token: any, provider: {
         useValue: any;
     }): TestBedStatic;
-    /**
-     * Overwrites all providers for the given token with the given provider definition.
-     *
-     * @deprecated as it makes all NgModules lazy. Introduced only for migrating off of it.
-     */
-    static deprecatedOverrideProvider(token: any, provider: {
-        useFactory: Function;
-        deps: any[];
-    }): void;
-    static deprecatedOverrideProvider(token: any, provider: {
-        useValue: any;
-    }): void;
     static get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
     /**
      * @deprecated from v8.0.0 use Type<T> or InjectionToken<T>
@@ -238,18 +209,6 @@ export declare class TestBedViewEngine implements Injector, TestBed {
         deps: any[];
     }): void;
     overrideProvider(token: any, provider: {
-        useValue: any;
-    }): void;
-    /**
-     * Overwrites all providers for the given token with the given provider definition.
-     *
-     * @deprecated as it makes all NgModules lazy. Introduced only for migrating off of it.
-     */
-    deprecatedOverrideProvider(token: any, provider: {
-        useFactory: Function;
-        deps: any[];
-    }): void;
-    deprecatedOverrideProvider(token: any, provider: {
         useValue: any;
     }): void;
     private overrideProviderImpl;

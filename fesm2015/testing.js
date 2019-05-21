@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+272.sha-ebfbc04.with-local-changes
+ * @license Angular v8.0.0-rc.0+273.sha-a96976e.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2384,15 +2384,6 @@ class TestBedRender3 {
     }
     /**
      * @param {?} token
-     * @param {?} provider
-     * @return {?}
-     */
-    static deprecatedOverrideProvider(token, provider) {
-        _getTestBedRender3().deprecatedOverrideProvider(token, (/** @type {?} */ (provider)));
-        return (/** @type {?} */ ((/** @type {?} */ (TestBedRender3))));
-    }
-    /**
-     * @param {?} token
      * @param {?=} notFoundValue
      * @param {?=} flags
      * @return {?}
@@ -2571,23 +2562,6 @@ class TestBedRender3 {
      */
     overrideProvider(token, provider) {
         this.compiler.overrideProvider(token, provider);
-    }
-    /**
-     * @param {?} token
-     * @param {?} provider
-     * @return {?}
-     */
-    deprecatedOverrideProvider(token, provider) {
-        // HACK: This is NOT the correct implementation for deprecatedOverrideProvider.
-        // To implement it in a backward compatible way, we would need to record some state
-        // so we know to prevent eager instantiation of NgModules. However, we don't plan
-        // to implement this at all since the API is deprecated and scheduled for removal
-        // in V8. This hack is here temporarily for Ivy testing until we transition apps
-        // inside Google to the overrideProvider API. At that point, we will be able to
-        // remove this method entirely. In the meantime, we can use overrideProvider to
-        // test apps with Ivy that don't care about eager instantiation. This fixes 85%
-        // of cases in our blueprint.
-        this.overrideProvider(token, (/** @type {?} */ (provider)));
     }
     /**
      * @template T
@@ -2990,15 +2964,6 @@ class TestBedViewEngine {
     }
     /**
      * @param {?} token
-     * @param {?} provider
-     * @return {?}
-     */
-    static deprecatedOverrideProvider(token, provider) {
-        _getTestBedViewEngine().deprecatedOverrideProvider(token, (/** @type {?} */ (provider)));
-        return (/** @type {?} */ ((/** @type {?} */ (TestBedViewEngine))));
-    }
-    /**
-     * @param {?} token
      * @param {?=} notFoundValue
      * @param {?=} flags
      * @return {?}
@@ -3343,14 +3308,6 @@ class TestBedViewEngine {
      */
     overrideProvider(token, provider) {
         this.overrideProviderImpl(token, provider);
-    }
-    /**
-     * @param {?} token
-     * @param {?} provider
-     * @return {?}
-     */
-    deprecatedOverrideProvider(token, provider) {
-        this.overrideProviderImpl(token, provider, /* deprecated */ true);
     }
     /**
      * @private

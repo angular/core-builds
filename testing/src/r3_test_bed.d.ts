@@ -75,18 +75,6 @@ export declare class TestBedRender3 implements Injector, TestBed {
     static overrideProvider(token: any, provider: {
         useValue: any;
     }): TestBedStatic;
-    /**
-     * Overwrites all providers for the given token with the given provider definition.
-     *
-     * @deprecated as it makes all NgModules lazy. Introduced only for migrating off of it.
-     */
-    static deprecatedOverrideProvider(token: any, provider: {
-        useFactory: Function;
-        deps: any[];
-    }): void;
-    static deprecatedOverrideProvider(token: any, provider: {
-        useValue: any;
-    }): void;
     static get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
     /**
      * @deprecated from v8.0.0 use Type<T> or InjectionToken<T>
@@ -145,18 +133,6 @@ export declare class TestBedRender3 implements Injector, TestBed {
         useFactory?: Function;
         useValue?: any;
         deps?: any[];
-    }): void;
-    /**
-     * Overwrites all providers for the given token with the given provider definition.
-     *
-     * @deprecated as it makes all NgModules lazy. Introduced only for migrating off of it.
-     */
-    deprecatedOverrideProvider(token: any, provider: {
-        useFactory: Function;
-        deps: any[];
-    }): void;
-    deprecatedOverrideProvider(token: any, provider: {
-        useValue: any;
     }): void;
     createComponent<T>(type: Type<T>): ComponentFixture<T>;
     private readonly compiler;

@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+272.sha-ebfbc04.with-local-changes
+ * @license Angular v8.0.0-rc.0+273.sha-a96976e.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1893,10 +1893,6 @@
             _getTestBedRender3().overrideProvider(token, provider);
             return TestBedRender3;
         };
-        TestBedRender3.deprecatedOverrideProvider = function (token, provider) {
-            _getTestBedRender3().deprecatedOverrideProvider(token, provider);
-            return TestBedRender3;
-        };
         TestBedRender3.get = function (token, notFoundValue, flags) {
             if (notFoundValue === void 0) { notFoundValue = i0.Injector.THROW_IF_NOT_FOUND; }
             if (flags === void 0) { flags = i0.InjectFlags.Default; }
@@ -2003,18 +1999,6 @@
          */
         TestBedRender3.prototype.overrideProvider = function (token, provider) {
             this.compiler.overrideProvider(token, provider);
-        };
-        TestBedRender3.prototype.deprecatedOverrideProvider = function (token, provider) {
-            // HACK: This is NOT the correct implementation for deprecatedOverrideProvider.
-            // To implement it in a backward compatible way, we would need to record some state
-            // so we know to prevent eager instantiation of NgModules. However, we don't plan
-            // to implement this at all since the API is deprecated and scheduled for removal
-            // in V8. This hack is here temporarily for Ivy testing until we transition apps
-            // inside Google to the overrideProvider API. At that point, we will be able to
-            // remove this method entirely. In the meantime, we can use overrideProvider to
-            // test apps with Ivy that don't care about eager instantiation. This fixes 85%
-            // of cases in our blueprint.
-            this.overrideProvider(token, provider);
         };
         TestBedRender3.prototype.createComponent = function (type) {
             var _this = this;
@@ -2293,10 +2277,6 @@
             _getTestBedViewEngine().overrideProvider(token, provider);
             return TestBedViewEngine;
         };
-        TestBedViewEngine.deprecatedOverrideProvider = function (token, provider) {
-            _getTestBedViewEngine().deprecatedOverrideProvider(token, provider);
-            return TestBedViewEngine;
-        };
         TestBedViewEngine.get = function (token, notFoundValue, flags) {
             if (notFoundValue === void 0) { notFoundValue = i0.Injector.THROW_IF_NOT_FOUND; }
             if (flags === void 0) { flags = i0.InjectFlags.Default; }
@@ -2545,9 +2525,6 @@
         };
         TestBedViewEngine.prototype.overrideProvider = function (token, provider) {
             this.overrideProviderImpl(token, provider);
-        };
-        TestBedViewEngine.prototype.deprecatedOverrideProvider = function (token, provider) {
-            this.overrideProviderImpl(token, provider, /* deprecated */ true);
         };
         TestBedViewEngine.prototype.overrideProviderImpl = function (token, provider, deprecated) {
             if (deprecated === void 0) { deprecated = false; }
