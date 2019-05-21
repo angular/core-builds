@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+274.sha-c9f5f3d.with-local-changes
+ * @license Angular v8.0.0-rc.0+275.sha-f3c69e7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21708,7 +21708,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-rc.0+274.sha-c9f5f3d.with-local-changes');
+const VERSION = new Version('8.0.0-rc.0+275.sha-f3c69e7.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -26419,28 +26419,27 @@ function addAllToArray(items, arr) {
     }
 }
 /**
- * Flattens an array in non-recursive way. Input arrays are not modified.
+ * Flattens an array.
  */
-function flatten(list, mapFn) {
-    const result = [];
-    let i = 0;
-    while (i < list.length) {
-        const item = list[i];
+function flatten(list, dst) {
+    if (dst === undefined)
+        dst = list;
+    for (let i = 0; i < list.length; i++) {
+        let item = list[i];
         if (Array.isArray(item)) {
-            if (item.length > 0) {
-                list = item.concat(list.slice(i + 1));
-                i = 0;
+            // we need to inline it.
+            if (dst === list) {
+                // Our assumption that the list was already flat was wrong and
+                // we need to clone flat since we need to write to it.
+                dst = list.slice(0, i);
             }
-            else {
-                i++;
-            }
+            flatten(item, dst);
         }
-        else {
-            result.push(mapFn ? mapFn(item) : item);
-            i++;
+        else if (dst !== list) {
+            dst.push(item);
         }
     }
-    return result;
+    return dst;
 }
 
 /**
@@ -30129,11 +30128,13 @@ function compileNgModuleDefs(moduleType, ngModule) {
             if (ngModuleDef === null) {
                 ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, `ng:///${moduleType.name}/ngModuleDef.js`, {
                     type: moduleType,
-                    bootstrap: flatten(ngModule.bootstrap || EMPTY_ARRAY$4, resolveForwardRef),
+                    bootstrap: flatten(ngModule.bootstrap || EMPTY_ARRAY$4).map(resolveForwardRef),
                     declarations: declarations.map(resolveForwardRef),
-                    imports: flatten(ngModule.imports || EMPTY_ARRAY$4, resolveForwardRef)
+                    imports: flatten(ngModule.imports || EMPTY_ARRAY$4)
+                        .map(resolveForwardRef)
                         .map(expandModuleWithProviders),
-                    exports: flatten(ngModule.exports || EMPTY_ARRAY$4, resolveForwardRef)
+                    exports: flatten(ngModule.exports || EMPTY_ARRAY$4)
+                        .map(resolveForwardRef)
                         .map(expandModuleWithProviders),
                     emitInline: true,
                     schemas: ngModule.schemas ? flatten(ngModule.schemas) : null,
@@ -30188,14 +30189,14 @@ function verifySemanticsOfNgModuleDef(moduleType) {
     const declarations = maybeUnwrapFn(ngModuleDef.declarations);
     /** @type {?} */
     const imports = maybeUnwrapFn(ngModuleDef.imports);
-    flatten(imports, unwrapModuleWithProvidersImports).forEach(verifySemanticsOfNgModuleDef);
+    flatten(imports).map(unwrapModuleWithProvidersImports).forEach(verifySemanticsOfNgModuleDef);
     /** @type {?} */
     const exports = maybeUnwrapFn(ngModuleDef.exports);
     declarations.forEach(verifyDeclarationsHaveDefinitions);
     /** @type {?} */
     const combinedDeclarations = [
         ...declarations.map(resolveForwardRef),
-        ...flatten(imports.map(computeCombinedExports), resolveForwardRef),
+        ...flatten(imports.map(computeCombinedExports)).map(resolveForwardRef),
     ];
     exports.forEach(verifyExportsAreDeclaredOrReExported);
     declarations.forEach(verifyDeclarationIsUnique);
@@ -30204,7 +30205,8 @@ function verifySemanticsOfNgModuleDef(moduleType) {
     const ngModule = getAnnotation(moduleType, 'NgModule');
     if (ngModule) {
         ngModule.imports &&
-            flatten(ngModule.imports, unwrapModuleWithProvidersImports)
+            flatten(ngModule.imports)
+                .map(unwrapModuleWithProvidersImports)
                 .forEach(verifySemanticsOfNgModuleDef);
         ngModule.bootstrap && ngModule.bootstrap.forEach(verifyCorrectBootstrapType);
         ngModule.bootstrap && ngModule.bootstrap.forEach(verifyComponentIsPartOfNgModule);
