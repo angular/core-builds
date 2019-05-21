@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+268.sha-df1d3fb.with-local-changes
+ * @license Angular v8.0.0-rc.0+266.sha-abe4433.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14111,10 +14111,7 @@ function setInputsFromAttrs(directiveIndex, instance, def, tNode) {
 function generateInitialInputs(directiveIndex, inputs, tNode) {
     /** @type {?} */
     const initialInputData = tNode.initialInputs || (tNode.initialInputs = []);
-    // Ensure that we don't create sparse arrays
-    for (let i = initialInputData.length; i <= directiveIndex; i++) {
-        initialInputData.push(null);
-    }
+    initialInputData[directiveIndex] = null;
     /** @type {?} */
     const attrs = (/** @type {?} */ (tNode.attrs));
     /** @type {?} */
@@ -17234,7 +17231,7 @@ function listenerInternal(eventName, listenerFn, useCapture = false, eventTarget
         /** @type {?} */
         const native = (/** @type {?} */ (getNativeByTNode(tNode, lView)));
         /** @type {?} */
-        const resolved = eventTargetResolver ? eventTargetResolver(native) : (/** @type {?} */ (EMPTY_OBJ));
+        const resolved = eventTargetResolver ? eventTargetResolver(native) : (/** @type {?} */ ({}));
         /** @type {?} */
         const target = resolved.target || native;
         /** @type {?} */
@@ -21270,7 +21267,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-rc.0+268.sha-df1d3fb.with-local-changes');
+const VERSION = new Version('8.0.0-rc.0+266.sha-abe4433.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -29196,9 +29193,10 @@ function add(query, tNode, insertBeforeContainer) {
  */
 function addMatch(query, matchingValue, insertBeforeViewMatches) {
     // Views created in constructors may have their container values created too early. In this case,
-    // ensure template node results are unshifted before container results. Otherwise, results inside
+    // ensure template node results are spliced before container results. Otherwise, results inside
     // embedded views will appear before results on parent template nodes when flattened.
-    insertBeforeViewMatches ? query.values.unshift(matchingValue) : query.values.push(matchingValue);
+    insertBeforeViewMatches ? query.values.splice(-1, 0, matchingValue) :
+        query.values.push(matchingValue);
     query.list.setDirty();
 }
 /**
