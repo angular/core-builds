@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+296.sha-70fd430.with-local-changes
+ * @license Angular v8.0.0-rc.0+304.sha-86c4690.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3585,7 +3585,7 @@ function maybeQueueResolutionOfComponentResources(type, metadata) {
  * @return {?}
  */
 function componentNeedsResolution(component) {
-    return !!((component.templateUrl && !component.template) ||
+    return !!((component.templateUrl && !component.hasOwnProperty('template')) ||
         component.styleUrls && component.styleUrls.length);
 }
 /**
@@ -21004,8 +21004,16 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
     }
     else {
         /** @type {?} */
-        const commentNode = hostView[RENDERER].createComment(ngDevMode ? 'container' : '');
-        ngDevMode && ngDevMode.rendererCreateComment++;
+        let commentNode;
+        // If the host is an element container, the native host element is guaranteed to be a
+        // comment and we can reuse that comment as anchor element for the new LContainer.
+        if (hostTNode.type === 4 /* ElementContainer */) {
+            commentNode = (/** @type {?} */ (unwrapRNode(slotValue)));
+        }
+        else {
+            ngDevMode && ngDevMode.rendererCreateComment++;
+            commentNode = hostView[RENDERER].createComment(ngDevMode ? 'container' : '');
+        }
         // A container can be created on the root (topmost / bootstrapped) component and in this case we
         // can't use LTree to insert container's marker node (both parent of a comment node and the
         // commend node itself is located outside of elements hold by LTree). In this specific case we
@@ -21270,7 +21278,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-rc.0+296.sha-70fd430.with-local-changes');
+const VERSION = new Version('8.0.0-rc.0+304.sha-86c4690.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
