@@ -9,6 +9,7 @@
  * A scope function for the Web Tracing Framework (WTF).
  *
  * @publicApi
+ * @deprecated the Web Tracing Framework is no longer supported in Angular
  */
 export interface WtfScopeFn {
     (arg0?: any, arg1?: any): any;

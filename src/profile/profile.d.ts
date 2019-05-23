@@ -40,6 +40,7 @@ export declare const wtfEnabled: boolean;
  * an exception is expected during normal execution while profiling.
  *
  * @publicApi
+ * @deprecated the Web Tracing Framework is no longer supported in Angular
  */
 export declare const wtfCreateScope: (signature: string, flags?: any) => WtfScopeFn;
 /**
@@ -50,6 +51,7 @@ export declare const wtfCreateScope: (signature: string, flags?: any) => WtfScop
  *
  * Returns the `returnValue for easy chaining.
  * @publicApi
+ * @deprecated the Web Tracing Framework is no longer supported in Angular
  */
 export declare const wtfLeave: <T>(scope: any, returnValue?: T) => T;
 /**
@@ -64,6 +66,7 @@ export declare const wtfLeave: <T>(scope: any, returnValue?: T) => T;
  *        });
  *     }
  * @publicApi
+ * @deprecated the Web Tracing Framework is no longer supported in Angular
  */
 export declare const wtfStartTimeRange: (rangeType: string, action: string) => any;
 /**
@@ -71,5 +74,6 @@ export declare const wtfStartTimeRange: (rangeType: string, action: string) => a
  * [range] is the return value from [wtfStartTimeRange] Async ranges only work if WTF has been
  * enabled.
  * @publicApi
+ * @deprecated the Web Tracing Framework is no longer supported in Angular
  */
 export declare const wtfEndTimeRange: (range: any) => void;
