@@ -157,10 +157,11 @@ export declare function getActiveDirectiveSuperClassDepth(): number;
  */
 export declare function ɵɵrestoreView(viewToRestore: OpaqueViewState): void;
 export declare function getPreviousOrParentTNode(): TNode;
-export declare function setPreviousOrParentTNode(tNode: TNode): void;
+export declare function setPreviousOrParentTNode(tNode: TNode, _isParent: boolean): void;
 export declare function setTNodeAndViewData(tNode: TNode, view: LView): void;
 export declare function getIsParent(): boolean;
-export declare function setIsParent(value: boolean): void;
+export declare function setIsNotParent(): void;
+export declare function setIsParent(): void;
 /** Checks whether a given view is in creation mode */
 export declare function isCreationMode(view?: LView): boolean;
 export declare function getContextLView(): LView;

@@ -12,7 +12,7 @@ import { LContainer } from '../interfaces/container';
 import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory, ViewQueriesFunction } from '../interfaces/definition';
 import { LocalRefExtractor, PropertyAliasValue, PropertyAliases, TAttributes, TContainerNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from '../interfaces/node';
 import { LQueries } from '../interfaces/query';
-import { RComment, RElement, RText, Renderer3, RendererFactory3 } from '../interfaces/renderer';
+import { RComment, RElement, Renderer3, RendererFactory3 } from '../interfaces/renderer';
 import { SanitizerFn } from '../interfaces/sanitization';
 import { StylingContext } from '../interfaces/styling';
 import { ExpandoInstructions, LView, LViewFlags, RootContext, RootContextFlags, TView } from '../interfaces/view';
@@ -40,6 +40,10 @@ export declare function createLView<T>(parentLView: LView | null, tView: TView, 
 /**
  * Create and stores the TNode, and hooks it up to the tree.
  *
+ * @param tView The current `TView`.
+ * @param tHostNode This is a hack and we should not have to pass this value in. It is only used to
+ * determine if the parent belongs to a different tView. Instead we should not have parentTView
+ * point to TView other the current one.
  * @param index The index at which the TNode should be saved (null if view, since they are not
  * saved).
  * @param type The type of TNode to create
@@ -47,11 +51,11 @@ export declare function createLView<T>(parentLView: LView | null, tView: TView, 
  * @param name The tag name of the associated native element, if applicable
  * @param attrs Any attrs for the native element, if applicable
  */
-export declare function createNodeAtIndex(index: number, type: TNodeType.Element, native: RElement | RText | null, name: string | null, attrs: TAttributes | null): TElementNode;
-export declare function createNodeAtIndex(index: number, type: TNodeType.Container, native: RComment, name: string | null, attrs: TAttributes | null): TContainerNode;
-export declare function createNodeAtIndex(index: number, type: TNodeType.Projection, native: null, name: null, attrs: TAttributes | null): TProjectionNode;
-export declare function createNodeAtIndex(index: number, type: TNodeType.ElementContainer, native: RComment, name: string | null, attrs: TAttributes | null): TElementContainerNode;
-export declare function createNodeAtIndex(index: number, type: TNodeType.IcuContainer, native: RComment, name: null, attrs: TAttributes | null): TElementContainerNode;
+export declare function getOrCreateTNode(tView: TView, tHostNode: TNode | null, index: number, type: TNodeType.Element, name: string | null, attrs: TAttributes | null): TElementNode;
+export declare function getOrCreateTNode(tView: TView, tHostNode: TNode | null, index: number, type: TNodeType.Container, name: string | null, attrs: TAttributes | null): TContainerNode;
+export declare function getOrCreateTNode(tView: TView, tHostNode: TNode | null, index: number, type: TNodeType.Projection, name: null, attrs: TAttributes | null): TProjectionNode;
+export declare function getOrCreateTNode(tView: TView, tHostNode: TNode | null, index: number, type: TNodeType.ElementContainer, name: string | null, attrs: TAttributes | null): TElementContainerNode;
+export declare function getOrCreateTNode(tView: TView, tHostNode: TNode | null, index: number, type: TNodeType.IcuContainer, name: null, attrs: TAttributes | null): TElementContainerNode;
 export declare function assignTViewNodeToLView(tView: TView, tParentNode: TNode | null, index: number, lView: LView): TViewNode;
 /**
  * When elements are created dynamically after a view blueprint is created (e.g. through
@@ -70,7 +74,8 @@ export declare function createEmbeddedViewAndNode<T>(tView: TView, context: T, d
  *
  * Dynamically created views must store/retrieve their TViews differently from component views
  * because their template functions are nested in the template functions of their hosts, creating
- * closures. If their host template happens to be an embedded template in a loop (e.g. ngFor inside
+ * closures. If their host template happens to be an embedded template in a loop (e.g. ngFor
+ * inside
  * an ngFor), the nesting would mean we'd have multiple instances of the template function, so we
  * can't store TViews in the template function itself (as we do for comps). Instead, we store the
  * TView for dynamically created views on their host TNode, which only has one instance.
@@ -265,7 +270,8 @@ export declare function checkNoChangesInternal<T>(view: LView, context: T): void
  * @param lView The view which the change detection should be checked on.
  */
 export declare function checkNoChangesInRootView(lView: LView): void;
-/** Checks the view of the component provided. Does not gate on dirty checks or execute doCheck. */
+/** Checks the view of the component provided. Does not gate on dirty checks or execute doCheck.
+ */
 export declare function checkView<T>(hostView: LView, component: T): void;
 /**
  * Creates binding metadata for a particular binding and stores it in
@@ -285,7 +291,7 @@ export declare function checkView<T>(hostView: LView, component: T): void;
  */
 export declare function storeBindingMetadata(lView: LView, prefix?: string, suffix?: string): string | null;
 export declare const CLEAN_PROMISE: Promise<null>;
-export declare function initializeTNodeInputs(tNode: TNode | null): PropertyAliases | null;
+export declare function initializeTNodeInputs(tNode: TNode): PropertyAliases | null;
 export declare function getCleanup(view: LView): any[];
 /**
  * There are cases where the sub component's renderer needs to be included
