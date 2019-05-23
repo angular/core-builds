@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.4+52.sha-3f2f937.with-local-changes
+ * @license Angular v8.0.0-rc.4+57.sha-c8af830.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1250,13 +1250,13 @@ export declare interface ContentChildDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | Function | string, opts?: {
+    (selector: Type<any> | Function | string, opts: {
         read?: any;
-        static?: boolean;
+        static: boolean;
     }): any;
-    new (selector: Type<any> | Function | string, opts?: {
+    new (selector: Type<any> | Function | string, opts: {
         read?: any;
-        static?: boolean;
+        static: boolean;
     }): ContentChild;
 }
 
@@ -5233,7 +5233,7 @@ export declare interface Query {
     read: any;
     isViewQuery: boolean;
     selector: any;
-    static?: boolean;
+    static: boolean;
 }
 
 /**
@@ -8051,13 +8051,13 @@ export declare interface ViewChildDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | Function | string, opts?: {
+    (selector: Type<any> | Function | string, opts: {
         read?: any;
-        static?: boolean;
+        static: boolean;
     }): any;
-    new (selector: Type<any> | Function | string, opts?: {
+    new (selector: Type<any> | Function | string, opts: {
         read?: any;
-        static?: boolean;
+        static: boolean;
     }): ViewChild;
 }
 
