@@ -6,6 +6,8 @@
  * found in the LICENSE file at https://angular.io/license
  */
 export * from './alloc_host_vars';
+export * from './attribute';
+export * from './attribute_interpolation';
 export * from './change_detection';
 export * from './container';
 export * from './storage';
