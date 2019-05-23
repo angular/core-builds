@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+327.sha-b5c8939.with-local-changes
+ * @license Angular v8.0.0-rc.0+329.sha-ccc76f7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8823,6 +8823,7 @@ export declare class WrappedValue {
  * an exception is expected during normal execution while profiling.
  *
  * @publicApi
+ * @deprecated the Web Tracing Framework is no longer supported in Angular
  */
 export declare const wtfCreateScope: (signature: string, flags?: any) => WtfScopeFn;
 
@@ -8831,6 +8832,7 @@ export declare const wtfCreateScope: (signature: string, flags?: any) => WtfScop
  * [range] is the return value from [wtfStartTimeRange] Async ranges only work if WTF has been
  * enabled.
  * @publicApi
+ * @deprecated the Web Tracing Framework is no longer supported in Angular
  */
 export declare const wtfEndTimeRange: (range: any) => void;
 
@@ -8842,6 +8844,7 @@ export declare const wtfEndTimeRange: (range: any) => void;
  *
  * Returns the `returnValue for easy chaining.
  * @publicApi
+ * @deprecated the Web Tracing Framework is no longer supported in Angular
  */
 export declare const wtfLeave: <T>(scope: any, returnValue?: T) => T;
 
@@ -8850,6 +8853,7 @@ export declare const wtfLeave: <T>(scope: any, returnValue?: T) => T;
  * A scope function for the Web Tracing Framework (WTF).
  *
  * @publicApi
+ * @deprecated the Web Tracing Framework is no longer supported in Angular
  */
 export declare interface WtfScopeFn {
     (arg0?: any, arg1?: any): any;
@@ -8867,6 +8871,7 @@ export declare interface WtfScopeFn {
  *        });
  *     }
  * @publicApi
+ * @deprecated the Web Tracing Framework is no longer supported in Angular
  */
 export declare const wtfStartTimeRange: (rangeType: string, action: string) => any;
 
