@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.4+57.sha-c8af830.with-local-changes
+ * @license Angular v8.0.0-rc.4+59.sha-361f181.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16583,7 +16583,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-rc.4+57.sha-c8af830.with-local-changes');
+var VERSION = new Version('8.0.0-rc.4+59.sha-361f181.with-local-changes');
 
 /**
  * @license
@@ -24040,6 +24040,7 @@ function noopScope(arg0, arg1) {
  * an exception is expected during normal execution while profiling.
  *
  * @publicApi
+ * @deprecated the Web Tracing Framework is no longer supported in Angular
  */
 var wtfCreateScope = wtfEnabled ? createScope : function (signature, flags) { return noopScope; };
 /**
@@ -24050,6 +24051,7 @@ var wtfCreateScope = wtfEnabled ? createScope : function (signature, flags) { re
  *
  * Returns the `returnValue for easy chaining.
  * @publicApi
+ * @deprecated the Web Tracing Framework is no longer supported in Angular
  */
 var wtfLeave = wtfEnabled ? leave : function (s, r) { return r; };
 /**
@@ -24064,6 +24066,7 @@ var wtfLeave = wtfEnabled ? leave : function (s, r) { return r; };
  *        });
  *     }
  * @publicApi
+ * @deprecated the Web Tracing Framework is no longer supported in Angular
  */
 var wtfStartTimeRange = wtfEnabled ? startTimeRange : function (rangeType, action) { return null; };
 /**
@@ -24071,6 +24074,7 @@ var wtfStartTimeRange = wtfEnabled ? startTimeRange : function (rangeType, actio
  * [range] is the return value from [wtfStartTimeRange] Async ranges only work if WTF has been
  * enabled.
  * @publicApi
+ * @deprecated the Web Tracing Framework is no longer supported in Angular
  */
 var wtfEndTimeRange = wtfEnabled ? endTimeRange : function (r) { return null; };
 
