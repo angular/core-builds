@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+311.sha-2cdbe9b.with-local-changes
+ * @license Angular v8.0.0-rc.0+297.sha-02523de.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4013,7 +4013,7 @@ function maybeQueueResolutionOfComponentResources(type, metadata) {
  * @return {?}
  */
 function componentNeedsResolution(component) {
-    return !!((component.templateUrl && !component.hasOwnProperty('template')) ||
+    return !!((component.templateUrl && !component.template) ||
         component.styleUrls && component.styleUrls.length);
 }
 /**
@@ -15166,6 +15166,56 @@ function prefillHostVars(tView, lView, totalHostVars) {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
+ * Synchronously perform change detection on a component (and possibly its sub-components).
+ *
+ * This function triggers change detection in a synchronous way on a component. There should
+ * be very little reason to call this function directly since a preferred way to do change
+ * detection is to {\@link markDirty} the component and wait for the scheduler to call this method
+ * at some future point in time. This is because a single user action often results in many
+ * components being invalidated and calling change detection on each component synchronously
+ * would be inefficient. It is better to wait until all components are marked as dirty and
+ * then perform single change detection across all of the components
+ *
+ * @template T
+ * @param {?} component The component which the change detection should be performed on.
+ * @return {?}
+ */
+function detectChanges(component) {
+    /** @type {?} */
+    const view = getComponentViewByInstance(component);
+    detectChangesInternal(view, component);
+}
+/**
+ * Mark the component as dirty (needing change detection).
+ *
+ * Marking a component dirty will schedule a change detection on this
+ * component at some point in the future. Marking an already dirty
+ * component as dirty is a noop. Only one outstanding change detection
+ * can be scheduled per component tree. (Two components bootstrapped with
+ * separate `renderComponent` will have separate schedulers)
+ *
+ * When the root component is bootstrapped with `renderComponent`, a scheduler
+ * can be provided.
+ *
+ * \@publicApi
+ * @template T
+ * @param {?} component Component to mark as dirty.
+ *
+ * @return {?}
+ */
+function markDirty(component) {
+    ngDevMode && assertDefined(component, 'component');
+    /** @type {?} */
+    const rootView = (/** @type {?} */ (markViewDirty(getComponentViewByInstance(component))));
+    ngDevMode && assertDefined(rootView[CONTEXT], 'rootContext should be defined');
+    scheduleTick((/** @type {?} */ (rootView[CONTEXT])), 1 /* DetectChanges */);
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
  * @param {?} tNode
  * @param {?} embeddedView
  * @return {?}
@@ -16051,6 +16101,268 @@ function appendProjectedNode(projectedTNode, tProjectionNode, currentView, proje
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
+ * Creates an LContainer for inline views, e.g.
+ *
+ * % if (showing) {
+ *   <div></div>
+ * % }
+ *
+ * \@codeGenApi
+ * @param {?} index The index of the container in the data array
+ *
+ * @return {?}
+ */
+function ɵɵcontainer(index) {
+    /** @type {?} */
+    const tNode = containerInternal(index, null, null);
+    /** @type {?} */
+    const lView = getLView();
+    if (lView[TVIEW].firstTemplatePass) {
+        tNode.tViews = [];
+    }
+    addTContainerToQueries(lView, tNode);
+    setIsParent(false);
+}
+/**
+ * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
+ *
+ * <ng-template #foo>
+ *    <div></div>
+ * </ng-template>
+ *
+ * \@codeGenApi
+ * @param {?} index The index of the container in the data array
+ * @param {?} templateFn Inline template
+ * @param {?} consts The number of nodes, local refs, and pipes for this template
+ * @param {?} vars The number of bindings for this template
+ * @param {?=} tagName The name of the container element, if applicable
+ * @param {?=} attrs The attrs attached to the container, if applicable
+ * @param {?=} localRefs A set of local reference bindings on the element.
+ * @param {?=} localRefExtractor A function which extracts local-refs values from the template.
+ *        Defaults to the current element associated with the local-ref.
+ *
+ * @return {?}
+ */
+function ɵɵtemplate(index, templateFn, consts, vars, tagName, attrs, localRefs, localRefExtractor) {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const tView = lView[TVIEW];
+    // TODO: consider a separate node type for templates
+    /** @type {?} */
+    const tContainerNode = containerInternal(index, tagName || null, attrs || null);
+    if (tView.firstTemplatePass) {
+        tContainerNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null, null);
+    }
+    createDirectivesAndLocals(tView, lView, localRefs, localRefExtractor);
+    addTContainerToQueries(lView, tContainerNode);
+    attachPatchData(getNativeByTNode(tContainerNode, lView), lView);
+    registerPostOrderHooks(tView, tContainerNode);
+    setIsParent(false);
+}
+/**
+ * Sets a container up to receive views.
+ *
+ * \@codeGenApi
+ * @param {?} index The index of the container in the data array
+ *
+ * @return {?}
+ */
+function ɵɵcontainerRefreshStart(index) {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const tView = lView[TVIEW];
+    /** @type {?} */
+    let previousOrParentTNode = (/** @type {?} */ (loadInternal(tView.data, index)));
+    setPreviousOrParentTNode(previousOrParentTNode);
+    ngDevMode && assertNodeType(previousOrParentTNode, 0 /* Container */);
+    setIsParent(true);
+    lView[index + HEADER_OFFSET][ACTIVE_INDEX] = 0;
+    // We need to execute init hooks here so ngOnInit hooks are called in top level views
+    // before they are called in embedded views (for backwards compatibility).
+    executePreOrderHooks(lView, tView, getCheckNoChangesMode(), undefined);
+}
+/**
+ * Marks the end of the LContainer.
+ *
+ * Marking the end of LContainer is the time when to child views get inserted or removed.
+ *
+ * \@codeGenApi
+ * @return {?}
+ */
+function ɵɵcontainerRefreshEnd() {
+    /** @type {?} */
+    let previousOrParentTNode = getPreviousOrParentTNode();
+    if (getIsParent()) {
+        setIsParent(false);
+    }
+    else {
+        ngDevMode && assertNodeType(previousOrParentTNode, 2 /* View */);
+        ngDevMode && assertHasParent(previousOrParentTNode);
+        previousOrParentTNode = (/** @type {?} */ (previousOrParentTNode.parent));
+        setPreviousOrParentTNode(previousOrParentTNode);
+    }
+    ngDevMode && assertNodeType(previousOrParentTNode, 0 /* Container */);
+    /** @type {?} */
+    const lContainer = getLView()[previousOrParentTNode.index];
+    /** @type {?} */
+    const nextIndex = lContainer[ACTIVE_INDEX];
+    // remove extra views at the end of the container
+    while (nextIndex < lContainer.length - CONTAINER_HEADER_OFFSET) {
+        removeView(lContainer, nextIndex);
+    }
+}
+/**
+ * Reporting a TContainer node queries is a 2-step process as we need to:
+ * - check if the container node itself is matching (query might match a <ng-template> node);
+ * - prepare room for nodes from views that might be created based on the TemplateRef linked to this
+ * container.
+ *
+ * Those 2 operations need to happen in the specific order (match the container node itself, then
+ * prepare space for nodes from views).
+ * @param {?} lView
+ * @param {?} tContainerNode
+ * @return {?}
+ */
+function addTContainerToQueries(lView, tContainerNode) {
+    /** @type {?} */
+    const queries = lView[QUERIES];
+    if (queries) {
+        /** @type {?} */
+        const lContainer = lView[tContainerNode.index];
+        if (lContainer[QUERIES]) {
+            // Query container should only exist if it was created through a dynamic view
+            // in a directive constructor. In this case, we must splice the template
+            // matches in before the view matches to ensure query results in embedded views
+            // don't clobber query results on the template node itself.
+            queries.insertNodeBeforeViews(tContainerNode);
+        }
+        else {
+            queries.addNode(tContainerNode);
+            lContainer[QUERIES] = queries.container();
+        }
+    }
+}
+/**
+ * @param {?} index
+ * @param {?} tagName
+ * @param {?} attrs
+ * @return {?}
+ */
+function containerInternal(index, tagName, attrs) {
+    /** @type {?} */
+    const lView = getLView();
+    ngDevMode && assertEqual(lView[BINDING_INDEX], lView[TVIEW].bindingStartIndex, 'container nodes should be created before any bindings');
+    /** @type {?} */
+    const adjustedIndex = index + HEADER_OFFSET;
+    /** @type {?} */
+    const comment = lView[RENDERER].createComment(ngDevMode ? 'container' : '');
+    ngDevMode && ngDevMode.rendererCreateComment++;
+    /** @type {?} */
+    const tNode = createNodeAtIndex(index, 0 /* Container */, comment, tagName, attrs);
+    /** @type {?} */
+    const lContainer = lView[adjustedIndex] =
+        createLContainer(lView[adjustedIndex], lView, comment, tNode);
+    appendChild(comment, tNode, lView);
+    // Containers are added to the current view tree instead of their embedded views
+    // because views can be removed and re-inserted.
+    addToViewTree(lView, lContainer);
+    ngDevMode && assertNodeType(getPreviousOrParentTNode(), 0 /* Container */);
+    return tNode;
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Store a value in the `data` at a given `index`.
+ * @template T
+ * @param {?} index
+ * @param {?} value
+ * @return {?}
+ */
+function store(index, value) {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const tView = lView[TVIEW];
+    // We don't store any static data for local variables, so the first time
+    // we see the template, we should store as null to avoid a sparse array
+    /** @type {?} */
+    const adjustedIndex = index + HEADER_OFFSET;
+    if (adjustedIndex >= tView.data.length) {
+        tView.data[adjustedIndex] = null;
+        tView.blueprint[adjustedIndex] = null;
+    }
+    lView[adjustedIndex] = value;
+}
+/**
+ * Retrieves a local reference from the current contextViewData.
+ *
+ * If the reference to retrieve is in a parent view, this instruction is used in conjunction
+ * with a nextContext() call, which walks up the tree and updates the contextViewData instance.
+ *
+ * \@codeGenApi
+ * @template T
+ * @param {?} index The index of the local ref in contextViewData.
+ *
+ * @return {?}
+ */
+function ɵɵreference(index) {
+    /** @type {?} */
+    const contextLView = getContextLView();
+    return loadInternal(contextLView, index);
+}
+/**
+ * Retrieves a value from current `viewData`.
+ *
+ * \@codeGenApi
+ * @template T
+ * @param {?} index
+ * @return {?}
+ */
+function ɵɵload(index) {
+    return loadInternal(getLView(), index);
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * @template T
+ * @param {?} token
+ * @param {?=} flags
+ * @return {?}
+ */
+function ɵɵdirectiveInject(token, flags = InjectFlags.Default) {
+    token = resolveForwardRef(token);
+    /** @type {?} */
+    const lView = getLView();
+    // Fall back to inject() if view hasn't been created. This situation can happen in tests
+    // if inject utilities are used before bootstrapping.
+    if (lView == null)
+        return ɵɵinject(token, flags);
+    return getOrCreateInjectable((/** @type {?} */ (getPreviousOrParentTNode())), lView, token, flags);
+}
+/**
+ * Facade for the attribute injection from DI.
+ *
+ * \@codeGenApi
+ * @param {?} attrNameToInject
+ * @return {?}
+ */
+function ɵɵinjectAttribute(attrNameToInject) {
+    return injectAttributeImpl(getPreviousOrParentTNode(), attrNameToInject);
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
  * This file contains the core logic for how styling instructions are processed in Angular.
  *
  * To learn more about the algorithm see `TStylingContext`.
@@ -16864,7 +17176,7 @@ function ɵɵelement(index, name, attrs, localRefs) {
     ɵɵelementEnd();
 }
 /**
- * Updates the value or removes an attribute on an Element.
+ * Updates the value of removes an attribute on an Element.
  *
  * \@codeGenApi
  * @param {?} index
@@ -16974,6 +17286,655 @@ function ɵɵelementHostAttrs(attrs) {
             }
         }
     }
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Creates a logical container for other nodes (<ng-container>) backed by a comment node in the DOM.
+ * The instruction must later be followed by `elementContainerEnd()` call.
+ *
+ * \@codeGenApi
+ * @param {?} index Index of the element in the LView array
+ * @param {?=} attrs Set of attributes to be used when matching directives.
+ * @param {?=} localRefs A set of local reference bindings on the element.
+ *
+ * Even if this instruction accepts a set of attributes no actual attribute values are propagated to
+ * the DOM (as a comment node can't have attributes). Attributes are here only for directive
+ * matching purposes and setting initial inputs of directives.
+ *
+ * @return {?}
+ */
+function ɵɵelementContainerStart(index, attrs, localRefs) {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const tView = lView[TVIEW];
+    /** @type {?} */
+    const renderer = lView[RENDERER];
+    /** @type {?} */
+    const tagName = 'ng-container';
+    ngDevMode && assertEqual(lView[BINDING_INDEX], tView.bindingStartIndex, 'element containers should be created before any bindings');
+    ngDevMode && ngDevMode.rendererCreateComment++;
+    /** @type {?} */
+    const native = renderer.createComment(ngDevMode ? tagName : '');
+    ngDevMode && assertDataInRange(lView, index - 1);
+    /** @type {?} */
+    const tNode = createNodeAtIndex(index, 4 /* ElementContainer */, native, tagName, attrs || null);
+    if (attrs) {
+        // While ng-container doesn't necessarily support styling, we use the style context to identify
+        // and execute directives on the ng-container.
+        setNodeStylingTemplate(tView, tNode, attrs, 0);
+    }
+    appendChild(native, tNode, lView);
+    createDirectivesAndLocals(tView, lView, localRefs);
+    attachPatchData(native, lView);
+    /** @type {?} */
+    const currentQueries = lView[QUERIES];
+    if (currentQueries) {
+        currentQueries.addNode(tNode);
+        lView[QUERIES] = currentQueries.clone();
+    }
+    executeContentQueries(tView, tNode, lView);
+}
+/**
+ * Mark the end of the <ng-container>.
+ *
+ * \@codeGenApi
+ * @return {?}
+ */
+function ɵɵelementContainerEnd() {
+    /** @type {?} */
+    let previousOrParentTNode = getPreviousOrParentTNode();
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const tView = lView[TVIEW];
+    if (getIsParent()) {
+        setIsParent(false);
+    }
+    else {
+        ngDevMode && assertHasParent(previousOrParentTNode);
+        previousOrParentTNode = (/** @type {?} */ (previousOrParentTNode.parent));
+        setPreviousOrParentTNode(previousOrParentTNode);
+    }
+    ngDevMode && assertNodeType(previousOrParentTNode, 4 /* ElementContainer */);
+    /** @type {?} */
+    const currentQueries = lView[QUERIES];
+    if (currentQueries) {
+        lView[QUERIES] = currentQueries.parent;
+    }
+    // this is required for all host-level styling-related instructions to run
+    // in the correct order
+    previousOrParentTNode.onElementCreationFns && applyOnCreateInstructions(previousOrParentTNode);
+    registerPostOrderHooks(tView, previousOrParentTNode);
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Marks the start of an embedded view.
+ *
+ * \@codeGenApi
+ * @param {?} viewBlockId The ID of this view
+ * @param {?} consts
+ * @param {?} vars
+ * @return {?} boolean Whether or not this view is in creation mode
+ *
+ */
+function ɵɵembeddedViewStart(viewBlockId, consts, vars) {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const previousOrParentTNode = getPreviousOrParentTNode();
+    // The previous node can be a view node if we are processing an inline for loop
+    /** @type {?} */
+    const containerTNode = previousOrParentTNode.type === 2 /* View */ ?
+        (/** @type {?} */ (previousOrParentTNode.parent)) :
+        previousOrParentTNode;
+    /** @type {?} */
+    const lContainer = (/** @type {?} */ (lView[containerTNode.index]));
+    ngDevMode && assertNodeType(containerTNode, 0 /* Container */);
+    /** @type {?} */
+    let viewToRender = scanForView(lContainer, (/** @type {?} */ (lContainer[ACTIVE_INDEX])), viewBlockId);
+    if (viewToRender) {
+        setIsParent(true);
+        enterView(viewToRender, viewToRender[TVIEW].node);
+    }
+    else {
+        // When we create a new LView, we always reset the state of the instructions.
+        viewToRender = createLView(lView, getOrCreateEmbeddedTView(viewBlockId, consts, vars, (/** @type {?} */ (containerTNode))), null, 16 /* CheckAlways */, null, null);
+        if (lContainer[QUERIES]) {
+            viewToRender[QUERIES] = (/** @type {?} */ (lContainer[QUERIES])).createView();
+        }
+        /** @type {?} */
+        const tParentNode = getIsParent() ? previousOrParentTNode :
+            previousOrParentTNode && previousOrParentTNode.parent;
+        assignTViewNodeToLView(viewToRender[TVIEW], tParentNode, viewBlockId, viewToRender);
+        enterView(viewToRender, viewToRender[TVIEW].node);
+    }
+    if (lContainer) {
+        if (isCreationMode(viewToRender)) {
+            // it is a new view, insert it into collection of views for a given container
+            insertView(viewToRender, lContainer, (/** @type {?} */ (lContainer[ACTIVE_INDEX])));
+        }
+        (/** @type {?} */ (lContainer[ACTIVE_INDEX]))++;
+    }
+    return isCreationMode(viewToRender) ? 1 /* Create */ | 2 /* Update */ :
+        2 /* Update */;
+}
+/**
+ * Initialize the TView (e.g. static data) for the active embedded view.
+ *
+ * Each embedded view block must create or retrieve its own TView. Otherwise, the embedded view's
+ * static data for a particular node would overwrite the static data for a node in the view above
+ * it with the same index (since it's in the same template).
+ *
+ * @param {?} viewIndex The index of the TView in TNode.tViews
+ * @param {?} consts The number of nodes, local refs, and pipes in this template
+ * @param {?} vars The number of bindings and pure function bindings in this template
+ * @param {?} parent
+ * @return {?} TView
+ */
+function getOrCreateEmbeddedTView(viewIndex, consts, vars, parent) {
+    /** @type {?} */
+    const tView = getLView()[TVIEW];
+    ngDevMode && assertNodeType(parent, 0 /* Container */);
+    /** @type {?} */
+    const containerTViews = (/** @type {?} */ (parent.tViews));
+    ngDevMode && assertDefined(containerTViews, 'TView expected');
+    ngDevMode && assertEqual(Array.isArray(containerTViews), true, 'TViews should be in an array');
+    if (viewIndex >= containerTViews.length || containerTViews[viewIndex] == null) {
+        containerTViews[viewIndex] = createTView(viewIndex, null, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null, null);
+    }
+    return containerTViews[viewIndex];
+}
+/**
+ * Looks for a view with a given view block id inside a provided LContainer.
+ * Removes views that need to be deleted in the process.
+ *
+ * @param {?} lContainer to search for views
+ * @param {?} startIdx starting index in the views array to search from
+ * @param {?} viewBlockId exact view block id to look for
+ * @return {?}
+ */
+function scanForView(lContainer, startIdx, viewBlockId) {
+    for (let i = startIdx + CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
+        /** @type {?} */
+        const viewAtPositionId = lContainer[i][TVIEW].id;
+        if (viewAtPositionId === viewBlockId) {
+            return lContainer[i];
+        }
+        else if (viewAtPositionId < viewBlockId) {
+            // found a view that should not be at this position - remove
+            removeView(lContainer, i - CONTAINER_HEADER_OFFSET);
+        }
+        else {
+            // found a view with id greater than the one we are searching for
+            // which means that required view doesn't exist and can't be found at
+            // later positions in the views array - stop the searchdef.cont here
+            break;
+        }
+    }
+    return null;
+}
+/**
+ * Marks the end of an embedded view.
+ *
+ * \@codeGenApi
+ * @return {?}
+ */
+function ɵɵembeddedViewEnd() {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const viewHost = lView[T_HOST];
+    if (isCreationMode(lView)) {
+        refreshDescendantViews(lView); // creation mode pass
+        lView[FLAGS] &= ~4 /* CreationMode */;
+    }
+    resetPreOrderHookFlags(lView);
+    refreshDescendantViews(lView); // update mode pass
+    // update mode pass
+    /** @type {?} */
+    const lContainer = (/** @type {?} */ (lView[PARENT]));
+    ngDevMode && assertLContainerOrUndefined(lContainer);
+    leaveView((/** @type {?} */ (lContainer[PARENT])));
+    setPreviousOrParentTNode((/** @type {?} */ (viewHost)));
+    setIsParent(false);
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Returns the current OpaqueViewState instance.
+ *
+ * Used in conjunction with the restoreView() instruction to save a snapshot
+ * of the current view and restore it when listeners are invoked. This allows
+ * walking the declaration view tree in listeners to get vars from parent views.
+ *
+ * \@codeGenApi
+ * @return {?}
+ */
+function ɵɵgetCurrentView() {
+    return (/** @type {?} */ ((/** @type {?} */ (getLView()))));
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Determine if the argument is shaped like a Promise
+ */
+function isPromise(obj) {
+    // allow any Promise/A+ compliant thenable.
+    // It's up to the caller to ensure that obj.then conforms to the spec
+    return !!obj && typeof obj.then === 'function';
+}
+/**
+ * Determine if the argument is an Observable
+ */
+function isObservable(obj) {
+    // TODO: use isObservable once we update pass rxjs 6.1
+    // https://github.com/ReactiveX/rxjs/blob/master/CHANGELOG.md#610-2018-05-03
+    return !!obj && typeof obj.subscribe === 'function';
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Adds an event listener to the current node.
+ *
+ * If an output exists on one of the node's directives, it also subscribes to the output
+ * and saves the subscription for later cleanup.
+ *
+ * \@codeGenApi
+ * @param {?} eventName Name of the event
+ * @param {?} listenerFn The function to be called when event emits
+ * @param {?=} useCapture Whether or not to use capture in event listener
+ * @param {?=} eventTargetResolver Function that returns global target information in case this listener
+ * should be attached to a global object like window, document or body
+ *
+ * @return {?}
+ */
+function ɵɵlistener(eventName, listenerFn, useCapture = false, eventTargetResolver) {
+    listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver);
+}
+/**
+ * Registers a synthetic host listener (e.g. `(\@foo.start)`) on a component.
+ *
+ * This instruction is for compatibility purposes and is designed to ensure that a
+ * synthetic host listener (e.g. `\@HostListener('\@foo.start')`) properly gets rendered
+ * in the component's renderer. Normally all host listeners are evaluated with the
+ * parent component's renderer, but, in the case of animation \@triggers, they need
+ * to be evaluated with the sub component's renderer (because that's where the
+ * animation triggers are defined).
+ *
+ * Do not use this instruction as a replacement for `listener`. This instruction
+ * only exists to ensure compatibility with the ViewEngine's host binding behavior.
+ *
+ * \@codeGenApi
+ * @template T
+ * @param {?} eventName Name of the event
+ * @param {?} listenerFn The function to be called when event emits
+ * @param {?=} useCapture Whether or not to use capture in event listener
+ * @param {?=} eventTargetResolver Function that returns global target information in case this listener
+ * should be attached to a global object like window, document or body
+ *
+ * @return {?}
+ */
+function ɵɵcomponentHostSyntheticListener(eventName, listenerFn, useCapture = false, eventTargetResolver) {
+    listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver, loadComponentRenderer);
+}
+/**
+ * A utility function that checks if a given element has already an event handler registered for an
+ * event with a specified name. The TView.cleanup data structure is used to find out which events
+ * are registered for a given element.
+ * @param {?} lView
+ * @param {?} eventName
+ * @param {?} tNodeIdx
+ * @return {?}
+ */
+function findExistingListener(lView, eventName, tNodeIdx) {
+    /** @type {?} */
+    const tView = lView[TVIEW];
+    /** @type {?} */
+    const tCleanup = tView.cleanup;
+    if (tCleanup != null) {
+        for (let i = 0; i < tCleanup.length - 1; i += 2) {
+            /** @type {?} */
+            const cleanupEventName = tCleanup[i];
+            if (cleanupEventName === eventName && tCleanup[i + 1] === tNodeIdx) {
+                // We have found a matching event name on the same node but it might not have been
+                // registered yet, so we must explicitly verify entries in the LView cleanup data
+                // structures.
+                /** @type {?} */
+                const lCleanup = (/** @type {?} */ (lView[CLEANUP]));
+                /** @type {?} */
+                const listenerIdxInLCleanup = tCleanup[i + 2];
+                return lCleanup.length > listenerIdxInLCleanup ? lCleanup[listenerIdxInLCleanup] : null;
+            }
+            // TView.cleanup can have a mix of 4-elements entries (for event handler cleanups) or
+            // 2-element entries (for directive and queries destroy hooks). As such we can encounter
+            // blocks of 4 or 2 items in the tView.cleanup and this is why we iterate over 2 elements
+            // first and jump another 2 elements if we detect listeners cleanup (4 elements). Also check
+            // documentation of TView.cleanup for more details of this data structure layout.
+            if (typeof cleanupEventName === 'string') {
+                i += 2;
+            }
+        }
+    }
+    return null;
+}
+/**
+ * @param {?} eventName
+ * @param {?} listenerFn
+ * @param {?=} useCapture
+ * @param {?=} eventTargetResolver
+ * @param {?=} loadRendererFn
+ * @return {?}
+ */
+function listenerInternal(eventName, listenerFn, useCapture = false, eventTargetResolver, loadRendererFn) {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const tNode = getPreviousOrParentTNode();
+    /** @type {?} */
+    const tView = lView[TVIEW];
+    /** @type {?} */
+    const firstTemplatePass = tView.firstTemplatePass;
+    /** @type {?} */
+    const tCleanup = firstTemplatePass && (tView.cleanup || (tView.cleanup = []));
+    ngDevMode && assertNodeOfPossibleTypes(tNode, 3 /* Element */, 0 /* Container */, 4 /* ElementContainer */);
+    /** @type {?} */
+    let processOutputs = true;
+    // add native event listener - applicable to elements only
+    if (tNode.type === 3 /* Element */) {
+        /** @type {?} */
+        const native = (/** @type {?} */ (getNativeByTNode(tNode, lView)));
+        /** @type {?} */
+        const resolved = eventTargetResolver ? eventTargetResolver(native) : (/** @type {?} */ (EMPTY_OBJ));
+        /** @type {?} */
+        const target = resolved.target || native;
+        /** @type {?} */
+        const renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
+        /** @type {?} */
+        const lCleanup = getCleanup(lView);
+        /** @type {?} */
+        const lCleanupIndex = lCleanup.length;
+        /** @type {?} */
+        const idxOrTargetGetter = eventTargetResolver ?
+            (/**
+             * @param {?} _lView
+             * @return {?}
+             */
+            (_lView) => eventTargetResolver(unwrapRNode(_lView[tNode.index])).target) :
+            tNode.index;
+        // In order to match current behavior, native DOM event listeners must be added for all
+        // events (including outputs).
+        if (isProceduralRenderer(renderer)) {
+            // There might be cases where multiple directives on the same element try to register an event
+            // handler function for the same event. In this situation we want to avoid registration of
+            // several native listeners as each registration would be intercepted by NgZone and
+            // trigger change detection. This would mean that a single user action would result in several
+            // change detections being invoked. To avoid this situation we want to have only one call to
+            // native handler registration (for the same element and same type of event).
+            //
+            // In order to have just one native event handler in presence of multiple handler functions,
+            // we just register a first handler function as a native event listener and then chain
+            // (coalesce) other handler functions on top of the first native handler function.
+            /** @type {?} */
+            let existingListener = null;
+            // Please note that the coalescing described here doesn't happen for events specifying an
+            // alternative target (ex. (document:click)) - this is to keep backward compatibility with the
+            // view engine.
+            // Also, we don't have to search for existing listeners is there are no directives
+            // matching on a given node as we can't register multiple event handlers for the same event in
+            // a template (this would mean having duplicate attributes).
+            if (!eventTargetResolver && hasDirectives(tNode)) {
+                existingListener = findExistingListener(lView, eventName, tNode.index);
+            }
+            if (existingListener !== null) {
+                // Attach a new listener at the head of the coalesced listeners list.
+                ((/** @type {?} */ (listenerFn))).__ngNextListenerFn__ = ((/** @type {?} */ (existingListener))).__ngNextListenerFn__;
+                ((/** @type {?} */ (existingListener))).__ngNextListenerFn__ = listenerFn;
+                processOutputs = false;
+            }
+            else {
+                // The first argument of `listen` function in Procedural Renderer is:
+                // - either a target name (as a string) in case of global target (window, document, body)
+                // - or element reference (in all other cases)
+                listenerFn = wrapListener(tNode, lView, listenerFn, false /** preventDefault */);
+                /** @type {?} */
+                const cleanupFn = renderer.listen(resolved.name || target, eventName, listenerFn);
+                ngDevMode && ngDevMode.rendererAddEventListener++;
+                lCleanup.push(listenerFn, cleanupFn);
+                tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, lCleanupIndex + 1);
+            }
+        }
+        else {
+            listenerFn = wrapListener(tNode, lView, listenerFn, true /** preventDefault */);
+            target.addEventListener(eventName, listenerFn, useCapture);
+            ngDevMode && ngDevMode.rendererAddEventListener++;
+            lCleanup.push(listenerFn);
+            tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, useCapture);
+        }
+    }
+    // subscribe to directive outputs
+    if (tNode.outputs === undefined) {
+        // if we create TNode here, inputs must be undefined so we know they still need to be
+        // checked
+        tNode.outputs = generatePropertyAliases(tNode, 1 /* Output */);
+    }
+    /** @type {?} */
+    const outputs = tNode.outputs;
+    /** @type {?} */
+    let props;
+    if (processOutputs && outputs && (props = outputs[eventName])) {
+        /** @type {?} */
+        const propsLength = props.length;
+        if (propsLength) {
+            /** @type {?} */
+            const lCleanup = getCleanup(lView);
+            for (let i = 0; i < propsLength; i += 3) {
+                /** @type {?} */
+                const index = (/** @type {?} */ (props[i]));
+                ngDevMode && assertDataInRange(lView, index);
+                /** @type {?} */
+                const minifiedName = props[i + 2];
+                /** @type {?} */
+                const directiveInstance = lView[index];
+                /** @type {?} */
+                const output = directiveInstance[minifiedName];
+                if (ngDevMode && !isObservable(output)) {
+                    throw new Error(`@Output ${minifiedName} not initialized in '${directiveInstance.constructor.name}'.`);
+                }
+                /** @type {?} */
+                const subscription = output.subscribe(listenerFn);
+                /** @type {?} */
+                const idx = lCleanup.length;
+                lCleanup.push(listenerFn, subscription);
+                tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
+            }
+        }
+    }
+}
+/**
+ * @param {?} lView
+ * @param {?} listenerFn
+ * @param {?} e
+ * @return {?}
+ */
+function executeListenerWithErrorHandling(lView, listenerFn, e) {
+    try {
+        // Only explicitly returning false from a listener should preventDefault
+        return listenerFn(e) !== false;
+    }
+    catch (error) {
+        handleError(lView, error);
+        return false;
+    }
+}
+/**
+ * Wraps an event listener with a function that marks ancestors dirty and prevents default behavior,
+ * if applicable.
+ *
+ * @param {?} tNode The TNode associated with this listener
+ * @param {?} lView The LView that contains this listener
+ * @param {?} listenerFn The listener function to call
+ * @param {?} wrapWithPreventDefault Whether or not to prevent default behavior
+ * (the procedural renderer does this already, so in those cases, we should skip)
+ * @return {?}
+ */
+function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
+    // Note: we are performing most of the work in the listener function itself
+    // to optimize listener registration.
+    return (/**
+     * @param {?} e
+     * @return {?}
+     */
+    function wrapListenerIn_markDirtyAndPreventDefault(e) {
+        // In order to be backwards compatible with View Engine, events on component host nodes
+        // must also mark the component view itself dirty (i.e. the view that it owns).
+        /** @type {?} */
+        const startView = tNode.flags & 1 /* isComponent */ ? getComponentViewByIndex(tNode.index, lView) : lView;
+        // See interfaces/view.ts for more on LViewFlags.ManualOnPush
+        if ((lView[FLAGS] & 32 /* ManualOnPush */) === 0) {
+            markViewDirty(startView);
+        }
+        /** @type {?} */
+        let result = executeListenerWithErrorHandling(lView, listenerFn, e);
+        // A just-invoked listener function might have coalesced listeners so we need to check for
+        // their presence and invoke as needed.
+        /** @type {?} */
+        let nextListenerFn = ((/** @type {?} */ (wrapListenerIn_markDirtyAndPreventDefault))).__ngNextListenerFn__;
+        while (nextListenerFn) {
+            // We should prevent default if any of the listeners explicitly return false
+            result = executeListenerWithErrorHandling(lView, nextListenerFn, e) && result;
+            nextListenerFn = ((/** @type {?} */ (nextListenerFn))).__ngNextListenerFn__;
+        }
+        if (wrapWithPreventDefault && result === false) {
+            e.preventDefault();
+            // Necessary for legacy browsers that don't support preventDefault (e.g. IE)
+            e.returnValue = false;
+        }
+        return result;
+    });
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Retrieves a context at the level specified and saves it as the global, contextViewData.
+ * Will get the next level up if level is not specified.
+ *
+ * This is used to save contexts of parent views so they can be bound in embedded views, or
+ * in conjunction with reference() to bind a ref from a parent view.
+ *
+ * \@codeGenApi
+ * @template T
+ * @param {?=} level The relative level of the view from which to grab context compared to contextVewData
+ * @return {?} context
+ *
+ */
+function ɵɵnextContext(level = 1) {
+    return nextContextImpl(level);
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
+ * It takes all the selectors from the entire component's template and decides where
+ * each projected node belongs (it re-distributes nodes among "buckets" where each "bucket" is
+ * backed by a selector).
+ *
+ * This function requires CSS selectors to be provided in 2 forms: parsed (by a compiler) and text,
+ * un-parsed form.
+ *
+ * The parsed form is needed for efficient matching of a node against a given CSS selector.
+ * The un-parsed, textual form is needed for support of the ngProjectAs attribute.
+ *
+ * Having a CSS selector in 2 different formats is not ideal, but alternatives have even more
+ * drawbacks:
+ * - having only a textual form would require runtime parsing of CSS selectors;
+ * - we can't have only a parsed as we can't re-construct textual form from it (as entered by a
+ * template author).
+ *
+ * \@codeGenApi
+ * @param {?=} selectors A collection of parsed CSS selectors
+ * @return {?}
+ */
+function ɵɵprojectionDef(selectors) {
+    /** @type {?} */
+    const componentNode = (/** @type {?} */ (findComponentView(getLView())[T_HOST]));
+    if (!componentNode.projection) {
+        /** @type {?} */
+        const noOfNodeBuckets = selectors ? selectors.length + 1 : 1;
+        /** @type {?} */
+        const projectionHeads = componentNode.projection =
+            new Array(noOfNodeBuckets).fill(null);
+        /** @type {?} */
+        const tails = projectionHeads.slice();
+        /** @type {?} */
+        let componentChild = componentNode.child;
+        while (componentChild !== null) {
+            /** @type {?} */
+            const bucketIndex = selectors ? matchingProjectionSelectorIndex(componentChild, selectors) : 0;
+            if (tails[bucketIndex]) {
+                (/** @type {?} */ (tails[bucketIndex])).projectionNext = componentChild;
+            }
+            else {
+                projectionHeads[bucketIndex] = componentChild;
+            }
+            tails[bucketIndex] = componentChild;
+            componentChild = componentChild.next;
+        }
+    }
+}
+/**
+ * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
+ * to the projectionDef instruction.
+ *
+ * \@codeGenApi
+ * @param {?} nodeIndex
+ * @param {?=} selectorIndex
+ * @param {?=} attrs
+ * @return {?}
+ */
+function ɵɵprojection(nodeIndex, selectorIndex = 0, attrs) {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const tProjectionNode = createNodeAtIndex(nodeIndex, 1 /* Projection */, null, null, attrs || null);
+    // We can't use viewData[HOST_NODE] because projection nodes can be nested in embedded views.
+    if (tProjectionNode.projection === null)
+        tProjectionNode.projection = selectorIndex;
+    // `<ng-content>` has no content
+    setIsParent(false);
+    // re-distribution of projectable nodes is stored on a component's view level
+    appendProjectedNodes(lView, tProjectionNode, selectorIndex, findComponentView(lView));
 }
 
 /**
@@ -17370,31 +18331,6 @@ function ɵɵcomponentHostSyntheticProperty(index, propName, value, sanitizer, n
     if (value !== NO_CHANGE) {
         elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadComponentRenderer);
     }
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Updates the value of or removes a bound attribute on an Element.
- *
- * Used in the case of `[attr.title]="value"`
- *
- * \@codeGenApi
- * @param {?} name name The name of the attribute.
- * @param {?} value value The attribute is removed when value is `null` or `undefined`.
- *                  Otherwise the attribute value is set to the stringified value.
- * @param {?=} sanitizer An optional function used to sanitize the value.
- * @param {?=} namespace Optional namespace to use when setting the attribute.
- *
- * @return {?}
- */
-function ɵɵattribute(name, value, sanitizer, namespace) {
-    /** @type {?} */
-    const index = getSelectedIndex();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    return ɵɵelementAttribute(index, name, ɵɵbind(value), sanitizer, namespace);
 }
 
 /**
@@ -18196,1340 +19132,6 @@ function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
         elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
     }
     return ɵɵpropertyInterpolateV;
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- *
- * Update an interpolated attribute on an element with single bound value surrounded by text.
- *
- * Used when the value passed to a property has 1 interpolated value in it:
- *
- * ```html
- * <div attr.title="prefix{{v0}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolate1('title', 'prefix', v0, 'suffix');
- * ```
- *
- * \@codeGenApi
- * @param {?} attrName The name of the attribute to update
- * @param {?} prefix Static value used for concatenation only.
- * @param {?} v0 Value checked for change.
- * @param {?} suffix Static value used for concatenation only.
- * @param {?=} sanitizer An optional sanitizer function
- * @param {?=} namespace
- * @return {?} itself, so that it may be chained.
- */
-function ɵɵattributeInterpolate1(attrName, prefix, v0, suffix, sanitizer, namespace) {
-    /** @type {?} */
-    const index = getSelectedIndex();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation1(prefix, v0, suffix);
-    ɵɵelementAttribute(index, attrName, interpolatedValue, sanitizer, namespace);
-    return ɵɵattributeInterpolate1;
-}
-/**
- *
- * Update an interpolated attribute on an element with 2 bound values surrounded by text.
- *
- * Used when the value passed to a property has 2 interpolated values in it:
- *
- * ```html
- * <div attr.title="prefix{{v0}}-{{v1}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolate2('title', 'prefix', v0, '-', v1, 'suffix');
- * ```
- *
- * \@codeGenApi
- * @param {?} attrName The name of the attribute to update
- * @param {?} prefix Static value used for concatenation only.
- * @param {?} v0 Value checked for change.
- * @param {?} i0 Static value used for concatenation only.
- * @param {?} v1 Value checked for change.
- * @param {?} suffix Static value used for concatenation only.
- * @param {?=} sanitizer An optional sanitizer function
- * @param {?=} namespace
- * @return {?} itself, so that it may be chained.
- */
-function ɵɵattributeInterpolate2(attrName, prefix, v0, i0, v1, suffix, sanitizer, namespace) {
-    /** @type {?} */
-    const index = getSelectedIndex();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation2(prefix, v0, i0, v1, suffix);
-    ɵɵelementAttribute(index, attrName, interpolatedValue, sanitizer, namespace);
-    return ɵɵattributeInterpolate2;
-}
-/**
- *
- * Update an interpolated attribute on an element with 3 bound values surrounded by text.
- *
- * Used when the value passed to a property has 3 interpolated values in it:
- *
- * ```html
- * <div attr.title="prefix{{v0}}-{{v1}}-{{v2}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolate3(
- * 'title', 'prefix', v0, '-', v1, '-', v2, 'suffix');
- * ```
- *
- * \@codeGenApi
- * @param {?} attrName The name of the attribute to update
- * @param {?} prefix Static value used for concatenation only.
- * @param {?} v0 Value checked for change.
- * @param {?} i0 Static value used for concatenation only.
- * @param {?} v1 Value checked for change.
- * @param {?} i1 Static value used for concatenation only.
- * @param {?} v2 Value checked for change.
- * @param {?} suffix Static value used for concatenation only.
- * @param {?=} sanitizer An optional sanitizer function
- * @param {?=} namespace
- * @return {?} itself, so that it may be chained.
- */
-function ɵɵattributeInterpolate3(attrName, prefix, v0, i0, v1, i1, v2, suffix, sanitizer, namespace) {
-    /** @type {?} */
-    const index = getSelectedIndex();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix);
-    ɵɵelementAttribute(index, attrName, interpolatedValue, sanitizer, namespace);
-    return ɵɵattributeInterpolate3;
-}
-/**
- *
- * Update an interpolated attribute on an element with 4 bound values surrounded by text.
- *
- * Used when the value passed to a property has 4 interpolated values in it:
- *
- * ```html
- * <div attr.title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolate4(
- * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, 'suffix');
- * ```
- *
- * \@codeGenApi
- * @param {?} attrName The name of the attribute to update
- * @param {?} prefix Static value used for concatenation only.
- * @param {?} v0 Value checked for change.
- * @param {?} i0 Static value used for concatenation only.
- * @param {?} v1 Value checked for change.
- * @param {?} i1 Static value used for concatenation only.
- * @param {?} v2 Value checked for change.
- * @param {?} i2 Static value used for concatenation only.
- * @param {?} v3 Value checked for change.
- * @param {?} suffix Static value used for concatenation only.
- * @param {?=} sanitizer An optional sanitizer function
- * @param {?=} namespace
- * @return {?} itself, so that it may be chained.
- */
-function ɵɵattributeInterpolate4(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, sanitizer, namespace) {
-    /** @type {?} */
-    const index = getSelectedIndex();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
-    ɵɵelementAttribute(index, attrName, interpolatedValue, sanitizer, namespace);
-    return ɵɵattributeInterpolate4;
-}
-/**
- *
- * Update an interpolated attribute on an element with 5 bound values surrounded by text.
- *
- * Used when the value passed to a property has 5 interpolated values in it:
- *
- * ```html
- * <div attr.title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolate5(
- * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, 'suffix');
- * ```
- *
- * \@codeGenApi
- * @param {?} attrName The name of the attribute to update
- * @param {?} prefix Static value used for concatenation only.
- * @param {?} v0 Value checked for change.
- * @param {?} i0 Static value used for concatenation only.
- * @param {?} v1 Value checked for change.
- * @param {?} i1 Static value used for concatenation only.
- * @param {?} v2 Value checked for change.
- * @param {?} i2 Static value used for concatenation only.
- * @param {?} v3 Value checked for change.
- * @param {?} i3 Static value used for concatenation only.
- * @param {?} v4 Value checked for change.
- * @param {?} suffix Static value used for concatenation only.
- * @param {?=} sanitizer An optional sanitizer function
- * @param {?=} namespace
- * @return {?} itself, so that it may be chained.
- */
-function ɵɵattributeInterpolate5(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, sanitizer, namespace) {
-    /** @type {?} */
-    const index = getSelectedIndex();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
-    ɵɵelementAttribute(index, attrName, interpolatedValue, sanitizer, namespace);
-    return ɵɵattributeInterpolate5;
-}
-/**
- *
- * Update an interpolated attribute on an element with 6 bound values surrounded by text.
- *
- * Used when the value passed to a property has 6 interpolated values in it:
- *
- * ```html
- * <div attr.title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolate6(
- *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, 'suffix');
- * ```
- *
- * \@codeGenApi
- * @param {?} attrName The name of the attribute to update
- * @param {?} prefix Static value used for concatenation only.
- * @param {?} v0 Value checked for change.
- * @param {?} i0 Static value used for concatenation only.
- * @param {?} v1 Value checked for change.
- * @param {?} i1 Static value used for concatenation only.
- * @param {?} v2 Value checked for change.
- * @param {?} i2 Static value used for concatenation only.
- * @param {?} v3 Value checked for change.
- * @param {?} i3 Static value used for concatenation only.
- * @param {?} v4 Value checked for change.
- * @param {?} i4 Static value used for concatenation only.
- * @param {?} v5 Value checked for change.
- * @param {?} suffix Static value used for concatenation only.
- * @param {?=} sanitizer An optional sanitizer function
- * @param {?=} namespace
- * @return {?} itself, so that it may be chained.
- */
-function ɵɵattributeInterpolate6(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, sanitizer, namespace) {
-    /** @type {?} */
-    const index = getSelectedIndex();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
-    ɵɵelementAttribute(index, attrName, interpolatedValue, sanitizer, namespace);
-    return ɵɵattributeInterpolate6;
-}
-/**
- *
- * Update an interpolated attribute on an element with 7 bound values surrounded by text.
- *
- * Used when the value passed to a property has 7 interpolated values in it:
- *
- * ```html
- * <div attr.title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolate7(
- *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, 'suffix');
- * ```
- *
- * \@codeGenApi
- * @param {?} attrName The name of the attribute to update
- * @param {?} prefix Static value used for concatenation only.
- * @param {?} v0 Value checked for change.
- * @param {?} i0 Static value used for concatenation only.
- * @param {?} v1 Value checked for change.
- * @param {?} i1 Static value used for concatenation only.
- * @param {?} v2 Value checked for change.
- * @param {?} i2 Static value used for concatenation only.
- * @param {?} v3 Value checked for change.
- * @param {?} i3 Static value used for concatenation only.
- * @param {?} v4 Value checked for change.
- * @param {?} i4 Static value used for concatenation only.
- * @param {?} v5 Value checked for change.
- * @param {?} i5 Static value used for concatenation only.
- * @param {?} v6 Value checked for change.
- * @param {?} suffix Static value used for concatenation only.
- * @param {?=} sanitizer An optional sanitizer function
- * @param {?=} namespace
- * @return {?} itself, so that it may be chained.
- */
-function ɵɵattributeInterpolate7(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, sanitizer, namespace) {
-    /** @type {?} */
-    const index = getSelectedIndex();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
-    ɵɵelementAttribute(index, attrName, interpolatedValue, sanitizer, namespace);
-    return ɵɵattributeInterpolate7;
-}
-/**
- *
- * Update an interpolated attribute on an element with 8 bound values surrounded by text.
- *
- * Used when the value passed to a property has 8 interpolated values in it:
- *
- * ```html
- * <div attr.title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolate8(
- *  'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, 'suffix');
- * ```
- *
- * \@codeGenApi
- * @param {?} attrName The name of the attribute to update
- * @param {?} prefix Static value used for concatenation only.
- * @param {?} v0 Value checked for change.
- * @param {?} i0 Static value used for concatenation only.
- * @param {?} v1 Value checked for change.
- * @param {?} i1 Static value used for concatenation only.
- * @param {?} v2 Value checked for change.
- * @param {?} i2 Static value used for concatenation only.
- * @param {?} v3 Value checked for change.
- * @param {?} i3 Static value used for concatenation only.
- * @param {?} v4 Value checked for change.
- * @param {?} i4 Static value used for concatenation only.
- * @param {?} v5 Value checked for change.
- * @param {?} i5 Static value used for concatenation only.
- * @param {?} v6 Value checked for change.
- * @param {?} i6 Static value used for concatenation only.
- * @param {?} v7 Value checked for change.
- * @param {?} suffix Static value used for concatenation only.
- * @param {?=} sanitizer An optional sanitizer function
- * @param {?=} namespace
- * @return {?} itself, so that it may be chained.
- */
-function ɵɵattributeInterpolate8(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, sanitizer, namespace) {
-    /** @type {?} */
-    const index = getSelectedIndex();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
-    ɵɵelementAttribute(index, attrName, interpolatedValue, sanitizer, namespace);
-    return ɵɵattributeInterpolate8;
-}
-/**
- * Update an interpolated attribute on an element with 8 or more bound values surrounded by text.
- *
- * Used when the number of interpolated values exceeds 7.
- *
- * ```html
- * <div
- *  title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}-{{v8}}-{{v9}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolateV(
- *  'title', ['prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, '-', v9,
- *  'suffix']);
- * ```
- *
- * \@codeGenApi
- * @param {?} attrName The name of the attribute to update.
- * @param {?} values The a collection of values and the strings in-between those values, beginning with
- * a string prefix and ending with a string suffix.
- * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
- * @param {?=} sanitizer An optional sanitizer function
- * @param {?=} namespace
- * @return {?} itself, so that it may be chained.
- */
-function ɵɵattributeInterpolateV(attrName, values, sanitizer, namespace) {
-    /** @type {?} */
-    const index = getSelectedIndex();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    ɵɵelementAttribute(index, attrName, ɵɵinterpolationV(values), sanitizer, namespace);
-    return ɵɵattributeInterpolateV;
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Synchronously perform change detection on a component (and possibly its sub-components).
- *
- * This function triggers change detection in a synchronous way on a component. There should
- * be very little reason to call this function directly since a preferred way to do change
- * detection is to {\@link markDirty} the component and wait for the scheduler to call this method
- * at some future point in time. This is because a single user action often results in many
- * components being invalidated and calling change detection on each component synchronously
- * would be inefficient. It is better to wait until all components are marked as dirty and
- * then perform single change detection across all of the components
- *
- * @template T
- * @param {?} component The component which the change detection should be performed on.
- * @return {?}
- */
-function detectChanges(component) {
-    /** @type {?} */
-    const view = getComponentViewByInstance(component);
-    detectChangesInternal(view, component);
-}
-/**
- * Mark the component as dirty (needing change detection).
- *
- * Marking a component dirty will schedule a change detection on this
- * component at some point in the future. Marking an already dirty
- * component as dirty is a noop. Only one outstanding change detection
- * can be scheduled per component tree. (Two components bootstrapped with
- * separate `renderComponent` will have separate schedulers)
- *
- * When the root component is bootstrapped with `renderComponent`, a scheduler
- * can be provided.
- *
- * \@publicApi
- * @template T
- * @param {?} component Component to mark as dirty.
- *
- * @return {?}
- */
-function markDirty(component) {
-    ngDevMode && assertDefined(component, 'component');
-    /** @type {?} */
-    const rootView = (/** @type {?} */ (markViewDirty(getComponentViewByInstance(component))));
-    ngDevMode && assertDefined(rootView[CONTEXT], 'rootContext should be defined');
-    scheduleTick((/** @type {?} */ (rootView[CONTEXT])), 1 /* DetectChanges */);
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Creates an LContainer for inline views, e.g.
- *
- * % if (showing) {
- *   <div></div>
- * % }
- *
- * \@codeGenApi
- * @param {?} index The index of the container in the data array
- *
- * @return {?}
- */
-function ɵɵcontainer(index) {
-    /** @type {?} */
-    const tNode = containerInternal(index, null, null);
-    /** @type {?} */
-    const lView = getLView();
-    if (lView[TVIEW].firstTemplatePass) {
-        tNode.tViews = [];
-    }
-    addTContainerToQueries(lView, tNode);
-    setIsParent(false);
-}
-/**
- * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
- *
- * <ng-template #foo>
- *    <div></div>
- * </ng-template>
- *
- * \@codeGenApi
- * @param {?} index The index of the container in the data array
- * @param {?} templateFn Inline template
- * @param {?} consts The number of nodes, local refs, and pipes for this template
- * @param {?} vars The number of bindings for this template
- * @param {?=} tagName The name of the container element, if applicable
- * @param {?=} attrs The attrs attached to the container, if applicable
- * @param {?=} localRefs A set of local reference bindings on the element.
- * @param {?=} localRefExtractor A function which extracts local-refs values from the template.
- *        Defaults to the current element associated with the local-ref.
- *
- * @return {?}
- */
-function ɵɵtemplate(index, templateFn, consts, vars, tagName, attrs, localRefs, localRefExtractor) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const tView = lView[TVIEW];
-    // TODO: consider a separate node type for templates
-    /** @type {?} */
-    const tContainerNode = containerInternal(index, tagName || null, attrs || null);
-    if (tView.firstTemplatePass) {
-        tContainerNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null, null);
-    }
-    createDirectivesAndLocals(tView, lView, localRefs, localRefExtractor);
-    addTContainerToQueries(lView, tContainerNode);
-    attachPatchData(getNativeByTNode(tContainerNode, lView), lView);
-    registerPostOrderHooks(tView, tContainerNode);
-    setIsParent(false);
-}
-/**
- * Sets a container up to receive views.
- *
- * \@codeGenApi
- * @param {?} index The index of the container in the data array
- *
- * @return {?}
- */
-function ɵɵcontainerRefreshStart(index) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const tView = lView[TVIEW];
-    /** @type {?} */
-    let previousOrParentTNode = (/** @type {?} */ (loadInternal(tView.data, index)));
-    setPreviousOrParentTNode(previousOrParentTNode);
-    ngDevMode && assertNodeType(previousOrParentTNode, 0 /* Container */);
-    setIsParent(true);
-    lView[index + HEADER_OFFSET][ACTIVE_INDEX] = 0;
-    // We need to execute init hooks here so ngOnInit hooks are called in top level views
-    // before they are called in embedded views (for backwards compatibility).
-    executePreOrderHooks(lView, tView, getCheckNoChangesMode(), undefined);
-}
-/**
- * Marks the end of the LContainer.
- *
- * Marking the end of LContainer is the time when to child views get inserted or removed.
- *
- * \@codeGenApi
- * @return {?}
- */
-function ɵɵcontainerRefreshEnd() {
-    /** @type {?} */
-    let previousOrParentTNode = getPreviousOrParentTNode();
-    if (getIsParent()) {
-        setIsParent(false);
-    }
-    else {
-        ngDevMode && assertNodeType(previousOrParentTNode, 2 /* View */);
-        ngDevMode && assertHasParent(previousOrParentTNode);
-        previousOrParentTNode = (/** @type {?} */ (previousOrParentTNode.parent));
-        setPreviousOrParentTNode(previousOrParentTNode);
-    }
-    ngDevMode && assertNodeType(previousOrParentTNode, 0 /* Container */);
-    /** @type {?} */
-    const lContainer = getLView()[previousOrParentTNode.index];
-    /** @type {?} */
-    const nextIndex = lContainer[ACTIVE_INDEX];
-    // remove extra views at the end of the container
-    while (nextIndex < lContainer.length - CONTAINER_HEADER_OFFSET) {
-        removeView(lContainer, nextIndex);
-    }
-}
-/**
- * Reporting a TContainer node queries is a 2-step process as we need to:
- * - check if the container node itself is matching (query might match a <ng-template> node);
- * - prepare room for nodes from views that might be created based on the TemplateRef linked to this
- * container.
- *
- * Those 2 operations need to happen in the specific order (match the container node itself, then
- * prepare space for nodes from views).
- * @param {?} lView
- * @param {?} tContainerNode
- * @return {?}
- */
-function addTContainerToQueries(lView, tContainerNode) {
-    /** @type {?} */
-    const queries = lView[QUERIES];
-    if (queries) {
-        /** @type {?} */
-        const lContainer = lView[tContainerNode.index];
-        if (lContainer[QUERIES]) {
-            // Query container should only exist if it was created through a dynamic view
-            // in a directive constructor. In this case, we must splice the template
-            // matches in before the view matches to ensure query results in embedded views
-            // don't clobber query results on the template node itself.
-            queries.insertNodeBeforeViews(tContainerNode);
-        }
-        else {
-            queries.addNode(tContainerNode);
-            lContainer[QUERIES] = queries.container();
-        }
-    }
-}
-/**
- * @param {?} index
- * @param {?} tagName
- * @param {?} attrs
- * @return {?}
- */
-function containerInternal(index, tagName, attrs) {
-    /** @type {?} */
-    const lView = getLView();
-    ngDevMode && assertEqual(lView[BINDING_INDEX], lView[TVIEW].bindingStartIndex, 'container nodes should be created before any bindings');
-    /** @type {?} */
-    const adjustedIndex = index + HEADER_OFFSET;
-    /** @type {?} */
-    const comment = lView[RENDERER].createComment(ngDevMode ? 'container' : '');
-    ngDevMode && ngDevMode.rendererCreateComment++;
-    /** @type {?} */
-    const tNode = createNodeAtIndex(index, 0 /* Container */, comment, tagName, attrs);
-    /** @type {?} */
-    const lContainer = lView[adjustedIndex] =
-        createLContainer(lView[adjustedIndex], lView, comment, tNode);
-    appendChild(comment, tNode, lView);
-    // Containers are added to the current view tree instead of their embedded views
-    // because views can be removed and re-inserted.
-    addToViewTree(lView, lContainer);
-    ngDevMode && assertNodeType(getPreviousOrParentTNode(), 0 /* Container */);
-    return tNode;
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Store a value in the `data` at a given `index`.
- * @template T
- * @param {?} index
- * @param {?} value
- * @return {?}
- */
-function store(index, value) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const tView = lView[TVIEW];
-    // We don't store any static data for local variables, so the first time
-    // we see the template, we should store as null to avoid a sparse array
-    /** @type {?} */
-    const adjustedIndex = index + HEADER_OFFSET;
-    if (adjustedIndex >= tView.data.length) {
-        tView.data[adjustedIndex] = null;
-        tView.blueprint[adjustedIndex] = null;
-    }
-    lView[adjustedIndex] = value;
-}
-/**
- * Retrieves a local reference from the current contextViewData.
- *
- * If the reference to retrieve is in a parent view, this instruction is used in conjunction
- * with a nextContext() call, which walks up the tree and updates the contextViewData instance.
- *
- * \@codeGenApi
- * @template T
- * @param {?} index The index of the local ref in contextViewData.
- *
- * @return {?}
- */
-function ɵɵreference(index) {
-    /** @type {?} */
-    const contextLView = getContextLView();
-    return loadInternal(contextLView, index);
-}
-/**
- * Retrieves a value from current `viewData`.
- *
- * \@codeGenApi
- * @template T
- * @param {?} index
- * @return {?}
- */
-function ɵɵload(index) {
-    return loadInternal(getLView(), index);
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * @template T
- * @param {?} token
- * @param {?=} flags
- * @return {?}
- */
-function ɵɵdirectiveInject(token, flags = InjectFlags.Default) {
-    token = resolveForwardRef(token);
-    /** @type {?} */
-    const lView = getLView();
-    // Fall back to inject() if view hasn't been created. This situation can happen in tests
-    // if inject utilities are used before bootstrapping.
-    if (lView == null)
-        return ɵɵinject(token, flags);
-    return getOrCreateInjectable((/** @type {?} */ (getPreviousOrParentTNode())), lView, token, flags);
-}
-/**
- * Facade for the attribute injection from DI.
- *
- * \@codeGenApi
- * @param {?} attrNameToInject
- * @return {?}
- */
-function ɵɵinjectAttribute(attrNameToInject) {
-    return injectAttributeImpl(getPreviousOrParentTNode(), attrNameToInject);
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Creates a logical container for other nodes (<ng-container>) backed by a comment node in the DOM.
- * The instruction must later be followed by `elementContainerEnd()` call.
- *
- * \@codeGenApi
- * @param {?} index Index of the element in the LView array
- * @param {?=} attrs Set of attributes to be used when matching directives.
- * @param {?=} localRefs A set of local reference bindings on the element.
- *
- * Even if this instruction accepts a set of attributes no actual attribute values are propagated to
- * the DOM (as a comment node can't have attributes). Attributes are here only for directive
- * matching purposes and setting initial inputs of directives.
- *
- * @return {?}
- */
-function ɵɵelementContainerStart(index, attrs, localRefs) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const tView = lView[TVIEW];
-    /** @type {?} */
-    const renderer = lView[RENDERER];
-    /** @type {?} */
-    const tagName = 'ng-container';
-    ngDevMode && assertEqual(lView[BINDING_INDEX], tView.bindingStartIndex, 'element containers should be created before any bindings');
-    ngDevMode && ngDevMode.rendererCreateComment++;
-    /** @type {?} */
-    const native = renderer.createComment(ngDevMode ? tagName : '');
-    ngDevMode && assertDataInRange(lView, index - 1);
-    /** @type {?} */
-    const tNode = createNodeAtIndex(index, 4 /* ElementContainer */, native, tagName, attrs || null);
-    if (attrs) {
-        // While ng-container doesn't necessarily support styling, we use the style context to identify
-        // and execute directives on the ng-container.
-        setNodeStylingTemplate(tView, tNode, attrs, 0);
-    }
-    appendChild(native, tNode, lView);
-    createDirectivesAndLocals(tView, lView, localRefs);
-    attachPatchData(native, lView);
-    /** @type {?} */
-    const currentQueries = lView[QUERIES];
-    if (currentQueries) {
-        currentQueries.addNode(tNode);
-        lView[QUERIES] = currentQueries.clone();
-    }
-    executeContentQueries(tView, tNode, lView);
-}
-/**
- * Mark the end of the <ng-container>.
- *
- * \@codeGenApi
- * @return {?}
- */
-function ɵɵelementContainerEnd() {
-    /** @type {?} */
-    let previousOrParentTNode = getPreviousOrParentTNode();
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const tView = lView[TVIEW];
-    if (getIsParent()) {
-        setIsParent(false);
-    }
-    else {
-        ngDevMode && assertHasParent(previousOrParentTNode);
-        previousOrParentTNode = (/** @type {?} */ (previousOrParentTNode.parent));
-        setPreviousOrParentTNode(previousOrParentTNode);
-    }
-    ngDevMode && assertNodeType(previousOrParentTNode, 4 /* ElementContainer */);
-    /** @type {?} */
-    const currentQueries = lView[QUERIES];
-    if (currentQueries) {
-        lView[QUERIES] = currentQueries.parent;
-    }
-    // this is required for all host-level styling-related instructions to run
-    // in the correct order
-    previousOrParentTNode.onElementCreationFns && applyOnCreateInstructions(previousOrParentTNode);
-    registerPostOrderHooks(tView, previousOrParentTNode);
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Marks the start of an embedded view.
- *
- * \@codeGenApi
- * @param {?} viewBlockId The ID of this view
- * @param {?} consts
- * @param {?} vars
- * @return {?} boolean Whether or not this view is in creation mode
- *
- */
-function ɵɵembeddedViewStart(viewBlockId, consts, vars) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const previousOrParentTNode = getPreviousOrParentTNode();
-    // The previous node can be a view node if we are processing an inline for loop
-    /** @type {?} */
-    const containerTNode = previousOrParentTNode.type === 2 /* View */ ?
-        (/** @type {?} */ (previousOrParentTNode.parent)) :
-        previousOrParentTNode;
-    /** @type {?} */
-    const lContainer = (/** @type {?} */ (lView[containerTNode.index]));
-    ngDevMode && assertNodeType(containerTNode, 0 /* Container */);
-    /** @type {?} */
-    let viewToRender = scanForView(lContainer, (/** @type {?} */ (lContainer[ACTIVE_INDEX])), viewBlockId);
-    if (viewToRender) {
-        setIsParent(true);
-        enterView(viewToRender, viewToRender[TVIEW].node);
-    }
-    else {
-        // When we create a new LView, we always reset the state of the instructions.
-        viewToRender = createLView(lView, getOrCreateEmbeddedTView(viewBlockId, consts, vars, (/** @type {?} */ (containerTNode))), null, 16 /* CheckAlways */, null, null);
-        if (lContainer[QUERIES]) {
-            viewToRender[QUERIES] = (/** @type {?} */ (lContainer[QUERIES])).createView();
-        }
-        /** @type {?} */
-        const tParentNode = getIsParent() ? previousOrParentTNode :
-            previousOrParentTNode && previousOrParentTNode.parent;
-        assignTViewNodeToLView(viewToRender[TVIEW], tParentNode, viewBlockId, viewToRender);
-        enterView(viewToRender, viewToRender[TVIEW].node);
-    }
-    if (lContainer) {
-        if (isCreationMode(viewToRender)) {
-            // it is a new view, insert it into collection of views for a given container
-            insertView(viewToRender, lContainer, (/** @type {?} */ (lContainer[ACTIVE_INDEX])));
-        }
-        (/** @type {?} */ (lContainer[ACTIVE_INDEX]))++;
-    }
-    return isCreationMode(viewToRender) ? 1 /* Create */ | 2 /* Update */ :
-        2 /* Update */;
-}
-/**
- * Initialize the TView (e.g. static data) for the active embedded view.
- *
- * Each embedded view block must create or retrieve its own TView. Otherwise, the embedded view's
- * static data for a particular node would overwrite the static data for a node in the view above
- * it with the same index (since it's in the same template).
- *
- * @param {?} viewIndex The index of the TView in TNode.tViews
- * @param {?} consts The number of nodes, local refs, and pipes in this template
- * @param {?} vars The number of bindings and pure function bindings in this template
- * @param {?} parent
- * @return {?} TView
- */
-function getOrCreateEmbeddedTView(viewIndex, consts, vars, parent) {
-    /** @type {?} */
-    const tView = getLView()[TVIEW];
-    ngDevMode && assertNodeType(parent, 0 /* Container */);
-    /** @type {?} */
-    const containerTViews = (/** @type {?} */ (parent.tViews));
-    ngDevMode && assertDefined(containerTViews, 'TView expected');
-    ngDevMode && assertEqual(Array.isArray(containerTViews), true, 'TViews should be in an array');
-    if (viewIndex >= containerTViews.length || containerTViews[viewIndex] == null) {
-        containerTViews[viewIndex] = createTView(viewIndex, null, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null, null);
-    }
-    return containerTViews[viewIndex];
-}
-/**
- * Looks for a view with a given view block id inside a provided LContainer.
- * Removes views that need to be deleted in the process.
- *
- * @param {?} lContainer to search for views
- * @param {?} startIdx starting index in the views array to search from
- * @param {?} viewBlockId exact view block id to look for
- * @return {?}
- */
-function scanForView(lContainer, startIdx, viewBlockId) {
-    for (let i = startIdx + CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
-        /** @type {?} */
-        const viewAtPositionId = lContainer[i][TVIEW].id;
-        if (viewAtPositionId === viewBlockId) {
-            return lContainer[i];
-        }
-        else if (viewAtPositionId < viewBlockId) {
-            // found a view that should not be at this position - remove
-            removeView(lContainer, i - CONTAINER_HEADER_OFFSET);
-        }
-        else {
-            // found a view with id greater than the one we are searching for
-            // which means that required view doesn't exist and can't be found at
-            // later positions in the views array - stop the searchdef.cont here
-            break;
-        }
-    }
-    return null;
-}
-/**
- * Marks the end of an embedded view.
- *
- * \@codeGenApi
- * @return {?}
- */
-function ɵɵembeddedViewEnd() {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const viewHost = lView[T_HOST];
-    if (isCreationMode(lView)) {
-        refreshDescendantViews(lView); // creation mode pass
-        lView[FLAGS] &= ~4 /* CreationMode */;
-    }
-    resetPreOrderHookFlags(lView);
-    refreshDescendantViews(lView); // update mode pass
-    // update mode pass
-    /** @type {?} */
-    const lContainer = (/** @type {?} */ (lView[PARENT]));
-    ngDevMode && assertLContainerOrUndefined(lContainer);
-    leaveView((/** @type {?} */ (lContainer[PARENT])));
-    setPreviousOrParentTNode((/** @type {?} */ (viewHost)));
-    setIsParent(false);
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Returns the current OpaqueViewState instance.
- *
- * Used in conjunction with the restoreView() instruction to save a snapshot
- * of the current view and restore it when listeners are invoked. This allows
- * walking the declaration view tree in listeners to get vars from parent views.
- *
- * \@codeGenApi
- * @return {?}
- */
-function ɵɵgetCurrentView() {
-    return (/** @type {?} */ ((/** @type {?} */ (getLView()))));
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Determine if the argument is shaped like a Promise
- */
-function isPromise(obj) {
-    // allow any Promise/A+ compliant thenable.
-    // It's up to the caller to ensure that obj.then conforms to the spec
-    return !!obj && typeof obj.then === 'function';
-}
-/**
- * Determine if the argument is an Observable
- */
-function isObservable(obj) {
-    // TODO: use isObservable once we update pass rxjs 6.1
-    // https://github.com/ReactiveX/rxjs/blob/master/CHANGELOG.md#610-2018-05-03
-    return !!obj && typeof obj.subscribe === 'function';
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Adds an event listener to the current node.
- *
- * If an output exists on one of the node's directives, it also subscribes to the output
- * and saves the subscription for later cleanup.
- *
- * \@codeGenApi
- * @param {?} eventName Name of the event
- * @param {?} listenerFn The function to be called when event emits
- * @param {?=} useCapture Whether or not to use capture in event listener
- * @param {?=} eventTargetResolver Function that returns global target information in case this listener
- * should be attached to a global object like window, document or body
- *
- * @return {?}
- */
-function ɵɵlistener(eventName, listenerFn, useCapture = false, eventTargetResolver) {
-    listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver);
-}
-/**
- * Registers a synthetic host listener (e.g. `(\@foo.start)`) on a component.
- *
- * This instruction is for compatibility purposes and is designed to ensure that a
- * synthetic host listener (e.g. `\@HostListener('\@foo.start')`) properly gets rendered
- * in the component's renderer. Normally all host listeners are evaluated with the
- * parent component's renderer, but, in the case of animation \@triggers, they need
- * to be evaluated with the sub component's renderer (because that's where the
- * animation triggers are defined).
- *
- * Do not use this instruction as a replacement for `listener`. This instruction
- * only exists to ensure compatibility with the ViewEngine's host binding behavior.
- *
- * \@codeGenApi
- * @template T
- * @param {?} eventName Name of the event
- * @param {?} listenerFn The function to be called when event emits
- * @param {?=} useCapture Whether or not to use capture in event listener
- * @param {?=} eventTargetResolver Function that returns global target information in case this listener
- * should be attached to a global object like window, document or body
- *
- * @return {?}
- */
-function ɵɵcomponentHostSyntheticListener(eventName, listenerFn, useCapture = false, eventTargetResolver) {
-    listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver, loadComponentRenderer);
-}
-/**
- * A utility function that checks if a given element has already an event handler registered for an
- * event with a specified name. The TView.cleanup data structure is used to find out which events
- * are registered for a given element.
- * @param {?} lView
- * @param {?} eventName
- * @param {?} tNodeIdx
- * @return {?}
- */
-function findExistingListener(lView, eventName, tNodeIdx) {
-    /** @type {?} */
-    const tView = lView[TVIEW];
-    /** @type {?} */
-    const tCleanup = tView.cleanup;
-    if (tCleanup != null) {
-        for (let i = 0; i < tCleanup.length - 1; i += 2) {
-            /** @type {?} */
-            const cleanupEventName = tCleanup[i];
-            if (cleanupEventName === eventName && tCleanup[i + 1] === tNodeIdx) {
-                // We have found a matching event name on the same node but it might not have been
-                // registered yet, so we must explicitly verify entries in the LView cleanup data
-                // structures.
-                /** @type {?} */
-                const lCleanup = (/** @type {?} */ (lView[CLEANUP]));
-                /** @type {?} */
-                const listenerIdxInLCleanup = tCleanup[i + 2];
-                return lCleanup.length > listenerIdxInLCleanup ? lCleanup[listenerIdxInLCleanup] : null;
-            }
-            // TView.cleanup can have a mix of 4-elements entries (for event handler cleanups) or
-            // 2-element entries (for directive and queries destroy hooks). As such we can encounter
-            // blocks of 4 or 2 items in the tView.cleanup and this is why we iterate over 2 elements
-            // first and jump another 2 elements if we detect listeners cleanup (4 elements). Also check
-            // documentation of TView.cleanup for more details of this data structure layout.
-            if (typeof cleanupEventName === 'string') {
-                i += 2;
-            }
-        }
-    }
-    return null;
-}
-/**
- * @param {?} eventName
- * @param {?} listenerFn
- * @param {?=} useCapture
- * @param {?=} eventTargetResolver
- * @param {?=} loadRendererFn
- * @return {?}
- */
-function listenerInternal(eventName, listenerFn, useCapture = false, eventTargetResolver, loadRendererFn) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const tNode = getPreviousOrParentTNode();
-    /** @type {?} */
-    const tView = lView[TVIEW];
-    /** @type {?} */
-    const firstTemplatePass = tView.firstTemplatePass;
-    /** @type {?} */
-    const tCleanup = firstTemplatePass && (tView.cleanup || (tView.cleanup = []));
-    ngDevMode && assertNodeOfPossibleTypes(tNode, 3 /* Element */, 0 /* Container */, 4 /* ElementContainer */);
-    /** @type {?} */
-    let processOutputs = true;
-    // add native event listener - applicable to elements only
-    if (tNode.type === 3 /* Element */) {
-        /** @type {?} */
-        const native = (/** @type {?} */ (getNativeByTNode(tNode, lView)));
-        /** @type {?} */
-        const resolved = eventTargetResolver ? eventTargetResolver(native) : (/** @type {?} */ (EMPTY_OBJ));
-        /** @type {?} */
-        const target = resolved.target || native;
-        /** @type {?} */
-        const renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
-        /** @type {?} */
-        const lCleanup = getCleanup(lView);
-        /** @type {?} */
-        const lCleanupIndex = lCleanup.length;
-        /** @type {?} */
-        const idxOrTargetGetter = eventTargetResolver ?
-            (/**
-             * @param {?} _lView
-             * @return {?}
-             */
-            (_lView) => eventTargetResolver(unwrapRNode(_lView[tNode.index])).target) :
-            tNode.index;
-        // In order to match current behavior, native DOM event listeners must be added for all
-        // events (including outputs).
-        if (isProceduralRenderer(renderer)) {
-            // There might be cases where multiple directives on the same element try to register an event
-            // handler function for the same event. In this situation we want to avoid registration of
-            // several native listeners as each registration would be intercepted by NgZone and
-            // trigger change detection. This would mean that a single user action would result in several
-            // change detections being invoked. To avoid this situation we want to have only one call to
-            // native handler registration (for the same element and same type of event).
-            //
-            // In order to have just one native event handler in presence of multiple handler functions,
-            // we just register a first handler function as a native event listener and then chain
-            // (coalesce) other handler functions on top of the first native handler function.
-            /** @type {?} */
-            let existingListener = null;
-            // Please note that the coalescing described here doesn't happen for events specifying an
-            // alternative target (ex. (document:click)) - this is to keep backward compatibility with the
-            // view engine.
-            // Also, we don't have to search for existing listeners is there are no directives
-            // matching on a given node as we can't register multiple event handlers for the same event in
-            // a template (this would mean having duplicate attributes).
-            if (!eventTargetResolver && hasDirectives(tNode)) {
-                existingListener = findExistingListener(lView, eventName, tNode.index);
-            }
-            if (existingListener !== null) {
-                // Attach a new listener at the head of the coalesced listeners list.
-                ((/** @type {?} */ (listenerFn))).__ngNextListenerFn__ = ((/** @type {?} */ (existingListener))).__ngNextListenerFn__;
-                ((/** @type {?} */ (existingListener))).__ngNextListenerFn__ = listenerFn;
-                processOutputs = false;
-            }
-            else {
-                // The first argument of `listen` function in Procedural Renderer is:
-                // - either a target name (as a string) in case of global target (window, document, body)
-                // - or element reference (in all other cases)
-                listenerFn = wrapListener(tNode, lView, listenerFn, false /** preventDefault */);
-                /** @type {?} */
-                const cleanupFn = renderer.listen(resolved.name || target, eventName, listenerFn);
-                ngDevMode && ngDevMode.rendererAddEventListener++;
-                lCleanup.push(listenerFn, cleanupFn);
-                tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, lCleanupIndex + 1);
-            }
-        }
-        else {
-            listenerFn = wrapListener(tNode, lView, listenerFn, true /** preventDefault */);
-            target.addEventListener(eventName, listenerFn, useCapture);
-            ngDevMode && ngDevMode.rendererAddEventListener++;
-            lCleanup.push(listenerFn);
-            tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, useCapture);
-        }
-    }
-    // subscribe to directive outputs
-    if (tNode.outputs === undefined) {
-        // if we create TNode here, inputs must be undefined so we know they still need to be
-        // checked
-        tNode.outputs = generatePropertyAliases(tNode, 1 /* Output */);
-    }
-    /** @type {?} */
-    const outputs = tNode.outputs;
-    /** @type {?} */
-    let props;
-    if (processOutputs && outputs && (props = outputs[eventName])) {
-        /** @type {?} */
-        const propsLength = props.length;
-        if (propsLength) {
-            /** @type {?} */
-            const lCleanup = getCleanup(lView);
-            for (let i = 0; i < propsLength; i += 3) {
-                /** @type {?} */
-                const index = (/** @type {?} */ (props[i]));
-                ngDevMode && assertDataInRange(lView, index);
-                /** @type {?} */
-                const minifiedName = props[i + 2];
-                /** @type {?} */
-                const directiveInstance = lView[index];
-                /** @type {?} */
-                const output = directiveInstance[minifiedName];
-                if (ngDevMode && !isObservable(output)) {
-                    throw new Error(`@Output ${minifiedName} not initialized in '${directiveInstance.constructor.name}'.`);
-                }
-                /** @type {?} */
-                const subscription = output.subscribe(listenerFn);
-                /** @type {?} */
-                const idx = lCleanup.length;
-                lCleanup.push(listenerFn, subscription);
-                tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
-            }
-        }
-    }
-}
-/**
- * @param {?} lView
- * @param {?} listenerFn
- * @param {?} e
- * @return {?}
- */
-function executeListenerWithErrorHandling(lView, listenerFn, e) {
-    try {
-        // Only explicitly returning false from a listener should preventDefault
-        return listenerFn(e) !== false;
-    }
-    catch (error) {
-        handleError(lView, error);
-        return false;
-    }
-}
-/**
- * Wraps an event listener with a function that marks ancestors dirty and prevents default behavior,
- * if applicable.
- *
- * @param {?} tNode The TNode associated with this listener
- * @param {?} lView The LView that contains this listener
- * @param {?} listenerFn The listener function to call
- * @param {?} wrapWithPreventDefault Whether or not to prevent default behavior
- * (the procedural renderer does this already, so in those cases, we should skip)
- * @return {?}
- */
-function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
-    // Note: we are performing most of the work in the listener function itself
-    // to optimize listener registration.
-    return (/**
-     * @param {?} e
-     * @return {?}
-     */
-    function wrapListenerIn_markDirtyAndPreventDefault(e) {
-        // In order to be backwards compatible with View Engine, events on component host nodes
-        // must also mark the component view itself dirty (i.e. the view that it owns).
-        /** @type {?} */
-        const startView = tNode.flags & 1 /* isComponent */ ? getComponentViewByIndex(tNode.index, lView) : lView;
-        // See interfaces/view.ts for more on LViewFlags.ManualOnPush
-        if ((lView[FLAGS] & 32 /* ManualOnPush */) === 0) {
-            markViewDirty(startView);
-        }
-        /** @type {?} */
-        let result = executeListenerWithErrorHandling(lView, listenerFn, e);
-        // A just-invoked listener function might have coalesced listeners so we need to check for
-        // their presence and invoke as needed.
-        /** @type {?} */
-        let nextListenerFn = ((/** @type {?} */ (wrapListenerIn_markDirtyAndPreventDefault))).__ngNextListenerFn__;
-        while (nextListenerFn) {
-            // We should prevent default if any of the listeners explicitly return false
-            result = executeListenerWithErrorHandling(lView, nextListenerFn, e) && result;
-            nextListenerFn = ((/** @type {?} */ (nextListenerFn))).__ngNextListenerFn__;
-        }
-        if (wrapWithPreventDefault && result === false) {
-            e.preventDefault();
-            // Necessary for legacy browsers that don't support preventDefault (e.g. IE)
-            e.returnValue = false;
-        }
-        return result;
-    });
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Retrieves a context at the level specified and saves it as the global, contextViewData.
- * Will get the next level up if level is not specified.
- *
- * This is used to save contexts of parent views so they can be bound in embedded views, or
- * in conjunction with reference() to bind a ref from a parent view.
- *
- * \@codeGenApi
- * @template T
- * @param {?=} level The relative level of the view from which to grab context compared to contextVewData
- * @return {?} context
- *
- */
-function ɵɵnextContext(level = 1) {
-    return nextContextImpl(level);
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
- * It takes all the selectors from the entire component's template and decides where
- * each projected node belongs (it re-distributes nodes among "buckets" where each "bucket" is
- * backed by a selector).
- *
- * This function requires CSS selectors to be provided in 2 forms: parsed (by a compiler) and text,
- * un-parsed form.
- *
- * The parsed form is needed for efficient matching of a node against a given CSS selector.
- * The un-parsed, textual form is needed for support of the ngProjectAs attribute.
- *
- * Having a CSS selector in 2 different formats is not ideal, but alternatives have even more
- * drawbacks:
- * - having only a textual form would require runtime parsing of CSS selectors;
- * - we can't have only a parsed as we can't re-construct textual form from it (as entered by a
- * template author).
- *
- * \@codeGenApi
- * @param {?=} selectors A collection of parsed CSS selectors
- * @return {?}
- */
-function ɵɵprojectionDef(selectors) {
-    /** @type {?} */
-    const componentNode = (/** @type {?} */ (findComponentView(getLView())[T_HOST]));
-    if (!componentNode.projection) {
-        /** @type {?} */
-        const noOfNodeBuckets = selectors ? selectors.length + 1 : 1;
-        /** @type {?} */
-        const projectionHeads = componentNode.projection =
-            new Array(noOfNodeBuckets).fill(null);
-        /** @type {?} */
-        const tails = projectionHeads.slice();
-        /** @type {?} */
-        let componentChild = componentNode.child;
-        while (componentChild !== null) {
-            /** @type {?} */
-            const bucketIndex = selectors ? matchingProjectionSelectorIndex(componentChild, selectors) : 0;
-            if (tails[bucketIndex]) {
-                (/** @type {?} */ (tails[bucketIndex])).projectionNext = componentChild;
-            }
-            else {
-                projectionHeads[bucketIndex] = componentChild;
-            }
-            tails[bucketIndex] = componentChild;
-            componentChild = componentChild.next;
-        }
-    }
-}
-/**
- * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
- * to the projectionDef instruction.
- *
- * \@codeGenApi
- * @param {?} nodeIndex
- * @param {?=} selectorIndex
- * @param {?=} attrs
- * @return {?}
- */
-function ɵɵprojection(nodeIndex, selectorIndex = 0, attrs) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const tProjectionNode = createNodeAtIndex(nodeIndex, 1 /* Projection */, null, null, attrs || null);
-    // We can't use viewData[HOST_NODE] because projection nodes can be nested in embedded views.
-    if (tProjectionNode.projection === null)
-        tProjectionNode.projection = selectorIndex;
-    // `<ng-content>` has no content
-    setIsParent(false);
-    // re-distribution of projectable nodes is stored on a component's view level
-    appendProjectedNodes(lView, tProjectionNode, selectorIndex, findComponentView(lView));
 }
 
 /**
@@ -21833,16 +21435,8 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
     }
     else {
         /** @type {?} */
-        let commentNode;
-        // If the host is an element container, the native host element is guaranteed to be a
-        // comment and we can reuse that comment as anchor element for the new LContainer.
-        if (hostTNode.type === 4 /* ElementContainer */) {
-            commentNode = (/** @type {?} */ (unwrapRNode(slotValue)));
-        }
-        else {
-            ngDevMode && ngDevMode.rendererCreateComment++;
-            commentNode = hostView[RENDERER].createComment(ngDevMode ? 'container' : '');
-        }
+        const commentNode = hostView[RENDERER].createComment(ngDevMode ? 'container' : '');
+        ngDevMode && ngDevMode.rendererCreateComment++;
         // A container can be created on the root (topmost / bootstrapped) component and in this case we
         // can't use LTree to insert container's marker node (both parent of a comment node and the
         // commend node itself is located outside of elements hold by LTree). In this specific case we
@@ -22114,7 +21708,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-rc.0+311.sha-2cdbe9b.with-local-changes');
+const VERSION = new Version('8.0.0-rc.0+297.sha-02523de.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -30336,16 +29930,6 @@ const ɵ0$9 = /**
  * @return {?}
  */
 () => ({
-    'ɵɵattribute': ɵɵattribute,
-    'ɵɵattributeInterpolate1': ɵɵattributeInterpolate1,
-    'ɵɵattributeInterpolate2': ɵɵattributeInterpolate2,
-    'ɵɵattributeInterpolate3': ɵɵattributeInterpolate3,
-    'ɵɵattributeInterpolate4': ɵɵattributeInterpolate4,
-    'ɵɵattributeInterpolate5': ɵɵattributeInterpolate5,
-    'ɵɵattributeInterpolate6': ɵɵattributeInterpolate6,
-    'ɵɵattributeInterpolate7': ɵɵattributeInterpolate7,
-    'ɵɵattributeInterpolate8': ɵɵattributeInterpolate8,
-    'ɵɵattributeInterpolateV': ɵɵattributeInterpolateV,
     'ɵɵdefineBase': ɵɵdefineBase,
     'ɵɵdefineComponent': ɵɵdefineComponent,
     'ɵɵdefineDirective': ɵɵdefineDirective,
@@ -38516,5 +38100,5 @@ class NgModuleFactory_ extends NgModuleFactory {
  * Generated bundle index. Do not edit.
  */
 
-export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_r, _iterableDiffersFactory as ɵangular_packages_core_core_o, _keyValueDiffersFactory as ɵangular_packages_core_core_p, _localeFactory as ɵangular_packages_core_core_q, zoneSchedulerFactory as ɵangular_packages_core_core_s, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, DefaultIterableDifferFactory as ɵangular_packages_core_core_m, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_n, DebugElement__PRE_R3__ as ɵangular_packages_core_core_l, DebugNode__PRE_R3__ as ɵangular_packages_core_core_k, NullInjector as ɵangular_packages_core_core_b, injectInjectorOnly as ɵangular_packages_core_core_a, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, getModuleFactory__PRE_R3__ as ɵangular_packages_core_core_j, wtfEnabled as ɵangular_packages_core_core_t, createScope as ɵangular_packages_core_core_v, detectWTF as ɵangular_packages_core_core_u, endTimeRange as ɵangular_packages_core_core_y, leave as ɵangular_packages_core_core_w, startTimeRange as ɵangular_packages_core_core_x, SCHEDULER as ɵangular_packages_core_core_bb, injectAttributeImpl as ɵangular_packages_core_core_bc, getLView as ɵangular_packages_core_core_bd, getPreviousOrParentTNode as ɵangular_packages_core_core_be, nextContextImpl as ɵangular_packages_core_core_bf, BoundPlayerFactory as ɵangular_packages_core_core_bj, getRootContext as ɵangular_packages_core_core_bp, loadInternal as ɵangular_packages_core_core_bo, createElementRef as ɵangular_packages_core_core_g, createTemplateRef as ɵangular_packages_core_core_h, createViewRef as ɵangular_packages_core_core_i, getUrlSanitizer as ɵangular_packages_core_core_bh, noSideEffects as ɵangular_packages_core_core_bn, makeParamDecorator as ɵangular_packages_core_core_bk, makePropDecorator as ɵangular_packages_core_core_bl, getClosureSafeProperty as ɵangular_packages_core_core_bq, _def as ɵangular_packages_core_core_z, DebugContext as ɵangular_packages_core_core_ba, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugEventListener, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS$1 as TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, ViewEncapsulation, Version, VERSION, InjectFlags, ɵɵdefineInjectable, defineInjectable, ɵɵdefineInjector, forwardRef, resolveForwardRef, Injectable, Injector, ɵɵinject, inject, INJECTOR, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵdefineBase, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefinePipe, ɵɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, ɵɵdirectiveInject, ɵɵinjectAttribute, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵtemplateRefExtractor, ɵɵProvidersFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, ɵɵcontainer, ɵɵnextContext, ɵɵelementStart, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵelement, ɵɵlistener, ɵɵtext, ɵɵembeddedViewStart, ɵɵprojection, ɵɵbind, ɵɵinterpolation1, ɵɵinterpolation2, ɵɵinterpolation3, ɵɵinterpolation4, ɵɵinterpolation5, ɵɵinterpolation6, ɵɵinterpolation7, ɵɵinterpolation8, ɵɵinterpolationV, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, ɵɵrestoreView, ɵɵcontainerRefreshStart, ɵɵcontainerRefreshEnd, ɵɵqueryRefresh, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵstaticContentQuery, ɵɵloadViewQuery, ɵɵcontentQuery, ɵɵloadContentQuery, ɵɵelementEnd, ɵɵelementProperty, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵcomponentHostSyntheticProperty, ɵɵcomponentHostSyntheticListener, ɵɵprojectionDef, ɵɵreference, ɵɵenableBindings, ɵɵdisableBindings, ɵɵallocHostVars, ɵɵelementAttribute, ɵɵelementContainerStart, ɵɵelementContainerEnd, ɵɵstyling, ɵɵstyleMap, ɵɵclassMap, ɵɵstyleProp, ɵɵstylingApply, ɵɵclassProp, ɵɵelementHostAttrs, ɵɵselect, ɵɵtextBinding, ɵɵtemplate, ɵɵembeddedViewEnd, store as ɵstore, ɵɵload, ɵɵpipe, whenRendered as ɵwhenRendered, ɵɵi18n, ɵɵi18nAttributes, ɵɵi18nExp, ɵɵi18nStart, ɵɵi18nEnd, ɵɵi18nApply, ɵɵi18nPostprocess, i18nConfigureLocalize as ɵi18nConfigureLocalize, ɵɵi18nLocalize, setClassMetadata as ɵsetClassMetadata, ɵɵresolveWindow, ɵɵresolveDocument, ɵɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, ɵɵsanitizeHtml, ɵɵsanitizeStyle, ɵɵdefaultStyleSanitizer, ɵɵsanitizeScript, ɵɵsanitizeUrl, ɵɵsanitizeResourceUrl, ɵɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, registerNgModuleType as ɵregisterNgModuleType, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, createInjector as ɵcreateInjector, INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$3 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_r, _iterableDiffersFactory as ɵangular_packages_core_core_o, _keyValueDiffersFactory as ɵangular_packages_core_core_p, _localeFactory as ɵangular_packages_core_core_q, zoneSchedulerFactory as ɵangular_packages_core_core_s, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, DefaultIterableDifferFactory as ɵangular_packages_core_core_m, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_n, DebugElement__PRE_R3__ as ɵangular_packages_core_core_l, DebugNode__PRE_R3__ as ɵangular_packages_core_core_k, NullInjector as ɵangular_packages_core_core_b, injectInjectorOnly as ɵangular_packages_core_core_a, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, getModuleFactory__PRE_R3__ as ɵangular_packages_core_core_j, wtfEnabled as ɵangular_packages_core_core_t, createScope as ɵangular_packages_core_core_v, detectWTF as ɵangular_packages_core_core_u, endTimeRange as ɵangular_packages_core_core_y, leave as ɵangular_packages_core_core_w, startTimeRange as ɵangular_packages_core_core_x, SCHEDULER as ɵangular_packages_core_core_bb, injectAttributeImpl as ɵangular_packages_core_core_bc, getLView as ɵangular_packages_core_core_bd, getPreviousOrParentTNode as ɵangular_packages_core_core_be, nextContextImpl as ɵangular_packages_core_core_bf, BoundPlayerFactory as ɵangular_packages_core_core_bj, getRootContext as ɵangular_packages_core_core_bp, loadInternal as ɵangular_packages_core_core_bo, createElementRef as ɵangular_packages_core_core_g, createTemplateRef as ɵangular_packages_core_core_h, createViewRef as ɵangular_packages_core_core_i, getUrlSanitizer as ɵangular_packages_core_core_bh, noSideEffects as ɵangular_packages_core_core_bn, makeParamDecorator as ɵangular_packages_core_core_bk, makePropDecorator as ɵangular_packages_core_core_bl, getClosureSafeProperty as ɵangular_packages_core_core_bq, _def as ɵangular_packages_core_core_z, DebugContext as ɵangular_packages_core_core_ba, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugEventListener, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS$1 as TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, ViewEncapsulation, Version, VERSION, InjectFlags, ɵɵdefineInjectable, defineInjectable, ɵɵdefineInjector, forwardRef, resolveForwardRef, Injectable, Injector, ɵɵinject, inject, INJECTOR, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, ɵɵdefineBase, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefinePipe, ɵɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, ɵɵdirectiveInject, ɵɵinjectAttribute, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵtemplateRefExtractor, ɵɵProvidersFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, ɵɵcontainer, ɵɵnextContext, ɵɵelementStart, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵelement, ɵɵlistener, ɵɵtext, ɵɵembeddedViewStart, ɵɵprojection, ɵɵbind, ɵɵinterpolation1, ɵɵinterpolation2, ɵɵinterpolation3, ɵɵinterpolation4, ɵɵinterpolation5, ɵɵinterpolation6, ɵɵinterpolation7, ɵɵinterpolation8, ɵɵinterpolationV, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, ɵɵrestoreView, ɵɵcontainerRefreshStart, ɵɵcontainerRefreshEnd, ɵɵqueryRefresh, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵstaticContentQuery, ɵɵloadViewQuery, ɵɵcontentQuery, ɵɵloadContentQuery, ɵɵelementEnd, ɵɵelementProperty, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵcomponentHostSyntheticProperty, ɵɵcomponentHostSyntheticListener, ɵɵprojectionDef, ɵɵreference, ɵɵenableBindings, ɵɵdisableBindings, ɵɵallocHostVars, ɵɵelementAttribute, ɵɵelementContainerStart, ɵɵelementContainerEnd, ɵɵstyling, ɵɵstyleMap, ɵɵclassMap, ɵɵstyleProp, ɵɵstylingApply, ɵɵclassProp, ɵɵelementHostAttrs, ɵɵselect, ɵɵtextBinding, ɵɵtemplate, ɵɵembeddedViewEnd, store as ɵstore, ɵɵload, ɵɵpipe, whenRendered as ɵwhenRendered, ɵɵi18n, ɵɵi18nAttributes, ɵɵi18nExp, ɵɵi18nStart, ɵɵi18nEnd, ɵɵi18nApply, ɵɵi18nPostprocess, i18nConfigureLocalize as ɵi18nConfigureLocalize, ɵɵi18nLocalize, setClassMetadata as ɵsetClassMetadata, ɵɵresolveWindow, ɵɵresolveDocument, ɵɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, ɵɵsanitizeHtml, ɵɵsanitizeStyle, ɵɵdefaultStyleSanitizer, ɵɵsanitizeScript, ɵɵsanitizeUrl, ɵɵsanitizeResourceUrl, ɵɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, registerNgModuleType as ɵregisterNgModuleType, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, createInjector as ɵcreateInjector, INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$3 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map
