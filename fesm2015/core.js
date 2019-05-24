@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+340.sha-68cd0ca.with-local-changes
+ * @license Angular v8.0.0-rc.0+343.sha-dc6406e.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11496,12 +11496,17 @@ function assertValidDirectiveIndex(context, directiveIndex) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
+/** @type {?} */
+const MAP_BASED_ENTRY_PROP_NAME = '--MAP--';
 /**
  * Creates a new instance of the `TStylingContext`.
+ *
+ * This function will also pre-fill the context with data
+ * for map-based bindings.
  * @return {?}
  */
 function allocStylingContext$1() {
-    return [0 /* Initial */, 0];
+    return [0 /* Initial */, 0, 0, 0, MAP_BASED_ENTRY_PROP_NAME];
 }
 /**
  * Temporary function that allows for a string-based property name to be
@@ -11558,7 +11563,7 @@ function getProp$1(context, index) {
  * @return {?}
  */
 function getGuardMask(context, index) {
-    return (/** @type {?} */ (context[index + 0 /* MaskOffset */]));
+    return (/** @type {?} */ (context[index + 0 /* GuardOffset */]));
 }
 /**
  * @param {?} context
@@ -11574,7 +11579,7 @@ function getValuesCount(context, index) {
  * @param {?} offset
  * @return {?}
  */
-function getValue$1(context, index, offset) {
+function getBindingValue(context, index, offset) {
     return (/** @type {?} */ (context[index + 3 /* BindingsStartOffset */ + offset]));
 }
 /**
@@ -11611,15 +11616,47 @@ function lockContext(context) {
 function isContextLocked(context) {
     return (getConfig(context) & 1 /* Locked */) > 0;
 }
+/**
+ * @param {?} context
+ * @return {?}
+ */
+function getPropValuesStartPosition(context) {
+    return 5 /* MapBindingsBindingsStartPosition */ +
+        context[3 /* MapBindingsValuesCountPosition */];
+}
+/**
+ * @param {?} a
+ * @param {?} b
+ * @return {?}
+ */
+function hasValueChanged$1(a, b) {
+    /** @type {?} */
+    const compareValueA = Array.isArray(a) ? a[0 /* RawValuePosition */] : a;
+    /** @type {?} */
+    const compareValueB = Array.isArray(b) ? b[0 /* RawValuePosition */] : b;
+    return compareValueA !== compareValueB;
+}
+/**
+ * Determines whether the provided styling value is truthy or falsy.
+ * @param {?} value
+ * @return {?}
+ */
+function isStylingValueDefined(value) {
+    // the reason why null is compared against is because
+    // a CSS class value that is set to `false` must be
+    // respected (otherwise it would be treated as falsy).
+    // Empty string values are because developers usually
+    // set a value to an empty string to remove it.
+    return value != null && value !== '';
+}
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
-// the values below are global to all styling code below. Each value
-// will either increment or mutate each time a styling instruction is
-// executed. Do not modify the values below.
 /**
+ * --------
+ *
  * This file contains the core logic for styling in Angular.
  *
  * All styling bindings (i.e. `[style]`, `[style.prop]`, `[class]` and `[class.name]`)
@@ -11632,27 +11669,37 @@ function isContextLocked(context) {
  * context.
  *
  * To learn more about the algorithm see `TStylingContext`.
+ *
+ * --------
  * @type {?}
  */
-let currentStyleIndex = 0;
+const DEFAULT_BINDING_VALUE = null;
 /** @type {?} */
-let currentClassIndex = 0;
+const DEFAULT_SIZE_VALUE = 1;
+// The first bit value reflects a map-based binding value's bit.
+// The reason why it's always activated for every entry in the map
+// is so that if any map-binding values update then all other prop
+// based bindings will pass the guard check automatically without
+// any extra code or flags.
+/** @type {?} */
+const DEFAULT_GUARD_MASK_VALUE = 0b1;
+/** @type {?} */
+const STYLING_INDEX_FOR_MAP_BINDING = 0;
+/** @type {?} */
+const STYLING_INDEX_START_VALUE = 1;
+// the values below are global to all styling code below. Each value
+// will either increment or mutate each time a styling instruction is
+// executed. Do not modify the values below.
+/** @type {?} */
+let currentStyleIndex = STYLING_INDEX_START_VALUE;
+/** @type {?} */
+let currentClassIndex = STYLING_INDEX_START_VALUE;
 /** @type {?} */
 let stylesBitMask = 0;
 /** @type {?} */
 let classesBitMask = 0;
 /** @type {?} */
 let deferredBindingQueue = [];
-/** @type {?} */
-const DEFAULT_BINDING_VALUE = null;
-/** @type {?} */
-const DEFAULT_SIZE_VALUE = 1;
-/** @type {?} */
-const DEFAULT_MASK_VALUE = 0;
-/** @type {?} */
-const DEFAULT_BINDING_INDEX_VALUE = -1;
-/** @type {?} */
-const BIT_MASK_APPLY_ALL = -1;
 /**
  * Visits a class-based binding and updates the new value (if changed).
  *
@@ -11660,7 +11707,7 @@ const BIT_MASK_APPLY_ALL = -1;
  * is executed. It's important that it's always called (even if the value
  * has not changed) so that the inner counter index value is incremented.
  * This way, each instruction is always guaranteed to get the same counter
- * state each time its called (which then allows the `TStylingContext`
+ * state each time it's called (which then allows the `TStylingContext`
  * and the bit mask values to be in sync).
  * @param {?} context
  * @param {?} data
@@ -11668,12 +11715,17 @@ const BIT_MASK_APPLY_ALL = -1;
  * @param {?} bindingIndex
  * @param {?} value
  * @param {?} deferRegistration
+ * @param {?=} forceUpdate
  * @return {?}
  */
-function updateClassBinding(context, data, prop, bindingIndex, value, deferRegistration) {
+function updateClassBinding(context, data, prop, bindingIndex, value, deferRegistration, forceUpdate) {
     /** @type {?} */
-    const index = currentClassIndex++;
-    if (updateBindingData(context, data, index, prop, bindingIndex, value, deferRegistration)) {
+    const isMapBased = !prop;
+    /** @type {?} */
+    const index = isMapBased ? STYLING_INDEX_FOR_MAP_BINDING : currentClassIndex++;
+    /** @type {?} */
+    const updated = updateBindingData(context, data, index, prop, bindingIndex, value, deferRegistration, forceUpdate);
+    if (updated || forceUpdate) {
         classesBitMask |= 1 << index;
     }
 }
@@ -11684,7 +11736,7 @@ function updateClassBinding(context, data, prop, bindingIndex, value, deferRegis
  * is executed. It's important that it's always called (even if the value
  * has not changed) so that the inner counter index value is incremented.
  * This way, each instruction is always guaranteed to get the same counter
- * state each time its called (which then allows the `TStylingContext`
+ * state each time it's called (which then allows the `TStylingContext`
  * and the bit mask values to be in sync).
  * @param {?} context
  * @param {?} data
@@ -11692,16 +11744,31 @@ function updateClassBinding(context, data, prop, bindingIndex, value, deferRegis
  * @param {?} bindingIndex
  * @param {?} value
  * @param {?} deferRegistration
+ * @param {?=} forceUpdate
  * @return {?}
  */
-function updateStyleBinding(context, data, prop, bindingIndex, value, deferRegistration) {
+function updateStyleBinding(context, data, prop, bindingIndex, value, deferRegistration, forceUpdate) {
     /** @type {?} */
-    const index = currentStyleIndex++;
-    if (updateBindingData(context, data, index, prop, bindingIndex, value, deferRegistration)) {
+    const isMapBased = !prop;
+    /** @type {?} */
+    const index = isMapBased ? STYLING_INDEX_FOR_MAP_BINDING : currentStyleIndex++;
+    /** @type {?} */
+    const updated = updateBindingData(context, data, index, prop, bindingIndex, value, deferRegistration, forceUpdate);
+    if (updated || forceUpdate) {
         stylesBitMask |= 1 << index;
     }
 }
 /**
+ * Called each time a binding value has changed within the provided `TStylingContext`.
+ *
+ * This function is designed to be called from `updateStyleBinding` and `updateClassBinding`.
+ * If called during the first update pass, the binding will be registered in the context.
+ * If the binding does get registered and the `deferRegistration` flag is true then the
+ * binding data will be queued up until the context is later flushed in `applyStyling`.
+ *
+ * This function will also update binding slot in the provided `LStylingData` with the
+ * new binding entry (if it has changed).
+ *
  * @param {?} context
  * @param {?} data
  * @param {?} counterIndex
@@ -11709,9 +11776,10 @@ function updateStyleBinding(context, data, prop, bindingIndex, value, deferRegis
  * @param {?} bindingIndex
  * @param {?} value
  * @param {?=} deferRegistration
- * @return {?}
+ * @param {?=} forceUpdate
+ * @return {?} whether or not the binding value was updated in the `LStylingData`.
  */
-function updateBindingData(context, data, counterIndex, prop, bindingIndex, value, deferRegistration) {
+function updateBindingData(context, data, counterIndex, prop, bindingIndex, value, deferRegistration, forceUpdate) {
     if (!isContextLocked(context)) {
         if (deferRegistration) {
             deferBindingRegistration(context, counterIndex, prop, bindingIndex);
@@ -11727,11 +11795,12 @@ function updateBindingData(context, data, counterIndex, prop, bindingIndex, valu
             registerBinding(context, counterIndex, prop, bindingIndex);
         }
     }
-    if (data[bindingIndex] !== value) {
+    /** @type {?} */
+    const changed = forceUpdate || hasValueChanged$1(data[bindingIndex], value);
+    if (changed) {
         data[bindingIndex] = value;
-        return true;
     }
-    return false;
+    return changed;
 }
 /**
  * Schedules a binding registration to be run at a later point.
@@ -11803,6 +11872,11 @@ function flushDeferredBindings() {
  *    as the default value for the binding. If the bindingValue property is inserted
  *    and it is either a string, number or null value then that will replace the default
  *    value.
+ *
+ * Note that this function is also used for map-based styling bindings. They are treated
+ * much the same as prop-based bindings, but, because they do not have a property value
+ * (since it's a map), all map-based entries are stored in an already populated area of
+ * the context at the top (which is reserved for map-based entries).
  * @param {?} context
  * @param {?} countId
  * @param {?} prop
@@ -11810,29 +11884,38 @@ function flushDeferredBindings() {
  * @return {?}
  */
 function registerBinding(context, countId, prop, bindingValue) {
-    /** @type {?} */
-    let i = 2 /* ValuesStartPosition */;
-    /** @type {?} */
-    let found = false;
-    while (i < context.length) {
+    // prop-based bindings (e.g `<div [style.width]="w" [class.foo]="f">`)
+    if (prop) {
         /** @type {?} */
-        const valuesCount = getValuesCount(context, i);
+        let found = false;
         /** @type {?} */
-        const p = getProp$1(context, i);
-        found = prop <= p;
-        if (found) {
-            // all style/class bindings are sorted by property name
-            if (prop < p) {
-                allocateNewContextEntry(context, i, prop);
+        let i = getPropValuesStartPosition(context);
+        while (i < context.length) {
+            /** @type {?} */
+            const valuesCount = getValuesCount(context, i);
+            /** @type {?} */
+            const p = getProp$1(context, i);
+            found = prop <= p;
+            if (found) {
+                // all style/class bindings are sorted by property name
+                if (prop < p) {
+                    allocateNewContextEntry(context, i, prop);
+                }
+                addBindingIntoContext(context, false, i, bindingValue, countId);
+                break;
             }
-            addBindingIntoContext(context, i, bindingValue, countId);
-            break;
+            i += 3 /* BindingsStartOffset */ + valuesCount;
         }
-        i += 3 /* BindingsStartOffset */ + valuesCount;
+        if (!found) {
+            allocateNewContextEntry(context, context.length, prop);
+            addBindingIntoContext(context, false, i, bindingValue, countId);
+        }
     }
-    if (!found) {
-        allocateNewContextEntry(context, context.length, prop);
-        addBindingIntoContext(context, i, bindingValue, countId);
+    else {
+        // map-based bindings (e.g `<div [style]="s" [class]="{className:true}">`)
+        // there is no need to allocate the map-based binding region into the context
+        // since it is already there when the context is first created.
+        addBindingIntoContext(context, true, 2 /* MapBindingsPosition */, bindingValue, countId);
     }
 }
 /**
@@ -11842,7 +11925,13 @@ function registerBinding(context, countId, prop, bindingValue) {
  * @return {?}
  */
 function allocateNewContextEntry(context, index, prop) {
-    context.splice(index, 0, DEFAULT_MASK_VALUE, DEFAULT_SIZE_VALUE, prop, DEFAULT_BINDING_VALUE);
+    // 1,2: splice index locations
+    // 3: each entry gets a guard mask value that is used to check against updates
+    // 4. each entry gets a size value (which is always one because there is always a default binding
+    // value)
+    // 5. the property that is getting allocated into the context
+    // 6. the default binding value (usually `null`)
+    context.splice(index, 0, DEFAULT_GUARD_MASK_VALUE, DEFAULT_SIZE_VALUE, prop, DEFAULT_BINDING_VALUE);
 }
 /**
  * Inserts a new binding value into a styling property tuple in the `TStylingContext`.
@@ -11857,29 +11946,39 @@ function allocateNewContextEntry(context, index, prop) {
  *
  * - Otherwise the binding value will update the default value for the property
  *   and this will only happen if the default value is `null`.
+ *
+ * Note that this function also handles map-based bindings and will insert them
+ * at the top of the context.
  * @param {?} context
+ * @param {?} isMapBased
  * @param {?} index
  * @param {?} bindingValue
  * @param {?} countId
  * @return {?}
  */
-function addBindingIntoContext(context, index, bindingValue, countId) {
+function addBindingIntoContext(context, isMapBased, index, bindingValue, countId) {
     /** @type {?} */
     const valuesCount = getValuesCount(context, index);
-    // -1 is used because we want the last value that's in the list (not the next slot)
     /** @type {?} */
-    const lastValueIndex = index + 3 /* BindingsStartOffset */ + valuesCount - 1;
+    let lastValueIndex = index + 3 /* BindingsStartOffset */ + valuesCount;
+    if (!isMapBased) {
+        // prop-based values all have default values, but map-based entries do not.
+        // we want to access the index for the default value in this case and not just
+        // the bindings...
+        lastValueIndex--;
+    }
     if (typeof bindingValue === 'number') {
         context.splice(lastValueIndex, 0, bindingValue);
         ((/** @type {?} */ (context[index + 1 /* ValuesCountOffset */])))++;
-        ((/** @type {?} */ (context[index + 0 /* MaskOffset */]))) |= 1 << countId;
+        ((/** @type {?} */ (context[index + 0 /* GuardOffset */]))) |= 1 << countId;
     }
     else if (typeof bindingValue === 'string' && context[lastValueIndex] == null) {
         context[lastValueIndex] = bindingValue;
     }
 }
 /**
- * Applies all class entries in the provided context to the provided element.
+ * Applies all class entries in the provided context to the provided element and resets
+ * any counter and/or bitMask values associated with class bindings.
  * @param {?} renderer
  * @param {?} data
  * @param {?} context
@@ -11890,15 +11989,18 @@ function addBindingIntoContext(context, index, bindingValue, countId) {
 function applyClasses(renderer, data, context, element, directiveIndex) {
     if (allowStylingFlush(context, directiveIndex)) {
         /** @type {?} */
-        const isFirstPass = isContextLocked(context);
+        const isFirstPass = !isContextLocked(context);
         isFirstPass && lockContext(context);
-        applyStyling(context, renderer, element, data, classesBitMask, setClass$1, isFirstPass);
-        currentClassIndex = 0;
-        classesBitMask = 0;
+        if (classesBitMask) {
+            applyStyling(context, renderer, element, data, classesBitMask, setClass$1);
+            classesBitMask = 0;
+        }
+        currentClassIndex = STYLING_INDEX_START_VALUE;
     }
 }
 /**
- * Applies all style entries in the provided context to the provided element.
+ * Applies all style entries in the provided context to the provided element and resets
+ * any counter and/or bitMask values associated with style bindings.
  * @param {?} renderer
  * @param {?} data
  * @param {?} context
@@ -11909,16 +12011,37 @@ function applyClasses(renderer, data, context, element, directiveIndex) {
 function applyStyles(renderer, data, context, element, directiveIndex) {
     if (allowStylingFlush(context, directiveIndex)) {
         /** @type {?} */
-        const isFirstPass = isContextLocked(context);
+        const isFirstPass = !isContextLocked(context);
         isFirstPass && lockContext(context);
-        applyStyling(context, renderer, element, data, stylesBitMask, setStyle$1, isFirstPass);
-        currentStyleIndex = 0;
-        stylesBitMask = 0;
+        if (stylesBitMask) {
+            applyStyling(context, renderer, element, data, stylesBitMask, setStyle$1);
+            stylesBitMask = 0;
+        }
+        currentStyleIndex = STYLING_INDEX_START_VALUE;
     }
 }
 /**
  * Runs through the provided styling context and applies each value to
  * the provided element (via the renderer) if one or more values are present.
+ *
+ * This function will iterate over all entries present in the provided
+ * `TStylingContext` array (both prop-based and map-based bindings).-
+ *
+ * Each entry, within the `TStylingContext` array, is stored alphabetically
+ * and this means that each prop/value entry will be applied in order
+ * (so long as it is marked dirty in the provided `bitMask` value).
+ *
+ * If there are any map-based entries present (which are applied to the
+ * element via the `[style]` and `[class]` bindings) then those entries
+ * will be applied as well. However, the code for that is not apart of
+ * this function. Instead, each time a property is visited, then the
+ * code below will call an external function called `stylingMapsSyncFn`
+ * and, if present, it will keep the application of styling values in
+ * map-based bindings up to sync with the application of prop-based
+ * bindings.
+ *
+ * Visit `styling_next/map_based_bindings.ts` to learn more about how the
+ * algorithm works for map-based styling bindings.
  *
  * Note that this function is not designed to be called in isolation (use
  * `applyClasses` and `applyStyles` to actually apply styling values).
@@ -11926,64 +12049,110 @@ function applyStyles(renderer, data, context, element, directiveIndex) {
  * @param {?} renderer
  * @param {?} element
  * @param {?} bindingData
- * @param {?} bitMask
+ * @param {?} bitMaskValue
  * @param {?} applyStylingFn
- * @param {?=} forceApplyDefaultValues
  * @return {?}
  */
-function applyStyling(context, renderer, element, bindingData, bitMask, applyStylingFn, forceApplyDefaultValues) {
+function applyStyling(context, renderer, element, bindingData, bitMaskValue, applyStylingFn) {
     deferredBindingQueue.length && flushDeferredBindings();
-    if (bitMask) {
+    /** @type {?} */
+    const bitMask = normalizeBitMaskValue(bitMaskValue);
+    /** @type {?} */
+    const stylingMapsSyncFn = getStylingMapsSyncFn();
+    /** @type {?} */
+    const mapsGuardMask = getGuardMask(context, 2 /* MapBindingsPosition */);
+    /** @type {?} */
+    const applyAllValues = (bitMask & mapsGuardMask) > 0;
+    /** @type {?} */
+    const mapsMode = applyAllValues ? 1 /* ApplyAllValues */ : 0 /* TraverseValues */;
+    /** @type {?} */
+    let i = getPropValuesStartPosition(context);
+    while (i < context.length) {
         /** @type {?} */
-        let processAllEntries = bitMask === BIT_MASK_APPLY_ALL;
+        const valuesCount = getValuesCount(context, i);
         /** @type {?} */
-        let i = 2 /* ValuesStartPosition */;
-        while (i < context.length) {
+        const guardMask = getGuardMask(context, i);
+        if (bitMask & guardMask) {
             /** @type {?} */
-            const valuesCount = getValuesCount(context, i);
+            let valueApplied = false;
             /** @type {?} */
-            const guardMask = getGuardMask(context, i);
-            // the guard mask value is non-zero if and when
-            // there are binding values present for the property.
-            // If there are ONLY static values (i.e. `style="prop:val")
-            // then the guard value will stay as zero.
+            const prop = getProp$1(context, i);
             /** @type {?} */
-            const processEntry = processAllEntries || (guardMask ? (bitMask & guardMask) : forceApplyDefaultValues);
-            if (processEntry) {
+            const valuesCountUpToDefault = valuesCount - 1;
+            /** @type {?} */
+            const defaultValue = (/** @type {?} */ (getBindingValue(context, i, valuesCountUpToDefault)));
+            // case 1: apply prop-based values
+            // try to apply the binding values and see if a non-null
+            // value gets set for the styling binding
+            for (let j = 0; j < valuesCountUpToDefault; j++) {
                 /** @type {?} */
-                const prop = getProp$1(context, i);
+                const bindingIndex = (/** @type {?} */ (getBindingValue(context, i, j)));
                 /** @type {?} */
-                const limit = valuesCount - 1;
-                for (let j = 0; j <= limit; j++) {
-                    /** @type {?} */
-                    const isFinalValue = j === limit;
-                    /** @type {?} */
-                    const bindingValue = getValue$1(context, i, j);
-                    /** @type {?} */
-                    const bindingIndex = isFinalValue ? DEFAULT_BINDING_INDEX_VALUE : ((/** @type {?} */ (bindingValue)));
-                    /** @type {?} */
-                    const valueToApply = isFinalValue ? bindingValue : bindingData[bindingIndex];
-                    if (isValueDefined(valueToApply) || isFinalValue) {
-                        applyStylingFn(renderer, element, prop, valueToApply, bindingIndex);
-                        break;
-                    }
+                const valueToApply = bindingData[bindingIndex];
+                if (isStylingValueDefined(valueToApply)) {
+                    applyStylingFn(renderer, element, prop, valueToApply, bindingIndex);
+                    valueApplied = true;
+                    break;
                 }
             }
-            i += 3 /* BindingsStartOffset */ + valuesCount;
+            // case 2: apply map-based values
+            // traverse through each map-based styling binding and update all values up to
+            // the provided `prop` value. If the property was not applied in the loop above
+            // then it will be attempted to be applied in the maps sync code below.
+            if (stylingMapsSyncFn) {
+                // determine whether or not to apply the target property or to skip it
+                /** @type {?} */
+                const mode = mapsMode | (valueApplied ? 4 /* SkipTargetProp */ :
+                    2 /* ApplyTargetProp */);
+                /** @type {?} */
+                const valueAppliedWithinMap = stylingMapsSyncFn(context, renderer, element, bindingData, applyStylingFn, mode, prop, defaultValue);
+                valueApplied = valueApplied || valueAppliedWithinMap;
+            }
+            // case 3: apply the default value
+            // if the value has not yet been applied then a truthy value does not exist in the
+            // prop-based or map-based bindings code. If and when this happens, just apply the
+            // default value (even if the default value is `null`).
+            if (!valueApplied) {
+                applyStylingFn(renderer, element, prop, defaultValue);
+            }
         }
+        i += 3 /* BindingsStartOffset */ + valuesCount;
+    }
+    // the map-based styling entries may have not applied all their
+    // values. For this reason, one more call to the sync function
+    // needs to be issued at the end.
+    if (stylingMapsSyncFn) {
+        stylingMapsSyncFn(context, renderer, element, bindingData, applyStylingFn, mapsMode);
     }
 }
 /**
  * @param {?} value
  * @return {?}
  */
-function isValueDefined(value) {
-    // the reason why null is compared against is because
-    // a CSS class value that is set to `false` must be
-    // respected (otherwise it would be treated as falsy).
-    // Empty string values are because developers usually
-    // set a value to an empty string to remove it.
-    return value != null && value !== '';
+function normalizeBitMaskValue(value) {
+    // if pass => apply all values (-1 implies that all bits are flipped to true)
+    if (value === true)
+        return -1;
+    // if pass => skip all values
+    if (value === false)
+        return 0;
+    // return the bit mask value as is
+    return value;
+}
+/** @type {?} */
+let _activeStylingMapApplyFn = null;
+/**
+ * @return {?}
+ */
+function getStylingMapsSyncFn() {
+    return _activeStylingMapApplyFn;
+}
+/**
+ * @param {?} fn
+ * @return {?}
+ */
+function setStylingMapsSyncFn(fn) {
+    _activeStylingMapApplyFn = fn;
 }
 /**
  * Assigns a style value to a style property for the given element.
@@ -12045,6 +12214,406 @@ const setClass$1 = (/**
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
+ * Used to apply styling values presently within any map-based bindings on an element.
+ *
+ * Angular supports map-based styling bindings which can be applied via the
+ * `[style]` and `[class]` bindings which can be placed on any HTML element.
+ * These bindings can work independently, together or alongside prop-based
+ * styling bindings (e.g. `<div [style]="x" [style.width]="w">`).
+ *
+ * If a map-based styling binding is detected by the compiler, the following
+ * AOT code is produced:
+ *
+ * ```typescript
+ * styleMap(ctx.styles); // styles = {key:value}
+ * classMap(ctx.classes); // classes = {key:value}|string
+ * ```
+ *
+ * If and when either of the instructions above are evaluated, then the code
+ * present in this file is included into the bundle. The mechanism used, to
+ * activate support for map-based bindings at runtime is possible via the
+ * `activeStylingMapFeature` function (which is also present in this file).
+ *
+ * # The Algorithm
+ * Whenever a map-based binding updates (which is when the identity of the
+ * map-value changes) then the map is iterated over and a `LStylingMap` array
+ * is produced. The `LStylingMap` instance is stored in the binding location
+ * where the `BINDING_INDEX` is situated when the `styleMap()` or `classMap()`
+ * instruction were called. Once the binding changes, then the internal `bitMask`
+ * value is marked as dirty.
+ *
+ * Styling values are applied once CD exits the element (which happens when
+ * the `select(n)` instruction is called or the template function exits). When
+ * this occurs, all prop-based bindings are applied. If a map-based binding is
+ * present then a special flushing function (called a sync function) is made
+ * available and it will be called each time a styling property is flushed.
+ *
+ * The flushing algorithm is designed to apply styling for a property (which is
+ * a CSS property or a className value) one by one. If map-based bindings
+ * are present, then the flushing algorithm will keep calling the maps styling
+ * sync function each time a property is visited. This way, the flushing
+ * behavior of map-based bindings will always be at the same property level
+ * as the current prop-based property being iterated over (because everything
+ * is alphabetically sorted).
+ *
+ * Let's imagine we have the following HTML template code:
+ *
+ * ```html
+ * <div [style]="{width:'100px', height:'200px', 'z-index':'10'}"
+ *      [style.width.px]="200">...</div>
+ * ```
+ *
+ * When CD occurs, both the `[style]` and `[style.width]` bindings
+ * are evaluated. Then when the styles are flushed on screen, the
+ * following operations happen:
+ *
+ * 1. `[style.width]` is attempted to be written to the element.
+ *
+ * 2.  Once that happens, the algorithm instructs the map-based
+ *     entries (`[style]` in this case) to "catch up" and apply
+ *     all values up to the `width` value. When this happens the
+ *     `height` value is applied to the element (since it is
+ *     alphabetically situated before the `width` property).
+ *
+ * 3. Since there are no more prop-based entries anymore, the
+ *    loop exits and then, just before the flushing ends, it
+ *    instructs all map-based bindings to "finish up" applying
+ *    their values.
+ *
+ * 4. The only remaining value within the map-based entries is
+ *    the `z-index` value (`width` got skipped because it was
+ *    successfully applied via the prop-based `[style.width]`
+ *    binding). Since all map-based entries are told to "finish up",
+ *    the `z-index` value is iterated over and it is then applied
+ *    to the element.
+ *
+ * The most important thing to take note of here is that prop-based
+ * bindings are evaluated in order alongside map-based bindings.
+ * This allows all styling across an element to be applied in O(n)
+ * time (a similar algorithm is that of the array merge algorithm
+ * in merge sort).
+ * @type {?}
+ */
+const syncStylingMap = (/**
+ * @param {?} context
+ * @param {?} renderer
+ * @param {?} element
+ * @param {?} data
+ * @param {?} applyStylingFn
+ * @param {?} mode
+ * @param {?=} targetProp
+ * @param {?=} defaultValue
+ * @return {?}
+ */
+(context, renderer, element, data, applyStylingFn, mode, targetProp, defaultValue) => {
+    /** @type {?} */
+    let targetPropValueWasApplied = false;
+    // once the map-based styling code is activate it is never deactivated. For this reason a
+    // check to see if the current styling context has any map based bindings is required.
+    /** @type {?} */
+    const totalMaps = getValuesCount(context, 2 /* MapBindingsPosition */);
+    if (totalMaps) {
+        /** @type {?} */
+        let runTheSyncAlgorithm = true;
+        /** @type {?} */
+        const loopUntilEnd = !targetProp;
+        // If the code is told to finish up (run until the end), but the mode
+        // hasn't been flagged to apply values (it only traverses values) then
+        // there is no point in iterating over the array because nothing will
+        // be applied to the element.
+        if (loopUntilEnd && (mode & ~1 /* ApplyAllValues */)) {
+            runTheSyncAlgorithm = false;
+            targetPropValueWasApplied = true;
+        }
+        if (runTheSyncAlgorithm) {
+            targetPropValueWasApplied = innerSyncStylingMap(context, renderer, element, data, applyStylingFn, mode, targetProp || null, 0, defaultValue || null);
+        }
+        if (loopUntilEnd) {
+            resetSyncCursors();
+        }
+    }
+    return targetPropValueWasApplied;
+});
+/**
+ * Recursive function designed to apply map-based styling to an element one map at a time.
+ *
+ * This function is designed to be called from the `syncStylingMap` function and will
+ * apply map-based styling data one map at a time to the provided `element`.
+ *
+ * This function is recursive and it will call itself if a follow-up map value is to be
+ * processed. To learn more about how the algorithm works, see `syncStylingMap`.
+ * @param {?} context
+ * @param {?} renderer
+ * @param {?} element
+ * @param {?} data
+ * @param {?} applyStylingFn
+ * @param {?} mode
+ * @param {?} targetProp
+ * @param {?} currentMapIndex
+ * @param {?} defaultValue
+ * @return {?}
+ */
+function innerSyncStylingMap(context, renderer, element, data, applyStylingFn, mode, targetProp, currentMapIndex, defaultValue) {
+    /** @type {?} */
+    let targetPropValueWasApplied = false;
+    /** @type {?} */
+    const totalMaps = getValuesCount(context, 2 /* MapBindingsPosition */);
+    if (currentMapIndex < totalMaps) {
+        /** @type {?} */
+        const bindingIndex = (/** @type {?} */ (getBindingValue(context, 2 /* MapBindingsPosition */, currentMapIndex)));
+        /** @type {?} */
+        const lStylingMap = (/** @type {?} */ (data[bindingIndex]));
+        /** @type {?} */
+        let cursor = getCurrentSyncCursor(currentMapIndex);
+        while (cursor < lStylingMap.length) {
+            /** @type {?} */
+            const prop = getMapProp(lStylingMap, cursor);
+            /** @type {?} */
+            const iteratedTooFar = targetProp && prop > targetProp;
+            /** @type {?} */
+            const isTargetPropMatched = !iteratedTooFar && prop === targetProp;
+            /** @type {?} */
+            const value = getMapValue(lStylingMap, cursor);
+            /** @type {?} */
+            const valueIsDefined = isStylingValueDefined(value);
+            // the recursive code is designed to keep applying until
+            // it reaches or goes past the target prop. If and when
+            // this happens then it will stop processing values, but
+            // all other map values must also catch up to the same
+            // point. This is why a recursive call is still issued
+            // even if the code has iterated too far.
+            /** @type {?} */
+            const innerMode = iteratedTooFar ? mode : resolveInnerMapMode(mode, valueIsDefined, isTargetPropMatched);
+            /** @type {?} */
+            const innerProp = iteratedTooFar ? targetProp : prop;
+            /** @type {?} */
+            let valueApplied = innerSyncStylingMap(context, renderer, element, data, applyStylingFn, innerMode, innerProp, currentMapIndex + 1, defaultValue);
+            if (iteratedTooFar) {
+                break;
+            }
+            if (!valueApplied && isValueAllowedToBeApplied(mode, isTargetPropMatched)) {
+                /** @type {?} */
+                const useDefault = isTargetPropMatched && !valueIsDefined;
+                /** @type {?} */
+                const valueToApply = useDefault ? defaultValue : value;
+                /** @type {?} */
+                const bindingIndexToApply = useDefault ? bindingIndex : null;
+                applyStylingFn(renderer, element, prop, valueToApply, bindingIndexToApply);
+                valueApplied = true;
+            }
+            targetPropValueWasApplied = valueApplied && isTargetPropMatched;
+            cursor += 2 /* TupleSize */;
+        }
+        setCurrentSyncCursor(currentMapIndex, cursor);
+    }
+    return targetPropValueWasApplied;
+}
+/**
+ * Enables support for map-based styling bindings (e.g. `[style]` and `[class]` bindings).
+ * @return {?}
+ */
+function activeStylingMapFeature() {
+    setStylingMapsSyncFn(syncStylingMap);
+}
+/**
+ * Used to determine the mode for the inner recursive call.
+ *
+ * If an inner map is iterated on then this is done so for one
+ * of two reasons:
+ *
+ * - The target property was detected and the inner map
+ *   must now "catch up" (pointer-wise) up to where the current
+ *   map's cursor is situated.
+ *
+ * - The target property was not detected in the current map
+ *   and must be found in an inner map. This can only be allowed
+ *   if the current map iteration is not set to skip the target
+ *   property.
+ * @param {?} currentMode
+ * @param {?} valueIsDefined
+ * @param {?} isExactMatch
+ * @return {?}
+ */
+function resolveInnerMapMode(currentMode, valueIsDefined, isExactMatch) {
+    /** @type {?} */
+    let innerMode = currentMode;
+    if (!valueIsDefined && isExactMatch && !(currentMode & 4 /* SkipTargetProp */)) {
+        // case 1: set the mode to apply the targeted prop value if it
+        // ends up being encountered in another map value
+        innerMode |= 2 /* ApplyTargetProp */;
+        innerMode &= ~4 /* SkipTargetProp */;
+    }
+    else {
+        // case 2: set the mode to skip the targeted prop value if it
+        // ends up being encountered in another map value
+        innerMode |= 4 /* SkipTargetProp */;
+        innerMode &= ~2 /* ApplyTargetProp */;
+    }
+    return innerMode;
+}
+/**
+ * Decides whether or not a prop/value entry will be applied to an element.
+ *
+ * To determine whether or not a value is to be applied,
+ * the following procedure is evaluated:
+ *
+ * First check to see the current `mode` status:
+ *  1. If the mode value permits all props to be applied then allow.
+ *    - But do not allow if the current prop is set to be skipped.
+ *  2. Otherwise if the current prop is permitted then allow.
+ * @param {?} mode
+ * @param {?} isTargetPropMatched
+ * @return {?}
+ */
+function isValueAllowedToBeApplied(mode, isTargetPropMatched) {
+    /** @type {?} */
+    let doApplyValue = (mode & 1 /* ApplyAllValues */) > 0;
+    if (!doApplyValue) {
+        if (mode & 2 /* ApplyTargetProp */) {
+            doApplyValue = isTargetPropMatched;
+        }
+    }
+    else if ((mode & 4 /* SkipTargetProp */) && isTargetPropMatched) {
+        doApplyValue = false;
+    }
+    return doApplyValue;
+}
+/**
+ * Used to keep track of concurrent cursor values for multiple map-based styling bindings present on
+ * an element.
+ * @type {?}
+ */
+const MAP_CURSORS = [];
+/**
+ * Used to reset the state of each cursor value being used to iterate over map-based styling
+ * bindings.
+ * @return {?}
+ */
+function resetSyncCursors() {
+    for (let i = 0; i < MAP_CURSORS.length; i++) {
+        MAP_CURSORS[i] = 1 /* ValuesStartPosition */;
+    }
+}
+/**
+ * Returns an active cursor value at a given mapIndex location.
+ * @param {?} mapIndex
+ * @return {?}
+ */
+function getCurrentSyncCursor(mapIndex) {
+    if (mapIndex >= MAP_CURSORS.length) {
+        MAP_CURSORS.push(1 /* ValuesStartPosition */);
+    }
+    return MAP_CURSORS[mapIndex];
+}
+/**
+ * Sets a cursor value at a given mapIndex location.
+ * @param {?} mapIndex
+ * @param {?} indexValue
+ * @return {?}
+ */
+function setCurrentSyncCursor(mapIndex, indexValue) {
+    MAP_CURSORS[mapIndex] = indexValue;
+}
+/**
+ * Used to convert a {key:value} map into a `LStylingMap` array.
+ *
+ * This function will either generate a new `LStylingMap` instance
+ * or it will patch the provided `newValues` map value into an
+ * existing `LStylingMap` value (this only happens if `bindingValue`
+ * is an instance of `LStylingMap`).
+ *
+ * If a new key/value map is provided with an old `LStylingMap`
+ * value then all properties will be overwritten with their new
+ * values or with `null`. This means that the array will never
+ * shrink in size (but it will also not be created and thrown
+ * away whenever the {key:value} map entries change).
+ * @param {?} bindingValue
+ * @param {?} newValues
+ * @return {?}
+ */
+function normalizeIntoStylingMap(bindingValue, newValues) {
+    /** @type {?} */
+    const lStylingMap = Array.isArray(bindingValue) ? bindingValue : [null];
+    lStylingMap[0 /* RawValuePosition */] = newValues || null;
+    // because the new values may not include all the properties
+    // that the old ones had, all values are set to `null` before
+    // the new values are applied. This way, when flushed, the
+    // styling algorithm knows exactly what style/class values
+    // to remove from the element (since they are `null`).
+    for (let j = 1 /* ValuesStartPosition */; j < lStylingMap.length; j += 2 /* TupleSize */) {
+        setMapValue(lStylingMap, j, null);
+    }
+    /** @type {?} */
+    let props = null;
+    /** @type {?} */
+    let map;
+    /** @type {?} */
+    let allValuesTrue = false;
+    if (typeof newValues === 'string') { // [class] bindings allow string values
+        if (newValues.length) {
+            props = newValues.split(/\s+/);
+            allValuesTrue = true;
+        }
+    }
+    else {
+        props = newValues ? Object.keys(newValues) : null;
+        map = newValues;
+    }
+    if (props) {
+        outer: for (let i = 0; i < props.length; i++) {
+            /** @type {?} */
+            const prop = (/** @type {?} */ (props[i]));
+            /** @type {?} */
+            const value = allValuesTrue ? true : (/** @type {?} */ (map))[prop];
+            for (let j = 1 /* ValuesStartPosition */; j < lStylingMap.length; j += 2 /* TupleSize */) {
+                /** @type {?} */
+                const propAtIndex = getMapProp(lStylingMap, j);
+                if (prop <= propAtIndex) {
+                    if (propAtIndex === prop) {
+                        setMapValue(lStylingMap, j, value);
+                    }
+                    else {
+                        lStylingMap.splice(j, 0, prop, value);
+                    }
+                    continue outer;
+                }
+            }
+            lStylingMap.push(prop, value);
+        }
+    }
+    return lStylingMap;
+}
+/**
+ * @param {?} map
+ * @param {?} index
+ * @return {?}
+ */
+function getMapProp(map, index) {
+    return (/** @type {?} */ (map[index + 0 /* PropOffset */]));
+}
+/**
+ * @param {?} map
+ * @param {?} index
+ * @param {?} value
+ * @return {?}
+ */
+function setMapValue(map, index, value) {
+    map[index + 1 /* ValueOffset */] = value;
+}
+/**
+ * @param {?} map
+ * @param {?} index
+ * @return {?}
+ */
+function getMapValue(map, index) {
+    return (/** @type {?} */ (map[index + 1 /* ValueOffset */]));
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
  * Instantiates and attaches an instance of `TStylingContextDebug` to the provided context.
  * @param {?} context
  * @return {?}
@@ -12084,26 +12653,31 @@ class TStylingContextDebug {
         /** @type {?} */
         const entries = {};
         /** @type {?} */
-        const start = 2 /* ValuesStartPosition */;
+        const start = 2 /* MapBindingsPosition */;
         /** @type {?} */
         let i = start;
         while (i < context.length) {
             /** @type {?} */
-            const prop = getProp$1(context, i);
-            /** @type {?} */
-            const guardMask = getGuardMask(context, i);
-            /** @type {?} */
             const valuesCount = getValuesCount(context, i);
-            /** @type {?} */
-            const defaultValue = getDefaultValue(context, i);
-            /** @type {?} */
-            const bindingsStartPosition = i + 3 /* BindingsStartOffset */;
-            /** @type {?} */
-            const sources = [];
-            for (let j = 0; j < valuesCount; j++) {
-                sources.push((/** @type {?} */ (context[bindingsStartPosition + j])));
+            // the context may contain placeholder values which are populated ahead of time,
+            // but contain no actual binding values. In this situation there is no point in
+            // classifying this as an "entry" since no real data is stored here yet.
+            if (valuesCount) {
+                /** @type {?} */
+                const prop = getProp$1(context, i);
+                /** @type {?} */
+                const guardMask = getGuardMask(context, i);
+                /** @type {?} */
+                const defaultValue = getDefaultValue(context, i);
+                /** @type {?} */
+                const bindingsStartPosition = i + 3 /* BindingsStartOffset */;
+                /** @type {?} */
+                const sources = [];
+                for (let j = 0; j < valuesCount; j++) {
+                    sources.push((/** @type {?} */ (context[bindingsStartPosition + j])));
+                }
+                entries[prop] = { prop, guardMask, valuesCount, defaultValue, sources };
             }
-            entries[prop] = { prop, guardMask, valuesCount, defaultValue, sources };
             i += 3 /* BindingsStartOffset */ + valuesCount;
         }
         return entries;
@@ -12123,20 +12697,17 @@ class NodeStylingDebug {
     constructor(context, _data) {
         this.context = context;
         this._data = _data;
-        this._contextDebug = (/** @type {?} */ (((/** @type {?} */ (this.context))).debug));
     }
     /**
      * Returns a detailed summary of each styling entry in the context and
      * what their runtime representation is.
      *
-     * See `StylingSummary`.
+     * See `LStylingSummary`.
      * @return {?}
      */
     get summary() {
         /** @type {?} */
-        const contextEntries = this._contextDebug.entries;
-        /** @type {?} */
-        const finalValues = {};
+        const entries = {};
         this._mapValues((/**
          * @param {?} prop
          * @param {?} value
@@ -12144,46 +12715,8 @@ class NodeStylingDebug {
          * @return {?}
          */
         (prop, value, bindingIndex) => {
-            finalValues[prop] = { value, bindingIndex };
+            entries[prop] = { prop, value, bindingIndex };
         }));
-        /** @type {?} */
-        const entries = {};
-        /** @type {?} */
-        const values = this.values;
-        /** @type {?} */
-        const props = Object.keys(values);
-        for (let i = 0; i < props.length; i++) {
-            /** @type {?} */
-            const prop = props[i];
-            /** @type {?} */
-            const contextEntry = contextEntries[prop];
-            /** @type {?} */
-            const sourceValues = contextEntry.sources.map((/**
-             * @param {?} v
-             * @return {?}
-             */
-            v => {
-                /** @type {?} */
-                let value;
-                /** @type {?} */
-                let bindingIndex;
-                if (typeof v === 'number') {
-                    value = this._data[v];
-                    bindingIndex = v;
-                }
-                else {
-                    value = v;
-                    bindingIndex = null;
-                }
-                return { bindingIndex, value };
-            }));
-            /** @type {?} */
-            const finalValue = (/** @type {?} */ (finalValues[prop]));
-            /** @type {?} */
-            let bindingIndex = finalValue.bindingIndex;
-            bindingIndex = bindingIndex === DEFAULT_BINDING_INDEX_VALUE ? null : bindingIndex;
-            entries[prop] = { prop, value: finalValue.value, bindingIndex, sourceValues };
-        }
         return entries;
     }
     /**
@@ -12213,6 +12746,11 @@ class NodeStylingDebug {
         /** @type {?} */
         const mockElement = (/** @type {?} */ ({}));
         /** @type {?} */
+        const hasMaps = getValuesCount(this.context, 2 /* MapBindingsPosition */) > 0;
+        if (hasMaps) {
+            activeStylingMapFeature();
+        }
+        /** @type {?} */
         const mapFn = (/**
          * @param {?} renderer
          * @param {?} element
@@ -12222,9 +12760,9 @@ class NodeStylingDebug {
          * @return {?}
          */
         (renderer, element, prop, value, bindingIndex) => {
-            fn(prop, value, bindingIndex);
+            fn(prop, value, bindingIndex || null);
         });
-        applyStyling(this.context, null, mockElement, this._data, BIT_MASK_APPLY_ALL, mapFn);
+        applyStyling(this.context, null, mockElement, this._data, true, mapFn);
     }
 }
 
@@ -15948,22 +16486,22 @@ function getHighestElementOrICUContainer(tNode) {
     return tNode;
 }
 /**
- * @param {?} index
+ * @param {?} viewIndexInContainer
  * @param {?} lContainer
  * @return {?}
  */
-function getBeforeNodeForView(index, lContainer) {
+function getBeforeNodeForView(viewIndexInContainer, lContainer) {
     /** @type {?} */
-    const containerNative = lContainer[NATIVE];
-    if (index + 1 < lContainer.length - CONTAINER_HEADER_OFFSET) {
+    const nextViewIndex = CONTAINER_HEADER_OFFSET + viewIndexInContainer + 1;
+    if (nextViewIndex < lContainer.length) {
         /** @type {?} */
-        const view = (/** @type {?} */ (lContainer[CONTAINER_HEADER_OFFSET + index + 1]));
+        const lView = (/** @type {?} */ (lContainer[nextViewIndex]));
         /** @type {?} */
-        const viewTNode = (/** @type {?} */ (view[T_HOST]));
-        return viewTNode.child ? getNativeByTNode(viewTNode.child, view) : containerNative;
+        const tViewNodeChild = ((/** @type {?} */ (lView[T_HOST]))).child;
+        return tViewNodeChild !== null ? getNativeByTNode(tViewNodeChild, lView) : lContainer[NATIVE];
     }
     else {
-        return containerNative;
+        return lContainer[NATIVE];
     }
 }
 /**
@@ -16068,9 +16606,13 @@ function appendProjectedNode(projectedTNode, tProjectionNode, currentView, proje
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
+ * --------
+ *
  * This file contains the core logic for how styling instructions are processed in Angular.
  *
  * To learn more about the algorithm see `TStylingContext`.
+ *
+ * --------
  */
 /**
  * Temporary function to bridge styling functionality between this new
@@ -16102,19 +16644,7 @@ function stylingInit() {
  * @return {?}
  */
 function styleProp(prop, value, suffix) {
-    /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const bindingIndex = lView[BINDING_INDEX]++;
-    /** @type {?} */
-    const tNode = getTNode(index, lView);
-    /** @type {?} */
-    const tContext = getStylesContext(tNode);
-    /** @type {?} */
-    const defer = getActiveDirectiveSuperClassHeight() > 0;
-    updateStyleBinding(tContext, lView, prop, bindingIndex, value, defer);
+    _stylingProp(prop, value, false);
 }
 /**
  * Mirror implementation of the `classProp()` instruction (found in `instructions/styling.ts`).
@@ -16123,6 +16653,16 @@ function styleProp(prop, value, suffix) {
  * @return {?}
  */
 function classProp(className, value) {
+    _stylingProp(className, value, true);
+}
+/**
+ * Shared function used to update a prop-based styling binding for an element.
+ * @param {?} prop
+ * @param {?} value
+ * @param {?} isClassBased
+ * @return {?}
+ */
+function _stylingProp(prop, value, isClassBased) {
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
@@ -16132,10 +16672,65 @@ function classProp(className, value) {
     /** @type {?} */
     const tNode = getTNode(index, lView);
     /** @type {?} */
-    const tContext = getClassesContext(tNode);
-    /** @type {?} */
     const defer = getActiveDirectiveSuperClassHeight() > 0;
-    updateClassBinding(tContext, lView, className, bindingIndex, value, defer);
+    if (isClassBased) {
+        updateClassBinding(getClassesContext(tNode), lView, prop, bindingIndex, (/** @type {?} */ (value)), defer);
+    }
+    else {
+        updateStyleBinding(getStylesContext(tNode), lView, prop, bindingIndex, (/** @type {?} */ (value)), defer);
+    }
+}
+/**
+ * Mirror implementation of the `styleMap()` instruction (found in `instructions/styling.ts`).
+ * @param {?} styles
+ * @return {?}
+ */
+function styleMap(styles) {
+    _stylingMap(styles, false);
+}
+/**
+ * Mirror implementation of the `classMap()` instruction (found in `instructions/styling.ts`).
+ * @param {?} classes
+ * @return {?}
+ */
+function classMap(classes) {
+    _stylingMap(classes, true);
+}
+/**
+ * Shared function used to update a map-based styling binding for an element.
+ *
+ * When this function is called it will activate support for `[style]` and
+ * `[class]` bindings in Angular.
+ * @param {?} value
+ * @param {?} isClassBased
+ * @return {?}
+ */
+function _stylingMap(value, isClassBased) {
+    activeStylingMapFeature();
+    /** @type {?} */
+    const index = getSelectedIndex();
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const bindingIndex = lView[BINDING_INDEX]++;
+    if (value !== NO_CHANGE) {
+        /** @type {?} */
+        const tNode = getTNode(index, lView);
+        /** @type {?} */
+        const defer = getActiveDirectiveSuperClassHeight() > 0;
+        /** @type {?} */
+        const oldValue = lView[bindingIndex];
+        /** @type {?} */
+        const valueHasChanged = hasValueChanged$1(oldValue, value);
+        /** @type {?} */
+        const lStylingMap = normalizeIntoStylingMap(oldValue, value);
+        if (isClassBased) {
+            updateClassBinding(getClassesContext(tNode), lView, null, bindingIndex, lStylingMap, defer, valueHasChanged);
+        }
+        else {
+            updateStyleBinding(getStylesContext(tNode), lView, null, bindingIndex, lStylingMap, defer, valueHasChanged);
+        }
+    }
 }
 /**
  * Temporary function to bridge styling functionality between this new
@@ -16168,43 +16763,6 @@ function stylingApply() {
     const directiveIndex = getActiveDirectiveStylingIndex();
     applyClasses(renderer, lView, getClassesContext(tNode), native, directiveIndex);
     applyStyles(renderer, lView, getStylesContext(tNode), native, directiveIndex);
-}
-/**
- * @param {?} tNode
- * @return {?}
- */
-function getStylesContext(tNode) {
-    return getContext(tNode, false);
-}
-/**
- * @param {?} tNode
- * @return {?}
- */
-function getClassesContext(tNode) {
-    return getContext(tNode, true);
-}
-/**
- * Returns/instantiates a styling context from/to a `tNode` instance.
- * @param {?} tNode
- * @param {?} isClassBased
- * @return {?}
- */
-function getContext(tNode, isClassBased) {
-    /** @type {?} */
-    let context = isClassBased ? tNode.newClasses : tNode.newStyles;
-    if (!context) {
-        context = allocStylingContext$1();
-        if (ngDevMode) {
-            attachStylingDebugObject(context);
-        }
-        if (isClassBased) {
-            tNode.newClasses = context;
-        }
-        else {
-            tNode.newStyles = context;
-        }
-    }
-    return context;
 }
 /**
  * Temporary function to bridge styling functionality between this new
@@ -16311,6 +16869,43 @@ function getActiveDirectiveStylingIndex() {
 function updateLastDirectiveIndex(tNode, directiveIndex) {
     updateContextDirectiveIndex(getClassesContext(tNode), directiveIndex);
     updateContextDirectiveIndex(getStylesContext(tNode), directiveIndex);
+}
+/**
+ * @param {?} tNode
+ * @return {?}
+ */
+function getStylesContext(tNode) {
+    return getContext(tNode, false);
+}
+/**
+ * @param {?} tNode
+ * @return {?}
+ */
+function getClassesContext(tNode) {
+    return getContext(tNode, true);
+}
+/**
+ * Returns/instantiates a styling context from/to a `tNode` instance.
+ * @param {?} tNode
+ * @param {?} isClassBased
+ * @return {?}
+ */
+function getContext(tNode, isClassBased) {
+    /** @type {?} */
+    let context = isClassBased ? tNode.newClasses : tNode.newStyles;
+    if (!context) {
+        context = allocStylingContext$1();
+        if (ngDevMode) {
+            attachStylingDebugObject(context);
+        }
+        if (isClassBased) {
+            tNode.newClasses = context;
+        }
+        else {
+            tNode.newStyles = context;
+        }
+    }
+    return context;
 }
 
 /**
@@ -16589,6 +17184,9 @@ function ɵɵstyleMap(styles) {
         }
         updateStyleMap(stylingContext, styles);
     }
+    if (runtimeIsNewStylingInUse()) {
+        styleMap(styles);
+    }
 }
 /**
  * Update class bindings using an object literal or class-string on an element.
@@ -16638,6 +17236,9 @@ function ɵɵclassMap(classes) {
             classes = NO_CHANGE;
         }
         updateClassMap(stylingContext, classes);
+    }
+    if (runtimeIsNewStylingInUse()) {
+        classMap(classes);
     }
 }
 /**
@@ -22138,7 +22739,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-rc.0+340.sha-68cd0ca.with-local-changes');
+const VERSION = new Version('8.0.0-rc.0+343.sha-dc6406e.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -30561,11 +31162,15 @@ function compileNgModule(moduleType, ngModule = {}) {
 }
 /**
  * Compiles and adds the `ngModuleDef` and `ngInjectorDef` properties to the module class.
+ *
+ * It's possible to compile a module via this API which will allow duplicate declarations in its
+ * root.
  * @param {?} moduleType
  * @param {?} ngModule
+ * @param {?=} allowDuplicateDeclarationsInRoot
  * @return {?}
  */
-function compileNgModuleDefs(moduleType, ngModule) {
+function compileNgModuleDefs(moduleType, ngModule, allowDuplicateDeclarationsInRoot = false) {
     ngDevMode && assertDefined(moduleType, 'Required value moduleType');
     ngDevMode && assertDefined(ngModule, 'Required value ngModule');
     /** @type {?} */
@@ -30605,7 +31210,7 @@ function compileNgModuleDefs(moduleType, ngModule) {
          */
         () => {
             if (ngInjectorDef === null) {
-                ngDevMode && verifySemanticsOfNgModuleDef((/** @type {?} */ ((/** @type {?} */ (moduleType)))));
+                ngDevMode && verifySemanticsOfNgModuleDef((/** @type {?} */ ((/** @type {?} */ (moduleType)))), allowDuplicateDeclarationsInRoot);
                 /** @type {?} */
                 const meta = {
                     name: moduleType.name,
@@ -30627,9 +31232,10 @@ function compileNgModuleDefs(moduleType, ngModule) {
 }
 /**
  * @param {?} moduleType
+ * @param {?} allowDuplicateDeclarationsInRoot
  * @return {?}
  */
-function verifySemanticsOfNgModuleDef(moduleType) {
+function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRoot) {
     if (verifiedNgModule.get(moduleType))
         return;
     verifiedNgModule.set(moduleType, true);
@@ -30642,7 +31248,13 @@ function verifySemanticsOfNgModuleDef(moduleType) {
     const declarations = maybeUnwrapFn(ngModuleDef.declarations);
     /** @type {?} */
     const imports = maybeUnwrapFn(ngModuleDef.imports);
-    flatten(imports).map(unwrapModuleWithProvidersImports).forEach(verifySemanticsOfNgModuleDef);
+    flatten(imports)
+        .map(unwrapModuleWithProvidersImports)
+        .forEach((/**
+     * @param {?} mod
+     * @return {?}
+     */
+    mod => verifySemanticsOfNgModuleDef(mod, false)));
     /** @type {?} */
     const exports = maybeUnwrapFn(ngModuleDef.exports);
     declarations.forEach(verifyDeclarationsHaveDefinitions);
@@ -30652,7 +31264,11 @@ function verifySemanticsOfNgModuleDef(moduleType) {
         ...flatten(imports.map(computeCombinedExports)).map(resolveForwardRef),
     ];
     exports.forEach(verifyExportsAreDeclaredOrReExported);
-    declarations.forEach(verifyDeclarationIsUnique);
+    declarations.forEach((/**
+     * @param {?} decl
+     * @return {?}
+     */
+    decl => verifyDeclarationIsUnique(decl, allowDuplicateDeclarationsInRoot)));
     declarations.forEach(verifyComponentEntryComponentsIsPartOfNgModule);
     /** @type {?} */
     const ngModule = getAnnotation(moduleType, 'NgModule');
@@ -30660,7 +31276,11 @@ function verifySemanticsOfNgModuleDef(moduleType) {
         ngModule.imports &&
             flatten(ngModule.imports)
                 .map(unwrapModuleWithProvidersImports)
-                .forEach(verifySemanticsOfNgModuleDef);
+                .forEach((/**
+             * @param {?} mod
+             * @return {?}
+             */
+            mod => verifySemanticsOfNgModuleDef(mod, false)));
         ngModule.bootstrap && ngModule.bootstrap.forEach(verifyCorrectBootstrapType);
         ngModule.bootstrap && ngModule.bootstrap.forEach(verifyComponentIsPartOfNgModule);
         ngModule.entryComponents && ngModule.entryComponents.forEach(verifyComponentIsPartOfNgModule);
@@ -30702,18 +31322,21 @@ function verifySemanticsOfNgModuleDef(moduleType) {
     }
     /**
      * @param {?} type
+     * @param {?} suppressErrors
      * @return {?}
      */
-    function verifyDeclarationIsUnique(type) {
+    function verifyDeclarationIsUnique(type, suppressErrors) {
         type = resolveForwardRef(type);
         /** @type {?} */
         const existingModule = ownerNgModule.get(type);
         if (existingModule && existingModule !== moduleType) {
-            /** @type {?} */
-            const modules = [existingModule, moduleType].map(stringifyForError).sort();
-            errors.push(`Type ${stringifyForError(type)} is part of the declarations of 2 modules: ${modules[0]} and ${modules[1]}! ` +
-                `Please consider moving ${stringifyForError(type)} to a higher module that imports ${modules[0]} and ${modules[1]}. ` +
-                `You can also create a new NgModule that exports and includes ${stringifyForError(type)} then import that NgModule in ${modules[0]} and ${modules[1]}.`);
+            if (!suppressErrors) {
+                /** @type {?} */
+                const modules = [existingModule, moduleType].map(stringifyForError).sort();
+                errors.push(`Type ${stringifyForError(type)} is part of the declarations of 2 modules: ${modules[0]} and ${modules[1]}! ` +
+                    `Please consider moving ${stringifyForError(type)} to a higher module that imports ${modules[0]} and ${modules[1]}. ` +
+                    `You can also create a new NgModule that exports and includes ${stringifyForError(type)} then import that NgModule in ${modules[0]} and ${modules[1]}.`);
+            }
         }
         else {
             // Mark type as having owner.
@@ -30844,7 +31467,7 @@ function computeCombinedExports(type) {
             /** @type {?} */
             /** @nocollapse */ const ngModuleDef = getNgModuleDef(type);
             if (ngModuleDef) {
-                verifySemanticsOfNgModuleDef((/** @type {?} */ ((/** @type {?} */ (type)))));
+                verifySemanticsOfNgModuleDef((/** @type {?} */ ((/** @type {?} */ (type)))), false);
                 return computeCombinedExports(type);
             }
             else {

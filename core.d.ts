@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+340.sha-68cd0ca.with-local-changes
+ * @license Angular v8.0.0-rc.0+343.sha-dc6406e.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3899,6 +3899,36 @@ declare interface LQueries {
     track<T>(queryList: QueryList<T>, predicate: Type<any> | string[], descend?: boolean, read?: Type<T>): void;
 }
 
+/**
+ * Array-based representation of a key/value array.
+ *
+ * The format of the array is "property", "value", "property2",
+ * "value2", etc...
+ *
+ * The first value in the array is reserved to store the instance
+ * of the key/value array that was used to populate the property/
+ * value entries that take place in the remainder of the array.
+ */
+declare interface LStylingMap extends Array<{} | string | number | null> {
+    [LStylingMapIndex.RawValuePosition]: {} | string | null;
+}
+
+/**
+ * An index of position and offset points for any data stored within a `LStylingMap` instance.
+ */
+declare const enum LStylingMapIndex {
+    /** The location of the raw key/value map instance used last to populate the array entries */
+    RawValuePosition = 0,
+    /** Where the values start in the array */
+    ValuesStartPosition = 1,
+    /** The size of each property/value entry */
+    TupleSize = 2,
+    /** The offset for the property entry in the tuple */
+    PropOffset = 0,
+    /** The offset for the value entry in the tuple */
+    ValueOffset = 1
+}
+
 /** Flags associated with an LView (saved in LView[FLAGS]) */
 declare const enum LViewFlags {
     /** The state of the init phase on the first 2 bits */
@@ -7629,6 +7659,15 @@ declare const enum TStylingConfigFlags {
 }
 
 /**
+ * --------
+ *
+ * This file contains the core interfaces for styling in Angular.
+ *
+ * To learn more about the algorithm see `TStylingContext`.
+ *
+ * --------
+ */
+/**
  * A static-level representation of all style or class bindings/values
  * associated with a `TNode`.
  *
@@ -7763,7 +7802,7 @@ declare const enum TStylingConfigFlags {
  * styling apply call has been called (this is triggered by the
  * `stylingApply()` instruction for the active element).
  *
- * # How Styles/Classes are Applied
+ * # How Styles/Classes are Rendered
  * Each time a styling instruction (e.g. `[class.name]`, `[style.prop]`,
  * etc...) is executed, the associated `lView` for the view is updated
  * at the current binding location. Also, when this happens, a local
@@ -7786,15 +7825,74 @@ declare const enum TStylingConfigFlags {
  * }
  * ```
  *
+ * ## The Apply Algorithm
+ * As explained above, each time a binding updates its value, the resulting
+ * value is stored in the `lView` array. These styling values have yet to
+ * be flushed to the element.
+ *
  * Once all the styling instructions have been evaluated, then the styling
  * context(s) are flushed to the element. When this happens, the context will
  * be iterated over (property by property) and each binding source will be
  * examined and the first non-null value will be applied to the element.
  *
+ * Let's say that we the following template code:
+ *
+ * ```html
+ * <div [style.width]="w1" dir-that-set-width="w2"></div>
+ * ```
+ *
+ * There are two styling bindings in the code above and they both write
+ * to the `width` property. When styling is flushed on the element, the
+ * algorithm will try and figure out which one of these values to write
+ * to the element.
+ *
+ * In order to figure out which value to apply, the following
+ * binding prioritization is adhered to:
+ *
+ * 1. First template-level styling bindings are applied (if present).
+ *    This includes things like `[style.width]` and `[class.active]`.
+ *
+ * 2. Second are styling-level host bindings present in directives.
+ *    (if there are sub/super directives present then the sub directives
+ *    are applied first).
+ *
+ * 3. Third are styling-level host bindings present in components.
+ *    (if there are sub/super components present then the sub directives
+ *    are applied first).
+ *
+ * This means that in the code above the styling binding present in the
+ * template is applied first and, only if its falsy, then the directive
+ * styling binding for width will be applied.
+ *
+ * ### What about map-based styling bindings?
+ * Map-based styling bindings are activated when there are one or more
+ * `[style]` and/or `[class]` bindings present on an element. When this
+ * code is activated, the apply algorithm will iterate over each map
+ * entry and apply each styling value to the element with the same
+ * prioritization rules as above.
+ *
+ * For the algorithm to apply styling values efficiently, the
+ * styling map entries must be applied in sync (property by property)
+ * with prop-based bindings. (The map-based algorithm is described
+ * more inside of the `render3/stlying_next/map_based_bindings.ts` file.)
  */
-declare interface TStylingContext extends Array<number | string | number | boolean | null> {
+declare interface TStylingContext extends Array<number | string | number | boolean | null | LStylingMap> {
+    /** Configuration data for the context */
     [TStylingContextIndex.ConfigPosition]: TStylingConfigFlags;
+    /** Temporary value used to track directive index entries until
+       the old styling code is fully removed. The reason why this
+       is required is to figure out which directive is last and,
+       when encountered, trigger a styling flush to happen */
     [TStylingContextIndex.MaxDirectiveIndexPosition]: number;
+    /** The bit guard value for all map-based bindings on an element */
+    [TStylingContextIndex.MapBindingsBitGuardPosition]: number;
+    /** The total amount of map-based bindings present on an element */
+    [TStylingContextIndex.MapBindingsValuesCountPosition]: number;
+    /** The prop value for map-based bindings (there actually isn't a
+     * value at all, but this is just used in the context to avoid
+     * having any special code to update the binding information for
+     * map-based entries). */
+    [TStylingContextIndex.MapBindingsPropPosition]: string;
 }
 
 /**
@@ -7803,8 +7901,12 @@ declare interface TStylingContext extends Array<number | string | number | boole
 declare const enum TStylingContextIndex {
     ConfigPosition = 0,
     MaxDirectiveIndexPosition = 1,
-    ValuesStartPosition = 2,
-    MaskOffset = 0,
+    MapBindingsPosition = 2,
+    MapBindingsBitGuardPosition = 2,
+    MapBindingsValuesCountPosition = 3,
+    MapBindingsPropPosition = 4,
+    MapBindingsBindingsStartPosition = 5,
+    GuardOffset = 0,
     ValuesCountOffset = 1,
     PropOffset = 2,
     BindingsStartOffset = 3
@@ -9676,8 +9778,11 @@ export declare function ɵcompileNgModule(moduleType: Type<any>, ngModule?: NgMo
 
 /**
  * Compiles and adds the `ngModuleDef` and `ngInjectorDef` properties to the module class.
+ *
+ * It's possible to compile a module via this API which will allow duplicate declarations in its
+ * root.
  */
-export declare function ɵcompileNgModuleDefs(moduleType: ɵNgModuleType, ngModule: NgModule): void;
+export declare function ɵcompileNgModuleDefs(moduleType: ɵNgModuleType, ngModule: NgModule, allowDuplicateDeclarationsInRoot?: boolean): void;
 
 export declare function ɵcompileNgModuleFactory__POST_R3__<M>(injector: Injector, options: CompilerOptions, moduleType: Type<M>): Promise<NgModuleFactory<M>>;
 
