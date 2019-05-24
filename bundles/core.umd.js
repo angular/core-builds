@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+342.sha-deb77bd.with-local-changes
+ * @license Angular v8.0.0-rc.0+340.sha-68cd0ca.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12694,15 +12694,15 @@
         }
         return tNode;
     }
-    function getBeforeNodeForView(viewIndexInContainer, lContainer) {
-        var nextViewIndex = CONTAINER_HEADER_OFFSET + viewIndexInContainer + 1;
-        if (nextViewIndex < lContainer.length) {
-            var lView = lContainer[nextViewIndex];
-            var tViewNodeChild = lView[T_HOST].child;
-            return tViewNodeChild !== null ? getNativeByTNode(tViewNodeChild, lView) : lContainer[NATIVE];
+    function getBeforeNodeForView(index, lContainer) {
+        var containerNative = lContainer[NATIVE];
+        if (index + 1 < lContainer.length - CONTAINER_HEADER_OFFSET) {
+            var view = lContainer[CONTAINER_HEADER_OFFSET + index + 1];
+            var viewTNode = view[T_HOST];
+            return viewTNode.child ? getNativeByTNode(viewTNode.child, view) : containerNative;
         }
         else {
-            return lContainer[NATIVE];
+            return containerNative;
         }
     }
     /**
@@ -17832,7 +17832,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-rc.0+342.sha-deb77bd.with-local-changes');
+    var VERSION = new Version('8.0.0-rc.0+340.sha-68cd0ca.with-local-changes');
 
     /**
      * @license
@@ -24164,12 +24164,8 @@
     }
     /**
      * Compiles and adds the `ngModuleDef` and `ngInjectorDef` properties to the module class.
-     *
-     * It's possible to compile a module via this API which will allow duplicate declarations in its
-     * root.
      */
-    function compileNgModuleDefs(moduleType, ngModule, allowDuplicateDeclarationsInRoot) {
-        if (allowDuplicateDeclarationsInRoot === void 0) { allowDuplicateDeclarationsInRoot = false; }
+    function compileNgModuleDefs(moduleType, ngModule) {
         ngDevMode && assertDefined(moduleType, 'Required value moduleType');
         ngDevMode && assertDefined(ngModule, 'Required value ngModule');
         var declarations = flatten(ngModule.declarations || EMPTY_ARRAY$4);
@@ -24200,7 +24196,7 @@
         Object.defineProperty(moduleType, NG_INJECTOR_DEF, {
             get: function () {
                 if (ngInjectorDef === null) {
-                    ngDevMode && verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRoot);
+                    ngDevMode && verifySemanticsOfNgModuleDef(moduleType);
                     var meta = {
                         name: moduleType.name,
                         type: moduleType,
@@ -24219,7 +24215,7 @@
             configurable: !!ngDevMode,
         });
     }
-    function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRoot) {
+    function verifySemanticsOfNgModuleDef(moduleType) {
         if (verifiedNgModule.get(moduleType))
             return;
         verifiedNgModule.set(moduleType, true);
@@ -24228,21 +24224,19 @@
         var errors = [];
         var declarations = maybeUnwrapFn(ngModuleDef.declarations);
         var imports = maybeUnwrapFn(ngModuleDef.imports);
-        flatten(imports)
-            .map(unwrapModuleWithProvidersImports)
-            .forEach(function (mod) { return verifySemanticsOfNgModuleDef(mod, false); });
+        flatten(imports).map(unwrapModuleWithProvidersImports).forEach(verifySemanticsOfNgModuleDef);
         var exports = maybeUnwrapFn(ngModuleDef.exports);
         declarations.forEach(verifyDeclarationsHaveDefinitions);
         var combinedDeclarations = __spread(declarations.map(resolveForwardRef), flatten(imports.map(computeCombinedExports)).map(resolveForwardRef));
         exports.forEach(verifyExportsAreDeclaredOrReExported);
-        declarations.forEach(function (decl) { return verifyDeclarationIsUnique(decl, allowDuplicateDeclarationsInRoot); });
+        declarations.forEach(verifyDeclarationIsUnique);
         declarations.forEach(verifyComponentEntryComponentsIsPartOfNgModule);
         var ngModule = getAnnotation(moduleType, 'NgModule');
         if (ngModule) {
             ngModule.imports &&
                 flatten(ngModule.imports)
                     .map(unwrapModuleWithProvidersImports)
-                    .forEach(function (mod) { return verifySemanticsOfNgModuleDef(mod, false); });
+                    .forEach(verifySemanticsOfNgModuleDef);
             ngModule.bootstrap && ngModule.bootstrap.forEach(verifyCorrectBootstrapType);
             ngModule.bootstrap && ngModule.bootstrap.forEach(verifyComponentIsPartOfNgModule);
             ngModule.entryComponents && ngModule.entryComponents.forEach(verifyComponentIsPartOfNgModule);
@@ -24272,16 +24266,14 @@
                 }
             }
         }
-        function verifyDeclarationIsUnique(type, suppressErrors) {
+        function verifyDeclarationIsUnique(type) {
             type = resolveForwardRef(type);
             var existingModule = ownerNgModule.get(type);
             if (existingModule && existingModule !== moduleType) {
-                if (!suppressErrors) {
-                    var modules = [existingModule, moduleType].map(stringifyForError).sort();
-                    errors.push("Type " + stringifyForError(type) + " is part of the declarations of 2 modules: " + modules[0] + " and " + modules[1] + "! " +
-                        ("Please consider moving " + stringifyForError(type) + " to a higher module that imports " + modules[0] + " and " + modules[1] + ". ") +
-                        ("You can also create a new NgModule that exports and includes " + stringifyForError(type) + " then import that NgModule in " + modules[0] + " and " + modules[1] + "."));
-                }
+                var modules = [existingModule, moduleType].map(stringifyForError).sort();
+                errors.push("Type " + stringifyForError(type) + " is part of the declarations of 2 modules: " + modules[0] + " and " + modules[1] + "! " +
+                    ("Please consider moving " + stringifyForError(type) + " to a higher module that imports " + modules[0] + " and " + modules[1] + ". ") +
+                    ("You can also create a new NgModule that exports and includes " + stringifyForError(type) + " then import that NgModule in " + modules[0] + " and " + modules[1] + "."));
             }
             else {
                 // Mark type as having owner.
@@ -24365,7 +24357,7 @@
         return __spread(flatten(maybeUnwrapFn(ngModuleDef.exports).map(function (type) {
             var ngModuleDef = getNgModuleDef(type);
             if (ngModuleDef) {
-                verifySemanticsOfNgModuleDef(type, false);
+                verifySemanticsOfNgModuleDef(type);
                 return computeCombinedExports(type);
             }
             else {

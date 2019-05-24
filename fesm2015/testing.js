@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+342.sha-deb77bd.with-local-changes
+ * @license Angular v8.0.0-rc.0+340.sha-68cd0ca.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1273,21 +1273,8 @@ class NgModuleResolver extends OverrideResolver {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
-/** @enum {number} */
-const TestingModuleOverride = {
-    DECLARATION: 0,
-    OVERRIDE_TEMPLATE: 1,
-};
-TestingModuleOverride[TestingModuleOverride.DECLARATION] = 'DECLARATION';
-TestingModuleOverride[TestingModuleOverride.OVERRIDE_TEMPLATE] = 'OVERRIDE_TEMPLATE';
-/**
- * @param {?} value
- * @return {?}
- */
-function isTestingModuleOverride(value) {
-    return value === TestingModuleOverride.DECLARATION ||
-        value === TestingModuleOverride.OVERRIDE_TEMPLATE;
-}
+/** @type {?} */
+const TESTING_MODULE = 'TestingModule';
 class R3TestBedCompiler {
     /**
      * @param {?} platform
@@ -1348,7 +1335,7 @@ class R3TestBedCompiler {
     configureTestingModule(moduleDef) {
         // Enqueue any compilation tasks for the directly declared component.
         if (moduleDef.declarations !== undefined) {
-            this.queueTypeArray(moduleDef.declarations, TestingModuleOverride.DECLARATION);
+            this.queueTypeArray(moduleDef.declarations, TESTING_MODULE);
             this.declarations.push(...moduleDef.declarations);
         }
         // Enqueue any compilation tasks for imported modules.
@@ -1468,7 +1455,7 @@ class R3TestBedCompiler {
             this.existingComponentStyles.set(type, def.styles);
         }
         // Set the component's scope to be the testing module.
-        this.componentToModuleScope.set(type, TestingModuleOverride.OVERRIDE_TEMPLATE);
+        this.componentToModuleScope.set(type, TESTING_MODULE);
     }
     /**
      * @return {?}
@@ -1630,7 +1617,7 @@ class R3TestBedCompiler {
         (moduleType) => {
             if (!moduleToScope.has(moduleType)) {
                 /** @type {?} */
-                const realType = isTestingModuleOverride(moduleType) ? this.testModuleType : moduleType;
+                const realType = moduleType === TESTING_MODULE ? this.testModuleType : moduleType;
                 moduleToScope.set(moduleType, ɵtransitiveScopesFor(realType));
             }
             return (/** @type {?} */ (moduleToScope.get(moduleType)));
@@ -1766,22 +1753,9 @@ class R3TestBedCompiler {
             }
             this.seenComponents.add(type);
             // Keep track of the module which declares this component, so later the component's scope
-            // can be set correctly. If the component has already been recorded here, then one of several
-            // cases is true:
-            // * the module containing the component was imported multiple times (common).
-            // * the component is declared in multiple modules (which is an error).
-            // * the component was in 'declarations' of the testing module, and also in an imported module
-            //   in which case the module scope will be TestingModuleOverride.DECLARATION.
-            // * overrideTemplateUsingTestingModule was called for the component in which case the module
-            //   scope will be TestingModuleOverride.OVERRIDE_TEMPLATE.
-            //
-            // If the component was previously in the testing module's 'declarations' (meaning the
-            // current value is TestingModuleOverride.DECLARATION), then `moduleType` is the component's
-            // real module, which was imported. This pattern is understood to mean that the component
-            // should use its original scope, but that the testing module should also contain the
-            // component in its scope.
-            if (!this.componentToModuleScope.has(type) ||
-                this.componentToModuleScope.get(type) === TestingModuleOverride.DECLARATION) {
+            // can be set correctly. Only record this the first time, because it might be overridden by
+            // overrideTemplateUsingTestingModule.
+            if (!this.componentToModuleScope.has(type)) {
                 this.componentToModuleScope.set(type, moduleType);
             }
             return;
@@ -1944,7 +1918,7 @@ class R3TestBedCompiler {
             imports,
             schemas: this.schemas,
             providers,
-        }, /* allowDuplicateDeclarationsInRoot */ true);
+        });
         // clang-format on
         this.applyProviderOverridesToModule(this.testModuleType);
     }
