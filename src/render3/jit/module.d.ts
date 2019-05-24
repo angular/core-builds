@@ -23,11 +23,8 @@ export declare function flushModuleScopingQueueAsMuchAsPossible(): void;
 export declare function compileNgModule(moduleType: Type<any>, ngModule?: NgModule): void;
 /**
  * Compiles and adds the `ngModuleDef` and `ngInjectorDef` properties to the module class.
- *
- * It's possible to compile a module via this API which will allow duplicate declarations in its
- * root.
  */
-export declare function compileNgModuleDefs(moduleType: NgModuleType, ngModule: NgModule, allowDuplicateDeclarationsInRoot?: boolean): void;
+export declare function compileNgModuleDefs(moduleType: NgModuleType, ngModule: NgModule): void;
 export declare function resetCompiledComponents(): void;
 /**
  * Patch the definition of a component with directives and pipes from the compilation scope of
