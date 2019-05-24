@@ -1,22 +1,26 @@
-import { StylingBindingData, TStylingContext } from './interfaces';
+import { LStylingData, TStylingContext } from './interfaces';
+/**
+ * --------
+ *
+ * This file contains the core debug functionality for styling in Angular.
+ *
+ * To learn more about the algorithm see `TStylingContext`.
+ *
+ * --------
+ */
 /**
  * A debug/testing-oriented summary of a styling entry.
  *
  * A value such as this is generated as an artifact of the `DebugStyling`
  * summary.
  */
-export interface StylingSummary {
+export interface LStylingSummary {
     /** The style/class property that the summary is attached to */
     prop: string;
     /** The last applied value for the style/class property */
-    value: string | null;
+    value: string | boolean | null;
     /** The binding index of the last applied style/class property */
     bindingIndex: number | null;
-    /** Every binding source that is writing the style/class property represented in this tuple */
-    sourceValues: {
-        value: string | number | null;
-        bindingIndex: number | null;
-    }[];
 }
 /**
  * A debug/testing-oriented summary of all styling entries for a `DebugNode` instance.
@@ -29,8 +33,8 @@ export interface DebugStyling {
      * present in the context.
      */
     summary: {
-        [key: string]: StylingSummary;
-    } | null;
+        [key: string]: LStylingSummary;
+    };
     /**
      * A key/value map of all styling properties and their
      * runtime values.
@@ -93,16 +97,15 @@ declare class TStylingContextDebug {
 export declare class NodeStylingDebug implements DebugStyling {
     context: TStylingContext;
     private _data;
-    private _contextDebug;
-    constructor(context: TStylingContext, _data: StylingBindingData);
+    constructor(context: TStylingContext, _data: LStylingData);
     /**
      * Returns a detailed summary of each styling entry in the context and
      * what their runtime representation is.
      *
-     * See `StylingSummary`.
+     * See `LStylingSummary`.
      */
     readonly summary: {
-        [key: string]: StylingSummary;
+        [key: string]: LStylingSummary;
     };
     /**
      * Returns a key/value map of all the styles/classes that were last applied to the element.

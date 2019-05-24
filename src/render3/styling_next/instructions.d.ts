@@ -1,8 +1,13 @@
 import { TAttributes, TNode } from '../interfaces/node';
+import { NO_CHANGE } from '../tokens';
 /**
+ * --------
+ *
  * This file contains the core logic for how styling instructions are processed in Angular.
  *
  * To learn more about the algorithm see `TStylingContext`.
+ *
+ * --------
  */
 /**
  * Temporary function to bridge styling functionality between this new
@@ -25,6 +30,18 @@ export declare function styleProp(prop: string, value: string | number | String 
  * Mirror implementation of the `classProp()` instruction (found in `instructions/styling.ts`).
  */
 export declare function classProp(className: string, value: boolean | null): void;
+/**
+ * Mirror implementation of the `styleMap()` instruction (found in `instructions/styling.ts`).
+ */
+export declare function styleMap(styles: {
+    [styleName: string]: any;
+} | NO_CHANGE | null): void;
+/**
+ * Mirror implementation of the `classMap()` instruction (found in `instructions/styling.ts`).
+ */
+export declare function classMap(classes: {
+    [className: string]: any;
+} | NO_CHANGE | string | null): void;
 /**
  * Temporary function to bridge styling functionality between this new
  * refactor (which is here inside of `styling_next/`) and the old
