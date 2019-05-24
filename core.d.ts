@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+341.sha-d5f96a8.with-local-changes
+ * @license Angular v8.0.0-rc.0+342.sha-deb77bd.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9676,8 +9676,11 @@ export declare function ɵcompileNgModule(moduleType: Type<any>, ngModule?: NgMo
 
 /**
  * Compiles and adds the `ngModuleDef` and `ngInjectorDef` properties to the module class.
+ *
+ * It's possible to compile a module via this API which will allow duplicate declarations in its
+ * root.
  */
-export declare function ɵcompileNgModuleDefs(moduleType: ɵNgModuleType, ngModule: NgModule): void;
+export declare function ɵcompileNgModuleDefs(moduleType: ɵNgModuleType, ngModule: NgModule, allowDuplicateDeclarationsInRoot?: boolean): void;
 
 export declare function ɵcompileNgModuleFactory__POST_R3__<M>(injector: Injector, options: CompilerOptions, moduleType: Type<M>): Promise<NgModuleFactory<M>>;
 

@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+341.sha-d5f96a8.with-local-changes
+ * @license Angular v8.0.0-rc.0+342.sha-deb77bd.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -22138,7 +22138,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-rc.0+341.sha-d5f96a8.with-local-changes');
+const VERSION = new Version('8.0.0-rc.0+342.sha-deb77bd.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -30561,11 +30561,15 @@ function compileNgModule(moduleType, ngModule = {}) {
 }
 /**
  * Compiles and adds the `ngModuleDef` and `ngInjectorDef` properties to the module class.
+ *
+ * It's possible to compile a module via this API which will allow duplicate declarations in its
+ * root.
  * @param {?} moduleType
  * @param {?} ngModule
+ * @param {?=} allowDuplicateDeclarationsInRoot
  * @return {?}
  */
-function compileNgModuleDefs(moduleType, ngModule) {
+function compileNgModuleDefs(moduleType, ngModule, allowDuplicateDeclarationsInRoot = false) {
     ngDevMode && assertDefined(moduleType, 'Required value moduleType');
     ngDevMode && assertDefined(ngModule, 'Required value ngModule');
     /** @type {?} */
@@ -30605,7 +30609,7 @@ function compileNgModuleDefs(moduleType, ngModule) {
          */
         () => {
             if (ngInjectorDef === null) {
-                ngDevMode && verifySemanticsOfNgModuleDef((/** @type {?} */ ((/** @type {?} */ (moduleType)))));
+                ngDevMode && verifySemanticsOfNgModuleDef((/** @type {?} */ ((/** @type {?} */ (moduleType)))), allowDuplicateDeclarationsInRoot);
                 /** @type {?} */
                 const meta = {
                     name: moduleType.name,
@@ -30627,9 +30631,10 @@ function compileNgModuleDefs(moduleType, ngModule) {
 }
 /**
  * @param {?} moduleType
+ * @param {?} allowDuplicateDeclarationsInRoot
  * @return {?}
  */
-function verifySemanticsOfNgModuleDef(moduleType) {
+function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRoot) {
     if (verifiedNgModule.get(moduleType))
         return;
     verifiedNgModule.set(moduleType, true);
@@ -30642,7 +30647,13 @@ function verifySemanticsOfNgModuleDef(moduleType) {
     const declarations = maybeUnwrapFn(ngModuleDef.declarations);
     /** @type {?} */
     const imports = maybeUnwrapFn(ngModuleDef.imports);
-    flatten(imports).map(unwrapModuleWithProvidersImports).forEach(verifySemanticsOfNgModuleDef);
+    flatten(imports)
+        .map(unwrapModuleWithProvidersImports)
+        .forEach((/**
+     * @param {?} mod
+     * @return {?}
+     */
+    mod => verifySemanticsOfNgModuleDef(mod, false)));
     /** @type {?} */
     const exports = maybeUnwrapFn(ngModuleDef.exports);
     declarations.forEach(verifyDeclarationsHaveDefinitions);
@@ -30652,7 +30663,11 @@ function verifySemanticsOfNgModuleDef(moduleType) {
         ...flatten(imports.map(computeCombinedExports)).map(resolveForwardRef),
     ];
     exports.forEach(verifyExportsAreDeclaredOrReExported);
-    declarations.forEach(verifyDeclarationIsUnique);
+    declarations.forEach((/**
+     * @param {?} decl
+     * @return {?}
+     */
+    decl => verifyDeclarationIsUnique(decl, allowDuplicateDeclarationsInRoot)));
     declarations.forEach(verifyComponentEntryComponentsIsPartOfNgModule);
     /** @type {?} */
     const ngModule = getAnnotation(moduleType, 'NgModule');
@@ -30660,7 +30675,11 @@ function verifySemanticsOfNgModuleDef(moduleType) {
         ngModule.imports &&
             flatten(ngModule.imports)
                 .map(unwrapModuleWithProvidersImports)
-                .forEach(verifySemanticsOfNgModuleDef);
+                .forEach((/**
+             * @param {?} mod
+             * @return {?}
+             */
+            mod => verifySemanticsOfNgModuleDef(mod, false)));
         ngModule.bootstrap && ngModule.bootstrap.forEach(verifyCorrectBootstrapType);
         ngModule.bootstrap && ngModule.bootstrap.forEach(verifyComponentIsPartOfNgModule);
         ngModule.entryComponents && ngModule.entryComponents.forEach(verifyComponentIsPartOfNgModule);
@@ -30702,18 +30721,21 @@ function verifySemanticsOfNgModuleDef(moduleType) {
     }
     /**
      * @param {?} type
+     * @param {?} suppressErrors
      * @return {?}
      */
-    function verifyDeclarationIsUnique(type) {
+    function verifyDeclarationIsUnique(type, suppressErrors) {
         type = resolveForwardRef(type);
         /** @type {?} */
         const existingModule = ownerNgModule.get(type);
         if (existingModule && existingModule !== moduleType) {
-            /** @type {?} */
-            const modules = [existingModule, moduleType].map(stringifyForError).sort();
-            errors.push(`Type ${stringifyForError(type)} is part of the declarations of 2 modules: ${modules[0]} and ${modules[1]}! ` +
-                `Please consider moving ${stringifyForError(type)} to a higher module that imports ${modules[0]} and ${modules[1]}. ` +
-                `You can also create a new NgModule that exports and includes ${stringifyForError(type)} then import that NgModule in ${modules[0]} and ${modules[1]}.`);
+            if (!suppressErrors) {
+                /** @type {?} */
+                const modules = [existingModule, moduleType].map(stringifyForError).sort();
+                errors.push(`Type ${stringifyForError(type)} is part of the declarations of 2 modules: ${modules[0]} and ${modules[1]}! ` +
+                    `Please consider moving ${stringifyForError(type)} to a higher module that imports ${modules[0]} and ${modules[1]}. ` +
+                    `You can also create a new NgModule that exports and includes ${stringifyForError(type)} then import that NgModule in ${modules[0]} and ${modules[1]}.`);
+            }
         }
         else {
             // Mark type as having owner.
@@ -30844,7 +30866,7 @@ function computeCombinedExports(type) {
             /** @type {?} */
             /** @nocollapse */ const ngModuleDef = getNgModuleDef(type);
             if (ngModuleDef) {
-                verifySemanticsOfNgModuleDef((/** @type {?} */ ((/** @type {?} */ (type)))));
+                verifySemanticsOfNgModuleDef((/** @type {?} */ ((/** @type {?} */ (type)))), false);
                 return computeCombinedExports(type);
             }
             else {

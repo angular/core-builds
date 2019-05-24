@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+341.sha-d5f96a8.with-local-changes
+ * @license Angular v8.0.0-rc.0+342.sha-deb77bd.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17787,7 +17787,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-rc.0+341.sha-d5f96a8.with-local-changes');
+var VERSION = new Version('8.0.0-rc.0+342.sha-deb77bd.with-local-changes');
 
 /**
  * @license
@@ -24119,8 +24119,12 @@ function compileNgModule(moduleType, ngModule) {
 }
 /**
  * Compiles and adds the `ngModuleDef` and `ngInjectorDef` properties to the module class.
+ *
+ * It's possible to compile a module via this API which will allow duplicate declarations in its
+ * root.
  */
-function compileNgModuleDefs(moduleType, ngModule) {
+function compileNgModuleDefs(moduleType, ngModule, allowDuplicateDeclarationsInRoot) {
+    if (allowDuplicateDeclarationsInRoot === void 0) { allowDuplicateDeclarationsInRoot = false; }
     ngDevMode && assertDefined(moduleType, 'Required value moduleType');
     ngDevMode && assertDefined(ngModule, 'Required value ngModule');
     var declarations = flatten(ngModule.declarations || EMPTY_ARRAY$4);
@@ -24151,7 +24155,7 @@ function compileNgModuleDefs(moduleType, ngModule) {
     Object.defineProperty(moduleType, NG_INJECTOR_DEF, {
         get: function () {
             if (ngInjectorDef === null) {
-                ngDevMode && verifySemanticsOfNgModuleDef(moduleType);
+                ngDevMode && verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRoot);
                 var meta = {
                     name: moduleType.name,
                     type: moduleType,
@@ -24170,7 +24174,7 @@ function compileNgModuleDefs(moduleType, ngModule) {
         configurable: !!ngDevMode,
     });
 }
-function verifySemanticsOfNgModuleDef(moduleType) {
+function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRoot) {
     if (verifiedNgModule.get(moduleType))
         return;
     verifiedNgModule.set(moduleType, true);
@@ -24179,19 +24183,21 @@ function verifySemanticsOfNgModuleDef(moduleType) {
     var errors = [];
     var declarations = maybeUnwrapFn(ngModuleDef.declarations);
     var imports = maybeUnwrapFn(ngModuleDef.imports);
-    flatten(imports).map(unwrapModuleWithProvidersImports).forEach(verifySemanticsOfNgModuleDef);
+    flatten(imports)
+        .map(unwrapModuleWithProvidersImports)
+        .forEach(function (mod) { return verifySemanticsOfNgModuleDef(mod, false); });
     var exports = maybeUnwrapFn(ngModuleDef.exports);
     declarations.forEach(verifyDeclarationsHaveDefinitions);
     var combinedDeclarations = __spread(declarations.map(resolveForwardRef), flatten(imports.map(computeCombinedExports)).map(resolveForwardRef));
     exports.forEach(verifyExportsAreDeclaredOrReExported);
-    declarations.forEach(verifyDeclarationIsUnique);
+    declarations.forEach(function (decl) { return verifyDeclarationIsUnique(decl, allowDuplicateDeclarationsInRoot); });
     declarations.forEach(verifyComponentEntryComponentsIsPartOfNgModule);
     var ngModule = getAnnotation(moduleType, 'NgModule');
     if (ngModule) {
         ngModule.imports &&
             flatten(ngModule.imports)
                 .map(unwrapModuleWithProvidersImports)
-                .forEach(verifySemanticsOfNgModuleDef);
+                .forEach(function (mod) { return verifySemanticsOfNgModuleDef(mod, false); });
         ngModule.bootstrap && ngModule.bootstrap.forEach(verifyCorrectBootstrapType);
         ngModule.bootstrap && ngModule.bootstrap.forEach(verifyComponentIsPartOfNgModule);
         ngModule.entryComponents && ngModule.entryComponents.forEach(verifyComponentIsPartOfNgModule);
@@ -24221,14 +24227,16 @@ function verifySemanticsOfNgModuleDef(moduleType) {
             }
         }
     }
-    function verifyDeclarationIsUnique(type) {
+    function verifyDeclarationIsUnique(type, suppressErrors) {
         type = resolveForwardRef(type);
         var existingModule = ownerNgModule.get(type);
         if (existingModule && existingModule !== moduleType) {
-            var modules = [existingModule, moduleType].map(stringifyForError).sort();
-            errors.push("Type " + stringifyForError(type) + " is part of the declarations of 2 modules: " + modules[0] + " and " + modules[1] + "! " +
-                ("Please consider moving " + stringifyForError(type) + " to a higher module that imports " + modules[0] + " and " + modules[1] + ". ") +
-                ("You can also create a new NgModule that exports and includes " + stringifyForError(type) + " then import that NgModule in " + modules[0] + " and " + modules[1] + "."));
+            if (!suppressErrors) {
+                var modules = [existingModule, moduleType].map(stringifyForError).sort();
+                errors.push("Type " + stringifyForError(type) + " is part of the declarations of 2 modules: " + modules[0] + " and " + modules[1] + "! " +
+                    ("Please consider moving " + stringifyForError(type) + " to a higher module that imports " + modules[0] + " and " + modules[1] + ". ") +
+                    ("You can also create a new NgModule that exports and includes " + stringifyForError(type) + " then import that NgModule in " + modules[0] + " and " + modules[1] + "."));
+            }
         }
         else {
             // Mark type as having owner.
@@ -24312,7 +24320,7 @@ function computeCombinedExports(type) {
     return __spread(flatten(maybeUnwrapFn(ngModuleDef.exports).map(function (type) {
         var ngModuleDef = getNgModuleDef(type);
         if (ngModuleDef) {
-            verifySemanticsOfNgModuleDef(type);
+            verifySemanticsOfNgModuleDef(type, false);
             return computeCombinedExports(type);
         }
         else {
