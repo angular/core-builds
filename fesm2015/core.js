@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+339.sha-9b3af14.with-local-changes
+ * @license Angular v8.0.0-rc.0+341.sha-d5f96a8.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15517,22 +15517,22 @@ function getHighestElementOrICUContainer(tNode) {
     return tNode;
 }
 /**
- * @param {?} index
+ * @param {?} viewIndexInContainer
  * @param {?} lContainer
  * @return {?}
  */
-function getBeforeNodeForView(index, lContainer) {
+function getBeforeNodeForView(viewIndexInContainer, lContainer) {
     /** @type {?} */
-    const containerNative = lContainer[NATIVE];
-    if (index + 1 < lContainer.length - CONTAINER_HEADER_OFFSET) {
+    const nextViewIndex = CONTAINER_HEADER_OFFSET + viewIndexInContainer + 1;
+    if (nextViewIndex < lContainer.length) {
         /** @type {?} */
-        const view = (/** @type {?} */ (lContainer[CONTAINER_HEADER_OFFSET + index + 1]));
+        const lView = (/** @type {?} */ (lContainer[nextViewIndex]));
         /** @type {?} */
-        const viewTNode = (/** @type {?} */ (view[T_HOST]));
-        return viewTNode.child ? getNativeByTNode(viewTNode.child, view) : containerNative;
+        const tViewNodeChild = ((/** @type {?} */ (lView[T_HOST]))).child;
+        return tViewNodeChild !== null ? getNativeByTNode(tViewNodeChild, lView) : lContainer[NATIVE];
     }
     else {
-        return containerNative;
+        return lContainer[NATIVE];
     }
 }
 /**
@@ -21700,7 +21700,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-rc.0+339.sha-9b3af14.with-local-changes');
+const VERSION = new Version('8.0.0-rc.0+341.sha-d5f96a8.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -26974,9 +26974,9 @@ function ɵɵi18nPostprocess(message, replacements = {}) {
         (m, phs, tmpl) => {
             /** @type {?} */
             const content = phs || tmpl;
-            if (!matches[content]) {
-                /** @type {?} */
-                const placeholders = [];
+            /** @type {?} */
+            const placeholders = matches[content] || [];
+            if (!placeholders.length) {
                 content.split('|').forEach((/**
                  * @param {?} placeholder
                  * @return {?}
@@ -26992,13 +26992,11 @@ function ɵɵi18nPostprocess(message, replacements = {}) {
                 }));
                 matches[content] = placeholders;
             }
-            if (!matches[content].length) {
+            if (!placeholders.length) {
                 throw new Error(`i18n postprocess: unmatched placeholder - ${content}`);
             }
             /** @type {?} */
             const currentTemplateId = templateIdsStack[templateIdsStack.length - 1];
-            /** @type {?} */
-            const placeholders = matches[content];
             /** @type {?} */
             let idx = 0;
             // find placeholder index that matches current template id
@@ -27020,16 +27018,6 @@ function ɵɵi18nPostprocess(message, replacements = {}) {
             placeholders.splice(idx, 1);
             return placeholder;
         }));
-        // verify that we injected all values
-        /** @type {?} */
-        const hasUnmatchedValues = Object.keys(matches).some((/**
-         * @param {?} key
-         * @return {?}
-         */
-        key => !!matches[key].length));
-        if (hasUnmatchedValues) {
-            throw new Error(`i18n postprocess: unmatched values - ${JSON.stringify(matches)}`);
-        }
     }
     // return current result if no replacements specified
     if (!Object.keys(replacements).length) {

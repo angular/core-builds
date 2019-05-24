@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+339.sha-9b3af14.with-local-changes
+ * @license Angular v8.0.0-rc.0+341.sha-d5f96a8.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12337,15 +12337,15 @@ function getHighestElementOrICUContainer(tNode) {
     }
     return tNode;
 }
-function getBeforeNodeForView(index, lContainer) {
-    var containerNative = lContainer[NATIVE];
-    if (index + 1 < lContainer.length - CONTAINER_HEADER_OFFSET) {
-        var view = lContainer[CONTAINER_HEADER_OFFSET + index + 1];
-        var viewTNode = view[T_HOST];
-        return viewTNode.child ? getNativeByTNode(viewTNode.child, view) : containerNative;
+function getBeforeNodeForView(viewIndexInContainer, lContainer) {
+    var nextViewIndex = CONTAINER_HEADER_OFFSET + viewIndexInContainer + 1;
+    if (nextViewIndex < lContainer.length) {
+        var lView = lContainer[nextViewIndex];
+        var tViewNodeChild = lView[T_HOST].child;
+        return tViewNodeChild !== null ? getNativeByTNode(tViewNodeChild, lView) : lContainer[NATIVE];
     }
     else {
-        return containerNative;
+        return lContainer[NATIVE];
     }
 }
 /**
@@ -17471,7 +17471,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.0.0-rc.0+339.sha-9b3af14.with-local-changes');
+var VERSION = new Version('8.0.0-rc.0+341.sha-d5f96a8.with-local-changes');
 
 /**
  * @license
@@ -21227,21 +21227,20 @@ function ɵɵi18nPostprocess(message, replacements) {
         var templateIdsStack_1 = [ROOT_TEMPLATE_ID];
         result = result.replace(PP_PLACEHOLDERS_REGEXP, function (m, phs, tmpl) {
             var content = phs || tmpl;
-            if (!matches_1[content]) {
-                var placeholders_1 = [];
+            var placeholders = matches_1[content] || [];
+            if (!placeholders.length) {
                 content.split('|').forEach(function (placeholder) {
                     var match = placeholder.match(PP_TEMPLATE_ID_REGEXP);
                     var templateId = match ? parseInt(match[1], 10) : ROOT_TEMPLATE_ID;
                     var isCloseTemplateTag = PP_CLOSE_TEMPLATE_REGEXP.test(placeholder);
-                    placeholders_1.push([templateId, isCloseTemplateTag, placeholder]);
+                    placeholders.push([templateId, isCloseTemplateTag, placeholder]);
                 });
-                matches_1[content] = placeholders_1;
+                matches_1[content] = placeholders;
             }
-            if (!matches_1[content].length) {
+            if (!placeholders.length) {
                 throw new Error("i18n postprocess: unmatched placeholder - " + content);
             }
             var currentTemplateId = templateIdsStack_1[templateIdsStack_1.length - 1];
-            var placeholders = matches_1[content];
             var idx = 0;
             // find placeholder index that matches current template id
             for (var i = 0; i < placeholders.length; i++) {
@@ -21262,11 +21261,6 @@ function ɵɵi18nPostprocess(message, replacements) {
             placeholders.splice(idx, 1);
             return placeholder;
         });
-        // verify that we injected all values
-        var hasUnmatchedValues = Object.keys(matches_1).some(function (key) { return !!matches_1[key].length; });
-        if (hasUnmatchedValues) {
-            throw new Error("i18n postprocess: unmatched values - " + JSON.stringify(matches_1));
-        }
     }
     // return current result if no replacements specified
     if (!Object.keys(replacements).length) {
