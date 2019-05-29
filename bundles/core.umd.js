@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+354.sha-4809382.with-local-changes
+ * @license Angular v8.0.0-rc.0+355.sha-dd08150.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14060,7 +14060,7 @@
     function ɵɵinterpolationV(values) {
         ngDevMode && assertLessThan(2, values.length, 'should have at least 3 values');
         ngDevMode && assertEqual(values.length % 2, 1, 'should have an odd number of values');
-        var different = false;
+        var isBindingUpdated = false;
         var lView = getLView();
         var tData = lView[TVIEW].data;
         var bindingIndex = lView[BINDING_INDEX];
@@ -14073,11 +14073,11 @@
         }
         for (var i = 1; i < values.length; i += 2) {
             // Check if bindings (odd indexes) have changed
-            bindingUpdated(lView, bindingIndex++, values[i]) && (different = true);
+            isBindingUpdated = bindingUpdated(lView, bindingIndex++, values[i]) || isBindingUpdated;
         }
         lView[BINDING_INDEX] = bindingIndex;
         storeBindingMetadata(lView, values[0], values[values.length - 1]);
-        if (!different) {
+        if (!isBindingUpdated) {
             return NO_CHANGE;
         }
         // Build the updated content
@@ -14270,430 +14270,6 @@
                 renderStringify(v3) + i3 + renderStringify(v4) + i4 + renderStringify(v5) + i5 +
                 renderStringify(v6) + i6 + renderStringify(v7) + suffix :
             NO_CHANGE;
-    }
-    /////////////////////////////////////////////////////////////////////
-    /// NEW INSTRUCTIONS
-    /////////////////////////////////////////////////////////////////////
-    /**
-     *
-     * Update an interpolated property on an element with a lone bound value
-     *
-     * Used when the value passed to a property has 1 interpolated value in it, an no additional text
-     * surrounds that interpolated value:
-     *
-     * ```html
-     * <div title="{{v0}}"></div>
-     * ```
-     *
-     * Its compiled representation is::
-     *
-     * ```ts
-     * ɵɵpropertyInterpolate('title', v0);
-     * ```
-     *
-     * If the property name also exists as an input property on one of the element's directives,
-     * the component property will be set instead of the element property. This check must
-     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
-     *
-     * @param propName The name of the property to update
-     * @param prefix Static value used for concatenation only.
-     * @param v0 Value checked for change.
-     * @param suffix Static value used for concatenation only.
-     * @param sanitizer An optional sanitizer function
-     * @returns itself, so that it may be chained.
-     * @codeGenApi
-     */
-    function ɵɵpropertyInterpolate(propName, v0, sanitizer) {
-        ɵɵpropertyInterpolate1(propName, '', v0, '', sanitizer);
-        return ɵɵpropertyInterpolate;
-    }
-    /**
-     *
-     * Update an interpolated property on an element with single bound value surrounded by text.
-     *
-     * Used when the value passed to a property has 1 interpolated value in it:
-     *
-     * ```html
-     * <div title="prefix{{v0}}suffix"></div>
-     * ```
-     *
-     * Its compiled representation is::
-     *
-     * ```ts
-     * ɵɵpropertyInterpolate1('title', 'prefix', v0, 'suffix');
-     * ```
-     *
-     * If the property name also exists as an input property on one of the element's directives,
-     * the component property will be set instead of the element property. This check must
-     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
-     *
-     * @param propName The name of the property to update
-     * @param prefix Static value used for concatenation only.
-     * @param v0 Value checked for change.
-     * @param suffix Static value used for concatenation only.
-     * @param sanitizer An optional sanitizer function
-     * @returns itself, so that it may be chained.
-     * @codeGenApi
-     */
-    function ɵɵpropertyInterpolate1(propName, prefix, v0, suffix, sanitizer) {
-        var index = getSelectedIndex();
-        var interpolatedValue = ɵɵinterpolation1(prefix, v0, suffix);
-        if (interpolatedValue !== NO_CHANGE) {
-            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
-        }
-        return ɵɵpropertyInterpolate1;
-    }
-    /**
-     *
-     * Update an interpolated property on an element with 2 bound values surrounded by text.
-     *
-     * Used when the value passed to a property has 2 interpolated values in it:
-     *
-     * ```html
-     * <div title="prefix{{v0}}-{{v1}}suffix"></div>
-     * ```
-     *
-     * Its compiled representation is::
-     *
-     * ```ts
-     * ɵɵpropertyInterpolate2('title', 'prefix', v0, '-', v1, 'suffix');
-     * ```
-     *
-     * If the property name also exists as an input property on one of the element's directives,
-     * the component property will be set instead of the element property. This check must
-     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
-     *
-     * @param propName The name of the property to update
-     * @param prefix Static value used for concatenation only.
-     * @param v0 Value checked for change.
-     * @param i0 Static value used for concatenation only.
-     * @param v1 Value checked for change.
-     * @param suffix Static value used for concatenation only.
-     * @param sanitizer An optional sanitizer function
-     * @returns itself, so that it may be chained.
-     * @codeGenApi
-     */
-    function ɵɵpropertyInterpolate2(propName, prefix, v0, i0, v1, suffix, sanitizer) {
-        var index = getSelectedIndex();
-        var interpolatedValue = ɵɵinterpolation2(prefix, v0, i0, v1, suffix);
-        if (interpolatedValue !== NO_CHANGE) {
-            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
-        }
-        return ɵɵpropertyInterpolate2;
-    }
-    /**
-     *
-     * Update an interpolated property on an element with 3 bound values surrounded by text.
-     *
-     * Used when the value passed to a property has 3 interpolated values in it:
-     *
-     * ```html
-     * <div title="prefix{{v0}}-{{v1}}-{{v2}}suffix"></div>
-     * ```
-     *
-     * Its compiled representation is::
-     *
-     * ```ts
-     * ɵɵpropertyInterpolate3(
-     * 'title', 'prefix', v0, '-', v1, '-', v2, 'suffix');
-     * ```
-     *
-     * If the property name also exists as an input property on one of the element's directives,
-     * the component property will be set instead of the element property. This check must
-     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
-     *
-     * @param propName The name of the property to update
-     * @param prefix Static value used for concatenation only.
-     * @param v0 Value checked for change.
-     * @param i0 Static value used for concatenation only.
-     * @param v1 Value checked for change.
-     * @param i1 Static value used for concatenation only.
-     * @param v2 Value checked for change.
-     * @param suffix Static value used for concatenation only.
-     * @param sanitizer An optional sanitizer function
-     * @returns itself, so that it may be chained.
-     * @codeGenApi
-     */
-    function ɵɵpropertyInterpolate3(propName, prefix, v0, i0, v1, i1, v2, suffix, sanitizer) {
-        var index = getSelectedIndex();
-        var interpolatedValue = ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix);
-        if (interpolatedValue !== NO_CHANGE) {
-            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
-        }
-        return ɵɵpropertyInterpolate3;
-    }
-    /**
-     *
-     * Update an interpolated property on an element with 4 bound values surrounded by text.
-     *
-     * Used when the value passed to a property has 4 interpolated values in it:
-     *
-     * ```html
-     * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}suffix"></div>
-     * ```
-     *
-     * Its compiled representation is::
-     *
-     * ```ts
-     * ɵɵpropertyInterpolate4(
-     * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, 'suffix');
-     * ```
-     *
-     * If the property name also exists as an input property on one of the element's directives,
-     * the component property will be set instead of the element property. This check must
-     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
-     *
-     * @param propName The name of the property to update
-     * @param prefix Static value used for concatenation only.
-     * @param v0 Value checked for change.
-     * @param i0 Static value used for concatenation only.
-     * @param v1 Value checked for change.
-     * @param i1 Static value used for concatenation only.
-     * @param v2 Value checked for change.
-     * @param i2 Static value used for concatenation only.
-     * @param v3 Value checked for change.
-     * @param suffix Static value used for concatenation only.
-     * @param sanitizer An optional sanitizer function
-     * @returns itself, so that it may be chained.
-     * @codeGenApi
-     */
-    function ɵɵpropertyInterpolate4(propName, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, sanitizer) {
-        var index = getSelectedIndex();
-        var interpolatedValue = ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
-        if (interpolatedValue !== NO_CHANGE) {
-            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
-        }
-        return ɵɵpropertyInterpolate4;
-    }
-    /**
-     *
-     * Update an interpolated property on an element with 5 bound values surrounded by text.
-     *
-     * Used when the value passed to a property has 5 interpolated values in it:
-     *
-     * ```html
-     * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}suffix"></div>
-     * ```
-     *
-     * Its compiled representation is::
-     *
-     * ```ts
-     * ɵɵpropertyInterpolate5(
-     * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, 'suffix');
-     * ```
-     *
-     * If the property name also exists as an input property on one of the element's directives,
-     * the component property will be set instead of the element property. This check must
-     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
-     *
-     * @param propName The name of the property to update
-     * @param prefix Static value used for concatenation only.
-     * @param v0 Value checked for change.
-     * @param i0 Static value used for concatenation only.
-     * @param v1 Value checked for change.
-     * @param i1 Static value used for concatenation only.
-     * @param v2 Value checked for change.
-     * @param i2 Static value used for concatenation only.
-     * @param v3 Value checked for change.
-     * @param i3 Static value used for concatenation only.
-     * @param v4 Value checked for change.
-     * @param suffix Static value used for concatenation only.
-     * @param sanitizer An optional sanitizer function
-     * @returns itself, so that it may be chained.
-     * @codeGenApi
-     */
-    function ɵɵpropertyInterpolate5(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, sanitizer) {
-        var index = getSelectedIndex();
-        var interpolatedValue = ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
-        if (interpolatedValue !== NO_CHANGE) {
-            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
-        }
-        return ɵɵpropertyInterpolate5;
-    }
-    /**
-     *
-     * Update an interpolated property on an element with 6 bound values surrounded by text.
-     *
-     * Used when the value passed to a property has 6 interpolated values in it:
-     *
-     * ```html
-     * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}suffix"></div>
-     * ```
-     *
-     * Its compiled representation is::
-     *
-     * ```ts
-     * ɵɵpropertyInterpolate6(
-     *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, 'suffix');
-     * ```
-     *
-     * If the property name also exists as an input property on one of the element's directives,
-     * the component property will be set instead of the element property. This check must
-     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
-     *
-     * @param propName The name of the property to update
-     * @param prefix Static value used for concatenation only.
-     * @param v0 Value checked for change.
-     * @param i0 Static value used for concatenation only.
-     * @param v1 Value checked for change.
-     * @param i1 Static value used for concatenation only.
-     * @param v2 Value checked for change.
-     * @param i2 Static value used for concatenation only.
-     * @param v3 Value checked for change.
-     * @param i3 Static value used for concatenation only.
-     * @param v4 Value checked for change.
-     * @param i4 Static value used for concatenation only.
-     * @param v5 Value checked for change.
-     * @param suffix Static value used for concatenation only.
-     * @param sanitizer An optional sanitizer function
-     * @returns itself, so that it may be chained.
-     * @codeGenApi
-     */
-    function ɵɵpropertyInterpolate6(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, sanitizer) {
-        var index = getSelectedIndex();
-        var interpolatedValue = ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
-        if (interpolatedValue !== NO_CHANGE) {
-            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
-        }
-        return ɵɵpropertyInterpolate6;
-    }
-    /**
-     *
-     * Update an interpolated property on an element with 7 bound values surrounded by text.
-     *
-     * Used when the value passed to a property has 7 interpolated values in it:
-     *
-     * ```html
-     * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}suffix"></div>
-     * ```
-     *
-     * Its compiled representation is::
-     *
-     * ```ts
-     * ɵɵpropertyInterpolate7(
-     *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, 'suffix');
-     * ```
-     *
-     * If the property name also exists as an input property on one of the element's directives,
-     * the component property will be set instead of the element property. This check must
-     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
-     *
-     * @param propName The name of the property to update
-     * @param prefix Static value used for concatenation only.
-     * @param v0 Value checked for change.
-     * @param i0 Static value used for concatenation only.
-     * @param v1 Value checked for change.
-     * @param i1 Static value used for concatenation only.
-     * @param v2 Value checked for change.
-     * @param i2 Static value used for concatenation only.
-     * @param v3 Value checked for change.
-     * @param i3 Static value used for concatenation only.
-     * @param v4 Value checked for change.
-     * @param i4 Static value used for concatenation only.
-     * @param v5 Value checked for change.
-     * @param i5 Static value used for concatenation only.
-     * @param v6 Value checked for change.
-     * @param suffix Static value used for concatenation only.
-     * @param sanitizer An optional sanitizer function
-     * @returns itself, so that it may be chained.
-     * @codeGenApi
-     */
-    function ɵɵpropertyInterpolate7(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, sanitizer) {
-        var index = getSelectedIndex();
-        var interpolatedValue = ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
-        if (interpolatedValue !== NO_CHANGE) {
-            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
-        }
-        return ɵɵpropertyInterpolate7;
-    }
-    /**
-     *
-     * Update an interpolated property on an element with 8 bound values surrounded by text.
-     *
-     * Used when the value passed to a property has 8 interpolated values in it:
-     *
-     * ```html
-     * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}suffix"></div>
-     * ```
-     *
-     * Its compiled representation is::
-     *
-     * ```ts
-     * ɵɵpropertyInterpolate8(
-     *  'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, 'suffix');
-     * ```
-     *
-     * If the property name also exists as an input property on one of the element's directives,
-     * the component property will be set instead of the element property. This check must
-     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
-     *
-     * @param propName The name of the property to update
-     * @param prefix Static value used for concatenation only.
-     * @param v0 Value checked for change.
-     * @param i0 Static value used for concatenation only.
-     * @param v1 Value checked for change.
-     * @param i1 Static value used for concatenation only.
-     * @param v2 Value checked for change.
-     * @param i2 Static value used for concatenation only.
-     * @param v3 Value checked for change.
-     * @param i3 Static value used for concatenation only.
-     * @param v4 Value checked for change.
-     * @param i4 Static value used for concatenation only.
-     * @param v5 Value checked for change.
-     * @param i5 Static value used for concatenation only.
-     * @param v6 Value checked for change.
-     * @param i6 Static value used for concatenation only.
-     * @param v7 Value checked for change.
-     * @param suffix Static value used for concatenation only.
-     * @param sanitizer An optional sanitizer function
-     * @returns itself, so that it may be chained.
-     * @codeGenApi
-     */
-    function ɵɵpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, sanitizer) {
-        var index = getSelectedIndex();
-        var interpolatedValue = ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
-        if (interpolatedValue !== NO_CHANGE) {
-            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
-        }
-        return ɵɵpropertyInterpolate8;
-    }
-    /**
-     * Update an interpolated property on an element with 8 or more bound values surrounded by text.
-     *
-     * Used when the number of interpolated values exceeds 7.
-     *
-     * ```html
-     * <div
-     *  title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}-{{v8}}-{{v9}}suffix"></div>
-     * ```
-     *
-     * Its compiled representation is::
-     *
-     * ```ts
-     * ɵɵpropertyInterpolateV(
-     *  'title', ['prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, '-', v9,
-     *  'suffix']);
-     * ```
-     *
-     * If the property name also exists as an input property on one of the element's directives,
-     * the component property will be set instead of the element property. This check must
-     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
-     *
-     * @param propName The name of the property to update.
-     * @param values The a collection of values and the strings inbetween those values, beginning with a
-     * string prefix and ending with a string suffix.
-     * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
-     * @param sanitizer An optional sanitizer function
-     * @returns itself, so that it may be chained.
-     * @codeGenApi
-     */
-    function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
-        var index = getSelectedIndex();
-        var interpolatedValue = ɵɵinterpolationV(values);
-        if (interpolatedValue !== NO_CHANGE) {
-            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
-        }
-        return ɵɵpropertyInterpolateV;
     }
 
     /**
@@ -15865,6 +15441,428 @@
     }
 
     /**
+     *
+     * Update an interpolated property on an element with a lone bound value
+     *
+     * Used when the value passed to a property has 1 interpolated value in it, an no additional text
+     * surrounds that interpolated value:
+     *
+     * ```html
+     * <div title="{{v0}}"></div>
+     * ```
+     *
+     * Its compiled representation is::
+     *
+     * ```ts
+     * ɵɵpropertyInterpolate('title', v0);
+     * ```
+     *
+     * If the property name also exists as an input property on one of the element's directives,
+     * the component property will be set instead of the element property. This check must
+     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+     *
+     * @param propName The name of the property to update
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @param sanitizer An optional sanitizer function
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵpropertyInterpolate(propName, v0, sanitizer) {
+        ɵɵpropertyInterpolate1(propName, '', v0, '', sanitizer);
+        return ɵɵpropertyInterpolate;
+    }
+    /**
+     *
+     * Update an interpolated property on an element with single bound value surrounded by text.
+     *
+     * Used when the value passed to a property has 1 interpolated value in it:
+     *
+     * ```html
+     * <div title="prefix{{v0}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is::
+     *
+     * ```ts
+     * ɵɵpropertyInterpolate1('title', 'prefix', v0, 'suffix');
+     * ```
+     *
+     * If the property name also exists as an input property on one of the element's directives,
+     * the component property will be set instead of the element property. This check must
+     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+     *
+     * @param propName The name of the property to update
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @param sanitizer An optional sanitizer function
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵpropertyInterpolate1(propName, prefix, v0, suffix, sanitizer) {
+        var index = getSelectedIndex();
+        var interpolatedValue = ɵɵinterpolation1(prefix, v0, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        }
+        return ɵɵpropertyInterpolate1;
+    }
+    /**
+     *
+     * Update an interpolated property on an element with 2 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 2 interpolated values in it:
+     *
+     * ```html
+     * <div title="prefix{{v0}}-{{v1}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is::
+     *
+     * ```ts
+     * ɵɵpropertyInterpolate2('title', 'prefix', v0, '-', v1, 'suffix');
+     * ```
+     *
+     * If the property name also exists as an input property on one of the element's directives,
+     * the component property will be set instead of the element property. This check must
+     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+     *
+     * @param propName The name of the property to update
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @param sanitizer An optional sanitizer function
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵpropertyInterpolate2(propName, prefix, v0, i0, v1, suffix, sanitizer) {
+        var index = getSelectedIndex();
+        var interpolatedValue = ɵɵinterpolation2(prefix, v0, i0, v1, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        }
+        return ɵɵpropertyInterpolate2;
+    }
+    /**
+     *
+     * Update an interpolated property on an element with 3 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 3 interpolated values in it:
+     *
+     * ```html
+     * <div title="prefix{{v0}}-{{v1}}-{{v2}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is::
+     *
+     * ```ts
+     * ɵɵpropertyInterpolate3(
+     * 'title', 'prefix', v0, '-', v1, '-', v2, 'suffix');
+     * ```
+     *
+     * If the property name also exists as an input property on one of the element's directives,
+     * the component property will be set instead of the element property. This check must
+     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+     *
+     * @param propName The name of the property to update
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @param sanitizer An optional sanitizer function
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵpropertyInterpolate3(propName, prefix, v0, i0, v1, i1, v2, suffix, sanitizer) {
+        var index = getSelectedIndex();
+        var interpolatedValue = ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        }
+        return ɵɵpropertyInterpolate3;
+    }
+    /**
+     *
+     * Update an interpolated property on an element with 4 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 4 interpolated values in it:
+     *
+     * ```html
+     * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is::
+     *
+     * ```ts
+     * ɵɵpropertyInterpolate4(
+     * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, 'suffix');
+     * ```
+     *
+     * If the property name also exists as an input property on one of the element's directives,
+     * the component property will be set instead of the element property. This check must
+     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+     *
+     * @param propName The name of the property to update
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @param sanitizer An optional sanitizer function
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵpropertyInterpolate4(propName, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, sanitizer) {
+        var index = getSelectedIndex();
+        var interpolatedValue = ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        }
+        return ɵɵpropertyInterpolate4;
+    }
+    /**
+     *
+     * Update an interpolated property on an element with 5 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 5 interpolated values in it:
+     *
+     * ```html
+     * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is::
+     *
+     * ```ts
+     * ɵɵpropertyInterpolate5(
+     * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, 'suffix');
+     * ```
+     *
+     * If the property name also exists as an input property on one of the element's directives,
+     * the component property will be set instead of the element property. This check must
+     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+     *
+     * @param propName The name of the property to update
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param i3 Static value used for concatenation only.
+     * @param v4 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @param sanitizer An optional sanitizer function
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵpropertyInterpolate5(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, sanitizer) {
+        var index = getSelectedIndex();
+        var interpolatedValue = ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        }
+        return ɵɵpropertyInterpolate5;
+    }
+    /**
+     *
+     * Update an interpolated property on an element with 6 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 6 interpolated values in it:
+     *
+     * ```html
+     * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is::
+     *
+     * ```ts
+     * ɵɵpropertyInterpolate6(
+     *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, 'suffix');
+     * ```
+     *
+     * If the property name also exists as an input property on one of the element's directives,
+     * the component property will be set instead of the element property. This check must
+     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+     *
+     * @param propName The name of the property to update
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param i3 Static value used for concatenation only.
+     * @param v4 Value checked for change.
+     * @param i4 Static value used for concatenation only.
+     * @param v5 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @param sanitizer An optional sanitizer function
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵpropertyInterpolate6(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, sanitizer) {
+        var index = getSelectedIndex();
+        var interpolatedValue = ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        }
+        return ɵɵpropertyInterpolate6;
+    }
+    /**
+     *
+     * Update an interpolated property on an element with 7 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 7 interpolated values in it:
+     *
+     * ```html
+     * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is::
+     *
+     * ```ts
+     * ɵɵpropertyInterpolate7(
+     *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, 'suffix');
+     * ```
+     *
+     * If the property name also exists as an input property on one of the element's directives,
+     * the component property will be set instead of the element property. This check must
+     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+     *
+     * @param propName The name of the property to update
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param i3 Static value used for concatenation only.
+     * @param v4 Value checked for change.
+     * @param i4 Static value used for concatenation only.
+     * @param v5 Value checked for change.
+     * @param i5 Static value used for concatenation only.
+     * @param v6 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @param sanitizer An optional sanitizer function
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵpropertyInterpolate7(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, sanitizer) {
+        var index = getSelectedIndex();
+        var interpolatedValue = ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        }
+        return ɵɵpropertyInterpolate7;
+    }
+    /**
+     *
+     * Update an interpolated property on an element with 8 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 8 interpolated values in it:
+     *
+     * ```html
+     * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is::
+     *
+     * ```ts
+     * ɵɵpropertyInterpolate8(
+     *  'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, 'suffix');
+     * ```
+     *
+     * If the property name also exists as an input property on one of the element's directives,
+     * the component property will be set instead of the element property. This check must
+     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+     *
+     * @param propName The name of the property to update
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param i3 Static value used for concatenation only.
+     * @param v4 Value checked for change.
+     * @param i4 Static value used for concatenation only.
+     * @param v5 Value checked for change.
+     * @param i5 Static value used for concatenation only.
+     * @param v6 Value checked for change.
+     * @param i6 Static value used for concatenation only.
+     * @param v7 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @param sanitizer An optional sanitizer function
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, sanitizer) {
+        var index = getSelectedIndex();
+        var interpolatedValue = ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        }
+        return ɵɵpropertyInterpolate8;
+    }
+    /**
+     * Update an interpolated property on an element with 8 or more bound values surrounded by text.
+     *
+     * Used when the number of interpolated values exceeds 7.
+     *
+     * ```html
+     * <div
+     *  title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}-{{v8}}-{{v9}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is::
+     *
+     * ```ts
+     * ɵɵpropertyInterpolateV(
+     *  'title', ['prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, '-', v9,
+     *  'suffix']);
+     * ```
+     *
+     * If the property name also exists as an input property on one of the element's directives,
+     * the component property will be set instead of the element property. This check must
+     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+     *
+     * @param propName The name of the property to update.
+     * @param values The a collection of values and the strings inbetween those values, beginning with a
+     * string prefix and ending with a string suffix.
+     * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
+     * @param sanitizer An optional sanitizer function
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
+        var index = getSelectedIndex();
+        var interpolatedValue = ɵɵinterpolationV(values);
+        if (interpolatedValue !== NO_CHANGE) {
+            elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        }
+        return ɵɵpropertyInterpolateV;
+    }
+
+    /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
      *
@@ -15952,6 +15950,267 @@
             isProceduralRenderer(renderer) ? renderer.setValue(element, renderStringify(value)) :
                 element.textContent = renderStringify(value);
         }
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     *
+     * Update text content with a lone bound value
+     *
+     * Used when a text node has 1 interpolated value in it, an no additional text
+     * surrounds that interpolated value:
+     *
+     * ```html
+     * <div>{{v0}}</div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵtextInterpolate(v0);
+     * ```
+     * @returns itself, so that it may be chained.
+     * @see textInterpolateV
+     * @codeGenApi
+     */
+    function ɵɵtextInterpolate(v0) {
+        ɵɵtextInterpolate1('', v0, '');
+        return ɵɵtextInterpolate;
+    }
+    /**
+     *
+     * Update text content with single bound value surrounded by other text.
+     *
+     * Used when a text node has 1 interpolated value in it:
+     *
+     * ```html
+     * <div>prefix{{v0}}suffix</div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵtextInterpolate1('prefix', v0, 'suffix');
+     * ```
+     * @returns itself, so that it may be chained.
+     * @see textInterpolateV
+     * @codeGenApi
+     */
+    function ɵɵtextInterpolate1(prefix, v0, suffix) {
+        var index = getSelectedIndex();
+        ɵɵtextBinding(index, ɵɵinterpolation1(prefix, v0, suffix));
+        return ɵɵtextInterpolate1;
+    }
+    /**
+     *
+     * Update text content with 2 bound values surrounded by other text.
+     *
+     * Used when a text node has 2 interpolated values in it:
+     *
+     * ```html
+     * <div>prefix{{v0}}-{{v1}}suffix</div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵtextInterpolate2('prefix', v0, '-', v1, 'suffix');
+     * ```
+     * @returns itself, so that it may be chained.
+     * @see textInterpolateV
+     * @codeGenApi
+     */
+    function ɵɵtextInterpolate2(prefix, v0, i0, v1, suffix) {
+        var index = getSelectedIndex();
+        ɵɵtextBinding(index, ɵɵinterpolation2(prefix, v0, i0, v1, suffix));
+        return ɵɵtextInterpolate2;
+    }
+    /**
+     *
+     * Update text content with 3 bound values surrounded by other text.
+     *
+     * Used when a text node has 3 interpolated values in it:
+     *
+     * ```html
+     * <div>prefix{{v0}}-{{v1}}-{{v2}}suffix</div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵtextInterpolate3(
+     * 'prefix', v0, '-', v1, '-', v2, 'suffix');
+     * ```
+     * @returns itself, so that it may be chained.
+     * @see textInterpolateV
+     * @codeGenApi
+     */
+    function ɵɵtextInterpolate3(prefix, v0, i0, v1, i1, v2, suffix) {
+        var index = getSelectedIndex();
+        ɵɵtextBinding(index, ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix));
+        return ɵɵtextInterpolate3;
+    }
+    /**
+     *
+     * Update text content with 4 bound values surrounded by other text.
+     *
+     * Used when a text node has 4 interpolated values in it:
+     *
+     * ```html
+     * <div>prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}suffix</div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵtextInterpolate4(
+     * 'prefix', v0, '-', v1, '-', v2, '-', v3, 'suffix');
+     * ```
+     * @returns itself, so that it may be chained.
+     * @see ɵɵtextInterpolateV
+     * @codeGenApi
+     */
+    function ɵɵtextInterpolate4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
+        var index = getSelectedIndex();
+        ɵɵtextBinding(index, ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix));
+        return ɵɵtextInterpolate4;
+    }
+    /**
+     *
+     * Update text content with 5 bound values surrounded by other text.
+     *
+     * Used when a text node has 5 interpolated values in it:
+     *
+     * ```html
+     * <div>prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}suffix</div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵtextInterpolate5(
+     * 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, 'suffix');
+     * ```
+     * @returns itself, so that it may be chained.
+     * @see textInterpolateV
+     * @codeGenApi
+     */
+    function ɵɵtextInterpolate5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
+        var index = getSelectedIndex();
+        ɵɵtextBinding(index, ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix));
+        return ɵɵtextInterpolate5;
+    }
+    /**
+     *
+     * Update text content with 6 bound values surrounded by other text.
+     *
+     * Used when a text node has 6 interpolated values in it:
+     *
+     * ```html
+     * <div>prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}suffix</div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵtextInterpolate6(
+     *    'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, 'suffix');
+     * ```
+     *
+     * @param i4 Static value used for concatenation only.
+     * @param v5 Value checked for change. @returns itself, so that it may be chained.
+     * @see textInterpolateV
+     * @codeGenApi
+     */
+    function ɵɵtextInterpolate6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
+        var index = getSelectedIndex();
+        ɵɵtextBinding(index, ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix));
+        return ɵɵtextInterpolate6;
+    }
+    /**
+     *
+     * Update text content with 7 bound values surrounded by other text.
+     *
+     * Used when a text node has 7 interpolated values in it:
+     *
+     * ```html
+     * <div>prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}suffix</div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵtextInterpolate7(
+     *    'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, 'suffix');
+     * ```
+     * @returns itself, so that it may be chained.
+     * @see textInterpolateV
+     * @codeGenApi
+     */
+    function ɵɵtextInterpolate7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
+        var index = getSelectedIndex();
+        ɵɵtextBinding(index, ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix));
+        return ɵɵtextInterpolate7;
+    }
+    /**
+     *
+     * Update text content with 8 bound values surrounded by other text.
+     *
+     * Used when a text node has 8 interpolated values in it:
+     *
+     * ```html
+     * <div>prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}suffix</div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵtextInterpolate8(
+     *  'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, 'suffix');
+     * ```
+     * @returns itself, so that it may be chained.
+     * @see textInterpolateV
+     * @codeGenApi
+     */
+    function ɵɵtextInterpolate8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
+        var index = getSelectedIndex();
+        ɵɵtextBinding(index, ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix));
+        return ɵɵtextInterpolate8;
+    }
+    /**
+     * Update text content with 9 or more bound values other surrounded by text.
+     *
+     * Used when the number of interpolated values exceeds 8.
+     *
+     * ```html
+     * <div>prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}-{{v8}}-{{v9}}suffix</div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵtextInterpolateV(
+     *  ['prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, '-', v9,
+     *  'suffix']);
+     * ```
+     *.
+     * @param values The a collection of values and the strings in between those values, beginning with
+     * a string prefix and ending with a string suffix.
+     * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
+     *
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵtextInterpolateV(values) {
+        var index = getSelectedIndex();
+        ɵɵtextBinding(index, ɵɵinterpolationV(values));
+        return ɵɵtextInterpolateV;
     }
 
     /**
@@ -17990,7 +18249,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-rc.0+354.sha-4809382.with-local-changes');
+    var VERSION = new Version('8.0.0-rc.0+355.sha-dd08150.with-local-changes');
 
     /**
      * @license
@@ -24210,6 +24469,16 @@
         'ɵɵtemplate': ɵɵtemplate,
         'ɵɵtext': ɵɵtext,
         'ɵɵtextBinding': ɵɵtextBinding,
+        'ɵɵtextInterpolate': ɵɵtextInterpolate,
+        'ɵɵtextInterpolate1': ɵɵtextInterpolate1,
+        'ɵɵtextInterpolate2': ɵɵtextInterpolate2,
+        'ɵɵtextInterpolate3': ɵɵtextInterpolate3,
+        'ɵɵtextInterpolate4': ɵɵtextInterpolate4,
+        'ɵɵtextInterpolate5': ɵɵtextInterpolate5,
+        'ɵɵtextInterpolate6': ɵɵtextInterpolate6,
+        'ɵɵtextInterpolate7': ɵɵtextInterpolate7,
+        'ɵɵtextInterpolate8': ɵɵtextInterpolate8,
+        'ɵɵtextInterpolateV': ɵɵtextInterpolateV,
         'ɵɵembeddedViewStart': ɵɵembeddedViewStart,
         'ɵɵembeddedViewEnd': ɵɵembeddedViewEnd,
         'ɵɵi18n': ɵɵi18n,
@@ -30169,6 +30438,16 @@
     exports.ɵɵelement = ɵɵelement;
     exports.ɵɵlistener = ɵɵlistener;
     exports.ɵɵtext = ɵɵtext;
+    exports.ɵɵtextInterpolate = ɵɵtextInterpolate;
+    exports.ɵɵtextInterpolate1 = ɵɵtextInterpolate1;
+    exports.ɵɵtextInterpolate2 = ɵɵtextInterpolate2;
+    exports.ɵɵtextInterpolate3 = ɵɵtextInterpolate3;
+    exports.ɵɵtextInterpolate4 = ɵɵtextInterpolate4;
+    exports.ɵɵtextInterpolate5 = ɵɵtextInterpolate5;
+    exports.ɵɵtextInterpolate6 = ɵɵtextInterpolate6;
+    exports.ɵɵtextInterpolate7 = ɵɵtextInterpolate7;
+    exports.ɵɵtextInterpolate8 = ɵɵtextInterpolate8;
+    exports.ɵɵtextInterpolateV = ɵɵtextInterpolateV;
     exports.ɵɵembeddedViewStart = ɵɵembeddedViewStart;
     exports.ɵɵprojection = ɵɵprojection;
     exports.ɵɵbind = ɵɵbind;
