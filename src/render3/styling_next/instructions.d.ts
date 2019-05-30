@@ -1,3 +1,12 @@
+/**
+* @license
+* Copyright Google Inc. All Rights Reserved.
+*
+* Use of this source code is governed by an MIT-style license that can be
+* found in the LICENSE file at https://angular.io/license
+*/
+import { Sanitizer } from '../../sanitization/security';
+import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
 import { TAttributes, TNode } from '../interfaces/node';
 import { NO_CHANGE } from '../tokens';
 /**
@@ -22,6 +31,23 @@ import { NO_CHANGE } from '../tokens';
  * required until the `select(n)` instruction is fully functional.
  */
 export declare function stylingInit(): void;
+/**
+ * Sets the current style sanitizer function which will then be used
+ * within all follow-up prop and map-based style binding instructions
+ * for the given element.
+ *
+ * Note that once styling has been applied to the element (i.e. once
+ * `select(n)` is executed or the hostBindings/template function exits)
+ * then the active `sanitizerFn` will be set to `null`. This means that
+ * once styling is applied to another element then a another call to
+ * `styleSanitizer` will need to be made.
+ *
+ * @param sanitizerFn The sanitization function that will be used to
+ *       process style prop/value entries.
+ *
+ * @codeGenApi
+ */
+export declare function styleSanitizer(sanitizer: Sanitizer | StyleSanitizeFn | null): void;
 /**
  * Mirror implementation of the `styleProp()` instruction (found in `instructions/styling.ts`).
  */

@@ -1,3 +1,4 @@
+import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
 import { LStylingData, TStylingContext } from './interfaces';
 /**
  * --------
@@ -42,6 +43,10 @@ export interface DebugStyling {
     values: {
         [key: string]: string | number | null | boolean;
     };
+    /**
+     * Overrides the sanitizer used to process styles.
+     */
+    overrideSanitizer(sanitizer: StyleSanitizeFn | null): void;
 }
 /**
  * A debug/testing-oriented summary of all styling entries within a `TStylingContext`.
@@ -56,6 +61,10 @@ export interface TStylingTupleSummary {
      * styling changes when and styling bindings update
      */
     guardMask: number;
+    /**
+     * Whether or not the entry requires sanitization
+     */
+    sanitizationRequired: boolean;
     /**
      * The default value that will be applied if any bindings are falsy.
      */
@@ -97,7 +106,13 @@ declare class TStylingContextDebug {
 export declare class NodeStylingDebug implements DebugStyling {
     context: TStylingContext;
     private _data;
-    constructor(context: TStylingContext, _data: LStylingData);
+    private _isClassBased?;
+    private _sanitizer;
+    constructor(context: TStylingContext, _data: LStylingData, _isClassBased?: boolean | undefined);
+    /**
+     * Overrides the sanitizer used to process styles.
+     */
+    overrideSanitizer(sanitizer: StyleSanitizeFn | null): void;
     /**
      * Returns a detailed summary of each styling entry in the context and
      * what their runtime representation is.

@@ -5,6 +5,7 @@
 * Use of this source code is governed by an MIT-style license that can be
 * found in the LICENSE file at https://angular.io/license
 */
+import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
 import { ProceduralRenderer3, RElement, Renderer3 } from '../interfaces/renderer';
 import { ApplyStylingFn, LStylingData, LStylingMap, SyncStylingMapsFn, TStylingContext } from './interfaces';
 export declare const DEFAULT_GUARD_MASK_VALUE = 1;
@@ -18,7 +19,7 @@ export declare const DEFAULT_GUARD_MASK_VALUE = 1;
  * state each time it's called (which then allows the `TStylingContext`
  * and the bit mask values to be in sync).
  */
-export declare function updateClassBinding(context: TStylingContext, data: LStylingData, prop: string | null, bindingIndex: number, value: boolean | string | null | undefined | LStylingMap, deferRegistration: boolean, forceUpdate?: boolean): void;
+export declare function updateClassBinding(context: TStylingContext, data: LStylingData, prop: string | null, bindingIndex: number, value: boolean | string | null | undefined | LStylingMap, deferRegistration: boolean, forceUpdate: boolean): void;
 /**
  * Visits a style-based binding and updates the new value (if changed).
  *
@@ -29,7 +30,7 @@ export declare function updateClassBinding(context: TStylingContext, data: LStyl
  * state each time it's called (which then allows the `TStylingContext`
  * and the bit mask values to be in sync).
  */
-export declare function updateStyleBinding(context: TStylingContext, data: LStylingData, prop: string | null, bindingIndex: number, value: String | string | number | null | undefined | LStylingMap, deferRegistration: boolean, forceUpdate?: boolean): void;
+export declare function updateStyleBinding(context: TStylingContext, data: LStylingData, prop: string | null, bindingIndex: number, value: String | string | number | null | undefined | LStylingMap, sanitizer: StyleSanitizeFn | null, deferRegistration: boolean, forceUpdate: boolean): void;
 /**
  * Registers the provided binding (prop + bindingIndex) into the context.
  *
@@ -66,17 +67,21 @@ export declare function updateStyleBinding(context: TStylingContext, data: LStyl
  * (since it's a map), all map-based entries are stored in an already populated area of
  * the context at the top (which is reserved for map-based entries).
  */
-export declare function registerBinding(context: TStylingContext, countId: number, prop: string | null, bindingValue: number | null | string | boolean): void;
+export declare function registerBinding(context: TStylingContext, countId: number, prop: string | null, bindingValue: number | null | string | boolean, sanitizationRequired?: boolean): void;
 /**
  * Applies all class entries in the provided context to the provided element and resets
  * any counter and/or bitMask values associated with class bindings.
+ *
+ * @returns whether or not the classes were flushed to the element.
  */
-export declare function applyClasses(renderer: Renderer3 | ProceduralRenderer3 | null, data: LStylingData, context: TStylingContext, element: RElement, directiveIndex: number): void;
+export declare function applyClasses(renderer: Renderer3 | ProceduralRenderer3 | null, data: LStylingData, context: TStylingContext, element: RElement, directiveIndex: number): boolean;
 /**
  * Applies all style entries in the provided context to the provided element and resets
  * any counter and/or bitMask values associated with style bindings.
+ *
+ * @returns whether or not the styles were flushed to the element.
  */
-export declare function applyStyles(renderer: Renderer3 | ProceduralRenderer3 | null, data: LStylingData, context: TStylingContext, element: RElement, directiveIndex: number): void;
+export declare function applyStyles(renderer: Renderer3 | ProceduralRenderer3 | null, data: LStylingData, context: TStylingContext, element: RElement, directiveIndex: number, sanitizer: StyleSanitizeFn | null): boolean;
 /**
  * Runs through the provided styling context and applies each value to
  * the provided element (via the renderer) if one or more values are present.
@@ -103,6 +108,6 @@ export declare function applyStyles(renderer: Renderer3 | ProceduralRenderer3 | 
  * Note that this function is not designed to be called in isolation (use
  * `applyClasses` and `applyStyles` to actually apply styling values).
  */
-export declare function applyStyling(context: TStylingContext, renderer: Renderer3 | ProceduralRenderer3 | null, element: RElement, bindingData: LStylingData, bitMaskValue: number | boolean, applyStylingFn: ApplyStylingFn): void;
+export declare function applyStyling(context: TStylingContext, renderer: Renderer3 | ProceduralRenderer3 | null, element: RElement, bindingData: LStylingData, bitMaskValue: number | boolean, applyStylingFn: ApplyStylingFn, sanitizer: StyleSanitizeFn | null): void;
 export declare function getStylingMapsSyncFn(): SyncStylingMapsFn | null;
 export declare function setStylingMapsSyncFn(fn: SyncStylingMapsFn): void;

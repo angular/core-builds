@@ -1,11 +1,6 @@
-/**
-* @license
-* Copyright Google Inc. All Rights Reserved.
-*
-* Use of this source code is governed by an MIT-style license that can be
-* found in the LICENSE file at https://angular.io/license
-*/
+import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
 import { StylingContext } from '../interfaces/styling';
+import { LView } from '../interfaces/view';
 import { LStylingMap, TStylingContext } from './interfaces';
 /**
  * Creates a new instance of the `TStylingContext`.
@@ -13,7 +8,7 @@ import { LStylingMap, TStylingContext } from './interfaces';
  * This function will also pre-fill the context with data
  * for map-based bindings.
  */
-export declare function allocStylingContext(): TStylingContext;
+export declare function allocTStylingContext(): TStylingContext;
 /**
  * Temporary function that allows for a string-based property name to be
  * obtained from an index-based property identifier.
@@ -26,7 +21,9 @@ export declare function getBindingNameFromIndex(stylingContext: StylingContext, 
 export declare function updateContextDirectiveIndex(context: TStylingContext, index: number): void;
 export declare function setConfig(context: TStylingContext, value: number): void;
 export declare function getProp(context: TStylingContext, index: number): string;
+export declare function isSanitizationRequired(context: TStylingContext, index: number): boolean;
 export declare function getGuardMask(context: TStylingContext, index: number): number;
+export declare function setGuardMask(context: TStylingContext, index: number, maskValue: number): void;
 export declare function getValuesCount(context: TStylingContext, index: number): number;
 export declare function getBindingValue(context: TStylingContext, index: number, offset: number): string | number;
 export declare function getDefaultValue(context: TStylingContext, index: number): string | boolean | null;
@@ -44,3 +41,11 @@ export declare function hasValueChanged(a: LStylingMap | number | String | strin
  * Determines whether the provided styling value is truthy or falsy.
  */
 export declare function isStylingValueDefined(value: any): boolean;
+/**
+ * Returns the current style sanitizer function for the given view.
+ *
+ * The default style sanitizer (which lives inside of `LView`) will
+ * be returned depending on whether the `styleSanitizer` instruction
+ * was called or not prior to any styling instructions running.
+ */
+export declare function getCurrentOrLViewSanitizer(lView: LView): StyleSanitizeFn | null;
