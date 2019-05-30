@@ -33,7 +33,7 @@ export interface QueryPredicate<T> {
  * - values collected based on a predicate
  * - `QueryList` to which collected values should be reported
  */
-export interface LQuery<T> {
+declare class LQuery<T> {
     /**
      * Next query. Used when queries are stored as a linked list in `LQueries`.
      */
@@ -49,15 +49,38 @@ export interface LQuery<T> {
     predicate: QueryPredicate<T>;
     /**
      * Values which have been located.
-     *
      * This is what builds up the `QueryList._valuesTree`.
      */
     values: any[];
     /**
-     * A pointer to an array that stores collected values from views. This is necessary so we know a
-     * container into which to insert nodes collected from views.
+     * A pointer to an array that stores collected values from views. This is necessary so we
+     * know a container into which to insert nodes collected from views.
      */
     containerValues: any[] | null;
+    constructor(
+    /**
+     * Next query. Used when queries are stored as a linked list in `LQueries`.
+     */
+    next: LQuery<any> | null, 
+    /**
+     * Destination to which the value should be added.
+     */
+    list: QueryList<T>, 
+    /**
+     * A predicate which determines if a given element/directive should be included in the query
+     * results.
+     */
+    predicate: QueryPredicate<T>, 
+    /**
+     * Values which have been located.
+     * This is what builds up the `QueryList._valuesTree`.
+     */
+    values: any[], 
+    /**
+     * A pointer to an array that stores collected values from views. This is necessary so we
+     * know a container into which to insert nodes collected from views.
+     */
+    containerValues: any[] | null);
 }
 export declare class LQueries_ implements LQueries {
     parent: LQueries_ | null;
@@ -141,3 +164,4 @@ export declare function ɵɵstaticContentQuery<T>(directiveIndex: number, predic
  * @codeGenApi
  */
 export declare function ɵɵloadContentQuery<T>(): QueryList<T>;
+export {};
