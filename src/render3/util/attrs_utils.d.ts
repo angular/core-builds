@@ -42,6 +42,6 @@ export declare function attrsStylingIndexOf(attrs: TAttributes, startIndex: numb
  * attribute values in a `TAttributes` array are only the names of attributes,
  * and not name-value pairs.
  * @param marker The attribute marker to test.
- * @returns true if the marker is a "name-only" marker (e.g. `Bindings` or `Template`).
+ * @returns true if the marker is a "name-only" marker (e.g. `Bindings`, `Template` or `I18n`).
  */
 export declare function isNameOnlyAttributeMarker(marker: string | AttributeMarker | CssSelector): boolean;
