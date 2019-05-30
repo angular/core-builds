@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+379.sha-7a0f8ac.with-local-changes
+ * @license Angular v8.0.0-rc.0+383.sha-41f372f.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10722,7 +10722,7 @@ export declare class ɵReflectionCapabilities implements PlatformReflectionCapab
  */
 export declare function ɵregisterModuleFactory(id: string, factory: NgModuleFactory<any>): void;
 
-export declare function ɵregisterNgModuleType(id: string, ngModuleType: ɵNgModuleType): void;
+export declare function ɵregisterNgModuleType(ngModuleType: ɵNgModuleType): void;
 
 /**
  * Render3 implementation of {@link viewEngine_ComponentFactory}.

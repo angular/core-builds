@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+379.sha-7a0f8ac.with-local-changes
+ * @license Angular v8.0.0-rc.0+383.sha-41f372f.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18723,7 +18723,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-rc.0+379.sha-7a0f8ac.with-local-changes');
+    var VERSION = new Version('8.0.0-rc.0+383.sha-41f372f.with-local-changes');
 
     /**
      * @license
@@ -23348,10 +23348,20 @@
             throw new Error("Duplicate module registered for " + id + " - " + stringify(type) + " vs " + stringify(type.name));
         }
     }
-    function registerNgModuleType(id, ngModuleType) {
-        var existing = modules.get(id);
-        assertSameOrNotExisting(id, existing, ngModuleType);
-        modules.set(id, ngModuleType);
+    function registerNgModuleType(ngModuleType) {
+        if (ngModuleType.ngModuleDef.id !== null) {
+            var id = ngModuleType.ngModuleDef.id;
+            var existing = modules.get(id);
+            assertSameOrNotExisting(id, existing, ngModuleType);
+            modules.set(id, ngModuleType);
+        }
+        var imports = ngModuleType.ngModuleDef.imports;
+        if (imports instanceof Function) {
+            imports = imports();
+        }
+        if (imports) {
+            imports.forEach(function (i) { return registerNgModuleType(i); });
+        }
     }
     function getRegisteredNgModuleType(id) {
         return modules.get(id);
@@ -23429,15 +23439,37 @@
         function NgModuleFactory(moduleType) {
             var _this = _super.call(this) || this;
             _this.moduleType = moduleType;
+            var ngModuleDef = getNgModuleDef(moduleType);
+            if (ngModuleDef !== null) {
+                // Register the NgModule with Angular's module registry. The location (and hence timing) of
+                // this call is critical to ensure this works correctly (modules get registered when expected)
+                // without bloating bundles (modules are registered when otherwise not referenced).
+                //
+                // In View Engine, registration occurs in the .ngfactory.js file as a side effect. This has
+                // several practical consequences:
+                //
+                // - If an .ngfactory file is not imported from, the module won't be registered (and can be
+                //   tree shaken).
+                // - If an .ngfactory file is imported from, the module will be registered even if an instance
+                //   is not actually created (via `create` below).
+                // - Since an .ngfactory file in View Engine references the .ngfactory files of the NgModule's
+                //   imports,
+                //
+                // In Ivy, things are a bit different. .ngfactory files still exist for compatibility, but are
+                // not a required API to use - there are other ways to obtain an NgModuleFactory for a given
+                // NgModule. Thus, relying on a side effect in the .ngfactory file is not sufficient. Instead,
+                // the side effect of registration is added here, in the constructor of NgModuleFactory,
+                // ensuring no matter how a factory is created, the module is registered correctly.
+                //
+                // An alternative would be to include the registration side effect inline following the actual
+                // NgModule definition. This also has the correct timing, but breaks tree-shaking - modules
+                // will be registered and retained even if they're otherwise never referenced.
+                registerNgModuleType(moduleType);
+            }
             return _this;
         }
         NgModuleFactory.prototype.create = function (parentInjector) {
-            var moduleType = this.moduleType;
-            var moduleRef = new NgModuleRef$1(moduleType, parentInjector);
-            var ngModuleDef = getNgModuleDef(moduleType);
-            ngModuleDef && ngModuleDef.id &&
-                registerNgModuleType(ngModuleDef.id, moduleType);
-            return moduleRef;
+            return new NgModuleRef$1(this.moduleType, parentInjector);
         };
         return NgModuleFactory;
     }(NgModuleFactory));
@@ -24199,6 +24231,45 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    /**
+     * An object representing a query, which is a combination of:
+     * - query predicate to determines if a given element/directive should be included in the query
+     * - values collected based on a predicate
+     * - `QueryList` to which collected values should be reported
+     */
+    var LQuery = /** @class */ (function () {
+        function LQuery(
+        /**
+         * Next query. Used when queries are stored as a linked list in `LQueries`.
+         */
+        next, 
+        /**
+         * Destination to which the value should be added.
+         */
+        list, 
+        /**
+         * A predicate which determines if a given element/directive should be included in the query
+         * results.
+         */
+        predicate, 
+        /**
+         * Values which have been located.
+         * This is what builds up the `QueryList._valuesTree`.
+         */
+        values, 
+        /**
+         * A pointer to an array that stores collected values from views. This is necessary so we
+         * know a container into which to insert nodes collected from views.
+         */
+        containerValues) {
+            this.next = next;
+            this.list = list;
+            this.predicate = predicate;
+            this.values = values;
+            this.containerValues = containerValues;
+        }
+        return LQuery;
+    }());
     var LQueries_ = /** @class */ (function () {
         function LQueries_(parent, shallow, deep) {
             this.parent = parent;
@@ -24247,14 +24318,7 @@
         while (query) {
             var containerValues = []; // prepare room for views
             query.values.push(containerValues);
-            var clonedQuery = {
-                next: result,
-                list: query.list,
-                predicate: query.predicate,
-                values: containerValues,
-                containerValues: null
-            };
-            result = clonedQuery;
+            result = new LQuery(result, query.list, query.predicate, containerValues, null);
             query = query.next;
         }
         return result;
@@ -24262,14 +24326,7 @@
     function copyQueriesToView(query) {
         var result = null;
         while (query) {
-            var clonedQuery = {
-                next: result,
-                list: query.list,
-                predicate: query.predicate,
-                values: [],
-                containerValues: query.values
-            };
-            result = clonedQuery;
+            result = new LQuery(result, query.list, query.predicate, [], query.values);
             query = query.next;
         }
         return result;
@@ -24422,13 +24479,7 @@
         };
     }
     function createLQuery(previous, queryList, predicate, read) {
-        return {
-            next: previous,
-            list: queryList,
-            predicate: createPredicate(predicate, read),
-            values: queryList._valuesTree,
-            containerValues: null
-        };
+        return new LQuery(previous, queryList, createPredicate(predicate, read), queryList._valuesTree, null);
     }
     /**
      * Creates a QueryList and stores it in LView's collection of active queries (LQueries).
