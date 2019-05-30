@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+383.sha-41f372f.with-local-changes
+ * @license Angular v8.0.0-rc.0+385.sha-53c6b78.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6663,10 +6663,11 @@
      * attribute values in a `TAttributes` array are only the names of attributes,
      * and not name-value pairs.
      * @param marker The attribute marker to test.
-     * @returns true if the marker is a "name-only" marker (e.g. `Bindings` or `Template`).
+     * @returns true if the marker is a "name-only" marker (e.g. `Bindings`, `Template` or `I18n`).
      */
     function isNameOnlyAttributeMarker(marker) {
-        return marker === 3 /* Bindings */ || marker === 4 /* Template */;
+        return marker === 3 /* Bindings */ || marker === 4 /* Template */ ||
+            marker === 6 /* I18n */;
     }
 
     /**
@@ -10853,17 +10854,18 @@
      * Attribute matching depends upon `isInlineTemplate` and `isProjectionMode`.
      * The following table summarizes which types of attributes we attempt to match:
      *
-     * =========================================================================================
-     * Modes                   | Normal Attributes | Bindings Attributes | Template Attributes
-     * =========================================================================================
-     * Inline + Projection     | YES               | YES                 | NO
-     * -----------------------------------------------------------------------------------------
-     * Inline + Directive      | NO                | NO                  | YES
-     * -----------------------------------------------------------------------------------------
-     * Non-inline + Projection | YES               | YES                 | NO
-     * -----------------------------------------------------------------------------------------
-     * Non-inline + Directive  | YES               | YES                 | NO
-     * =========================================================================================
+     * ===========================================================================================================
+     * Modes                   | Normal Attributes | Bindings Attributes | Template Attributes | I18n
+     * Attributes
+     * ===========================================================================================================
+     * Inline + Projection     | YES               | YES                 | NO                  | YES
+     * -----------------------------------------------------------------------------------------------------------
+     * Inline + Directive      | NO                | NO                  | YES                 | NO
+     * -----------------------------------------------------------------------------------------------------------
+     * Non-inline + Projection | YES               | YES                 | NO                  | YES
+     * -----------------------------------------------------------------------------------------------------------
+     * Non-inline + Directive  | YES               | YES                 | NO                  | YES
+     * ===========================================================================================================
      *
      * @param name the name of the attribute to find
      * @param attrs the attribute array to examine
@@ -10883,7 +10885,7 @@
                 if (maybeAttrName === name) {
                     return i;
                 }
-                else if (maybeAttrName === 3 /* Bindings */) {
+                else if (maybeAttrName === 3 /* Bindings */ || maybeAttrName === 6 /* I18n */) {
                     bindingsMode = true;
                 }
                 else if (maybeAttrName === 1 /* Classes */) {
@@ -14082,7 +14084,7 @@
     /**
      * Updates the value or removes an attribute on an Element.
      *
-     * @param number index The index of the element in the data array
+     * @param index The index of the element in the data array
      * @param name name The name of the attribute.
      * @param value value The attribute is removed when value is `null` or `undefined`.
      *                  Otherwise the attribute value is set to the stringified value.
@@ -14093,26 +14095,29 @@
      */
     function ɵɵelementAttribute(index, name, value, sanitizer, namespace) {
         if (value !== NO_CHANGE) {
-            ngDevMode && validateAgainstEventAttributes(name);
             var lView = getLView();
             var renderer = lView[RENDERER];
-            var element = getNativeByIndex(index, lView);
-            if (value == null) {
-                ngDevMode && ngDevMode.rendererRemoveAttribute++;
-                isProceduralRenderer(renderer) ? renderer.removeAttribute(element, name, namespace) :
-                    element.removeAttribute(name);
+            elementAttributeInternal(index, name, value, lView, renderer, sanitizer, namespace);
+        }
+    }
+    function elementAttributeInternal(index, name, value, lView, renderer, sanitizer, namespace) {
+        ngDevMode && validateAgainstEventAttributes(name);
+        var element = getNativeByIndex(index, lView);
+        if (value == null) {
+            ngDevMode && ngDevMode.rendererRemoveAttribute++;
+            isProceduralRenderer(renderer) ? renderer.removeAttribute(element, name, namespace) :
+                element.removeAttribute(name);
+        }
+        else {
+            ngDevMode && ngDevMode.rendererSetAttribute++;
+            var tNode = getTNode(index, lView);
+            var strValue = sanitizer == null ? renderStringify(value) : sanitizer(value, tNode.tagName || '', name);
+            if (isProceduralRenderer(renderer)) {
+                renderer.setAttribute(element, name, strValue, namespace);
             }
             else {
-                ngDevMode && ngDevMode.rendererSetAttribute++;
-                var tNode = getTNode(index, lView);
-                var strValue = sanitizer == null ? renderStringify(value) : sanitizer(value, tNode.tagName || '', name);
-                if (isProceduralRenderer(renderer)) {
-                    renderer.setAttribute(element, name, strValue, namespace);
-                }
-                else {
-                    namespace ? element.setAttributeNS(namespace, name, strValue) :
-                        element.setAttribute(name, strValue);
-                }
+                namespace ? element.setAttributeNS(namespace, name, strValue) :
+                    element.setAttribute(name, strValue);
             }
         }
     }
@@ -18723,7 +18728,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0-rc.0+383.sha-41f372f.with-local-changes');
+    var VERSION = new Version('8.0.0-rc.0+385.sha-53c6b78.with-local-changes');
 
     /**
      * @license
@@ -22803,7 +22808,10 @@
                         var elementNodeIndex = opCode >>> 3 /* SHIFT_REF */;
                         var attrName = createOpCodes[++i];
                         var attrValue = createOpCodes[++i];
-                        ɵɵelementAttribute(elementNodeIndex, attrName, attrValue);
+                        var renderer_1 = viewData[RENDERER];
+                        // This code is used for ICU expressions only, since we don't support
+                        // directives/components in ICUs, we don't need to worry about inputs here
+                        elementAttributeInternal(elementNodeIndex, attrName, attrValue, viewData, renderer_1);
                         break;
                     default:
                         throw new Error("Unable to determine the type of mutate operation for \"" + opCode + "\"");
@@ -22871,9 +22879,9 @@
                             var icuTNode = void 0;
                             switch (opCode & 3 /* MASK_OPCODE */) {
                                 case 1 /* Attr */:
-                                    var attrName = updateOpCodes[++j];
+                                    var propName = updateOpCodes[++j];
                                     var sanitizeFn = updateOpCodes[++j];
-                                    ɵɵelementAttribute(nodeIndex, attrName, value, sanitizeFn);
+                                    elementPropertyInternal(nodeIndex, propName, value, sanitizeFn);
                                     break;
                                 case 0 /* Text */:
                                     ɵɵtextBinding(nodeIndex, value);
@@ -22999,7 +23007,11 @@
             var parts = message.split(ICU_REGEXP);
             for (var j = 0; j < parts.length; j++) {
                 var value = parts[j];
-                if (j & 1) ;
+                if (j & 1) {
+                    // Odd indexes are ICU expressions
+                    // TODO(ocombe): support ICU expressions in attributes
+                    throw new Error('ICU expressions are not yet supported in attributes');
+                }
                 else if (value !== '') {
                     // Even indexes are text (including bindings)
                     var hasBinding = !!value.match(BINDING_REGEXP);
@@ -23007,7 +23019,15 @@
                         addAllToArray(generateBindingUpdateOpCodes(value, previousElementIndex, attrName), updateOpCodes);
                     }
                     else {
-                        ɵɵelementAttribute(previousElementIndex, attrName, value);
+                        var lView = getLView();
+                        var renderer = lView[RENDERER];
+                        elementAttributeInternal(previousElementIndex, attrName, value, lView, renderer);
+                        // Check if that attribute is a directive input
+                        var tNode = getTNode(previousElementIndex, lView);
+                        var dataValue = tNode.inputs && tNode.inputs[attrName];
+                        if (dataValue) {
+                            setInputsForProperty(lView, dataValue, value);
+                        }
                     }
                 }
             }

@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+383.sha-41f372f.with-local-changes
+ * @license Angular v8.0.0-rc.0+385.sha-53c6b78.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8184,10 +8184,11 @@ function attrsStylingIndexOf(attrs, startIndex) {
  * attribute values in a `TAttributes` array are only the names of attributes,
  * and not name-value pairs.
  * @param {?} marker The attribute marker to test.
- * @return {?} true if the marker is a "name-only" marker (e.g. `Bindings` or `Template`).
+ * @return {?} true if the marker is a "name-only" marker (e.g. `Bindings`, `Template` or `I18n`).
  */
 function isNameOnlyAttributeMarker(marker) {
-    return marker === 3 /* Bindings */ || marker === 4 /* Template */;
+    return marker === 3 /* Bindings */ || marker === 4 /* Template */ ||
+        marker === 6 /* I18n */;
 }
 
 /**
@@ -13645,17 +13646,18 @@ function readClassValueFromTNode(tNode) {
  * Attribute matching depends upon `isInlineTemplate` and `isProjectionMode`.
  * The following table summarizes which types of attributes we attempt to match:
  *
- * =========================================================================================
- * Modes                   | Normal Attributes | Bindings Attributes | Template Attributes
- * =========================================================================================
- * Inline + Projection     | YES               | YES                 | NO
- * -----------------------------------------------------------------------------------------
- * Inline + Directive      | NO                | NO                  | YES
- * -----------------------------------------------------------------------------------------
- * Non-inline + Projection | YES               | YES                 | NO
- * -----------------------------------------------------------------------------------------
- * Non-inline + Directive  | YES               | YES                 | NO
- * =========================================================================================
+ * ===========================================================================================================
+ * Modes                   | Normal Attributes | Bindings Attributes | Template Attributes | I18n
+ * Attributes
+ * ===========================================================================================================
+ * Inline + Projection     | YES               | YES                 | NO                  | YES
+ * -----------------------------------------------------------------------------------------------------------
+ * Inline + Directive      | NO                | NO                  | YES                 | NO
+ * -----------------------------------------------------------------------------------------------------------
+ * Non-inline + Projection | YES               | YES                 | NO                  | YES
+ * -----------------------------------------------------------------------------------------------------------
+ * Non-inline + Directive  | YES               | YES                 | NO                  | YES
+ * ===========================================================================================================
  *
  * @param {?} name the name of the attribute to find
  * @param {?} attrs the attribute array to examine
@@ -13679,7 +13681,7 @@ function findAttrIndexInNode(name, attrs, isInlineTemplate, isProjectionMode) {
             if (maybeAttrName === name) {
                 return i;
             }
-            else if (maybeAttrName === 3 /* Bindings */) {
+            else if (maybeAttrName === 3 /* Bindings */ || maybeAttrName === 6 /* I18n */) {
                 bindingsMode = true;
             }
             else if (maybeAttrName === 1 /* Classes */) {
@@ -17712,7 +17714,7 @@ function ɵɵelement(index, name, attrs, localRefs) {
  * Updates the value or removes an attribute on an Element.
  *
  * \@codeGenApi
- * @param {?} index
+ * @param {?} index The index of the element in the data array
  * @param {?} name name The name of the attribute.
  * @param {?} value value The attribute is removed when value is `null` or `undefined`.
  *                  Otherwise the attribute value is set to the stringified value.
@@ -17723,31 +17725,44 @@ function ɵɵelement(index, name, attrs, localRefs) {
  */
 function ɵɵelementAttribute(index, name, value, sanitizer, namespace) {
     if (value !== NO_CHANGE) {
-        ngDevMode && validateAgainstEventAttributes(name);
         /** @type {?} */
         const lView = getLView();
         /** @type {?} */
         const renderer = lView[RENDERER];
+        elementAttributeInternal(index, name, value, lView, renderer, sanitizer, namespace);
+    }
+}
+/**
+ * @param {?} index
+ * @param {?} name
+ * @param {?} value
+ * @param {?} lView
+ * @param {?} renderer
+ * @param {?=} sanitizer
+ * @param {?=} namespace
+ * @return {?}
+ */
+function elementAttributeInternal(index, name, value, lView, renderer, sanitizer, namespace) {
+    ngDevMode && validateAgainstEventAttributes(name);
+    /** @type {?} */
+    const element = (/** @type {?} */ (getNativeByIndex(index, lView)));
+    if (value == null) {
+        ngDevMode && ngDevMode.rendererRemoveAttribute++;
+        isProceduralRenderer(renderer) ? renderer.removeAttribute(element, name, namespace) :
+            element.removeAttribute(name);
+    }
+    else {
+        ngDevMode && ngDevMode.rendererSetAttribute++;
         /** @type {?} */
-        const element = (/** @type {?} */ (getNativeByIndex(index, lView)));
-        if (value == null) {
-            ngDevMode && ngDevMode.rendererRemoveAttribute++;
-            isProceduralRenderer(renderer) ? renderer.removeAttribute(element, name, namespace) :
-                element.removeAttribute(name);
+        const tNode = getTNode(index, lView);
+        /** @type {?} */
+        const strValue = sanitizer == null ? renderStringify(value) : sanitizer(value, tNode.tagName || '', name);
+        if (isProceduralRenderer(renderer)) {
+            renderer.setAttribute(element, name, strValue, namespace);
         }
         else {
-            ngDevMode && ngDevMode.rendererSetAttribute++;
-            /** @type {?} */
-            const tNode = getTNode(index, lView);
-            /** @type {?} */
-            const strValue = sanitizer == null ? renderStringify(value) : sanitizer(value, tNode.tagName || '', name);
-            if (isProceduralRenderer(renderer)) {
-                renderer.setAttribute(element, name, strValue, namespace);
-            }
-            else {
-                namespace ? element.setAttributeNS(namespace, name, strValue) :
-                    element.setAttribute(name, strValue);
-            }
+            namespace ? element.setAttributeNS(namespace, name, strValue) :
+                element.setAttribute(name, strValue);
         }
     }
 }
@@ -23312,7 +23327,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-rc.0+383.sha-41f372f.with-local-changes');
+const VERSION = new Version('8.0.0-rc.0+385.sha-53c6b78.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -29007,7 +29022,11 @@ function readCreateOpCodes(index, createOpCodes, icus, viewData) {
                     const attrName = (/** @type {?} */ (createOpCodes[++i]));
                     /** @type {?} */
                     const attrValue = (/** @type {?} */ (createOpCodes[++i]));
-                    ɵɵelementAttribute(elementNodeIndex, attrName, attrValue);
+                    /** @type {?} */
+                    const renderer = viewData[RENDERER];
+                    // This code is used for ICU expressions only, since we don't support
+                    // directives/components in ICUs, we don't need to worry about inputs here
+                    elementAttributeInternal(elementNodeIndex, attrName, attrValue, viewData, renderer);
                     break;
                 default:
                     throw new Error(`Unable to determine the type of mutate operation for "${opCode}"`);
@@ -29099,10 +29118,10 @@ function readUpdateOpCodes(updateOpCodes, icus, bindingsStartIndex, changeMask, 
                         switch (opCode & 3 /* MASK_OPCODE */) {
                             case 1 /* Attr */:
                                 /** @type {?} */
-                                const attrName = (/** @type {?} */ (updateOpCodes[++j]));
+                                const propName = (/** @type {?} */ (updateOpCodes[++j]));
                                 /** @type {?} */
                                 const sanitizeFn = (/** @type {?} */ (updateOpCodes[++j]));
-                                ɵɵelementAttribute(nodeIndex, attrName, value, sanitizeFn);
+                                elementPropertyInternal(nodeIndex, propName, value, sanitizeFn);
                                 break;
                             case 0 /* Text */:
                                 ɵɵtextBinding(nodeIndex, value);
@@ -29260,7 +29279,11 @@ function i18nAttributesFirstPass(tView, index, values) {
         for (let j = 0; j < parts.length; j++) {
             /** @type {?} */
             const value = parts[j];
-            if (j & 1) ;
+            if (j & 1) {
+                // Odd indexes are ICU expressions
+                // TODO(ocombe): support ICU expressions in attributes
+                throw new Error('ICU expressions are not yet supported in attributes');
+            }
             else if (value !== '') {
                 // Even indexes are text (including bindings)
                 /** @type {?} */
@@ -29269,7 +29292,19 @@ function i18nAttributesFirstPass(tView, index, values) {
                     addAllToArray(generateBindingUpdateOpCodes(value, previousElementIndex, attrName), updateOpCodes);
                 }
                 else {
-                    ɵɵelementAttribute(previousElementIndex, attrName, value);
+                    /** @type {?} */
+                    const lView = getLView();
+                    /** @type {?} */
+                    const renderer = lView[RENDERER];
+                    elementAttributeInternal(previousElementIndex, attrName, value, lView, renderer);
+                    // Check if that attribute is a directive input
+                    /** @type {?} */
+                    const tNode = getTNode(previousElementIndex, lView);
+                    /** @type {?} */
+                    const dataValue = tNode.inputs && tNode.inputs[attrName];
+                    if (dataValue) {
+                        setInputsForProperty(lView, dataValue, value);
+                    }
                 }
             }
         }

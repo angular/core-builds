@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+383.sha-41f372f.with-local-changes
+ * @license Angular v8.0.0-rc.0+385.sha-53c6b78.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9655,7 +9655,22 @@ export declare const enum ɵAttributeMarker {
      * ['attr', 'value', AttributeMarker.ProjectAs, ['', 'title', '']]
      * ```
      */
-    ProjectAs = 5
+    ProjectAs = 5,
+    /**
+     * Signals that the following attribute will be translated by runtime i18n
+     *
+     * For example, given the following HTML:
+     *
+     * ```
+     * <div moo="car" foo="value" i18n-foo [bar]="binding" i18n-bar>
+     * ```
+     *
+     * the generated code is:
+     *
+     * ```
+     * var _c1 = ['moo', 'car', AttributeMarker.I18n, 'foo', 'bar'];
+     */
+    I18n = 6
 }
 
 export declare const enum ɵBindingFlags {
@@ -12101,7 +12116,7 @@ export declare function ɵɵelement(index: number, name: string, attrs?: TAttrib
 /**
  * Updates the value or removes an attribute on an Element.
  *
- * @param number index The index of the element in the data array
+ * @param index The index of the element in the data array
  * @param name name The name of the attribute.
  * @param value value The attribute is removed when value is `null` or `undefined`.
  *                  Otherwise the attribute value is set to the stringified value.
