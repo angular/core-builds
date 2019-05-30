@@ -1,10 +1,10 @@
 /**
- * @license Angular v8.0.0-rc.0+377.sha-f5b0c8a.with-local-changes
+ * @license Angular v8.0.0-rc.0+378.sha-5e0f982.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { RendererFactory2, getDebugNode, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, COMPILER_OPTIONS, ɵcompileNgModuleDefs, ɵNgModuleFactory, ɵgetInjectableDef, ɵNG_COMPONENT_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵpatchComponentDefWithScope, ɵNG_INJECTOR_DEF, ɵNG_MODULE_DEF, NgZone, Compiler, ɵtransitiveScopesFor, ModuleWithComponentFactories, ɵresetCompiledComponents, Injector, InjectFlags, ɵflushModuleScopingQueueAsMuchAsPossible, ɵɵdefineInjectable, ɵɵgetInheritedFactory, ɵsetClassMetadata, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, ɵivyEnabled, Optional, SkipSelf } from '@angular/core';
+import { RendererFactory2, getDebugNode, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, COMPILER_OPTIONS, ɵcompileNgModuleDefs, ɵNgModuleFactory, ɵgetInjectableDef, ɵNG_COMPONENT_DEF, ɵRender3NgModuleRef, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵpatchComponentDefWithScope, ɵNG_INJECTOR_DEF, ɵNG_MODULE_DEF, NgZone, Compiler, ɵtransitiveScopesFor, ModuleWithComponentFactories, ɵresetCompiledComponents, Injector, InjectFlags, ɵflushModuleScopingQueueAsMuchAsPossible, ɵɵdefineInjectable, ɵɵgetInheritedFactory, ɵsetClassMetadata, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, ɵivyEnabled, Optional, SkipSelf } from '@angular/core';
 import { __read, __extends, __spread, __awaiter, __generator, __values, __decorate } from 'tslib';
 import { ResourceLoader } from '@angular/compiler';
 
@@ -1176,6 +1176,9 @@ var R3TestBedCompiler = /** @class */ (function () {
         this.componentToModuleScope.clear();
         var parentInjector = this.platform.injector;
         this.testModuleRef = new ɵRender3NgModuleRef(this.testModuleType, parentInjector);
+        // Set the locale ID, it can be overridden for the tests
+        var localeId = this.testModuleRef.injector.get(LOCALE_ID, ɵDEFAULT_LOCALE_ID);
+        ɵsetLocaleId(localeId);
         // ApplicationInitStatus.runInitializers() is marked @internal to core.
         // Cast it to any before accessing it.
         this.testModuleRef.injector.get(ApplicationInitStatus).runInitializers();
@@ -1486,6 +1489,8 @@ var R3TestBedCompiler = /** @class */ (function () {
         this.initialNgDefs.clear();
         this.moduleProvidersOverridden.clear();
         this.restoreComponentResolutionQueue();
+        // Restore the locale ID to the default value, this shouldn't be necessary but we never know
+        ɵsetLocaleId(ɵDEFAULT_LOCALE_ID);
     };
     R3TestBedCompiler.prototype.compileTestModule = function () {
         var _this = this;

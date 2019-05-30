@@ -18,7 +18,7 @@ export { detectChanges, markDirty, store, tick, ɵɵallocHostVars, ɵɵattribute
 export { RenderFlags } from './interfaces/definition';
 export { CssSelectorList } from './interfaces/projection';
 export { ɵɵrestoreView, ɵɵenableBindings, ɵɵdisableBindings, } from './state';
-export { ɵɵi18n, ɵɵi18nAttributes, ɵɵi18nExp, ɵɵi18nStart, ɵɵi18nEnd, ɵɵi18nApply, ɵɵi18nPostprocess, i18nConfigureLocalize, ɵɵi18nLocalize, } from './i18n';
+export { DEFAULT_LOCALE_ID, ɵɵi18n, ɵɵi18nAttributes, ɵɵi18nExp, ɵɵi18nStart, ɵɵi18nEnd, ɵɵi18nApply, ɵɵi18nPostprocess, i18nConfigureLocalize, ɵɵi18nLocalize, getLocaleId, setLocaleId, } from './i18n';
 export { NgModuleFactory, NgModuleRef, NgModuleType } from './ng_module_ref';
 export { AttributeMarker } from './interfaces/node';
 export { setClassMetadata, } from './metadata';
