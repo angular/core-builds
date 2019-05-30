@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+356.sha-d72479b.with-local-changes
+ * @license Angular v8.0.0-rc.0+357.sha-82682bb.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7073,16 +7073,25 @@ function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl, tag, prop) {
  */
 const ɵɵdefaultStyleSanitizer = ((/** @type {?} */ ((/**
  * @param {?} prop
- * @param {?=} value
+ * @param {?} value
+ * @param {?=} mode
  * @return {?}
  */
-function (prop, value) {
-    if (value === undefined) {
-        return prop === 'background-image' || prop === 'background' || prop === 'border-image' ||
-            prop === 'filter' || prop === 'list-style' || prop === 'list-style-image' ||
-            prop === 'clip-path';
+function (prop, value, mode) {
+    mode = mode || 3 /* ValidateAndSanitize */;
+    /** @type {?} */
+    let doSanitizeValue = true;
+    if (mode & 1 /* ValidateProperty */) {
+        doSanitizeValue = prop === 'background-image' || prop === 'background' ||
+            prop === 'border-image' || prop === 'filter' || prop === 'list-style' ||
+            prop === 'list-style-image' || prop === 'clip-path';
     }
-    return ɵɵsanitizeStyle(value);
+    if (mode & 2 /* SanitizeOnly */) {
+        return doSanitizeValue ? ɵɵsanitizeStyle(value) : value;
+    }
+    else {
+        return doSanitizeValue;
+    }
 }))));
 /**
  * @param {?} name
@@ -9231,6 +9240,21 @@ function runtimeIsNewStylingInUse() {
 function runtimeAllowOldStyling() {
     return _stylingMode < 2 /* UseNew */;
 }
+/** @type {?} */
+let _currentSanitizer;
+/**
+ * @param {?} sanitizer
+ * @return {?}
+ */
+function setCurrentStyleSanitizer(sanitizer) {
+    _currentSanitizer = sanitizer;
+}
+/**
+ * @return {?}
+ */
+function getCurrentStyleSanitizer() {
+    return _currentSanitizer;
+}
 
 /**
  * @fileoverview added by tsickle
@@ -10365,7 +10389,7 @@ function updateSingleStylingValue(context, offset, input, isClassBased, directiv
             const prop = getProp(context, singleIndex);
             /** @type {?} */
             const sanitizer = getStyleSanitizer(context, directiveIndex);
-            setSanitizeFlag(context, singleIndex, (sanitizer && sanitizer(prop)) ? true : false);
+            setSanitizeFlag(context, singleIndex, (sanitizer && sanitizer(prop, null, 1 /* ValidateProperty */)) ? true : false);
         }
         // the value will always get updated (even if the dirty flag is skipped)
         setValue(context, singleIndex, value);
@@ -10558,7 +10582,8 @@ function renderStyling(context, renderer, rootOrView, isFirstRender, classesStor
  * @return {?}
  */
 function setStyle(native, prop, value, renderer, sanitizer, store, playerBuilder) {
-    value = sanitizer && value ? sanitizer(prop, value) : value;
+    value =
+        sanitizer && value ? sanitizer(prop, value, 3 /* ValidateAndSanitize */) : value;
     if (store || playerBuilder) {
         if (store) {
             store.setValue(prop, value);
@@ -11035,7 +11060,9 @@ function valueExists(value, isClassBased) {
  */
 function prepareInitialFlag(context, prop, entryIsClassBased, sanitizer) {
     /** @type {?} */
-    let flag = (sanitizer && sanitizer(prop)) ? 4 /* Sanitize */ : 0 /* None */;
+    let flag = (sanitizer && sanitizer(prop, null, 1 /* ValidateProperty */)) ?
+        4 /* Sanitize */ :
+        0 /* None */;
     /** @type {?} */
     let initialIndex;
     if (entryIsClassBased) {
@@ -11505,8 +11532,15 @@ const MAP_BASED_ENTRY_PROP_NAME = '--MAP--';
  * for map-based bindings.
  * @return {?}
  */
-function allocStylingContext$1() {
-    return [0 /* Initial */, 0, 0, 0, MAP_BASED_ENTRY_PROP_NAME];
+function allocTStylingContext() {
+    // because map-based bindings deal with a dynamic set of values, there
+    // is no way to know ahead of time whether or not sanitization is required.
+    // For this reason the configuration will always mark sanitization as active
+    // (this means that when map-based values are applied then sanitization will
+    // be checked against each property).
+    /** @type {?} */
+    const mapBasedConfig = 1 /* SanitizationRequired */;
+    return [0 /* Initial */, 0, mapBasedConfig, 0, MAP_BASED_ENTRY_PROP_NAME];
 }
 /**
  * Temporary function that allows for a string-based property name to be
@@ -11562,8 +11596,40 @@ function getProp$1(context, index) {
  * @param {?} index
  * @return {?}
  */
+function getPropConfig(context, index) {
+    return ((/** @type {?} */ (context[index + 0 /* ConfigAndGuardOffset */]))) &
+        1 /* Mask */;
+}
+/**
+ * @param {?} context
+ * @param {?} index
+ * @return {?}
+ */
+function isSanitizationRequired(context, index) {
+    return (getPropConfig(context, index) & 1 /* SanitizationRequired */) > 0;
+}
+/**
+ * @param {?} context
+ * @param {?} index
+ * @return {?}
+ */
 function getGuardMask(context, index) {
-    return (/** @type {?} */ (context[index + 0 /* GuardOffset */]));
+    /** @type {?} */
+    const configGuardValue = (/** @type {?} */ (context[index + 0 /* ConfigAndGuardOffset */]));
+    return configGuardValue >> 1 /* TotalBits */;
+}
+/**
+ * @param {?} context
+ * @param {?} index
+ * @param {?} maskValue
+ * @return {?}
+ */
+function setGuardMask(context, index, maskValue) {
+    /** @type {?} */
+    const config = getPropConfig(context, index);
+    /** @type {?} */
+    const guardMask = maskValue << 1 /* TotalBits */;
+    context[index + 0 /* ConfigAndGuardOffset */] = config | guardMask;
 }
 /**
  * @param {?} context
@@ -11649,6 +11715,48 @@ function isStylingValueDefined(value) {
     // set a value to an empty string to remove it.
     return value != null && value !== '';
 }
+/**
+ * Returns the current style sanitizer function for the given view.
+ *
+ * The default style sanitizer (which lives inside of `LView`) will
+ * be returned depending on whether the `styleSanitizer` instruction
+ * was called or not prior to any styling instructions running.
+ * @param {?} lView
+ * @return {?}
+ */
+function getCurrentOrLViewSanitizer(lView) {
+    /** @type {?} */
+    const sanitizer = (/** @type {?} */ ((getCurrentStyleSanitizer() || lView[SANITIZER])));
+    if (sanitizer && typeof sanitizer !== 'function') {
+        setCurrentStyleSanitizer(sanitizer);
+        return sanitizeUsingSanitizerObject;
+    }
+    return sanitizer;
+}
+/**
+ * Style sanitization function that internally uses a `Sanitizer` instance to handle style
+ * sanitization.
+ * @type {?}
+ */
+const sanitizeUsingSanitizerObject = (/**
+ * @param {?} prop
+ * @param {?} value
+ * @param {?} mode
+ * @return {?}
+ */
+(prop, value, mode) => {
+    /** @type {?} */
+    const sanitizer = (/** @type {?} */ (getCurrentStyleSanitizer()));
+    if (sanitizer) {
+        if (mode & 2 /* SanitizeOnly */) {
+            return sanitizer.sanitize(SecurityContext.STYLE, value);
+        }
+        else {
+            return true;
+        }
+    }
+    return value;
+});
 
 /**
  * @fileoverview added by tsickle
@@ -11715,7 +11823,7 @@ let deferredBindingQueue = [];
  * @param {?} bindingIndex
  * @param {?} value
  * @param {?} deferRegistration
- * @param {?=} forceUpdate
+ * @param {?} forceUpdate
  * @return {?}
  */
 function updateClassBinding(context, data, prop, bindingIndex, value, deferRegistration, forceUpdate) {
@@ -11724,7 +11832,7 @@ function updateClassBinding(context, data, prop, bindingIndex, value, deferRegis
     /** @type {?} */
     const index = isMapBased ? STYLING_INDEX_FOR_MAP_BINDING : currentClassIndex++;
     /** @type {?} */
-    const updated = updateBindingData(context, data, index, prop, bindingIndex, value, deferRegistration, forceUpdate);
+    const updated = updateBindingData(context, data, index, prop, bindingIndex, value, deferRegistration, forceUpdate, false);
     if (updated || forceUpdate) {
         classesBitMask |= 1 << index;
     }
@@ -11743,17 +11851,22 @@ function updateClassBinding(context, data, prop, bindingIndex, value, deferRegis
  * @param {?} prop
  * @param {?} bindingIndex
  * @param {?} value
+ * @param {?} sanitizer
  * @param {?} deferRegistration
- * @param {?=} forceUpdate
+ * @param {?} forceUpdate
  * @return {?}
  */
-function updateStyleBinding(context, data, prop, bindingIndex, value, deferRegistration, forceUpdate) {
+function updateStyleBinding(context, data, prop, bindingIndex, value, sanitizer, deferRegistration, forceUpdate) {
     /** @type {?} */
     const isMapBased = !prop;
     /** @type {?} */
     const index = isMapBased ? STYLING_INDEX_FOR_MAP_BINDING : currentStyleIndex++;
     /** @type {?} */
-    const updated = updateBindingData(context, data, index, prop, bindingIndex, value, deferRegistration, forceUpdate);
+    const sanitizationRequired = isMapBased ?
+        true :
+        (sanitizer ? sanitizer((/** @type {?} */ (prop)), null, 1 /* ValidateProperty */) : false);
+    /** @type {?} */
+    const updated = updateBindingData(context, data, index, prop, bindingIndex, value, deferRegistration, forceUpdate, sanitizationRequired);
     if (updated || forceUpdate) {
         stylesBitMask |= 1 << index;
     }
@@ -11775,14 +11888,15 @@ function updateStyleBinding(context, data, prop, bindingIndex, value, deferRegis
  * @param {?} prop
  * @param {?} bindingIndex
  * @param {?} value
- * @param {?=} deferRegistration
- * @param {?=} forceUpdate
+ * @param {?} deferRegistration
+ * @param {?} forceUpdate
+ * @param {?} sanitizationRequired
  * @return {?} whether or not the binding value was updated in the `LStylingData`.
  */
-function updateBindingData(context, data, counterIndex, prop, bindingIndex, value, deferRegistration, forceUpdate) {
+function updateBindingData(context, data, counterIndex, prop, bindingIndex, value, deferRegistration, forceUpdate, sanitizationRequired) {
     if (!isContextLocked(context)) {
         if (deferRegistration) {
-            deferBindingRegistration(context, counterIndex, prop, bindingIndex);
+            deferBindingRegistration(context, counterIndex, prop, bindingIndex, sanitizationRequired);
         }
         else {
             deferredBindingQueue.length && flushDeferredBindings();
@@ -11792,7 +11906,7 @@ function updateBindingData(context, data, counterIndex, prop, bindingIndex, valu
             // update pass is executed (remember that all styling instructions
             // are run in the update phase, and, as a result, are no more
             // styling instructions that are run in the creation phase).
-            registerBinding(context, counterIndex, prop, bindingIndex);
+            registerBinding(context, counterIndex, prop, bindingIndex, sanitizationRequired);
         }
     }
     /** @type {?} */
@@ -11816,10 +11930,11 @@ function updateBindingData(context, data, counterIndex, prop, bindingIndex, valu
  * @param {?} counterIndex
  * @param {?} prop
  * @param {?} bindingIndex
+ * @param {?} sanitizationRequired
  * @return {?}
  */
-function deferBindingRegistration(context, counterIndex, prop, bindingIndex) {
-    deferredBindingQueue.splice(0, 0, context, counterIndex, prop, bindingIndex);
+function deferBindingRegistration(context, counterIndex, prop, bindingIndex, sanitizationRequired) {
+    deferredBindingQueue.unshift(context, counterIndex, prop, bindingIndex, sanitizationRequired);
 }
 /**
  * Flushes the collection of deferred bindings and causes each entry
@@ -11838,7 +11953,9 @@ function flushDeferredBindings() {
         const prop = (/** @type {?} */ (deferredBindingQueue[i++]));
         /** @type {?} */
         const bindingIndex = (/** @type {?} */ (deferredBindingQueue[i++]));
-        registerBinding(context, count, prop, bindingIndex);
+        /** @type {?} */
+        const sanitizationRequired = (/** @type {?} */ (deferredBindingQueue[i++]));
+        registerBinding(context, count, prop, bindingIndex, sanitizationRequired);
     }
     deferredBindingQueue.length = 0;
 }
@@ -11881,9 +11998,10 @@ function flushDeferredBindings() {
  * @param {?} countId
  * @param {?} prop
  * @param {?} bindingValue
+ * @param {?=} sanitizationRequired
  * @return {?}
  */
-function registerBinding(context, countId, prop, bindingValue) {
+function registerBinding(context, countId, prop, bindingValue, sanitizationRequired) {
     // prop-based bindings (e.g `<div [style.width]="w" [class.foo]="f">`)
     if (prop) {
         /** @type {?} */
@@ -11899,7 +12017,7 @@ function registerBinding(context, countId, prop, bindingValue) {
             if (found) {
                 // all style/class bindings are sorted by property name
                 if (prop < p) {
-                    allocateNewContextEntry(context, i, prop);
+                    allocateNewContextEntry(context, i, prop, sanitizationRequired);
                 }
                 addBindingIntoContext(context, false, i, bindingValue, countId);
                 break;
@@ -11907,7 +12025,7 @@ function registerBinding(context, countId, prop, bindingValue) {
             i += 3 /* BindingsStartOffset */ + valuesCount;
         }
         if (!found) {
-            allocateNewContextEntry(context, context.length, prop);
+            allocateNewContextEntry(context, context.length, prop, sanitizationRequired);
             addBindingIntoContext(context, false, i, bindingValue, countId);
         }
     }
@@ -11922,16 +12040,21 @@ function registerBinding(context, countId, prop, bindingValue) {
  * @param {?} context
  * @param {?} index
  * @param {?} prop
+ * @param {?=} sanitizationRequired
  * @return {?}
  */
-function allocateNewContextEntry(context, index, prop) {
+function allocateNewContextEntry(context, index, prop, sanitizationRequired) {
     // 1,2: splice index locations
-    // 3: each entry gets a guard mask value that is used to check against updates
+    // 3: each entry gets a config value (guard mask + flags)
     // 4. each entry gets a size value (which is always one because there is always a default binding
     // value)
     // 5. the property that is getting allocated into the context
     // 6. the default binding value (usually `null`)
-    context.splice(index, 0, DEFAULT_GUARD_MASK_VALUE, DEFAULT_SIZE_VALUE, prop, DEFAULT_BINDING_VALUE);
+    /** @type {?} */
+    const config = sanitizationRequired ? 1 /* SanitizationRequired */ :
+        0 /* Default */;
+    context.splice(index, 0, config, DEFAULT_SIZE_VALUE, prop, DEFAULT_BINDING_VALUE);
+    setGuardMask(context, index, DEFAULT_GUARD_MASK_VALUE);
 }
 /**
  * Inserts a new binding value into a styling property tuple in the `TStylingContext`.
@@ -11970,7 +12093,12 @@ function addBindingIntoContext(context, isMapBased, index, bindingValue, countId
     if (typeof bindingValue === 'number') {
         context.splice(lastValueIndex, 0, bindingValue);
         ((/** @type {?} */ (context[index + 1 /* ValuesCountOffset */])))++;
-        ((/** @type {?} */ (context[index + 0 /* GuardOffset */]))) |= 1 << countId;
+        // now that a new binding index has been added to the property
+        // the guard mask bit value (at the `countId` position) needs
+        // to be included into the existing mask value.
+        /** @type {?} */
+        const guardMask = getGuardMask(context, index) | (1 << countId);
+        setGuardMask(context, index, guardMask);
     }
     else if (typeof bindingValue === 'string' && context[lastValueIndex] == null) {
         context[lastValueIndex] = bindingValue;
@@ -11979,46 +12107,59 @@ function addBindingIntoContext(context, isMapBased, index, bindingValue, countId
 /**
  * Applies all class entries in the provided context to the provided element and resets
  * any counter and/or bitMask values associated with class bindings.
+ *
  * @param {?} renderer
  * @param {?} data
  * @param {?} context
  * @param {?} element
  * @param {?} directiveIndex
- * @return {?}
+ * @return {?} whether or not the classes were flushed to the element.
  */
 function applyClasses(renderer, data, context, element, directiveIndex) {
+    /** @type {?} */
+    let classesFlushed = false;
     if (allowStylingFlush(context, directiveIndex)) {
         /** @type {?} */
         const isFirstPass = !isContextLocked(context);
         isFirstPass && lockContext(context);
         if (classesBitMask) {
-            applyStyling(context, renderer, element, data, classesBitMask, setClass$1);
+            // there is no way to sanitize a class value therefore `sanitizer=null`
+            applyStyling(context, renderer, element, data, classesBitMask, setClass$1, null);
             classesBitMask = 0;
+            classesFlushed = true;
         }
         currentClassIndex = STYLING_INDEX_START_VALUE;
     }
+    return classesFlushed;
 }
 /**
  * Applies all style entries in the provided context to the provided element and resets
  * any counter and/or bitMask values associated with style bindings.
+ *
  * @param {?} renderer
  * @param {?} data
  * @param {?} context
  * @param {?} element
  * @param {?} directiveIndex
- * @return {?}
+ * @param {?} sanitizer
+ * @return {?} whether or not the styles were flushed to the element.
  */
-function applyStyles(renderer, data, context, element, directiveIndex) {
+function applyStyles(renderer, data, context, element, directiveIndex, sanitizer) {
+    /** @type {?} */
+    let stylesFlushed = false;
     if (allowStylingFlush(context, directiveIndex)) {
         /** @type {?} */
         const isFirstPass = !isContextLocked(context);
         isFirstPass && lockContext(context);
         if (stylesBitMask) {
-            applyStyling(context, renderer, element, data, stylesBitMask, setStyle$1);
+            applyStyling(context, renderer, element, data, stylesBitMask, setStyle$1, sanitizer);
             stylesBitMask = 0;
+            stylesFlushed = true;
         }
         currentStyleIndex = STYLING_INDEX_START_VALUE;
+        return true;
     }
+    return stylesFlushed;
 }
 /**
  * Runs through the provided styling context and applies each value to
@@ -12051,9 +12192,10 @@ function applyStyles(renderer, data, context, element, directiveIndex) {
  * @param {?} bindingData
  * @param {?} bitMaskValue
  * @param {?} applyStylingFn
+ * @param {?} sanitizer
  * @return {?}
  */
-function applyStyling(context, renderer, element, bindingData, bitMaskValue, applyStylingFn) {
+function applyStyling(context, renderer, element, bindingData, bitMaskValue, applyStylingFn, sanitizer) {
     deferredBindingQueue.length && flushDeferredBindings();
     /** @type {?} */
     const bitMask = normalizeBitMaskValue(bitMaskValue);
@@ -12088,9 +12230,13 @@ function applyStyling(context, renderer, element, bindingData, bitMaskValue, app
                 /** @type {?} */
                 const bindingIndex = (/** @type {?} */ (getBindingValue(context, i, j)));
                 /** @type {?} */
-                const valueToApply = bindingData[bindingIndex];
-                if (isStylingValueDefined(valueToApply)) {
-                    applyStylingFn(renderer, element, prop, valueToApply, bindingIndex);
+                const value = bindingData[bindingIndex];
+                if (isStylingValueDefined(value)) {
+                    /** @type {?} */
+                    const finalValue = sanitizer && isSanitizationRequired(context, i) ?
+                        sanitizer(prop, value, 2 /* SanitizeOnly */) :
+                        value;
+                    applyStylingFn(renderer, element, prop, finalValue, bindingIndex);
                     valueApplied = true;
                     break;
                 }
@@ -12105,7 +12251,7 @@ function applyStyling(context, renderer, element, bindingData, bitMaskValue, app
                 const mode = mapsMode | (valueApplied ? 4 /* SkipTargetProp */ :
                     2 /* ApplyTargetProp */);
                 /** @type {?} */
-                const valueAppliedWithinMap = stylingMapsSyncFn(context, renderer, element, bindingData, applyStylingFn, mode, prop, defaultValue);
+                const valueAppliedWithinMap = stylingMapsSyncFn(context, renderer, element, bindingData, applyStylingFn, sanitizer, mode, prop, defaultValue);
                 valueApplied = valueApplied || valueAppliedWithinMap;
             }
             // case 3: apply the default value
@@ -12122,7 +12268,7 @@ function applyStyling(context, renderer, element, bindingData, bitMaskValue, app
     // values. For this reason, one more call to the sync function
     // needs to be issued at the end.
     if (stylingMapsSyncFn) {
-        stylingMapsSyncFn(context, renderer, element, bindingData, applyStylingFn, mapsMode);
+        stylingMapsSyncFn(context, renderer, element, bindingData, applyStylingFn, sanitizer, mapsMode);
     }
 }
 /**
@@ -12300,12 +12446,13 @@ const syncStylingMap = (/**
  * @param {?} element
  * @param {?} data
  * @param {?} applyStylingFn
+ * @param {?} sanitizer
  * @param {?} mode
  * @param {?=} targetProp
  * @param {?=} defaultValue
  * @return {?}
  */
-(context, renderer, element, data, applyStylingFn, mode, targetProp, defaultValue) => {
+(context, renderer, element, data, applyStylingFn, sanitizer, mode, targetProp, defaultValue) => {
     /** @type {?} */
     let targetPropValueWasApplied = false;
     // once the map-based styling code is activate it is never deactivated. For this reason a
@@ -12326,7 +12473,7 @@ const syncStylingMap = (/**
             targetPropValueWasApplied = true;
         }
         if (runTheSyncAlgorithm) {
-            targetPropValueWasApplied = innerSyncStylingMap(context, renderer, element, data, applyStylingFn, mode, targetProp || null, 0, defaultValue || null);
+            targetPropValueWasApplied = innerSyncStylingMap(context, renderer, element, data, applyStylingFn, sanitizer, mode, targetProp || null, 0, defaultValue || null);
         }
         if (loopUntilEnd) {
             resetSyncCursors();
@@ -12347,13 +12494,14 @@ const syncStylingMap = (/**
  * @param {?} element
  * @param {?} data
  * @param {?} applyStylingFn
+ * @param {?} sanitizer
  * @param {?} mode
  * @param {?} targetProp
  * @param {?} currentMapIndex
  * @param {?} defaultValue
  * @return {?}
  */
-function innerSyncStylingMap(context, renderer, element, data, applyStylingFn, mode, targetProp, currentMapIndex, defaultValue) {
+function innerSyncStylingMap(context, renderer, element, data, applyStylingFn, sanitizer, mode, targetProp, currentMapIndex, defaultValue) {
     /** @type {?} */
     let targetPropValueWasApplied = false;
     /** @type {?} */
@@ -12387,7 +12535,7 @@ function innerSyncStylingMap(context, renderer, element, data, applyStylingFn, m
             /** @type {?} */
             const innerProp = iteratedTooFar ? targetProp : prop;
             /** @type {?} */
-            let valueApplied = innerSyncStylingMap(context, renderer, element, data, applyStylingFn, innerMode, innerProp, currentMapIndex + 1, defaultValue);
+            let valueApplied = innerSyncStylingMap(context, renderer, element, data, applyStylingFn, sanitizer, innerMode, innerProp, currentMapIndex + 1, defaultValue);
             if (iteratedTooFar) {
                 break;
             }
@@ -12398,7 +12546,11 @@ function innerSyncStylingMap(context, renderer, element, data, applyStylingFn, m
                 const valueToApply = useDefault ? defaultValue : value;
                 /** @type {?} */
                 const bindingIndexToApply = useDefault ? bindingIndex : null;
-                applyStylingFn(renderer, element, prop, valueToApply, bindingIndexToApply);
+                /** @type {?} */
+                const finalValue = sanitizer ?
+                    sanitizer(prop, valueToApply, 3 /* ValidateAndSanitize */) :
+                    valueToApply;
+                applyStylingFn(renderer, element, prop, finalValue, bindingIndexToApply);
                 valueApplied = true;
             }
             targetPropValueWasApplied = valueApplied && isTargetPropMatched;
@@ -12670,13 +12822,15 @@ class TStylingContextDebug {
                 /** @type {?} */
                 const defaultValue = getDefaultValue(context, i);
                 /** @type {?} */
+                const sanitizationRequired = isSanitizationRequired(context, i);
+                /** @type {?} */
                 const bindingsStartPosition = i + 3 /* BindingsStartOffset */;
                 /** @type {?} */
                 const sources = [];
                 for (let j = 0; j < valuesCount; j++) {
                     sources.push((/** @type {?} */ (context[bindingsStartPosition + j])));
                 }
-                entries[prop] = { prop, guardMask, valuesCount, defaultValue, sources };
+                entries[prop] = { prop, guardMask, sanitizationRequired, valuesCount, defaultValue, sources };
             }
             i += 3 /* BindingsStartOffset */ + valuesCount;
         }
@@ -12693,11 +12847,20 @@ class NodeStylingDebug {
     /**
      * @param {?} context
      * @param {?} _data
+     * @param {?=} _isClassBased
      */
-    constructor(context, _data) {
+    constructor(context, _data, _isClassBased) {
         this.context = context;
         this._data = _data;
+        this._isClassBased = _isClassBased;
+        this._sanitizer = null;
     }
+    /**
+     * Overrides the sanitizer used to process styles.
+     * @param {?} sanitizer
+     * @return {?}
+     */
+    overrideSanitizer(sanitizer) { this._sanitizer = sanitizer; }
     /**
      * Returns a detailed summary of each styling entry in the context and
      * what their runtime representation is.
@@ -12762,7 +12925,10 @@ class NodeStylingDebug {
         (renderer, element, prop, value, bindingIndex) => {
             fn(prop, value, bindingIndex || null);
         });
-        applyStyling(this.context, null, mockElement, this._data, true, mapFn);
+        /** @type {?} */
+        const sanitizer = this._isClassBased ? null : (this._sanitizer ||
+            getCurrentOrLViewSanitizer((/** @type {?} */ (this._data))));
+        applyStyling(this.context, null, mockElement, this._data, true, mapFn, sanitizer);
     }
 }
 
@@ -12974,8 +13140,8 @@ function toDebugNodes(tNode, lView) {
             /** @type {?} */
             let classes = null;
             if (runtimeIsNewStylingInUse()) {
-                styles = tNode.newStyles ? new NodeStylingDebug(tNode.newStyles, lView) : null;
-                classes = tNode.newClasses ? new NodeStylingDebug(tNode.newClasses, lView) : null;
+                styles = tNode.newStyles ? new NodeStylingDebug(tNode.newStyles, lView, false) : null;
+                classes = tNode.newClasses ? new NodeStylingDebug(tNode.newClasses, lView, true) : null;
             }
             debugNodes.push({
                 html: toHtml(native),
@@ -16637,6 +16803,24 @@ function stylingInit() {
     updateLastDirectiveIndex(tNode, getActiveDirectiveStylingIndex());
 }
 /**
+ * Sets the current style sanitizer function which will then be used
+ * within all follow-up prop and map-based style binding instructions
+ * for the given element.
+ *
+ * Note that once styling has been applied to the element (i.e. once
+ * `select(n)` is executed or the hostBindings/template function exits)
+ * then the active `sanitizerFn` will be set to `null`. This means that
+ * once styling is applied to another element then a another call to
+ * `styleSanitizer` will need to be made.
+ *
+ * \@codeGenApi
+ * @param {?} sanitizer
+ * @return {?}
+ */
+function styleSanitizer(sanitizer) {
+    setCurrentStyleSanitizer(sanitizer);
+}
+/**
  * Mirror implementation of the `styleProp()` instruction (found in `instructions/styling.ts`).
  * @param {?} prop
  * @param {?} value
@@ -16644,7 +16828,7 @@ function stylingInit() {
  * @return {?}
  */
 function styleProp(prop, value, suffix) {
-    _stylingProp(prop, value, false);
+    _stylingProp(prop, resolveStylePropValue(value, suffix), false);
 }
 /**
  * Mirror implementation of the `classProp()` instruction (found in `instructions/styling.ts`).
@@ -16674,10 +16858,12 @@ function _stylingProp(prop, value, isClassBased) {
     /** @type {?} */
     const defer = getActiveDirectiveSuperClassHeight() > 0;
     if (isClassBased) {
-        updateClassBinding(getClassesContext(tNode), lView, prop, bindingIndex, (/** @type {?} */ (value)), defer);
+        updateClassBinding(getClassesContext(tNode), lView, prop, bindingIndex, (/** @type {?} */ (value)), defer, false);
     }
     else {
-        updateStyleBinding(getStylesContext(tNode), lView, prop, bindingIndex, (/** @type {?} */ (value)), defer);
+        /** @type {?} */
+        const sanitizer = getCurrentOrLViewSanitizer(lView);
+        updateStyleBinding(getStylesContext(tNode), lView, prop, bindingIndex, (/** @type {?} */ (value)), sanitizer, defer, false);
     }
 }
 /**
@@ -16728,7 +16914,9 @@ function _stylingMap(value, isClassBased) {
             updateClassBinding(getClassesContext(tNode), lView, null, bindingIndex, lStylingMap, defer, valueHasChanged);
         }
         else {
-            updateStyleBinding(getStylesContext(tNode), lView, null, bindingIndex, lStylingMap, defer, valueHasChanged);
+            /** @type {?} */
+            const sanitizer = getCurrentOrLViewSanitizer(lView);
+            updateStyleBinding(getStylesContext(tNode), lView, null, bindingIndex, lStylingMap, sanitizer, defer, valueHasChanged);
         }
     }
 }
@@ -16762,7 +16950,10 @@ function stylingApply() {
     /** @type {?} */
     const directiveIndex = getActiveDirectiveStylingIndex();
     applyClasses(renderer, lView, getClassesContext(tNode), native, directiveIndex);
-    applyStyles(renderer, lView, getStylesContext(tNode), native, directiveIndex);
+    /** @type {?} */
+    const sanitizer = getCurrentOrLViewSanitizer(lView);
+    applyStyles(renderer, lView, getStylesContext(tNode), native, directiveIndex, sanitizer);
+    setCurrentStyleSanitizer(null);
 }
 /**
  * Temporary function to bridge styling functionality between this new
@@ -16830,11 +17021,11 @@ function registerInitialStylingIntoContext(tNode, attrs, startIndex) {
         }
         else if (mode == 1 /* Classes */) {
             classesContext = classesContext || getClassesContext(tNode);
-            registerBinding(classesContext, -1, (/** @type {?} */ (attr)), true);
+            registerBinding(classesContext, -1, (/** @type {?} */ (attr)), true, false);
         }
         else if (mode == 2 /* Styles */) {
             stylesContext = stylesContext || getStylesContext(tNode);
-            registerBinding(stylesContext, -1, (/** @type {?} */ (attr)), (/** @type {?} */ (attrs[++i])));
+            registerBinding(stylesContext, -1, (/** @type {?} */ (attr)), (/** @type {?} */ (attrs[++i])), false);
         }
     }
 }
@@ -16894,7 +17085,7 @@ function getContext(tNode, isClassBased) {
     /** @type {?} */
     let context = isClassBased ? tNode.newClasses : tNode.newStyles;
     if (!context) {
-        context = allocStylingContext$1();
+        context = allocTStylingContext();
         if (ngDevMode) {
             attachStylingDebugObject(context);
         }
@@ -16906,6 +17097,30 @@ function getContext(tNode, isClassBased) {
         }
     }
     return context;
+}
+/**
+ * @param {?} value
+ * @param {?} suffix
+ * @return {?}
+ */
+function resolveStylePropValue(value, suffix) {
+    /** @type {?} */
+    let resolvedValue = null;
+    if (value !== null) {
+        if (suffix) {
+            // when a suffix is applied then it will bypass
+            // sanitization entirely (b/c a new string is created)
+            resolvedValue = renderStringify(value) + suffix;
+        }
+        else {
+            // sanitization happens by dealing with a String value
+            // this means that the string value will be passed through
+            // into the style rendering later (which is where the value
+            // will be sanitized before it is applied)
+            resolvedValue = (/** @type {?} */ ((/** @type {?} */ (value))));
+        }
+    }
+    return resolvedValue;
 }
 
 /**
@@ -17030,7 +17245,7 @@ function ɵɵstyleProp(styleIndex, value, suffix, forceOverride) {
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
-    const valueToAdd = resolveStylePropValue(value, suffix);
+    const valueToAdd = resolveStylePropValue$1(value, suffix);
     /** @type {?} */
     const stylingContext = getStylingContext(index, getLView());
     /** @type {?} */
@@ -17057,7 +17272,7 @@ function ɵɵstyleProp(styleIndex, value, suffix, forceOverride) {
  * @param {?} suffix
  * @return {?}
  */
-function resolveStylePropValue(value, suffix) {
+function resolveStylePropValue$1(value, suffix) {
     /** @type {?} */
     let valueToAdd = null;
     if (value !== null) {
@@ -23088,7 +23303,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-rc.0+356.sha-d72479b.with-local-changes');
+const VERSION = new Version('8.0.0-rc.0+357.sha-82682bb.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -31399,6 +31614,7 @@ const ɵ0$9 = /**
     'ɵɵstyling': ɵɵstyling,
     'ɵɵstyleMap': ɵɵstyleMap,
     'ɵɵstyleProp': ɵɵstyleProp,
+    'ɵɵstyleSanitizer': styleSanitizer,
     'ɵɵstylingApply': ɵɵstylingApply,
     'ɵɵclassProp': ɵɵclassProp,
     'ɵɵselect': ɵɵselect,
