@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+377.sha-f5b0c8a.with-local-changes
+ * @license Angular v8.0.0-rc.0+378.sha-5e0f982.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1285,6 +1285,9 @@
             this.componentToModuleScope.clear();
             var parentInjector = this.platform.injector;
             this.testModuleRef = new core.ɵRender3NgModuleRef(this.testModuleType, parentInjector);
+            // Set the locale ID, it can be overridden for the tests
+            var localeId = this.testModuleRef.injector.get(core.LOCALE_ID, core.ɵDEFAULT_LOCALE_ID);
+            core.ɵsetLocaleId(localeId);
             // ApplicationInitStatus.runInitializers() is marked @internal to core.
             // Cast it to any before accessing it.
             this.testModuleRef.injector.get(core.ApplicationInitStatus).runInitializers();
@@ -1595,6 +1598,8 @@
             this.initialNgDefs.clear();
             this.moduleProvidersOverridden.clear();
             this.restoreComponentResolutionQueue();
+            // Restore the locale ID to the default value, this shouldn't be necessary but we never know
+            core.ɵsetLocaleId(core.ɵDEFAULT_LOCALE_ID);
         };
         R3TestBedCompiler.prototype.compileTestModule = function () {
             var _this = this;
