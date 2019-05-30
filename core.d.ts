@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+343.sha-dc6406e.with-local-changes
+ * @license Angular v8.0.0-rc.0+376.sha-d2b0ac7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1249,13 +1249,13 @@ export declare interface ContentChildDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | Function | string, opts?: {
+    (selector: Type<any> | Function | string, opts: {
         read?: any;
-        static?: boolean;
+        static: boolean;
     }): any;
-    new (selector: Type<any> | Function | string, opts?: {
+    new (selector: Type<any> | Function | string, opts: {
         read?: any;
-        static?: boolean;
+        static: boolean;
     }): ContentChild;
 }
 
@@ -5254,7 +5254,7 @@ export declare interface Query {
     read: any;
     isViewQuery: boolean;
     selector: any;
-    static?: boolean;
+    static: boolean;
 }
 
 /**
@@ -6518,11 +6518,31 @@ export declare type StaticProvider = ValueProvider | ExistingProvider | StaticCl
  * If a value is provided then the sanitized version of that will be returned.
  */
 declare interface StyleSanitizeFn {
-    /** This mode is designed to instruct whether the property will be used for sanitization
-     * at a later point */
-    (prop: string): boolean;
-    /** This mode is designed to sanitize the provided value */
-    (prop: string, value: string): string;
+    (prop: string, value: string | null, mode?: StyleSanitizeMode): any;
+}
+
+/**
+ * A series of flags to instruct a style sanitizer to either validate
+ * or sanitize a value.
+ *
+ * Because sanitization is dependent on the style property (i.e. style
+ * sanitization for `width` is much different than for `background-image`)
+ * the sanitization function (e.g. `StyleSanitizerFn`) needs to check a
+ * property value first before it actually sanitizes any values.
+ *
+ * This enum exist to allow a style sanitization function to either only
+ * do validation (check the property to see whether a value will be
+ * sanitized or not) or to sanitize the value (or both).
+ *
+ * @publicApi
+ */
+declare const enum StyleSanitizeMode {
+    /** Just check to see if the property is required to be sanitized or not */
+    ValidateProperty = 1,
+    /** Skip checking the property; just sanitize the value */
+    SanitizeOnly = 2,
+    /** Check the property and (if true) then sanitize the value */
+    ValidateAndSanitize = 3
 }
 
 /**
@@ -7849,16 +7869,16 @@ declare const enum TStylingConfigFlags {
  * In order to figure out which value to apply, the following
  * binding prioritization is adhered to:
  *
- * 1. First template-level styling bindings are applied (if present).
- *    This includes things like `[style.width]` and `[class.active]`.
+ *   1. First template-level styling bindings are applied (if present).
+ *      This includes things like `[style.width]` and `[class.active]`.
  *
- * 2. Second are styling-level host bindings present in directives.
- *    (if there are sub/super directives present then the sub directives
- *    are applied first).
+ *   2. Second are styling-level host bindings present in directives.
+ *      (if there are sub/super directives present then the sub directives
+ *      are applied first).
  *
- * 3. Third are styling-level host bindings present in components.
- *    (if there are sub/super components present then the sub directives
- *    are applied first).
+ *   3. Third are styling-level host bindings present in components.
+ *      (if there are sub/super components present then the sub directives
+ *      are applied first).
  *
  * This means that in the code above the styling binding present in the
  * template is applied first and, only if its falsy, then the directive
@@ -7874,7 +7894,39 @@ declare const enum TStylingConfigFlags {
  * For the algorithm to apply styling values efficiently, the
  * styling map entries must be applied in sync (property by property)
  * with prop-based bindings. (The map-based algorithm is described
- * more inside of the `render3/stlying_next/map_based_bindings.ts` file.)
+ * more inside of the `render3/styling_next/map_based_bindings.ts` file.)
+ *
+ * ## Sanitization
+ * Sanitization is used to prevent invalid style values from being applied to
+ * the element.
+ *
+ * It is enabled in two cases:
+ *
+ *   1. The `styleSanitizer(sanitizerFn)` instruction was called (just before any other
+ *      styling instructions are run).
+ *
+ *   2. The component/directive `LView` instance has a sanitizer object attached to it
+ *      (this happens when `renderComponent` is executed with a `sanitizer` value or
+ *      if the ngModule contains a sanitizer provider attached to it).
+ *
+ * If and when sanitization is active then all property/value entries will be evaluated
+ * through the active sanitizer before they are applied to the element (or the styling
+ * debug handler).
+ *
+ * If a `Sanitizer` object is used (via the `LView[SANITIZER]` value) then that object
+ * will be used for every property.
+ *
+ * If a `StyleSanitizerFn` function is used (via the `styleSanitizer`) then it will be
+ * called in two ways:
+ *
+ *   1. property validation mode: this will be called early to mark whether a property
+ *      should be sanitized or not at during the flushing stage.
+ *
+ *   2. value sanitization mode: this will be called during the flushing stage and will
+ *      run the sanitizer function against the value before applying it to the element.
+ *
+ * If sanitization returns an empty value then that empty value will be applied
+ * to the element.
  */
 declare interface TStylingContext extends Array<number | string | number | boolean | null | LStylingMap> {
     /** Configuration data for the context */
@@ -7906,7 +7958,7 @@ declare const enum TStylingContextIndex {
     MapBindingsValuesCountPosition = 3,
     MapBindingsPropPosition = 4,
     MapBindingsBindingsStartPosition = 5,
-    GuardOffset = 0,
+    ConfigAndGuardOffset = 0,
     ValuesCountOffset = 1,
     PropOffset = 2,
     BindingsStartOffset = 3
@@ -8351,13 +8403,13 @@ export declare interface ViewChildDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | Function | string, opts?: {
+    (selector: Type<any> | Function | string, opts: {
         read?: any;
-        static?: boolean;
+        static: boolean;
     }): any;
-    new (selector: Type<any> | Function | string, opts?: {
+    new (selector: Type<any> | Function | string, opts: {
         read?: any;
-        static?: boolean;
+        static: boolean;
     }): ViewChild;
 }
 
@@ -13659,6 +13711,230 @@ export declare function ɵɵtext(index: number, value?: any): void;
  * @codeGenApi
  */
 export declare function ɵɵtextBinding<T>(index: number, value: T | ɵNO_CHANGE): void;
+
+/**
+ *
+ * Update text content with a lone bound value
+ *
+ * Used when a text node has 1 interpolated value in it, an no additional text
+ * surrounds that interpolated value:
+ *
+ * ```html
+ * <div>{{v0}}</div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵtextInterpolate(v0);
+ * ```
+ * @returns itself, so that it may be chained.
+ * @see textInterpolateV
+ * @codeGenApi
+ */
+export declare function ɵɵtextInterpolate(v0: any): TsickleIssue1009;
+
+/**
+ *
+ * Update text content with single bound value surrounded by other text.
+ *
+ * Used when a text node has 1 interpolated value in it:
+ *
+ * ```html
+ * <div>prefix{{v0}}suffix</div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵtextInterpolate1('prefix', v0, 'suffix');
+ * ```
+ * @returns itself, so that it may be chained.
+ * @see textInterpolateV
+ * @codeGenApi
+ */
+export declare function ɵɵtextInterpolate1(prefix: string, v0: any, suffix: string): TsickleIssue1009;
+
+/**
+ *
+ * Update text content with 2 bound values surrounded by other text.
+ *
+ * Used when a text node has 2 interpolated values in it:
+ *
+ * ```html
+ * <div>prefix{{v0}}-{{v1}}suffix</div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵtextInterpolate2('prefix', v0, '-', v1, 'suffix');
+ * ```
+ * @returns itself, so that it may be chained.
+ * @see textInterpolateV
+ * @codeGenApi
+ */
+export declare function ɵɵtextInterpolate2(prefix: string, v0: any, i0: string, v1: any, suffix: string): TsickleIssue1009;
+
+/**
+ *
+ * Update text content with 3 bound values surrounded by other text.
+ *
+ * Used when a text node has 3 interpolated values in it:
+ *
+ * ```html
+ * <div>prefix{{v0}}-{{v1}}-{{v2}}suffix</div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵtextInterpolate3(
+ * 'prefix', v0, '-', v1, '-', v2, 'suffix');
+ * ```
+ * @returns itself, so that it may be chained.
+ * @see textInterpolateV
+ * @codeGenApi
+ */
+export declare function ɵɵtextInterpolate3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): TsickleIssue1009;
+
+/**
+ *
+ * Update text content with 4 bound values surrounded by other text.
+ *
+ * Used when a text node has 4 interpolated values in it:
+ *
+ * ```html
+ * <div>prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}suffix</div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵtextInterpolate4(
+ * 'prefix', v0, '-', v1, '-', v2, '-', v3, 'suffix');
+ * ```
+ * @returns itself, so that it may be chained.
+ * @see ɵɵtextInterpolateV
+ * @codeGenApi
+ */
+export declare function ɵɵtextInterpolate4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): TsickleIssue1009;
+
+/**
+ *
+ * Update text content with 5 bound values surrounded by other text.
+ *
+ * Used when a text node has 5 interpolated values in it:
+ *
+ * ```html
+ * <div>prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}suffix</div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵtextInterpolate5(
+ * 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, 'suffix');
+ * ```
+ * @returns itself, so that it may be chained.
+ * @see textInterpolateV
+ * @codeGenApi
+ */
+export declare function ɵɵtextInterpolate5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string): TsickleIssue1009;
+
+/**
+ *
+ * Update text content with 6 bound values surrounded by other text.
+ *
+ * Used when a text node has 6 interpolated values in it:
+ *
+ * ```html
+ * <div>prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}suffix</div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵtextInterpolate6(
+ *    'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, 'suffix');
+ * ```
+ *
+ * @param i4 Static value used for concatenation only.
+ * @param v5 Value checked for change. @returns itself, so that it may be chained.
+ * @see textInterpolateV
+ * @codeGenApi
+ */
+export declare function ɵɵtextInterpolate6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string): TsickleIssue1009;
+
+/**
+ *
+ * Update text content with 7 bound values surrounded by other text.
+ *
+ * Used when a text node has 7 interpolated values in it:
+ *
+ * ```html
+ * <div>prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}suffix</div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵtextInterpolate7(
+ *    'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, 'suffix');
+ * ```
+ * @returns itself, so that it may be chained.
+ * @see textInterpolateV
+ * @codeGenApi
+ */
+export declare function ɵɵtextInterpolate7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): TsickleIssue1009;
+
+/**
+ *
+ * Update text content with 8 bound values surrounded by other text.
+ *
+ * Used when a text node has 8 interpolated values in it:
+ *
+ * ```html
+ * <div>prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}suffix</div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵtextInterpolate8(
+ *  'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, 'suffix');
+ * ```
+ * @returns itself, so that it may be chained.
+ * @see textInterpolateV
+ * @codeGenApi
+ */
+export declare function ɵɵtextInterpolate8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): TsickleIssue1009;
+
+/**
+ * Update text content with 9 or more bound values other surrounded by text.
+ *
+ * Used when the number of interpolated values exceeds 8.
+ *
+ * ```html
+ * <div>prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}-{{v8}}-{{v9}}suffix</div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵtextInterpolateV(
+ *  ['prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, '-', v9,
+ *  'suffix']);
+ * ```
+ *.
+ * @param values The a collection of values and the strings in between those values, beginning with
+ * a string prefix and ending with a string suffix.
+ * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
+ *
+ * @returns itself, so that it may be chained.
+ * @codeGenApi
+ */
+export declare function ɵɵtextInterpolateV(values: any[]): TsickleIssue1009;
 
 /**
  * Creates new QueryList, stores the reference in LView and returns QueryList.
