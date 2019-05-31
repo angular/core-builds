@@ -21,11 +21,8 @@ export declare function isNodeMatchingSelector(tNode: TNode, selector: CssSelect
 export declare function isNodeMatchingSelectorList(tNode: TNode, selector: CssSelectorList, isProjectionMode?: boolean): boolean;
 export declare function getProjectAsAttrValue(tNode: TNode): CssSelector | null;
 /**
- * Checks a given node against matching projection selectors and returns
- * selector index (or 0 if none matched).
- *
- * This function takes into account the parsed ngProjectAs selector from the node's attributes.
- * If present, it will check whether the ngProjectAs selector matches any of the projection
- * selectors.
+ * Checks whether a selector is inside a CssSelectorList
+ * @param selector Selector to be checked.
+ * @param list List in which to look for the selector.
  */
-export declare function matchingProjectionSelectorIndex(tNode: TNode, selectors: CssSelectorList[]): number;
+export declare function isSelectorInSelectorList(selector: CssSelector, list: CssSelectorList): boolean;

@@ -1,5 +1,21 @@
-import { TAttributes } from '../interfaces/node';
-import { CssSelectorList } from '../interfaces/projection';
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+import { TAttributes, TNode } from '../interfaces/node';
+import { ProjectionSlots } from '../interfaces/projection';
+/**
+ * Checks a given node against matching projection slots and returns the
+ * determined slot index. Returns "null" if no slot matched the given node.
+ *
+ * This function takes into account the parsed ngProjectAs selector from the
+ * node's attributes. If present, it will check whether the ngProjectAs selector
+ * matches any of the projection slot selectors.
+ */
+export declare function matchingProjectionSlotIndex(tNode: TNode, projectionSlots: ProjectionSlots): number | null;
 /**
  * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
  * It takes all the selectors from the entire component's template and decides where
@@ -18,12 +34,14 @@ import { CssSelectorList } from '../interfaces/projection';
  * - we can't have only a parsed as we can't re-construct textual form from it (as entered by a
  * template author).
  *
- * @param selectors A collection of parsed CSS selectors
- * @param rawSelectors A collection of CSS selectors in the raw, un-parsed form
+ * @param projectionSlots? A collection of projection slots. A projection slot can be based
+ *        on a parsed CSS selectors or set to the wildcard selector ("*") in order to match
+ *        all nodes which do not match any selector. If not specified, a single wildcard
+ *        selector projection slot will be defined.
  *
  * @codeGenApi
  */
-export declare function ɵɵprojectionDef(selectors?: CssSelectorList[]): void;
+export declare function ɵɵprojectionDef(projectionSlots?: ProjectionSlots): void;
 /**
  * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
  * to the projectionDef instruction.
