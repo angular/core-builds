@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+376.sha-d2b0ac7.with-local-changes
+ * @license Angular v8.1.0-beta.0+10.sha-aca339e.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1740,8 +1740,13 @@ class R3Injector {
         }
     }
     /**
-     * Add an `InjectorType` or `InjectorDefTypeWithProviders` and all of its transitive providers
+     * Add an `InjectorType` or `InjectorTypeWithProviders` and all of its transitive providers
      * to this injector.
+     *
+     * If an `InjectorTypeWithProviders` that declares providers besides the type is specified,
+     * the function will return "true" to indicate that the providers of the type definition need
+     * to be processed. This allows us to process providers of injector types after all imports of
+     * an injector definition are processed. (following View Engine semantics: see FW-1349)
      * @private
      * @param {?} defOrWrappedDef
      * @param {?} parents
@@ -1751,7 +1756,7 @@ class R3Injector {
     processInjectorType(defOrWrappedDef, parents, dedupStack) {
         defOrWrappedDef = resolveForwardRef(defOrWrappedDef);
         if (!defOrWrappedDef)
-            return;
+            return false;
         // Either the defOrWrappedDef is an InjectorType (with ngInjectorDef) or an
         // InjectorDefTypeWithProviders (aka ModuleWithProviders). Detecting either is a megamorphic
         // read, so care is taken to only do the read once.
@@ -1780,11 +1785,6 @@ class R3Injector {
         // Check for multiple imports of the same module
         /** @type {?} */
         const isDuplicate = dedupStack.indexOf(defType) !== -1;
-        // If defOrWrappedType was an InjectorDefTypeWithProviders, then .providers may hold some
-        // extra providers.
-        /** @type {?} */
-        const providers = (ngModule !== undefined) && ((/** @type {?} */ (defOrWrappedDef))).providers ||
-            EMPTY_ARRAY$1;
         // Finally, if defOrWrappedType was an `InjectorDefTypeWithProviders`, then the actual
         // `InjectorDef` is on its `ngModule`.
         if (ngModule !== undefined) {
@@ -1792,7 +1792,7 @@ class R3Injector {
         }
         // If no definition was found, it might be from exports. Remove it.
         if (def == null) {
-            return;
+            return false;
         }
         // Track the InjectorType and add a provider for it.
         this.injectorDefTypes.add(defType);
@@ -1806,17 +1806,40 @@ class R3Injector {
             parents.push(defType);
             // Add it to the set of dedups. This way we can detect multiple imports of the same module
             dedupStack.push(defType);
+            /** @type {?} */
+            let importTypesWithProviders;
             try {
                 deepForEach(def.imports, (/**
                  * @param {?} imported
                  * @return {?}
                  */
-                imported => this.processInjectorType(imported, parents, dedupStack)));
+                imported => {
+                    if (this.processInjectorType(imported, parents, dedupStack)) {
+                        if (importTypesWithProviders === undefined)
+                            importTypesWithProviders = [];
+                        // If the processed import is an injector type with providers, we store it in the
+                        // list of import types with providers, so that we can process those afterwards.
+                        importTypesWithProviders.push(imported);
+                    }
+                }));
             }
             finally {
                 // Remove it from the parents set when finished.
                 // TODO(FW-1307): Re-add ngDevMode when closure can handle it
                 parents.pop();
+            }
+            // Imports which are declared with providers (TypeWithProviders) need to be processed
+            // after all imported modules are processed. This is similar to how View Engine
+            // processes/merges module imports in the metadata resolver. See: FW-1349.
+            if (importTypesWithProviders !== undefined) {
+                for (let i = 0; i < importTypesWithProviders.length; i++) {
+                    const { ngModule, providers } = importTypesWithProviders[i];
+                    deepForEach((/** @type {?} */ (providers)), (/**
+                     * @param {?} provider
+                     * @return {?}
+                     */
+                    provider => this.processProvider(provider, ngModule, providers || EMPTY_ARRAY$1)));
+                }
             }
         }
         // Next, include providers listed on the definition itself.
@@ -1831,14 +1854,8 @@ class R3Injector {
              */
             provider => this.processProvider(provider, injectorType, defProviders)));
         }
-        // Finally, include providers from an InjectorDefTypeWithProviders if there was one.
-        /** @type {?} */
-        const ngModuleType = ((/** @type {?} */ (defOrWrappedDef))).ngModule;
-        deepForEach(providers, (/**
-         * @param {?} provider
-         * @return {?}
-         */
-        provider => this.processProvider(provider, ngModuleType, providers)));
+        return (ngModule !== undefined &&
+            ((/** @type {?} */ (defOrWrappedDef))).providers !== undefined);
     }
     /**
      * Process a `SingleProvider` and add it.
@@ -4210,6 +4227,8 @@ const NG_PIPE_DEF = getClosureSafeProperty({ ngPipeDef: getClosureSafeProperty }
 /** @type {?} */
 const NG_MODULE_DEF = getClosureSafeProperty({ ngModuleDef: getClosureSafeProperty });
 /** @type {?} */
+const NG_LOCALE_ID_DEF = getClosureSafeProperty({ ngLocaleIdDef: getClosureSafeProperty });
+/** @type {?} */
 const NG_BASE_DEF = getClosureSafeProperty({ ngBaseDef: getClosureSafeProperty });
 // TODO(misko): This is wrong. The NG_ELEMENT_ID should never be minified.
 /**
@@ -4629,6 +4648,13 @@ function getNgModuleDef(type, throwNotFound) {
         throw new Error(`Type ${stringify(type)} does not have 'ngModuleDef' property.`);
     }
     return ngModuleDef;
+}
+/**
+ * @param {?} type
+ * @return {?}
+ */
+function getNgLocaleIdDef(type) {
+    return ((/** @type {?} */ (type)))[NG_LOCALE_ID_DEF] || null;
 }
 
 /**
@@ -8175,10 +8201,11 @@ function attrsStylingIndexOf(attrs, startIndex) {
  * attribute values in a `TAttributes` array are only the names of attributes,
  * and not name-value pairs.
  * @param {?} marker The attribute marker to test.
- * @return {?} true if the marker is a "name-only" marker (e.g. `Bindings` or `Template`).
+ * @return {?} true if the marker is a "name-only" marker (e.g. `Bindings`, `Template` or `I18n`).
  */
 function isNameOnlyAttributeMarker(marker) {
-    return marker === 3 /* Bindings */ || marker === 4 /* Template */;
+    return marker === 3 /* Bindings */ || marker === 4 /* Template */ ||
+        marker === 6 /* I18n */;
 }
 
 /**
@@ -13636,17 +13663,18 @@ function readClassValueFromTNode(tNode) {
  * Attribute matching depends upon `isInlineTemplate` and `isProjectionMode`.
  * The following table summarizes which types of attributes we attempt to match:
  *
- * =========================================================================================
- * Modes                   | Normal Attributes | Bindings Attributes | Template Attributes
- * =========================================================================================
- * Inline + Projection     | YES               | YES                 | NO
- * -----------------------------------------------------------------------------------------
- * Inline + Directive      | NO                | NO                  | YES
- * -----------------------------------------------------------------------------------------
- * Non-inline + Projection | YES               | YES                 | NO
- * -----------------------------------------------------------------------------------------
- * Non-inline + Directive  | YES               | YES                 | NO
- * =========================================================================================
+ * ===========================================================================================================
+ * Modes                   | Normal Attributes | Bindings Attributes | Template Attributes | I18n
+ * Attributes
+ * ===========================================================================================================
+ * Inline + Projection     | YES               | YES                 | NO                  | YES
+ * -----------------------------------------------------------------------------------------------------------
+ * Inline + Directive      | NO                | NO                  | YES                 | NO
+ * -----------------------------------------------------------------------------------------------------------
+ * Non-inline + Projection | YES               | YES                 | NO                  | YES
+ * -----------------------------------------------------------------------------------------------------------
+ * Non-inline + Directive  | YES               | YES                 | NO                  | YES
+ * ===========================================================================================================
  *
  * @param {?} name the name of the attribute to find
  * @param {?} attrs the attribute array to examine
@@ -13670,7 +13698,7 @@ function findAttrIndexInNode(name, attrs, isInlineTemplate, isProjectionMode) {
             if (maybeAttrName === name) {
                 return i;
             }
-            else if (maybeAttrName === 3 /* Bindings */) {
+            else if (maybeAttrName === 3 /* Bindings */ || maybeAttrName === 6 /* I18n */) {
                 bindingsMode = true;
             }
             else if (maybeAttrName === 1 /* Classes */) {
@@ -13733,31 +13761,6 @@ function getProjectAsAttrValue(tNode) {
         }
     }
     return null;
-}
-/**
- * Checks a given node against matching projection selectors and returns
- * selector index (or 0 if none matched).
- *
- * This function takes into account the parsed ngProjectAs selector from the node's attributes.
- * If present, it will check whether the ngProjectAs selector matches any of the projection
- * selectors.
- * @param {?} tNode
- * @param {?} selectors
- * @return {?}
- */
-function matchingProjectionSelectorIndex(tNode, selectors) {
-    /** @type {?} */
-    const ngProjectAsAttrVal = getProjectAsAttrValue(tNode);
-    for (let i = 0; i < selectors.length; i++) {
-        // If we ran into an `ngProjectAs` attribute, we should match its parsed selector
-        // to the list of selectors, otherwise we fall back to matching against the node.
-        if (ngProjectAsAttrVal === null ?
-            isNodeMatchingSelectorList(tNode, selectors[i], /* isProjectionMode */ true) :
-            isSelectorInSelectorList(ngProjectAsAttrVal, selectors[i])) {
-            return i + 1; // first matching selector "captures" a given node
-        }
-    }
-    return 0;
 }
 /**
  * @param {?} nodeAttrs
@@ -17703,7 +17706,7 @@ function ɵɵelement(index, name, attrs, localRefs) {
  * Updates the value or removes an attribute on an Element.
  *
  * \@codeGenApi
- * @param {?} index
+ * @param {?} index The index of the element in the data array
  * @param {?} name name The name of the attribute.
  * @param {?} value value The attribute is removed when value is `null` or `undefined`.
  *                  Otherwise the attribute value is set to the stringified value.
@@ -17714,31 +17717,44 @@ function ɵɵelement(index, name, attrs, localRefs) {
  */
 function ɵɵelementAttribute(index, name, value, sanitizer, namespace) {
     if (value !== NO_CHANGE) {
-        ngDevMode && validateAgainstEventAttributes(name);
         /** @type {?} */
         const lView = getLView();
         /** @type {?} */
         const renderer = lView[RENDERER];
+        elementAttributeInternal(index, name, value, lView, renderer, sanitizer, namespace);
+    }
+}
+/**
+ * @param {?} index
+ * @param {?} name
+ * @param {?} value
+ * @param {?} lView
+ * @param {?} renderer
+ * @param {?=} sanitizer
+ * @param {?=} namespace
+ * @return {?}
+ */
+function elementAttributeInternal(index, name, value, lView, renderer, sanitizer, namespace) {
+    ngDevMode && validateAgainstEventAttributes(name);
+    /** @type {?} */
+    const element = (/** @type {?} */ (getNativeByIndex(index, lView)));
+    if (value == null) {
+        ngDevMode && ngDevMode.rendererRemoveAttribute++;
+        isProceduralRenderer(renderer) ? renderer.removeAttribute(element, name, namespace) :
+            element.removeAttribute(name);
+    }
+    else {
+        ngDevMode && ngDevMode.rendererSetAttribute++;
         /** @type {?} */
-        const element = (/** @type {?} */ (getNativeByIndex(index, lView)));
-        if (value == null) {
-            ngDevMode && ngDevMode.rendererRemoveAttribute++;
-            isProceduralRenderer(renderer) ? renderer.removeAttribute(element, name, namespace) :
-                element.removeAttribute(name);
+        const tNode = getTNode(index, lView);
+        /** @type {?} */
+        const strValue = sanitizer == null ? renderStringify(value) : sanitizer(value, tNode.tagName || '', name);
+        if (isProceduralRenderer(renderer)) {
+            renderer.setAttribute(element, name, strValue, namespace);
         }
         else {
-            ngDevMode && ngDevMode.rendererSetAttribute++;
-            /** @type {?} */
-            const tNode = getTNode(index, lView);
-            /** @type {?} */
-            const strValue = sanitizer == null ? renderStringify(value) : sanitizer(value, tNode.tagName || '', name);
-            if (isProceduralRenderer(renderer)) {
-                renderer.setAttribute(element, name, strValue, namespace);
-            }
-            else {
-                namespace ? element.setAttributeNS(namespace, name, strValue) :
-                    element.setAttribute(name, strValue);
-            }
+            namespace ? element.setAttributeNS(namespace, name, strValue) :
+                element.setAttribute(name, strValue);
         }
     }
 }
@@ -19857,6 +19873,41 @@ function ɵɵnextContext(level = 1) {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
+ * Checks a given node against matching projection slots and returns the
+ * determined slot index. Returns "null" if no slot matched the given node.
+ *
+ * This function takes into account the parsed ngProjectAs selector from the
+ * node's attributes. If present, it will check whether the ngProjectAs selector
+ * matches any of the projection slot selectors.
+ * @param {?} tNode
+ * @param {?} projectionSlots
+ * @return {?}
+ */
+function matchingProjectionSlotIndex(tNode, projectionSlots) {
+    /** @type {?} */
+    let wildcardNgContentIndex = null;
+    /** @type {?} */
+    const ngProjectAsAttrVal = getProjectAsAttrValue(tNode);
+    for (let i = 0; i < projectionSlots.length; i++) {
+        /** @type {?} */
+        const slotValue = projectionSlots[i];
+        // The last wildcard projection slot should match all nodes which aren't matching
+        // any selector. This is necessary to be backwards compatible with view engine.
+        if (slotValue === '*') {
+            wildcardNgContentIndex = i;
+            continue;
+        }
+        // If we ran into an `ngProjectAs` attribute, we should match its parsed selector
+        // to the list of selectors, otherwise we fall back to matching against the node.
+        if (ngProjectAsAttrVal === null ?
+            isNodeMatchingSelectorList(tNode, slotValue, /* isProjectionMode */ true) :
+            isSelectorInSelectorList(ngProjectAsAttrVal, slotValue)) {
+            return i; // first matching selector "captures" a given node
+        }
+    }
+    return wildcardNgContentIndex;
+}
+/**
  * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
  * It takes all the selectors from the entire component's template and decides where
  * each projected node belongs (it re-distributes nodes among "buckets" where each "bucket" is
@@ -19875,32 +19926,36 @@ function ɵɵnextContext(level = 1) {
  * template author).
  *
  * \@codeGenApi
- * @param {?=} selectors A collection of parsed CSS selectors
+ * @param {?=} projectionSlots
  * @return {?}
  */
-function ɵɵprojectionDef(selectors) {
+function ɵɵprojectionDef(projectionSlots) {
     /** @type {?} */
     const componentNode = (/** @type {?} */ (findComponentView(getLView())[T_HOST]));
     if (!componentNode.projection) {
+        // If no explicit projection slots are defined, fall back to a single
+        // projection slot with the wildcard selector.
         /** @type {?} */
-        const noOfNodeBuckets = selectors ? selectors.length + 1 : 1;
+        const numProjectionSlots = projectionSlots ? projectionSlots.length : 1;
         /** @type {?} */
         const projectionHeads = componentNode.projection =
-            new Array(noOfNodeBuckets).fill(null);
+            new Array(numProjectionSlots).fill(null);
         /** @type {?} */
         const tails = projectionHeads.slice();
         /** @type {?} */
         let componentChild = componentNode.child;
         while (componentChild !== null) {
             /** @type {?} */
-            const bucketIndex = selectors ? matchingProjectionSelectorIndex(componentChild, selectors) : 0;
-            if (tails[bucketIndex]) {
-                (/** @type {?} */ (tails[bucketIndex])).projectionNext = componentChild;
+            const slotIndex = projectionSlots ? matchingProjectionSlotIndex(componentChild, projectionSlots) : 0;
+            if (slotIndex !== null) {
+                if (tails[slotIndex]) {
+                    (/** @type {?} */ (tails[slotIndex])).projectionNext = componentChild;
+                }
+                else {
+                    projectionHeads[slotIndex] = componentChild;
+                }
+                tails[slotIndex] = componentChild;
             }
-            else {
-                projectionHeads[bucketIndex] = componentChild;
-            }
-            tails[bucketIndex] = componentChild;
             componentChild = componentChild.next;
         }
     }
@@ -23303,7 +23358,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0-rc.0+376.sha-d2b0ac7.with-local-changes');
+const VERSION = new Version('8.1.0-beta.0+10.sha-aca339e.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -27812,10 +27867,8 @@ class ComponentFactory$1 extends ComponentFactory {
         this.ngModule = ngModule;
         this.componentType = componentDef.type;
         this.selector = (/** @type {?} */ (componentDef.selectors[0][0]));
-        // The component definition does not include the wildcard ('*') selector in its list.
-        // It is implicitly expected as the first item in the projectable nodes array.
         this.ngContentSelectors =
-            componentDef.ngContentSelectors ? ['*', ...componentDef.ngContentSelectors] : [];
+            componentDef.ngContentSelectors ? componentDef.ngContentSelectors : [];
         this.isBoundToModule = !!ngModule;
     }
     /**
@@ -27993,6 +28046,190 @@ if (typeof ngI18nClosureMode === 'undefined') {
         // TODO(FW-1250): validate that this actually, you know, works.
         // tslint:disable-next-line:no-toplevel-property-access
         typeof goog !== 'undefined' && typeof goog.getMsg === 'function';
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * This const is used to store the locale data registered with `registerLocaleData`
+ * @type {?}
+ */
+const LOCALE_DATA = {};
+/** @enum {number} */
+const LocaleDataIndex = {
+    LocaleId: 0,
+    DayPeriodsFormat: 1,
+    DayPeriodsStandalone: 2,
+    DaysFormat: 3,
+    DaysStandalone: 4,
+    MonthsFormat: 5,
+    MonthsStandalone: 6,
+    Eras: 7,
+    FirstDayOfWeek: 8,
+    WeekendRange: 9,
+    DateFormat: 10,
+    TimeFormat: 11,
+    DateTimeFormat: 12,
+    NumberSymbols: 13,
+    NumberFormats: 14,
+    CurrencySymbol: 15,
+    CurrencyName: 16,
+    Currencies: 17,
+    PluralCase: 18,
+    ExtraData: 19,
+};
+LocaleDataIndex[LocaleDataIndex.LocaleId] = 'LocaleId';
+LocaleDataIndex[LocaleDataIndex.DayPeriodsFormat] = 'DayPeriodsFormat';
+LocaleDataIndex[LocaleDataIndex.DayPeriodsStandalone] = 'DayPeriodsStandalone';
+LocaleDataIndex[LocaleDataIndex.DaysFormat] = 'DaysFormat';
+LocaleDataIndex[LocaleDataIndex.DaysStandalone] = 'DaysStandalone';
+LocaleDataIndex[LocaleDataIndex.MonthsFormat] = 'MonthsFormat';
+LocaleDataIndex[LocaleDataIndex.MonthsStandalone] = 'MonthsStandalone';
+LocaleDataIndex[LocaleDataIndex.Eras] = 'Eras';
+LocaleDataIndex[LocaleDataIndex.FirstDayOfWeek] = 'FirstDayOfWeek';
+LocaleDataIndex[LocaleDataIndex.WeekendRange] = 'WeekendRange';
+LocaleDataIndex[LocaleDataIndex.DateFormat] = 'DateFormat';
+LocaleDataIndex[LocaleDataIndex.TimeFormat] = 'TimeFormat';
+LocaleDataIndex[LocaleDataIndex.DateTimeFormat] = 'DateTimeFormat';
+LocaleDataIndex[LocaleDataIndex.NumberSymbols] = 'NumberSymbols';
+LocaleDataIndex[LocaleDataIndex.NumberFormats] = 'NumberFormats';
+LocaleDataIndex[LocaleDataIndex.CurrencySymbol] = 'CurrencySymbol';
+LocaleDataIndex[LocaleDataIndex.CurrencyName] = 'CurrencyName';
+LocaleDataIndex[LocaleDataIndex.Currencies] = 'Currencies';
+LocaleDataIndex[LocaleDataIndex.PluralCase] = 'PluralCase';
+LocaleDataIndex[LocaleDataIndex.ExtraData] = 'ExtraData';
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+// THIS CODE IS GENERATED - DO NOT MODIFY
+// See angular/tools/gulp-tasks/cldr/extract.js
+/** @type {?} */
+const u = undefined;
+/**
+ * @param {?} n
+ * @return {?}
+ */
+function plural(n) {
+    /** @type {?} */
+    let i = Math.floor(Math.abs(n));
+    /** @type {?} */
+    let v = n.toString().replace(/^[^.]*\.?/, '').length;
+    if (i === 1 && v === 0)
+        return 1;
+    return 5;
+}
+var localeEn = [
+    'en', [['a', 'p'], ['AM', 'PM'], u], [['AM', 'PM'], u, u],
+    [
+        ['S', 'M', 'T', 'W', 'T', 'F', 'S'], ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+        ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+    ],
+    u,
+    [
+        ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'],
+        ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        [
+            'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
+            'October', 'November', 'December'
+        ]
+    ],
+    u, [['B', 'A'], ['BC', 'AD'], ['Before Christ', 'Anno Domini']], 0, [6, 0],
+    ['M/d/yy', 'MMM d, y', 'MMMM d, y', 'EEEE, MMMM d, y'],
+    ['h:mm a', 'h:mm:ss a', 'h:mm:ss a z', 'h:mm:ss a zzzz'], ['{1}, {0}', u, '{1} \'at\' {0}', u],
+    ['.', ',', ';', '%', '+', '-', 'E', '×', '‰', '∞', 'NaN', ':'],
+    ['#,##0.###', '#,##0%', '¤#,##0.00', '#E0'], '$', 'US Dollar', {}, plural
+];
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Retrieves the plural function used by ICU expressions to determine the plural case to use
+ * for a given locale.
+ * @see `NgPlural` / [Internationalization (i18n) Guide](https://angular.io/guide/i18n)
+ * @param {?} locale A locale code for the locale format rules to use.
+ * @return {?} The plural function for the locale.
+ */
+function getLocalePluralCase(locale) {
+    /** @type {?} */
+    const data = findLocaleData(locale);
+    return data[LocaleDataIndex.PluralCase];
+}
+/**
+ * Finds the locale data for a given locale.
+ *
+ * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n)
+ * @param {?} locale The locale code.
+ * @return {?} The locale data.
+ */
+function findLocaleData(locale) {
+    /** @type {?} */
+    const normalizedLocale = locale.toLowerCase().replace(/_/g, '-');
+    /** @type {?} */
+    let match = LOCALE_DATA[normalizedLocale];
+    if (match) {
+        return match;
+    }
+    // let's try to find a parent locale
+    /** @type {?} */
+    const parentLocale = normalizedLocale.split('-')[0];
+    match = LOCALE_DATA[parentLocale];
+    if (match) {
+        return match;
+    }
+    if (parentLocale === 'en') {
+        return localeEn;
+    }
+    throw new Error(`Missing locale data for the locale "${locale}".`);
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Returns the plural case based on the locale
+ * @param {?} value
+ * @param {?} locale
+ * @return {?}
+ */
+function getPluralCase(value, locale) {
+    /** @type {?} */
+    const plural = getLocalePluralCase(locale)(value);
+    switch (plural) {
+        case 0:
+            return 'zero';
+        case 1:
+            return 'one';
+        case 2:
+            return 'two';
+        case 3:
+            return 'few';
+        case 4:
+            return 'many';
+        default:
+            return 'other';
+    }
 }
 
 /**
@@ -28814,7 +29051,11 @@ function readCreateOpCodes(index, createOpCodes, icus, viewData) {
                     const attrName = (/** @type {?} */ (createOpCodes[++i]));
                     /** @type {?} */
                     const attrValue = (/** @type {?} */ (createOpCodes[++i]));
-                    ɵɵelementAttribute(elementNodeIndex, attrName, attrValue);
+                    /** @type {?} */
+                    const renderer = viewData[RENDERER];
+                    // This code is used for ICU expressions only, since we don't support
+                    // directives/components in ICUs, we don't need to worry about inputs here
+                    elementAttributeInternal(elementNodeIndex, attrName, attrValue, viewData, renderer);
                     break;
                 default:
                     throw new Error(`Unable to determine the type of mutate operation for "${opCode}"`);
@@ -28906,10 +29147,10 @@ function readUpdateOpCodes(updateOpCodes, icus, bindingsStartIndex, changeMask, 
                         switch (opCode & 3 /* MASK_OPCODE */) {
                             case 1 /* Attr */:
                                 /** @type {?} */
-                                const attrName = (/** @type {?} */ (updateOpCodes[++j]));
+                                const propName = (/** @type {?} */ (updateOpCodes[++j]));
                                 /** @type {?} */
                                 const sanitizeFn = (/** @type {?} */ (updateOpCodes[++j]));
-                                ɵɵelementAttribute(nodeIndex, attrName, value, sanitizeFn);
+                                elementPropertyInternal(nodeIndex, propName, value, sanitizeFn);
                                 break;
                             case 0 /* Text */:
                                 ɵɵtextBinding(nodeIndex, value);
@@ -29067,7 +29308,11 @@ function i18nAttributesFirstPass(tView, index, values) {
         for (let j = 0; j < parts.length; j++) {
             /** @type {?} */
             const value = parts[j];
-            if (j & 1) ;
+            if (j & 1) {
+                // Odd indexes are ICU expressions
+                // TODO(ocombe): support ICU expressions in attributes
+                throw new Error('ICU expressions are not yet supported in attributes');
+            }
             else if (value !== '') {
                 // Even indexes are text (including bindings)
                 /** @type {?} */
@@ -29076,7 +29321,19 @@ function i18nAttributesFirstPass(tView, index, values) {
                     addAllToArray(generateBindingUpdateOpCodes(value, previousElementIndex, attrName), updateOpCodes);
                 }
                 else {
-                    ɵɵelementAttribute(previousElementIndex, attrName, value);
+                    /** @type {?} */
+                    const lView = getLView();
+                    /** @type {?} */
+                    const renderer = lView[RENDERER];
+                    elementAttributeInternal(previousElementIndex, attrName, value, lView, renderer);
+                    // Check if that attribute is a directive input
+                    /** @type {?} */
+                    const tNode = getTNode(previousElementIndex, lView);
+                    /** @type {?} */
+                    const dataValue = tNode.inputs && tNode.inputs[attrName];
+                    if (dataValue) {
+                        setInputsForProperty(lView, dataValue, value);
+                    }
                 }
             }
         }
@@ -29140,427 +29397,6 @@ function ɵɵi18nApply(index) {
         shiftsCounter = 0;
     }
 }
-/** @enum {number} */
-const Plural = {
-    Zero: 0,
-    One: 1,
-    Two: 2,
-    Few: 3,
-    Many: 4,
-    Other: 5,
-};
-Plural[Plural.Zero] = 'Zero';
-Plural[Plural.One] = 'One';
-Plural[Plural.Two] = 'Two';
-Plural[Plural.Few] = 'Few';
-Plural[Plural.Many] = 'Many';
-Plural[Plural.Other] = 'Other';
-/**
- * Returns the plural case based on the locale.
- * This is a copy of the deprecated function that we used in Angular v4.
- * // TODO(ocombe): remove this once we can the real getPluralCase function
- *
- * @deprecated from v5 the plural case function is in locale data files common/locales/*.ts
- * @param {?} locale
- * @param {?} nLike
- * @return {?}
- */
-function getPluralCase(locale, nLike) {
-    if (typeof nLike === 'string') {
-        nLike = parseInt((/** @type {?} */ (nLike)), 10);
-    }
-    /** @type {?} */
-    const n = (/** @type {?} */ (nLike));
-    /** @type {?} */
-    const nDecimal = n.toString().replace(/^[^.]*\.?/, '');
-    /** @type {?} */
-    const i = Math.floor(Math.abs(n));
-    /** @type {?} */
-    const v = nDecimal.length;
-    /** @type {?} */
-    const f = parseInt(nDecimal, 10);
-    /** @type {?} */
-    const t = parseInt(n.toString().replace(/^[^.]*\.?|0+$/g, ''), 10) || 0;
-    /** @type {?} */
-    const lang = locale.split('-')[0].toLowerCase();
-    switch (lang) {
-        case 'af':
-        case 'asa':
-        case 'az':
-        case 'bem':
-        case 'bez':
-        case 'bg':
-        case 'brx':
-        case 'ce':
-        case 'cgg':
-        case 'chr':
-        case 'ckb':
-        case 'ee':
-        case 'el':
-        case 'eo':
-        case 'es':
-        case 'eu':
-        case 'fo':
-        case 'fur':
-        case 'gsw':
-        case 'ha':
-        case 'haw':
-        case 'hu':
-        case 'jgo':
-        case 'jmc':
-        case 'ka':
-        case 'kk':
-        case 'kkj':
-        case 'kl':
-        case 'ks':
-        case 'ksb':
-        case 'ky':
-        case 'lb':
-        case 'lg':
-        case 'mas':
-        case 'mgo':
-        case 'ml':
-        case 'mn':
-        case 'nb':
-        case 'nd':
-        case 'ne':
-        case 'nn':
-        case 'nnh':
-        case 'nyn':
-        case 'om':
-        case 'or':
-        case 'os':
-        case 'ps':
-        case 'rm':
-        case 'rof':
-        case 'rwk':
-        case 'saq':
-        case 'seh':
-        case 'sn':
-        case 'so':
-        case 'sq':
-        case 'ta':
-        case 'te':
-        case 'teo':
-        case 'tk':
-        case 'tr':
-        case 'ug':
-        case 'uz':
-        case 'vo':
-        case 'vun':
-        case 'wae':
-        case 'xog':
-            if (n === 1)
-                return Plural.One;
-            return Plural.Other;
-        case 'ak':
-        case 'ln':
-        case 'mg':
-        case 'pa':
-        case 'ti':
-            if (n === Math.floor(n) && n >= 0 && n <= 1)
-                return Plural.One;
-            return Plural.Other;
-        case 'am':
-        case 'as':
-        case 'bn':
-        case 'fa':
-        case 'gu':
-        case 'hi':
-        case 'kn':
-        case 'mr':
-        case 'zu':
-            if (i === 0 || n === 1)
-                return Plural.One;
-            return Plural.Other;
-        case 'ar':
-            if (n === 0)
-                return Plural.Zero;
-            if (n === 1)
-                return Plural.One;
-            if (n === 2)
-                return Plural.Two;
-            if (n % 100 === Math.floor(n % 100) && n % 100 >= 3 && n % 100 <= 10)
-                return Plural.Few;
-            if (n % 100 === Math.floor(n % 100) && n % 100 >= 11 && n % 100 <= 99)
-                return Plural.Many;
-            return Plural.Other;
-        case 'ast':
-        case 'ca':
-        case 'de':
-        case 'en':
-        case 'et':
-        case 'fi':
-        case 'fy':
-        case 'gl':
-        case 'it':
-        case 'nl':
-        case 'sv':
-        case 'sw':
-        case 'ur':
-        case 'yi':
-            if (i === 1 && v === 0)
-                return Plural.One;
-            return Plural.Other;
-        case 'be':
-            if (n % 10 === 1 && !(n % 100 === 11))
-                return Plural.One;
-            if (n % 10 === Math.floor(n % 10) && n % 10 >= 2 && n % 10 <= 4 &&
-                !(n % 100 >= 12 && n % 100 <= 14))
-                return Plural.Few;
-            if (n % 10 === 0 || n % 10 === Math.floor(n % 10) && n % 10 >= 5 && n % 10 <= 9 ||
-                n % 100 === Math.floor(n % 100) && n % 100 >= 11 && n % 100 <= 14)
-                return Plural.Many;
-            return Plural.Other;
-        case 'br':
-            if (n % 10 === 1 && !(n % 100 === 11 || n % 100 === 71 || n % 100 === 91))
-                return Plural.One;
-            if (n % 10 === 2 && !(n % 100 === 12 || n % 100 === 72 || n % 100 === 92))
-                return Plural.Two;
-            if (n % 10 === Math.floor(n % 10) && (n % 10 >= 3 && n % 10 <= 4 || n % 10 === 9) &&
-                !(n % 100 >= 10 && n % 100 <= 19 || n % 100 >= 70 && n % 100 <= 79 ||
-                    n % 100 >= 90 && n % 100 <= 99))
-                return Plural.Few;
-            if (!(n === 0) && n % 1e6 === 0)
-                return Plural.Many;
-            return Plural.Other;
-        case 'bs':
-        case 'hr':
-        case 'sr':
-            if (v === 0 && i % 10 === 1 && !(i % 100 === 11) || f % 10 === 1 && !(f % 100 === 11))
-                return Plural.One;
-            if (v === 0 && i % 10 === Math.floor(i % 10) && i % 10 >= 2 && i % 10 <= 4 &&
-                !(i % 100 >= 12 && i % 100 <= 14) ||
-                f % 10 === Math.floor(f % 10) && f % 10 >= 2 && f % 10 <= 4 &&
-                    !(f % 100 >= 12 && f % 100 <= 14))
-                return Plural.Few;
-            return Plural.Other;
-        case 'cs':
-        case 'sk':
-            if (i === 1 && v === 0)
-                return Plural.One;
-            if (i === Math.floor(i) && i >= 2 && i <= 4 && v === 0)
-                return Plural.Few;
-            if (!(v === 0))
-                return Plural.Many;
-            return Plural.Other;
-        case 'cy':
-            if (n === 0)
-                return Plural.Zero;
-            if (n === 1)
-                return Plural.One;
-            if (n === 2)
-                return Plural.Two;
-            if (n === 3)
-                return Plural.Few;
-            if (n === 6)
-                return Plural.Many;
-            return Plural.Other;
-        case 'da':
-            if (n === 1 || !(t === 0) && (i === 0 || i === 1))
-                return Plural.One;
-            return Plural.Other;
-        case 'dsb':
-        case 'hsb':
-            if (v === 0 && i % 100 === 1 || f % 100 === 1)
-                return Plural.One;
-            if (v === 0 && i % 100 === 2 || f % 100 === 2)
-                return Plural.Two;
-            if (v === 0 && i % 100 === Math.floor(i % 100) && i % 100 >= 3 && i % 100 <= 4 ||
-                f % 100 === Math.floor(f % 100) && f % 100 >= 3 && f % 100 <= 4)
-                return Plural.Few;
-            return Plural.Other;
-        case 'ff':
-        case 'fr':
-        case 'hy':
-        case 'kab':
-            if (i === 0 || i === 1)
-                return Plural.One;
-            return Plural.Other;
-        case 'fil':
-            if (v === 0 && (i === 1 || i === 2 || i === 3) ||
-                v === 0 && !(i % 10 === 4 || i % 10 === 6 || i % 10 === 9) ||
-                !(v === 0) && !(f % 10 === 4 || f % 10 === 6 || f % 10 === 9))
-                return Plural.One;
-            return Plural.Other;
-        case 'ga':
-            if (n === 1)
-                return Plural.One;
-            if (n === 2)
-                return Plural.Two;
-            if (n === Math.floor(n) && n >= 3 && n <= 6)
-                return Plural.Few;
-            if (n === Math.floor(n) && n >= 7 && n <= 10)
-                return Plural.Many;
-            return Plural.Other;
-        case 'gd':
-            if (n === 1 || n === 11)
-                return Plural.One;
-            if (n === 2 || n === 12)
-                return Plural.Two;
-            if (n === Math.floor(n) && (n >= 3 && n <= 10 || n >= 13 && n <= 19))
-                return Plural.Few;
-            return Plural.Other;
-        case 'gv':
-            if (v === 0 && i % 10 === 1)
-                return Plural.One;
-            if (v === 0 && i % 10 === 2)
-                return Plural.Two;
-            if (v === 0 &&
-                (i % 100 === 0 || i % 100 === 20 || i % 100 === 40 || i % 100 === 60 || i % 100 === 80))
-                return Plural.Few;
-            if (!(v === 0))
-                return Plural.Many;
-            return Plural.Other;
-        case 'he':
-            if (i === 1 && v === 0)
-                return Plural.One;
-            if (i === 2 && v === 0)
-                return Plural.Two;
-            if (v === 0 && !(n >= 0 && n <= 10) && n % 10 === 0)
-                return Plural.Many;
-            return Plural.Other;
-        case 'is':
-            if (t === 0 && i % 10 === 1 && !(i % 100 === 11) || !(t === 0))
-                return Plural.One;
-            return Plural.Other;
-        case 'ksh':
-            if (n === 0)
-                return Plural.Zero;
-            if (n === 1)
-                return Plural.One;
-            return Plural.Other;
-        case 'kw':
-        case 'naq':
-        case 'se':
-        case 'smn':
-            if (n === 1)
-                return Plural.One;
-            if (n === 2)
-                return Plural.Two;
-            return Plural.Other;
-        case 'lag':
-            if (n === 0)
-                return Plural.Zero;
-            if ((i === 0 || i === 1) && !(n === 0))
-                return Plural.One;
-            return Plural.Other;
-        case 'lt':
-            if (n % 10 === 1 && !(n % 100 >= 11 && n % 100 <= 19))
-                return Plural.One;
-            if (n % 10 === Math.floor(n % 10) && n % 10 >= 2 && n % 10 <= 9 &&
-                !(n % 100 >= 11 && n % 100 <= 19))
-                return Plural.Few;
-            if (!(f === 0))
-                return Plural.Many;
-            return Plural.Other;
-        case 'lv':
-        case 'prg':
-            if (n % 10 === 0 || n % 100 === Math.floor(n % 100) && n % 100 >= 11 && n % 100 <= 19 ||
-                v === 2 && f % 100 === Math.floor(f % 100) && f % 100 >= 11 && f % 100 <= 19)
-                return Plural.Zero;
-            if (n % 10 === 1 && !(n % 100 === 11) || v === 2 && f % 10 === 1 && !(f % 100 === 11) ||
-                !(v === 2) && f % 10 === 1)
-                return Plural.One;
-            return Plural.Other;
-        case 'mk':
-            if (v === 0 && i % 10 === 1 || f % 10 === 1)
-                return Plural.One;
-            return Plural.Other;
-        case 'mt':
-            if (n === 1)
-                return Plural.One;
-            if (n === 0 || n % 100 === Math.floor(n % 100) && n % 100 >= 2 && n % 100 <= 10)
-                return Plural.Few;
-            if (n % 100 === Math.floor(n % 100) && n % 100 >= 11 && n % 100 <= 19)
-                return Plural.Many;
-            return Plural.Other;
-        case 'pl':
-            if (i === 1 && v === 0)
-                return Plural.One;
-            if (v === 0 && i % 10 === Math.floor(i % 10) && i % 10 >= 2 && i % 10 <= 4 &&
-                !(i % 100 >= 12 && i % 100 <= 14))
-                return Plural.Few;
-            if (v === 0 && !(i === 1) && i % 10 === Math.floor(i % 10) && i % 10 >= 0 && i % 10 <= 1 ||
-                v === 0 && i % 10 === Math.floor(i % 10) && i % 10 >= 5 && i % 10 <= 9 ||
-                v === 0 && i % 100 === Math.floor(i % 100) && i % 100 >= 12 && i % 100 <= 14)
-                return Plural.Many;
-            return Plural.Other;
-        case 'pt':
-            if (n === Math.floor(n) && n >= 0 && n <= 2 && !(n === 2))
-                return Plural.One;
-            return Plural.Other;
-        case 'ro':
-            if (i === 1 && v === 0)
-                return Plural.One;
-            if (!(v === 0) || n === 0 ||
-                !(n === 1) && n % 100 === Math.floor(n % 100) && n % 100 >= 1 && n % 100 <= 19)
-                return Plural.Few;
-            return Plural.Other;
-        case 'ru':
-        case 'uk':
-            if (v === 0 && i % 10 === 1 && !(i % 100 === 11))
-                return Plural.One;
-            if (v === 0 && i % 10 === Math.floor(i % 10) && i % 10 >= 2 && i % 10 <= 4 &&
-                !(i % 100 >= 12 && i % 100 <= 14))
-                return Plural.Few;
-            if (v === 0 && i % 10 === 0 ||
-                v === 0 && i % 10 === Math.floor(i % 10) && i % 10 >= 5 && i % 10 <= 9 ||
-                v === 0 && i % 100 === Math.floor(i % 100) && i % 100 >= 11 && i % 100 <= 14)
-                return Plural.Many;
-            return Plural.Other;
-        case 'shi':
-            if (i === 0 || n === 1)
-                return Plural.One;
-            if (n === Math.floor(n) && n >= 2 && n <= 10)
-                return Plural.Few;
-            return Plural.Other;
-        case 'si':
-            if (n === 0 || n === 1 || i === 0 && f === 1)
-                return Plural.One;
-            return Plural.Other;
-        case 'sl':
-            if (v === 0 && i % 100 === 1)
-                return Plural.One;
-            if (v === 0 && i % 100 === 2)
-                return Plural.Two;
-            if (v === 0 && i % 100 === Math.floor(i % 100) && i % 100 >= 3 && i % 100 <= 4 || !(v === 0))
-                return Plural.Few;
-            return Plural.Other;
-        case 'tzm':
-            if (n === Math.floor(n) && n >= 0 && n <= 1 || n === Math.floor(n) && n >= 11 && n <= 99)
-                return Plural.One;
-            return Plural.Other;
-        // When there is no specification, the default is always "other"
-        // Spec: http://cldr.unicode.org/index/cldr-spec/plural-rules
-        // > other (required—general plural form — also used if the language only has a single form)
-        default:
-            return Plural.Other;
-    }
-}
-/**
- * @param {?} value
- * @param {?} locale
- * @return {?}
- */
-function getPluralCategory(value, locale) {
-    /** @type {?} */
-    const plural = getPluralCase(locale, value);
-    switch (plural) {
-        case Plural.Zero:
-            return 'zero';
-        case Plural.One:
-            return 'one';
-        case Plural.Two:
-            return 'two';
-        case Plural.Few:
-            return 'few';
-        case Plural.Many:
-            return 'many';
-        default:
-            return 'other';
-    }
-}
 /**
  * Returns the index of the current case of an ICU expression depending on the main binding value
  *
@@ -29574,11 +29410,8 @@ function getCaseIndex(icuExpression, bindingValue) {
     if (index === -1) {
         switch (icuExpression.type) {
             case 1 /* plural */: {
-                // TODO(ocombe): replace this hard-coded value by the real LOCALE_ID value
                 /** @type {?} */
-                const locale = 'en-US';
-                /** @type {?} */
-                const resolvedCase = getPluralCategory(bindingValue, locale);
+                const resolvedCase = getPluralCase(bindingValue, getLocaleId());
                 index = icuExpression.cases.indexOf(resolvedCase);
                 if (index === -1 && resolvedCase !== 'other') {
                     index = icuExpression.cases.indexOf('other');
@@ -29831,7 +29664,7 @@ const LOCALIZE_PH_REGEXP = /\{\$(.*?)\}/g;
  * running outside of Closure Compiler. This method will not be needed once runtime translation
  * service support is introduced.
  *
- * \@publicApi
+ * \@codeGenApi
  * @deprecated this method is temporary & should not be used as it will be removed soon
  * @param {?} input
  * @param {?=} placeholders
@@ -29849,6 +29682,35 @@ function ɵɵi18nLocalize(input, placeholders = {}) {
          */
         (match, key) => placeholders[key] || '')) :
         input;
+}
+/**
+ * The locale id that the application is currently using (for translations and ICU expressions).
+ * This is the ivy version of `LOCALE_ID` that was defined as an injection token for the view engine
+ * but is now defined as a global value.
+ * @type {?}
+ */
+const DEFAULT_LOCALE_ID = 'en-US';
+/** @type {?} */
+let LOCALE_ID = DEFAULT_LOCALE_ID;
+/**
+ * Sets the locale id that will be used for translations and ICU expressions.
+ * This is the ivy version of `LOCALE_ID` that was defined as an injection token for the view engine
+ * but is now defined as a global value.
+ *
+ * @param {?} localeId
+ * @return {?}
+ */
+function setLocaleId(localeId) {
+    LOCALE_ID = localeId.toLowerCase().replace(/_/g, '-');
+}
+/**
+ * Gets the locale id that will be used for translations and ICU expressions.
+ * This is the ivy version of `LOCALE_ID` that was defined as an injection token for the view engine
+ * but is now defined as a global value.
+ * @return {?}
+ */
+function getLocaleId() {
+    return LOCALE_ID;
 }
 
 /**
@@ -29887,15 +29749,30 @@ function assertSameOrNotExisting(id, type, incoming) {
     }
 }
 /**
- * @param {?} id
  * @param {?} ngModuleType
  * @return {?}
  */
-function registerNgModuleType(id, ngModuleType) {
+function registerNgModuleType(ngModuleType) {
+    if (ngModuleType.ngModuleDef.id !== null) {
+        /** @type {?} */
+        const id = ngModuleType.ngModuleDef.id;
+        /** @type {?} */
+        const existing = (/** @type {?} */ (modules.get(id)));
+        assertSameOrNotExisting(id, existing, ngModuleType);
+        modules.set(id, ngModuleType);
+    }
     /** @type {?} */
-    const existing = (/** @type {?} */ (modules.get(id)));
-    assertSameOrNotExisting(id, existing, ngModuleType);
-    modules.set(id, ngModuleType);
+    let imports = ngModuleType.ngModuleDef.imports;
+    if (imports instanceof Function) {
+        imports = imports();
+    }
+    if (imports) {
+        imports.forEach((/**
+         * @param {?} i
+         * @return {?}
+         */
+        (i) => registerNgModuleType(i)));
+    }
 }
 /**
  * @param {?} id
@@ -29933,6 +29810,11 @@ class NgModuleRef$1 extends NgModuleRef {
         /** @type {?} */
         /** @nocollapse */ const ngModuleDef = getNgModuleDef(ngModuleType);
         ngDevMode && assertDefined(ngModuleDef, `NgModule '${stringify(ngModuleType)}' is not a subtype of 'NgModuleType'.`);
+        /** @type {?} */
+        const ngLocaleIdDef = getNgLocaleIdDef(ngModuleType);
+        if (ngLocaleIdDef) {
+            setLocaleId(ngLocaleIdDef);
+        }
         this._bootstrapComponents = maybeUnwrapFn((/** @type {?} */ (ngModuleDef)).bootstrap);
         /** @type {?} */
         const additionalProviders = [
@@ -29997,21 +29879,41 @@ class NgModuleFactory$1 extends NgModuleFactory {
     constructor(moduleType) {
         super();
         this.moduleType = moduleType;
+        /** @type {?} */
+        /** @nocollapse */ const ngModuleDef = getNgModuleDef(moduleType);
+        if (ngModuleDef !== null) {
+            // Register the NgModule with Angular's module registry. The location (and hence timing) of
+            // this call is critical to ensure this works correctly (modules get registered when expected)
+            // without bloating bundles (modules are registered when otherwise not referenced).
+            //
+            // In View Engine, registration occurs in the .ngfactory.js file as a side effect. This has
+            // several practical consequences:
+            //
+            // - If an .ngfactory file is not imported from, the module won't be registered (and can be
+            //   tree shaken).
+            // - If an .ngfactory file is imported from, the module will be registered even if an instance
+            //   is not actually created (via `create` below).
+            // - Since an .ngfactory file in View Engine references the .ngfactory files of the NgModule's
+            //   imports,
+            //
+            // In Ivy, things are a bit different. .ngfactory files still exist for compatibility, but are
+            // not a required API to use - there are other ways to obtain an NgModuleFactory for a given
+            // NgModule. Thus, relying on a side effect in the .ngfactory file is not sufficient. Instead,
+            // the side effect of registration is added here, in the constructor of NgModuleFactory,
+            // ensuring no matter how a factory is created, the module is registered correctly.
+            //
+            // An alternative would be to include the registration side effect inline following the actual
+            // NgModule definition. This also has the correct timing, but breaks tree-shaking - modules
+            // will be registered and retained even if they're otherwise never referenced.
+            registerNgModuleType((/** @type {?} */ (moduleType)));
+        }
     }
     /**
      * @param {?} parentInjector
      * @return {?}
      */
     create(parentInjector) {
-        /** @type {?} */
-        const moduleType = this.moduleType;
-        /** @type {?} */
-        const moduleRef = new NgModuleRef$1(moduleType, parentInjector);
-        /** @type {?} */
-        /** @nocollapse */ const ngModuleDef = getNgModuleDef(moduleType);
-        ngModuleDef && ngModuleDef.id &&
-            registerNgModuleType(ngModuleDef.id, (/** @type {?} */ (moduleType)));
-        return moduleRef;
+        return new NgModuleRef$1(this.moduleType, parentInjector);
     }
 }
 
@@ -30909,6 +30811,29 @@ class QueryList {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
+/**
+ * An object representing a query, which is a combination of:
+ * - query predicate to determines if a given element/directive should be included in the query
+ * - values collected based on a predicate
+ * - `QueryList` to which collected values should be reported
+ * @template T
+ */
+class LQuery {
+    /**
+     * @param {?} next
+     * @param {?} list
+     * @param {?} predicate
+     * @param {?} values
+     * @param {?} containerValues
+     */
+    constructor(next, list, predicate, values, containerValues) {
+        this.next = next;
+        this.list = list;
+        this.predicate = predicate;
+        this.values = values;
+        this.containerValues = containerValues;
+    }
+}
 class LQueries_ {
     /**
      * @param {?} parent
@@ -31003,15 +30928,7 @@ function copyQueriesToContainer(query) {
         /** @type {?} */
         const containerValues = [];
         query.values.push(containerValues);
-        /** @type {?} */
-        const clonedQuery = {
-            next: result,
-            list: query.list,
-            predicate: query.predicate,
-            values: containerValues,
-            containerValues: null
-        };
-        result = clonedQuery;
+        result = new LQuery(result, query.list, query.predicate, containerValues, null);
         query = query.next;
     }
     return result;
@@ -31024,15 +30941,7 @@ function copyQueriesToView(query) {
     /** @type {?} */
     let result = null;
     while (query) {
-        /** @type {?} */
-        const clonedQuery = {
-            next: result,
-            list: query.list,
-            predicate: query.predicate,
-            values: [],
-            containerValues: query.values
-        };
-        result = clonedQuery;
+        result = new LQuery(result, query.list, query.predicate, [], query.values);
         query = query.next;
     }
     return result;
@@ -31260,13 +31169,7 @@ function createPredicate(predicate, read) {
  * @return {?}
  */
 function createLQuery(previous, queryList, predicate, read) {
-    return {
-        next: previous,
-        list: queryList,
-        predicate: createPredicate(predicate, read),
-        values: ((/** @type {?} */ ((/** @type {?} */ (queryList)))))._valuesTree,
-        containerValues: null
-    };
+    return new LQuery(previous, queryList, createPredicate(predicate, read), ((/** @type {?} */ ((/** @type {?} */ (queryList)))))._valuesTree, null);
 }
 /**
  * Creates a QueryList and stores it in LView's collection of active queries (LQueries).
@@ -33066,6 +32969,93 @@ Console.decorators = [
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
+ * Provide this token to set the locale of your application.
+ * It is used for i18n extraction, by i18n pipes (DatePipe, I18nPluralPipe, CurrencyPipe,
+ * DecimalPipe and PercentPipe) and by ICU expressions.
+ *
+ * See the [i18n guide](guide/i18n#setting-up-locale) for more information.
+ *
+ * \@usageNotes
+ * ### Example
+ *
+ * ```typescript
+ * import { LOCALE_ID } from '\@angular/core';
+ * import { platformBrowserDynamic } from '\@angular/platform-browser-dynamic';
+ * import { AppModule } from './app/app.module';
+ *
+ * platformBrowserDynamic().bootstrapModule(AppModule, {
+ *   providers: [{provide: LOCALE_ID, useValue: 'en-US' }]
+ * });
+ * ```
+ *
+ * \@publicApi
+ * @type {?}
+ */
+const LOCALE_ID$1 = new InjectionToken('LocaleId');
+/**
+ * Use this token at bootstrap to provide the content of your translation file (`xtb`,
+ * `xlf` or `xlf2`) when you want to translate your application in another language.
+ *
+ * See the [i18n guide](guide/i18n#merge) for more information.
+ *
+ * \@usageNotes
+ * ### Example
+ *
+ * ```typescript
+ * import { TRANSLATIONS } from '\@angular/core';
+ * import { platformBrowserDynamic } from '\@angular/platform-browser-dynamic';
+ * import { AppModule } from './app/app.module';
+ *
+ * // content of your translation file
+ * const translations = '....';
+ *
+ * platformBrowserDynamic().bootstrapModule(AppModule, {
+ *   providers: [{provide: TRANSLATIONS, useValue: translations }]
+ * });
+ * ```
+ *
+ * \@publicApi
+ * @type {?}
+ */
+const TRANSLATIONS$1 = new InjectionToken('Translations');
+/**
+ * Provide this token at bootstrap to set the format of your {\@link TRANSLATIONS}: `xtb`,
+ * `xlf` or `xlf2`.
+ *
+ * See the [i18n guide](guide/i18n#merge) for more information.
+ *
+ * \@usageNotes
+ * ### Example
+ *
+ * ```typescript
+ * import { TRANSLATIONS_FORMAT } from '\@angular/core';
+ * import { platformBrowserDynamic } from '\@angular/platform-browser-dynamic';
+ * import { AppModule } from './app/app.module';
+ *
+ * platformBrowserDynamic().bootstrapModule(AppModule, {
+ *   providers: [{provide: TRANSLATIONS_FORMAT, useValue: 'xlf' }]
+ * });
+ * ```
+ *
+ * \@publicApi
+ * @type {?}
+ */
+const TRANSLATIONS_FORMAT = new InjectionToken('TranslationsFormat');
+/** @enum {number} */
+const MissingTranslationStrategy = {
+    Error: 0,
+    Warning: 1,
+    Ignore: 2,
+};
+MissingTranslationStrategy[MissingTranslationStrategy.Error] = 'Error';
+MissingTranslationStrategy[MissingTranslationStrategy.Warning] = 'Warning';
+MissingTranslationStrategy[MissingTranslationStrategy.Ignore] = 'Ignore';
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
  * Combination of NgModuleFactory and ComponentFactorys.
  *
  * \@publicApi
@@ -34406,6 +34396,10 @@ class PlatformRef {
             if (!exceptionHandler) {
                 throw new Error('No ErrorHandler. Is platform module (BrowserModule) included?');
             }
+            // If the `LOCALE_ID` provider is defined at bootstrap we set the value for runtime i18n (ivy)
+            /** @type {?} */
+            const localeId = moduleRef.injector.get(LOCALE_ID$1, DEFAULT_LOCALE_ID);
+            setLocaleId(localeId);
             moduleRef.onDestroy((/**
              * @return {?}
              */
@@ -36079,15 +36073,20 @@ const _nativeNodeToDebugNode = new Map();
 function getDebugNode__PRE_R3__(nativeNode) {
     return _nativeNodeToDebugNode.get(nativeNode) || null;
 }
+/** @type {?} */
+const NG_DEBUG_PROPERTY = '__ng_debug__';
 /**
  * @param {?} nativeNode
  * @return {?}
  */
 function getDebugNode__POST_R3__(nativeNode) {
     if (nativeNode instanceof Node) {
-        return nativeNode.nodeType == Node.ELEMENT_NODE ?
-            new DebugElement__POST_R3__((/** @type {?} */ (nativeNode))) :
-            new DebugNode__POST_R3__(nativeNode);
+        if (!(nativeNode.hasOwnProperty(NG_DEBUG_PROPERTY))) {
+            ((/** @type {?} */ (nativeNode)))[NG_DEBUG_PROPERTY] = nativeNode.nodeType == Node.ELEMENT_NODE ?
+                new DebugElement__POST_R3__((/** @type {?} */ (nativeNode))) :
+                new DebugNode__POST_R3__(nativeNode);
+        }
+        return ((/** @type {?} */ (nativeNode)))[NG_DEBUG_PROPERTY];
     }
     return null;
 }
@@ -36114,12 +36113,12 @@ function removeDebugNodeFromIndex(node) {
  * \@publicApi
  * @type {?}
  */
-const DebugNode = (/** @type {?} */ (DebugNode__PRE_R3__));
+const DebugNode = DebugNode__PRE_R3__;
 /**
  * \@publicApi
  * @type {?}
  */
-const DebugElement = (/** @type {?} */ (DebugElement__PRE_R3__));
+const DebugElement = DebugElement__PRE_R3__;
 
 /**
  * @fileoverview added by tsickle
@@ -36145,93 +36144,6 @@ const _CORE_PLATFORM_PROVIDERS = [
  * @type {?}
  */
 const platformCore = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDERS);
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Provide this token to set the locale of your application.
- * It is used for i18n extraction, by i18n pipes (DatePipe, I18nPluralPipe, CurrencyPipe,
- * DecimalPipe and PercentPipe) and by ICU expressions.
- *
- * See the [i18n guide](guide/i18n#setting-up-locale) for more information.
- *
- * \@usageNotes
- * ### Example
- *
- * ```typescript
- * import { LOCALE_ID } from '\@angular/core';
- * import { platformBrowserDynamic } from '\@angular/platform-browser-dynamic';
- * import { AppModule } from './app/app.module';
- *
- * platformBrowserDynamic().bootstrapModule(AppModule, {
- *   providers: [{provide: LOCALE_ID, useValue: 'en-US' }]
- * });
- * ```
- *
- * \@publicApi
- * @type {?}
- */
-const LOCALE_ID = new InjectionToken('LocaleId');
-/**
- * Use this token at bootstrap to provide the content of your translation file (`xtb`,
- * `xlf` or `xlf2`) when you want to translate your application in another language.
- *
- * See the [i18n guide](guide/i18n#merge) for more information.
- *
- * \@usageNotes
- * ### Example
- *
- * ```typescript
- * import { TRANSLATIONS } from '\@angular/core';
- * import { platformBrowserDynamic } from '\@angular/platform-browser-dynamic';
- * import { AppModule } from './app/app.module';
- *
- * // content of your translation file
- * const translations = '....';
- *
- * platformBrowserDynamic().bootstrapModule(AppModule, {
- *   providers: [{provide: TRANSLATIONS, useValue: translations }]
- * });
- * ```
- *
- * \@publicApi
- * @type {?}
- */
-const TRANSLATIONS$1 = new InjectionToken('Translations');
-/**
- * Provide this token at bootstrap to set the format of your {\@link TRANSLATIONS}: `xtb`,
- * `xlf` or `xlf2`.
- *
- * See the [i18n guide](guide/i18n#merge) for more information.
- *
- * \@usageNotes
- * ### Example
- *
- * ```typescript
- * import { TRANSLATIONS_FORMAT } from '\@angular/core';
- * import { platformBrowserDynamic } from '\@angular/platform-browser-dynamic';
- * import { AppModule } from './app/app.module';
- *
- * platformBrowserDynamic().bootstrapModule(AppModule, {
- *   providers: [{provide: TRANSLATIONS_FORMAT, useValue: 'xlf' }]
- * });
- * ```
- *
- * \@publicApi
- * @type {?}
- */
-const TRANSLATIONS_FORMAT = new InjectionToken('TranslationsFormat');
-/** @enum {number} */
-const MissingTranslationStrategy = {
-    Error: 0,
-    Warning: 1,
-    Ignore: 2,
-};
-MissingTranslationStrategy[MissingTranslationStrategy.Error] = 'Error';
-MissingTranslationStrategy[MissingTranslationStrategy.Warning] = 'Warning';
-MissingTranslationStrategy[MissingTranslationStrategy.Ignore] = 'Ignore';
 
 /**
  * @fileoverview added by tsickle
@@ -36278,9 +36190,9 @@ const APPLICATION_MODULE_PROVIDERS = [
     { provide: IterableDiffers, useFactory: _iterableDiffersFactory, deps: [] },
     { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory, deps: [] },
     {
-        provide: LOCALE_ID,
+        provide: LOCALE_ID$1,
         useFactory: _localeFactory,
-        deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
+        deps: [[new Inject(LOCALE_ID$1), new Optional(), new SkipSelf()]]
     },
 ];
 /**
@@ -39730,5 +39642,5 @@ class NgModuleFactory_ extends NgModuleFactory {
  * Generated bundle index. Do not edit.
  */
 
-export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_r, _iterableDiffersFactory as ɵangular_packages_core_core_o, _keyValueDiffersFactory as ɵangular_packages_core_core_p, _localeFactory as ɵangular_packages_core_core_q, zoneSchedulerFactory as ɵangular_packages_core_core_s, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, DefaultIterableDifferFactory as ɵangular_packages_core_core_m, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_n, DebugElement__PRE_R3__ as ɵangular_packages_core_core_l, DebugNode__PRE_R3__ as ɵangular_packages_core_core_k, NullInjector as ɵangular_packages_core_core_b, injectInjectorOnly as ɵangular_packages_core_core_a, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, getModuleFactory__PRE_R3__ as ɵangular_packages_core_core_j, wtfEnabled as ɵangular_packages_core_core_t, createScope as ɵangular_packages_core_core_v, detectWTF as ɵangular_packages_core_core_u, endTimeRange as ɵangular_packages_core_core_y, leave as ɵangular_packages_core_core_w, startTimeRange as ɵangular_packages_core_core_x, SCHEDULER as ɵangular_packages_core_core_bb, injectAttributeImpl as ɵangular_packages_core_core_bc, getLView as ɵangular_packages_core_core_bd, getPreviousOrParentTNode as ɵangular_packages_core_core_be, nextContextImpl as ɵangular_packages_core_core_bf, BoundPlayerFactory as ɵangular_packages_core_core_bj, getRootContext as ɵangular_packages_core_core_bp, loadInternal as ɵangular_packages_core_core_bo, createElementRef as ɵangular_packages_core_core_g, createTemplateRef as ɵangular_packages_core_core_h, createViewRef as ɵangular_packages_core_core_i, getUrlSanitizer as ɵangular_packages_core_core_bh, noSideEffects as ɵangular_packages_core_core_bn, makeParamDecorator as ɵangular_packages_core_core_bk, makePropDecorator as ɵangular_packages_core_core_bl, getClosureSafeProperty as ɵangular_packages_core_core_bq, _def as ɵangular_packages_core_core_z, DebugContext as ɵangular_packages_core_core_ba, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugEventListener, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS$1 as TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, ViewEncapsulation, Version, VERSION, InjectFlags, ɵɵdefineInjectable, defineInjectable, ɵɵdefineInjector, forwardRef, resolveForwardRef, Injectable, Injector, ɵɵinject, inject, INJECTOR, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵdefineBase, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefinePipe, ɵɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, ɵɵdirectiveInject, ɵɵinjectAttribute, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵtemplateRefExtractor, ɵɵProvidersFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, ɵɵcontainer, ɵɵnextContext, ɵɵelementStart, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵelement, ɵɵlistener, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵembeddedViewStart, ɵɵprojection, ɵɵbind, ɵɵinterpolation1, ɵɵinterpolation2, ɵɵinterpolation3, ɵɵinterpolation4, ɵɵinterpolation5, ɵɵinterpolation6, ɵɵinterpolation7, ɵɵinterpolation8, ɵɵinterpolationV, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, ɵɵrestoreView, ɵɵcontainerRefreshStart, ɵɵcontainerRefreshEnd, ɵɵqueryRefresh, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵstaticContentQuery, ɵɵloadViewQuery, ɵɵcontentQuery, ɵɵloadContentQuery, ɵɵelementEnd, ɵɵelementProperty, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵcomponentHostSyntheticProperty, ɵɵcomponentHostSyntheticListener, ɵɵprojectionDef, ɵɵreference, ɵɵenableBindings, ɵɵdisableBindings, ɵɵallocHostVars, ɵɵelementAttribute, ɵɵelementContainerStart, ɵɵelementContainerEnd, ɵɵstyling, ɵɵstyleMap, ɵɵclassMap, ɵɵstyleProp, ɵɵstylingApply, ɵɵclassProp, ɵɵelementHostAttrs, ɵɵselect, ɵɵtextBinding, ɵɵtemplate, ɵɵembeddedViewEnd, store as ɵstore, ɵɵload, ɵɵpipe, whenRendered as ɵwhenRendered, ɵɵi18n, ɵɵi18nAttributes, ɵɵi18nExp, ɵɵi18nStart, ɵɵi18nEnd, ɵɵi18nApply, ɵɵi18nPostprocess, i18nConfigureLocalize as ɵi18nConfigureLocalize, ɵɵi18nLocalize, setClassMetadata as ɵsetClassMetadata, ɵɵresolveWindow, ɵɵresolveDocument, ɵɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, ɵɵsanitizeHtml, ɵɵsanitizeStyle, ɵɵdefaultStyleSanitizer, ɵɵsanitizeScript, ɵɵsanitizeUrl, ɵɵsanitizeResourceUrl, ɵɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, registerNgModuleType as ɵregisterNgModuleType, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, createInjector as ɵcreateInjector, INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$3 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_r, _iterableDiffersFactory as ɵangular_packages_core_core_o, _keyValueDiffersFactory as ɵangular_packages_core_core_p, _localeFactory as ɵangular_packages_core_core_q, zoneSchedulerFactory as ɵangular_packages_core_core_s, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, DefaultIterableDifferFactory as ɵangular_packages_core_core_m, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_n, DebugElement__PRE_R3__ as ɵangular_packages_core_core_l, DebugNode__PRE_R3__ as ɵangular_packages_core_core_k, NullInjector as ɵangular_packages_core_core_b, injectInjectorOnly as ɵangular_packages_core_core_a, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, getModuleFactory__PRE_R3__ as ɵangular_packages_core_core_j, wtfEnabled as ɵangular_packages_core_core_t, createScope as ɵangular_packages_core_core_v, detectWTF as ɵangular_packages_core_core_u, endTimeRange as ɵangular_packages_core_core_y, leave as ɵangular_packages_core_core_w, startTimeRange as ɵangular_packages_core_core_x, SCHEDULER as ɵangular_packages_core_core_bb, injectAttributeImpl as ɵangular_packages_core_core_bc, getLView as ɵangular_packages_core_core_bd, getPreviousOrParentTNode as ɵangular_packages_core_core_be, nextContextImpl as ɵangular_packages_core_core_bf, BoundPlayerFactory as ɵangular_packages_core_core_bj, getRootContext as ɵangular_packages_core_core_bp, loadInternal as ɵangular_packages_core_core_bo, createElementRef as ɵangular_packages_core_core_g, createTemplateRef as ɵangular_packages_core_core_h, createViewRef as ɵangular_packages_core_core_i, getUrlSanitizer as ɵangular_packages_core_core_bh, noSideEffects as ɵangular_packages_core_core_bn, makeParamDecorator as ɵangular_packages_core_core_bk, makePropDecorator as ɵangular_packages_core_core_bl, getClosureSafeProperty as ɵangular_packages_core_core_bq, _def as ɵangular_packages_core_core_z, DebugContext as ɵangular_packages_core_core_ba, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugEventListener, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS$1 as TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID$1 as LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, ViewEncapsulation, Version, VERSION, InjectFlags, ɵɵdefineInjectable, defineInjectable, ɵɵdefineInjector, forwardRef, resolveForwardRef, Injectable, Injector, ɵɵinject, inject, INJECTOR, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, getLocalePluralCase as ɵgetLocalePluralCase, findLocaleData as ɵfindLocaleData, LOCALE_DATA as ɵLOCALE_DATA, LocaleDataIndex as ɵLocaleDataIndex, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵdefineBase, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefinePipe, ɵɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, ɵɵdirectiveInject, ɵɵinjectAttribute, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵtemplateRefExtractor, ɵɵProvidersFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, ɵɵcontainer, ɵɵnextContext, ɵɵelementStart, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵelement, ɵɵlistener, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵembeddedViewStart, ɵɵprojection, ɵɵbind, ɵɵinterpolation1, ɵɵinterpolation2, ɵɵinterpolation3, ɵɵinterpolation4, ɵɵinterpolation5, ɵɵinterpolation6, ɵɵinterpolation7, ɵɵinterpolation8, ɵɵinterpolationV, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, ɵɵrestoreView, ɵɵcontainerRefreshStart, ɵɵcontainerRefreshEnd, ɵɵqueryRefresh, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵstaticContentQuery, ɵɵloadViewQuery, ɵɵcontentQuery, ɵɵloadContentQuery, ɵɵelementEnd, ɵɵelementProperty, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵcomponentHostSyntheticProperty, ɵɵcomponentHostSyntheticListener, ɵɵprojectionDef, ɵɵreference, ɵɵenableBindings, ɵɵdisableBindings, ɵɵallocHostVars, ɵɵelementAttribute, ɵɵelementContainerStart, ɵɵelementContainerEnd, ɵɵstyling, ɵɵstyleMap, ɵɵclassMap, ɵɵstyleProp, ɵɵstylingApply, ɵɵclassProp, ɵɵelementHostAttrs, ɵɵselect, ɵɵtextBinding, ɵɵtemplate, ɵɵembeddedViewEnd, store as ɵstore, ɵɵload, ɵɵpipe, whenRendered as ɵwhenRendered, ɵɵi18n, ɵɵi18nAttributes, ɵɵi18nExp, ɵɵi18nStart, ɵɵi18nEnd, ɵɵi18nApply, ɵɵi18nPostprocess, i18nConfigureLocalize as ɵi18nConfigureLocalize, ɵɵi18nLocalize, setLocaleId as ɵsetLocaleId, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, setClassMetadata as ɵsetClassMetadata, ɵɵresolveWindow, ɵɵresolveDocument, ɵɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, ɵɵsanitizeHtml, ɵɵsanitizeStyle, ɵɵdefaultStyleSanitizer, ɵɵsanitizeScript, ɵɵsanitizeUrl, ɵɵsanitizeResourceUrl, ɵɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, registerNgModuleType as ɵregisterNgModuleType, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, createInjector as ɵcreateInjector, INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$3 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map

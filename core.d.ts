@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0-rc.0+376.sha-d2b0ac7.with-local-changes
+ * @license Angular v8.1.0-beta.0+10.sha-aca339e.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1355,7 +1355,7 @@ declare interface CreateComponentOptions {
      * Typically, the features in this list are features that cannot be added to the
      * other features list in the component definition because they rely on other factors.
      *
-     * Example: `RootLifecycleHooks` is a function that adds lifecycle hook capabilities
+     * Example: `LifecycleHooksFeature` is a function that adds lifecycle hook capabilities
      * to root components in a tree-shakable way. It cannot be added to the component
      * features list because there's no way of knowing when the component will be used as
      * a root component.
@@ -5178,6 +5178,16 @@ declare interface ProceduralRenderer3 {
 declare type ProcessProvidersFunction = (providers: Provider[]) => Provider[];
 
 /**
+ * List of slots for a projection. A slot can be either based on a parsed CSS selector
+ * which will be used to determine nodes which are projected into that slot.
+ *
+ * When set to "*", the slot is reserved and can be used for multi-slot projection
+ * using {@link ViewContainerRef#createComponent}. The last slot that specifies the
+ * wildcard selector will retrieve all projectable nodes which do not match any selector.
+ */
+declare type ProjectionSlots = (ɵCssSelectorList | '*')[];
+
+/**
  * This mapping is necessary so we can set input properties and output listeners
  * properly at runtime when property names are minified or aliased.
  *
@@ -5404,8 +5414,13 @@ declare class R3Injector {
     toString(): string;
     private assertNotDestroyed;
     /**
-     * Add an `InjectorType` or `InjectorDefTypeWithProviders` and all of its transitive providers
+     * Add an `InjectorType` or `InjectorTypeWithProviders` and all of its transitive providers
      * to this injector.
+     *
+     * If an `InjectorTypeWithProviders` that declares providers besides the type is specified,
+     * the function will return "true" to indicate that the providers of the type definition need
+     * to be processed. This allows us to process providers of injector types after all imports of
+     * an injector definition are processed. (following View Engine semantics: see FW-1349)
      */
     private processInjectorType;
     /**
@@ -9655,7 +9670,22 @@ export declare const enum ɵAttributeMarker {
      * ['attr', 'value', AttributeMarker.ProjectAs, ['', 'title', '']]
      * ```
      */
-    ProjectAs = 5
+    ProjectAs = 5,
+    /**
+     * Signals that the following attribute will be translated by runtime i18n
+     *
+     * For example, given the following HTML:
+     *
+     * ```
+     * <div moo="car" foo="value" i18n-foo [bar]="binding" i18n-bar>
+     * ```
+     *
+     * the generated code is:
+     *
+     * ```
+     * var _c1 = ['moo', 'car', AttributeMarker.I18n, 'foo', 'bar'];
+     */
+    I18n = 6
 }
 
 export declare const enum ɵBindingFlags {
@@ -9984,6 +10014,13 @@ export declare function ɵcrt(values: {
  */
 export declare type ɵCssSelectorList = CssSelector[];
 
+/**
+ * The locale id that the application is currently using (for translations and ICU expressions).
+ * This is the ivy version of `LOCALE_ID` that was defined as an injection token for the view engine
+ * but is now defined as a global value.
+ */
+export declare const ɵDEFAULT_LOCALE_ID = "en-US";
+
 export declare const ɵdefaultIterableDiffers: IterableDiffers;
 
 export declare const ɵdefaultKeyValueDiffers: KeyValueDiffers;
@@ -10096,6 +10133,15 @@ export declare const ɵEMPTY_MAP: {
 };
 
 /**
+ * Finds the locale data for a given locale.
+ *
+ * @param locale The locale code.
+ * @returns The locale data.
+ * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n)
+ */
+export declare function ɵfindLocaleData(locale: string): any;
+
+/**
  * Loops over queued module definitions, if a given module definition has all of its
  * declarations resolved, it dequeues that module definition and sets the scope on
  * its declarations.
@@ -10159,6 +10205,17 @@ export declare function ɵgetInjectableDef<T>(type: any): ɵɵInjectableDef<T> |
  * @param target Component, Directive or DOM Node.
  */
 export declare function ɵgetLContext(target: any): ɵLContext | null;
+
+
+/**
+ * Retrieves the plural function used by ICU expressions to determine the plural case to use
+ * for a given locale.
+ * @param locale A locale code for the locale format rules to use.
+ * @returns The plural function for the locale.
+ * @see `NgPlural`
+ * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n)
+ */
+export declare function ɵgetLocalePluralCase(locale: string): (value: number) => number;
 
 export declare function ɵgetModuleFactory__POST_R3__(id: string): NgModuleFactory<any>;
 
@@ -10273,6 +10330,39 @@ export declare interface ɵLContext {
  * ```
  */
 export declare function ɵLifecycleHooksFeature(component: any, def: ɵComponentDef<any>): void;
+
+/**
+ * This const is used to store the locale data registered with `registerLocaleData`
+ */
+export declare const ɵLOCALE_DATA: {
+    [localeId: string]: any;
+};
+
+/**
+ * Index of each type of locale data from the locale data array
+ */
+export declare enum ɵLocaleDataIndex {
+    LocaleId = 0,
+    DayPeriodsFormat = 1,
+    DayPeriodsStandalone = 2,
+    DaysFormat = 3,
+    DaysStandalone = 4,
+    MonthsFormat = 5,
+    MonthsStandalone = 6,
+    Eras = 7,
+    FirstDayOfWeek = 8,
+    WeekendRange = 9,
+    DateFormat = 10,
+    TimeFormat = 11,
+    DateTimeFormat = 12,
+    NumberSymbols = 13,
+    NumberFormats = 14,
+    CurrencySymbol = 15,
+    CurrencyName = 16,
+    Currencies = 17,
+    PluralCase = 18,
+    ExtraData = 19
+}
 
 
 export declare function ɵlooseIdentical(a: any, b: any): boolean;
@@ -10662,7 +10752,7 @@ export declare class ɵReflectionCapabilities implements PlatformReflectionCapab
  */
 export declare function ɵregisterModuleFactory(id: string, factory: NgModuleFactory<any>): void;
 
-export declare function ɵregisterNgModuleType(id: string, ngModuleType: ɵNgModuleType): void;
+export declare function ɵregisterNgModuleType(ngModuleType: ɵNgModuleType): void;
 
 /**
  * Render3 implementation of {@link viewEngine_ComponentFactory}.
@@ -10821,6 +10911,15 @@ export declare function ɵsetClassMetadata(type: Type<any>, decorators: any[] | 
 } | null): void;
 
 export declare function ɵsetCurrentInjector(injector: Injector | null | undefined): Injector | undefined | null;
+
+/**
+ * Sets the locale id that will be used for translations and ICU expressions.
+ * This is the ivy version of `LOCALE_ID` that was defined as an injection token for the view engine
+ * but is now defined as a global value.
+ *
+ * @param localeId
+ */
+export declare function ɵsetLocaleId(localeId: string): void;
 
 
 export declare type ɵSetterFn = (obj: any, value: any) => void;
@@ -12032,7 +12131,7 @@ export declare function ɵɵelement(index: number, name: string, attrs?: TAttrib
 /**
  * Updates the value or removes an attribute on an Element.
  *
- * @param number index The index of the element in the data array
+ * @param index The index of the element in the data array
  * @param name name The name of the attribute.
  * @param value value The attribute is removed when value is `null` or `undefined`.
  *                  Otherwise the attribute value is set to the stringified value.
@@ -12283,7 +12382,7 @@ export declare function ɵɵi18nExp<T>(expression: T | ɵNO_CHANGE): void;
  * running outside of Closure Compiler. This method will not be needed once runtime translation
  * service support is introduced.
  *
- * @publicApi
+ * @codeGenApi
  * @deprecated this method is temporary & should not be used as it will be removed soon
  */
 export declare function ɵɵi18nLocalize(input: string, placeholders?: {
@@ -12723,12 +12822,14 @@ export declare function ɵɵprojection(nodeIndex: number, selectorIndex?: number
  * - we can't have only a parsed as we can't re-construct textual form from it (as entered by a
  * template author).
  *
- * @param selectors A collection of parsed CSS selectors
- * @param rawSelectors A collection of CSS selectors in the raw, un-parsed form
+ * @param projectionSlots? A collection of projection slots. A projection slot can be based
+ *        on a parsed CSS selectors or set to the wildcard selector ("*") in order to match
+ *        all nodes which do not match any selector. If not specified, a single wildcard
+ *        selector projection slot will be defined.
  *
  * @codeGenApi
  */
-export declare function ɵɵprojectionDef(selectors?: ɵCssSelectorList[]): void;
+export declare function ɵɵprojectionDef(projectionSlots?: ProjectionSlots): void;
 
 /**
  * Update a property on a selected element.
