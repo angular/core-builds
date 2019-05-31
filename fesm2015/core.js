@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-beta.0+8.sha-6d861f2.with-local-changes
+ * @license Angular v8.1.0-beta.0+10.sha-aca339e.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13763,31 +13763,6 @@ function getProjectAsAttrValue(tNode) {
     return null;
 }
 /**
- * Checks a given node against matching projection selectors and returns
- * selector index (or 0 if none matched).
- *
- * This function takes into account the parsed ngProjectAs selector from the node's attributes.
- * If present, it will check whether the ngProjectAs selector matches any of the projection
- * selectors.
- * @param {?} tNode
- * @param {?} selectors
- * @return {?}
- */
-function matchingProjectionSelectorIndex(tNode, selectors) {
-    /** @type {?} */
-    const ngProjectAsAttrVal = getProjectAsAttrValue(tNode);
-    for (let i = 0; i < selectors.length; i++) {
-        // If we ran into an `ngProjectAs` attribute, we should match its parsed selector
-        // to the list of selectors, otherwise we fall back to matching against the node.
-        if (ngProjectAsAttrVal === null ?
-            isNodeMatchingSelectorList(tNode, selectors[i], /* isProjectionMode */ true) :
-            isSelectorInSelectorList(ngProjectAsAttrVal, selectors[i])) {
-            return i + 1; // first matching selector "captures" a given node
-        }
-    }
-    return 0;
-}
-/**
  * @param {?} nodeAttrs
  * @return {?}
  */
@@ -19898,6 +19873,41 @@ function ɵɵnextContext(level = 1) {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
+ * Checks a given node against matching projection slots and returns the
+ * determined slot index. Returns "null" if no slot matched the given node.
+ *
+ * This function takes into account the parsed ngProjectAs selector from the
+ * node's attributes. If present, it will check whether the ngProjectAs selector
+ * matches any of the projection slot selectors.
+ * @param {?} tNode
+ * @param {?} projectionSlots
+ * @return {?}
+ */
+function matchingProjectionSlotIndex(tNode, projectionSlots) {
+    /** @type {?} */
+    let wildcardNgContentIndex = null;
+    /** @type {?} */
+    const ngProjectAsAttrVal = getProjectAsAttrValue(tNode);
+    for (let i = 0; i < projectionSlots.length; i++) {
+        /** @type {?} */
+        const slotValue = projectionSlots[i];
+        // The last wildcard projection slot should match all nodes which aren't matching
+        // any selector. This is necessary to be backwards compatible with view engine.
+        if (slotValue === '*') {
+            wildcardNgContentIndex = i;
+            continue;
+        }
+        // If we ran into an `ngProjectAs` attribute, we should match its parsed selector
+        // to the list of selectors, otherwise we fall back to matching against the node.
+        if (ngProjectAsAttrVal === null ?
+            isNodeMatchingSelectorList(tNode, slotValue, /* isProjectionMode */ true) :
+            isSelectorInSelectorList(ngProjectAsAttrVal, slotValue)) {
+            return i; // first matching selector "captures" a given node
+        }
+    }
+    return wildcardNgContentIndex;
+}
+/**
  * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
  * It takes all the selectors from the entire component's template and decides where
  * each projected node belongs (it re-distributes nodes among "buckets" where each "bucket" is
@@ -19916,32 +19926,36 @@ function ɵɵnextContext(level = 1) {
  * template author).
  *
  * \@codeGenApi
- * @param {?=} selectors A collection of parsed CSS selectors
+ * @param {?=} projectionSlots
  * @return {?}
  */
-function ɵɵprojectionDef(selectors) {
+function ɵɵprojectionDef(projectionSlots) {
     /** @type {?} */
     const componentNode = (/** @type {?} */ (findComponentView(getLView())[T_HOST]));
     if (!componentNode.projection) {
+        // If no explicit projection slots are defined, fall back to a single
+        // projection slot with the wildcard selector.
         /** @type {?} */
-        const noOfNodeBuckets = selectors ? selectors.length + 1 : 1;
+        const numProjectionSlots = projectionSlots ? projectionSlots.length : 1;
         /** @type {?} */
         const projectionHeads = componentNode.projection =
-            new Array(noOfNodeBuckets).fill(null);
+            new Array(numProjectionSlots).fill(null);
         /** @type {?} */
         const tails = projectionHeads.slice();
         /** @type {?} */
         let componentChild = componentNode.child;
         while (componentChild !== null) {
             /** @type {?} */
-            const bucketIndex = selectors ? matchingProjectionSelectorIndex(componentChild, selectors) : 0;
-            if (tails[bucketIndex]) {
-                (/** @type {?} */ (tails[bucketIndex])).projectionNext = componentChild;
+            const slotIndex = projectionSlots ? matchingProjectionSlotIndex(componentChild, projectionSlots) : 0;
+            if (slotIndex !== null) {
+                if (tails[slotIndex]) {
+                    (/** @type {?} */ (tails[slotIndex])).projectionNext = componentChild;
+                }
+                else {
+                    projectionHeads[slotIndex] = componentChild;
+                }
+                tails[slotIndex] = componentChild;
             }
-            else {
-                projectionHeads[bucketIndex] = componentChild;
-            }
-            tails[bucketIndex] = componentChild;
             componentChild = componentChild.next;
         }
     }
@@ -23344,7 +23358,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.1.0-beta.0+8.sha-6d861f2.with-local-changes');
+const VERSION = new Version('8.1.0-beta.0+10.sha-aca339e.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -27853,10 +27867,8 @@ class ComponentFactory$1 extends ComponentFactory {
         this.ngModule = ngModule;
         this.componentType = componentDef.type;
         this.selector = (/** @type {?} */ (componentDef.selectors[0][0]));
-        // The component definition does not include the wildcard ('*') selector in its list.
-        // It is implicitly expected as the first item in the projectable nodes array.
         this.ngContentSelectors =
-            componentDef.ngContentSelectors ? ['*', ...componentDef.ngContentSelectors] : [];
+            componentDef.ngContentSelectors ? componentDef.ngContentSelectors : [];
         this.isBoundToModule = !!ngModule;
     }
     /**

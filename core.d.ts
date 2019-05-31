@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-beta.0+8.sha-6d861f2.with-local-changes
+ * @license Angular v8.1.0-beta.0+10.sha-aca339e.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5176,6 +5176,16 @@ declare interface ProceduralRenderer3 {
  * overrides).
  */
 declare type ProcessProvidersFunction = (providers: Provider[]) => Provider[];
+
+/**
+ * List of slots for a projection. A slot can be either based on a parsed CSS selector
+ * which will be used to determine nodes which are projected into that slot.
+ *
+ * When set to "*", the slot is reserved and can be used for multi-slot projection
+ * using {@link ViewContainerRef#createComponent}. The last slot that specifies the
+ * wildcard selector will retrieve all projectable nodes which do not match any selector.
+ */
+declare type ProjectionSlots = (ɵCssSelectorList | '*')[];
 
 /**
  * This mapping is necessary so we can set input properties and output listeners
@@ -12812,12 +12822,14 @@ export declare function ɵɵprojection(nodeIndex: number, selectorIndex?: number
  * - we can't have only a parsed as we can't re-construct textual form from it (as entered by a
  * template author).
  *
- * @param selectors A collection of parsed CSS selectors
- * @param rawSelectors A collection of CSS selectors in the raw, un-parsed form
+ * @param projectionSlots? A collection of projection slots. A projection slot can be based
+ *        on a parsed CSS selectors or set to the wildcard selector ("*") in order to match
+ *        all nodes which do not match any selector. If not specified, a single wildcard
+ *        selector projection slot will be defined.
  *
  * @codeGenApi
  */
-export declare function ɵɵprojectionDef(selectors?: ɵCssSelectorList[]): void;
+export declare function ɵɵprojectionDef(projectionSlots?: ProjectionSlots): void;
 
 /**
  * Update a property on a selected element.
