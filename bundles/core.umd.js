@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-beta.0+1.sha-09c57ec.with-local-changes
+ * @license Angular v8.1.0-beta.0+4.sha-99c9bca.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18397,7 +18397,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.1.0-beta.0+1.sha-09c57ec.with-local-changes');
+    var VERSION = new Version('8.1.0-beta.0+4.sha-99c9bca.with-local-changes');
 
     /**
      * @license
@@ -27768,11 +27768,15 @@
     }
     // Need to keep the nodes in a global Map so that multiple angular apps are supported.
     var _nativeNodeToDebugNode = new Map();
+    var NG_DEBUG_PROPERTY = '__ng_debug__';
     function getDebugNode__POST_R3__(nativeNode) {
         if (nativeNode instanceof Node) {
-            return nativeNode.nodeType == Node.ELEMENT_NODE ?
-                new DebugElement__POST_R3__(nativeNode) :
-                new DebugNode__POST_R3__(nativeNode);
+            if (!(nativeNode.hasOwnProperty(NG_DEBUG_PROPERTY))) {
+                nativeNode[NG_DEBUG_PROPERTY] = nativeNode.nodeType == Node.ELEMENT_NODE ?
+                    new DebugElement__POST_R3__(nativeNode) :
+                    new DebugNode__POST_R3__(nativeNode);
+            }
+            return nativeNode[NG_DEBUG_PROPERTY];
         }
         return null;
     }
@@ -27789,11 +27793,11 @@
     /**
      * @publicApi
      */
-    var DebugNode = DebugNode__PRE_R3__;
+    var DebugNode = DebugNode__POST_R3__;
     /**
      * @publicApi
      */
-    var DebugElement = DebugElement__PRE_R3__;
+    var DebugElement = DebugElement__POST_R3__;
 
     /**
      * @license

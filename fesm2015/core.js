@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-beta.0+1.sha-09c57ec.with-local-changes
+ * @license Angular v8.1.0-beta.0+4.sha-99c9bca.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -22889,7 +22889,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.1.0-beta.0+1.sha-09c57ec.with-local-changes');
+const VERSION = new Version('8.1.0-beta.0+4.sha-99c9bca.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -35549,15 +35549,20 @@ function collectClassNames(debugElement) {
 // Need to keep the nodes in a global Map so that multiple angular apps are supported.
 /** @type {?} */
 const _nativeNodeToDebugNode = new Map();
+/** @type {?} */
+const NG_DEBUG_PROPERTY = '__ng_debug__';
 /**
  * @param {?} nativeNode
  * @return {?}
  */
 function getDebugNode__POST_R3__(nativeNode) {
     if (nativeNode instanceof Node) {
-        return nativeNode.nodeType == Node.ELEMENT_NODE ?
-            new DebugElement__POST_R3__((/** @type {?} */ (nativeNode))) :
-            new DebugNode__POST_R3__(nativeNode);
+        if (!(nativeNode.hasOwnProperty(NG_DEBUG_PROPERTY))) {
+            ((/** @type {?} */ (nativeNode)))[NG_DEBUG_PROPERTY] = nativeNode.nodeType == Node.ELEMENT_NODE ?
+                new DebugElement__POST_R3__((/** @type {?} */ (nativeNode))) :
+                new DebugNode__POST_R3__(nativeNode);
+        }
+        return ((/** @type {?} */ (nativeNode)))[NG_DEBUG_PROPERTY];
     }
     return null;
 }
@@ -35584,12 +35589,12 @@ function removeDebugNodeFromIndex(node) {
  * \@publicApi
  * @type {?}
  */
-const DebugNode = (/** @type {?} */ (DebugNode__PRE_R3__));
+const DebugNode = DebugNode__POST_R3__;
 /**
  * \@publicApi
  * @type {?}
  */
-const DebugElement = (/** @type {?} */ (DebugElement__PRE_R3__));
+const DebugElement = DebugElement__POST_R3__;
 
 /**
  * @fileoverview added by tsickle
