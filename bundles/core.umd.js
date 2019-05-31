@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-beta.0+7.sha-1f79c82.with-local-changes
+ * @license Angular v8.1.0-beta.0+9.sha-f4cd374.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1508,14 +1508,19 @@
             }
         };
         /**
-         * Add an `InjectorType` or `InjectorDefTypeWithProviders` and all of its transitive providers
+         * Add an `InjectorType` or `InjectorTypeWithProviders` and all of its transitive providers
          * to this injector.
+         *
+         * If an `InjectorTypeWithProviders` that declares providers besides the type is specified,
+         * the function will return "true" to indicate that the providers of the type definition need
+         * to be processed. This allows us to process providers of injector types after all imports of
+         * an injector definition are processed. (following View Engine semantics: see FW-1349)
          */
         R3Injector.prototype.processInjectorType = function (defOrWrappedDef, parents, dedupStack) {
             var _this = this;
             defOrWrappedDef = resolveForwardRef(defOrWrappedDef);
             if (!defOrWrappedDef)
-                return;
+                return false;
             // Either the defOrWrappedDef is an InjectorType (with ngInjectorDef) or an
             // InjectorDefTypeWithProviders (aka ModuleWithProviders). Detecting either is a megamorphic
             // read, so care is taken to only do the read once.
@@ -1535,10 +1540,6 @@
             }
             // Check for multiple imports of the same module
             var isDuplicate = dedupStack.indexOf(defType) !== -1;
-            // If defOrWrappedType was an InjectorDefTypeWithProviders, then .providers may hold some
-            // extra providers.
-            var providers = (ngModule !== undefined) && defOrWrappedDef.providers ||
-                EMPTY_ARRAY;
             // Finally, if defOrWrappedType was an `InjectorDefTypeWithProviders`, then the actual
             // `InjectorDef` is on its `ngModule`.
             if (ngModule !== undefined) {
@@ -1546,7 +1547,7 @@
             }
             // If no definition was found, it might be from exports. Remove it.
             if (def == null) {
-                return;
+                return false;
             }
             // Track the InjectorType and add a provider for it.
             this.injectorDefTypes.add(defType);
@@ -1560,13 +1561,34 @@
                 parents.push(defType);
                 // Add it to the set of dedups. This way we can detect multiple imports of the same module
                 dedupStack.push(defType);
+                var importTypesWithProviders_1;
                 try {
-                    deepForEach(def.imports, function (imported) { return _this.processInjectorType(imported, parents, dedupStack); });
+                    deepForEach(def.imports, function (imported) {
+                        if (_this.processInjectorType(imported, parents, dedupStack)) {
+                            if (importTypesWithProviders_1 === undefined)
+                                importTypesWithProviders_1 = [];
+                            // If the processed import is an injector type with providers, we store it in the
+                            // list of import types with providers, so that we can process those afterwards.
+                            importTypesWithProviders_1.push(imported);
+                        }
+                    });
                 }
                 finally {
                     // Remove it from the parents set when finished.
                     // TODO(FW-1307): Re-add ngDevMode when closure can handle it
                     parents.pop();
+                }
+                // Imports which are declared with providers (TypeWithProviders) need to be processed
+                // after all imported modules are processed. This is similar to how View Engine
+                // processes/merges module imports in the metadata resolver. See: FW-1349.
+                if (importTypesWithProviders_1 !== undefined) {
+                    var _loop_1 = function (i) {
+                        var _a = importTypesWithProviders_1[i], ngModule_1 = _a.ngModule, providers = _a.providers;
+                        deepForEach(providers, function (provider) { return _this.processProvider(provider, ngModule_1, providers || EMPTY_ARRAY); });
+                    };
+                    for (var i = 0; i < importTypesWithProviders_1.length; i++) {
+                        _loop_1(i);
+                    }
                 }
             }
             // Next, include providers listed on the definition itself.
@@ -1575,9 +1597,8 @@
                 var injectorType_1 = defOrWrappedDef;
                 deepForEach(defProviders, function (provider) { return _this.processProvider(provider, injectorType_1, defProviders); });
             }
-            // Finally, include providers from an InjectorDefTypeWithProviders if there was one.
-            var ngModuleType = defOrWrappedDef.ngModule;
-            deepForEach(providers, function (provider) { return _this.processProvider(provider, ngModuleType, providers); });
+            return (ngModule !== undefined &&
+                defOrWrappedDef.providers !== undefined);
         };
         /**
          * Process a `SingleProvider` and add it.
@@ -18397,7 +18418,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.1.0-beta.0+7.sha-1f79c82.with-local-changes');
+    var VERSION = new Version('8.1.0-beta.0+9.sha-f4cd374.with-local-changes');
 
     /**
      * @license
