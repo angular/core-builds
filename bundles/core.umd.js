@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-beta.0+25.sha-07cd65b.with-local-changes
+ * @license Angular v8.1.0-beta.0+26.sha-8154433.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13700,7 +13700,7 @@
         var currentQueries = lView[QUERIES];
         if (currentQueries) {
             currentQueries.addNode(tNode);
-            lView[QUERIES] = currentQueries.clone();
+            lView[QUERIES] = currentQueries.clone(tNode);
         }
         executeContentQueries(tView, tNode, lView);
     }
@@ -13726,7 +13726,8 @@
         ngDevMode && assertNodeType(previousOrParentTNode, 3 /* Element */);
         var lView = getLView();
         var currentQueries = lView[QUERIES];
-        if (currentQueries) {
+        // Go back up to parent queries only if queries have been cloned on this element.
+        if (currentQueries && previousOrParentTNode.index === currentQueries.nodeIndex) {
             lView[QUERIES] = currentQueries.parent;
         }
         registerPostOrderHooks(getLView()[TVIEW], previousOrParentTNode);
@@ -15075,7 +15076,7 @@
         var currentQueries = lView[QUERIES];
         if (currentQueries) {
             currentQueries.addNode(tNode);
-            lView[QUERIES] = currentQueries.clone();
+            lView[QUERIES] = currentQueries.clone(tNode);
         }
         executeContentQueries(tView, tNode, lView);
     }
@@ -15098,7 +15099,8 @@
         }
         ngDevMode && assertNodeType(previousOrParentTNode, 4 /* ElementContainer */);
         var currentQueries = lView[QUERIES];
-        if (currentQueries) {
+        // Go back up to parent queries only if queries have been cloned on this element.
+        if (currentQueries && previousOrParentTNode.index === currentQueries.nodeIndex) {
             lView[QUERIES] = currentQueries.parent;
         }
         // this is required for all host-level styling-related instructions to run
@@ -18436,7 +18438,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.1.0-beta.0+25.sha-07cd65b.with-local-changes');
+    var VERSION = new Version('8.1.0-beta.0+26.sha-8154433.with-local-changes');
 
     /**
      * @license
@@ -23990,10 +23992,12 @@
         return LQuery;
     }());
     var LQueries_ = /** @class */ (function () {
-        function LQueries_(parent, shallow, deep) {
+        function LQueries_(parent, shallow, deep, nodeIndex) {
+            if (nodeIndex === void 0) { nodeIndex = -1; }
             this.parent = parent;
             this.shallow = shallow;
             this.deep = deep;
+            this.nodeIndex = nodeIndex;
         }
         LQueries_.prototype.track = function (queryList, predicate, descend, read) {
             if (descend) {
@@ -24003,7 +24007,11 @@
                 this.shallow = createLQuery(this.shallow, queryList, predicate, read != null ? read : null);
             }
         };
-        LQueries_.prototype.clone = function () { return new LQueries_(this, null, this.deep); };
+        LQueries_.prototype.clone = function (tNode) {
+            return this.shallow !== null || isContentQueryHost(tNode) ?
+                new LQueries_(this, null, this.deep, tNode.index) :
+                this;
+        };
         LQueries_.prototype.container = function () {
             var shallowResults = copyQueriesToContainer(this.shallow);
             var deepResults = copyQueriesToContainer(this.deep);
@@ -24210,10 +24218,10 @@
      */
     function createQueryListInLView(
     // TODO: "read" should be an AbstractType (FW-486)
-    lView, predicate, descend, read, isStatic) {
+    lView, predicate, descend, read, isStatic, nodeIndex) {
         ngDevMode && assertPreviousIsParent(getIsParent());
         var queryList = new QueryList();
-        var queries = lView[QUERIES] || (lView[QUERIES] = new LQueries_(null, null, null));
+        var queries = lView[QUERIES] || (lView[QUERIES] = new LQueries_(null, null, null, nodeIndex));
         queryList._valuesTree = [];
         queryList._static = isStatic;
         queries.track(queryList, predicate, descend, read);
@@ -24279,7 +24287,7 @@
             tView.expandoStartIndex++;
         }
         var index = getCurrentQueryIndex();
-        var queryList = createQueryListInLView(lView, predicate, descend, read, isStatic);
+        var queryList = createQueryListInLView(lView, predicate, descend, read, isStatic, -1);
         store(index - HEADER_OFFSET, queryList);
         setCurrentQueryIndex(index + 1);
         return queryList;
@@ -24311,12 +24319,13 @@
     read) {
         var lView = getLView();
         var tView = lView[TVIEW];
-        return contentQueryInternal(lView, tView, directiveIndex, predicate, descend, read, false);
+        var tNode = getPreviousOrParentTNode();
+        return contentQueryInternal(lView, tView, directiveIndex, predicate, descend, read, false, tNode.index);
     }
     function contentQueryInternal(lView, tView, directiveIndex, predicate, descend, 
     // TODO(FW-486): "read" should be an AbstractType
-    read, isStatic) {
-        var contentQuery = createQueryListInLView(lView, predicate, descend, read, isStatic);
+    read, isStatic, nodeIndex) {
+        var contentQuery = createQueryListInLView(lView, predicate, descend, read, isStatic, nodeIndex);
         (lView[CONTENT_QUERIES] || (lView[CONTENT_QUERIES] = [])).push(contentQuery);
         if (tView.firstTemplatePass) {
             var tViewContentQueries = tView.contentQueries || (tView.contentQueries = []);
@@ -24344,7 +24353,8 @@
     read) {
         var lView = getLView();
         var tView = lView[TVIEW];
-        contentQueryInternal(lView, tView, directiveIndex, predicate, descend, read, true);
+        var tNode = getPreviousOrParentTNode();
+        contentQueryInternal(lView, tView, directiveIndex, predicate, descend, read, true, tNode.index);
         tView.staticContentQueries = true;
     }
     /**

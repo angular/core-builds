@@ -7,7 +7,7 @@
  */
 import { Type } from '../interface/type';
 import { QueryList } from '../linker/query_list';
-import { TContainerNode, TElementContainerNode, TElementNode } from './interfaces/node';
+import { TContainerNode, TElementContainerNode, TElementNode, TNode } from './interfaces/node';
 import { LQueries } from './interfaces/query';
 /**
  * A predicate which determines if a given element/directive should be included in the query
@@ -86,9 +86,10 @@ export declare class LQueries_ implements LQueries {
     parent: LQueries_ | null;
     private shallow;
     private deep;
-    constructor(parent: LQueries_ | null, shallow: LQuery<any> | null, deep: LQuery<any> | null);
+    nodeIndex: number;
+    constructor(parent: LQueries_ | null, shallow: LQuery<any> | null, deep: LQuery<any> | null, nodeIndex?: number);
     track<T>(queryList: QueryList<T>, predicate: Type<T> | string[], descend?: boolean, read?: Type<T>): void;
-    clone(): LQueries;
+    clone(tNode: TNode): LQueries;
     container(): LQueries | null;
     createView(): LQueries | null;
     insertView(index: number): void;
