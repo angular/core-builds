@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0+26.sha-393529d.with-local-changes
+ * @license Angular v8.0.0+28.sha-5a15126.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10999,7 +10999,7 @@ function getInitialStyleStringValue(context) {
     return styleString;
 }
 /**
- * Returns the current cached mutli-value for a given directiveIndex within the provided context.
+ * Returns the current cached multi-value for a given directiveIndex within the provided context.
  * @param {?} context
  * @param {?} entryIsClassBased
  * @param {?} directiveIndex
@@ -20510,7 +20510,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.0.0+26.sha-393529d.with-local-changes');
+const VERSION = new Version('8.0.0+28.sha-5a15126.with-local-changes');
 
 /**
  * @fileoverview added by tsickle

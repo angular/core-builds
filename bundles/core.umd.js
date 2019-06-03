@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0+26.sha-393529d.with-local-changes
+ * @license Angular v8.0.0+28.sha-5a15126.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8943,7 +8943,7 @@
         return styleString;
     }
     /**
-     * Returns the current cached mutli-value for a given directiveIndex within the provided context.
+     * Returns the current cached multi-value for a given directiveIndex within the provided context.
      */
     function readCachedMapValue(context, entryIsClassBased, directiveIndex) {
         var values = context[entryIsClassBased ? 6 /* CachedMultiClasses */ : 7 /* CachedMultiStyles */];
@@ -16628,7 +16628,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.0.0+26.sha-393529d.with-local-changes');
+    var VERSION = new Version('8.0.0+28.sha-5a15126.with-local-changes');
 
     /**
      * @license
