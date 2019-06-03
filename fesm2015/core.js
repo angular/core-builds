@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-beta.0+18.sha-dd8cf19.with-local-changes
+ * @license Angular v8.1.0-beta.0+20.sha-680d385.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1444,6 +1444,64 @@ const SWITCH_COMPILE_INJECTABLE__PRE_R3__ = render2CompileInjectable;
 const SWITCH_COMPILE_INJECTABLE = SWITCH_COMPILE_INJECTABLE__PRE_R3__;
 
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function ngDevModeResetPerfCounters() {
+    const newCounters = {
+        firstTemplatePass: 0,
+        tNode: 0,
+        tView: 0,
+        rendererCreateTextNode: 0,
+        rendererSetText: 0,
+        rendererCreateElement: 0,
+        rendererAddEventListener: 0,
+        rendererSetAttribute: 0,
+        rendererRemoveAttribute: 0,
+        rendererSetProperty: 0,
+        rendererSetClassName: 0,
+        rendererAddClass: 0,
+        rendererRemoveClass: 0,
+        rendererSetStyle: 0,
+        rendererRemoveStyle: 0,
+        rendererDestroy: 0,
+        rendererDestroyNode: 0,
+        rendererMoveNode: 0,
+        rendererRemoveNode: 0,
+        rendererAppendChild: 0,
+        rendererInsertBefore: 0,
+        rendererCreateComment: 0,
+        styleMap: 0,
+        styleMapCacheMiss: 0,
+        classMap: 0,
+        classMapCacheMiss: 0,
+        stylingProp: 0,
+        stylingPropCacheMiss: 0,
+        stylingApply: 0,
+        stylingApplyCacheMiss: 0,
+    };
+    // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
+    _global['ngDevMode'] = newCounters;
+    return newCounters;
+}
+/**
+ * This checks to see if the `ngDevMode` has been set. If yes,
+ * then we honor it, otherwise we default to dev mode with additional checks.
+ *
+ * The idea is that unless we are doing production build where we explicitly
+ * set `ngDevMode == false` we should be helping the developer by providing
+ * as much early warning and errors as possible.
+ *
+ * NOTE: changes to the `ngDevMode` name must be synced with `compiler-cli/src/tooling.ts`.
+ */
+if (typeof ngDevMode === 'undefined' || ngDevMode) {
+    ngDevModeResetPerfCounters();
+}
+
+/**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
@@ -1772,8 +1830,7 @@ class R3Injector {
         /** @type {?} */
         const defType = (ngModule === undefined) ? ((/** @type {?} */ (defOrWrappedDef))) : ngModule;
         // Check for circular dependencies.
-        // TODO(FW-1307): Re-add ngDevMode when closure can handle it
-        if (parents.indexOf(defType) !== -1) {
+        if (ngDevMode && parents.indexOf(defType) !== -1) {
             /** @type {?} */
             const defName = stringify(defType);
             throw new Error(`Circular dependency in DI detected for type ${defName}. Dependency path: ${parents.map((/**
@@ -1802,8 +1859,7 @@ class R3Injector {
         if (def.imports != null && !isDuplicate) {
             // Before processing defType's imports, add it to the set of parents. This way, if it ends
             // up deeply importing itself, this can be detected.
-            // TODO(FW-1307): Re-add ngDevMode when closure can handle it
-            parents.push(defType);
+            ngDevMode && parents.push(defType);
             // Add it to the set of dedups. This way we can detect multiple imports of the same module
             dedupStack.push(defType);
             /** @type {?} */
@@ -1825,8 +1881,7 @@ class R3Injector {
             }
             finally {
                 // Remove it from the parents set when finished.
-                // TODO(FW-1307): Re-add ngDevMode when closure can handle it
-                parents.pop();
+                ngDevMode && parents.pop();
             }
             // Imports which are declared with providers (TypeWithProviders) need to be processed
             // after all imported modules are processed. This is similar to how View Engine
@@ -4111,64 +4166,6 @@ ViewEncapsulation[ViewEncapsulation.Emulated] = 'Emulated';
 ViewEncapsulation[ViewEncapsulation.Native] = 'Native';
 ViewEncapsulation[ViewEncapsulation.None] = 'None';
 ViewEncapsulation[ViewEncapsulation.ShadowDom] = 'ShadowDom';
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-function ngDevModeResetPerfCounters() {
-    const newCounters = {
-        firstTemplatePass: 0,
-        tNode: 0,
-        tView: 0,
-        rendererCreateTextNode: 0,
-        rendererSetText: 0,
-        rendererCreateElement: 0,
-        rendererAddEventListener: 0,
-        rendererSetAttribute: 0,
-        rendererRemoveAttribute: 0,
-        rendererSetProperty: 0,
-        rendererSetClassName: 0,
-        rendererAddClass: 0,
-        rendererRemoveClass: 0,
-        rendererSetStyle: 0,
-        rendererRemoveStyle: 0,
-        rendererDestroy: 0,
-        rendererDestroyNode: 0,
-        rendererMoveNode: 0,
-        rendererRemoveNode: 0,
-        rendererAppendChild: 0,
-        rendererInsertBefore: 0,
-        rendererCreateComment: 0,
-        styleMap: 0,
-        styleMapCacheMiss: 0,
-        classMap: 0,
-        classMapCacheMiss: 0,
-        stylingProp: 0,
-        stylingPropCacheMiss: 0,
-        stylingApply: 0,
-        stylingApplyCacheMiss: 0,
-    };
-    // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
-    _global['ngDevMode'] = newCounters;
-    return newCounters;
-}
-/**
- * This checks to see if the `ngDevMode` has been set. If yes,
- * then we honor it, otherwise we default to dev mode with additional checks.
- *
- * The idea is that unless we are doing production build where we explicitly
- * set `ngDevMode == false` we should be helping the developer by providing
- * as much early warning and errors as possible.
- *
- * NOTE: changes to the `ngDevMode` name must be synced with `compiler-cli/src/tooling.ts`.
- */
-if (typeof ngDevMode === 'undefined' || ngDevMode) {
-    ngDevModeResetPerfCounters();
-}
 
 /**
  * @license
@@ -16448,10 +16445,12 @@ function getRenderParent(tNode, currentView) {
     // Skip over element and ICU containers as those are represented by a comment node and
     // can't be used as a render parent.
     /** @type {?} */
-    const parent = getHighestElementOrICUContainer(tNode).parent;
+    const parent = getHighestElementOrICUContainer(tNode);
+    /** @type {?} */
+    const renderParent = parent.parent;
     // If the parent is null, then we are inserting across views: either into an embedded view or a
     // component view.
-    if (parent == null) {
+    if (renderParent == null) {
         /** @type {?} */
         const hostTNode = (/** @type {?} */ (currentView[T_HOST]));
         if (hostTNode.type === 2 /* View */) {
@@ -16471,12 +16470,19 @@ function getRenderParent(tNode, currentView) {
         }
     }
     else {
-        ngDevMode && assertNodeType(parent, 3 /* Element */);
-        if (parent.flags & 1 /* isComponent */) {
+        /** @type {?} */
+        const isIcuCase = parent && parent.type === 5 /* IcuContainer */;
+        // If the parent of this node is an ICU container, then it is represented by comment node and we
+        // need to use it as an anchor. If it is projected then its direct parent node is the renderer.
+        if (isIcuCase && parent.flags & 2 /* isProjected */) {
+            return (/** @type {?} */ (getNativeByTNode(parent, currentView).parentNode));
+        }
+        ngDevMode && assertNodeType(renderParent, 3 /* Element */);
+        if (renderParent.flags & 1 /* isComponent */ && !isIcuCase) {
             /** @type {?} */
             const tData = currentView[TVIEW].data;
             /** @type {?} */
-            const tNode = (/** @type {?} */ (tData[parent.index]));
+            const tNode = (/** @type {?} */ (tData[renderParent.index]));
             /** @type {?} */
             const encapsulation = ((/** @type {?} */ (tData[tNode.directiveStart]))).encapsulation;
             // We've got a parent which is an element in the current view. We just need to verify if the
@@ -16490,7 +16496,7 @@ function getRenderParent(tNode, currentView) {
                 return null;
             }
         }
-        return (/** @type {?} */ (getNativeByTNode(parent, currentView)));
+        return (/** @type {?} */ (getNativeByTNode(renderParent, currentView)));
     }
 }
 /**
@@ -23358,7 +23364,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.1.0-beta.0+18.sha-dd8cf19.with-local-changes');
+const VERSION = new Version('8.1.0-beta.0+20.sha-680d385.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
