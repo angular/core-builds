@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-beta.0+20.sha-680d385.with-local-changes
+ * @license Angular v8.1.0-beta.0+21.sha-b4e6802.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14485,9 +14485,12 @@
      *
      * @codeGenApi
      */
-    function ɵɵcomponentHostSyntheticProperty(index, propName, value, sanitizer, nativeOnly) {
-        if (value !== NO_CHANGE) {
-            elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadComponentRenderer);
+    function ɵɵupdateSyntheticHostBinding(propName, value, sanitizer, nativeOnly) {
+        var index = getSelectedIndex();
+        // TODO(benlesh): remove bind call here.
+        var bound = ɵɵbind(value);
+        if (bound !== NO_CHANGE) {
+            elementPropertyInternal(index, propName, bound, sanitizer, nativeOnly, loadComponentRenderer);
         }
     }
 
@@ -18767,7 +18770,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.1.0-beta.0+20.sha-680d385.with-local-changes');
+    var VERSION = new Version('8.1.0-beta.0+21.sha-b4e6802.with-local-changes');
 
     /**
      * @license
@@ -24800,7 +24803,7 @@
         'ɵɵload': ɵɵload,
         'ɵɵprojection': ɵɵprojection,
         'ɵɵelementProperty': ɵɵelementProperty,
-        'ɵɵcomponentHostSyntheticProperty': ɵɵcomponentHostSyntheticProperty,
+        'ɵɵupdateSyntheticHostBinding': ɵɵupdateSyntheticHostBinding,
         'ɵɵcomponentHostSyntheticListener': ɵɵcomponentHostSyntheticListener,
         'ɵɵpipeBind1': ɵɵpipeBind1,
         'ɵɵpipeBind2': ɵɵpipeBind2,
@@ -31040,7 +31043,7 @@
     exports.ɵɵpropertyInterpolate7 = ɵɵpropertyInterpolate7;
     exports.ɵɵpropertyInterpolate8 = ɵɵpropertyInterpolate8;
     exports.ɵɵpropertyInterpolateV = ɵɵpropertyInterpolateV;
-    exports.ɵɵcomponentHostSyntheticProperty = ɵɵcomponentHostSyntheticProperty;
+    exports.ɵɵupdateSyntheticHostBinding = ɵɵupdateSyntheticHostBinding;
     exports.ɵɵcomponentHostSyntheticListener = ɵɵcomponentHostSyntheticListener;
     exports.ɵɵprojectionDef = ɵɵprojectionDef;
     exports.ɵɵreference = ɵɵreference;

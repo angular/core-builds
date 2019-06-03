@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-beta.0+20.sha-680d385.with-local-changes
+ * @license Angular v8.1.0-beta.0+21.sha-b4e6802.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11478,31 +11478,6 @@ export declare type ɵɵComponentDefWithMeta<T, Selector extends String, ExportA
 export declare function ɵɵcomponentHostSyntheticListener<T>(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
 
 /**
- * Updates a synthetic host binding (e.g. `[@foo]`) on a component.
- *
- * This instruction is for compatibility purposes and is designed to ensure that a
- * synthetic host binding (e.g. `@HostBinding('@foo')`) properly gets rendered in
- * the component's renderer. Normally all host bindings are evaluated with the parent
- * component's renderer, but, in the case of animation @triggers, they need to be
- * evaluated with the sub component's renderer (because that's where the animation
- * triggers are defined).
- *
- * Do not use this instruction as a replacement for `elementProperty`. This instruction
- * only exists to ensure compatibility with the ViewEngine's host binding behavior.
- *
- * @param index The index of the element to update in the data array
- * @param propName Name of property. Because it is going to DOM, this is not subject to
- *        renaming as part of minification.
- * @param value New value to write.
- * @param sanitizer An optional function used to sanitize the value.
- * @param nativeOnly Whether or not we should only set native properties and skip input check
- * (this is necessary for host property bindings)
- *
- * @codeGenApi
- */
-export declare function ɵɵcomponentHostSyntheticProperty<T>(index: number, propName: string, value: T | ɵNO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): void;
-
-/**
  * Creates an LContainer for inline views, e.g.
  *
  * % if (showing) {
@@ -14036,6 +14011,31 @@ export declare function ɵɵtextInterpolate8(prefix: string, v0: any, i0: string
  * @codeGenApi
  */
 export declare function ɵɵtextInterpolateV(values: any[]): TsickleIssue1009;
+
+/**
+ * Updates a synthetic host binding (e.g. `[@foo]`) on a component.
+ *
+ * This instruction is for compatibility purposes and is designed to ensure that a
+ * synthetic host binding (e.g. `@HostBinding('@foo')`) properly gets rendered in
+ * the component's renderer. Normally all host bindings are evaluated with the parent
+ * component's renderer, but, in the case of animation @triggers, they need to be
+ * evaluated with the sub component's renderer (because that's where the animation
+ * triggers are defined).
+ *
+ * Do not use this instruction as a replacement for `elementProperty`. This instruction
+ * only exists to ensure compatibility with the ViewEngine's host binding behavior.
+ *
+ * @param index The index of the element to update in the data array
+ * @param propName Name of property. Because it is going to DOM, this is not subject to
+ *        renaming as part of minification.
+ * @param value New value to write.
+ * @param sanitizer An optional function used to sanitize the value.
+ * @param nativeOnly Whether or not we should only set native properties and skip input check
+ * (this is necessary for host property bindings)
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵupdateSyntheticHostBinding<T>(propName: string, value: T | ɵNO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): void;
 
 /**
  * Creates new QueryList, stores the reference in LView and returns QueryList.
