@@ -72,4 +72,4 @@ export declare function ɵɵelementProperty<T>(index: number, propName: string, 
  *
  * @codeGenApi
  */
-export declare function ɵɵcomponentHostSyntheticProperty<T>(index: number, propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): void;
+export declare function ɵɵupdateSyntheticHostBinding<T>(propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): void;
