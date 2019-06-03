@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-beta.0+12.sha-f936590.with-local-changes
+ * @license Angular v8.1.0-beta.0+23.sha-fcdd784.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -523,18 +523,15 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    function getGlobal() {
-        var __globalThis = typeof globalThis !== 'undefined' && globalThis;
-        var __window = typeof window !== 'undefined' && window;
-        var __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
-            self instanceof WorkerGlobalScope && self;
-        var __global = typeof global !== 'undefined' && global;
-        // Always use __globalThis if available, which is the spec-defined global variable across all
-        // environments, then fallback to __global first, because in Node tests both __global and
-        // __window may be defined and _global should be __global in that case.
-        return __globalThis || __global || __window || __self;
-    }
-    var _global = getGlobal();
+    var __globalThis = typeof globalThis !== 'undefined' && globalThis;
+    var __window = typeof window !== 'undefined' && window;
+    var __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
+        self instanceof WorkerGlobalScope && self;
+    var __global = typeof global !== 'undefined' && global;
+    // Always use __globalThis if available, which is the spec-defined global variable across all
+    // environments, then fallback to __global first, because in Node tests both __global and
+    // __window may be defined and _global should be __global in that case.
+    var _global = __globalThis || __global || __window || __self;
 
     /**
      * @license
@@ -1375,6 +1372,64 @@
     var SWITCH_COMPILE_INJECTABLE__PRE_R3__ = render2CompileInjectable;
     var SWITCH_COMPILE_INJECTABLE = SWITCH_COMPILE_INJECTABLE__PRE_R3__;
 
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    function ngDevModeResetPerfCounters() {
+        var newCounters = {
+            firstTemplatePass: 0,
+            tNode: 0,
+            tView: 0,
+            rendererCreateTextNode: 0,
+            rendererSetText: 0,
+            rendererCreateElement: 0,
+            rendererAddEventListener: 0,
+            rendererSetAttribute: 0,
+            rendererRemoveAttribute: 0,
+            rendererSetProperty: 0,
+            rendererSetClassName: 0,
+            rendererAddClass: 0,
+            rendererRemoveClass: 0,
+            rendererSetStyle: 0,
+            rendererRemoveStyle: 0,
+            rendererDestroy: 0,
+            rendererDestroyNode: 0,
+            rendererMoveNode: 0,
+            rendererRemoveNode: 0,
+            rendererAppendChild: 0,
+            rendererInsertBefore: 0,
+            rendererCreateComment: 0,
+            styleMap: 0,
+            styleMapCacheMiss: 0,
+            classMap: 0,
+            classMapCacheMiss: 0,
+            stylingProp: 0,
+            stylingPropCacheMiss: 0,
+            stylingApply: 0,
+            stylingApplyCacheMiss: 0,
+        };
+        // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
+        _global['ngDevMode'] = newCounters;
+        return newCounters;
+    }
+    /**
+     * This checks to see if the `ngDevMode` has been set. If yes,
+     * then we honor it, otherwise we default to dev mode with additional checks.
+     *
+     * The idea is that unless we are doing production build where we explicitly
+     * set `ngDevMode == false` we should be helping the developer by providing
+     * as much early warning and errors as possible.
+     *
+     * NOTE: changes to the `ngDevMode` name must be synced with `compiler-cli/src/tooling.ts`.
+     */
+    if (typeof ngDevMode === 'undefined' || ngDevMode) {
+        ngDevModeResetPerfCounters();
+    }
+
     /** Called when directives inject each other (creating a circular dependency) */
     function throwCyclicDependencyError(token) {
         throw new Error("Cannot instantiate cyclic dependency! " + token);
@@ -1614,8 +1669,7 @@
             // is the `ngModule`.
             var defType = (ngModule === undefined) ? defOrWrappedDef : ngModule;
             // Check for circular dependencies.
-            // TODO(FW-1307): Re-add ngDevMode when closure can handle it
-            if (parents.indexOf(defType) !== -1) {
+            if (ngDevMode && parents.indexOf(defType) !== -1) {
                 var defName = stringify(defType);
                 throw new Error("Circular dependency in DI detected for type " + defName + ". Dependency path: " + parents.map(function (defType) { return stringify(defType); }).join(' > ') + " > " + defName + ".");
             }
@@ -1638,8 +1692,7 @@
             if (def.imports != null && !isDuplicate) {
                 // Before processing defType's imports, add it to the set of parents. This way, if it ends
                 // up deeply importing itself, this can be detected.
-                // TODO(FW-1307): Re-add ngDevMode when closure can handle it
-                parents.push(defType);
+                ngDevMode && parents.push(defType);
                 // Add it to the set of dedups. This way we can detect multiple imports of the same module
                 dedupStack.push(defType);
                 var importTypesWithProviders_1;
@@ -1656,8 +1709,7 @@
                 }
                 finally {
                     // Remove it from the parents set when finished.
-                    // TODO(FW-1307): Re-add ngDevMode when closure can handle it
-                    parents.pop();
+                    ngDevMode && parents.pop();
                 }
                 // Imports which are declared with providers (TypeWithProviders) need to be processed
                 // after all imported modules are processed. This is similar to how View Engine
@@ -3366,64 +3418,6 @@
          */
         ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
     })(exports.ViewEncapsulation || (exports.ViewEncapsulation = {}));
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    function ngDevModeResetPerfCounters() {
-        var newCounters = {
-            firstTemplatePass: 0,
-            tNode: 0,
-            tView: 0,
-            rendererCreateTextNode: 0,
-            rendererSetText: 0,
-            rendererCreateElement: 0,
-            rendererAddEventListener: 0,
-            rendererSetAttribute: 0,
-            rendererRemoveAttribute: 0,
-            rendererSetProperty: 0,
-            rendererSetClassName: 0,
-            rendererAddClass: 0,
-            rendererRemoveClass: 0,
-            rendererSetStyle: 0,
-            rendererRemoveStyle: 0,
-            rendererDestroy: 0,
-            rendererDestroyNode: 0,
-            rendererMoveNode: 0,
-            rendererRemoveNode: 0,
-            rendererAppendChild: 0,
-            rendererInsertBefore: 0,
-            rendererCreateComment: 0,
-            styleMap: 0,
-            styleMapCacheMiss: 0,
-            classMap: 0,
-            classMapCacheMiss: 0,
-            stylingProp: 0,
-            stylingPropCacheMiss: 0,
-            stylingApply: 0,
-            stylingApplyCacheMiss: 0,
-        };
-        // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
-        _global['ngDevMode'] = newCounters;
-        return newCounters;
-    }
-    /**
-     * This checks to see if the `ngDevMode` has been set. If yes,
-     * then we honor it, otherwise we default to dev mode with additional checks.
-     *
-     * The idea is that unless we are doing production build where we explicitly
-     * set `ngDevMode == false` we should be helping the developer by providing
-     * as much early warning and errors as possible.
-     *
-     * NOTE: changes to the `ngDevMode` name must be synced with `compiler-cli/src/tooling.ts`.
-     */
-    if (typeof ngDevMode === 'undefined' || ngDevMode) {
-        ngDevModeResetPerfCounters();
-    }
 
     /**
      * @license
@@ -9069,7 +9063,7 @@
         return styleString;
     }
     /**
-     * Returns the current cached mutli-value for a given directiveIndex within the provided context.
+     * Returns the current cached multi-value for a given directiveIndex within the provided context.
      */
     function readCachedMapValue(context, entryIsClassBased, directiveIndex) {
         var values = context[entryIsClassBased ? 6 /* CachedMultiClasses */ : 7 /* CachedMultiStyles */];
@@ -13064,10 +13058,11 @@
         }
         // Skip over element and ICU containers as those are represented by a comment node and
         // can't be used as a render parent.
-        var parent = getHighestElementOrICUContainer(tNode).parent;
+        var parent = getHighestElementOrICUContainer(tNode);
+        var renderParent = parent.parent;
         // If the parent is null, then we are inserting across views: either into an embedded view or a
         // component view.
-        if (parent == null) {
+        if (renderParent == null) {
             var hostTNode = currentView[T_HOST];
             if (hostTNode.type === 2 /* View */) {
                 // We are inserting a root element of an embedded view We might delay insertion of children
@@ -13086,10 +13081,16 @@
             }
         }
         else {
-            ngDevMode && assertNodeType(parent, 3 /* Element */);
-            if (parent.flags & 1 /* isComponent */) {
+            var isIcuCase = parent && parent.type === 5 /* IcuContainer */;
+            // If the parent of this node is an ICU container, then it is represented by comment node and we
+            // need to use it as an anchor. If it is projected then its direct parent node is the renderer.
+            if (isIcuCase && parent.flags & 2 /* isProjected */) {
+                return getNativeByTNode(parent, currentView).parentNode;
+            }
+            ngDevMode && assertNodeType(renderParent, 3 /* Element */);
+            if (renderParent.flags & 1 /* isComponent */ && !isIcuCase) {
                 var tData = currentView[TVIEW].data;
-                var tNode_1 = tData[parent.index];
+                var tNode_1 = tData[renderParent.index];
                 var encapsulation = tData[tNode_1.directiveStart].encapsulation;
                 // We've got a parent which is an element in the current view. We just need to verify if the
                 // parent element is not a component. Component's content nodes are not inserted immediately
@@ -13102,7 +13103,7 @@
                     return null;
                 }
             }
-            return getNativeByTNode(parent, currentView);
+            return getNativeByTNode(renderParent, currentView);
         }
     }
     /**
@@ -14481,9 +14482,12 @@
      *
      * @codeGenApi
      */
-    function ɵɵcomponentHostSyntheticProperty(index, propName, value, sanitizer, nativeOnly) {
-        if (value !== NO_CHANGE) {
-            elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadComponentRenderer);
+    function ɵɵupdateSyntheticHostBinding(propName, value, sanitizer, nativeOnly) {
+        var index = getSelectedIndex();
+        // TODO(benlesh): remove bind call here.
+        var bound = ɵɵbind(value);
+        if (bound !== NO_CHANGE) {
+            elementPropertyInternal(index, propName, bound, sanitizer, nativeOnly, loadComponentRenderer);
         }
     }
 
@@ -18763,7 +18767,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.1.0-beta.0+12.sha-f936590.with-local-changes');
+    var VERSION = new Version('8.1.0-beta.0+23.sha-fcdd784.with-local-changes');
 
     /**
      * @license
@@ -22045,11 +22049,14 @@
         // These property accesses can be ignored because ngI18nClosureMode will be set to false
         // when optimizing code and the whole if statement will be dropped.
         // Make sure to refer to ngI18nClosureMode as ['ngI18nClosureMode'] for closure.
-        // tslint:disable-next-line:no-toplevel-property-access
-        _global['ngI18nClosureMode'] =
-            // TODO(FW-1250): validate that this actually, you know, works.
+        // NOTE: we need to have it in IIFE so that the tree-shaker is happy.
+        (function () {
             // tslint:disable-next-line:no-toplevel-property-access
-            typeof goog !== 'undefined' && typeof goog.getMsg === 'function';
+            _global['ngI18nClosureMode'] =
+                // TODO(FW-1250): validate that this actually, you know, works.
+                // tslint:disable-next-line:no-toplevel-property-access
+                typeof goog !== 'undefined' && typeof goog.getMsg === 'function';
+        })();
     }
 
     /**
@@ -24156,6 +24163,9 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    function symbolIterator() {
+        return this._results[getSymbolIterator()]();
+    }
     /**
      * An unmodifiable list of items that Angular keeps up to date when the state
      * of the application changes.
@@ -24188,6 +24198,14 @@
             this._results = [];
             this.changes = new EventEmitter();
             this.length = 0;
+            // This function should be declared on the prototype, but doing so there will cause the class
+            // declaration to have side-effects and become not tree-shakable. For this reason we do it in
+            // the constructor.
+            // [getSymbolIterator()](): Iterator<T> { ... }
+            var symbol = getSymbolIterator();
+            var proto = QueryList.prototype;
+            if (!proto[symbol])
+                proto[symbol] = symbolIterator;
         }
         /**
          * See
@@ -24231,7 +24249,6 @@
          * Returns a copy of the internal results list as an Array.
          */
         QueryList.prototype.toArray = function () { return this._results.slice(); };
-        QueryList.prototype[getSymbolIterator()] = function () { return this._results[getSymbolIterator()](); };
         QueryList.prototype.toString = function () { return this._results.toString(); };
         /**
          * Updates the stored data of the query list, and resets the `dirty` flag to `false`, so that
@@ -24796,7 +24813,7 @@
         'ɵɵload': ɵɵload,
         'ɵɵprojection': ɵɵprojection,
         'ɵɵelementProperty': ɵɵelementProperty,
-        'ɵɵcomponentHostSyntheticProperty': ɵɵcomponentHostSyntheticProperty,
+        'ɵɵupdateSyntheticHostBinding': ɵɵupdateSyntheticHostBinding,
         'ɵɵcomponentHostSyntheticListener': ɵɵcomponentHostSyntheticListener,
         'ɵɵpipeBind1': ɵɵpipeBind1,
         'ɵɵpipeBind2': ɵɵpipeBind2,
@@ -31036,7 +31053,7 @@
     exports.ɵɵpropertyInterpolate7 = ɵɵpropertyInterpolate7;
     exports.ɵɵpropertyInterpolate8 = ɵɵpropertyInterpolate8;
     exports.ɵɵpropertyInterpolateV = ɵɵpropertyInterpolateV;
-    exports.ɵɵcomponentHostSyntheticProperty = ɵɵcomponentHostSyntheticProperty;
+    exports.ɵɵupdateSyntheticHostBinding = ɵɵupdateSyntheticHostBinding;
     exports.ɵɵcomponentHostSyntheticListener = ɵɵcomponentHostSyntheticListener;
     exports.ɵɵprojectionDef = ɵɵprojectionDef;
     exports.ɵɵreference = ɵɵreference;
