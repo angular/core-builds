@@ -39,6 +39,7 @@ export declare class QueryList<T> {
     readonly length: number;
     readonly first: T;
     readonly last: T;
+    constructor();
     /**
      * See
      * [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)

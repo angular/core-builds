@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-beta.0+22.sha-a981dd2.with-local-changes
+ * @license Angular v8.1.0-beta.0+23.sha-fcdd784.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -440,18 +440,15 @@ function resolveForwardRef(type) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-function getGlobal() {
-    const __globalThis = typeof globalThis !== 'undefined' && globalThis;
-    const __window = typeof window !== 'undefined' && window;
-    const __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
-        self instanceof WorkerGlobalScope && self;
-    const __global = typeof global !== 'undefined' && global;
-    // Always use __globalThis if available, which is the spec-defined global variable across all
-    // environments, then fallback to __global first, because in Node tests both __global and
-    // __window may be defined and _global should be __global in that case.
-    return __globalThis || __global || __window || __self;
-}
-const _global = getGlobal();
+const __globalThis = typeof globalThis !== 'undefined' && globalThis;
+const __window = typeof window !== 'undefined' && window;
+const __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
+    self instanceof WorkerGlobalScope && self;
+const __global = typeof global !== 'undefined' && global;
+// Always use __globalThis if available, which is the spec-defined global variable across all
+// environments, then fallback to __global first, because in Node tests both __global and
+// __window may be defined and _global should be __global in that case.
+const _global = __globalThis || __global || __window || __self;
 
 /**
  * @license
@@ -22930,7 +22927,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.1.0-beta.0+22.sha-a981dd2.with-local-changes');
+const VERSION = new Version('8.1.0-beta.0+23.sha-fcdd784.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -27598,11 +27595,14 @@ if (typeof ngI18nClosureMode === 'undefined') {
     // These property accesses can be ignored because ngI18nClosureMode will be set to false
     // when optimizing code and the whole if statement will be dropped.
     // Make sure to refer to ngI18nClosureMode as ['ngI18nClosureMode'] for closure.
-    // tslint:disable-next-line:no-toplevel-property-access
-    _global['ngI18nClosureMode'] =
-        // TODO(FW-1250): validate that this actually, you know, works.
+    // NOTE: we need to have it in IIFE so that the tree-shaker is happy.
+    (function () {
         // tslint:disable-next-line:no-toplevel-property-access
-        typeof goog !== 'undefined' && typeof goog.getMsg === 'function';
+        _global['ngI18nClosureMode'] =
+            // TODO(FW-1250): validate that this actually, you know, works.
+            // tslint:disable-next-line:no-toplevel-property-access
+            typeof goog !== 'undefined' && typeof goog.getMsg === 'function';
+    })();
 }
 
 /**
@@ -30220,6 +30220,14 @@ class EventEmitter extends Subject {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
+ * @template T
+ * @this {?}
+ * @return {?}
+ */
+function symbolIterator() {
+    return ((/** @type {?} */ (((/** @type {?} */ ((/** @type {?} */ (this)))))._results)))[getSymbolIterator()]();
+}
+/**
  * An unmodifiable list of items that Angular keeps up to date when the state
  * of the application changes.
  *
@@ -30252,6 +30260,16 @@ class QueryList {
         this._results = [];
         this.changes = new EventEmitter();
         this.length = 0;
+        // This function should be declared on the prototype, but doing so there will cause the class
+        // declaration to have side-effects and become not tree-shakable. For this reason we do it in
+        // the constructor.
+        // [getSymbolIterator()](): Iterator<T> { ... }
+        /** @type {?} */
+        const symbol = getSymbolIterator();
+        /** @type {?} */
+        const proto = (/** @type {?} */ (QueryList.prototype));
+        if (!proto[symbol])
+            proto[symbol] = symbolIterator;
     }
     /**
      * See
@@ -30311,10 +30329,6 @@ class QueryList {
      * @return {?}
      */
     toArray() { return this._results.slice(); }
-    /**
-     * @return {?}
-     */
-    [getSymbolIterator()]() { return ((/** @type {?} */ (this._results)))[getSymbolIterator()](); }
     /**
      * @return {?}
      */

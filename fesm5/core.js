@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-beta.0+22.sha-a981dd2.with-local-changes
+ * @license Angular v8.1.0-beta.0+23.sha-fcdd784.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -436,18 +436,15 @@ function resolveForwardRef(type) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-function getGlobal() {
-    var __globalThis = typeof globalThis !== 'undefined' && globalThis;
-    var __window = typeof window !== 'undefined' && window;
-    var __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
-        self instanceof WorkerGlobalScope && self;
-    var __global = typeof global !== 'undefined' && global;
-    // Always use __globalThis if available, which is the spec-defined global variable across all
-    // environments, then fallback to __global first, because in Node tests both __global and
-    // __window may be defined and _global should be __global in that case.
-    return __globalThis || __global || __window || __self;
-}
-var _global = getGlobal();
+var __globalThis = typeof globalThis !== 'undefined' && globalThis;
+var __window = typeof window !== 'undefined' && window;
+var __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
+    self instanceof WorkerGlobalScope && self;
+var __global = typeof global !== 'undefined' && global;
+// Always use __globalThis if available, which is the spec-defined global variable across all
+// environments, then fallback to __global first, because in Node tests both __global and
+// __window may be defined and _global should be __global in that case.
+var _global = __globalThis || __global || __window || __self;
 
 /**
  * @license
@@ -18409,7 +18406,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.1.0-beta.0+22.sha-a981dd2.with-local-changes');
+var VERSION = new Version('8.1.0-beta.0+23.sha-fcdd784.with-local-changes');
 
 /**
  * @license
@@ -21671,11 +21668,14 @@ if (typeof ngI18nClosureMode === 'undefined') {
     // These property accesses can be ignored because ngI18nClosureMode will be set to false
     // when optimizing code and the whole if statement will be dropped.
     // Make sure to refer to ngI18nClosureMode as ['ngI18nClosureMode'] for closure.
-    // tslint:disable-next-line:no-toplevel-property-access
-    _global['ngI18nClosureMode'] =
-        // TODO(FW-1250): validate that this actually, you know, works.
+    // NOTE: we need to have it in IIFE so that the tree-shaker is happy.
+    (function () {
         // tslint:disable-next-line:no-toplevel-property-access
-        typeof goog !== 'undefined' && typeof goog.getMsg === 'function';
+        _global['ngI18nClosureMode'] =
+            // TODO(FW-1250): validate that this actually, you know, works.
+            // tslint:disable-next-line:no-toplevel-property-access
+            typeof goog !== 'undefined' && typeof goog.getMsg === 'function';
+    })();
 }
 
 /**
@@ -23786,6 +23786,9 @@ var EventEmitter = /** @class */ (function (_super) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+function symbolIterator() {
+    return this._results[getSymbolIterator()]();
+}
 /**
  * An unmodifiable list of items that Angular keeps up to date when the state
  * of the application changes.
@@ -23818,6 +23821,14 @@ var QueryList = /** @class */ (function () {
         this._results = [];
         this.changes = new EventEmitter();
         this.length = 0;
+        // This function should be declared on the prototype, but doing so there will cause the class
+        // declaration to have side-effects and become not tree-shakable. For this reason we do it in
+        // the constructor.
+        // [getSymbolIterator()](): Iterator<T> { ... }
+        var symbol = getSymbolIterator();
+        var proto = QueryList.prototype;
+        if (!proto[symbol])
+            proto[symbol] = symbolIterator;
     }
     /**
      * See
@@ -23861,7 +23872,6 @@ var QueryList = /** @class */ (function () {
      * Returns a copy of the internal results list as an Array.
      */
     QueryList.prototype.toArray = function () { return this._results.slice(); };
-    QueryList.prototype[getSymbolIterator()] = function () { return this._results[getSymbolIterator()](); };
     QueryList.prototype.toString = function () { return this._results.toString(); };
     /**
      * Updates the stored data of the query list, and resets the `dirty` flag to `false`, so that
