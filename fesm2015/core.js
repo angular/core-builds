@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-beta.0+17.sha-8bedf50.with-local-changes
+ * @license Angular v8.1.0-beta.0+19.sha-21328f2.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1350,6 +1350,64 @@ const SWITCH_COMPILE_INJECTABLE__POST_R3__ = compileInjectable;
 const SWITCH_COMPILE_INJECTABLE = SWITCH_COMPILE_INJECTABLE__POST_R3__;
 
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function ngDevModeResetPerfCounters() {
+    const newCounters = {
+        firstTemplatePass: 0,
+        tNode: 0,
+        tView: 0,
+        rendererCreateTextNode: 0,
+        rendererSetText: 0,
+        rendererCreateElement: 0,
+        rendererAddEventListener: 0,
+        rendererSetAttribute: 0,
+        rendererRemoveAttribute: 0,
+        rendererSetProperty: 0,
+        rendererSetClassName: 0,
+        rendererAddClass: 0,
+        rendererRemoveClass: 0,
+        rendererSetStyle: 0,
+        rendererRemoveStyle: 0,
+        rendererDestroy: 0,
+        rendererDestroyNode: 0,
+        rendererMoveNode: 0,
+        rendererRemoveNode: 0,
+        rendererAppendChild: 0,
+        rendererInsertBefore: 0,
+        rendererCreateComment: 0,
+        styleMap: 0,
+        styleMapCacheMiss: 0,
+        classMap: 0,
+        classMapCacheMiss: 0,
+        stylingProp: 0,
+        stylingPropCacheMiss: 0,
+        stylingApply: 0,
+        stylingApplyCacheMiss: 0,
+    };
+    // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
+    _global['ngDevMode'] = newCounters;
+    return newCounters;
+}
+/**
+ * This checks to see if the `ngDevMode` has been set. If yes,
+ * then we honor it, otherwise we default to dev mode with additional checks.
+ *
+ * The idea is that unless we are doing production build where we explicitly
+ * set `ngDevMode == false` we should be helping the developer by providing
+ * as much early warning and errors as possible.
+ *
+ * NOTE: changes to the `ngDevMode` name must be synced with `compiler-cli/src/tooling.ts`.
+ */
+if (typeof ngDevMode === 'undefined' || ngDevMode) {
+    ngDevModeResetPerfCounters();
+}
+
+/**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
@@ -1678,8 +1736,7 @@ class R3Injector {
         /** @type {?} */
         const defType = (ngModule === undefined) ? ((/** @type {?} */ (defOrWrappedDef))) : ngModule;
         // Check for circular dependencies.
-        // TODO(FW-1307): Re-add ngDevMode when closure can handle it
-        if (parents.indexOf(defType) !== -1) {
+        if (ngDevMode && parents.indexOf(defType) !== -1) {
             /** @type {?} */
             const defName = stringify(defType);
             throw new Error(`Circular dependency in DI detected for type ${defName}. Dependency path: ${parents.map((/**
@@ -1708,8 +1765,7 @@ class R3Injector {
         if (def.imports != null && !isDuplicate) {
             // Before processing defType's imports, add it to the set of parents. This way, if it ends
             // up deeply importing itself, this can be detected.
-            // TODO(FW-1307): Re-add ngDevMode when closure can handle it
-            parents.push(defType);
+            ngDevMode && parents.push(defType);
             // Add it to the set of dedups. This way we can detect multiple imports of the same module
             dedupStack.push(defType);
             /** @type {?} */
@@ -1731,8 +1787,7 @@ class R3Injector {
             }
             finally {
                 // Remove it from the parents set when finished.
-                // TODO(FW-1307): Re-add ngDevMode when closure can handle it
-                parents.pop();
+                ngDevMode && parents.pop();
             }
             // Imports which are declared with providers (TypeWithProviders) need to be processed
             // after all imported modules are processed. This is similar to how View Engine
@@ -3683,64 +3738,6 @@ ViewEncapsulation[ViewEncapsulation.Emulated] = 'Emulated';
 ViewEncapsulation[ViewEncapsulation.Native] = 'Native';
 ViewEncapsulation[ViewEncapsulation.None] = 'None';
 ViewEncapsulation[ViewEncapsulation.ShadowDom] = 'ShadowDom';
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-function ngDevModeResetPerfCounters() {
-    const newCounters = {
-        firstTemplatePass: 0,
-        tNode: 0,
-        tView: 0,
-        rendererCreateTextNode: 0,
-        rendererSetText: 0,
-        rendererCreateElement: 0,
-        rendererAddEventListener: 0,
-        rendererSetAttribute: 0,
-        rendererRemoveAttribute: 0,
-        rendererSetProperty: 0,
-        rendererSetClassName: 0,
-        rendererAddClass: 0,
-        rendererRemoveClass: 0,
-        rendererSetStyle: 0,
-        rendererRemoveStyle: 0,
-        rendererDestroy: 0,
-        rendererDestroyNode: 0,
-        rendererMoveNode: 0,
-        rendererRemoveNode: 0,
-        rendererAppendChild: 0,
-        rendererInsertBefore: 0,
-        rendererCreateComment: 0,
-        styleMap: 0,
-        styleMapCacheMiss: 0,
-        classMap: 0,
-        classMapCacheMiss: 0,
-        stylingProp: 0,
-        stylingPropCacheMiss: 0,
-        stylingApply: 0,
-        stylingApplyCacheMiss: 0,
-    };
-    // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
-    _global['ngDevMode'] = newCounters;
-    return newCounters;
-}
-/**
- * This checks to see if the `ngDevMode` has been set. If yes,
- * then we honor it, otherwise we default to dev mode with additional checks.
- *
- * The idea is that unless we are doing production build where we explicitly
- * set `ngDevMode == false` we should be helping the developer by providing
- * as much early warning and errors as possible.
- *
- * NOTE: changes to the `ngDevMode` name must be synced with `compiler-cli/src/tooling.ts`.
- */
-if (typeof ngDevMode === 'undefined' || ngDevMode) {
-    ngDevModeResetPerfCounters();
-}
 
 /**
  * @license
@@ -22920,7 +22917,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.1.0-beta.0+17.sha-8bedf50.with-local-changes');
+const VERSION = new Version('8.1.0-beta.0+19.sha-21328f2.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
