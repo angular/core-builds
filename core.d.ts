@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-beta.0+22.sha-a981dd2.with-local-changes
+ * @license Angular v8.1.0-beta.0+23.sha-fcdd784.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5324,6 +5324,7 @@ export declare class QueryList<T> {
     readonly length: number;
     readonly first: T;
     readonly last: T;
+    constructor();
     /**
      * See
      * [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
