@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.0+27.sha-9e4b2f1.with-local-changes
+ * @license Angular v8.0.0+26.sha-393529d.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3155,7 +3155,7 @@ export declare interface InjectableDecorator {
      *
      * The following example shows how service classes are properly marked as
      * injectable.
-     *
+     *Z
      * <code-example path="core/di/ts/metadata_spec.ts" region="Injectable"></code-example>
      *
      */
