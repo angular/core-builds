@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-beta.0+33.sha-4ecff42.with-local-changes
+ * @license Angular v8.1.0-beta.0+35.sha-0d4f8c7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18940,7 +18940,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.1.0-beta.0+33.sha-4ecff42.with-local-changes');
+    var VERSION = new Version('8.1.0-beta.0+35.sha-0d4f8c7.with-local-changes');
 
     /**
      * @license
@@ -22470,7 +22470,7 @@
                     if (ICU_BLOCK_REGEXP.test(block)) {
                         results.push(parseICUBlock(block));
                     }
-                    else if (block) { // Don't push empty strings
+                    else {
                         results.push(block);
                     }
                     prevPos = pos + 1;
@@ -22486,9 +22486,7 @@
             }
         }
         var substring = pattern.substring(prevPos);
-        if (substring != '') {
-            results.push(substring);
-        }
+        results.push(substring);
         return results;
     }
     /**
@@ -22525,7 +22523,7 @@
                 cases.push(key);
             }
             var blocks = extractParts(parts[pos++]);
-            if (blocks.length) {
+            if (cases.length > values.length) {
                 values.push(blocks);
             }
         }
