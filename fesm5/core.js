@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-beta.0+32.sha-55a14e4.with-local-changes
+ * @license Angular v8.1.0-beta.0+30.sha-456f2e7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1295,9 +1295,7 @@ var SWITCH_COMPILE_INJECTABLE = SWITCH_COMPILE_INJECTABLE__PRE_R3__;
  * found in the LICENSE file at https://angular.io/license
  */
 function ngDevModeResetPerfCounters() {
-    var locationString = typeof location !== 'undefined' ? location.toString() : '';
     var newCounters = {
-        namedConstructors: locationString.indexOf('ngDevMode=namedConstructors') != -1,
         firstTemplatePass: 0,
         tNode: 0,
         tView: 0,
@@ -1330,8 +1328,7 @@ function ngDevModeResetPerfCounters() {
         stylingApplyCacheMiss: 0,
     };
     // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
-    var allowNgDevModeTrue = locationString.indexOf('ngDevMode=false') === -1;
-    _global['ngDevMode'] = allowNgDevModeTrue && newCounters;
+    _global['ngDevMode'] = newCounters;
     return newCounters;
 }
 /**
@@ -7461,43 +7458,6 @@ var NO_ERRORS_SCHEMA = {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * THIS FILE CONTAINS CODE WHICH SHOULD BE TREE SHAKEN AND NEVER CALLED FROM PRODUCTION CODE!!!
- */
-/**
- * Creates an `Array` construction with a given name. This is useful when
- * looking for memory consumption to see what time of array it is.
- *
- *
- * @param name Name to give to the constructor
- * @returns A subclass of `Array` if possible. This can only be done in
- *          environments which support `class` construct.
- */
-function createNamedArrayType(name) {
-    // This should never be called in prod mode, so let's verify that is the case.
-    if (ngDevMode) {
-        try {
-            // We need to do it this way so that TypeScript does not down-level the below code.
-            var FunctionConstructor = createNamedArrayType.constructor;
-            return (new FunctionConstructor('Array', "return class ABC extends Array{}"))(Array);
-        }
-        catch (e) {
-            // If it does not work just give up and fall back to regular Array.
-            return Array;
-        }
-    }
-    else {
-        throw new Error('Looks like we are in \'prod mode\', but we are creating a named Array type, which is wrong! Check your code');
-    }
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function normalizeDebugBindingName(name) {
     // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
     name = camelCaseToDashCase(name.replace(/[$@]/g, '_'));
@@ -7523,7 +7483,44 @@ function normalizeDebugBindingValue(value) {
     }
 }
 
-// Note: This hack is necessary so we don't erroneously get a circular dependency
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Marks that the next string is for element.
+ *
+ * See `I18nMutateOpCodes` documentation.
+ */
+var ELEMENT_MARKER = {
+    marker: 'element'
+};
+/**
+ * Marks that the next string is for comment.
+ *
+ * See `I18nMutateOpCodes` documentation.
+ */
+var COMMENT_MARKER = {
+    marker: 'comment'
+};
+
+var _stylingMode = 0;
+function runtimeIsNewStylingInUse() {
+    return _stylingMode > 0 /* UseOld */;
+}
+function runtimeAllowOldStyling() {
+    return _stylingMode < 2 /* UseNew */;
+}
+var _currentSanitizer;
+function setCurrentStyleSanitizer(sanitizer) {
+    _currentSanitizer = sanitizer;
+}
+function getCurrentStyleSanitizer() {
+    return _currentSanitizer;
+}
 
 /**
  * @license
@@ -7532,6 +7529,9 @@ function normalizeDebugBindingValue(value) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+function attachDebugObject(obj, debug) {
+    Object.defineProperty(obj, 'debug', { value: debug, enumerable: false });
+}
 
 /**
  * @license
@@ -9165,327 +9165,6 @@ function assertValidDirectiveIndex(context, directiveIndex) {
 }
 
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-var NG_TEMPLATE_SELECTOR = 'ng-template';
-function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
-    var nodeClassesLen = nodeClassAttrVal.length;
-    var matchIndex = nodeClassAttrVal.indexOf(cssClassToMatch);
-    var matchEndIdx = matchIndex + cssClassToMatch.length;
-    if (matchIndex === -1 // no match
-        || (matchIndex > 0 && nodeClassAttrVal[matchIndex - 1] !== ' ') // no space before
-        ||
-            (matchEndIdx < nodeClassesLen && nodeClassAttrVal[matchEndIdx] !== ' ')) // no space after
-     {
-        return false;
-    }
-    return true;
-}
-/**
- * Function that checks whether a given tNode matches tag-based selector and has a valid type.
- *
- * Matching can be performed in 2 modes: projection mode (when we project nodes) and regular
- * directive matching mode:
- * - in the "directive matching" mode we do _not_ take TContainer's tagName into account if it is
- * different from NG_TEMPLATE_SELECTOR (value different from NG_TEMPLATE_SELECTOR indicates that a
- * tag name was extracted from * syntax so we would match the same directive twice);
- * - in the "projection" mode, we use a tag name potentially extracted from the * syntax processing
- * (applicable to TNodeType.Container only).
- */
-function hasTagAndTypeMatch(tNode, currentSelector, isProjectionMode) {
-    var tagNameToCompare = tNode.type === 0 /* Container */ && !isProjectionMode ?
-        NG_TEMPLATE_SELECTOR :
-        tNode.tagName;
-    return currentSelector === tagNameToCompare;
-}
-/**
- * A utility function to match an Ivy node static data against a simple CSS selector
- *
- * @param node static data of the node to match
- * @param selector The selector to try matching against the node.
- * @param isProjectionMode if `true` we are matching for content projection, otherwise we are doing
- * directive matching.
- * @returns true if node matches the selector.
- */
-function isNodeMatchingSelector(tNode, selector, isProjectionMode) {
-    ngDevMode && assertDefined(selector[0], 'Selector should have a tag name');
-    var mode = 4 /* ELEMENT */;
-    var nodeAttrs = tNode.attrs || [];
-    // Find the index of first attribute that has no value, only a name.
-    var nameOnlyMarkerIdx = getNameOnlyMarkerIndex(nodeAttrs);
-    // When processing ":not" selectors, we skip to the next ":not" if the
-    // current one doesn't match
-    var skipToNextSelector = false;
-    for (var i = 0; i < selector.length; i++) {
-        var current = selector[i];
-        if (typeof current === 'number') {
-            // If we finish processing a :not selector and it hasn't failed, return false
-            if (!skipToNextSelector && !isPositive(mode) && !isPositive(current)) {
-                return false;
-            }
-            // If we are skipping to the next :not() and this mode flag is positive,
-            // it's a part of the current :not() selector, and we should keep skipping
-            if (skipToNextSelector && isPositive(current))
-                continue;
-            skipToNextSelector = false;
-            mode = current | (mode & 1 /* NOT */);
-            continue;
-        }
-        if (skipToNextSelector)
-            continue;
-        if (mode & 4 /* ELEMENT */) {
-            mode = 2 /* ATTRIBUTE */ | mode & 1 /* NOT */;
-            if (current !== '' && !hasTagAndTypeMatch(tNode, current, isProjectionMode) ||
-                current === '' && selector.length === 1) {
-                if (isPositive(mode))
-                    return false;
-                skipToNextSelector = true;
-            }
-        }
-        else {
-            var selectorAttrValue = mode & 8 /* CLASS */ ? current : selector[++i];
-            // special case for matching against classes when a tNode has been instantiated with
-            // class and style values as separate attribute values (e.g. ['title', CLASS, 'foo'])
-            if ((mode & 8 /* CLASS */) && tNode.stylingTemplate) {
-                if (!isCssClassMatching(readClassValueFromTNode(tNode), selectorAttrValue)) {
-                    if (isPositive(mode))
-                        return false;
-                    skipToNextSelector = true;
-                }
-                continue;
-            }
-            var isInlineTemplate = tNode.type == 0 /* Container */ && tNode.tagName !== NG_TEMPLATE_SELECTOR;
-            var attrName = (mode & 8 /* CLASS */) ? 'class' : current;
-            var attrIndexInNode = findAttrIndexInNode(attrName, nodeAttrs, isInlineTemplate, isProjectionMode);
-            if (attrIndexInNode === -1) {
-                if (isPositive(mode))
-                    return false;
-                skipToNextSelector = true;
-                continue;
-            }
-            if (selectorAttrValue !== '') {
-                var nodeAttrValue = void 0;
-                if (attrIndexInNode > nameOnlyMarkerIdx) {
-                    nodeAttrValue = '';
-                }
-                else {
-                    ngDevMode && assertNotEqual(nodeAttrs[attrIndexInNode], 0 /* NamespaceURI */, 'We do not match directives on namespaced attributes');
-                    nodeAttrValue = nodeAttrs[attrIndexInNode + 1];
-                }
-                var compareAgainstClassName = mode & 8 /* CLASS */ ? nodeAttrValue : null;
-                if (compareAgainstClassName &&
-                    !isCssClassMatching(compareAgainstClassName, selectorAttrValue) ||
-                    mode & 2 /* ATTRIBUTE */ && selectorAttrValue !== nodeAttrValue) {
-                    if (isPositive(mode))
-                        return false;
-                    skipToNextSelector = true;
-                }
-            }
-        }
-    }
-    return isPositive(mode) || skipToNextSelector;
-}
-function isPositive(mode) {
-    return (mode & 1 /* NOT */) === 0;
-}
-function readClassValueFromTNode(tNode) {
-    // comparing against CSS class values is complex because the compiler doesn't place them as
-    // regular attributes when an element is created. Instead, the classes (and styles for
-    // that matter) are placed in a special styling context that is used for resolving all
-    // class/style values across static attributes, [style]/[class] and [style.prop]/[class.name]
-    // bindings. Therefore if and when the styling context exists then the class values are to be
-    // extracted by the context helper code below...
-    return tNode.stylingTemplate ? getInitialClassNameValue(tNode.stylingTemplate) : '';
-}
-/**
- * Examines the attribute's definition array for a node to find the index of the
- * attribute that matches the given `name`.
- *
- * NOTE: This will not match namespaced attributes.
- *
- * Attribute matching depends upon `isInlineTemplate` and `isProjectionMode`.
- * The following table summarizes which types of attributes we attempt to match:
- *
- * ===========================================================================================================
- * Modes                   | Normal Attributes | Bindings Attributes | Template Attributes | I18n
- * Attributes
- * ===========================================================================================================
- * Inline + Projection     | YES               | YES                 | NO                  | YES
- * -----------------------------------------------------------------------------------------------------------
- * Inline + Directive      | NO                | NO                  | YES                 | NO
- * -----------------------------------------------------------------------------------------------------------
- * Non-inline + Projection | YES               | YES                 | NO                  | YES
- * -----------------------------------------------------------------------------------------------------------
- * Non-inline + Directive  | YES               | YES                 | NO                  | YES
- * ===========================================================================================================
- *
- * @param name the name of the attribute to find
- * @param attrs the attribute array to examine
- * @param isInlineTemplate true if the node being matched is an inline template (e.g. `*ngFor`)
- * rather than a manually expanded template node (e.g `<ng-template>`).
- * @param isProjectionMode true if we are matching against content projection otherwise we are
- * matching against directives.
- */
-function findAttrIndexInNode(name, attrs, isInlineTemplate, isProjectionMode) {
-    if (attrs === null)
-        return -1;
-    var i = 0;
-    if (isProjectionMode || !isInlineTemplate) {
-        var bindingsMode = false;
-        while (i < attrs.length) {
-            var maybeAttrName = attrs[i];
-            if (maybeAttrName === name) {
-                return i;
-            }
-            else if (maybeAttrName === 3 /* Bindings */ || maybeAttrName === 6 /* I18n */) {
-                bindingsMode = true;
-            }
-            else if (maybeAttrName === 1 /* Classes */) {
-                var value = attrs[++i];
-                // We should skip classes here because we have a separate mechanism for
-                // matching classes in projection mode.
-                while (typeof value === 'string') {
-                    value = attrs[++i];
-                }
-                continue;
-            }
-            else if (maybeAttrName === 4 /* Template */) {
-                // We do not care about Template attributes in this scenario.
-                break;
-            }
-            else if (maybeAttrName === 0 /* NamespaceURI */) {
-                // Skip the whole namespaced attribute and value. This is by design.
-                i += 4;
-                continue;
-            }
-            // In binding mode there are only names, rather than name-value pairs.
-            i += bindingsMode ? 1 : 2;
-        }
-        // We did not match the attribute
-        return -1;
-    }
-    else {
-        return matchTemplateAttribute(attrs, name);
-    }
-}
-function isNodeMatchingSelectorList(tNode, selector, isProjectionMode) {
-    if (isProjectionMode === void 0) { isProjectionMode = false; }
-    for (var i = 0; i < selector.length; i++) {
-        if (isNodeMatchingSelector(tNode, selector[i], isProjectionMode)) {
-            return true;
-        }
-    }
-    return false;
-}
-function getProjectAsAttrValue(tNode) {
-    var nodeAttrs = tNode.attrs;
-    if (nodeAttrs != null) {
-        var ngProjectAsAttrIdx = nodeAttrs.indexOf(5 /* ProjectAs */);
-        // only check for ngProjectAs in attribute names, don't accidentally match attribute's value
-        // (attribute names are stored at even indexes)
-        if ((ngProjectAsAttrIdx & 1) === 0) {
-            return nodeAttrs[ngProjectAsAttrIdx + 1];
-        }
-    }
-    return null;
-}
-function getNameOnlyMarkerIndex(nodeAttrs) {
-    for (var i = 0; i < nodeAttrs.length; i++) {
-        var nodeAttr = nodeAttrs[i];
-        if (isNameOnlyAttributeMarker(nodeAttr)) {
-            return i;
-        }
-    }
-    return nodeAttrs.length;
-}
-function matchTemplateAttribute(attrs, name) {
-    var i = attrs.indexOf(4 /* Template */);
-    if (i > -1) {
-        i++;
-        while (i < attrs.length) {
-            if (attrs[i] === name)
-                return i;
-            i++;
-        }
-    }
-    return -1;
-}
-/**
- * Checks whether a selector is inside a CssSelectorList
- * @param selector Selector to be checked.
- * @param list List in which to look for the selector.
- */
-function isSelectorInSelectorList(selector, list) {
-    selectorListLoop: for (var i = 0; i < list.length; i++) {
-        var currentSelectorInList = list[i];
-        if (selector.length !== currentSelectorInList.length) {
-            continue;
-        }
-        for (var j = 0; j < selector.length; j++) {
-            if (selector[j] !== currentSelectorInList[j]) {
-                continue selectorListLoop;
-            }
-        }
-        return true;
-    }
-    return false;
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Marks that the next string is for element.
- *
- * See `I18nMutateOpCodes` documentation.
- */
-var ELEMENT_MARKER = {
-    marker: 'element'
-};
-/**
- * Marks that the next string is for comment.
- *
- * See `I18nMutateOpCodes` documentation.
- */
-var COMMENT_MARKER = {
-    marker: 'comment'
-};
-
-var _stylingMode = 0;
-function runtimeIsNewStylingInUse() {
-    return _stylingMode > 0 /* UseOld */;
-}
-function runtimeAllowOldStyling() {
-    return _stylingMode < 2 /* UseNew */;
-}
-var _currentSanitizer;
-function setCurrentStyleSanitizer(sanitizer) {
-    _currentSanitizer = sanitizer;
-}
-function getCurrentStyleSanitizer() {
-    return _currentSanitizer;
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-function attachDebugObject(obj, debug) {
-    Object.defineProperty(obj, 'debug', { value: debug, enumerable: false });
-}
-
-/**
 * @license
 * Copyright Google Inc. All Rights Reserved.
 *
@@ -10546,102 +10225,6 @@ var NodeStylingDebug = /** @class */ (function () {
  * }
  * ```
  */
-var LViewArray = ngDevMode && createNamedArrayType('LView');
-var LVIEW_EMPTY; // can't initialize here or it will not be tree shaken, because `LView`
-// constructor could have side-effects.
-/**
- * This function clones a blueprint and creates LView.
- *
- * Simple slice will keep the same type, and we need it to be LView
- */
-function cloneToLView(list) {
-    if (LVIEW_EMPTY === undefined)
-        LVIEW_EMPTY = new LViewArray();
-    return LVIEW_EMPTY.concat(list);
-}
-/**
- * This class is a debug version of Object literal so that we can have constructor name show up in
- * debug tools in ngDevMode.
- */
-var TViewConstructor = /** @class */ (function () {
-    function TView(id, //
-    blueprint, //
-    template, //
-    viewQuery, //
-    node, //
-    data, //
-    bindingStartIndex, //
-    viewQueryStartIndex, //
-    expandoStartIndex, //
-    expandoInstructions, //
-    firstTemplatePass, //
-    staticViewQueries, //
-    staticContentQueries, //
-    preOrderHooks, //
-    preOrderCheckHooks, //
-    contentHooks, //
-    contentCheckHooks, //
-    viewHooks, //
-    viewCheckHooks, //
-    destroyHooks, //
-    cleanup, //
-    contentQueries, //
-    components, //
-    directiveRegistry, //
-    pipeRegistry, //
-    firstChild, //
-    schemas) {
-        this.id = id;
-        this.blueprint = blueprint;
-        this.template = template;
-        this.viewQuery = viewQuery;
-        this.node = node;
-        this.data = data;
-        this.bindingStartIndex = bindingStartIndex;
-        this.viewQueryStartIndex = viewQueryStartIndex;
-        this.expandoStartIndex = expandoStartIndex;
-        this.expandoInstructions = expandoInstructions;
-        this.firstTemplatePass = firstTemplatePass;
-        this.staticViewQueries = staticViewQueries;
-        this.staticContentQueries = staticContentQueries;
-        this.preOrderHooks = preOrderHooks;
-        this.preOrderCheckHooks = preOrderCheckHooks;
-        this.contentHooks = contentHooks;
-        this.contentCheckHooks = contentCheckHooks;
-        this.viewHooks = viewHooks;
-        this.viewCheckHooks = viewCheckHooks;
-        this.destroyHooks = destroyHooks;
-        this.cleanup = cleanup;
-        this.contentQueries = contentQueries;
-        this.components = components;
-        this.directiveRegistry = directiveRegistry;
-        this.pipeRegistry = pipeRegistry;
-        this.firstChild = firstChild;
-        this.schemas = schemas;
-    }
-    return TView;
-}());
-var TViewData = ngDevMode && createNamedArrayType('TViewData');
-var TVIEWDATA_EMPTY; // can't initialize here or it will not be tree shaken, because `LView`
-// constructor could have side-effects.
-/**
- * This function clones a blueprint and creates TData.
- *
- * Simple slice will keep the same type, and we need it to be TData
- */
-function cloneToTViewData(list) {
-    if (TVIEWDATA_EMPTY === undefined)
-        TVIEWDATA_EMPTY = new TViewData();
-    return TVIEWDATA_EMPTY.concat(list);
-}
-var LViewBlueprint = ngDevMode && createNamedArrayType('LViewBlueprint');
-var MatchesArray = ngDevMode && createNamedArrayType('MatchesArray');
-var TViewComponents = ngDevMode && createNamedArrayType('TViewComponents');
-var TNodeLocalNames = ngDevMode && createNamedArrayType('TNodeLocalNames');
-var TNodeInitialInputs = ngDevMode && createNamedArrayType('TNodeInitialInputs');
-var TNodeInitialData = ngDevMode && createNamedArrayType('TNodeInitialData');
-var LCleanup = ngDevMode && createNamedArrayType('LCleanup');
-var TCleanup = ngDevMode && createNamedArrayType('TCleanup');
 function attachLViewDebug(lView) {
     attachDebugObject(lView, new LViewDebug(lView));
 }
@@ -11080,6 +10663,287 @@ var I18nUpdateOpCodesDebug = /** @class */ (function () {
     return I18nUpdateOpCodesDebug;
 }());
 
+// Note: This hack is necessary so we don't erroneously get a circular dependency
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+var NG_TEMPLATE_SELECTOR = 'ng-template';
+function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
+    var nodeClassesLen = nodeClassAttrVal.length;
+    var matchIndex = nodeClassAttrVal.indexOf(cssClassToMatch);
+    var matchEndIdx = matchIndex + cssClassToMatch.length;
+    if (matchIndex === -1 // no match
+        || (matchIndex > 0 && nodeClassAttrVal[matchIndex - 1] !== ' ') // no space before
+        ||
+            (matchEndIdx < nodeClassesLen && nodeClassAttrVal[matchEndIdx] !== ' ')) // no space after
+     {
+        return false;
+    }
+    return true;
+}
+/**
+ * Function that checks whether a given tNode matches tag-based selector and has a valid type.
+ *
+ * Matching can be performed in 2 modes: projection mode (when we project nodes) and regular
+ * directive matching mode:
+ * - in the "directive matching" mode we do _not_ take TContainer's tagName into account if it is
+ * different from NG_TEMPLATE_SELECTOR (value different from NG_TEMPLATE_SELECTOR indicates that a
+ * tag name was extracted from * syntax so we would match the same directive twice);
+ * - in the "projection" mode, we use a tag name potentially extracted from the * syntax processing
+ * (applicable to TNodeType.Container only).
+ */
+function hasTagAndTypeMatch(tNode, currentSelector, isProjectionMode) {
+    var tagNameToCompare = tNode.type === 0 /* Container */ && !isProjectionMode ?
+        NG_TEMPLATE_SELECTOR :
+        tNode.tagName;
+    return currentSelector === tagNameToCompare;
+}
+/**
+ * A utility function to match an Ivy node static data against a simple CSS selector
+ *
+ * @param node static data of the node to match
+ * @param selector The selector to try matching against the node.
+ * @param isProjectionMode if `true` we are matching for content projection, otherwise we are doing
+ * directive matching.
+ * @returns true if node matches the selector.
+ */
+function isNodeMatchingSelector(tNode, selector, isProjectionMode) {
+    ngDevMode && assertDefined(selector[0], 'Selector should have a tag name');
+    var mode = 4 /* ELEMENT */;
+    var nodeAttrs = tNode.attrs || [];
+    // Find the index of first attribute that has no value, only a name.
+    var nameOnlyMarkerIdx = getNameOnlyMarkerIndex(nodeAttrs);
+    // When processing ":not" selectors, we skip to the next ":not" if the
+    // current one doesn't match
+    var skipToNextSelector = false;
+    for (var i = 0; i < selector.length; i++) {
+        var current = selector[i];
+        if (typeof current === 'number') {
+            // If we finish processing a :not selector and it hasn't failed, return false
+            if (!skipToNextSelector && !isPositive(mode) && !isPositive(current)) {
+                return false;
+            }
+            // If we are skipping to the next :not() and this mode flag is positive,
+            // it's a part of the current :not() selector, and we should keep skipping
+            if (skipToNextSelector && isPositive(current))
+                continue;
+            skipToNextSelector = false;
+            mode = current | (mode & 1 /* NOT */);
+            continue;
+        }
+        if (skipToNextSelector)
+            continue;
+        if (mode & 4 /* ELEMENT */) {
+            mode = 2 /* ATTRIBUTE */ | mode & 1 /* NOT */;
+            if (current !== '' && !hasTagAndTypeMatch(tNode, current, isProjectionMode) ||
+                current === '' && selector.length === 1) {
+                if (isPositive(mode))
+                    return false;
+                skipToNextSelector = true;
+            }
+        }
+        else {
+            var selectorAttrValue = mode & 8 /* CLASS */ ? current : selector[++i];
+            // special case for matching against classes when a tNode has been instantiated with
+            // class and style values as separate attribute values (e.g. ['title', CLASS, 'foo'])
+            if ((mode & 8 /* CLASS */) && tNode.stylingTemplate) {
+                if (!isCssClassMatching(readClassValueFromTNode(tNode), selectorAttrValue)) {
+                    if (isPositive(mode))
+                        return false;
+                    skipToNextSelector = true;
+                }
+                continue;
+            }
+            var isInlineTemplate = tNode.type == 0 /* Container */ && tNode.tagName !== NG_TEMPLATE_SELECTOR;
+            var attrName = (mode & 8 /* CLASS */) ? 'class' : current;
+            var attrIndexInNode = findAttrIndexInNode(attrName, nodeAttrs, isInlineTemplate, isProjectionMode);
+            if (attrIndexInNode === -1) {
+                if (isPositive(mode))
+                    return false;
+                skipToNextSelector = true;
+                continue;
+            }
+            if (selectorAttrValue !== '') {
+                var nodeAttrValue = void 0;
+                if (attrIndexInNode > nameOnlyMarkerIdx) {
+                    nodeAttrValue = '';
+                }
+                else {
+                    ngDevMode && assertNotEqual(nodeAttrs[attrIndexInNode], 0 /* NamespaceURI */, 'We do not match directives on namespaced attributes');
+                    nodeAttrValue = nodeAttrs[attrIndexInNode + 1];
+                }
+                var compareAgainstClassName = mode & 8 /* CLASS */ ? nodeAttrValue : null;
+                if (compareAgainstClassName &&
+                    !isCssClassMatching(compareAgainstClassName, selectorAttrValue) ||
+                    mode & 2 /* ATTRIBUTE */ && selectorAttrValue !== nodeAttrValue) {
+                    if (isPositive(mode))
+                        return false;
+                    skipToNextSelector = true;
+                }
+            }
+        }
+    }
+    return isPositive(mode) || skipToNextSelector;
+}
+function isPositive(mode) {
+    return (mode & 1 /* NOT */) === 0;
+}
+function readClassValueFromTNode(tNode) {
+    // comparing against CSS class values is complex because the compiler doesn't place them as
+    // regular attributes when an element is created. Instead, the classes (and styles for
+    // that matter) are placed in a special styling context that is used for resolving all
+    // class/style values across static attributes, [style]/[class] and [style.prop]/[class.name]
+    // bindings. Therefore if and when the styling context exists then the class values are to be
+    // extracted by the context helper code below...
+    return tNode.stylingTemplate ? getInitialClassNameValue(tNode.stylingTemplate) : '';
+}
+/**
+ * Examines the attribute's definition array for a node to find the index of the
+ * attribute that matches the given `name`.
+ *
+ * NOTE: This will not match namespaced attributes.
+ *
+ * Attribute matching depends upon `isInlineTemplate` and `isProjectionMode`.
+ * The following table summarizes which types of attributes we attempt to match:
+ *
+ * ===========================================================================================================
+ * Modes                   | Normal Attributes | Bindings Attributes | Template Attributes | I18n
+ * Attributes
+ * ===========================================================================================================
+ * Inline + Projection     | YES               | YES                 | NO                  | YES
+ * -----------------------------------------------------------------------------------------------------------
+ * Inline + Directive      | NO                | NO                  | YES                 | NO
+ * -----------------------------------------------------------------------------------------------------------
+ * Non-inline + Projection | YES               | YES                 | NO                  | YES
+ * -----------------------------------------------------------------------------------------------------------
+ * Non-inline + Directive  | YES               | YES                 | NO                  | YES
+ * ===========================================================================================================
+ *
+ * @param name the name of the attribute to find
+ * @param attrs the attribute array to examine
+ * @param isInlineTemplate true if the node being matched is an inline template (e.g. `*ngFor`)
+ * rather than a manually expanded template node (e.g `<ng-template>`).
+ * @param isProjectionMode true if we are matching against content projection otherwise we are
+ * matching against directives.
+ */
+function findAttrIndexInNode(name, attrs, isInlineTemplate, isProjectionMode) {
+    if (attrs === null)
+        return -1;
+    var i = 0;
+    if (isProjectionMode || !isInlineTemplate) {
+        var bindingsMode = false;
+        while (i < attrs.length) {
+            var maybeAttrName = attrs[i];
+            if (maybeAttrName === name) {
+                return i;
+            }
+            else if (maybeAttrName === 3 /* Bindings */ || maybeAttrName === 6 /* I18n */) {
+                bindingsMode = true;
+            }
+            else if (maybeAttrName === 1 /* Classes */) {
+                var value = attrs[++i];
+                // We should skip classes here because we have a separate mechanism for
+                // matching classes in projection mode.
+                while (typeof value === 'string') {
+                    value = attrs[++i];
+                }
+                continue;
+            }
+            else if (maybeAttrName === 4 /* Template */) {
+                // We do not care about Template attributes in this scenario.
+                break;
+            }
+            else if (maybeAttrName === 0 /* NamespaceURI */) {
+                // Skip the whole namespaced attribute and value. This is by design.
+                i += 4;
+                continue;
+            }
+            // In binding mode there are only names, rather than name-value pairs.
+            i += bindingsMode ? 1 : 2;
+        }
+        // We did not match the attribute
+        return -1;
+    }
+    else {
+        return matchTemplateAttribute(attrs, name);
+    }
+}
+function isNodeMatchingSelectorList(tNode, selector, isProjectionMode) {
+    if (isProjectionMode === void 0) { isProjectionMode = false; }
+    for (var i = 0; i < selector.length; i++) {
+        if (isNodeMatchingSelector(tNode, selector[i], isProjectionMode)) {
+            return true;
+        }
+    }
+    return false;
+}
+function getProjectAsAttrValue(tNode) {
+    var nodeAttrs = tNode.attrs;
+    if (nodeAttrs != null) {
+        var ngProjectAsAttrIdx = nodeAttrs.indexOf(5 /* ProjectAs */);
+        // only check for ngProjectAs in attribute names, don't accidentally match attribute's value
+        // (attribute names are stored at even indexes)
+        if ((ngProjectAsAttrIdx & 1) === 0) {
+            return nodeAttrs[ngProjectAsAttrIdx + 1];
+        }
+    }
+    return null;
+}
+function getNameOnlyMarkerIndex(nodeAttrs) {
+    for (var i = 0; i < nodeAttrs.length; i++) {
+        var nodeAttr = nodeAttrs[i];
+        if (isNameOnlyAttributeMarker(nodeAttr)) {
+            return i;
+        }
+    }
+    return nodeAttrs.length;
+}
+function matchTemplateAttribute(attrs, name) {
+    var i = attrs.indexOf(4 /* Template */);
+    if (i > -1) {
+        i++;
+        while (i < attrs.length) {
+            if (attrs[i] === name)
+                return i;
+            i++;
+        }
+    }
+    return -1;
+}
+/**
+ * Checks whether a selector is inside a CssSelectorList
+ * @param selector Selector to be checked.
+ * @param list List in which to look for the selector.
+ */
+function isSelectorInSelectorList(selector, list) {
+    selectorListLoop: for (var i = 0; i < list.length; i++) {
+        var currentSelectorInList = list[i];
+        if (selector.length !== currentSelectorInList.length) {
+            continue;
+        }
+        for (var j = 0; j < selector.length; j++) {
+            if (selector[j] !== currentSelectorInList[j]) {
+                continue selectorListLoop;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
 var ɵ0$8 = function () { return Promise.resolve(null); };
 /**
  * A permanent marker promise which signifies that the current CD tree is
@@ -11216,7 +11080,7 @@ function elementCreate(name, overriddenRenderer) {
     return native;
 }
 function createLView(parentLView, tView, context, flags, host, tHostNode, rendererFactory, renderer, sanitizer, injector) {
-    var lView = ngDevMode ? cloneToLView(tView.blueprint) : tView.blueprint.slice();
+    var lView = tView.blueprint.slice();
     lView[HOST] = host;
     lView[FLAGS] = flags | 4 /* CreationMode */ | 128 /* Attached */ | 8 /* FirstLViewPass */;
     resetPreOrderHookFlags(lView);
@@ -11509,68 +11373,38 @@ function createTView(viewIndex, templateFn, consts, vars, directives, pipes, vie
     // that has a host binding, we will update the blueprint with that def's hostVars count.
     var initialViewLength = bindingStartIndex + vars;
     var blueprint = createViewBlueprint(bindingStartIndex, initialViewLength);
-    return blueprint[TVIEW] = ngDevMode ?
-        new TViewConstructor(viewIndex, // id: number,
-        blueprint, // blueprint: LView,
-        templateFn, // template: ComponentTemplate<{}>|null,
-        viewQuery, // viewQuery: ViewQueriesFunction<{}>|null,
-        null, // node: TViewNode|TElementNode|null,
-        cloneToTViewData(blueprint).fill(null, bindingStartIndex), // data: TData,
-        bindingStartIndex, // bindingStartIndex: number,
-        initialViewLength, // viewQueryStartIndex: number,
-        initialViewLength, // expandoStartIndex: number,
-        null, // expandoInstructions: ExpandoInstructions|null,
-        true, // firstTemplatePass: boolean,
-        false, // staticViewQueries: boolean,
-        false, // staticContentQueries: boolean,
-        null, // preOrderHooks: HookData|null,
-        null, // preOrderCheckHooks: HookData|null,
-        null, // contentHooks: HookData|null,
-        null, // contentCheckHooks: HookData|null,
-        null, // viewHooks: HookData|null,
-        null, // viewCheckHooks: HookData|null,
-        null, // destroyHooks: HookData|null,
-        null, // cleanup: any[]|null,
-        null, // contentQueries: number[]|null,
-        null, // components: number[]|null,
-        typeof directives === 'function' ?
-            directives() :
-            directives, // directiveRegistry: DirectiveDefList|null,
-        typeof pipes === 'function' ? pipes() : pipes, // pipeRegistry: PipeDefList|null,
-        null, // firstChild: TNode|null,
-        schemas) :
-        {
-            id: viewIndex,
-            blueprint: blueprint,
-            template: templateFn,
-            viewQuery: viewQuery,
-            node: null,
-            data: blueprint.slice().fill(null, bindingStartIndex),
-            bindingStartIndex: bindingStartIndex,
-            viewQueryStartIndex: initialViewLength,
-            expandoStartIndex: initialViewLength,
-            expandoInstructions: null,
-            firstTemplatePass: true,
-            staticViewQueries: false,
-            staticContentQueries: false,
-            preOrderHooks: null,
-            preOrderCheckHooks: null,
-            contentHooks: null,
-            contentCheckHooks: null,
-            viewHooks: null,
-            viewCheckHooks: null,
-            destroyHooks: null,
-            cleanup: null,
-            contentQueries: null,
-            components: null,
-            directiveRegistry: typeof directives === 'function' ? directives() : directives,
-            pipeRegistry: typeof pipes === 'function' ? pipes() : pipes,
-            firstChild: null,
-            schemas: schemas,
-        };
+    return blueprint[TVIEW] = {
+        id: viewIndex,
+        blueprint: blueprint,
+        template: templateFn,
+        viewQuery: viewQuery,
+        node: null,
+        data: blueprint.slice().fill(null, bindingStartIndex),
+        bindingStartIndex: bindingStartIndex,
+        viewQueryStartIndex: initialViewLength,
+        expandoStartIndex: initialViewLength,
+        expandoInstructions: null,
+        firstTemplatePass: true,
+        staticViewQueries: false,
+        staticContentQueries: false,
+        preOrderHooks: null,
+        preOrderCheckHooks: null,
+        contentHooks: null,
+        contentCheckHooks: null,
+        viewHooks: null,
+        viewCheckHooks: null,
+        destroyHooks: null,
+        cleanup: null,
+        contentQueries: null,
+        components: null,
+        directiveRegistry: typeof directives === 'function' ? directives() : directives,
+        pipeRegistry: typeof pipes === 'function' ? pipes() : pipes,
+        firstChild: null,
+        schemas: schemas,
+    };
 }
 function createViewBlueprint(bindingStartIndex, initialViewLength) {
-    var blueprint = new (ngDevMode ? LViewBlueprint : Array)(initialViewLength)
+    var blueprint = new Array(initialViewLength)
         .fill(null, 0, bindingStartIndex)
         .fill(NO_CHANGE, bindingStartIndex);
     blueprint[BINDING_INDEX] = bindingStartIndex;
@@ -12036,7 +11870,7 @@ function findDirectiveMatches(tView, viewData, tNode) {
         for (var i = 0; i < registry.length; i++) {
             var def = registry[i];
             if (isNodeMatchingSelectorList(tNode, def.selectors, /* isProjectionMode */ false)) {
-                matches || (matches = ngDevMode ? new MatchesArray() : []);
+                matches || (matches = []);
                 diPublicInInjector(getOrCreateNodeInjectorForNode(getPreviousOrParentTNode(), viewData), viewData, def.type);
                 if (isComponentDef(def)) {
                     if (tNode.flags & 1 /* isComponent */)
@@ -12058,13 +11892,12 @@ function queueComponentIndexForCheck(previousOrParentTNode) {
     var tView = getLView()[TVIEW];
     ngDevMode &&
         assertEqual(tView.firstTemplatePass, true, 'Should only be called in first template pass.');
-    (tView.components || (tView.components = ngDevMode ? new TViewComponents() : [])).push(previousOrParentTNode.index);
+    (tView.components || (tView.components = [])).push(previousOrParentTNode.index);
 }
 /** Caches local names and their matching directive indices for query and template lookups. */
 function cacheMatchingLocalNames(tNode, localRefs, exportsMap) {
     if (localRefs) {
-        var localNames = tNode.localNames =
-            ngDevMode ? new TNodeLocalNames() : [];
+        var localNames = tNode.localNames = [];
         // Local names must be stored in tNode in the same order that localRefs are defined
         // in the template to ensure the data is loaded in the same slots as their refs
         // in the template (for template queries).
@@ -12177,7 +12010,7 @@ function setInputsFromAttrs(directiveIndex, instance, def, tNode) {
  * @param tNode The static data on this node
  */
 function generateInitialInputs(directiveIndex, inputs, tNode) {
-    var initialInputData = tNode.initialInputs || (tNode.initialInputs = ngDevMode ? new TNodeInitialInputs() : []);
+    var initialInputData = tNode.initialInputs || (tNode.initialInputs = []);
     // Ensure that we don't create sparse arrays
     for (var i_1 = initialInputData.length; i_1 <= directiveIndex; i_1++) {
         initialInputData.push(null);
@@ -12202,8 +12035,7 @@ function generateInitialInputs(directiveIndex, inputs, tNode) {
         var minifiedInputName = inputs[attrName];
         var attrValue = attrs[i + 1];
         if (minifiedInputName !== undefined) {
-            var inputsToStore = initialInputData[directiveIndex] ||
-                (initialInputData[directiveIndex] = ngDevMode ? new TNodeInitialData() : []);
+            var inputsToStore = initialInputData[directiveIndex] || (initialInputData[directiveIndex] = []);
             inputsToStore.push(attrName, minifiedInputName, attrValue);
         }
         i += 2;
@@ -12213,8 +12045,6 @@ function generateInitialInputs(directiveIndex, inputs, tNode) {
 //////////////////////////
 //// ViewContainer & View
 //////////////////////////
-// Not sure why I need to do `any` here but TS complains later.
-var LContainerArray = ngDevMode && createNamedArrayType('LContainer');
 /**
  * Creates a LContainer, either from a container instruction, or for a ViewContainerRef.
  *
@@ -12228,15 +12058,16 @@ var LContainerArray = ngDevMode && createNamedArrayType('LContainer');
 function createLContainer(hostNative, currentView, native, tNode, isForViewContainerRef) {
     ngDevMode && assertDomNode(native);
     ngDevMode && assertLView(currentView);
-    // https://jsperf.com/array-literal-vs-new-array-really
-    var lContainer = new (ngDevMode ? LContainerArray : Array)(hostNative, // host native
-    true, // Boolean `true` in this position signifies that this is an `LContainer`
-    isForViewContainerRef ? -1 : 0, // active index
-    currentView, // parent
-    null, // next
-    null, // queries
-    tNode, // t_host
-    native);
+    var lContainer = [
+        hostNative,
+        true,
+        isForViewContainerRef ? -1 : 0,
+        currentView,
+        null,
+        null,
+        tNode,
+        native,
+    ];
     ngDevMode && attachLContainerDebug(lContainer);
     return lContainer;
 }
@@ -12528,10 +12359,10 @@ function initializeTNodeInputs(tNode) {
 }
 function getCleanup(view) {
     // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-    return view[CLEANUP] || (view[CLEANUP] = ngDevMode ? new LCleanup() : []);
+    return view[CLEANUP] || (view[CLEANUP] = []);
 }
 function getTViewCleanup(view) {
-    return view[TVIEW].cleanup || (view[TVIEW].cleanup = ngDevMode ? new TCleanup() : []);
+    return view[TVIEW].cleanup || (view[TVIEW].cleanup = []);
 }
 /**
  * There are cases where the sub component's renderer needs to be included
@@ -18895,7 +18726,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.1.0-beta.0+32.sha-55a14e4.with-local-changes');
+var VERSION = new Version('8.1.0-beta.0+30.sha-456f2e7.with-local-changes');
 
 /**
  * @license
