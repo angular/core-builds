@@ -8,6 +8,7 @@
 declare global {
     const ngDevMode: null | NgDevModePerfCounters;
     interface NgDevModePerfCounters {
+        namedConstructors: boolean;
         firstTemplatePass: number;
         tNode: number;
         tView: number;
