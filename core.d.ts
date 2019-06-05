@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-beta.0+37.sha-337b6fe.with-local-changes
+ * @license Angular v8.1.0-beta.0+39.sha-d1df0a9.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12210,26 +12210,6 @@ export declare function ɵɵelementEnd(): void;
 export declare function ɵɵelementHostAttrs(attrs: TAttributes): void;
 
 /**
-* **TODO: Remove this function after `property` is in use**
-* Update a property on an element.
-*
-* If the property name also exists as an input property on one of the element's directives,
-* the component property will be set instead of the element property. This check must
-* be conducted at runtime so child components that add new @Inputs don't have to be re-compiled.
-*
-* @param index The index of the element to update in the data array
-* @param propName Name of property. Because it is going to DOM, this is not subject to
-*        renaming as part of minification.
-* @param value New value to write.
-* @param sanitizer An optional function used to sanitize the value.
-* @param nativeOnly Whether or not we should only set native properties and skip input check
-* (this is necessary for host property bindings)
- *
- * @codeGenApi
-*/
-export declare function ɵɵelementProperty<T>(index: number, propName: string, value: T | ɵNO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): void;
-
-/**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
  *
  * @param index Index of the element in the LView array
@@ -12423,6 +12403,10 @@ export declare function ɵɵi18nPostprocess(message: string, replacements?: {
  *   and end of DOM element that were embedded in the original translation block. The placeholder
  *   `index` points to the element index in the template instructions set. An optional `block` that
  *   matches the sub-template in which it was declared.
+ * - `�!{index}(:{block})�`/`�/!{index}(:{block})�`: *Projection Placeholder*:  Marks the
+ *   beginning and end of <ng-content> that was embedded in the original translation block.
+ *   The placeholder `index` points to the element index in the template instructions set.
+ *   An optional `block` that matches the sub-template in which it was declared.
  * - `�*{index}:{block}�`/`�/*{index}:{block}�`: *Sub-template Placeholder*: Sub-templates must be
  *   split up and translated separately in each angular template function. The `index` points to the
  *   `template` instruction index. A `block` that matches the sub-template in which it was declared.
