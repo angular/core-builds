@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-beta.0+34.sha-b74df20.with-local-changes
+ * @license Angular v8.1.0-beta.0+37.sha-337b6fe.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -23585,7 +23585,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.1.0-beta.0+34.sha-b74df20.with-local-changes');
+const VERSION = new Version('8.1.0-beta.0+37.sha-337b6fe.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -28573,7 +28573,7 @@ function extractParts(pattern) {
                 if (ICU_BLOCK_REGEXP.test(block)) {
                     results.push(parseICUBlock(block));
                 }
-                else if (block) { // Don't push empty strings
+                else {
                     results.push(block);
                 }
                 prevPos = pos + 1;
@@ -28591,9 +28591,7 @@ function extractParts(pattern) {
     }
     /** @type {?} */
     const substring = pattern.substring(prevPos);
-    if (substring != '') {
-        results.push(substring);
-    }
+    results.push(substring);
     return results;
 }
 /**
@@ -28644,7 +28642,7 @@ function parseICUBlock(pattern) {
         }
         /** @type {?} */
         const blocks = (/** @type {?} */ (extractParts(parts[pos++])));
-        if (blocks.length) {
+        if (cases.length > values.length) {
             values.push(blocks);
         }
     }
