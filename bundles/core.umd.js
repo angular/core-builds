@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-beta.0+38.sha-00cc905.with-local-changes
+ * @license Angular v8.1.0-beta.0+40.sha-8852b79.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14287,29 +14287,6 @@
         return bindingUpdated(lView, bindingIndex, value) ? value : NO_CHANGE;
     }
     /**
-    * **TODO: Remove this function after `property` is in use**
-    * Update a property on an element.
-    *
-    * If the property name also exists as an input property on one of the element's directives,
-    * the component property will be set instead of the element property. This check must
-    * be conducted at runtime so child components that add new @Inputs don't have to be re-compiled.
-    *
-    * @param index The index of the element to update in the data array
-    * @param propName Name of property. Because it is going to DOM, this is not subject to
-    *        renaming as part of minification.
-    * @param value New value to write.
-    * @param sanitizer An optional function used to sanitize the value.
-    * @param nativeOnly Whether or not we should only set native properties and skip input check
-    * (this is necessary for host property bindings)
-     *
-     * @codeGenApi
-    */
-    function ɵɵelementProperty(index, propName, value, sanitizer, nativeOnly) {
-        if (value !== NO_CHANGE) {
-            elementPropertyInternal(index, propName, value, sanitizer, nativeOnly);
-        }
-    }
-    /**
      * Updates a synthetic host binding (e.g. `[@foo]`) on a component.
      *
      * This instruction is for compatibility purposes and is designed to ensure that a
@@ -18616,7 +18593,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.1.0-beta.0+38.sha-00cc905.with-local-changes');
+    var VERSION = new Version('8.1.0-beta.0+40.sha-8852b79.with-local-changes');
 
     /**
      * @license
@@ -24666,7 +24643,6 @@
         'ɵɵlistener': ɵɵlistener,
         'ɵɵload': ɵɵload,
         'ɵɵprojection': ɵɵprojection,
-        'ɵɵelementProperty': ɵɵelementProperty,
         'ɵɵupdateSyntheticHostBinding': ɵɵupdateSyntheticHostBinding,
         'ɵɵcomponentHostSyntheticListener': ɵɵcomponentHostSyntheticListener,
         'ɵɵpipeBind1': ɵɵpipeBind1,
@@ -30737,7 +30713,6 @@
     exports.ɵɵcontentQuery = ɵɵcontentQuery;
     exports.ɵɵloadContentQuery = ɵɵloadContentQuery;
     exports.ɵɵelementEnd = ɵɵelementEnd;
-    exports.ɵɵelementProperty = ɵɵelementProperty;
     exports.ɵɵproperty = ɵɵproperty;
     exports.ɵɵpropertyInterpolate = ɵɵpropertyInterpolate;
     exports.ɵɵpropertyInterpolate1 = ɵɵpropertyInterpolate1;
