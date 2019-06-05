@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-beta.0+35.sha-0d4f8c7.with-local-changes
+ * @license Angular v8.1.0-beta.0+39.sha-d1df0a9.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14609,29 +14609,6 @@
         return bindingUpdated(lView, bindingIndex, value) ? value : NO_CHANGE;
     }
     /**
-    * **TODO: Remove this function after `property` is in use**
-    * Update a property on an element.
-    *
-    * If the property name also exists as an input property on one of the element's directives,
-    * the component property will be set instead of the element property. This check must
-    * be conducted at runtime so child components that add new @Inputs don't have to be re-compiled.
-    *
-    * @param index The index of the element to update in the data array
-    * @param propName Name of property. Because it is going to DOM, this is not subject to
-    *        renaming as part of minification.
-    * @param value New value to write.
-    * @param sanitizer An optional function used to sanitize the value.
-    * @param nativeOnly Whether or not we should only set native properties and skip input check
-    * (this is necessary for host property bindings)
-     *
-     * @codeGenApi
-    */
-    function ɵɵelementProperty(index, propName, value, sanitizer, nativeOnly) {
-        if (value !== NO_CHANGE) {
-            elementPropertyInternal(index, propName, value, sanitizer, nativeOnly);
-        }
-    }
-    /**
      * Updates a synthetic host binding (e.g. `[@foo]`) on a component.
      *
      * This instruction is for compatibility purposes and is designed to ensure that a
@@ -16098,6 +16075,10 @@
             }
         }
     }
+    var delayProjection = false;
+    function setDelayProjection(value) {
+        delayProjection = value;
+    }
     /**
      * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
      * to the projectionDef instruction.
@@ -16118,8 +16099,11 @@
             tProjectionNode.projection = selectorIndex;
         // `<ng-content>` has no content
         setIsNotParent();
-        // re-distribution of projectable nodes is stored on a component's view level
-        appendProjectedNodes(lView, tProjectionNode, selectorIndex, findComponentView(lView));
+        // We might need to delay the projection of nodes if they are in the middle of an i18n block
+        if (!delayProjection) {
+            // re-distribution of projectable nodes is stored on a component's view level
+            appendProjectedNodes(lView, tProjectionNode, selectorIndex, findComponentView(lView));
+        }
     }
 
     /**
@@ -18940,7 +18924,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.1.0-beta.0+35.sha-0d4f8c7.with-local-changes');
+    var VERSION = new Version('8.1.0-beta.0+39.sha-d1df0a9.with-local-changes');
 
     /**
      * @license
@@ -22429,7 +22413,7 @@
     var MARKER = "\uFFFD";
     var ICU_BLOCK_REGEXP = /^\s*(�\d+:?\d*�)\s*,\s*(select|plural)\s*,/;
     var SUBTEMPLATE_REGEXP = /�\/?\*(\d+:\d+)�/gi;
-    var PH_REGEXP = /�(\/?[#*]\d+):?\d*�/gi;
+    var PH_REGEXP = /�(\/?[#*!]\d+):?\d*�/gi;
     var BINDING_REGEXP = /�(\d+):?\d*�/gi;
     var ICU_REGEXP = /({\s*�\d+:?\d*�\s*,\s*\S{6}\s*,[\s\S]*})/gi;
     // i18nPostprocess consts
@@ -22669,6 +22653,10 @@
      *   and end of DOM element that were embedded in the original translation block. The placeholder
      *   `index` points to the element index in the template instructions set. An optional `block` that
      *   matches the sub-template in which it was declared.
+     * - `�!{index}(:{block})�`/`�/!{index}(:{block})�`: *Projection Placeholder*:  Marks the
+     *   beginning and end of <ng-content> that was embedded in the original translation block.
+     *   The placeholder `index` points to the element index in the template instructions set.
+     *   An optional `block` that matches the sub-template in which it was declared.
      * - `�*{index}:{block}�`/`�/*{index}:{block}�`: *Sub-template Placeholder*: Sub-templates must be
      *   split up and translated separately in each angular template function. The `index` points to the
      *   `template` instruction index. A `block` that matches the sub-template in which it was declared.
@@ -22683,6 +22671,8 @@
         var tView = getLView()[TVIEW];
         ngDevMode && assertDefined(tView, "tView should be defined");
         i18nIndexStack[++i18nIndexStackPointer] = index;
+        // We need to delay projections until `i18nEnd`
+        setDelayProjection(true);
         if (tView.firstTemplatePass && tView.data[index + HEADER_OFFSET] === null) {
             i18nStartFirstPass(tView, index, message, subTemplateIndex);
         }
@@ -22721,7 +22711,7 @@
                 // Odd indexes are placeholders (elements and sub-templates)
                 if (value.charAt(0) === '/') {
                     // It is a closing tag
-                    if (value.charAt(1) === '#') {
+                    if (value.charAt(1) === "#" /* ELEMENT */) {
                         var phIndex = parseInt(value.substr(2), 10);
                         parentIndex = parentIndexStack[--parentIndexPointer];
                         createOpCodes.push(phIndex << 3 /* SHIFT_REF */ | 5 /* ElementEnd */);
@@ -22731,7 +22721,7 @@
                     var phIndex = parseInt(value.substr(1), 10);
                     // The value represents a placeholder that we move to the designated index
                     createOpCodes.push(phIndex << 3 /* SHIFT_REF */ | 0 /* Select */, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
-                    if (value.charAt(0) === '#') {
+                    if (value.charAt(0) === "#" /* ELEMENT */) {
                         parentIndexStack[++parentIndexPointer] = parentIndex = phIndex;
                     }
                 }
@@ -22814,6 +22804,12 @@
                 cursor.next = nextNode;
             }
             cursor = cursor.next;
+        }
+        // If the placeholder to append is a projection, we need to move the projected nodes instead
+        if (tNode.type === 1 /* Projection */) {
+            var tProjectionNode = tNode;
+            appendProjectedNodes(viewData, tProjectionNode, tProjectionNode.projection, findComponentView(viewData));
+            return tNode;
         }
         appendChild(getNativeByTNode(tNode, viewData), tNode, viewData);
         var slotValue = viewData[tNode.index];
@@ -22931,6 +22927,8 @@
         var tView = getLView()[TVIEW];
         ngDevMode && assertDefined(tView, "tView should be defined");
         i18nEndFirstPass(tView);
+        // Stop delaying projections
+        setDelayProjection(false);
     }
     /**
      * See `i18nEnd` above.
@@ -24991,7 +24989,6 @@
         'ɵɵlistener': ɵɵlistener,
         'ɵɵload': ɵɵload,
         'ɵɵprojection': ɵɵprojection,
-        'ɵɵelementProperty': ɵɵelementProperty,
         'ɵɵupdateSyntheticHostBinding': ɵɵupdateSyntheticHostBinding,
         'ɵɵcomponentHostSyntheticListener': ɵɵcomponentHostSyntheticListener,
         'ɵɵpipeBind1': ɵɵpipeBind1,
@@ -31220,7 +31217,6 @@
     exports.ɵɵcontentQuery = ɵɵcontentQuery;
     exports.ɵɵloadContentQuery = ɵɵloadContentQuery;
     exports.ɵɵelementEnd = ɵɵelementEnd;
-    exports.ɵɵelementProperty = ɵɵelementProperty;
     exports.ɵɵproperty = ɵɵproperty;
     exports.ɵɵpropertyInterpolate = ɵɵpropertyInterpolate;
     exports.ɵɵpropertyInterpolate1 = ɵɵpropertyInterpolate1;
